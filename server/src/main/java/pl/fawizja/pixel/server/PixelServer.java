@@ -29,6 +29,12 @@ public final class PixelServer implements AutoCloseable {
     private Thread acceptor;
 
     private final String fingerprint;
+    /** Limity polaczen: lacznie i z jednego adresu (np. jeden dom - kilku graczy). */
+    static final int MAX_CONNECTIONS = 300;
+    static final int MAX_PER_ADDRESS = 8;
+    private final java.util.Map<java.net.InetAddress, java.util.concurrent.atomic.AtomicInteger> perAddress =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private final java.util.concurrent.atomic.AtomicInteger total = new java.util.concurrent.atomic.AtomicInteger();
 
     /** Serwer z TLS (domyslnie). */
     public PixelServer(int port, File saveDir) throws IOException {
@@ -71,7 +77,22 @@ public final class PixelServer implements AutoCloseable {
         while (running) {
             try {
                 Socket s = socket.accept();
-                new ClientHandler(s, this).start();
+                java.net.InetAddress addr = s.getInetAddress();
+                java.util.concurrent.atomic.AtomicInteger n = perAddress.computeIfAbsent(addr,
+                        k -> new java.util.concurrent.atomic.AtomicInteger());
+                if (total.get() >= MAX_CONNECTIONS || n.get() >= MAX_PER_ADDRESS) {
+                    LOG.warning("odrzucono polaczenie z " + addr + " (limit)");
+                    s.close();
+                    continue;
+                }
+                ClientHandler c = new ClientHandler(s, this);
+                n.incrementAndGet();
+                total.incrementAndGet();
+                c.onClose(() -> {
+                    n.decrementAndGet();
+                    total.decrementAndGet();
+                });
+                c.start();
             } catch (IOException e) {
                 if (running) LOG.warning("accept: " + e.getMessage());
             }

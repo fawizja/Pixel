@@ -13,6 +13,8 @@ final class ServerPlayer {
     int pvpTarget = -1;
     final pl.fawizja.pixel.pvp.PvpRules.Status pvp;
     long logSent;
+    /** Czasy ostatnich wiadomosci czatu (limit spamu). */
+    final java.util.ArrayDeque<Long> chatTimes = new java.util.ArrayDeque<>();
     long eventsSent;
     String lastSelf;
     long lastSelfMs = -1_000_000;

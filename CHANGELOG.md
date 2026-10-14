@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1] - 2026-10-14
+
+### Dodano
+- Odpornosc serwera: wysylka do kazdego klienta w osobnym watku (wolny telefon nie spowalnia swiata),
+  limit 300 polaczen i 8 z jednego adresu, 40 wiadomosci/s (zapas 80), linia do 2048 znakow,
+  15 s na zalogowanie, czat najwyzej 5 wiadomosci na 10 s.
+- 2 nowe testy (lacznie 173).
+
 ## [0.12.0] - 2026-10-14
 
 ### Dodano

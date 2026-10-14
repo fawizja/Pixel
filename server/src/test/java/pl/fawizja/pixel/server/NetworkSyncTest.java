@@ -293,4 +293,53 @@ class NetworkSyncTest {
             }
         }
     }
+
+    @Test
+    void floodingAndSilentConnectionsAreCutOffAndChatIsRateLimited() throws Exception {
+        try (NetClient spam = connect()) {
+            spam.hello("Spammer", "MONK", "haslo-spam");
+            await("in", () -> spam.selfSave() != null);
+            for (int i = 0; i < 300; i++) spam.send("MOVE", "-");
+            await("flood cut off", () -> spam.isClosed());
+            assertTrue(String.valueOf(spam.error()).contains("Za duzo") || spam.error() == null || spam.isClosed());
+        }
+        try (NetClient talker = connect(); NetClient listener = connect()) {
+            talker.hello("Talker", "MONK", "haslo-talk");
+            listener.hello("Listener", "DRUID", "haslo-list");
+            await("in", () -> talker.selfSave() != null && listener.selfSave() != null);
+            for (int i = 0; i < ServerWorld.CHAT_MAX + 3; i++) talker.send("CHAT", "wiadomosc " + i);
+            await("warned", () -> {
+                String[] m;
+                while ((m = talker.poll()) != null) if (m[0].equals("LOG") && m[2].contains("Zwolnij")) return true;
+                return false;
+            });
+            Thread.sleep(300);
+            int got = 0;
+            String[] m;
+            while ((m = listener.poll()) != null) if (m[0].equals("CHAT")) got++;
+            assertEquals(ServerWorld.CHAT_MAX, got);
+        }
+    }
+
+    @Test
+    void connectionsPerAddressAreLimited() throws Exception {
+        java.util.List<java.net.Socket> open = new java.util.ArrayList<>();
+        try {
+            for (int i = 0; i < PixelServer.MAX_PER_ADDRESS; i++) open.add(new java.net.Socket("127.0.0.1", server.port()));
+            java.net.Socket extra = new java.net.Socket("127.0.0.1", server.port());
+            extra.setSoTimeout(3000);
+            assertEquals(-1, extra.getInputStream().read(), "over the limit = closed at once");
+            extra.close();
+        } finally {
+            for (java.net.Socket s : open) s.close();
+        }
+        // po zamknieciu miejsca sie zwalniaja
+        await("slots freed", () -> {
+            try (NetClient c = connect()) {
+                return true;
+            } catch (IOException e) {
+                return false;
+            }
+        });
+    }
 }

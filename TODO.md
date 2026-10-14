@@ -122,7 +122,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Konta z haslem: PBKDF2-HMAC-SHA256 + sol, blokada po 5 bledach, protokol v2
 - [x] Czat: przycisk CZAT / Enter; powrot do menu po rozlaczeniu
 - [x] TLS: certyfikat serwera tworzony przy pierwszym starcie (poza repo), przypinanie odcisku w kliencie
-- [ ] Limity polaczen/wiadomosci na serwerze, kopie zapasowe zapisow
+- [x] Limity polaczen/wiadomosci/czatu, asynchroniczna wysylka do klientow
+- [ ] Kopie zapasowe katalogu zapisow serwera (codzienne archiwum)
 - [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
 - [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka

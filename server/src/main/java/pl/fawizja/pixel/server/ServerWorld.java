@@ -49,6 +49,9 @@ final class ServerWorld {
     private static final Logger LOG = Logger.getLogger("pixel.server");
     static final long SAVE_EVERY_MS = 60_000;
     static final long SELF_EVERY_MS = 250;
+    /** Czat: najwyzej CHAT_MAX wiadomosci w CHAT_WINDOW_MS. */
+    static final int CHAT_MAX = 5;
+    static final long CHAT_WINDOW_MS = 10_000;
 
     final ItemRegistry items = ItemRegistry.loadDefault();
     final WorldMap world;
@@ -221,6 +224,12 @@ final class ServerWorld {
                 break;
             case "CHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
+                    while (!p.chatTimes.isEmpty() && now - p.chatTimes.peekFirst() > CHAT_WINDOW_MS) p.chatTimes.pollFirst();
+                    if (p.chatTimes.size() >= CHAT_MAX) {
+                        p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za duzo wiadomosci na czacie.");
+                        break;
+                    }
+                    p.chatTimes.addLast(now);
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
                     for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text);
                 }
