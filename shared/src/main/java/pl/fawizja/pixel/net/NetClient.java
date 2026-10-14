@@ -120,7 +120,10 @@ public final class NetClient implements AutoCloseable {
         }
     }
 
-    public void hello(String name, String vocation) { send("HELLO", String.valueOf(Protocol.VERSION), name, vocation); }
+    /** Logowanie (wersja 2: z haslem). Uwaga: polaczenie nie jest jeszcze szyfrowane. */
+    public void hello(String name, String vocation, String password) {
+        send("HELLO", String.valueOf(Protocol.VERSION), name, vocation, password);
+    }
 
     public int playerId() { return playerId; }
     public String error() { return error; }

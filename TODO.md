@@ -118,9 +118,12 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Testy przez prawdziwe polaczenia TCP (widocznosc, ruch, czat, podwojne logowanie, wspolne potwory)
 - [x] Tryb online w kliencie libGDX: replika stanu z serwera, inni gracze, potwory, ziemia, obrazenia, czat (odbior)
 - [x] Wolne pole przy logowaniu (gracze nie stoja na jednym kafelku)
-- [ ] Ekran logowania / wyboru serwera (takze Android), okno pisania czatu
+- [x] Menu startowe (lokalnie / online), ekran logowania (takze Android), zapamietany adres i imie
+- [x] Konta z haslem: PBKDF2-HMAC-SHA256 + sol, blokada po 5 bledach, protokol v2
+- [x] Czat: przycisk CZAT / Enter; powrot do menu po rozlaczeniu
+- [ ] TLS (np. SSLSocket z certyfikatem serwera przypietym w kliencie) przed wystawieniem publicznie
+- [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
 - [ ] Przewidywanie ruchu po stronie klienta (teraz ruch czeka na serwer ~100 ms)
-- [ ] Konta z haslem (hash, bez sekretow w repo), szyfrowanie (TLS) przed publicznym serwerem
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

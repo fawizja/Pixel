@@ -8,7 +8,7 @@
 > potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
 > Stan: dziala serwer z synchronizacja sieciowa i tryb online klienta desktopowego (wielu graczy w jednym
 > swiecie). Dziala PvP z ochrona nowych postaci i czaszkami.
-> Brakuje jeszcze kont z haslem, szyfrowania i wyboru serwera na Androidzie.
+> Logowanie z haslem dziala takze w APK. Brakuje jeszcze szyfrowania polaczenia (TLS).
 
 ## Moduly
 
@@ -85,11 +85,13 @@ Serwer jest zrodlem prawdy: klient wysyla tylko zamiary (ruch, akcje), serwer od
 Klient desktopowy w trybie online:
 
 ```bash
-JAVA_OPTS="-Dpixel.server=127.0.0.1:7171 -Dpixel.autostart=Darek:PALADIN" desktop/build/install/desktop/bin/desktop
+JAVA_OPTS="-Dpixel.server=127.0.0.1:7171 -Dpixel.autostart=Darek:PALADIN -Dpixel.password=twoje-haslo" desktop/build/install/desktop/bin/desktop
 ```
 
-Gdy serwer nie odpowiada, klient gra lokalnie. Na Androidzie brak jeszcze ekranu wyboru serwera
-(APK dziala lokalnie), nie ma tez kont z haslem ani szyfrowania - serwer nie jest gotowy do wystawienia publicznie.
+Bez `-Dpixel.autostart` klient pokazuje menu: "Graj lokalnie" albo "Graj online" (ekran logowania:
+adres serwera, imie, haslo). Pierwsze logowanie nowym imieniem zaklada konto; haslo serwer przechowuje
+tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`. Polaczenie nie jest jeszcze szyfrowane -
+serwera nie nalezy wystawiac publicznie (tylko siec lokalna / testy).
 
 ## Dokumentacja
 

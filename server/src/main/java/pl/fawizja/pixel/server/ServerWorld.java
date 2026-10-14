@@ -67,6 +67,7 @@ final class ServerWorld {
     private final RecipeRegistry recipes;
     private final CharacterCodec codec = new CharacterCodec(items);
     private final SaveStore saves;
+    private final AccountStore accounts;
     private final Random rng = new Random();
     private final Map<Integer, ServerPlayer> players = new LinkedHashMap<>();
     private int nextId = 1;
@@ -83,6 +84,7 @@ final class ServerWorld {
         consumables = ConsumableRegistry.loadDefault(items);
         recipes = RecipeRegistry.loadDefault(items);
         saves = new SaveStore(saveDir);
+        accounts = new AccountStore(saveDir);
     }
 
     Collection<ServerPlayer> players() { return Collections.unmodifiableCollection(players.values()); }
@@ -93,7 +95,36 @@ final class ServerWorld {
     }
 
     /** Logowanie: wczytuje zapis postaci o tym imieniu albo tworzy nowa. Zwraca null z komunikatem bledu w client. */
-    ServerPlayer join(ClientHandler client, String name, String vocation, long now) {
+    ServerPlayer join(ClientHandler client, String name, String vocation, String password, long now) {
+        try {
+            PlayerCharacter.validateName(name);
+        } catch (IllegalArgumentException e) {
+            client.send("ERR", "Niepoprawne imie: 3-20 liter, spacje i apostrof.");
+            return null;
+        }
+        if (!saved(name) && !accounts.exists(name)) {
+            try {
+                Vocation.valueOf(vocation);
+            } catch (IllegalArgumentException e) {
+                client.send("ERR", "Nieznana profesja.");
+                return null;
+            }
+        }
+        switch (accounts.login(name, password, now)) {
+            case WRONG_PASSWORD:
+                client.send("ERR", "Zle haslo.");
+                return null;
+            case LOCKED:
+                client.send("ERR", "Za duzo blednych prob - sprobuj za minute.");
+                return null;
+            case BAD_PASSWORD:
+                client.send("ERR", "Haslo musi miec " + AccountStore.MIN_PASSWORD + "-" + AccountStore.MAX_PASSWORD + " znakow.");
+                return null;
+            case CREATED:
+                LOG.info("new account " + name);
+                break;
+            default:
+        }
         if (find(name) != null) {
             client.send("ERR", "Postac " + name + " jest juz w grze.");
             return null;

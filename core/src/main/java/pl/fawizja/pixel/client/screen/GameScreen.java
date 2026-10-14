@@ -103,7 +103,10 @@ public final class GameScreen extends ScreenAdapter {
     private NetClient.Frame lastFrame;
     private Direction sentMove;
     private boolean disconnectShown;
+    private long disconnectAtMs;
     private int pvpTargetId = -1;
+    /** Wpisywana wiadomosc czatu (desktop: Enter otwiera, Enter wysyla, Esc anuluje) albo null. */
+    private StringBuilder chatDraft;
     private String mySkull = "NONE";
 
     public GameScreen(PixelGame game, PlayerCharacter pc) {
@@ -125,6 +128,7 @@ public final class GameScreen extends ScreenAdapter {
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
         if (net != null) lastSelf = net.selfSave();
+        hud.setChatEnabled(net != null);
         lastSaveMs = now();
     }
 
@@ -161,8 +165,29 @@ public final class GameScreen extends ScreenAdapter {
             }
 
             @Override
+            public boolean keyTyped(char c) {
+                if (chatDraft == null) return false;
+                if (c == '\b') {
+                    if (chatDraft.length() > 0) chatDraft.setLength(chatDraft.length() - 1);
+                } else if (c >= 32 && c != 127 && chatDraft.length() < 200) {
+                    chatDraft.append(c);
+                }
+                return true;
+            }
+
+            @Override
             public boolean keyDown(int keycode) {
+                if (chatDraft != null) {
+                    if (keycode == Input.Keys.ENTER) {
+                        sendChat(chatDraft.toString());
+                        chatDraft = null;
+                    } else if (keycode == Input.Keys.ESCAPE) {
+                        chatDraft = null;
+                    }
+                    return true; // klawisze ida do czatu, nie do gry
+                }
                 switch (keycode) {
+                    case Input.Keys.ENTER: onButton("chat"); return true;
                     case Input.Keys.E: onButton("use"); return true;
                     case Input.Keys.R: onButton("run"); return true;
                     case Input.Keys.T: onButton("torch"); return true;
@@ -201,6 +226,7 @@ public final class GameScreen extends ScreenAdapter {
             case "diag": hud.toggleDiagnostics(); break;
             case "book": hud.toggleBook(); break;
             case "talk": hud.toggleNpc(session); break;
+            case "chat": openChat(); break;
             case "target":
                 if (net == null) session.cycleTarget(t);
                 else {
@@ -230,6 +256,25 @@ public final class GameScreen extends ScreenAdapter {
                     act(id, t);
                 }
         }
+    }
+
+    private void openChat() {
+        if (net == null) return;
+        if (Gdx.app.getType() == Application.ApplicationType.Android) {
+            Gdx.input.getTextInput(new Input.TextInputListener() {
+                @Override
+                public void input(String text) { sendChat(text); }
+
+                @Override
+                public void canceled() { }
+            }, "Czat", "", "Wiadomosc do wszystkich graczy");
+        } else {
+            chatDraft = new StringBuilder();
+        }
+    }
+
+    private void sendChat(String text) {
+        if (net != null && text != null && !text.isBlank()) net.send("CHAT", text.trim());
     }
 
     /** Dotkniecie swiata: wybor potwora jako celu. */
@@ -279,7 +324,7 @@ public final class GameScreen extends ScreenAdapter {
         if (paused) return;
         frameTimeAvg = frameTimeAvg * 0.95f + Math.min(delta, 0.25f) * 0.05f;
 
-        Direction dir = keyboardDirection();
+        Direction dir = chatDraft == null ? keyboardDirection() : null;
         if (dir == null && hud.joystick().active()) {
             dir = Direction.fromVector(hud.joystick().value().x, hud.joystick().value().y, 0.25f);
         }
@@ -436,6 +481,11 @@ public final class GameScreen extends ScreenAdapter {
             }
             font.draw(batch, text, projected.x - text.length() * 3.5f * scale, projected.y);
         }
+        if (chatDraft != null) {
+            font.setColor(1f, 1f, 0.6f, 1f);
+            boolean caret = (TimeUtils.millis() / 500) % 2 == 0;
+            font.draw(batch, "Czat: " + chatDraft + (caret ? "_" : ""), 12 * scale, Gdx.graphics.getHeight() * 0.42f);
+        }
         font.getData().setScale(1f);
         font.setColor(Color.WHITE);
         batch.end();
@@ -567,8 +617,14 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (net.isClosed() && !disconnectShown) {
             disconnectShown = true;
+            disconnectAtMs = TimeUtils.millis();
             String why = net.error() != null ? net.error() : "serwer zamknal polaczenie";
             session.log().add(now(), EventLog.Kind.WARNING, "Rozlaczono z serwerem: " + why);
+        }
+        if (disconnectShown && TimeUtils.millis() - disconnectAtMs > 4_000L) {
+            String why = net.error() != null ? net.error() : "serwer zamknal polaczenie";
+            Gdx.app.postRunnable(() -> game.backToMenu("Rozlaczono z serwerem: " + why));
+            disconnectAtMs = Long.MAX_VALUE / 2;
         }
     }
 

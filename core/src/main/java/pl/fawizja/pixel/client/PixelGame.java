@@ -83,12 +83,30 @@ public class PixelGame extends Game {
         codec = new CharacterCodec(items);
         saveStore = new SaveStore(platform.saveDirectory());
 
+        setScreen(new pl.fawizja.pixel.client.screen.MenuScreen(this, null));
+    }
+
+    /** Gra lokalna: kontynuacja zapisanej postaci albo wybor profesji nowej. */
+    public void playLocal() {
         PlayerCharacter loaded = loadCharacter();
         if (loaded != null) {
             startGame(loaded);
         } else {
             setScreen(new VocationSelectScreen(this));
         }
+    }
+
+    /** Krotki opis zapisanej postaci lokalnej (do menu) albo null. */
+    public String localSaveSummary() {
+        PlayerCharacter pc = loadCharacter();
+        return pc == null ? null : pc.name() + ", " + pc.vocation().displayName() + ", poziom " + pc.level();
+    }
+
+    /** Powrot do menu (np. po rozlaczeniu z serwerem); poprzedni ekran jest zwalniany. */
+    public void backToMenu(String message) {
+        com.badlogic.gdx.Screen old = getScreen();
+        setScreen(new pl.fawizja.pixel.client.screen.MenuScreen(this, message));
+        if (old != null) old.dispose();
     }
 
     private PlayerCharacter loadCharacter() {
@@ -114,41 +132,34 @@ public class PixelGame extends Game {
 
     public void startGame(PlayerCharacter pc) {
         Gdx.app.log(TAG, "Start: " + pc.name() + " (" + pc.vocation() + ", lvl " + pc.level() + ")");
-        String server = platform.serverAddress();
-        if (server != null && !server.isBlank()) {
-            String problem = startOnline(server.trim(), pc);
-            if (problem == null) return;
-            Gdx.app.error(TAG, "Tryb online niedostepny: " + problem);
-            GameScreen offline = new GameScreen(this, pc);
-            offline.session().log().add(0, pl.fawizja.pixel.game.EventLog.Kind.WARNING,
-                    "Brak polaczenia z serwerem (" + problem + ") - gra lokalna.");
-            setScreen(offline);
-            return;
-        }
         setScreen(new GameScreen(this, pc));
     }
 
+    /** Wynik logowania na serwer: polaczenie i postac z serwera albo opis problemu. */
+    public record OnlineLogin(pl.fawizja.pixel.net.NetClient net, PlayerCharacter character, String problem) {}
+
     /**
-     * Laczy z serwerem i czeka na pierwszy zapis postaci (serwer jest jego wlascicielem).
-     * Zwraca null po sukcesie albo opis problemu.
+     * Laczy z serwerem, loguje (imie, profesja dla nowego konta, haslo) i czeka na zapis postaci -
+     * serwer jest jego wlascicielem. Blokuje do kilku sekund: wywolywac poza watkiem grafiki.
      */
-    private String startOnline(String address, PlayerCharacter local) {
+    public OnlineLogin connectOnline(String address, String name, String vocation, String password) {
         int colon = address.lastIndexOf(':');
-        String host = colon > 0 ? address.substring(0, colon) : address;
+        String host = (colon > 0 ? address.substring(0, colon) : address).trim();
         int port = pl.fawizja.pixel.net.Protocol.DEFAULT_PORT;
         try {
-            if (colon > 0) port = Integer.parseInt(address.substring(colon + 1));
+            if (colon > 0) port = Integer.parseInt(address.substring(colon + 1).trim());
         } catch (NumberFormatException e) {
-            return "zly port";
+            return new OnlineLogin(null, null, "Zly port w adresie serwera.");
         }
+        if (host.isEmpty()) return new OnlineLogin(null, null, "Podaj adres serwera.");
         pl.fawizja.pixel.net.NetClient net;
         try {
-            net = new pl.fawizja.pixel.net.NetClient(host, port, 3000);
+            net = new pl.fawizja.pixel.net.NetClient(host, port, 4000);
         } catch (IOException e) {
-            return e.getMessage() == null ? "brak polaczenia" : e.getMessage();
+            return new OnlineLogin(null, null, "Brak polaczenia z " + host + ":" + port + ".");
         }
-        net.hello(local.name(), local.vocation().name());
-        long deadline = System.currentTimeMillis() + 5000;
+        net.hello(name.trim(), vocation, password);
+        long deadline = System.currentTimeMillis() + 6000;
         while (net.selfSave() == null && net.error() == null && !net.isClosed() && System.currentTimeMillis() < deadline) {
             try {
                 Thread.sleep(20);
@@ -158,20 +169,24 @@ public class PixelGame extends Game {
             }
         }
         if (net.selfSave() == null) {
-            String err = net.error() != null ? net.error() : "serwer nie odpowiada";
+            String err = net.error() != null ? net.error() : "Serwer nie odpowiada.";
             net.close();
-            return err;
+            return new OnlineLogin(null, null, err);
         }
-        PlayerCharacter remote;
         try {
-            remote = codec.decode(net.selfSave());
+            return new OnlineLogin(net, codec.decode(net.selfSave()), null);
         } catch (Exception e) {
             net.close();
-            return "nieczytelny stan postaci";
+            return new OnlineLogin(null, null, "Nieczytelny stan postaci z serwera.");
         }
-        Gdx.app.log(TAG, "Online: " + address + " jako " + remote.name() + " (id " + net.playerId() + ")");
-        setScreen(new GameScreen(this, remote, net));
-        return null;
+    }
+
+    /** Start gry online po udanym logowaniu (watek grafiki). */
+    public void startOnline(OnlineLogin login) {
+        Gdx.app.log(TAG, "Online jako " + login.character().name() + " (id " + login.net().playerId() + ")");
+        com.badlogic.gdx.Screen old = getScreen();
+        setScreen(new GameScreen(this, login.character(), login.net()));
+        if (old != null && !(old instanceof GameScreen)) old.dispose();
     }
 
     /** Bezpieczny zapis (plik tymczasowy + kopia zapasowa). Bledy sa logowane, nie przerywaja gry. */

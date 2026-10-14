@@ -104,7 +104,7 @@ public final class PixelServer implements AutoCloseable {
             return;
         }
         if (c.player == null) {
-            if (!f[0].equals("HELLO") || f.length < 4) {
+            if (!f[0].equals("HELLO") || f.length < 2) {
                 c.send("ERR", "Najpierw HELLO.");
                 return;
             }
@@ -112,7 +112,11 @@ public final class PixelServer implements AutoCloseable {
                 c.send("ERR", "Niezgodna wersja protokolu (serwer " + Protocol.VERSION + ").");
                 return;
             }
-            c.player = world.join(c, f[2], f[3], now);
+            if (f.length < 5) {
+                c.send("ERR", "Podaj imie, profesje i haslo.");
+                return;
+            }
+            c.player = world.join(c, f[2], f[3], f[4], now);
             return;
         }
         world.command(c.player, f, now);

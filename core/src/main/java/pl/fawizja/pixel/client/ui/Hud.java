@@ -57,6 +57,8 @@ public final class Hud {
     private final HudButton book = new HudButton("book", "KSIEGA");
     private final HudButton fish = new HudButton("fish", "LOW");
     private final HudButton talk = new HudButton("talk", "ROZMOWA");
+    private final HudButton chat = new HudButton("chat", "CZAT");
+    private boolean chatEnabled;
     /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
     private boolean npcMode;
     private pl.fawizja.pixel.npc.Npc npc;
@@ -117,6 +119,7 @@ public final class Hud {
         buttons.add(book);
         buttons.add(fish);
         buttons.add(talk);
+        buttons.add(chat);
         buttons.add(potionHp);
         buttons.add(potionMp);
         for (int i = 0; i < spellButtons.length; i++) {
@@ -124,6 +127,9 @@ public final class Hud {
             buttons.add(spellButtons[i]);
         }
     }
+
+    /** Przycisk czatu (tylko w grze online). */
+    public void setChatEnabled(boolean enabled) { chatEnabled = enabled; }
 
     public void resize(int width, int height) {
         float density = Gdx.graphics.getDensity();
@@ -148,6 +154,7 @@ public final class Hud {
         book.x = bx - br * 2.4f; book.y = by + br * 4.8f; book.r = br;
         fish.x = bx - br * 4.8f; fish.y = by + br * 4.8f; fish.r = br;
         talk.x = bx; talk.y = by + br * 7.2f; talk.r = br;
+        chat.x = bx - br * 2.4f; chat.y = by + br * 7.2f; chat.r = br;
         // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
         float sr = Math.max(20, br * 0.72f);
         float sx0 = margin + jr * 2.6f + sr + 12;
@@ -476,6 +483,7 @@ public final class Hud {
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
         talk.active = npcOpen();
+        chat.visible = chatEnabled;
         if (npcMode && near != npc) {
             menuOpen = false;
             npcMode = false;

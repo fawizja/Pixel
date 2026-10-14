@@ -57,8 +57,8 @@ class NetworkSyncTest {
     void twoPlayersSeeEachOtherMoveAndChat() throws Exception {
         try (NetClient alice = new NetClient("127.0.0.1", server.port(), 3000);
              NetClient bob = new NetClient("127.0.0.1", server.port(), 3000)) {
-            alice.hello("Alice", "PALADIN");
-            bob.hello("Bob", "DRUID");
+            alice.hello("Alice", "PALADIN", "tajne-Alice");
+            bob.hello("Bob", "DRUID", "tajne-Bob");
             await("welcome", () -> alice.playerId() > 0 && bob.playerId() > 0);
             await("self state", () -> alice.selfSave() != null && bob.selfSave() != null);
             assertEquals("Alice", self(alice).name());
@@ -98,10 +98,10 @@ class NetworkSyncTest {
     @Test
     void serverRejectsDuplicateLoginsAndBadVersionsAndRestoresSavedCharacters() throws Exception {
         try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000)) {
-            a.hello("Carol", "SORCERER");
+            a.hello("Carol", "SORCERER", "tajne-Carol");
             await("welcome", () -> a.playerId() > 0);
             try (NetClient dup = new NetClient("127.0.0.1", server.port(), 3000)) {
-                dup.hello("carol", "MONK");
+                dup.hello("carol", "MONK", "tajne-Carol");
                 await("duplicate rejected", () -> dup.error() != null);
                 assertTrue(dup.error().contains("juz w grze"));
             }
@@ -120,7 +120,7 @@ class NetworkSyncTest {
         }
         await("carol left", () -> server.world().players().isEmpty());
         try (NetClient again = new NetClient("127.0.0.1", server.port(), 3000)) {
-            again.hello("Carol", "MONK"); // profesja z zapisu, nie z prosby
+            again.hello("Carol", "MONK", "tajne-Carol"); // profesja z zapisu, nie z prosby
             await("restored", () -> again.selfSave() != null);
             assertEquals("SORCERER", self(again).vocation().name());
         }
@@ -130,8 +130,8 @@ class NetworkSyncTest {
     void monstersAreSharedBetweenPlayers() throws Exception {
         try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
              NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
-            a.hello("Erin", "PALADIN");
-            b.hello("Finn", "MONK");
+            a.hello("Erin", "PALADIN", "tajne-Erin");
+            b.hello("Finn", "MONK", "tajne-Finn");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
             // obaj teleportowani (na serwerze) do pola z wilkami: widza te same potwory o tych samych id
             Position field = new Position(58, 75, 0);
@@ -150,8 +150,8 @@ class NetworkSyncTest {
     void droppedItemsAndCombatEventsReachClients() throws Exception {
         try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
              NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
-            a.hello("Gina", "PALADIN");
-            b.hello("Hugo", "SORCERER");
+            a.hello("Gina", "PALADIN", "tajne-Gina");
+            b.hello("Hugo", "SORCERER", "tajne-Hugo");
             await("self", () -> a.selfSave() != null && b.selfSave() != null);
             PlayerCharacter gina = self(a);
             int slot = -1;
@@ -181,8 +181,8 @@ class NetworkSyncTest {
     void pvpFollowsTheRulesOverTheNetwork() throws Exception {
         try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
              NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
-            a.hello("Ivo", "PALADIN");
-            b.hello("Jan", "MONK");
+            a.hello("Ivo", "PALADIN", "tajne-Ivo");
+            b.hello("Jan", "MONK", "tajne-Jan");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
             int janId = b.playerId();
             // w swiatyni (PZ) i na poziomie 8 atak jest odrzucony z komunikatem
@@ -221,5 +221,39 @@ class NetworkSyncTest {
                 }
             });
         }
+    }
+
+    static boolean accepted(String name, String voc, String password) throws Exception {
+        try (NetClient c = new NetClient("127.0.0.1", server().port(), 3000)) {
+            c.hello(name, voc, password);
+            await("answer", () -> c.selfSave() != null || c.error() != null);
+            return c.selfSave() != null;
+        }
+    }
+
+    static PixelServer current;
+
+    static PixelServer server() { return current; }
+
+    @Test
+    void accountsRequireTheRightPasswordAndLockAfterFailures() throws Exception {
+        current = server;
+        assertTrue(accepted("Kora", "DRUID", "pierwsze-haslo"), "first login creates the account");
+        await("left", () -> server.world().players().isEmpty());
+        assertFalse(accepted("Kora", "DRUID", "inne-haslo"));
+        assertFalse(accepted("Nowa", "DRUID", "123"), "too short password");
+        assertTrue(accepted("Kora", "DRUID", "pierwsze-haslo"));
+        await("left", () -> server.world().players().isEmpty());
+        for (int i = 0; i < AccountStore.MAX_FAILURES; i++) assertFalse(accepted("Kora", "DRUID", "zle-haslo"));
+        try (NetClient c = new NetClient("127.0.0.1", server.port(), 3000)) {
+            c.hello("Kora", "DRUID", "pierwsze-haslo");
+            await("locked", () -> c.error() != null);
+            assertTrue(c.error().contains("Za duzo"), c.error());
+        }
+        // plik konta nie zawiera hasla
+        File acc = new File(new File(saves, "accounts"), "kora.acc");
+        String content = new String(Files.readAllBytes(acc.toPath()));
+        assertFalse(content.contains("pierwsze-haslo"));
+        assertTrue(content.startsWith("pbkdf2-sha256;"));
     }
 }

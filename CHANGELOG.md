@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.0] - 2026-10-14 - etap 14: konta, logowanie, czat
+
+### Dodano
+- Menu startowe: "Graj lokalnie" (zapis na urzadzeniu) albo "Graj online".
+- Ekran logowania (adres serwera, imie, haslo, profesja nowego konta) - dziala tez na Androidzie,
+  wiec APK moze grac online; adres i imie sa zapamietywane, haslo nigdy.
+- Konta na serwerze: pierwsze logowanie zaklada konto, haslo przechowywane tylko jako skrot
+  PBKDF2-HMAC-SHA256 z losowa sola; 5 blednych prob = blokada na minute. Protokol w wersji 2.
+- Czat: przycisk CZAT (Android - okno wpisywania), Enter na komputerze.
+- Po utracie polaczenia klient wraca do menu z komunikatem.
+- Uprawnienie INTERNET w APK.
+- 1 nowy test kont przez TCP (lacznie 168); logowanie i czat sprawdzone recznie wpisywaniem z klawiatury.
+
+### Jeszcze nie
+- Polaczenie nie jest szyfrowane (TLS) - serwera nie nalezy wystawiac publicznie.
+
 ## [0.10.0] - 2026-10-14 - etap 13: PvP
 
 ### Dodano

@@ -2,13 +2,13 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.10.0)
+## Podsumowanie (2026-10-14, wersja 0.11.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie i online: modul `server` (TCP) + tryb online klienta desktopowego (`-Dpixel.server`).
-  PvP (etap 13) dziala na serwerze. Brakuje kont z haslem, TLS i wyboru serwera na Androidzie - nie wystawiac publicznie.
+  PvP (etap 13), konta z haslem, menu i ekran logowania (takze APK). Brak TLS - nie wystawiac publicznie.
 - Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 oraz czesci etapow 2, 9, 10, 11, 14, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = PvP.
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = 4613838 (PvP, CI zielone). 0.11.0 = konta/logowanie/czat.
 
 ## Architektura
 
@@ -85,16 +85,18 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
 - Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
-- Brak kont z haslem; PvP tylko atakiem podstawowym. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
+- Brak TLS; PvP tylko atakiem podstawowym. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
 - Miasta poza Varden maja tylko swiatynie, plac i domy (bez sklepow do etapu 12).
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: dokonczenie etapu 14** (TODO.md), potem etap 16. Plan:
-1. Ekran logowania (imie, haslo, adres serwera) w kliencie - takze Android (wtedy APK moze grac online);
-   konta na serwerze z hashem hasla (PBKDF2, sol na konto) - bez zadnych hasel w repo.
-2. Okno pisania czatu; przewidywanie ruchu po stronie klienta.
+**Nastepne zadanie: etap 16 (optymalizacja, regresja, Android) i domkniecie etapu 14** (TODO.md). Plan:
+1. TLS dla serwera (SSLSocket, certyfikat generowany przy pierwszym starcie poza repo, odcisk przypiety w kliencie).
+2. Przewidywanie ruchu po stronie klienta (ruch czeka teraz na serwer ~100 ms).
 3. PvP: czary/runy na graczy, blokada PZ po walce, zapis czaszek na dysku serwera.
+4. Poziomy 230..1000: nowe obszary i potwory (swiat konczy sie na ~230).
+Menu: `MenuScreen` -> `PixelGame.playLocal()` albo `LoginScreen` -> `connectOnline` (watek) -> `startOnline`.
+Test GUI bez myszy: Xvfb :99 + python-xlib (XTEST) do klikania i pisania - skrypt w opisie sesji, nie w repo.
 Tryb online: `GameScreen(game, pc, NetClient)` - bez symulacji, `syncWithServer` odwzorowuje SELF/FRAME/LOG/EV.
 Uruchomienie lokalne: `server/build/install/server/bin/server 7272 <katalog>` i klient z `-Dpixel.server=127.0.0.1:7272`.
 Mapy swiata zmieniaj tylko przez `tools/mapgen/generate_world.py`, potem `./gradlew :shared:test`.

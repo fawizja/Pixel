@@ -25,7 +25,7 @@ import java.util.List;
  */
 public final class Protocol {
 
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
     public static final int DEFAULT_PORT = 7171;
     /** Promien widocznosci innych graczy i potworow w klatce stanu. */
     public static final int VIEW_RADIUS = 12;

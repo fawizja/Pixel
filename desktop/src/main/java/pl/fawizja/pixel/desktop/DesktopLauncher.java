@@ -14,7 +14,9 @@ import pl.fawizja.pixel.world.Position;
  * Uruchamianie na PC: ./gradlew :desktop:run
  *
  * Opcje deweloperskie (wlasciwosci systemowe, przydatne w CI i do zrzutow ekranu):
- *   -Dpixel.autostart=Imie:PALADIN    tworzy postac bez okna dialogowego, jesli nie ma zapisu
+ *   -Dpixel.autostart=Imie:PALADIN    pomija menu: gra lokalna (tworzy postac, jesli nie ma zapisu)
+ *   -Dpixel.server=host:port          z autostart: logowanie na serwer (haslo -Dpixel.password, domyslnie haslo-dev)
+ *                                     bez autostart: domyslny adres w ekranie logowania
  *   -Dpixel.teleport=x,y,z            ustawia postac na pozycji (np. 8,23,-1)
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
@@ -46,10 +48,25 @@ public final class DesktopLauncher {
         @Override
         public void create() {
             super.create();
-            if (autostart != null && !(getScreen() instanceof GameScreen)) {
-                String[] p = autostart.split(":");
-                createCharacter(p[0], Vocation.valueOf(p.length > 1 ? p[1] : "PALADIN"));
+            if (autostart == null) {
+                if ("login".equals(System.getProperty("pixel.open"))) {
+                    setScreen(new pl.fawizja.pixel.client.screen.LoginScreen(this));
+                }
+                return;
             }
+            String[] p = autostart.split(":");
+            Vocation v = Vocation.valueOf(p.length > 1 ? p[1] : "PALADIN");
+            String server = platform().serverAddress();
+            if (server != null) {
+                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", "haslo-dev"));
+                if (login.problem() == null) {
+                    startOnline(login);
+                    return;
+                }
+                Gdx.app.error("Pixel", "Online niedostepne: " + login.problem());
+            }
+            if (localSaveSummary() != null) playLocal();
+            else createCharacter(p[0], v);
         }
 
         @Override
