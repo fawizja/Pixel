@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tymczasowa ikona wektorowa: zielony kafelek z czerwona postacia -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="16" android:viewportHeight="16">
+    <path android:fillColor="#4F8A3C" android:pathData="M0,0h16v16h-16z" />
+    <path android:fillColor="#F0C8A0" android:pathData="M5,1h6v5h-6z" />
+    <path android:fillColor="#5A3A1E" android:pathData="M5,1h6v2h-6z" />
+    <path android:fillColor="#B0472F" android:pathData="M4,6h8v6h-8z" />
+    <path android:fillColor="#E8C040" android:pathData="M4,10h8v1h-8z" />
+    <path android:fillColor="#5E2618" android:pathData="M5,11h2v4h-2zM9,11h2v4h-2z" />
+</vector>

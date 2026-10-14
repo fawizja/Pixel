@@ -1,0 +1,24 @@
+# id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations(* = wszystkie);light;color;description
+1;gold_coin;Gold Coin;CURRENCY;100;1;NONE;0;0;0;0;*;0;#f2c230;Zolta moneta. 100 Gold = 1 Platinum.
+2;platinum_coin;Platinum Coin;CURRENCY;100;100;NONE;0;0;0;0;*;0;#b8c8dc;Srebrno-niebieska moneta. 100 Platinum = 1 Crystal.
+3;crystal_coin;Crystal Coin;CURRENCY;100;10000;NONE;0;0;0;0;*;0;#4aa8ff;Niebieska krysztalowa moneta warta 10 000 gp.
+10;leather_helmet;Leather Helmet;ARMOR;1;12;HEAD;0;0;1;0;*;0;#8a5a2b;Prosty skorzany helm.
+11;leather_armor;Leather Armor;ARMOR;1;25;ARMOR;0;0;4;0;*;0;#8a5a2b;Lekka zbroja dla poczatkujacych.
+12;leather_legs;Leather Legs;ARMOR;1;10;LEGS;0;0;1;0;*;0;#8a5a2b;Skorzane spodnie.
+13;leather_boots;Leather Boots;ARMOR;1;8;FEET;0;0;1;0;*;0;#6b4423;Wygodne buty podroznika.
+20;hunting_spear;Hunting Spear;WEAPON;1;40;WEAPON;25;0;0;0;PALADIN;0;#c9b37e;Rzucana wlocznia paladyna, wraca do reki.
+21;wooden_shield;Wooden Shield;SHIELD;1;15;SHIELD;0;12;0;0;PALADIN,MONK;0;#9c6b3c;Lekka drewniana tarcza.
+22;wand_of_embers;Wand of Embers;WEAPON;1;120;WEAPON;14;0;0;8;SORCERER;0;#ff6a2b;Rozdzka czarodzieja, strzela iskrami ognia.
+23;thornroot_rod;Thornroot Rod;WEAPON;1;120;WEAPON;14;0;0;8;DRUID;0;#58b04a;Rozdzka druida, rani kolcami ziemi.
+24;cloth_wraps;Cloth Wraps;WEAPON;1;35;WEAPON;20;4;0;0;MONK;0;#e8dcc0;Owijki na dlonie mnicha.
+25;training_sword;Training Sword;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK;0;#b0b0b8;Tepy miecz cwiczebny.
+30;health_potion;Health Potion;POTION;100;45;NONE;0;0;0;0;*;0;#d8263c;Przywraca czesc zdrowia.
+31;mana_potion;Mana Potion;POTION;100;50;NONE;0;0;0;0;*;0;#3a5bd8;Przywraca czesc many.
+32;torch;Torch;LIGHT;1;2;NONE;0;0;0;0;*;5;#ffb347;Pochodnia: rozjasnia ciemne podziemia.
+33;rope;Rope;TOOL;1;50;NONE;0;0;0;0;*;0;#c8a165;Lina do wspinania sie z dziur.
+34;shovel;Shovel;TOOL;1;50;NONE;0;0;0;0;*;0;#8f8f8f;Lopata do odkopywania przejsc.
+35;fishing_rod;Fishing Rod;TOOL;1;150;NONE;0;0;0;0;*;0;#a07040;Wedka do lowienia ryb.
+36;worm;Worm;BAIT;100;1;NONE;0;0;0;0;*;0;#d48a8a;Przyneta na ryby.
+37;blank_rune;Blank Rune;RUNE;100;10;NONE;0;0;0;0;*;0;#d0d0c0;Pusta runa do zaklinania.
+38;bread;Bread;FOOD;100;3;NONE;0;0;0;0;*;0;#d9a85b;Chleb z piekarni w Varden.
+39;spear;Spear;AMMUNITION;100;3;AMMO;20;0;0;0;PALADIN;0;#c9b37e;Zwykla wlocznia do rzucania.

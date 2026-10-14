@@ -1,0 +1,17 @@
+apply plugin: 'application'
+
+description = 'Pixel - launcher desktop (LWJGL3) do uruchamiania i testow na PC'
+
+application {
+    mainClass = 'pl.fawizja.pixel.desktop.DesktopLauncher'
+}
+
+dependencies {
+    implementation project(':core')
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+}
+
+tasks.named('run') {
+    workingDir = rootProject.file('.')
+}

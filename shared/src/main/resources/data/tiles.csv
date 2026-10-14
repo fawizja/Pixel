@@ -1,0 +1,42 @@
+# id;key;layer;walkable(podloze: mozna stanac / obiekt: nie blokuje);light;biome;color;pattern
+# --- podloze ---
+1;grass;GROUND;1;0;temperate;#4f8a3c;grass
+2;cobblestone;GROUND;1;0;town;#8c8a82;cobble
+3;dirt;GROUND;1;0;temperate;#8a6a42;dirt
+4;water;GROUND;0;0;temperate;#2f6fb0;water
+5;wood_floor;GROUND;1;0;town;#9a6b3e;planks
+6;stone_floor;GROUND;1;0;town;#a8a49a;tiles
+7;field;GROUND;1;0;temperate;#9c8a3c;dirt
+8;cave_floor;GROUND;1;0;underground;#5a5048;gravel
+9;bridge;GROUND;1;0;temperate;#a87b4a;planks
+10;sand;GROUND;1;0;desert;#d9c27a;sand
+11;snow;GROUND;1;0;north;#e8eef2;snow
+12;jungle_grass;GROUND;1;0;equatorial;#2f7a3a;grass
+# --- dekoracje (nie blokuja) ---
+30;tall_grass;DECORATION;1;0;temperate;#6aa84f;tuft
+31;flowers;DECORATION;1;0;temperate;#e05a8a;flowers
+32;wheat;DECORATION;1;0;temperate;#e0c050;wheat
+33;rug;DECORATION;1;0;town;#8a2a2a;rug
+# --- obiekty ---
+50;tree;OBJECT;0;0;temperate;#2d5e2a;tree
+51;rock;OBJECT;0;0;temperate;#7a7a7a;rock
+52;fountain;OBJECT;0;0;town;#5fa8e0;fountain
+53;street_lamp;OBJECT;0;6;town;#ffd27a;lamp
+54;wall_torch;OBJECT;1;5;town;#ffb347;torch
+55;counter;OBJECT;0;0;town;#6b4423;counter
+56;fence;OBJECT;0;0;temperate;#8a6a42;fence
+57;crystal;OBJECT;0;4;underground;#7fd8ff;crystal
+58;rubble;OBJECT;0;0;underground;#6e6258;rubble
+59;stairs_up;OBJECT;1;0;any;#d8d0c0;stairs_up
+60;stairs_down;OBJECT;1;0;any;#3a3530;stairs_down
+61;ladder;OBJECT;1;0;any;#b07a40;ladder
+62;hole;OBJECT;1;0;any;#151210;hole
+63;campfire;OBJECT;0;7;temperate;#ff7a20;fire
+64;door_open;OBJECT;1;0;town;#6b4423;door
+65;altar;OBJECT;0;3;town;#e8e0ff;altar
+66;bush;OBJECT;0;0;temperate;#3f7a35;bush
+67;crate;OBJECT;0;0;town;#a0783c;crate
+# --- sciany ---
+80;stone_wall;WALL;0;0;town;#6a665e;brick
+81;cave_wall;WALL;0;0;underground;#3e3631;rockwall
+82;wood_wall;WALL;0;0;town;#7a5230;woodwall

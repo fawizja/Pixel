@@ -1,0 +1,6 @@
+description = 'Pixel - klient libGDX: renderowanie, ekrany, UI'
+
+dependencies {
+    api project(':shared')
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+}

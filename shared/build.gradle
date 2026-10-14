@@ -1,0 +1,7 @@
+// Czysta logika gry: bez zaleznosci od libGDX, dzieki czemu testy dzialaja bez telefonu i bez GPU.
+// Ten sam modul bedzie uzywany przez przyszly serwer (serwer jest zrodlem prawdy).
+description = 'Pixel - logika gry wspolna dla klienta i serwera'
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+}

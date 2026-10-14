@@ -1,0 +1,28 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+    plugins {
+        id 'com.android.application' version '8.7.3'
+    }
+}
+
+rootProject.name = 'pixel'
+
+// shared  - czysta logika gry (bez libGDX), testowana JUnit
+// core    - renderowanie, ekrany i UI w libGDX
+// desktop - launcher LWJGL3 do szybkiego uruchamiania i testow na PC
+// android - glowna platforma docelowa (wymaga Android SDK)
+include 'shared', 'core', 'desktop'
+
+def localProps = new Properties()
+def localFile = file('local.properties')
+if (localFile.exists()) localFile.withInputStream { localProps.load(it) }
+def sdkDir = localProps.getProperty('sdk.dir') ?: System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+if (sdkDir != null && new File(sdkDir).isDirectory()) {
+    include 'android'
+} else {
+    logger.lifecycle('Android SDK not found (sdk.dir / ANDROID_HOME) - skipping :android module.')
+}
