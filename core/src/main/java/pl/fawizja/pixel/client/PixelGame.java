@@ -41,6 +41,9 @@ public class PixelGame extends Game {
     private WorldMap world;
     private MonsterRegistry monsters;
     private List<SpawnPoint> spawns;
+    private pl.fawizja.pixel.npc.ShopRegistry shops;
+    private pl.fawizja.pixel.npc.NpcRegistry npcs;
+    private pl.fawizja.pixel.quest.QuestRegistry quests;
     private TileArt art;
     private SpriteBatch batch;
     private ShapeRenderer shapes;
@@ -65,10 +68,13 @@ public class PixelGame extends Game {
             world = new MapLoader(tiles).load(WorldLayout.WORLD_MAP);
             monsters = MonsterRegistry.loadDefault(items);
             spawns = SpawnTable.load(WorldLayout.WORLD_MAP, world, monsters);
+            shops = pl.fawizja.pixel.npc.ShopRegistry.loadDefault(items);
+            npcs = pl.fawizja.pixel.npc.NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
+            quests = pl.fawizja.pixel.quest.QuestRegistry.loadDefault(items, monsters);
         } catch (IOException e) {
             throw new IllegalStateException("Nie mozna wczytac mapy", e);
         }
-        art = new TileArt(tiles, items, monsters);
+        art = new TileArt(tiles, items, monsters, npcs.all());
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
         font = new BitmapFont();
@@ -95,6 +101,10 @@ public class PixelGame extends Game {
             return null;
         }
     }
+
+    public pl.fawizja.pixel.npc.ShopRegistry shops() { return shops; }
+    public pl.fawizja.pixel.npc.NpcRegistry npcs() { return npcs; }
+    public pl.fawizja.pixel.quest.QuestRegistry quests() { return quests; }
 
     public void createCharacter(String name, Vocation vocation) {
         PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()));

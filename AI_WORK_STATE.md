@@ -2,12 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.7.0)
+## Podsumowanie (2026-10-14, wersja 0.8.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca (wszystkie z zielonym CI i APK). 0.7.0 = etap 11.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5 (wszystkie z zielonym CI i APK). 0.8.0 = etap 12.
 
 ## Architektura
 
@@ -33,6 +33,8 @@ shared/   pl.fawizja.pixel.*         czysta Java 17, bez libGDX, testy JUnit 5
               ConsumableRegistry, RecipeRegistry, CraftingSystem, CastResult (komunikaty)
   gathering/  FishingSystem, FishingResult
   movement/   + Pathfinder (BFS z limitem wezlow)
+  npc/        Npc, NpcRegistry (maps/world/npcs.csv), Shop, ShopRegistry (data/shops.csv), TradeSystem
+  quest/      QuestType, QuestRegistry (data/quests.csv), QuestLog (w postaci), QuestSystem
   game/       GameSession (lokalna petla gry: ruch -> potwory -> walka, teleport), EventLog
 core/     pl.fawizja.pixel.client.*   libGDX
   PixelGame, screen/VocationSelectScreen, screen/GameScreen,
@@ -47,6 +49,7 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.8.0: `./gradlew build` - OK, 153 testy; zrzuty okna kupca i listy zadan w Varden.
 - 0.7.0: `./gradlew build` - OK, 147 testow; zrzut o 23:00 przy wilkach Varden (noc, wilk atakuje).
 - 0.6.0: `./gradlew build` - OK, 142 testy; zrzuty: krolowa lodu na -5 (krysztaly swieca), w ruinach
   postac 8 poziomu ginie od kolosa i odradza sie w swiatyni.
@@ -74,15 +77,17 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
 - Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
-- Brak NPC, PvP, serwera. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
+- Brak PvP i serwera. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
 - Miasta poza Varden maja tylko swiatynie, plac i domy (bez sklepow do etapu 12).
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 12 - NPC, zadania, handel, bank** (lista w TODO.md):
-1. Model NPC w `shared` (npc/): dane w `data/npcs.csv` (miasto, pozycja, rola: kupiec, bankier, kaplan,
-   nauczyciel), oferty w `data/shops.csv` (kup/sprzedaj, ceny z items.csv), dialogi slowami kluczowymi.
-2. Handel atomowy z `Money` (platnosci z reszta) i limitem plecaka; bank w UI (logika `BankAccount` jest).
-3. Proste zadania (zabij N potworow, przynies przedmioty) z nagroda exp/gp, zapis postepu w zapisie postaci.
-4. NPC w 4 miastach (generator: pozycje w `generate_world.py` -> plik npcs w maps/world).
+**Nastepne zadanie: Etap 13 - PvP i reguly serwerowe** (lista w TODO.md). PvP wymaga wielu graczy,
+wiec sensownie jest zrobic go razem z etapem 14 (serwer). Plan:
+1. Etap 14 najpierw w minimalnej formie: modul `server/` (Java 17, bez libGDX), autorytatywna petla
+   `GameSession`-podobna dla wielu postaci, protokol tekstowy/JSON po WebSocket albo TCP, klient wysyla
+   tylko intencje (ruch, atak, czar), serwer rozsyla stan w promieniu widzenia.
+2. Reguly PvP w `shared`: strefy (PZ bez walki, Varden-okolice bez PvP do poziomu 30?), czaszki/kary,
+   ochrona nowych postaci (np. ponizej poziomu 20 brak PvP) - decyzje zapisac w docs/GAME_SYSTEMS.md.
+3. MonsterManager.Target juz obsluguje "widok gracza" - rozszerzyc na wielu graczy.
 Mapy swiata zmieniaj tylko przez `tools/mapgen/generate_world.py`, potem `./gradlew :shared:test`.

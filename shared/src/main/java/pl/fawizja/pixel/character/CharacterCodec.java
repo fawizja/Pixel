@@ -41,6 +41,10 @@ public final class CharacterCodec {
         m.put("map", WorldLayout.WORLD_MAP);
         m.put("bank", Long.toString(pc.bank().balance()));
         m.put("hometown", pc.homeTown());
+        for (java.util.Map.Entry<String, Integer> q : pc.quests().active().entrySet()) {
+            m.put("quest." + q.getKey(), "A/" + q.getValue());
+        }
+        for (String q : pc.quests().done()) m.put("quest." + q, "D");
         m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         for (int i = 0; i < pc.backpack().size(); i++) {
@@ -141,6 +145,11 @@ public final class CharacterCodec {
                 ItemStack s = parseStack(e.getValue());
                 if (items.get(s.itemId()).slot() != slot) throw new IllegalArgumentException("item in wrong slot " + slot);
                 pc.equipment().setDirect(slot, s);
+            } else if (k.startsWith("quest.")) {
+                String v = e.getValue();
+                if (v.equals("D")) pc.quests().restore(k.substring(6), true, 0);
+                else if (v.startsWith("A/")) pc.quests().restore(k.substring(6), false, Integer.parseInt(v.substring(2)));
+                else throw new IllegalArgumentException("bad quest state " + v);
             } else if (k.startsWith("skill.")) {
                 String[] v = e.getValue().split("/");
                 pc.skills().set(Skill.valueOf(k.substring(6)), Integer.parseInt(v[0]), Long.parseLong(v[1]));

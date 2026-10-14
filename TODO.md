@@ -94,8 +94,16 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Nocne drapiezniki (kolumna activity w monsters.csv): w nocy na powierzchni aggro +3, ataki o 20% szybsze
 - [x] Ostrzezenie o pietrze liczy tylko spawny w promieniu 30 kafelkow (duzy swiat)
 - [ ] Czas gry z serwera (etap 14), nocne spawny
-## Etap 12 - NPC, zadania, handel, bank  <- NASTEPNY
-## Etap 13 - PvP i reguly serwerowe
+## Etap 12 - NPC, zadania, handel, bank
+- [x] 17 NPC w 4 miastach (bankier, kupiec, kaplan, przewodnik; w Varden takze czarodziejka), generowane z mapa
+- [x] 5 sklepow (data/shops.csv): kupno z ilosciami, sprzedaz wszystkich sztuk, atomowo, z reszta
+- [x] Zabezpieczenia ekonomii: skup ponizej ceny sprzedazy w calym swiecie, brak skupu run/mikstur/monet,
+      brak zysku z receptur i zadan na przynoszenie (testy)
+- [x] Bank w UI: wplata wszystkiego, wyplaty; kaplan: leczenie i zamieszkanie (miejsce odrodzenia)
+- [x] 13 zadan (data/quests.csv): zabij N / przynies N, nagrody exp i gp, zapis postepu
+- [x] Klient: sprite i imiona NPC, przycisk ROZMOWA, dotkniecie NPC, okno rozmowy z rolami i stronami
+- [ ] Dialogi slowami kluczowymi, zadania wieloetapowe, nagrody przedmiotami
+## Etap 13 - PvP i reguly serwerowe  <- NASTEPNY
 ## Etap 14 - Serwer i synchronizacja MMORPG
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0] - 2026-10-14
+
+### Dodano
+- NPC w czterech miastach: kupcy, bankierzy, kaplani i przewodnicy z zadaniami.
+- Handel: kupno w ilosciach 1/5/25/100, sprzedaz lupow, ceny w data/shops.csv.
+- Bank w grze (wplaty i wyplaty), leczenie u kaplana i wybor miasta odrodzenia.
+- 13 zadan (zabij potwory / przynies lupy) z nagrodami exp i zlota; postep jest zapisywany.
+- Okno rozmowy z NPC, imiona nad NPC, przycisk ROZMOWA.
+- 6 nowych testow (lacznie 153), w tym kontrola, ze handlem, rzemioslem i zadaniami nie da sie "drukowac" zlota.
+
 ## [0.7.0] - 2026-10-14
 
 ### Dodano

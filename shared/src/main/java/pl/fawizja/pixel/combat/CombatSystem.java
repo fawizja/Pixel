@@ -54,6 +54,11 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public Monster target() { return target; }
     public int kills() { return kills; }
+
+    private java.util.function.Consumer<MonsterType> killListener;
+
+    /** Powiadomienie o zabiciu potwora przez gracza (np. licznik zadan). */
+    public void setKillListener(java.util.function.Consumer<MonsterType> listener) { this.killListener = listener; }
     public boolean autoLoot() { return autoLoot; }
     public void setAutoLoot(boolean v) { autoLoot = v; }
 
@@ -145,6 +150,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onMonsterDeath(Monster m, long now) {
         MonsterType t = m.type();
         kills++;
+        if (killListener != null) killListener.accept(t);
         long exp = Balance.experienceReward(t.experience(), t.level(), pc.level());
         int levels = pc.addExperience(exp);
         log.add(now, EventLog.Kind.INFO, "Pokonano: " + t.name() + " (+" + exp + " exp)");

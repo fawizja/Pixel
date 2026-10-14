@@ -1,0 +1,18 @@
+# klucz;imie;rola;miasto;x;y;z;sklep;kolor;powitanie
+varden_banker;Bankier Aldric;BANKER;Varden;70;77;0;-;#d8c070;Witaj w banku Varden. Twoje zloto jest tu bezpieczne.
+varden_merchant;Kupiec Tomas;MERCHANT;Varden;88;77;0;varden_general;#a07040;Pochodnie, liny, prowiant i sprzet dla poczatkujacych. Skupuje tez lupy.
+varden_mage;Czarodziejka Mirela;MERCHANT;Varden;70;95;0;varden_magic;#8060c0;Mikstury, runy i rozdzki. Skupuje krysztaly i perly.
+varden_priest;Kaplan Benedykt;PRIEST;Varden;82;79;0;-;#f0f0f0;Niech swiatlo cie prowadzi. Moge cie uleczyc.
+varden_guide;Straznik Oren;GUIDE;Varden;77;80;0;-;#607080;Okolica potrzebuje pomocy. Mam dla ciebie zadania.
+frost_banker;Bankier Frostholm;BANKER;Frostholm;68;23;0;-;#d8c070;Bank Frostholm prowadzi konta we wszystkich miastach.
+frost_merchant;Kupiec Frostholm;MERCHANT;Frostholm;90;23;0;frost_shop;#c0d8e8;Towary z Frostholm i skup lupow z okolicy.
+frost_priest;Kaplan Frostholm;PRIEST;Frostholm;82;24;0;-;#f0f0f0;Swiatynia Frostholm wita wedrowca.
+frost_guide;Przewodnik Frostholm;GUIDE;Frostholm;77;26;0;-;#6080a0;Okolice Frostholm sa niebezpieczne. Pomozesz?
+selv_banker;Bankier Selvaran;BANKER;Selvaran;104;131;0;-;#d8c070;Bank Selvaran prowadzi konta we wszystkich miastach.
+selv_merchant;Kupiec Selvaran;MERCHANT;Selvaran;122;131;0;selv_shop;#60a060;Towary z Selvaran i skup lupow z okolicy.
+selv_priest;Kaplan Selvaran;PRIEST;Selvaran;116;132;0;-;#f0f0f0;Swiatynia Selvaran wita wedrowca.
+selv_guide;Przewodnik Selvaran;GUIDE;Selvaran;111;134;0;-;#80a040;Okolice Selvaran sa niebezpieczne. Pomozesz?
+qas_banker;Bankier Qasirah;BANKER;Qasirah;68;190;0;-;#d8c070;Bank Qasirah prowadzi konta we wszystkich miastach.
+qas_merchant;Kupiec Qasirah;MERCHANT;Qasirah;90;190;0;qas_shop;#e0c080;Towary z Qasirah i skup lupow z okolicy.
+qas_priest;Kaplan Qasirah;PRIEST;Qasirah;82;191;0;-;#f0f0f0;Swiatynia Qasirah wita wedrowca.
+qas_guide;Przewodnik Qasirah;GUIDE;Qasirah;77;193;0;-;#c09050;Okolice Qasirah sa niebezpieczne. Pomozesz?

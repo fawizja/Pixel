@@ -90,7 +90,7 @@ public final class SpellRegistry {
     private static int i(String s) { return Integer.parseInt(s.trim()); }
     private static double d(String s) { return Double.parseDouble(s.trim()); }
 
-    static List<String> readLines(String path) throws IOException {
+    public static List<String> readLines(String path) throws IOException {
         List<String> lines = new ArrayList<>();
         try (InputStream in = SpellRegistry.class.getResourceAsStream(path)) {
             if (in == null) throw new IOException("Missing resource " + path);

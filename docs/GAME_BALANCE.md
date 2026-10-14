@@ -76,7 +76,13 @@ jest najlepsza w swojej roli i ze profile sa rozne (`VocationTest`).
 
 - 100 Gold Coin = 1 Platinum Coin, 100 Platinum Coin = 1 Crystal Coin (10 000 gp).
 - Monety maja stos do 100 sztuk. Platnosci wydaja reszte optymalnie; brak miejsca na reszte anuluje transakcje.
-- Ceny przedmiotow (`value` w `items.csv`) sa punktem odniesienia dla sklepow NPC (etap 12).
+- Ceny przedmiotow (`value` w `items.csv`) sa punktem odniesienia dla sklepow NPC.
+- Sklepy (`data/shops.csv`): zapasy (pochodnia 8, lina 60, mikstury 50/55, silne 200/130, pusta runa 15),
+  sprzet startowy, a w miastach biomow bron i zbroje na poziom 40-70 za ok. 2x `value`.
+- Skup: lupy za `value`, sprzet za 1/4..1/2 `value`. Skup zawsze ponizej najnizszej ceny sprzedazy w swiecie;
+  runy, mikstury, amunicja i monety nie sa skupowane (runy powstaja z many - inaczej mana = zloto).
+- Zadania: nagrody 2 000 .. 2 500 000 exp i 300 .. 60 000 gp; zadania na przynoszenie dotycza tylko lupow,
+  ktorych nie da sie kupic. Kazde zadanie mozna wykonac raz.
 
 ## Noc (etap 11)
 

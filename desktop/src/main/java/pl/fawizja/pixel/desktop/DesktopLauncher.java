@@ -19,7 +19,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character            otwiera ksiege, plecak albo karte postaci (character) (zrzuty ekranu)
+ *   -Dpixel.open=book|bag|character|npc        otwiera ksiege, plecak, karte postaci albo rozmowe z NPC (zrzuty ekranu)
  */
 public final class DesktopLauncher {
 
@@ -68,6 +68,10 @@ public final class DesktopLauncher {
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
+                if ("npc".equals(open)) {
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.hud().openNpc(gs.session());
+                }
             }
             super.render();
             if (screenshot != null && ++frame == frames) {

@@ -26,6 +26,7 @@ public final class PlayerCharacter {
     private final BankAccount bank;
     private final Skills skills = new Skills();
     private final AutoLootFilter autoLootFilter = new AutoLootFilter();
+    private final pl.fawizja.pixel.quest.QuestLog quests = new pl.fawizja.pixel.quest.QuestLog();
     private String homeTown;
     private boolean running;
     private boolean torchLit;
@@ -91,6 +92,10 @@ public final class PlayerCharacter {
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public String homeTown() { return homeTown; }
+    public pl.fawizja.pixel.quest.QuestLog quests() { return quests; }
+
+    /** Zamieszkanie w miescie (u kaplana): tam postac odradza sie po smierci. */
+    public void setHomeTown(String town) { this.homeTown = Objects.requireNonNull(town); }
     public boolean isDead() { return health <= 0; }
     public boolean isRunning() { return running; }
     public void setRunning(boolean running) { this.running = running; }

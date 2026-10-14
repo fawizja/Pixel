@@ -410,6 +410,38 @@ def main():
                     (112, 222, -1, 'STAIRS', 112, 221, -2), (112, 222, -2, 'STAIRS', 112, 223, -1),
                     (132, 226, -2, 'STAIRS', 132, 225, -3), (132, 226, -3, 'STAIRS', 132, 227, -2)]
 
+    # NPC: Varden (wspolrzedne mapy varden + przesuniecie) i uklad town() dla 3 miast
+    npcs = [
+        ('varden_banker', 'Bankier Aldric', 'BANKER', 'Varden', 22 + VX, 13 + VY, '-', '#d8c070',
+         'Witaj w banku Varden. Twoje zloto jest tu bezpieczne.'),
+        ('varden_merchant', 'Kupiec Tomas', 'MERCHANT', 'Varden', 40 + VX, 13 + VY, 'varden_general', '#a07040',
+         'Pochodnie, liny, prowiant i sprzet dla poczatkujacych. Skupuje tez lupy.'),
+        ('varden_mage', 'Czarodziejka Mirela', 'MERCHANT', 'Varden', 22 + VX, 31 + VY, 'varden_magic', '#8060c0',
+         'Mikstury, runy i rozdzki. Skupuje krysztaly i perly.'),
+        ('varden_priest', 'Kaplan Benedykt', 'PRIEST', 'Varden', 34 + VX, 15 + VY, '-', '#f0f0f0',
+         'Niech swiatlo cie prowadzi. Moge cie uleczyc.'),
+        ('varden_guide', 'Straznik Oren', 'GUIDE', 'Varden', 29 + VX, 16 + VY, '-', '#607080',
+         'Okolica potrzebuje pomocy. Mam dla ciebie zadania.'),
+    ]
+    for key, name, (x0, y0, x1, y1), temple, shop, colors in [
+        ('frost', 'Frostholm', (64, 20, 95, 43), frost, 'frost_shop', ('#c0d8e8', '#6080a0')),
+        ('selv', 'Selvaran', (100, 128, 127, 151), selv, 'selv_shop', ('#60a060', '#80a040')),
+        ('qas', 'Qasirah', (64, 187, 95, 210), qas, 'qas_shop', ('#e0c080', '#c09050')),
+    ]:
+        cx, ty0 = (x0 + x1) // 2, y0 + 2
+        npcs += [
+            (key + '_banker', 'Bankier ' + name, 'BANKER', name, x0 + 4, y0 + 3, '-', '#d8c070',
+             'Bank ' + name + ' prowadzi konta we wszystkich miastach.'),
+            (key + '_merchant', 'Kupiec ' + name, 'MERCHANT', name, x1 - 5, y0 + 3, shop, colors[0],
+             'Towary z ' + name + ' i skup lupow z okolicy.'),
+            (key + '_priest', 'Kaplan ' + name, 'PRIEST', name, cx + 3, ty0 + 2, '-', '#f0f0f0',
+             'Swiatynia ' + name + ' wita wedrowca.'),
+            (key + '_guide', 'Przewodnik ' + name, 'GUIDE', name, cx - 2, ty0 + 4, '-', colors[1],
+             'Okolice ' + name + ' sa niebezpieczne. Pomozesz?'),
+        ]
+    for (_k, _n, _r, _t, x, y, *_rest) in npcs:
+        assert g[y][x] in WALKABLE, f'npc {_k} on {g[y][x]!r} at {x},{y}'
+
     # kontrola: wszystkie miasta osiagalne z Varden po powierzchni
     vt = (31 + VX, 16 + VY)
     reach = reachable(g, vt)
@@ -533,6 +565,10 @@ def main():
         fixed.append(f'{k};{nx};{ny};{z};{rr};{c};{s}')
     with open(os.path.join(OUT, 'spawns.csv'), 'w') as f:
         f.write('\n'.join(fixed) + '\n')
+    with open(os.path.join(OUT, 'npcs.csv'), 'w') as f:
+        f.write('# klucz;imie;rola;miasto;x;y;z;sklep;kolor;powitanie\n')
+        for (k, n, r, t, x, y, shop, color, greet) in npcs:
+            f.write(f'{k};{n};{r};{t};{x};{y};0;{shop};{color};{greet}\n')
     print('world generated', W, 'x', H, 'towns', towns)
 
 

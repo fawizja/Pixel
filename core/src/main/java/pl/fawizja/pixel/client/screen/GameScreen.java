@@ -78,6 +78,7 @@ public final class GameScreen extends ScreenAdapter {
         monsters.populate(pc.position());
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
                 game.startingConfig().startLevel());
+        session.setTownServices(game.npcs(), game.shops(), game.quests());
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
@@ -129,10 +130,12 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.Q: onButton("potion_hp"); return true;
                     case Input.Keys.F: onButton("potion_mp"); return true;
                     case Input.Keys.K: onButton("book"); return true;
+                    case Input.Keys.N: onButton("talk"); return true;
                     case Input.Keys.P: hud.toggleCharacter(); return true;
                     case Input.Keys.L: onButton("fish"); return true;
                     case Input.Keys.ESCAPE:
-                        if (hud.bookOpen()) hud.toggleBook();
+                        if (hud.npcOpen()) hud.toggleNpc(session);
+                        else if (hud.bookOpen()) hud.toggleBook();
                         else if (hud.bagOpen()) hud.toggleBag();
                         return true;
                     default: return false;
@@ -153,6 +156,7 @@ public final class GameScreen extends ScreenAdapter {
             case "target": session.cycleTarget(t); break;
             case "defensive": session.toggleDefensive(t); break;
             case "book": hud.toggleBook(); break;
+            case "talk": hud.toggleNpc(session); break;
             case "fish": session.fish(t); break;
             case "potion_hp": session.usePotion("health_potion", t); break;
             case "potion_mp": session.usePotion("mana_potion", t); break;
@@ -176,7 +180,24 @@ public final class GameScreen extends ScreenAdapter {
                     session.castSpell(id.substring(5), t);
                 } else if (id.startsWith("craft:")) {
                     session.craft(id.substring(6), t);
+                } else if (id.startsWith("npc:")) {
+                    npcAction(id.substring(4), t);
                 }
+        }
+    }
+
+    /** Akcje z okna rozmowy z NPC. */
+    private void npcAction(String a, long t) {
+        String[] p = a.split(":");
+        switch (p[0]) {
+            case "buy": session.buy(Integer.parseInt(p[1]), Integer.parseInt(p[2]), t); break;
+            case "sell": session.sellAll(Integer.parseInt(p[1]), t); break;
+            case "deposit": session.depositAll(t); break;
+            case "withdraw": session.withdraw(Long.parseLong(p[1]), t); break;
+            case "heal": session.priestHeal(t); break;
+            case "settle": session.settleHere(t); break;
+            case "quest": session.questAction(p[1], t); break;
+            default:
         }
     }
 
@@ -186,6 +207,12 @@ public final class GameScreen extends ScreenAdapter {
         int x = (int) Math.floor(w.x);
         int y = game.world().height() - 1 - (int) Math.floor(w.y);
         Position p = new Position(x, y, session.character().position().z());
+        pl.fawizja.pixel.npc.Npc npc = session.npcs().at(p);
+        if (npc != null) {
+            if (session.npcNearby() == npc) hud.openNpc(session);
+            else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdz blizej, aby porozmawiac.");
+            return true;
+        }
         return session.targetAt(p);
     }
 
@@ -249,6 +276,12 @@ public final class GameScreen extends ScreenAdapter {
                 boolean flip = m.facing() != null && m.facing().dx < 0;
                 b.draw(tr, flip ? mx + 1f : mx, my, flip ? -1f : 1f, 1f);
             }
+            for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
+                Position np = n.position();
+                if (np.y() != row || np.z() != z) continue;
+                TextureRegion tr = game.art().npc(n.key());
+                if (tr != null) b.draw(tr, np.x(), worldRenderer.worldY(np.y()), 1f, 1f);
+            }
             if (row == playerRow) {
                 b.draw(game.art().character(pc.vocation(), session.facing()), px, worldRenderer.worldY(py), 1f, 1f);
             }
@@ -298,12 +331,21 @@ public final class GameScreen extends ScreenAdapter {
 
         // liczby obrazen w pikselach ekranu
         List<CombatEvent> events = session.combat().recentEvents(t, 1200);
-        if (events.isEmpty()) return;
         screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.setProjectionMatrix(screenMatrix);
         batch.begin();
         BitmapFont font = game.font();
         float scale = Math.max(1f, Gdx.graphics.getDensity() * 1.1f);
+        // imiona NPC w poblizu
+        font.getData().setScale(scale * 0.8f);
+        Position me = session.character().position();
+        for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
+            if (n.position().z() != z || n.position().distanceTo(me) > 7) continue;
+            projected.set(n.position().x() + 0.5f, worldRenderer.worldY(n.position().y()) + 1.15f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            font.setColor(0.75f, 0.95f, 1f, 1f);
+            font.draw(batch, n.name(), projected.x - n.name().length() * 2.8f * scale, projected.y);
+        }
         font.getData().setScale(scale);
         for (CombatEvent e : events) {
             if (e.position().z() != z) continue;

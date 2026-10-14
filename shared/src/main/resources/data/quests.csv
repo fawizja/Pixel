@@ -1,0 +1,14 @@
+# klucz;nazwa;zleceniodawca (npc);rodzaj (KILL/COLLECT);cel (potwor/przedmiot);ilosc;exp;gp;poziom min;opis
+varden_wolves;Plaga wilkow;varden_guide;KILL;wolf;10;2000;300;8;Wilki atakuja pasterzy na polach Varden. Pokonaj 10.
+varden_ears;Uszy goblinow;varden_guide;COLLECT;goblin_ear;10;6000;600;12;Przynies 10 uszu goblinow z kopalni jako dowod.
+varden_trolls;Trolle w glebinach;varden_guide;KILL;cave_troll;10;40000;2000;30;Trolle jaskiniowe niszcza chodniki kopalni.
+varden_king;Krol kopalni;varden_guide;KILL;grimtooth;1;60000;5000;45;Pokonaj Grimtootha na dnie kopalni Varden.
+frost_pelts;Futra na zime;frost_guide;COLLECT;frost_pelt;10;30000;1500;40;Frostholm potrzebuje futer wilkow snieznych.
+frost_yeti;Polowanie na yeti;frost_guide;KILL;yeti;15;120000;4000;65;Yeti napadaja na karawany. Pokonaj 15.
+frost_queen;Lodowa korona;frost_guide;KILL;frost_queen;1;600000;20000;140;Zakoncz panowanie Krolowej Lodu na dnie jaskin.
+selv_crocs;Krokodyle w kanalach;selv_guide;KILL;crocodile;20;90000;3000;50;Krokodyle zagrazaja rybakom Selvaran.
+selv_idols;Zaginione posazki;selv_guide;COLLECT;jungle_idol;3;150000;0;65;Odzyskaj 3 zlote posazki z zatopionych ruin.
+selv_colossus;Serce ruin;selv_guide;KILL;ruin_colossus;1;1500000;40000;190;Zniszcz kamiennego kolosa w sercu ruin.
+qas_scorpions;Kolce skorpionow;qas_guide;COLLECT;scorpion_tail;15;80000;2000;55;Alchemicy Qasirah potrzebuja jadu skorpionow.
+qas_mummies;Spokoj zmarlych;qas_guide;KILL;mummy;10;900000;15000;180;Mumie wychodza z krypt. Odeslij 10 z powrotem.
+qas_pharaoh;Klatwa faraona;qas_guide;KILL;pharaoh;1;2500000;60000;210;Zdejmij klatwe Neferakha w najglebszej krypcie.

@@ -59,6 +59,7 @@ jako artefakt `pixel-debug-apk`.
 | Ksiega czarow i rzemiosla | KSIEGA | K |
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |
 | Karta postaci i umiejetnosci | dotknij paskow HP/MP | P |
+| Rozmowa z NPC (sklep, bank, kaplan, zadania) | ROZMOWA albo dotkniecie NPC | N |
 | Uzycie przedmiotu (mikstura, jedzenie, runa na cel) | PLECAK -> zaznacz -> UZYJ | - |
 
 W plecaku: dotknij przedmiotu, aby go zaznaczyc (statystyki), potem dotknij innego slotu, aby

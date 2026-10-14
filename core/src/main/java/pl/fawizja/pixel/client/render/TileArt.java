@@ -33,6 +33,7 @@ public final class TileArt implements Disposable {
     private static final int ITEM_BASE = 256;
     private static final int SPRITE_BASE = 512;
     private static final int MONSTER_BASE = 640;
+    private static final int NPC_BASE = 800;
 
     private final Texture atlas;
     private final Texture lightTexture;
@@ -41,8 +42,10 @@ public final class TileArt implements Disposable {
     private final TextureRegion[][] characters;
     private final TextureRegion white;
     private final Map<String, TextureRegion> monsters = new HashMap<>();
+    private final Map<String, TextureRegion> npcs = new HashMap<>();
 
-    public TileArt(TileRegistry tileRegistry, ItemRegistry itemRegistry, MonsterRegistry monsterRegistry) {
+    public TileArt(TileRegistry tileRegistry, ItemRegistry itemRegistry, MonsterRegistry monsterRegistry,
+                   List<pl.fawizja.pixel.npc.Npc> npcList) {
         Pixmap pm = new Pixmap(ATLAS, ATLAS, Pixmap.Format.RGBA8888);
         pm.setBlending(Pixmap.Blending.None);
         pm.setColor(0, 0, 0, 0);
@@ -69,6 +72,10 @@ public final class TileArt implements Disposable {
             int cell = MONSTER_BASE + i;
             paintMonster(pm, cellX(cell), cellY(cell), mtypes.get(i));
         }
+        for (int i = 0; i < npcList.size(); i++) {
+            int cell = NPC_BASE + i;
+            paintNpc(pm, cellX(cell), cellY(cell), npcList.get(i));
+        }
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -83,6 +90,7 @@ public final class TileArt implements Disposable {
             for (int d = 0; d < 4; d++) characters[v.ordinal()][d] = region(SPRITE_BASE + v.ordinal() * 4 + d);
         }
         for (int i = 0; i < mtypes.size(); i++) monsters.put(mtypes.get(i).key(), region(MONSTER_BASE + i));
+        for (int i = 0; i < npcList.size(); i++) npcs.put(npcList.get(i).key(), region(NPC_BASE + i));
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -100,6 +108,7 @@ public final class TileArt implements Disposable {
     public TextureRegion item(int id) { return id > 0 && id < items.length ? items[id] : null; }
     public TextureRegion white() { return white; }
     public TextureRegion monster(String key) { return monsters.get(key); }
+    public TextureRegion npc(String key) { return npcs.get(key); }
     public Texture lightTexture() { return lightTexture; }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -486,6 +495,30 @@ public final class TileArt implements Disposable {
             default:
                 for (int i = 0; i < 10; i++) px(pm, ox, oy, 3 + i, 12 - i, Color.valueOf("#6b4423"));
                 rect(pm, ox, oy, 10, 2, 4, 4, c);
+        }
+    }
+
+    /** NPC: dluga szata w kolorze z npcs.csv, rola widoczna po dodatkach (kaplan - aureola, bankier - sakwa). */
+    private void paintNpc(Pixmap pm, int ox, int oy, pl.fawizja.pixel.npc.Npc n) {
+        Color robe = Color.valueOf(n.color());
+        Color skin = Color.valueOf("#e8c09a");
+        Color hair = n.role() == pl.fawizja.pixel.npc.NpcRole.PRIEST ? Color.valueOf("#d8d8d8") : Color.valueOf("#4a3020");
+        Color outline = Color.valueOf("#1a1410");
+        disc(pm, ox, oy, 8f, 14.5f, 4f, new Color(0, 0, 0, 0.35f));
+        rect(pm, ox, oy, 4, 6, 8, 9, robe);
+        rect(pm, ox, oy, 4, 14, 8, 1, shade(robe, 0.6f));
+        rect(pm, ox, oy, 7, 6, 2, 8, shade(robe, 1.2f));
+        rect(pm, ox, oy, 2, 7, 2, 5, shade(robe, 0.85f));
+        rect(pm, ox, oy, 12, 7, 2, 5, shade(robe, 0.85f));
+        rect(pm, ox, oy, 5, 1, 6, 5, skin);
+        rect(pm, ox, oy, 5, 1, 6, 2, hair);
+        px(pm, ox, oy, 6, 3, outline);
+        px(pm, ox, oy, 9, 3, outline);
+        switch (n.role()) {
+            case PRIEST: rect(pm, ox, oy, 5, 0, 6, 1, Color.valueOf("#ffe680")); break;
+            case BANKER: rect(pm, ox, oy, 11, 10, 3, 3, Color.valueOf("#e8c040")); break;
+            case GUIDE: rect(pm, ox, oy, 13, 2, 1, 12, Color.valueOf("#8a6a42")); break;
+            default: rect(pm, ox, oy, 4, 10, 8, 1, Color.valueOf("#e8d8b0")); break;
         }
     }
 

@@ -27,6 +27,17 @@ import pl.fawizja.pixel.world.GroundItems;
 import pl.fawizja.pixel.world.Position;
 import pl.fawizja.pixel.world.Region;
 import pl.fawizja.pixel.world.WorldMap;
+import pl.fawizja.pixel.npc.Npc;
+import pl.fawizja.pixel.npc.NpcRegistry;
+import pl.fawizja.pixel.npc.NpcRole;
+import pl.fawizja.pixel.npc.Shop;
+import pl.fawizja.pixel.npc.ShopRegistry;
+import pl.fawizja.pixel.npc.TradeResult;
+import pl.fawizja.pixel.npc.TradeSystem;
+import pl.fawizja.pixel.quest.QuestRegistry;
+import pl.fawizja.pixel.quest.QuestResult;
+import pl.fawizja.pixel.quest.QuestSystem;
+import pl.fawizja.pixel.quest.QuestType;
 import pl.fawizja.pixel.time.DayPhase;
 import pl.fawizja.pixel.time.WorldClock;
 
@@ -53,6 +64,9 @@ public final class GameSession {
     /** Zegar swiata; czas sesji 0 = 09:00 czasu gry. W trybie online czas poda serwer. */
     private WorldClock clock = new WorldClock(-9L * 150_000L, 60L * 60L * 1000L, 0.38f);
     private Boolean wasNight;
+    private NpcRegistry npcs = NpcRegistry.empty();
+    private ShopRegistry shops;
+    private QuestSystem quests;
     /** Promien, w jakim ostrzezenie o pietrze bierze pod uwage spawny. */
     static final int DANGER_RADIUS = 30;
 
@@ -93,7 +107,13 @@ public final class GameSession {
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
         this.fishing = new FishingSystem(world, items, rng);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
-        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null);
+        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null);
+        this.combat.setKillListener(t -> {
+            QuestType done = quests == null ? null : quests.onKill(pc, t.key());
+            if (done != null) {
+                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiagniety, wroc po nagrode.");
+            }
+        });
         this.playerTarget = new MonsterManager.Target() {
             @Override
             public Position position() { return pc.position(); }
@@ -101,6 +121,106 @@ public final class GameSession {
             @Override
             public boolean attackable() { return !pc.isDead(); }
         };
+    }
+
+    // ------------------------------------------------------------------ NPC, handel, bank, zadania
+
+    /** Podlacza NPC, sklepy i zadania swiata (PixelGame i testy). */
+    public void setTownServices(NpcRegistry npcs, ShopRegistry shops, QuestRegistry quests) {
+        this.npcs = java.util.Objects.requireNonNull(npcs);
+        this.shops = shops;
+        this.quests = quests == null ? null : new QuestSystem(quests, items);
+    }
+
+    public NpcRegistry npcs() { return npcs; }
+    public ShopRegistry shops() { return shops; }
+    public QuestSystem quests() { return quests; }
+
+    /** NPC, z ktorym mozna teraz rozmawiac (albo null). */
+    public Npc npcNearby() {
+        return pc.isDead() ? null : npcs.nearest(pc.position(), world);
+    }
+
+    private Npc talkTo(NpcRole role, long nowMs) {
+        Npc n = npcNearby();
+        if (n == null || n.role() != role) {
+            log.add(nowMs, EventLog.Kind.WARNING, TradeResult.TOO_FAR.message());
+            return null;
+        }
+        return n;
+    }
+
+    public Shop shopOf(Npc n) {
+        return n == null || n.shopKey() == null || shops == null ? null : shops.get(n.shopKey());
+    }
+
+    public TradeResult buy(int itemId, int count, long nowMs) {
+        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        if (n == null) return TradeResult.TOO_FAR;
+        TradeResult r = TradeSystem.buy(pc.backpack(), items, shopOf(n), itemId, count);
+        log.add(nowMs, r.ok() ? EventLog.Kind.LOOT : EventLog.Kind.WARNING,
+                r.ok() ? "Kupiono: " + count + "x " + items.get(itemId).name() : r.message());
+        return r;
+    }
+
+    public TradeResult sellAll(int itemId, long nowMs) {
+        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        if (n == null) return TradeResult.TOO_FAR;
+        long value = TradeSystem.sellValue(pc.backpack(), shopOf(n), itemId);
+        int count = pc.backpack().count(itemId);
+        TradeResult r = TradeSystem.sellAll(pc.backpack(), shopOf(n), itemId);
+        log.add(nowMs, r.ok() ? EventLog.Kind.LOOT : EventLog.Kind.WARNING,
+                r.ok() ? "Sprzedano: " + count + "x " + items.get(itemId).name() + " za " + value + " gp" : r.message());
+        return r;
+    }
+
+    public InventoryResult depositAll(long nowMs) {
+        if (talkTo(NpcRole.BANKER, nowMs) == null) return InventoryResult.INVALID_AMOUNT;
+        long before = gold();
+        InventoryResult r = pc.bank().depositAll(pc.backpack());
+        log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
+                r.ok() ? "Wplacono " + before + " gp. Saldo: " + pc.bank().balance() + " gp." : "Nie masz monet do wplacenia.");
+        return r;
+    }
+
+    public InventoryResult withdraw(long amount, long nowMs) {
+        if (talkTo(NpcRole.BANKER, nowMs) == null) return InventoryResult.INVALID_AMOUNT;
+        InventoryResult r = pc.bank().withdraw(pc.backpack(), amount);
+        log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
+                r.ok() ? "Wyplacono " + amount + " gp. Saldo: " + pc.bank().balance() + " gp."
+                        : r == InventoryResult.INSUFFICIENT_FUNDS ? "Za malo pieniedzy na koncie." : "Brak miejsca w plecaku.");
+        return r;
+    }
+
+    /** Kaplan: pelne leczenie i mana (tylko w swiatyni, wiec poza walka). */
+    public void priestHeal(long nowMs) {
+        if (talkTo(NpcRole.PRIEST, nowMs) == null) return;
+        pc.heal(pc.maxHealth());
+        pc.restoreMana(pc.maxMana());
+        log.add(nowMs, EventLog.Kind.INFO, "Kaplan cie uleczyl.");
+    }
+
+    /** Kaplan: zamieszkanie w miescie - tu postac odrodzi sie po smierci. */
+    public void settleHere(long nowMs) {
+        Npc n = talkTo(NpcRole.PRIEST, nowMs);
+        if (n == null) return;
+        pc.setHomeTown(n.town().toLowerCase(java.util.Locale.ROOT));
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Mieszkasz teraz w " + n.town() + ". Tu bedziesz sie odradzac.");
+    }
+
+    public QuestResult questAction(String questKey, long nowMs) {
+        Npc n = talkTo(NpcRole.GUIDE, nowMs);
+        QuestType q = quests == null ? null : quests.registry().get(questKey);
+        if (n == null || q == null || !q.giver().equals(n.key())) return QuestResult.NOT_FINISHED;
+        QuestResult r = quests.interact(pc, q);
+        String text = r.message();
+        if (r == QuestResult.COMPLETED) {
+            text = "Ukonczono \"" + q.name() + "\": +" + q.rewardExp() + " exp" + (q.rewardGold() > 0 ? ", +" + q.rewardGold() + " gp" : "");
+        } else if (r == QuestResult.ACCEPTED) {
+            text = "Przyjeto zadanie \"" + q.name() + "\".";
+        }
+        log.add(nowMs, r == QuestResult.COMPLETED || r == QuestResult.ACCEPTED ? EventLog.Kind.SYSTEM : EventLog.Kind.WARNING, text);
+        return r;
     }
 
     public MonsterManager monsters() { return monsters; }

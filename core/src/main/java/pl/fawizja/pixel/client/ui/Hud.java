@@ -56,6 +56,13 @@ public final class Hud {
     private final HudButton defensive = new HudButton("defensive", "TARCZA");
     private final HudButton book = new HudButton("book", "KSIEGA");
     private final HudButton fish = new HudButton("fish", "LOW");
+    private final HudButton talk = new HudButton("talk", "ROZMOWA");
+    /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
+    private boolean npcMode;
+    private pl.fawizja.pixel.npc.Npc npc;
+    private int npcPage;
+    private int npcQty = 1;
+    private static final int[] QUANTITIES = {1, 5, 25, 100};
     private boolean charOpen;
     private final HudButton potionHp = new HudButton("potion_hp", "HP");
     private final HudButton potionMp = new HudButton("potion_mp", "MP");
@@ -109,6 +116,7 @@ public final class Hud {
         buttons.add(defensive);
         buttons.add(book);
         buttons.add(fish);
+        buttons.add(talk);
         buttons.add(potionHp);
         buttons.add(potionMp);
         for (int i = 0; i < spellButtons.length; i++) {
@@ -139,6 +147,7 @@ public final class Hud {
         defensive.x = bx; defensive.y = by + br * 4.8f; defensive.r = br;
         book.x = bx - br * 2.4f; book.y = by + br * 4.8f; book.r = br;
         fish.x = bx - br * 4.8f; fish.y = by + br * 4.8f; fish.r = br;
+        talk.x = bx; talk.y = by + br * 7.2f; talk.r = br;
         // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
         float sr = Math.max(20, br * 0.72f);
         float sx0 = margin + jr * 2.6f + sr + 12;
@@ -176,7 +185,33 @@ public final class Hud {
     public VirtualJoystick joystick() { return joystick; }
     public boolean bagOpen() { return bagOpen; }
     public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
-    public void toggleBook() { menuOpen = !menuOpen; if (menuOpen) bagOpen = false; }
+    public void toggleBook() {
+        menuOpen = !(menuOpen && !npcMode);
+        npcMode = false;
+        if (menuOpen) bagOpen = false;
+    }
+
+    /** Otwiera lub zamyka rozmowe z NPC w zasiegu. */
+    public void toggleNpc(GameSession session) {
+        if (menuOpen && npcMode) {
+            menuOpen = false;
+            npcMode = false;
+        } else {
+            openNpc(session);
+        }
+    }
+
+    public void openNpc(GameSession session) {
+        pl.fawizja.pixel.npc.Npc n = session.npcNearby();
+        if (n == null) return;
+        if (n != npc) npcPage = 0;
+        npc = n;
+        npcMode = true;
+        menuOpen = true;
+        bagOpen = false;
+    }
+
+    public boolean npcOpen() { return menuOpen && npcMode; }
     public boolean bookOpen() { return menuOpen; }
     public void toggleCharacter() { charOpen = !charOpen; }
     public boolean characterOpen() { return charOpen; }
@@ -215,6 +250,10 @@ public final class Hud {
 
     private void rebuildMenu(GameSession session) {
         menuRows.clear();
+        if (npcMode) {
+            rebuildNpcMenu(session);
+            return;
+        }
         PlayerCharacter pc = session.character();
         for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
             boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
@@ -246,6 +285,95 @@ public final class Hud {
             row.h = rowH - 3;
         }
     }
+    private void rebuildNpcMenu(GameSession session) {
+        PlayerCharacter pc = session.character();
+        List<MenuRow> left = new ArrayList<>();
+        List<MenuRow> right = new ArrayList<>();
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        switch (npc.role()) {
+            case MERCHANT: {
+                pl.fawizja.pixel.npc.Shop shop = session.shopOf(npc);
+                List<pl.fawizja.pixel.npc.ShopOffer> sold = new ArrayList<>();
+                for (pl.fawizja.pixel.npc.ShopOffer o : shop.offers()) if (o.sold()) sold.add(o);
+                left.add(new MenuRow("npc:qty", "Ilosc: " + npcQty + " (zmien)", "dotknij towaru, aby kupic", true));
+                int per = perCol - 2;
+                int pages = Math.max(1, (sold.size() + per - 1) / per);
+                if (npcPage >= pages) npcPage = 0;
+                long gold = session.gold();
+                for (int i = npcPage * per; i < Math.min(sold.size(), (npcPage + 1) * per); i++) {
+                    pl.fawizja.pixel.npc.ShopOffer o = sold.get(i);
+                    long cost = o.buyPrice() * npcQty;
+                    left.add(new MenuRow("npc:buy:" + o.itemId() + ":" + npcQty, session.items().get(o.itemId()).name(),
+                            o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : ""), gold >= cost));
+                }
+                if (pages > 1) left.add(new MenuRow("npc:page", "Nastepna strona", (npcPage + 1) + " / " + pages, true));
+                right.add(new MenuRow("npc:none", "Skup", "dotknij przedmiotu, aby sprzedac wszystkie sztuki", false));
+                java.util.Set<Integer> seen = new java.util.LinkedHashSet<>();
+                for (ItemStack s : pc.backpack().contents()) if (s != null) seen.add(s.itemId());
+                for (int id : seen) {
+                    long value = pl.fawizja.pixel.npc.TradeSystem.sellValue(pc.backpack(), shop, id);
+                    if (value <= 0 || right.size() >= perCol) continue;
+                    right.add(new MenuRow("npc:sell:" + id, pc.backpack().count(id) + "x " + session.items().get(id).name(),
+                            "sprzedaj za " + value + " gp", true));
+                }
+                if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do sprzedania", "kupiec skupuje lupy z potworow", false));
+                break;
+            }
+            case BANKER: {
+                long bal = pc.bank().balance();
+                left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspolne dla wszystkich miast", false));
+                left.add(new MenuRow("npc:deposit", "Wplac wszystkie monety", String.format("w plecaku: %,d gp", session.gold()), session.gold() > 0));
+                for (long a : new long[] {1_000, 10_000, 100_000, 1_000_000}) {
+                    left.add(new MenuRow("npc:withdraw:" + a, String.format("Wyplac %,d gp", a), "monety trafia do plecaka", bal >= a));
+                }
+                break;
+            }
+            case PRIEST: {
+                left.add(new MenuRow("npc:heal", "Ulecz mnie", "pelne zdrowie i mana", pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
+                boolean home = npc.town().equalsIgnoreCase(pc.homeTown());
+                left.add(new MenuRow("npc:settle", "Zamieszkaj w " + npc.town(),
+                        home ? "juz tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu bedziesz sie odradzac", !home));
+                break;
+            }
+            case GUIDE: {
+                pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
+                if (qs == null) break;
+                for (pl.fawizja.pixel.quest.QuestType q : qs.registry().byGiver(npc.key())) {
+                    String reward = q.rewardExp() + " exp" + (q.rewardGold() > 0 ? ", " + q.rewardGold() + " gp" : "");
+                    String detail;
+                    boolean ok;
+                    switch (pc.quests().state(q.key())) {
+                        case DONE: detail = "ukonczone"; ok = false; break;
+                        case ACTIVE:
+                            ok = qs.ready(pc, q);
+                            detail = ok ? "ODDAJ - nagroda: " + reward : "w toku: " + qs.progress(pc, q) + " / " + q.amount();
+                            break;
+                        default:
+                            ok = pc.level() >= q.minLevel();
+                            detail = "przyjmij (poz. " + q.minLevel() + "): " + reward;
+                    }
+                    MenuRow row = new MenuRow("npc:quest:" + q.key(), q.name(), detail, ok);
+                    if (left.size() < perCol) left.add(row);
+                    else right.add(row);
+                }
+                break;
+            }
+            default:
+        }
+        float colW = (menuW - 30) / 2f;
+        for (int c = 0; c < 2; c++) {
+            List<MenuRow> col = c == 0 ? left : right;
+            for (int i = 0; i < col.size(); i++) {
+                MenuRow row = col.get(i);
+                row.x = menuX + 10 + c * (colW + 10);
+                row.y = menuY + menuH - 52 - (i + 1) * rowH;
+                row.w = colW;
+                row.h = rowH - 3;
+                menuRows.add(row);
+            }
+        }
+    }
+
     public void toggleDiagnostics() { diagnosticsOpen = !diagnosticsOpen; }
     public boolean diagnosticsOpen() { return diagnosticsOpen; }
     public int selectedSlot() { return selectedSlot; }
@@ -270,7 +398,15 @@ public final class Hud {
             rebuildMenu(session);
             for (MenuRow row : menuRows) {
                 if (p.x >= row.x && p.x <= row.x + row.w && p.y >= row.y && p.y <= row.y + row.h) {
-                    actions.onButton(row.action);
+                    if (row.action.equals("npc:qty")) {
+                        int i = 0;
+                        while (i < QUANTITIES.length && QUANTITIES[i] != npcQty) i++;
+                        npcQty = QUANTITIES[(i + 1) % QUANTITIES.length];
+                    } else if (row.action.equals("npc:page")) {
+                        npcPage++;
+                    } else if (!row.action.equals("npc:none")) {
+                        actions.onButton(row.action);
+                    }
                     return true;
                 }
             }
@@ -335,8 +471,15 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen;
+        book.active = menuOpen && !npcMode;
         fish.visible = session.canFish();
+        pl.fawizja.pixel.npc.Npc near = session.npcNearby();
+        talk.visible = near != null;
+        talk.active = npcOpen();
+        if (npcMode && near != npc) {
+            menuOpen = false;
+            npcMode = false;
+        }
         updateBar(session);
         int hpCount = pc.backpack().count(session.items().byKey("health_potion").id());
         int mpCount = pc.backpack().count(session.items().byKey("mana_potion").id());
@@ -458,8 +601,17 @@ public final class Hud {
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
-            text(batch, "Czary (dotknij, aby rzucic)", menuX + 10, menuY + menuH - 14);
-            text(batch, "Rzemioslo (dotknij, aby wytworzyc)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+            if (npcMode) {
+                text(batch, npc.name() + " (" + npc.town() + ")", menuX + 10, menuY + menuH - 14);
+                font.getData().setScale(0.85f);
+                font.setColor(0.85f, 0.85f, 0.7f, 1f);
+                text(batch, npc.greeting(), menuX + 10, menuY + menuH - 32);
+                font.setColor(Color.WHITE);
+                font.getData().setScale(1f);
+            } else {
+                text(batch, "Czary (dotknij, aby rzucic)", menuX + 10, menuY + menuH - 14);
+                text(batch, "Rzemioslo (dotknij, aby wytworzyc)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+            }
             centered(batch, "X", menuClose.x, menuClose.y);
             for (MenuRow row : menuRows) {
                 font.setColor(row.enabled ? Color.WHITE : Color.GRAY);
