@@ -104,7 +104,14 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] 13 zadan (data/quests.csv): zabij N / przynies N, nagrody exp i gp, zapis postepu
 - [x] Klient: sprite i imiona NPC, przycisk ROZMOWA, dotkniecie NPC, okno rozmowy z rolami i stronami
 - [ ] Dialogi slowami kluczowymi, zadania wieloetapowe, nagrody przedmiotami
-## Etap 13 - PvP i reguly serwerowe  <- NASTEPNY
+## Etap 13 - PvP i reguly serwerowe
+- [x] `pvp/PvpRules`: ochrona do poziomu 30, brak walki w PZ, zakaz atakowania postaci o ponad polowe slabszych
+- [x] Biala czaszka (15 min) za atak na niewinnego, czerwona (6 h) za 3 nieusprawiedliwione zabojstwa w 24 h
+- [x] Smierc z czerwona czaszka = caly plecak na ziemi; PvP nie daje exp; obrazenia graczom x0,5
+- [x] Serwer: `ATTACK id`, czaszki w klatkach (PL, ME), stan PvP przetrwa wylogowanie
+- [x] Klient: dotkniecie gracza = atak (drugie = koniec), czerwona ramka celu, kolor imienia wg czaszki
+- [x] Testy zasad + symulacja pojedynkow 4x4 profesji na poziomie 50 + test przez TCP
+- [ ] Czary i runy na graczy, blokada wejscia do PZ po walce, zapis czaszek na dysku serwera
 ## Etap 14 - Serwer i synchronizacja MMORPG
 - [x] Modul `server` (TCP, protokol tekstowy), wspolny swiat, wielu graczy, zapis postaci na serwerze
 - [x] Potwory wybieraja najblizszego gracza; atak trafia do sesji tego gracza

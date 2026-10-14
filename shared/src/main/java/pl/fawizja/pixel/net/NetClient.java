@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
 public final class NetClient implements AutoCloseable {
 
     /** Klatka stanu: czas serwera i widoczne byty. */
-    public record Frame(long serverTime, Position self, String facing, int targetId,
+    public record Frame(long serverTime, Position self, String facing, int targetId, int playerTargetId, String skull,
                         List<RemoteEntity> players, List<RemoteEntity> monsters, List<GroundStack> ground) {}
 
     /** Stos przedmiotow na ziemi widoczny w klatce. */
@@ -53,6 +53,8 @@ public final class NetClient implements AutoCloseable {
         Position self = null;
         String facing = null;
         int targetId = -1;
+        int playerTargetId = -1;
+        String skull = "NONE";
         List<RemoteEntity> players = new ArrayList<>();
         List<RemoteEntity> monsters = new ArrayList<>();
         List<GroundStack> ground = new ArrayList<>();
@@ -73,10 +75,13 @@ public final class NetClient implements AutoCloseable {
                     case "ME":
                         self = pos(f, 1);
                         facing = f.length > 4 ? f[4] : null;
+                        skull = f.length > 5 ? f[5] : "NONE";
                         break;
                     case "TG": targetId = f[1].equals("-") ? -1 : Integer.parseInt(f[1]); break;
+                    case "TP": playerTargetId = f[1].equals("-") ? -1 : Integer.parseInt(f[1]); break;
                     case "PL":
-                        players.add(new RemoteEntity("PL", Integer.parseInt(f[1]), f[3], f[2], pos(f, 4), Integer.parseInt(f[7])));
+                        players.add(new RemoteEntity("PL", Integer.parseInt(f[1]), f[3], f[2], pos(f, 4), Integer.parseInt(f[7]),
+                                f.length > 8 ? f[8] : "NONE"));
                         break;
                     case "MO":
                         monsters.add(new RemoteEntity("MO", Integer.parseInt(f[1]), f[2], f[2], pos(f, 3), Integer.parseInt(f[6])));
@@ -85,7 +90,7 @@ public final class NetClient implements AutoCloseable {
                         ground.add(new GroundStack(pos(f, 1), Integer.parseInt(f[4]), Integer.parseInt(f[5])));
                         break;
                     case "END":
-                        frame = new Frame(frameTime, self, facing, targetId,
+                        frame = new Frame(frameTime, self, facing, targetId, playerTargetId, skull,
                                 Collections.unmodifiableList(players), Collections.unmodifiableList(monsters),
                                 Collections.unmodifiableList(ground));
                         break;

@@ -29,6 +29,7 @@ import pl.fawizja.pixel.monster.SpawnTable;
 import pl.fawizja.pixel.net.Protocol;
 import pl.fawizja.pixel.npc.NpcRegistry;
 import pl.fawizja.pixel.npc.ShopRegistry;
+import pl.fawizja.pixel.pvp.PvpRules;
 import pl.fawizja.pixel.quest.QuestRegistry;
 import pl.fawizja.pixel.save.SaveStore;
 import pl.fawizja.pixel.vocation.Vocation;
@@ -53,6 +54,9 @@ final class ServerWorld {
     final WorldMap world;
     final MonsterManager monsters;
     final GroundItems ground = new GroundItems();
+    /** Stan PvP po imieniu - przetrwa wylogowanie (czaszki nie znikaja po ponownym wejsciu). */
+    private final Map<String, PvpRules.Status> pvp = new java.util.HashMap<>();
+    private final Random pvpRng = new Random();
     private final StartingConfig config = StartingConfig.loadDefault();
     private final MonsterRegistry monsterTypes;
     private final NpcRegistry npcs;
@@ -109,7 +113,8 @@ final class ServerWorld {
         GameSession s = new GameSession(items, world, pc, monsters, ground, new Random(rng.nextLong()),
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
-        ServerPlayer p = new ServerPlayer(nextId++, s, client, now);
+        ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
+                pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> new PvpRules.Status()));
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
@@ -170,7 +175,11 @@ final class ServerWorld {
         switch (f[0]) {
             case "MOVE": p.move = f.length > 1 && !f[1].equals("-") ? parseDir(f[1]) : null; break;
             case "ACT": if (f.length > 1) Actions.apply(p.session, f[1], now); break;
+            case "ATTACK":
+                if (f.length > 1) attackPlayer(p, parseInt(f[1]), now);
+                break;
             case "TARGET":
+                p.pvpTarget = -1;
                 if (f.length > 1) {
                     int id = parseInt(f[1]);
                     for (Monster m : monsters.monsters()) {
@@ -186,6 +195,23 @@ final class ServerWorld {
                 break;
             default:
         }
+    }
+
+    /** Wybor gracza do ataku: zasady sprawdzane od razu, by gracz dostal czytelna odpowiedz. */
+    void attackPlayer(ServerPlayer p, int id, long now) {
+        ServerPlayer t = players.get(id);
+        if (t == null) {
+            p.pvpTarget = -1;
+            return;
+        }
+        PvpRules.Verdict v = PvpRules.check(p.session.character(), t.session.character(), t.pvp, world, now);
+        if (v != PvpRules.Verdict.OK) {
+            p.session.log().add(now, EventLog.Kind.WARNING, v.message);
+            p.pvpTarget = -1;
+            return;
+        }
+        p.pvpTarget = t.id;
+        p.session.combat().setTarget(null);
     }
 
     private static Direction parseDir(String s) {
@@ -235,6 +261,23 @@ final class ServerWorld {
             }
         });
         for (ServerPlayer p : players.values()) {
+            if (p.pvpTarget < 0) continue;
+            ServerPlayer t = players.get(p.pvpTarget);
+            if (t == null) {
+                p.pvpTarget = -1;
+                continue;
+            }
+            PvpRules.Verdict v = PvpRules.check(p.session.character(), t.session.character(), t.pvp, world, now);
+            if (v != PvpRules.Verdict.OK) {
+                p.session.log().add(now, EventLog.Kind.INFO, "Koniec walki z " + t.name() + ": " + v.message);
+                p.pvpTarget = -1;
+                continue;
+            }
+            if (PvpRules.attack(p.session, p.pvp, t.session, t.pvp, world, now, pvpRng) == PvpRules.Outcome.KILLED) {
+                p.pvpTarget = -1;
+            }
+        }
+        for (ServerPlayer p : players.values()) {
             if (now - p.lastSaveMs >= SAVE_EVERY_MS) {
                 save(p);
                 p.lastSaveMs = now;
@@ -274,7 +317,8 @@ final class ServerWorld {
             StringBuilder frame = new StringBuilder();
             frame.append(Protocol.line("FRAME", String.valueOf(now))).append('\n');
             frame.append(Protocol.line("ME", String.valueOf(me.x()), String.valueOf(me.y()), String.valueOf(me.z()),
-                    p.session.facing().name())).append('\n');
+                    p.session.facing().name(), p.pvp.skull(now).name())).append('\n');
+            frame.append(Protocol.line("TP", p.pvpTarget < 0 ? "-" : String.valueOf(p.pvpTarget))).append('\n');
             Monster tg = p.session.combat().target();
             frame.append(Protocol.line("TG", tg == null || tg.isDead() ? "-" : String.valueOf(tg.id()))).append('\n');
             for (ServerPlayer o : players.values()) {
@@ -283,7 +327,7 @@ final class ServerWorld {
                 PlayerCharacter oc = o.session.character();
                 frame.append(Protocol.line("PL", String.valueOf(o.id), oc.name(), oc.vocation().name(),
                         String.valueOf(op.x()), String.valueOf(op.y()), String.valueOf(op.z()),
-                        String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())))).append('\n');
+                        String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())), o.pvp.skull(now).name())).append('\n');
             }
             for (Monster m : monsters.near(me, Protocol.VIEW_RADIUS)) {
                 if (m.isDead() || m.position().z() != me.z()) continue;

@@ -10,11 +10,24 @@ Stan: **Z** = zaimplementowane i przetestowane, **C** = czesciowo, **P** = zapla
   serwer prowadzi po jednej sesji na gracza (zrodlo prawdy o HP, manie, przedmiotach i walucie),
   a klient trzyma replike bez symulacji (`copyStateFrom`, `applyRemotePosition`, `MonsterManager.syncRemote`).
 
+## PvP (etap 13)
+
+Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
+- Postacie ponizej poziomu 30 nie atakuja graczy i nie moga byc atakowane (start na poziomie 8 = okres ochronny).
+- W strefie ochronnej (PZ) nie ma walki - ani atakujacy, ani cel nie moga w niej stac.
+- Nie mozna atakowac postaci o poziomie mniejszym niz polowa wlasnego, chyba ze ma czaszke.
+- Atak na gracza bez czaszki = biala czaszka na 15 min. Atak na gracza z czaszka jest usprawiedliwiony.
+- 3 nieusprawiedliwione zabojstwa w 24 h = czerwona czaszka na 6 h; smierc z nia = caly plecak zostaje na ziemi.
+- Smierc z reki gracza: ta sama kara exp co od potwora, odrodzenie w swiatyni miasta. Zabojca nie dostaje exp.
+- Obrazenia zadawane graczom x0,5 (walki trwaja dluzej niz z potworami - czas na ucieczke lub leczenie).
+- Stan czaszek trzyma serwer po imieniu postaci (przetrwa wylogowanie, ale jeszcze nie restart serwera).
+- Na razie tylko atak podstawowy; czary i runy dzialaja wylacznie na potwory.
+
 ## Siec (etap 14)
 
 - TCP, linie tekstowe rozdzielone tabulatorem (`net.Protocol`, wersja 1, port 7171).
 - Klient -> serwer: `HELLO wersja imie PROFESJA`, `MOVE kierunek|-`, `ACT akcja` (te same nazwy co
-  `game.Actions`), `TARGET id`, `CHAT tekst`, `BYE`.
+  `game.Actions`), `TARGET id` (potwor), `ATTACK id|-` (gracz, PvP), `CHAT tekst`, `BYE`.
 - Serwer -> klient: `WELCOME id`, `ERR`, `SELF zapis` (gdy sie zmienil, max 4/s), `LOG`, `CHAT`,
   `EV` (zdarzenie walki), co 100 ms klatka `FRAME czas` + `ME` + `TG` + `PL`/`MO`/`GI` w promieniu 12 + `END`.
 - Serwer: 20 krokow/s, potwory aktualizowane raz na krok dla wszystkich graczy, zapis co 60 s i przy wyjsciu.

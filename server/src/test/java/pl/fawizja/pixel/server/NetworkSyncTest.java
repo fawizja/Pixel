@@ -176,4 +176,50 @@ class NetworkSyncTest {
             });
         }
     }
+
+    @Test
+    void pvpFollowsTheRulesOverTheNetwork() throws Exception {
+        try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
+             NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
+            a.hello("Ivo", "PALADIN");
+            b.hello("Jan", "MONK");
+            await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
+            int janId = b.playerId();
+            // w swiatyni (PZ) i na poziomie 8 atak jest odrzucony z komunikatem
+            a.send("ATTACK", String.valueOf(janId));
+            await("refused", () -> {
+                String[] m;
+                while ((m = a.poll()) != null) if (m[0].equals("LOG") && m[2].contains("poziomu")) return true;
+                return false;
+            });
+            Position field = new Position(58, 75, 0);
+            server.enqueueTest(() -> {
+                int i = 0;
+                for (ServerPlayer p : server.world().players()) {
+                    PlayerCharacter pc = p.session.character();
+                    pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(40) - pc.experience());
+                    pc.heal(pc.maxHealth());
+                    p.session.teleport(field.translate(i++, 0), server.now());
+                }
+            });
+            await("both level 40", () -> {
+                try {
+                    return self(a).level() >= 40 && self(b).level() >= 40;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            int full = self(b).health();
+            a.send("ATTACK", String.valueOf(janId));
+            await("jan hurt and ivo marked", () -> {
+                RemoteEntity ivo = seen(b, "Ivo");
+                try {
+                    return ivo != null && "WHITE".equals(ivo.mark()) && self(b).health() < full
+                            && a.frame().playerTargetId() == janId && "WHITE".equals(a.frame().skull());
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+        }
+    }
 }

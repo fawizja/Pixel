@@ -2,13 +2,13 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.9.0)
+## Podsumowanie (2026-10-14, wersja 0.10.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie i online: modul `server` (TCP) + tryb online klienta desktopowego (`-Dpixel.server`).
-  Brakuje kont z haslem, TLS, PvP i wyboru serwera na Androidzie - nie wystawiac publicznie.
-- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = klient online.
+  PvP (etap 13) dziala na serwerze. Brakuje kont z haslem, TLS i wyboru serwera na Androidzie - nie wystawiac publicznie.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 oraz czesci etapow 2, 9, 10, 11, 14, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = PvP.
 
 ## Architektura
 
@@ -26,6 +26,7 @@ shared/   pl.fawizja.pixel.*         czysta Java 17, bez libGDX, testy JUnit 5
   movement/   MovementSystem (krok, uzycie, czas kroku)
   time/       WorldClock (doba 60 min, plynna jasnosc)
   perf/       ResourceGuard (90%/75%, NORMAL/LIMITED/RECOVERING)
+  pvp/        PvpRules (ochrona, PZ, roznica poziomow, czaszki, atak gracz-gracz)
   net/        Protocol (linie TCP), NetClient (watek odbiorczy, klatki), RemoteEntity
   game/       GameSession, Actions (nazwy akcji wspolne dla HUD i serwera), EventLog
   save/       SaveStore (zapis atomowy + .bak), SaveFormatException
@@ -84,16 +85,16 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
 - Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
-- Brak PvP i kont z haslem. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
+- Brak kont z haslem; PvP tylko atakiem podstawowym. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
 - Miasta poza Varden maja tylko swiatynie, plac i domy (bez sklepow do etapu 12).
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 13 - PvP i reguly serwerowe**, potem reszta etapu 14 (TODO.md). Plan:
-1. Reguly PvP w `shared` (np. `pvp/PvpRules`): PZ bez walki, ochrona postaci ponizej ustalonego poziomu,
-   kary za zabijanie (czaszki); decyzje do docs/GAME_SYSTEMS.md. Cel gracza na serwerze: `TARGET` z id gracza.
-2. Ekran logowania (imie, haslo, adres serwera) w kliencie - takze Android; konta z hashem hasla na serwerze.
-3. Okno pisania czatu; przewidywanie ruchu po stronie klienta.
+**Nastepne zadanie: dokonczenie etapu 14** (TODO.md), potem etap 16. Plan:
+1. Ekran logowania (imie, haslo, adres serwera) w kliencie - takze Android (wtedy APK moze grac online);
+   konta na serwerze z hashem hasla (PBKDF2, sol na konto) - bez zadnych hasel w repo.
+2. Okno pisania czatu; przewidywanie ruchu po stronie klienta.
+3. PvP: czary/runy na graczy, blokada PZ po walce, zapis czaszek na dysku serwera.
 Tryb online: `GameScreen(game, pc, NetClient)` - bez symulacji, `syncWithServer` odwzorowuje SELF/FRAME/LOG/EV.
 Uruchomienie lokalne: `server/build/install/server/bin/server 7272 <katalog>` i klient z `-Dpixel.server=127.0.0.1:7272`.
 Mapy swiata zmieniaj tylko przez `tools/mapgen/generate_world.py`, potem `./gradlew :shared:test`.

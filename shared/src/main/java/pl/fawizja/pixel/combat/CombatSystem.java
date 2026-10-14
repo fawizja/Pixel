@@ -224,6 +224,36 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                 + (before - pc.experience()) + " exp. Odrodzenie w swiatyni.");
     }
 
+    /**
+     * Smierc z reki innego gracza (PvP): ta sama kara co od potwora; przy czerwonej czaszce
+     * caly plecak zostaje na miejscu smierci. Zwraca liczbe porzuconych stosow.
+     */
+    public int diedFromPlayer(String killer, boolean dropBackpack, long now) {
+        Position at = pc.position();
+        int dropped = 0;
+        if (dropBackpack) {
+            for (int i = 0; i < pc.backpack().size(); i++) {
+                ItemStack s = pc.backpack().get(i);
+                if (s == null) continue;
+                ItemStack taken = pc.backpack().takeFromSlot(i, s.count());
+                if (taken != null) {
+                    ground.place(at, taken);
+                    dropped++;
+                }
+            }
+        }
+        long before = pc.experience();
+        pc.applyDeathPenalty(minLevel);
+        Position temple = world.templeOf(pc.homeTown());
+        pc.revive(temple);
+        target = null;
+        push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
+        log.add(now, EventLog.Kind.WARNING, "Zginales z reki gracza " + killer + ". Strata: "
+                + (before - pc.experience()) + " exp" + (dropped > 0 ? ", plecak zostal na ziemi" : "")
+                + ". Odrodzenie w swiatyni.");
+        return dropped;
+    }
+
     private void push(CombatEvent e) {
         eventTotal++;
         events.addLast(e);

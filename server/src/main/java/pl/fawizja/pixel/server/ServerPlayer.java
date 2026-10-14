@@ -9,13 +9,17 @@ final class ServerPlayer {
     final GameSession session;
     final ClientHandler client;
     Direction move;
+    /** Gracz atakowany w PvP (id) albo -1. */
+    int pvpTarget = -1;
+    final pl.fawizja.pixel.pvp.PvpRules.Status pvp;
     long logSent;
     long eventsSent;
     String lastSelf;
     long lastSelfMs = -1_000_000;
     long lastSaveMs;
 
-    ServerPlayer(int id, GameSession session, ClientHandler client, long now) {
+    ServerPlayer(int id, GameSession session, ClientHandler client, long now, pl.fawizja.pixel.pvp.PvpRules.Status pvp) {
+        this.pvp = pvp;
         this.id = id;
         this.session = session;
         this.client = client;

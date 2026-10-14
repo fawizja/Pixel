@@ -90,6 +90,7 @@ public final class GameScreen extends ScreenAdapter {
         Direction facing = Direction.SOUTH;
         long stepStart;
         int healthPercent;
+        String skull = "NONE";
         boolean seen;
     }
 
@@ -102,6 +103,8 @@ public final class GameScreen extends ScreenAdapter {
     private NetClient.Frame lastFrame;
     private Direction sentMove;
     private boolean disconnectShown;
+    private int pvpTargetId = -1;
+    private String mySkull = "NONE";
 
     public GameScreen(PixelGame game, PlayerCharacter pc) {
         this(game, pc, null);
@@ -235,6 +238,17 @@ public final class GameScreen extends ScreenAdapter {
         int x = (int) Math.floor(w.x);
         int y = game.world().height() - 1 - (int) Math.floor(w.y);
         Position p = new Position(x, y, session.character().position().z());
+        if (net != null) {
+            for (Map.Entry<Integer, RemotePlayer> e : remotePlayers.entrySet()) {
+                if (e.getValue().to.equals(p)) {
+                    // drugi dotyk tego samego gracza konczy atak
+                    boolean stop = pvpTargetId == e.getKey();
+                    net.send("ATTACK", stop ? "-" : String.valueOf(e.getKey()));
+                    pvpTargetId = stop ? -1 : e.getKey();
+                    return true;
+                }
+            }
+        }
         pl.fawizja.pixel.npc.Npc npc = session.npcs().at(p);
         if (npc != null) {
             if (session.npcNearby() == npc) hud.openNpc(session);
@@ -367,6 +381,16 @@ public final class GameScreen extends ScreenAdapter {
             shapes.end();
         }
 
+        RemotePlayer pvpTarget = remotePlayers.get(pvpTargetId);
+        if (pvpTarget != null && pvpTarget.to.z() == z) {
+            shapes.begin(ShapeRenderer.ShapeType.Line);
+            shapes.setColor(1f, 0.2f, 0.2f, 1f);
+            float tx = remoteX(pvpTarget, t), ty = worldRenderer.worldY(remoteY(pvpTarget, t));
+            shapes.rect(tx + 0.03f, ty + 0.03f, 0.94f, 0.94f);
+            shapes.rect(tx + 0.07f, ty + 0.07f, 0.86f, 0.86f);
+            shapes.end();
+        }
+
         // liczby obrazen w pikselach ekranu
         List<CombatEvent> events = session.combat().recentEvents(t, 1200);
         screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -388,8 +412,11 @@ public final class GameScreen extends ScreenAdapter {
             if (rp.to.z() != z) continue;
             projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            font.setColor(0.55f, 1f, 0.55f, 1f);
-            String label = rp.name + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "");
+            if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
+            else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
+            else font.setColor(0.55f, 1f, 0.55f, 1f);
+            String label = rp.name + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
+                    + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "");
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
         }
         font.getData().setScale(scale);
@@ -467,6 +494,16 @@ public final class GameScreen extends ScreenAdapter {
             Monster target = null;
             for (Monster m : session.monsters().monsters()) if (m.id() == f.targetId()) target = m;
             session.combat().setTarget(target);
+            pvpTargetId = f.playerTargetId();
+            if (f.skull() != null && !f.skull().equals(mySkull)) {
+                if (!f.skull().equals("NONE")) {
+                    session.log().add(now, EventLog.Kind.WARNING, f.skull().equals("RED")
+                            ? "Masz czerwona czaszke!" : "Masz biala czaszke (atak na gracza).");
+                } else if (!mySkull.equals("NONE")) {
+                    session.log().add(now, EventLog.Kind.INFO, "Czaszka zniknela.");
+                }
+                mySkull = f.skull();
+            }
             for (RemotePlayer rp : remotePlayers.values()) rp.seen = false;
             for (RemoteEntity e : f.players()) {
                 RemotePlayer rp = remotePlayers.get(e.id());
@@ -491,6 +528,7 @@ public final class GameScreen extends ScreenAdapter {
                     rp.vocation = session.character().vocation();
                 }
                 rp.healthPercent = e.healthPercent();
+                rp.skull = e.mark();
                 rp.seen = true;
             }
             remotePlayers.values().removeIf(rp -> !rp.seen);

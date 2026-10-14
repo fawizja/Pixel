@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.0] - 2026-10-14 - etap 13: PvP
+
+### Dodano
+- Walka gracz kontra gracz na serwerze: dotkniecie innego gracza rozpoczyna atak, drugie dotkniecie go konczy.
+- Ochrona: do poziomu 30 nie mozna atakowac graczy ani byc atakowanym; w strefie ochronnej nie ma walki;
+  nie mozna atakowac postaci o ponad polowe slabszej (chyba ze ma czaszke).
+- Czaszki: biala za atak na niewinnego (15 min), czerwona za 3 nieusprawiedliwione zabojstwa w ciagu 24 h (6 h).
+  Smierc z czerwona czaszka zostawia caly plecak na ziemi. Zabijanie graczy nie daje doswiadczenia.
+- Imiona graczy z czaszka sa biale lub czerwone, atakowany gracz ma czerwona ramke.
+- 6 nowych testow (lacznie 167), w tym symulacja pojedynkow wszystkich par profesji.
+
 ## [0.9.0] - 2026-10-14 - etap 14: serwer i tryb online
 
 ### Dodano (czesc 2: klient online)

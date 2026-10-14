@@ -204,3 +204,18 @@ Grimtoothowi - zawsze przegrywa (boss zadaje do 160 obrazen, wiecej niz mikstury
 ## Do zrobienia w kolejnych etapach
 
 Krzywe umiejetnosci i fishingu (etap 8), ceny NPC (etap 12), PvP (etap 13).
+
+## PvP (etap 13)
+
+Symulacja `PvpRulesTest.equalLevelDuelsAreNeitherInstantNorEndless`: poziom 50, ekwipunek startowy, sam atak
+podstawowy (bez czarow i mikstur), srednia z 5 walk. Czas zabicia (atakujacy -> cel):
+
+| atakujacy \ cel | Paladin | Druid | Sorcerer | Monk |
+|---|---|---|---|---|
+| Paladin  | 110 s | 60 s | 60 s | 116 s |
+| Druid    | 106 s | 70 s | 70 s | 128 s |
+| Sorcerer | 88 s  | 56 s | 56 s | 106 s |
+| Monk     | 92 s  | 48 s | 48 s | 95 s  |
+
+Wymog testu: nikt nie ginie szybciej niz w 10 s. Magowie maja mniej zycia (krocej zyja), a ich sila w PvP
+przyjdzie z czarami na graczy (jeszcze niezaimplementowane) - do ponownego zbalansowania razem z nimi.

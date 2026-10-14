@@ -7,7 +7,8 @@
 > lochami na pietrach -5..+5 i regionami z zalecanym poziomem, postac, profesje, plecak, monety, bank (logika), zapis oraz
 > potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
 > Stan: dziala serwer z synchronizacja sieciowa i tryb online klienta desktopowego (wielu graczy w jednym
-> swiecie). Brakuje jeszcze kont z haslem, szyfrowania, PvP i wyboru serwera na Androidzie.
+> swiecie). Dziala PvP z ochrona nowych postaci i czaszkami.
+> Brakuje jeszcze kont z haslem, szyfrowania i wyboru serwera na Androidzie.
 
 ## Moduly
 
