@@ -59,7 +59,10 @@ Joystick ze strefa martwa, klawiatura na PC.
 - Zrodla swiatla na mapie: latarnie, pochodnie scienne, ogniska, krysztaly (takze lodowe), swiecacy mech,
   magma, swiatlo z otworu nad miejscem na line.
 - Renderowanie: FBO o obnizonej rozdzielczosci, mnozenie przez scene; lista zrodel buforowana per pietro.
-- P: wplyw nocy na potwory (etap 11).
+- Zegar swiata jest w `GameSession` (czas sesji 0 = 09:00); klient bierze z niego jasnosc i godzine.
+  `setClock` pozwoli podac czas serwera. Noc = 21:00-05:00.
+- Nocne drapiezniki (`activity=NOCTURNAL`: wilki, hieny, bandyci, szkielety, upiory, mumie, faraon) maja
+  w nocy na powierzchni aggro +3 i ataki co 80% czasu. Pod ziemia noc nie ma znaczenia.
 
 ## Ochrona zasobow 90% / 75% (Z logika, C platforma)
 

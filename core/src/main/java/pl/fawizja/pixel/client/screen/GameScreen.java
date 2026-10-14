@@ -57,7 +57,6 @@ public final class GameScreen extends ScreenAdapter {
     private final WorldRenderer worldRenderer;
     private final LightRenderer lightRenderer;
     private final Hud hud;
-    private final WorldClock clock = WorldClock.standard();
     private final ResourceGuard guard = new ResourceGuard();
     private final Map<Resource, Float> sample = new EnumMap<>(Resource.class);
     private final long startMs = TimeUtils.millis();
@@ -88,7 +87,7 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Czas swiata: w trybie lokalnym liczony od startu klienta (w trybie online - z serwera). */
     private long now() {
-        return TimeUtils.millis() - startMs + 9L * 150_000L; // start o 09:00 czasu gry
+        return TimeUtils.millis() - startMs; // czas sesji 0 = 09:00 czasu gry (zegar w GameSession)
     }
 
     @Override
@@ -256,14 +255,14 @@ public final class GameScreen extends ScreenAdapter {
         });
         batch.end();
 
-        int minute = clock.minuteOfDay(t);
-        float ambient = Lighting.ambientForFloor(z, clock.ambientLight(minute));
+        int minute = session.clock().minuteOfDay(t);
+        float ambient = Lighting.ambientForFloor(z, session.clock().ambientLight(minute));
         lightRenderer.render(batch, camera, game.world().floor(z), game.world().height(), ambient,
                 guard.effectsQuality(), camX, camY, Lighting.playerLightRadius(pc, game.items()));
         batch.setColor(Color.WHITE);
         drawCombatOverlay(batch, game.shapes(), t, z);
 
-        hud.render(batch, game.shapes(), session, clock, t, this::diagnosticsLines);
+        hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
         limitFrameRate();
     }
 

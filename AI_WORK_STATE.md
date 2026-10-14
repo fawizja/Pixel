@@ -2,12 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.6.0)
+## Podsumowanie (2026-10-14, wersja 0.7.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81 (wszystkie z zielonym CI i APK). 0.6.0 = etap 10.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca (wszystkie z zielonym CI i APK). 0.7.0 = etap 11.
 
 ## Architektura
 
@@ -47,6 +47,7 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.7.0: `./gradlew build` - OK, 147 testow; zrzut o 23:00 przy wilkach Varden (noc, wilk atakuje).
 - 0.6.0: `./gradlew build` - OK, 142 testy; zrzuty: krolowa lodu na -5 (krysztaly swieca), w ruinach
   postac 8 poziomu ginie od kolosa i odradza sie w swiatyni.
 - 0.5.0: `./gradlew build` - wynik ponizej w sekcji punktu wznowienia; desktop pod Xvfb na nowym swiecie:
@@ -78,8 +79,10 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 11 - dzien, noc, oswietlenie swiata** (lista w TODO.md):
-1. Wplyw nocy na potwory (np. nieumarli i wilki aktywniejsze w nocy: wiekszy zasieg aggro), nocne spawny.
-2. Zegar swiata gotowy na serwer (czas z zewnatrz, `WorldClock`), zapis czasu gry.
-3. Potem etap 12 (NPC, sklepy w 4 miastach, bank w UI, zadania) - najwazniejsze dla grywalnosci.
+**Nastepne zadanie: Etap 12 - NPC, zadania, handel, bank** (lista w TODO.md):
+1. Model NPC w `shared` (npc/): dane w `data/npcs.csv` (miasto, pozycja, rola: kupiec, bankier, kaplan,
+   nauczyciel), oferty w `data/shops.csv` (kup/sprzedaj, ceny z items.csv), dialogi slowami kluczowymi.
+2. Handel atomowy z `Money` (platnosci z reszta) i limitem plecaka; bank w UI (logika `BankAccount` jest).
+3. Proste zadania (zabij N potworow, przynies przedmioty) z nagroda exp/gp, zapis postepu w zapisie postaci.
+4. NPC w 4 miastach (generator: pozycje w `generate_world.py` -> plik npcs w maps/world).
 Mapy swiata zmieniaj tylko przez `tools/mapgen/generate_world.py`, potem `./gradlew :shared:test`.

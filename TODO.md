@@ -88,10 +88,13 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] 3 lochy biomow do -5 (dziury, drabiny, miejsca na line), swiecacy mech, magma, lodowe krysztaly
 - [x] 3 bossowie biomow (150, 200, 230) z unikalnymi lupami; testy drogi powrotnej i swiatla
 - [ ] Pietra +1..+5 poza wieza Varden (gory, przelecze)
-## Etap 11 - Dzien, noc, oswietlenie swiata  <- NASTEPNY
+## Etap 11 - Dzien, noc, oswietlenie swiata
 - [x] Zegar swiata, fazy, plynna jasnosc, czytelna noc
-- [ ] Zegar z serwera, wplyw nocy na potwory
-## Etap 12 - NPC, zadania, handel, bank
+- [x] Zegar w GameSession (wspolny dla logiki i grafiki, wymienny - serwer poda czas), komunikaty o zmroku i switaniu
+- [x] Nocne drapiezniki (kolumna activity w monsters.csv): w nocy na powierzchni aggro +3, ataki o 20% szybsze
+- [x] Ostrzezenie o pietrze liczy tylko spawny w promieniu 30 kafelkow (duzy swiat)
+- [ ] Czas gry z serwera (etap 14), nocne spawny
+## Etap 12 - NPC, zadania, handel, bank  <- NASTEPNY
 ## Etap 13 - PvP i reguly serwerowe
 ## Etap 14 - Serwer i synchronizacja MMORPG
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka

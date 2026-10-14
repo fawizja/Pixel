@@ -142,4 +142,30 @@ class MonsterAiTest {
         run(mm, d, 0, 30_000);
         assertEquals(start, boar.position(), "out of active radius - frozen");
     }
+
+    @Test
+    void nocturnalPredatorsSpotPlayersFromFartherAtNight() {
+        Position wolfAt = new Position(42, 6, 0);
+        int distance = REG.get("wolf").aggroRange() + 2;
+        for (boolean night : new boolean[] {false, true}) {
+            MonsterManager mm = single("wolf", wolfAt, 0);
+            mm.setNight(night);
+            Monster w = mm.monsters().get(0);
+            Dummy d = new Dummy(w.position().translate(distance, 0));
+            run(mm, d, 0, 1_000);
+            assertEquals(night ? MonsterState.CHASE : MonsterState.IDLE, w.state(), "night=" + night);
+        }
+    }
+
+    @Test
+    void nightBonusOnlyForNocturnalMonstersOnTheSurface() {
+        assertTrue(REG.get("wolf").nocturnal());
+        assertFalse(REG.get("boar").nocturnal());
+        MonsterManager boar = single("boar", new Position(42, 6, 0), 0);
+        boar.setNight(true);
+        assertFalse(boar.nightBonus(boar.monsters().get(0)), "boar is diurnal");
+        MonsterManager skel = single("skeleton", new Position(10, 22, -3), 3);
+        skel.setNight(true);
+        assertFalse(skel.nightBonus(skel.monsters().get(0)), "no night underground");
+    }
 }

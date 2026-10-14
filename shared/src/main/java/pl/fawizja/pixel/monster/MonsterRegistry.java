@@ -55,14 +55,14 @@ public final class MonsterRegistry {
             n++;
             String t = line.trim();
             if (t.isEmpty() || t.startsWith("#")) continue;
-            String[] f = t.split(";", 22);
-            if (f.length != 22) throw new IOException("monsters.csv line " + n + ": expected 22 fields, got " + f.length);
+            String[] f = t.split(";", 23);
+            if (f.length != 23) throw new IOException("monsters.csv line " + n + ": expected 23 fields, got " + f.length);
             try {
                 String key = f[0].trim();
                 MonsterType m = new MonsterType(key, f[1].trim(), i(f[2]), i(f[3]), Long.parseLong(f[4].trim()), i(f[5]),
                         i(f[6]), i(f[7]), DamageType.valueOf(f[8].trim()), i(f[9]), i(f[10]), i(f[11]),
                         parseResistances(f[12].trim()), MonsterBehavior.valueOf(f[13].trim()), i(f[14]), i(f[15]),
-                        i(f[16]), "1".equals(f[17].trim()), f[18].trim(), f[19].trim(), f[20].trim(), f[21].trim(),
+                        i(f[16]), "1".equals(f[17].trim()), f[18].trim(), f[19].trim(), f[20].trim(), activity(f[21].trim()), f[22].trim(),
                         loot.getOrDefault(key, Collections.emptyList()));
                 if (map.put(key, m) != null) throw new IOException("duplicate monster " + key);
             } catch (IllegalArgumentException e) {
@@ -73,6 +73,12 @@ public final class MonsterRegistry {
             if (!map.containsKey(k)) throw new IOException("loot.csv references unknown monster " + k);
         }
         return new MonsterRegistry(map);
+    }
+
+    private static boolean activity(String v) {
+        if ("NOCTURNAL".equals(v)) return true;
+        if ("-".equals(v) || v.isEmpty()) return false;
+        throw new IllegalArgumentException("activity must be NOCTURNAL or -: " + v);
     }
 
     private static int i(String s) { return Integer.parseInt(s.trim()); }

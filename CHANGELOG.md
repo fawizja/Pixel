@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0] - 2026-10-14
+
+### Dodano
+- Noc wplywa na potwory: wilki, hieny, bandyci i nieumarli w nocy widza dalej i atakuja szybciej.
+- Komunikaty o zapadajacej nocy i wschodzie dnia.
+- Opcja deweloperska `-Dpixel.hour` (godzina gry na starcie).
+- 5 nowych testow (lacznie 147).
+
+### Zmieniono
+- Zegar swiata jest czescia logiki gry (przygotowanie pod czas z serwera).
+- Ostrzezenie o niebezpiecznym pietrze bierze pod uwage tylko okolice, a nie caly swiat.
+
 ## [0.6.0] - 2026-10-14
 
 ### Dodano

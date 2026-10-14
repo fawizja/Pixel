@@ -68,7 +68,7 @@ przeniesc / polaczyc / zamienic, albo uzyj ZALOZ / WYRZUC.
 
 ```bash
 ./gradlew :desktop:installDist
-JAVA_OPTS="-Dpixel.autostart=Darek:MONK -Dpixel.teleport=12,27,-5 -Dpixel.screenshot=shot.png" \
+JAVA_OPTS="-Dpixel.autostart=Darek:MONK -Dpixel.teleport=60,91,-5 -Dpixel.hour=23 -Dpixel.screenshot=shot.png" \
   desktop/build/install/desktop/bin/desktop
 ```
 

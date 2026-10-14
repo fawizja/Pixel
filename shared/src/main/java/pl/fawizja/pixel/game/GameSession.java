@@ -27,6 +27,8 @@ import pl.fawizja.pixel.world.GroundItems;
 import pl.fawizja.pixel.world.Position;
 import pl.fawizja.pixel.world.Region;
 import pl.fawizja.pixel.world.WorldMap;
+import pl.fawizja.pixel.time.DayPhase;
+import pl.fawizja.pixel.time.WorldClock;
 
 /**
  * Lokalna sesja gry (tryb offline): laczy postac, swiat i systemy w jedna petle
@@ -48,6 +50,11 @@ public final class GameSession {
     private final SpellSystem spells;
     private final RecipeRegistry recipes;
     private final FishingSystem fishing;
+    /** Zegar swiata; czas sesji 0 = 09:00 czasu gry. W trybie online czas poda serwer. */
+    private WorldClock clock = new WorldClock(-9L * 150_000L, 60L * 60L * 1000L, 0.38f);
+    private Boolean wasNight;
+    /** Promien, w jakim ostrzezenie o pietrze bierze pod uwage spawny. */
+    static final int DANGER_RADIUS = 30;
 
     private Region currentRegion;
     private Position stepFrom;
@@ -154,6 +161,12 @@ public final class GameSession {
     public WorldMap world() { return world; }
     public GroundItems ground() { return ground; }
     public EventLog log() { return log; }
+    public WorldClock clock() { return clock; }
+    public void setClock(WorldClock clock) { this.clock = java.util.Objects.requireNonNull(clock); }
+
+    public boolean isNight(long nowMs) {
+        return WorldClock.phase(clock.minuteOfDay(nowMs)) == DayPhase.NIGHT;
+    }
     public ItemRegistry items() { return items; }
     public Direction facing() { return facing; }
     public boolean isMoving() { return moving; }
@@ -187,6 +200,13 @@ public final class GameSession {
                 onFloorChanged(nowMs);
             }
         }
+        boolean night = isNight(nowMs);
+        if (wasNight != null && night != wasNight) {
+            log.add(nowMs, EventLog.Kind.INFO, night ? "Zapada noc. Nocne drapiezniki sa grozniejsze."
+                    : "Wstaje dzien.");
+        }
+        wasNight = night;
+        monsters.setNight(night);
         Position before = pc.position();
         monsters.update(nowMs, playerTarget, combat);
         combat.update(nowMs);
@@ -216,7 +236,7 @@ public final class GameSession {
         moving = false;
         combat.setTarget(null);
         log.add(nowMs, EventLog.Kind.INFO, floorMessage(pc.position().z()));
-        int danger = monsters.maxMonsterLevelOnFloor(pc.position().z());
+        int danger = monsters.maxMonsterLevelNear(pc.position(), DANGER_RADIUS);
         if (danger > pc.level() * 2 + 10) {
             log.add(nowMs, EventLog.Kind.WARNING, "Uwaga: niebezpieczny obszar (potwory do poziomu " + danger + ").");
         }

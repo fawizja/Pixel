@@ -29,6 +29,7 @@ public final class MonsterType {
     private final String color;
     private final String shape;
     private final String biome;
+    private final boolean nocturnal;
     private final String description;
     private final List<LootEntry> loot;
 
@@ -36,7 +37,7 @@ public final class MonsterType {
                        int attackMin, int attackMax, DamageType damageType, int range, int attackIntervalMs,
                        int armor, Map<DamageType, Integer> resistances, MonsterBehavior behavior, int aggroRange,
                        int fleeHealthPercent, int healAmount, boolean boss, String color, String shape,
-                       String biome, String description, List<LootEntry> loot) {
+                       String biome, boolean nocturnal, String description, List<LootEntry> loot) {
         if (maxHealth <= 0 || level <= 0 || experience < 0) throw new IllegalArgumentException("bad stats: " + key);
         if (attackMin < 0 || attackMax < attackMin) throw new IllegalArgumentException("bad attack: " + key);
         if (range < 1 || attackIntervalMs < 200) throw new IllegalArgumentException("bad range/interval: " + key);
@@ -64,6 +65,7 @@ public final class MonsterType {
         this.color = color;
         this.shape = shape;
         this.biome = biome;
+        this.nocturnal = nocturnal;
         this.description = description;
         this.loot = Collections.unmodifiableList(new java.util.ArrayList<>(loot));
     }
@@ -91,6 +93,8 @@ public final class MonsterType {
     public String color() { return color; }
     public String shape() { return shape; }
     public String biome() { return biome; }
+    /** Nocny drapieznik: w nocy na powierzchni wieksze aggro i szybsze ataki. */
+    public boolean nocturnal() { return nocturnal; }
     public String description() { return description; }
     public List<LootEntry> loot() { return loot; }
 }

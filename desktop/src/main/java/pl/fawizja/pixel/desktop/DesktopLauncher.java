@@ -18,6 +18,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.teleport=x,y,z            ustawia postac na pozycji (np. 8,23,-1)
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
+ *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
  *   -Dpixel.open=book|bag|character            otwiera ksiege, plecak albo karte postaci (character) (zrzuty ekranu)
  */
 public final class DesktopLauncher {
@@ -37,6 +38,8 @@ public final class DesktopLauncher {
         private final String teleport = System.getProperty("pixel.teleport");
         private final String screenshot = System.getProperty("pixel.screenshot");
         private final int frames = Integer.getInteger("pixel.frames", 120);
+        private final Integer hour = Integer.getInteger("pixel.hour");
+        private boolean clockSet;
         private int frame;
         private boolean teleported;
 
@@ -51,6 +54,11 @@ public final class DesktopLauncher {
 
         @Override
         public void render() {
+            if (!clockSet && hour != null && getScreen() instanceof GameScreen) {
+                clockSet = true;
+                ((GameScreen) getScreen()).session().setClock(
+                        new pl.fawizja.pixel.time.WorldClock(-hour * 150_000L, 60L * 60L * 1000L, 0.38f));
+            }
             if (!teleported && teleport != null && getScreen() instanceof GameScreen) {
                 String[] p = teleport.split(",");
                 ((GameScreen) getScreen()).session().teleport(

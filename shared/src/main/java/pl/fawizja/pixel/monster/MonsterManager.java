@@ -47,6 +47,10 @@ public final class MonsterManager {
     private final Map<SpawnPoint, List<Long>> respawnQueue = new HashMap<>();
     private final List<Monster> scratch = new ArrayList<>();
     private int nextId = 1;
+    private boolean night;
+
+    /** Dodatkowy zasieg aggro nocnych drapieznikow w nocy (powierzchnia). */
+    public static final int NIGHT_AGGRO_BONUS = 3;
 
     public MonsterManager(WorldMap world, MonsterRegistry registry, List<SpawnPoint> spawns, Random rng) {
         this.world = world;
@@ -84,6 +88,15 @@ public final class MonsterManager {
 
     public Monster monsterAt(Position p) { return grid.at(p); }
 
+    /** Noc na powierzchni: nocne drapiezniki widza dalej i atakuja szybciej. */
+    public void setNight(boolean night) { this.night = night; }
+    public boolean isNight() { return night; }
+
+    /** Czy potwor korzysta z premii nocnej (nocny, noc, pietro 0 lub wyzej). */
+    public boolean nightBonus(Monster m) {
+        return night && m.type().nocturnal() && m.position().z() >= 0;
+    }
+
     public List<Monster> near(Position p, int radius) {
         return new ArrayList<>(grid.query(p, radius, scratch));
     }
@@ -102,6 +115,18 @@ public final class MonsterManager {
         int max = 0;
         for (SpawnPoint sp : spawns) {
             if (sp.center().z() == z) max = Math.max(max, registry.get(sp.monsterKey()).level());
+        }
+        return max;
+    }
+
+    /** Najwyzszy poziom potworow na tym pietrze w promieniu (kafelki) od pozycji. */
+    public int maxMonsterLevelNear(Position p, int radius) {
+        int max = 0;
+        for (SpawnPoint sp : spawns) {
+            Position c = sp.center();
+            if (c.z() == p.z() && c.distanceTo(p) <= radius + sp.radius()) {
+                max = Math.max(max, registry.get(sp.monsterKey()).level());
+            }
         }
         return max;
     }
@@ -147,7 +172,9 @@ public final class MonsterManager {
         Position tp = target.position();
         Position mp = m.position();
         int dist = mp.distanceTo(tp);
-        boolean canSee = dist <= t.aggroRange() + 6 && world.hasLineOfSight(mp, tp);
+        boolean nightBonus = nightBonus(m);
+        int aggro = t.aggroRange() + (nightBonus ? NIGHT_AGGRO_BONUS : 0);
+        boolean canSee = dist <= aggro + 6 && world.hasLineOfSight(mp, tp);
         boolean targetValid = target.attackable() && tp.z() == mp.z() && !world.isProtectionZone(tp);
         boolean tooFarFromHome = mp.distanceTo(m.spawn().center()) > m.spawn().radius() + LEASH
                 || mp.z() != m.spawn().center().z();
@@ -155,7 +182,7 @@ public final class MonsterManager {
         // wybor stanu
         switch (m.state()) {
             case IDLE:
-                if (targetValid && dist <= t.aggroRange() && canSee) m.setState(MonsterState.CHASE);
+                if (targetValid && dist <= aggro && canSee) m.setState(MonsterState.CHASE);
                 break;
             case CHASE:
             case FLEE:
@@ -186,6 +213,7 @@ public final class MonsterManager {
             if (now >= m.nextAttackMs()) {
                 int interval = t.attackIntervalMs();
                 if (t.boss() && m.healthFraction() < 0.5f) interval = interval * 7 / 10; // szal
+                if (nightBonus) interval = interval * 8 / 10;
                 boolean acted = false;
                 if (t.behavior() == MonsterBehavior.HEALER && t.healAmount() > 0) {
                     Monster ally = weakestAlly(m);

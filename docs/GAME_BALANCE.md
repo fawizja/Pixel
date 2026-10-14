@@ -78,6 +78,11 @@ jest najlepsza w swojej roli i ze profile sa rozne (`VocationTest`).
 - Monety maja stos do 100 sztuk. Platnosci wydaja reszte optymalnie; brak miejsca na reszte anuluje transakcje.
 - Ceny przedmiotow (`value` w `items.csv`) sa punktem odniesienia dla sklepow NPC (etap 12).
 
+## Noc (etap 11)
+
+Nocne drapiezniki na powierzchni w nocy: zasieg aggro +3 (wilk 6 -> 9) i ataki co 80% czasu (wilk co 1,6 s
+zamiast 2 s). Pozostale potwory bez zmian. Symulacje i test "godzina na wilkach" obejmuja pelna dobe gry.
+
 ## Walka (etap 6, `CombatFormulas`)
 
 - Maksymalne obrazenia gracza (`L` = poziom, `A` = atak broni, piesci = 7):
