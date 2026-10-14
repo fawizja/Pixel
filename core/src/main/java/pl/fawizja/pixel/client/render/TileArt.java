@@ -5,10 +5,16 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import pl.fawizja.pixel.item.ItemCategory;
 import pl.fawizja.pixel.item.ItemRegistry;
 import pl.fawizja.pixel.item.ItemType;
+import pl.fawizja.pixel.monster.MonsterRegistry;
+import pl.fawizja.pixel.monster.MonsterType;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.TileRegistry;
@@ -26,6 +32,7 @@ public final class TileArt implements Disposable {
     private static final int COLS = ATLAS / SIZE;
     private static final int ITEM_BASE = 256;
     private static final int SPRITE_BASE = 512;
+    private static final int MONSTER_BASE = 640;
 
     private final Texture atlas;
     private final Texture lightTexture;
@@ -33,8 +40,9 @@ public final class TileArt implements Disposable {
     private final TextureRegion[] items;
     private final TextureRegion[][] characters;
     private final TextureRegion white;
+    private final Map<String, TextureRegion> monsters = new HashMap<>();
 
-    public TileArt(TileRegistry tileRegistry, ItemRegistry itemRegistry) {
+    public TileArt(TileRegistry tileRegistry, ItemRegistry itemRegistry, MonsterRegistry monsterRegistry) {
         Pixmap pm = new Pixmap(ATLAS, ATLAS, Pixmap.Format.RGBA8888);
         pm.setBlending(Pixmap.Blending.None);
         pm.setColor(0, 0, 0, 0);
@@ -55,6 +63,12 @@ public final class TileArt implements Disposable {
                 paintCharacter(pm, cellX(cell), cellY(cell), v, d);
             }
         }
+        List<MonsterType> mtypes = new ArrayList<>(monsterRegistry.all());
+        mtypes.sort((a, b) -> a.key().compareTo(b.key()));
+        for (int i = 0; i < mtypes.size(); i++) {
+            int cell = MONSTER_BASE + i;
+            paintMonster(pm, cellX(cell), cellY(cell), mtypes.get(i));
+        }
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -68,6 +82,7 @@ public final class TileArt implements Disposable {
         for (Vocation v : Vocation.values()) {
             for (int d = 0; d < 4; d++) characters[v.ordinal()][d] = region(SPRITE_BASE + v.ordinal() * 4 + d);
         }
+        for (int i = 0; i < mtypes.size(); i++) monsters.put(mtypes.get(i).key(), region(MONSTER_BASE + i));
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -84,6 +99,7 @@ public final class TileArt implements Disposable {
     public TextureRegion tile(int id) { return id > 0 && id < tiles.length ? tiles[id] : null; }
     public TextureRegion item(int id) { return id > 0 && id < items.length ? items[id] : null; }
     public TextureRegion white() { return white; }
+    public TextureRegion monster(String key) { return monsters.get(key); }
     public Texture lightTexture() { return lightTexture; }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -470,6 +486,101 @@ public final class TileArt implements Disposable {
         }
         if (v == Vocation.PALADIN) {
             rect(pm, ox, oy, 13, 2, 1, 10, Color.valueOf("#c9b37e")); // wlocznia
+        }
+    }
+
+    /** Sylwetki potworow wedlug ksztaltu z monsters.csv, barwione kolorem typu. */
+    private void paintMonster(Pixmap pm, int ox, int oy, MonsterType t) {
+        Color c = Color.valueOf(t.color());
+        Color dark = shade(c, 0.6f);
+        Color light = shade(c, 1.3f);
+        Color eye = Color.valueOf("#ff3020");
+        disc(pm, ox, oy, 8f, 14.5f, 5f, new Color(0, 0, 0, 0.35f));
+        switch (t.shape()) {
+            case "beast":
+                rect(pm, ox, oy, 2, 7, 11, 5, c);          // tulow
+                rect(pm, ox, oy, 2, 7, 11, 1, light);
+                rect(pm, ox, oy, 3, 12, 2, 3, dark);       // nogi
+                rect(pm, ox, oy, 10, 12, 2, 3, dark);
+                rect(pm, ox, oy, 11, 4, 4, 5, c);          // glowa
+                px(pm, ox, oy, 13, 5, eye);
+                rect(pm, ox, oy, 14, 7, 2, 2, dark);       // pysk
+                rect(pm, ox, oy, 0, 6, 2, 2, dark);        // ogon
+                if (t.key().contains("boar")) {
+                    px(pm, ox, oy, 15, 9, Color.valueOf("#f0ead0"));
+                    px(pm, ox, oy, 12, 9, Color.valueOf("#f0ead0"));
+                }
+                break;
+            case "spider":
+                disc(pm, ox, oy, 8f, 9f, 4f, c);
+                disc(pm, ox, oy, 8f, 5f, 2.5f, dark);
+                px(pm, ox, oy, 7, 4, eye);
+                px(pm, ox, oy, 9, 4, eye);
+                for (int i = 0; i < 4; i++) {
+                    int ly = 6 + i * 2;
+                    rect(pm, ox, oy, 1, ly, 4, 1, dark);
+                    rect(pm, ox, oy, 11, ly, 4, 1, dark);
+                    px(pm, ox, oy, 0, ly + 1, dark);
+                    px(pm, ox, oy, 15, ly + 1, dark);
+                }
+                break;
+            case "golem":
+                rect(pm, ox, oy, 3, 4, 10, 8, c);
+                rect(pm, ox, oy, 5, 1, 6, 4, light);
+                rect(pm, ox, oy, 1, 5, 2, 6, dark);
+                rect(pm, ox, oy, 13, 5, 2, 6, dark);
+                rect(pm, ox, oy, 4, 12, 3, 3, dark);
+                rect(pm, ox, oy, 9, 12, 3, 3, dark);
+                px(pm, ox, oy, 6, 2, Color.WHITE);
+                px(pm, ox, oy, 9, 2, Color.WHITE);
+                px(pm, ox, oy, 7, 7, Color.WHITE);
+                px(pm, ox, oy, 10, 9, light);
+                break;
+            case "boss": {
+                Color skin = Color.valueOf("#7a8a4a");
+                rect(pm, ox, oy, 2, 5, 12, 8, c);          // pancerz
+                rect(pm, ox, oy, 2, 9, 12, 1, dark);
+                rect(pm, ox, oy, 4, 13, 3, 3, dark);
+                rect(pm, ox, oy, 9, 13, 3, 3, dark);
+                rect(pm, ox, oy, 0, 6, 2, 6, skin);
+                rect(pm, ox, oy, 14, 6, 2, 6, skin);
+                rect(pm, ox, oy, 5, 1, 6, 5, skin);        // glowa
+                px(pm, ox, oy, 6, 3, eye);
+                px(pm, ox, oy, 9, 3, eye);
+                rect(pm, ox, oy, 4, 0, 8, 1, Color.valueOf("#f0c840")); // korona
+                px(pm, ox, oy, 4, 0, Color.valueOf("#ff4060"));
+                px(pm, ox, oy, 8, 0, Color.valueOf("#40a0ff"));
+                px(pm, ox, oy, 11, 0, Color.valueOf("#ff4060"));
+                break;
+            }
+            case "humanoid":
+            default: {
+                boolean skeleton = t.key().contains("skeleton");
+                boolean troll = t.key().contains("troll");
+                Color skin = skeleton ? Color.valueOf("#e8e4d0") : troll ? Color.valueOf("#6a7a4a")
+                        : t.key().contains("goblin") ? Color.valueOf("#7ab040") : Color.valueOf("#e0b090");
+                int top = troll ? 0 : 2;
+                rect(pm, ox, oy, 5, 11, 2, 4, dark);
+                rect(pm, ox, oy, 9, 11, 2, 4, dark);
+                rect(pm, ox, oy, troll ? 3 : 4, 6, troll ? 10 : 8, 6, skeleton ? skin : c);
+                if (skeleton) {
+                    for (int r = 7; r < 11; r += 2) rect(pm, ox, oy, 5, r, 6, 1, Color.valueOf("#6a6658"));
+                }
+                rect(pm, ox, oy, 2, 7, 2, 4, skin);
+                rect(pm, ox, oy, 12, 7, 2, 4, skin);
+                rect(pm, ox, oy, 5, top, 6, 6 - top + 1, skin);
+                px(pm, ox, oy, 6, top + 2, skeleton ? Color.BLACK : eye);
+                px(pm, ox, oy, 9, top + 2, skeleton ? Color.BLACK : eye);
+                if (t.key().contains("goblin")) {
+                    px(pm, ox, oy, 4, top + 1, skin);
+                    px(pm, ox, oy, 11, top + 1, skin);
+                }
+                if (t.key().contains("shaman")) {
+                    rect(pm, ox, oy, 13, 2, 1, 11, Color.valueOf("#8a5a2b"));
+                    px(pm, ox, oy, 13, 1, Color.valueOf("#ff7a30"));
+                }
+                if (t.key().contains("bandit")) rect(pm, ox, oy, 5, top + 3, 6, 2, dark); // chusta
+            }
         }
     }
 

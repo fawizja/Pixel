@@ -55,6 +55,23 @@ Przejscia: `STAIRS` (wejscie na kafelek), `HOLE` (zejscie przez dziure), `TUNNEL
 `LADDER` (trzeba uzyc), `ROPE_SPOT` (wymaga liny). Ladowanie mapy odrzuca przejscia prowadzace
 w sciane albo na inne przejscie (petla).
 
+## Spawny Varden (`maps/varden/spawns.csv`)
+
+| Miejsce | Potwory | Pietro |
+|---|---|---|
+| Pola na zachod od miasta (10,8) | 2x wilk | 0 |
+| Las poludniowo-zachodni (14,30) | 2x wilk | 0 |
+| Pola polnocno-wschodnie (42,6) | 3x dzik | 0 |
+| Las poludniowy (24,42) | 3x lesny pajak | 0 |
+| Obozy bandytow (58,12), (58,32) | 2x bandyta | 0 |
+| Kopalnia, poziom 1-2 | gobliny, goblin szaman | -1, -2 |
+| Krypta kopalni | szkielety | -3 |
+| Glebokie chodniki | trolle jaskiniowe | -4 |
+| Krysztalowa grota i komnata krola | golem, boss Grimtooth (odrodzenie 20 min) | -5 |
+
+Miasto (mury i budynki, wszystkie pietra wiezy) jest strefa ochronna: brak walki, potwory nie wchodza.
+Wejscie na pietro z potworami o poziomie > 2 x poziom postaci + 10 wyswietla ostrzezenie.
+
 ## Planowane regiony i expowiska
 
 | Region | Biom | Pietra | Poziomy | Potwory |

@@ -65,6 +65,17 @@ public final class MapLoader {
         if (!world.isWalkable(spawn)) throw new IOException("spawn " + spawn + " is not walkable");
         world.setSpawn(spawn);
 
+        String pz = props.getProperty("pz", "").trim();
+        if (!pz.isEmpty()) {
+            for (String rect : pz.split(";")) {
+                String[] v = rect.trim().split(",");
+                if (v.length != 5) throw new IOException("pz entry needs x0,y0,x1,y1,z: " + rect);
+                world.addProtectionZone(Integer.parseInt(v[0].trim()), Integer.parseInt(v[1].trim()),
+                        Integer.parseInt(v[2].trim()), Integer.parseInt(v[3].trim()), Integer.parseInt(v[4].trim()));
+            }
+        }
+        if (!world.isProtectionZone(spawn)) throw new IOException("spawn must be inside a protection zone");
+
         readTransitions(base + "transitions.csv", world);
         validateTransitions(world);
         return world;

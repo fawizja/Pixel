@@ -29,6 +29,7 @@ public final class PlayerCharacter {
     private String homeTown;
     private boolean running;
     private boolean torchLit;
+    private boolean defensive;
     private long regenAccumulatorMs;
 
     public PlayerCharacter(String id, String name, Vocation vocation, int level, Position position,
@@ -79,6 +80,9 @@ public final class PlayerCharacter {
     public boolean isRunning() { return running; }
     public void setRunning(boolean running) { this.running = running; }
     public boolean isTorchLit() { return torchLit; }
+    /** Postawa obronna (tarcza w HUD): mniej obrazen zadawanych i otrzymywanych. */
+    public boolean isDefensive() { return defensive; }
+    public void setDefensive(boolean defensive) { this.defensive = defensive; }
 
     /** Zapala lub gasi pochodnie; zapalic mozna tylko majac pochodnie w plecaku. */
     public boolean setTorchLit(boolean lit, int torchItemId) {
@@ -154,6 +158,20 @@ public final class PlayerCharacter {
             heal(Balance.healthRegenPerTick(vocation, level));
             restoreMana(Balance.manaRegenPerTick(vocation, level));
         }
+    }
+
+    /** Kara za smierc: utrata doswiadczenia (poziom moze spasc, ale nie ponizej minLevel). */
+    public void applyDeathPenalty(int minLevel) {
+        experience = Balance.experienceAfterDeath(experience, minLevel);
+        level = Balance.levelForExperience(experience);
+    }
+
+    /** Odrodzenie z pelnym zdrowiem i mana. */
+    public void revive(Position at) {
+        position = Objects.requireNonNull(at);
+        health = maxHealth();
+        mana = maxMana();
+        regenAccumulatorMs = 0;
     }
 
     /** Odtwarza stan z zapisu (waliduje zakresy). */

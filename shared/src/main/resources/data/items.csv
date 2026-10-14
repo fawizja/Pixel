@@ -1,24 +1,42 @@
-# id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations(* = wszystkie);light;color;description
-1;gold_coin;Gold Coin;CURRENCY;100;1;NONE;0;0;0;0;*;0;#f2c230;Zolta moneta. 100 Gold = 1 Platinum.
-2;platinum_coin;Platinum Coin;CURRENCY;100;100;NONE;0;0;0;0;*;0;#b8c8dc;Srebrno-niebieska moneta. 100 Platinum = 1 Crystal.
-3;crystal_coin;Crystal Coin;CURRENCY;100;10000;NONE;0;0;0;0;*;0;#4aa8ff;Niebieska krysztalowa moneta warta 10 000 gp.
-10;leather_helmet;Leather Helmet;ARMOR;1;12;HEAD;0;0;1;0;*;0;#8a5a2b;Prosty skorzany helm.
-11;leather_armor;Leather Armor;ARMOR;1;25;ARMOR;0;0;4;0;*;0;#8a5a2b;Lekka zbroja dla poczatkujacych.
-12;leather_legs;Leather Legs;ARMOR;1;10;LEGS;0;0;1;0;*;0;#8a5a2b;Skorzane spodnie.
-13;leather_boots;Leather Boots;ARMOR;1;8;FEET;0;0;1;0;*;0;#6b4423;Wygodne buty podroznika.
-20;hunting_spear;Hunting Spear;WEAPON;1;40;WEAPON;25;0;0;0;PALADIN;0;#c9b37e;Rzucana wlocznia paladyna, wraca do reki.
-21;wooden_shield;Wooden Shield;SHIELD;1;15;SHIELD;0;12;0;0;PALADIN,MONK;0;#9c6b3c;Lekka drewniana tarcza.
-22;wand_of_embers;Wand of Embers;WEAPON;1;120;WEAPON;14;0;0;8;SORCERER;0;#ff6a2b;Rozdzka czarodzieja, strzela iskrami ognia.
-23;thornroot_rod;Thornroot Rod;WEAPON;1;120;WEAPON;14;0;0;8;DRUID;0;#58b04a;Rozdzka druida, rani kolcami ziemi.
-24;cloth_wraps;Cloth Wraps;WEAPON;1;35;WEAPON;20;4;0;0;MONK;0;#e8dcc0;Owijki na dlonie mnicha.
-25;training_sword;Training Sword;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK;0;#b0b0b8;Tepy miecz cwiczebny.
-30;health_potion;Health Potion;POTION;100;45;NONE;0;0;0;0;*;0;#d8263c;Przywraca czesc zdrowia.
-31;mana_potion;Mana Potion;POTION;100;50;NONE;0;0;0;0;*;0;#3a5bd8;Przywraca czesc many.
-32;torch;Torch;LIGHT;1;2;NONE;0;0;0;0;*;5;#ffb347;Pochodnia: rozjasnia ciemne podziemia.
-33;rope;Rope;TOOL;1;50;NONE;0;0;0;0;*;0;#c8a165;Lina do wspinania sie z dziur.
-34;shovel;Shovel;TOOL;1;50;NONE;0;0;0;0;*;0;#8f8f8f;Lopata do odkopywania przejsc.
-35;fishing_rod;Fishing Rod;TOOL;1;150;NONE;0;0;0;0;*;0;#a07040;Wedka do lowienia ryb.
-36;worm;Worm;BAIT;100;1;NONE;0;0;0;0;*;0;#d48a8a;Przyneta na ryby.
-37;blank_rune;Blank Rune;RUNE;100;10;NONE;0;0;0;0;*;0;#d0d0c0;Pusta runa do zaklinania.
-38;bread;Bread;FOOD;100;3;NONE;0;0;0;0;*;0;#d9a85b;Chleb z piekarni w Varden.
-39;spear;Spear;AMMUNITION;100;3;AMMO;20;0;0;0;PALADIN;0;#c9b37e;Zwykla wlocznia do rzucania.
+# id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations(* = wszystkie);light;range;damageType;color;description
+1;gold_coin;Gold Coin;CURRENCY;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#f2c230;Zolta moneta. 100 Gold = 1 Platinum.
+2;platinum_coin;Platinum Coin;CURRENCY;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;#b8c8dc;Srebrno-niebieska moneta. 100 Platinum = 1 Crystal.
+3;crystal_coin;Crystal Coin;CURRENCY;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;#4aa8ff;Niebieska krysztalowa moneta warta 10 000 gp.
+10;leather_helmet;Leather Helmet;ARMOR;1;12;HEAD;0;0;1;0;*;0;0;PHYSICAL;#8a5a2b;Prosty skorzany helm.
+11;leather_armor;Leather Armor;ARMOR;1;25;ARMOR;0;0;4;0;*;0;0;PHYSICAL;#8a5a2b;Lekka zbroja dla poczatkujacych.
+12;leather_legs;Leather Legs;ARMOR;1;10;LEGS;0;0;1;0;*;0;0;PHYSICAL;#8a5a2b;Skorzane spodnie.
+13;leather_boots;Leather Boots;ARMOR;1;8;FEET;0;0;1;0;*;0;0;PHYSICAL;#6b4423;Wygodne buty podroznika.
+20;hunting_spear;Hunting Spear;WEAPON;1;40;WEAPON;25;0;0;0;PALADIN;0;4;PHYSICAL;#c9b37e;Rzucana wlocznia paladyna, wraca do reki.
+21;wooden_shield;Wooden Shield;SHIELD;1;15;SHIELD;0;12;0;0;PALADIN,MONK;0;0;PHYSICAL;#9c6b3c;Lekka drewniana tarcza.
+22;wand_of_embers;Wand of Embers;WEAPON;1;120;WEAPON;22;0;0;8;SORCERER;0;4;FIRE;#ff6a2b;Rozdzka czarodzieja, strzela iskrami ognia.
+23;thornroot_rod;Thornroot Rod;WEAPON;1;120;WEAPON;22;0;0;8;DRUID;0;4;EARTH;#58b04a;Rozdzka druida, rani kolcami ziemi.
+24;cloth_wraps;Cloth Wraps;WEAPON;1;35;WEAPON;20;4;0;0;MONK;0;1;PHYSICAL;#e8dcc0;Owijki na dlonie mnicha.
+25;training_sword;Training Sword;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK;0;1;PHYSICAL;#b0b0b8;Tepy miecz cwiczebny.
+30;health_potion;Health Potion;POTION;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8263c;Przywraca czesc zdrowia.
+31;mana_potion;Mana Potion;POTION;100;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a5bd8;Przywraca czesc many.
+32;torch;Torch;LIGHT;1;2;NONE;0;0;0;0;*;5;0;PHYSICAL;#ffb347;Pochodnia: rozjasnia ciemne podziemia.
+33;rope;Rope;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#c8a165;Lina do wspinania sie z dziur.
+34;shovel;Shovel;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#8f8f8f;Lopata do odkopywania przejsc.
+35;fishing_rod;Fishing Rod;TOOL;1;150;NONE;0;0;0;0;*;0;0;PHYSICAL;#a07040;Wedka do lowienia ryb.
+36;worm;Worm;BAIT;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#d48a8a;Przyneta na ryby.
+37;blank_rune;Blank Rune;RUNE;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#d0d0c0;Pusta runa do zaklinania.
+38;bread;Bread;FOOD;100;3;NONE;0;0;0;0;*;0;0;PHYSICAL;#d9a85b;Chleb z piekarni w Varden.
+39;spear;Spear;AMMUNITION;100;3;AMMO;20;0;0;0;PALADIN;0;4;PHYSICAL;#c9b37e;Zwykla wlocznia do rzucania.
+40;meat;Meat;FOOD;100;4;NONE;0;0;0;0;*;0;0;PHYSICAL;#b04a3a;Surowe mieso. Mozna zjesc albo sprzedac.
+41;wolf_pelt;Wolf Pelt;MATERIAL;100;12;NONE;0;0;0;0;*;0;0;PHYSICAL;#8a8a8a;Futro wilka, material dla kusnierzy.
+42;boar_tusk;Boar Tusk;MATERIAL;100;20;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e0c8;Kiel dzika.
+43;spider_silk;Spider Silk;MATERIAL;100;25;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e8f0;Mocna nic pajecza.
+44;goblin_ear;Goblin Ear;MATERIAL;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#6a9a3a;Trofeum z goblina.
+45;bone;Bone;MATERIAL;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0dcc8;Kosc szkieletu.
+46;troll_hide;Troll Hide;MATERIAL;100;60;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a6a3a;Gruba skora trolla.
+47;crystal_shard;Crystal Shard;MATERIAL;100;150;NONE;0;0;0;0;*;3;0;PHYSICAL;#7fd8ff;Swiecacy odlamek krysztalu z glebin.
+48;iron_ore;Iron Ore;MATERIAL;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#7a6a62;Ruda zelaza z kopalni Varden.
+50;iron_sword;Iron Sword;WEAPON;1;250;WEAPON;24;12;0;15;PALADIN,MONK;0;1;PHYSICAL;#c8c8d0;Solidny miecz z zelaza z Varden.
+51;studded_armor;Studded Armor;ARMOR;1;180;ARMOR;0;0;6;12;*;0;0;PHYSICAL;#7a5a3a;Skorzana zbroja nabijana cwiekami.
+52;bone_shield;Bone Shield;SHIELD;1;140;SHIELD;0;17;0;14;PALADIN,MONK;0;0;PHYSICAL;#e0dcc8;Tarcza z kosci.
+53;wand_of_sparks;Wand of Sparks;WEAPON;1;900;WEAPON;26;0;0;25;SORCERER;0;4;ENERGY;#a0c8ff;Rozdzka energii.
+54;rod_of_frost;Rod of Frost;WEAPON;1;900;WEAPON;26;0;0;25;DRUID;0;4;ICE;#a0e8ff;Rozdzka lodu.
+55;iron_knuckles;Iron Knuckles;WEAPON;1;600;WEAPON;30;6;0;20;MONK;0;1;PHYSICAL;#a8a8b0;Kastety mnicha.
+56;miner_helmet;Miner Helmet;ARMOR;1;300;HEAD;0;0;3;20;*;2;0;PHYSICAL;#d8b040;Helm gornika z lampka.
+57;grimtooth_crown;Grimtooth Crown;ARMOR;1;5000;HEAD;0;0;5;40;*;0;0;PHYSICAL;#e8c040;Korona Krola Kopalni.
+58;steel_spear;Steel Spear;WEAPON;1;800;WEAPON;34;0;0;25;PALADIN;0;4;PHYSICAL;#d8d8e0;Wywazona stalowa wlocznia, wraca do reki.

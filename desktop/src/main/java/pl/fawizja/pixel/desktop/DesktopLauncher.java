@@ -52,8 +52,8 @@ public final class DesktopLauncher {
         public void render() {
             if (!teleported && teleport != null && getScreen() instanceof GameScreen) {
                 String[] p = teleport.split(",");
-                ((GameScreen) getScreen()).session().character().setPosition(
-                        new Position(Integer.parseInt(p[0].trim()), Integer.parseInt(p[1].trim()), Integer.parseInt(p[2].trim())));
+                ((GameScreen) getScreen()).session().teleport(
+                        new Position(Integer.parseInt(p[0].trim()), Integer.parseInt(p[1].trim()), Integer.parseInt(p[2].trim())), 0L);
                 teleported = true;
             }
             super.render();

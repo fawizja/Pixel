@@ -120,6 +120,25 @@ public final class Balance {
         return Math.round(diagonal ? ms * Math.sqrt(2.0) : ms);
     }
 
+    /**
+     * Doswiadczenie za zabicie potwora. Postac o wiele silniejsza od potwora dostaje
+     * coraz mniej (min. 10%), zeby nie oplacalo sie bic banalnych przeciwnikow.
+     */
+    public static long experienceReward(long monsterExp, int monsterLevel, int playerLevel) {
+        if (monsterExp <= 0) return 0;
+        long threshold = 4L * monsterLevel + 20;
+        if (playerLevel <= threshold) return monsterExp;
+        double factor = Math.max(0.1, (double) threshold / playerLevel);
+        return Math.max(1, Math.round(monsterExp * factor));
+    }
+
+    /** Utrata doswiadczenia przy smierci: 5%, ale nie ponizej progu poziomu minLevel. */
+    public static long experienceAfterDeath(long experience, int minLevel) {
+        long floor = experienceForLevel(minLevel);
+        long after = experience - experience / 20;
+        return Math.max(Math.min(experience, floor), after);
+    }
+
     /** Dodawanie doswiadczenia z nasyceniem: nigdy nie przekracza maksimum ani nie przepelnia long. */
     public static long addExperience(long current, long gained) {
         if (gained <= 0) return current;

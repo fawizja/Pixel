@@ -2,11 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.1.0)
+## Podsumowanie (2026-10-14, wersja 0.2.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- Ukonczone: etapy 1, 3, 4, 5, 6 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = commit 301ac0a (CI zielone, APK artefakt `pixel-debug-apk`). 0.2.0 = etap 6.
 
 ## Architektura
 
@@ -25,7 +26,11 @@ shared/   pl.fawizja.pixel.*         czysta Java 17, bez libGDX, testy JUnit 5
   time/       WorldClock (doba 60 min, plynna jasnosc)
   perf/       ResourceGuard (90%/75%, NORMAL/LIMITED/RECOVERING)
   save/       SaveStore (zapis atomowy + .bak), SaveFormatException
-  game/       GameSession (lokalna petla gry), EventLog
+  monster/    MonsterType, MonsterRegistry (monsters.csv + loot.csv), SpawnTable, SpawnPoint,
+              Monster, MonsterManager (AI + spawny + odradzanie), SpatialGrid, MonsterBehavior/State
+  combat/     CombatFormulas, CombatSystem (gracz <-> potwory, smierc, lupy), CombatEvent, DamageType
+  movement/   + Pathfinder (BFS z limitem wezlow)
+  game/       GameSession (lokalna petla gry: ruch -> potwory -> walka, teleport), EventLog
 core/     pl.fawizja.pixel.client.*   libGDX
   PixelGame, screen/VocationSelectScreen, screen/GameScreen,
   render/TileArt (grafika proceduralna), render/WorldRenderer, render/LightRenderer (FBO),
@@ -39,7 +44,10 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
-- `./gradlew :shared:test :core:build :desktop:build` - **OK, 76 testow, 0 bledow** (JDK 21, `--release 17`).
+- 0.2.0: `./gradlew :shared:test` - **OK, 106 testow, 0 bledow**; `:desktop:installDist` OK.
+  Gra uruchomiona pod Xvfb z teleportem do wilkow (0), goblinow (-1) i trolli (-4): potwory
+  atakuja, liczby obrazen, paski HP, panel celu, autoloot i exp dzialaja (zrzuty w /mnt/project-files/pixel/screenshots).
+- 0.1.0: `./gradlew :shared:test :core:build :desktop:build` - OK, 76 testow (JDK 21, `--release 17`).
 - Gra uruchomiona na desktopie pod Xvfb (Mesa, renderowanie programowe): zrzuty ekranu miasta,
   kopalni (-1) i wiezy (+5) wygladaly poprawnie; zapis postaci utworzony (`character.save` + `.bak`).
 - Kod modulu `android` skompilowany `javac` wzgledem klas Android 14 (robolectric android-all) i
@@ -54,13 +62,16 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
   lustra Google przez `~/.gradle/init.d/mirror.gradle` (poza repozytorium). Repo uzywa standardowego mavenCentral().
 - W trybie programowego renderowania (Xvfb) czas klatki bywa wysoki, co moze wlaczyc LIMITED - zgodnie z zalozeniem.
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
-- Brak potworow, walki, NPC - to kolejne etapy.
+- Jedyne leczenie to regeneracja (mikstury i czary w etapie 7); postac stojaca AFK przy stadzie moze zginac.
+- Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
+- Brak NPC, czarow, PvP, serwera.
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 6 - potwory, AI, walka, lupy** (lista w TODO.md):
-1. `shared/.../monster/`: MonsterType + `data/monsters.csv`, spawny w `maps/varden/spawns.csv`.
-2. `shared/.../combat/`: formuly obrazen w Balance (atak, pancerz, odpornosci, wspolczynniki profesji),
-   CombatSystem z cooldownami, smierc, exp, lupy (autoloot + GroundItems).
-3. AI (aggro, poscig, ucieczka, powrot), siatka przestrzenna.
-4. Symulacje walk profesji (testy) i UI celu / ataku / tarczy.
+**Nastepne zadanie: Etap 7 - czary, runy, mikstury, crafting** (lista w TODO.md):
+1. `shared/.../magic/`: SpellType + `data/spells.csv` (mana, cooldown, poziom, profesja, zasieg, obszar),
+   czary leczace (Druid najsilniejsze), ataki obszarowe (Sorcerer), strzaly swiete (Paladin), ciosy combo (Monk).
+2. Mikstury HP/MP z cooldownem (uzycie z plecaka), jedzenie (regeneracja).
+3. Runy: blank_rune + mana -> runa (zaklinanie), uzycie runy na cel.
+4. Crafting z materialow z lupow (receptury w pliku danych).
+5. Ponownie uruchomic `CombatSimulationTest` z czarami i miksturami; UI paska czarow.

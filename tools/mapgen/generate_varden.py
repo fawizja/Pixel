@@ -276,7 +276,9 @@ def main():
                 f'width={W}\nheight={H}\n'
                 'floors=-5,-4,-3,-2,-1,0,1,2,3,4,5\n'
                 '# swiatynia w Varden - bezpieczne miejsce startu\n'
-                'spawn=31,16,0\n')
+                'spawn=31,16,0\n'
+                '# strefy ochronne (x0,y0,x1,y1,z): wnetrze murow miasta i wieza\n'
+                'pz=19,11,43,33,0;37,26,43,32,1;37,26,43,32,2;37,26,43,32,3;37,26,43,32,4;37,26,43,32,5\n')
 
 
 if __name__ == '__main__':

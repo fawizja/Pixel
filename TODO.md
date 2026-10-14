@@ -34,15 +34,24 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [ ] Uzywanie przedmiotow (mikstury, jedzenie) - razem z etapem 7
 - [ ] Okno banku w UI - etap 12
 
-## Etap 6 - Potwory, AI, walka, lupy  <- NASTEPNY
-- [ ] Rejestr potworow (data/monsters.csv): typy walki, odpornosci, zachowania
-- [ ] AI: aggro, poscig, ucieczka, powrot do spawnu, leczenie innych
-- [ ] Walka: wybor celu, wrecz, dystans, magia, pancerz, odpornosci, szybkosc ataku
-- [ ] Smierc, doswiadczenie, lupy z autolootem
-- [ ] Symulacje walk profesji na niskich, srednich i wysokich poziomach
-- [ ] Siatka przestrzenna do wyszukiwania potworow (bez skanowania wszystkich w kazdej klatce)
+## Etap 6 - Potwory, AI, walka, lupy
+- [x] Rejestr potworow (data/monsters.csv, data/loot.csv): 10 typow + boss, odpornosci, 6 zachowan
+- [x] Spawny (maps/varden/spawns.csv), odradzanie, brak pojawiania sie na oczach gracza
+- [x] AI: aggro z linia wzroku, poscig (BFS), ucieczka i osaczenie, dystans dla strzelcow, leczenie sojusznikow,
+      smycz i powrot do spawnu z leczeniem, regeneracja poza walka, boss (jednorazowe leczenie, szal)
+- [x] Strefy ochronne (miasto): brak walki, potwory nie wchodza
+- [x] Walka: cel (przycisk, dotkniecie, automatyczna odpowiedz), wrecz / dystans / magia, pancerz, tarcza,
+      odpornosci, szybkosc ataku, postawa obronna
+- [x] Smierc gracza (5% exp, nigdy ponizej poziomu startowego, odrodzenie w swiatyni)
+- [x] Doswiadczenie z malejacym zyskiem za zbyt slabe potwory, lupy z autolootem lub na ziemie
+- [x] Symulacje walk profesji (poziom 8 i 30), test "godzina na wilkach", test wysokiego poziomu
+- [x] Siatka przestrzenna, symulacja tylko w promieniu 20 kafelkow od gracza
+- [x] Klient: sprite potworow, paski HP, obwodka celu, liczby obrazen, panel celu, CEL / TARCZA
+- [ ] Mikstury i czary leczace (etap 7) - teraz jedyne leczenie to regeneracja
+- [ ] Dzwiek, animacja ataku, cialo potwora z lupem do przeszukania
 
-## Etap 7 - Czary, runy, mikstury, crafting
+## Etap 7 - Czary, runy, mikstury, crafting  <- NASTEPNY
+
 ## Etap 8 - Fishing i umiejetnosci
 ## Etap 9 - Miasta (max 4), biomy, expowiska
 - [x] Varden: swiatynia, bank, sklepy, domy, wieza, kopalnia, jezioro, pola

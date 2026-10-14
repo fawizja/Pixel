@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.movement;
 
+import java.util.function.Predicate;
 import pl.fawizja.pixel.balance.Balance;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.world.Direction;
@@ -15,16 +16,22 @@ public final class MovementSystem {
 
     private final WorldMap world;
     private final int ropeItemId;
+    private Predicate<Position> occupied = p -> false;
 
     public MovementSystem(WorldMap world, int ropeItemId) {
         this.world = world;
         this.ropeItemId = ropeItemId;
     }
 
+    /** Ustawia test zajetosci kafelka (np. przez potwory lub innych graczy). */
+    public void setOccupancy(Predicate<Position> occupied) {
+        this.occupied = occupied;
+    }
+
     /** Czy krok z pozycji w danym kierunku jest dozwolony (bez scinania rogow po skosie). */
     public boolean canStep(Position from, Direction d) {
         Position to = from.translate(d.dx, d.dy);
-        if (!world.isWalkable(to)) return false;
+        if (!world.isWalkable(to) || occupied.test(to)) return false;
         if (d.diagonal()) {
             return world.isWalkable(from.translate(d.dx, 0)) && world.isWalkable(from.translate(0, d.dy));
         }

@@ -2,9 +2,15 @@ package pl.fawizja.pixel.game;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.TestData;
 import pl.fawizja.pixel.character.PlayerCharacter;
+import pl.fawizja.pixel.monster.MonsterManager;
+import pl.fawizja.pixel.monster.MonsterRegistry;
+import pl.fawizja.pixel.monster.SpawnPoint;
+import pl.fawizja.pixel.monster.SpawnTable;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.Position;
@@ -64,5 +70,64 @@ class GameSessionTest {
         pc.setPosition(new Position(18, 15, 0)); // sciana
         new GameSession(TestData.ITEMS, TestData.varden(), pc);
         assertEquals(TestData.varden().spawn(), pc.position());
+    }
+
+    static final MonsterRegistry REG = MonsterRegistry.loadDefault(TestData.ITEMS);
+
+    private static GameSession sessionWithMonsters(PlayerCharacter pc, long seed) throws Exception {
+        List<SpawnPoint> spawns = SpawnTable.load("varden", TestData.varden(), REG);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, spawns, new Random(seed));
+        mm.populate(pc.position());
+        return new GameSession(TestData.ITEMS, TestData.varden(), pc, mm, new Random(seed + 1), 8);
+    }
+
+    @Test
+    void newCharacterSurvivesTheWolvesNextToTown() throws Exception {
+        for (Vocation v : Vocation.values()) {
+            PlayerCharacter pc = TestData.newCharacter(v);
+            GameSession s = sessionWithMonsters(pc, 3);
+            s.teleport(new Position(13, 11, 0), 0);
+            long exp = pc.experience();
+            // stoi w miejscu przez 3 minuty: wilki atakuja, postac odpowiada automatycznie
+            for (long t = 0; t < 180_000; t += 50) s.update(t, null);
+            assertEquals(new Position(13, 11, 0), pc.position(), v + " did not die");
+            assertTrue(pc.experience() > exp, v + " killed something");
+            assertTrue(s.combat().kills() >= 2, v + " kills " + s.combat().kills());
+        }
+    }
+
+    @Test
+    void enteringDeepFloorWarnsNewCharacter() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = sessionWithMonsters(pc, 5);
+        s.teleport(new Position(13, 22, -5), 1000);
+        assertTrue(s.log().latest(5).stream().anyMatch(e -> e.text().startsWith("Uwaga")), "danger warning on -5");
+        GameSession calm = sessionWithMonsters(TestData.newCharacter(Vocation.DRUID), 5);
+        calm.teleport(new Position(13, 11, 0), 1000);
+        assertTrue(calm.log().latest(5).stream().noneMatch(e -> e.text().startsWith("Uwaga")));
+    }
+
+    @Test
+    void monsterLevelsGrowWithDepthAndSurfaceIsSafe() throws Exception {
+        List<SpawnPoint> spawns = SpawnTable.load("varden", TestData.varden(), REG);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, spawns, new Random(1));
+        assertTrue(mm.maxMonsterLevelOnFloor(0) <= 15, "surface around the starting town");
+        for (int z = 1; z <= 5; z++) assertEquals(0, mm.maxMonsterLevelOnFloor(z), "no monsters in town buildings");
+        int prev = mm.maxMonsterLevelOnFloor(-1);
+        for (int z = -2; z >= -5; z--) {
+            int lvl = mm.maxMonsterLevelOnFloor(z);
+            assertTrue(lvl >= prev, "floor " + z + " is not easier than the one above");
+            prev = lvl;
+        }
+    }
+
+    @Test
+    void teleportOntoMonsterFreesTheTile() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        GameSession s = sessionWithMonsters(pc, 9);
+        Position occupied = s.monsters().monsters().get(0).position();
+        s.teleport(occupied, 0);
+        assertNull(s.monsters().monsterAt(occupied));
+        assertEquals(occupied, pc.position());
     }
 }

@@ -78,7 +78,50 @@ jest najlepsza w swojej roli i ze profile sa rozne (`VocationTest`).
 - Monety maja stos do 100 sztuk. Platnosci wydaja reszte optymalnie; brak miejsca na reszte anuluje transakcje.
 - Ceny przedmiotow (`value` w `items.csv`) sa punktem odniesienia dla sklepow NPC (etap 12).
 
+## Walka (etap 6, `CombatFormulas`)
+
+- Maksymalne obrazenia gracza (`L` = poziom, `A` = atak broni, piesci = 7):
+  - wrecz: `A * (umiejetnosc + 10) / 20 * meleeFactor + L/5` (Monk: FIST, reszta: SWORD),
+  - dystans: `A * (distance + 10) / 20 * distanceFactor + L/5`,
+  - magia (rozdzki, rozdzki druida): `A * (1 + magic/25) * magicFactor + L/5`.
+- Rzut: 40-100% maksimum. Postawa obronna: 80% zadawanych, 75% otrzymywanych obrazen.
+- Potwor: fizyczne minus `armor/2..armor`, potem odpornosc w % (ujemna = slabosc).
+- Gracz: fizyczne minus `0..pancerz/2` i `0..obrona/3` (tarcza * defenseFactor * shielding); zywioly ignoruja pancerz.
+- Exp za potwora: pelny do poziomu `4 * poziom_potwora + 20`, potem proporcjonalnie mniej (min. 10%,
+  ale realnie ~0 przy wielkiej roznicy). Smierc: -5% exp, nigdy ponizej poziomu startowego.
+
+## Potwory Varden
+
+| Potwor | Poz. | HP | Exp | Atak | Typ | Zasieg | Zachowanie | Pietro |
+|---|---|---|---|---|---|---|---|---|
+| Wolf | 8 | 55 | 20 | 2-10 | fiz. | 1 | SKIRMISHER (ucieka <) | 0 |
+| Boar | 10 | 90 | 32 | 3-14 | fiz. | 1 | TANK | 0 |
+| Forest Spider | 12 | 70 | 35 | 2-12 | ziemia | 1 | MELEE | 0 |
+| Bandit | 15 | 140 | 65 | 5-22 | fiz. | 1 | SKIRMISHER | 0 |
+| Goblin | 12 | 60 | 30 | 2-12 | fiz. | 4 | RANGED | -1, -2 |
+| Goblin Shaman | 18 | 90 | 70 | 6-20 | ogien | 4 | HEALER | -2 |
+| Skeleton | 22 | 160 | 90 | 6-26 | fiz. | 1 | MELEE (odporny na smierc, slaby na swiete) | -3 |
+| Cave Troll | 32 | 320 | 220 | 10-40 | fiz. | 1 | TANK | -4 |
+| Crystal Golem | 45 | 620 | 450 | 15-55 | energia | 2 | MAGIC | -5 |
+| Grimtooth (boss) | 60 | 3200 | 4000 | 25-90 | fiz. | 1 | TANK, leczenie 1x, szal <50% | -5 |
+
+## Symulacje walk (`CombatSimulationTest`, 300 pojedynkow, bez mikstur i ucieczki)
+
+| Sytuacja | Wynik |
+|---|---|
+| Kazda profesja, poziom 8, zestaw startowy vs wilk | 100% wygranych, 4-6 s |
+| Poziom 8 vs bandyta | 100%, 12-16 s |
+| Poziom 8 vs troll / golem / boss | 0-0,7% (za wczesnie) |
+| Poziom 30 (sredni sprzet) vs szkielet, troll | 100% |
+| Poziom 30 solo vs Grimtooth | 0% (boss na grupe lub wyzszy poziom) |
+| Obrazenia na atak, poziom 8 (max / min profesji) | <= 1,6x |
+| Obrazenia na atak, poziom 30 rozdzka vs bron | <= 2,0x (czary w etapie 7 wyrownaja magow) |
+| Godzina zabijania wilkow od poziomu 8 | <= poziom 20 |
+| Poziom 300, godzina na wilkach | < 1% poziomu |
+
+Wnioski: Druid jest najslabszy w obrazeniach (rola wsparcia - leczenie w etapie 7); Sorcerer
+cierpi na krysztalowym golemie (80% odpornosci na energie) - zamierzone, trzeba dobrac zywiol.
+
 ## Do zrobienia w kolejnych etapach
 
-Krzywe obrazen, pancerza i odpornosci, potworow i bossow, lupow, kosztow many i cooldownow, czarow
-i run - razem z symulacjami walk porownujacymi profesje na niskich, srednich i wysokich poziomach.
+Koszty many i cooldowny czarow, runy, mikstury - z ponownym uruchomieniem symulacji.

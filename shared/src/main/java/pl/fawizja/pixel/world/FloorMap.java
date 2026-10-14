@@ -79,6 +79,15 @@ public final class FloorMap {
         return inBounds(x, y) && !blocked[idx(x, y)];
     }
 
+    /** Czy kafelek zaslania widok i pociski (sciany i przeszkody; woda nie zaslania). */
+    public boolean blocksSight(int x, int y) {
+        if (!inBounds(x, y)) return true;
+        int i = idx(x, y);
+        if (layers.get(Layer.WALL)[i] != 0) return true;
+        TileType obj = tiles.get(layers.get(Layer.OBJECT)[i]);
+        return obj != null && !obj.walkable();
+    }
+
     public int lightAt(int x, int y) {
         return inBounds(x, y) ? lightEmission[idx(x, y)] : 0;
     }

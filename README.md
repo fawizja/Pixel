@@ -3,7 +3,8 @@
 2D MMORPG na Androida w stylu klasycznych gier fantasy, budowany etapami w **libGDX (Java 17)**.
 
 > Stan: **wczesna wersja lokalna (offline)**. Jest grywalny fragment swiata (miasto Varden z wieza
-> i kopalnia, pietra +5..-5), postac, profesje, plecak, monety, bank (logika) i zapis.
+> i kopalnia, pietra +5..-5), postac, profesje, plecak, monety, bank (logika), zapis oraz
+> potwory z AI, walka, smierc, doswiadczenie i lupy.
 > To jeszcze **nie jest MMORPG**: serwer i synchronizacja sieciowa sa zaplanowane w etapie 14
 > (patrz [TODO.md](TODO.md)).
 
@@ -49,6 +50,8 @@ jako artefakt `pixel-debug-apk`.
 | Plecak | PLECAK | B lub I |
 | Podnies przedmiot spod nog | PODNIES | G |
 | Diagnostyka | `i` w prawym gornym rogu | F3 |
+| Nastepny cel (atak automatyczny) | CEL albo dotkniecie potwora | Spacja / C |
+| Postawa obronna (zielony = wlaczona) | TARCZA | V |
 
 W plecaku: dotknij przedmiotu, aby go zaznaczyc (statystyki), potem dotknij innego slotu, aby
 przeniesc / polaczyc / zamienic, albo uzyj ZALOZ / WYRZUC.

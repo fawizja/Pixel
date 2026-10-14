@@ -6,6 +6,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -15,19 +21,24 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.client.PixelGame;
 import pl.fawizja.pixel.client.render.LightRenderer;
 import pl.fawizja.pixel.client.render.WorldRenderer;
 import pl.fawizja.pixel.client.ui.Hud;
+import pl.fawizja.pixel.combat.CombatEvent;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
+import pl.fawizja.pixel.monster.Monster;
+import pl.fawizja.pixel.monster.MonsterManager;
 import pl.fawizja.pixel.perf.GuardMode;
 import pl.fawizja.pixel.perf.Resource;
 import pl.fawizja.pixel.perf.ResourceGuard;
 import pl.fawizja.pixel.time.WorldClock;
 import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.Lighting;
+import pl.fawizja.pixel.world.Position;
 
 /** Ekran gry: petla symulacji, kamera, swiat, swiatlo, HUD, autozapis i ochrona zasobow. */
 public final class GameScreen extends ScreenAdapter {
@@ -57,10 +68,17 @@ public final class GameScreen extends ScreenAdapter {
     private GuardMode lastMode = GuardMode.NORMAL;
     private long frameStartNs;
     private boolean paused;
+    private final List<Monster> visibleMonsters = new ArrayList<>();
+    private final Matrix4 screenMatrix = new Matrix4();
+    private final Vector3 projected = new Vector3();
 
     public GameScreen(PixelGame game, PlayerCharacter pc) {
         this.game = game;
-        this.session = new GameSession(game.items(), game.world(), pc);
+        long seed = TimeUtils.millis();
+        MonsterManager monsters = new MonsterManager(game.world(), game.monsters(), game.spawns(), new Random(seed));
+        monsters.populate(pc.position());
+        this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
+                game.startingConfig().startLevel());
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
@@ -78,7 +96,8 @@ public final class GameScreen extends ScreenAdapter {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean touchDown(int sx, int sy, int pointer, int button) {
-                return hud.touchDown(sx, sy, pointer, session, GameScreen.this::onButton);
+                if (hud.touchDown(sx, sy, pointer, session, GameScreen.this::onButton)) return true;
+                return tapWorld(sx, sy);
             }
 
             @Override
@@ -101,6 +120,9 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.I: onButton("bag"); return true;
                     case Input.Keys.G: onButton("pick"); return true;
                     case Input.Keys.F3: onButton("diag"); return true;
+                    case Input.Keys.SPACE:
+                    case Input.Keys.C: onButton("target"); return true;
+                    case Input.Keys.V: onButton("defensive"); return true;
                     default: return false;
                 }
             }
@@ -116,6 +138,8 @@ public final class GameScreen extends ScreenAdapter {
             case "bag": hud.toggleBag(); break;
             case "pick": session.pickUpHere(t); break;
             case "diag": hud.toggleDiagnostics(); break;
+            case "target": session.cycleTarget(t); break;
+            case "defensive": session.toggleDefensive(t); break;
             case "bag_equip":
                 session.equipFromSlot(hud.selectedSlot(), t);
                 hud.clearSelection();
@@ -126,6 +150,15 @@ public final class GameScreen extends ScreenAdapter {
                 break;
             default:
         }
+    }
+
+    /** Dotkniecie swiata: wybor potwora jako celu. */
+    private boolean tapWorld(int sx, int sy) {
+        Vector3 w = viewport.unproject(new Vector3(sx, sy, 0));
+        int x = (int) Math.floor(w.x);
+        int y = game.world().height() - 1 - (int) Math.floor(w.y);
+        Position p = new Position(x, y, session.character().position().z());
+        return session.targetAt(p);
     }
 
     private Direction keyboardDirection() {
@@ -174,7 +207,20 @@ public final class GameScreen extends ScreenAdapter {
         batch.begin();
         int z = pc.position().z();
         int playerRow = pc.position().y();
+        visibleMonsters.clear();
+        int radius = (int) Math.ceil(Math.max(viewport.getWorldWidth(), viewport.getWorldHeight()) / 2f) + 2;
+        visibleMonsters.addAll(session.monsters().near(pc.position(), radius));
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
+            for (int i = 0; i < visibleMonsters.size(); i++) {
+                Monster m = visibleMonsters.get(i);
+                if (m.position().y() != row || m.position().z() != z) continue;
+                TextureRegion tr = game.art().monster(m.type().key());
+                if (tr == null) continue;
+                float mx = m.renderX(t);
+                float my = worldRenderer.worldY(m.renderY(t));
+                boolean flip = m.facing() != null && m.facing().dx < 0;
+                b.draw(tr, flip ? mx + 1f : mx, my, flip ? -1f : 1f, 1f);
+            }
             if (row == playerRow) {
                 b.draw(game.art().character(pc.vocation(), session.facing()), px, worldRenderer.worldY(py), 1f, 1f);
             }
@@ -186,9 +232,70 @@ public final class GameScreen extends ScreenAdapter {
         lightRenderer.render(batch, camera, game.world().floor(z), game.world().height(), ambient,
                 guard.effectsQuality(), camX, camY, Lighting.playerLightRadius(pc, game.items()));
         batch.setColor(Color.WHITE);
+        drawCombatOverlay(batch, game.shapes(), t, z);
 
         hud.render(batch, game.shapes(), session, clock, t, this::diagnosticsLines);
         limitFrameRate();
+    }
+
+    /** Paski zycia potworow, obwodka celu i liczby obrazen (rysowane po swietle, zawsze czytelne). */
+    private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
+        Monster target = session.combat().target();
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapes.setProjectionMatrix(camera.combined);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        for (Monster m : visibleMonsters) {
+            if (m.isDead() || m.position().z() != z) continue;
+            float mx = m.renderX(t);
+            float my = worldRenderer.worldY(m.renderY(t));
+            boolean hurt = m.healthFraction() < 1f;
+            if (!hurt && m != target) continue;
+            float f = m.healthFraction();
+            shapes.setColor(0f, 0f, 0f, 0.7f);
+            shapes.rect(mx + 0.1f, my + 1.02f, 0.8f, 0.12f);
+            shapes.setColor(f > 0.6f ? new Color(0.2f, 0.85f, 0.2f, 1f)
+                    : f > 0.3f ? new Color(0.95f, 0.8f, 0.15f, 1f) : new Color(0.9f, 0.15f, 0.15f, 1f));
+            shapes.rect(mx + 0.12f, my + 1.04f, 0.76f * f, 0.08f);
+        }
+        shapes.end();
+        if (target != null && target.position().z() == z) {
+            shapes.begin(ShapeRenderer.ShapeType.Line);
+            shapes.setColor(1f, 0.2f, 0.2f, 1f);
+            float tx = target.renderX(t), ty = worldRenderer.worldY(target.renderY(t));
+            shapes.rect(tx + 0.03f, ty + 0.03f, 0.94f, 0.94f);
+            shapes.rect(tx + 0.07f, ty + 0.07f, 0.86f, 0.86f);
+            shapes.end();
+        }
+
+        // liczby obrazen w pikselach ekranu
+        List<CombatEvent> events = session.combat().recentEvents(t, 1200);
+        if (events.isEmpty()) return;
+        screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.setProjectionMatrix(screenMatrix);
+        batch.begin();
+        BitmapFont font = game.font();
+        float scale = Math.max(1f, Gdx.graphics.getDensity() * 1.1f);
+        font.getData().setScale(scale);
+        for (CombatEvent e : events) {
+            if (e.position().z() != z) continue;
+            float age = (t - e.timeMs()) / 1200f;
+            projected.set(e.position().x() + 0.5f, worldRenderer.worldY(e.position().y()) + 0.9f + age * 0.8f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            String text;
+            switch (e.kind()) {
+                case HIT_MONSTER: font.setColor(1f, 1f, 1f, 1f - age); text = String.valueOf(e.amount()); break;
+                case HIT_PLAYER: font.setColor(1f, 0.25f, 0.25f, 1f - age); text = String.valueOf(e.amount()); break;
+                case HEAL: font.setColor(0.4f, 1f, 0.4f, 1f - age); text = "+" + e.amount(); break;
+                case BLOCKED: font.setColor(0.6f, 0.8f, 1f, 1f - age); text = "blok"; break;
+                case LEVEL_UP: font.setColor(1f, 0.9f, 0.3f, 1f - age); text = "POZIOM " + e.amount() + "!"; break;
+                default: continue;
+            }
+            font.draw(batch, text, projected.x - text.length() * 3.5f * scale, projected.y);
+        }
+        font.getData().setScale(1f);
+        font.setColor(Color.WHITE);
+        batch.end();
     }
 
     private void updateGuard(long t) {

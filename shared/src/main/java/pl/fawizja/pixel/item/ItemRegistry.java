@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import pl.fawizja.pixel.combat.DamageType;
 import pl.fawizja.pixel.vocation.Vocation;
 
 /** Rejestr wszystkich typow przedmiotow. Dane w data/items.csv (separator ';'). */
@@ -41,7 +42,7 @@ public final class ItemRegistry {
         }
     }
 
-    /** Format: id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations;light;color;description */
+    /** Format: id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations;light;range;damageType;color;description */
     public static ItemRegistry parse(Reader reader) throws IOException {
         Map<Integer, ItemType> map = new LinkedHashMap<>();
         BufferedReader br = new BufferedReader(reader);
@@ -51,8 +52,8 @@ public final class ItemRegistry {
             lineNo++;
             String trimmed = line.trim();
             if (trimmed.isEmpty() || trimmed.startsWith("#")) continue;
-            String[] f = trimmed.split(";", 15); // opis moze zawierac ";"
-            if (f.length != 15) throw new IOException("items.csv line " + lineNo + ": expected 15 fields, got " + f.length);
+            String[] f = trimmed.split(";", 17); // opis moze zawierac ";"
+            if (f.length != 17) throw new IOException("items.csv line " + lineNo + ": expected 17 fields, got " + f.length);
             try {
                 int id = Integer.parseInt(f[0].trim());
                 int maxStack = Integer.parseInt(f[4].trim());
@@ -61,7 +62,8 @@ public final class ItemRegistry {
                         Long.parseLong(f[5].trim()), EquipSlot.valueOf(f[6].trim()),
                         Integer.parseInt(f[7].trim()), Integer.parseInt(f[8].trim()), Integer.parseInt(f[9].trim()),
                         Integer.parseInt(f[10].trim()), parseVocations(f[11].trim()),
-                        Integer.parseInt(f[12].trim()), f[13].trim(), f[14].trim());
+                        Integer.parseInt(f[12].trim()), Integer.parseInt(f[13].trim()),
+                        DamageType.valueOf(f[14].trim()), f[15].trim(), f[16].trim());
                 if (map.put(id, t) != null) throw new IOException("items.csv line " + lineNo + ": duplicate id " + id);
             } catch (IllegalArgumentException e) {
                 throw new IOException("items.csv line " + lineNo + ": " + e.getMessage(), e);

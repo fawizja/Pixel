@@ -16,6 +16,7 @@ import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.client.render.TileArt;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
+import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.item.EquipSlot;
 import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.item.ItemType;
@@ -44,6 +45,8 @@ public final class Hud {
     private final HudButton bag = new HudButton("bag", "PLECAK");
     private final HudButton pick = new HudButton("pick", "PODNIES");
     private final HudButton diag = new HudButton("diag", "i");
+    private final HudButton target = new HudButton("target", "CEL");
+    private final HudButton defensive = new HudButton("defensive", "TARCZA");
     private final Vector2 tmp = new Vector2();
     private float uiScale = 1f;
     private float w;
@@ -66,6 +69,8 @@ public final class Hud {
         buttons.add(bag);
         buttons.add(pick);
         buttons.add(diag);
+        buttons.add(target);
+        buttons.add(defensive);
     }
 
     public void resize(int width, int height) {
@@ -86,6 +91,8 @@ public final class Hud {
         torch.x = bx; torch.y = by + br * 2.4f; torch.r = br;
         bag.x = bx - br * 2.4f; bag.y = by + br * 2.4f; bag.r = br;
         pick.x = bx - br * 4.8f; pick.y = by; pick.r = br;
+        target.x = bx - br * 4.8f; target.y = by + br * 2.4f; target.r = br;
+        defensive.x = bx; defensive.y = by + br * 4.8f; defensive.r = br;
         diag.x = w - margin - 14; diag.y = h - margin - 14; diag.r = 14;
         slotSize = Math.min(44, Math.min(w, h) / 9f);
         bagX = w / 2f - slotSize * 2.5f;
@@ -170,6 +177,9 @@ public final class Hud {
         bag.active = bagOpen;
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
+        defensive.active = pc.isDefensive();
+        Monster tgt = session.combat().target();
+        target.active = tgt != null;
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -195,6 +205,12 @@ public final class Hud {
             shapes.circle(b.x, b.y, b.r, 32);
         }
 
+        if (tgt != null) {
+            float tw = Math.min(200, w * 0.36f);
+            shapes.setColor(0, 0, 0, 0.55f);
+            shapes.rect(w / 2f - tw / 2f - 6, h - 44, tw + 12, 38);
+            bar(shapes, w / 2f - tw / 2f, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
+        }
         if (bagOpen) drawBagBackground(shapes, session);
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.6f);
@@ -228,6 +244,9 @@ public final class Hud {
         for (HudButton b : buttons) {
             if (!b.visible) continue;
             centered(batch, b.label, b.x, b.y);
+        }
+        if (tgt != null) {
+            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", w / 2f, h - 16);
         }
         if (bagOpen) drawBagContents(batch, session);
         if (diagnosticsOpen && diagInfo != null) {

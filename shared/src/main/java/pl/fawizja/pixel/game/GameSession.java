@@ -1,6 +1,12 @@
 package pl.fawizja.pixel.game;
 
+import java.util.Collections;
+import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
+import pl.fawizja.pixel.combat.CombatSystem;
+import pl.fawizja.pixel.monster.Monster;
+import pl.fawizja.pixel.monster.MonsterManager;
+import pl.fawizja.pixel.monster.MonsterRegistry;
 import pl.fawizja.pixel.economy.Money;
 import pl.fawizja.pixel.inventory.InventoryResult;
 import pl.fawizja.pixel.item.ItemRegistry;
@@ -26,6 +32,9 @@ public final class GameSession {
     private final GroundItems ground = new GroundItems();
     private final EventLog log = new EventLog(50);
     private final int torchId;
+    private final MonsterManager monsters;
+    private final CombatSystem combat;
+    private final MonsterManager.Target playerTarget;
 
     private Position stepFrom;
     private long stepStartMs;
@@ -34,7 +43,13 @@ public final class GameSession {
     private Direction facing = Direction.SOUTH;
     private long lastUpdateMs = -1;
 
+    /** Sesja bez potworow (testy, edytor). */
     public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc) {
+        this(items, world, pc, null, new Random(1), 8);
+    }
+
+    public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc, MonsterManager monsters,
+                       Random rng, int minLevel) {
         this.items = items;
         this.world = world;
         this.pc = pc;
@@ -44,7 +59,21 @@ public final class GameSession {
             pc.setPosition(world.spawn());
         }
         this.stepFrom = pc.position();
+        this.monsters = monsters != null ? monsters
+                : new MonsterManager(world, null, Collections.emptyList(), rng);
+        this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
+        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null);
+        this.playerTarget = new MonsterManager.Target() {
+            @Override
+            public Position position() { return pc.position(); }
+
+            @Override
+            public boolean attackable() { return !pc.isDead(); }
+        };
     }
+
+    public MonsterManager monsters() { return monsters; }
+    public CombatSystem combat() { return combat; }
 
     public PlayerCharacter character() { return pc; }
     public WorldMap world() { return world; }
@@ -71,11 +100,56 @@ public final class GameSession {
                 stepDurationMs = MovementSystem.stepDurationMs(pc, requested);
                 moving = true;
             } else if (r == MoveResult.CHANGED_FLOOR) {
-                stepFrom = pc.position();
-                moving = false;
-                log.add(nowMs, EventLog.Kind.INFO, floorMessage(pc.position().z()));
+                onFloorChanged(nowMs);
             }
         }
+        Position before = pc.position();
+        monsters.update(nowMs, playerTarget, combat);
+        combat.update(nowMs);
+        if (!pc.position().equals(before)) {
+            // smierc i odrodzenie w swiatyni
+            stepFrom = pc.position();
+            moving = false;
+        }
+    }
+
+    private void onFloorChanged(long nowMs) {
+        stepFrom = pc.position();
+        moving = false;
+        combat.setTarget(null);
+        log.add(nowMs, EventLog.Kind.INFO, floorMessage(pc.position().z()));
+        int danger = monsters.maxMonsterLevelOnFloor(pc.position().z());
+        if (danger > pc.level() * 2 + 10) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Uwaga: niebezpieczny obszar (potwory do poziomu " + danger + ").");
+        }
+    }
+
+    /** Natychmiastowe przeniesienie postaci (swiatynia, narzedzia deweloperskie, w przyszlosci teleporty NPC). */
+    public void teleport(Position p, long nowMs) {
+        monsters.evict(p, nowMs);
+        pc.setPosition(p);
+        stepFrom = p;
+        moving = false;
+        combat.setTarget(null);
+        onFloorChanged(nowMs);
+    }
+
+    public void toggleDefensive(long nowMs) {
+        pc.setDefensive(!pc.isDefensive());
+        log.add(nowMs, EventLog.Kind.INFO, pc.isDefensive() ? "Postawa obronna." : "Postawa ofensywna.");
+    }
+
+    public void cycleTarget(long nowMs) {
+        Monster m = combat.cycleTarget();
+        if (m == null) log.add(nowMs, EventLog.Kind.INFO, "Brak celu w poblizu.");
+    }
+
+    /** Wybor celu dotknieciem kafelka. Zwraca true, jesli trafiono potwora. */
+    public boolean targetAt(Position p) {
+        Monster m = monsters.monsterAt(p);
+        if (m == null) return false;
+        combat.setTarget(m);
+        return true;
     }
 
     /** Pozycja do rysowania (plynna interpolacja miedzy kafelkami). */
@@ -103,9 +177,7 @@ public final class GameSession {
         MoveResult r = movement.use(pc);
         switch (r) {
             case CHANGED_FLOOR:
-                stepFrom = pc.position();
-                moving = false;
-                log.add(nowMs, EventLog.Kind.INFO, floorMessage(pc.position().z()));
+                onFloorChanged(nowMs);
                 break;
             case NEEDS_ROPE:
                 log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");

@@ -74,7 +74,30 @@ Tekstowy format z wersja i CRC32, migracja v1 -> v2, odrzucanie uszkodzonych pli
 zapis atomowy (tmp + fsync + kopia .bak), odczyt z kopii przy uszkodzeniu. Autozapis co 60 s,
 przy pauzie, utracie fokusu i zamknieciu.
 
+## Potwory i AI (Z logika, C grafika)
+
+- `MonsterRegistry` (monsters.csv + loot.csv), `SpawnTable` (spawns.csv), `MonsterManager`.
+- Stany: IDLE (wedrowka w promieniu spawnu, regeneracja 5%), CHASE (BFS, max 400 wezlow), FLEE,
+  RETURN (smycz: promien spawnu + 10 lub inne pietro; po powrocie pelne HP).
+- Zachowania: MELEE, TANK, SKIRMISHER (ucieka ponizej progu HP; osaczony walczy do konca),
+  RANGED / MAGIC (trzymaja dystans >= 2, strzelaja z linii wzroku), HEALER (leczy najslabszego
+  sojusznika < 70% w promieniu 4), boss (leczenie raz ponizej 30%, atak 30% szybszy ponizej 50%).
+- Potwory nie wchodza na strefy ochronne, przejscia, gracza ani siebie nawzajem; nie pojawiaja sie
+  blizej niz 5 kafelkow od gracza.
+- Wydajnosc: `SpatialGrid` (komorki 8x8); symulowane sa tylko potwory w promieniu 20 kafelkow.
+  Serwer (etap 14) bedzie uzywal tej samej klasy dla wielu graczy (`Target`).
+
+## Walka (Z)
+
+- `CombatSystem`: atak co `attackIntervalMs` profesji (Monk 1,4 s, reszta 2 s), zasieg broni, linia wzroku.
+- Cel: CEL (najblizszy, kolejne nacisniecia przechodza dalej), dotkniecie potwora, automatyczna
+  odpowiedz na atak; gdy cel ucieknie poza zasieg, cel przechodzi na atakujacego potwora w zasiegu.
+- Smierc potwora: exp (z redukcja), trening umiejetnosci, lup do plecaka (autoloot w promieniu 8,
+  lista ignorowanych) lub na ziemie, odrodzenie po czasie ze spawns.csv.
+- Smierc gracza: -5% exp (nie ponizej poziomu startowego), pelne HP/MP, swiatynia Varden.
+- Zdarzenia walki (`CombatEvent`) -> liczby obrazen, leczenia, awansu w kliencie.
+
 ## Planowane
 
-Potwory i AI, walka PvM/PvP, lupy, czary, runy, mikstury, fishing, NPC, zadania, handel, bank w UI,
+Czary, runy, mikstury, fishing, NPC, zadania, handel, bank w UI, PvP,
 serwer i synchronizacja - patrz [TODO.md](../TODO.md).
