@@ -158,4 +158,25 @@ class CombatTest {
         MonsterManager m = mm != null ? mm : new MonsterManager(TestData.varden(), REG, Collections.emptyList(), rng);
         return new CombatSystem(pc, TestData.varden(), TestData.ITEMS, m, new GroundItems(), new EventLog(50), rng, 8);
     }
+
+    @Test
+    void trivialMonstersDoNotTrainSkills() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        pc.addExperience(Balance.experienceForLevel(100) - pc.experience());
+        pc.setPosition(new Position(10, 12, 0));
+        SpawnPoint sp = new SpawnPoint("wolf", new Position(11, 12, 0), 0, 1, 60);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, List.of(sp), new Random(3));
+        mm.populate(null);
+        CombatSystem cs = system(pc, new Random(5), mm);
+        Monster wolf = mm.monsters().get(0);
+        assertTrue(cs.isTrivial(wolf.type()));
+        cs.setTarget(wolf);
+        long tries = pc.skills().tries(Skill.FIST);
+        int lvl = pc.skills().level(Skill.FIST);
+        for (long t = 0; t < 30_000 && !wolf.isDead(); t += 100) cs.update(t);
+        assertTrue(wolf.isDead());
+        assertEquals(tries, pc.skills().tries(Skill.FIST));
+        assertEquals(lvl, pc.skills().level(Skill.FIST));
+        assertFalse(system(TestData.newCharacter(Vocation.MONK), new Random(1), mm).isTrivial(REG.get("wolf")));
+    }
 }

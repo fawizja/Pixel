@@ -64,8 +64,15 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [ ] Wlasny uklad paska czarow (teraz automatyczny)
 
 
-## Etap 8 - Fishing i umiejetnosci  <- NASTEPNY
-## Etap 9 - Miasta (max 4), biomy, expowiska
+## Etap 8 - Fishing i umiejetnosci
+- [x] Lowienie: wedka + robak (zuzywany tylko przy zlowieniu), woda w zasiegu 3, szansa 16%..70% wg umiejetnosci
+- [x] Odpoczynek lowiska 2 min po zlowieniu (brak farmienia jednego kafelka), perly od umiejetnosci 30
+- [x] Trening umiejetnosci tylko na potworach, ktore nie sa zbyt slabe (ten sam prog co pelny exp)
+- [x] Karta postaci (dotkniecie paskow HP/MP lub P): exp, szybkosc, udzwig, sytosc, umiejetnosci z postepem
+- [x] Przycisk LOW pokazywany tylko przy wodzie z wedka w plecaku
+- [ ] Ryby zalezne od biomu (lod, bagna, oaza) - razem z nowymi miastami
+
+## Etap 9 - Miasta (max 4), biomy, expowiska  <- NASTEPNY
 - [x] Varden: swiatynia, bank, sklepy, domy, wieza, kopalnia, jezioro, pola
 - [ ] NPC i uslugi Varden, Frostholm, Selvaran, Qasirah, biomy snieg / rownik / pustynia
 ## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie

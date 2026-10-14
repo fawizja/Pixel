@@ -130,6 +130,8 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.Q: onButton("potion_hp"); return true;
                     case Input.Keys.F: onButton("potion_mp"); return true;
                     case Input.Keys.K: onButton("book"); return true;
+                    case Input.Keys.P: hud.toggleCharacter(); return true;
+                    case Input.Keys.L: onButton("fish"); return true;
                     case Input.Keys.ESCAPE:
                         if (hud.bookOpen()) hud.toggleBook();
                         else if (hud.bagOpen()) hud.toggleBag();
@@ -152,6 +154,7 @@ public final class GameScreen extends ScreenAdapter {
             case "target": session.cycleTarget(t); break;
             case "defensive": session.toggleDefensive(t); break;
             case "book": hud.toggleBook(); break;
+            case "fish": session.fish(t); break;
             case "potion_hp": session.usePotion("health_potion", t); break;
             case "potion_mp": session.usePotion("mana_potion", t); break;
             case "bag_use":

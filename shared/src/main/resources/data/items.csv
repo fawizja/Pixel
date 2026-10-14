@@ -46,3 +46,4 @@
 62;boulder_rune;Boulder Rune;RUNE;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#9a8a70;Runa: ciska glazem w cel.
 63;healing_rune;Healing Rune;RUNE;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#60e080;Runa: leczy uzytkownika.
 64;fish;Fish;FOOD;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa8c8;Swieza ryba z jeziora.
+65;pearl;Pearl;MATERIAL;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;#f0eef8;Rzadka perla z jeziora - cenna u jubilerow.

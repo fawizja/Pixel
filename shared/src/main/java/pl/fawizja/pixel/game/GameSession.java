@@ -11,6 +11,8 @@ import pl.fawizja.pixel.economy.Money;
 import pl.fawizja.pixel.inventory.InventoryResult;
 import pl.fawizja.pixel.item.ItemRegistry;
 import pl.fawizja.pixel.item.ItemStack;
+import pl.fawizja.pixel.gathering.FishingResult;
+import pl.fawizja.pixel.gathering.FishingSystem;
 import pl.fawizja.pixel.magic.CastResult;
 import pl.fawizja.pixel.magic.ConsumableRegistry;
 import pl.fawizja.pixel.magic.CraftingSystem;
@@ -44,6 +46,7 @@ public final class GameSession {
     private final MonsterManager.Target playerTarget;
     private final SpellSystem spells;
     private final RecipeRegistry recipes;
+    private final FishingSystem fishing;
 
     private Position stepFrom;
     private long stepStartMs;
@@ -79,6 +82,7 @@ public final class GameSession {
         this.monsters = monsters != null ? monsters
                 : new MonsterManager(world, null, Collections.emptyList(), rng);
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
+        this.fishing = new FishingSystem(world, items, rng);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null);
         this.playerTarget = new MonsterManager.Target() {
@@ -94,6 +98,30 @@ public final class GameSession {
     public CombatSystem combat() { return combat; }
     public SpellSystem spells() { return spells; }
     public RecipeRegistry recipes() { return recipes; }
+
+    public FishingSystem fishing() { return fishing; }
+
+    /** Czy pokazac przycisk lowienia (wedka w plecaku i woda w zasiegu). */
+    public boolean canFish() {
+        return fishing.hasRod(pc) && fishing.waterNearby(pc.position());
+    }
+
+    public FishingResult fish(long nowMs) {
+        FishingResult r = fishing.fish(pc, nowMs);
+        switch (r) {
+            case CAUGHT:
+                log.add(nowMs, EventLog.Kind.LOOT, "Zlowiono: " + items.get(fishing.lastCatchId()).name());
+                break;
+            case NOTHING:
+                log.add(nowMs, EventLog.Kind.INFO, r.message);
+                break;
+            case COOLDOWN:
+                break;
+            default:
+                log.add(nowMs, EventLog.Kind.WARNING, r.message);
+        }
+        return r;
+    }
 
     public CastResult castSpell(String key, long nowMs) {
         return spells.cast(key, nowMs);

@@ -18,6 +18,7 @@ import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
 import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.character.Skill;
+import pl.fawizja.pixel.character.Skills;
 import pl.fawizja.pixel.magic.CastResult;
 import pl.fawizja.pixel.magic.CraftingSystem;
 import pl.fawizja.pixel.magic.Recipe;
@@ -54,6 +55,8 @@ public final class Hud {
     private final HudButton target = new HudButton("target", "CEL");
     private final HudButton defensive = new HudButton("defensive", "TARCZA");
     private final HudButton book = new HudButton("book", "KSIEGA");
+    private final HudButton fish = new HudButton("fish", "LOW");
+    private boolean charOpen;
     private final HudButton potionHp = new HudButton("potion_hp", "HP");
     private final HudButton potionMp = new HudButton("potion_mp", "MP");
     private final HudButton[] spellButtons = new HudButton[4];
@@ -105,6 +108,7 @@ public final class Hud {
         buttons.add(target);
         buttons.add(defensive);
         buttons.add(book);
+        buttons.add(fish);
         buttons.add(potionHp);
         buttons.add(potionMp);
         for (int i = 0; i < spellButtons.length; i++) {
@@ -134,6 +138,7 @@ public final class Hud {
         target.x = bx - br * 4.8f; target.y = by + br * 2.4f; target.r = br;
         defensive.x = bx; defensive.y = by + br * 4.8f; defensive.r = br;
         book.x = bx - br * 2.4f; book.y = by + br * 4.8f; book.r = br;
+        fish.x = bx - br * 4.8f; fish.y = by + br * 4.8f; fish.r = br;
         // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
         float sr = Math.max(20, br * 0.72f);
         float sx0 = margin + jr * 2.6f + sr + 12;
@@ -173,6 +178,8 @@ public final class Hud {
     public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
     public void toggleBook() { menuOpen = !menuOpen; if (menuOpen) bagOpen = false; }
     public boolean bookOpen() { return menuOpen; }
+    public void toggleCharacter() { charOpen = !charOpen; }
+    public boolean characterOpen() { return charOpen; }
 
     /** Klucz czaru na pasku (0..3) albo null. */
     public String barSpell(int i) { return i >= 0 && i < barSpells.length ? barSpells[i] : null; }
@@ -253,6 +260,11 @@ public final class Hud {
     /** Zwraca true, jesli dotyk zostal obsluzony przez interfejs. */
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
+        if (p.x <= Math.min(240, w * 0.45f) && p.y >= h - 62) {
+            // dotkniecie paskow HP/MP: karta postaci
+            toggleCharacter();
+            return true;
+        }
         if (menuOpen) {
             if (menuClose.hit(p.x, p.y)) { menuOpen = false; return true; }
             rebuildMenu(session);
@@ -324,6 +336,7 @@ public final class Hud {
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
         book.active = menuOpen;
+        fish.visible = session.canFish();
         updateBar(session);
         int hpCount = pc.backpack().count(session.items().byKey("health_potion").id());
         int mpCount = pc.backpack().count(session.items().byKey("mana_potion").id());
@@ -380,6 +393,16 @@ public final class Hud {
             shapes.rect(w / 2f - tw / 2f - 6, h - 44, tw + 12, 38);
             bar(shapes, w / 2f - tw / 2f, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
         }
+        if (charOpen) {
+            shapes.setColor(0.06f, 0.06f, 0.08f, 0.88f);
+            shapes.rect(10, h - 420, 270, 300);
+            float yy = h - 250;
+            for (Skill sk : Skill.values()) {
+                double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
+                bar(shapes, 150, yy - 10, 110, 6, (float) prog, new Color(0.3f, 0.75f, 0.4f, 1));
+                yy -= 22;
+            }
+        }
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
             rebuildMenu(session);
@@ -432,6 +455,7 @@ public final class Hud {
         if (tgt != null) {
             centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", w / 2f, h - 16);
         }
+        if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
             text(batch, "Czary (dotknij, aby rzucic)", menuX + 10, menuY + menuH - 14);
@@ -455,6 +479,26 @@ public final class Hud {
             }
         }
         batch.end();
+    }
+
+    private static final String[] SKILL_NAMES = {"Piesci", "Miecz", "Dystans", "Tarcza", "Magia", "Wedkarstwo"};
+
+    private void drawCharacterSheet(SpriteBatch batch, GameSession session) {
+        PlayerCharacter pc = session.character();
+        float x = 20, y = h - 130;
+        text(batch, pc.name() + " - " + pc.vocation().displayName() + ", poziom " + pc.level(), x, y);
+        long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
+        text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
+        text(batch, "Szybkosc " + pc.speed() + "   Udzwig " + pc.capacity(), x, y - 36);
+        text(batch, "Sytosc: " + (pc.fedMs() / 60_000) + " min   Zabite: " + session.combat().kills(), x, y - 54);
+        float yy = h - 250;
+        for (Skill sk : Skill.values()) {
+            text(batch, SKILL_NAMES[sk.ordinal()] + "  " + pc.skills().level(sk), x, yy);
+            yy -= 22;
+        }
+        font.getData().setScale(0.8f);
+        text(batch, "Dotknij paskow HP/MP, aby zamknac", x, h - 404);
+        font.getData().setScale(1f);
     }
 
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {

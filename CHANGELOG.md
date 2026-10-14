@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-10-14
+
+### Dodano
+- Lowienie ryb: wedka, robaki, szansa rosnaca z umiejetnoscia, odpoczynek lowiska, rzadkie perly.
+- Karta postaci z umiejetnosciami i postepem, sytoscia i liczba zabitych potworow.
+- 7 nowych testow (lacznie 129).
+
+### Zmieniono
+- Umiejetnosci walki i tarczy nie rosna na zbyt slabych potworach.
+
 ## [0.3.0] - 2026-10-14
 
 ### Dodano

@@ -18,7 +18,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.teleport=x,y,z            ustawia postac na pozycji (np. 8,23,-1)
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
- *   -Dpixel.open=book|bag             otwiera ksiege czarow albo plecak (zrzuty ekranu)
+ *   -Dpixel.open=book|bag|character            otwiera ksiege, plecak albo karte postaci (character) (zrzuty ekranu)
  */
 public final class DesktopLauncher {
 
@@ -59,6 +59,7 @@ public final class DesktopLauncher {
                 String open = System.getProperty("pixel.open");
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
+                if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
             }
             super.render();
             if (screenshot != null && ++frame == frames) {

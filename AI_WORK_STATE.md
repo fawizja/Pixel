@@ -2,12 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.3.0)
+## Podsumowanie (2026-10-14, wersja 0.4.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5, 6, 7 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4 (oba z zielonym CI i APK). 0.3.0 = etap 7.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971 (wszystkie z zielonym CI i APK). 0.4.0 = etap 8.
 
 ## Architektura
 
@@ -31,6 +31,7 @@ shared/   pl.fawizja.pixel.*         czysta Java 17, bez libGDX, testy JUnit 5
   combat/     CombatFormulas, CombatSystem (gracz <-> potwory, smierc, lupy), CombatEvent, DamageType
   magic/      SpellType/Registry (spells.csv), SpellSystem (czary, runy, mikstury, jedzenie), Cooldowns,
               ConsumableRegistry, RecipeRegistry, CraftingSystem, CastResult (komunikaty)
+  gathering/  FishingSystem, FishingResult
   movement/   + Pathfinder (BFS z limitem wezlow)
   game/       GameSession (lokalna petla gry: ruch -> potwory -> walka, teleport), EventLog
 core/     pl.fawizja.pixel.client.*   libGDX
@@ -46,6 +47,7 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.4.0: `./gradlew build` - **OK, 129 testow**; zrzut przy rzece (przycisk LOW, karta postaci) OK.
 - 0.3.0: `./gradlew build` - **OK, 122 testy, 0 bledow**; desktop uruchomiony, zrzuty paska czarow i ksiegi OK.
 - 0.2.0: `./gradlew :shared:test` - **OK, 106 testow, 0 bledow**; `:desktop:installDist` OK.
   Gra uruchomiona pod Xvfb z teleportem do wilkow (0), goblinow (-1) i trolli (-4): potwory
@@ -72,9 +74,11 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 8 - fishing i umiejetnosci** (lista w TODO.md):
-1. Fishing: wedka (fishing_rod) + robak (worm) na kafelku wody w zasiegu 3; szansa zalezna od FISHING;
-   lup: fish i rzadkie przedmioty; trening umiejetnosci; brak wody / przynety = komunikat.
-2. Przeglad umiejetnosci: okno postaci (poziom, umiejetnosci z paskami postepu, odpornosc, sytosc).
-3. Ograniczenie treningu na zbyt slabych potworach (bez farmienia umiejetnosci na wilkach przez poziom 100).
-4. Testy: szanse, trening, brak przynety; aktualizacja dokumentacji.
+**Nastepne zadanie: Etap 9 - miasta (max 4), biomy, expowiska** (lista w TODO.md, plan w docs/WORLD_MAP.md):
+1. Swiat wieloregionowy: obecnie jedna mapa `varden` 64x48. Zaprojektowac format swiata z regionami
+   (osobne pliki map + przejscia miedzy regionami na krawedziach / drogach) albo jedna wieksza mape
+   ladowana fragmentami (etap 3: chunki). Rekomendacja: regiony = osobne mapy, przejscie "travel" na krawedzi.
+2. Generator (tools/mapgen) dla Frostholm (snieg, polnoc), Selvaran (rownik), Qasirah (pustynia):
+   swiatynia, bank, sklepy, strefa ochronna, okolice z expowiskami; nowe kafelki biomow (snieg, lod, piasek, bagno).
+3. Nowe potwory biomow (zgodnie z tabela w WORLD_MAP.md) i ich spawny; ryby zalezne od biomu.
+4. Testy: dostepnosc wszystkich miast z Varden, spawn w strefie ochronnej, poziomy potworow rosna z odlegloscia.

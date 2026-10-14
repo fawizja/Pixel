@@ -55,6 +55,8 @@ jako artefakt `pixel-debug-apk`.
 | Czary z paska (leczenie, atak, obszar, swiatlo) | 4 male przyciski na dole | 1-4 |
 | Mikstura zdrowia / many | HP / MP | Q / F |
 | Ksiega czarow i rzemiosla | KSIEGA | K |
+| Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |
+| Karta postaci i umiejetnosci | dotknij paskow HP/MP | P |
 | Uzycie przedmiotu (mikstura, jedzenie, runa na cel) | PLECAK -> zaznacz -> UZYJ | - |
 
 W plecaku: dotknij przedmiotu, aby go zaznaczyc (statystyki), potem dotknij innego slotu, aby

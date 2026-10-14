@@ -100,9 +100,17 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
         int dealt = target.damage(dmg);
         monsters.provoke(target);
-        pc.skills().addTries(ap.skill(), 1);
+        if (!isTrivial(target.type())) pc.skills().addTries(ap.skill(), 1);
         push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
         if (target.isDead()) onMonsterDeath(target, now);
+    }
+
+    /**
+     * Potwor zbyt slaby, by czegokolwiek uczyc (ten sam prog co pelne doswiadczenie):
+     * poziom 100 nie wytrenuje umiejetnosci na wilkach.
+     */
+    public boolean isTrivial(MonsterType t) {
+        return pc.level() > 4 * t.level() + 20;
     }
 
     /** Obrazenia z czaru lub runy: odpornosci, zdarzenie, prowokacja, smierc. Zwraca zadane HP. */
@@ -187,7 +195,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int raw = CombatFormulas.rollBetween(t.attackMin(), t.attackMax(), rng);
         int dmg = CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), pc.isDefensive(), rng);
         int dealt = pc.damage(dmg);
-        if (t.damageType() == pl.fawizja.pixel.combat.DamageType.PHYSICAL) pc.skills().addTries(Skill.SHIELDING, 1);
+        if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t)) pc.skills().addTries(Skill.SHIELDING, 1);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED));
         if (target == null) target = m; // automatyczna odpowiedz na atak
         if (pc.isDead()) onPlayerDeath(m, now);
