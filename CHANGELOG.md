@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.1] - 2026-10-14
+
+### Dodano
+- Przewidywanie ruchu w kliencie online (`game.MovePredictor`): postac rusza od razu, serwer tylko
+  potwierdza kroki; przy blokadzie, teleporcie lub smierci obowiazuje pozycja serwera.
+  Licznik poprawek w panelu diagnostyki (F3 / przycisk i).
+- 2 testy symulujace opoznienie sieci (lacznie 170).
+
+### Naprawiono
+- Serwer zapisuje postac przed usunieciem gracza z listy (niestabilny test sieciowy).
+- Test wspolnych potworow nie zalezy juz od tego, czy obie klatki pochodza z tego samego kroku.
+
 ## [0.11.0] - 2026-10-14 - etap 14: konta, logowanie, czat
 
 ### Dodano

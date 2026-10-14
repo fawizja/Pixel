@@ -195,8 +195,9 @@ final class ServerWorld {
     boolean saved(String name) { return saves.exists("player_" + name.toLowerCase(java.util.Locale.ROOT)); }
 
     void leave(ServerPlayer p) {
-        if (players.remove(p.id) == null) return;
-        save(p);
+        if (!players.containsKey(p.id)) return;
+        save(p); // najpierw zapis, potem usuniecie z listy graczy
+        players.remove(p.id);
         broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
         LOG.info("leave " + p.name() + " (" + players.size() + " online)");
     }

@@ -40,7 +40,7 @@ import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.Lighting;
 import pl.fawizja.pixel.world.Position;
 import pl.fawizja.pixel.game.Actions;
-import pl.fawizja.pixel.movement.MovementSystem;
+import pl.fawizja.pixel.game.MovePredictor;
 import pl.fawizja.pixel.net.NetClient;
 import pl.fawizja.pixel.net.RemoteEntity;
 import pl.fawizja.pixel.item.ItemStack;
@@ -103,6 +103,7 @@ public final class GameScreen extends ScreenAdapter {
     private NetClient.Frame lastFrame;
     private Direction sentMove;
     private boolean disconnectShown;
+    private final MovePredictor predictor = new MovePredictor();
     private long disconnectAtMs;
     private int pvpTargetId = -1;
     /** Wpisywana wiadomosc czatu (desktop: Enter otwiera, Enter wysyla, Esc anuluje) albo null. */
@@ -510,6 +511,7 @@ public final class GameScreen extends ScreenAdapter {
             net.send("MOVE", dir == null ? "-" : dir.name());
             sentMove = dir;
         }
+        if (clockSynced) predictor.tick(session, dir, now());
         String self = net.selfSave();
         if (self != null && !self.equals(lastSelf)) {
             lastSelf = self;
@@ -529,16 +531,13 @@ public final class GameScreen extends ScreenAdapter {
             }
             long now = now();
             if (f.self() != null) {
-                Position cur = session.character().position();
-                Direction d = Direction.fromDelta(Integer.signum(f.self().x() - cur.x()), Integer.signum(f.self().y() - cur.y()));
-                long step = d == null ? 0 : MovementSystem.stepDurationMs(session.character(), d);
                 Direction facing = null;
                 try {
                     if (f.facing() != null) facing = Direction.valueOf(f.facing());
                 } catch (IllegalArgumentException ignored) {
                     // nieznany kierunek - zostaje poprzedni
                 }
-                session.applyRemotePosition(f.self(), facing, now, step);
+                predictor.onServer(session, f.self(), facing, now);
             }
             session.monsters().syncRemote(f.monsters(), now, REMOTE_STEP_MS);
             Monster target = null;
@@ -684,6 +683,7 @@ public final class GameScreen extends ScreenAdapter {
         String thermal = game.platform().thermalInfo();
         if (thermal != null) l.add("Termika: " + thermal);
         l.add("Tryb: " + guard.describe());
+        if (net != null) l.add("Siec: online, poprawki ruchu: " + predictor.corrections() + (net.isClosed() ? " (rozlaczono)" : ""));
         l.add("Limit FPS: " + guard.fpsCap(userFpsCap));
         return l;
     }

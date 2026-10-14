@@ -409,6 +409,29 @@ public final class GameSession {
     }
 
     /**
+     * Klient online: przewidywany krok (bez czekania na serwer). Tylko zwykly krok po wolnym kafelku -
+     * schody, dziury i inne przejscia czekaja na serwer. Zwraca true, gdy krok sie zaczal.
+     */
+    public boolean predictStep(Direction d, long nowMs) {
+        if (moving && nowMs - stepStartMs < stepDurationMs) return false;
+        if (pc.isDead()) return false;
+        facing = d;
+        Position from = pc.position();
+        if (!movement.canStep(from, d)) return false;
+        Position to = from.translate(d.dx, d.dy);
+        if (world.transitionAt(to) != null) return false;
+        pc.setPosition(to);
+        stepFrom = from;
+        stepStartMs = nowMs;
+        stepDurationMs = MovementSystem.stepDurationMs(pc, d);
+        moving = true;
+        return true;
+    }
+
+    /** Czy trwa krok (wg czasu, takze bez wywolan update - tryb online). */
+    public boolean isStepping(long nowMs) { return moving && nowMs - stepStartMs < stepDurationMs; }
+
+    /**
      * Klient online: pozycja postaci z klatki stanu serwera. Krok na sasiedni kafelek jest
      * interpolowany przez stepMs (jak lokalny ruch), dalszy skok (teleport, schody) - natychmiast.
      */

@@ -141,8 +141,15 @@ class NetworkSyncTest {
             await("both see monsters", () -> a.frame() != null && b.frame() != null
                     && !a.frame().monsters().isEmpty() && !b.frame().monsters().isEmpty()
                     && seen(a, "Finn") != null);
-            RemoteEntity ma = a.frame().monsters().get(0);
-            assertTrue(b.frame().monsters().stream().anyMatch(m -> m.id() == ma.id() && m.key().equals(ma.key())));
+            // klatki obu graczy moga pochodzic z roznych krokow (potwor na skraju widoku) - czekamy na wspolny
+            await("same monster ids and types", () -> {
+                for (RemoteEntity ma : a.frame().monsters()) {
+                    for (RemoteEntity mb : b.frame().monsters()) {
+                        if (ma.id() == mb.id() && ma.key().equals(mb.key())) return true;
+                    }
+                }
+                return false;
+            });
         }
     }
 

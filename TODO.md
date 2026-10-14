@@ -123,7 +123,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Czat: przycisk CZAT / Enter; powrot do menu po rozlaczeniu
 - [ ] TLS (np. SSLSocket z certyfikatem serwera przypietym w kliencie) przed wystawieniem publicznie
 - [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
-- [ ] Przewidywanie ruchu po stronie klienta (teraz ruch czeka na serwer ~100 ms)
+- [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
