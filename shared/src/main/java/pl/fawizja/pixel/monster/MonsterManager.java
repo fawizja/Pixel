@@ -113,6 +113,11 @@ public final class MonsterManager {
         respawnQueue.computeIfAbsent(m.spawn(), k -> new ArrayList<>()).add(now + m.spawn().respawnSeconds() * 1000L);
     }
 
+    /** Potwor trafiony z daleka (czar, runa) przestaje stac bezczynnie i rusza na gracza. */
+    public void provoke(Monster m) {
+        if (!m.isDead() && m.state() == MonsterState.IDLE) m.setState(MonsterState.CHASE);
+    }
+
     /** Zwalnia kafelek (np. po teleporcie gracza): potwor wraca do kolejki odrodzen bez lupu. */
     public void evict(Position p, long now) {
         Monster m = grid.at(p);

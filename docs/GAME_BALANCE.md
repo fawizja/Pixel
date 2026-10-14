@@ -122,6 +122,44 @@ jest najlepsza w swojej roli i ze profile sa rozne (`VocationTest`).
 Wnioski: Druid jest najslabszy w obrazeniach (rola wsparcia - leczenie w etapie 7); Sorcerer
 cierpi na krysztalowym golemie (80% odpornosci na energie) - zamierzone, trzeba dobrac zywiol.
 
+## Czary, runy i mikstury (etap 7)
+
+Wartosc czaru = `baza + poziom * lf + magia * mf + umiejetnosc * sf`, rzut 85-115%.
+Leczenie mnozone przez `healingFactor` profesji (Druid 1,3, Monk 0,9, Paladin 0,85,
+Sorcerer 0,7); efekty run przez `magicFactor`. Umiejetnosc: Paladin dystans, Monk piesci.
+Trening magii: proby = mana * min(1, magicFactor) (Druid/Sorcerer 1,0, Paladin 0,6, Monk 0,5).
+
+| Czar | Profesje | Poz. | Mana | Odnowienie | Efekt (baza / lf / mf / sf) |
+|---|---|---|---|---|---|
+| Opatrzenie ran | wszystkie | 8 | 20 | 1 s | leczenie 20 / 0,4 / 2,0 |
+| Uzdrowienie | D, S, P | 20 | 60 | 1 s | leczenie 50 / 0,8 / 4,0 |
+| Przyplyw zycia | Druid | 35 | 120 | 1 s | leczenie 130 / 1,4 / 7,0 |
+| Wewnetrzny spokoj | Monk | 12 | 25 | 1 s | leczenie 30 / 0,6 / - / 0,8 |
+| Zar / Iskra | Sorcerer | 8 / 14 | 20 / 30 | 2 s | ogien 15 / energia 20, zasieg 4 |
+| Krag ognia | Sorcerer | 25 | 80 | 4 s | ogien, promien 2 |
+| Lodowy pocisk / Wybuch cierni | Druid | 8 / 14 | 20 / 30 | 2 s | lod / ziemia, zasieg 4 |
+| Mrozna fala | Druid | 30 | 90 | 4 s | lod, promien 2 |
+| Swiety pocisk | Paladin | 8 | 20 | 2 s | swiete, zasieg 4 |
+| Przeszywajacy rzut | Paladin | 20 | 40 | 3 s | fizyczne, sf 1,5 |
+| Swieta fala | Paladin | 30 | 80 | 4 s | swiete, promien 2 |
+| Cios tygrysa | Monk | 8 | 15 | 2 s | fizyczne wrecz, sf 1,2 |
+| Wirujace kopniecie | Monk | 20 | 40 | 4 s | fizyczne, promien 1 |
+| Poswiata | wszystkie | 8 | 20 | 2 s | swiatlo 4 kafelki na 5 min |
+
+Grupy: atak 2 s, leczenie 1 s, wsparcie 2 s, mikstury 1 s (osobne - mozna leczyc sie i atakowac).
+
+| Mikstura / jedzenie | Efekt | Wymagania |
+|---|---|---|
+| Health Potion | 60-90 HP | brak |
+| Mana Potion | 50-80 many | brak |
+| Great Health Potion | 220-300 HP | poziom 50, Paladin / Monk |
+| Great Mana Potion | 140-200 many | poziom 50, Druid / Sorcerer / Paladin |
+| Chleb / mieso / ryba | sytosc 5 / 3 / 4 min (podwojna regeneracja, maks. 20 min) | brak |
+
+Symulacje z botem (`SpellBotSimulationTest`): kazda profesja na poziomie 8 przez 10 minut przy
+wilkach pod Varden - zero smierci, co najmniej 5 zabitych; poziom 8 ze 100 miksturami przeciw
+Grimtoothowi - zawsze przegrywa (boss zadaje do 160 obrazen, wiecej niz mikstury nadrabiaja).
+
 ## Do zrobienia w kolejnych etapach
 
-Koszty many i cooldowny czarow, runy, mikstury - z ponownym uruchomieniem symulacji.
+Krzywe umiejetnosci i fishingu (etap 8), ceny NPC (etap 12), PvP (etap 13).

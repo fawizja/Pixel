@@ -1,0 +1,8 @@
+# przedmiot;hpMin;hpMax;manaMin;manaMax;cooldownMs;sytosc (s)
+health_potion;60;90;0;0;1000;0
+mana_potion;0;0;50;80;1000;0
+great_health_potion;220;300;0;0;1000;0
+great_mana_potion;0;0;140;200;1000;0
+bread;0;0;0;0;0;300
+meat;0;0;0;0;0;180
+fish;0;0;0;0;0;240

@@ -2,12 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.2.0)
+## Podsumowanie (2026-10-14, wersja 0.3.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5, 6 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = commit 301ac0a (CI zielone, APK artefakt `pixel-debug-apk`). 0.2.0 = etap 6.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4 (oba z zielonym CI i APK). 0.3.0 = etap 7.
 
 ## Architektura
 
@@ -29,6 +29,8 @@ shared/   pl.fawizja.pixel.*         czysta Java 17, bez libGDX, testy JUnit 5
   monster/    MonsterType, MonsterRegistry (monsters.csv + loot.csv), SpawnTable, SpawnPoint,
               Monster, MonsterManager (AI + spawny + odradzanie), SpatialGrid, MonsterBehavior/State
   combat/     CombatFormulas, CombatSystem (gracz <-> potwory, smierc, lupy), CombatEvent, DamageType
+  magic/      SpellType/Registry (spells.csv), SpellSystem (czary, runy, mikstury, jedzenie), Cooldowns,
+              ConsumableRegistry, RecipeRegistry, CraftingSystem, CastResult (komunikaty)
   movement/   + Pathfinder (BFS z limitem wezlow)
   game/       GameSession (lokalna petla gry: ruch -> potwory -> walka, teleport), EventLog
 core/     pl.fawizja.pixel.client.*   libGDX
@@ -44,6 +46,7 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.3.0: `./gradlew build` - **OK, 122 testy, 0 bledow**; desktop uruchomiony, zrzuty paska czarow i ksiegi OK.
 - 0.2.0: `./gradlew :shared:test` - **OK, 106 testow, 0 bledow**; `:desktop:installDist` OK.
   Gra uruchomiona pod Xvfb z teleportem do wilkow (0), goblinow (-1) i trolli (-4): potwory
   atakuja, liczby obrazen, paski HP, panel celu, autoloot i exp dzialaja (zrzuty w /mnt/project-files/pixel/screenshots).
@@ -62,16 +65,16 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
   lustra Google przez `~/.gradle/init.d/mirror.gradle` (poza repozytorium). Repo uzywa standardowego mavenCentral().
 - W trybie programowego renderowania (Xvfb) czas klatki bywa wysoki, co moze wlaczyc LIMITED - zgodnie z zalozeniem.
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
-- Jedyne leczenie to regeneracja (mikstury i czary w etapie 7); postac stojaca AFK przy stadzie moze zginac.
+- Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
+- Sytosc i swiatlo z czaru nie sa zapisywane.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
 - Brak NPC, czarow, PvP, serwera.
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 7 - czary, runy, mikstury, crafting** (lista w TODO.md):
-1. `shared/.../magic/`: SpellType + `data/spells.csv` (mana, cooldown, poziom, profesja, zasieg, obszar),
-   czary leczace (Druid najsilniejsze), ataki obszarowe (Sorcerer), strzaly swiete (Paladin), ciosy combo (Monk).
-2. Mikstury HP/MP z cooldownem (uzycie z plecaka), jedzenie (regeneracja).
-3. Runy: blank_rune + mana -> runa (zaklinanie), uzycie runy na cel.
-4. Crafting z materialow z lupow (receptury w pliku danych).
-5. Ponownie uruchomic `CombatSimulationTest` z czarami i miksturami; UI paska czarow.
+**Nastepne zadanie: Etap 8 - fishing i umiejetnosci** (lista w TODO.md):
+1. Fishing: wedka (fishing_rod) + robak (worm) na kafelku wody w zasiegu 3; szansa zalezna od FISHING;
+   lup: fish i rzadkie przedmioty; trening umiejetnosci; brak wody / przynety = komunikat.
+2. Przeglad umiejetnosci: okno postaci (poziom, umiejetnosci z paskami postepu, odpornosc, sytosc).
+3. Ograniczenie treningu na zbyt slabych potworach (bez farmienia umiejetnosci na wilkach przez poziom 100).
+4. Testy: szanse, trening, brak przynety; aktualizacja dokumentacji.

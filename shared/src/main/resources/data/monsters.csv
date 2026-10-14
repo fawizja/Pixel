@@ -8,4 +8,4 @@ goblin_shaman;Goblin Shaman;18;90;70;200;6;20;FIRE;4;2500;1;FIRE:30,ICE:-20;HEAL
 skeleton;Skeleton;22;160;90;200;6;26;PHYSICAL;1;2000;6;DEATH:100,HOLY:-30,EARTH:30;MELEE;6;0;0;0;#e0dcc8;humanoid;underground;Nieumarly straznik kopalni.
 cave_troll;Cave Troll;32;320;220;190;10;40;PHYSICAL;1;2200;10;PHYSICAL:10,FIRE:-20;TANK;5;0;0;0;#5a6a3a;humanoid;underground;Powolny, ale bardzo wytrzymaly.
 crystal_golem;Crystal Golem;45;620;450;170;15;55;ENERGY;2;2400;18;PHYSICAL:25,EARTH:50,ENERGY:80,ICE:-25;MAGIC;5;0;0;0;#7fd8ff;golem;underground;Zywy krysztal razacy energia.
-grimtooth;Grimtooth the Mine King;60;3200;4000;200;25;90;PHYSICAL;1;1800;20;DEATH:50,FIRE:-10;TANK;8;0;400;1;#c8a040;boss;underground;Krol kopalni. Leczy sie raz i wpada w szal ponizej polowy zdrowia.
+grimtooth;Grimtooth the Mine King;60;3200;4000;200;40;160;PHYSICAL;1;1800;20;DEATH:50,FIRE:-10;TANK;8;0;400;1;#c8a040;boss;underground;Krol kopalni. Leczy sie raz i wpada w szal ponizej polowy zdrowia.

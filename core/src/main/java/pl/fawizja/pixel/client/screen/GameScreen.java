@@ -123,6 +123,17 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.SPACE:
                     case Input.Keys.C: onButton("target"); return true;
                     case Input.Keys.V: onButton("defensive"); return true;
+                    case Input.Keys.NUM_1: onButton("spell:0"); return true;
+                    case Input.Keys.NUM_2: onButton("spell:1"); return true;
+                    case Input.Keys.NUM_3: onButton("spell:2"); return true;
+                    case Input.Keys.NUM_4: onButton("spell:3"); return true;
+                    case Input.Keys.Q: onButton("potion_hp"); return true;
+                    case Input.Keys.F: onButton("potion_mp"); return true;
+                    case Input.Keys.K: onButton("book"); return true;
+                    case Input.Keys.ESCAPE:
+                        if (hud.bookOpen()) hud.toggleBook();
+                        else if (hud.bagOpen()) hud.toggleBag();
+                        return true;
                     default: return false;
                 }
             }
@@ -140,6 +151,13 @@ public final class GameScreen extends ScreenAdapter {
             case "diag": hud.toggleDiagnostics(); break;
             case "target": session.cycleTarget(t); break;
             case "defensive": session.toggleDefensive(t); break;
+            case "book": hud.toggleBook(); break;
+            case "potion_hp": session.usePotion("health_potion", t); break;
+            case "potion_mp": session.usePotion("mana_potion", t); break;
+            case "bag_use":
+                session.useSlot(hud.selectedSlot(), t);
+                hud.clearSelection();
+                break;
             case "bag_equip":
                 session.equipFromSlot(hud.selectedSlot(), t);
                 hud.clearSelection();
@@ -149,6 +167,14 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             default:
+                if (id.startsWith("spell:")) {
+                    String key = hud.barSpell(Integer.parseInt(id.substring(6)));
+                    if (key != null) session.castSpell(key, t);
+                } else if (id.startsWith("cast:")) {
+                    session.castSpell(id.substring(5), t);
+                } else if (id.startsWith("craft:")) {
+                    session.craft(id.substring(6), t);
+                }
         }
     }
 
@@ -387,4 +413,5 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     public GameSession session() { return session; }
+    public Hud hud() { return hud; }
 }

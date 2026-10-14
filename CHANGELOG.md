@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0] - 2026-10-14
+
+### Dodano
+- Czary dla 4 profesji: leczenie (Druid najsilniejsze), ataki na cel (ogien, energia, lod, ziemia,
+  swiete, fizyczne), ataki obszarowe, poswiata, przywolanie wloczni, zaklinanie run.
+- Runy glazu, wybuchu ognia i leczenia; mikstury zdrowia i many (takze silne od poziomu 50);
+  jedzenie (chleb, mieso, ryba) podwajajace regeneracje.
+- Crafting: 8 receptur z materialow z lupow (zbroje, miecz, tarcza, wlocznie, puste runy, pochodnie).
+- Trening poziomu magii, czasy odnowienia czarow i grup, komunikaty o bledach (mana, poziom, zasieg...).
+- Klient: pasek czarow z odnowieniem, przyciski HP/MP z licznikiem, ksiega czarow i rzemiosla,
+  przycisk UZYJ w plecaku, skroty 1-4, Q, F, K.
+- 16 nowych testow (lacznie 122), w tym symulacje z botem leczacym sie czarami i miksturami.
+
+### Zmieniono
+- Grimtooth uderza mocniej (40-160): bez tego postac na poziomie 8 mogla go pokonac zapasem mikstur.
+- Potwory trafione z daleka (czar, runa, dystans) od razu ruszaja na gracza.
+
 ## [0.2.0] - 2026-10-14
 
 ### Dodano

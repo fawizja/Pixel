@@ -11,6 +11,13 @@ import pl.fawizja.pixel.economy.Money;
 import pl.fawizja.pixel.inventory.InventoryResult;
 import pl.fawizja.pixel.item.ItemRegistry;
 import pl.fawizja.pixel.item.ItemStack;
+import pl.fawizja.pixel.magic.CastResult;
+import pl.fawizja.pixel.magic.ConsumableRegistry;
+import pl.fawizja.pixel.magic.CraftingSystem;
+import pl.fawizja.pixel.magic.Recipe;
+import pl.fawizja.pixel.magic.RecipeRegistry;
+import pl.fawizja.pixel.magic.SpellRegistry;
+import pl.fawizja.pixel.magic.SpellSystem;
 import pl.fawizja.pixel.movement.MoveResult;
 import pl.fawizja.pixel.movement.MovementSystem;
 import pl.fawizja.pixel.world.Direction;
@@ -35,6 +42,8 @@ public final class GameSession {
     private final MonsterManager monsters;
     private final CombatSystem combat;
     private final MonsterManager.Target playerTarget;
+    private final SpellSystem spells;
+    private final RecipeRegistry recipes;
 
     private Position stepFrom;
     private long stepStartMs;
@@ -50,7 +59,15 @@ public final class GameSession {
 
     public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc, MonsterManager monsters,
                        Random rng, int minLevel) {
+        this(items, world, pc, monsters, rng, minLevel, SpellRegistry.loadDefault(items),
+                ConsumableRegistry.loadDefault(items), RecipeRegistry.loadDefault(items));
+    }
+
+    public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc, MonsterManager monsters,
+                       Random rng, int minLevel, SpellRegistry spellRegistry, ConsumableRegistry consumables,
+                       RecipeRegistry recipes) {
         this.items = items;
+        this.recipes = recipes;
         this.world = world;
         this.pc = pc;
         this.movement = new MovementSystem(world, items.byKey("rope").id());
@@ -62,6 +79,7 @@ public final class GameSession {
         this.monsters = monsters != null ? monsters
                 : new MonsterManager(world, null, Collections.emptyList(), rng);
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
+        this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null);
         this.playerTarget = new MonsterManager.Target() {
             @Override
@@ -74,6 +92,33 @@ public final class GameSession {
 
     public MonsterManager monsters() { return monsters; }
     public CombatSystem combat() { return combat; }
+    public SpellSystem spells() { return spells; }
+    public RecipeRegistry recipes() { return recipes; }
+
+    public CastResult castSpell(String key, long nowMs) {
+        return spells.cast(key, nowMs);
+    }
+
+    /** Uzycie przedmiotu z plecaka (mikstura, jedzenie, runa). */
+    public CastResult useSlot(int slot, long nowMs) {
+        if (slot < 0 || slot >= pc.backpack().size()) return CastResult.MISSING_ITEM;
+        return spells.useItem(slot, nowMs);
+    }
+
+    public CastResult usePotion(String itemKey, long nowMs) {
+        return spells.useFirst(itemKey, nowMs);
+    }
+
+    public CastResult craft(String recipeKey, long nowMs) {
+        Recipe r = recipes.get(recipeKey);
+        CastResult res = CraftingSystem.craft(pc, r);
+        if (res == CastResult.OK) {
+            log.add(nowMs, EventLog.Kind.LOOT, "Wytworzono: " + r.resultCount() + "x " + items.get(r.resultItemId()).name());
+        } else {
+            log.add(nowMs, EventLog.Kind.WARNING, res.message);
+        }
+        return res;
+    }
 
     public PlayerCharacter character() { return pc; }
     public WorldMap world() { return world; }

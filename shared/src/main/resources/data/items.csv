@@ -40,3 +40,9 @@
 56;miner_helmet;Miner Helmet;ARMOR;1;300;HEAD;0;0;3;20;*;2;0;PHYSICAL;#d8b040;Helm gornika z lampka.
 57;grimtooth_crown;Grimtooth Crown;ARMOR;1;5000;HEAD;0;0;5;40;*;0;0;PHYSICAL;#e8c040;Korona Krola Kopalni.
 58;steel_spear;Steel Spear;WEAPON;1;800;WEAPON;34;0;0;25;PALADIN;0;4;PHYSICAL;#d8d8e0;Wywazona stalowa wlocznia, wraca do reki.
+59;great_health_potion;Great Health Potion;POTION;100;190;NONE;0;0;0;50;PALADIN,MONK;0;0;PHYSICAL;#a8102a;Silna mikstura zdrowia dla wojownikow od poziomu 50.
+60;great_mana_potion;Great Mana Potion;POTION;100;120;NONE;0;0;0;50;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#2a2aa8;Silna mikstura many od poziomu 50.
+61;fireburst_rune;Fireburst Rune;RUNE;100;45;NONE;0;0;0;0;*;0;0;FIRE;#ff5a20;Runa: wybuch ognia wokol celu (promien 1).
+62;boulder_rune;Boulder Rune;RUNE;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#9a8a70;Runa: ciska glazem w cel.
+63;healing_rune;Healing Rune;RUNE;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#60e080;Runa: leczy uzytkownika.
+64;fish;Fish;FOOD;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa8c8;Swieza ryba z jeziora.

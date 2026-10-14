@@ -1,0 +1,24 @@
+# klucz;nazwa;profesje(*);poziom;magia min;mana;cooldown ms;grupa;rodzaj;typ obrazen;baza;x poziom;x magia;x umiejetnosc;zasieg;promien;tworzy;zuzywa;ilosc;opis
+mend;Opatrzenie ran;*;8;0;20;1000;HEALING;HEAL_SELF;PHYSICAL;20;0.4;2.0;0;0;0;;;0;Lekkie leczenie dostepne dla kazdego.
+greater_mend;Uzdrowienie;DRUID,SORCERER,PALADIN;20;0;60;1000;HEALING;HEAL_SELF;PHYSICAL;50;0.8;4.0;0;0;0;;;0;Mocniejsze leczenie.
+vital_surge;Przyplyw zycia;DRUID;35;0;120;1000;HEALING;HEAL_SELF;PHYSICAL;130;1.4;7.0;0;0;0;;;0;Najsilniejsze leczenie - specjalnosc druida.
+inner_calm;Wewnetrzny spokoj;MONK;12;0;25;1000;HEALING;HEAL_SELF;PHYSICAL;30;0.6;0;0.8;0;0;;;0;Leczenie mnicha zalezne od walki wrecz.
+ember_bolt;Zar;SORCERER;8;0;20;2000;ATTACK;ATTACK_TARGET;FIRE;15;0.3;2.5;0;4;0;;;0;Pocisk ognia w cel.
+spark_bolt;Iskra;SORCERER;14;0;30;2000;ATTACK;ATTACK_TARGET;ENERGY;20;0.35;2.8;0;4;0;;;0;Pocisk energii w cel.
+flame_ring;Krag ognia;SORCERER;25;0;80;4000;ATTACK;ATTACK_AREA;FIRE;30;0.4;3.0;0;0;2;;;0;Ogien wokol czarodzieja (promien 2).
+frost_bolt;Lodowy pocisk;DRUID;8;0;20;2000;ATTACK;ATTACK_TARGET;ICE;14;0.3;2.3;0;4;0;;;0;Pocisk lodu w cel.
+thorn_burst;Wybuch cierni;DRUID;14;0;30;2000;ATTACK;ATTACK_TARGET;EARTH;18;0.32;2.5;0;4;0;;;0;Kolce ziemi w cel.
+frost_nova;Mrozna fala;DRUID;30;0;90;4000;ATTACK;ATTACK_AREA;ICE;26;0.35;2.6;0;0;2;;;0;Mroz wokol druida (promien 2).
+holy_bolt;Swiety pocisk;PALADIN;8;0;20;2000;ATTACK;ATTACK_TARGET;HOLY;12;0.3;1.5;0.5;4;0;;;0;Swiete swiatlo w cel; mocne na nieumarlych.
+sacred_nova;Swieta fala;PALADIN;30;0;80;4000;ATTACK;ATTACK_AREA;HOLY;25;0.35;1.5;0.6;0;2;;;0;Swiete swiatlo wokol paladyna (promien 2).
+piercing_throw;Przeszywajacy rzut;PALADIN;20;0;40;3000;ATTACK;ATTACK_TARGET;PHYSICAL;20;0.4;0;1.5;4;0;;;0;Silny rzut zalezny od umiejetnosci dystansu.
+tiger_strike;Cios tygrysa;MONK;8;0;15;2000;ATTACK;ATTACK_TARGET;PHYSICAL;15;0.3;0;1.2;1;0;;;0;Silny cios wrecz.
+whirlwind_kick;Wirujace kopniecie;MONK;20;0;40;4000;ATTACK;ATTACK_AREA;PHYSICAL;25;0.4;0;1.4;0;1;;;0;Kopniecie trafia wszystko obok mnicha.
+glow;Poswiata;*;8;0;20;2000;SUPPORT;LIGHT;PHYSICAL;0;0;0;0;0;4;;;0;Swiatlo wokol postaci na 5 minut.
+conjure_spears;Przywolanie wloczni;PALADIN;10;0;40;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;spear;;5;Tworzy 5 wloczni.
+enchant_boulder;Zaklecie glazu;PALADIN,DRUID,SORCERER;12;2;50;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;boulder_rune;blank_rune;2;Zamienia pusta rune w 2 runy glazu.
+enchant_fireburst;Zaklecie wybuchu;DRUID,SORCERER;15;4;80;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;fireburst_rune;blank_rune;3;Zamienia pusta rune w 3 runy wybuchu ognia.
+enchant_healing;Zaklecie leczenia;DRUID;20;6;100;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;healing_rune;blank_rune;1;Zamienia pusta rune w rune leczenia.
+boulder_rune;Glaz (runa);*;8;2;0;2000;ATTACK;RUNE_TARGET;PHYSICAL;22;0.3;2.0;0;5;0;;;0;Efekt runy glazu.
+fireburst_rune;Wybuch ognia (runa);*;8;4;0;2000;ATTACK;RUNE_AREA;FIRE;20;0.35;2.4;0;5;1;;;0;Efekt runy wybuchu.
+healing_rune;Leczenie (runa);*;8;6;0;1000;HEALING;RUNE_HEAL;PHYSICAL;70;1.0;4.0;0;0;0;;;0;Efekt runy leczenia.

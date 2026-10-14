@@ -4,7 +4,7 @@
 
 > Stan: **wczesna wersja lokalna (offline)**. Jest grywalny fragment swiata (miasto Varden z wieza
 > i kopalnia, pietra +5..-5), postac, profesje, plecak, monety, bank (logika), zapis oraz
-> potwory z AI, walka, smierc, doswiadczenie i lupy.
+> potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
 > To jeszcze **nie jest MMORPG**: serwer i synchronizacja sieciowa sa zaplanowane w etapie 14
 > (patrz [TODO.md](TODO.md)).
 
@@ -52,6 +52,10 @@ jako artefakt `pixel-debug-apk`.
 | Diagnostyka | `i` w prawym gornym rogu | F3 |
 | Nastepny cel (atak automatyczny) | CEL albo dotkniecie potwora | Spacja / C |
 | Postawa obronna (zielony = wlaczona) | TARCZA | V |
+| Czary z paska (leczenie, atak, obszar, swiatlo) | 4 male przyciski na dole | 1-4 |
+| Mikstura zdrowia / many | HP / MP | Q / F |
+| Ksiega czarow i rzemiosla | KSIEGA | K |
+| Uzycie przedmiotu (mikstura, jedzenie, runa na cel) | PLECAK -> zaznacz -> UZYJ | - |
 
 W plecaku: dotknij przedmiotu, aby go zaznaczyc (statystyki), potem dotknij innego slotu, aby
 przeniesc / polaczyc / zamienic, albo uzyj ZALOZ / WYRZUC.

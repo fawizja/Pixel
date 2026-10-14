@@ -31,6 +31,13 @@ public final class PlayerCharacter {
     private boolean torchLit;
     private boolean defensive;
     private long regenAccumulatorMs;
+    /** Pozostaly czas sytosci (podwojna regeneracja) i swiatla z czaru - stan ulotny. */
+    private long fedMs;
+    private long lightBuffMs;
+    private int lightBuffRadius;
+
+    /** Maksymalna sytosc: 20 minut. */
+    public static final long MAX_FED_MS = 20 * 60_000L;
 
     public PlayerCharacter(String id, String name, Vocation vocation, int level, Position position,
                            ItemRegistry registry, long bankBalance, String homeTown) {
@@ -151,14 +158,33 @@ public final class PlayerCharacter {
     /** Regeneracja zalezna od czasu gry (wywolywana z petli symulacji). */
     public void tickRegeneration(long deltaMs) {
         if (isDead() || deltaMs <= 0) return;
+        lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
         regenAccumulatorMs += deltaMs;
         long tick = Balance.REGEN_TICK_SECONDS * 1000L;
         while (regenAccumulatorMs >= tick) {
             regenAccumulatorMs -= tick;
-            heal(Balance.healthRegenPerTick(vocation, level));
-            restoreMana(Balance.manaRegenPerTick(vocation, level));
+            int mult = fedMs > 0 ? 2 : 1;
+            heal(Balance.healthRegenPerTick(vocation, level) * mult);
+            restoreMana(Balance.manaRegenPerTick(vocation, level) * mult);
+            fedMs = Math.max(0, fedMs - tick);
         }
     }
+
+    public long fedMs() { return fedMs; }
+
+    /** Jedzenie: dodaje sytosc; false, gdy postac jest najedzona (nic nie zuzyto). */
+    public boolean feed(long ms) {
+        if (ms <= 0 || fedMs + ms > MAX_FED_MS) return false;
+        fedMs += ms;
+        return true;
+    }
+
+    public void addLightBuff(int radius, long ms) {
+        lightBuffRadius = Math.max(0, radius);
+        lightBuffMs = Math.max(lightBuffMs, ms);
+    }
+
+    public int lightBuffRadius() { return lightBuffMs > 0 ? lightBuffRadius : 0; }
 
     /** Kara za smierc: utrata doswiadczenia (poziom moze spasc, ale nie ponizej minLevel). */
     public void applyDeathPenalty(int minLevel) {

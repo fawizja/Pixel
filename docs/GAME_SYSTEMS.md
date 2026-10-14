@@ -97,7 +97,20 @@ przy pauzie, utracie fokusu i zamknieciu.
 - Smierc gracza: -5% exp (nie ponizej poziomu startowego), pelne HP/MP, swiatynia Varden.
 - Zdarzenia walki (`CombatEvent`) -> liczby obrazen, leczenia, awansu w kliencie.
 
+## Czary, runy, mikstury, crafting (Z logika, C UI)
+
+- `magic/SpellRegistry` (spells.csv), `ConsumableRegistry` (consumables.csv), `RecipeRegistry` (recipes.csv).
+- `SpellSystem`: kazda akcja jest najpierw sprawdzana (profesja, poziom, magia, mana, odnowienie, cel,
+  zasieg, linia wzroku, strefa ochronna, przedmioty, miejsce), a dopiero potem pobiera koszt -
+  nieudana proba nic nie kosztuje. Ataki przechodza przez `CombatSystem.damageMonster`
+  (odpornosci, smierc, lup, exp).
+- Runy: przedmiot RUNE o kluczu takim jak efekt w spells.csv (`RUNE_TARGET`, `RUNE_AREA`, `RUNE_HEAL`).
+- `CraftingSystem` i zaklinanie run dzialaja na kopii plecaka (atomowo).
+- Sytosc i swiatlo z czaru to stan ulotny (nie zapisywany) - po wczytaniu gry trzeba zjesc ponownie.
+- UI: pasek wybierany automatycznie (najlepsze leczenie, atak, obszar, swiatlo), ksiega z wszystkimi
+  czarami profesji (szare = jeszcze niedostepne) i recepturami (szare = brak skladnikow).
+
 ## Planowane
 
-Czary, runy, mikstury, fishing, NPC, zadania, handel, bank w UI, PvP,
+ fishing, NPC, zadania, handel, bank w UI, PvP,
 serwer i synchronizacja - patrz [TODO.md](../TODO.md).

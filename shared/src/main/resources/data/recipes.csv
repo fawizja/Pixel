@@ -1,0 +1,9 @@
+# klucz;wynik;ilosc;skladniki (przedmiot:ilosc,...);koszt gp;poziom min;opis
+leather_helmet;leather_helmet;1;wolf_pelt:2;0;8;Helm z dwoch wilczych futer.
+leather_armor;leather_armor;1;wolf_pelt:4,spider_silk:1;0;8;Zbroja z futer zszyta pajecza nicia.
+studded_armor;studded_armor;1;leather_armor:1,iron_ore:3;50;12;Skorzana zbroja nabita cwiekami z rudy.
+iron_sword;iron_sword;1;iron_ore:5;100;15;Miecz wykuty z rudy z kopalni Varden.
+bone_shield;bone_shield;1;wooden_shield:1,bone:8;0;14;Drewniana tarcza wzmocniona koscmi.
+spears;spear;5;iron_ore:1;10;8;Piec wloczni do rzucania.
+blank_runes;blank_rune;2;crystal_shard:1;0;8;Dwie puste runy z odlamka krysztalu.
+torches;torch;3;meat:1;5;8;Pochodnie nasaczone tluszczem.

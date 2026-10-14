@@ -50,9 +50,21 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [ ] Mikstury i czary leczace (etap 7) - teraz jedyne leczenie to regeneracja
 - [ ] Dzwiek, animacja ataku, cialo potwora z lupem do przeszukania
 
-## Etap 7 - Czary, runy, mikstury, crafting  <- NASTEPNY
+## Etap 7 - Czary, runy, mikstury, crafting
+- [x] 20 czarow i 3 efekty run (data/spells.csv): leczenie, ataki na cel i obszarowe, swiatlo, przywolanie wloczni, zaklinanie run
+- [x] Mana, poziom, poziom magii, czasy odnowienia czaru i grupy (atak / leczenie / wsparcie / mikstury)
+- [x] Trening poziomu magii wydawana mana (magowie szybciej)
+- [x] Runy: pusta runa + czar -> runy; uzycie na cel lub na siebie, wymagany poziom magii
+- [x] Mikstury (data/consumables.csv) z wymaganiami profesji i poziomu, bez marnowania przy pelnym HP/MP
+- [x] Jedzenie: sytosc do 20 min, podwojna regeneracja
+- [x] Crafting (data/recipes.csv): 8 receptur, atomowo, koszt w gp
+- [x] Klient: automatyczny pasek czarow z odnowieniem, przyciski HP/MP, ksiega czarow i rzemiosla, UZYJ w plecaku
+- [x] Symulacje z botem leczacym: 10 min przy wilkach bez smierci; 100 mikstur nie wystarcza na bossa na poziomie 8
+- [ ] Efekty graficzne czarow (pociski, wybuchy), dzwieki
+- [ ] Wlasny uklad paska czarow (teraz automatyczny)
 
-## Etap 8 - Fishing i umiejetnosci
+
+## Etap 8 - Fishing i umiejetnosci  <- NASTEPNY
 ## Etap 9 - Miasta (max 4), biomy, expowiska
 - [x] Varden: swiatynia, bank, sklepy, domy, wieza, kopalnia, jezioro, pola
 - [ ] NPC i uslugi Varden, Frostholm, Selvaran, Qasirah, biomy snieg / rownik / pustynia

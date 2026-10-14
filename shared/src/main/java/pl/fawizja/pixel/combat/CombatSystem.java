@@ -99,10 +99,26 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (pc.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
         int dealt = target.damage(dmg);
+        monsters.provoke(target);
         pc.skills().addTries(ap.skill(), 1);
         push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
         if (target.isDead()) onMonsterDeath(target, now);
     }
+
+    /** Obrazenia z czaru lub runy: odpornosci, zdarzenie, prowokacja, smierc. Zwraca zadane HP. */
+    public int damageMonster(Monster m, int raw, DamageType type, long now) {
+        if (m.isDead()) return 0;
+        int dmg = CombatFormulas.mitigateOnMonster(m.type(), raw, type, rng);
+        int dealt = m.damage(dmg);
+        push(new CombatEvent(now, m.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
+        monsters.provoke(m);
+        if (target == null) target = m;
+        if (m.isDead()) onMonsterDeath(m, now);
+        return dealt;
+    }
+
+    /** Zdarzenie do wyswietlenia (leczenie z czaru, mikstury). */
+    public void addEvent(CombatEvent e) { push(e); }
 
     private boolean inReach(Monster m, int range) {
         return m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= range

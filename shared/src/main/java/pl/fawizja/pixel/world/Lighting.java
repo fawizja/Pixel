@@ -25,10 +25,11 @@ public final class Lighting {
 
     /** Promien swiatla postaci: zapalona pochodnia albo podstawowa poswiata. */
     public static float playerLightRadius(PlayerCharacter pc, ItemRegistry items) {
+        float r = Math.max(BASE_PLAYER_GLOW, pc.lightBuffRadius());
         int torch = items.byKey("torch").id();
         if (pc.isTorchLit() && pc.backpack().count(torch) > 0) {
-            return Math.max(BASE_PLAYER_GLOW, items.get(torch).lightRadius());
+            r = Math.max(r, items.get(torch).lightRadius());
         }
-        return BASE_PLAYER_GLOW;
+        return r;
     }
 }

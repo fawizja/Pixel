@@ -17,6 +17,12 @@ import pl.fawizja.pixel.client.render.TileArt;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
 import pl.fawizja.pixel.monster.Monster;
+import pl.fawizja.pixel.character.Skill;
+import pl.fawizja.pixel.magic.CastResult;
+import pl.fawizja.pixel.magic.CraftingSystem;
+import pl.fawizja.pixel.magic.Recipe;
+import pl.fawizja.pixel.magic.SpellKind;
+import pl.fawizja.pixel.magic.SpellType;
 import pl.fawizja.pixel.item.EquipSlot;
 import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.item.ItemType;
@@ -47,6 +53,32 @@ public final class Hud {
     private final HudButton diag = new HudButton("diag", "i");
     private final HudButton target = new HudButton("target", "CEL");
     private final HudButton defensive = new HudButton("defensive", "TARCZA");
+    private final HudButton book = new HudButton("book", "KSIEGA");
+    private final HudButton potionHp = new HudButton("potion_hp", "HP");
+    private final HudButton potionMp = new HudButton("potion_mp", "MP");
+    private final HudButton[] spellButtons = new HudButton[4];
+    private final String[] barSpells = new String[4];
+
+    private boolean menuOpen;
+    private float menuX, menuY, menuW, menuH, rowH;
+    private final List<MenuRow> menuRows = new ArrayList<>();
+    private final HudButton menuClose = new HudButton("menu_close", "X");
+
+    /** Wiersz ksiegi: czar albo receptura. */
+    private static final class MenuRow {
+        final String action;
+        final String label;
+        final String detail;
+        final boolean enabled;
+        float x, y, w, h;
+
+        MenuRow(String action, String label, String detail, boolean enabled) {
+            this.action = action;
+            this.label = label;
+            this.detail = detail;
+            this.enabled = enabled;
+        }
+    }
     private final Vector2 tmp = new Vector2();
     private float uiScale = 1f;
     private float w;
@@ -57,6 +89,7 @@ public final class Hud {
     private float bagX, bagY, slotSize;
     private final HudButton bagEquip = new HudButton("bag_equip", "ZALOZ");
     private final HudButton bagDrop = new HudButton("bag_drop", "WYRZUC");
+    private final HudButton bagUse = new HudButton("bag_use", "UZYJ");
     private final HudButton bagClose = new HudButton("bag_close", "X");
     private boolean diagnosticsOpen;
 
@@ -71,6 +104,13 @@ public final class Hud {
         buttons.add(diag);
         buttons.add(target);
         buttons.add(defensive);
+        buttons.add(book);
+        buttons.add(potionHp);
+        buttons.add(potionMp);
+        for (int i = 0; i < spellButtons.length; i++) {
+            spellButtons[i] = new HudButton("spell:" + i, "");
+            buttons.add(spellButtons[i]);
+        }
     }
 
     public void resize(int width, int height) {
@@ -93,19 +133,112 @@ public final class Hud {
         pick.x = bx - br * 4.8f; pick.y = by; pick.r = br;
         target.x = bx - br * 4.8f; target.y = by + br * 2.4f; target.r = br;
         defensive.x = bx; defensive.y = by + br * 4.8f; defensive.r = br;
-        diag.x = w - margin - 14; diag.y = h - margin - 14; diag.r = 14;
+        book.x = bx - br * 2.4f; book.y = by + br * 4.8f; book.r = br;
+        // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
+        float sr = Math.max(20, br * 0.72f);
+        float sx0 = margin + jr * 2.6f + sr + 12;
+        float sy = margin + sr;
+        for (int i = 0; i < spellButtons.length; i++) {
+            spellButtons[i].x = sx0 + i * sr * 2.3f;
+            spellButtons[i].y = sy;
+            spellButtons[i].r = sr;
+        }
+        potionHp.x = sx0 + 4 * sr * 2.3f; potionHp.y = sy; potionHp.r = sr;
+        potionMp.x = sx0 + 5 * sr * 2.3f; potionMp.y = sy; potionMp.r = sr;
+        if (potionMp.x + sr > pick.x - br - 6) {
+            // waski ekran: pasek w drugim rzedzie nad joystickiem
+            float sy2 = margin + jr * 2.6f + sr + 8;
+            for (int i = 0; i < spellButtons.length; i++) { spellButtons[i].x = margin + sr + i * sr * 2.3f; spellButtons[i].y = sy2; }
+            potionHp.x = margin + sr + 4 * sr * 2.3f; potionHp.y = sy2;
+            potionMp.x = margin + sr + 5 * sr * 2.3f; potionMp.y = sy2;
+        }
+        menuW = Math.min(w - 40, 620);
+        menuH = Math.min(h - 40, 400);
+        menuX = (w - menuW) / 2f;
+        menuY = (h - menuH) / 2f;
+        rowH = Math.max(26, Math.min(36, (menuH - 50) / 10f));
+        menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 16; menuClose.r = 14;        diag.x = w - margin - 14; diag.y = h - margin - 14; diag.r = 14;
         slotSize = Math.min(44, Math.min(w, h) / 9f);
         bagX = w / 2f - slotSize * 2.5f;
         bagY = h / 2f - slotSize * 2f;
         float bbr = slotSize * 0.55f;
         bagEquip.x = bagX + slotSize * 1.0f; bagEquip.y = bagY - bbr * 1.4f; bagEquip.r = bbr;
         bagDrop.x = bagX + slotSize * 4.0f; bagDrop.y = bagY - bbr * 1.4f; bagDrop.r = bbr;
+        bagUse.x = bagX + slotSize * 2.5f; bagUse.y = bagY - bbr * 1.4f; bagUse.r = bbr;
         bagClose.x = bagX + slotSize * 5f + 4; bagClose.y = bagY + slotSize * 4f + 18; bagClose.r = 14;
     }
 
     public VirtualJoystick joystick() { return joystick; }
     public boolean bagOpen() { return bagOpen; }
-    public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; }
+    public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
+    public void toggleBook() { menuOpen = !menuOpen; if (menuOpen) bagOpen = false; }
+    public boolean bookOpen() { return menuOpen; }
+
+    /** Klucz czaru na pasku (0..3) albo null. */
+    public String barSpell(int i) { return i >= 0 && i < barSpells.length ? barSpells[i] : null; }
+
+    /**
+     * Automatyczny pasek: najlepsze leczenie, najlepszy atak na cel, atak obszarowy (lub drugi atak),
+     * poswiata. Gracz nie musi niczego ustawiac na telefonie.
+     */
+    public void updateBar(GameSession session) {
+        List<SpellType> known = session.spells().knownSpells();
+        SpellType heal = null, attack = null, attack2 = null, area = null, extra = null;
+        for (SpellType sp : known) {
+            switch (sp.kind()) {
+                case HEAL_SELF: heal = sp; break;
+                case ATTACK_TARGET: attack2 = attack; attack = sp; break;
+                case ATTACK_AREA: area = sp; break;
+                case LIGHT: extra = sp; break;
+                default:
+            }
+        }
+        SpellType[] bar = {heal, attack, area != null ? area : attack2, extra};
+        for (int i = 0; i < 4; i++) {
+            barSpells[i] = bar[i] == null ? null : bar[i].key();
+            spellButtons[i].visible = bar[i] != null;
+            spellButtons[i].label = bar[i] == null ? "" : shortName(bar[i].name());
+        }
+    }
+
+    private static String shortName(String name) {
+        String first = name.split(" ")[0];
+        return first.length() > 7 ? first.substring(0, 6) + "." : first;
+    }
+
+    private void rebuildMenu(GameSession session) {
+        menuRows.clear();
+        PlayerCharacter pc = session.character();
+        for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
+            boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
+            String detail = sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
+            menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
+        }
+        for (Recipe rc : session.recipes().all()) {
+            StringBuilder d = new StringBuilder();
+            for (java.util.Map.Entry<Integer, Integer> e : rc.ingredients().entrySet()) {
+                if (d.length() > 0) d.append(", ");
+                d.append(e.getValue()).append("x ").append(session.items().get(e.getKey()).name());
+            }
+            if (rc.goldCost() > 0) d.append(", ").append(rc.goldCost()).append(" gp");
+            boolean ok = CraftingSystem.canCraft(pc, rc) == CastResult.OK;
+            menuRows.add(new MenuRow("craft:" + rc.key(),
+                    rc.resultCount() + "x " + session.items().get(rc.resultItemId()).name(), d.toString(), ok));
+        }
+        // dwie kolumny: czary po lewej, receptury po prawej
+        float colW = (menuW - 30) / 2f;
+        int spellsCount = 0;
+        for (MenuRow row : menuRows) if (row.action.startsWith("cast:")) spellsCount++;
+        int li = 0, ri = 0;
+        for (MenuRow row : menuRows) {
+            boolean left = row.action.startsWith("cast:");
+            int idx = left ? li++ : ri++;
+            row.x = menuX + 10 + (left ? 0 : colW + 10);
+            row.y = menuY + menuH - 40 - (idx + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+        }
+    }
     public void toggleDiagnostics() { diagnosticsOpen = !diagnosticsOpen; }
     public boolean diagnosticsOpen() { return diagnosticsOpen; }
     public int selectedSlot() { return selectedSlot; }
@@ -120,10 +253,22 @@ public final class Hud {
     /** Zwraca true, jesli dotyk zostal obsluzony przez interfejs. */
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
+        if (menuOpen) {
+            if (menuClose.hit(p.x, p.y)) { menuOpen = false; return true; }
+            rebuildMenu(session);
+            for (MenuRow row : menuRows) {
+                if (p.x >= row.x && p.x <= row.x + row.w && p.y >= row.y && p.y <= row.y + row.h) {
+                    actions.onButton(row.action);
+                    return true;
+                }
+            }
+            if (p.x >= menuX && p.x <= menuX + menuW && p.y >= menuY && p.y <= menuY + menuH) return true;
+        }
         if (bagOpen) {
             if (bagClose.hit(p.x, p.y)) { toggleBag(); return true; }
             if (selectedSlot >= 0 && bagEquip.hit(p.x, p.y)) { actions.onButton("bag_equip"); return true; }
             if (selectedSlot >= 0 && bagDrop.hit(p.x, p.y)) { actions.onButton("bag_drop"); return true; }
+            if (selectedSlot >= 0 && bagUse.hit(p.x, p.y)) { actions.onButton("bag_use"); return true; }
             int slot = slotAt(p.x, p.y);
             if (slot >= 0) {
                 if (selectedSlot < 0) {
@@ -178,6 +323,12 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
+        book.active = menuOpen;
+        updateBar(session);
+        int hpCount = pc.backpack().count(session.items().byKey("health_potion").id());
+        int mpCount = pc.backpack().count(session.items().byKey("mana_potion").id());
+        potionHp.label = "HP " + hpCount;
+        potionMp.label = "MP " + mpCount;
         Monster tgt = session.combat().target();
         target.active = tgt != null;
 
@@ -204,6 +355,24 @@ public final class Hud {
             shapes.setColor(b.active ? new Color(0.15f, 0.7f, 0.25f, 0.85f) : new Color(0.08f, 0.08f, 0.1f, 0.6f));
             shapes.circle(b.x, b.y, b.r, 32);
         }
+        for (int i = 0; i < spellButtons.length; i++) {
+            HudButton b = spellButtons[i];
+            if (!b.visible || barSpells[i] == null) continue;
+            SpellType sp = session.spells().registry().get(barSpells[i]);
+            shapes.setColor(sp.kind() == SpellKind.HEAL_SELF ? new Color(0.2f, 0.6f, 0.3f, 0.55f)
+                    : sp.kind().isOffensive() ? new Color(0.65f, 0.2f, 0.15f, 0.55f) : new Color(0.3f, 0.3f, 0.6f, 0.55f));
+            shapes.circle(b.x, b.y, b.r * 0.92f, 28);
+            long rem = session.spells().cooldowns().remaining(sp, serverTimeMs);
+            if (rem > 0) {
+                float frac = Math.min(1f, rem / (float) Math.max(sp.cooldownMs(), sp.group().groupCooldownMs));
+                shapes.setColor(0, 0, 0, 0.6f);
+                shapes.arc(b.x, b.y, b.r * 0.92f, 90, 360 * frac, 28);
+            }
+            if (pc.mana() < sp.mana()) {
+                shapes.setColor(0.1f, 0.1f, 0.4f, 0.55f);
+                shapes.circle(b.x, b.y, b.r * 0.92f, 28);
+            }
+        }
 
         if (tgt != null) {
             float tw = Math.min(200, w * 0.36f);
@@ -212,6 +381,17 @@ public final class Hud {
             bar(shapes, w / 2f - tw / 2f, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
         }
         if (bagOpen) drawBagBackground(shapes, session);
+        if (menuOpen) {
+            rebuildMenu(session);
+            shapes.setColor(0.08f, 0.07f, 0.1f, 0.92f);
+            shapes.rect(menuX, menuY, menuW, menuH);
+            for (MenuRow row : menuRows) {
+                shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
+                shapes.rect(row.x, row.y, row.w, row.h);
+            }
+            shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
+            shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
+        }
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.6f);
             shapes.rect(w - 250, h - 210, 238, 170);
@@ -243,12 +423,30 @@ public final class Hud {
 
         for (HudButton b : buttons) {
             if (!b.visible) continue;
+            layout.setText(font, b.label);
+            float fit = layout.width > b.r * 1.8f ? b.r * 1.8f / layout.width : 1f;
+            font.getData().setScale(fit);
             centered(batch, b.label, b.x, b.y);
+            font.getData().setScale(1f);
         }
         if (tgt != null) {
             centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", w / 2f, h - 16);
         }
         if (bagOpen) drawBagContents(batch, session);
+        if (menuOpen) {
+            text(batch, "Czary (dotknij, aby rzucic)", menuX + 10, menuY + menuH - 14);
+            text(batch, "Rzemioslo (dotknij, aby wytworzyc)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+            centered(batch, "X", menuClose.x, menuClose.y);
+            for (MenuRow row : menuRows) {
+                font.setColor(row.enabled ? Color.WHITE : Color.GRAY);
+                text(batch, row.label, row.x + 4, row.y + row.h - 3);
+                font.getData().setScale(0.8f);
+                font.setColor(row.enabled ? new Color(0.8f, 0.85f, 0.7f, 1f) : Color.GRAY);
+                text(batch, row.detail, row.x + 4, row.y + row.h * 0.45f);
+                font.getData().setScale(1f);
+            }
+            font.setColor(Color.WHITE);
+        }
         if (diagnosticsOpen && diagInfo != null) {
             float dy = h - 50;
             for (String line : diagInfo.lines()) {
@@ -271,7 +469,7 @@ public final class Hud {
             shapes.rect(sx + 4, sy + 4, slotSize - 8, slotSize - 8);
         }
         if (selectedSlot >= 0) {
-            for (HudButton b : new HudButton[] {bagEquip, bagDrop}) {
+            for (HudButton b : new HudButton[] {bagEquip, bagDrop, bagUse}) {
                 shapes.setColor(0.25f, 0.45f, 0.3f, 0.95f);
                 shapes.rect(b.x - b.r * 1.3f, b.y - b.r * 0.6f, b.r * 2.6f, b.r * 1.2f);
             }
@@ -304,6 +502,7 @@ public final class Hud {
                 text(batch, stats, bagX, bagY - 12);
                 if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
+                centered(batch, bagUse.label, bagUse.x, bagUse.y);
             }
         }
     }
