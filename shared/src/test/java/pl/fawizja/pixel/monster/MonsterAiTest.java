@@ -168,4 +168,27 @@ class MonsterAiTest {
         skel.setNight(true);
         assertFalse(skel.nightBonus(skel.monsters().get(0)), "no night underground");
     }
+
+    @Test
+    void withManyPlayersMonsterHuntsTheNearestAndIsUpdatedOnce() {
+        MonsterManager mm = single("boar", new Position(42, 6, 0), 0);
+        Monster boar = mm.monsters().get(0);
+        Dummy near = new Dummy(new Position(45, 6, 0));
+        Dummy far = new Dummy(new Position(48, 6, 0));
+        MonsterAiTest.Dummy[] both = {near, far};
+        java.util.List<Dummy> targets = java.util.Arrays.asList(both);
+        int[] attacksOn = new int[2];
+        MonsterManager.AttackHandler h = new MonsterManager.AttackHandler() {
+            public void monsterAttacks(Monster m, long now) { attacksOn[m.target() == near ? 0 : 1]++; }
+            public void monsterHeals(Monster a, Monster b, int amount, long now) {}
+        };
+        for (long t = 0; t < 20_000; t += 50) mm.update(t, targets, h);
+        assertSame(near, boar.target());
+        assertTrue(attacksOn[0] >= 5 && attacksOn[1] == 0, "attacks " + attacksOn[0] + "/" + attacksOn[1]);
+        // gracz bliski chowa sie w miescie: dzik przelacza sie na drugiego
+        near.alive = false;
+        for (long t = 20_000; t < 40_000; t += 50) mm.update(t, targets, h);
+        assertSame(far, boar.target());
+        assertTrue(attacksOn[1] > 0, "switched to the other player");
+    }
 }

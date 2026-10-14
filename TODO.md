@@ -105,6 +105,11 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [ ] Dialogi slowami kluczowymi, zadania wieloetapowe, nagrody przedmiotami
 ## Etap 13 - PvP i reguly serwerowe  <- NASTEPNY
 ## Etap 14 - Serwer i synchronizacja MMORPG
+- [x] Modul `server` (TCP, protokol tekstowy), wspolny swiat, wielu graczy, zapis postaci na serwerze
+- [x] Potwory wybieraja najblizszego gracza; atak trafia do sesji tego gracza
+- [x] Testy przez prawdziwe polaczenia TCP (widocznosc, ruch, czat, podwojne logowanie, wspolne potwory)
+- [ ] Tryb online w kliencie libGDX (rysowanie innych graczy i stanu z serwera)
+- [ ] Konta z haslem (hash, bez sekretow w repo), szyfrowanie (TLS) przed publicznym serwerem
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

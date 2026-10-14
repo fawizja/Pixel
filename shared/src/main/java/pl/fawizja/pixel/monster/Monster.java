@@ -19,6 +19,7 @@ public final class Monster {
     private boolean healedOnce;
     private boolean cornered;
     private Direction facing = Direction.SOUTH;
+    private MonsterManager.Target target;
 
     public Monster(int id, MonsterType type, SpawnPoint spawn, Position position) {
         this.id = id;
@@ -42,6 +43,10 @@ public final class Monster {
     void markHealed() { healedOnce = true; }
     /** Osaczony potwor przestaje uciekac i walczy do konca (do powrotu na spawn). */
     public boolean cornered() { return cornered; }
+
+    /** Gracz, na ktorego potwor teraz poluje (wielu graczy: serwer kieruje atak do jego sesji). */
+    public MonsterManager.Target target() { return target; }
+    void setTarget(MonsterManager.Target t) { target = t; }
     void setCornered(boolean c) { cornered = c; }
 
     void setState(MonsterState s) { state = s; }

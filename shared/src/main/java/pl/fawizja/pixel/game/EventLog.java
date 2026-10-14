@@ -13,6 +13,7 @@ public final class EventLog {
 
     private final int capacity;
     private final ArrayDeque<Entry> entries = new ArrayDeque<>();
+    private long total;
 
     public EventLog(int capacity) {
         this.capacity = capacity;
@@ -20,6 +21,7 @@ public final class EventLog {
 
     public void add(long timeMs, Kind kind, String text) {
         entries.addLast(new Entry(timeMs, kind, text));
+        total++;
         while (entries.size() > capacity) entries.removeFirst();
     }
 
@@ -29,4 +31,7 @@ public final class EventLog {
     }
 
     public int size() { return entries.size(); }
+
+    /** Ile wpisow dodano od poczatku (serwer przesyla klientowi tylko nowe). */
+    public long total() { return total; }
 }

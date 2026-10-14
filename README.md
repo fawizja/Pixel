@@ -73,6 +73,16 @@ JAVA_OPTS="-Dpixel.autostart=Darek:MONK -Dpixel.teleport=60,91,-5 -Dpixel.hour=2
   desktop/build/install/desktop/bin/desktop
 ```
 
+### Serwer (etap 14, w budowie)
+
+```bash
+./gradlew :server:installDist
+server/build/install/server/bin/server 7171 server-saves   # port i katalog zapisow postaci
+```
+
+Serwer jest zrodlem prawdy: klient wysyla tylko zamiary (ruch, akcje), serwer odsyla stan swiata.
+Klient libGDX nie ma jeszcze trybu online - gra na telefonie dziala lokalnie.
+
 ## Dokumentacja
 
 - [AI_WORK_STATE.md](AI_WORK_STATE.md) - aktualny stan, architektura, testy, punkt wznowienia

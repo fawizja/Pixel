@@ -153,18 +153,79 @@ public final class MonsterManager {
     }
 
     public void update(long now, Target target, AttackHandler handler) {
-        // odradzanie
+        update(now, Collections.singletonList(target), handler);
+    }
+
+    /**
+     * Krok AI dla wielu graczy (serwer): kazdy potwor w promieniu ACTIVE_RADIUS od ktoregokolwiek gracza
+     * jest aktualizowany raz i poluje na najblizszego widocznego gracza (trzyma sie obecnego celu,
+     * dopoki ten jest poprawny). Atak trafia do handlera; cel jest w {@link Monster#target()}.
+     */
+    public void update(long now, List<? extends Target> targets, AttackHandler handler) {
         for (Map.Entry<SpawnPoint, List<Long>> e : respawnQueue.entrySet()) {
             List<Long> times = e.getValue();
             for (int i = times.size() - 1; i >= 0; i--) {
-                if (times.get(i) <= now && spawnOne(e.getKey(), target.position(), now)) times.remove(i);
+                if (times.get(i) <= now && spawnOne(e.getKey(), targets, now)) times.remove(i);
             }
         }
-        Position tp = target.position();
-        List<Monster> active = new ArrayList<>(grid.query(tp, ACTIVE_RADIUS, scratch));
-        for (Monster m : active) {
-            if (!m.isDead()) think(m, now, target, handler);
+        java.util.LinkedHashSet<Monster> active = new java.util.LinkedHashSet<>();
+        for (Target tg : targets) active.addAll(grid.query(tg.position(), ACTIVE_RADIUS, scratch));
+        for (Monster m : new ArrayList<>(active)) {
+            if (m.isDead()) continue;
+            Target tg = chooseTarget(m, targets);
+            if (tg != null) think(m, now, tg, handler);
         }
+    }
+
+    private boolean validTarget(Monster m, Target t) {
+        Position tp = t.position();
+        return t.attackable() && tp.z() == m.position().z() && !world.isProtectionZone(tp)
+                && tp.distanceTo(m.position()) <= ACTIVE_RADIUS;
+    }
+
+    private Target chooseTarget(Monster m, List<? extends Target> targets) {
+        Target current = m.target();
+        if (current != null && targets.contains(current) && validTarget(m, current)
+                && m.state() != MonsterState.IDLE) {
+            return current;
+        }
+        Target best = null;
+        int bestDist = Integer.MAX_VALUE;
+        for (Target t : targets) {
+            if (!validTarget(m, t)) continue;
+            int d = t.position().distanceTo(m.position());
+            if (d < bestDist) { bestDist = d; best = t; }
+        }
+        if (best == null) {
+            // nikogo w poblizu: potwor wraca do spawnu wzgledem dowolnego gracza z listy
+            best = current != null && targets.contains(current) ? current : null;
+            if (best == null) {
+                for (Target t : targets) {
+                    if (t.position().distanceTo(m.position()) <= ACTIVE_RADIUS) { best = t; break; }
+                }
+            }
+        }
+        m.setTarget(best);
+        return best;
+    }
+
+    private boolean spawnOne(SpawnPoint sp, List<? extends Target> players, long now) {
+        for (int attempt = 0; attempt < 30; attempt++) {
+            int dx = sp.radius() == 0 ? 0 : rng.nextInt(sp.radius() * 2 + 1) - sp.radius();
+            int dy = sp.radius() == 0 ? 0 : rng.nextInt(sp.radius() * 2 + 1) - sp.radius();
+            Position p = sp.center().translate(dx, dy);
+            boolean seen = false;
+            for (Target t : players) {
+                if (t.position().equals(p) || p.distanceTo(t.position()) <= 5) seen = true;
+            }
+            if (seen || !canOccupy(p, null)) continue;
+            Monster m = new Monster(nextId++, registry.get(sp.monsterKey()), sp, p);
+            m.setNextActionMs(now + 500 + rng.nextInt(2000));
+            monsters.add(m);
+            grid.add(m);
+            return true;
+        }
+        return false;
     }
 
     private void think(Monster m, long now, Target target, AttackHandler handler) {

@@ -14,8 +14,9 @@ rootProject.name = 'pixel'
 // shared  - czysta logika gry (bez libGDX), testowana JUnit
 // core    - renderowanie, ekrany i UI w libGDX
 // desktop - launcher LWJGL3 do szybkiego uruchamiania i testow na PC
+// server  - autorytatywny serwer gry (TCP), uzywa shared
 // android - glowna platforma docelowa (wymaga Android SDK)
-include 'shared', 'core', 'desktop'
+include 'shared', 'core', 'desktop', 'server'
 
 def localProps = new Properties()
 def localFile = file('local.properties')

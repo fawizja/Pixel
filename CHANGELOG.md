@@ -1,5 +1,19 @@
 # Changelog
 
+## [Niewydane] - etap 14, czesc 1
+
+### Dodano
+- Modul `server`: autorytatywny serwer gry (TCP, protokol tekstowy `net.Protocol`), jeden wspolny swiat:
+  potwory i przedmioty na ziemi wspolne dla wszystkich graczy, petla 20 krokow/s, stan 10 razy/s.
+- Logowanie imieniem i profesja, zapis postaci na serwerze (co minute i przy wyjsciu), odrzucanie
+  podwojnych logowan i zlej wersji protokolu, czat.
+- `NetClient` (bez libGDX) i `Actions` - te same akcje co w HUD wykonywane na serwerze.
+- Potwory poluja na najblizszego z wielu graczy.
+- 4 nowe testy, w tym 3 przez prawdziwe polaczenia TCP (lacznie 157).
+
+### Jeszcze nie
+- Klient libGDX nie laczy sie jeszcze z serwerem (nastepny krok), brak kont z haslem i PvP.
+
 ## [0.8.0] - 2026-10-14
 
 ### Dodano

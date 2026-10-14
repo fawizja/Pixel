@@ -1,0 +1,16 @@
+apply plugin: 'application'
+
+// Autorytatywny serwer gry: ta sama logika co klient (modul shared), bez libGDX.
+description = 'Pixel - serwer MMORPG (TCP, protokol tekstowy)'
+
+application {
+    mainClass = 'pl.fawizja.pixel.server.PixelServer'
+}
+
+dependencies {
+    implementation project(':shared')
+}
+
+tasks.named('run') {
+    workingDir = rootProject.file('.')
+}

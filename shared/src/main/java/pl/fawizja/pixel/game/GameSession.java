@@ -52,7 +52,9 @@ public final class GameSession {
     private final WorldMap world;
     private final PlayerCharacter pc;
     private final MovementSystem movement;
-    private final GroundItems ground = new GroundItems();
+    private final GroundItems ground;
+    /** Tryb serwera: potwory i przedmioty na ziemi sa wspolne, petla swiata aktualizuje potwory raz. */
+    private final boolean sharedWorld;
     private final EventLog log = new EventLog(50);
     private final int torchId;
     private final MonsterManager monsters;
@@ -92,6 +94,18 @@ public final class GameSession {
     public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc, MonsterManager monsters,
                        Random rng, int minLevel, SpellRegistry spellRegistry, ConsumableRegistry consumables,
                        RecipeRegistry recipes) {
+        this(items, world, pc, monsters, null, rng, minLevel, spellRegistry, consumables, recipes);
+    }
+
+    /**
+     * Sesja gracza we wspolnym swiecie (serwer): sharedGround != null oznacza, ze potwory i przedmioty
+     * na ziemi naleza do swiata, a {@link #update} nie aktualizuje potworow (robi to petla serwera).
+     */
+    public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc, MonsterManager monsters,
+                       GroundItems sharedGround, Random rng, int minLevel, SpellRegistry spellRegistry,
+                       ConsumableRegistry consumables, RecipeRegistry recipes) {
+        this.sharedWorld = sharedGround != null;
+        this.ground = sharedGround != null ? sharedGround : new GroundItems();
         this.items = items;
         this.recipes = recipes;
         this.world = world;
@@ -224,6 +238,9 @@ public final class GameSession {
     }
 
     public MonsterManager monsters() { return monsters; }
+    /** Widok gracza dla AI potworow (petla serwera zbiera je ze wszystkich sesji). */
+    public MonsterManager.Target playerTarget() { return playerTarget; }
+    public boolean sharedWorld() { return sharedWorld; }
     public CombatSystem combat() { return combat; }
     public SpellSystem spells() { return spells; }
     public RecipeRegistry recipes() { return recipes; }
@@ -328,7 +345,7 @@ public final class GameSession {
         wasNight = night;
         monsters.setNight(night);
         Position before = pc.position();
-        monsters.update(nowMs, playerTarget, combat);
+        if (!sharedWorld) monsters.update(nowMs, playerTarget, combat);
         combat.update(nowMs);
         if (!pc.position().equals(before)) {
             // smierc i odrodzenie w swiatyni
