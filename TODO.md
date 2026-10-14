@@ -81,11 +81,14 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Regiony z zalecanym poziomem i ostrzezeniem, odrodzenie w swiatyni miasta, migracja zapisu v3
 - [x] Testy: 4 miasta ze strefami, dostepnosc wszystkich miast i lochow z Varden, kolejnosc biomow, spawny
 - [ ] NPC i uslugi w miastach (etap 12), ryby zalezne od biomu, poziomy 230..1000
-## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie  <- NASTEPNY
+## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie
 - [x] Pietra -5..+5, schody, dziury, drabiny, liny; test dostepnosci wszystkich pieter
 - [x] Ciemne podziemia, pochodnie na mapie i w plecaku, poswiata postaci
-- [ ] Paliwo pochodni, czary swiatla
-## Etap 11 - Dzien, noc, oswietlenie swiata
+- [x] Paliwo pochodni (30 min, automatycznie nastepna), czar Poswiata, zapis stanu swiatla i sytosci
+- [x] 3 lochy biomow do -5 (dziury, drabiny, miejsca na line), swiecacy mech, magma, lodowe krysztaly
+- [x] 3 bossowie biomow (150, 200, 230) z unikalnymi lupami; testy drogi powrotnej i swiatla
+- [ ] Pietra +1..+5 poza wieza Varden (gory, przelecze)
+## Etap 11 - Dzien, noc, oswietlenie swiata  <- NASTEPNY
 - [x] Zegar swiata, fazy, plynna jasnosc, czytelna noc
 - [ ] Zegar z serwera, wplyw nocy na potwory
 ## Etap 12 - NPC, zadania, handel, bank

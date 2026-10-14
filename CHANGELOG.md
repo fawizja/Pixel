@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0] - 2026-10-14
+
+### Dodano
+- Lochy biomow siegaja pietra -5: dziury, drabiny i miejsca, z ktorych wychodzi sie tylko z lina.
+- Trzej bossowie: Frost Queen Ysolde (150), Ruin Colossus (200), Pharaoh Neferakh (230) i ich lupy.
+- Nowe zrodla swiatla: swiecacy mech, magma, swiatlo nad miejscem na line.
+- Pochodnie sie wypalaja (30 minut), czas widac na karcie postaci.
+- 6 nowych testow (lacznie 142).
+
+### Zmieniono
+- Sytosc, swiatlo z czaru i zapalona pochodnia sa zapisywane razem z postacia.
+
 ## [0.5.0] - 2026-10-14
 
 ### Dodano

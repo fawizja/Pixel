@@ -66,3 +66,6 @@
 82;sandstone_shield;Sandstone Shield;SHIELD;1;2400;SHIELD;0;24;0;50;PALADIN,MONK;0;0;PHYSICAL;#c8a870;Ciezka tarcza z piaskowca.
 83;scarab_helmet;Scarab Helmet;ARMOR;1;4000;HEAD;0;0;6;70;*;0;0;PHYSICAL;#40a080;Helm zdobiony skarabeuszem.
 84;croc_legs;Crocodile Legs;ARMOR;1;2200;LEGS;0;0;5;55;*;0;0;PHYSICAL;#5a7a3a;Spodnie z krokodylej skory.
+85;frost_tiara;Frost Tiara;ARMOR;1;12000;HEAD;0;0;9;120;*;0;0;PHYSICAL;#c8f0ff;Diadem krolowej lodu.
+86;colossus_core;Colossus Core;MATERIAL;100;8000;NONE;0;0;0;0;*;2;0;PHYSICAL;#ff8a40;Zarzace sie serce kamiennego kolosa.
+87;pharaoh_scepter;Pharaoh Scepter;WEAPON;1;20000;WEAPON;58;0;0;150;SORCERER,DRUID;0;4;DEATH;#e8c860;Berlo faraona razace moca smierci.

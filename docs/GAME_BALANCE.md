@@ -122,6 +122,13 @@ jest najlepsza w swojej roli i ze profile sa rozne (`VocationTest`).
 | Temple Guardian | 180 | 4800 | 5200 | 70-210 | fizyczny | tank | rownik |
 | Mummy | 200 | 5200 | 6200 | 70-230 | smierc | tank | pustynia |
 
+| **Frost Queen Ysolde** (boss) | 150 | 9000 | 12000 | 60-180 (zasieg 4) | lod | magic, leczenie 1200 | polnoc -5 |
+| **Ruin Colossus** (boss) | 200 | 14000 | 19000 | 90-260 | fizyczny | tank, leczenie 2000 | rownik -5 |
+| **Pharaoh Neferakh** (boss) | 230 | 16000 | 22000 | 80-250 (zasieg 3) | smierc | magic, leczenie 2500 | pustynia -5 |
+
+Bossowie odradzaja sie co 30 minut i daja unikalne lupy (Frost Tiara, Colossus Core, Pharaoh Scepter).
+Postac na poziomie 8, ktora tam dotrze, ginie od pierwszych ciosow (sprawdzone w grze).
+
 Zasady (test `newMonstersAreSensiblyScaled`): exp/HP miedzy 0.3 a 1.4, HP >= 5 x poziom.
 Odpornosci tworza slabosci biomow: polnoc slaba na ogien, pustynne nieumarle na swiete i ogien,
 dzungla na lod. Nowe lupy: futra, kly, kly krokodyla, luski, zadla, bandaze, skarabeusze, rdzenie lodu

@@ -77,3 +77,11 @@ I;tomb_floor;-;-;sandstone_wall
 *;tomb_floor;-;stairs_down;-
 @;tomb_floor;-;wall_torch;-
 $;frozen_floor;-;wall_torch;-
+0;frozen_floor;-;hole;-
+1;frozen_floor;-;ladder;-
+2;frozen_floor;-;rope_spot;-
+4;cave_floor;-;rope_spot;-
+5;tomb_floor;-;hole;-
+7;tomb_floor;-;rope_spot;-
+8;cave_floor;-;glow_moss;-
+9;cave_floor;-;magma;-

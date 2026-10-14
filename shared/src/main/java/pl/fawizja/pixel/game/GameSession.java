@@ -160,7 +160,15 @@ public final class GameSession {
 
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
     public void update(long nowMs, Direction requested) {
-        if (lastUpdateMs >= 0) pc.tickRegeneration(Math.min(1000, nowMs - lastUpdateMs));
+        if (lastUpdateMs >= 0) {
+            long dt = Math.min(1000, nowMs - lastUpdateMs);
+            pc.tickRegeneration(dt);
+            switch (pc.tickTorch(dt, torchId)) {
+                case NEXT_LIT: log.add(nowMs, EventLog.Kind.INFO, "Pochodnia sie wypalila. Zapalasz nastepna."); break;
+                case BURNED_OUT: log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia sie wypalila. Nie masz kolejnej."); break;
+                default:
+            }
+        }
         lastUpdateMs = nowMs;
         if (moving && nowMs - stepStartMs >= stepDurationMs) {
             moving = false;

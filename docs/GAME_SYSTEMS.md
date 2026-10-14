@@ -53,9 +53,13 @@ Joystick ze strefa martwa, klawiatura na PC.
 
 - `WorldClock`: doba gry = 60 min, fazy swit/dzien/zmierzch/noc, plynne przejscia, noc min. 38% jasnosci.
 - Podziemia: jasnosc maleje z glebokoscia, min. 16%; postac zawsze ma poswiate 2,5 kafelka.
-- Pochodnia z plecaka (POCH) - promien 5; latarnie, pochodnie scienne, ogniska, krysztaly na mapie.
+- Pochodnia z plecaka (POCH) - promien 5; pali sie 30 min czasu gry, potem znika i zapala sie nastepna
+  (komunikat, gdy brak kolejnej). Zgaszona nie traci paliwa. Czas widac na karcie postaci.
+- Czar Poswiata (LIGHT) daje wiekszy promien na czas; sytosc, swiatlo z czaru i pochodnia sa zapisywane.
+- Zrodla swiatla na mapie: latarnie, pochodnie scienne, ogniska, krysztaly (takze lodowe), swiecacy mech,
+  magma, swiatlo z otworu nad miejscem na line.
 - Renderowanie: FBO o obnizonej rozdzielczosci, mnozenie przez scene; lista zrodel buforowana per pietro.
-- P: zuzycie paliwa pochodni, czary swiatla, wplyw nocy na potwory.
+- P: wplyw nocy na potwory (etap 11).
 
 ## Ochrona zasobow 90% / 75% (Z logika, C platforma)
 

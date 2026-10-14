@@ -2,12 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.5.0)
+## Podsumowanie (2026-10-14, wersja 0.6.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9 (wszystkie z zielonym CI i APK). 0.5.0 = etap 9.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81 (wszystkie z zielonym CI i APK). 0.6.0 = etap 10.
 
 ## Architektura
 
@@ -47,6 +47,8 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.6.0: `./gradlew build` - OK, 142 testy; zrzuty: krolowa lodu na -5 (krysztaly swieca), w ruinach
+  postac 8 poziomu ginie od kolosa i odradza sie w swiatyni.
 - 0.5.0: `./gradlew build` - wynik ponizej w sekcji punktu wznowienia; desktop pod Xvfb na nowym swiecie:
   Frostholm, Qasirah, Selvaran, wilki sniezne (atakuja postac 8 poziomu), bagna przy krokodylach - renderowanie OK.
 - 0.4.0: `./gradlew build` - **OK, 129 testow**; zrzut przy rzece (przycisk LOW, karta postaci) OK.
@@ -70,17 +72,14 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 - W trybie programowego renderowania (Xvfb) czas klatki bywa wysoki, co moze wlaczyc LIMITED - zgodnie z zalozeniem.
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
 - Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
-- Sytosc i swiatlo z czaru nie sa zapisywane.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
 - Brak NPC, PvP, serwera. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
 - Miasta poza Varden maja tylko swiatynie, plac i domy (bez sklepow do etapu 12).
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 10 - pietra, jaskinie, oswietlenie** (lista w TODO.md):
-1. Paliwo pochodni (czas palenia, gasniecie), czar swiatla juz jest (`lightBuffRadius`) - zapisywac go.
-2. Rozbudowa lochow biomow (obecnie 2-3 pietra kazdy): zejscia do -5, wiecej przejsc (liny, drabiny),
-   ciemniejsze glebiny, zrodla swiatla (lodowe krysztaly, magma).
-3. Mapa swiata generuje `tools/mapgen/generate_world.py` - zmiany map wylacznie przez generator, potem
-   `./gradlew :shared:test` (GameWorldTest sprawdza dostepnosc i spawny).
-4. Potem etap 12 (NPC, sklepy w 4 miastach, bank w UI, zadania).
+**Nastepne zadanie: Etap 11 - dzien, noc, oswietlenie swiata** (lista w TODO.md):
+1. Wplyw nocy na potwory (np. nieumarli i wilki aktywniejsze w nocy: wiekszy zasieg aggro), nocne spawny.
+2. Zegar swiata gotowy na serwer (czas z zewnatrz, `WorldClock`), zapis czasu gry.
+3. Potem etap 12 (NPC, sklepy w 4 miastach, bank w UI, zadania) - najwazniejsze dla grywalnosci.
+Mapy swiata zmieniaj tylko przez `tools/mapgen/generate_world.py`, potem `./gradlew :shared:test`.

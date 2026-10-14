@@ -65,8 +65,17 @@ EXTRA_LEGEND = [
     ('*', 'tomb_floor', '-', 'stairs_down', '-'),
     ('@', 'tomb_floor', '-', 'wall_torch', '-'),
     ('$', 'frozen_floor', '-', 'wall_torch', '-'),
+    # etap 10: dziury, drabiny, miejsca na line i zrodla swiatla w glebokich lochach
+    ('0', 'frozen_floor', '-', 'hole', '-'),
+    ('1', 'frozen_floor', '-', 'ladder', '-'),
+    ('2', 'frozen_floor', '-', 'rope_spot', '-'),
+    ('4', 'cave_floor', '-', 'rope_spot', '-'),
+    ('5', 'tomb_floor', '-', 'hole', '-'),
+    ('7', 'tomb_floor', '-', 'rope_spot', '-'),
+    ('8', 'cave_floor', '-', 'glow_moss', '-'),
+    ('9', 'cave_floor', '-', 'magma', '-'),
 ]
-WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$')
+WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578')
 
 
 def grid(fill=' '):
@@ -246,8 +255,9 @@ def dungeon(g, area, points, wall, floor, decor, extra_rooms, seed_marks):
             y += 1 if ty > y else -1
     for (mx, my), ch in seed_marks.items():
         g[my][mx] = ch
+    near_points = {(px + dx, py + dy) for (px, py) in points for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
     cells = [(x, y) for y in range(Y0, Y1 + 1) for x in range(X0, X1 + 1)
-             if g[y][x] == floor and (x, y) not in points]
+             if g[y][x] == floor and (x, y) not in near_points]
     rnd.shuffle(cells)
     walk_count = len(reachable(g, points[0]))
     for ch in decor:
@@ -344,9 +354,19 @@ def main():
     dungeon(f1, (6, 14, 40, 46), [(20, 30), (34, 18), (30, 42), (12, 40)], 'E', 'e', '$GG', 4,
             {(20, 30): '!', (12, 40): '?'})
     f2 = floors[-2]
-    dungeon(f2, (4, 30, 36, 58), [(12, 40), (30, 34), (28, 54), (8, 54)], 'E', 'e', 'GGG$', 5, {(12, 40): '!'})
+    dungeon(f2, (4, 30, 36, 58), [(12, 40), (30, 34), (28, 54), (8, 54)], 'E', 'e', 'GGG$', 5,
+            {(12, 40): '!', (8, 54): '0'})
+    # -2 dziura -> -3 (drabina w gore) -> dziura -> -4 (lina w gore) -> schody -> -5 (krolowa lodu)
+    dungeon(floors[-3], (2, 40, 40, 62), [(8, 54), (24, 58), (36, 46), (14, 44)], 'E', 'e', 'GG$', 4,
+            {(8, 54): '1', (36, 46): '0'})
+    dungeon(floors[-4], (10, 30, 50, 62), [(36, 46), (20, 36), (46, 58), (16, 58)], 'E', 'e', 'GGG', 4,
+            {(36, 46): '2', (16, 58): '?'})
+    dungeon(floors[-5], (4, 36, 44, 62), [(16, 58), (30, 44), (40, 56)], 'E', 'e', 'GGGG', 3, {(16, 58): '!'})
     transitions += [(20, 30, 0, 'STAIRS', 20, 31, -1), (20, 30, -1, 'STAIRS', 21, 30, 0),
-                    (12, 40, -1, 'STAIRS', 12, 41, -2), (12, 40, -2, 'STAIRS', 12, 39, -1)]
+                    (12, 40, -1, 'STAIRS', 12, 41, -2), (12, 40, -2, 'STAIRS', 12, 39, -1),
+                    (8, 54, -2, 'HOLE', 9, 54, -3), (8, 54, -3, 'LADDER', 8, 53, -2),
+                    (36, 46, -3, 'HOLE', 37, 46, -4), (36, 46, -4, 'ROPE_SPOT', 36, 45, -3),
+                    (16, 58, -4, 'STAIRS', 16, 59, -5), (16, 58, -5, 'STAIRS', 16, 57, -4)]
 
     # ruiny swiatyni w dzungli: wejscie (60,150) -> -1 -> -2
     g[150][60] = '|'
@@ -354,9 +374,19 @@ def main():
     dungeon(r1, (40, 140, 80, 168), [(60, 150), (46, 146), (74, 162), (50, 164)], 'N', 'c', 'jj', 4,
             {(60, 150): '(', (50, 164): ')'})
     r2 = floors[-2]
-    dungeon(r2, (36, 152, 76, 180), [(50, 164), (70, 158), (66, 176), (42, 174)], 'N', 'c', 'jm', 5, {(50, 164): '('})
+    dungeon(r2, (36, 152, 76, 180), [(50, 164), (70, 158), (66, 176), (42, 174)], 'N', 'c', 'jm8', 5,
+            {(50, 164): '(', (42, 174): 'O'})
+    # -2 dziura -> -3 (drabina) -> dziura -> -4 (lina) -> schody -> -5 (kolos z magma)
+    dungeon(floors[-3], (32, 150, 80, 184), [(42, 174), (60, 180), (74, 156), (48, 152)], 'N', 'c', '88j', 4,
+            {(42, 174): 'H', (74, 156): 'O'})
+    dungeon(floors[-4], (34, 140, 86, 176), [(74, 156), (56, 144), (40, 170), (80, 172)], 'N', 'c', '889', 4,
+            {(74, 156): '4', (40, 170): ')'})
+    dungeon(floors[-5], (32, 146, 84, 184), [(40, 170), (60, 150), (78, 178)], 'N', 'c', '9998', 3, {(40, 170): '('})
     transitions += [(60, 150, 0, 'STAIRS', 60, 151, -1), (60, 150, -1, 'STAIRS', 61, 150, 0),
-                    (50, 164, -1, 'STAIRS', 50, 165, -2), (50, 164, -2, 'STAIRS', 50, 163, -1)]
+                    (50, 164, -1, 'STAIRS', 50, 165, -2), (50, 164, -2, 'STAIRS', 50, 163, -1),
+                    (42, 174, -2, 'HOLE', 43, 174, -3), (42, 174, -3, 'LADDER', 42, 173, -2),
+                    (74, 156, -3, 'HOLE', 75, 156, -4), (74, 156, -4, 'ROPE_SPOT', 74, 155, -3),
+                    (40, 170, -4, 'STAIRS', 40, 171, -5), (40, 170, -5, 'STAIRS', 40, 169, -4)]
 
     # grobowce pod pustynia: wejscie (124,206) -> -1 -> -2 -> -3
     g[206][124] = '^'
@@ -367,7 +397,15 @@ def main():
     dungeon(t2, (100, 196, 146, 230), [(112, 222), (140, 200), (132, 226)], 'I', 'z', '@', 5,
             {(112, 222): '&', (132, 226): '*'})
     t3 = floors[-3]
-    dungeon(t3, (116, 200, 156, 230), [(132, 226), (150, 206), (122, 204)], 'I', 'z', '@', 4, {(132, 226): '&'})
+    dungeon(t3, (116, 200, 156, 230), [(132, 226), (150, 206), (122, 204)], 'I', 'z', '@', 4,
+            {(132, 226): '&', (150, 206): '5'})
+    # -3 dziura -> -4 (lina w gore) -> schody -> -5 (faraon)
+    dungeon(floors[-4], (104, 190, 156, 230), [(150, 206), (130, 194), (108, 220), (140, 228)], 'I', 'z', '@@', 4,
+            {(150, 206): '7', (108, 220): '*'})
+    dungeon(floors[-5], (100, 192, 150, 230), [(108, 220), (126, 198), (144, 224)], 'I', 'z', '@@@', 3,
+            {(108, 220): '&'})
+    transitions += [(150, 206, -3, 'HOLE', 151, 206, -4), (150, 206, -4, 'ROPE_SPOT', 150, 205, -3),
+                    (108, 220, -4, 'STAIRS', 108, 221, -5), (108, 220, -5, 'STAIRS', 108, 219, -4)]
     transitions += [(124, 206, 0, 'STAIRS', 124, 207, -1), (124, 206, -1, 'STAIRS', 124, 205, 0),
                     (112, 222, -1, 'STAIRS', 112, 221, -2), (112, 222, -2, 'STAIRS', 112, 223, -1),
                     (132, 226, -2, 'STAIRS', 132, 225, -3), (132, 226, -3, 'STAIRS', 132, 227, -2)]
@@ -457,6 +495,13 @@ def main():
         '# Grobowce Qasirah',
         'scorpion;140;220;-1;4;3;120', 'sand_wraith;118;200;-1;4;2;180', 'mummy;140;202;-2;4;2;300',
         'mummy;148;210;-3;4;2;300',
+        '# Glebokie lochy (etap 10)',
+        'ice_golem;24;58;-3;4;2;240', 'frost_witch;20;40;-3;4;2;150', 'ice_golem;30;40;-4;5;3;240',
+        'frost_queen;30;44;-5;2;1;1800',
+        'temple_guardian;60;178;-3;4;2;300', 'temple_guardian;56;146;-4;4;2;300', 'temple_guardian;80;170;-4;3;2;300',
+        'ruin_colossus;60;150;-5;2;1;1800',
+        'mummy;130;196;-4;4;3;300', 'mummy;140;226;-4;3;2;300', 'mummy;120;214;-4;4;2;300',
+        'pharaoh;126;198;-5;2;1;1800',
     ]
     pz_rects = [tuple(int(v) for v in r.split(',')) for r in pz]
 

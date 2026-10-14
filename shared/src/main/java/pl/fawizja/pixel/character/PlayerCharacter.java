@@ -31,10 +31,18 @@ public final class PlayerCharacter {
     private boolean torchLit;
     private boolean defensive;
     private long regenAccumulatorMs;
-    /** Pozostaly czas sytosci (podwojna regeneracja) i swiatla z czaru - stan ulotny. */
+    /** Pozostaly czas sytosci (podwojna regeneracja) i swiatla z czaru. */
     private long fedMs;
     private long lightBuffMs;
     private int lightBuffRadius;
+    /** Pozostaly czas palenia biezacej pochodni (0 = nowa, nieuzywana). */
+    private long torchBurnMs;
+
+    /** Jedna pochodnia pali sie 30 minut czasu gry. */
+    public static final long TORCH_BURN_MS = 30 * 60_000L;
+
+    /** Wynik palenia pochodni w kroku symulacji. */
+    public enum TorchTick { NONE, NEXT_LIT, BURNED_OUT }
 
     /** Maksymalna sytosc: 20 minut. */
     public static final long MAX_FED_MS = 20 * 60_000L;
@@ -95,7 +103,45 @@ public final class PlayerCharacter {
     public boolean setTorchLit(boolean lit, int torchItemId) {
         if (lit && backpack.count(torchItemId) == 0) return false;
         torchLit = lit;
+        if (lit && torchBurnMs <= 0) torchBurnMs = TORCH_BURN_MS;
         return true;
+    }
+
+    public long torchBurnMs() { return torchBurnMs; }
+
+    /**
+     * Zapalona pochodnia sie wypala: po TORCH_BURN_MS znika z plecaka, a jesli sa kolejne,
+     * zapala sie nastepna. Zgaszona pochodnia nie traci paliwa.
+     */
+    public TorchTick tickTorch(long deltaMs, int torchItemId) {
+        if (!torchLit || deltaMs <= 0) return TorchTick.NONE;
+        if (backpack.count(torchItemId) == 0) {
+            torchLit = false;
+            torchBurnMs = 0;
+            return TorchTick.BURNED_OUT;
+        }
+        torchBurnMs -= deltaMs;
+        if (torchBurnMs > 0) return TorchTick.NONE;
+        backpack.remove(torchItemId, 1);
+        if (backpack.count(torchItemId) > 0) {
+            torchBurnMs = TORCH_BURN_MS;
+            return TorchTick.NEXT_LIT;
+        }
+        torchLit = false;
+        torchBurnMs = 0;
+        return TorchTick.BURNED_OUT;
+    }
+
+    public long lightBuffMs() { return lightBuffMs; }
+
+    /** Przywrocenie stanu ulotnego z zapisu (sytosc, swiatlo z czaru, pochodnia). */
+    public void restoreTimers(long fedMs, long lightBuffMs, int lightBuffRadius, boolean torchLit, long torchBurnMs,
+                              int torchItemId) {
+        this.fedMs = Math.max(0, Math.min(MAX_FED_MS, fedMs));
+        this.lightBuffMs = Math.max(0, lightBuffMs);
+        this.lightBuffRadius = Math.max(0, lightBuffRadius);
+        this.torchBurnMs = Math.max(0, Math.min(TORCH_BURN_MS, torchBurnMs));
+        this.torchLit = torchLit && backpack.count(torchItemId) > 0;
     }
 
     public void setPosition(Position position) { this.position = Objects.requireNonNull(position); }

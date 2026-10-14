@@ -41,6 +41,8 @@ public final class CharacterCodec {
         m.put("map", WorldLayout.WORLD_MAP);
         m.put("bank", Long.toString(pc.bank().balance()));
         m.put("hometown", pc.homeTown());
+        m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
+                + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack s = pc.backpack().get(i);
             if (s != null) m.put("bp." + i, s.itemId() + "x" + s.count());
@@ -143,6 +145,12 @@ public final class CharacterCodec {
                 String[] v = e.getValue().split("/");
                 pc.skills().set(Skill.valueOf(k.substring(6)), Integer.parseInt(v[0]), Long.parseLong(v[1]));
             }
+        }
+        String timers = m.get("timers");
+        if (timers != null) {
+            String[] t = timers.split(",");
+            pc.restoreTimers(Long.parseLong(t[0]), Long.parseLong(t[1]), Integer.parseInt(t[2]), "1".equals(t[3]),
+                    Long.parseLong(t[4]), items.byKey("torch").id());
         }
         String ignore = m.getOrDefault("autoloot.ignore", "");
         if (!ignore.isEmpty()) {

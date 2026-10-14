@@ -54,6 +54,20 @@ miesci sie w zalecanym zakresie regionu (test `spawnsAreValidAwayFromTownsAndMat
 Nowa postac (poziom 8) idaca na polnoc lub poludnie trafia najpierw na ostrzezenie i potwory
 40+, ktore ja szybko pokonaja - nie da sie "przypadkiem" wejsc w endgame.
 
+## Glebokie lochy biomow (etap 10)
+
+Kazdy loch schodzi do pietra -5 roznymi przejsciami:
+
+| Loch | Droga w dol | Boss na -5 |
+|---|---|---|
+| Lodowe Jaskinie (wejscie 20,30) | schody -1, -2; dziura (8,54) na -3 (drabina w gore); dziura (36,46) na -4 (lina w gore); schody (16,58) na -5 | Frost Queen Ysolde (150) |
+| Zatopione Ruiny (wejscie 60,150) | schody -1, -2; dziura (42,174) na -3 (drabina); dziura (74,156) na -4 (lina); schody (40,170) na -5 | Ruin Colossus (200) |
+| Grobowce Qasirah (wejscie 124,206) | schody -1..-3; dziura (150,206) na -4 (lina); schody (108,220) na -5 | Pharaoh Neferakh (230) |
+
+Bez liny w plecaku nie da sie wrocic z pieter -4 i -5 (test `withoutARopeTheDeepFloorsAreAOneWayTrip`);
+lina jest w zestawie startowym. Kazde z pieter -3..-5 kazdego lochu ma co najmniej 3 zrodla swiatla
+(lodowe krysztaly, swiecacy mech i magma, pochodnie scienne).
+
 Poziomy 230..1000 (glebie swiata, bossowie endgame) zostana dodane w kolejnych etapach.
 
 ## Region Varden (`maps/varden`, 64 x 48; w swiecie przesuniety o +48, +64)

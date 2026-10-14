@@ -490,7 +490,7 @@ public final class Hud {
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
         text(batch, "Szybkosc " + pc.speed() + "   Udzwig " + pc.capacity(), x, y - 36);
-        text(batch, "Sytosc: " + (pc.fedMs() / 60_000) + " min   Zabite: " + session.combat().kills(), x, y - 54);
+        text(batch, "Sytosc: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Zabite: " + session.combat().kills(), x, y - 54);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {
             text(batch, SKILL_NAMES[sk.ordinal()] + "  " + pc.skills().level(sk), x, yy);

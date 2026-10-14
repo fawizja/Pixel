@@ -50,6 +50,9 @@
 71;snow_rock;OBJECT;0;0;north;#b8c4cc;rock
 72;sandstone_rock;OBJECT;0;0;desert;#b08a5a;rock
 73;ice_crystal;OBJECT;0;4;north;#a8e8ff;crystal
+74;rope_spot;OBJECT;1;2;any;#c8c0a0;rope_spot
+75;glow_moss;OBJECT;1;3;equatorial;#7ae890;flowers
+76;magma;OBJECT;0;7;underground;#ff5a1a;magma
 # --- sciany ---
 80;stone_wall;WALL;0;0;town;#6a665e;brick
 81;cave_wall;WALL;0;0;underground;#3e3631;rockwall

@@ -25,7 +25,7 @@ frost_witch;130;44;0;3;2;150
 # Lodowe Jaskinie
 yeti;30;20;-1;4;2;150
 frost_witch;30;40;-1;4;2;150
-ice_golem;20;50;-2;4;2;240
+ice_golem;16;46;-2;4;2;240
 ice_golem;30;36;-2;4;2;240
 # Dzungla Selvaran
 crocodile;60;122;0;6;3;120
@@ -35,7 +35,7 @@ jungle_serpent;145;120;0;5;3;120
 jungle_hunter;40;160;0;4;2;120
 jungle_hunter;150;145;0;4;2;120
 # Zatopione Ruiny
-jungle_serpent;73;161;-1;4;2;120
+jungle_serpent;70;158;-1;4;2;120
 temple_guardian;67;169;-2;4;2;300
 temple_guardian;44;172;-2;3;1;300
 # Pustynia Qasirah
@@ -48,4 +48,17 @@ sand_wraith;20;226;0;4;2;180
 scorpion;140;220;-1;4;3;120
 sand_wraith;117;199;-1;4;2;180
 mummy;140;202;-2;4;2;300
-mummy;150;208;-3;4;2;300
+mummy;147;209;-3;4;2;300
+# Glebokie lochy (etap 10)
+ice_golem;24;58;-3;4;2;240
+frost_witch;15;43;-3;4;2;150
+ice_golem;29;39;-4;5;3;240
+frost_queen;30;44;-5;2;1;1800
+temple_guardian;60;178;-3;4;2;300
+temple_guardian;56;146;-4;4;2;300
+temple_guardian;80;170;-4;3;2;300
+ruin_colossus;60;150;-5;2;1;1800
+mummy;130;196;-4;4;3;300
+mummy;140;226;-4;3;2;300
+mummy;116;218;-4;4;2;300
+pharaoh;126;198;-5;2;1;1800

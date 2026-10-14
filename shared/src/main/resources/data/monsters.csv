@@ -21,3 +21,6 @@ hyena;Hyena;45;480;360;280;15;55;PHYSICAL;1;1800;6;;SKIRMISHER;7;20;0;0;#b89a60;
 scorpion;Scorpion;60;700;600;200;20;75;EARTH;1;2000;18;EARTH:60,ICE:-20;MELEE;5;0;0;0;#a06030;spider;desert;Pancerny skorpion z jadowitym kolcem.
 sand_wraith;Sand Wraith;130;1800;2300;220;40;130;DEATH;3;2300;10;DEATH:100,HOLY:-40,PHYSICAL:40;MAGIC;7;0;0;0;#c8b080;humanoid;desert;Upior z piasku i gniewu.
 mummy;Mummy;200;5200;6200;170;70;230;DEATH;1;2200;30;DEATH:80,FIRE:-30,HOLY:-30;TANK;5;0;0;0;#d8ccaa;humanoid;desert;Prastary straznik grobowcow.
+frost_queen;Frost Queen Ysolde;150;9000;12000;210;60;180;ICE;4;1800;20;ICE:100,FIRE:-20;MAGIC;8;0;1200;1;#c8f0ff;boss;north;Krolowa lodowych glebin. Razi lodem z dystansu, leczy sie raz.
+ruin_colossus;Ruin Colossus;200;14000;19000;150;90;260;PHYSICAL;1;2000;50;PHYSICAL:40,EARTH:50,ENERGY:-20;TANK;7;0;2000;1;#8a8a60;boss;equatorial;Kamienny kolos w sercu ruin, otoczony magma.
+pharaoh;Pharaoh Neferakh;230;16000;22000;200;80;250;DEATH;3;1800;30;DEATH:100,HOLY:-30,FIRE:-20;MAGIC;8;0;2500;1;#e8c860;boss;desert;Nieumarly faraon najglebszej krypty.

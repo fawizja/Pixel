@@ -383,6 +383,17 @@ public final class TileArt implements Disposable {
                 disc(pm, ox, oy, 8f, 8.5f, 6.5f, shade(c, 3f));
                 disc(pm, ox, oy, 8f, 9f, 5.2f, c);
                 break;
+            case "rope_spot":
+                // plama swiatla z otworu w stropie i zwisajaca lina
+                disc(pm, ox, oy, 8f, 8.5f, 6.5f, shade(c, 0.75f));
+                disc(pm, ox, oy, 8f, 8.5f, 4.5f, c);
+                for (int y = 0; y < 13; y++) px(pm, ox, oy, 8 + (y / 2 % 2), y, Color.valueOf("#a07840"));
+                break;
+            case "magma":
+                disc(pm, ox, oy, 8f, 8f, 7f, shade(c, 0.6f));
+                disc(pm, ox, oy, 8f, 8f, 5f, c);
+                for (int i = 0; i < 5; i++) px(pm, ox, oy, 4 + r.nextInt(8), 4 + r.nextInt(8), Color.valueOf("#ffe080"));
+                break;
             case "door":
                 rect(pm, ox, oy, 2, 0, 12, SIZE, Color.valueOf("#2a1a0e"));
                 rect(pm, ox, oy, 2, 0, 3, SIZE, c);
