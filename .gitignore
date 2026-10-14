@@ -13,3 +13,8 @@ saves/
 *.log
 .DS_Store
 __pycache__/
+# katalog serwera: konta (skroty hasel), certyfikat TLS i haslo magazynu kluczy - nigdy do repo
+server-saves/
+*.p12
+keystore.pass
+*.acc

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.12.0] - 2026-10-14
+
+### Dodano
+- Szyfrowanie TLS miedzy klientem a serwerem. Serwer przy pierwszym starcie tworzy wlasny certyfikat
+  (w katalogu zapisow, poza repozytorium) i wypisuje jego odcisk.
+- Klient zapamietuje odcisk certyfikatu przy pierwszym polaczeniu; gdy sie zmieni, odmawia polaczenia
+  przed wyslaniem hasla i proponuje "Zapomnij certyfikat" (na wypadek przeinstalowania serwera).
+- Opcja serwera `--no-tls` (tylko testy).
+- 1 nowy test TLS (lacznie 171); recznie sprawdzone pierwsze polaczenie i podmieniony certyfikat.
+
 ## [0.11.1] - 2026-10-14
 
 ### Dodano

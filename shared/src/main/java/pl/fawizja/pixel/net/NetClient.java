@@ -37,16 +37,93 @@ public final class NetClient implements AutoCloseable {
     private volatile boolean closed;
     private final ConcurrentLinkedQueue<String[]> messages = new ConcurrentLinkedQueue<>();
 
+    /**
+     * Decyzja o zaufaniu certyfikatowi serwera po odcisku SHA-256 (przypinanie jak w SSH:
+     * pierwszy odcisk zapamietany, kolejne musza sie zgadzac).
+     */
+    public interface Pinning {
+        boolean accept(String fingerprint);
+    }
+
+    private volatile String serverFingerprint;
+
+    /** Polaczenie bez szyfrowania (testy, siec lokalna z serwerem uruchomionym z --no-tls). */
     public NetClient(String host, int port, int timeoutMs) throws IOException {
-        socket = new Socket();
-        socket.connect(new InetSocketAddress(host, port), timeoutMs);
-        socket.setTcpNoDelay(true);
+        this(host, port, timeoutMs, null);
+    }
+
+    /** Polaczenie TLS z przypietym certyfikatem, gdy pinning != null. */
+    public NetClient(String host, int port, int timeoutMs, Pinning pinning) throws IOException {
+        Socket raw = new Socket();
+        raw.connect(new InetSocketAddress(host, port), timeoutMs);
+        raw.setTcpNoDelay(true);
+        if (pinning != null) {
+            raw.setSoTimeout(timeoutMs);
+            javax.net.ssl.SSLSocket ssl;
+            try {
+                javax.net.ssl.SSLContext ctx = javax.net.ssl.SSLContext.getInstance("TLS");
+                ctx.init(null, new javax.net.ssl.TrustManager[] {pinningTrust(pinning)}, new java.security.SecureRandom());
+                ssl = (javax.net.ssl.SSLSocket) ctx.getSocketFactory().createSocket(raw, host, port, true);
+                ssl.startHandshake();
+            } catch (java.security.GeneralSecurityException e) {
+                raw.close();
+                throw new IOException("TLS: " + e.getMessage(), e);
+            } catch (IOException e) {
+                raw.close();
+                throw e;
+            }
+            ssl.setSoTimeout(0);
+            socket = ssl;
+        } else {
+            socket = raw;
+        }
         out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
         reader = new Thread(() -> readLoop(in), "pixel-net-reader");
         reader.setDaemon(true);
         reader.start();
     }
+
+    private javax.net.ssl.X509TrustManager pinningTrust(Pinning pinning) {
+        return new javax.net.ssl.X509TrustManager() {
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType)
+                    throws java.security.cert.CertificateException {
+                if (chain == null || chain.length == 0) throw new java.security.cert.CertificateException("brak certyfikatu");
+                String fp = fingerprint(chain[0].getEncoded());
+                serverFingerprint = fp;
+                if (!pinning.accept(fp)) throw new java.security.cert.CertificateException("odcisk certyfikatu sie nie zgadza");
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new java.security.cert.X509Certificate[0];
+            }
+        };
+    }
+
+    /** Odcisk SHA-256 certyfikatu w postaci AB:CD:... */
+    public static String fingerprint(byte[] encoded) {
+        try {
+            byte[] d = java.security.MessageDigest.getInstance("SHA-256").digest(encoded);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < d.length; i++) {
+                if (i > 0) sb.append(':');
+                sb.append(String.format("%02X", d[i] & 0xff));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /** Odcisk certyfikatu serwera z ostatniego polaczenia TLS albo null. */
+    public String serverFingerprint() { return serverFingerprint; }
 
     private void readLoop(BufferedReader in) {
         long frameTime = 0;

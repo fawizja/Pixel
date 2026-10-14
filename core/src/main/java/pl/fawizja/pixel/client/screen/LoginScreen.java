@@ -43,6 +43,8 @@ public final class LoginScreen extends ScreenAdapter {
     private Vocation vocation = Vocation.PALADIN;
     private volatile boolean connecting;
     private String message = "";
+    private boolean certificateChanged;
+    private final Rectangle forget = new Rectangle();
 
     public LoginScreen(PixelGame game) {
         this.game = game;
@@ -75,6 +77,13 @@ public final class LoginScreen extends ScreenAdapter {
                 }
                 for (int i = 0; i < vocations.length; i++) {
                     if (vocations[i].contains(p)) vocation = Vocation.values()[i];
+                }
+                if (certificateChanged && forget.contains(p)) {
+                    prefs.remove("pin." + values[SERVER].toString().trim());
+                    prefs.flush();
+                    certificateChanged = false;
+                    message = "Zapomniano certyfikat - nastepne polaczenie zapamieta nowy.";
+                    return true;
                 }
                 if (connect.contains(p)) connect();
                 if (back.contains(p)) game.backToMenu(null);
@@ -125,13 +134,20 @@ public final class LoginScreen extends ScreenAdapter {
         message = "Laczenie z " + server + "...";
         Gdx.input.setOnscreenKeyboardVisible(false);
         Vocation voc = vocation;
+        String pinKey = "pin." + server;
+        String pinned = prefs.getString(pinKey, null);
         Thread t = new Thread(() -> {
-            PixelGame.OnlineLogin login = game.connectOnline(server, name, voc.name(), password);
+            PixelGame.OnlineLogin login = game.connectOnline(server, name, voc.name(), password, pinned);
             Gdx.app.postRunnable(() -> {
                 connecting = false;
                 if (login.problem() != null) {
                     message = login.problem();
+                    certificateChanged = login.certificateChanged();
                     return;
+                }
+                if (pinned == null && login.fingerprint() != null) {
+                    prefs.putString(pinKey, login.fingerprint()); // pierwsze polaczenie: zapamietaj certyfikat
+                    Gdx.app.log("Pixel", "Zapamietano certyfikat serwera " + server + ": " + login.fingerprint());
                 }
                 prefs.putString("server", server);
                 prefs.putString("name", login.character().name());
@@ -162,6 +178,7 @@ public final class LoginScreen extends ScreenAdapter {
         y -= 38 + 18;
         connect.set(x + fw / 2f + 4, y - 40, fw / 2f - 4, 40);
         back.set(x, y - 40, fw / 2f - 4, 40);
+        forget.set(x, y - 40 - 70, fw, 34);
     }
 
     @Override
@@ -188,6 +205,10 @@ public final class LoginScreen extends ScreenAdapter {
         shapes.rect(connect.x, connect.y, connect.width, connect.height);
         shapes.setColor(0.25f, 0.2f, 0.2f, 1f);
         shapes.rect(back.x, back.y, back.width, back.height);
+        if (certificateChanged) {
+            shapes.setColor(0.45f, 0.15f, 0.12f, 1f);
+            shapes.rect(forget.x, forget.y, forget.width, forget.height);
+        }
         shapes.end();
 
         SpriteBatch batch = game.batch();
@@ -216,7 +237,11 @@ public final class LoginScreen extends ScreenAdapter {
         centered(batch, connecting ? "Laczenie..." : "Polacz", connect.x + connect.width / 2f, connect.y + connect.height / 2f, Color.WHITE);
         centered(batch, "Wstecz", back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);
         if (!message.isEmpty()) centered(batch, message, w / 2f, back.y - 20, Color.SALMON);
-        centered(batch, "Pierwsze logowanie nowym imieniem zaklada konto. Polaczenie nie jest jeszcze szyfrowane.",
+        if (certificateChanged) {
+            centered(batch, "Zapomnij certyfikat (gdy serwer przeinstalowano)",
+                    forget.x + forget.width / 2f, forget.y + forget.height / 2f, Color.WHITE);
+        }
+        centered(batch, "Pierwsze logowanie nowym imieniem zaklada konto. Polaczenie jest szyfrowane (TLS).",
                 w / 2f, 14, Color.GRAY);
         batch.end();
     }

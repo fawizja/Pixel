@@ -11,7 +11,8 @@ import pl.fawizja.pixel.net.Protocol;
 
 /**
  * Serwer gry: watek akceptujacy polaczenia i jedna petla swiata (TICK_MS), ktora jako jedyna
- * zmienia stan gry. Uruchomienie: {@code ./gradlew :server:run --args="7171 saves"}.
+ * zmienia stan gry. Uruchomienie: {@code ./gradlew :server:run --args="7171 saves"}
+ * (polaczenia szyfrowane TLS; {@code --no-tls} jako trzeci argument tylko do testow w sieci lokalnej).
  */
 public final class PixelServer implements AutoCloseable {
     private static final Logger LOG = Logger.getLogger("pixel.server");
@@ -27,14 +28,31 @@ public final class PixelServer implements AutoCloseable {
     private Thread loop;
     private Thread acceptor;
 
+    private final String fingerprint;
+
+    /** Serwer z TLS (domyslnie). */
     public PixelServer(int port, File saveDir) throws IOException {
+        this(port, saveDir, true);
+    }
+
+    public PixelServer(int port, File saveDir, boolean tls) throws IOException {
         world = new ServerWorld(saveDir);
-        socket = new ServerSocket();
+        if (tls) {
+            TlsSetup t = TlsSetup.load(saveDir);
+            socket = t.factory.createServerSocket();
+            fingerprint = t.fingerprint;
+        } else {
+            socket = new ServerSocket();
+            fingerprint = null;
+        }
         socket.setReuseAddress(true);
         socket.bind(new InetSocketAddress(port));
     }
 
     public int port() { return socket.getLocalPort(); }
+
+    /** Odcisk SHA-256 certyfikatu TLS albo null (bez szyfrowania). */
+    public String fingerprint() { return fingerprint; }
 
     /** Czas swiata w ms od startu serwera (wspolny zegar dla wszystkich graczy). */
     long now() { return (System.nanoTime() - startNs) / 1_000_000L; }
@@ -45,7 +63,8 @@ public final class PixelServer implements AutoCloseable {
         acceptor.start();
         loop = new Thread(this::gameLoop, "pixel-world");
         loop.start();
-        LOG.info("Pixel server listening on port " + port());
+        LOG.info("Pixel server listening on port " + port()
+                + (fingerprint != null ? " (TLS, odcisk certyfikatu " + fingerprint + ")" : " (BEZ szyfrowania)"));
     }
 
     private void acceptLoop() {
@@ -141,7 +160,8 @@ public final class PixelServer implements AutoCloseable {
     public static void main(String[] args) throws Exception {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : Protocol.DEFAULT_PORT;
         File saves = new File(args.length > 1 ? args[1] : "server-saves");
-        PixelServer server = new PixelServer(port, saves);
+        boolean tls = !(args.length > 2 && args[2].equals("--no-tls"));
+        PixelServer server = new PixelServer(port, saves, tls);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 server.close();

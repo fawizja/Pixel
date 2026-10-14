@@ -121,7 +121,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Menu startowe (lokalnie / online), ekran logowania (takze Android), zapamietany adres i imie
 - [x] Konta z haslem: PBKDF2-HMAC-SHA256 + sol, blokada po 5 bledach, protokol v2
 - [x] Czat: przycisk CZAT / Enter; powrot do menu po rozlaczeniu
-- [ ] TLS (np. SSLSocket z certyfikatem serwera przypietym w kliencie) przed wystawieniem publicznie
+- [x] TLS: certyfikat serwera tworzony przy pierwszym starcie (poza repo), przypinanie odcisku w kliencie
+- [ ] Limity polaczen/wiadomosci na serwerze, kopie zapasowe zapisow
 - [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
 - [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka

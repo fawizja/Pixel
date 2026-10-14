@@ -25,9 +25,11 @@ Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
 
 ## Siec (etap 14)
 
+- TLS (certyfikat serwera tworzony przy pierwszym starcie, klient przypina odcisk SHA-256 przy pierwszym
+  polaczeniu - zmiana odcisku = odmowa bez wysylania hasla). Opcja serwera `--no-tls` tylko do testow.
 - TCP, linie tekstowe rozdzielone tabulatorem (`net.Protocol`, wersja 1, port 7171).
 - Klient -> serwer: `HELLO 2 imie PROFESJA haslo` (konto zakladane przy pierwszym logowaniu, haslo
-  tylko jako skrot PBKDF2 z sola, 5 blednych prob = blokada 60 s; polaczenie jeszcze bez TLS), `MOVE kierunek|-`, `ACT akcja` (te same nazwy co
+  tylko jako skrot PBKDF2 z sola, 5 blednych prob = blokada 60 s; polaczenie TLS), `MOVE kierunek|-`, `ACT akcja` (te same nazwy co
   `game.Actions`), `TARGET id` (potwor), `ATTACK id|-` (gracz, PvP), `CHAT tekst`, `BYE`.
 - Serwer -> klient: `WELCOME id`, `ERR`, `SELF zapis` (gdy sie zmienil, max 4/s), `LOG`, `CHAT`,
   `EV` (zdarzenie walki), co 100 ms klatka `FRAME czas` + `ME` + `TG` + `PL`/`MO`/`GI` w promieniu 12 + `END`.

@@ -3,6 +3,7 @@ package pl.fawizja.pixel.server;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +35,12 @@ class NetworkSyncTest {
         server.close();
     }
 
+    /** Klient TLS przypinajacy certyfikat tego serwera. */
+    NetClient connect() throws IOException {
+        String expected = server.fingerprint();
+        return new NetClient("127.0.0.1", server.port(), 3000, fp -> fp.equals(expected));
+    }
+
     static void await(String what, BooleanSupplier cond) throws InterruptedException {
         long end = System.currentTimeMillis() + 10_000;
         while (!cond.getAsBoolean()) {
@@ -55,8 +62,8 @@ class NetworkSyncTest {
 
     @Test
     void twoPlayersSeeEachOtherMoveAndChat() throws Exception {
-        try (NetClient alice = new NetClient("127.0.0.1", server.port(), 3000);
-             NetClient bob = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient alice = connect();
+             NetClient bob = connect()) {
             alice.hello("Alice", "PALADIN", "tajne-Alice");
             bob.hello("Bob", "DRUID", "tajne-Bob");
             await("welcome", () -> alice.playerId() > 0 && bob.playerId() > 0);
@@ -97,15 +104,15 @@ class NetworkSyncTest {
 
     @Test
     void serverRejectsDuplicateLoginsAndBadVersionsAndRestoresSavedCharacters() throws Exception {
-        try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient a = connect()) {
             a.hello("Carol", "SORCERER", "tajne-Carol");
             await("welcome", () -> a.playerId() > 0);
-            try (NetClient dup = new NetClient("127.0.0.1", server.port(), 3000)) {
+            try (NetClient dup = connect()) {
                 dup.hello("carol", "MONK", "tajne-Carol");
                 await("duplicate rejected", () -> dup.error() != null);
                 assertTrue(dup.error().contains("juz w grze"));
             }
-            try (NetClient old = new NetClient("127.0.0.1", server.port(), 3000)) {
+            try (NetClient old = connect()) {
                 old.send("HELLO", "0", "Dave", "MONK");
                 await("version rejected", () -> old.error() != null);
             }
@@ -119,7 +126,7 @@ class NetworkSyncTest {
             });
         }
         await("carol left", () -> server.world().players().isEmpty());
-        try (NetClient again = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient again = connect()) {
             again.hello("Carol", "MONK", "tajne-Carol"); // profesja z zapisu, nie z prosby
             await("restored", () -> again.selfSave() != null);
             assertEquals("SORCERER", self(again).vocation().name());
@@ -128,8 +135,8 @@ class NetworkSyncTest {
 
     @Test
     void monstersAreSharedBetweenPlayers() throws Exception {
-        try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
-             NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
             a.hello("Erin", "PALADIN", "tajne-Erin");
             b.hello("Finn", "MONK", "tajne-Finn");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
@@ -155,8 +162,8 @@ class NetworkSyncTest {
 
     @Test
     void droppedItemsAndCombatEventsReachClients() throws Exception {
-        try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
-             NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
             a.hello("Gina", "PALADIN", "tajne-Gina");
             b.hello("Hugo", "SORCERER", "tajne-Hugo");
             await("self", () -> a.selfSave() != null && b.selfSave() != null);
@@ -186,8 +193,8 @@ class NetworkSyncTest {
 
     @Test
     void pvpFollowsTheRulesOverTheNetwork() throws Exception {
-        try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
-             NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
             a.hello("Ivo", "PALADIN", "tajne-Ivo");
             b.hello("Jan", "MONK", "tajne-Jan");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
@@ -230,21 +237,16 @@ class NetworkSyncTest {
         }
     }
 
-    static boolean accepted(String name, String voc, String password) throws Exception {
-        try (NetClient c = new NetClient("127.0.0.1", server().port(), 3000)) {
+    boolean accepted(String name, String voc, String password) throws Exception {
+        try (NetClient c = connect()) {
             c.hello(name, voc, password);
             await("answer", () -> c.selfSave() != null || c.error() != null);
             return c.selfSave() != null;
         }
     }
 
-    static PixelServer current;
-
-    static PixelServer server() { return current; }
-
     @Test
     void accountsRequireTheRightPasswordAndLockAfterFailures() throws Exception {
-        current = server;
         assertTrue(accepted("Kora", "DRUID", "pierwsze-haslo"), "first login creates the account");
         await("left", () -> server.world().players().isEmpty());
         assertFalse(accepted("Kora", "DRUID", "inne-haslo"));
@@ -252,7 +254,7 @@ class NetworkSyncTest {
         assertTrue(accepted("Kora", "DRUID", "pierwsze-haslo"));
         await("left", () -> server.world().players().isEmpty());
         for (int i = 0; i < AccountStore.MAX_FAILURES; i++) assertFalse(accepted("Kora", "DRUID", "zle-haslo"));
-        try (NetClient c = new NetClient("127.0.0.1", server.port(), 3000)) {
+        try (NetClient c = connect()) {
             c.hello("Kora", "DRUID", "pierwsze-haslo");
             await("locked", () -> c.error() != null);
             assertTrue(c.error().contains("Za duzo"), c.error());
@@ -262,5 +264,33 @@ class NetworkSyncTest {
         String content = new String(Files.readAllBytes(acc.toPath()));
         assertFalse(content.contains("pierwsze-haslo"));
         assertTrue(content.startsWith("pbkdf2-sha256;"));
+    }
+
+    @Test
+    void connectionsAreEncryptedAndAChangedCertificateIsRefused() throws Exception {
+        assertNotNull(server.fingerprint());
+        assertEquals(32 * 3 - 1, server.fingerprint().length());
+        try (NetClient c = connect()) {
+            assertEquals(server.fingerprint(), c.serverFingerprint());
+            c.hello("Lena", "MONK", "haslo-lena");
+            await("tls login", () -> c.selfSave() != null);
+        }
+        // inny przypiety odcisk (np. podstawiony serwer) - polaczenie odrzucone przed wyslaniem hasla
+        assertThrows(IOException.class, () -> new NetClient("127.0.0.1", server.port(), 3000, fp -> false));
+        // ten sam katalog = ten sam certyfikat po restarcie
+        String before = server.fingerprint();
+        server.close();
+        server = new PixelServer(0, saves);
+        server.start();
+        assertEquals(before, server.fingerprint());
+        // bez TLS (opcja --no-tls) dziala zwykle polaczenie
+        try (PixelServer plain = new PixelServer(0, Files.createTempDirectory("pixel-plain").toFile(), false)) {
+            plain.start();
+            assertNull(plain.fingerprint());
+            try (NetClient c = new NetClient("127.0.0.1", plain.port(), 3000)) {
+                c.hello("Olaf", "PALADIN", "haslo-olaf");
+                await("plain login", () -> c.selfSave() != null);
+            }
+        }
     }
 }

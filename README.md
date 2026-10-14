@@ -8,7 +8,7 @@
 > potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
 > Stan: dziala serwer z synchronizacja sieciowa i tryb online klienta desktopowego (wielu graczy w jednym
 > swiecie). Dziala PvP z ochrona nowych postaci i czaszkami.
-> Logowanie z haslem dziala takze w APK. Brakuje jeszcze szyfrowania polaczenia (TLS).
+> Logowanie z haslem dziala takze w APK, polaczenie jest szyfrowane (TLS z przypietym certyfikatem).
 
 ## Moduly
 
@@ -90,8 +90,13 @@ JAVA_OPTS="-Dpixel.server=127.0.0.1:7171 -Dpixel.autostart=Darek:PALADIN -Dpixel
 
 Bez `-Dpixel.autostart` klient pokazuje menu: "Graj lokalnie" albo "Graj online" (ekran logowania:
 adres serwera, imie, haslo). Pierwsze logowanie nowym imieniem zaklada konto; haslo serwer przechowuje
-tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`. Polaczenie nie jest jeszcze szyfrowane -
-serwera nie nalezy wystawiac publicznie (tylko siec lokalna / testy).
+tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`.
+
+Polaczenie jest szyfrowane TLS. Przy pierwszym starcie serwer tworzy wlasny certyfikat w
+`<katalog zapisow>/tls/` (klucz i haslo magazynu nigdy nie trafiaja do repozytorium) i wypisuje jego
+odcisk SHA-256. Klient zapamietuje odcisk przy pierwszym polaczeniu i odmawia, gdy sie zmieni
+(haslo nie jest wtedy wysylane). Przed wystawieniem serwera w internecie warto jeszcze dodac limity
+polaczen i kopie zapasowe katalogu zapisow.
 
 ## Dokumentacja
 

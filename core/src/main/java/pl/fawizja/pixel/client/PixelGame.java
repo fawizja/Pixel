@@ -136,27 +136,46 @@ public class PixelGame extends Game {
     }
 
     /** Wynik logowania na serwer: polaczenie i postac z serwera albo opis problemu. */
-    public record OnlineLogin(pl.fawizja.pixel.net.NetClient net, PlayerCharacter character, String problem) {}
+    public record OnlineLogin(pl.fawizja.pixel.net.NetClient net, PlayerCharacter character, String problem,
+                              String fingerprint, boolean certificateChanged) {
+        static OnlineLogin failed(String problem) { return new OnlineLogin(null, null, problem, null, false); }
+    }
 
     /**
      * Laczy z serwerem, loguje (imie, profesja dla nowego konta, haslo) i czeka na zapis postaci -
      * serwer jest jego wlascicielem. Blokuje do kilku sekund: wywolywac poza watkiem grafiki.
      */
     public OnlineLogin connectOnline(String address, String name, String vocation, String password) {
+        return connectOnline(address, name, vocation, password, null);
+    }
+
+    /**
+     * Jak wyzej, z przypietym odciskiem certyfikatu TLS (null = pierwsze polaczenie z tym serwerem:
+     * odcisk zostanie przyjety i zwrocony do zapamietania). Inny odcisk niz przypiety = odmowa.
+     */
+    public OnlineLogin connectOnline(String address, String name, String vocation, String password, String pinned) {
         int colon = address.lastIndexOf(':');
         String host = (colon > 0 ? address.substring(0, colon) : address).trim();
         int port = pl.fawizja.pixel.net.Protocol.DEFAULT_PORT;
         try {
             if (colon > 0) port = Integer.parseInt(address.substring(colon + 1).trim());
         } catch (NumberFormatException e) {
-            return new OnlineLogin(null, null, "Zly port w adresie serwera.");
+            return OnlineLogin.failed("Zly port w adresie serwera.");
         }
-        if (host.isEmpty()) return new OnlineLogin(null, null, "Podaj adres serwera.");
+        if (host.isEmpty()) return OnlineLogin.failed("Podaj adres serwera.");
         pl.fawizja.pixel.net.NetClient net;
+        boolean[] changed = new boolean[1];
         try {
-            net = new pl.fawizja.pixel.net.NetClient(host, port, 4000);
+            net = new pl.fawizja.pixel.net.NetClient(host, port, 4000, fp -> {
+                changed[0] = pinned != null && !pinned.equals(fp);
+                return !changed[0];
+            });
         } catch (IOException e) {
-            return new OnlineLogin(null, null, "Brak polaczenia z " + host + ":" + port + ".");
+            if (changed[0]) {
+                return new OnlineLogin(null, null, "Certyfikat serwera sie zmienil - mozliwe podszycie! Haslo nie zostalo wyslane.",
+                        null, true);
+            }
+            return OnlineLogin.failed("Brak polaczenia z " + host + ":" + port + " (szyfrowane TLS).");
         }
         net.hello(name.trim(), vocation, password);
         long deadline = System.currentTimeMillis() + 6000;
@@ -171,13 +190,13 @@ public class PixelGame extends Game {
         if (net.selfSave() == null) {
             String err = net.error() != null ? net.error() : "Serwer nie odpowiada.";
             net.close();
-            return new OnlineLogin(null, null, err);
+            return OnlineLogin.failed(err);
         }
         try {
-            return new OnlineLogin(net, codec.decode(net.selfSave()), null);
+            return new OnlineLogin(net, codec.decode(net.selfSave()), null, net.serverFingerprint(), false);
         } catch (Exception e) {
             net.close();
-            return new OnlineLogin(null, null, "Nieczytelny stan postaci z serwera.");
+            return OnlineLogin.failed("Nieczytelny stan postaci z serwera.");
         }
     }
 
