@@ -2,8 +2,9 @@
 
 2D MMORPG na Androida w stylu klasycznych gier fantasy, budowany etapami w **libGDX (Java 17)**.
 
-> Stan: **wczesna wersja lokalna (offline)**. Jest grywalny fragment swiata (miasto Varden z wieza
-> i kopalnia, pietra +5..-5), postac, profesje, plecak, monety, bank (logika), zapis oraz
+> Stan: **wczesna wersja lokalna (offline)**. Jest grywalny swiat z czterema miastami
+> (Frostholm, Varden, Selvaran, Qasirah) w pasach biomow snieg - umiarkowany - dzungla - pustynia,
+> lochami na pietrach -5..+5 i regionami z zalecanym poziomem, postac, profesje, plecak, monety, bank (logika), zapis oraz
 > potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
 > To jeszcze **nie jest MMORPG**: serwer i synchronizacja sieciowa sa zaplanowane w etapie 14
 > (patrz [TODO.md](TODO.md)).
@@ -19,7 +20,8 @@
 | `tools/mapgen` | Deterministyczny generator mapy startowej (Python 3). |
 
 Dane gry (latwe do balansowania bez zmian w kodzie) leza w `shared/src/main/resources`:
-`data/items.csv`, `data/tiles.csv`, `data/starting.properties`, `maps/varden/*`.
+`data/items.csv`, `data/tiles.csv`, `data/starting.properties`, `data/monsters.csv`, `data/spells.csv`, `maps/world/*` (generowane przez
+`tools/mapgen/generate_world.py`, ktory korzysta z `maps/varden/*`).
 
 ## Wymagania
 

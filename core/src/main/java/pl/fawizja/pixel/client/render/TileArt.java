@@ -277,6 +277,41 @@ public final class TileArt implements Disposable {
                 disc(pm, ox, oy, 7f, 6f, 5.5f, c);
                 disc(pm, ox, oy, 6f, 4.5f, 2.5f, shade(c, 1.35f));
                 break;
+            case "pine":
+                rect(pm, ox, oy, 7, 12, 2, 4, Color.valueOf("#4a3020"));
+                for (int k = 0; k < 3; k++) {
+                    int top = 1 + k * 4, half = 2 + k * 2;
+                    for (int y = 0; y < 5; y++) {
+                        int hw = Math.max(1, half * (y + 1) / 5);
+                        rect(pm, ox, oy, 8 - hw, top + y, hw * 2, 1, shade(c, 0.85f + y * 0.05f));
+                    }
+                    rect(pm, ox, oy, 8 - half / 2, top + 1, half / 2 + 1, 1, Color.valueOf("#f0f6fa")); // snieg
+                }
+                break;
+            case "palm":
+                for (int y = 6; y < 16; y++) px(pm, ox, oy, 7 + (y < 10 ? 1 : 0), y, Color.valueOf("#8a6a3a"));
+                for (int k = -6; k <= 6; k++) {
+                    int yy = 4 + Math.abs(k) / 2;
+                    px(pm, ox, oy, 8 + k, yy, c);
+                    px(pm, ox, oy, 8 + k, yy + 1, shade(c, 0.75f));
+                }
+                for (int k = 0; k < 4; k++) {
+                    px(pm, ox, oy, 8, 1 + k, shade(c, 1.2f));
+                    px(pm, ox, oy, 5 - k, 6 + k, shade(c, 0.9f));
+                    px(pm, ox, oy, 11 + k, 6 + k, shade(c, 0.9f));
+                }
+                px(pm, ox, oy, 7, 6, Color.valueOf("#6a4a20"));
+                px(pm, ox, oy, 9, 6, Color.valueOf("#6a4a20"));
+                break;
+            case "cactus":
+                rect(pm, ox, oy, 6, 3, 4, 13, c);
+                rect(pm, ox, oy, 7, 3, 1, 13, shade(c, 1.25f));
+                rect(pm, ox, oy, 2, 6, 2, 5, c);
+                rect(pm, ox, oy, 2, 10, 4, 2, c);
+                rect(pm, ox, oy, 12, 4, 2, 5, c);
+                rect(pm, ox, oy, 10, 8, 4, 2, c);
+                px(pm, ox, oy, 8, 2, Color.valueOf("#f070a0"));
+                break;
             case "bush":
                 disc(pm, ox, oy, 8f, 10f, 5f, shade(c, 0.8f));
                 disc(pm, ox, oy, 7f, 9f, 3.5f, c);

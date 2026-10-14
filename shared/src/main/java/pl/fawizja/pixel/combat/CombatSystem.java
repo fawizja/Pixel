@@ -209,9 +209,10 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onPlayerDeath(Monster killer, long now) {
         long before = pc.experience();
         pc.applyDeathPenalty(minLevel);
-        pc.revive(world.spawn());
+        Position temple = world.templeOf(pc.homeTown());
+        pc.revive(temple);
         target = null;
-        push(new CombatEvent(now, world.spawn(), 0, CombatEvent.Kind.DEATH));
+        push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         log.add(now, EventLog.Kind.WARNING, "Zginales (" + killer.type().name() + "). Strata: "
                 + (before - pc.experience()) + " exp. Odrodzenie w swiatyni.");
     }

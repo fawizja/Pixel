@@ -16,6 +16,8 @@ public final class WorldMap {
     private final Map<Integer, FloorMap> floors = new TreeMap<>();
     private Position spawn;
     private final List<int[]> protectionZones = new ArrayList<>();
+    private final List<Town> towns = new ArrayList<>();
+    private final List<Region> regions = new ArrayList<>();
 
     public WorldMap(String name, int width, int height, TileRegistry tiles) {
         this.name = name;
@@ -28,6 +30,34 @@ public final class WorldMap {
     public int width() { return width; }
     public int height() { return height; }
     public TileRegistry tiles() { return tiles; }
+
+    public List<Town> towns() { return Collections.unmodifiableList(towns); }
+    public List<Region> regions() { return Collections.unmodifiableList(regions); }
+
+    void addTown(Town t) {
+        if (towns.size() >= Town.MAX_TOWNS) throw new IllegalArgumentException("at most " + Town.MAX_TOWNS + " towns");
+        towns.add(t);
+    }
+
+    void addRegion(Region r) { regions.add(r); }
+
+    /** Miasto o nazwie (bez rozrozniania wielkosci liter) albo null. */
+    public Town town(String name) {
+        for (Town t : towns) if (t.name().equalsIgnoreCase(name)) return t;
+        return null;
+    }
+
+    /** Swiatynia miasta rodzinnego albo punkt startu, gdy miasta brak (np. mapa testowa). */
+    public Position templeOf(String townName) {
+        Town t = townName == null ? null : town(townName);
+        return t != null ? t.temple() : spawn;
+    }
+
+    /** Pierwszy region zawierajacy pozycje albo null. */
+    public Region regionAt(Position p) {
+        for (Region r : regions) if (r.contains(p)) return r;
+        return null;
+    }
 
     public FloorMap floor(int z) { return floors.get(z); }
 

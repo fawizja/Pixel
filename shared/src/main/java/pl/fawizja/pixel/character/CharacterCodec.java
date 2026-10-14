@@ -11,6 +11,7 @@ import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.save.SaveFormatException;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
+import pl.fawizja.pixel.world.WorldLayout;
 
 /**
  * Tekstowy, wersjonowany format zapisu postaci z suma kontrolna CRC32.
@@ -19,7 +20,7 @@ import pl.fawizja.pixel.world.Position;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 2;
+    public static final int CURRENT_VERSION = 3;
 
     private final ItemRegistry items;
 
@@ -37,6 +38,7 @@ public final class CharacterCodec {
         m.put("mana", Integer.toString(pc.mana()));
         Position p = pc.position();
         m.put("position", p.x() + "," + p.y() + "," + p.z());
+        m.put("map", WorldLayout.WORLD_MAP);
         m.put("bank", Long.toString(pc.bank().balance()));
         m.put("hometown", pc.homeTown());
         for (int i = 0; i < pc.backpack().size(); i++) {
@@ -95,13 +97,24 @@ public final class CharacterCodec {
         }
     }
 
-    /** Migracje formatu: v1 zapisywal pozycje bez pietra i saldo pod kluczem "gold.bank". */
+    /**
+     * Migracje formatu: v1 zapisywal pozycje bez pietra i saldo pod kluczem "gold.bank";
+     * v1 i v2 zapisywaly pozycje na mapie Varden - w v3 to wspolrzedne swiata (przesuniecie regionu Varden).
+     */
     static void migrate(int version, Map<String, String> m) {
         if (version < 2) {
             String pos = m.get("position");
             if (pos != null && pos.split(",").length == 2) m.put("position", pos + ",0");
             if (m.containsKey("gold.bank") && !m.containsKey("bank")) m.put("bank", m.remove("gold.bank"));
             m.putIfAbsent("hometown", "varden");
+        }
+        if (version < 3) {
+            String[] pos = m.getOrDefault("position", "").split(",");
+            if (pos.length == 3) {
+                m.put("position", (Integer.parseInt(pos[0].trim()) + WorldLayout.VARDEN_OFFSET_X) + ","
+                        + (Integer.parseInt(pos[1].trim()) + WorldLayout.VARDEN_OFFSET_Y) + "," + pos[2].trim());
+            }
+            m.put("map", WorldLayout.WORLD_MAP);
         }
     }
 

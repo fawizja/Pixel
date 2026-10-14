@@ -25,6 +25,7 @@ import pl.fawizja.pixel.save.SaveStore;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.MapLoader;
 import pl.fawizja.pixel.world.TileRegistry;
+import pl.fawizja.pixel.world.WorldLayout;
 import pl.fawizja.pixel.world.WorldMap;
 
 /** Glowna klasa gry wspolna dla Androida i desktopu. */
@@ -61,9 +62,9 @@ public class PixelGame extends Game {
         tiles = TileRegistry.loadDefault();
         startingConfig = StartingConfig.loadDefault();
         try {
-            world = new MapLoader(tiles).load("varden");
+            world = new MapLoader(tiles).load(WorldLayout.WORLD_MAP);
             monsters = MonsterRegistry.loadDefault(items);
-            spawns = SpawnTable.load("varden", world, monsters);
+            spawns = SpawnTable.load(WorldLayout.WORLD_MAP, world, monsters);
         } catch (IOException e) {
             throw new IllegalStateException("Nie mozna wczytac mapy", e);
         }
@@ -96,7 +97,7 @@ public class PixelGame extends Game {
     }
 
     public void createCharacter(String name, Vocation vocation) {
-        PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.spawn());
+        PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()));
         saveCharacter(pc);
         startGame(pc);
     }

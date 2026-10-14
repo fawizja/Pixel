@@ -12,11 +12,19 @@
 10;sand;GROUND;1;0;desert;#d9c27a;sand
 11;snow;GROUND;1;0;north;#e8eef2;snow
 12;jungle_grass;GROUND;1;0;equatorial;#2f7a3a;grass
+13;ice;GROUND;1;0;north;#bfe0f0;tiles
+14;swamp;GROUND;0;0;equatorial;#3f5a34;water
+15;sandstone_floor;GROUND;1;0;desert;#c8a870;tiles
+16;frozen_floor;GROUND;1;0;north;#93a8b8;gravel
+17;tomb_floor;GROUND;1;0;desert;#8a7458;gravel
 # --- dekoracje (nie blokuja) ---
 30;tall_grass;DECORATION;1;0;temperate;#6aa84f;tuft
 31;flowers;DECORATION;1;0;temperate;#e05a8a;flowers
 32;wheat;DECORATION;1;0;temperate;#e0c050;wheat
 33;rug;DECORATION;1;0;town;#8a2a2a;rug
+34;snow_tuft;DECORATION;1;0;north;#ffffff;tuft
+35;fern;DECORATION;1;0;equatorial;#4aa050;tuft
+36;dry_grass;DECORATION;1;0;desert;#b89a50;tuft
 # --- obiekty ---
 50;tree;OBJECT;0;0;temperate;#2d5e2a;tree
 51;rock;OBJECT;0;0;temperate;#7a7a7a;rock
@@ -36,7 +44,17 @@
 65;altar;OBJECT;0;3;town;#e8e0ff;altar
 66;bush;OBJECT;0;0;temperate;#3f7a35;bush
 67;crate;OBJECT;0;0;town;#a0783c;crate
+68;pine;OBJECT;0;0;north;#2a5a48;pine
+69;palm;OBJECT;0;0;equatorial;#3a9a40;palm
+70;cactus;OBJECT;0;0;desert;#4a8a3a;cactus
+71;snow_rock;OBJECT;0;0;north;#b8c4cc;rock
+72;sandstone_rock;OBJECT;0;0;desert;#b08a5a;rock
+73;ice_crystal;OBJECT;0;4;north;#a8e8ff;crystal
 # --- sciany ---
 80;stone_wall;WALL;0;0;town;#6a665e;brick
 81;cave_wall;WALL;0;0;underground;#3e3631;rockwall
 82;wood_wall;WALL;0;0;town;#7a5230;woodwall
+83;ice_wall;WALL;0;0;north;#7aa8c8;rockwall
+84;sandstone_wall;WALL;0;0;desert;#b89860;brick
+85;mossy_wall;WALL;0;0;equatorial;#5a7050;brick
+86;log_wall;WALL;0;0;north;#6a4a30;woodwall

@@ -15,6 +15,7 @@ public final class TestData {
     public static final ItemRegistry ITEMS = ItemRegistry.loadDefault();
     public static final TileRegistry TILES = TileRegistry.loadDefault();
     private static WorldMap varden;
+    private static WorldMap world;
 
     private TestData() {}
 
@@ -27,6 +28,18 @@ public final class TestData {
             }
         }
         return varden;
+    }
+
+    /** Pelny swiat gry (4 miasta). */
+    public static synchronized WorldMap world() {
+        if (world == null) {
+            try {
+                world = new MapLoader(TILES).load("world");
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return world;
     }
 
     public static PlayerCharacter newCharacterNamed(String name) {

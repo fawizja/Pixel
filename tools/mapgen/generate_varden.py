@@ -216,6 +216,7 @@ def cave_floor(z):
     cells = [(x, y) for y in range(H) for x in range(W) if g[y][x] == 'c' and (x, y) not in protected]
     rnd.shuffle(cells)
     want = {'j': 3 if z >= -2 else 1, 'g': 0 if z >= -2 else 2 + (-z - 3), 'm': 3}
+    walk_count = len(reachable(g, pts[0]))
     for ch, n in want.items():
         for (x, y) in cells:
             if n <= 0:
@@ -226,8 +227,9 @@ def cave_floor(z):
             if ch in WALKABLE:
                 n -= 1
                 continue
-            base = reachable(g, pts[0])
-            if all(p in base for p in pts):
+            # przeszkoda nie moze odciac zadnej czesci jaskini (tylko sam kafelek wypada z zasiegu)
+            if len(reachable(g, pts[0])) == walk_count - 1:
+                walk_count -= 1
                 n -= 1
             else:
                 g[y][x] = 'c'

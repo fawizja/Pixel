@@ -105,6 +105,29 @@ jest najlepsza w swojej roli i ze profile sa rozne (`VocationTest`).
 | Crystal Golem | 45 | 620 | 450 | 15-55 | energia | 2 | MAGIC | -5 |
 | Grimtooth (boss) | 60 | 3200 | 4000 | 25-90 | fiz. | 1 | TANK, leczenie 1x, szal <50% | -5 |
 
+## Potwory biomow (etap 9)
+
+| Potwor | Poz. | HP | Exp | Atak | Typ | Zachowanie | Biom |
+|---|---|---|---|---|---|---|---|
+| Snow Wolf | 40 | 420 | 330 | 15-50 | fizyczny | skirmisher | polnoc |
+| Hyena | 45 | 480 | 360 | 15-55 | fizyczny | skirmisher | pustynia |
+| Crocodile | 55 | 650 | 520 | 20-70 | fizyczny | tank | rownik |
+| Scorpion | 60 | 700 | 600 | 20-75 | ziemia | melee | pustynia |
+| Jungle Hunter | 65 | 600 | 650 | 25-75 (zasieg 4) | fizyczny | ranged | rownik |
+| Yeti | 70 | 1100 | 950 | 30-95 | fizyczny | tank | polnoc |
+| Jungle Serpent | 75 | 760 | 800 | 20-80 | ziemia | skirmisher | rownik |
+| Frost Witch | 85 | 800 | 1000 | 25-85 (zasieg 4) | lod | magic | polnoc |
+| Ice Golem | 120 | 2600 | 2600 | 50-150 | lod | magic | polnoc |
+| Sand Wraith | 130 | 1800 | 2300 | 40-130 (zasieg 3) | smierc | magic | pustynia |
+| Temple Guardian | 180 | 4800 | 5200 | 70-210 | fizyczny | tank | rownik |
+| Mummy | 200 | 5200 | 6200 | 70-230 | smierc | tank | pustynia |
+
+Zasady (test `newMonstersAreSensiblyScaled`): exp/HP miedzy 0.3 a 1.4, HP >= 5 x poziom.
+Odpornosci tworza slabosci biomow: polnoc slaba na ogien, pustynne nieumarle na swiete i ogien,
+dzungla na lod. Nowe lupy: futra, kly, kly krokodyla, luski, zadla, bandaze, skarabeusze, rdzenie lodu
+oraz bron i zbroje na poziom 40-100 (Frost Blade, Fur Armor, Serpent Spear, Wand of Storms,
+Rod of Vines, Desert Knuckles, Sandstone Shield, Scarab Helmet, Croc Legs).
+
 ## Symulacje walk (`CombatSimulationTest`, 300 pojedynkow, bez mikstur i ucieczki)
 
 | Sytuacja | Wynik |

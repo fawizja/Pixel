@@ -47,3 +47,22 @@
 63;healing_rune;Healing Rune;RUNE;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#60e080;Runa: leczy uzytkownika.
 64;fish;Fish;FOOD;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa8c8;Swieza ryba z jeziora.
 65;pearl;Pearl;MATERIAL;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;#f0eef8;Rzadka perla z jeziora - cenna u jubilerow.
+66;frost_pelt;Frost Pelt;MATERIAL;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#dce8f0;Futro snieznego wilka.
+67;yeti_fur;Yeti Fur;MATERIAL;100;90;NONE;0;0;0;0;*;0;0;PHYSICAL;#f4f4f0;Gesta siersc yeti.
+68;frozen_heart;Frozen Heart;MATERIAL;100;400;NONE;0;0;0;0;*;2;0;PHYSICAL;#a8e8ff;Lodowe serce golema, slabo swieci.
+69;croc_leather;Crocodile Leather;MATERIAL;100;70;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Twarda skora krokodyla.
+70;snake_skin;Snake Skin;MATERIAL;100;55;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa040;Wylinka weza z dzungli.
+71;jungle_idol;Jungle Idol;MATERIAL;100;600;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8b040;Zloty posazek z zatopionych ruin.
+72;scorpion_tail;Scorpion Tail;MATERIAL;100;40;NONE;0;0;0;0;*;0;0;PHYSICAL;#a06030;Kolec skorpiona.
+73;hyena_fang;Hyena Fang;MATERIAL;100;15;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e0c8;Kiel hieny.
+74;mummy_wrap;Mummy Wrap;MATERIAL;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8ccaa;Stary bandaz mumii.
+75;scarab_gem;Scarab Gem;MATERIAL;100;500;NONE;0;0;0;0;*;1;0;PHYSICAL;#40c0a0;Klejnot w ksztalcie skarabeusza.
+76;frost_blade;Frost Blade;WEAPON;1;3000;WEAPON;40;16;0;60;PALADIN,MONK;0;1;PHYSICAL;#b8e0f8;Miecz z lodowego metalu Frostholm.
+77;fur_armor;Fur Armor;ARMOR;1;1500;ARMOR;0;0;8;40;*;0;0;PHYSICAL;#d8d0c0;Ciepla zbroja z futer.
+78;serpent_spear;Serpent Spear;WEAPON;1;3500;WEAPON;44;0;0;60;PALADIN;0;4;PHYSICAL;#80b050;Wlocznia z grotem jak kiel weza.
+79;wand_of_storms;Wand of Storms;WEAPON;1;3200;WEAPON;34;0;0;50;SORCERER;0;4;ENERGY;#c0d8ff;Rozdzka burzy.
+80;rod_of_vines;Rod of Vines;WEAPON;1;3200;WEAPON;34;0;0;50;DRUID;0;4;EARTH;#60b040;Rozdzka z zywego pnacza.
+81;desert_knuckles;Desert Knuckles;WEAPON;1;3600;WEAPON;42;8;0;60;MONK;0;1;PHYSICAL;#c8a060;Kastety z brazu pustyni.
+82;sandstone_shield;Sandstone Shield;SHIELD;1;2400;SHIELD;0;24;0;50;PALADIN,MONK;0;0;PHYSICAL;#c8a870;Ciezka tarcza z piaskowca.
+83;scarab_helmet;Scarab Helmet;ARMOR;1;4000;HEAD;0;0;6;70;*;0;0;PHYSICAL;#40a080;Helm zdobiony skarabeuszem.
+84;croc_legs;Crocodile Legs;ARMOR;1;2200;LEGS;0;0;5;55;*;0;0;PHYSICAL;#5a7a3a;Spodnie z krokodylej skory.

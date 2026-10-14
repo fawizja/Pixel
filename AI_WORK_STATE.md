@@ -2,12 +2,12 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-14, wersja 0.4.0)
+## Podsumowanie (2026-10-14, wersja 0.5.0)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie (offline) na desktopie; to jeszcze nie MMORPG (brak serwera i synchronizacji).
-- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971 (wszystkie z zielonym CI i APK). 0.4.0 = etap 8.
+- Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9 oraz czesci etapow 2, 9, 10, 11, 15 (szczegoly w TODO.md).
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9 (wszystkie z zielonym CI i APK). 0.5.0 = etap 9.
 
 ## Architektura
 
@@ -19,7 +19,7 @@ shared/   pl.fawizja.pixel.*         czysta Java 17, bez libGDX, testy JUnit 5
   item/       ItemType, ItemRegistry (data/items.csv), ItemStack (niezmienny), EquipSlot
   inventory/  Container (atomowy, 20 slotow), Equipment, AutoLootFilter, InventoryResult
   economy/    Currency, Money (platnosci z reszta, wymiana), BankAccount
-  world/      Position (z -5..+5), FloorMap (warstwy short[] + cache kolizji + swiatlo),
+  world/      WorldLayout (mapa "world"), Town, Region, Position (z -5..+5), FloorMap (warstwy short[] + cache kolizji + swiatlo),
               WorldMap, MapLoader (maps/<nazwa>/), TileRegistry (data/tiles.csv), Transition,
               GroundItems, Lighting, Direction
   movement/   MovementSystem (krok, uzycie, czas kroku)
@@ -40,13 +40,15 @@ core/     pl.fawizja.pixel.client.*   libGDX
   ui/Hud, ui/VirtualJoystick, ui/HudButton, platform/PlatformServices (+Default)
 desktop/  DesktopLauncher (+ opcje -Dpixel.autostart/teleport/screenshot)
 android/  AndroidLauncher, AndroidPlatformServices (pamiec, termika API 29+, bateria)
-tools/mapgen/generate_varden.py  generator mapy (deterministyczny)
+tools/mapgen/generate_varden.py, generate_world.py  generatory map (deterministyczne; world wkleja varden)
 ```
 
 Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serwer (etap 14) ma uzyc `shared`.
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.5.0: `./gradlew build` - wynik ponizej w sekcji punktu wznowienia; desktop pod Xvfb na nowym swiecie:
+  Frostholm, Qasirah, Selvaran, wilki sniezne (atakuja postac 8 poziomu), bagna przy krokodylach - renderowanie OK.
 - 0.4.0: `./gradlew build` - **OK, 129 testow**; zrzut przy rzece (przycisk LOW, karta postaci) OK.
 - 0.3.0: `./gradlew build` - **OK, 122 testy, 0 bledow**; desktop uruchomiony, zrzuty paska czarow i ksiegi OK.
 - 0.2.0: `./gradlew :shared:test` - **OK, 106 testow, 0 bledow**; `:desktop:installDist` OK.
@@ -70,15 +72,15 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 - Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
 - Sytosc i swiatlo z czaru nie sa zapisywane.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
-- Brak NPC, czarow, PvP, serwera.
+- Brak NPC, PvP, serwera. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
+- Miasta poza Varden maja tylko swiatynie, plac i domy (bez sklepow do etapu 12).
 
 ## Punkt wznowienia
 
-**Nastepne zadanie: Etap 9 - miasta (max 4), biomy, expowiska** (lista w TODO.md, plan w docs/WORLD_MAP.md):
-1. Swiat wieloregionowy: obecnie jedna mapa `varden` 64x48. Zaprojektowac format swiata z regionami
-   (osobne pliki map + przejscia miedzy regionami na krawedziach / drogach) albo jedna wieksza mape
-   ladowana fragmentami (etap 3: chunki). Rekomendacja: regiony = osobne mapy, przejscie "travel" na krawedzi.
-2. Generator (tools/mapgen) dla Frostholm (snieg, polnoc), Selvaran (rownik), Qasirah (pustynia):
-   swiatynia, bank, sklepy, strefa ochronna, okolice z expowiskami; nowe kafelki biomow (snieg, lod, piasek, bagno).
-3. Nowe potwory biomow (zgodnie z tabela w WORLD_MAP.md) i ich spawny; ryby zalezne od biomu.
-4. Testy: dostepnosc wszystkich miast z Varden, spawn w strefie ochronnej, poziomy potworow rosna z odlegloscia.
+**Nastepne zadanie: Etap 10 - pietra, jaskinie, oswietlenie** (lista w TODO.md):
+1. Paliwo pochodni (czas palenia, gasniecie), czar swiatla juz jest (`lightBuffRadius`) - zapisywac go.
+2. Rozbudowa lochow biomow (obecnie 2-3 pietra kazdy): zejscia do -5, wiecej przejsc (liny, drabiny),
+   ciemniejsze glebiny, zrodla swiatla (lodowe krysztaly, magma).
+3. Mapa swiata generuje `tools/mapgen/generate_world.py` - zmiany map wylacznie przez generator, potem
+   `./gradlew :shared:test` (GameWorldTest sprawdza dostepnosc i spawny).
+4. Potem etap 12 (NPC, sklepy w 4 miastach, bank w UI, zadania).

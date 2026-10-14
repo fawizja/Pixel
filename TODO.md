@@ -18,7 +18,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Kamera z przyciaganiem do pikseli, ExtendViewport (rozne proporcje ekranu), UI skalowane wg DPI
 - [x] Ruch w 8 kierunkach z interpolacja, kolizje, bez scinania rogow
 - [x] Joystick, przyciski, klawiatura
-- [ ] Ladowanie fragmentow (chunkow) dla duzego swiata
+- [~] Duzy swiat 160x232 dziala bez chunkow (rysowane tylko widoczne kafelki); chunki przy wiekszym swiecie
 
 ## Etap 4 - Postac, profesje, HP, MP, poziomy, doswiadczenie
 - [x] Start: poziom 8, 10 000 gp w plecaku (nie w banku), zestaw profesji, swiatynia Varden
@@ -72,10 +72,16 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Przycisk LOW pokazywany tylko przy wodzie z wedka w plecaku
 - [ ] Ryby zalezne od biomu (lod, bagna, oaza) - razem z nowymi miastami
 
-## Etap 9 - Miasta (max 4), biomy, expowiska  <- NASTEPNY
+## Etap 9 - Miasta (max 4), biomy, expowiska
 - [x] Varden: swiatynia, bank, sklepy, domy, wieza, kopalnia, jezioro, pola
-- [ ] NPC i uslugi Varden, Frostholm, Selvaran, Qasirah, biomy snieg / rownik / pustynia
-## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie
+- [x] Swiat 160x232 (generate_world.py): Frostholm (snieg), Varden, Selvaran (dzungla, bagna), Qasirah (pustynia), drogi
+- [x] Nowe kafelki biomow: lod, bagno, piaskowiec, zamarzniete i grobowcowe posadzki, sosny, palmy, kaktusy, sciany
+- [x] Lochy: Lodowe Jaskinie (-1..-2), Zatopione Ruiny (-1..-2), Grobowce (-1..-3)
+- [x] 12 potworow biomow (poz. 40-200) z lupami, 9 przedmiotow na poziom 40-100
+- [x] Regiony z zalecanym poziomem i ostrzezeniem, odrodzenie w swiatyni miasta, migracja zapisu v3
+- [x] Testy: 4 miasta ze strefami, dostepnosc wszystkich miast i lochow z Varden, kolejnosc biomow, spawny
+- [ ] NPC i uslugi w miastach (etap 12), ryby zalezne od biomu, poziomy 230..1000
+## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie  <- NASTEPNY
 - [x] Pietra -5..+5, schody, dziury, drabiny, liny; test dostepnosci wszystkich pieter
 - [x] Ciemne podziemia, pochodnie na mapie i w plecaku, poswiata postaci
 - [ ] Paliwo pochodni, czary swiatla

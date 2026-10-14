@@ -119,6 +119,15 @@ przy pauzie, utracie fokusu i zamknieciu.
   `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
 - Umiejetnosci: start 10 (magia 0), koszt kolejnego poziomu `50 * 1,1^(poziom-10)` prob, maks. 200.
 
+## Swiat, miasta i regiony (Z)
+
+- Jedna mapa `maps/world` 160 x 232 x 11 pieter (`WorldLayout.WORLD_MAP`), generator `tools/mapgen/generate_world.py`.
+- `Town` (maks. 4, swiatynia musi byc w strefie ochronnej i przechodnia) i `Region` (prostokat, zakres pieter,
+  zalecany poziom) wczytywane z `towns=` i `regions=` w map.properties.
+- `WorldMap.templeOf(miasto)` - odrodzenie po smierci; `regionAt(pozycja)`; `GameSession.checkRegion` wypisuje
+  nazwe regionu i ostrzezenie przy wejsciu.
+- Zapis w wersji 3 (`map=world`); starsze zapisy z mapy Varden sa przenoszone o (+48, +64).
+
 ## Planowane
 
  fishing, NPC, zadania, handel, bank w UI, PvP,

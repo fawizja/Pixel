@@ -76,6 +76,36 @@ public final class MapLoader {
         }
         if (!world.isProtectionZone(spawn)) throw new IOException("spawn must be inside a protection zone");
 
+        String towns = props.getProperty("towns", "").trim();
+        if (!towns.isEmpty()) {
+            for (String entry : towns.split(";")) {
+                String[] nv = entry.trim().split(":");
+                if (nv.length != 2) throw new IOException("town entry needs name:x,y,z: " + entry);
+                String[] v = nv[1].split(",");
+                Position temple = new Position(Integer.parseInt(v[0].trim()), Integer.parseInt(v[1].trim()), Integer.parseInt(v[2].trim()));
+                if (!world.isWalkable(temple) || !world.isProtectionZone(temple)) {
+                    throw new IOException("temple of " + nv[0] + " must be walkable and protected: " + temple);
+                }
+                try {
+                    world.addTown(new Town(nv[0].trim(), temple));
+                } catch (IllegalArgumentException e) {
+                    throw new IOException(e.getMessage(), e);
+                }
+            }
+        }
+        String regions = props.getProperty("regions", "").trim();
+        if (!regions.isEmpty()) {
+            for (String entry : regions.split("\\|")) {
+                String[] f = entry.trim().split(";");
+                if (f.length != 9) throw new IOException("region needs 9 fields: " + entry);
+                try {
+                    world.addRegion(new Region(f[0].trim(), i(f[1]), i(f[2]), i(f[3]), i(f[4]), i(f[5]), i(f[6]), i(f[7]), i(f[8])));
+                } catch (IllegalArgumentException e) {
+                    throw new IOException(e.getMessage(), e);
+                }
+            }
+        }
+
         readTransitions(base + "transitions.csv", world);
         validateTransitions(world);
         return world;
@@ -142,4 +172,6 @@ public final class MapLoader {
         }
         return lines;
     }
+
+    private static int i(String s) { return Integer.parseInt(s.trim()); }
 }

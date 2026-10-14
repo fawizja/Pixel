@@ -1,0 +1,51 @@
+# potwor;x;y;z;promien;liczba;respawn (s)
+wolf;58;72;0;4;2;60
+wolf;62;94;0;3;2;60
+boar;90;70;0;4;3;75
+forest_spider;72;106;0;4;3;70
+bandit;106;76;0;3;2;120
+bandit;106;96;0;3;2;120
+goblin;61;88;-1;4;4;60
+goblin;54;81;-1;3;2;60
+goblin;56;92;-2;3;3;70
+goblin_shaman;60;85;-2;3;2;90
+skeleton;58;86;-3;4;3;90
+skeleton;62;81;-3;3;2;90
+cave_troll;58;89;-4;4;3;120
+cave_troll;60;84;-4;3;2;120
+crystal_golem;56;86;-5;3;2;180
+grimtooth;60;91;-5;2;1;1200
+# Mrozne Pustkowia
+snow_wolf;50;12;0;5;3;90
+snow_wolf;110;12;0;5;3;90
+snow_wolf;30;56;0;4;3;90
+yeti;20;10;0;4;2;150
+yeti;140;20;0;4;2;150
+frost_witch;130;44;0;3;2;150
+# Lodowe Jaskinie
+yeti;30;20;-1;4;2;150
+frost_witch;30;40;-1;4;2;150
+ice_golem;20;50;-2;4;2;240
+ice_golem;30;36;-2;4;2;240
+# Dzungla Selvaran
+crocodile;60;122;0;6;3;120
+crocodile;134;167;0;5;2;120
+jungle_serpent;29;129;0;5;3;120
+jungle_serpent;145;120;0;5;3;120
+jungle_hunter;40;160;0;4;2;120
+jungle_hunter;150;145;0;4;2;120
+# Zatopione Ruiny
+jungle_serpent;73;161;-1;4;2;120
+temple_guardian;67;169;-2;4;2;300
+temple_guardian;44;172;-2;3;1;300
+# Pustynia Qasirah
+hyena;40;190;0;6;3;90
+hyena;120;180;0;6;3;90
+scorpion;30;215;0;5;3;120
+scorpion;140;190;0;5;3;120
+sand_wraith;20;226;0;4;2;180
+# Grobowce Qasirah
+scorpion;140;220;-1;4;3;120
+sand_wraith;117;199;-1;4;2;180
+mummy;140;202;-2;4;2;300
+mummy;150;208;-3;4;2;300

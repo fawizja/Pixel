@@ -9,3 +9,15 @@ skeleton;Skeleton;22;160;90;200;6;26;PHYSICAL;1;2000;6;DEATH:100,HOLY:-30,EARTH:
 cave_troll;Cave Troll;32;320;220;190;10;40;PHYSICAL;1;2200;10;PHYSICAL:10,FIRE:-20;TANK;5;0;0;0;#5a6a3a;humanoid;underground;Powolny, ale bardzo wytrzymaly.
 crystal_golem;Crystal Golem;45;620;450;170;15;55;ENERGY;2;2400;18;PHYSICAL:25,EARTH:50,ENERGY:80,ICE:-25;MAGIC;5;0;0;0;#7fd8ff;golem;underground;Zywy krysztal razacy energia.
 grimtooth;Grimtooth the Mine King;60;3200;4000;200;40;160;PHYSICAL;1;1800;20;DEATH:50,FIRE:-10;TANK;8;0;400;1;#c8a040;boss;underground;Krol kopalni. Leczy sie raz i wpada w szal ponizej polowy zdrowia.
+snow_wolf;Snow Wolf;40;420;330;270;15;50;PHYSICAL;1;1800;8;ICE:50,FIRE:-15;SKIRMISHER;7;15;0;0;#dce8f0;beast;north;Bialy wilk polujacy w stadach.
+yeti;Yeti;70;1100;950;200;30;95;PHYSICAL;1;2200;14;ICE:60,FIRE:-20;TANK;6;0;0;0;#f0f0e8;humanoid;north;Ogromny wlochaty stwor gor.
+frost_witch;Frost Witch;85;800;1000;210;25;85;ICE;4;2300;6;ICE:90,FIRE:-25;MAGIC;7;0;0;0;#80b8e0;humanoid;north;Wiedzma rzucajaca lodowe pociski z dystansu.
+ice_golem;Ice Golem;120;2600;2600;160;50;150;ICE;2;2400;30;ICE:100,PHYSICAL:20,FIRE:-30,ENERGY:-10;MAGIC;6;0;0;0;#a8d8f0;golem;north;Golem z wiecznego lodu.
+crocodile;Crocodile;55;650;520;180;20;70;PHYSICAL;1;2200;14;EARTH:20,ICE:-10;TANK;5;0;0;0;#4a6a30;beast;equatorial;Czai sie przy bagnach.
+jungle_serpent;Jungle Serpent;75;760;800;260;20;80;EARTH;1;1800;8;EARTH:80,ICE:-20;SKIRMISHER;7;10;0;0;#7aa040;spider;equatorial;Jadowity waz - szybki i zwinny.
+jungle_hunter;Jungle Hunter;65;600;650;220;25;75;PHYSICAL;4;2200;6;;RANGED;8;0;0;0;#8a5a3a;humanoid;equatorial;Mysliwy strzelajacy z dmuchawki.
+temple_guardian;Temple Guardian;180;4800;5200;170;70;210;PHYSICAL;1;2200;40;PHYSICAL:30,HOLY:50,DEATH:-20;TANK;5;0;0;0;#9a9a70;golem;equatorial;Kamienny straznik zatopionej swiatyni.
+hyena;Hyena;45;480;360;280;15;55;PHYSICAL;1;1800;6;;SKIRMISHER;7;20;0;0;#b89a60;beast;desert;Padlinozerca polujacy w grupach.
+scorpion;Scorpion;60;700;600;200;20;75;EARTH;1;2000;18;EARTH:60,ICE:-20;MELEE;5;0;0;0;#a06030;spider;desert;Pancerny skorpion z jadowitym kolcem.
+sand_wraith;Sand Wraith;130;1800;2300;220;40;130;DEATH;3;2300;10;DEATH:100,HOLY:-40,PHYSICAL:40;MAGIC;7;0;0;0;#c8b080;humanoid;desert;Upior z piasku i gniewu.
+mummy;Mummy;200;5200;6200;170;70;230;DEATH;1;2200;30;DEATH:80,FIRE:-30,HOLY:-30;TANK;5;0;0;0;#d8ccaa;humanoid;desert;Prastary straznik grobowcow.

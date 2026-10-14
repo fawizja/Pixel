@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0] - 2026-10-14
+
+### Dodano
+- Swiat z czterema miastami: Frostholm (snieg), Varden (start), Selvaran (dzungla) i Qasirah (pustynia),
+  polaczonymi drogami; mapa 160 x 232 na 11 pietrach.
+- Lochy: Lodowe Jaskinie, Zatopione Ruiny, Grobowce Qasirah.
+- 12 potworow biomow (poziomy 40-200), nowe materialy, bron i zbroje na poziom 40-100.
+- Regiony z zalecanym poziomem i ostrzezeniem przy wejsciu na zbyt niebezpieczny teren.
+- Nowe kafelki: lod, bagno, piaskowiec, sosny, palmy, kaktusy, sciany lodowe i z piaskowca.
+- 7 nowych testow swiata (lacznie 136).
+
+### Zmieniono
+- Zapis postaci w wersji 3; stare zapisy sa przenoszone na nowa mape automatycznie.
+- Odrodzenie po smierci w swiatyni miasta postaci.
+- Generator map nie stawia dekoracji, ktore odcinalyby fragment mapy (naprawiony niedostepny spawn szkieletow).
+
 ## [0.4.0] - 2026-10-14
 
 ### Dodano

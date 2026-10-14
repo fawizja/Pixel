@@ -25,6 +25,7 @@ import pl.fawizja.pixel.movement.MovementSystem;
 import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.GroundItems;
 import pl.fawizja.pixel.world.Position;
+import pl.fawizja.pixel.world.Region;
 import pl.fawizja.pixel.world.WorldMap;
 
 /**
@@ -48,6 +49,7 @@ public final class GameSession {
     private final RecipeRegistry recipes;
     private final FishingSystem fishing;
 
+    private Region currentRegion;
     private Position stepFrom;
     private long stepStartMs;
     private long stepDurationMs;
@@ -167,6 +169,7 @@ public final class GameSession {
             facing = requested;
             Position before = pc.position();
             MoveResult r = movement.step(pc, requested);
+            if (r == MoveResult.MOVED || r == MoveResult.CHANGED_FLOOR) checkRegion(nowMs);
             if (r == MoveResult.MOVED) {
                 stepFrom = before;
                 stepStartMs = nowMs;
@@ -185,6 +188,20 @@ public final class GameSession {
             moving = false;
         }
     }
+
+    /** Komunikat przy wejsciu do nowego regionu i ostrzezenie, gdy jest zbyt trudny. */
+    private void checkRegion(long nowMs) {
+        Region r = world.regionAt(pc.position());
+        if (r == currentRegion) return;
+        currentRegion = r;
+        if (r == null) return;
+        log.add(nowMs, EventLog.Kind.INFO, r.name() + " (zalecany poziom " + r.levelMin() + "-" + r.levelMax() + ")");
+        if (r.levelMin() > pc.level() + 15) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Uwaga: ten region jest zbyt niebezpieczny dla poziomu " + pc.level() + ".");
+        }
+    }
+
+    public Region currentRegion() { return currentRegion; }
 
     private void onFloorChanged(long nowMs) {
         stepFrom = pc.position();
@@ -205,6 +222,7 @@ public final class GameSession {
         moving = false;
         combat.setTarget(null);
         onFloorChanged(nowMs);
+        checkRegion(nowMs);
     }
 
     public void toggleDefensive(long nowMs) {

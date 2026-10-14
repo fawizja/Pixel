@@ -16,6 +16,7 @@ import pl.fawizja.pixel.economy.Money;
 import pl.fawizja.pixel.item.EquipSlot;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
+import pl.fawizja.pixel.world.WorldLayout;
 
 class SaveTest {
 
@@ -54,7 +55,7 @@ class SaveTest {
         assertThrows(SaveFormatException.class, () -> codec.decode(tampered));
         assertThrows(SaveFormatException.class, () -> codec.decode(text.substring(0, text.length() / 2)));
         assertThrows(SaveFormatException.class, () -> codec.decode("garbage"));
-        assertThrows(SaveFormatException.class, () -> codec.decode(text.replace("PIXELSAVE 2", "PIXELSAVE 99")));
+        assertThrows(SaveFormatException.class, () -> codec.decode(text.replace("PIXELSAVE " + CharacterCodec.CURRENT_VERSION, "PIXELSAVE 99")));
     }
 
     @Test
@@ -73,7 +74,8 @@ class SaveTest {
         crc.update(body.toString().getBytes(StandardCharsets.UTF_8));
         String v1 = "PIXELSAVE 1\n" + body + "crc=" + Long.toHexString(crc.getValue()) + "\n";
         PlayerCharacter pc = codec.decode(v1);
-        assertEquals(new Position(31, 16, 0), pc.position());
+        // v1/v2 zapisywaly wspolrzedne mapy Varden - teraz to wspolrzedne swiata
+        assertEquals(new Position(31 + WorldLayout.VARDEN_OFFSET_X, 16 + WorldLayout.VARDEN_OFFSET_Y, 0), pc.position());
         assertEquals(777, pc.bank().balance());
         assertEquals("varden", pc.homeTown());
     }
