@@ -123,7 +123,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Czat: przycisk CZAT / Enter; powrot do menu po rozlaczeniu
 - [x] TLS: certyfikat serwera tworzony przy pierwszym starcie (poza repo), przypinanie odcisku w kliencie
 - [x] Limity polaczen/wiadomosci/czatu, asynchroniczna wysylka do klientow
-- [ ] Kopie zapasowe katalogu zapisow serwera (codzienne archiwum)
+- [x] Kopie zapasowe katalogu serwera: zip przy starcie i co 6 h, 7 najnowszych
 - [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
 - [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka

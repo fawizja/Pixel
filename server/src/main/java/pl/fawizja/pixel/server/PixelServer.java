@@ -183,6 +183,7 @@ public final class PixelServer implements AutoCloseable {
         File saves = new File(args.length > 1 ? args[1] : "server-saves");
         boolean tls = !(args.length > 2 && args[2].equals("--no-tls"));
         PixelServer server = new PixelServer(port, saves, tls);
+        new Backups(saves).startSchedule(); // kopia przy starcie i co 6 h, 7 najnowszych
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 server.close();

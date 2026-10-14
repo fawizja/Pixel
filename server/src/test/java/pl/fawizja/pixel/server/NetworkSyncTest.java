@@ -342,4 +342,24 @@ class NetworkSyncTest {
             }
         });
     }
+
+    @Test
+    void backupsArchiveSavesAccountsAndKeepTheNewest() throws Exception {
+        try (NetClient c = connect()) {
+            c.hello("Mila", "DRUID", "haslo-mila");
+            await("in", () -> c.selfSave() != null);
+        }
+        await("saved", () -> server.world().saved("Mila"));
+        Backups b = new Backups(saves);
+        File zip = b.create();
+        java.util.Set<String> names = new java.util.HashSet<>();
+        try (java.util.zip.ZipFile z = new java.util.zip.ZipFile(zip)) {
+            z.stream().forEach(e -> names.add(e.getName()));
+        }
+        assertTrue(names.contains("player_mila.save"), names.toString());
+        assertTrue(names.contains("accounts/mila.acc"), names.toString());
+        assertTrue(names.contains("tls/server.p12"), names.toString());
+        for (int i = 0; i < Backups.KEEP + 3; i++) b.create();
+        assertEquals(Backups.KEEP, b.list().length);
+    }
 }

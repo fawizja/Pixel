@@ -85,15 +85,14 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 - Grafika jest tymczasowa (proceduralna), czcionka domyslna libGDX nie ma polskich znakow - teksty UI bez diakrytykow.
 - Brak efektow graficznych czarow (tylko liczby obrazen/leczenia); pasek czarow jest automatyczny.
 - Symulacje walk to model "stoimy i wymieniamy ciosy" (pesymistyczny dla profesji dystansowych).
-- PvP tylko atakiem podstawowym; limity serwera sa, kopii zapasowych brak. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
+- PvP tylko atakiem podstawowym; limity serwera i kopie zapasowe sa. Swiat konczy sie na poziomie ~230; poziomy 230..1000 do dodania.
 - Miasta poza Varden maja tylko swiatynie, plac i domy (bez sklepow do etapu 12).
 
 ## Punkt wznowienia
 
 **Nastepne zadanie: etap 16 (optymalizacja, regresja, Android) i domkniecie etapu 14** (TODO.md). Plan:
-1. Serwer: codzienna kopia zapasowa katalogu zapisow.
-2. PvP: czary/runy na graczy, blokada PZ po walce, zapis czaszek na dysku serwera.
-3. Poziomy 230..1000: nowe obszary i potwory (swiat konczy sie na ~230).
+1. PvP: czary/runy na graczy, blokada PZ po walce, zapis czaszek na dysku serwera.
+2. Poziomy 230..1000: nowe obszary i potwory (swiat konczy sie na ~230).
 Menu: `MenuScreen` -> `PixelGame.playLocal()` albo `LoginScreen` -> `connectOnline` (watek) -> `startOnline`.
 Test GUI bez myszy: Xvfb :99 + python-xlib (XTEST) do klikania i pisania - skrypt w opisie sesji, nie w repo.
 Tryb online: `GameScreen(game, pc, NetClient)` - bez symulacji, `syncWithServer` odwzorowuje SELF/FRAME/LOG/EV.

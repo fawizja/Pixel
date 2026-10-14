@@ -95,7 +95,8 @@ tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`.
 Polaczenie jest szyfrowane TLS. Przy pierwszym starcie serwer tworzy wlasny certyfikat w
 `<katalog zapisow>/tls/` (klucz i haslo magazynu nigdy nie trafiaja do repozytorium) i wypisuje jego
 odcisk SHA-256. Klient zapamietuje odcisk przy pierwszym polaczeniu i odmawia, gdy sie zmieni
-(haslo nie jest wtedy wysylane). Przed wystawieniem serwera w internecie warto jeszcze dodac limity
+(haslo nie jest wtedy wysylane). Serwer robi kopie zapasowe katalogu zapisow (`backups/*.zip`, przy
+starcie i co 6 h, 7 najnowszych) - zawieraja tez klucz TLS, wiec trzeba je chronic jak sam katalog. Przed wystawieniem serwera w internecie warto jeszcze dodac limity
 polaczen i kopie zapasowe katalogu zapisow.
 
 ## Dokumentacja
