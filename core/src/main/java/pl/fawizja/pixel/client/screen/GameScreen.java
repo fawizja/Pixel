@@ -39,8 +39,18 @@ import pl.fawizja.pixel.time.WorldClock;
 import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.Lighting;
 import pl.fawizja.pixel.world.Position;
+import pl.fawizja.pixel.game.Actions;
+import pl.fawizja.pixel.movement.MovementSystem;
+import pl.fawizja.pixel.net.NetClient;
+import pl.fawizja.pixel.net.RemoteEntity;
+import pl.fawizja.pixel.item.ItemStack;
+import pl.fawizja.pixel.vocation.Vocation;
 
-/** Ekran gry: petla symulacji, kamera, swiat, swiatlo, HUD, autozapis i ochrona zasobow. */
+/**
+ * Ekran gry: petla symulacji, kamera, swiat, swiatlo, HUD, autozapis i ochrona zasobow.
+ * W trybie online (z {@link NetClient}) nie symuluje swiata: wysyla zamiary gracza na serwer
+ * i odwzorowuje jego klatki stanu (postac, potwory, inni gracze, przedmioty, dziennik).
+ */
 public final class GameScreen extends ScreenAdapter {
 
     /** Minimalny widoczny obszar w kafelkach (reszta zalezy od proporcji ekranu). */
@@ -71,24 +81,61 @@ public final class GameScreen extends ScreenAdapter {
     private final Matrix4 screenMatrix = new Matrix4();
     private final Vector3 projected = new Vector3();
 
+    /** Inny gracz widziany w trybie online (interpolowany miedzy klatkami). */
+    private static final class RemotePlayer {
+        String name;
+        Vocation vocation;
+        Position from;
+        Position to;
+        Direction facing = Direction.SOUTH;
+        long stepStart;
+        int healthPercent;
+        boolean seen;
+    }
+
+    private static final long REMOTE_STEP_MS = 300L;
+    private final NetClient net;
+    private final Map<Integer, RemotePlayer> remotePlayers = new java.util.HashMap<>();
+    private long clockOffset;
+    private boolean clockSynced;
+    private String lastSelf;
+    private NetClient.Frame lastFrame;
+    private Direction sentMove;
+    private boolean disconnectShown;
+
     public GameScreen(PixelGame game, PlayerCharacter pc) {
+        this(game, pc, null);
+    }
+
+    public GameScreen(PixelGame game, PlayerCharacter pc, NetClient net) {
         this.game = game;
+        this.net = net;
         long seed = TimeUtils.millis();
         MonsterManager monsters = new MonsterManager(game.world(), game.monsters(), game.spawns(), new Random(seed));
-        monsters.populate(pc.position());
+        if (net == null) monsters.populate(pc.position()); // online: potwory przychodza z serwera
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
                 game.startingConfig().startLevel());
         session.setTownServices(game.npcs(), game.shops(), game.quests());
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
-        session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! (tryb lokalny)");
+        session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
+                + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
+        if (net != null) lastSelf = net.selfSave();
         lastSaveMs = now();
     }
 
-    /** Czas swiata: w trybie lokalnym liczony od startu klienta (w trybie online - z serwera). */
+    /** Czas swiata: w trybie lokalnym liczony od startu klienta, w trybie online - zgrany z serwerem. */
     private long now() {
-        return TimeUtils.millis() - startMs; // czas sesji 0 = 09:00 czasu gry (zegar w GameSession)
+        return TimeUtils.millis() - startMs + clockOffset; // czas sesji 0 = 09:00 czasu gry (zegar w GameSession)
+    }
+
+    public boolean online() { return net != null; }
+
+    /** Akcja gracza: lokalnie wykonana od razu, online - wyslana do serwera (jedyne zrodlo prawdy). */
+    private void act(String action, long t) {
+        if (net != null) net.send("ACT", action);
+        else Actions.apply(session, action, t);
     }
 
     @Override
@@ -147,57 +194,38 @@ public final class GameScreen extends ScreenAdapter {
     private void onButton(String id) {
         long t = now();
         switch (id) {
-            case "use": session.useNearby(t); break;
-            case "run": session.toggleRun(t); break;
-            case "torch": session.toggleTorch(t); break;
             case "bag": hud.toggleBag(); break;
-            case "pick": session.pickUpHere(t); break;
             case "diag": hud.toggleDiagnostics(); break;
-            case "target": session.cycleTarget(t); break;
-            case "defensive": session.toggleDefensive(t); break;
             case "book": hud.toggleBook(); break;
             case "talk": hud.toggleNpc(session); break;
-            case "fish": session.fish(t); break;
-            case "potion_hp": session.usePotion("health_potion", t); break;
-            case "potion_mp": session.usePotion("mana_potion", t); break;
+            case "target":
+                if (net == null) session.cycleTarget(t);
+                else {
+                    session.cycleTarget(t); // natychmiastowa odpowiedz na ekranie, serwer potwierdza
+                    Monster m = session.combat().target();
+                    net.send("TARGET", m == null ? "-" : String.valueOf(m.id()));
+                }
+                break;
             case "bag_use":
-                session.useSlot(hud.selectedSlot(), t);
+                act("slot_use:" + hud.selectedSlot(), t);
                 hud.clearSelection();
                 break;
             case "bag_equip":
-                session.equipFromSlot(hud.selectedSlot(), t);
+                act("slot_equip:" + hud.selectedSlot(), t);
                 hud.clearSelection();
                 break;
             case "bag_drop":
-                session.dropFromSlot(hud.selectedSlot(), t);
+                act("slot_drop:" + hud.selectedSlot(), t);
                 hud.clearSelection();
                 break;
             default:
                 if (id.startsWith("spell:")) {
                     String key = hud.barSpell(Integer.parseInt(id.substring(6)));
-                    if (key != null) session.castSpell(key, t);
-                } else if (id.startsWith("cast:")) {
-                    session.castSpell(id.substring(5), t);
-                } else if (id.startsWith("craft:")) {
-                    session.craft(id.substring(6), t);
-                } else if (id.startsWith("npc:")) {
-                    npcAction(id.substring(4), t);
+                    if (key != null) act("cast:" + key, t);
+                } else {
+                    // use, run, torch, pick, defensive, fish, potion_*, cast:, craft:, slot_move:, npc:*
+                    act(id, t);
                 }
-        }
-    }
-
-    /** Akcje z okna rozmowy z NPC. */
-    private void npcAction(String a, long t) {
-        String[] p = a.split(":");
-        switch (p[0]) {
-            case "buy": session.buy(Integer.parseInt(p[1]), Integer.parseInt(p[2]), t); break;
-            case "sell": session.sellAll(Integer.parseInt(p[1]), t); break;
-            case "deposit": session.depositAll(t); break;
-            case "withdraw": session.withdraw(Long.parseLong(p[1]), t); break;
-            case "heal": session.priestHeal(t); break;
-            case "settle": session.settleHere(t); break;
-            case "quest": session.questAction(p[1], t); break;
-            default:
         }
     }
 
@@ -213,7 +241,12 @@ public final class GameScreen extends ScreenAdapter {
             else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdz blizej, aby porozmawiac.");
             return true;
         }
-        return session.targetAt(p);
+        boolean hit = session.targetAt(p);
+        if (hit && net != null) {
+            Monster m = session.combat().target();
+            if (m != null) net.send("TARGET", String.valueOf(m.id()));
+        }
+        return hit;
     }
 
     private Direction keyboardDirection() {
@@ -229,7 +262,6 @@ public final class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         frameStartNs = TimeUtils.nanoTime();
-        long t = now();
         if (paused) return;
         frameTimeAvg = frameTimeAvg * 0.95f + Math.min(delta, 0.25f) * 0.05f;
 
@@ -237,10 +269,12 @@ public final class GameScreen extends ScreenAdapter {
         if (dir == null && hud.joystick().active()) {
             dir = Direction.fromVector(hud.joystick().value().x, hud.joystick().value().y, 0.25f);
         }
-        session.update(t, dir);
+        if (net != null) syncWithServer(dir);
+        final long t = now();
+        if (net == null) session.update(t, dir);
         updateGuard(t);
 
-        if (t - lastSaveMs >= AUTOSAVE_MS) {
+        if (net == null && t - lastSaveMs >= AUTOSAVE_MS) {
             game.saveCharacter(session.character());
             lastSaveMs = t;
         }
@@ -281,6 +315,10 @@ public final class GameScreen extends ScreenAdapter {
                 if (np.y() != row || np.z() != z) continue;
                 TextureRegion tr = game.art().npc(n.key());
                 if (tr != null) b.draw(tr, np.x(), worldRenderer.worldY(np.y()), 1f, 1f);
+            }
+            for (RemotePlayer rp : remotePlayers.values()) {
+                if (rp.to.y() != row || rp.to.z() != z) continue;
+                b.draw(game.art().character(rp.vocation, rp.facing), remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)), 1f, 1f);
             }
             if (row == playerRow) {
                 b.draw(game.art().character(pc.vocation(), session.facing()), px, worldRenderer.worldY(py), 1f, 1f);
@@ -346,6 +384,14 @@ public final class GameScreen extends ScreenAdapter {
             font.setColor(0.75f, 0.95f, 1f, 1f);
             font.draw(batch, n.name(), projected.x - n.name().length() * 2.8f * scale, projected.y);
         }
+        for (RemotePlayer rp : remotePlayers.values()) {
+            if (rp.to.z() != z) continue;
+            projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            font.setColor(0.55f, 1f, 0.55f, 1f);
+            String label = rp.name + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "");
+            font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
+        }
         font.getData().setScale(scale);
         for (CombatEvent e : events) {
             if (e.position().z() != z) continue;
@@ -366,6 +412,126 @@ public final class GameScreen extends ScreenAdapter {
         font.getData().setScale(1f);
         font.setColor(Color.WHITE);
         batch.end();
+    }
+
+    private static float lerp(int a, int b, float f) { return a + (b - a) * f; }
+
+    private static float remoteProgress(RemotePlayer rp, long t) {
+        return Math.max(0f, Math.min(1f, (t - rp.stepStart) / (float) REMOTE_STEP_MS));
+    }
+
+    private static float remoteX(RemotePlayer rp, long t) { return lerp(rp.from.x(), rp.to.x(), remoteProgress(rp, t)); }
+
+    private static float remoteY(RemotePlayer rp, long t) { return lerp(rp.from.y(), rp.to.y(), remoteProgress(rp, t)); }
+
+    /**
+     * Tryb online: wysyla zmiane kierunku ruchu i odwzorowuje to, co przyszlo z serwera:
+     * zapis postaci (SELF), klatke stanu (pozycja, cel, potwory, gracze, ziemia) i komunikaty.
+     */
+    private void syncWithServer(Direction dir) {
+        if (dir != sentMove) {
+            net.send("MOVE", dir == null ? "-" : dir.name());
+            sentMove = dir;
+        }
+        String self = net.selfSave();
+        if (self != null && !self.equals(lastSelf)) {
+            lastSelf = self;
+            try {
+                session.character().copyStateFrom(game.codec().decode(self));
+            } catch (Exception e) {
+                Gdx.app.error("Pixel", "Nieczytelny stan postaci z serwera", e);
+            }
+        }
+        NetClient.Frame f = net.frame();
+        if (f != null && f != lastFrame) {
+            lastFrame = f;
+            long local = TimeUtils.millis() - startMs;
+            if (!clockSynced || Math.abs(local + clockOffset - f.serverTime()) > 1_000L) {
+                clockOffset = f.serverTime() - local;
+                clockSynced = true;
+            }
+            long now = now();
+            if (f.self() != null) {
+                Position cur = session.character().position();
+                Direction d = Direction.fromDelta(Integer.signum(f.self().x() - cur.x()), Integer.signum(f.self().y() - cur.y()));
+                long step = d == null ? 0 : MovementSystem.stepDurationMs(session.character(), d);
+                Direction facing = null;
+                try {
+                    if (f.facing() != null) facing = Direction.valueOf(f.facing());
+                } catch (IllegalArgumentException ignored) {
+                    // nieznany kierunek - zostaje poprzedni
+                }
+                session.applyRemotePosition(f.self(), facing, now, step);
+            }
+            session.monsters().syncRemote(f.monsters(), now, REMOTE_STEP_MS);
+            Monster target = null;
+            for (Monster m : session.monsters().monsters()) if (m.id() == f.targetId()) target = m;
+            session.combat().setTarget(target);
+            for (RemotePlayer rp : remotePlayers.values()) rp.seen = false;
+            for (RemoteEntity e : f.players()) {
+                RemotePlayer rp = remotePlayers.get(e.id());
+                if (rp == null) {
+                    rp = new RemotePlayer();
+                    rp.from = e.position();
+                    rp.to = e.position();
+                    remotePlayers.put(e.id(), rp);
+                } else if (!rp.to.equals(e.position())) {
+                    Direction d = Direction.fromDelta(Integer.signum(e.position().x() - rp.to.x()),
+                            Integer.signum(e.position().y() - rp.to.y()));
+                    boolean step = rp.to.z() == e.position().z() && rp.to.distanceTo(e.position()) == 1;
+                    rp.from = step ? rp.to : e.position();
+                    rp.to = e.position();
+                    rp.stepStart = now;
+                    if (d != null) rp.facing = d;
+                }
+                rp.name = e.name();
+                try {
+                    rp.vocation = Vocation.valueOf(e.key());
+                } catch (IllegalArgumentException ex) {
+                    rp.vocation = session.character().vocation();
+                }
+                rp.healthPercent = e.healthPercent();
+                rp.seen = true;
+            }
+            remotePlayers.values().removeIf(rp -> !rp.seen);
+            session.ground().clear();
+            for (NetClient.GroundStack g : f.ground()) session.ground().place(g.position(), new ItemStack(g.itemId(), g.count()));
+        }
+        String[] m;
+        while ((m = net.poll()) != null) {
+            long now = now();
+            switch (m[0]) {
+                case "LOG":
+                    if (m.length < 3) break;
+                    EventLog.Kind kind;
+                    try {
+                        kind = EventLog.Kind.valueOf(m[1]);
+                    } catch (IllegalArgumentException e) {
+                        kind = EventLog.Kind.INFO;
+                    }
+                    session.log().add(now, kind, m[2]);
+                    break;
+                case "CHAT":
+                    if (m.length >= 3) session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
+                    break;
+                case "EV":
+                    if (m.length < 6) break;
+                    try {
+                        session.combat().addRemoteEvent(new CombatEvent(now, new Position(Integer.parseInt(m[2]),
+                                Integer.parseInt(m[3]), Integer.parseInt(m[4])), Integer.parseInt(m[5]),
+                                CombatEvent.Kind.valueOf(m[1])));
+                    } catch (IllegalArgumentException ignored) {
+                        // zla linia - pomijamy
+                    }
+                    break;
+                default:
+            }
+        }
+        if (net.isClosed() && !disconnectShown) {
+            disconnectShown = true;
+            String why = net.error() != null ? net.error() : "serwer zamknal polaczenie";
+            session.log().add(now(), EventLog.Kind.WARNING, "Rozlaczono z serwerem: " + why);
+        }
     }
 
     private void updateGuard(long t) {
@@ -438,7 +604,7 @@ public final class GameScreen extends ScreenAdapter {
     public void pause() {
         // utrata fokusu / blokada ekranu: zapisz postep i wstrzymaj symulacje
         paused = true;
-        game.saveCharacter(session.character());
+        if (net == null) game.saveCharacter(session.character()); // online zapisuje serwer
     }
 
     @Override
@@ -448,11 +614,12 @@ public final class GameScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
-        game.saveCharacter(session.character());
+        if (net == null) game.saveCharacter(session.character());
     }
 
     @Override
     public void dispose() {
+        if (net != null) net.close();
         lightRenderer.dispose();
     }
 

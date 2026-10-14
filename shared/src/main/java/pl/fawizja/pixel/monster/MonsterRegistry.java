@@ -100,6 +100,7 @@ public final class MonsterRegistry {
     }
 
     public Collection<MonsterType> all() { return byKey.values(); }
+    public boolean contains(String key) { return byKey.containsKey(key); }
 
     static List<String> readLines(String path) throws IOException {
         List<String> lines = new ArrayList<>();

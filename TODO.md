@@ -93,7 +93,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Zegar w GameSession (wspolny dla logiki i grafiki, wymienny - serwer poda czas), komunikaty o zmroku i switaniu
 - [x] Nocne drapiezniki (kolumna activity w monsters.csv): w nocy na powierzchni aggro +3, ataki o 20% szybsze
 - [x] Ostrzezenie o pietrze liczy tylko spawny w promieniu 30 kafelkow (duzy swiat)
-- [ ] Czas gry z serwera (etap 14), nocne spawny
+- [x] Czas gry z serwera (klient online zgrywa zegar)
+- [ ] Nocne spawny
 ## Etap 12 - NPC, zadania, handel, bank
 - [x] 17 NPC w 4 miastach (bankier, kupiec, kaplan, przewodnik; w Varden takze czarodziejka), generowane z mapa
 - [x] 5 sklepow (data/shops.csv): kupno z ilosciami, sprzedaz wszystkich sztuk, atomowo, z reszta
@@ -108,7 +109,10 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Modul `server` (TCP, protokol tekstowy), wspolny swiat, wielu graczy, zapis postaci na serwerze
 - [x] Potwory wybieraja najblizszego gracza; atak trafia do sesji tego gracza
 - [x] Testy przez prawdziwe polaczenia TCP (widocznosc, ruch, czat, podwojne logowanie, wspolne potwory)
-- [ ] Tryb online w kliencie libGDX (rysowanie innych graczy i stanu z serwera)
+- [x] Tryb online w kliencie libGDX: replika stanu z serwera, inni gracze, potwory, ziemia, obrazenia, czat (odbior)
+- [x] Wolne pole przy logowaniu (gracze nie stoja na jednym kafelku)
+- [ ] Ekran logowania / wyboru serwera (takze Android), okno pisania czatu
+- [ ] Przewidywanie ruchu po stronie klienta (teraz ruch czeka na serwer ~100 ms)
 - [ ] Konta z haslem (hash, bez sekretow w repo), szyfrowanie (TLS) przed publicznym serwerem
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami

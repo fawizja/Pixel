@@ -24,4 +24,7 @@ public interface PlatformServices {
 
     /** Czy platforma powinna sama ograniczac FPS (Android nie ma wbudowanego limitu). */
     boolean needsSoftwareFrameLimit();
+
+    /** Adres serwera gry "host:port" albo null (gra lokalna, bez sieci). */
+    default String serverAddress() { return null; }
 }

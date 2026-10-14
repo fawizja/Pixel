@@ -10,6 +10,7 @@ final class ServerPlayer {
     final ClientHandler client;
     Direction move;
     long logSent;
+    long eventsSent;
     String lastSelf;
     long lastSelfMs = -1_000_000;
     long lastSaveMs;
@@ -19,6 +20,7 @@ final class ServerPlayer {
         this.session = session;
         this.client = client;
         this.logSent = session.log().total();
+        this.eventsSent = session.combat().eventTotal();
         this.lastSaveMs = now;
     }
 

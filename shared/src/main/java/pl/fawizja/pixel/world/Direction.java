@@ -15,6 +15,12 @@ public enum Direction {
 
     public boolean diagonal() { return dx != 0 && dy != 0; }
 
+    /** Kierunek o danym przesunieciu (-1..1) albo null dla (0,0). */
+    public static Direction fromDelta(int dx, int dy) {
+        for (Direction d : values()) if (d.dx == dx && d.dy == dy) return d;
+        return null;
+    }
+
     /** Kierunek z wektora joysticka (os y w gore dodatnia) lub null w martwej strefie. */
     public static Direction fromVector(float vx, float vy, float deadZone) {
         double len = Math.sqrt(vx * vx + vy * vy);

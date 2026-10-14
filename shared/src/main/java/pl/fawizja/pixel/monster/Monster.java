@@ -65,6 +65,11 @@ public final class Monster {
         stepDurationMs = durationMs;
     }
 
+    /** Klient online: zdrowie z klatki stanu serwera (w procentach). */
+    void setHealthPercent(int percent) {
+        health = Math.max(1, Math.min(type.maxHealth(), (int) Math.round(type.maxHealth() * percent / 100.0)));
+    }
+
     /** Teleport bez interpolacji (spawn). */
     void placeAt(Position p) {
         position = p;

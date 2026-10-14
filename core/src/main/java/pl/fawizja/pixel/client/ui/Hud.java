@@ -424,7 +424,7 @@ public final class Hud {
                 } else if (selectedSlot == slot) {
                     selectedSlot = -1;
                 } else {
-                    session.moveSlot(selectedSlot, slot);
+                    actions.onButton("slot_move:" + selectedSlot + ":" + slot);
                     selectedSlot = -1;
                 }
                 return true;

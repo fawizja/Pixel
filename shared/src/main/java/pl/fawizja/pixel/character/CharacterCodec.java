@@ -45,6 +45,7 @@ public final class CharacterCodec {
             m.put("quest." + q.getKey(), "A/" + q.getValue());
         }
         for (String q : pc.quests().done()) m.put("quest." + q, "D");
+        m.put("flags", (pc.isRunning() ? "R" : "") + (pc.isDefensive() ? "D" : ""));
         m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         for (int i = 0; i < pc.backpack().size(); i++) {
@@ -155,6 +156,9 @@ public final class CharacterCodec {
                 pc.skills().set(Skill.valueOf(k.substring(6)), Integer.parseInt(v[0]), Long.parseLong(v[1]));
             }
         }
+        String flags = m.getOrDefault("flags", "");
+        pc.setRunning(flags.contains("R"));
+        pc.setDefensive(flags.contains("D"));
         String timers = m.get("timers");
         if (timers != null) {
             String[] t = timers.split(",");

@@ -65,6 +65,38 @@ public final class PlayerCharacter {
         this.mana = maxMana();
     }
 
+    /**
+     * Klient online: przepisuje stan postaci przyslany przez serwer (pozycje ustawia osobno klatka stanu,
+     * zeby ruch byl plynny). Ta sama postac: imie i profesja musza sie zgadzac.
+     */
+    public void copyStateFrom(PlayerCharacter o) {
+        if (!o.name.equals(name) || o.vocation != vocation) throw new IllegalArgumentException("different character");
+        level = o.level;
+        experience = o.experience;
+        health = o.health;
+        mana = o.mana;
+        backpack.clear();
+        for (int i = 0; i < o.backpack.size(); i++) {
+            if (o.backpack.get(i) != null) backpack.putInSlot(i, o.backpack.get(i));
+        }
+        for (pl.fawizja.pixel.item.EquipSlot s : pl.fawizja.pixel.item.EquipSlot.values()) {
+            equipment.setDirect(s, o.equipment.get(s));
+        }
+        bank.mirror(o.bank);
+        for (Skill s : Skill.values()) skills.set(s, o.skills.level(s), o.skills.tries(s));
+        for (Integer id : new java.util.ArrayList<>(autoLootFilter.ignoredIds())) autoLootFilter.allow(id);
+        for (Integer id : o.autoLootFilter.ignoredIds()) autoLootFilter.ignore(id);
+        quests.mirror(o.quests);
+        homeTown = o.homeTown;
+        running = o.running;
+        torchLit = o.torchLit;
+        defensive = o.defensive;
+        fedMs = o.fedMs;
+        lightBuffMs = o.lightBuffMs;
+        lightBuffRadius = o.lightBuffRadius;
+        torchBurnMs = o.torchBurnMs;
+    }
+
     public static String validateName(String name) {
         if (name == null) throw new IllegalArgumentException("name is null");
         String n = name.trim();

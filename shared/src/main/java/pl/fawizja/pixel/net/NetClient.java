@@ -21,7 +21,11 @@ import pl.fawizja.pixel.world.Position;
 public final class NetClient implements AutoCloseable {
 
     /** Klatka stanu: czas serwera i widoczne byty. */
-    public record Frame(long serverTime, List<RemoteEntity> players, List<RemoteEntity> monsters) {}
+    public record Frame(long serverTime, Position self, String facing, int targetId,
+                        List<RemoteEntity> players, List<RemoteEntity> monsters, List<GroundStack> ground) {}
+
+    /** Stos przedmiotow na ziemi widoczny w klatce. */
+    public record GroundStack(Position position, int itemId, int count) {}
 
     private final Socket socket;
     private final BufferedWriter out;
@@ -46,8 +50,12 @@ public final class NetClient implements AutoCloseable {
 
     private void readLoop(BufferedReader in) {
         long frameTime = 0;
+        Position self = null;
+        String facing = null;
+        int targetId = -1;
         List<RemoteEntity> players = new ArrayList<>();
         List<RemoteEntity> monsters = new ArrayList<>();
+        List<GroundStack> ground = new ArrayList<>();
         try {
             String line;
             while ((line = in.readLine()) != null) {
@@ -60,17 +68,28 @@ public final class NetClient implements AutoCloseable {
                         frameTime = Long.parseLong(f[1]);
                         players = new ArrayList<>();
                         monsters = new ArrayList<>();
+                        ground = new ArrayList<>();
                         break;
+                    case "ME":
+                        self = pos(f, 1);
+                        facing = f.length > 4 ? f[4] : null;
+                        break;
+                    case "TG": targetId = f[1].equals("-") ? -1 : Integer.parseInt(f[1]); break;
                     case "PL":
                         players.add(new RemoteEntity("PL", Integer.parseInt(f[1]), f[3], f[2], pos(f, 4), Integer.parseInt(f[7])));
                         break;
                     case "MO":
                         monsters.add(new RemoteEntity("MO", Integer.parseInt(f[1]), f[2], f[2], pos(f, 3), Integer.parseInt(f[6])));
                         break;
-                    case "END":
-                        frame = new Frame(frameTime, Collections.unmodifiableList(players), Collections.unmodifiableList(monsters));
+                    case "GI":
+                        ground.add(new GroundStack(pos(f, 1), Integer.parseInt(f[4]), Integer.parseInt(f[5])));
                         break;
-                    default: messages.add(f); // LOG, CHAT
+                    case "END":
+                        frame = new Frame(frameTime, self, facing, targetId,
+                                Collections.unmodifiableList(players), Collections.unmodifiableList(monsters),
+                                Collections.unmodifiableList(ground));
+                        break;
+                    default: messages.add(f); // LOG, CHAT, EV
                 }
             }
         } catch (IOException | RuntimeException e) {

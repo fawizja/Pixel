@@ -6,8 +6,8 @@
 > (Frostholm, Varden, Selvaran, Qasirah) w pasach biomow snieg - umiarkowany - dzungla - pustynia,
 > lochami na pietrach -5..+5 i regionami z zalecanym poziomem, postac, profesje, plecak, monety, bank (logika), zapis oraz
 > potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
-> To jeszcze **nie jest MMORPG**: serwer i synchronizacja sieciowa sa zaplanowane w etapie 14
-> (patrz [TODO.md](TODO.md)).
+> Stan: dziala serwer z synchronizacja sieciowa i tryb online klienta desktopowego (wielu graczy w jednym
+> swiecie). Brakuje jeszcze kont z haslem, szyfrowania, PvP i wyboru serwera na Androidzie.
 
 ## Moduly
 
@@ -73,7 +73,7 @@ JAVA_OPTS="-Dpixel.autostart=Darek:MONK -Dpixel.teleport=60,91,-5 -Dpixel.hour=2
   desktop/build/install/desktop/bin/desktop
 ```
 
-### Serwer (etap 14, w budowie)
+### Serwer i gra online (etap 14)
 
 ```bash
 ./gradlew :server:installDist
@@ -81,7 +81,14 @@ server/build/install/server/bin/server 7171 server-saves   # port i katalog zapi
 ```
 
 Serwer jest zrodlem prawdy: klient wysyla tylko zamiary (ruch, akcje), serwer odsyla stan swiata.
-Klient libGDX nie ma jeszcze trybu online - gra na telefonie dziala lokalnie.
+Klient desktopowy w trybie online:
+
+```bash
+JAVA_OPTS="-Dpixel.server=127.0.0.1:7171 -Dpixel.autostart=Darek:PALADIN" desktop/build/install/desktop/bin/desktop
+```
+
+Gdy serwer nie odpowiada, klient gra lokalnie. Na Androidzie brak jeszcze ekranu wyboru serwera
+(APK dziala lokalnie), nie ma tez kont z haslem ani szyfrowania - serwer nie jest gotowy do wystawienia publicznie.
 
 ## Dokumentacja
 

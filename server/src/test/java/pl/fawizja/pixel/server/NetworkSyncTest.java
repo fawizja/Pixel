@@ -63,6 +63,7 @@ class NetworkSyncTest {
             await("self state", () -> alice.selfSave() != null && bob.selfSave() != null);
             assertEquals("Alice", self(alice).name());
             assertEquals(8, self(alice).level());
+            assertNotEquals(self(alice).position(), self(bob).position(), "players do not spawn on one tile");
             await("bob sees alice", () -> seen(bob, "Alice") != null);
             Position start = seen(bob, "Alice").position();
 
@@ -142,6 +143,37 @@ class NetworkSyncTest {
                     && seen(a, "Finn") != null);
             RemoteEntity ma = a.frame().monsters().get(0);
             assertTrue(b.frame().monsters().stream().anyMatch(m -> m.id() == ma.id() && m.key().equals(ma.key())));
+        }
+    }
+
+    @Test
+    void droppedItemsAndCombatEventsReachClients() throws Exception {
+        try (NetClient a = new NetClient("127.0.0.1", server.port(), 3000);
+             NetClient b = new NetClient("127.0.0.1", server.port(), 3000)) {
+            a.hello("Gina", "PALADIN");
+            b.hello("Hugo", "SORCERER");
+            await("self", () -> a.selfSave() != null && b.selfSave() != null);
+            PlayerCharacter gina = self(a);
+            int slot = -1;
+            for (int i = 0; i < gina.backpack().size(); i++) if (gina.backpack().get(i) != null) slot = i;
+            int itemId = gina.backpack().get(slot).itemId();
+            a.send("ACT", "slot_drop:" + slot);
+            await("hugo sees the item on the ground", () -> b.frame() != null && b.frame().ground().stream()
+                    .anyMatch(g -> g.itemId() == itemId));
+
+            // walka na polu z wilkami: zdarzenia walki (EV) docieraja do klienta
+            Position field = new Position(58, 75, 0);
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    if (p.name().equals("Gina")) p.session.teleport(field, server.now());
+                }
+            });
+            await("combat event", () -> {
+                if (a.frame() != null && !a.frame().monsters().isEmpty()) a.send("TARGET", String.valueOf(a.frame().monsters().get(0).id()));
+                String[] m;
+                while ((m = a.poll()) != null) if (m[0].equals("EV")) return true;
+                return false;
+            });
         }
     }
 }

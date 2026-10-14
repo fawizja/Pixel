@@ -14,6 +14,7 @@ import pl.fawizja.pixel.character.CharacterCodec;
 import pl.fawizja.pixel.character.CharacterFactory;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.config.StartingConfig;
+import pl.fawizja.pixel.combat.CombatEvent;
 import pl.fawizja.pixel.game.Actions;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
@@ -104,6 +105,7 @@ final class ServerWorld {
             client.send("ERR", "Nieprawidlowe dane postaci: " + e.getMessage());
             return null;
         }
+        pc.setPosition(freeSpotNear(pc.position()));
         GameSession s = new GameSession(items, world, pc, monsters, ground, new Random(rng.nextLong()),
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
@@ -113,6 +115,26 @@ final class ServerWorld {
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
         LOG.info("join " + pc.name() + " (" + players.size() + " online)");
         return p;
+    }
+
+    /** Wolne pole najblizej p (bez innego gracza i przejscia), aby gracze nie stali jeden na drugim. */
+    Position freeSpotNear(Position p) {
+        for (int r = 0; r <= 3; r++) {
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) != r) continue;
+                    Position c = p.translate(dx, dy);
+                    if (r > 0 && (!world.isWalkable(c) || world.transitionAt(c) != null)) continue;
+                    if (!occupied(c)) return c;
+                }
+            }
+        }
+        return p;
+    }
+
+    private boolean occupied(Position c) {
+        for (ServerPlayer o : players.values()) if (o.session.character().position().equals(c)) return true;
+        return false;
     }
 
     private PlayerCharacter load(String name) {
@@ -231,6 +253,15 @@ final class ServerWorld {
                 }
                 p.logSent = log.total();
             }
+            long freshEv = p.session.combat().eventTotal() - p.eventsSent;
+            if (freshEv > 0) {
+                for (CombatEvent e : p.session.combat().latestEvents((int) Math.min(freshEv, 40))) {
+                    Position ep = e.position();
+                    p.client.send("EV", e.kind().name(), String.valueOf(ep.x()), String.valueOf(ep.y()),
+                            String.valueOf(ep.z()), String.valueOf(e.amount()));
+                }
+                p.eventsSent = p.session.combat().eventTotal();
+            }
             if (now - p.lastSelfMs >= SELF_EVERY_MS) {
                 String self = codec.encode(p.session.character());
                 if (!self.equals(p.lastSelf)) {
@@ -242,6 +273,10 @@ final class ServerWorld {
             Position me = p.session.character().position();
             StringBuilder frame = new StringBuilder();
             frame.append(Protocol.line("FRAME", String.valueOf(now))).append('\n');
+            frame.append(Protocol.line("ME", String.valueOf(me.x()), String.valueOf(me.y()), String.valueOf(me.z()),
+                    p.session.facing().name())).append('\n');
+            Monster tg = p.session.combat().target();
+            frame.append(Protocol.line("TG", tg == null || tg.isDead() ? "-" : String.valueOf(tg.id()))).append('\n');
             for (ServerPlayer o : players.values()) {
                 Position op = o.session.character().position();
                 if (o == p || op.z() != me.z() || op.distanceTo(me) > Protocol.VIEW_RADIUS) continue;
@@ -257,6 +292,9 @@ final class ServerWorld {
                         String.valueOf(mp.y()), String.valueOf(mp.z()), String.valueOf(Math.round(100 * m.healthFraction()))))
                         .append('\n');
             }
+            ground.forEachNear(me, Protocol.VIEW_RADIUS, (gp, st) -> frame.append(Protocol.line("GI",
+                    String.valueOf(gp.x()), String.valueOf(gp.y()), String.valueOf(gp.z()),
+                    String.valueOf(st.itemId()), String.valueOf(st.count()))).append('\n'));
             frame.append("END");
             p.client.sendRaw(frame.toString());
         }

@@ -6,8 +6,18 @@ Stan: **Z** = zaimplementowane i przetestowane, **C** = czesciowo, **P** = zapla
 
 - `shared` - logika bez libGDX (testowalna na JVM, docelowo uzywana przez serwer).
 - `core` - klient: renderowanie, UI, wejscie. Nie zawiera regul gry.
-- `GameSession` (shared) - lokalna sesja offline laczaca postac, swiat i systemy. W trybie online
-  te same akcje beda walidowane przez serwer (serwer jest zrodlem prawdy o HP, manie, przedmiotach i walucie).
+- `GameSession` (shared) - sesja laczaca postac, swiat i systemy. Offline dziala w kliencie; online
+  serwer prowadzi po jednej sesji na gracza (zrodlo prawdy o HP, manie, przedmiotach i walucie),
+  a klient trzyma replike bez symulacji (`copyStateFrom`, `applyRemotePosition`, `MonsterManager.syncRemote`).
+
+## Siec (etap 14)
+
+- TCP, linie tekstowe rozdzielone tabulatorem (`net.Protocol`, wersja 1, port 7171).
+- Klient -> serwer: `HELLO wersja imie PROFESJA`, `MOVE kierunek|-`, `ACT akcja` (te same nazwy co
+  `game.Actions`), `TARGET id`, `CHAT tekst`, `BYE`.
+- Serwer -> klient: `WELCOME id`, `ERR`, `SELF zapis` (gdy sie zmienil, max 4/s), `LOG`, `CHAT`,
+  `EV` (zdarzenie walki), co 100 ms klatka `FRAME czas` + `ME` + `TG` + `PL`/`MO`/`GI` w promieniu 12 + `END`.
+- Serwer: 20 krokow/s, potwory aktualizowane raz na krok dla wszystkich graczy, zapis co 60 s i przy wyjsciu.
 
 ## Postac (Z)
 

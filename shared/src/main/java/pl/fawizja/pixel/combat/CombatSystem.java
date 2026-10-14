@@ -35,6 +35,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private final Random rng;
     private final int minLevel;
     private final ArrayDeque<CombatEvent> events = new ArrayDeque<>();
+    private long eventTotal;
     private Monster target;
     private long nextPlayerAttackMs;
     private boolean autoLoot = true;
@@ -224,9 +225,22 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     }
 
     private void push(CombatEvent e) {
+        eventTotal++;
         events.addLast(e);
         while (events.size() > 40) events.removeFirst();
     }
+
+    /** Liczba wszystkich zdarzen od poczatku (serwer wysyla tylko nowe). */
+    public long eventTotal() { return eventTotal; }
+
+    /** Ostatnie n zdarzen (najstarsze pierwsze). */
+    public List<CombatEvent> latestEvents(int n) {
+        List<CombatEvent> out = new ArrayList<>(events);
+        return out.subList(Math.max(0, out.size() - n), out.size());
+    }
+
+    /** Klient online: zdarzenie walki odebrane z serwera (do wyswietlenia). */
+    public void addRemoteEvent(CombatEvent e) { push(e); }
 
     public List<CombatEvent> recentEvents(long now, long maxAgeMs) {
         List<CombatEvent> out = new ArrayList<>();

@@ -408,6 +408,23 @@ public final class GameSession {
         return true;
     }
 
+    /**
+     * Klient online: pozycja postaci z klatki stanu serwera. Krok na sasiedni kafelek jest
+     * interpolowany przez stepMs (jak lokalny ruch), dalszy skok (teleport, schody) - natychmiast.
+     */
+    public void applyRemotePosition(Position p, Direction facing, long nowMs, long stepMs) {
+        Position cur = pc.position();
+        if (facing != null) this.facing = facing;
+        if (cur.equals(p)) return;
+        boolean step = cur.z() == p.z() && cur.distanceTo(p) == 1;
+        stepFrom = step ? cur : p;
+        pc.setPosition(p);
+        stepStartMs = nowMs;
+        stepDurationMs = step ? stepMs : 0;
+        moving = step;
+        if (!step || cur.z() != p.z()) checkRegion(nowMs);
+    }
+
     /** Pozycja do rysowania (plynna interpolacja miedzy kafelkami). */
     public float renderX(long nowMs) {
         return lerp(stepFrom.x(), pc.position().x(), progress(nowMs));

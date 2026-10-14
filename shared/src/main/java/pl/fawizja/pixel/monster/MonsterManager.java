@@ -131,6 +131,39 @@ public final class MonsterManager {
         return max;
     }
 
+    /**
+     * Klient online: odwzorowuje potwory z klatki stanu serwera (id, typ, pozycja, % zdrowia).
+     * Brakujace w klatce znikaja, nowe pojawiaja sie, przesuniete ida plynnie przez stepMs.
+     */
+    public void syncRemote(List<pl.fawizja.pixel.net.RemoteEntity> seen, long now, long stepMs) {
+        Map<Integer, Monster> byId = new HashMap<>();
+        for (Monster m : monsters) byId.put(m.id(), m);
+        java.util.Set<Integer> keep = new java.util.HashSet<>();
+        for (pl.fawizja.pixel.net.RemoteEntity e : seen) {
+            if (!registry.contains(e.key())) continue;
+            keep.add(e.id());
+            Monster m = byId.get(e.id());
+            if (m == null) {
+                m = new Monster(e.id(), registry.get(e.key()), new SpawnPoint(e.key(), e.position(), 0, 1, 60), e.position());
+                monsters.add(m);
+                grid.add(m);
+            } else if (!m.position().equals(e.position())) {
+                Position from = m.position();
+                Direction d = Direction.fromDelta(Integer.signum(e.position().x() - from.x()), Integer.signum(e.position().y() - from.y()));
+                if (from.distanceTo(e.position()) > 1 || from.z() != e.position().z() || d == null) m.placeAt(e.position());
+                else m.moveTo(e.position(), d, now, stepMs);
+                grid.moved(m, from);
+            }
+            m.setHealthPercent(e.healthPercent());
+        }
+        for (Monster m : new ArrayList<>(monsters)) {
+            if (!keep.contains(m.id())) {
+                monsters.remove(m);
+                grid.remove(m, m.position());
+            }
+        }
+    }
+
     /** Usuwa zabitego potwora i planuje odrodzenie. */
     public void kill(Monster m, long now) {
         monsters.remove(m);

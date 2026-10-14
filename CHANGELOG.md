@@ -1,6 +1,16 @@
 # Changelog
 
-## [Niewydane] - etap 14, czesc 1
+## [0.9.0] - 2026-10-14 - etap 14: serwer i tryb online
+
+### Dodano (czesc 2: klient online)
+- Klient libGDX laczy sie z serwerem (`-Dpixel.server=host:port`): ruch i akcje ida na serwer,
+  ekran pokazuje stan z serwera - postac, potwory, innych graczy (z imionami i % zdrowia),
+  przedmioty na ziemi, liczby obrazen, dziennik i czat. Bez serwera gra przechodzi w tryb lokalny.
+- Zegar gry zgrany z czasem serwera; zapis postaci online robi tylko serwer.
+- Gracze logujacy sie w to samo miejsce dostaja wolne pole obok (nie stoja jeden na drugim).
+- 4 nowe testy (lacznie 161): replika klienta (stan postaci, pozycja, potwory) i przedmioty/zdarzenia walki przez TCP.
+
+### Dodano (czesc 1: serwer)
 
 ### Dodano
 - Modul `server`: autorytatywny serwer gry (TCP, protokol tekstowy `net.Protocol`), jeden wspolny swiat:
@@ -12,7 +22,8 @@
 - 4 nowe testy, w tym 3 przez prawdziwe polaczenia TCP (lacznie 157).
 
 ### Jeszcze nie
-- Klient libGDX nie laczy sie jeszcze z serwerem (nastepny krok), brak kont z haslem i PvP.
+- Brak kont z haslem, szyfrowania i PvP; na Androidzie nie ma jeszcze ekranu wpisania adresu serwera
+  (APK gra lokalnie), brak okna czatu do pisania (czat jest odbierany i wyswietlany).
 
 ## [0.8.0] - 2026-10-14
 

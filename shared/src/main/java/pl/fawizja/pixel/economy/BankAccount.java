@@ -15,6 +15,9 @@ public final class BankAccount {
 
     public long balance() { return balance; }
 
+    /** Kopia salda ze stanu serwera (klient online). */
+    public void mirror(BankAccount other) { this.balance = other.balance; }
+
     public InventoryResult deposit(Container backpack, long amount) {
         if (amount <= 0) return InventoryResult.INVALID_AMOUNT;
         long newBalance;

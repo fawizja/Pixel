@@ -32,4 +32,7 @@ public class DefaultPlatformServices implements PlatformServices {
 
     @Override
     public boolean needsSoftwareFrameLimit() { return false; }
+
+    @Override
+    public String serverAddress() { return System.getProperty("pixel.server"); }
 }

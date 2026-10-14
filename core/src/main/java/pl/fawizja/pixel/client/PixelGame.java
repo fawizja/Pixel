@@ -114,7 +114,64 @@ public class PixelGame extends Game {
 
     public void startGame(PlayerCharacter pc) {
         Gdx.app.log(TAG, "Start: " + pc.name() + " (" + pc.vocation() + ", lvl " + pc.level() + ")");
+        String server = platform.serverAddress();
+        if (server != null && !server.isBlank()) {
+            String problem = startOnline(server.trim(), pc);
+            if (problem == null) return;
+            Gdx.app.error(TAG, "Tryb online niedostepny: " + problem);
+            GameScreen offline = new GameScreen(this, pc);
+            offline.session().log().add(0, pl.fawizja.pixel.game.EventLog.Kind.WARNING,
+                    "Brak polaczenia z serwerem (" + problem + ") - gra lokalna.");
+            setScreen(offline);
+            return;
+        }
         setScreen(new GameScreen(this, pc));
+    }
+
+    /**
+     * Laczy z serwerem i czeka na pierwszy zapis postaci (serwer jest jego wlascicielem).
+     * Zwraca null po sukcesie albo opis problemu.
+     */
+    private String startOnline(String address, PlayerCharacter local) {
+        int colon = address.lastIndexOf(':');
+        String host = colon > 0 ? address.substring(0, colon) : address;
+        int port = pl.fawizja.pixel.net.Protocol.DEFAULT_PORT;
+        try {
+            if (colon > 0) port = Integer.parseInt(address.substring(colon + 1));
+        } catch (NumberFormatException e) {
+            return "zly port";
+        }
+        pl.fawizja.pixel.net.NetClient net;
+        try {
+            net = new pl.fawizja.pixel.net.NetClient(host, port, 3000);
+        } catch (IOException e) {
+            return e.getMessage() == null ? "brak polaczenia" : e.getMessage();
+        }
+        net.hello(local.name(), local.vocation().name());
+        long deadline = System.currentTimeMillis() + 5000;
+        while (net.selfSave() == null && net.error() == null && !net.isClosed() && System.currentTimeMillis() < deadline) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        if (net.selfSave() == null) {
+            String err = net.error() != null ? net.error() : "serwer nie odpowiada";
+            net.close();
+            return err;
+        }
+        PlayerCharacter remote;
+        try {
+            remote = codec.decode(net.selfSave());
+        } catch (Exception e) {
+            net.close();
+            return "nieczytelny stan postaci";
+        }
+        Gdx.app.log(TAG, "Online: " + address + " jako " + remote.name() + " (id " + net.playerId() + ")");
+        setScreen(new GameScreen(this, remote, net));
+        return null;
     }
 
     /** Bezpieczny zapis (plik tymczasowy + kopia zapasowa). Bledy sa logowane, nie przerywaja gry. */
@@ -129,6 +186,7 @@ public class PixelGame extends Game {
     }
 
     public PlatformServices platform() { return platform; }
+    public CharacterCodec codec() { return codec; }
     public ItemRegistry items() { return items; }
     public WorldMap world() { return world; }
     public MonsterRegistry monsters() { return monsters; }

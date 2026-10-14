@@ -45,6 +45,17 @@ public final class GroundItems {
         return InventoryResult.OK;
     }
 
+    /** Wszystkie stosy w promieniu (to samo pietro), np. do wyslania klientowi. */
+    public void forEachNear(Position c, int radius, java.util.function.BiConsumer<Position, ItemStack> out) {
+        for (Map.Entry<Position, List<ItemStack>> e : items.entrySet()) {
+            Position p = e.getKey();
+            if (p.z() != c.z() || p.distanceTo(c) > radius) continue;
+            for (ItemStack s : e.getValue()) out.accept(p, s);
+        }
+    }
+
+    public void clear() { items.clear(); }
+
     public int totalStacks() {
         int n = 0;
         for (List<ItemStack> l : items.values()) n += l.size();

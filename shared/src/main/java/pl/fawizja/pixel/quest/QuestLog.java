@@ -31,6 +31,14 @@ public final class QuestLog {
         done.put(key, Boolean.TRUE);
     }
 
+    /** Kopia stanu z innej postaci (klient online). */
+    public void mirror(QuestLog o) {
+        active.clear();
+        active.putAll(o.active);
+        done.clear();
+        done.putAll(o.done);
+    }
+
     /** Odtworzenie z zapisu. */
     public void restore(String key, boolean finished, int progress) {
         if (finished) {

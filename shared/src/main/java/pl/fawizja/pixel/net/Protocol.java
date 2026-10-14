@@ -14,7 +14,9 @@ import java.util.List;
  * MOVE   KIERUNEK | -                   ERR     komunikat
  * ACT    akcja (jak w HUD, np. cast:x)  SELF    zapis postaci (CharacterCodec)
  * TARGET idPotwora                      FRAME   czasSerwera            (poczatek klatki stanu)
- * CHAT   tekst                          PL      id imie PROFESJA x y z hp% (inny gracz w zasiegu)
+ * CHAT   tekst                          ME      x y z KIERUNEK         (wlasna pozycja)
+ *                                       TG      idPotwora | -          (cel walki)
+ *                                       PL      id imie PROFESJA x y z hp% (inny gracz w zasiegu)
  * BYE                                   MO      id klucz x y z hp%     (potwor w zasiegu)
  *                                       END                            (koniec klatki)
  *                                       LOG     RODZAJ tekst
