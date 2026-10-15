@@ -151,6 +151,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Zadanie dnia u przewodnika (0.32.0)
 - [x] Wierzchowiec (siodlo, +60 szybkosci, widoczny dla innych) (0.33.0)
 - [x] Poczta: przesylki do depozytu, takze dla graczy offline (0.34.0)
+- [x] Skrzynie skarbow w lochach i na wyzynach (0.35.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

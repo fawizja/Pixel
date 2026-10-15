@@ -37,6 +37,9 @@ public final class TileArt implements Disposable {
     /** Kon (wierzchowiec): w prawo i w lewo. */
     private static final int HORSE_CELL = 1000;
     private TextureRegion[] horse;
+    /** Skrzynia skarbow: zamknieta i otwarta. */
+    private static final int CHEST_CELL = 1002;
+    private TextureRegion[] chest;
 
     private final Texture atlas;
     private final Texture lightTexture;
@@ -81,6 +84,8 @@ public final class TileArt implements Disposable {
         }
         paintHorse(pm, cellX(HORSE_CELL), cellY(HORSE_CELL), false);
         paintHorse(pm, cellX(HORSE_CELL + 1), cellY(HORSE_CELL + 1), true);
+        paintChest(pm, cellX(CHEST_CELL), cellY(CHEST_CELL), false);
+        paintChest(pm, cellX(CHEST_CELL + 1), cellY(CHEST_CELL + 1), true);
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -97,6 +102,7 @@ public final class TileArt implements Disposable {
         for (int i = 0; i < mtypes.size(); i++) monsters.put(mtypes.get(i).key(), region(MONSTER_BASE + i));
         for (int i = 0; i < npcList.size(); i++) npcs.put(npcList.get(i).key(), region(NPC_BASE + i));
         horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
+        chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -118,6 +124,8 @@ public final class TileArt implements Disposable {
 
     /** Kon pod jezdzcem, zwrocony w strone ruchu (w lewo albo w prawo). */
     public TextureRegion horse(Direction facing) { return horse[facing != null && facing.dx < 0 ? 1 : 0]; }
+
+    public TextureRegion chest(boolean open) { return chest[open ? 1 : 0]; }
     public Texture lightTexture() { return lightTexture; }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -585,6 +593,26 @@ public final class TileArt implements Disposable {
         }
         if (v == Vocation.PALADIN) {
             rect(pm, ox, oy, 13, 2, 1, 10, Color.valueOf("#c9b37e")); // wlocznia
+        }
+    }
+
+    /** Skrzynia: drewno z okuciami i zamkiem; otwarta - podniesione wieko i ciemne, puste wnetrze. */
+    private void paintChest(Pixmap pm, int ox, int oy, boolean open) {
+        Color wood = Color.valueOf("#8a5a2a");
+        Color dark = shade(wood, 0.6f);
+        Color metal = Color.valueOf("#d8b040");
+        disc(pm, ox, oy, 8f, 14.5f, 6f, new Color(0, 0, 0, 0.35f));
+        rect(pm, ox, oy, 2, 8, 12, 6, wood);       // skrzynia
+        rect(pm, ox, oy, 2, 13, 12, 1, dark);
+        rect(pm, ox, oy, 2, 8, 1, 6, metal);       // okucia
+        rect(pm, ox, oy, 13, 8, 1, 6, metal);
+        if (open) {
+            rect(pm, ox, oy, 2, 3, 12, 4, dark);   // podniesione wieko
+            rect(pm, ox, oy, 3, 8, 10, 2, Color.valueOf("#2a1a0a"));
+        } else {
+            rect(pm, ox, oy, 2, 5, 12, 3, shade(wood, 1.15f)); // wieko
+            rect(pm, ox, oy, 2, 7, 12, 1, metal);
+            rect(pm, ox, oy, 7, 7, 2, 3, metal);   // zamek
         }
     }
 

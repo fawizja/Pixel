@@ -142,6 +142,7 @@ public final class GameScreen extends ScreenAdapter {
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
                 game.startingConfig().startLevel());
         session.setTownServices(game.npcs(), game.shops(), game.quests());
+        session.setChests(game.chests());
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
@@ -496,6 +497,7 @@ public final class GameScreen extends ScreenAdapter {
         float lx = myLunge == null ? 0f : myLunge[0], ly = myLunge == null ? 0f : myLunge[1];
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
             drawCorpses(b, row, z);
+            drawChests(b, row, z);
             for (int i = 0; i < visibleMonsters.size(); i++) {
                 Monster m = visibleMonsters.get(i);
                 if (m.position().y() != row || m.position().z() != z) continue;
@@ -560,6 +562,17 @@ public final class GameScreen extends ScreenAdapter {
             int dx = Integer.signum(e.position().x() - e.from().x());
             int dy = Integer.signum(e.position().y() - e.from().y());
             lunges.put(e.from(), new float[] {dx * amount, dy * amount});
+        }
+    }
+
+    /** Skrzynie skarbow w danym wierszu: zamknieta albo otwarta (gdy ta postac juz ja oproznila). */
+    private void drawChests(SpriteBatch b, int row, int z) {
+        if (game.chests() == null) return;
+        for (pl.fawizja.pixel.treasure.TreasureChests.Chest c : game.chests().all()) {
+            Position p = c.position();
+            if (p.y() != row || p.z() != z) continue;
+            boolean open = session.character().openedChests().contains(c.id());
+            b.draw(game.art().chest(open), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
         }
     }
 

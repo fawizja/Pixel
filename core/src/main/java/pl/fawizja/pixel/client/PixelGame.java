@@ -44,6 +44,7 @@ public class PixelGame extends Game {
     private pl.fawizja.pixel.npc.ShopRegistry shops;
     private pl.fawizja.pixel.npc.NpcRegistry npcs;
     private pl.fawizja.pixel.quest.QuestRegistry quests;
+    private pl.fawizja.pixel.treasure.TreasureChests chests;
     private TileArt art;
     private pl.fawizja.pixel.client.audio.SoundPlayer sound;
     private SpriteBatch batch;
@@ -72,6 +73,7 @@ public class PixelGame extends Game {
             shops = pl.fawizja.pixel.npc.ShopRegistry.loadDefault(items);
             npcs = pl.fawizja.pixel.npc.NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
             quests = pl.fawizja.pixel.quest.QuestRegistry.loadDefault(items, monsters);
+            chests = pl.fawizja.pixel.treasure.TreasureChests.generate(world);
         } catch (IOException e) {
             throw new IllegalStateException("Nie można wczytać mapy", e);
         }
@@ -130,6 +132,7 @@ public class PixelGame extends Game {
     public pl.fawizja.pixel.npc.ShopRegistry shops() { return shops; }
     public pl.fawizja.pixel.npc.NpcRegistry npcs() { return npcs; }
     public pl.fawizja.pixel.quest.QuestRegistry quests() { return quests; }
+    public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
 
     public void createCharacter(String name, Vocation vocation) {
         PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()));

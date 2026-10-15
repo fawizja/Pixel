@@ -71,6 +71,7 @@ final class ServerWorld {
     private final NpcRegistry npcs;
     private final ShopRegistry shops;
     private final QuestRegistry quests;
+    private final pl.fawizja.pixel.treasure.TreasureChests chests;
     private final SpellRegistry spells;
     private final ConsumableRegistry consumables;
     private final RecipeRegistry recipes;
@@ -111,6 +112,7 @@ final class ServerWorld {
         shops = ShopRegistry.loadDefault(items);
         npcs = NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
         quests = QuestRegistry.loadDefault(items, monsterTypes);
+        chests = pl.fawizja.pixel.treasure.TreasureChests.generate(world);
         spells = SpellRegistry.loadDefault(items);
         consumables = ConsumableRegistry.loadDefault(items);
         recipes = RecipeRegistry.loadDefault(items);
@@ -661,6 +663,7 @@ final class ServerWorld {
         GameSession s = new GameSession(items, world, pc, monsters, ground, new Random(rng.nextLong()),
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
+        s.setChests(chests);
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
                 pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));
         if (p.pvp.fightUntil() > now) s.lockProtectionZonesUntil(p.pvp.fightUntil());

@@ -30,6 +30,8 @@ public final class PlayerCharacter {
     private final pl.fawizja.pixel.achievement.Bestiary bestiary = new pl.fawizja.pixel.achievement.Bestiary();
     private final pl.fawizja.pixel.achievement.Achievements achievements = new pl.fawizja.pixel.achievement.Achievements();
     private final pl.fawizja.pixel.daily.DailyTask daily = new pl.fawizja.pixel.daily.DailyTask();
+    /** Otwarte skrzynie skarbow (identyfikatory). */
+    private final java.util.Set<String> openedChests = new java.util.LinkedHashSet<>();
 
     public static final int DEPOT_SLOTS = 60;
     private final Skills skills = new Skills();
@@ -96,6 +98,8 @@ public final class PlayerCharacter {
         bestiary.copyFrom(o.bestiary);
         achievements.copyFrom(o.achievements);
         daily.copyFrom(o.daily);
+        openedChests.clear();
+        openedChests.addAll(o.openedChests);
         depot.clear();
         for (int i = 0; i < o.depot.size(); i++) {
             if (o.depot.get(i) != null) depot.putInSlot(i, o.depot.get(i));
@@ -159,6 +163,7 @@ public final class PlayerCharacter {
     public pl.fawizja.pixel.achievement.Bestiary bestiary() { return bestiary; }
     public pl.fawizja.pixel.achievement.Achievements achievements() { return achievements; }
     public pl.fawizja.pixel.daily.DailyTask daily() { return daily; }
+    public java.util.Set<String> openedChests() { return openedChests; }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public String homeTown() { return homeTown; }

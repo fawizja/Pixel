@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.35.0] - 2026-10-15
+
+### Dodano
+- Skrzynie skarbów: po 4 na każdym piętrze lochów (-1..-5) i po 2 na wyżynach (+1..+3), z dala od schodów i przejść,
+  zawsze osiągalne z miasta. Każda postać otwiera każdą skrzynię raz (UŻYJ obok skrzyni): złoto od 500 gp na -1
+  do 40 500 gp na -5 i mikstury coraz lepsze z głębokością. Pełny plecak - skrzynia czeka.
+- Skrzynie rysowane na mapie (zamknięta / otwarta dla tej postaci), działają lokalnie i online; zapis `chests`.
+- Nowa scena `chest` w regresji GUI (22 sceny); 2 nowe testy (rozmieszczenie, osiągalność, otwieranie raz,
+  zapis); łącznie 260.
+
 ## [0.34.0] - 2026-10-15
 
 ### Dodano

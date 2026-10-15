@@ -673,8 +673,39 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
                 break;
             default:
+                if (openChest(nowMs)) break;
                 if (!searchCorpse(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
         }
+    }
+
+    private pl.fawizja.pixel.treasure.TreasureChests chests;
+
+    /** Skrzynie skarbow swiata (PixelGame, serwer, testy). */
+    public void setChests(pl.fawizja.pixel.treasure.TreasureChests chests) { this.chests = chests; }
+
+    public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
+
+    /** Skrzynia obok gracza: zloto i przedmioty do plecaka, raz na postac. false = nie ma skrzyni obok. */
+    public boolean openChest(long nowMs) {
+        pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests == null ? null : chests.near(pc.position());
+        if (c == null) return false;
+        if (pc.openedChests().contains(c.id())) {
+            log.add(nowMs, EventLog.Kind.INFO, "Ta skrzynia jest już pusta.");
+            return true;
+        }
+        int itemId = items.byKey(c.itemKey()).id();
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        boolean ok = pl.fawizja.pixel.economy.Money.add(tx, c.gold()).ok()
+                && tx.add(new pl.fawizja.pixel.item.ItemStack(itemId, c.count())).ok();
+        if (!ok) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Skrzynia pełna skarbów, ale plecak nie ma miejsca. Zrób miejsce i spróbuj znowu.");
+            return true;
+        }
+        pc.backpack().commitFrom(tx);
+        pc.openedChests().add(c.id());
+        log.add(nowMs, EventLog.Kind.LOOT, "Skrzynia skarbów! " + String.format("%,d gp", c.gold()) + " i " + c.count() + "x "
+                + items.get(itemId).name() + ".");
+        return true;
     }
 
     public void toggleRun(long nowMs) {
