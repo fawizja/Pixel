@@ -197,7 +197,7 @@ public final class PixelServer implements AutoCloseable {
 
     /**
      * Konsola operatora (stdin, np. {@code docker attach} albo terminal): say tekst, kick imie, ban imie godziny,
-     * unban imie, mute imie minuty, admin imie, who. Polecenia wykonuje watek swiata.
+     * unban imie, mute imie minuty, admin imie, who, invasion [miasto]. Polecenia wykonuje watek swiata.
      */
     void startConsole(java.io.InputStream in) {
         Thread t = new Thread(() -> {

@@ -61,6 +61,11 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Powiadomienie o zabiciu potwora przez gracza (np. licznik zadan). */
     public void setKillListener(java.util.function.Consumer<MonsterType> listener) { this.killListener = listener; }
 
+    /** Konkretny pokonany potwor (np. serwer liczy najezdzcow inwazji). */
+    private java.util.function.Consumer<Monster> deathListener;
+
+    public void setDeathListener(java.util.function.Consumer<Monster> listener) { this.deathListener = listener; }
+
     /** Podzial doswiadczenia w druzynie (serwer); true = doswiadczenie juz rozdane, zabojca nie dostaje go sam. */
     public interface ExperienceSharer { boolean share(MonsterType killed, long now); }
 
@@ -172,6 +177,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         MonsterType t = m.type();
         kills++;
         if (killListener != null) killListener.accept(t);
+        if (deathListener != null) deathListener.accept(m);
         if (experienceSharer == null || !experienceSharer.share(t, now)) {
             awardExperience(Balance.experienceReward(t.experience(), t.level(), pc.level()), "Pokonano: " + t.name(), now);
         }

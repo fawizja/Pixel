@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.31.0] - 2026-10-15
+
+### Dodano
+- Inwazje na miasta (serwer): co 120 minut (`-Dpixel.invasionMinutes`) grupa potworów z hersztem pojawia się
+  za murami kolejnego miasta - Varden (bandyci, troll), Frostholm (śnieżne wilki, yeti), Qasirah (hieny, skorpion),
+  Selvaran (krokodyle, wąż). Ogłoszenie dla wszystkich z kierunkiem ataku, komunikaty o hersztcie i połowie wrogów.
+- Każdy pokonany najeźdźca liczy się graczowi; po obronie (albo po 20 minutach) 100 gp za wroga i 1 000 gp
+  za herszta na konto, ogłoszenie najlepszego obrońcy. Najeźdźcy się nie odradzają, po czasie odchodzą.
+- Administrator: `/inwazja [miasto]` (konsola: `invasion`) uruchamia inwazję od razu.
+- Wchodzący do gry w czasie inwazji dostaje informację, ile wrogów zostało.
+- 4 nowe testy (liczenie i nagrody, miejsca zbiórki we wszystkich miastach, potwory bez odradzania, sieciowy
+  od ogłoszenia do nagrody); łącznie 252.
+
 ## [0.30.0] - 2026-10-15
 
 ### Dodano

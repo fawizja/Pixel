@@ -780,6 +780,43 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void anInvasionIsAnnouncedFoughtOffAndRewarded() throws Exception {
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            ola.send("ADMIN", "INVASION", "Varden");
+            awaitMessage(ola, "admins only", m -> m[0].equals("LOG") && m[2].contains("Brak uprawnień"));
+            String[] answer = new String[1];
+            server.enqueueTest(() -> answer[0] = server.world().moderate(new String[] {"INVASION", "Varden"}, "konsola", server.now()));
+            await("started", () -> answer[0] != null);
+            assertTrue(answer[0].startsWith("Inwazja na Varden rozpoczęta"), answer[0]);
+            awaitMessage(ola, "announced", m -> m[0].equals("LOG") && m[2].startsWith("Inwazja! Bandyci atakują Varden"));
+            int[] total = new int[1];
+            server.enqueueTest(() -> {
+                ServerWorld w = server.world();
+                total[0] = w.invasion().total();
+                assertEquals("Trwa już inwazja na Varden.", w.startInvasion(null, server.now()));
+                ServerPlayer p = w.find("Ola");
+                for (pl.fawizja.pixel.monster.Monster m : new java.util.ArrayList<>(w.monsters.monsters())) {
+                    if (w.invasion() != null && w.invasion().aliveIds().contains(m.id())) {
+                        p.session.combat().damageMonster(m, 1_000_000, pl.fawizja.pixel.combat.DamageType.FIRE, server.now());
+                    }
+                }
+            });
+            awaitMessage(ola, "defended", m -> m[0].equals("LOG") && m[2].startsWith("Varden obronione! Najwięcej pokonał(a): Ola"));
+            long expected = total[0] * pl.fawizja.pixel.event.Invasion.REWARD_PER_KILL + pl.fawizja.pixel.event.Invasion.LEADER_BONUS;
+            await("reward on the account", () -> {
+                try {
+                    return self(ola).bank().balance() == expected;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            assertNull(server.world().invasion());
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

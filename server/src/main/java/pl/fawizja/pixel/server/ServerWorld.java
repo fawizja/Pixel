@@ -80,6 +80,11 @@ final class ServerWorld {
     private final SaveStore saves;
     private final AccountStore accounts;
     private final Random rng = new Random();
+    /** Trwajaca inwazja na miasto (null = spokoj) i czas nastepnej (0 = ustalany przy pierwszym kroku). */
+    private pl.fawizja.pixel.event.Invasion invasion;
+    private long nextInvasionAt;
+    private int nextInvasionPlan = -1;
+    private final long invasionEveryMs = Math.max(1, Long.getLong("pixel.invasionMinutes", 120L)) * 60_000L;
     private final Map<Integer, ServerPlayer> players = new LinkedHashMap<>();
     private final pl.fawizja.pixel.party.PartyManager parties = new pl.fawizja.pixel.party.PartyManager();
     /** Otwarte wymiany (klucz: imie malymi literami, obie strony wskazuja ta sama wymiane). */
@@ -598,6 +603,7 @@ final class ServerWorld {
             }
         });
         s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
+        s.combat().setDeathListener(m -> invasionKill(p, m));
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
@@ -605,6 +611,10 @@ final class ServerWorld {
         List<String> on = new ArrayList<>();
         for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
         if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
+        if (invasion != null) {
+            s.log().add(lastNow, EventLog.Kind.SYSTEM, "Trwa inwazja: " + invasion.plan().name() + " atakują "
+                    + invasion.plan().town() + " (zostało " + invasion.remaining() + " wrogów).");
+        }
         long earned = market.takeEarnings(pc.name());
         if (earned > 0) {
             if (pc.bank().credit(earned).ok()) {
@@ -1065,7 +1075,7 @@ final class ServerWorld {
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
     String moderate(String[] c, String by, long now) {
-        if (c.length == 0) return "Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO";
+        if (c.length == 0) return "Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION";
         long wall = wallClock.getAsLong();
         try {
             switch (c[0].toUpperCase(java.util.Locale.ROOT)) {
@@ -1105,13 +1115,15 @@ final class ServerWorld {
                     if (c.length < 2) return "Podaj imię.";
                     moderation.addAdmin(c[1].trim());
                     return "Dodano administratora: " + c[1].trim() + ".";
+                case "INVASION":
+                    return startInvasion(c.length > 1 ? c[1] : null, now);
                 case "WHO": {
                     List<String> names = new ArrayList<>();
                     for (ServerPlayer o : players.values()) names.add(o.name() + " (" + o.session.character().level() + ")");
                     return players.size() + " w grze: " + String.join(", ", names);
                 }
                 default:
-                    return "Nieznane polecenie. Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO";
+                    return "Nieznane polecenie. Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION";
             }
         } catch (NumberFormatException e) {
             return "Czas musi być liczbą.";
@@ -1203,6 +1215,7 @@ final class ServerWorld {
     void tick(long now) {
         lastNow = now;
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
+        updateInvasion(now);
         if (players.isEmpty()) return;
         List<MonsterManager.Target> targets = new ArrayList<>();
         Map<MonsterManager.Target, ServerPlayer> byTarget = new LinkedHashMap<>();
@@ -1250,6 +1263,91 @@ final class ServerWorld {
             }
         }
     }
+
+    /** Ogloszenie wydarzenia dla wszystkich graczy w grze. */
+    private void announce(String text, long now) {
+        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, text);
+    }
+
+    /** Harmonogram inwazji: co pixel.invasionMinutes (domyslnie 120) minut, gdy ktos jest w grze. */
+    private void updateInvasion(long now) {
+        if (invasion != null) {
+            if (invasion.over(now)) finishInvasion(now);
+            return;
+        }
+        if (nextInvasionAt == 0) nextInvasionAt = now + invasionEveryMs;
+        if (now >= nextInvasionAt && !players.isEmpty()) {
+            startInvasion(null, now);
+            nextInvasionAt = now + invasionEveryMs;
+        }
+    }
+
+    /** Start inwazji (town = null: kolejne miasto z listy). Zwraca opis dla administratora. */
+    String startInvasion(String town, long now) {
+        if (invasion != null) return "Trwa już inwazja na " + invasion.plan().town() + ".";
+        List<pl.fawizja.pixel.event.Invasion.Plan> plans = pl.fawizja.pixel.event.Invasion.PLANS;
+        pl.fawizja.pixel.event.Invasion.Plan plan = null;
+        if (town != null && !town.isBlank()) {
+            for (pl.fawizja.pixel.event.Invasion.Plan pl0 : plans) if (pl0.town().equalsIgnoreCase(town.trim())) plan = pl0;
+            if (plan == null) return "Nie ma planu inwazji dla miasta " + town.trim() + ".";
+        } else {
+            if (nextInvasionPlan < 0) nextInvasionPlan = rng.nextInt(plans.size());
+            plan = plans.get(nextInvasionPlan);
+            nextInvasionPlan = (nextInvasionPlan + 1) % plans.size();
+        }
+        pl.fawizja.pixel.world.Town t = world.town(plan.town());
+        Position center = t == null ? null : pl.fawizja.pixel.event.Invasion.gatherPoint(world, t, rng);
+        if (center == null) return "Nie znaleziono miejsca na inwazję przy " + plan.town() + ".";
+        List<Monster> spawned = new ArrayList<>(monsters.spawnEvent(plan.monster(), center, 6, plan.count(), now));
+        List<Monster> leader = monsters.spawnEvent(plan.leader(), center, 2, 1, now);
+        spawned.addAll(leader);
+        if (spawned.isEmpty()) return "Potwory nie zmieściły się przy " + plan.town() + ".";
+        List<Integer> ids = new ArrayList<>();
+        for (Monster m : spawned) ids.add(m.id());
+        invasion = new pl.fawizja.pixel.event.Invasion(plan, center, ids, leader.isEmpty() ? -1 : leader.get(0).id(), now,
+                pl.fawizja.pixel.event.Invasion.DURATION_MS);
+        String leaderName = leader.isEmpty() ? "" : ", herszt: " + leader.get(0).type().name();
+        announce("Inwazja! " + plan.name() + " atakują " + plan.town() + " " + pl.fawizja.pixel.event.Invasion.direction(t.temple(), center)
+                + " (" + spawned.size() + " wrogów" + leaderName + "). Za każdego pokonanego "
+                + pl.fawizja.pixel.event.Invasion.REWARD_PER_KILL + " gp na konto po obronie.", now);
+        LOG.info("invasion " + plan.town() + " at " + center + " (" + spawned.size() + ")");
+        return "Inwazja na " + plan.town() + " rozpoczęta (" + spawned.size() + " wrogów przy " + center.x() + "," + center.y() + ").";
+    }
+
+    private void invasionKill(ServerPlayer p, Monster m) {
+        if (invasion == null || !invasion.onKill(p.name(), m.id())) return;
+        long now = lastNow;
+        if (p.name().equals(invasion.leaderSlayer()) && invasion.remaining() > 0 && m.type().key().equals(invasion.plan().leader())) {
+            announce(p.name() + " pokonuje herszta najeźdźców! Zostało " + invasion.remaining() + " wrogów.", now);
+        } else if (invasion.remaining() == invasion.total() / 2) {
+            announce("Inwazja na " + invasion.plan().town() + ": połowa wrogów pokonana, zostało " + invasion.remaining() + ".", now);
+        }
+    }
+
+    private void finishInvasion(long now) {
+        pl.fawizja.pixel.event.Invasion inv = invasion;
+        invasion = null;
+        monsters.clearEvent(inv.aliveIds());
+        List<Map.Entry<String, Integer>> top = inv.ranking();
+        String best = top.isEmpty() ? "" : " Najwięcej pokonał(a): " + top.get(0).getKey() + " (" + top.get(0).getValue() + ").";
+        if (inv.defended()) announce(inv.plan().town() + " obronione!" + best + " Nagrody trafiły na konta.", now);
+        else announce("Najeźdźcy odchodzą od " + inv.plan().town() + " (zostało " + inv.remaining() + ")." + best
+                + (top.isEmpty() ? "" : " Za pokonanych są nagrody."), now);
+        for (Map.Entry<String, Integer> e : top) {
+            ServerPlayer o = find(e.getKey());
+            long reward = inv.reward(e.getKey());
+            if (o == null || reward <= 0) continue;
+            if (o.session.character().bank().credit(reward).ok()) {
+                o.session.log().add(now, EventLog.Kind.SYSTEM, "Nagroda za obronę " + inv.plan().town() + ": "
+                        + String.format("%,d gp", reward) + " na koncie (" + e.getValue() + " pokonanych).");
+                save(o);
+            }
+        }
+        LOG.info("invasion over " + inv.plan().town() + (inv.defended() ? " defended" : " expired"));
+    }
+
+    /** Trwajaca inwazja (testy). */
+    pl.fawizja.pixel.event.Invasion invasion() { return invasion; }
 
     /** Wysyla kazdemu graczowi nowe wpisy dziennika, zapis postaci (gdy sie zmienil) i klatke stanu. */
     void sendState(long now) {

@@ -59,6 +59,30 @@ public final class MonsterManager {
         this.rng = rng;
     }
 
+    /** Spawny jednorazowe (wydarzenia): potwory z nich sie nie odradzaja. */
+    private final java.util.Set<SpawnPoint> eventSpawns = new java.util.HashSet<>();
+
+    /** Wydarzenie: count potworow wokol center (bez odradzania). Zwraca utworzone potwory. */
+    public List<Monster> spawnEvent(String monsterKey, Position center, int radius, int count, long now) {
+        SpawnPoint sp = new SpawnPoint(monsterKey, center, radius, count, 1);
+        eventSpawns.add(sp);
+        List<Monster> out = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            if (spawnOne(sp, (Position) null, now)) out.add(monsters.get(monsters.size() - 1));
+        }
+        return out;
+    }
+
+    /** Koniec wydarzenia: usuwa jego pozostale potwory. */
+    public void clearEvent(java.util.Collection<Integer> ids) {
+        for (Monster m : new ArrayList<>(monsters)) {
+            if (ids.contains(m.id()) && eventSpawns.contains(m.spawn())) {
+                monsters.remove(m);
+                grid.remove(m, m.position());
+            }
+        }
+    }
+
     /** Wypelnia wszystkie spawny (start swiata). */
     public void populate(Position avoid) {
         for (SpawnPoint sp : spawns) {
@@ -169,6 +193,7 @@ public final class MonsterManager {
     public void kill(Monster m, long now) {
         monsters.remove(m);
         grid.remove(m, m.position());
+        if (eventSpawns.contains(m.spawn())) return;
         respawnQueue.computeIfAbsent(m.spawn(), k -> new ArrayList<>()).add(now + m.spawn().respawnSeconds() * 1000L);
     }
 
@@ -183,6 +208,7 @@ public final class MonsterManager {
         if (m == null) return;
         monsters.remove(m);
         grid.remove(m, p);
+        if (eventSpawns.contains(m.spawn())) return;
         respawnQueue.computeIfAbsent(m.spawn(), k -> new ArrayList<>()).add(now);
     }
 

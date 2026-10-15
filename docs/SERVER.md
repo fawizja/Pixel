@@ -68,10 +68,15 @@ Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pi
 | `unban Imie` | `/unban Imie` | zdjecie bana |
 | `mute Imie 30` | `/wycisz Imie 30` | wyciszenie czatu na 30 min (0 = zdjecie) |
 | `who` | `/kto` | kto jest w grze |
+| `invasion Varden` | `/inwazja Varden` | inwazja na miasto teraz (bez nazwy - kolejne miasto) |
 | `admin Imie` | - | nowy administrator (tylko konsola) |
 
 Bany i wyciszenia sa w `<dane>/moderation.txt` (przetrwaja restart), dzialania administratorow w logu serwera.
 Gracze moga pisac prywatnie: `/w Imie, tekst`.
+
+Inwazje na miasta startuja same co 120 minut (gdy ktos jest w grze); odstep zmienia `-Dpixel.invasionMinutes=60`
+(w Dockerze: `JAVA_OPTS`). Trwaja do pokonania wszystkich najezdzcow albo 20 minut. Nagrody (100 gp za wroga,
+1 000 gp za herszta) trafiaja na konta graczy obecnych w grze przy koncu inwazji. Rynek graczy zapisuje sie w `<dane>/market.txt`.
 
 ## Aktualizacja
 
