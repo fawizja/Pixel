@@ -14,7 +14,7 @@ Klient (telefon, PC) laczy sie z nim szyfrowanym polaczeniem TLS.
 ```bash
 ./gradlew :server:installDist
 docker build -f server/Dockerfile -t pixel-server .
-docker run -d --name pixel -p 7171:7171 -v pixel-data:/data --restart unless-stopped pixel-server
+docker run -dit --name pixel -p 7171:7171 -v pixel-data:/data --restart unless-stopped pixel-server
 docker logs pixel | grep odcisk      # odcisk certyfikatu TLS
 ```
 
@@ -55,6 +55,24 @@ WantedBy=multi-user.target
 - Serwer ma limity polaczen z jednego adresu, wiadomosci, czatu i zakladania kont (5 na dobe z adresu).
 - Nie umieszczaj katalogu danych w repozytorium (`.gitignore` blokuje `server-saves/`, `*.p12`, `keystore.pass`).
 
+## Moderacja
+
+Administratorzy: imiona w pliku `<dane>/admins.txt` (jedno w linii) albo polecenie konsoli `admin Imie`.
+Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pixel` (wyjscie: Ctrl+P, Ctrl+Q).
+
+| Konsola | Czat administratora | Dzialanie |
+|---|---|---|
+| `say tekst` | `/ogloszenie tekst` | ogloszenie do wszystkich |
+| `kick Imie` | `/kick Imie` | wyrzucenie (z zapisem postaci) |
+| `ban Imie 24` | `/ban Imie 24` | ban na 24 h (bez liczby albo 0 = na stale), wyrzuca z gry |
+| `unban Imie` | `/unban Imie` | zdjecie bana |
+| `mute Imie 30` | `/wycisz Imie 30` | wyciszenie czatu na 30 min (0 = zdjecie) |
+| `who` | `/kto` | kto jest w grze |
+| `admin Imie` | - | nowy administrator (tylko konsola) |
+
+Bany i wyciszenia sa w `<dane>/moderation.txt` (przetrwaja restart), dzialania administratorow w logu serwera.
+Gracze moga pisac prywatnie: `/w Imie, tekst`.
+
 ## Aktualizacja
 
 ```bash
@@ -62,7 +80,7 @@ git pull
 ./gradlew :server:installDist
 docker build -f server/Dockerfile -t pixel-server .
 docker stop pixel && docker rm pixel
-docker run -d --name pixel -p 7171:7171 -v pixel-data:/data --restart unless-stopped pixel-server
+docker run -dit --name pixel -p 7171:7171 -v pixel-data:/data --restart unless-stopped pixel-server
 ```
 
 Zatrzymanie serwera zapisuje wszystkie postacie (zapis takze co kilka minut i przy wylogowaniu).

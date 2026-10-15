@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.23.0] - 2026-10-15
+
+### Dodano
+- Prywatne wiadomosci: `/w Imie, tekst` (z limitem spamu).
+- Moderacja serwera: administratorzy z `admins.txt`, polecenia czatu `/ogloszenie`, `/kick`, `/ban Imie [godziny]`,
+  `/unban`, `/wycisz Imie [minuty]`, `/kto` oraz te same polecenia w konsoli serwera (stdin, `docker attach`).
+  Bany i wyciszenia zapisywane w `moderation.txt`, przetrwaja restart; zbanowany nie zaloguje sie do konca bana,
+  wyciszony nie pisze na zadnym czacie.
+- 2 nowe testy, w tym sieciowy (bany po restarcie i wygasanie) (lacznie 231).
+
 ## [0.22.0] - 2026-10-15
 
 ### Dodano

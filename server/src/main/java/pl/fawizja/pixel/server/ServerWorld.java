@@ -83,6 +83,9 @@ final class ServerWorld {
     /** Otwarte wymiany (klucz: imie malymi literami, obie strony wskazuja ta sama wymiane). */
     private final Map<String, PlayerTrade> trades = new java.util.HashMap<>();
     private final pl.fawizja.pixel.guild.GuildRegistry guilds;
+    private final Moderation moderation;
+    /** Zegar scienny dla banow i wyciszen (testy moga go podmienic). */
+    volatile java.util.function.LongSupplier wallClock = System::currentTimeMillis;
     private final File guildFile;
     /** Prosby o handel: adresat -> (proszacy -> waznosc). */
     private final Map<String, Map<String, Long>> tradeRequests = new java.util.HashMap<>();
@@ -102,6 +105,7 @@ final class ServerWorld {
         recipes = RecipeRegistry.loadDefault(items);
         saves = new SaveStore(saveDir);
         accounts = new AccountStore(saveDir);
+        moderation = new Moderation(saveDir);
         guildFile = new File(saveDir, "guilds.txt");
         guilds = pl.fawizja.pixel.guild.GuildRegistry.decode(guildFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(guildFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
@@ -272,6 +276,11 @@ final class ServerWorld {
                 newAccounts.computeIfAbsent(client.address(), k -> new java.util.ArrayDeque<>()).addLast(now);
                 break;
             default:
+        }
+        Long banned = moderation.bannedUntil(name, wallClock.getAsLong());
+        if (banned != null) {
+            client.send("ERR", "Konto zablokowane " + Moderation.describeUntil(banned) + ".");
+            return null;
         }
         if (find(name) != null) {
             client.send("ERR", "Postac " + name + " jest juz w grze.");
@@ -683,6 +692,30 @@ final class ServerWorld {
             case "PARTY": partyCommand(p, f, now); break;
             case "TRADE": tradeCommand(p, f, now); break;
             case "GUILD": guildCommand(p, f, now); break;
+            case "PM": {
+                if (f.length < 3 || f[2].isBlank()) break;
+                ServerPlayer to = find(f[1].trim());
+                if (to == null) {
+                    warn(p, "Gracz " + f[1].trim() + " nie jest w grze.", now);
+                    break;
+                }
+                if (!chatAllowed(p, now)) break;
+                String text = f[2].length() > 200 ? f[2].substring(0, 200) : f[2];
+                to.client.send("CHAT", "[od " + p.name() + "]", text);
+                p.client.send("CHAT", "[do " + to.name() + "]", text);
+                break;
+            }
+            case "ADMIN":
+                if (!moderation.isAdmin(p.name())) {
+                    warn(p, "Brak uprawnien administratora.", now);
+                    break;
+                }
+                String[] cmd = new String[f.length - 1];
+                System.arraycopy(f, 1, cmd, 0, cmd.length);
+                String answer = moderate(cmd, p.name(), now);
+                info(p, answer, now);
+                LOG.info("admin " + p.name() + ": " + String.join(" ", cmd) + " -> " + answer);
+                break;
             case "GCHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
                     pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(p.name());
@@ -724,8 +757,81 @@ final class ServerWorld {
         }
     }
 
+    /**
+     * Polecenie moderacji (z czatu administratora albo z konsoli serwera): SAY tekst, KICK imie,
+     * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
+     * WHO. Zwraca odpowiedz dla wydajacego polecenie.
+     */
+    String moderate(String[] c, String by, long now) {
+        if (c.length == 0) return "Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO";
+        long wall = wallClock.getAsLong();
+        try {
+            switch (c[0].toUpperCase(java.util.Locale.ROOT)) {
+                case "SAY": {
+                    if (c.length < 2 || c[1].isBlank()) return "Podaj tekst ogloszenia.";
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogloszenie]", c[1]);
+                    return "Wyslano ogloszenie do " + players.size() + " graczy.";
+                }
+                case "KICK": {
+                    ServerPlayer t = c.length < 2 ? null : find(c[1].trim());
+                    if (t == null) return "Nie ma takiego gracza w grze.";
+                    kick(t, "Wyrzucono z serwera (" + by + ").");
+                    return "Wyrzucono " + t.name() + ".";
+                }
+                case "BAN": {
+                    if (c.length < 2 || !saved(c[1].trim()) && find(c[1].trim()) == null) return "Nie ma takiej postaci.";
+                    long hours = c.length > 2 ? Long.parseLong(c[2].trim()) : 0;
+                    moderation.ban(c[1].trim(), hours, wall);
+                    ServerPlayer t = find(c[1].trim());
+                    String until = Moderation.describeUntil(moderation.bannedUntil(c[1].trim(), wall));
+                    if (t != null) kick(t, "Konto zablokowane " + until + ".");
+                    return "Zbanowano " + c[1].trim() + " " + until + ".";
+                }
+                case "UNBAN":
+                    if (c.length < 2) return "Podaj imie.";
+                    return moderation.unban(c[1].trim()) ? "Zdjeto bana: " + c[1].trim() + "." : "Ta postac nie ma bana.";
+                case "MUTE": {
+                    if (c.length < 2) return "Podaj imie.";
+                    long minutes = c.length > 2 ? Long.parseLong(c[2].trim()) : 60;
+                    moderation.mute(c[1].trim(), minutes, wall);
+                    ServerPlayer t = find(c[1].trim());
+                    if (t != null) warn(t, minutes > 0 ? "Wyciszono cie na " + minutes + " min." : "Wyciszenie zdjete.", now);
+                    return minutes > 0 ? "Wyciszono " + c[1].trim() + " na " + minutes + " min." : "Zdjeto wyciszenie: " + c[1].trim() + ".";
+                }
+                case "ADMIN":
+                    if (!by.equals("konsola")) return "Administratorow dodaje tylko konsola serwera albo plik admins.txt.";
+                    if (c.length < 2) return "Podaj imie.";
+                    moderation.addAdmin(c[1].trim());
+                    return "Dodano administratora: " + c[1].trim() + ".";
+                case "WHO": {
+                    List<String> names = new ArrayList<>();
+                    for (ServerPlayer o : players.values()) names.add(o.name() + " (" + o.session.character().level() + ")");
+                    return players.size() + " w grze: " + String.join(", ", names);
+                }
+                default:
+                    return "Nieznane polecenie. Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO";
+            }
+        } catch (NumberFormatException e) {
+            return "Czas musi byc liczba.";
+        } catch (IOException e) {
+            return "Blad zapisu: " + e.getMessage();
+        }
+    }
+
+    /** Wyrzucenie: zapis postaci, komunikat i rozlaczenie. */
+    void kick(ServerPlayer t, String reason) {
+        leave(t);
+        t.client.player = null;
+        t.client.send("ERR", reason);
+        t.client.close();
+    }
+
     /** Limit spamu wspolny dla czatu ogolnego i druzyny. */
     private boolean chatAllowed(ServerPlayer p, long now) {
+        if (moderation.isMuted(p.name(), wallClock.getAsLong())) {
+            p.session.log().add(now, EventLog.Kind.WARNING, "Jestes wyciszony przez administratora.");
+            return false;
+        }
         while (!p.chatTimes.isEmpty() && now - p.chatTimes.peekFirst() > CHAT_WINDOW_MS) p.chatTimes.pollFirst();
         if (p.chatTimes.size() >= CHAT_MAX) {
             p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za duzo wiadomosci na czacie.");

@@ -561,6 +561,59 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void privateMessagesAndModerationBansMutesAndKicks() throws Exception {
+        assertArrayEquals(new String[] {"BAN", "Stary Wilk", "24"}, PixelServer.consoleCommand("ban Stary Wilk 24"));
+        assertArrayEquals(new String[] {"SAY", "restart za 5 min"}, PixelServer.consoleCommand("say restart za 5 min"));
+        assertArrayEquals(new String[] {"WHO"}, PixelServer.consoleCommand(" who "));
+        assertNull(PixelServer.consoleCommand("   "));
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            ula.send("PM", "ola", "psst");
+            awaitMessage(ola, "private message", m -> m[0].equals("CHAT") && m[1].equals("[od Ula]") && m[2].equals("psst"));
+            awaitMessage(ula, "echo", m -> m[0].equals("CHAT") && m[1].equals("[do Ola]"));
+
+            ula.send("ADMIN", "KICK", "Ola");
+            awaitMessage(ula, "not an admin", m -> m[0].equals("LOG") && m[2].contains("Brak uprawnien"));
+            String[] answer = new String[1];
+            server.enqueueTest(() -> answer[0] = server.world().moderate(new String[] {"ADMIN", "Ola"}, "konsola", server.now()));
+            await("admin added", () -> answer[0] != null);
+            assertTrue(new java.io.File(saves, "admins.txt").isFile());
+
+            ola.send("ADMIN", "MUTE", "Ula", "10");
+            awaitMessage(ula, "muted", m -> m[0].equals("LOG") && m[2].contains("Wyciszono"));
+            ula.send("CHAT", "spam");
+            awaitMessage(ula, "chat blocked", m -> m[0].equals("LOG") && m[2].contains("wyciszony"));
+
+            ola.send("ADMIN", "SAY", "restart o 20:00");
+            awaitMessage(ula, "broadcast", m -> m[0].equals("CHAT") && m[1].equals("[Ogloszenie]"));
+
+            ola.send("ADMIN", "BAN", "Ula", "2");
+            await("ula kicked", () -> ula.error() != null && ula.error().contains("zablokowane"));
+        }
+        await("left", () -> server.world().players().isEmpty());
+        try (NetClient again = connect()) {
+            again.hello("Ula", "DRUID", "tajne-Ula");
+            await("ban survives relog", () -> again.error() != null && again.error().contains("zablokowane"));
+        }
+        // ban przetrwa restart serwera, a po uplywie czasu wygasa
+        server.close();
+        server = new PixelServer(0, saves);
+        server.start();
+        try (NetClient again = connect()) {
+            again.hello("Ula", "DRUID", "tajne-Ula");
+            await("ban after restart", () -> again.error() != null && again.error().contains("zablokowane"));
+        }
+        server.world().wallClock = () -> System.currentTimeMillis() + 3 * 3_600_000L;
+        try (NetClient later = connect()) {
+            later.hello("Ula", "DRUID", "tajne-Ula");
+            await("ban expired", () -> later.selfSave() != null);
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

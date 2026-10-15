@@ -192,5 +192,43 @@ public final class PixelServer implements AutoCloseable {
             }
         }));
         server.start();
+        server.startConsole(System.in);
+    }
+
+    /**
+     * Konsola operatora (stdin, np. {@code docker attach} albo terminal): say tekst, kick imie, ban imie godziny,
+     * unban imie, mute imie minuty, admin imie, who. Polecenia wykonuje watek swiata.
+     */
+    void startConsole(java.io.InputStream in) {
+        Thread t = new Thread(() -> {
+            try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(in,
+                    java.nio.charset.StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = r.readLine()) != null) {
+                    String[] c = consoleCommand(line);
+                    if (c == null) continue;
+                    inbox.add(new Object[] {(Runnable) () -> LOG.info("> " + world.moderate(c, "konsola", now()))});
+                }
+            } catch (IOException ignored) {
+                // brak konsoli (usluga w tle) - nic do zrobienia
+            }
+        }, "pixel-console");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /** "ban Imie Nazwisko 24" -> [BAN, Imie Nazwisko, 24]; "say tekst" -> [SAY, tekst]. */
+    static String[] consoleCommand(String line) {
+        String t = line == null ? "" : line.trim();
+        if (t.isEmpty()) return null;
+        int sp = t.indexOf(' ');
+        String cmd = (sp < 0 ? t : t.substring(0, sp)).toUpperCase(java.util.Locale.ROOT);
+        String rest = sp < 0 ? "" : t.substring(sp + 1).trim();
+        if (cmd.equals("SAY")) return new String[] {cmd, rest};
+        if ((cmd.equals("BAN") || cmd.equals("MUTE")) && !rest.isEmpty()) {
+            String[] nn = pl.fawizja.pixel.net.ChatCommands.nameAndNumber(rest);
+            return nn.length == 2 ? new String[] {cmd, nn[0], nn[1]} : new String[] {cmd, nn[0]};
+        }
+        return rest.isEmpty() ? new String[] {cmd} : new String[] {cmd, rest};
     }
 }

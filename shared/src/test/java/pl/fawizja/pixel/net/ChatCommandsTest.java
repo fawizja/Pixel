@@ -15,4 +15,18 @@ class ChatCommandsTest {
         assertNull(ChatCommands.toMessage("/nieznane x"));
         assertNull(ChatCommands.toMessage("   "));
     }
+
+    @Test
+    void privateMessagesAndModeratorCommands() {
+        assertArrayEquals(new String[] {"PM", "Stary Wilk", "czesc, co slychac?"}, ChatCommands.toMessage("/w Stary Wilk, czesc, co slychac?"));
+        assertArrayEquals(new String[] {"PM", "Ola", "hej tam"}, ChatCommands.toMessage("/w Ola hej tam"));
+        assertNull(ChatCommands.toMessage("/w Ola"));
+        assertArrayEquals(new String[] {"ADMIN", "SAY", "restart o 20:00"}, ChatCommands.toMessage("/ogloszenie restart o 20:00"));
+        assertArrayEquals(new String[] {"ADMIN", "BAN", "Stary Wilk", "24"}, ChatCommands.toMessage("/ban Stary Wilk 24"));
+        assertArrayEquals(new String[] {"ADMIN", "BAN", "Oszust"}, ChatCommands.toMessage("/ban Oszust"));
+        assertArrayEquals(new String[] {"ADMIN", "MUTE", "Ola", "15"}, ChatCommands.toMessage("/wycisz Ola 15"));
+        assertArrayEquals(new String[] {"ADMIN", "KICK", "Ola"}, ChatCommands.toMessage("/kick Ola"));
+        assertArrayEquals(new String[] {"ADMIN", "UNBAN", "Ola"}, ChatCommands.toMessage("/unban Ola"));
+        assertArrayEquals(new String[] {"ADMIN", "WHO"}, ChatCommands.toMessage("/kto"));
+    }
 }

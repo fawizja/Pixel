@@ -7,7 +7,9 @@ package pl.fawizja.pixel.net;
  * "/d tekst" -> PCHAT (czat druzyny). Handel: "/handel Imie" -> TRADE REQUEST, "/oferuj 5 health potion"
  * albo "/oferuj 1000 gp" -> TRADE OFFER, "/akceptuj" -> TRADE ACCEPT, "/anuluj" -> TRADE CANCEL.
  * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
- * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT.
+ * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
+ * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
+ * "/kto" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO.
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
 public final class ChatCommands {
@@ -43,6 +45,26 @@ public final class ChatCommands {
                 return guild(t, w);
             case "/g":
                 return w.length >= 2 ? new String[] {"GCHAT", rest(t)} : null;
+            case "/w": {
+                // imie moze miec spacje: "/w Stary Wilk, czesc"; bez przecinka imie = pierwsze slowo
+                String r = rest(t);
+                int comma = r.indexOf(',');
+                String name = comma >= 0 ? r.substring(0, comma).trim() : (w.length >= 3 ? w[1] : "");
+                String msg = comma >= 0 ? r.substring(comma + 1).trim() : (w.length >= 3 ? rest(r) : "");
+                return name.isEmpty() || msg.isEmpty() ? null : new String[] {"PM", name, msg};
+            }
+            case "/ogloszenie":
+                return w.length >= 2 ? new String[] {"ADMIN", "SAY", rest(t)} : null;
+            case "/kick":
+                return w.length >= 2 ? new String[] {"ADMIN", "KICK", rest(t)} : null;
+            case "/unban":
+                return w.length >= 2 ? new String[] {"ADMIN", "UNBAN", rest(t)} : null;
+            case "/ban":
+                return w.length >= 2 ? prefixed("ADMIN", "BAN", nameAndNumber(rest(t))) : null;
+            case "/wycisz":
+                return w.length >= 2 ? prefixed("ADMIN", "MUTE", nameAndNumber(rest(t))) : null;
+            case "/kto":
+                return w.length == 1 ? new String[] {"ADMIN", "WHO"} : null;
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:
@@ -63,6 +85,22 @@ public final class ChatCommands {
         }
     }
 
+    /** "Stary Wilk 24" -> [Stary Wilk, 24]; "Ola" -> [Ola] (liczba na koncu = czas). */
+    public static String[] nameAndNumber(String rest) {
+        String r = rest.trim();
+        int sp = r.lastIndexOf(' ');
+        if (sp > 0 && r.substring(sp + 1).matches("\\d+")) return new String[] {r.substring(0, sp).trim(), r.substring(sp + 1)};
+        return new String[] {r};
+    }
+
+    private static String[] prefixed(String a, String b, String[] tail) {
+        String[] out = new String[tail.length + 2];
+        out[0] = a;
+        out[1] = b;
+        System.arraycopy(tail, 0, out, 2, tail.length);
+        return out;
+    }
+
     /** Tekst po pierwszym slowie (imiona moga miec spacje). */
     private static String rest(String t) {
         int i = t.indexOf(' ');
@@ -70,5 +108,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /gildia [zaloz|zapros|przyjmij|wyrzuc|opusc], /g tekst, /handel Imie, /oferuj 5 health potion | 1000 gp, /akceptuj, /anuluj, /zapros Imie, /przyjmij Imie, /opusc, /d tekst (druzyna), /haslo stare nowe, /usun-konto haslo";
+    public static final String HELP = "Polecenia: /w Imie, tekst (prywatnie), /gildia [zaloz|zapros|przyjmij|wyrzuc|opusc], /g tekst, /handel Imie, /oferuj 5 health potion | 1000 gp, /akceptuj, /anuluj, /zapros Imie, /przyjmij Imie, /opusc, /d tekst (druzyna), /haslo stare nowe, /usun-konto haslo";
 }
