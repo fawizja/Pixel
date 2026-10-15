@@ -21,6 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
+ *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|map|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
@@ -147,6 +148,12 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().setWalkTarget(new Position(120, 150, 0));
                     gs.hud().toggleMap();
+                }
+                String tap = System.getProperty("pixel.tap");
+                if (tap != null) {
+                    String[] w = tap.split(",");
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.tapTile(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()), gs.session().character().position().z()));
                 }
                 String walkTo = System.getProperty("pixel.walkto");
                 if (walkTo != null) {

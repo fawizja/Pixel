@@ -257,6 +257,8 @@ kafelka x0.8, blokujacy obiekt x0.5, puste pole przezroczyste. `client/ui/Minima
 i rysuje wycinek 60x60 pol wokol gracza albo cale pietro (`Hud.toggleMap`, klawisz J) z nazwami miast.
 Dotkniecie duzej mapy -> akcja `map:goto:x,y` -> `GameScreen.walkTo`: `Pathfinder.path` (BFS na tablicach, bez przejsc
 na inne pietra) i co klatke kierunek do nastepnego pola, podawany jak z joysticka (dziala tez online).
+Dotkniecie swiata (`GameScreen.tapTile`): gracz online -> menu gracza, NPC blisko -> rozmowa, NPC daleko -> marsz na
+pole obok (`pathNextTo`) i rozmowa po dojsciu, potwor -> cel, cialo obok -> lup, wolne pole -> marsz bez komunikatu.
 
 ## Poczta (Z logika, S serwer)
 

@@ -335,7 +335,7 @@ public final class GameScreen extends ScreenAdapter {
                     if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
                 } else if (id.startsWith("map:goto:")) {
                     String[] xy = id.substring(9).split(",");
-                    walkTo(new Position(Integer.parseInt(xy[0]), Integer.parseInt(xy[1]), session.character().position().z()), t);
+                    walkTo(new Position(Integer.parseInt(xy[0]), Integer.parseInt(xy[1]), session.character().position().z()), t, false, false);
                 } else if (id.startsWith("friend:pm:")) {
                     hud.closeFriends();
                     openChat("/w " + id.substring(10) + ", ");
@@ -406,7 +406,11 @@ public final class GameScreen extends ScreenAdapter {
         Vector3 w = viewport.unproject(new Vector3(sx, sy, 0));
         int x = (int) Math.floor(w.x);
         int y = game.world().height() - 1 - (int) Math.floor(w.y);
-        Position p = new Position(x, y, session.character().position().z());
+        return tapTile(new Position(x, y, session.character().position().z()));
+    }
+
+    /** Dotkniecie pola swiata (desktop: -Dpixel.tap=x,y). */
+    public boolean tapTile(Position p) {
         if (net != null) {
             for (Map.Entry<Integer, RemotePlayer> e : remotePlayers.entrySet()) {
                 if (e.getValue().to.equals(p)) {
@@ -421,6 +425,7 @@ public final class GameScreen extends ScreenAdapter {
         pl.fawizja.pixel.npc.Npc npc = session.npcs().at(p);
         if (npc != null) {
             if (session.npcNearby() == npc) hud.openNpc(session);
+            else if (walkTo(p, now(), true, true)) walkNpc = npc; // rozmowa otworzy sie po dojsciu
             else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
             return true;
         }
@@ -436,6 +441,9 @@ public final class GameScreen extends ScreenAdapter {
                 act("loot", now());
                 return true;
             }
+            // dotkniecie wolnego pola: marsz tam (jak na duzej mapie, bez komunikatu)
+            if (c != null && c.hasLoot()) return walkTo(p, now(), true, true);
+            return walkTo(p, now(), true, false);
         }
         return hit;
     }
@@ -443,25 +451,47 @@ public final class GameScreen extends ScreenAdapter {
     /** Marsz do pola wskazanego na duzej mapie: trasa liczona raz, potem krok po kroku jak joystick. */
     private List<Position> walkPath;
     private int walkIndex;
+    private pl.fawizja.pixel.npc.Npc walkNpc;
 
     /** Marsz do pola na biezacym pietrze (dotkniecie duzej mapy; desktop: -Dpixel.walkto=x,y). */
-    public void walkTo(Position goal) { walkTo(goal, now()); }
+    public void walkTo(Position goal) { walkTo(goal, now(), false, false); }
 
-    private void walkTo(Position goal, long now) {
+    /**
+     * quiet: dotkniecie swiata (bez komunikatow); nextTo: zatrzymanie na polu obok celu (NPC, cialo).
+     * Zwraca, czy marsz sie zaczal.
+     */
+    private boolean walkTo(Position goal, long now, boolean quiet, boolean nextTo) {
         Position from = session.character().position();
-        List<Position> path = pl.fawizja.pixel.movement.Pathfinder.path(session.world(), from, goal, WALK_MAX_NODES);
+        if (nextTo && from.distanceTo(goal) <= 1) return false;
+        List<Position> path = nextTo ? pathNextTo(from, goal)
+                : pl.fawizja.pixel.movement.Pathfinder.path(session.world(), from, goal, WALK_MAX_NODES);
         if (path.isEmpty()) {
             stopWalk();
-            session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? "Już tu jesteś." : "Nie ma drogi do tego miejsca.");
-            return;
+            if (!quiet) session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? "Już tu jesteś." : "Nie ma drogi do tego miejsca.");
+            return false;
         }
         walkPath = path;
         walkIndex = 0;
-        hud.setWalkTarget(goal);
-        session.log().add(now, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + path.size() + " pól). Joystick przerywa marsz.");
+        walkNpc = null;
+        hud.setWalkTarget(path.get(path.size() - 1));
+        if (!quiet) session.log().add(now, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + path.size() + " pól). Joystick przerywa marsz.");
+        return true;
+    }
+
+    /** Najkrotsza trasa na ktores wolne pole obok celu (cel sam bywa zajety: NPC, fontanna z cialem). */
+    private List<Position> pathNextTo(Position from, Position goal) {
+        List<Position> best = java.util.Collections.emptyList();
+        for (Direction d : Direction.values()) {
+            Position n = goal.translate(d.dx, d.dy);
+            if (session.npcs().at(n) != null) continue;
+            List<Position> p = pl.fawizja.pixel.movement.Pathfinder.path(session.world(), from, n, WALK_MAX_NODES);
+            if (!p.isEmpty() && (best.isEmpty() || p.size() < best.size())) best = p;
+        }
+        return best;
     }
 
     private void stopWalk() {
+        walkNpc = null;
         if (walkPath == null) return;
         walkPath = null;
         hud.setWalkTarget(null);
@@ -471,7 +501,9 @@ public final class GameScreen extends ScreenAdapter {
         Position pos = session.character().position();
         Position goal = walkPath.get(walkPath.size() - 1);
         if (pos.equals(goal) || pos.z() != goal.z()) {
+            pl.fawizja.pixel.npc.Npc npc = walkNpc;
             stopWalk();
+            if (npc != null && session.npcNearby() == npc && !hud.npcOpen()) hud.openNpc(session);
             return null;
         }
         // postep: najdalsze pole trasy, na ktorym stoimy (od ostatniego miejsca, z zapasem jednego pola)

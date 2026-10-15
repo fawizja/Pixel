@@ -154,6 +154,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Skrzynie skarbow w lochach i na wyzynach (0.35.0)
 - [x] Minimapa i duza mapa pietra (0.36.0)
 - [x] Marsz do miejsca wskazanego na mapie (0.37.0)
+- [x] Dotknij, aby iść (pole, NPC z rozmowa po dojsciu, cialo) (0.38.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

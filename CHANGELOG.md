@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.38.0] - 2026-10-15
+
+### Dodano
+- Dotknij, aby iść: dotknięcie wolnego pola na ekranie prowadzi tam postać tą samą trasą co marsz z mapy
+  (potwór dalej oznacza cel, gracz online otwiera menu gracza).
+- Dotknięcie dalekiego NPC prowadzi na pole obok niego i samo otwiera rozmowę po dojściu; dotknięcie dalekiego
+  ciała z łupem prowadzi obok niego.
+- Opcja deweloperska `-Dpixel.tap=x,y` (dotknięcie pola). Sprawdzone w grze: marsz spod bramy do Strażnika Orena
+  kończy się otwartą rozmową. Regresja GUI bez zmian (23/23), testy 264/264.
+
 ## [0.37.0] - 2026-10-15
 
 ### Dodano
