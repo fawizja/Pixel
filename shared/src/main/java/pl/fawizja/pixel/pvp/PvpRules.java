@@ -59,6 +59,15 @@ public final class PvpRules {
         long nextAttackMs;
         long fightUntil;
         final ArrayDeque<Long> unjustKills = new ArrayDeque<>();
+        /** Pojedynek (tylko w pamieci): imie przeciwnika malymi literami i koniec czasu walki; null = brak. */
+        String duelPartner;
+        long duelUntil;
+
+        public String duelPartner() { return duelPartner; }
+        public long duelUntil() { return duelUntil; }
+        public boolean duelling(String name) {
+            return duelPartner != null && duelPartner.equals(name.toLowerCase(java.util.Locale.ROOT));
+        }
 
         /** Do kiedy trwa blokada strefy ochronnej po walce z graczem (czas serwera). */
         public long fightUntil() { return fightUntil; }
@@ -125,7 +134,22 @@ public final class PvpRules {
     }
 
     /** Wynik jednego ataku. */
-    public enum Outcome { NOT_ALLOWED, NOT_READY, OUT_OF_REACH, HIT, KILLED }
+    public enum Outcome { NOT_ALLOWED, NOT_READY, OUT_OF_REACH, HIT, KILLED, DUEL_WON }
+
+    /** Pojedynek trwa najwyzej tyle; potem remis. */
+    public static final long DUEL_MS = 5 * 60_000L;
+
+    /** Poczatek pojedynku: bez czaszek, bez ochrony poziomu, do pierwszej krwi (przegrany zostaje z 1 HP). */
+    public static void startDuel(String a, Status as, String b, Status bs, long now) {
+        as.duelPartner = b.toLowerCase(java.util.Locale.ROOT);
+        bs.duelPartner = a.toLowerCase(java.util.Locale.ROOT);
+        as.duelUntil = bs.duelUntil = now + DUEL_MS;
+    }
+
+    public static void endDuel(Status as, Status bs) {
+        as.duelPartner = null;
+        bs.duelPartner = null;
+    }
 
     private PvpRules() {}
 
@@ -133,10 +157,12 @@ public final class PvpRules {
     public static Verdict check(PlayerCharacter a, PlayerCharacter b, Status bStatus, WorldMap world, long now) {
         if (a == b || a.id().equals(b.id())) return Verdict.SELF;
         if (b.isDead() || a.isDead()) return Verdict.DEAD;
-        if (a.level() < PROTECTION_LEVEL) return Verdict.ATTACKER_PROTECTED;
-        if (b.level() < PROTECTION_LEVEL) return Verdict.TARGET_PROTECTED;
+        boolean duel = bStatus != null && bStatus.duelling(a.name());
+        if (!duel && a.level() < PROTECTION_LEVEL) return Verdict.ATTACKER_PROTECTED;
+        if (!duel && b.level() < PROTECTION_LEVEL) return Verdict.TARGET_PROTECTED;
         if (a.position().z() != b.position().z()) return Verdict.OTHER_FLOOR;
         if (world.isProtectionZone(a.position()) || world.isProtectionZone(b.position())) return Verdict.PROTECTION_ZONE;
+        if (duel) return Verdict.OK; // pojedynek: poziomy bez znaczenia
         boolean marked = bStatus != null && bStatus.skull(now) != Skull.NONE;
         if (!marked && b.level() * 2 < a.level()) return Verdict.LEVEL_GAP;
         return Verdict.OK;
@@ -177,6 +203,7 @@ public final class PvpRules {
                                DamageType type, long now, Random rng) {
         PlayerCharacter a = attacker.character();
         PlayerCharacter b = victim.character();
+        if (vs.duelling(a.name())) return duelHit(attacker, as, victim, vs, raw, type, now, rng);
         as.fightUntil = Math.max(as.fightUntil, now + FIGHT_LOCK_MS);
         vs.fightUntil = Math.max(vs.fightUntil, now + FIGHT_LOCK_MS);
         attacker.lockProtectionZonesUntil(as.fightUntil);
@@ -207,5 +234,26 @@ public final class PvpRules {
             }
         }
         return Outcome.KILLED;
+    }
+
+    /** Trafienie w pojedynku: bez czaszek i blokady PZ; cios, ktory by zabil, konczy pojedynek przy 1 HP. */
+    private static Outcome duelHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
+                                   DamageType type, long now, Random rng) {
+        PlayerCharacter a = attacker.character();
+        PlayerCharacter b = victim.character();
+        raw = (int) Math.round(raw * PVP_DAMAGE);
+        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, b.isDefensive(), rng);
+        boolean won = dmg >= b.health();
+        if (won) dmg = b.health() - 1;
+        int dealt = b.damage(dmg);
+        victim.combat().addEvent(new CombatEvent(now, b.position(), dealt,
+                dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED));
+        attacker.combat().addEvent(new CombatEvent(now, b.position(), dealt,
+                dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
+        if (!won) return Outcome.HIT;
+        endDuel(as, vs);
+        attacker.log().add(now, EventLog.Kind.SYSTEM, "Wygrywasz pojedynek z " + b.name() + "!");
+        victim.log().add(now, EventLog.Kind.SYSTEM, "Przegrywasz pojedynek z " + a.name() + ".");
+        return Outcome.DUEL_WON;
     }
 }

@@ -44,5 +44,8 @@ class ChatCommandsTest {
         assertNull(ChatCommands.toMessage("/wyslij Ola 5 lina"), "the comma separates the name");
         assertArrayEquals(new String[] {"ADMIN", "INVASION", "Frostholm"}, ChatCommands.toMessage("/inwazja Frostholm"));
         assertArrayEquals(new String[] {"RANK", "druid"}, ChatCommands.toMessage("/Ranking druid"));
+        assertArrayEquals(new String[] {"DUEL", "REQUEST", "Stary Wilk"}, ChatCommands.toMessage("/pojedynek Stary Wilk"));
+        assertArrayEquals(new String[] {"DUEL", "SURRENDER"}, ChatCommands.toMessage("/pojedynek poddaj"));
+        assertArrayEquals(new String[] {"DUEL", "HELP"}, ChatCommands.toMessage("/pojedynek"));
     }
 }

@@ -275,6 +275,58 @@ class NetworkSyncTest {
         }
     }
 
+    static boolean logged(NetClient c, String text) {
+        String[] m;
+        while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;
+        return false;
+    }
+
+    @Test
+    void duelEndsAtFirstBloodWithoutSkullsEvenBelowProtectionLevel() throws Exception {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
+            a.hello("Ola", "PALADIN", "tajne-Ola");
+            b.hello("Piotr", "MONK", "tajne-Piotr");
+            await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
+            int piotrId = b.playerId();
+            Position field = new Position(58, 75, 0);
+            server.enqueueTest(() -> {
+                int i = 0;
+                for (ServerPlayer p : server.world().players()) p.session.teleport(field.translate(i++, 0), server.now());
+            });
+            await("on the field", () -> {
+                RemoteEntity o = seen(b, "Ola");
+                return o != null && o.position().equals(field);
+            });
+            a.send("DUEL", "REQUEST", "Piotr");
+            await("challenge reaches piotr", () -> logged(b, "wyzywa cię na pojedynek"));
+            b.send("DUEL", "REQUEST", "Ola");
+            await("duel starts", () -> logged(a, "Pojedynek z Piotr"));
+            // szybszy koniec: Piotr ma juz malo zdrowia
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    PlayerCharacter pc = p.session.character();
+                    if (pc.name().equals("Piotr")) pc.damage(pc.health() - 3);
+                }
+            });
+            a.send("ATTACK", String.valueOf(piotrId)); // poziom 8 < 30: bez pojedynku byloby odrzucone
+            await("ola wins", () -> logged(a, "Wygrywasz pojedynek"));
+            await("piotr at 1 hp, alive", () -> {
+                try {
+                    PlayerCharacter pc = self(b);
+                    return pc.health() == 1 && !pc.isDead();
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            await("no skull, attack stopped", () -> a.frame() != null && "NONE".equals(a.frame().skull())
+                    && a.frame().playerTargetId() != piotrId);
+            // po pojedynku zwykle zasady: poziom 8 nie atakuje graczy
+            a.send("ATTACK", String.valueOf(piotrId));
+            await("refused again", () -> logged(a, "poziomu"));
+        }
+    }
+
     boolean accepted(String name, String voc, String password) throws Exception {
         try (NetClient c = connect()) {
             c.hello(name, voc, password);

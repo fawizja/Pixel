@@ -680,6 +680,7 @@ final class ServerWorld {
                 if (v == null) return false;
                 PvpRules.Outcome o = PvpRules.spellHit(p.session, p.pvp, v.session, v.pvp, amount, type, world, t, pvpRng);
                 if (o == PvpRules.Outcome.KILLED) p.pvpTarget = -1;
+                if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
                 return o != PvpRules.Outcome.NOT_ALLOWED;
             }
         });
@@ -782,6 +783,111 @@ final class ServerWorld {
     }
 
     private static String lower(String name) { return name.toLowerCase(java.util.Locale.ROOT); }
+
+    /** Wyzwania na pojedynek: wyzywajacy (male litery) -> {wyzwany, czas}. */
+    private final Map<String, Object[]> duelInvites = new java.util.HashMap<>();
+    static final long DUEL_INVITE_MS = 60_000L;
+
+    /** DUEL REQUEST imie (wyzwanie albo przyjecie wyzwania) | DUEL SURRENDER. */
+    private void duelCommand(ServerPlayer p, String[] f, long now) {
+        String me = p.name().toLowerCase(java.util.Locale.ROOT);
+        if (f.length >= 2 && f[1].equals("SURRENDER")) {
+            ServerPlayer o = p.pvp.duelPartner() == null ? null : find(p.pvp.duelPartner());
+            if (o == null) {
+                warn(p, "Nie walczysz w pojedynku.", now);
+                return;
+            }
+            PvpRules.endDuel(p.pvp, o.pvp);
+            info(p, "Poddajesz pojedynek z " + o.name() + ".", now);
+            info(o, p.name() + " poddaje się - wygrywasz pojedynek!", now);
+            duelOver(o, p, now);
+            return;
+        }
+        if (f.length < 3 || !f[1].equals("REQUEST")) {
+            info(p, "Pojedynek: /pojedynek Imię (wyzwanie albo przyjęcie wyzwania), /pojedynek poddaj.", now);
+            return;
+        }
+        ServerPlayer t = find(f[2]);
+        if (t == null) {
+            warn(p, "Nie ma w grze gracza " + f[2] + ".", now);
+            return;
+        }
+        if (t == p) {
+            warn(p, "Nie możesz walczyć sam ze sobą.", now);
+            return;
+        }
+        if (p.pvp.duelPartner() != null || t.pvp.duelPartner() != null) {
+            warn(p, (p.pvp.duelPartner() != null ? "Już walczysz" : t.name() + " już walczy") + " w pojedynku.", now);
+            return;
+        }
+        if (p.session.character().position().distanceTo(t.session.character().position()) > 8
+                || p.session.character().position().z() != t.session.character().position().z()) {
+            warn(p, t.name() + " jest za daleko - podejdź bliżej.", now);
+            return;
+        }
+        String them = t.name().toLowerCase(java.util.Locale.ROOT);
+        Object[] theirs = duelInvites.get(them);
+        if (theirs != null && theirs[0].equals(me) && now - (Long) theirs[1] <= DUEL_INVITE_MS) {
+            duelInvites.remove(them);
+            duelInvites.remove(me);
+            PvpRules.startDuel(p.name(), p.pvp, t.name(), t.pvp, now);
+            String rules = " Do pierwszej krwi (przegrany zostaje z 1 HP), bez czaszek, najwyżej 5 min. Wyjdźcie ze strefy ochronnej i zaatakujcie się.";
+            p.session.log().add(now, EventLog.Kind.SYSTEM, "Pojedynek z " + t.name() + "!" + rules);
+            t.session.log().add(now, EventLog.Kind.SYSTEM, "Pojedynek z " + p.name() + "!" + rules);
+            return;
+        }
+        duelInvites.put(me, new Object[] {them, now});
+        info(p, "Wyzywasz " + t.name() + " na pojedynek (czeka minutę).", now);
+        info(t, p.name() + " wyzywa cię na pojedynek. Przyjmij: /pojedynek " + p.name(), now);
+    }
+
+    /** Wyjscie z gry w trakcie pojedynku: walkower dla przeciwnika. */
+    private void leftDuel(ServerPlayer p) {
+        duelInvites.remove(p.name().toLowerCase(java.util.Locale.ROOT));
+        String partner = p.pvp.duelPartner();
+        if (partner == null) return;
+        ServerPlayer o = find(partner);
+        if (o == null || o == p) {
+            PvpRules.endDuel(p.pvp, p.pvp);
+            return;
+        }
+        PvpRules.endDuel(p.pvp, o.pvp);
+        info(o, p.name() + " opuścił grę - wygrywasz pojedynek walkowerem.", lastNow);
+        duelOver(o, p, lastNow);
+    }
+
+    /** Koniec pojedynku: obie strony przestaja sie atakowac (dalsza walka bylaby zwyklym PvP z czaszka). */
+    private void duelOver(ServerPlayer winner, ServerPlayer loser, long now) {
+        if (winner.pvpTarget == loser.id) winner.pvpTarget = -1;
+        if (loser.pvpTarget == winner.id) loser.pvpTarget = -1;
+        for (ServerPlayer o : players.values()) {
+            if (o != winner && o != loser && o.session.character().position().distanceTo(winner.session.character().position()) <= Protocol.VIEW_RADIUS) {
+                info(o, winner.name() + " wygrywa pojedynek z " + loser.name() + ".", now);
+            }
+        }
+    }
+
+    /** Remis po czasie albo gdy ktos zginie od potwora w trakcie pojedynku. */
+    private void updateDuels(long now) {
+        for (ServerPlayer p : players.values()) {
+            String partner = p.pvp.duelPartner();
+            if (partner == null) continue;
+            ServerPlayer o = find(partner);
+            if (o == null) {
+                PvpRules.endDuel(p.pvp, p.pvp);
+                continue;
+            }
+            boolean dead = p.session.character().isDead() || o.session.character().isDead();
+            if (now >= p.pvp.duelUntil() || dead) {
+                PvpRules.endDuel(p.pvp, o.pvp);
+                String why = dead ? "Pojedynek przerwany." : "Czas minął - pojedynek kończy się remisem.";
+                info(p, why, now);
+                info(o, why, now);
+                if (p.pvpTarget == o.id) p.pvpTarget = -1;
+                if (o.pvpTarget == p.id) o.pvpTarget = -1;
+            }
+        }
+    }
 
     private void info(ServerPlayer p, String text, long now) { p.session.log().add(now, EventLog.Kind.INFO, text); }
 
@@ -1006,6 +1112,7 @@ final class ServerWorld {
         String key = p.name().toLowerCase(java.util.Locale.ROOT);
         partyLeft(p, lastNow);
         leftTrade(p);
+        leftDuel(p);
         if (guilds.guildOf(p.name()) != null) {
             guilds.forget(p.name());
             saveGuilds();
@@ -1037,6 +1144,7 @@ final class ServerWorld {
         save(p); // najpierw zapis, potem usuniecie z listy graczy
         partyLeft(p, lastNow);
         leftTrade(p);
+        leftDuel(p);
         players.remove(p.id);
         tellFriends(p, "wyszedł z gry.", lastNow);
         broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
@@ -1086,6 +1194,7 @@ final class ServerWorld {
             case "FRIEND": friendCommand(p, f, now); break;
             case "MARKET": marketCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
+            case "DUEL": duelCommand(p, f, now); break;
             case "RANK":
                 if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
                 break;
@@ -1247,7 +1356,7 @@ final class ServerWorld {
             p.pvpTarget = -1;
             return;
         }
-        if (sameParty(p, t)) {
+        if (sameParty(p, t) && !p.pvp.duelling(t.name())) {
             p.session.log().add(now, EventLog.Kind.WARNING, "Nie atakujesz członka własnej drużyny.");
             p.pvpTarget = -1;
             return;
@@ -1301,6 +1410,7 @@ final class ServerWorld {
         lastNow = now;
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         updateInvasion(now);
+        updateDuels(now);
         if (players.isEmpty()) return;
         List<MonsterManager.Target> targets = new ArrayList<>();
         Map<MonsterManager.Target, ServerPlayer> byTarget = new LinkedHashMap<>();
@@ -1327,7 +1437,7 @@ final class ServerWorld {
         for (ServerPlayer p : players.values()) {
             if (p.pvpTarget < 0) continue;
             ServerPlayer t = players.get(p.pvpTarget);
-            if (t == null || sameParty(p, t)) {
+            if (t == null || (sameParty(p, t) && !p.pvp.duelling(t.name()))) {
                 p.pvpTarget = -1;
                 continue;
             }
@@ -1337,9 +1447,9 @@ final class ServerWorld {
                 p.pvpTarget = -1;
                 continue;
             }
-            if (PvpRules.attack(p.session, p.pvp, t.session, t.pvp, world, now, pvpRng) == PvpRules.Outcome.KILLED) {
-                p.pvpTarget = -1;
-            }
+            PvpRules.Outcome o = PvpRules.attack(p.session, p.pvp, t.session, t.pvp, world, now, pvpRng);
+            if (o == PvpRules.Outcome.KILLED) p.pvpTarget = -1;
+            if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, t, now);
         }
         for (ServerPlayer p : players.values()) {
             if (now - p.lastSaveMs >= SAVE_EVERY_MS) {

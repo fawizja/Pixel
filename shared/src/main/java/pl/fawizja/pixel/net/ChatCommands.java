@@ -69,6 +69,10 @@ public final class ChatCommands {
                 return w.length >= 2 ? prefixed("ADMIN", "MUTE", nameAndNumber(rest(t))) : null;
             case "/ranking":
                 return w.length == 1 ? new String[] {"RANK"} : new String[] {"RANK", rest(t)};
+            case "/pojedynek":
+                if (w.length < 2) return new String[] {"DUEL", "HELP"};
+                if (key(w[1]).equals("poddaj")) return new String[] {"DUEL", "SURRENDER"};
+                return new String[] {"DUEL", "REQUEST", rest(t)};
             case "/znajomi":
                 return friends(t, w);
             case "/rynek":
@@ -155,5 +159,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

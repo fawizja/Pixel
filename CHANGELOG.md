@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.39.0] - 2026-10-15
+
+### Dodano
+- Pojedynki (online): `/pojedynek Imię` wyzywa gracza stojącego najwyżej 8 pól dalej, ta sama komenda drugiej
+  strony przyjmuje wyzwanie (ważne minutę); także wiersz „Pojedynek” w menu gracza. Walka do pierwszej krwi:
+  cios, który by zabił, kończy pojedynek przy 1 HP przegranego. Bez czaszek, blokady strefy ochronnej i ochrony
+  poziomu 30 (pojedynkować się mogą też nowe postacie i członkowie drużyny), obrażenia jak w PvP (x0,5).
+- Koniec: zwycięstwo, `/pojedynek poddaj`, wyjście z gry (walkower), śmierć od potwora lub remis po 5 minutach.
+  Obie strony przestają się atakować, gracze w pobliżu widzą wynik.
+- Test sieciowy pojedynku (poziom 8, 1 HP, brak czaszki, potem zwykłe zasady) i test komend; łącznie 265.
+
 ## [0.38.0] - 2026-10-15
 
 ### Dodano
