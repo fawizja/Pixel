@@ -89,6 +89,8 @@ final class ServerWorld {
     /** Zegar scienny dla banow i wyciszen (testy moga go podmienic). */
     volatile java.util.function.LongSupplier wallClock = System::currentTimeMillis;
     private final File guildFile;
+    private final File marketFile;
+    final pl.fawizja.pixel.market.Market market;
     /** Prosby o handel: adresat -> (proszacy -> waznosc). */
     private final Map<String, Map<String, Long>> tradeRequests = new java.util.HashMap<>();
     static final long TRADE_REQUEST_MS = 60_000L;
@@ -111,6 +113,9 @@ final class ServerWorld {
         guildFile = new File(saveDir, "guilds.txt");
         guilds = pl.fawizja.pixel.guild.GuildRegistry.decode(guildFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(guildFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        marketFile = new File(saveDir, "market.txt");
+        market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         loadRanking(saveDir);
     }
 
@@ -228,6 +233,159 @@ final class ServerWorld {
                 o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
             }
         }
+    }
+
+    /** Zapis rynku: plik tymczasowy i podmiana. */
+    private void saveMarket() {
+        try {
+            File tmp = new File(marketFile.getParentFile(), "market.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), market.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), marketFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("market save failed: " + e.getMessage());
+        }
+    }
+
+    private boolean atBanker(ServerPlayer p, long now) {
+        pl.fawizja.pixel.npc.Npc n = p.session.npcNearby();
+        if (n != null && n.role() == pl.fawizja.pixel.npc.NpcRole.BANKER) return true;
+        warn(p, "Rynek obsługuje bankier - podejdź do niego.", now);
+        return false;
+    }
+
+    /** MARKET LIST [szukaj] | SELL "5 wilcze futro 300" | BUY id | CANCEL id. */
+    private void marketCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        PlayerCharacter pc = p.session.character();
+        String arg = f.length > 2 ? f[2].trim() : "";
+        switch (f[1]) {
+            case "LIST":
+                sendMarket(p, arg);
+                return;
+            case "SELL": {
+                if (!atBanker(p, now)) return;
+                int sp = arg.lastIndexOf(' ');
+                String priceText = sp < 0 ? "" : arg.substring(sp + 1).toLowerCase(java.util.Locale.ROOT).replace("gp", "");
+                long price;
+                try {
+                    price = Long.parseLong(priceText);
+                } catch (NumberFormatException e) {
+                    warn(p, "Wpisz: /rynek wystaw 5 wilcze futro 300 (ilość, przedmiot, cena za wszystko w gp).", now);
+                    return;
+                }
+                pl.fawizja.pixel.trade.PlayerTrade.Parsed what = pl.fawizja.pixel.trade.PlayerTrade.parse(arg.substring(0, sp), items);
+                if (what == null || what.itemId() < 0 || pl.fawizja.pixel.economy.Currency.isCoin(what.itemId())) {
+                    warn(p, "Nie wiem, jaki przedmiot wystawić. Monet nie wystawia się na rynku.", now);
+                    return;
+                }
+                int count = (int) what.count();
+                if (pc.backpack().count(what.itemId()) < count) {
+                    warn(p, "Nie masz w plecaku " + count + "x " + items.get(what.itemId()).name() + ".", now);
+                    return;
+                }
+                pl.fawizja.pixel.market.Market.Result r = market.canList(p.name(), price);
+                if (r != pl.fawizja.pixel.market.Market.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                if (!pc.backpack().remove(what.itemId(), count).ok()) return;
+                pl.fawizja.pixel.market.Market.Listing l = market.add(p.name(), what.itemId(), count, price);
+                saveMarket();
+                save(p);
+                info(p, "Wystawiono na rynku: " + count + "x " + items.get(l.itemId()).name() + " za "
+                        + String.format("%,d gp", price) + " (oferta #" + l.id() + ").", now);
+                break;
+            }
+            case "BUY": {
+                if (!atBanker(p, now)) return;
+                int id = parseInt(arg);
+                pl.fawizja.pixel.market.Market.Result r = market.checkBuy(id, p.name());
+                if (r != pl.fawizja.pixel.market.Market.Result.OK) {
+                    warn(p, r.message, now);
+                    break;
+                }
+                pl.fawizja.pixel.market.Market.Listing l = market.get(id);
+                if (!pc.backpack().canAdd(l.itemId(), l.count())) {
+                    warn(p, "Brak miejsca w plecaku.", now);
+                    return;
+                }
+                // najpierw konto, potem monety z plecaka
+                boolean paid = pc.bank().debit(l.price()).ok()
+                        || pl.fawizja.pixel.economy.Money.pay(pc.backpack(), l.price()).ok();
+                if (!paid) {
+                    warn(p, "Za mało złota: oferta kosztuje " + String.format("%,d gp", l.price()) + " (konto albo plecak).", now);
+                    return;
+                }
+                market.sold(id);
+                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(l.itemId(), l.count()));
+                long earned = l.price() - pl.fawizja.pixel.market.Market.fee(l.price());
+                String what = l.count() + "x " + items.get(l.itemId()).name();
+                ServerPlayer seller = find(l.seller());
+                if (seller != null && seller.session.character().bank().credit(earned).ok()) {
+                    seller.session.log().add(now, EventLog.Kind.SYSTEM, "Rynek: " + p.name() + " kupił " + what
+                            + ". Na konto wpłynęło " + String.format("%,d gp", earned) + ".");
+                    save(seller);
+                } else {
+                    market.addEarnings(l.seller(), earned);
+                }
+                saveMarket();
+                save(p);
+                info(p, "Kupiono " + what + " za " + String.format("%,d gp", l.price()) + ".", now);
+                break;
+            }
+            case "CANCEL": {
+                if (!atBanker(p, now)) return;
+                int id = parseInt(arg);
+                pl.fawizja.pixel.market.Market.Result r = market.checkCancel(id, p.name());
+                if (r != pl.fawizja.pixel.market.Market.Result.OK) {
+                    warn(p, r.message, now);
+                    break;
+                }
+                pl.fawizja.pixel.market.Market.Listing l = market.get(id);
+                if (!pc.backpack().canAdd(l.itemId(), l.count())) {
+                    warn(p, "Brak miejsca w plecaku.", now);
+                    return;
+                }
+                market.cancel(id);
+                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(l.itemId(), l.count()));
+                saveMarket();
+                save(p);
+                info(p, "Wycofano ofertę: " + l.count() + "x " + items.get(l.itemId()).name() + " wraca do plecaka.", now);
+                break;
+            }
+            default:
+                return;
+        }
+        sendMarket(p, "");
+    }
+
+    /** Okno rynku: najpierw wlasne oferty, potem najnowsze cudze (opcjonalnie tylko pasujace do nazwy). */
+    private void sendMarket(ServerPlayer p, String search) {
+        String q = search == null ? "" : plainLower(search.trim());
+        java.util.List<pl.fawizja.pixel.market.MarketView.Row> rows = new java.util.ArrayList<>();
+        for (pl.fawizja.pixel.market.Market.Listing l : market.bySeller(p.name())) rows.add(marketRow(l, true));
+        int others = 0;
+        for (pl.fawizja.pixel.market.Market.Listing l : market.newestFirst()) {
+            if (l.seller().equalsIgnoreCase(p.name())) continue;
+            if (!q.isEmpty() && !plainLower(items.get(l.itemId()).name()).contains(q) && !items.get(l.itemId()).key().contains(q.replace(' ', '_'))) continue;
+            if (others++ >= 40) break;
+            rows.add(marketRow(l, false));
+        }
+        String[] f = new pl.fawizja.pixel.market.MarketView(market.size(), q.isEmpty() ? null : search.trim(), rows).encode();
+        String[] msg = new String[f.length + 1];
+        msg[0] = "MARKET";
+        System.arraycopy(f, 0, msg, 1, f.length);
+        p.client.send(msg);
+    }
+
+    private pl.fawizja.pixel.market.MarketView.Row marketRow(pl.fawizja.pixel.market.Market.Listing l, boolean mine) {
+        return new pl.fawizja.pixel.market.MarketView.Row(l.id(), items.get(l.itemId()).name(), l.count(), l.price(), l.seller(), mine);
+    }
+
+    private static String plainLower(String s) {
+        String t = s.toLowerCase(java.util.Locale.ROOT).replace('ł', 'l');
+        return java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
     }
 
     private String guildTag(String name) {
@@ -447,6 +605,17 @@ final class ServerWorld {
         List<String> on = new ArrayList<>();
         for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
         if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
+        long earned = market.takeEarnings(pc.name());
+        if (earned > 0) {
+            if (pc.bank().credit(earned).ok()) {
+                s.log().add(lastNow, EventLog.Kind.SYSTEM, "Rynek: pod Twoją nieobecność sprzedano przedmioty. Na konto wpłynęło "
+                        + String.format("%,d gp", earned) + ".");
+                save(p);
+            } else {
+                market.addEarnings(pc.name(), earned);
+            }
+            saveMarket();
+        }
         LOG.info("join " + pc.name() + " (" + players.size() + " online)");
         return p;
     }
@@ -749,6 +918,8 @@ final class ServerWorld {
             guilds.forget(p.name());
             saveGuilds();
         }
+        market.forget(p.name());
+        saveMarket();
         players.remove(p.id);
         pvp.remove(key);
         ranking.remove(p.name());
@@ -819,6 +990,7 @@ final class ServerWorld {
             case "TRADE": tradeCommand(p, f, now); break;
             case "GUILD": guildCommand(p, f, now); break;
             case "FRIEND": friendCommand(p, f, now); break;
+            case "MARKET": marketCommand(p, f, now); break;
             case "RANK":
                 if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
                 break;

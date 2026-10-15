@@ -11,6 +11,8 @@ package pl.fawizja.pixel.net;
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
  * "/kto" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO. Ranking: "/ranking [profesja]" -> RANK [profesja].
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
+ * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
+ * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12.
  * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
@@ -69,12 +71,25 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"RANK"} : new String[] {"RANK", rest(t)};
             case "/znajomi":
                 return friends(t, w);
+            case "/rynek":
+                return market(t, w);
             case "/kto":
                 return w.length == 1 ? new String[] {"ADMIN", "WHO"} : null;
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:
                 return null;
+        }
+    }
+
+    private static String[] market(String t, String[] w) {
+        if (w.length == 1) return new String[] {"MARKET", "LIST"};
+        String arg = rest(rest(t));
+        switch (key(w[1])) {
+            case "wystaw": return arg.isEmpty() ? null : new String[] {"MARKET", "SELL", arg};
+            case "kup": return arg.matches("#?\\d+") ? new String[] {"MARKET", "BUY", arg.replace("#", "")} : null;
+            case "wycofaj": return arg.matches("#?\\d+") ? new String[] {"MARKET", "CANCEL", arg.replace("#", "")} : null;
+            default: return new String[] {"MARKET", "LIST", rest(t)};
         }
     }
 
@@ -131,5 +146,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

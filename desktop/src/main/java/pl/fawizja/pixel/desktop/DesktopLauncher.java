@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc|depot|friends|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|character|npc|depot|friends|market|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -110,6 +110,16 @@ public final class DesktopLauncher {
                     }
                     ((GameScreen) getScreen()).hud().openRanking(
                             new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
+                }
+                if ("market".equals(open)) {
+                    // podglad rynku (bez serwera): przykladowe oferty
+                    pl.fawizja.pixel.market.MarketView.Row[] r = {
+                            new pl.fawizja.pixel.market.MarketView.Row(41, "Mikstura zdrowia", 20, 1_200, "Ula", false),
+                            new pl.fawizja.pixel.market.MarketView.Row(40, "Wilcze futro", 15, 300, "Kuba", false),
+                            new pl.fawizja.pixel.market.MarketView.Row(37, "Lina", 1, 80, "Stary Wilk", false),
+                            new pl.fawizja.pixel.market.MarketView.Row(35, "Wędka", 1, 250, "Mira", false),
+                            new pl.fawizja.pixel.market.MarketView.Row(12, "Robak", 50, 500, "Test", true)};
+                    ((GameScreen) getScreen()).hud().openMarket(new pl.fawizja.pixel.market.MarketView(64, null, java.util.List.of(r)));
                 }
                 if ("friends".equals(open)) {
                     // podglad listy znajomych (bez serwera)

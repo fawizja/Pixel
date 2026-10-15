@@ -33,6 +33,12 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"FRIEND", "ADD", "Stary Wilk"}, ChatCommands.toMessage("/znajomi dodaj Stary Wilk"));
         assertArrayEquals(new String[] {"FRIEND", "REMOVE", "Ola"}, ChatCommands.toMessage("/znajomi usuń Ola"));
         assertNull(ChatCommands.toMessage("/znajomi dodaj"));
+        assertArrayEquals(new String[] {"MARKET", "LIST"}, ChatCommands.toMessage("/rynek"));
+        assertArrayEquals(new String[] {"MARKET", "LIST", "wilcze futro"}, ChatCommands.toMessage("/rynek wilcze futro"));
+        assertArrayEquals(new String[] {"MARKET", "SELL", "5 wilcze futro 300"}, ChatCommands.toMessage("/rynek wystaw 5 wilcze futro 300"));
+        assertArrayEquals(new String[] {"MARKET", "BUY", "12"}, ChatCommands.toMessage("/rynek kup #12"));
+        assertArrayEquals(new String[] {"MARKET", "CANCEL", "3"}, ChatCommands.toMessage("/rynek wycofaj 3"));
+        assertNull(ChatCommands.toMessage("/rynek kup tanio"));
         assertArrayEquals(new String[] {"RANK", "druid"}, ChatCommands.toMessage("/Ranking druid"));
     }
 }

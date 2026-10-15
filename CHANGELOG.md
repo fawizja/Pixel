@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.29.0] - 2026-10-15
+
+### Dodano
+- Rynek graczy (online, u bankiera w każdym mieście): `/rynek wystaw 5 wilcze futro 300` wystawia przedmioty
+  z plecaka za cenę za całość, `/rynek` pokazuje okno (cudze oferty po lewej - dotknięcie kupuje,
+  własne po prawej - dotknięcie wycofuje), `/rynek nazwa` szuka, `/rynek kup 12`, `/rynek wycofaj 12`.
+  U bankiera nowy wiersz "Rynek graczy".
+- Kupujący płaci z konta, a gdy na nim brakuje - monetami z plecaka. Sprzedawca dostaje cenę minus 2% prowizji
+  na konto od razu, a gdy jest offline - przy następnym wejściu do gry (z wiadomością).
+- Do 10 ofert na gracza; oferty i zaległe wypłaty w `market.txt` na serwerze (zapis atomowy), przetrwają restart.
+  Po każdej transakcji zapis postaci (bez podwajania przedmiotów po awarii). Usunięcie konta kasuje jego oferty.
+- `-Dpixel.open=market` - podgląd; nowa scena `market` w regresji GUI (17 scen).
+- 4 nowe testy (rynek, zapis, komunikat, sieciowy z zakupem od gracza offline); łącznie 245.
+
 ## [0.28.0] - 2026-10-15
 
 ### Dodano

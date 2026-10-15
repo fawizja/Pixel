@@ -313,6 +313,13 @@ public final class GameScreen extends ScreenAdapter {
                     if (id.equals("trade:accept")) net.send("TRADE", "ACCEPT");
                     else if (id.equals("trade:cancel")) net.send("TRADE", "CANCEL");
                     else if (id.startsWith("trade:offer:")) net.send("TRADE", "OFFER", id.substring(12));
+                } else if (id.equals("npc:market")) {
+                    if (net == null) session.log().add(t, EventLog.Kind.INFO, "Rynek graczy działa online.");
+                    else net.send("MARKET", "LIST");
+                } else if (id.startsWith("market:")) {
+                    String[] f = id.split(":");
+                    if (net != null && f.length == 3 && f[1].equals("buy")) net.send("MARKET", "BUY", f[2]);
+                    if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
                 } else if (id.startsWith("friend:pm:")) {
                     hud.closeFriends();
                     openChat("/w " + id.substring(10) + ", ");
@@ -903,6 +910,9 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "RANK":
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
+                    break;
+                case "MARKET":
+                    hud.openMarket(pl.fawizja.pixel.market.MarketView.parse(m));
                     break;
                 case "FRIENDS":
                     hud.openFriends(pl.fawizja.pixel.friends.FriendsView.parse(m));

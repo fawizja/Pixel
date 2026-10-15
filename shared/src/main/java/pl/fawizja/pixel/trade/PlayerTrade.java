@@ -164,7 +164,7 @@ public final class PlayerTrade {
     }
 
     /** Ilosc i przedmiot (itemId) albo zloto (itemId = -1). */
-    record Parsed(int itemId, long count) {}
+    public record Parsed(int itemId, long count) {}
 
     /** "5 health potion", "health_potion", "1000 gp" (takze "zloto"). Ilosc domyslnie 1. */
     /** Bez polskich znakow: "złota moneta" = "zlota moneta". */
@@ -173,7 +173,7 @@ public final class PlayerTrade {
         return java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
     }
 
-    static Parsed parse(String text, ItemRegistry reg) {
+    public static Parsed parse(String text, ItemRegistry reg) {
         if (text == null) return null;
         String t = text.trim().toLowerCase(Locale.ROOT);
         long count = 1;

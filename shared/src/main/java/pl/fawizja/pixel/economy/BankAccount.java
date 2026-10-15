@@ -44,6 +44,25 @@ public final class BankAccount {
         return r;
     }
 
+    /** Wplyw na konto bez monet z plecaka (np. sprzedaz na rynku). */
+    public InventoryResult credit(long amount) {
+        if (amount <= 0) return InventoryResult.INVALID_AMOUNT;
+        try {
+            balance = Math.addExact(balance, amount);
+        } catch (ArithmeticException e) {
+            return InventoryResult.INVALID_AMOUNT;
+        }
+        return InventoryResult.OK;
+    }
+
+    /** Oplata z konta (np. zakup na rynku). */
+    public InventoryResult debit(long amount) {
+        if (amount <= 0) return InventoryResult.INVALID_AMOUNT;
+        if (amount > balance) return InventoryResult.INSUFFICIENT_FUNDS;
+        balance -= amount;
+        return InventoryResult.OK;
+    }
+
     /** Przelew miedzy kontami (np. handel bankowy). */
     public InventoryResult transferTo(BankAccount other, long amount) {
         if (other == this || amount <= 0) return InventoryResult.INVALID_AMOUNT;

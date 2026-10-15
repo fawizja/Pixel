@@ -243,6 +243,13 @@ przy pauzie, utracie fokusu i zamknieciu.
   usuniecie konta usuwa gracza z gildii. Nazwa gildii w klatce stanu (10. pole PL).
 - Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GCHAT tekst`.
 
+## Rynek graczy (Z logika, S serwer, C okno)
+
+`market/Market`: oferty (id, sprzedawca, przedmiot, ilosc, cena za calosc), do 10 na gracza, 2000 na serwer, prowizja 2%.
+Zaplata dla sprzedawcy offline czeka w `takeEarnings` i trafia na konto przy wejsciu. Serwer: MARKET LIST [szukaj] |
+SELL tekst | BUY id | CANCEL id (`ServerWorld.marketCommand`), wystawianie, kupno i wycofanie tylko przy bankierze.
+Kupujacy placi z konta (`BankAccount.debit`), potem z plecaka. Zapis `market.txt` (atomowo) i zapis postaci po kazdej operacji.
+
 ## Znajomi (Z logika, S serwer, C okno)
 
 `friends/FriendList` (do 30 imion, bez powtorzen, zapis `fr.<i>`), `friends/FriendsView` (komunikat FRIENDS).

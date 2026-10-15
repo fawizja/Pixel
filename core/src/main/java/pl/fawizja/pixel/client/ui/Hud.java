@@ -70,6 +70,8 @@ public final class Hud {
     private pl.fawizja.pixel.ranking.RankingView rankingView;
     /** Okno znajomych z serwera (null = zamkniete). */
     private pl.fawizja.pixel.friends.FriendsView friendsView;
+    /** Okno rynku z serwera (null = zamkniete). */
+    private pl.fawizja.pixel.market.MarketView marketView;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
     /** U bankiera: widok depozytu przedmiotow zamiast konta. */
@@ -212,9 +214,10 @@ public final class Hud {
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
         playerMenu = null;
-        if (rankingView != null || friendsView != null) {
+        if (rankingView != null || friendsView != null || marketView != null) {
             rankingView = null;
             friendsView = null;
+            marketView = null;
             menuOpen = false;
         }
         menuOpen = !(menuOpen && !npcMode);
@@ -284,6 +287,7 @@ public final class Hud {
         if (view == null || trade != null) return;
         rankingView = view;
         friendsView = null;
+        marketView = null;
         playerMenu = null;
         menuOpen = true;
         npcMode = false;
@@ -297,6 +301,7 @@ public final class Hud {
         if (view == null || trade != null) return;
         friendsView = view;
         rankingView = null;
+        marketView = null;
         playerMenu = null;
         menuOpen = true;
         npcMode = false;
@@ -304,6 +309,20 @@ public final class Hud {
     }
 
     public boolean friendsOpen() { return menuOpen && friendsView != null; }
+
+    /** Rynek z serwera: otwiera okno (handel ma pierwszenstwo). */
+    public void openMarket(pl.fawizja.pixel.market.MarketView view) {
+        if (view == null || trade != null) return;
+        marketView = view;
+        rankingView = null;
+        friendsView = null;
+        playerMenu = null;
+        menuOpen = true;
+        npcMode = false;
+        bagOpen = false;
+    }
+
+    public boolean marketOpen() { return menuOpen && marketView != null; }
 
     public void closeFriends() {
         if (friendsView != null) menuOpen = false;
@@ -379,6 +398,10 @@ public final class Hud {
             rebuildFriendsMenu();
             return;
         }
+        if (marketView != null) {
+            rebuildMarketMenu(session);
+            return;
+        }
         if (npcMode) {
             rebuildNpcMenu(session);
             return;
@@ -443,6 +466,42 @@ public final class Hud {
             row.w = colW;
             row.h = rowH - 3;
             menuRows.add(row);
+        }
+    }
+
+    /** Rynek: cudze oferty po lewej (dotkniecie = kup), wlasne po prawej (dotkniecie = wycofaj). */
+    private void rebuildMarketMenu(GameSession session) {
+        List<MenuRow> left = new ArrayList<>();
+        List<MenuRow> right = new ArrayList<>();
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        long money = session.gold() + session.character().bank().balance();
+        String found = marketView.search() == null ? "najnowsze oferty" : "szukano: " + marketView.search();
+        left.add(new MenuRow("market:none", "Kup (dotknij oferty)", found + "; płacisz z konta albo plecaka", false));
+        right.add(new MenuRow("market:none", "Twoje oferty (dotknij, aby wycofać)",
+                "/rynek wystaw 5 wilcze futro 300", false));
+        for (pl.fawizja.pixel.market.MarketView.Row r : marketView.rows()) {
+            String label = r.count() + "x " + r.item();
+            String price = String.format("%,d gp", r.price());
+            if (r.mine()) {
+                if (right.size() < perCol) right.add(new MenuRow("market:cancel:" + r.id(), label, price + " (#" + r.id() + ")", true));
+            } else if (left.size() < perCol) {
+                left.add(new MenuRow("market:buy:" + r.id(), label, price + " - " + r.seller() + " (#" + r.id() + ")", money >= r.price()));
+            }
+        }
+        if (left.size() == 1) left.add(new MenuRow("market:none", "Brak ofert", "/rynek nazwa - szukanie przedmiotu", false));
+        if (right.size() == 1) right.add(new MenuRow("market:none", "Nic nie wystawiasz",
+                "prowizja rynku " + pl.fawizja.pixel.market.Market.FEE_PERCENT + "%", false));
+        float colW = (menuW - 30) / 2f;
+        for (int c = 0; c < 2; c++) {
+            List<MenuRow> col = c == 0 ? left : right;
+            for (int i = 0; i < col.size(); i++) {
+                MenuRow row = col.get(i);
+                row.x = menuX + 10 + c * (colW + 10);
+                row.y = menuY + menuH - 40 - (i + 1) * rowH;
+                row.w = colW;
+                row.h = rowH - 3;
+                menuRows.add(row);
+            }
         }
     }
 
@@ -601,6 +660,7 @@ public final class Hud {
                     if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do odłożenia", "monety wpłać na konto", false));
                     break;
                 }
+                left.add(new MenuRow("npc:market", "Rynek graczy", "kupno i sprzedaż, także gdy sprzedawca jest offline", true));
                 left.add(new MenuRow("npc:depot", "Depozyt przedmiotów", (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc, wspólny dla miast", true));
                 long bal = pc.bank().balance();
                 left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspólne dla wszystkich miast", false));
@@ -707,6 +767,7 @@ public final class Hud {
                     menuOpen = false;
                     rankingView = null;
                     friendsView = null;
+                    marketView = null;
                 }
                 return true;
             }
@@ -729,7 +790,7 @@ public final class Hud {
                         customBar.assign(assignSlot, row.action.substring(5));
                         updateBar(session);
                         actions.onButton("bar_saved");
-                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none")) {
+                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none") && !row.action.equals("market:none")) {
                         actions.onButton(row.action);
                     }
                     return true;
@@ -797,10 +858,11 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null && friendsView == null;
+        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null;
         if (playerMenu != null && !menuOpen) playerMenu = null;
         if (rankingView != null && !menuOpen) rankingView = null;
         if (friendsView != null && !menuOpen) friendsView = null;
+        if (marketView != null && !menuOpen) marketView = null;
         fish.visible = session.canFish();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
@@ -940,6 +1002,8 @@ public final class Hud {
         if (menuOpen) {
             if (trade == null && playerMenu != null) {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && marketView != null) {
+                text(batch, "Rynek graczy (" + marketView.total() + " ofert)", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && friendsView != null) {
                 text(batch, "Znajomi (" + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && rankingView != null) {

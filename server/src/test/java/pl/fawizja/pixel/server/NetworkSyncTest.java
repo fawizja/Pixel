@@ -693,6 +693,93 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void theMarketSellsToOthersAndPaysSellersEvenWhenTheyAreOffline() throws Exception {
+        java.util.function.Function<NetClient, pl.fawizja.pixel.market.MarketView> view = c -> {
+            String[][] got = new String[1][];
+            try {
+                awaitMessage(c, "market", m -> m[0].equals("MARKET") && (got[0] = m) != null);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            return pl.fawizja.pixel.market.MarketView.parse(got[0]);
+        };
+        Position banker = new Position(70, 78, 0);
+        int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
+        try (NetClient ula = connect()) {
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ula.selfSave() != null);
+            int[] sold = new int[1];
+            try (NetClient ola = connect()) {
+                ola.hello("Ola", "PALADIN", "tajne-Ola");
+                await("welcome", () -> ola.selfSave() != null);
+                ola.send("MARKET", "SELL", "5 wilcze futro 300");
+                awaitMessage(ola, "not at a banker", m -> m[0].equals("LOG") && m[2].contains("bankier"));
+                server.enqueueTest(() -> {
+                    for (ServerPlayer p : server.world().players()) {
+                        p.session.teleport(banker, server.now());
+                        p.session.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(pelt, 10));
+                    }
+                });
+                await("at the banker", () -> {
+                    try {
+                        return self(ola).position().equals(banker) && self(ula).position().equals(banker);
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
+                ola.send("MARKET", "SELL", "5 wilcze futro 300");
+                pl.fawizja.pixel.market.MarketView v = view.apply(ola);
+                assertEquals(1, v.rows().size());
+                assertTrue(v.rows().get(0).mine());
+                assertEquals("Wilcze futro", v.rows().get(0).item());
+                int id = v.rows().get(0).id();
+                ola.send("MARKET", "BUY", String.valueOf(id));
+                awaitMessage(ola, "own offer", m -> m[0].equals("LOG") && m[2].contains("Twoja oferta"));
+                ula.send("MARKET", "BUY", String.valueOf(id));
+                awaitMessage(ola, "seller told", m -> m[0].equals("LOG") && m[2].contains("Ula kupił 5x Wilcze futro"));
+                await("goods and money moved", () -> {
+                    try {
+                        return self(ula).backpack().count(pelt) == 15 && self(ola).bank().balance() == 294
+                                && self(ola).backpack().count(pelt) == 5;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
+                ola.send("MARKET", "SELL", "5 wilcze 1000");
+                String[][] mine = new String[1][];
+                awaitMessage(ola, "second offer", m -> m[0].equals("MARKET") && m.length > 3 && m[3].contains(";1000;") && (mine[0] = m) != null);
+                sold[0] = pl.fawizja.pixel.market.MarketView.parse(mine[0]).rows().get(0).id();
+            }
+            await("ola left", () -> server.world().find("Ola") == null);
+            ula.send("MARKET", "LIST", "futro");
+            String[][] list = new String[1][];
+            awaitMessage(ula, "search", m -> m[0].equals("MARKET") && m[2].equals("futro") && (list[0] = m) != null);
+            pl.fawizja.pixel.market.MarketView found = pl.fawizja.pixel.market.MarketView.parse(list[0]);
+            assertEquals("futro", found.search());
+            assertEquals(1, found.rows().size(), "the offline seller's offer is still there");
+            ula.send("MARKET", "BUY", String.valueOf(sold[0]));
+            await("bought from an offline seller", () -> {
+                try {
+                    return self(ula).backpack().count(pelt) == 20;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+        }
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            awaitMessage(ola, "paid on return", m -> m[0].equals("LOG") && m[2].contains("pod Twoją nieobecność"));
+            await("balance", () -> {
+                try {
+                    return self(ola).bank().balance() == 294 + 980;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;
