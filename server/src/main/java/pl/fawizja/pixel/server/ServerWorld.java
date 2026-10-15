@@ -59,6 +59,7 @@ final class ServerWorld {
     final GroundItems ground = new GroundItems();
     /** Stan PvP po imieniu - przetrwa wylogowanie (czaszki nie znikaja po ponownym wejsciu). */
     private final Map<String, PvpRules.Status> pvp = new java.util.HashMap<>();
+    private long lastNow;
     private final Random pvpRng = new Random();
     private final StartingConfig config = StartingConfig.loadDefault();
     private final MonsterRegistry monsterTypes;
@@ -148,7 +149,8 @@ final class ServerWorld {
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
-                pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> new PvpRules.Status()));
+                pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));
+        if (p.pvp.fightUntil() > now) s.lockProtectionZonesUntil(p.pvp.fightUntil());
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
@@ -190,6 +192,7 @@ final class ServerWorld {
         String slot = "player_" + p.name().toLowerCase(java.util.Locale.ROOT);
         try {
             saves.write(slot, codec.encode(p.session.character()));
+            saves.write("pvp_" + p.name().toLowerCase(java.util.Locale.ROOT), p.pvp.encode(lastNow, System.currentTimeMillis()));
         } catch (IOException e) {
             LOG.warning("save failed for " + p.name() + ": " + e.getMessage());
         }
@@ -276,7 +279,22 @@ final class ServerWorld {
     }
 
     /** Krok swiata: sesje graczy, potem potwory raz dla wszystkich, potem walka. */
+    /** Czaszki i nieusprawiedliwione zabojstwa z dysku (przetrwaja restart serwera). */
+    private PvpRules.Status loadPvp(String key, long now) {
+        try {
+            if (saves.exists("pvp_" + key)) {
+                PvpRules.Status st = saves.read("pvp_" + key,
+                        text -> PvpRules.Status.decode(text, now, System.currentTimeMillis())).value();
+                if (st != null) return st;
+            }
+        } catch (IOException | RuntimeException e) {
+            LOG.warning("pvp status of " + key + " unreadable: " + e.getMessage());
+        }
+        return new PvpRules.Status();
+    }
+
     void tick(long now) {
+        lastNow = now;
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         if (players.isEmpty()) return;
         List<MonsterManager.Target> targets = new ArrayList<>();
@@ -356,7 +374,6 @@ final class ServerWorld {
             }
             Position me = p.session.character().position();
             StringBuilder frame = new StringBuilder();
-            frame.append(Protocol.line("FRAME", String.valueOf(now))).append('\n');
             frame.append(Protocol.line("ME", String.valueOf(me.x()), String.valueOf(me.y()), String.valueOf(me.z()),
                     p.session.facing().name(), p.pvp.skull(now).name())).append('\n');
             frame.append(Protocol.line("TP", p.pvpTarget < 0 ? "-" : String.valueOf(p.pvpTarget))).append('\n');
@@ -380,8 +397,15 @@ final class ServerWorld {
             ground.forEachNear(me, Protocol.VIEW_RADIUS, (gp, st) -> frame.append(Protocol.line("GI",
                     String.valueOf(gp.x()), String.valueOf(gp.y()), String.valueOf(gp.z()),
                     String.valueOf(st.itemId()), String.valueOf(st.count()))).append('\n'));
-            frame.append("END");
-            p.client.sendRaw(frame.toString());
+            String body = frame.toString();
+            if (body.equals(p.lastFrameBody)) {
+                // nic sie nie zmienilo: sam znacznik czasu zamiast calej klatki (oszczednosc transferu na telefonie)
+                p.client.send("KEEP", String.valueOf(now));
+                p.framesKept++;
+            } else {
+                p.client.sendRaw(Protocol.line("FRAME", String.valueOf(now)) + "\n" + body + "END");
+                p.lastFrameBody = body;
+            }
         }
     }
 

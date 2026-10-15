@@ -146,4 +146,65 @@ class PvpRulesTest {
         pc.heal(pc.maxHealth());
         return new GameSession(TestData.ITEMS, W, pc);
     }
+
+    @Test
+    void afterAPlayerFightTheProtectionZoneStaysClosedForAMinute() {
+        GameSession a = at("Lockera", 60, FIELD);
+        GameSession b = at("Lockerb", 60, FIELD.translate(1, 0));
+        Status as = new Status(), bs = new Status();
+        assertEquals(Outcome.HIT, PvpRules.attack(a, as, b, bs, W, 10_000, new Random(1)));
+        assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, as.fightUntil());
+        assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, b.protectionZoneLockedUntil(), "the victim is locked too");
+
+        // pole tuz przed strefa ochronna
+        Position edge = null;
+        pl.fawizja.pixel.world.Direction into = null;
+        search:
+        for (int y = 1; y < W.height() - 1; y++) {
+            for (int x = 1; x < W.width() - 1; x++) {
+                Position q = new Position(x, y, 0);
+                if (!W.isWalkable(q) || W.isProtectionZone(q) || W.transitionAt(q) != null) continue;
+                for (pl.fawizja.pixel.world.Direction d : new pl.fawizja.pixel.world.Direction[] {
+                        pl.fawizja.pixel.world.Direction.NORTH, pl.fawizja.pixel.world.Direction.SOUTH,
+                        pl.fawizja.pixel.world.Direction.EAST, pl.fawizja.pixel.world.Direction.WEST}) {
+                    Position n = q.translate(d.dx, d.dy);
+                    if (W.isWalkable(n) && W.isProtectionZone(n) && W.transitionAt(n) == null) {
+                        edge = q;
+                        into = d;
+                        break search;
+                    }
+                }
+            }
+        }
+        assertNotNull(edge);
+        a.character().setPosition(edge);
+        a.update(20_000, into);
+        assertEquals(edge, a.character().position(), "locked out of the protection zone");
+        assertTrue(a.log().latest(5).stream().anyMatch(e -> e.text().contains("strefa ochronna zamknieta")));
+        a.update(20_000 + PvpRules.FIGHT_LOCK_MS, into);
+        assertTrue(W.isProtectionZone(a.character().position()), "open again after the lock");
+    }
+
+    @Test
+    void skullsAndUnjustKillsSurviveAServerRestart() {
+        Status s = new Status();
+        GameSession killer = at("Restarta", 80, FIELD);
+        Random rng = new Random(3);
+        long t = 1_000;
+        for (int i = 0; i < 3; i++) {
+            GameSession v = at("Victim" + (char) ('a' + i), 80, FIELD.translate(1, 0));
+            assertEquals(Outcome.KILLED, fight(killer, s, v, new Status(), t, rng));
+            t += 700_000;
+        }
+        assertEquals(Skull.RED, s.skull(t));
+        long wall = 1_700_000_000_000L;
+        String saved = s.encode(t, wall);
+        // nowy proces serwera: zegar od zera, minelo 10 minut czasu rzeczywistego
+        Status back = Status.decode(saved, 50, wall + 600_000);
+        assertEquals(Skull.RED, back.skull(50));
+        assertEquals(3, back.unjustKills(50));
+        assertEquals(Skull.NONE, back.skull(50 + PvpRules.RED_SKULL_MS), "the red skull still expires on time");
+        assertEquals(Skull.NONE, Status.decode("smieci;;", 0, wall).skull(0));
+        assertEquals(Skull.NONE, Status.decode(new Status().encode(5, wall), 5, wall).skull(5));
+    }
 }

@@ -16,6 +16,9 @@ final class ServerPlayer {
     /** Czasy ostatnich wiadomosci czatu (limit spamu). */
     final java.util.ArrayDeque<Long> chatTimes = new java.util.ArrayDeque<>();
     long eventsSent;
+    /** Ostatnia wyslana klatka (bez znacznika czasu) i licznik klatek zastapionych przez KEEP. */
+    String lastFrameBody;
+    long framesKept;
     String lastSelf;
     long lastSelfMs = -1_000_000;
     long lastSaveMs;

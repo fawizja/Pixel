@@ -115,7 +115,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Serwer: `ATTACK id`, czaszki w klatkach (PL, ME), stan PvP przetrwa wylogowanie
 - [x] Klient: dotkniecie gracza = atak (drugie = koniec), czerwona ramka celu, kolor imienia wg czaszki
 - [x] Testy zasad + symulacja pojedynkow 4x4 profesji na poziomie 50 + test przez TCP
-- [ ] Czary i runy na graczy, blokada wejscia do PZ po walce, zapis czaszek na dysku serwera
+- [x] Blokada wejscia do PZ po walce (60 s), zapis czaszek na dysku serwera (przetrwaja restart)
+- [ ] Czary i runy na graczy
 ## Etap 14 - Serwer i synchronizacja MMORPG
 - [x] Modul `server` (TCP, protokol tekstowy), wspolny swiat, wielu graczy, zapis postaci na serwerze
 - [x] Potwory wybieraja najblizszego gracza; atak trafia do sesji tego gracza
@@ -130,8 +131,13 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Kopie zapasowe katalogu serwera: zip przy starcie i co 6 h, 7 najnowszych
 - [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
 - [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
+- [x] Protokol v3: niezmieniona klatka jako `KEEP` (mniej transferu)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
 - [ ] Osobne ustawienia oszczedzania baterii, menu ustawien
 ## Etap 16 - Optymalizacja, regresja, przygotowanie Androida
+- [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
+- [x] Mniej transferu: klatki bez zmian jako `KEEP`
+- [ ] Pomiar klatek na prawdziwym telefonie (wymaga urzadzenia), docelowa grafika w atlasie tekstur
+- [ ] Zestaw testow regresji GUI (zrzuty ekranu kluczowych miejsc porownywane automatycznie)

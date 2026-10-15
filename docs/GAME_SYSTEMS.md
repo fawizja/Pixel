@@ -20,24 +20,30 @@ Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
 - 3 nieusprawiedliwione zabojstwa w 24 h = czerwona czaszka na 6 h; smierc z nia = caly plecak zostaje na ziemi.
 - Smierc z reki gracza: ta sama kara exp co od potwora, odrodzenie w swiatyni miasta. Zabojca nie dostaje exp.
 - Obrazenia zadawane graczom x0,5 (walki trwaja dluzej niz z potworami - czas na ucieczke lub leczenie).
-- Stan czaszek trzyma serwer po imieniu postaci (przetrwa wylogowanie, ale jeszcze nie restart serwera).
+- Stan czaszek trzyma serwer po imieniu postaci i zapisuje na dysku (`pvp_<imie>`, czasy jako zegar scienny),
+  wiec czaszki i licznik zabojstw przetrwaja wylogowanie i restart serwera.
+- Blokada strefy ochronnej: kazdy atak PvP zamyka PZ dla atakujacego i ofiary na 60 s (wyjsc mozna, wejsc nie -
+  takze schodami prowadzacymi do PZ). Blokada przetrwa ponowne zalogowanie.
 - Na razie tylko atak podstawowy; czary i runy dzialaja wylacznie na potwory.
 
 ## Siec (etap 14)
 
 - TLS (certyfikat serwera tworzony przy pierwszym starcie, klient przypina odcisk SHA-256 przy pierwszym
   polaczeniu - zmiana odcisku = odmowa bez wysylania hasla). Opcja serwera `--no-tls` tylko do testow.
-- TCP, linie tekstowe rozdzielone tabulatorem (`net.Protocol`, wersja 1, port 7171).
-- Klient -> serwer: `HELLO 2 imie PROFESJA haslo` (konto zakladane przy pierwszym logowaniu, haslo
+- TCP, linie tekstowe rozdzielone tabulatorem (`net.Protocol`, wersja 3, port 7171).
+- Klient -> serwer: `HELLO 3 imie PROFESJA haslo` (konto zakladane przy pierwszym logowaniu, haslo
   tylko jako skrot PBKDF2 z sola, 5 blednych prob = blokada 60 s; polaczenie TLS), `MOVE kierunek|-`, `ACT akcja` (te same nazwy co
   `game.Actions`), `TARGET id` (potwor), `ATTACK id|-` (gracz, PvP), `CHAT tekst`, `BYE`.
 - Serwer -> klient: `WELCOME id`, `ERR`, `SELF zapis` (gdy sie zmienil, max 4/s), `LOG`, `CHAT`,
   `EV` (zdarzenie walki), co 100 ms klatka `FRAME czas` + `ME` + `TG` + `PL`/`MO`/`GI` w promieniu 12 + `END`.
+  Gdy klatka jest identyczna jak poprzednia, serwer wysyla tylko `KEEP czas` (klient powtarza ostatni stan).
 - Klient przewiduje zwykle kroki (`MovePredictor`, max 2 kroki przed serwerem, 800 ms na potwierdzenie);
   schody i przejscia czekaja na serwer. Inna pozycja z serwera = korekta.
 - Ochrona serwera: osobny watek wysylki na klienta (400 zaleglych linii = rozlaczenie), 300 polaczen,
   8 na adres, 40 wiadomosci/s (zapas 80), linia do 2048 znakow, 15 s na HELLO, czat 5 wiadomosci / 10 s.
 - Serwer: 20 krokow/s, potwory aktualizowane raz na krok dla wszystkich graczy, zapis co 60 s i przy wyjsciu.
+- Budzet wydajnosci (`ServerLoadBudgetTest`): 200 graczy przy spawnach calej mapy 256x232, pelna populacja
+  potworow - srednio ok. 0,5 ms na tik AI lokalnie (budzet testu 25 ms z 50 ms tiku).
 
 ## Postac (Z)
 

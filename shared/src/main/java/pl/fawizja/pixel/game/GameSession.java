@@ -80,6 +80,8 @@ public final class GameSession {
     private Direction facing = Direction.SOUTH;
     private long lastUpdateMs = -1;
     private long lastGateWarningMs = -10_000;
+    private long pzLockedUntil;
+    private long lastPzWarningMs = -10_000;
 
     /** Sesja bez potworow (testy, edytor). */
     public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc) {
@@ -327,7 +329,7 @@ public final class GameSession {
         if (!moving && requested != null) {
             facing = requested;
             Position before = pc.position();
-            MoveResult r = movement.step(pc, requested);
+            MoveResult r = pzLocked(before, requested, nowMs) ? MoveResult.BLOCKED : movement.step(pc, requested);
             if (r == MoveResult.MOVED || r == MoveResult.CHANGED_FLOOR) checkRegion(nowMs);
             if (r == MoveResult.MOVED) {
                 stepFrom = before;
@@ -417,6 +419,24 @@ public final class GameSession {
      * Klient online: przewidywany krok (bez czekania na serwer). Tylko zwykly krok po wolnym kafelku -
      * schody, dziury i inne przejscia czekaja na serwer. Zwraca true, gdy krok sie zaczal.
      */
+    /** Po walce z graczem: do tego czasu nie mozna wejsc do strefy ochronnej (mozna z niej wyjsc). */
+    public void lockProtectionZonesUntil(long untilMs) { pzLockedUntil = Math.max(pzLockedUntil, untilMs); }
+
+    public long protectionZoneLockedUntil() { return pzLockedUntil; }
+
+    private boolean pzLocked(Position from, Direction d, long nowMs) {
+        if (nowMs >= pzLockedUntil || world.isProtectionZone(from)) return false;
+        Position to = from.translate(d.dx, d.dy);
+        pl.fawizja.pixel.world.Transition t = world.transitionAt(to);
+        if (!world.isProtectionZone(to) && (t == null || !world.isProtectionZone(t.to()))) return false;
+        if (nowMs - lastPzWarningMs > 3000) {
+            lastPzWarningMs = nowMs;
+            log.add(nowMs, EventLog.Kind.WARNING, "Walczysz z graczem - strefa ochronna zamknieta jeszcze "
+                    + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
+        }
+        return true;
+    }
+
     public boolean predictStep(Direction d, long nowMs) {
         if (moving && nowMs - stepStartMs < stepDurationMs) return false;
         if (pc.isDead()) return false;

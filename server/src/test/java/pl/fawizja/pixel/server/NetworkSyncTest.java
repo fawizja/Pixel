@@ -251,6 +251,15 @@ class NetworkSyncTest {
                 }
             });
         }
+        // czaszka przetrwa restart serwera
+        await("both left", () -> server.world().players().isEmpty());
+        server.close();
+        server = new PixelServer(0, saves);
+        server.start();
+        try (NetClient a = connect()) {
+            a.hello("Ivo", "PALADIN", "tajne-Ivo");
+            await("skull after restart", () -> a.frame() != null && "WHITE".equals(a.frame().skull()));
+        }
     }
 
     boolean accepted(String name, String voc, String password) throws Exception {
@@ -377,5 +386,19 @@ class NetworkSyncTest {
         assertTrue(names.contains("tls/server.p12"), names.toString());
         for (int i = 0; i < Backups.KEEP + 3; i++) b.create();
         assertEquals(Backups.KEEP, b.list().length);
+    }
+
+    @Test
+    void anUnchangedWorldIsSentAsAShortKeepAlive() throws Exception {
+        try (NetClient a = connect()) {
+            a.hello("Kora", "DRUID", "tajne-Kora");
+            await("first frame", () -> a.frame() != null);
+            Position at = a.frame().self();
+            long t0 = a.frame().serverTime();
+            await("keep frames", () -> server.world().players().stream()
+                    .anyMatch(p -> p.name().equals("Kora") && p.framesKept >= 5));
+            await("time advances", () -> a.frame().serverTime() > t0);
+            assertEquals(at, a.frame().self(), "KEEP repeats the last state");
+        }
     }
 }

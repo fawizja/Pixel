@@ -2,13 +2,13 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-15, wersja 0.13.1)
+## Podsumowanie (2026-10-15, wersja 0.13.2)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie i online: modul `server` (TCP) + tryb online klienta desktopowego (`-Dpixel.server`).
   PvP (etap 13), konta z haslem, menu i ekran logowania (takze APK). TLS z przypinaniem certyfikatu.
 - Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 oraz czesci etapow 2, 9, 10, 11, 14, 15 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = 4613838 (PvP, CI zielone). 0.11.0 = 9511573 (konta/logowanie/czat, CI zielone). 0.11.1 = a97ad23 (przewidywanie ruchu, CI zielone). 0.12.0 = 955b3c1 (TLS, CI zielone). 0.12.1 = e6c5175 (limity serwera), kopie zapasowe = b64d06a, endgame cz.1 = 05d40b4 (potwory, sprzet, symulacje; CI zielone). 0.13.0 = d0f3c45 (wschodni kontynent i straznik mostu, CI zielone). 0.13.1 = oboz za mostem, kuznia endgame.
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = 4613838 (PvP, CI zielone). 0.11.0 = 9511573 (konta/logowanie/czat, CI zielone). 0.11.1 = a97ad23 (przewidywanie ruchu, CI zielone). 0.12.0 = 955b3c1 (TLS, CI zielone). 0.12.1 = e6c5175 (limity serwera), kopie zapasowe = b64d06a, endgame cz.1 = 05d40b4 (potwory, sprzet, symulacje; CI zielone). 0.13.0 = d0f3c45 (wschodni kontynent i straznik mostu, CI zielone). 0.13.1 = f3d52d5 (oboz, kuznia, CI zielone). 0.13.2 = blokada PZ po walce, trwale czaszki, KEEP.
 
 ## Architektura
 
@@ -55,6 +55,7 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 
 ## Testy i weryfikacja (co faktycznie wykonano)
 
+- 0.13.2: `./gradlew test` - OK, 187 testow (w tym restart serwera z zachowana czaszka, budzet tiku 0,45 ms).
 - 0.13.1: `./gradlew test` - OK, 183 testy (3 przebiegi pod rzad bez bledu); zrzut obozu z 3 NPC.
 - 0.13.0: `./gradlew test` - OK, 181 testow; zrzuty pod Xvfb: oboz za mostem, krater, ruiny Kha'zuula,
   Otchlan -1 (renderowanie nowych kafelkow OK). Kontrola: zachodnia czesc mapy identyczna jak przed
@@ -96,7 +97,7 @@ Zasada: reguly gry tylko w `shared`; klient tylko wyswietla i wysyla akcje. Serw
 ## Punkt wznowienia
 
 **Nastepne zadanie: etap 16 (optymalizacja, regresja, Android) i domkniecie etapu 14** (TODO.md). Plan:
-1. PvP: czary/runy na graczy, blokada PZ po walce, zapis czaszek na dysku serwera.
+1. PvP: czary i runy na graczy (blokada PZ i trwale czaszki juz sa).
 2. Etap 16: wydajnosc (profil klatki na duzej mapie 256x232), regresja, Android.
 Menu: `MenuScreen` -> `PixelGame.playLocal()` albo `LoginScreen` -> `connectOnline` (watek) -> `startOnline`.
 Test GUI bez myszy: Xvfb :99 + python-xlib (XTEST) do klikania i pisania - skrypt w opisie sesji, nie w repo.

@@ -166,6 +166,14 @@ public final class NetClient implements AutoCloseable {
                     case "GI":
                         ground.add(new GroundStack(pos(f, 1), Integer.parseInt(f[4]), Integer.parseInt(f[5])));
                         break;
+                    case "KEEP": {
+                        Frame last = frame;
+                        if (last != null) {
+                            frame = new Frame(Long.parseLong(f[1]), last.self(), last.facing(), last.targetId(),
+                                    last.playerTargetId(), last.skull(), last.players(), last.monsters(), last.ground());
+                        }
+                        break;
+                    }
                     case "END":
                         frame = new Frame(frameTime, self, facing, targetId, playerTargetId, skull,
                                 Collections.unmodifiableList(players), Collections.unmodifiableList(monsters),

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.2] - 2026-10-15
+
+### Dodano
+- PvP: po kazdym ataku na gracza strefa ochronna jest zamknieta dla obu stron przez 60 s (takze schodami).
+- Czaszki i nieusprawiedliwione zabojstwa zapisywane na dysku serwera - przetrwaja restart.
+- Protokol 3: niezmieniona klatka stanu wysylana jako krotkie `KEEP` (mniej transferu na telefonie).
+- Test budzetu wydajnosci serwera: 200 graczy na calej mapie, ok. 0,5 ms na tik AI.
+- 4 nowe testy (lacznie 187).
+
 ## [0.13.1] - 2026-10-15
 
 ### Dodano

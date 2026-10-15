@@ -31,6 +31,8 @@ public final class PvpRules {
     public static final long KILL_WINDOW_MS = 24 * 3_600_000L;
     public static final int RED_SKULL_KILLS = 3;
     public static final double PVP_DAMAGE = 0.5;
+    /** Po walce z graczem (atak lub trafienie) nie mozna wejsc do strefy ochronnej przez ten czas. */
+    public static final long FIGHT_LOCK_MS = 60_000L;
 
     public enum Skull { NONE, WHITE, RED }
 
@@ -54,7 +56,54 @@ public final class PvpRules {
         long whiteUntil;
         long redUntil;
         long nextAttackMs;
+        long fightUntil;
         final ArrayDeque<Long> unjustKills = new ArrayDeque<>();
+
+        /** Do kiedy trwa blokada strefy ochronnej po walce z graczem (czas serwera). */
+        public long fightUntil() { return fightUntil; }
+
+        /**
+         * Zapis na dysk: czasy jako zegar scienny (czas serwera liczy sie od startu procesu), wiec czaszki
+         * i zabojstwa przetrwaja restart serwera. Format: "white;red;kill1,kill2,..." (ms epoki, 0 = brak).
+         */
+        public String encode(long now, long wallNow) {
+            prune(now);
+            StringBuilder sb = new StringBuilder();
+            sb.append(toWall(whiteUntil, now, wallNow)).append(';').append(toWall(redUntil, now, wallNow)).append(';');
+            boolean first = true;
+            for (long k : unjustKills) {
+                if (!first) sb.append(',');
+                sb.append(wallNow + (k - now));
+                first = false;
+            }
+            return sb.toString();
+        }
+
+        public static Status decode(String line, long now, long wallNow) {
+            Status s = new Status();
+            if (line == null || line.isBlank()) return s;
+            String[] f = line.trim().split(";", -1);
+            if (f.length < 2) return s;
+            try {
+                s.whiteUntil = fromWall(Long.parseLong(f[0]), now, wallNow);
+                s.redUntil = fromWall(Long.parseLong(f[1]), now, wallNow);
+                if (f.length > 2 && !f[2].isEmpty()) {
+                    for (String k : f[2].split(",")) s.unjustKills.addLast(now + (Long.parseLong(k) - wallNow));
+                }
+            } catch (NumberFormatException e) {
+                return new Status(); // uszkodzony zapis: bez czaszek (bezpieczniej niz blad logowania)
+            }
+            s.prune(now);
+            return s;
+        }
+
+        private static long toWall(long until, long now, long wallNow) {
+            return until <= now ? 0 : wallNow + (until - now);
+        }
+
+        private static long fromWall(long wall, long now, long wallNow) {
+            return wall <= wallNow ? 0 : now + (wall - wallNow);
+        }
 
         public Skull skull(long now) {
             if (now < redUntil) return Skull.RED;
@@ -107,6 +156,10 @@ public final class PvpRules {
             return Outcome.OUT_OF_REACH;
         }
         as.nextAttackMs = now + ap.intervalMs();
+        as.fightUntil = Math.max(as.fightUntil, now + FIGHT_LOCK_MS);
+        vs.fightUntil = Math.max(vs.fightUntil, now + FIGHT_LOCK_MS);
+        attacker.lockProtectionZonesUntil(as.fightUntil);
+        victim.lockProtectionZonesUntil(vs.fightUntil);
         boolean justified = vs.skull(now) != Skull.NONE;
         if (!justified && as.skull(now) == Skull.NONE) {
             attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowales gracza " + b.name() + " - biala czaszka na 15 min.");
