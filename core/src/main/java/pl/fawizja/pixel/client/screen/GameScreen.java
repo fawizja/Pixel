@@ -317,6 +317,7 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:light":
             case "settings:numbers":
             case "settings:sound":
+            case "settings:loot":
                 settings.apply(id);
                 settingsPrefs.put(settings.toMap());
                 settingsPrefs.flush();
@@ -523,6 +524,24 @@ public final class GameScreen extends ScreenAdapter {
         return best;
     }
 
+    /** Automatyczne lupy: cialo z lupem obok postaci przeszukiwane co 0,8 s; najwyzej 2 proby na cialo (pelny plecak). */
+    private long autoLootAtMs;
+    private final Map<Position, Integer> autoLootTries = new java.util.HashMap<>();
+
+    private void autoLoot(long t) {
+        if (!settings.autoLoot() || t < autoLootAtMs || session.character().isDead()) return;
+        autoLootAtMs = t + 800;
+        Position c = session.corpseToSearch();
+        if (c == null) {
+            autoLootTries.clear();
+            return;
+        }
+        int tries = autoLootTries.getOrDefault(c, 0);
+        if (tries >= 2) return;
+        autoLootTries.put(c, tries + 1);
+        act("loot", t);
+    }
+
     /** Marsz do pola na biezacym pietrze (dotkniecie duzej mapy; desktop: -Dpixel.walkto=x,y). */
     public void walkTo(Position goal) { walkTo(goal, now(), false, false); }
 
@@ -637,6 +656,7 @@ public final class GameScreen extends ScreenAdapter {
         if (net != null) syncWithServer(dir);
         final long t = now();
         if (net == null) session.update(t, dir);
+        autoLoot(t);
         updateGuard(t);
 
         if (net == null && t - lastSaveMs >= AUTOSAVE_MS) {

@@ -55,4 +55,15 @@ class GameSettingsTest {
         assertEquals(0, GameSettings.fromMap(s.toMap()).volume());
         assertEquals(60, GameSettings.fromMap(Map.of("volume", "55")).volume(), "unsupported level falls back");
     }
+
+    @Test
+    void autoLootIsOnByDefaultTogglesAndIsSaved() {
+        GameSettings s = new GameSettings();
+        assertTrue(s.autoLoot());
+        assertTrue(s.apply("settings:loot"));
+        assertFalse(s.autoLoot());
+        assertTrue(s.rows()[5][1].contains("dotknięciem"));
+        assertFalse(GameSettings.fromMap(s.toMap()).autoLoot());
+        assertTrue(GameSettings.fromMap(Map.of("loot", "?")).autoLoot(), "bad value falls back");
+    }
 }

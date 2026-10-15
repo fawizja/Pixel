@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Ustawienia gracza (etap 15): limit klatek, oszczedzanie baterii, jakosc swiatla, liczby obrazen i glosnosc.
+ * Ustawienia gracza (etap 15): limit klatek, oszczedzanie baterii, jakosc swiatla, liczby obrazen, glosnosc
+ * i automatyczne lupy.
  * Zapisywane jako pary tekstowe (na kliencie w Preferences); bledne wartosci wracaja do domyslnych.
  * Ochrona zasobow 90% / 75% dziala niezaleznie i moze tylko dodatkowo obnizyc te limity.
  */
@@ -23,12 +24,15 @@ public final class GameSettings {
     private boolean highLighting = true;
     private boolean damageNumbers = true;
     private int volume = 60;
+    private boolean autoLoot = true;
 
     public int fpsCap() { return fpsCap; }
     public boolean batterySaver() { return batterySaver; }
     public boolean highLighting() { return highLighting; }
     public boolean damageNumbers() { return damageNumbers; }
     public int volume() { return volume; }
+    /** Przeszukiwanie cial obok postaci bez dotykania (lup do plecaka). */
+    public boolean autoLoot() { return autoLoot; }
     /** Glosnosc 0..1 dla odtwarzacza. */
     public float volumeFactor() { return volume / 100f; }
 
@@ -58,6 +62,7 @@ public final class GameSettings {
     public void toggleBatterySaver() { batterySaver = !batterySaver; }
     public void toggleHighLighting() { highLighting = !highLighting; }
     public void toggleDamageNumbers() { damageNumbers = !damageNumbers; }
+    public void toggleAutoLoot() { autoLoot = !autoLoot; }
 
     /** Obsluga przycisku z panelu ustawien ("settings:fps" itd.); false dla nieznanej akcji. */
     public boolean apply(String action) {
@@ -67,6 +72,7 @@ public final class GameSettings {
             case "settings:light": toggleHighLighting(); return true;
             case "settings:numbers": toggleDamageNumbers(); return true;
             case "settings:sound": cycleVolume(); return true;
+            case "settings:loot": toggleAutoLoot(); return true;
             default: return false;
         }
     }
@@ -78,6 +84,7 @@ public final class GameSettings {
         m.put("light", String.valueOf(highLighting));
         m.put("numbers", String.valueOf(damageNumbers));
         m.put("volume", String.valueOf(volume));
+        m.put("loot", String.valueOf(autoLoot));
         return m;
     }
 
@@ -89,6 +96,7 @@ public final class GameSettings {
         s.batterySaver = bool(m.get("battery"), false);
         s.highLighting = bool(m.get("light"), true);
         s.damageNumbers = bool(m.get("numbers"), true);
+        s.autoLoot = bool(m.get("loot"), true);
         return s;
     }
 
@@ -119,6 +127,7 @@ public final class GameSettings {
             {"settings:light", "Światło: " + (highLighting ? "wysoka jakość" : "niska jakość")},
             {"settings:numbers", "Liczby obrażeń: " + (damageNumbers ? "pokazuj" : "ukryj")},
             {"settings:sound", "Dźwięk: " + (volume == 0 ? "wyłączony" : volume + "%")},
+            {"settings:loot", "Łupy z ciał: " + (autoLoot ? "automatycznie" : "dotknięciem")},
         };
     }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.43.0] - 2026-10-15
+
+### Dodano
+- Automatyczne łupy (domyślnie włączone, przełącznik „Łupy z ciał” w panelu ustawień pod „i”): ciało z łupem
+  na polu postaci albo obok jest przeszukiwane samo, co 0,8 s, lokalnie i online. Przy pełnym plecaku najwyżej
+  dwie próby na ciało, bez zalewania dziennika ostrzeżeniami.
+- Ustawienie zapisywane (`loot` w Preferences). Sprawdzone w grze: walka z goblinami w kopalni, 78 gp z ciał
+  trafiło do plecaka bez dotykania. Test ustawień; łącznie 269.
+
 ## [0.42.0] - 2026-10-15
 
 ### Dodano
