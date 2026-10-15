@@ -175,11 +175,27 @@ class NetworkSyncTest {
             await("hugo sees the item on the ground", () -> b.frame() != null && b.frame().ground().stream()
                     .anyMatch(g -> g.itemId() == itemId));
 
-            // walka na polu z wilkami: zdarzenia walki (EV) docieraja do klienta
+            // walka obok zywego wilka: zdarzenia walki (EV) docieraja do klienta
             Position field = new Position(58, 75, 0);
             server.enqueueTest(() -> {
-                for (ServerPlayer p : server.world().players()) {
-                    if (p.name().equals("Gina")) p.session.teleport(field, server.now());
+                ServerWorld w = server.world();
+                Position spot = field;
+                pl.fawizja.pixel.monster.Monster best = null;
+                for (pl.fawizja.pixel.monster.Monster m : w.monsters.monsters()) {
+                    if (m.isDead() || m.position().z() != 0 || !m.type().key().equals("wolf")) continue;
+                    if (best == null || m.position().distanceTo(field) < best.position().distanceTo(field)) best = m;
+                }
+                if (best != null) {
+                    for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+                        Position n = best.position().translate(d.dx, d.dy);
+                        if (w.world.isWalkable(n) && !w.world.isProtectionZone(n) && w.monsters.monsterAt(n) == null) {
+                            spot = n;
+                            break;
+                        }
+                    }
+                }
+                for (ServerPlayer p : w.players()) {
+                    if (p.name().equals("Gina")) p.session.teleport(spot, server.now());
                 }
             });
             await("combat event", () -> {

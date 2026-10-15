@@ -16,3 +16,6 @@ qas_banker;Bankier Qasirah;BANKER;Qasirah;68;190;0;-;#d8c070;Bank Qasirah prowad
 qas_merchant;Kupiec Qasirah;MERCHANT;Qasirah;90;190;0;qas_shop;#e0c080;Towary z Qasirah i skup lupow z okolicy.
 qas_priest;Kaplan Qasirah;PRIEST;Qasirah;82;191;0;-;#f0f0f0;Swiatynia Qasirah wita wedrowca.
 qas_guide;Przewodnik Qasirah;GUIDE;Qasirah;77;193;0;-;#c09050;Okolice Qasirah sa niebezpieczne. Pomozesz?
+camp_merchant;Kwatermistrz Bren;MERCHANT;Oboz Zwiadowcow;183;84;0;camp_shop;#a07040;Mikstury dla twardych i skup wszystkiego, co przyniesiesz zza mostu.
+camp_banker;Skarbniczka Wena;BANKER;Oboz Zwiadowcow;175;88;0;-;#d8c070;Konto jest wspolne ze wszystkimi bankami miast.
+camp_guide;Zwiadowczyni Ilka;GUIDE;Oboz Zwiadowcow;179;82;0;-;#506040;Za obozem zaczyna sie prawdziwe niebezpieczenstwo. Mam zadania dla najsilniejszych.

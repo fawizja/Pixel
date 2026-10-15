@@ -79,6 +79,13 @@ Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie 
 - Klient: przycisk ROZMOWA (lub N / dotkniecie NPC), okno z kupnem (ilosc 1/5/25/100, strony), skupem,
   bankiem, uslugami kaplana i lista zadan ze stanem.
 
+## Oboz i kuznia endgame (Z logika, C UI)
+
+- NPC moga stac poza miastami (pole "miasto" = nazwa obozu), ale kaplan tylko w miescie ze swiatynia.
+- `camp_shop`: mikstury (w tym Supreme), skup materialow po 1/2 i sprzetu endgame po 1/4 wartosci.
+- Receptury endgame w `recipes.csv` (crafting z ksiegi, bez stanowiska); poziom receptury = poziom przedmiotu.
+- Ksiega: receptury do poziomu postaci + 100, po kilka na strone ("Nastepna strona receptur").
+
 ## Mapa, kolizje, pietra (Z)
 
 - Warstwy: podloze, dekoracje, obiekty (przeszkody), sciany, swiatlo, przejscia.

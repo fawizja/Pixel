@@ -63,6 +63,7 @@ public final class Hud {
     private boolean npcMode;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
+    private int bookPage;
     private int npcQty = 1;
     private static final int[] QUANTITIES = {1, 5, 25, 100};
     private boolean charOpen;
@@ -267,7 +268,13 @@ public final class Hud {
             String detail = sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
-        for (Recipe rc : session.recipes().all()) {
+        // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
+        List<Recipe> shown = new ArrayList<>();
+        for (Recipe rc : session.recipes().all()) if (rc.minLevel() <= pc.level() + 100) shown.add(rc);
+        int perPage = Math.max(3, (int) ((menuH - 70) / rowH) - 1);
+        int bookPages = Math.max(1, (shown.size() + perPage - 1) / perPage);
+        if (bookPage >= bookPages) bookPage = 0;
+        for (Recipe rc : shown.subList(bookPage * perPage, Math.min(shown.size(), (bookPage + 1) * perPage))) {
             StringBuilder d = new StringBuilder();
             for (java.util.Map.Entry<Integer, Integer> e : rc.ingredients().entrySet()) {
                 if (d.length() > 0) d.append(", ");
@@ -278,6 +285,7 @@ public final class Hud {
             menuRows.add(new MenuRow("craft:" + rc.key(),
                     rc.resultCount() + "x " + session.items().get(rc.resultItemId()).name(), d.toString(), ok));
         }
+        if (bookPages > 1) menuRows.add(new MenuRow("book:page", "Nastepna strona receptur", (bookPage + 1) + " / " + bookPages, true));
         // dwie kolumny: czary po lewej, receptury po prawej
         float colW = (menuW - 30) / 2f;
         int spellsCount = 0;
@@ -411,6 +419,8 @@ public final class Hud {
                         npcQty = QUANTITIES[(i + 1) % QUANTITIES.length];
                     } else if (row.action.equals("npc:page")) {
                         npcPage++;
+                    } else if (row.action.equals("book:page")) {
+                        bookPage++;
                     } else if (!row.action.equals("npc:none")) {
                         actions.onButton(row.action);
                     }

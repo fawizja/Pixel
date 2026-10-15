@@ -82,8 +82,9 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Testy: 4 miasta ze strefami, dostepnosc wszystkich miast i lochow z Varden, kolejnosc biomow, spawny
 - [x] Poziomy 230..1000: wschodni kontynent (5 krain, 17 potworow, 4 bossow, 4 progi sprzetu), most ze straznikiem (poz. 200)
 - [x] Symulacje endgame z leczeniem: kazdy prog do przejscia, bossowie tylko druzyna, bez przeskakiwania progow
-- [ ] Ryby zalezne od biomu; NPC w obozie za mostem (kupiec, skup materialow endgame)
-- [ ] Wytwarzanie z materialow endgame (obsydian, lodowe rdzenie, esencja cienia, zar Otchlani)
+- [x] Oboz za mostem: kupiec ze skupem materialow, bankier, zwiadowczyni z 9 zadaniami endgame
+- [x] Kuznia endgame: 28 receptur z obsydianu, lodowych rdzeni, esencji cienia i zaru Otchlani
+- [ ] Ryby zalezne od biomu
 ## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie
 - [x] Pietra -5..+5, schody, dziury, drabiny, liny; test dostepnosci wszystkich pieter
 - [x] Ciemne podziemia, pochodnie na mapie i w plecaku, poswiata postaci

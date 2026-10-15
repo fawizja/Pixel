@@ -262,4 +262,39 @@ class TownServicesTest {
         assertEquals(QuestLog.State.DONE, again.quests().state("varden_ears"));
         assertEquals(QuestLog.State.ACTIVE, again.quests().state("varden_wolves"));
     }
+
+    @Test
+    void theCampBehindTheBridgeTradesBanksAndGivesQuestsButHasNoTemple() {
+        List<Npc> camp = npcs.all().stream().filter(n -> n.town().equals("Oboz Zwiadowcow")).toList();
+        assertEquals(Set.of(NpcRole.MERCHANT, NpcRole.BANKER, NpcRole.GUIDE),
+                camp.stream().map(Npc::role).collect(java.util.stream.Collectors.toSet()));
+        for (Npc n : camp) {
+            assertTrue(n.position().x() >= 168, n.key() + " stands behind the guarded bridge");
+            assertTrue(world.requiredLevelAt(n.position()) == 0 && world.isProtectionZone(n.position()), n.key());
+        }
+        for (QuestType q : quests.byGiver("camp_guide")) assertTrue(q.minLevel() >= 230, q.key());
+    }
+
+    @Test
+    void endgameGearIsForgedFromItsOwnTierMaterialsAndNeverPaysForItself() throws Exception {
+        RecipeRegistry recipes = RecipeRegistry.loadDefault(TestData.ITEMS);
+        for (int itemId = 92; itemId <= 120; itemId++) {
+            if (itemId == 116) continue; // korona Otchlani tylko od Mor'gatha
+            final int target = itemId;
+            Recipe r = recipes.all().stream().filter(x -> x.resultItemId() == target).findFirst().orElse(null);
+            assertNotNull(r, "no recipe for " + TestData.ITEMS.get(itemId).key());
+            assertEquals(TestData.ITEMS.get(itemId).minLevel(), r.minLevel(), r.key());
+            long materials = 0;
+            for (Map.Entry<Integer, Integer> e : r.ingredients().entrySet()) materials += bestSell(e.getKey()) * e.getValue();
+            assertTrue(bestSell(itemId) < r.goldCost() + materials, r.key() + " forging and selling must lose money");
+        }
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(250) - pc.experience());
+        Recipe spear = recipes.all().stream().filter(x -> x.key().equals("magma_spear")).findFirst().orElseThrow();
+        pc.backpack().add(new ItemStack(id("obsidian_shard"), 20));
+        pc.backpack().add(new ItemStack(id("platinum_coin"), 300));
+        assertEquals(pl.fawizja.pixel.magic.CastResult.OK, pl.fawizja.pixel.magic.CraftingSystem.craft(pc, spear));
+        assertEquals(1, pc.backpack().count(id("magma_spear")));
+        assertEquals(0, pc.backpack().count(id("obsidian_shard")));
+    }
 }

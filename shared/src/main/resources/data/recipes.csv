@@ -7,3 +7,32 @@ bone_shield;bone_shield;1;wooden_shield:1,bone:8;0;14;Drewniana tarcza wzmocnion
 spears;spear;5;iron_ore:1;10;8;Piec wloczni do rzucania.
 blank_runes;blank_rune;2;crystal_shard:1;0;8;Dwie puste runy z odlamka krysztalu.
 torches;torch;3;meat:1;5;8;Pochodnie nasaczone tluszczem.
+# --- endgame: kuznia z materialow wschodniego kontynentu ---
+magma_spear;magma_spear;1;obsidian_shard:20;40000;250;Wlocznia z obsydianu hartowana w lawie.
+obsidian_wand;obsidian_wand;1;obsidian_shard:20;40000;250;Rozdzka z wulkanicznego szkla.
+rod_of_hoarfrost;rod_of_hoarfrost;1;obsidian_shard:20;40000;250;Rozdzka szronu na ogniste Wyzyny.
+molten_knuckles;molten_knuckles;1;obsidian_shard:20;40000;250;Rekawice z zastyglej magmy.
+obsidian_armor;obsidian_armor;1;obsidian_shard:25;50000;250;Zbroja z plyt obsydianu.
+obsidian_helmet;obsidian_helmet;1;obsidian_shard:15;30000;250;Helm z obsydianu.
+obsidian_legs;obsidian_legs;1;obsidian_shard:15;30000;250;Nogawice z obsydianu.
+obsidian_shield;obsidian_shield;1;obsidian_shard:20;40000;250;Tarcza z obsydianu.
+frostfang_spear;frostfang_spear;1;glacial_core:20,obsidian_shard:10;150000;450;Wlocznia z kla lodowego smoka.
+wand_of_inferno;wand_of_inferno;1;glacial_core:20,obsidian_shard:10;150000;450;Ogien zamkniety w lodowym rdzeniu.
+rod_of_stoneroot;rod_of_stoneroot;1;glacial_core:20,obsidian_shard:10;150000;450;Rozdzka z korzeni skal pod lodem.
+frostbound_fists;frostbound_fists;1;glacial_core:20,obsidian_shard:10;150000;450;Rekawice skute wiecznym lodem.
+glacial_plate;glacial_plate;1;glacial_core:25,obsidian_shard:10;180000;450;Plyta z lodowych rdzeni.
+glacial_helm;glacial_helm;1;glacial_core:15,obsidian_shard:5;110000;450;Helm z lodowego rdzenia.
+glacial_legs;glacial_legs;1;glacial_core:15,obsidian_shard:5;110000;450;Nogawice z lodowych rdzeni.
+glacial_shield;glacial_shield;1;glacial_core:20,obsidian_shard:10;150000;450;Tarcza wiecznego lodu.
+shadowpiercer;shadowpiercer;1;shadow_essence:20,glacial_core:10;400000;700;Wlocznia przebijajaca cien.
+stormcaller_wand;stormcaller_wand;1;shadow_essence:20,glacial_core:10;400000;700;Rozdzka burzy z esencji cienia.
+rod_of_twilight;rod_of_twilight;1;shadow_essence:20,glacial_core:10;400000;700;Rozdzka zmierzchu.
+umbral_grips;umbral_grips;1;shadow_essence:20,glacial_core:10;400000;700;Rekawice z cienia.
+shadowweave_armor;shadowweave_armor;1;shadow_essence:25,glacial_core:10;500000;700;Zbroja tkana z cienia.
+shadow_hood;shadow_hood;1;shadow_essence:15,glacial_core:5;300000;700;Kaptur z cienia.
+shadow_legs;shadow_legs;1;shadow_essence:15,glacial_core:5;300000;700;Spodnie z cienia.
+shadow_aegis;shadow_aegis;1;shadow_essence:20,glacial_core:10;400000;700;Tarcza pochlaniajaca swiatlo.
+dawnspear;dawnspear;1;abyssal_ember:25,shadow_essence:15;1000000;850;Wlocznia switu z zaru Otchlani.
+starfall_wand;starfall_wand;1;abyssal_ember:25,shadow_essence:15;1000000;850;Rozdzka spadajacych gwiazd.
+rod_of_eternal_winter;rod_of_eternal_winter;1;abyssal_ember:25,shadow_essence:15;1000000;850;Rozdzka wiecznej zimy.
+fists_of_the_abyss;fists_of_the_abyss;1;abyssal_ember:25,shadow_essence:15;1000000;850;Rekawice z serca Otchlani.

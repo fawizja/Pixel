@@ -12,3 +12,12 @@ selv_colossus;Serce ruin;selv_guide;KILL;ruin_colossus;1;1500000;40000;190;Znisz
 qas_scorpions;Kolce skorpionow;qas_guide;COLLECT;scorpion_tail;15;80000;2000;55;Alchemicy Qasirah potrzebuja jadu skorpionow.
 qas_mummies;Spokoj zmarlych;qas_guide;KILL;mummy;10;900000;15000;180;Mumie wychodza z krypt. Odeslij 10 z powrotem.
 qas_pharaoh;Klatwa faraona;qas_guide;KILL;pharaoh;1;2500000;60000;210;Zdejmij klatwe Neferakha w najglebszej krypcie.
+camp_treants;Przeklety las;camp_guide;KILL;cursed_treant;25;300000;20000;230;Drzewce dusza droge od mostu. Wytnij 25.
+camp_golems;Rzeka lawy;camp_guide;KILL;lava_golem;20;500000;40000;320;Golemy lawy zalewaja szlak na poludnie. Rozbij 20.
+camp_ignaroth;Pan wulkanu;camp_guide;KILL;ignaroth;1;3000000;150000;350;Ignaroth budzi wulkan. Zbierz druzyne i zgas go.
+camp_dragons;Lodowe skrzydla;camp_guide;KILL;ice_dragon;20;800000;60000;450;Lodowe smoki porywaja zwiadowcow. Pokonaj 20.
+camp_hrimgar;Krol lodu;camp_guide;KILL;hrimgar;1;5000000;250000;500;Hrimgar zamyka przelecze. Stracz go ze szczytu.
+camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1500000;0;600;Kaplani obozu badaja cien. Przynies 10 esencji.
+camp_khazuul;Pusty krol;camp_guide;KILL;khazuul;1;8000000;400000;650;Kha'zuul wola cienie z ruin. Rozprosz go.
+camp_lords;Panowie Otchlani;camp_guide;KILL;abyss_lord;15;6000000;300000;850;Panowie Otchlani gromadza armie. Pokonaj 15.
+camp_morgath;Serce Otchlani;camp_guide;KILL;morgath;1;20000000;1000000;900;Ostatnie zadanie swiata: zniszcz Mor'gatha.

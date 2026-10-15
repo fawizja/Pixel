@@ -102,3 +102,5 @@
 118;starfall_wand;Starfall Wand;WEAPON;1;580000;WEAPON;116;0;0;850;SORCERER;1;4;ENERGY;#d0d8ff;Rozdzka sciagajaca gwiazdy w glab ziemi.
 119;rod_of_eternal_winter;Rod of Eternal Winter;WEAPON;1;580000;WEAPON;136;0;0;850;DRUID;1;4;ICE;#c0f0ff;Rozdzka wiecznej zimy, gasi nawet ogien demonow.
 120;fists_of_the_abyss;Fists of the Abyss;WEAPON;1;600000;WEAPON;116;22;0;850;MONK;0;1;PHYSICAL;#802020;Rekawice wykute z serca Otchlani.
+121;supreme_health_potion;Supreme Health Potion;POTION;100;500;NONE;0;0;0;200;PALADIN,MONK;0;0;PHYSICAL;#d01040;Najsilniejsza mikstura zdrowia, warzona w obozie za mostem.
+122;supreme_mana_potion;Supreme Mana Potion;POTION;100;350;NONE;0;0;0;200;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#3030e0;Najsilniejsza mikstura many dla doswiadczonych magow.

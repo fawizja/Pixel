@@ -24,7 +24,8 @@ Za ciesnina (x 160..167, sama woda) lezy **wschodni kontynent** (x 168..255) - e
 ```
  y=0    Lodowe Szczyty 400-560   schody na +1 (214,30) -> +2: Hrimgar (242,8,+2)
  y=64   Przeklete Knieje 230-300 <- most (160..167, y 86-87, straznik: poziom 200) <- trakt z Varden
-                                    oboz za mostem (172..186 x 80..93, strefa ochronna, bez swiatyni)
+                                    oboz za mostem (172..186 x 80..93, strefa ochronna, bez swiatyni):
+                                    kwatermistrz Bren, skarbniczka Wena, zwiadowczyni Ilka (zadania)
  y=112  Spalone Wyzyny 300-400   krater z lawa, Ignaroth (212,142)
  y=172  Pustkowia Cienia 550-750 ruiny Kha'zuula (222..238 x 198..212), zejscie do Otchlani (196,216)
         Otchlan -1..-5 750-1000  Mor'gath (240,170,-5)

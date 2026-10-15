@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.1] - 2026-10-15
+
+### Dodano
+- Oboz Zwiadowcow za mostem: kwatermistrz (mikstury, skup materialow i sprzetu endgame), skarbniczka
+  (wspolne konto bankowe) i zwiadowczyni z 9 zadaniami dla poziomow 230-900 (w tym na 4 bossow).
+  Kaplana nie ma - oboz nie jest miastem, odrodzenie zostaje w swiatyni.
+- Najsilniejsze mikstury: Supreme Health Potion (800-1100 HP, paladyn i mnich) i Supreme Mana Potion
+  (400-600 many), od poziomu 200.
+- 28 receptur kuzni endgame: kazdy element sprzetu progow 250/450/700/850 (bez korony Otchlani) z materialow
+  swojego progu i poprzedniego oraz zlota. Wykucie i sprzedaz zawsze sie nie oplaca.
+- Ksiega rzemiosla pokazuje receptury do poziomu postaci + 100 i ma strony.
+
+### Naprawiono
+- Test sieciowy walki teleportuje postac obok zywego wilka (wczesniej czasem czekal na wilka, ktory odszedl).
+
 ## [0.13.0] - 2026-10-15
 
 ### Dodano

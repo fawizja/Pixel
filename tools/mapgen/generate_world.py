@@ -608,6 +608,15 @@ def main():
             (key + '_guide', 'Przewodnik ' + name, 'GUIDE', name, cx - 2, ty0 + 4, '-', colors[1],
              'Okolice ' + name + ' sa niebezpieczne. Pomozesz?'),
         ]
+    camp = 'Oboz Zwiadowcow'
+    npcs += [
+        ('camp_merchant', 'Kwatermistrz Bren', 'MERCHANT', camp, CAMP[2] - 3, CAMP[1] + 4, 'camp_shop', '#a07040',
+         'Mikstury dla twardych i skup wszystkiego, co przyniesiesz zza mostu.'),
+        ('camp_banker', 'Skarbniczka Wena', 'BANKER', camp, CAMP[0] + 3, CAMP[1] + 8, '-', '#d8c070',
+         'Konto jest wspolne ze wszystkimi bankami miast.'),
+        ('camp_guide', 'Zwiadowczyni Ilka', 'GUIDE', camp, (CAMP[0] + CAMP[2]) // 2, CAMP[1] + 2, '-', '#506040',
+         'Za obozem zaczyna sie prawdziwe niebezpieczenstwo. Mam zadania dla najsilniejszych.'),
+    ]
     for (_k, _n, _r, _t, x, y, *_rest) in npcs:
         assert g[y][x] in WALKABLE, f'npc {_k} on {g[y][x]!r} at {x},{y}'
 
