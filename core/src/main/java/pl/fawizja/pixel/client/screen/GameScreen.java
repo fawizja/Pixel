@@ -73,6 +73,10 @@ public final class GameScreen extends ScreenAdapter {
     private long lastSaveMs;
     private long lastGuardSampleMs;
     private float frameTimeAvg = 1f / 60f;
+    /** Okresowy wpis do logu o plynnosci (pomiar na telefonie / emulatorze: logcat, tag Pixel). */
+    private static final long FRAME_LOG_MS = 30_000L;
+    private final pl.fawizja.pixel.perf.FrameStats frameStats = new pl.fawizja.pixel.perf.FrameStats(8192);
+    private long frameLogAtMs = TimeUtils.millis() + FRAME_LOG_MS;
     private final pl.fawizja.pixel.settings.GameSettings settings;
     private final pl.fawizja.pixel.audio.SoundCues soundCues = new pl.fawizja.pixel.audio.SoundCues();
     /** Wypady przy ciosach wrecz: pozycja atakujacego -> przesuniecie sprite'a w kafelkach mapy (dx, dy). */
@@ -383,6 +387,13 @@ public final class GameScreen extends ScreenAdapter {
         frameStartNs = TimeUtils.nanoTime();
         if (paused) return;
         frameTimeAvg = frameTimeAvg * 0.95f + Math.min(delta, 0.25f) * 0.05f;
+        frameStats.add(delta);
+        if (TimeUtils.millis() >= frameLogAtMs) {
+            Gdx.app.log("Pixel", frameStats.summary() + " limit=" + guard.fpsCap(settings.effectiveFpsCap())
+                    + " tryb=" + guard.mode());
+            frameStats.reset();
+            frameLogAtMs = TimeUtils.millis() + FRAME_LOG_MS;
+        }
 
         Direction dir = chatDraft == null ? keyboardDirection() : null;
         if (dir == null && hud.joystick().active()) {

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.18.1] - 2026-10-15
+
+### Dodano
+- Pomiar plynnosci: klient co 30 s zapisuje w logu FPS, mediane, 95. percentyl i najdluzsza klatke
+  (na Androidzie logcat, tag `Pixel`).
+- Test APK na emulatorze Androida w CI (zadanie `android-smoke`): instalacja, start gry z pominieciem menu,
+  75 s gry, zrzut ekranu i logcat jako artefakt. Ten sam skrypt `tools/android-smoke/run.sh` dziala z telefonem przez adb.
+- APK debug przyjmuje `--es autostart Imie:PROFESJA` (tylko wersja debug).
+- 1 nowy test (lacznie 215).
+
 ## [0.18.0] - 2026-10-15
 
 ### Dodano

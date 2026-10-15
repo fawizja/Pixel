@@ -40,11 +40,13 @@ Dane gry (latwe do balansowania bez zmian w kodzie) leza w `shared/src/main/reso
 ./gradlew :android:installDebug   # instalacja na podlaczonym telefonie
 tools/gui-regression/run.sh       # regresja GUI: 10 scen porownanych z wzorcami (wymaga ekranu, np. Xvfb)
 tools/gui-regression/run.sh --update  # nowe wzorce po zamierzonej zmianie wygladu
+tools/android-smoke/run.sh android/build/outputs/apk/debug  # APK na telefonie/emulatorze przez adb: start, 75 s gry, pomiar klatek
 ```
 
 CI (GitHub Actions, `.github/workflows/build.yml`) uruchamia testy, kompiluje klienta i buduje APK debug
 jako artefakt `pixel-debug-apk`. Osobne zadanie `gui-regression` robi zrzuty ekranu pod Xvfb i porownuje je
-z wzorcami w `tools/gui-regression/reference` (roznice jako artefakt `gui-regression`).
+z wzorcami w `tools/gui-regression/reference` (roznice jako artefakt `gui-regression`). Zadanie `android-smoke`
+uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (artefakt `android-smoke`).
 
 ### Sterowanie
 

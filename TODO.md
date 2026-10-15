@@ -141,5 +141,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 ## Etap 16 - Optymalizacja, regresja, przygotowanie Androida
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
-- [ ] Pomiar klatek na prawdziwym telefonie (wymaga urzadzenia), docelowa grafika w atlasie tekstur
+- [x] Grafika w jednym atlasie tekstur (TileArt)
+- [x] Pomiar klatek w kliencie (logcat co 30 s) i test APK na emulatorze w CI (`android-smoke`)
+- [ ] Pomiar klatek na prawdziwym telefonie (wymaga urzadzenia: `tools/android-smoke/run.sh` przez adb)
 - [x] Zestaw testow regresji GUI (zrzuty ekranu kluczowych miejsc porownywane automatycznie, zadanie CI)

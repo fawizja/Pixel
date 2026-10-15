@@ -49,3 +49,35 @@ jobs:
         with:
           name: gui-regression
           path: build/gui-regression
+
+  android-smoke:
+    # APK z zadania build uruchomiony na emulatorze: start bez awarii i pomiar klatek z logcat.
+    # Emulator renderuje programowo (SwiftShader), wiec FPS nie odpowiada telefonowi - liczy sie brak awarii i trend.
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: pixel-debug-apk
+          path: apk
+      - name: KVM dla emulatora
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Emulator - start gry i pomiar klatek
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          arch: x86_64
+          target: default
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: tools/android-smoke/run.sh apk build/android-smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-smoke
+          path: build/android-smoke
