@@ -250,6 +250,12 @@ i bramami poziomu, >= 8 pol od przejsc, losowanie z ziarnem 20261015 + pietro, o
 pietrach). Lup rosnie x3 na pietro w dol. Otwieranie: `GameSession.openChest` (UZYJ obok), raz na postac
 (`openedChests`, zapis `chests`).
 
+## Minimapa (Z kolory, C rysowanie)
+
+`world/MinimapPalette.color/paint`: piksel RGBA8888 na kafelek - przejscie zolte, sciana ciemna, podloze w kolorze
+kafelka x0.8, blokujacy obiekt x0.5, puste pole przezroczyste. `client/ui/Minimap` buduje teksture pietra raz (Nearest)
+i rysuje wycinek 60x60 pol wokol gracza albo cale pietro (`Hud.toggleMap`, klawisz J) z nazwami miast.
+
 ## Poczta (Z logika, S serwer)
 
 `mail/Mailbox`: przesylki (odbiorca, nadawca, przedmiot, ilosc) czekajace na serwerze w `mail.txt`. MAIL SEND imie tekst

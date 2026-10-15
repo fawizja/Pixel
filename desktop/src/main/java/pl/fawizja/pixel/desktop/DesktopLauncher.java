@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|map|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -141,6 +141,7 @@ public final class DesktopLauncher {
                     }
                     gs.session().toggleTorch(0L);
                 }
+                if ("map".equals(open)) ((GameScreen) getScreen()).hud().toggleMap();
                 if ("market".equals(open)) {
                     // podglad rynku (bez serwera): przykladowe oferty
                     pl.fawizja.pixel.market.MarketView.Row[] r = {

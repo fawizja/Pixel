@@ -247,8 +247,10 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.L: onButton("fish"); return true;
                     case Input.Keys.O: hud.openAchievements(false); return true;
                     case Input.Keys.M: onButton("mount"); return true;
+                    case Input.Keys.J: hud.toggleMap(); return true;
                     case Input.Keys.ESCAPE:
-                        if (hud.npcOpen()) hud.toggleNpc(session);
+                        if (hud.mapOpen()) hud.toggleMap();
+                        else if (hud.npcOpen()) hud.toggleNpc(session);
                         else if (hud.bookOpen()) hud.toggleBook();
                         else if (hud.bagOpen()) hud.toggleBag();
                         return true;
@@ -1084,6 +1086,7 @@ public final class GameScreen extends ScreenAdapter {
     public void dispose() {
         if (net != null) net.close();
         lightRenderer.dispose();
+        hud.dispose();
     }
 
     public GameSession session() { return session; }

@@ -21,3 +21,4 @@ bestiary|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0
 guide|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=78,80,0 -Dpixel.open=npc
 mount|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=mount
 chest|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=chest
+map|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=map

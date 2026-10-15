@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.0] - 2026-10-15
+
+### Dodano
+- Minimapa w prawym górnym rogu (60 x 60 pól wokół postaci): ściany, woda, przeszkody, schody i drabiny (żółte),
+  czerwony znacznik gracza. Działa na każdym piętrze; na niskim ekranie maleje albo znika, by nie zasłaniać przycisków.
+- Duża mapa całego piętra z nazwami miast: dotknięcie minimapy albo klawisz J (zamyka dotknięcie, J lub Esc).
+- Nowa scena `map` w regresji GUI (23 sceny), odświeżone wzorce scen z minimapą; 2 nowe testy kolorów; łącznie 262.
+
 ## [0.35.0] - 2026-10-15
 
 ### Dodano

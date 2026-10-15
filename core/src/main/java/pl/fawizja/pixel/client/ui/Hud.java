@@ -126,6 +126,11 @@ public final class Hud {
     private final HudButton bagUse = new HudButton("bag_use", "UŻYJ");
     private final HudButton bagClose = new HudButton("bag_close", "X");
     private boolean diagnosticsOpen;
+    /** Minimapa w prawym gornym rogu i duza mapa calego pietra (dotkniecie minimapy / klawisz J). */
+    private final Minimap minimap = new Minimap();
+    private boolean bigMapOpen;
+    private float mmX, mmY, mmSize;
+    private static final int MINIMAP_TILES = 60;
     /** Ustawienia gracza pokazywane pod diagnostyka (klikalne wiersze "settings:*"). */
     private pl.fawizja.pixel.settings.GameSettings settings;
 
@@ -181,6 +186,10 @@ public final class Hud {
         talk.x = bx; talk.y = by + br * 7.2f; talk.r = br;
         chat.x = bx - br * 2.4f; chat.y = by + br * 7.2f; chat.r = br;
         mount.x = bx - br * 4.8f; mount.y = by + br * 7.2f; mount.r = br;
+        // minimapa pod przyciskiem diagnostyki, nad najwyzszym rzedem przyciskow
+        mmSize = Math.min(120, h - margin - 34 - (talk.y + br) - 12);
+        mmX = w - margin - mmSize;
+        mmY = h - margin - 34 - mmSize;
         // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
         float sr = Math.max(20, br * 0.72f);
         float sx0 = margin + jr * 2.6f + sr + 12;
@@ -817,6 +826,21 @@ public final class Hud {
     }
 
     public void toggleDiagnostics() { diagnosticsOpen = !diagnosticsOpen; }
+
+    public void toggleMap() {
+        bigMapOpen = !bigMapOpen;
+        if (bigMapOpen) {
+            menuOpen = false;
+            bagOpen = false;
+        }
+    }
+    public boolean mapOpen() { return bigMapOpen; }
+
+    private boolean minimapVisible() {
+        return mmSize >= 56 && !diagnosticsOpen && !menuOpen && !bagOpen && !bigMapOpen;
+    }
+
+    public void dispose() { minimap.dispose(); }
     public boolean diagnosticsOpen() { return diagnosticsOpen; }
     public void setSettings(pl.fawizja.pixel.settings.GameSettings settings) { this.settings = settings; }
 
@@ -838,6 +862,14 @@ public final class Hud {
         if (p.x <= Math.min(240, w * 0.45f) && p.y >= h - 62) {
             // dotkniecie paskow HP/MP: karta postaci
             toggleCharacter();
+            return true;
+        }
+        if (bigMapOpen) {
+            bigMapOpen = false;
+            return true;
+        }
+        if (minimapVisible() && p.x >= mmX - 3 && p.x <= mmX + mmSize + 3 && p.y >= mmY - 3 && p.y <= mmY + mmSize + 3) {
+            toggleMap();
             return true;
         }
         if (diagnosticsOpen && settings != null) {
@@ -945,6 +977,7 @@ public final class Hud {
                        long serverTimeMs, DiagnosticsInfo diagInfo) {
         viewport.apply();
         if (trade != null && !bagOpen) menuOpen = true; // po zamknieciu plecaka wraca okno handlu
+        if (menuOpen || bagOpen) bigMapOpen = false;
         PlayerCharacter pc = session.character();
         run.active = pc.isRunning();
         torch.active = pc.isTorchLit();
@@ -1047,6 +1080,14 @@ public final class Hud {
             shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
+        if (minimapVisible()) {
+            shapes.setColor(0.05f, 0.05f, 0.07f, 0.85f);
+            shapes.rect(mmX - 3, mmY - 3, mmSize + 6, mmSize + 6);
+        }
+        if (bigMapOpen) {
+            shapes.setColor(0.04f, 0.04f, 0.06f, 0.94f);
+            shapes.rect(menuX, menuY, menuW, menuH);
+        }
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.6f);
             shapes.rect(w - 250, h - 256, 238, 216);
@@ -1135,6 +1176,8 @@ public final class Hud {
             }
             font.setColor(Color.WHITE);
         }
+        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), mmX, mmY, mmSize, MINIMAP_TILES);
+        if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
             float dy = h - 50;
             for (String line : diagInfo.lines()) {
@@ -1149,6 +1192,21 @@ public final class Hud {
             }
         }
         batch.end();
+    }
+
+    private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
+        pl.fawizja.pixel.world.Position p = session.character().position();
+        text(batch, "Mapa - piętro " + floor + " (dotknij, aby zamknąć)", menuX + 10, menuY + menuH - 8);
+        float[] img = minimap.drawWhole(batch, session.world(), p, menuX + 8, menuY + 8, menuW - 16, menuH - 34);
+        if (img == null) return;
+        font.getData().setScale(0.85f);
+        for (pl.fawizja.pixel.world.Town t : session.world().towns()) {
+            if (t.temple().z() != p.z()) continue;
+            float tx = img[0] + t.temple().x() * img[2];
+            float ty = img[1] + img[3] - t.temple().y() * img[2];
+            text(batch, t.name(), tx - 20, ty + 14);
+        }
+        font.getData().setScale(1f);
     }
 
     private static final String[] SKILL_NAMES = {"Pięści", "Miecz", "Dystans", "Tarcza", "Magia", "Wędkarstwo"};
