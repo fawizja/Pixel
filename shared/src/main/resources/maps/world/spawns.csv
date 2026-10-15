@@ -114,6 +114,17 @@ abyss_lord;226;184;-4;5;2;480
 abyss_lord;246;214;-4;4;2;480
 abyss_lord;210;200;-5;4;2;480
 morgath;240;170;-5;2;1;7200
+# Mrozne Turnie (+1..+3)
+snow_wolf;27;15;1;4;3;90
+yeti;46;10;1;4;2;150
+snow_wolf;46;18;1;4;2;90
+yeti;57;13;2;4;2;150
+frost_witch;50;10;3;3;2;150
+# Plaskowyz Qasirah (+1..+2)
+scorpion;30;210;1;5;3;120
+hyena;44;198;1;5;3;90
+scorpion;38;222;1;4;2;120
+sand_wraith;50;218;2;4;2;180
 # --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---
 wolf;58;72;0;5;3;60;noc
 bandit;106;96;0;3;2;120;noc

@@ -57,6 +57,8 @@ poziomow wyzsze od poziomu postaci, pojawia sie ostrzezenie. To informacja, nie 
 | Mrozne Pustkowia | y 0..63 | 0..+5 | 40-90 | wilki sniezne, yeti, lodowe wiedzmy |
 | Lodowe Jaskinie | y 0..63 | -1 | 70-100 | yeti, lodowe wiedzmy |
 | Glebokie Lodowe Jaskinie | y 0..63 | -5..-2 | 100-150 | lodowe golemy |
+| Mrozne Turnie | x 20..64, y 0..24 | +1..+5 (generowane +1..+3) | 40-90 | wilki sniezne, yeti, lodowe wiedzmy |
+| Plaskowyz Qasirah | x 14..60, y 186..231 | +1..+5 (generowane +1..+2) | 45-130 | skorpiony, hieny, piaskowe upiory |
 | Dzungla Selvaran | y 112..171 | 0..+5 | 55-80 | krokodyle, weze, mysliwi |
 | Zatopione Ruiny | 30..90 x 130..185 | -1 | 65-90 | weze dzungli |
 | Serce Ruin | 30..90 x 130..185 | -5..-2 | 150-200 | straznicy swiatyni |
@@ -123,6 +125,10 @@ Wspolrzedne ponizej sa wzgledem `maps/varden` (w swiecie dodaj 48 do x i 64 do y
 Przejscia: `STAIRS` (wejscie na kafelek), `HOLE` (zejscie przez dziure), `TUNNEL`,
 `LADDER` (trzeba uzyc), `ROPE_SPOT` (wymaga liny). Ladowanie mapy odrzuca przejscia prowadzace
 w sciane albo na inne przejscie (petla).
+
+Wyzyny poza wieza Varden (0.17.1, `highlands()` w generatorze):
+- Mrozne Turnie: schody (36,10) 0->+1, (52,6) +1->+2, (44,12) +2->+3; snieg, skaly sniezne.
+- Plaskowyz Qasirah: schody (30,200) 0->+1, (44,222) +1->+2; piaskowiec, kaktusy.
 
 ## Spawny Varden (`maps/varden/spawns.csv`)
 

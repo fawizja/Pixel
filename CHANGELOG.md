@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.1] - 2026-10-15
+
+### Dodano
+- Wyzyny poza wieza Varden: Mrozne Turnie (pietra +1..+3, poziomy 40-90, wilki sniezne, yeti, lodowe wiedzmy)
+  i Plaskowyz Qasirah (pietra +1..+2, poziomy 45-130, skorpiony, hieny, piaskowe upiory). Wejscia po
+  schodach z powierzchni, generowane deterministycznie.
+- Generator mapy zapisuje teraz takze nocne spawny (osme pole "noc"), wiec `spawns.csv` nie wymaga recznych zmian.
+
+### Poprawiono
+- Niestabilny test sieciowy: losowe haslo magazynu TLS zaczynajace sie od "-J" bylo czytane przez keytool jako
+  opcja JVM (czerwone CI dla 2cdebc8). Haslo ma teraz staly prefiks.
+
 ## [0.17.0] - 2026-10-15
 
 ### Dodano

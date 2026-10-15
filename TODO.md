@@ -93,7 +93,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Paliwo pochodni (30 min, automatycznie nastepna), czar Poswiata, zapis stanu swiatla i sytosci
 - [x] 3 lochy biomow do -5 (dziury, drabiny, miejsca na line), swiecacy mech, magma, lodowe krysztaly
 - [x] 3 bossowie biomow (150, 200, 230) z unikalnymi lupami; testy drogi powrotnej i swiatla
-- [ ] Pietra +1..+5 poza wieza Varden (gory, przelecze)
+- [x] Pietra +1..+5 poza wieza Varden: Mrozne Turnie +1..+3, Plaskowyz Qasirah +1..+2 (0.17.1)
 ## Etap 11 - Dzien, noc, oswietlenie swiata
 - [x] Zegar swiata, fazy, plynna jasnosc, czytelna noc
 - [x] Zegar w GameSession (wspolny dla logiki i grafiki, wymienny - serwer poda czas), komunikaty o zmroku i switaniu

@@ -58,7 +58,8 @@ final class TlsSetup {
         Files.createDirectories(dir.toPath());
         byte[] raw = new byte[24];
         new SecureRandom().nextBytes(raw);
-        String pass = Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
+        // litera na poczatku: haslo zaczynajace sie od "-J" keytool bralby za opcje JVM (losowy blad)
+        String pass = "p" + Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
         Files.write(passFile.toPath(), pass.getBytes(StandardCharsets.UTF_8));
         passFile.setReadable(false, false);
         passFile.setReadable(true, true);

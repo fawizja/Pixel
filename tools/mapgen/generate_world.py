@@ -478,6 +478,49 @@ def east_continent(floors, transitions):
     return spawns, entrances
 
 
+# ------------------------------------------------------------------ gory i plaskowyze (pietra +1..+3)
+
+TURNIE = (36, 10)      # wejscie na Mrozne Turnie (snieg, +1..+3)
+MESA = (30, 200)       # wejscie na Plaskowyz Qasirah (piasek, +1..+2)
+
+
+def highlands(g, floors, transitions):
+    """Pietra nad powierzchnia poza wieza Varden. Wlasny generator losowy - reszta swiata sie nie zmienia."""
+    r = random.Random(20261018)
+    # Mrozne Turnie: sniezne polki skalne, schody z zamarznietego lodu
+    tx, ty = TURNIE
+    rect(g, tx - 1, ty - 1, tx + 1, ty + 1, 's')
+    g[ty][tx] = '!'
+    dungeon(floors[1], (22, 2, 58, 22), [TURNIE, (52, 6), (26, 18), (48, 18)], 'n', 's', 'vSvS', 6,
+            {TURNIE: '?', (52, 6): '!'}, r)
+    dungeon(floors[2], (38, 2, 62, 18), [(52, 6), (58, 14), (44, 12)], 'n', 's', 'vS', 4,
+            {(52, 6): '?', (44, 12): '!'}, r)
+    dungeon(floors[3], (40, 4, 56, 18), [(44, 12), (50, 8), (52, 14)], 'n', 's', 'v', 2,
+            {(44, 12): '?'}, r)
+    transitions += [(tx, ty, 0, 'STAIRS', tx, ty - 1, 1), (tx, ty, 1, 'STAIRS', tx, ty + 1, 0),
+                    (52, 6, 1, 'STAIRS', 52, 7, 2), (52, 6, 2, 'STAIRS', 53, 6, 1),
+                    (44, 12, 2, 'STAIRS', 44, 13, 3), (44, 12, 3, 'STAIRS', 45, 12, 2)]
+    # Plaskowyz Qasirah: piaszczyste tarasy wsrod skal, kamienne schody
+    mx, my = MESA
+    rect(g, mx - 1, my - 1, mx + 1, my + 1, 'y')
+    g[my][mx] = '['
+    dungeon(floors[1], (16, 190, 54, 228), [MESA, (46, 196), (22, 222), (44, 222)], 'Q', 'y', 'oKoK', 6,
+            {MESA: ']', (44, 222): '['}, r)
+    dungeon(floors[2], (32, 210, 58, 230), [(44, 222), (54, 214), (38, 228)], 'Q', 'y', 'oK', 4,
+            {(44, 222): ']'}, r)
+    transitions += [(mx, my, 0, 'STAIRS', mx, my - 1, 1), (mx, my, 1, 'STAIRS', mx, my + 1, 0),
+                    (44, 222, 1, 'STAIRS', 44, 223, 2), (44, 222, 2, 'STAIRS', 45, 222, 1)]
+    spawns = [
+        '# Mrozne Turnie (+1..+3)',
+        'snow_wolf;28;16;1;4;3;90', 'yeti;46;10;1;4;2;150', 'snow_wolf;46;18;1;4;2;90',
+        'yeti;56;12;2;4;2;150', 'frost_witch;50;10;3;3;2;150',
+        '# Plaskowyz Qasirah (+1..+2)',
+        'scorpion;28;212;1;5;3;120', 'hyena;44;198;1;5;3;90', 'scorpion;40;220;1;4;2;120',
+        'sand_wraith;50;218;2;4;2;180',
+    ]
+    return spawns, [('turnie', TURNIE), ('mesa', MESA)]
+
+
 # ------------------------------------------------------------------ swiat
 
 def main():
@@ -578,6 +621,8 @@ def main():
 
     # ---------------------------------------------------------- wschodni kontynent (endgame)
     east_spawns, east_entrances = east_continent(floors, transitions)
+    high_spawns, high_entrances = highlands(g, floors, transitions)
+    east_entrances = east_entrances + high_entrances
 
     # NPC: Varden (wspolrzedne mapy varden + przesuniecie) i uklad town() dla 3 miast
     npcs = [
@@ -663,6 +708,8 @@ def main():
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
     regions = [
+        'Mrozne Turnie;20;0;64;24;1;5;40;90',
+        'Plaskowyz Qasirah;14;186;60;231;1;5;45;130',
         'Mrozne Pustkowia;0;0;159;63;0;5;40;90',
         'Lodowe Jaskinie;0;0;159;63;-1;-1;70;100',
         'Glebokie Lodowe Jaskinie;0;0;159;63;-5;-2;100;150',
@@ -694,7 +741,7 @@ def main():
                 'regions=' + '|'.join(regions) + '\n')
 
     # spawny: Varden (przesuniete) + biomy
-    spawns = ['# potwor;x;y;z;promien;liczba;respawn (s)']
+    spawns = ['# potwor;x;y;z;promien;liczba;respawn (s)[;noc - tylko w nocy, na powierzchni]']
     for line in read_lines('spawns.csv'):
         k, x, y, z, rr, c, s = line.split(';')
         spawns.append(f'{k};{int(x) + VX};{int(y) + VY};{z};{rr};{c};{s}')
@@ -722,7 +769,11 @@ def main():
         'ruin_colossus;60;150;-5;2;1;1800',
         'mummy;130;196;-4;4;3;300', 'mummy;140;226;-4;3;2;300', 'mummy;120;214;-4;4;2;300',
         'pharaoh;126;198;-5;2;1;1800',
-    ] + east_spawns
+    ] + east_spawns + high_spawns + [
+        '# --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---',
+        'wolf;58;72;0;5;3;60;noc', 'bandit;106;96;0;3;2;120;noc', 'snow_wolf;50;12;0;6;3;90;noc',
+        'hyena;40;190;0;6;3;90;noc', 'sand_wraith;20;226;0;5;2;180;noc', 'wraith_knight;186;103;0;5;3;240;noc',
+    ]
     pz_rects = [tuple(int(v) for v in r.split(',')) for r in pz]
 
     def in_pz(x, y, z):
@@ -749,9 +800,9 @@ def main():
         if line.startswith('#'):
             fixed.append(line)
             continue
-        k, x, y, z, rr, c, s = line.split(';')
+        k, x, y, z, rr, c, s, *night = line.split(';')
         nx, ny = snap(int(x), int(y), int(z))
-        fixed.append(f'{k};{nx};{ny};{z};{rr};{c};{s}')
+        fixed.append(f'{k};{nx};{ny};{z};{rr};{c};{s}' + ''.join(';' + n for n in night))
     with open(os.path.join(OUT, 'spawns.csv'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(fixed) + '\n')
     with open(os.path.join(OUT, 'npcs.csv'), 'w', encoding='utf-8') as f:
