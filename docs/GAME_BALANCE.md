@@ -22,6 +22,10 @@ Kwota startowa jest dodawana w najwyzszych nominalach (`Money.add`), wiec 10 000
 Wartosci sa liczone w `long` z kontrola przepelnienia (`Math.*Exact`), dodawanie doswiadczenia jest
 nasycane do maksimum poziomu 1000 (`Balance.addExperience`).
 
+### Gildia (0.21.0)
+Zalozenie kosztuje 50 000 gp - ok. 5x startowe 10 000 gp, wiec nowa postac nie zalozy gildii od razu,
+a dla poziomu 60+ to rozsadny wydatek (zloto znika z gry - ujscie monet).
+
 ### Druzyna (0.19.0)
 Udzial czlonka = doswiadczenie solo wg jego poziomu * (1 + 0,2 * (n - 1)) / n: 2 osoby po 60%, 4 po 40%, 8 po 30%.
 Druzyna zdobywa lacznie wiecej (premia za wspolprace), ale kazdy osobno mniej niz solo na tym samym potworze -

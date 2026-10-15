@@ -82,6 +82,8 @@ final class ServerWorld {
     private final pl.fawizja.pixel.party.PartyManager parties = new pl.fawizja.pixel.party.PartyManager();
     /** Otwarte wymiany (klucz: imie malymi literami, obie strony wskazuja ta sama wymiane). */
     private final Map<String, PlayerTrade> trades = new java.util.HashMap<>();
+    private final pl.fawizja.pixel.guild.GuildRegistry guilds;
+    private final File guildFile;
     /** Prosby o handel: adresat -> (proszacy -> waznosc). */
     private final Map<String, Map<String, Long>> tradeRequests = new java.util.HashMap<>();
     static final long TRADE_REQUEST_MS = 60_000L;
@@ -100,6 +102,129 @@ final class ServerWorld {
         recipes = RecipeRegistry.loadDefault(items);
         saves = new SaveStore(saveDir);
         accounts = new AccountStore(saveDir);
+        guildFile = new File(saveDir, "guilds.txt");
+        guilds = pl.fawizja.pixel.guild.GuildRegistry.decode(guildFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(guildFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+    }
+
+    private String guildTag(String name) {
+        pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(name);
+        return g == null ? "-" : g.name();
+    }
+
+    /** Zapis gildii: plik tymczasowy i podmiana (bez polowicznego zapisu). */
+    private void saveGuilds() {
+        try {
+            File tmp = new File(guildFile.getParentFile(), "guilds.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), guilds.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), guildFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("guild save failed: " + e.getMessage());
+        }
+    }
+
+    /** Wiadomosc do zalogowanych czlonkow gildii. */
+    private void toGuild(pl.fawizja.pixel.guild.GuildRegistry.Guild g, String text, long now) {
+        for (String n : g.members()) {
+            ServerPlayer m = find(n);
+            if (m != null) m.session.log().add(now, EventLog.Kind.SYSTEM, "[Gildia] " + text);
+        }
+    }
+
+    /** GUILD CREATE nazwa | INVITE imie | ACCEPT nazwa | LEAVE | KICK imie | INFO. */
+    private void guildCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        pl.fawizja.pixel.guild.GuildRegistry.Result r;
+        pl.fawizja.pixel.guild.GuildRegistry.Guild mine = guilds.guildOf(p.name());
+        switch (f[1]) {
+            case "CREATE": {
+                if (f.length < 3) return;
+                r = guilds.canCreate(p.name(), f[2]);
+                if (r == pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    if (!pl.fawizja.pixel.economy.Money.pay(p.session.character().backpack(),
+                            pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST).ok()) {
+                        warn(p, "Zalozenie gildii kosztuje " + String.format("%,d gp", pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST)
+                                + " (monety w plecaku).", now);
+                        return;
+                    }
+                    r = guilds.create(p.name(), f[2]);
+                }
+                if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                saveGuilds();
+                save(p);
+                p.session.log().add(now, EventLog.Kind.SYSTEM, "Zalozono gildie " + f[2].trim() + ". Zapraszaj: /gildia zapros Imie");
+                LOG.info("guild created " + f[2].trim() + " by " + p.name());
+                return;
+            }
+            case "INVITE": {
+                if (f.length < 3) return;
+                ServerPlayer other = find(f[2]);
+                if (other == null) {
+                    warn(p, "Gracz " + f[2] + " nie jest w grze.", now);
+                    return;
+                }
+                r = guilds.invite(p.name(), other.name(), now);
+                if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                info(p, "Zaproszono " + other.name() + " do gildii " + mine.name() + ".", now);
+                other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cie do gildii " + mine.name()
+                        + ": /gildia przyjmij " + mine.name());
+                return;
+            }
+            case "ACCEPT": {
+                if (f.length < 3) return;
+                r = guilds.accept(p.name(), f[2], now);
+                if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                saveGuilds();
+                toGuild(guilds.guildOf(p.name()), p.name() + " dolacza do gildii.", now);
+                return;
+            }
+            case "LEAVE": {
+                if (mine == null) {
+                    warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                    return;
+                }
+                guilds.leave(p.name());
+                saveGuilds();
+                info(p, "Opusciles gildie " + mine.name() + ".", now);
+                if (!mine.members().isEmpty()) toGuild(mine, p.name() + " opuszcza gildie. Lider: " + mine.leader(), now);
+                return;
+            }
+            case "KICK": {
+                if (f.length < 3) return;
+                pl.fawizja.pixel.guild.GuildRegistry.Guild g = mine;
+                String target = f[2].trim();
+                r = guilds.kick(p.name(), target);
+                if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                saveGuilds();
+                toGuild(g, target + " zostaje usuniety z gildii.", now);
+                ServerPlayer t = find(target);
+                if (t != null) warn(t, "Usunieto cie z gildii " + g.name() + ".", now);
+                return;
+            }
+            default: // INFO
+                if (mine == null) {
+                    info(p, "Nie nalezysz do gildii. Zaloz: /gildia zaloz Nazwa (" + String.format("%,d gp",
+                            pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST) + ")", now);
+                    return;
+                }
+                List<String> online = new ArrayList<>();
+                for (String n : mine.members()) if (find(n) != null) online.add(n);
+                info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", czlonkow " + mine.members().size()
+                        + ", w grze: " + String.join(", ", online), now);
+        }
     }
 
     Collection<ServerPlayer> players() { return Collections.unmodifiableCollection(players.values()); }
@@ -487,6 +612,10 @@ final class ServerWorld {
         String key = p.name().toLowerCase(java.util.Locale.ROOT);
         partyLeft(p, lastNow);
         leftTrade(p);
+        if (guilds.guildOf(p.name()) != null) {
+            guilds.forget(p.name());
+            saveGuilds();
+        }
         players.remove(p.id);
         pvp.remove(key);
         try {
@@ -553,6 +682,22 @@ final class ServerWorld {
                 break;
             case "PARTY": partyCommand(p, f, now); break;
             case "TRADE": tradeCommand(p, f, now); break;
+            case "GUILD": guildCommand(p, f, now); break;
+            case "GCHAT":
+                if (f.length > 1 && !f[1].isBlank()) {
+                    pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(p.name());
+                    if (g == null) {
+                        warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                        break;
+                    }
+                    if (!chatAllowed(p, now)) break;
+                    String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
+                    for (String n : g.members()) {
+                        ServerPlayer m = find(n);
+                        if (m != null) m.client.send("CHAT", "[" + g.name() + "] " + p.name(), text);
+                    }
+                }
+                break;
             case "PCHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
                     List<String> team = parties.members(p.name());
@@ -747,7 +892,8 @@ final class ServerWorld {
                 PlayerCharacter oc = o.session.character();
                 frame.append(Protocol.line("PL", String.valueOf(o.id), oc.name(), oc.vocation().name(),
                         String.valueOf(op.x()), String.valueOf(op.y()), String.valueOf(op.z()),
-                        String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())), o.pvp.skull(now).name())).append('\n');
+                        String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())), o.pvp.skull(now).name(),
+                        guildTag(oc.name()))).append('\n');
             }
             for (Monster m : monsters.near(me, Protocol.VIEW_RADIUS)) {
                 if (m.isDead() || m.position().z() != me.z()) continue;

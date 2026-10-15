@@ -6,6 +6,8 @@ package pl.fawizja.pixel.net;
  * Druzyna: "/zapros Imie" i "/przyjmij Imie" -> PARTY INVITE|ACCEPT imie, "/opusc" -> PARTY LEAVE,
  * "/d tekst" -> PCHAT (czat druzyny). Handel: "/handel Imie" -> TRADE REQUEST, "/oferuj 5 health potion"
  * albo "/oferuj 1000 gp" -> TRADE OFFER, "/akceptuj" -> TRADE ACCEPT, "/anuluj" -> TRADE CANCEL.
+ * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
+ * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT.
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
 public final class ChatCommands {
@@ -37,10 +39,27 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"TRADE", "ACCEPT"} : null;
             case "/anuluj":
                 return w.length == 1 ? new String[] {"TRADE", "CANCEL"} : null;
+            case "/gildia":
+                return guild(t, w);
+            case "/g":
+                return w.length >= 2 ? new String[] {"GCHAT", rest(t)} : null;
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:
                 return null;
+        }
+    }
+
+    private static String[] guild(String t, String[] w) {
+        if (w.length == 1) return new String[] {"GUILD", "INFO"};
+        String arg = rest(rest(t));
+        switch (w[1].toLowerCase(java.util.Locale.ROOT)) {
+            case "zaloz": return arg.isEmpty() ? null : new String[] {"GUILD", "CREATE", arg};
+            case "zapros": return arg.isEmpty() ? null : new String[] {"GUILD", "INVITE", arg};
+            case "przyjmij": return arg.isEmpty() ? null : new String[] {"GUILD", "ACCEPT", arg};
+            case "wyrzuc": return arg.isEmpty() ? null : new String[] {"GUILD", "KICK", arg};
+            case "opusc": return w.length == 2 ? new String[] {"GUILD", "LEAVE"} : null;
+            default: return null;
         }
     }
 
@@ -51,5 +70,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /handel Imie, /oferuj 5 health potion | 1000 gp, /akceptuj, /anuluj, /zapros Imie, /przyjmij Imie, /opusc, /d tekst (druzyna), /haslo stare nowe, /usun-konto haslo";
+    public static final String HELP = "Polecenia: /gildia [zaloz|zapros|przyjmij|wyrzuc|opusc], /g tekst, /handel Imie, /oferuj 5 health potion | 1000 gp, /akceptuj, /anuluj, /zapros Imie, /przyjmij Imie, /opusc, /d tekst (druzyna), /haslo stare nowe, /usun-konto haslo";
 }

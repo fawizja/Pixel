@@ -507,6 +507,60 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void guildsCostGoldShowUpOverPlayersAndSurviveARestart() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            ola.send("GUILD", "CREATE", "Wilcze Kly");
+            awaitMessage(ola, "too poor", m -> m[0].equals("LOG") && m[2].contains("kosztuje"));
+            server.enqueueTest(() -> pl.fawizja.pixel.economy.Money.add(
+                    server.world().find("Ola").session.character().backpack(), 50_000));
+            long before = 50_000 + pl.fawizja.pixel.economy.Money.totalValue(self(ola).backpack());
+            await("gold arrived", () -> {
+                try {
+                    return pl.fawizja.pixel.economy.Money.totalValue(self(ola).backpack()) == before;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            ola.send("GUILD", "CREATE", "Wilcze Kly");
+            awaitMessage(ola, "founded", m -> m[0].equals("LOG") && m[2].contains("Zalozono gildie"));
+            await("founding fee paid", () -> {
+                try {
+                    return pl.fawizja.pixel.economy.Money.totalValue(self(ola).backpack())
+                            == before - pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            ola.send("GUILD", "INVITE", "Ula");
+            awaitMessage(ula, "invite", m -> m[0].equals("LOG") && m[2].contains("/gildia przyjmij Wilcze Kly"));
+            ula.send("GUILD", "ACCEPT", "Wilcze Kly");
+            await("ula shown with the guild tag", () -> {
+                RemoteEntity u = seen(ola, "Ula");
+                return u != null && "Wilcze Kly".equals(u.guild());
+            });
+            ula.send("GCHAT", "hej");
+            awaitMessage(ola, "guild chat", m -> m[0].equals("CHAT") && m[1].equals("[Wilcze Kly] Ula") && m[2].equals("hej"));
+        }
+        await("both left", () -> server.world().players().isEmpty());
+        server.close();
+        server = new PixelServer(0, saves);
+        server.start();
+        try (NetClient a = connect();
+             NetClient b = connect()) {
+            a.hello("Ola", "PALADIN", "tajne-Ola");
+            b.hello("Ula", "DRUID", "tajne-Ula");
+            await("guild remembered after restart", () -> {
+                RemoteEntity u = seen(a, "Ula");
+                return u != null && "Wilcze Kly".equals(u.guild());
+            });
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

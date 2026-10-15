@@ -231,6 +231,15 @@ przy pauzie, utracie fokusu i zamknieciu.
   `TS partner mojaOferta jegoOferta 0|1 0|1` (`TS -` zamyka okno; `trade/TradeView`).
 - Klient: okno handlu w HUD (oferty, AKCEPTUJ/ANULUJ, +zloto, przedmioty z plecaka), X = anulowanie.
 
+## Gildie (Z logika, S serwer)
+
+- `guild/GuildRegistry`: nazwa 3-20 liter i spacji, unikalna bez wzgledu na wielkosc liter; jedna gildia na gracza;
+  do 50 czlonkow; zaproszenie lidera wazne 2 min; lider = najdluzej obecny czlonek; pusta gildia znika.
+  Zapis tekstowy "Nazwa;Lider,Czlonek,..." (bledne linie pomijane).
+- Serwer: oplata 50 000 gp pobierana z plecaka przed zalozeniem; `guilds.txt` zapisywany atomowo po kazdej zmianie;
+  usuniecie konta usuwa gracza z gildii. Nazwa gildii w klatce stanu (10. pole PL).
+- Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GCHAT tekst`.
+
 ## Dzwiek (Z synteza i dobor, C odtwarzanie)
 
 - `audio/SoundSynth`: 13 efektow syntezowanych w kodzie (fale, szum, obwiednie), deterministycznie, WAV PCM 16 bit

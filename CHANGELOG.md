@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.21.0] - 2026-10-15
+
+### Dodano
+- Gildie (trwale, zapisywane na serwerze w `guilds.txt`, objete kopiami zapasowymi): `/gildia zaloz Nazwa`
+  (50 000 gp z plecaka), `/gildia zapros Imie`, `/gildia przyjmij Nazwa`, `/gildia wyrzuc Imie`, `/gildia opusc`,
+  `/gildia` (informacje), czat gildii `/g tekst`. Do 50 czlonkow; po wyjsciu lidera przywodztwo przechodzi na
+  najdluzej obecnego czlonka, pusta gildia znika. Nazwa gildii widoczna przy imieniu gracza.
+- 4 nowe testy, w tym sieciowy z restartem serwera (lacznie 229).
+
 ## [0.20.1] - 2026-10-15
 
 ### Dodano

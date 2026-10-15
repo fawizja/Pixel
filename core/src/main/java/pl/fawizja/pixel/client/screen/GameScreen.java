@@ -104,6 +104,7 @@ public final class GameScreen extends ScreenAdapter {
         long stepStart;
         int healthPercent;
         String skull = "NONE";
+        String guild;
         boolean seen;
     }
 
@@ -684,7 +685,7 @@ public final class GameScreen extends ScreenAdapter {
             else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
             else font.setColor(0.55f, 1f, 0.55f, 1f);
             String label = rp.name + (ally ? " [druzyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
-                    + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "");
+                    + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "") + (rp.guild == null ? "" : " <" + rp.guild + ">");
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
         }
         font.getData().setScale(scale);
@@ -801,6 +802,7 @@ public final class GameScreen extends ScreenAdapter {
                 }
                 rp.healthPercent = e.healthPercent();
                 rp.skull = e.mark();
+                rp.guild = e.guild();
                 rp.seen = true;
             }
             remotePlayers.values().removeIf(rp -> !rp.seen);
