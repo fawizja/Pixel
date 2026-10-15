@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.40.0] - 2026-10-15
+
+### Dodano
+- Nagroda za codzienne wejście do gry: seria 7 dni (300, 500, 800, 1 000, 1 500, 2 000 i 5 000 gp, razy poziom/10
+  od poziomu 20), złoto na konto, raz dziennie, z komunikatem w dzienniku. Przerwa zeruje serię, po 7. dniu
+  zaczyna się nowy tydzień. Działa lokalnie i online (serwer liczy dzień), zapis `login`.
+- 3 nowe testy (seria i zapis, nagroda w sesji); testy sieciowe sald uwzględniają nagrodę. Łącznie 268.
+  Odświeżone wzorce GUI (komunikat w dzienniku).
+
 ## [0.39.0] - 2026-10-15
 
 ### Dodano

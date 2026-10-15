@@ -198,6 +198,27 @@ public final class GameSession {
     private long achievementsCheckedMs;
     private boolean achievementsChecked;
 
+    /** Nagroda za codzienne wejscie: sprawdzana przy pierwszym kroku i potem co minute (zmiana dnia w grze). */
+    private long loginCheckedMs = Long.MIN_VALUE / 2;
+
+    public void checkLoginReward(long nowMs) {
+        loginCheckedMs = nowMs;
+        if (pc.isDead()) return;
+        pl.fawizja.pixel.daily.LoginStreak s = pc.loginStreak();
+        long prevDay = s.lastDay();
+        int prevStreak = s.streak();
+        int day = s.claim(today());
+        if (day == 0) return;
+        long gold = pl.fawizja.pixel.daily.LoginStreak.rewardGold(day, pc.level());
+        if (!pc.bank().credit(gold).ok()) {
+            s.restoreState(prevDay, prevStreak); // pelne konto - sprobujemy pozniej
+            return;
+        }
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za wejście do gry (dzień " + day + " z " + pl.fawizja.pixel.daily.LoginStreak.DAYS
+                + "): " + String.format("%,d gp", gold) + " na konto." + (day < pl.fawizja.pixel.daily.LoginStreak.DAYS
+                ? " Wróć jutro po większą." : " Pełny tydzień!"));
+    }
+
     /** Nowe osiagniecia: wpis w dzienniku (sprawdzane przy zabiciu potwora i co sekunde). */
     public void checkAchievements(long nowMs) {
         achievementsCheckedMs = nowMs;
@@ -477,6 +498,7 @@ public final class GameSession {
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
     public void update(long nowMs, Direction requested) {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
+        if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
             pc.setMounted(false);
             log.add(nowMs, EventLog.Kind.INFO, "Zostawiasz konia przy zejściu pod ziemię.");

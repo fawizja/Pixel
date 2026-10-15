@@ -21,6 +21,8 @@ class NetworkSyncTest {
 
     PixelServer server;
     File saves;
+    /** Nagroda za pierwsze wejscie dnia (nowa postac, poziom 8) - trafia na konto przy pierwszym kroku serwera. */
+    static final long LOGIN_BONUS = pl.fawizja.pixel.daily.LoginStreak.rewardGold(1, 8);
     static final CharacterCodec CODEC = new CharacterCodec(ItemRegistry.loadDefault());
 
     @BeforeEach
@@ -794,7 +796,7 @@ class NetworkSyncTest {
                 awaitMessage(ola, "seller told", m -> m[0].equals("LOG") && m[2].contains("Ula kupił 5x Wilcze futro"));
                 await("goods and money moved", () -> {
                     try {
-                        return self(ula).backpack().count(pelt) == 15 && self(ola).bank().balance() == 294
+                        return self(ula).backpack().count(pelt) == 15 && self(ola).bank().balance() == 294 + LOGIN_BONUS
                                 && self(ola).backpack().count(pelt) == 5;
                     } catch (Exception e) {
                         return false;
@@ -826,7 +828,7 @@ class NetworkSyncTest {
             awaitMessage(ola, "paid on return", m -> m[0].equals("LOG") && m[2].contains("pod Twoją nieobecność"));
             await("balance", () -> {
                 try {
-                    return self(ola).bank().balance() == 294 + 980;
+                    return self(ola).bank().balance() == 294 + 980 + LOGIN_BONUS; // drugie wejscie tego dnia: bez nowej nagrody
                 } catch (Exception e) {
                     return false;
                 }
@@ -862,7 +864,7 @@ class NetworkSyncTest {
             long expected = total[0] * pl.fawizja.pixel.event.Invasion.REWARD_PER_KILL + pl.fawizja.pixel.event.Invasion.LEADER_BONUS;
             await("reward on the account", () -> {
                 try {
-                    return self(ola).bank().balance() == expected;
+                    return self(ola).bank().balance() == expected + LOGIN_BONUS;
                 } catch (Exception e) {
                     return false;
                 }

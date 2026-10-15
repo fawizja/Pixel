@@ -260,6 +260,12 @@ na inne pietra) i co klatke kierunek do nastepnego pola, podawany jak z joystick
 Dotkniecie swiata (`GameScreen.tapTile`): gracz online -> menu gracza, NPC blisko -> rozmowa, NPC daleko -> marsz na
 pole obok (`pathNextTo`) i rozmowa po dojsciu, potwor -> cel, cialo obok -> lup, wolne pole -> marsz bez komunikatu.
 
+## Nagroda za logowanie (Z logika)
+
+`daily/LoginStreak.claim(dzien)`: 1..7 (kolejny dzien +1, po 7 od nowa, przerwa = 1), 0 gdy juz odebrano.
+`GameSession.checkLoginReward` (pierwszy krok sesji i co 60 s) dopisuje `rewardGold(dzien, poziom)` do konta;
+pelne konto cofa odbior. Na serwerze dzien liczy sesja serwera (klient online nie wywoluje update).
+
 ## Pojedynki (Z zasady, S serwer)
 
 `PvpRules.startDuel` zapisuje przeciwnika w `Status.duelPartner` (bez zapisu na dysk). `check` pomija ochrone poziomu

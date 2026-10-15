@@ -472,4 +472,22 @@ class TownServicesTest {
         s.teleport(TestData.world().spawn().translate(0, 6), 1000);
         if (s.npcNearby() == null) assertNull(s.askNpc("czesc", 1000));
     }
+
+    @Test
+    void theFirstStepOfTheDayPaysTheLoginBonusOnceAndTheStreakGrows() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = session(pc, List.of());
+        long[] day = {500};
+        s.setToday(() -> day[0]);
+        long before = pc.bank().balance();
+        s.update(1000, null);
+        assertEquals(before + pl.fawizja.pixel.daily.LoginStreak.rewardGold(1, pc.level()), pc.bank().balance());
+        assertTrue(s.log().latest(5).stream().anyMatch(e -> e.text().startsWith("Nagroda za wejście do gry (dzień 1 z 7)")));
+        s.update(70_000, null);
+        assertEquals(before + 300, pc.bank().balance(), "once a day");
+        day[0] = 501;
+        s.update(140_000, null);
+        assertEquals(2, pc.loginStreak().streak(), "next day continues the streak");
+        assertEquals(before + 300 + 500, pc.bank().balance());
+    }
 }
