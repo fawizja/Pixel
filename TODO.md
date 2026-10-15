@@ -98,7 +98,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Nocne drapiezniki (kolumna activity w monsters.csv): w nocy na powierzchni aggro +3, ataki o 20% szybsze
 - [x] Ostrzezenie o pietrze liczy tylko spawny w promieniu 30 kafelkow (duzy swiat)
 - [x] Czas gry z serwera (klient online zgrywa zegar)
-- [ ] Nocne spawny
+- [x] Nocne spawny (6 grup na powierzchni, znikaja za dnia poza wzrokiem graczy)
 ## Etap 12 - NPC, zadania, handel, bank
 - [x] 17 NPC w 4 miastach (bankier, kupiec, kaplan, przewodnik; w Varden takze czarodziejka), generowane z mapa
 - [x] 5 sklepow (data/shops.csv): kupno z ilosciami, sprzedaz wszystkich sztuk, atomowo, z reszta

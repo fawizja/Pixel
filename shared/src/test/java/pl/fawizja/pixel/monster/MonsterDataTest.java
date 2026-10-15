@@ -50,4 +50,21 @@ class MonsterDataTest {
         assertTrue(mm.maxMonsterLevelOnFloor(-5) > mm.maxMonsterLevelOnFloor(-3));
         assertTrue(mm.maxMonsterLevelOnFloor(-3) > mm.maxMonsterLevelOnFloor(-1));
     }
+
+    @Test
+    void nightSpawnsAreNocturnalSurfaceMonstersInEveryClimate() throws Exception {
+        List<SpawnPoint> night = SpawnTable.load("world", TestData.world(), reg).stream().filter(SpawnPoint::nightOnly).toList();
+        assertTrue(night.size() >= 5, "night spawns: " + night.size());
+        Set<String> regions = new java.util.HashSet<>();
+        for (SpawnPoint sp : night) {
+            assertTrue(reg.get(sp.monsterKey()).nocturnal(), sp.monsterKey() + " should be nocturnal");
+            assertTrue(sp.center().z() >= 0);
+            pl.fawizja.pixel.world.Region r = TestData.world().regionAt(sp.center());
+            assertNotNull(r, "night spawn outside regions: " + sp);
+            assertTrue(reg.get(sp.monsterKey()).level() <= r.levelMax() + 20,
+                    sp.monsterKey() + " too strong for " + r.name());
+            regions.add(r.name());
+        }
+        assertTrue(regions.containsAll(Set.of("Krainy Varden", "Mrozne Pustkowia", "Pustynia Qasirah")), regions.toString());
+    }
 }

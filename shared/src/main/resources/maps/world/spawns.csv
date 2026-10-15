@@ -1,4 +1,4 @@
-# potwor;x;y;z;promien;liczba;respawn (s)
+# potwor;x;y;z;promien;liczba;respawn (s)[;noc - tylko w nocy, na powierzchni]
 wolf;58;72;0;4;2;60
 wolf;62;94;0;3;2;60
 boar;90;70;0;4;3;75
@@ -114,3 +114,10 @@ abyss_lord;226;184;-4;5;2;480
 abyss_lord;246;214;-4;4;2;480
 abyss_lord;210;200;-5;4;2;480
 morgath;240;170;-5;2;1;7200
+# --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---
+wolf;58;72;0;5;3;60;noc
+bandit;106;96;0;3;2;120;noc
+snow_wolf;50;12;0;6;3;90;noc
+hyena;40;190;0;6;3;90;noc
+sand_wraith;20;226;0;5;2;180;noc
+wraith_knight;186;103;0;5;3;240;noc

@@ -2,13 +2,13 @@
 
 Plik stanu dla kolejnych sesji pracy. **Po wznowieniu przeczytaj go razem z TODO.md.**
 
-## Podsumowanie (2026-10-15, wersja 0.15.2)
+## Podsumowanie (2026-10-15, wersja 0.15.3)
 
 - Repozytorium `fawizja/Pixel` bylo puste; projekt utworzony od zera i wypchniety na `main`.
 - Gra dziala lokalnie i online: modul `server` (TCP) + tryb online klienta desktopowego (`-Dpixel.server`).
   PvP (etap 13), konta z haslem, menu i ekran logowania (takze APK). TLS z przypinaniem certyfikatu.
 - Ukonczone: etapy 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15 oraz czesci etapow 2, 9, 10, 11, 14, 16 (szczegoly w TODO.md).
-- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = 4613838 (PvP, CI zielone). 0.11.0 = 9511573 (konta/logowanie/czat, CI zielone). 0.11.1 = a97ad23 (przewidywanie ruchu, CI zielone). 0.12.0 = 955b3c1 (TLS, CI zielone). 0.12.1 = e6c5175 (limity serwera), kopie zapasowe = b64d06a, endgame cz.1 = 05d40b4 (potwory, sprzet, symulacje; CI zielone). 0.13.0 = d0f3c45 (wschodni kontynent i straznik mostu, CI zielone). 0.13.1 = f3d52d5 (oboz, kuznia, CI zielone). 0.13.2 = 9e8bda2 (blokada PZ po walce, trwale czaszki, KEEP; CI zielone). 0.14.0 = bf72e4c (PvP czarami i runami - etap 13 domkniety, CI zielone). 0.14.1 = aa6d179 (zarzadzanie kontem, limit kont; CI zielone). 0.15.0 = 65f6622 (ustawienia gracza, etap 15 domkniety; CI zielone). 0.15.1 = 9e446f6 (regresja GUI, CI zielone razem z zadaniem gui-regression). 0.15.2 = ryby biomow.
+- 0.1.0 = 301ac0a, 0.2.0 = f6142e4, 0.3.0 = f554971, 0.4.0 = f77ddc9, 0.5.0 = 561ad81, 0.6.0 = 9be0eca, 0.7.0 = e6268c5, 0.8.0 = b759340, etap 14 cz.1 = 9b914f5 (wszystkie z zielonym CI i APK). 0.9.0 = 143c40b (klient online, CI zielone). 0.10.0 = 4613838 (PvP, CI zielone). 0.11.0 = 9511573 (konta/logowanie/czat, CI zielone). 0.11.1 = a97ad23 (przewidywanie ruchu, CI zielone). 0.12.0 = 955b3c1 (TLS, CI zielone). 0.12.1 = e6c5175 (limity serwera), kopie zapasowe = b64d06a, endgame cz.1 = 05d40b4 (potwory, sprzet, symulacje; CI zielone). 0.13.0 = d0f3c45 (wschodni kontynent i straznik mostu, CI zielone). 0.13.1 = f3d52d5 (oboz, kuznia, CI zielone). 0.13.2 = 9e8bda2 (blokada PZ po walce, trwale czaszki, KEEP; CI zielone). 0.14.0 = bf72e4c (PvP czarami i runami - etap 13 domkniety, CI zielone). 0.14.1 = aa6d179 (zarzadzanie kontem, limit kont; CI zielone). 0.15.0 = 65f6622 (ustawienia gracza, etap 15 domkniety; CI zielone). 0.15.1 = 9e446f6 (regresja GUI, CI zielone razem z zadaniem gui-regression). 0.15.2 = 4264d68 (ryby biomow, CI zielone). 0.15.3 = nocne spawny.
 
 ## Architektura
 

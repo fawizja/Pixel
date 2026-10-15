@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.3] - 2026-10-15
+
+### Dodano
+- Nocne spawny: o zmroku na powierzchni pojawia sie 6 dodatkowych grup nocnych drapieznikow (wilki i bandyci
+  przy Varden, sniezne wilki, hieny, piaskowe upiory, upiorni rycerze). Za dnia znikaja, ale nigdy na oczach
+  gracza ani w trakcie walki. Spawny przy Varden nie przekraczaja poziomu 15.
+- 2 nowe testy (lacznie 198).
+
 ## [0.15.2] - 2026-10-15
 
 ### Dodano

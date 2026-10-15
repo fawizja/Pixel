@@ -19,14 +19,19 @@ public final class SpawnTable {
             String t = line.trim();
             if (t.isEmpty() || t.startsWith("#")) continue;
             String[] f = t.split(";");
-            if (f.length != 7) throw new IOException("spawns.csv line " + n + ": expected 7 fields");
+            if (f.length != 7 && f.length != 8) throw new IOException("spawns.csv line " + n + ": expected 7 or 8 fields");
+            boolean nightOnly = false;
+            if (f.length == 8) {
+                if (!f[7].trim().equals("noc")) throw new IOException("spawns.csv line " + n + ": 8th field must be 'noc'");
+                nightOnly = true;
+            }
             try {
                 monsters.get(f[0].trim());
                 Position c = new Position(Integer.parseInt(f[1].trim()), Integer.parseInt(f[2].trim()), Integer.parseInt(f[3].trim()));
                 if (!world.isWalkable(c)) throw new IOException("spawns.csv line " + n + ": center not walkable " + c);
                 if (world.isProtectionZone(c)) throw new IOException("spawns.csv line " + n + ": spawn inside protection zone");
                 list.add(new SpawnPoint(f[0].trim(), c, Integer.parseInt(f[4].trim()), Integer.parseInt(f[5].trim()),
-                        Integer.parseInt(f[6].trim())));
+                        Integer.parseInt(f[6].trim()), nightOnly));
             } catch (IllegalArgumentException e) {
                 throw new IOException("spawns.csv line " + n + ": " + e.getMessage(), e);
             }

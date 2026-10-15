@@ -191,4 +191,41 @@ class MonsterAiTest {
         assertSame(far, boar.target());
         assertTrue(attacksOn[1] > 0, "switched to the other player");
     }
+
+    @Test
+    void nightSpawnsComeAtDuskAndLeaveAtDawnButNeverInFrontOfAPlayer() {
+        Position camp = new Position(42, 6, 0);
+        SpawnPoint day = new SpawnPoint("boar", camp, 0, 1, 60);
+        SpawnPoint night = new SpawnPoint("wolf", camp, 2, 2, 60, true);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, List.of(day, night), new Random(12));
+        mm.populate(null);
+        assertEquals(1, mm.monsters().size(), "only the day spawn at start");
+        Dummy d = new Dummy(new Position(5, 40, 0));
+        d.alive = false; // obserwator, nie cel
+        run(mm, d, 0, 2_000);
+        assertEquals(1, mm.monsters().size(), "no wolves by day");
+
+        mm.setNight(true);
+        run(mm, d, 2_000, 4_000);
+        assertEquals(2, mm.monsters().stream().filter(m -> m.spawn().nightOnly()).count(), "wolves at dusk");
+
+        mm.setNight(false);
+        d.pos = new Position(44, 8, 0); // gracz patrzy na wilki
+        run(mm, d, 4_000, 6_000);
+        assertEquals(2, mm.monsters().stream().filter(m -> m.spawn().nightOnly()).count(), "no vanishing in sight");
+        d.pos = new Position(5, 40, 0);
+        run(mm, d, 6_000, 8_000);
+        assertEquals(List.of("boar"), mm.monsters().stream().map(m -> m.type().key()).toList(), "wolves gone at dawn");
+        run(mm, d, 8_000, 200_000);
+        assertEquals(1, mm.monsters().size(), "night spawns do not respawn by day");
+
+        mm.setNight(true);
+        run(mm, d, 200_000, 202_000);
+        Monster wolf = mm.monsters().stream().filter(m -> m.spawn().nightOnly()).findFirst().orElseThrow();
+        mm.kill(wolf, 202_000);
+        run(mm, d, 202_000, 230_000);
+        assertEquals(1, mm.monsters().stream().filter(m -> m.spawn().nightOnly()).count(), "a kill respawns only after its delay");
+        run(mm, d, 230_000, 270_000);
+        assertEquals(2, mm.monsters().stream().filter(m -> m.spawn().nightOnly()).count());
+    }
 }

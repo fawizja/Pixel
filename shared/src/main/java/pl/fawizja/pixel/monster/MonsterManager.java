@@ -62,6 +62,7 @@ public final class MonsterManager {
     /** Wypelnia wszystkie spawny (start swiata). */
     public void populate(Position avoid) {
         for (SpawnPoint sp : spawns) {
+            if (sp.nightOnly()) continue; // nocne pojawiaja sie o zmroku (update)
             for (int i = 0; i < sp.count(); i++) spawnOne(sp, avoid, 0L);
         }
     }
@@ -195,8 +196,10 @@ public final class MonsterManager {
      * dopoki ten jest poprawny). Atak trafia do handlera; cel jest w {@link Monster#target()}.
      */
     public void update(long now, List<? extends Target> targets, AttackHandler handler) {
+        updateNightSpawns(now, targets);
         for (Map.Entry<SpawnPoint, List<Long>> e : respawnQueue.entrySet()) {
             List<Long> times = e.getValue();
+            if (e.getKey().nightOnly() && !night) continue;
             for (int i = times.size() - 1; i >= 0; i--) {
                 if (times.get(i) <= now && spawnOne(e.getKey(), targets, now)) times.remove(i);
             }
@@ -208,6 +211,49 @@ public final class MonsterManager {
             Target tg = chooseTarget(m, targets);
             if (tg != null) think(m, now, tg, handler);
         }
+    }
+
+    /** Dystans, z ktorego gracz widzi potwora - nocne potwory nie znikaja na jego oczach. */
+    public static final int DESPAWN_SIGHT = 9;
+    private boolean nightSpawnsUp;
+    /** Za dnia: czy moga jeszcze byc nocne potwory do usuniecia (pomija petle, gdy juz ich nie ma). */
+    private boolean nightLeftovers;
+
+    /**
+     * O zmroku nocne spawny dostaja pelna obsade (pojawia sie stopniowo, poza zasiegiem wzroku graczy),
+     * za dnia ich potwory znikaja, gdy nie walcza i nikt ich nie widzi; zabite w nocy nie odradzaja sie za dnia.
+     */
+    private void updateNightSpawns(long now, List<? extends Target> targets) {
+        if (night && !nightSpawnsUp) {
+            nightSpawnsUp = true;
+            Map<SpawnPoint, Integer> alive = new HashMap<>();
+            for (Monster m : monsters) if (m.spawn().nightOnly()) alive.merge(m.spawn(), 1, Integer::sum);
+            for (SpawnPoint sp : spawns) {
+                if (!sp.nightOnly()) continue;
+                List<Long> q = respawnQueue.computeIfAbsent(sp, k -> new ArrayList<>());
+                q.clear();
+                for (int i = alive.getOrDefault(sp, 0); i < sp.count(); i++) q.add(now);
+            }
+        } else if (!night && nightSpawnsUp) {
+            nightSpawnsUp = false;
+            for (SpawnPoint sp : spawns) if (sp.nightOnly()) respawnQueue.remove(sp);
+            nightLeftovers = true;
+        }
+        if (night || !nightLeftovers) return;
+        boolean left = false;
+        for (Monster m : new ArrayList<>(monsters)) {
+            if (!m.spawn().nightOnly() || m.isDead()) continue;
+            left = true;
+            if (m.state() != MonsterState.IDLE && m.state() != MonsterState.RETURN) continue;
+            boolean seen = false;
+            for (Target t : targets) {
+                if (t.position().z() == m.position().z() && t.position().distanceTo(m.position()) <= DESPAWN_SIGHT) { seen = true; break; }
+            }
+            if (seen) continue;
+            monsters.remove(m);
+            grid.remove(m, m.position());
+        }
+        nightLeftovers = left;
     }
 
     private boolean validTarget(Monster m, Target t) {

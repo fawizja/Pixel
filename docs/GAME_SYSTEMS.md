@@ -126,6 +126,10 @@ Joystick ze strefa martwa, klawiatura na PC.
   `setClock` pozwoli podac czas serwera. Noc = 21:00-05:00.
 - Nocne drapiezniki (`activity=NOCTURNAL`: wilki, hieny, bandyci, szkielety, upiory, mumie, faraon) maja
   w nocy na powierzchni aggro +3 i ataki co 80% czasu. Pod ziemia noc nie ma znaczenia.
+- Nocne spawny (8. kolumna `noc` w spawns.csv, tylko powierzchnia): o zmroku dostaja pelna obsade
+  (potwory pojawiaja sie poza zasiegiem 5 kafelkow od gracza), za dnia znikaja, gdy nie walcza i zaden gracz
+  nie jest blizej niz 9 kafelkow; zabite w nocy nie odradzaja sie za dnia. Teraz: wilki i bandyci przy Varden,
+  sniezne wilki, hieny, piaskowe upiory i upiorni rycerze na wschodzie.
 
 ## Ochrona zasobow 90% / 75% (Z logika, C platforma)
 
