@@ -110,6 +110,45 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private static final long REMOTE_STEP_MS = 300L;
+
+    /** Dymki czatu nad postaciami: imie (male litery) -> {tekst, do kiedy (ms zegara)}. */
+    private final Map<String, Object[]> bubbles = new java.util.HashMap<>();
+    private final com.badlogic.gdx.graphics.g2d.GlyphLayout bubbleLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+
+    /** Dymek nad postacia na kilka sekund (dluzszy tekst - dluzej, najwyzej 9 s). */
+    public void say(String name, String text) {
+        String t = text.length() > 90 ? text.substring(0, 87) + "..." : text;
+        bubbles.put(name.toLowerCase(java.util.Locale.ROOT), new Object[] {t, TimeUtils.millis() + Math.min(9_000, 4_000 + 60L * t.length())});
+    }
+
+    private void drawBubble(SpriteBatch batch, BitmapFont font, float scale, String name, float wx, float wy) {
+        Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
+        if (b == null) return;
+        long left = (Long) b[1] - TimeUtils.millis();
+        if (left <= 0) {
+            bubbles.remove(name.toLowerCase(java.util.Locale.ROOT));
+            return;
+        }
+        projected.set(wx + 0.5f, wy + 1.75f, 0);
+        camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+        float alpha = Math.min(1f, left / 500f);
+        float width = 230 * scale;
+        String text = (String) b[0];
+        // dymek: ciemne tlo pod tekstem, kilka linii rosnie w gore
+        float oldScale = font.getData().scaleX;
+        font.getData().setScale(scale);
+        bubbleLayout.setText(font, text, new com.badlogic.gdx.graphics.Color(1f, 0.95f, 0.6f, alpha), width, com.badlogic.gdx.utils.Align.center, true);
+        float pad = 4 * scale;
+        float top = projected.y + bubbleLayout.height;
+        float bx = projected.x - bubbleLayout.width / 2 - pad;
+        com.badlogic.gdx.graphics.Color old = batch.getColor().cpy();
+        batch.setColor(0.05f, 0.05f, 0.08f, 0.72f * alpha);
+        batch.draw(game.art().white(), bx, projected.y - pad, bubbleLayout.width + 2 * pad, bubbleLayout.height + 2 * pad);
+        batch.draw(game.art().white(), projected.x - 3 * scale, projected.y - pad - 4 * scale, 6 * scale, 4 * scale);
+        batch.setColor(old);
+        font.draw(batch, bubbleLayout, projected.x - width / 2, top);
+        font.getData().setScale(oldScale);
+    }
     /** Imiona czlonkow mojej druzyny (male litery) - z komunikatu PARTY serwera. */
     private final java.util.Set<String> party = new java.util.HashSet<>();
     /** Ci sami czlonkowie w kolejnosci z serwera (lider pierwszy), z oryginalna pisownia - panel druzyny. */
@@ -867,7 +906,9 @@ public final class GameScreen extends ScreenAdapter {
             String label = rp.name + (ally ? " [drużyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
                     + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "") + (rp.guild == null ? "" : " <" + rp.guild + ">");
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
+            drawBubble(batch, font, scale, rp.name, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)));
         }
+        drawBubble(batch, font, scale, session.character().name(), session.renderX(t), worldRenderer.worldY(session.renderY(t)));
         font.getData().setScale(scale);
         for (CombatEvent e : events) {
             if (e.position().z() != z) continue;
@@ -1047,7 +1088,10 @@ public final class GameScreen extends ScreenAdapter {
                     session.log().add(now, kind, m[2]);
                     break;
                 case "CHAT":
-                    if (m.length >= 3) session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
+                    if (m.length >= 3) {
+                        session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
+                        if (!m[1].startsWith("[")) say(m[1], m[2]); // czat ogolny: dymek nad mowiacym
+                    }
                     break;
                 case "TS":
                     hud.setTrade(pl.fawizja.pixel.trade.TradeView.parse(m));

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.41.0] - 2026-10-15
+
+### Dodano
+- Dymki czatu: wiadomość z czatu ogólnego pojawia się nad głową mówiącego gracza (także nad własną postacią)
+  na 4-9 s, z ciemnym tłem, zawijana do kilku linii i wygaszana na końcu. Czat prywatny, drużyny i gildii
+  zostaje tylko w dzienniku.
+- Scena `chat` w regresji GUI (24 sceny), opcja `-Dpixel.open=chat`. Testy 268/268.
+
 ## [0.40.0] - 2026-10-15
 
 ### Dodano
