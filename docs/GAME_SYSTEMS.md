@@ -139,6 +139,13 @@ Joystick ze strefa martwa, klawiatura na PC.
   nie jest blizej niz 9 kafelkow; zabite w nocy nie odradzaja sie za dnia. Teraz: wilki i bandyci przy Varden,
   sniezne wilki, hieny, piaskowe upiory i upiorni rycerze na wschodzie.
 
+## Pasek czarow (Z logika, C UI)
+
+- 4 przyciski. Domyslnie automat: najlepsze leczenie, atak na cel, atak obszarowy (lub drugi atak), poswiata.
+- `settings/SpellBar`: w ksiedze wiersz "Ustaw pasek czarow" wybiera przycisk 1-4, dotkniecie czaru go przypisuje,
+  ten sam czar drugi raz przywraca automat. Czar nieznany postaci (poziom, profesja) = automat.
+- Zapis w Preferences `pixel-bar`, osobno dla kazdej postaci (klucz = imie).
+
 ## Efekty graficzne czarow (Z zdarzenia, C rysowanie)
 
 - `CombatEvent` ma rodzaje PROJECTILE (z `from` do `position`) i AREA (promien w `amount`), `effect` = rodzaj

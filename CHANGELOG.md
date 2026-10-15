@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.16.2] - 2026-10-15
+
+### Dodano
+- Wlasny uklad paska czarow: w ksiedze "Ustaw pasek czarow", potem dotkniecie czaru; zapisywany osobno dla
+  kazdej postaci. Puste przyciski dzialaja jak dotad automatycznie.
+- 2 nowe testy (lacznie 206).
+
+### Poprawiono
+- Regresja GUI izoluje katalog domowy Javy (`-Duser.home`), wiec zapamietany login i ustawienia z komputera
+  nie wplywaja na zrzuty. Wzorce odswiezone.
+
 ## [0.16.1] - 2026-10-15
 
 ### Dodano

@@ -71,6 +71,9 @@ public final class Hud {
     private final HudButton potionMp = new HudButton("potion_mp", "MP");
     private final HudButton[] spellButtons = new HudButton[4];
     private final String[] barSpells = new String[4];
+    /** Wlasny uklad paska (null = tylko automat) i przycisk, ktoremu przypisujemy czar w ksiedze (-1 = brak). */
+    private pl.fawizja.pixel.settings.SpellBar customBar = new pl.fawizja.pixel.settings.SpellBar();
+    private int assignSlot = -1;
 
     private boolean menuOpen;
     private float menuX, menuY, menuW, menuH, rowH;
@@ -198,6 +201,7 @@ public final class Hud {
     public void toggleBook() {
         menuOpen = !(menuOpen && !npcMode);
         npcMode = false;
+        assignSlot = -1;
         if (menuOpen) bagOpen = false;
     }
 
@@ -246,12 +250,21 @@ public final class Hud {
             }
         }
         SpellType[] bar = {heal, attack, area != null ? area : attack2, extra};
+        String[] auto = new String[4];
+        for (int i = 0; i < 4; i++) auto[i] = bar[i] == null ? null : bar[i].key();
+        java.util.Set<String> knownKeys = new java.util.HashSet<>();
+        for (SpellType sp : known) knownKeys.add(sp.key());
+        String[] resolved = customBar.resolve(auto, knownKeys);
         for (int i = 0; i < 4; i++) {
-            barSpells[i] = bar[i] == null ? null : bar[i].key();
-            spellButtons[i].visible = bar[i] != null;
-            spellButtons[i].label = bar[i] == null ? "" : shortName(bar[i].name());
+            SpellType sp = resolved[i] == null ? null : session.spells().registry().get(resolved[i]);
+            barSpells[i] = sp == null ? null : sp.key();
+            spellButtons[i].visible = sp != null;
+            spellButtons[i].label = sp == null ? "" : shortName(sp.name());
         }
     }
+
+    public void setSpellBar(pl.fawizja.pixel.settings.SpellBar bar) { customBar = bar; }
+    public pl.fawizja.pixel.settings.SpellBar spellBar() { return customBar; }
 
     private static String shortName(String name) {
         String first = name.split(" ")[0];
@@ -270,10 +283,15 @@ public final class Hud {
             String detail = sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
+        // ustawianie paska: wybierz przycisk, potem dotknij czaru (ten sam czar drugi raz = automat)
+        String assignLabel = assignSlot < 0 ? "Ustaw pasek czarow" : "Przycisk " + (assignSlot + 1) + ": dotknij czaru";
+        String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? "wlasny uklad; dotknij, aby zmienic" : "pasek automatyczny; dotknij, aby zmienic")
+                : "teraz: " + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + "; dotknij, by wybrac nastepny";
+        menuRows.add(new MenuRow("book:assign", assignLabel, assignDetail, true));
         // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
         List<Recipe> shown = new ArrayList<>();
         for (Recipe rc : session.recipes().all()) if (rc.minLevel() <= pc.level() + 100) shown.add(rc);
-        int perPage = Math.max(3, (int) ((menuH - 70) / rowH) - 1);
+        int perPage = Math.max(3, (int) ((menuH - 70) / rowH) - 2);
         int bookPages = Math.max(1, (shown.size() + perPage - 1) / perPage);
         if (bookPage >= bookPages) bookPage = 0;
         for (Recipe rc : shown.subList(bookPage * perPage, Math.min(shown.size(), (bookPage + 1) * perPage))) {
@@ -446,6 +464,12 @@ public final class Hud {
                         npcPage++;
                     } else if (row.action.equals("book:page")) {
                         bookPage++;
+                    } else if (row.action.equals("book:assign")) {
+                        assignSlot = assignSlot >= 3 ? -1 : assignSlot + 1;
+                    } else if (assignSlot >= 0 && row.action.startsWith("cast:")) {
+                        customBar.assign(assignSlot, row.action.substring(5));
+                        updateBar(session);
+                        actions.onButton("bar_saved");
                     } else if (!row.action.equals("npc:none")) {
                         actions.onButton(row.action);
                     }

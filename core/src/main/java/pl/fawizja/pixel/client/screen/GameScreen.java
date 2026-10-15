@@ -75,6 +75,11 @@ public final class GameScreen extends ScreenAdapter {
     private float frameTimeAvg = 1f / 60f;
     private final pl.fawizja.pixel.settings.GameSettings settings;
     private final com.badlogic.gdx.Preferences settingsPrefs;
+    private final com.badlogic.gdx.Preferences barPrefs;
+
+    private static String barKey(PlayerCharacter pc) {
+        return pc.name().trim().toLowerCase(java.util.Locale.ROOT);
+    }
     private GuardMode lastMode = GuardMode.NORMAL;
     private long frameStartNs;
     private boolean paused;
@@ -130,6 +135,9 @@ public final class GameScreen extends ScreenAdapter {
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
         hud.setSettings(settings);
+        // wlasny uklad paska czarow, osobno dla kazdej postaci
+        this.barPrefs = Gdx.app.getPreferences("pixel-bar");
+        hud.setSpellBar(pl.fawizja.pixel.settings.SpellBar.decode(barPrefs.getString(barKey(pc), null)));
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
         if (net != null) lastSelf = net.selfSave();
@@ -232,6 +240,10 @@ public final class GameScreen extends ScreenAdapter {
         switch (id) {
             case "bag": hud.toggleBag(); break;
             case "diag": hud.toggleDiagnostics(); break;
+            case "bar_saved":
+                barPrefs.putString(barKey(session.character()), hud.spellBar().encode());
+                barPrefs.flush();
+                break;
             case "settings:fps":
             case "settings:battery":
             case "settings:light":

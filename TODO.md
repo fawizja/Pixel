@@ -62,7 +62,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Symulacje z botem leczacym: 10 min przy wilkach bez smierci; 100 mikstur nie wystarcza na bossa na poziomie 8
 - [x] Efekty graficzne czarow (pociski, wybuchy, leczenie, ataki dystansowe)
 - [ ] Dzwieki
-- [ ] Wlasny uklad paska czarow (teraz automatyczny)
+- [x] Wlasny uklad paska czarow (ksiega: "Ustaw pasek czarow", zapis per postac)
 
 
 ## Etap 8 - Fishing i umiejetnosci
