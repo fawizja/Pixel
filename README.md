@@ -38,7 +38,7 @@ Dane gry (latwe do balansowania bez zmian w kodzie) leza w `shared/src/main/reso
 ./gradlew :desktop:run            # gra na PC
 ./gradlew :android:assembleDebug  # APK (wymaga Android SDK)
 ./gradlew :android:installDebug   # instalacja na podlaczonym telefonie
-tools/gui-regression/run.sh       # regresja GUI: 12 scen porownanych z wzorcami (wymaga ekranu, np. Xvfb)
+tools/gui-regression/run.sh       # regresja GUI: 13 scen porownanych z wzorcami (wymaga ekranu, np. Xvfb)
 tools/gui-regression/run.sh --update  # nowe wzorce po zamierzonej zmianie wygladu
 tools/android-smoke/run.sh android/build/outputs/apk/debug  # APK na telefonie/emulatorze przez adb: start, 75 s gry, pomiar klatek
 ```

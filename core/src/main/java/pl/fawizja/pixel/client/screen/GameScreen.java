@@ -111,6 +111,8 @@ public final class GameScreen extends ScreenAdapter {
     private static final long REMOTE_STEP_MS = 300L;
     /** Imiona czlonkow mojej druzyny (male litery) - z komunikatu PARTY serwera. */
     private final java.util.Set<String> party = new java.util.HashSet<>();
+    /** Ci sami czlonkowie w kolejnosci z serwera (lider pierwszy), z oryginalna pisownia - panel druzyny. */
+    private final List<String> partyNames = new ArrayList<>();
     private final NetClient net;
     private final Map<Integer, RemotePlayer> remotePlayers = new java.util.HashMap<>();
     private long clockOffset;
@@ -723,6 +725,7 @@ public final class GameScreen extends ScreenAdapter {
             }
             font.draw(batch, text, projected.x - text.length() * 3.5f * scale, projected.y);
         }
+        drawPartyPanel(batch, font, scale);
         if (chatDraft != null) {
             font.setColor(1f, 1f, 0.6f, 1f);
             boolean caret = (TimeUtils.millis() / 500) % 2 == 0;
@@ -731,6 +734,46 @@ public final class GameScreen extends ScreenAdapter {
         font.getData().setScale(1f);
         font.setColor(Color.WHITE);
         batch.end();
+    }
+
+    /**
+     * Panel druzyny po lewej stronie: czlonkowie (bez mnie) z HP w procentach, gdy sa w zasiegu wzroku,
+     * kolor wg zdrowia - leczacy od razu widzi, kto potrzebuje pomocy.
+     */
+    private void drawPartyPanel(SpriteBatch batch, BitmapFont font, float scale) {
+        if (partyNames.size() < 2) return;
+        String me = session.character().name();
+        float x = 12 * scale;
+        float y = Gdx.graphics.getHeight() * 0.62f;
+        // tlo dla czytelnosci na jasnej podlodze
+        float rows = partyNames.size(); // naglowek + pozostali czlonkowie
+        batch.setColor(0f, 0f, 0f, 0.55f);
+        batch.draw(game.art().white(), x - 6 * scale, y - rows * 15 * scale - 6 * scale, 170 * scale, rows * 15 * scale + 20 * scale);
+        batch.setColor(Color.WHITE);
+        font.getData().setScale(scale * 0.85f);
+        font.setColor(0.45f, 0.75f, 1f, 1f);
+        font.draw(batch, "Druzyna", x, y);
+        y -= 16 * scale;
+        for (String n : partyNames) {
+            if (n.equalsIgnoreCase(me)) continue;
+            RemotePlayer rp = null;
+            for (RemotePlayer r : remotePlayers.values()) if (r.name != null && r.name.equalsIgnoreCase(n)) rp = r;
+            String line;
+            if (rp == null) {
+                font.setColor(0.6f, 0.6f, 0.65f, 1f);
+                line = n + "  (daleko)";
+            } else {
+                int hp = rp.healthPercent;
+                if (hp < 35) font.setColor(1f, 0.35f, 0.3f, 1f);
+                else if (hp < 70) font.setColor(1f, 0.85f, 0.35f, 1f);
+                else font.setColor(0.55f, 1f, 0.55f, 1f);
+                line = n + "  " + hp + "% HP";
+            }
+            font.draw(batch, line, x, y);
+            y -= 15 * scale;
+        }
+        font.getData().setScale(scale);
+        font.setColor(Color.WHITE);
     }
 
     private static float lerp(int a, int b, float f) { return a + (b - a) * f; }
@@ -849,8 +892,12 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "PARTY":
                     party.clear();
+                    partyNames.clear();
                     if (m.length >= 2 && !m[1].equals("-")) {
-                        for (String n : m[1].split(",")) party.add(n.toLowerCase(java.util.Locale.ROOT));
+                        for (String n : m[1].split(",")) {
+                            party.add(n.toLowerCase(java.util.Locale.ROOT));
+                            partyNames.add(n);
+                        }
                     }
                     break;
                 case "EV":
@@ -973,4 +1020,14 @@ public final class GameScreen extends ScreenAdapter {
 
     public GameSession session() { return session; }
     public Hud hud() { return hud; }
+
+    /** Podglad panelu druzyny bez serwera (opcje deweloperskie desktop). */
+    public void previewParty(List<String> names) {
+        party.clear();
+        partyNames.clear();
+        for (String n : names) {
+            party.add(n.toLowerCase(java.util.Locale.ROOT));
+            partyNames.add(n);
+        }
+    }
 }

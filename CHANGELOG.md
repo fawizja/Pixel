@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.2] - 2026-10-15
+
+### Dodano
+- Panel druzyny po lewej stronie ekranu: czlonkowie z HP w procentach (zielone / zolte / czerwone), "daleko" gdy
+  poza zasiegiem wzroku - leczacy od razu widzi, komu pomoc.
+- `-Dpixel.open=party` - podglad panelu; nowa scena `party` w regresji GUI (13 scen).
+
 ## [0.21.1] - 2026-10-15
 
 ### Zmieniono
