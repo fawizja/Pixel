@@ -144,6 +144,13 @@ public final class GameScreen extends ScreenAdapter {
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
+        hud.setMonsterNames(k -> {
+            try {
+                return game.monsters() == null ? k : game.monsters().get(k).name();
+            } catch (IllegalArgumentException e) {
+                return k; // potwor z nowszej wersji danych
+            }
+        });
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
         hud.setSettings(settings);
@@ -236,6 +243,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.N: onButton("talk"); return true;
                     case Input.Keys.P: hud.toggleCharacter(); return true;
                     case Input.Keys.L: onButton("fish"); return true;
+                    case Input.Keys.O: hud.openAchievements(false); return true;
                     case Input.Keys.ESCAPE:
                         if (hud.npcOpen()) hud.toggleNpc(session);
                         else if (hud.bookOpen()) hud.toggleBook();
@@ -356,6 +364,13 @@ public final class GameScreen extends ScreenAdapter {
 
     private void sendChat(String text) {
         if (text == null || text.isBlank()) return;
+        // okna z danymi wlasnej postaci - dzialaja tez bez serwera
+        String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
+                java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        if (cmd.equals("/osiagniecia") || cmd.equals("/bestiariusz")) {
+            hud.openAchievements(cmd.equals("/bestiariusz"));
+            return;
+        }
         // obok NPC: slowa kluczowe trafiaja do niego (polecenia czatu zaczynaja sie od '/')
         if (!text.startsWith("/") && session.npcNearby() != null) {
             String said = pl.fawizja.pixel.npc.DialogueRegistry.normalize(text);

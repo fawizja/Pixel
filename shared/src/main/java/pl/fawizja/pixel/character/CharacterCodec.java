@@ -57,6 +57,8 @@ public final class CharacterCodec {
             if (s != null) m.put("dp." + i, s.itemId() + "x" + s.count());
         }
         for (int i = 0; i < pc.friends().size(); i++) m.put("fr." + i, pc.friends().names().get(i));
+        for (String k : pc.bestiary().keys()) m.put("kill." + k, pc.bestiary().encodeValue(k));
+        if (pc.achievements().count() > 0) m.put("achievements", pc.achievements().encode());
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
         }
@@ -151,6 +153,8 @@ public final class CharacterCodec {
                 int slot = Integer.parseInt(k.substring(3));
                 ItemStack s = parseStack(e.getValue());
                 if (!pc.depot().putInSlot(slot, s).ok()) throw new IllegalArgumentException("bad depot slot " + slot);
+            } else if (k.startsWith("kill.")) {
+                pc.bestiary().restore(k.substring(5), e.getValue());
             } else if (k.startsWith("fr.")) {
                 friends.put(Integer.parseInt(k.substring(3)), e.getValue());
             } else if (k.startsWith("eq.")) {
@@ -178,6 +182,7 @@ public final class CharacterCodec {
                     Long.parseLong(t[4]), items.byKey("torch").id());
         }
         for (String f : friends.values()) pc.friends().restore(f);
+        pc.achievements().restore(m.get("achievements"));
         String ignore = m.getOrDefault("autoloot.ignore", "");
         if (!ignore.isEmpty()) {
             for (String id : ignore.split(",")) pc.autoLootFilter().ignore(Integer.parseInt(id.trim()));

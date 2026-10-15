@@ -27,6 +27,8 @@ public final class PlayerCharacter {
     /** Depozyt przedmiotow w banku: wspolny dla wszystkich bankierow, nie liczy sie do udzwigu. */
     private final Container depot;
     private final pl.fawizja.pixel.friends.FriendList friends = new pl.fawizja.pixel.friends.FriendList();
+    private final pl.fawizja.pixel.achievement.Bestiary bestiary = new pl.fawizja.pixel.achievement.Bestiary();
+    private final pl.fawizja.pixel.achievement.Achievements achievements = new pl.fawizja.pixel.achievement.Achievements();
 
     public static final int DEPOT_SLOTS = 60;
     private final Skills skills = new Skills();
@@ -90,6 +92,8 @@ public final class PlayerCharacter {
         }
         bank.mirror(o.bank);
         friends.copyFrom(o.friends);
+        bestiary.copyFrom(o.bestiary);
+        achievements.copyFrom(o.achievements);
         depot.clear();
         for (int i = 0; i < o.depot.size(); i++) {
             if (o.depot.get(i) != null) depot.putInSlot(i, o.depot.get(i));
@@ -134,6 +138,8 @@ public final class PlayerCharacter {
     public BankAccount bank() { return bank; }
     public Container depot() { return depot; }
     public pl.fawizja.pixel.friends.FriendList friends() { return friends; }
+    public pl.fawizja.pixel.achievement.Bestiary bestiary() { return bestiary; }
+    public pl.fawizja.pixel.achievement.Achievements achievements() { return achievements; }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public String homeTown() { return homeTown; }

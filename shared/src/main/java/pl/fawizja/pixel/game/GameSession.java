@@ -127,6 +127,8 @@ public final class GameSession {
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null);
         this.combat.setKillListener(t -> {
+            pc.bestiary().record(t.key(), t.boss());
+            checkAchievements(lastUpdateMs);
             QuestType done = quests == null ? null : quests.onKill(pc, t.key());
             if (done != null) {
                 log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiągnięty, wróć po nagrodę.");
@@ -139,6 +141,18 @@ public final class GameSession {
             @Override
             public boolean attackable() { return !pc.isDead(); }
         };
+    }
+
+    private long achievementsCheckedMs;
+    private boolean achievementsChecked;
+
+    /** Nowe osiagniecia: wpis w dzienniku (sprawdzane przy zabiciu potwora i co sekunde). */
+    public void checkAchievements(long nowMs) {
+        achievementsCheckedMs = nowMs;
+        achievementsChecked = true;
+        for (pl.fawizja.pixel.achievement.Achievement a : pc.achievements().check(pc)) {
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Osiągnięcie zdobyte: " + a.title() + " (" + a.goal() + ")!");
+        }
     }
 
     // ------------------------------------------------------------------ NPC, handel, bank, zadania
@@ -376,6 +390,7 @@ public final class GameSession {
 
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
     public void update(long nowMs, Direction requested) {
+        if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt);

@@ -263,6 +263,8 @@ class TownServicesTest {
             killed++;
         }
         assertEquals(10, killed);
+        assertEquals(10, pc.bestiary().kills("wolf"), "the bestiary counts every kill");
+        assertEquals(1, pc.bestiary().species());
         assertEquals(10, pc.quests().progress("varden_wolves"));
         long exp = pc.experience();
         long gold = s.gold();

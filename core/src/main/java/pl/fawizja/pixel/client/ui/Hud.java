@@ -70,6 +70,10 @@ public final class Hud {
     private pl.fawizja.pixel.ranking.RankingView rankingView;
     /** Okno znajomych z serwera (null = zamkniete). */
     private pl.fawizja.pixel.friends.FriendsView friendsView;
+    /** Okno osiagniec (albo bestiariusza) - dane lokalnej postaci. */
+    private boolean achievementsView;
+    private boolean bestiaryMode;
+    private java.util.function.Function<String, String> monsterNames = k -> k;
     /** Okno rynku z serwera (null = zamkniete). */
     private pl.fawizja.pixel.market.MarketView marketView;
     private pl.fawizja.pixel.npc.Npc npc;
@@ -214,10 +218,11 @@ public final class Hud {
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
         playerMenu = null;
-        if (rankingView != null || friendsView != null || marketView != null) {
+        if (rankingView != null || friendsView != null || marketView != null || achievementsView) {
             rankingView = null;
             friendsView = null;
             marketView = null;
+            achievementsView = false;
             menuOpen = false;
         }
         menuOpen = !(menuOpen && !npcMode);
@@ -288,6 +293,7 @@ public final class Hud {
         rankingView = view;
         friendsView = null;
         marketView = null;
+        achievementsView = false;
         playerMenu = null;
         menuOpen = true;
         npcMode = false;
@@ -302,6 +308,7 @@ public final class Hud {
         friendsView = view;
         rankingView = null;
         marketView = null;
+        achievementsView = false;
         playerMenu = null;
         menuOpen = true;
         npcMode = false;
@@ -316,6 +323,7 @@ public final class Hud {
         marketView = view;
         rankingView = null;
         friendsView = null;
+        achievementsView = false;
         playerMenu = null;
         menuOpen = true;
         npcMode = false;
@@ -323,6 +331,30 @@ public final class Hud {
     }
 
     public boolean marketOpen() { return menuOpen && marketView != null; }
+
+    /** Nazwy potworow do bestiariusza (klucz z monsters.csv -> nazwa). */
+    public void setMonsterNames(java.util.function.Function<String, String> names) { this.monsterNames = names; }
+
+    /** Osiagniecia (bestiary = false) albo bestiariusz; ponowne wywolanie z tym samym widokiem zamyka okno. */
+    public void openAchievements(boolean bestiary) {
+        if (trade != null) return;
+        if (achievementsView && menuOpen && bestiaryMode == bestiary) {
+            achievementsView = false;
+            menuOpen = false;
+            return;
+        }
+        achievementsView = true;
+        bestiaryMode = bestiary;
+        rankingView = null;
+        friendsView = null;
+        marketView = null;
+        playerMenu = null;
+        menuOpen = true;
+        npcMode = false;
+        bagOpen = false;
+    }
+
+    public boolean achievementsOpen() { return menuOpen && achievementsView; }
 
     public void closeFriends() {
         if (friendsView != null) menuOpen = false;
@@ -402,6 +434,10 @@ public final class Hud {
             rebuildMarketMenu(session);
             return;
         }
+        if (achievementsView) {
+            rebuildAchievementsMenu(session);
+            return;
+        }
         if (npcMode) {
             rebuildNpcMenu(session);
             return;
@@ -463,6 +499,41 @@ public final class Hud {
             MenuRow row = rows.get(i);
             row.x = menuX + 10 + (i % 2) * (colW + 10);
             row.y = menuY + menuH - 40 - (i / 2 + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+            menuRows.add(row);
+        }
+    }
+
+    /** Osiagniecia w dwoch kolumnach albo bestiariusz (najczesciej zabijane potwory). */
+    private void rebuildAchievementsMenu(GameSession session) {
+        PlayerCharacter pc = session.character();
+        List<MenuRow> rows = new ArrayList<>();
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        pl.fawizja.pixel.achievement.Bestiary b = pc.bestiary();
+        if (!bestiaryMode) {
+            rows.add(new MenuRow("ach:toggle", "Pokaż bestiariusz", String.format("%,d pokonanych, %d rodzajów", b.total(), b.species()), true));
+            for (pl.fawizja.pixel.achievement.Achievement a : pl.fawizja.pixel.achievement.Achievement.values()) {
+                boolean has = pc.achievements().has(a);
+                long p = Math.min(a.progress(pc), a.target());
+                String detail = has ? "zdobyte: " + a.goal() : a.goal() + String.format(" (%,d / %,d)", p, a.target());
+                rows.add(new MenuRow("ach:none", (has ? "* " : "") + a.title(), detail, has));
+            }
+        } else {
+            rows.add(new MenuRow("ach:toggle", "Pokaż osiągnięcia", String.format("%,d pokonanych, %d rodzajów, %d bossów",
+                    b.total(), b.species(), b.bossesDefeated()), true));
+            for (String k : b.mostKilled()) {
+                if (rows.size() >= perCol * 2) break;
+                rows.add(new MenuRow("ach:none", monsterNames.apply(k) + (b.isBoss(k) ? " (boss)" : ""),
+                        String.format("pokonano %,d", b.kills(k)), true));
+            }
+            if (rows.size() == 1) rows.add(new MenuRow("ach:none", "Jeszcze nic", "pokonane potwory pojawią się tutaj", false));
+        }
+        float colW = (menuW - 30) / 2f;
+        for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
+            MenuRow row = rows.get(i);
+            row.x = menuX + 10 + (i / perCol) * (colW + 10);
+            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
             row.w = colW;
             row.h = rowH - 3;
             menuRows.add(row);
@@ -768,6 +839,7 @@ public final class Hud {
                     rankingView = null;
                     friendsView = null;
                     marketView = null;
+                    achievementsView = false;
                 }
                 return true;
             }
@@ -780,6 +852,8 @@ public final class Hud {
                         npcQty = QUANTITIES[(i + 1) % QUANTITIES.length];
                     } else if (row.action.equals("npc:page")) {
                         npcPage++;
+                    } else if (row.action.equals("ach:toggle")) {
+                        bestiaryMode = !bestiaryMode;
                     } else if (row.action.equals("npc:depot")) {
                         depotView = !depotView;
                     } else if (row.action.equals("book:page")) {
@@ -790,7 +864,7 @@ public final class Hud {
                         customBar.assign(assignSlot, row.action.substring(5));
                         updateBar(session);
                         actions.onButton("bar_saved");
-                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none") && !row.action.equals("market:none")) {
+                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none") && !row.action.equals("market:none") && !row.action.equals("ach:none")) {
                         actions.onButton(row.action);
                     }
                     return true;
@@ -858,11 +932,12 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null;
+        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null && !achievementsView;
         if (playerMenu != null && !menuOpen) playerMenu = null;
         if (rankingView != null && !menuOpen) rankingView = null;
         if (friendsView != null && !menuOpen) friendsView = null;
         if (marketView != null && !menuOpen) marketView = null;
+        if (achievementsView && !menuOpen) achievementsView = false;
         fish.visible = session.canFish();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
@@ -1002,6 +1077,11 @@ public final class Hud {
         if (menuOpen) {
             if (trade == null && playerMenu != null) {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && achievementsView) {
+                PlayerCharacter me = session.character();
+                text(batch, bestiaryMode ? "Bestiariusz - " + me.name()
+                        : "Osiągnięcia " + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length,
+                        menuX + 10, menuY + menuH - 14);
             } else if (trade == null && marketView != null) {
                 text(batch, "Rynek graczy (" + marketView.total() + " ofert)", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && friendsView != null) {
@@ -1058,7 +1138,7 @@ public final class Hud {
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
         text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity(), x, y - 36);
-        text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Zabite: " + session.combat().kills(), x, y - 54);
+        text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Pokonane: " + pc.bestiary().total() + "   Osiągnięcia: " + pc.achievements().count() + " (O)", x, y - 54);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {
             text(batch, SKILL_NAMES[sk.ordinal()] + "  " + pc.skills().level(sk), x, yy);

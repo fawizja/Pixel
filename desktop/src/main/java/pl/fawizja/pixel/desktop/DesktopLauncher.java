@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc|depot|friends|market|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|character|npc|depot|friends|market|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -110,6 +110,17 @@ public final class DesktopLauncher {
                     }
                     ((GameScreen) getScreen()).hud().openRanking(
                             new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
+                }
+                if ("achievements".equals(open) || "bestiary".equals(open)) {
+                    // podglad: troche pokonanych potworow i jeden boss
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.achievement.Bestiary b = gs.session().character().bestiary();
+                    for (int i = 0; i < 120; i++) b.record("wolf", false);
+                    for (int i = 0; i < 34; i++) b.record("goblin", false);
+                    for (int i = 0; i < 9; i++) b.record("goblin_shaman", false);
+                    b.record("grimtooth", true);
+                    gs.session().character().achievements().check(gs.session().character());
+                    gs.hud().openAchievements("bestiary".equals(open));
                 }
                 if ("market".equals(open)) {
                     // podglad rynku (bez serwera): przykladowe oferty

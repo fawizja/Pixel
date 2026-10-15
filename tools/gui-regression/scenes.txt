@@ -16,3 +16,5 @@ ranking|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 
 depot|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=70,78,0 -Dpixel.open=depot
 friends|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=friends
 market|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=70,78,0 -Dpixel.open=market
+achievements|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=achievements
+bestiary|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=bestiary

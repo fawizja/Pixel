@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.30.0] - 2026-10-15
+
+### Dodano
+- Bestiariusz: postać liczy pokonane potwory każdego rodzaju (i bossów); zapis `kill.<potwór>`.
+- 15 osiągnięć (poziom 20/50/100/300, 100/1 000/10 000 potworów, 10/30 rodzajów, pierwszy boss i 5 bossów,
+  5/20 zadań, 1 000 000 gp na koncie, 5 znajomych). Zdobyte raz zostają; wpis "Osiągnięcie zdobyte: ..." w dzienniku.
+  Działa w grze lokalnej i online (liczy serwer).
+- Okno osiągnięć z postępem (klawisz O, `/osiągnięcia`) przełączane na bestiariusz (`/bestiariusz`). Karta postaci
+  pokazuje liczbę pokonanych potworów i osiągnięć.
+- `-Dpixel.open=achievements|bestiary`; 2 nowe sceny w regresji GUI (19 scen), wzorzec `character` odświeżony.
+- 3 nowe testy osiągnięć i bestiariusza, liczenie w teście zadań; łącznie 248.
+
 ## [0.29.0] - 2026-10-15
 
 ### Dodano
