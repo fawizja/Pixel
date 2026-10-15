@@ -24,6 +24,10 @@ public final class PlayerCharacter {
     private final Container backpack;
     private final Equipment equipment;
     private final BankAccount bank;
+    /** Depozyt przedmiotow w banku: wspolny dla wszystkich bankierow, nie liczy sie do udzwigu. */
+    private final Container depot;
+
+    public static final int DEPOT_SLOTS = 60;
     private final Skills skills = new Skills();
     private final AutoLootFilter autoLootFilter = new AutoLootFilter();
     private final pl.fawizja.pixel.quest.QuestLog quests = new pl.fawizja.pixel.quest.QuestLog();
@@ -60,6 +64,7 @@ public final class PlayerCharacter {
         this.backpack = Container.backpack(registry);
         this.equipment = new Equipment(registry);
         this.bank = new BankAccount(bankBalance);
+        this.depot = new Container(registry, DEPOT_SLOTS);
         this.homeTown = homeTown;
         this.health = maxHealth();
         this.mana = maxMana();
@@ -83,6 +88,10 @@ public final class PlayerCharacter {
             equipment.setDirect(s, o.equipment.get(s));
         }
         bank.mirror(o.bank);
+        depot.clear();
+        for (int i = 0; i < o.depot.size(); i++) {
+            if (o.depot.get(i) != null) depot.putInSlot(i, o.depot.get(i));
+        }
         for (Skill s : Skill.values()) skills.set(s, o.skills.level(s), o.skills.tries(s));
         for (Integer id : new java.util.ArrayList<>(autoLootFilter.ignoredIds())) autoLootFilter.allow(id);
         for (Integer id : o.autoLootFilter.ignoredIds()) autoLootFilter.ignore(id);
@@ -121,6 +130,7 @@ public final class PlayerCharacter {
     public Container backpack() { return backpack; }
     public Equipment equipment() { return equipment; }
     public BankAccount bank() { return bank; }
+    public Container depot() { return depot; }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public String homeTown() { return homeTown; }

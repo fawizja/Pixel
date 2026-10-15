@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc|diag|trade|player|party   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|character|npc|depot|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -110,6 +110,15 @@ public final class DesktopLauncher {
                     }
                     ((GameScreen) getScreen()).hud().openRanking(
                             new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
+                }
+                if ("depot".equals(open)) {
+                    // podglad depozytu: kilka rzeczy juz odlozonych
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    for (String[] it : new String[][] {{"wolf_pelt", "14"}, {"rope", "1"}, {"health_potion", "20"}}) {
+                        gs.session().character().depot().add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(it[0]).id(), Integer.parseInt(it[1])));
+                    }
+                    gs.hud().openDepot(gs.session());
                 }
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();

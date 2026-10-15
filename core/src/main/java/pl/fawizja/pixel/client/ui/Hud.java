@@ -70,6 +70,8 @@ public final class Hud {
     private pl.fawizja.pixel.ranking.RankingView rankingView;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
+    /** U bankiera: widok depozytu przedmiotow zamiast konta. */
+    private boolean depotView;
     private int bookPage;
     private int npcQty = 1;
     private static final int[] QUANTITIES = {1, 5, 25, 100};
@@ -228,11 +230,20 @@ public final class Hud {
         }
     }
 
+    /** Rozmowa z bankierem od razu w widoku depozytu (podglad GUI). */
+    public void openDepot(GameSession session) {
+        openNpc(session);
+        depotView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER;
+    }
+
     public void openNpc(GameSession session) {
         pl.fawizja.pixel.npc.Npc n = session.npcNearby();
         if (n == null) return;
         playerMenu = null;
-        if (n != npc) npcPage = 0;
+        if (n != npc) {
+            npcPage = 0;
+            depotView = false;
+        }
         npc = n;
         npcMode = true;
         menuOpen = true;
@@ -475,6 +486,12 @@ public final class Hud {
         }
     }
 
+    private static List<Integer> distinctIds(pl.fawizja.pixel.inventory.Container c) {
+        java.util.Set<Integer> seen = new java.util.LinkedHashSet<>();
+        for (ItemStack s : c.contents()) if (s != null) seen.add(s.itemId());
+        return new ArrayList<>(seen);
+    }
+
     private void rebuildNpcMenu(GameSession session) {
         PlayerCharacter pc = session.character();
         List<MenuRow> left = new ArrayList<>();
@@ -510,6 +527,25 @@ public final class Hud {
                 break;
             }
             case BANKER: {
+                pl.fawizja.pixel.inventory.Container depot = pc.depot();
+                if (depotView) {
+                    left.add(new MenuRow("npc:depot", "Wróć do konta", "depozyt: " + (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc", true));
+                    for (int id : distinctIds(depot)) {
+                        if (left.size() >= perCol) break;
+                        left.add(new MenuRow("npc:take:" + id, "Wyjmij " + depot.count(id) + "x " + session.items().get(id).name(),
+                                "do plecaka", pc.backpack().spaceFor(id) > 0));
+                    }
+                    if (left.size() == 1) left.add(new MenuRow("npc:none", "Depozyt jest pusty", "odłóż coś z plecaka", false));
+                    right.add(new MenuRow("npc:none", "Plecak", "dotknij, aby odłożyć wszystkie sztuki", false));
+                    for (int id : distinctIds(pc.backpack())) {
+                        if (pl.fawizja.pixel.economy.Currency.isCoin(id) || right.size() >= perCol) continue;
+                        right.add(new MenuRow("npc:store:" + id, "Odłóż " + pc.backpack().count(id) + "x " + session.items().get(id).name(),
+                                "do depozytu", depot.spaceFor(id) > 0));
+                    }
+                    if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do odłożenia", "monety wpłać na konto", false));
+                    break;
+                }
+                left.add(new MenuRow("npc:depot", "Depozyt przedmiotów", (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc, wspólny dla miast", true));
                 long bal = pc.bank().balance();
                 left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspólne dla wszystkich miast", false));
                 left.add(new MenuRow("npc:deposit", "Wpłać wszystkie monety", String.format("w plecaku: %,d gp", session.gold()), session.gold() > 0));
@@ -553,7 +589,8 @@ public final class Hud {
             default:
         }
         // tematy rozmowy (to samo mozna wpisac w czacie obok NPC)
-        for (String topic : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
+        boolean depotRows = depotView && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER;
+        for (String topic : depotRows ? java.util.List.<String>of() : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
             MenuRow row = new MenuRow("npc:ask:" + topic, "Zapytaj: " + topic, "rozmowa", true);
             if (right.size() < perCol) right.add(row);
             else if (left.size() < perCol) left.add(row);
@@ -625,6 +662,8 @@ public final class Hud {
                         npcQty = QUANTITIES[(i + 1) % QUANTITIES.length];
                     } else if (row.action.equals("npc:page")) {
                         npcPage++;
+                    } else if (row.action.equals("npc:depot")) {
+                        depotView = !depotView;
                     } else if (row.action.equals("book:page")) {
                         bookPage++;
                     } else if (row.action.equals("book:assign")) {

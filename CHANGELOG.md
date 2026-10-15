@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.27.0] - 2026-10-15
+
+### Dodano
+- Depozyt przedmiotow w banku: 60 miejsc, wspolny dla wszystkich miast (jak konto). U bankiera wiersz
+  "Depozyt przedmiotów" przelacza okno na widok depozytu: po lewej "Wyjmij Nx Nazwa", po prawej "Odłóż Nx Nazwa"
+  z plecaka (wszystkie sztuki, ile sie zmiesci). Monety nie trafiaja do depozytu - od tego jest konto.
+- Depozyt zapisuje sie razem z postacia (`dp.<slot>` w zapisie) i dziala online (akcje `npc:store:<id>`,
+  `npc:take:<id>` wykonuje serwer, stan wraca w SELF).
+- `-Dpixel.open=depot` - podglad; nowa scena `depot` w regresji GUI (15 scen).
+- Test `depotStoresItemsOnlyAtABankerKeepsCoinsOutAndSurvivesSaving`; lacznie 237 testow.
+
 ## [0.26.0] - 2026-10-15
 
 ### Dodano

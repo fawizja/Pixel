@@ -46,6 +46,8 @@ public final class Actions {
             case "sell": s.sellAll(Integer.parseInt(p[2]), now); return true;
             case "deposit": s.depositAll(now); return true;
             case "withdraw": s.withdraw(Long.parseLong(p[2]), now); return true;
+            case "store": s.depotStore(Integer.parseInt(p[2]), now); return true;
+            case "take": s.depotTake(Integer.parseInt(p[2]), now); return true;
             case "heal": s.priestHeal(now); return true;
             case "settle": s.settleHere(now); return true;
             case "quest": s.questAction(p[2], now); return true;

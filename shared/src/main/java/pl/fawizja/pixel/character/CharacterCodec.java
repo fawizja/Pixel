@@ -52,6 +52,10 @@ public final class CharacterCodec {
             ItemStack s = pc.backpack().get(i);
             if (s != null) m.put("bp." + i, s.itemId() + "x" + s.count());
         }
+        for (int i = 0; i < pc.depot().size(); i++) {
+            ItemStack s = pc.depot().get(i);
+            if (s != null) m.put("dp." + i, s.itemId() + "x" + s.count());
+        }
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
         }
@@ -141,6 +145,10 @@ public final class CharacterCodec {
                 int slot = Integer.parseInt(k.substring(3));
                 ItemStack s = parseStack(e.getValue());
                 if (!pc.backpack().putInSlot(slot, s).ok()) throw new IllegalArgumentException("bad backpack slot " + slot);
+            } else if (k.startsWith("dp.")) {
+                int slot = Integer.parseInt(k.substring(3));
+                ItemStack s = parseStack(e.getValue());
+                if (!pc.depot().putInSlot(slot, s).ok()) throw new IllegalArgumentException("bad depot slot " + slot);
             } else if (k.startsWith("eq.")) {
                 EquipSlot slot = EquipSlot.valueOf(k.substring(3));
                 ItemStack s = parseStack(e.getValue());

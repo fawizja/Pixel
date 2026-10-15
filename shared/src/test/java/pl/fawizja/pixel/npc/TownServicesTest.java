@@ -215,6 +215,37 @@ class TownServicesTest {
     }
 
     @Test
+    void depotStoresItemsOnlyAtABankerKeepsCoinsOutAndSurvivesSaving() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        GameSession s = session(pc, List.of());
+        long t = 1000;
+        pc.backpack().add(new ItemStack(id("wolf_pelt"), 7));
+        assertEquals(0, s.depotStore(id("wolf_pelt"), t), "not next to a banker");
+        assertEquals(7, pc.backpack().count(id("wolf_pelt")));
+
+        s.teleport(talkSpot(npcs.get("frost_banker")), t);
+        assertEquals(7, s.depotStore(id("wolf_pelt"), t));
+        assertEquals(0, pc.backpack().count(id("wolf_pelt")));
+        assertEquals(7, pc.depot().count(id("wolf_pelt")));
+        int coin = pl.fawizja.pixel.economy.Currency.GOLD.itemId();
+        long gold = s.gold();
+        assertEquals(0, s.depotStore(coin, t), "coins go to the bank account");
+        assertEquals(gold, s.gold());
+
+        CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
+        PlayerCharacter back = codec.decode(codec.encode(pc));
+        assertEquals(7, back.depot().count(id("wolf_pelt")));
+        assertEquals(PlayerCharacter.DEPOT_SLOTS, back.depot().size());
+
+        // depozyt jest wspolny: wyjmujemy w innym miescie
+        s.teleport(talkSpot(npcs.get("varden_banker")), t);
+        assertEquals(7, s.depotTake(id("wolf_pelt"), t));
+        assertEquals(7, pc.backpack().count(id("wolf_pelt")));
+        assertEquals(0, pc.depot().count(id("wolf_pelt")));
+        assertEquals(0, s.depotTake(id("wolf_pelt"), t));
+    }
+
+    @Test
     void killQuestCountsKillsAndPaysOnce() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         Position field = new Position(58, 72, 0);

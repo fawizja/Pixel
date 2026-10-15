@@ -210,6 +210,45 @@ public final class GameSession {
         return r;
     }
 
+    /**
+     * Depozyt u bankiera: odklada wszystkie sztuki przedmiotu z plecaka (ile sie zmiesci). Monety ida na konto,
+     * nie do depozytu. Zwraca liczbe przeniesionych sztuk.
+     */
+    public int depotStore(int itemId, long nowMs) {
+        if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
+        if (pl.fawizja.pixel.economy.Currency.isCoin(itemId)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Monety wpłać na konto, nie do depozytu.");
+            return 0;
+        }
+        return moveAll(pc.backpack(), pc.depot(), itemId, nowMs, "Odłożono do depozytu", "Depozyt jest pełny.");
+    }
+
+    /** Depozyt: wyjmuje do plecaka wszystkie sztuki przedmiotu (ile sie zmiesci). */
+    public int depotTake(int itemId, long nowMs) {
+        if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
+        return moveAll(pc.depot(), pc.backpack(), itemId, nowMs, "Wyjęto z depozytu", "Brak miejsca w plecaku.");
+    }
+
+    private int moveAll(pl.fawizja.pixel.inventory.Container from, pl.fawizja.pixel.inventory.Container to, int itemId,
+                        long nowMs, String done, String full) {
+        int have = from.count(itemId);
+        if (have <= 0) return 0;
+        int n = (int) Math.min(have, to.spaceFor(itemId));
+        if (n <= 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, full);
+            return 0;
+        }
+        // atomowo: najpierw zdejmujemy, potem dodajemy (miejsce sprawdzone wyzej)
+        if (!from.remove(itemId, n).ok()) return 0;
+        if (!to.add(new ItemStack(itemId, n)).ok()) {
+            from.add(new ItemStack(itemId, n)); // nie powinno sie zdarzyc - oddajemy
+            return 0;
+        }
+        String name = items.get(itemId).name();
+        log.add(nowMs, EventLog.Kind.INFO, done + ": " + n + "x " + name + (n < have ? " (reszta się nie zmieściła)" : "") + ".");
+        return n;
+    }
+
     /** Kaplan: pelne leczenie i mana (tylko w swiatyni, wiec poza walka). */
     public void priestHeal(long nowMs) {
         if (talkTo(NpcRole.PRIEST, nowMs) == null) return;
