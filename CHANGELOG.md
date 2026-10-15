@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.20.0] - 2026-10-15
+
+### Dodano
+- Handel miedzy graczami online, twarza w twarz (maks. 2 pola): `/handel Imie` (druga strona odpowiada tym samym),
+  `/oferuj 5 health potion`, `/oferuj 1000 gp`, `/akceptuj`, `/anuluj`. Kazda zmiana oferty kasuje akceptacje,
+  wymiana dzieje sie po akceptacji obu stron atomowo (albo cala, albo wcale), a potem oba zapisy postaci sa zapisywane.
+  Wymiane przerywa oddalenie, wylogowanie albo 3 minuty bez zmian.
+- 4 nowe testy, w tym sieciowy (lacznie 224).
+
 ## [0.19.0] - 2026-10-15
 
 ### Dodano

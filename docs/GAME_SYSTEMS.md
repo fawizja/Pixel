@@ -220,6 +220,15 @@ przy pauzie, utracie fokusu i zamknieciu.
 - `CombatSystem.setExperienceSharer` - punkt podpiecia serwera. PvP miedzy czlonkami jest zablokowane.
 - Protokol: `PARTY INVITE|ACCEPT imie`, `PARTY LEAVE`, `PCHAT tekst`; serwer odsyla `PARTY imie1,imie2` albo `PARTY -`.
 
+## Handel miedzy graczami (Z logika, S serwer)
+
+- `trade/PlayerTrade`: oferty obu stron (do 8 pozycji + zloto), sprawdzane z plecakiem przy dodawaniu; kazda zmiana
+  kasuje obie akceptacje; `execute` dziala na kopiach plecakow (CHANGED gdy przedmiotow juz nie ma, NO_SPACE gdy
+  brak miejsca) i zatwierdza obie naraz. Przedmioty po kluczu, nazwie albo jednoznacznym poczatku nazwy.
+- Serwer: prosba `/handel` wazna 60 s, wymiana otwiera sie, gdy obie strony poprosza; odleglosc maks. 2 pola na tym
+  samym pietrze, limit 3 min bez zmian; po wymianie zapis obu postaci i wpis w logu serwera.
+- Protokol: `TRADE REQUEST imie | OFFER tekst | ACCEPT | CANCEL`, odpowiedzi jako wpisy LOG.
+
 ## Dzwiek (Z synteza i dobor, C odtwarzanie)
 
 - `audio/SoundSynth`: 13 efektow syntezowanych w kodzie (fale, szum, obwiednie), deterministycznie, WAV PCM 16 bit

@@ -468,6 +468,43 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void playersTradeSafelyFaceToFace() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            long olaGold = pl.fawizja.pixel.economy.Money.totalValue(self(ola).backpack());
+            long ulaGold = pl.fawizja.pixel.economy.Money.totalValue(self(ula).backpack());
+            int ulaPotions = self(ula).backpack().count(30);
+            server.enqueueTest(() -> {
+                server.world().find("Ola").session.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(30, 7));
+                server.world().find("Ula").session.teleport(server.world().find("Ola").session.character().position().translate(1, 0), server.now());
+            });
+            ola.send("TRADE", "REQUEST", "Ula");
+            awaitMessage(ula, "trade request", m -> m[0].equals("LOG") && m[2].contains("/handel Ola"));
+            ula.send("TRADE", "REQUEST", "Ola");
+            awaitMessage(ola, "trade open", m -> m[0].equals("LOG") && m[2].contains("otwarta"));
+            ola.send("TRADE", "OFFER", "7 health potion");
+            ula.send("TRADE", "OFFER", "700 gp");
+            awaitMessage(ola, "both offers", m -> m[0].equals("LOG") && m[2].contains("Oferta Ula: 700 gp"));
+            ola.send("TRADE", "ACCEPT");
+            ula.send("TRADE", "ACCEPT");
+            await("goods swapped", () -> {
+                try {
+                    return pl.fawizja.pixel.economy.Money.totalValue(self(ola).backpack()) == olaGold + 700
+                            && pl.fawizja.pixel.economy.Money.totalValue(self(ula).backpack()) == ulaGold - 700
+                            && self(ula).backpack().count(30) == ulaPotions + 7;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            ola.send("TRADE", "OFFER", "1 rope");
+            awaitMessage(ola, "trade is closed", m -> m[0].equals("LOG") && m[2].contains("Nie masz otwartej wymiany"));
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

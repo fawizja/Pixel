@@ -30,6 +30,7 @@ import pl.fawizja.pixel.net.Protocol;
 import pl.fawizja.pixel.npc.NpcRegistry;
 import pl.fawizja.pixel.npc.ShopRegistry;
 import pl.fawizja.pixel.pvp.PvpRules;
+import pl.fawizja.pixel.trade.PlayerTrade;
 import pl.fawizja.pixel.quest.QuestRegistry;
 import pl.fawizja.pixel.save.SaveStore;
 import pl.fawizja.pixel.vocation.Vocation;
@@ -79,6 +80,11 @@ final class ServerWorld {
     private final Random rng = new Random();
     private final Map<Integer, ServerPlayer> players = new LinkedHashMap<>();
     private final pl.fawizja.pixel.party.PartyManager parties = new pl.fawizja.pixel.party.PartyManager();
+    /** Otwarte wymiany (klucz: imie malymi literami, obie strony wskazuja ta sama wymiane). */
+    private final Map<String, PlayerTrade> trades = new java.util.HashMap<>();
+    /** Prosby o handel: adresat -> (proszacy -> waznosc). */
+    private final Map<String, Map<String, Long>> tradeRequests = new java.util.HashMap<>();
+    static final long TRADE_REQUEST_MS = 60_000L;
     private int nextId = 1;
 
     ServerWorld(File saveDir) throws IOException {
@@ -257,6 +263,141 @@ final class ServerWorld {
         }
     }
 
+    private static String lower(String name) { return name.toLowerCase(java.util.Locale.ROOT); }
+
+    private void info(ServerPlayer p, String text, long now) { p.session.log().add(now, EventLog.Kind.INFO, text); }
+
+    private void warn(ServerPlayer p, String text, long now) { p.session.log().add(now, EventLog.Kind.WARNING, text); }
+
+    /** Handel miedzy graczami: TRADE REQUEST imie | OFFER tekst | ACCEPT | CANCEL. */
+    private void tradeCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        PlayerTrade open = trades.get(lower(p.name()));
+        if (open != null && tradeBroken(open, now)) {
+            cancelTrade(open, "Wymiana anulowana (za daleko albo uplynal czas).", now);
+            open = null;
+        }
+        switch (f[1]) {
+            case "REQUEST": {
+                if (f.length < 3) return;
+                ServerPlayer other = find(f[2]);
+                if (other == null || other == p) {
+                    warn(p, other == p ? "Nie mozesz handlowac z samym soba." : "Gracz " + f[2] + " nie jest w grze.", now);
+                    return;
+                }
+                if (open != null) {
+                    warn(p, "Najpierw zakoncz obecna wymiane (/anuluj).", now);
+                    return;
+                }
+                PlayerTrade theirs = trades.get(lower(other.name()));
+                if (theirs != null && !tradeBroken(theirs, now)) {
+                    warn(p, other.name() + " juz z kims handluje.", now);
+                    return;
+                }
+                if (!PlayerTrade.closeEnough(p.session.character().position(), other.session.character().position())) {
+                    warn(p, PlayerTrade.Result.TOO_FAR.message, now);
+                    return;
+                }
+                Map<String, Long> mine = tradeRequests.get(lower(p.name()));
+                Long asked = mine == null ? null : mine.get(lower(other.name()));
+                if (asked != null && now <= asked) {
+                    mine.remove(lower(other.name()));
+                    PlayerTrade t = new PlayerTrade(other.name(), p.name(), now);
+                    trades.put(lower(p.name()), t);
+                    trades.put(lower(other.name()), t);
+                    String how = "Dodaj oferte: /oferuj 5 health potion albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
+                    info(p, "Wymiana z " + other.name() + " otwarta. " + how, now);
+                    info(other, "Wymiana z " + p.name() + " otwarta. " + how, now);
+                } else {
+                    tradeRequests.computeIfAbsent(lower(other.name()), k -> new java.util.HashMap<>())
+                            .put(lower(p.name()), now + TRADE_REQUEST_MS);
+                    info(p, "Zaproponowano handel graczowi " + other.name() + ".", now);
+                    other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " chce handlowac: /handel " + p.name());
+                }
+                return;
+            }
+            case "CANCEL":
+                if (open == null) {
+                    warn(p, "Nie masz otwartej wymiany.", now);
+                    return;
+                }
+                cancelTrade(open, p.name() + " anuluje wymiane.", now);
+                return;
+            default:
+        }
+        if (open == null) {
+            warn(p, "Nie masz otwartej wymiany. Zacznij od /handel Imie.", now);
+            return;
+        }
+        ServerPlayer partner = find(open.partnerOf(p.name()));
+        if (partner == null) {
+            cancelTrade(open, "Wymiana anulowana - drugi gracz wyszedl.", now);
+            return;
+        }
+        if (f[1].equals("OFFER") && f.length >= 3) {
+            PlayerTrade.Result r = open.offer(p.name(), p.session.character().backpack(), items, f[2], now);
+            if (r != PlayerTrade.Result.OK) {
+                warn(p, r.message, now);
+                return;
+            }
+            String status = "Oferta " + p.name() + ": " + open.offerOf(p.name()).describe(items)
+                    + " | Oferta " + partner.name() + ": " + open.offerOf(partner.name()).describe(items) + ". /akceptuj";
+            info(p, status, now);
+            info(partner, status, now);
+        } else if (f[1].equals("ACCEPT")) {
+            PlayerTrade.Result r = open.accept(p.name());
+            if (r == PlayerTrade.Result.WAITING) {
+                info(p, r.message, now);
+                partner.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " akceptuje wymiane: "
+                        + open.offerOf(p.name()).describe(items) + " za " + open.offerOf(partner.name()).describe(items)
+                        + ". /akceptuj albo /anuluj");
+                return;
+            }
+            if (r != PlayerTrade.Result.DONE) {
+                warn(p, r.message, now);
+                return;
+            }
+            ServerPlayer first = find(open.first());
+            ServerPlayer second = find(open.second());
+            PlayerTrade.Result done = open.execute(first.session.character().backpack(), second.session.character().backpack());
+            trades.remove(lower(first.name()));
+            trades.remove(lower(second.name()));
+            for (ServerPlayer x : new ServerPlayer[] {first, second}) {
+                if (done == PlayerTrade.Result.DONE) info(x, "Wymiana zakonczona: oddano " + open.offerOf(x.name()).describe(items)
+                        + ", otrzymano " + open.offerOf(open.partnerOf(x.name())).describe(items) + ".", now);
+                else warn(x, done.message, now);
+            }
+            if (done == PlayerTrade.Result.DONE) {
+                LOG.info("trade " + first.name() + " <-> " + second.name() + ": " + open.offerOf(first.name()).describe(items)
+                        + " / " + open.offerOf(second.name()).describe(items));
+                save(first);
+                save(second);
+            }
+        }
+    }
+
+    /** Wylogowanie przerywa wymiane i kasuje prosby (przed usunieciem z listy graczy). */
+    private void leftTrade(ServerPlayer p) {
+        tradeRequests.remove(lower(p.name()));
+        PlayerTrade t = trades.get(lower(p.name()));
+        if (t != null) cancelTrade(t, "Wymiana anulowana - " + p.name() + " wychodzi z gry.", lastNow);
+    }
+
+    private boolean tradeBroken(PlayerTrade t, long now) {
+        ServerPlayer x = find(t.first()), y = find(t.second());
+        return x == null || y == null || t.expired(now)
+                || !PlayerTrade.closeEnough(x.session.character().position(), y.session.character().position());
+    }
+
+    private void cancelTrade(PlayerTrade t, String why, long now) {
+        trades.remove(lower(t.first()));
+        trades.remove(lower(t.second()));
+        for (String n : new String[] {t.first(), t.second()}) {
+            ServerPlayer x = find(n);
+            if (x != null) warn(x, why, now);
+        }
+    }
+
     /** Wyjscie z druzyny (polecenie, wylogowanie, usuniecie konta) z powiadomieniem pozostalych. */
     private void partyLeft(ServerPlayer p, long now) {
         List<String> rest = parties.leave(p.name());
@@ -325,6 +466,7 @@ final class ServerWorld {
     private void deleteCharacter(ServerPlayer p) {
         String key = p.name().toLowerCase(java.util.Locale.ROOT);
         partyLeft(p, lastNow);
+        leftTrade(p);
         players.remove(p.id);
         pvp.remove(key);
         try {
@@ -346,6 +488,7 @@ final class ServerWorld {
         if (!players.containsKey(p.id)) return;
         save(p); // najpierw zapis, potem usuniecie z listy graczy
         partyLeft(p, lastNow);
+        leftTrade(p);
         players.remove(p.id);
         broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
         LOG.info("leave " + p.name() + " (" + players.size() + " online)");
@@ -389,6 +532,7 @@ final class ServerWorld {
                 deleteCharacter(p);
                 break;
             case "PARTY": partyCommand(p, f, now); break;
+            case "TRADE": tradeCommand(p, f, now); break;
             case "PCHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
                     List<String> team = parties.members(p.name());
