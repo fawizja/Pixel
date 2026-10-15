@@ -291,8 +291,10 @@ class NetworkSyncTest {
             int piotrId = b.playerId();
             Position field = new Position(58, 75, 0);
             server.enqueueTest(() -> {
-                int i = 0;
-                for (ServerPlayer p : server.world().players()) p.session.teleport(field.translate(i++, 0), server.now());
+                // po imieniu - kolejnosc graczy na serwerze nie jest stala
+                for (ServerPlayer p : server.world().players()) {
+                    p.session.teleport(field.translate(p.name().equals("Ola") ? 0 : 1, 0), server.now());
+                }
             });
             await("on the field", () -> {
                 RemoteEntity o = seen(b, "Ola");
