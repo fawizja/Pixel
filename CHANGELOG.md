@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.16.1] - 2026-10-15
+
+### Dodano
+- Efekty graficzne: pociski czarow, run i atakow dystansowych (takze potworow), fala czarow obszarowych,
+  iskry leczenia. Kolory wg zywiolu, uproszczone w trybie oszczedzania baterii. Dzialaja takze online.
+- `-Dpixel.fx=true` - podglad efektow na zrzucie ekranu.
+- Testy czarow sprawdzaja emitowane efekty (lacznie 204).
+
 ## [0.16.0] - 2026-10-15
 
 ### Dodano

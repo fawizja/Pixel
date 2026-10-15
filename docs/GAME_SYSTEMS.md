@@ -139,6 +139,16 @@ Joystick ze strefa martwa, klawiatura na PC.
   nie jest blizej niz 9 kafelkow; zabite w nocy nie odradzaja sie za dnia. Teraz: wilki i bandyci przy Varden,
   sniezne wilki, hieny, piaskowe upiory i upiorni rycerze na wschodzie.
 
+## Efekty graficzne czarow (Z zdarzenia, C rysowanie)
+
+- `CombatEvent` ma rodzaje PROJECTILE (z `from` do `position`) i AREA (promien w `amount`), `effect` = rodzaj
+  obrazen albo HEAL. Emituja je czary na cel i runy (pocisk), czary i runy obszarowe (fala), leczenie (iskry),
+  ataki dystansowe gracza i potworow (pocisk).
+- Klient rysuje je addytywnie po swietle: pocisk z warkoczem (260 ms), pierscien biegnacy po kafelkach (450 ms),
+  kolory wg zywiolu. Przy niskiej jakosci (bateria, ochrona zasobow) bez warkocza i iskier.
+- Online: `EV` z 10 polami (skad x,y,z i efekt); stare klienty ignoruja nieznane rodzaje.
+- Podglad do zrzutow: `-Dpixel.fx=true`.
+
 ## Ochrona zasobow 90% / 75% (Z logika, C platforma)
 
 - Stany NORMAL / LIMITED / RECOVERING, progi konfigurowalne (domyslnie 90% wejscie, 75% wznowienie).

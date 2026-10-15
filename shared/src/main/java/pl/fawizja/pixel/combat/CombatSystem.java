@@ -104,6 +104,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int raw = CombatFormulas.roll(ap.maxDamage(), rng);
         if (pc.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
+        if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
         int dealt = target.damage(dmg);
         monsters.provoke(target);
         if (!isTrivial(target.type())) pc.skills().addTries(ap.skill(), 1);
@@ -201,6 +202,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         MonsterType t = m.type();
         int raw = CombatFormulas.rollBetween(t.attackMin(), t.attackMax(), rng);
         int dmg = CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), pc.isDefensive(), rng);
+        if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
         if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t)) pc.skills().addTries(Skill.SHIELDING, 1);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED));
@@ -257,7 +259,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void push(CombatEvent e) {
         eventTotal++;
         events.addLast(e);
-        while (events.size() > 40) events.removeFirst();
+        while (events.size() > 64) events.removeFirst();
     }
 
     /** Liczba wszystkich zdarzen od poczatku (serwer wysyla tylko nowe). */

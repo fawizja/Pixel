@@ -144,6 +144,9 @@ public final class GameScreen extends ScreenAdapter {
 
     public boolean online() { return net != null; }
 
+    /** Czas swiata uzywany przy rysowaniu (narzedzia deweloperskie, zrzuty ekranu). */
+    public long worldTime() { return now(); }
+
     /** Akcja gracza: lokalnie wykonana od razu, online - wyslana do serwera (jedyne zrodlo prawdy). */
     private void act(String action, long t) {
         if (net != null) net.send("ACT", action);
@@ -429,6 +432,92 @@ public final class GameScreen extends ScreenAdapter {
         limitFrameRate();
     }
 
+    private static Color effectColor(String effect) {
+        if (effect == null) return new Color(0.9f, 0.85f, 0.75f, 1f);
+        switch (effect) {
+            case "FIRE": return new Color(1f, 0.5f, 0.12f, 1f);
+            case "ICE": return new Color(0.6f, 0.9f, 1f, 1f);
+            case "EARTH": return new Color(0.45f, 0.85f, 0.3f, 1f);
+            case "ENERGY": return new Color(0.78f, 0.5f, 1f, 1f);
+            case "HOLY": return new Color(1f, 0.95f, 0.55f, 1f);
+            case "DEATH": return new Color(0.6f, 0.25f, 0.7f, 1f);
+            case "HEAL": return new Color(0.55f, 1f, 0.65f, 1f);
+            default: return new Color(0.9f, 0.85f, 0.75f, 1f);
+        }
+    }
+
+    /**
+     * Efekty czarow i atakow dystansowych: pocisk z warkoczem leci od rzucajacego do celu, czar obszarowy
+     * rozbiega sie pierscieniem po kafelkach, leczenie - iskry unoszace sie nad postacia.
+     * Przy niskiej jakosci (bateria, ochrona zasobow) bez warkocza i iskier.
+     */
+    private void drawSpellEffects(ShapeRenderer shapes, List<CombatEvent> events, long t, int z) {
+        boolean rich = Math.min(settings.qualityCap(), guard.effectsQuality()) > 0.6f;
+        boolean begun = false;
+        for (CombatEvent e : events) {
+            if (!e.isVisualEffect() || e.position().z() != z) continue;
+            if (!begun) {
+                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE); // swiecace, addytywne
+                shapes.begin(ShapeRenderer.ShapeType.Filled);
+                begun = true;
+            }
+            Color c = effectColor(e.effect());
+            long age = t - e.timeMs();
+            if (e.kind() == CombatEvent.Kind.PROJECTILE && e.from() != null) {
+                float p = age / (float) CombatEvent.PROJECTILE_MS;
+                if (p < 0f || p > 1f) continue;
+                int trail = rich ? 4 : 1;
+                for (int i = trail - 1; i >= 0; i--) {
+                    float q = Math.max(0f, p - i * 0.07f);
+                    float x = e.from().x() + (e.position().x() - e.from().x()) * q + 0.5f;
+                    float y = worldRenderer.worldY(e.from().y() + (e.position().y() - e.from().y()) * q) + 0.5f;
+                    float a = 1f - i / (float) trail;
+                    shapes.setColor(c.r, c.g, c.b, 0.85f * a);
+                    shapes.circle(x, y, 0.16f * (1f - i * 0.18f), 10);
+                }
+                shapes.setColor(1f, 1f, 1f, 0.7f);
+                float x = e.from().x() + (e.position().x() - e.from().x()) * p + 0.5f;
+                float y = worldRenderer.worldY(e.from().y() + (e.position().y() - e.from().y()) * p) + 0.5f;
+                shapes.circle(x, y, 0.06f, 8);
+            } else if (e.kind() == CombatEvent.Kind.AREA) {
+                float p = age / (float) CombatEvent.AREA_MS;
+                if (p < 0f || p > 1f) continue;
+                int r = e.amount();
+                if (r <= 0) {
+                    // leczenie: iskry wznoszace sie nad postacia
+                    int sparks = rich ? 6 : 3;
+                    for (int i = 0; i < sparks; i++) {
+                        float sx = e.position().x() + 0.2f + 0.6f * ((i * 37) % 10) / 10f;
+                        float sy = worldRenderer.worldY(e.position().y()) + 0.15f + p * 0.9f + (i % 3) * 0.12f;
+                        shapes.setColor(c.r, c.g, c.b, 0.9f * (1f - p));
+                        shapes.rect(sx, sy, 0.12f, 0.12f);
+                    }
+                    continue;
+                }
+                float wave = p * (r + 0.5f); // pierscien biegnie od srodka na zewnatrz
+                for (int dy = -r; dy <= r; dy++) {
+                    for (int dx = -r; dx <= r; dx++) {
+                        int d = Math.max(Math.abs(dx), Math.abs(dy));
+                        float near = 1f - Math.min(1f, Math.abs(d - wave));
+                        float a = (0.15f + 0.55f * near) * (1f - p);
+                        if (a <= 0.02f) continue;
+                        float tx = e.position().x() + dx, ty = worldRenderer.worldY(e.position().y() + dy);
+                        shapes.setColor(c.r, c.g, c.b, a);
+                        shapes.rect(tx + 0.08f, ty + 0.08f, 0.84f, 0.84f);
+                        if (rich && near > 0.6f) {
+                            shapes.setColor(1f, 1f, 1f, a * 0.6f);
+                            shapes.rect(tx + 0.4f, ty + 0.4f, 0.2f, 0.2f);
+                        }
+                    }
+                }
+            }
+        }
+        if (begun) {
+            shapes.end();
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        }
+    }
+
     /** Paski zycia potworow, obwodka celu i liczby obrazen (rysowane po swietle, zawsze czytelne). */
     private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
         Monster target = session.combat().target();
@@ -469,8 +558,10 @@ public final class GameScreen extends ScreenAdapter {
             shapes.end();
         }
 
-        // liczby obrazen w pikselach ekranu
         List<CombatEvent> events = session.combat().recentEvents(t, 1200);
+        drawSpellEffects(shapes, events, t, z);
+
+        // liczby obrazen w pikselach ekranu
         screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.setProjectionMatrix(screenMatrix);
         batch.begin();
@@ -637,9 +728,11 @@ public final class GameScreen extends ScreenAdapter {
                 case "EV":
                     if (m.length < 6) break;
                     try {
+                        Position from = m.length >= 10 ? new Position(Integer.parseInt(m[6]), Integer.parseInt(m[7]),
+                                Integer.parseInt(m[8])) : null;
                         session.combat().addRemoteEvent(new CombatEvent(now, new Position(Integer.parseInt(m[2]),
                                 Integer.parseInt(m[3]), Integer.parseInt(m[4])), Integer.parseInt(m[5]),
-                                CombatEvent.Kind.valueOf(m[1])));
+                                CombatEvent.Kind.valueOf(m[1]), from, m.length >= 10 && !m[9].equals("-") ? m[9] : null));
                     } catch (IllegalArgumentException ignored) {
                         // zla linia - pomijamy
                     }

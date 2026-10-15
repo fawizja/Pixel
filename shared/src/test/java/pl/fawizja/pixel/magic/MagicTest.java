@@ -104,6 +104,11 @@ class MagicTest {
         s.combat().setTarget(m);
         assertEquals(CastResult.OK, s.castSpell("ember_bolt", 0));
         assertTrue(m.health() < m.type().maxHealth());
+        pl.fawizja.pixel.combat.CombatEvent bolt = s.combat().latestEvents(64).stream()
+                .filter(e -> e.kind() == pl.fawizja.pixel.combat.CombatEvent.Kind.PROJECTILE).findFirst().orElseThrow();
+        assertEquals(pc.position(), bolt.from(), "the bolt flies from the caster");
+        assertEquals(m.position(), bolt.position());
+        assertEquals("FIRE", bolt.effect());
         PlayerCharacter far = TestData.newCharacter(Vocation.SORCERER);
         GameSession s2 = session(far, "bandit", new Position(17, 12, 0));
         s2.combat().setTarget(s2.monsters().monsters().get(0));
@@ -138,6 +143,8 @@ class MagicTest {
         int hurt = 0;
         for (Monster m : mm.monsters()) if (m.health() < m.type().maxHealth()) hurt++;
         assertEquals(2, hurt, "only the two adjacent boars");
+        assertTrue(s.combat().latestEvents(64).stream().anyMatch(e -> e.kind() == pl.fawizja.pixel.combat.CombatEvent.Kind.AREA
+                && e.position().equals(pc.position()) && e.amount() == 1), "area effect around the monk");
     }
 
     @Test

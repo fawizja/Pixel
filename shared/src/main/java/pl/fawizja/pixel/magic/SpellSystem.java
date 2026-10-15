@@ -157,23 +157,29 @@ public final class SpellSystem {
             case HEAL_SELF:
             case RUNE_HEAL: {
                 int healed = pc.heal(roll(s));
+                combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HEAL"));
                 combat.addEvent(new CombatEvent(now, pc.position(), healed, CombatEvent.Kind.HEAL));
                 return CastResult.OK;
             }
             case ATTACK_TARGET:
             case RUNE_TARGET:
+                combat.addEvent(CombatEvent.projectile(now, pc.position(),
+                        playerTargetPosition() != null ? playerTargetPosition() : combat.target().position(), s.damageType().name()));
                 if (playerTargetPosition() != null) {
                     return playerTarget.strike(roll(s), s.damageType(), now) ? CastResult.OK : CastResult.NOT_ALLOWED;
                 }
                 combat.damageMonster(combat.target(), roll(s), s.damageType(), now);
                 return CastResult.OK;
             case ATTACK_AREA:
+                combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), s.damageType().name()));
                 for (Monster m : targetsAround(pc.position(), s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
                 if (playerInArea(pc.position(), s.radius())) playerTarget.strike(roll(s), s.damageType(), now);
                 return CastResult.OK;
             case RUNE_AREA: {
                 Position pvp = playerTargetPosition();
                 Position center = pvp != null ? pvp : combat.target().position();
+                combat.addEvent(CombatEvent.projectile(now, pc.position(), center, s.damageType().name()));
+                combat.addEvent(CombatEvent.area(now, center, s.radius(), s.damageType().name()));
                 for (Monster m : targetsAround(center, s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
                 if (playerInArea(center, s.radius())) playerTarget.strike(roll(s), s.damageType(), now);
                 return CastResult.OK;

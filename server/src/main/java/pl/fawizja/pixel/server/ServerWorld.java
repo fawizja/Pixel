@@ -423,10 +423,18 @@ final class ServerWorld {
             }
             long freshEv = p.session.combat().eventTotal() - p.eventsSent;
             if (freshEv > 0) {
-                for (CombatEvent e : p.session.combat().latestEvents((int) Math.min(freshEv, 40))) {
+                for (CombatEvent e : p.session.combat().latestEvents((int) Math.min(freshEv, 64))) {
                     Position ep = e.position();
-                    p.client.send("EV", e.kind().name(), String.valueOf(ep.x()), String.valueOf(ep.y()),
-                            String.valueOf(ep.z()), String.valueOf(e.amount()));
+                    if (e.from() != null || e.effect() != null) {
+                        // efekt graficzny: pocisk (skad) i rodzaj obrazen
+                        Position fp = e.from() != null ? e.from() : ep;
+                        p.client.send("EV", e.kind().name(), String.valueOf(ep.x()), String.valueOf(ep.y()),
+                                String.valueOf(ep.z()), String.valueOf(e.amount()), String.valueOf(fp.x()),
+                                String.valueOf(fp.y()), String.valueOf(fp.z()), e.effect() == null ? "-" : e.effect());
+                    } else {
+                        p.client.send("EV", e.kind().name(), String.valueOf(ep.x()), String.valueOf(ep.y()),
+                                String.valueOf(ep.z()), String.valueOf(e.amount()));
+                    }
                 }
                 p.eventsSent = p.session.combat().eventTotal();
             }

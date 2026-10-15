@@ -60,7 +60,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Crafting (data/recipes.csv): 8 receptur, atomowo, koszt w gp
 - [x] Klient: automatyczny pasek czarow z odnowieniem, przyciski HP/MP, ksiega czarow i rzemiosla, UZYJ w plecaku
 - [x] Symulacje z botem leczacym: 10 min przy wilkach bez smierci; 100 mikstur nie wystarcza na bossa na poziomie 8
-- [ ] Efekty graficzne czarow (pociski, wybuchy), dzwieki
+- [x] Efekty graficzne czarow (pociski, wybuchy, leczenie, ataki dystansowe)
+- [ ] Dzwieki
 - [ ] Wlasny uklad paska czarow (teraz automatyczny)
 
 
