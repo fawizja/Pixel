@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.18.0] - 2026-10-15
+
+### Dodano
+- Dzwieki: 13 efektow syntezowanych w kodzie (trafienie, rana, blok, strzal, leczenie, szesc zywiolow czarow,
+  awans, smierc). Graja przy zdarzeniach walki, ciszej z daleka, takze online.
+- Ustawienie glosnosci w panelu ustawien: wylaczony / 30 / 60 / 100%.
+- Animacja ataku wrecz: atakujacy (gracz, potwor, inny gracz) robi krotki wypad w strone celu, na celu widac ciecie.
+- 5 nowych testow (lacznie 214).
+
 ## [0.17.1] - 2026-10-15
 
 ### Dodano

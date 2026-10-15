@@ -108,7 +108,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dealt = target.damage(dmg);
         monsters.provoke(target);
         if (!isTrivial(target.type())) pc.skills().addTries(ap.skill(), 1);
-        push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
+        // wrecz: "skad" = gracz (animacja wypadu na kliencie)
+        push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
+                ap.range() > 1 ? null : pc.position(), null));
         if (target.isDead()) onMonsterDeath(target, now);
     }
 
@@ -208,7 +210,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
         if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t)) pc.skills().addTries(Skill.SHIELDING, 1);
-        push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED));
+        push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
+                t.range() > 1 ? null : m.position(), null));
         if (target == null) target = m; // automatyczna odpowiedz na atak
         if (pc.isDead()) onPlayerDeath(m, now);
     }

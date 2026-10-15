@@ -49,7 +49,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Klient: sprite potworow, paski HP, obwodka celu, liczby obrazen, panel celu, CEL / TARCZA
 - [x] Mikstury i czary leczace (etap 7)
 - [x] Cialo potwora z lupem do przeszukania (UZYJ / PODNIES / dotkniecie obok), znika po 3 min
-- [ ] Dzwiek, animacja ataku
+- [x] Dzwiek, animacja ataku (wypad i ciecie przy ciosie wrecz, efekty syntezowane, 0.18.0)
 
 ## Etap 7 - Czary, runy, mikstury, crafting
 - [x] 20 czarow i 3 efekty run (data/spells.csv): leczenie, ataki na cel i obszarowe, swiatlo, przywolanie wloczni, zaklinanie run
@@ -62,7 +62,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Klient: automatyczny pasek czarow z odnowieniem, przyciski HP/MP, ksiega czarow i rzemiosla, UZYJ w plecaku
 - [x] Symulacje z botem leczacym: 10 min przy wilkach bez smierci; 100 mikstur nie wystarcza na bossa na poziomie 8
 - [x] Efekty graficzne czarow (pociski, wybuchy, leczenie, ataki dystansowe)
-- [ ] Dzwieki
+- [x] Dzwieki czarow wg zywiolu, leczenia i awansu (0.18.0)
 - [x] Wlasny uklad paska czarow (ksiega: "Ustaw pasek czarow", zapis per postac)
 
 

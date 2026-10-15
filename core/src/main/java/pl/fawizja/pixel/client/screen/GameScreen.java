@@ -74,6 +74,9 @@ public final class GameScreen extends ScreenAdapter {
     private long lastGuardSampleMs;
     private float frameTimeAvg = 1f / 60f;
     private final pl.fawizja.pixel.settings.GameSettings settings;
+    private final pl.fawizja.pixel.audio.SoundCues soundCues = new pl.fawizja.pixel.audio.SoundCues();
+    /** Wypady przy ciosach wrecz: pozycja atakujacego -> przesuniecie sprite'a w kafelkach mapy (dx, dy). */
+    private final java.util.Map<Position, float[]> lunges = new java.util.HashMap<>();
     private final com.badlogic.gdx.Preferences settingsPrefs;
     private final com.badlogic.gdx.Preferences barPrefs;
 
@@ -248,6 +251,7 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:battery":
             case "settings:light":
             case "settings:numbers":
+            case "settings:sound":
                 settings.apply(id);
                 settingsPrefs.put(settings.toMap());
                 settingsPrefs.flush();
@@ -414,6 +418,9 @@ public final class GameScreen extends ScreenAdapter {
         visibleMonsters.clear();
         int radius = (int) Math.ceil(Math.max(viewport.getWorldWidth(), viewport.getWorldHeight()) / 2f) + 2;
         visibleMonsters.addAll(session.monsters().near(pc.position(), radius));
+        collectLunges(t);
+        float[] myLunge = lunges.get(pc.position());
+        float lx = myLunge == null ? 0f : myLunge[0], ly = myLunge == null ? 0f : myLunge[1];
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
             drawCorpses(b, row, z);
             for (int i = 0; i < visibleMonsters.size(); i++) {
@@ -421,8 +428,9 @@ public final class GameScreen extends ScreenAdapter {
                 if (m.position().y() != row || m.position().z() != z) continue;
                 TextureRegion tr = game.art().monster(m.type().key());
                 if (tr == null) continue;
-                float mx = m.renderX(t);
-                float my = worldRenderer.worldY(m.renderY(t));
+                float[] lg = lunges.get(m.position());
+                float mx = m.renderX(t) + (lg == null ? 0f : lg[0]);
+                float my = worldRenderer.worldY(m.renderY(t) + (lg == null ? 0f : lg[1]));
                 boolean flip = m.facing() != null && m.facing().dx < 0;
                 b.draw(tr, flip ? mx + 1f : mx, my, flip ? -1f : 1f, 1f);
             }
@@ -434,10 +442,12 @@ public final class GameScreen extends ScreenAdapter {
             }
             for (RemotePlayer rp : remotePlayers.values()) {
                 if (rp.to.y() != row || rp.to.z() != z) continue;
-                b.draw(game.art().character(rp.vocation, rp.facing), remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)), 1f, 1f);
+                float[] lg = lunges.get(rp.to);
+                b.draw(game.art().character(rp.vocation, rp.facing), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
+                        worldRenderer.worldY(remoteY(rp, t) + (lg == null ? 0f : lg[1])), 1f, 1f);
             }
             if (row == playerRow) {
-                b.draw(game.art().character(pc.vocation(), session.facing()), px, worldRenderer.worldY(py), 1f, 1f);
+                b.draw(game.art().character(pc.vocation(), session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
             }
         });
         batch.end();
@@ -451,6 +461,23 @@ public final class GameScreen extends ScreenAdapter {
 
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
         limitFrameRate();
+    }
+
+    /**
+     * Ciosy wrecz z ostatnich {@link CombatEvent#LUNGE_MS} ms: atakujacy (gracz, potwor, inny gracz) robi krotki
+     * wypad w strone celu i wraca. Klucz to pozycja atakujacego z chwili ciosu.
+     */
+    private void collectLunges(long t) {
+        lunges.clear();
+        for (CombatEvent e : session.combat().recentEvents(t, CombatEvent.LUNGE_MS)) {
+            if (!e.isMeleeStrike()) continue;
+            float p = (t - e.timeMs()) / (float) CombatEvent.LUNGE_MS;
+            if (p < 0f || p > 1f) continue;
+            float amount = 0.22f * (float) Math.sin(Math.PI * p);
+            int dx = Integer.signum(e.position().x() - e.from().x());
+            int dy = Integer.signum(e.position().y() - e.from().y());
+            lunges.put(e.from(), new float[] {dx * amount, dy * amount});
+        }
     }
 
     /** Ciala potworow w danym wierszu: lezacy, przyciemniony sprite (jasniejszy, gdy jest w nim lup). */
@@ -491,7 +518,8 @@ public final class GameScreen extends ScreenAdapter {
         boolean rich = Math.min(settings.qualityCap(), guard.effectsQuality()) > 0.6f;
         boolean begun = false;
         for (CombatEvent e : events) {
-            if (!e.isVisualEffect() || e.position().z() != z) continue;
+            boolean slash = e.isMeleeStrike() && t - e.timeMs() <= CombatEvent.LUNGE_MS;
+            if ((!e.isVisualEffect() && !slash) || e.position().z() != z) continue;
             if (!begun) {
                 Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE); // swiecace, addytywne
                 shapes.begin(ShapeRenderer.ShapeType.Filled);
@@ -499,6 +527,20 @@ public final class GameScreen extends ScreenAdapter {
             }
             Color c = effectColor(e.effect());
             long age = t - e.timeMs();
+            if (slash) {
+                // cios wrecz: jasne ciecie po skosie celu, krotko
+                float p = age / (float) CombatEvent.LUNGE_MS;
+                float a = (e.kind() == CombatEvent.Kind.BLOCKED ? 0.35f : 0.75f) * (1f - p);
+                float tx = e.position().x(), ty = worldRenderer.worldY(e.position().y());
+                float len = 0.25f + 0.5f * Math.min(1f, p * 2f);
+                shapes.setColor(1f, 0.95f, 0.85f, a);
+                shapes.rectLine(tx + 0.2f, ty + 0.8f, tx + 0.2f + len * 0.75f, ty + 0.8f - len * 0.75f, 0.07f);
+                if (rich) {
+                    shapes.setColor(1f, 0.7f, 0.5f, a * 0.6f);
+                    shapes.rectLine(tx + 0.35f, ty + 0.85f, tx + 0.35f + len * 0.6f, ty + 0.85f - len * 0.6f, 0.04f);
+                }
+                continue;
+            }
             if (e.kind() == CombatEvent.Kind.PROJECTILE && e.from() != null) {
                 float p = age / (float) CombatEvent.PROJECTILE_MS;
                 if (p < 0f || p > 1f) continue;
@@ -596,6 +638,7 @@ public final class GameScreen extends ScreenAdapter {
 
         List<CombatEvent> events = session.combat().recentEvents(t, 1200);
         drawSpellEffects(shapes, events, t, z);
+        game.sound().play(soundCues.poll(events, session.character().position(), t), settings.volumeFactor());
 
         // liczby obrazen w pikselach ekranu
         screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

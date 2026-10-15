@@ -175,7 +175,7 @@ Joystick ze strefa martwa, klawiatura na PC.
 - Pomiary: sterta aplikacji (desktop i Android), pamiec systemu i stan termiczny (Android API 29+),
   czas klatki (wskaznik posredni). CPU jest oznaczone jako niedostepne - Android nie udostepnia go aplikacjom.
 - Panel diagnostyki (`i` / F3): FPS, pamiec, CPU, temperatura, bateria, tryb i przyczyna.
-- Pod panelem ustawienia (`GameSettings`, zapis w Preferences `pixel-settings`): limit FPS 30/60/90/120,
+- Pod panelem ustawienia (`GameSettings`, zapis w Preferences `pixel-settings`): glosnosc 0/30/60/100%, limit FPS 30/60/90/120,
   oszczedzanie baterii (maks. 30 FPS, jakosc swiatla 0,5), jakosc swiatla, liczby obrazen.
   Ostateczny limit = min(ustawienie, ochrona zasobow); jakosc swiatla = min(ustawienie, ochrona zasobow).
 
@@ -207,6 +207,17 @@ przy pauzie, utracie fokusu i zamknieciu.
   lista ignorowanych) lub na ziemie, odrodzenie po czasie ze spawns.csv.
 - Smierc gracza: -5% exp (nie ponizej poziomu startowego), pelne HP/MP, swiatynia Varden.
 - Zdarzenia walki (`CombatEvent`) -> liczby obrazen, leczenia, awansu w kliencie.
+- Cios wrecz niesie pozycje atakujacego (`from`, `isMeleeStrike`): klient rysuje wypad atakujacego w strone celu
+  (180 ms) i krotkie ciecie na celu. Dziala tez online (EV z 10 polami).
+
+## Dzwiek (Z synteza i dobor, C odtwarzanie)
+
+- `audio/SoundSynth`: 13 efektow syntezowanych w kodzie (fale, szum, obwiednie), deterministycznie, WAV PCM 16 bit
+  22 050 Hz. Bez plikow z zewnatrz. Klient zapisuje je raz (`~/.pixel/sfx-v1/` na PC, pamiec aplikacji na Androidzie).
+- `audio/SoundCues`: zdarzenie walki -> efekt (trafienie, rana, blok, leczenie, zywiol czaru/pocisku, awans, smierc).
+  Kazde zdarzenie gra raz, tylko na pietrze gracza i do 9 kafelkow (ciszej z daleka), ten sam efekt nie czesciej niz
+  co 70 ms, najwyzej 3 dzwieki na klatke.
+- Glosnosc w ustawieniach: 0 (wylaczony) / 30 / 60 / 100%. Brak urzadzenia audio wylacza dzwiek bez bledu.
 
 ## Czary, runy, mikstury, crafting (Z logika, C UI)
 

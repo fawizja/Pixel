@@ -154,6 +154,29 @@ class CombatTest {
         assertTrue(pc.level() >= 8);
     }
 
+    @Test
+    void meleeStrikesCarryTheAttackersPositionForTheLungeAnimation() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        pc.setPosition(new Position(10, 12, 0));
+        SpawnPoint sp = new SpawnPoint("wolf", new Position(11, 12, 0), 0, 1, 60);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, List.of(sp), new Random(3));
+        mm.populate(null);
+        Monster wolf = mm.monsters().get(0);
+        CombatSystem cs = system(pc, new Random(5), mm);
+        cs.setTarget(wolf);
+        cs.update(0);
+        CombatEvent strike = cs.latestEvents(1).get(0);
+        assertTrue(strike.isMeleeStrike(), strike.toString());
+        assertEquals(pc.position(), strike.from());
+        assertEquals(wolf.position(), strike.position());
+
+        cs.monsterAttacks(wolf, 50);
+        CombatEvent bite = cs.latestEvents(1).get(0);
+        assertTrue(bite.isMeleeStrike());
+        assertEquals(wolf.position(), bite.from());
+        assertFalse(bite.isVisualEffect(), "melee strikes are not drawn as projectiles");
+    }
+
     static CombatSystem system(PlayerCharacter pc, Random rng, MonsterManager mm) {
         MonsterManager m = mm != null ? mm : new MonsterManager(TestData.varden(), REG, Collections.emptyList(), rng);
         return new CombatSystem(pc, TestData.varden(), TestData.ITEMS, m, new GroundItems(), new EventLog(50), rng, 8);

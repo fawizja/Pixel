@@ -45,6 +45,7 @@ public class PixelGame extends Game {
     private pl.fawizja.pixel.npc.NpcRegistry npcs;
     private pl.fawizja.pixel.quest.QuestRegistry quests;
     private TileArt art;
+    private pl.fawizja.pixel.client.audio.SoundPlayer sound;
     private SpriteBatch batch;
     private ShapeRenderer shapes;
     private BitmapFont font;
@@ -78,6 +79,7 @@ public class PixelGame extends Game {
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
         font = new BitmapFont();
+        sound = new pl.fawizja.pixel.client.audio.SoundPlayer();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.setUseIntegerPositions(true);
         codec = new CharacterCodec(items);
@@ -227,6 +229,7 @@ public class PixelGame extends Game {
     public List<SpawnPoint> spawns() { return spawns; }
     public StartingConfig startingConfig() { return startingConfig; }
     public TileArt art() { return art; }
+    public pl.fawizja.pixel.client.audio.SoundPlayer sound() { return sound; }
     public SpriteBatch batch() { return batch; }
     public ShapeRenderer shapes() { return shapes; }
     public BitmapFont font() { return font; }
@@ -239,5 +242,6 @@ public class PixelGame extends Game {
         if (batch != null) batch.dispose();
         if (shapes != null) shapes.dispose();
         if (font != null) font.dispose();
+        if (sound != null) sound.dispose();
     }
 }

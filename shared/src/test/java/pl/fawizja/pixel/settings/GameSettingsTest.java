@@ -41,4 +41,18 @@ class GameSettingsTest {
         assertTrue(g.fpsCap(s.effectiveFpsCap()) <= s.effectiveFpsCap());
         assertTrue(Math.min(s.qualityCap(), g.effectsQuality()) <= s.qualityCap());
     }
+
+    @Test
+    void volumeCyclesThroughLevelsAndIsSaved() {
+        GameSettings s = new GameSettings();
+        assertEquals(60, s.volume());
+        assertTrue(s.apply("settings:sound"));
+        assertEquals(100, s.volume());
+        s.cycleVolume();
+        assertEquals(0, s.volume());
+        assertEquals(0f, s.volumeFactor());
+        assertTrue(s.rows()[4][1].contains("wylaczony"));
+        assertEquals(0, GameSettings.fromMap(s.toMap()).volume());
+        assertEquals(60, GameSettings.fromMap(Map.of("volume", "55")).volume(), "unsupported level falls back");
+    }
 }

@@ -27,4 +27,12 @@ public record CombatEvent(long timeMs, Position position, int amount, Kind kind,
     }
 
     public boolean isVisualEffect() { return kind == Kind.PROJECTILE || kind == Kind.AREA; }
+
+    /** Cios wrecz (trafiony albo zablokowany) z pozycja atakujacego w {@code from} - klient animuje wypad. */
+    public boolean isMeleeStrike() {
+        return from != null && (kind == Kind.HIT_MONSTER || kind == Kind.HIT_PLAYER || kind == Kind.BLOCKED);
+    }
+
+    /** Czas wypadu atakujacego przy ciosie wrecz (klient). */
+    public static final long LUNGE_MS = 180L;
 }
