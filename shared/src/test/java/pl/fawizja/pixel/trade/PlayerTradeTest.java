@@ -94,4 +94,13 @@ class PlayerTradeTest {
         assertArrayEquals(new String[] {"TRADE", "ACCEPT"}, ChatCommands.toMessage("/akceptuj"));
         assertArrayEquals(new String[] {"TRADE", "CANCEL"}, ChatCommands.toMessage("/anuluj"));
     }
+
+    @Test
+    void tradeStateRoundTripsForTheClientWindow() {
+        TradeView v = new TradeView("Ula", "5x Health Potion", "700 gp", true, false);
+        String[] f = v.encode();
+        String[] msg = {"TS", f[0], f[1], f[2], f[3], f[4]};
+        assertEquals(v, TradeView.parse(msg));
+        assertNull(TradeView.parse(new String[] {"TS", "-"}), "closed trade");
+    }
 }

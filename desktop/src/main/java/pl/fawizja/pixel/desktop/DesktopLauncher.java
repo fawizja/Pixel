@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc|diag   otwiera ksiege, plecak, karte postaci, rozmowe z NPC albo diagnostyke
+ *   -Dpixel.open=book|bag|character|npc|diag|trade   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -88,6 +88,11 @@ public final class DesktopLauncher {
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
+                if ("trade".equals(open)) {
+                    // podglad okna handlu (bez serwera): przykladowe oferty
+                    ((GameScreen) getScreen()).hud().setTrade(new pl.fawizja.pixel.trade.TradeView(
+                            "Ula", "5x Health Potion, 1x Rope", "700 gp", false, true));
+                }
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().openNpc(gs.session());

@@ -287,7 +287,12 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             default:
-                if (id.startsWith("spell:")) {
+                if (id.startsWith("trade:")) {
+                    if (net == null) break;
+                    if (id.equals("trade:accept")) net.send("TRADE", "ACCEPT");
+                    else if (id.equals("trade:cancel")) net.send("TRADE", "CANCEL");
+                    else if (id.startsWith("trade:offer:")) net.send("TRADE", "OFFER", id.substring(12));
+                } else if (id.startsWith("spell:")) {
                     String key = hud.barSpell(Integer.parseInt(id.substring(6)));
                     if (key != null) act("cast:" + key, t);
                 } else {
@@ -819,6 +824,9 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "CHAT":
                     if (m.length >= 3) session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
+                    break;
+                case "TS":
+                    hud.setTrade(pl.fawizja.pixel.trade.TradeView.parse(m));
                     break;
                 case "PARTY":
                     party.clear();

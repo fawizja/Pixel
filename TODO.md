@@ -136,7 +136,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Protokol v3: niezmieniona klatka jako `KEEP` (mniej transferu)
 - [x] Druzyny: zaproszenia, czat druzyny, wspolne doswiadczenie z premia, bez PvP w druzynie (0.19.0)
 - [x] Bezpieczny handel miedzy graczami (oferty, podwojna akceptacja, atomowa wymiana) (0.20.0)
-- [ ] Okno handlu w HUD (teraz polecenia czatu)
+- [x] Okno handlu w HUD (0.20.1)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

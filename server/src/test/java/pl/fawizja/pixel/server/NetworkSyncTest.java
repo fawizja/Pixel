@@ -489,6 +489,8 @@ class NetworkSyncTest {
             ola.send("TRADE", "OFFER", "7 health potion");
             ula.send("TRADE", "OFFER", "700 gp");
             awaitMessage(ola, "both offers", m -> m[0].equals("LOG") && m[2].contains("Oferta Ula: 700 gp"));
+            awaitMessage(ula, "trade window state", m -> m[0].equals("TS") && m.length == 6 && m[1].equals("Ola")
+                    && m[2].equals("700 gp") && m[3].equals("7x Health Potion"));
             ola.send("TRADE", "ACCEPT");
             ula.send("TRADE", "ACCEPT");
             await("goods swapped", () -> {

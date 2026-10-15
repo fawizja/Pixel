@@ -308,6 +308,7 @@ final class ServerWorld {
                     String how = "Dodaj oferte: /oferuj 5 health potion albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
                     info(p, "Wymiana z " + other.name() + " otwarta. " + how, now);
                     info(other, "Wymiana z " + p.name() + " otwarta. " + how, now);
+                    sendTradeState(t);
                 } else {
                     tradeRequests.computeIfAbsent(lower(other.name()), k -> new java.util.HashMap<>())
                             .put(lower(p.name()), now + TRADE_REQUEST_MS);
@@ -344,10 +345,12 @@ final class ServerWorld {
                     + " | Oferta " + partner.name() + ": " + open.offerOf(partner.name()).describe(items) + ". /akceptuj";
             info(p, status, now);
             info(partner, status, now);
+            sendTradeState(open);
         } else if (f[1].equals("ACCEPT")) {
             PlayerTrade.Result r = open.accept(p.name());
             if (r == PlayerTrade.Result.WAITING) {
                 info(p, r.message, now);
+                sendTradeState(open);
                 partner.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " akceptuje wymiane: "
                         + open.offerOf(p.name()).describe(items) + " za " + open.offerOf(partner.name()).describe(items)
                         + ". /akceptuj albo /anuluj");
@@ -362,6 +365,8 @@ final class ServerWorld {
             PlayerTrade.Result done = open.execute(first.session.character().backpack(), second.session.character().backpack());
             trades.remove(lower(first.name()));
             trades.remove(lower(second.name()));
+            first.client.send("TS", "-");
+            second.client.send("TS", "-");
             for (ServerPlayer x : new ServerPlayer[] {first, second}) {
                 if (done == PlayerTrade.Result.DONE) info(x, "Wymiana zakonczona: oddano " + open.offerOf(x.name()).describe(items)
                         + ", otrzymano " + open.offerOf(open.partnerOf(x.name())).describe(items) + ".", now);
@@ -394,7 +399,22 @@ final class ServerWorld {
         trades.remove(lower(t.second()));
         for (String n : new String[] {t.first(), t.second()}) {
             ServerPlayer x = find(n);
-            if (x != null) warn(x, why, now);
+            if (x == null) continue;
+            warn(x, why, now);
+            x.client.send("TS", "-");
+        }
+    }
+
+    /** Stan wymiany dla okna handlu u obu graczy. */
+    private void sendTradeState(PlayerTrade t) {
+        for (String n : new String[] {t.first(), t.second()}) {
+            ServerPlayer x = find(n);
+            if (x == null) continue;
+            String other = t.partnerOf(n);
+            pl.fawizja.pixel.trade.TradeView v = new pl.fawizja.pixel.trade.TradeView(other,
+                    t.offerOf(n).describe(items), t.offerOf(other).describe(items), t.accepted(n), t.accepted(other));
+            String[] f = v.encode();
+            x.client.send("TS", f[0], f[1], f[2], f[3], f[4]);
         }
     }
 

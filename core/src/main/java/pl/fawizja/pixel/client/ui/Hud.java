@@ -61,6 +61,8 @@ public final class Hud {
     private boolean chatEnabled;
     /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
     private boolean npcMode;
+    /** Otwarta wymiana z innym graczem (okno handlu) albo null. */
+    private pl.fawizja.pixel.trade.TradeView trade;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
     private int bookPage;
@@ -199,6 +201,7 @@ public final class Hud {
     public boolean bagOpen() { return bagOpen; }
     public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
     public void toggleBook() {
+        if (trade != null) return; // okno handlu ma pierwszenstwo
         menuOpen = !(menuOpen && !npcMode);
         npcMode = false;
         assignSlot = -1;
@@ -226,6 +229,21 @@ public final class Hud {
     }
 
     public boolean npcOpen() { return menuOpen && npcMode; }
+
+    /** Stan wymiany z serwera: otwiera okno handlu albo je zamyka (null). */
+    public void setTrade(pl.fawizja.pixel.trade.TradeView view) {
+        boolean wasOpen = trade != null;
+        trade = view;
+        if (view != null) {
+            menuOpen = true;
+            npcMode = false;
+            bagOpen = false;
+        } else if (wasOpen) {
+            menuOpen = false;
+        }
+    }
+
+    public boolean tradeOpen() { return trade != null; }
     public boolean bookOpen() { return menuOpen; }
     public void toggleCharacter() { charOpen = !charOpen; }
     public boolean characterOpen() { return charOpen; }
@@ -273,6 +291,10 @@ public final class Hud {
 
     private void rebuildMenu(GameSession session) {
         menuRows.clear();
+        if (trade != null) {
+            rebuildTradeMenu(session);
+            return;
+        }
         if (npcMode) {
             rebuildNpcMenu(session);
             return;
@@ -320,6 +342,47 @@ public final class Hud {
             row.h = rowH - 3;
         }
     }
+    /** Okno handlu: lewa kolumna - oferty i decyzje, prawa - przedmioty z plecaka do dodania. */
+    private void rebuildTradeMenu(GameSession session) {
+        List<MenuRow> left = new ArrayList<>();
+        List<MenuRow> right = new ArrayList<>();
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        left.add(new MenuRow("trade:none", "Ty dajesz" + (trade.mineAccepted() ? " (zaakceptowano)" : ""), trade.mine(), false));
+        left.add(new MenuRow("trade:none", trade.partner() + " daje" + (trade.theirsAccepted() ? " (zaakceptowal)" : ""),
+                trade.theirs(), false));
+        left.add(new MenuRow("trade:accept", trade.mineAccepted() ? "Czekam na druga strone" : "AKCEPTUJ",
+                "zmiana oferty kasuje akceptacje obu stron", !trade.mineAccepted()));
+        left.add(new MenuRow("trade:cancel", "ANULUJ", "nic nie zostanie wymienione", true));
+        long gold = session.gold();
+        for (long g : new long[] {100, 1_000, 10_000}) {
+            left.add(new MenuRow("trade:offer:" + g + " gp", "+" + String.format("%,d gp", g), "dodaj zloto do oferty", gold >= g));
+        }
+        java.util.Map<Integer, Integer> counts = new java.util.LinkedHashMap<>();
+        for (pl.fawizja.pixel.item.ItemStack st : session.character().backpack().contents()) {
+            if (session.items().get(st.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.CURRENCY) continue;
+            counts.merge(st.itemId(), st.count(), Integer::sum);
+        }
+        for (java.util.Map.Entry<Integer, Integer> e : counts.entrySet()) {
+            if (right.size() >= perCol) break;
+            pl.fawizja.pixel.item.ItemType it = session.items().get(e.getKey());
+            int n = Math.min(e.getValue(), 10_000);
+            right.add(new MenuRow("trade:offer:" + n + " " + it.key(), "Oferuj " + n + "x " + it.name(), "cala ilosc z plecaka", true));
+        }
+        if (right.isEmpty()) right.add(new MenuRow("trade:none", "Plecak bez przedmiotow", "mozesz oferowac zloto", false));
+        float colW = (menuW - 30) / 2f;
+        for (int c = 0; c < 2; c++) {
+            List<MenuRow> col = c == 0 ? left : right;
+            for (int i = 0; i < col.size() && i < perCol; i++) {
+                MenuRow row = col.get(i);
+                row.x = menuX + 10 + c * (colW + 10);
+                row.y = menuY + menuH - 40 - (i + 1) * rowH;
+                row.w = colW;
+                row.h = rowH - 3;
+                menuRows.add(row);
+            }
+        }
+    }
+
     private void rebuildNpcMenu(GameSession session) {
         PlayerCharacter pc = session.character();
         List<MenuRow> left = new ArrayList<>();
@@ -452,7 +515,11 @@ public final class Hud {
             }
         }
         if (menuOpen) {
-            if (menuClose.hit(p.x, p.y)) { menuOpen = false; return true; }
+            if (menuClose.hit(p.x, p.y)) {
+                if (trade != null) actions.onButton("trade:cancel"); // zamkniecie okna = rezygnacja
+                else menuOpen = false;
+                return true;
+            }
             rebuildMenu(session);
             for (MenuRow row : menuRows) {
                 if (p.x >= row.x && p.x <= row.x + row.w && p.y >= row.y && p.y <= row.y + row.h) {
@@ -470,7 +537,7 @@ public final class Hud {
                         customBar.assign(assignSlot, row.action.substring(5));
                         updateBar(session);
                         actions.onButton("bar_saved");
-                    } else if (!row.action.equals("npc:none")) {
+                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none")) {
                         actions.onButton(row.action);
                     }
                     return true;
@@ -530,6 +597,7 @@ public final class Hud {
     public void render(SpriteBatch batch, ShapeRenderer shapes, GameSession session, WorldClock clock,
                        long serverTimeMs, DiagnosticsInfo diagInfo) {
         viewport.apply();
+        if (trade != null && !bagOpen) menuOpen = true; // po zamknieciu plecaka wraca okno handlu
         PlayerCharacter pc = session.character();
         run.active = pc.isRunning();
         torch.active = pc.isTorchLit();
@@ -537,13 +605,13 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode;
+        book.active = menuOpen && !npcMode && trade == null;
         fish.visible = session.canFish();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
         talk.active = npcOpen();
         chat.visible = chatEnabled || near != null;
-        if (npcMode && near != npc) {
+        if (npcMode && trade == null && near != npc) {
             menuOpen = false;
             npcMode = false;
         }
@@ -675,7 +743,10 @@ public final class Hud {
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
-            if (npcMode) {
+            if (trade != null) {
+                text(batch, "Handel z " + trade.partner(), menuX + 10, menuY + menuH - 14);
+                text(batch, "Twoj plecak (dotknij, aby dodac do oferty)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+            } else if (npcMode) {
                 text(batch, npc.name() + " (" + npc.town() + ")", menuX + 10, menuY + menuH - 14);
                 font.getData().setScale(0.85f);
                 font.setColor(0.85f, 0.85f, 0.7f, 1f);

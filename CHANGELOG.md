@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.20.1] - 2026-10-15
+
+### Dodano
+- Okno handlu w interfejsie (wygodne na telefonie): oferty obu stron ze stanem akceptacji, AKCEPTUJ, ANULUJ,
+  dodawanie zlota (+100 / +1 000 / +10 000 gp) i przedmiotow z plecaka jednym dotknieciem. Otwiera sie samo po
+  rozpoczeciu wymiany (`/handel Imie`), zamkniecie X anuluje wymiane. Serwer wysyla stan wymiany (`TS`).
+- `-Dpixel.open=trade` - podglad okna handlu; nowa scena `trade` w regresji GUI (11 scen).
+- 1 nowy test, sieciowy test handlu sprawdza tez stan okna (lacznie 225).
+
 ## [0.20.0] - 2026-10-15
 
 ### Dodano
