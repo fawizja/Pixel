@@ -51,6 +51,7 @@ public final class Actions {
             case "heal": s.priestHeal(now); return true;
             case "settle": s.settleHere(now); return true;
             case "quest": s.questAction(p[2], now); return true;
+            case "daily": s.dailyAction(now); return true;
             case "ask": s.askNpc(p[2], now); return true;
             default: return false;
         }

@@ -59,6 +59,7 @@ public final class CharacterCodec {
         for (int i = 0; i < pc.friends().size(); i++) m.put("fr." + i, pc.friends().names().get(i));
         for (String k : pc.bestiary().keys()) m.put("kill." + k, pc.bestiary().encodeValue(k));
         if (pc.achievements().count() > 0) m.put("achievements", pc.achievements().encode());
+        if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
         }
@@ -183,6 +184,7 @@ public final class CharacterCodec {
         }
         for (String f : friends.values()) pc.friends().restore(f);
         pc.achievements().restore(m.get("achievements"));
+        pc.daily().restore(m.get("daily"));
         String ignore = m.getOrDefault("autoloot.ignore", "");
         if (!ignore.isEmpty()) {
             for (String id : ignore.split(",")) pc.autoLootFilter().ignore(Integer.parseInt(id.trim()));

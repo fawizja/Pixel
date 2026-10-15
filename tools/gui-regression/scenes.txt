@@ -18,3 +18,4 @@ friends|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 
 market|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=70,78,0 -Dpixel.open=market
 achievements|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=achievements
 bestiary|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=bestiary
+guide|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=78,80,0 -Dpixel.open=npc

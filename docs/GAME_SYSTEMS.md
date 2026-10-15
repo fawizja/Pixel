@@ -243,6 +243,12 @@ przy pauzie, utracie fokusu i zamknieciu.
   usuniecie konta usuwa gracza z gildii. Nazwa gildii w klatce stanu (10. pole PL).
 - Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GCHAT tekst`.
 
+## Zadanie dnia (Z logika, C UI)
+
+`daily/DailyTask`: raz na dzien kalendarzowy (`GameSession.today()`, w testach `setToday`) potwor ze stalych spawnow
+(`MonsterManager.spawnedTypes`), nie boss, poziom od polowy do 120% (+5) poziomu postaci; 20-40 sztuk. Losowanie
+powtarzalne (imie + dzien). Nagroda: 2x exp potworow, poziom x ilosc x 3 gp na konto. Akcja `npc:daily` u przewodnika.
+
 ## Inwazje (Z logika, S serwer)
 
 `event/Invasion`: plany dla 4 miast (potwor, liczba, herszt), miejsce zbiorki 14-24 pola od swiatyni poza PZ,

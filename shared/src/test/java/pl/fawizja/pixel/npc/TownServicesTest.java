@@ -246,6 +246,51 @@ class TownServicesTest {
     }
 
     @Test
+    void theDailyTaskIsGivenOncePerDayCountsKillsAndPaysToTheBank() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
+        Position field = new Position(58, 72, 0);
+        GameSession s = session(pc, List.of(new SpawnPoint("wolf", field, 6, 40, 600)));
+        long[] day = {20_000};
+        s.setToday(() -> day[0]);
+        long t = 1000;
+        s.dailyAction(t);
+        assertFalse(pc.daily().activeOn(day[0]), "only at a guide");
+        s.teleport(talkSpot(npcs.get("varden_guide")), t);
+        s.dailyAction(t);
+        assertTrue(pc.daily().activeOn(day[0]));
+        assertEquals("wolf", pc.daily().monster(), "the only monster around fits level 8");
+        int target = pc.daily().target();
+        assertTrue(target >= 20 && target <= 40);
+        s.dailyAction(t);
+        assertEquals(target, pc.daily().target(), "asking again keeps the task");
+        for (Monster m : List.copyOf(s.monsters().monsters())) {
+            if (pc.daily().doneOn(day[0])) break;
+            s.combat().damageMonster(m, 100_000, pl.fawizja.pixel.combat.DamageType.FIRE, t++);
+        }
+        assertTrue(pc.daily().doneOn(day[0]));
+        assertEquals(target, pc.daily().progress());
+        long bank = pc.bank().balance();
+        long exp = pc.experience();
+        s.dailyAction(t);
+        assertTrue(pc.daily().claimed());
+        MonsterRegistry reg = MONSTERS;
+        assertEquals(bank + pl.fawizja.pixel.daily.DailyTask.rewardGold(reg.get("wolf"), target), pc.bank().balance());
+        assertTrue(pc.experience() > exp);
+        s.dailyAction(t);
+        assertEquals(bank + pl.fawizja.pixel.daily.DailyTask.rewardGold(reg.get("wolf"), target), pc.bank().balance(), "paid once");
+
+        CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
+        PlayerCharacter back = codec.decode(codec.encode(pc));
+        assertTrue(back.daily().claimed());
+        assertEquals("wolf", back.daily().monster());
+
+        day[0]++;
+        s.dailyAction(t);
+        assertTrue(pc.daily().activeOn(day[0]), "a new day, a new task");
+        assertFalse(pc.daily().claimed());
+    }
+
+    @Test
     void killQuestCountsKillsAndPaysOnce() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         Position field = new Position(58, 72, 0);

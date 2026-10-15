@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.32.0] - 2026-10-15
+
+### Dodano
+- Zadanie dnia u przewodnika w każdym mieście: raz dziennie (data kalendarzowa) pokonaj 20-40 potworów
+  jednego rodzaju dobranego do poziomu (nie boss, między połową a 120% poziomu postaci). Nagroda: podwójne
+  doświadczenie za te potwory i złoto na konto. Postęp w oknie przewodnika ("Zadanie dnia: Wilk 12 / 31"),
+  wpis w dzienniku po wykonaniu. Działa lokalnie i online; zapis w postaci (`daily`).
+- Nowa scena `guide` w regresji GUI (20 scen).
+- 2 nowe testy (dobór potwora dla poziomów 8-1000, cały przebieg dnia z nagrodą i nowym dniem); łącznie 254.
+
+### Poprawiono
+- "ukończone" z polską literą w liście zadań przewodnika.
+
 ## [0.31.0] - 2026-10-15
 
 ### Dodano

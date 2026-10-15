@@ -128,6 +128,9 @@ public final class GameSession {
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null);
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
+            if (pc.daily().onKill(t.key(), today())) {
+                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
+            }
             checkAchievements(lastUpdateMs);
             QuestType done = quests == null ? null : quests.onKill(pc, t.key());
             if (done != null) {
@@ -141,6 +144,55 @@ public final class GameSession {
             @Override
             public boolean attackable() { return !pc.isDead(); }
         };
+    }
+
+    /** Dzisiejsza data (dzien od 1970); w testach podmieniana. */
+    private java.util.function.LongSupplier today = () -> java.time.LocalDate.now().toEpochDay();
+
+    public void setToday(java.util.function.LongSupplier today) { this.today = today; }
+
+    public long today() { return today.getAsLong(); }
+
+    /** Zadanie dnia u przewodnika: przyjecie, postep albo odbior nagrody. */
+    public void dailyAction(long nowMs) {
+        if (talkTo(NpcRole.GUIDE, nowMs) == null) return;
+        pl.fawizja.pixel.daily.DailyTask d = pc.daily();
+        long day = today();
+        if (!d.activeOn(day)) {
+            d.assign(pc.name(), day, pc.level(), monsters.spawnedTypes());
+            if (d.monster() == null) {
+                log.add(nowMs, EventLog.Kind.WARNING, "Dziś nie mam dla ciebie zadania.");
+                return;
+            }
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Zadanie dnia: pokonaj " + d.target() + "x " + monsterName(d.monster()) + ".");
+            return;
+        }
+        if (d.claimed()) {
+            log.add(nowMs, EventLog.Kind.INFO, "Dzisiejsze zadanie już wykonane. Wróć jutro.");
+            return;
+        }
+        if (!d.doneOn(day)) {
+            log.add(nowMs, EventLog.Kind.INFO, "Zadanie dnia: " + monsterName(d.monster()) + " " + d.progress() + " / " + d.target() + ".");
+            return;
+        }
+        pl.fawizja.pixel.monster.MonsterType t = monsterType(d.monster());
+        long gold = t == null ? 0 : pl.fawizja.pixel.daily.DailyTask.rewardGold(t, d.target());
+        long exp = t == null ? 0 : pl.fawizja.pixel.daily.DailyTask.rewardExp(t, d.target());
+        if (gold > 0 && !pc.bank().credit(gold).ok()) return;
+        d.claim();
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zadanie dnia: " + String.format("%,d gp", gold) + " na konto.");
+        if (exp > 0) combat.awardExperience(exp, "Zadanie dnia", nowMs);
+    }
+
+    private pl.fawizja.pixel.monster.MonsterType monsterType(String key) {
+        for (pl.fawizja.pixel.monster.MonsterType t : monsters.spawnedTypes()) if (t.key().equals(key)) return t;
+        return null;
+    }
+
+    /** Nazwa potwora do napisow (klucz, gdy rejestr nieznany). */
+    public String monsterName(String key) {
+        pl.fawizja.pixel.monster.MonsterType t = monsterType(key);
+        return t == null ? key : t.name();
     }
 
     private long achievementsCheckedMs;

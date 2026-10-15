@@ -111,6 +111,14 @@ public final class MonsterManager {
     public SpatialGrid grid() { return grid; }
     public List<SpawnPoint> spawns() { return Collections.unmodifiableList(spawns); }
 
+    /** Rodzaje potworow ze stalych spawnow (np. do zadan dnia); pusta lista bez rejestru. */
+    public List<MonsterType> spawnedTypes() {
+        java.util.Map<String, MonsterType> out = new java.util.TreeMap<>();
+        if (registry == null) return new ArrayList<>();
+        for (SpawnPoint sp : spawns) out.putIfAbsent(sp.monsterKey(), registry.get(sp.monsterKey()));
+        return new ArrayList<>(out.values());
+    }
+
     public Monster monsterAt(Position p) { return grid.at(p); }
 
     /** Noc na powierzchni: nocne drapiezniki widza dalej i atakuja szybciej. */

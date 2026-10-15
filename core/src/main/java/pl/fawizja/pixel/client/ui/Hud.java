@@ -749,6 +749,23 @@ public final class Hud {
                 break;
             }
             case GUIDE: {
+                pl.fawizja.pixel.daily.DailyTask d = pc.daily();
+                long day = session.today();
+                String dl, dd;
+                if (!d.activeOn(day)) {
+                    dl = "Zadanie dnia";
+                    dd = "dotknij, aby wziąć zadanie na dziś";
+                } else if (d.claimed()) {
+                    dl = "Zadanie dnia: wykonane";
+                    dd = "następne jutro";
+                } else if (d.doneOn(day)) {
+                    dl = "Zadanie dnia: ODDAJ";
+                    dd = d.target() + "x " + monsterNames.apply(d.monster()) + " - odbierz nagrodę";
+                } else {
+                    dl = "Zadanie dnia: " + monsterNames.apply(d.monster());
+                    dd = "pokonano " + d.progress() + " / " + d.target();
+                }
+                left.add(new MenuRow("npc:daily", dl, dd, !d.activeOn(day) || d.doneOn(day) && !d.claimed()));
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;
                 for (pl.fawizja.pixel.quest.QuestType q : qs.registry().byGiver(npc.key())) {
@@ -758,7 +775,7 @@ public final class Hud {
                     String detail;
                     boolean ok;
                     switch (pc.quests().state(q.key())) {
-                        case DONE: detail = "ukonczone"; ok = false; break;
+                        case DONE: detail = "ukończone"; ok = false; break;
                         case ACTIVE:
                             ok = qs.ready(pc, q);
                             detail = ok ? "ODDAJ - nagroda: " + reward : "w toku: " + qs.progress(pc, q) + " / " + q.amount();

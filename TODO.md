@@ -148,6 +148,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Rynek graczy u bankiera, sprzedaz takze offline, prowizja 2% (0.29.0)
 - [x] Bestiariusz i 15 osiagniec z oknem postepu (0.30.0)
 - [x] Inwazje potworow na miasta z nagrodami (0.31.0)
+- [x] Zadanie dnia u przewodnika (0.32.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
