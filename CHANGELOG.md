@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.2] - 2026-10-15
+
+### Dodano
+- Ryby zalezne od biomu (`data/fishing.csv`): lodowy dorsz we Mroznych Pustkowiach, wegorz bagienny w dzungli
+  Selvaran (lowi sie z bagien), karp z oazy w Qasirah. Wymagaja progu umiejetnosci, dluzej syca,
+  skupuje je lokalny kupiec. Ryby maja w plecaku wlasna ikone.
+- Test ryb biomow na prawdziwej mapie (lacznie 196 testow).
+
 ## [0.15.1] - 2026-10-15
 
 ### Dodano

@@ -24,15 +24,15 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Start: poziom 8, 10 000 gp w plecaku (nie w banku), zestaw profesji, swiatynia Varden
 - [x] Krzywe 8..1000 bez przepelnien, regeneracja, szybkosc z limitem
 - [x] 4 profesje o roznych profilach
-- [ ] Czary i umiejetnosci profesji (etap 7), zasady PvP (etap 13)
+- [x] Czary i umiejetnosci profesji (etap 7), zasady PvP (etap 13)
 
 ## Etap 5 - Plecak, przedmioty, monety, ekwipunek
 - [x] Plecak 20 slotow, atomowe operacje, laczenie stosow, przenoszenie, zamiana
 - [x] Ekwipunek z wymaganiami profesji i poziomu
 - [x] Wyrzucanie i podnoszenie, lista ignorowanych przy autoloocie
 - [x] Gold / Platinum / Crystal, wymiana, platnosci z reszta, bank (logika)
-- [ ] Uzywanie przedmiotow (mikstury, jedzenie) - razem z etapem 7
-- [ ] Okno banku w UI - etap 12
+- [x] Uzywanie przedmiotow (mikstury, jedzenie) - etap 7
+- [x] Okno banku w UI - etap 12
 
 ## Etap 6 - Potwory, AI, walka, lupy
 - [x] Rejestr potworow (data/monsters.csv, data/loot.csv): 10 typow + boss, odpornosci, 6 zachowan
@@ -47,7 +47,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Symulacje walk profesji (poziom 8 i 30), test "godzina na wilkach", test wysokiego poziomu
 - [x] Siatka przestrzenna, symulacja tylko w promieniu 20 kafelkow od gracza
 - [x] Klient: sprite potworow, paski HP, obwodka celu, liczby obrazen, panel celu, CEL / TARCZA
-- [ ] Mikstury i czary leczace (etap 7) - teraz jedyne leczenie to regeneracja
+- [x] Mikstury i czary leczace (etap 7)
 - [ ] Dzwiek, animacja ataku, cialo potwora z lupem do przeszukania
 
 ## Etap 7 - Czary, runy, mikstury, crafting
@@ -70,7 +70,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Trening umiejetnosci tylko na potworach, ktore nie sa zbyt slabe (ten sam prog co pelny exp)
 - [x] Karta postaci (dotkniecie paskow HP/MP lub P): exp, szybkosc, udzwig, sytosc, umiejetnosci z postepem
 - [x] Przycisk LOW pokazywany tylko przy wodzie z wedka w plecaku
-- [ ] Ryby zalezne od biomu (lod, bagna, oaza) - razem z nowymi miastami
+- [x] Ryby zalezne od biomu (lod, bagna, oaza): data/fishing.csv
 
 ## Etap 9 - Miasta (max 4), biomy, expowiska
 - [x] Varden: swiatynia, bank, sklepy, domy, wieza, kopalnia, jezioro, pola
@@ -84,7 +84,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Symulacje endgame z leczeniem: kazdy prog do przejscia, bossowie tylko druzyna, bez przeskakiwania progow
 - [x] Oboz za mostem: kupiec ze skupem materialow, bankier, zwiadowczyni z 9 zadaniami endgame
 - [x] Kuznia endgame: 28 receptur z obsydianu, lodowych rdzeni, esencji cienia i zaru Otchlani
-- [ ] Ryby zalezne od biomu
+- [x] Ryby zalezne od biomu
 ## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie
 - [x] Pietra -5..+5, schody, dziury, drabiny, liny; test dostepnosci wszystkich pieter
 - [x] Ciemne podziemia, pochodnie na mapie i w plecaku, poswiata postaci

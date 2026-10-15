@@ -69,6 +69,7 @@ frost_shop;bone;0;5
 frost_shop;troll_hide;0;60
 frost_shop;iron_ore;0;30
 frost_shop;fish;0;2
+frost_shop;ice_cod;0;4
 frost_shop;pearl;0;100
 frost_shop;frost_pelt;0;45
 frost_shop;yeti_fur;0;90
@@ -98,6 +99,7 @@ selv_shop;bone;0;5
 selv_shop;troll_hide;0;60
 selv_shop;iron_ore;0;30
 selv_shop;fish;0;2
+selv_shop;swamp_eel;0;4
 selv_shop;pearl;0;100
 selv_shop;croc_leather;0;70
 selv_shop;snake_skin;0;55
@@ -128,6 +130,7 @@ qas_shop;bone;0;5
 qas_shop;troll_hide;0;60
 qas_shop;iron_ore;0;30
 qas_shop;fish;0;2
+qas_shop;oasis_carp;0;5
 qas_shop;pearl;0;100
 qas_shop;scorpion_tail;0;40
 qas_shop;hyena_fang;0;15

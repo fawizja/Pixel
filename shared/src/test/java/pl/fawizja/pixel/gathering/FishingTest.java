@@ -2,14 +2,20 @@ package pl.fawizja.pixel.gathering;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.TestData;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.character.Skill;
+import pl.fawizja.pixel.item.ItemCategory;
 import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
+import pl.fawizja.pixel.world.Region;
+import pl.fawizja.pixel.world.WorldMap;
 
 class FishingTest {
 
@@ -127,5 +133,64 @@ class FishingTest {
         } while (r == FishingResult.NOTHING);
         assertEquals(FishingResult.BACKPACK_FULL, r);
         assertEquals(worms, pc.backpack().count(id("worm")));
+    }
+
+    /** Brzeg wody w glebi regionu (cala okolica w zasiegu wedki nalezy do regionu). */
+    static Position shoreIn(FishingSystem fs, String region) {
+        WorldMap w = TestData.world();
+        for (int y = 0; y < w.height(); y++) {
+            for (int x = 0; x < w.width(); x++) {
+                Position p = new Position(x, y, 0);
+                if (!w.isWalkable(p) || !fs.isWater(p.translate(1, 0))) continue;
+                boolean inside = true;
+                for (int d = -FishingSystem.RANGE; d <= FishingSystem.RANGE && inside; d++) {
+                    for (int e = -FishingSystem.RANGE; e <= FishingSystem.RANGE && inside; e++) {
+                        Region r = w.regionAt(p.translate(d, e));
+                        inside = r != null && r.name().equals(region);
+                    }
+                }
+                if (inside) return p;
+            }
+        }
+        throw new AssertionError("no fishing water in " + region);
+    }
+
+    /** Wspolny zegar kolejnych serii lowienia (odnowienie proby przechodzi miedzy seriami). */
+    private static long clock;
+
+    static Map<Integer, Integer> catches(FishingSystem fs, PlayerCharacter pc, int skill, int attempts) {
+        Map<Integer, Integer> got = new HashMap<>();
+        for (int i = 0; i < attempts; i++) {
+            pc.skills().set(Skill.FISHING, skill, 0);
+            if (pc.backpack().count(id("worm")) < 5) pc.backpack().add(new ItemStack(id("worm"), 50));
+            if (fs.fish(pc, clock) == FishingResult.CAUGHT) got.merge(fs.lastCatchId(), 1, Integer::sum);
+            for (int k = 0; k < 20; k++) {
+                ItemStack st = pc.backpack().get(k);
+                if (st != null && TestData.ITEMS.get(st.itemId()).category() == ItemCategory.FOOD) pc.backpack().remove(st.itemId(), st.count());
+            }
+            clock += FishingSystem.TILE_REST_MS + 1;
+        }
+        return got;
+    }
+
+    @Test
+    void everyBiomeHasItsOwnFishAboveASkillThreshold() {
+        FishingSystem fs = new FishingSystem(TestData.world(), TestData.ITEMS, new Random(6));
+        assertEquals(3, fs.biomeFish().size());
+        for (FishingSystem.BiomeFish b : fs.biomeFish()) {
+            PlayerCharacter pc = fisher(shoreIn(fs, b.region()));
+            Map<Integer, Integer> skilled = catches(fs, pc, 29, 400); // ponizej progu perel
+            int special = skilled.getOrDefault(b.itemId(), 0);
+            int plain = skilled.getOrDefault(id("fish"), 0);
+            assertTrue(special > 0 && plain > 0, b.region() + ": " + skilled);
+            double share = special / (double) (special + plain);
+            assertEquals(b.permille() / 1000.0, share, 0.12, b.region() + " share");
+
+            Map<Integer, Integer> novice = catches(fs, pc, b.minSkill() - 1, 200);
+            assertEquals(0, novice.getOrDefault(b.itemId(), 0), b.region() + ": needs skill " + b.minSkill());
+        }
+        PlayerCharacter varden = fisher(shoreIn(fs, "Krainy Varden"));
+        Map<Integer, Integer> lake = catches(fs, varden, 29, 200);
+        assertEquals(Set.of(id("fish")), lake.keySet(), "Varden has only ordinary fish");
     }
 }

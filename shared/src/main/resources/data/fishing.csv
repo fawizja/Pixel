@@ -1,0 +1,5 @@
+# Ryby zalezne od biomu: region (nazwa z map.properties);przedmiot;szansa na zlowienie (promile);minimalna umiejetnosc
+# Gdy losowanie sie nie powiedzie albo umiejetnosc jest za niska, lowi sie zwykla rybe.
+Mrozne Pustkowia;ice_cod;350;15
+Dzungla Selvaran;swamp_eel;350;20
+Pustynia Qasirah;oasis_carp;300;25

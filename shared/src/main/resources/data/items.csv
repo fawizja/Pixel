@@ -104,3 +104,6 @@
 120;fists_of_the_abyss;Fists of the Abyss;WEAPON;1;600000;WEAPON;116;22;0;850;MONK;0;1;PHYSICAL;#802020;Rekawice wykute z serca Otchlani.
 121;supreme_health_potion;Supreme Health Potion;POTION;100;500;NONE;0;0;0;200;PALADIN,MONK;0;0;PHYSICAL;#d01040;Najsilniejsza mikstura zdrowia, warzona w obozie za mostem.
 122;supreme_mana_potion;Supreme Mana Potion;POTION;100;350;NONE;0;0;0;200;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#3030e0;Najsilniejsza mikstura many dla doswiadczonych magow.
+123;ice_cod;Ice Cod;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#b8d8f0;Tlusty dorsz spod lodu Mroznych Pustkowi. Syci na dlugo.
+124;swamp_eel;Swamp Eel;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Sliski wegorz z bagien Selvaran.
+125;oasis_carp;Oasis Carp;FOOD;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0a050;Zloty karp z oaz Qasirah.

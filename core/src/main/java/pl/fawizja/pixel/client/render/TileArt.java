@@ -427,6 +427,8 @@ public final class TileArt implements Disposable {
         }
     }
 
+    private static final java.util.Set<String> FISH_KEYS = java.util.Set.of("fish", "ice_cod", "swamp_eel", "oasis_carp");
+
     private void paintItem(Pixmap pm, int ox, int oy, ItemType it) {
         Color c = Color.valueOf(it.color());
         Color dark = shade(c, 0.6f);
@@ -487,6 +489,15 @@ public final class TileArt implements Disposable {
                 rect(pm, ox, oy, 4, 4, 8, 8, c);
                 break;
             case FOOD:
+                if (FISH_KEYS.contains(it.key())) {
+                    // ryba: tulow, ogon i oko
+                    disc(pm, ox, oy, 7f, 9f, 3.5f, c);
+                    disc(pm, ox, oy, 9.5f, 9f, 3f, c);
+                    for (int i = 0; i < 4; i++) rect(pm, ox, oy, 12 + i, 7 - i / 2, 1, 4 + i, shade(c, 0.8f));
+                    px(pm, ox, oy, 5, 8, dark);
+                    break;
+                }
+                // fall through
             case BAIT:
                 disc(pm, ox, oy, 8f, 9f, 4.5f, c);
                 disc(pm, ox, oy, 7f, 8f, 1.5f, shade(c, 1.3f));
