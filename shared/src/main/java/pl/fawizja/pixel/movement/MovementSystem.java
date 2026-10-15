@@ -44,6 +44,7 @@ public final class MovementSystem {
         Position from = pc.position();
         if (!canStep(from, d)) return MoveResult.BLOCKED;
         Position to = from.translate(d.dx, d.dy);
+        if (world.requiredLevelAt(to) > pc.level()) return MoveResult.LEVEL_TOO_LOW;
         Transition t = world.transitionAt(to);
         if (t != null && t.type().triggeredByWalking()) {
             pc.setPosition(t.to());

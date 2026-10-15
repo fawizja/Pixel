@@ -76,6 +76,15 @@ public final class MapLoader {
         }
         if (!world.isProtectionZone(spawn)) throw new IOException("spawn must be inside a protection zone");
 
+        String gates = props.getProperty("gates", "").trim();
+        if (!gates.isEmpty()) {
+            for (String rect : gates.split(";")) {
+                String[] v = rect.trim().split(",");
+                if (v.length != 6) throw new IOException("gate entry needs x0,y0,x1,y1,z,minLevel: " + rect);
+                world.addLevelGate(i(v[0]), i(v[1]), i(v[2]), i(v[3]), i(v[4]), i(v[5]));
+            }
+        }
+
         String towns = props.getProperty("towns", "").trim();
         if (!towns.isEmpty()) {
             for (String entry : towns.split(";")) {

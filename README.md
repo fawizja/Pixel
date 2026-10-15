@@ -9,6 +9,7 @@
 > Stan: dziala serwer z synchronizacja sieciowa i tryb online klienta desktopowego (wielu graczy w jednym
 > swiecie). Dziala PvP z ochrona nowych postaci i czaszkami.
 > Logowanie z haslem dziala takze w APK, polaczenie jest szyfrowane (TLS z przypietym certyfikatem).
+> Poziomy 230-1000: wschodni kontynent za mostem (wpuszcza od poziomu 200) z piecioma krainami i czterema bossami dla druzyn.
 
 ## Moduly
 

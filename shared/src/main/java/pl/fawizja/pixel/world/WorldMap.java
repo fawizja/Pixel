@@ -16,6 +16,7 @@ public final class WorldMap {
     private final Map<Integer, FloorMap> floors = new TreeMap<>();
     private Position spawn;
     private final List<int[]> protectionZones = new ArrayList<>();
+    private final List<int[]> levelGates = new ArrayList<>();
     private final List<Town> towns = new ArrayList<>();
     private final List<Region> regions = new ArrayList<>();
 
@@ -81,6 +82,20 @@ public final class WorldMap {
     /** Dodaje prostokatna strefe ochronna (bez walki, potwory nie wchodza). */
     public void addProtectionZone(int x0, int y0, int x1, int y1, int z) {
         protectionZones.add(new int[] {Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1), Math.max(y0, y1), z});
+    }
+
+    /** Przejscie strzezone: wejsc moga tylko postacie od danego poziomu. */
+    public void addLevelGate(int x0, int y0, int x1, int y1, int z, int minLevel) {
+        levelGates.add(new int[] {Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1), Math.max(y0, y1), z, minLevel});
+    }
+
+    /** Wymagany poziom, aby wejsc na kafelek (0 = brak wymagan). */
+    public int requiredLevelAt(Position p) {
+        int need = 0;
+        for (int[] r : levelGates) {
+            if (p.z() == r[4] && p.x() >= r[0] && p.x() <= r[2] && p.y() >= r[1] && p.y() <= r[3]) need = Math.max(need, r[5]);
+        }
+        return need;
     }
 
     public boolean isProtectionZone(Position p) {

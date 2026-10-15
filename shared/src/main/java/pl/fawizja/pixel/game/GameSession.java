@@ -79,6 +79,7 @@ public final class GameSession {
     private boolean moving;
     private Direction facing = Direction.SOUTH;
     private long lastUpdateMs = -1;
+    private long lastGateWarningMs = -10_000;
 
     /** Sesja bez potworow (testy, edytor). */
     public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc) {
@@ -335,6 +336,10 @@ public final class GameSession {
                 moving = true;
             } else if (r == MoveResult.CHANGED_FLOOR) {
                 onFloorChanged(nowMs);
+            } else if (r == MoveResult.LEVEL_TOO_LOW && nowMs - lastGateWarningMs > 3000) {
+                lastGateWarningMs = nowMs;
+                log.add(nowMs, EventLog.Kind.WARNING, "Straznik: dalej wpuszczamy tylko od poziomu "
+                        + world.requiredLevelAt(pc.position().translate(requested.dx, requested.dy)) + ".");
             }
         }
         boolean night = isNight(nowMs);
@@ -419,7 +424,7 @@ public final class GameSession {
         Position from = pc.position();
         if (!movement.canStep(from, d)) return false;
         Position to = from.translate(d.dx, d.dy);
-        if (world.transitionAt(to) != null) return false;
+        if (world.transitionAt(to) != null || world.requiredLevelAt(to) > pc.level()) return false;
         pc.setPosition(to);
         stepFrom = from;
         stepStartMs = nowMs;

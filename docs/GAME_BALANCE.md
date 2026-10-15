@@ -163,6 +163,58 @@ Rod of Vines, Desert Knuckles, Sandstone Shield, Scarab Helmet, Croc Legs).
 Wnioski: Druid jest najslabszy w obrazeniach (rola wsparcia - leczenie w etapie 7); Sorcerer
 cierpi na krysztalowym golemie (80% odpornosci na energie) - zamierzone, trzeba dobrac zywiol.
 
+## Endgame 230-1000 (wschodni kontynent, 0.13.0)
+
+Za mostem ze straznikiem (poziom 200). Kazda kraina ma potwory "w progu", jednego trudniejszego
+"elitarnego" (lava_golem, ice_dragon, void_priest, abyss_lord) i bossa dla druzyny.
+
+| Potwor | Poziom | HP | Exp | Atak | Typ, zasieg | Odpornosci | Uwagi |
+|---|---|---|---|---|---|---|---|
+| Cursed Treant | 240 | 5600 | 6400 | 105-330 co 2400 ms | EARTH, 1 | EARTH:70,FIRE:-30 | TANK |
+| Wraith Knight | 280 | 5200 | 7000 | 135-390 co 2000 ms | DEATH, 1 | DEATH:90,HOLY:-35,PHYSICAL:20 | MELEE, nocny |
+| Fire Elemental | 320 | 5600 | 7500 | 150-450 co 2300 ms | FIRE, 3 | FIRE:100,ICE:-30,PHYSICAL:30 | MAGIC |
+| Lava Golem | 370 | 8600 | 10500 | 155-440 co 2400 ms | FIRE, 1 | FIRE:100,PHYSICAL:30,ICE:-25,ENERGY:-10 | TANK |
+| Ignaroth the Molten | 400 | 45000 | 60000 | 440-1230 co 1800 ms | FIRE, 3 | FIRE:100,ICE:-20 | **boss**, leczy sie raz o 4000 |
+| Frost Giant | 430 | 10500 | 12500 | 250-720 co 2400 ms | PHYSICAL, 1 | ICE:80,FIRE:-25 | TANK |
+| Storm Harpy | 470 | 8200 | 11000 | 235-755 co 2000 ms | ENERGY, 3 | ENERGY:90,EARTH:-20 | SKIRMISHER |
+| Ice Dragon | 520 | 13800 | 17000 | 430-1270 co 2300 ms | ICE, 3 | ICE:100,FIRE:-30 | MAGIC |
+| Hrimgar the Glacier King | 560 | 70000 | 95000 | 650-1900 co 1800 ms | ICE, 1 | ICE:100,FIRE:-20,PHYSICAL:20 | **boss**, leczy sie raz o 6000 |
+| Shadow Stalker | 590 | 11500 | 15500 | 340-990 co 1800 ms | DEATH, 1 | DEATH:90,HOLY:-40 | SKIRMISHER, nocny |
+| Sand Titan | 650 | 17000 | 19500 | 340-985 co 2500 ms | PHYSICAL, 1 | PHYSICAL:35,EARTH:60,ICE:-20 | TANK |
+| Void Priest | 700 | 17600 | 23600 | 1050-1425 co 2300 ms | DEATH, 4 | DEATH:100,HOLY:-40,EARTH:25 | HEALER |
+| Kha'zuul the Hollow | 750 | 95000 | 130000 | 800-2250 co 1800 ms | DEATH, 3 | DEATH:100,HOLY:-30 | **boss**, leczy sie raz o 8000, nocny |
+| Abyssal Demon | 800 | 18000 | 25000 | 480-1400 co 2000 ms | FIRE, 1 | FIRE:90,HOLY:-30,ICE:-10 | MELEE |
+| Bone Dragon | 880 | 20000 | 28000 | 520-1520 co 2200 ms | DEATH, 3 | DEATH:100,HOLY:-35,EARTH:30 | MAGIC |
+| Abyss Lord | 950 | 28100 | 33500 | 1080-2000 co 2300 ms | PHYSICAL, 1 | PHYSICAL:15,FIRE:50,DEATH:50,HOLY:-25 | TANK |
+| Mor'gath, Heart of the Abyss | 1000 | 160000 | 250000 | 1040-2990 co 1700 ms | DEATH, 3 | DEATH:100,FIRE:50,HOLY:-25 | **boss**, leczy sie raz o 12000 |
+
+Sprzet (lupy, rzadkie; bossowie daja komplet swojego progu z szansa 25-30%):
+
+| Prog | Poziom | Paladyn | Druid | Czarodziej | Mnich | Zbroja (pancerz) | Tarcza |
+|---|---|---|---|---|---|---|---|
+| Obsydian | 250 | Magma Spear 64 | Rod of Hoarfrost 62 ICE | Obsidian Wand 62 ENERGY | Molten Knuckles 62 | 12/8/7 | 30 |
+| Lodowy | 450 | Frostfang Spear 82 | Rod of Stoneroot 80 EARTH | Wand of Inferno 80 FIRE | Frostbound Fists 80 | 15/10/9 | 36 |
+| Cien | 700 | Shadowpiercer 100 | Rod of Twilight 98 ICE | Stormcaller Wand 98 ENERGY | Umbral Grips 98 | 18/12/11 | 42 |
+| Otchlan | 850 | Dawnspear 118 | Rod of Eternal Winter 136 ICE | Starfall Wand 116 ENERGY | Fists of the Abyss 116 | + Korona Otchlani 16 (poz. 900) | - |
+
+Zywioly broni sa dobrane tak, by nie trafialy w odpornosci potworow swojego progu (np. rozdzka
+ognia nie jest bronia na Spalone Wyzyny).
+
+### Symulacje endgame (`EndgameSimulationTest`, 200 walk, atak + najlepszy czar leczacy ponizej 55% HP)
+
+Postac modelowa progu: Knieje/Wyzyny poz. 320 (umiejetnosc 95, magia 75), Szczyty 500 (110/90),
+Pustkowia 680 (120/100), Otchlan 900 (128/112), sprzet swojego progu, tylko poczatkowa mana (bez mikstur).
+
+| Wymaganie testu | Wynik |
+|---|---|
+| Kazda profesja wygrywa >= 95% walk z kazdym potworem progu, srednio <= 90 s, mana <= 60% | spelnione; najwolniej druid i paladyn na elitach (83-90 s) |
+| Boss w pojedynke: <= 10% zwyciestw | 0% dla wszystkich profesji i bossow (gina w 6-126 s) |
+| Postac z nizszego progu przeciw najtrudniejszemu potworowi nastepnego: <= 50% zwyciestw albo > 120 s | ice_dragon 0%; void_priest 0-8% (druid 143 s); abyss_lord 0-3% (druid 126 s) |
+| Postac poziomu 8 przeciw kazdemu potworowi endgame | 0% |
+
+Slabsze potwory nastepnego progu (np. frost_giant, abyssal_demon) sa do pokonania z progu nizej -
+to zamierzone przejscie miedzy krainami, ktorych zakresy poziomow na siebie zachodza.
+
 ## Czary, runy i mikstury (etap 7)
 
 Wartosc czaru = `baza + poziom * lf + magia * mf + umiejetnosc * sf`, rzut 85-115%.

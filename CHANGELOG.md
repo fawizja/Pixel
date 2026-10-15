@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.13.0] - 2026-10-15
+
+### Dodano
+- Endgame dla poziomow 230-1000: wschodni kontynent za ciesnina (mapa 256 x 232), most ze straznikiem
+  wpuszczajacym dopiero od poziomu 200 i oboz (strefa ochronna) za mostem.
+- 5 krain: Przeklete Knieje (230-300), Spalone Wyzyny (300-400, krater Ignarotha), Lodowe Szczyty
+  (400-560, wnetrze gor +1..+2 z Hrimgarem), Pustkowia Cienia (550-750, ruiny Kha'zuula) i Otchlan
+  (pietra -1..-5, 750-1000, Mor'gath na -5).
+- 17 potworow (w tym 4 bossow dla druzyn), 33 przedmioty: 4 komplety broni (poziom 250/450/700/850),
+  3 komplety zbroi, korona Otchlani, 4 materialy; lupy dla wszystkich nowych potworow.
+- Nowe kafelki: przekleta trawa, popiol, lawa, ciemny piasek, kosci, martwe drzewa, obsydian, posadzka Otchlani.
+- Przejscia strzezone poziomem (`gates=` w map.properties), sprawdzane takze przy przewidywaniu ruchu online.
+- Symulacje endgame z leczeniem (`EndgameSimulationTest`), testy straznika mostu (lacznie 181 testow).
+
+### Zmieniono
+- Generator mapy: zachodni kontynent losowany ta sama sekwencja co wczesniej (identyczny poza przedluzeniem
+  wschodniego traktu na most).
+
 ## [0.12.1] - 2026-10-14
 
 ### Dodano

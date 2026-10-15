@@ -61,3 +61,13 @@
 84;sandstone_wall;WALL;0;0;desert;#b89860;brick
 85;mossy_wall;WALL;0;0;equatorial;#5a7050;brick
 86;log_wall;WALL;0;0;north;#6a4a30;woodwall
+# --- wschodni kontynent (etap endgame) ---
+18;blighted_grass;GROUND;1;0;temperate;#3b4a32;grass
+19;ash;GROUND;1;0;equatorial;#4c4642;gravel
+20;dark_sand;GROUND;1;0;desert;#7a6a52;sand
+21;lava;GROUND;0;3;equatorial;#e0581a;water
+22;abyss_floor;GROUND;1;0;underground;#3a2c30;gravel
+37;bones;DECORATION;1;0;desert;#e0d8c4;tuft
+77;dead_tree;OBJECT;0;0;temperate;#4a3a2c;tree
+78;obsidian_rock;OBJECT;0;0;equatorial;#2a2230;rock
+87;obsidian_wall;WALL;0;0;underground;#2a1e2a;rockwall

@@ -17,7 +17,10 @@ ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'mai
 VARDEN = os.path.join(ROOT, 'varden')
 OUT = os.path.join(ROOT, 'world')
 
-W, H = 160, 232
+W, H = 256, 232
+OLD_W = 160              # zachodni kontynent (losowanie terenu jak przed rozszerzeniem mapy)
+STRAIT_X0, STRAIT_X1 = 160, 167   # ciesnina miedzy kontynentami
+EAST_X0 = 168
 VX, VY = 48, 64          # przesuniecie regionu Varden (musi zgadzac sie z WorldLayout.VARDEN_OFFSET_*)
 VW, VH = 64, 48
 FLOORS = list(range(-5, 6))
@@ -26,6 +29,7 @@ FLOORS = list(range(-5, 6))
 NORTH_END, TEMPERATE_END, JUNGLE_END = 63, 111, 171
 
 rnd = random.Random(20261015)
+rnd_east = random.Random(20261016)   # osobna sekwencja: zachod pozostaje bez zmian
 
 # symbole legendy swiata (legend.csv = legenda Varden + ponizsze)
 EXTRA_LEGEND = [
@@ -74,8 +78,26 @@ EXTRA_LEGEND = [
     ('7', 'tomb_floor', '-', 'rope_spot', '-'),
     ('8', 'cave_floor', '-', 'glow_moss', '-'),
     ('9', 'cave_floor', '-', 'magma', '-'),
+    # wschodni kontynent (endgame 230-1000)
+    ('\u03b1', 'blighted_grass', '-', '-', '-'),
+    ('\u03c0', 'blighted_grass', 'tall_grass', '-', '-'),
+    ('\u03b2', 'blighted_grass', '-', 'dead_tree', '-'),
+    ('\u03b3', 'ash', '-', '-', '-'),
+    ('\u03b4', 'ash', '-', 'obsidian_rock', '-'),
+    ('\u03b5', 'lava', '-', '-', '-'),
+    ('\u03b6', 'dark_sand', '-', '-', '-'),
+    ('\u03b7', 'dark_sand', 'bones', '-', '-'),
+    ('\u03c1', 'dark_sand', '-', 'sandstone_rock', '-'),
+    ('\u03bd', 'dark_sand', '-', 'stairs_down', '-'),
+    ('\u03b8', 'abyss_floor', '-', '-', '-'),
+    ('\u03b9', 'abyss_floor', '-', '-', 'obsidian_wall'),
+    ('\u03ba', 'abyss_floor', '-', 'magma', '-'),
+    ('\u03bb', 'abyss_floor', '-', 'stairs_down', '-'),
+    ('\u03bc', 'abyss_floor', '-', 'stairs_up', '-'),
+    ('\u03be', 'abyss_floor', '-', 'wall_torch', '-'),
 ]
-WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578')
+WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578'
+               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be')
 
 
 def grid(fill=' '):
@@ -108,9 +130,9 @@ def reachable(g, start):
 
 # ------------------------------------------------------------------ teren powierzchni
 
-def biome_at(y):
+def biome_at(y, r=None):
     """Pas biomu z poszarpana granica (szum)."""
-    j = rnd.randint(-2, 2)
+    j = (r or rnd).randint(-2, 2)
     if y + j <= NORTH_END:
         return 'north'
     if y + j <= TEMPERATE_END:
@@ -118,6 +140,26 @@ def biome_at(y):
     if y + j <= JUNGLE_END:
         return 'jungle'
     return 'desert'
+
+
+def east_terrain(biome, edge, rng):
+    """Wschodni kontynent: te same pasy, ale ziemie zniszczone (endgame)."""
+    r = rng.random()
+    if biome == 'north':
+        if edge or r < 0.07:
+            return 'n'
+        return 'S' if r < 0.13 else ('i' if r < 0.17 else ('v' if r < 0.27 else 's'))
+    if biome == 'temperate':
+        if edge or r < 0.11:
+            return '\u03b2'
+        return 'T' if r < 0.15 else ('\u03c0' if r < 0.30 else '\u03b1')
+    if biome == 'jungle':
+        if edge or r < 0.07:
+            return '\u03b4'
+        return '\u03b4' if r < 0.09 else '\u03b3'
+    if edge or r < 0.04:
+        return '\u03c1'
+    return '\u03b7' if r < 0.10 else ('\u03c1' if r < 0.12 else '\u03b6')
 
 
 def terrain(biome, edge):
@@ -142,9 +184,15 @@ def terrain(biome, edge):
 def surface():
     g = grid()
     for y in range(H):
-        for x in range(W):
-            edge = min(x, y, W - 1 - x, H - 1 - y) < 2
+        for x in range(OLD_W):
+            edge = min(x, y, OLD_W - 1 - x, H - 1 - y) < 2
             g[y][x] = terrain(biome_at(y), edge)
+        for x in range(OLD_W, W):
+            if x <= STRAIT_X1:
+                g[y][x] = '~'
+                continue
+            edge = min(y, W - 1 - x, H - 1 - y) < 2
+            g[y][x] = east_terrain(biome_at(y, rnd_east), edge, rnd_east)
     # jeziora: zamarzniete na polnocy, bagna w dzungli, oaza na pustyni
     lake(g, 40, 50, 7, 4, 'i')
     lake(g, 122, 52, 5, 3, '~')
@@ -216,8 +264,9 @@ def town(g, x0, y0, x1, y1, wall, street, inner_wall, inner_floor, door_floor):
 
 # ------------------------------------------------------------------ podziemia
 
-def dungeon(g, area, points, wall, floor, decor, extra_rooms, seed_marks):
+def dungeon(g, area, points, wall, floor, decor, extra_rooms, seed_marks, rng=None):
     """Korytarze laczace punkty kluczowe w prostokacie area; sprawdza dostepnosc."""
+    rnd = rng or globals()['rnd']
     X0, Y0, X1, Y1 = area
     rect(g, X0, Y0, X1, Y1, wall)
 
@@ -310,6 +359,123 @@ def read_props():
                 k, v = l.strip().split('=', 1)
                 props[k] = v
     return props
+
+
+# ------------------------------------------------------------------ wschodni kontynent
+
+BRIDGE_Y = 86
+CAMP = (172, 80, 186, 93)                       # palisada obozu za mostem (strefa ochronna)
+GATES = [(STRAIT_X0, BRIDGE_Y, STRAIT_X1, BRIDGE_Y + 1, 0, 200)]   # straznik mostu: od poziomu 200
+VOLCANO = (212, 142)                            # krater Ignarotha
+RUINS = (222, 198, 238, 212)                    # ruiny Kha'zuula
+SUMMIT = (214, 30)                              # wejscie na Lodowe Szczyty (+1, +2)
+ABYSS = (196, 216)                              # zejscie do Otchlani (-1..-5)
+
+
+def east_continent(floors, transitions):
+    """Kontynent za ciesnina: 4 krainy w pasach biomow i Otchlan pod spodem. Zwraca spawny i wejscia."""
+    g = floors[0]
+    r = rnd_east
+    # most nad ciesnina - przedluzenie wschodniego szlaku Varden
+    road(g, [(146, BRIDGE_Y), (CAMP[0] + 4, BRIDGE_Y)])
+    # oboz: plot, wejscia na 4 strony, ogniska
+    x0, y0, x1, y1 = CAMP
+    rect(g, x0, y0, x1, y1, 'F')
+    rect(g, x0 + 1, y0 + 1, x1 - 1, y1 - 1, ':')
+    cx = (x0 + x1) // 2
+    for gx, gy in [(x0, BRIDGE_Y), (x0, BRIDGE_Y + 1), (x1, BRIDGE_Y), (x1, BRIDGE_Y + 1),
+                   (cx, y0), (cx + 1, y0), (cx, y1), (cx + 1, y1)]:
+        g[gy][gx] = ':'
+    g[y0 + 3][x0 + 4] = 'k'
+    g[y1 - 3][x1 - 4] = 'k'
+    # szlaki z obozu do krain
+    road(g, [(x1, BRIDGE_Y), (199, BRIDGE_Y), (199, 150)])          # na poludnie: Wyzyny
+    road(g, [(cx, y0), (cx, 40), (SUMMIT[0] - 6, 40)])               # na polnoc: Szczyty
+    road(g, [(199, 150), (199, ABYSS[1] - 6), (ABYSS[0], ABYSS[1] - 6)])  # dalej: Pustkowia
+
+    # lawa na Wyzynach i krater wulkanu (wyspa z boss'em, jedno przejscie od poludnia)
+    for (lx, ly, rx, ry) in [(184, 124, 4, 3), (240, 128, 5, 3), (232, 162, 4, 2), (188, 160, 3, 2)]:
+        lake(g, lx, ly, rx, ry, '\u03b5')
+    vx, vy = VOLCANO
+    lake(g, vx, vy, 9, 6, '\u03b5')
+    lake(g, vx, vy, 5, 3, '\u03b3')
+    rect(g, vx, vy, vx + 1, vy + 7, '\u03b3')
+    # zamarzniete jeziora na Szczytach, rozlewiska w Kniejach
+    lake(g, 238, 44, 5, 3, 'i')
+    lake(g, 226, 96, 5, 3, 'V')
+    lake(g, 196, 70, 3, 2, 'V')
+    # ruiny Kha'zuula: piaskowiec, wejscia od zachodu i polnocy
+    rx0, ry0, rx1, ry1 = RUINS
+    box(g, rx0, ry0, rx1, ry1, 'I', 'z')
+    for gx, gy in [(rx0, (ry0 + ry1) // 2), (rx0, (ry0 + ry1) // 2 + 1), ((rx0 + rx1) // 2, ry0)]:
+        g[gy][gx] = 'z'
+    for tx, ty in [(rx0 + 2, ry0 + 2), (rx1 - 2, ry0 + 2), (rx0 + 2, ry1 - 2), (rx1 - 2, ry1 - 2)]:
+        g[ty][tx] = '@'
+
+    # Lodowe Szczyty: schody na +1 i +2 (lodowe wnetrze gor)
+    sx, sy = SUMMIT
+    rect(g, sx - 2, sy - 2, sx + 2, sy + 2, 's')
+    g[sy][sx] = '!'
+    dungeon(floors[1], (198, 10, 236, 44), [SUMMIT, (228, 16), (204, 40), (232, 38)], 'E', 'e', 'GG$$', 4,
+            {SUMMIT: '?', (228, 16): '!'}, r)
+    dungeon(floors[2], (214, 2, 248, 30), [(228, 16), (242, 8), (220, 26)], 'E', 'e', 'GG$', 3,
+            {(228, 16): '?'}, r)
+    transitions += [(sx, sy, 0, 'STAIRS', sx, sy - 1, 1), (sx, sy, 1, 'STAIRS', sx, sy + 1, 0),
+                    (228, 16, 1, 'STAIRS', 228, 17, 2), (228, 16, 2, 'STAIRS', 229, 16, 1)]
+
+    # Otchlan: piec pieter w dol, schody w obie strony
+    ax, ay = ABYSS
+    rect(g, ax - 2, ay - 2, ax + 2, ay + 2, '\u03b6')
+    g[ay][ax] = '\u03bd'
+    down, up = '\u03bb', '\u03bc'
+    levels = [
+        (-1, (170, 160, 252, 230), [ABYSS, (230, 190), (180, 180), (240, 224)]),
+        (-2, (170, 156, 252, 230), [(240, 224), (210, 170), (176, 200), (200, 228)]),
+        (-3, (170, 150, 252, 230), [(200, 228), (240, 160), (186, 160)]),
+        (-4, (170, 150, 252, 230), [(186, 160), (226, 184), (246, 214), (176, 224)]),
+        (-5, (170, 156, 252, 230), [(176, 224), (210, 200), (240, 170)]),
+    ]
+    for z, area, pts in levels:
+        marks = {pts[0]: up}
+        if z > -5:
+            marks[pts[-1]] = down
+        dungeon(floors[z], area, pts, '\u03b9', '\u03b8', '\u03be\u03ba\u03be\u03ba', 5, marks, r)
+        (ex, ey) = pts[0]
+        if z == -1:
+            transitions += [(ex, ey, 0, 'STAIRS', ex, ey + 1, -1), (ex, ey, -1, 'STAIRS', ex + 1, ey, 0)]
+        else:
+            transitions += [(ex, ey, z + 1, 'STAIRS', ex, ey + 1, z), (ex, ey, z, 'STAIRS', ex + 1, ey, z + 1)]
+
+    spawns = [
+        '# Przeklete Knieje (230-300)',
+        'cursed_treant;196;76;0;5;3;240', 'cursed_treant;232;80;0;5;3;240', 'cursed_treant;214;104;0;5;3;240',
+        'cursed_treant;246;104;0;4;2;240', 'wraith_knight;186;104;0;5;3;240', 'wraith_knight;222;70;0;5;3;240',
+        'wraith_knight;244;90;0;5;3;240', 'wraith_knight;200;96;0;4;2;240',
+        '# Spalone Wyzyny (300-400)',
+        'fire_elemental;184;132;0;5;3;240', 'fire_elemental;236;138;0;5;3;240', 'fire_elemental;190;166;0;5;2;240',
+        'fire_elemental;246;156;0;4;2;240', 'lava_golem;196;120;0;5;2;300', 'lava_golem;226;122;0;5;2;300',
+        'lava_golem;222;166;0;5;2;300',
+        f'ignaroth;{VOLCANO[0]};{VOLCANO[1]};0;2;1;3600',
+        '# Lodowe Szczyty (400-560)',
+        'frost_giant;180;20;0;5;3;300', 'frost_giant;246;26;0;5;3;300', 'frost_giant;196;54;0;5;2;300',
+        'storm_harpy;230;54;0;6;3;300', 'storm_harpy;188;8;0;6;3;300', 'storm_harpy;244;8;0;5;2;300',
+        'ice_dragon;204;40;1;4;2;360', 'ice_dragon;232;38;1;4;2;360', 'frost_giant;214;20;1;4;2;300',
+        'ice_dragon;222;56;0;5;1;360',
+        'hrimgar;242;8;2;2;1;3600',
+        '# Pustkowia Cienia (550-750)',
+        'shadow_stalker;180;180;0;5;3;300', 'shadow_stalker;246;180;0;5;3;300', 'shadow_stalker;200;226;0;5;2;300',
+        'sand_titan;220;186;0;5;2;360', 'sand_titan;184;206;0;5;2;360', 'sand_titan;248;222;0;4;2;360',
+        'void_priest;212;204;0;4;2;360', 'void_priest;244;200;0;4;2;360', 'void_priest;230;226;0;4;2;360',
+        f'khazuul;{(RUINS[0] + RUINS[2]) // 2};{(RUINS[1] + RUINS[3]) // 2};0;2;1;3600',
+        '# Otchlan (750-1000)',
+        'abyssal_demon;230;190;-1;5;3;360', 'abyssal_demon;180;180;-1;5;3;360', 'abyssal_demon;210;170;-2;5;3;360',
+        'bone_dragon;176;200;-2;5;2;420', 'bone_dragon;240;160;-3;5;2;420', 'bone_dragon;200;200;-3;5;2;420',
+        'abyss_lord;226;184;-4;5;2;480', 'abyss_lord;246;214;-4;4;2;480', 'abyss_lord;210;200;-5;4;2;480',
+        'morgath;240;170;-5;2;1;7200',
+    ]
+    entrances = [('camp', (cx, BRIDGE_Y)), ('volcano', VOLCANO), ('ruins', ((RUINS[0] + RUINS[2]) // 2, (RUINS[1] + RUINS[3]) // 2)),
+                 ('summit', SUMMIT), ('abyss', ABYSS)]
+    return spawns, entrances
 
 
 # ------------------------------------------------------------------ swiat
@@ -410,6 +576,9 @@ def main():
                     (112, 222, -1, 'STAIRS', 112, 221, -2), (112, 222, -2, 'STAIRS', 112, 223, -1),
                     (132, 226, -2, 'STAIRS', 132, 225, -3), (132, 226, -3, 'STAIRS', 132, 227, -2)]
 
+    # ---------------------------------------------------------- wschodni kontynent (endgame)
+    east_spawns, east_entrances = east_continent(floors, transitions)
+
     # NPC: Varden (wspolrzedne mapy varden + przesuniecie) i uklad town() dla 3 miast
     npcs = [
         ('varden_banker', 'Bankier Aldric', 'BANKER', 'Varden', 22 + VX, 13 + VY, '-', '#d8c070',
@@ -450,11 +619,13 @@ def main():
     for (x, y, z, *_r) in transitions:
         if z == 0:
             assert (x, y) in reach, f'entrance {x},{y} unreachable'
+    for name, pos in east_entrances:
+        assert pos in reach, f'{name} unreachable from Varden'
 
     # zapis pieter
     for z in FLOORS:
         name = f'floor_{"+" + str(z) if z > 0 else z}.txt'
-        with open(os.path.join(OUT, name), 'w') as f:
+        with open(os.path.join(OUT, name), 'w', encoding='utf-8') as f:
             for row in floors[z]:
                 f.write(''.join(row).rstrip() + '\n')
 
@@ -464,10 +635,10 @@ def main():
     legend.append('// --- biomy swiata (generate_world.py) ---')
     for sym, ground, dec, obj, wall in EXTRA_LEGEND:
         legend.append(f'{sym};{ground};{dec};{obj};{wall}')
-    with open(os.path.join(OUT, 'legend.csv'), 'w') as f:
+    with open(os.path.join(OUT, 'legend.csv'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(legend) + '\n')
 
-    with open(os.path.join(OUT, 'transitions.csv'), 'w') as f:
+    with open(os.path.join(OUT, 'transitions.csv'), 'w', encoding='utf-8') as f:
         f.write('# x;y;z;typ;docelowe x;y;z\n')
         for t in transitions:
             f.write(';'.join(str(v) for v in t) + '\n')
@@ -479,6 +650,7 @@ def main():
         x0, y0, x1, y1, z = (int(v) for v in r.split(','))
         pz.append(f'{x0 + VX},{y0 + VY},{x1 + VX},{y1 + VY},{z}')
     pz += ['65,21,94,42,0', '101,129,126,150,0', '65,188,94,209,0']
+    pz += [f'{CAMP[0] + 1},{CAMP[1] + 1},{CAMP[2] - 1},{CAMP[3] - 1},0']   # oboz za mostem (bez swiatyni)
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
     regions = [
@@ -492,14 +664,21 @@ def main():
         'Pustynia Qasirah;0;172;159;231;0;5;45;130',
         'Grobowce Qasirah;100;185;159;231;-1;-1;60;130',
         'Krypty Faraonow;100;185;159;231;-5;-2;180;230',
+        'Przeklete Knieje;168;64;255;111;0;5;230;300',
+        'Spalone Wyzyny;168;112;255;171;0;5;300;400',
+        'Lodowe Szczyty;168;0;255;63;0;5;400;560',
+        'Pustkowia Cienia;168;172;255;231;0;5;550;750',
+        'Otchlan;168;0;255;231;-5;-1;750;1000',
     ]
-    with open(os.path.join(OUT, 'map.properties'), 'w') as f:
+    with open(os.path.join(OUT, 'map.properties'), 'w', encoding='utf-8') as f:
         f.write('# Swiat gry: 4 miasta w pasach biomow (generate_world.py)\n'
                 'name=Swiat Pixel\n'
                 f'width={W}\nheight={H}\n'
                 'floors=' + ','.join(str(z) for z in FLOORS) + '\n'
                 f'spawn={vt[0]},{vt[1]},0\n'
                 'pz=' + ';'.join(pz) + '\n'
+                '# przejscia strzezone: x0,y0,x1,y1,z,minimalny poziom\n'
+                'gates=' + ';'.join(','.join(str(v) for v in gt) for gt in GATES) + '\n'
                 '# miasta: nazwa:x,y,z swiatyni (maks. 4)\n'
                 'towns=' + ';'.join(f'{n}:{t[0]},{t[1]},0' for n, t in towns) + '\n'
                 '# regiony: nazwa;x0;y0;x1;y1;z od;z do;zalecany poziom od;do (oddzielone |)\n'
@@ -534,7 +713,7 @@ def main():
         'ruin_colossus;60;150;-5;2;1;1800',
         'mummy;130;196;-4;4;3;300', 'mummy;140;226;-4;3;2;300', 'mummy;120;214;-4;4;2;300',
         'pharaoh;126;198;-5;2;1;1800',
-    ]
+    ] + east_spawns
     pz_rects = [tuple(int(v) for v in r.split(',')) for r in pz]
 
     def in_pz(x, y, z):
@@ -551,7 +730,8 @@ def main():
                         continue
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < W and 0 <= ny < H and fl[ny][nx] in WALKABLE and not in_pz(nx, ny, z) \
-                            and (nx, ny, z) not in trans and fl[ny][nx] not in '<>(){}|^!?&*[]HO':
+                            and (nx, ny, z) not in trans and fl[ny][nx] not in '<>(){}|^!?&*[]HO\u03bb\u03bc\u03bd' \
+                            and (z != 0 or (nx, ny) in reach):
                         return nx, ny
         raise AssertionError(f'no walkable tile near {x},{y},{z}')
 
@@ -563,9 +743,9 @@ def main():
         k, x, y, z, rr, c, s = line.split(';')
         nx, ny = snap(int(x), int(y), int(z))
         fixed.append(f'{k};{nx};{ny};{z};{rr};{c};{s}')
-    with open(os.path.join(OUT, 'spawns.csv'), 'w') as f:
+    with open(os.path.join(OUT, 'spawns.csv'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(fixed) + '\n')
-    with open(os.path.join(OUT, 'npcs.csv'), 'w') as f:
+    with open(os.path.join(OUT, 'npcs.csv'), 'w', encoding='utf-8') as f:
         f.write('# klucz;imie;rola;miasto;x;y;z;sklep;kolor;powitanie\n')
         for (k, n, r, t, x, y, shop, color, greet) in npcs:
             f.write(f'{k};{n};{r};{t};{x};{y};0;{shop};{color};{greet}\n')

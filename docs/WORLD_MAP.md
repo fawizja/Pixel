@@ -4,7 +4,7 @@ Swiat ma **cztery glowne miasta** ulozone wzdluz osi klimatycznej polnoc-poludni
 w siebie stopniowo (tundra -> lasy umiarkowane -> dzungla -> pustynia), a regiony lacza drogi,
 mosty, przelecze, porty, tunele i jaskinie.
 
-Swiat jest jedna mapa `maps/world` (160 x 232 kafelkow, pietra -5..+5), generowana
+Swiat jest jedna mapa `maps/world` (256 x 232 kafelkow, pietra -5..+5), generowana
 deterministycznie przez `tools/mapgen/generate_world.py`. Region Varden jest wklejony bez zmian z
 `maps/varden` z przesunieciem (+48, +64) - test `GameWorldTest` pilnuje, ze jest identyczny.
 
@@ -18,6 +18,20 @@ deterministycznie przez `tools/mapgen/generate_world.py`. Region Varden jest wkl
  y=172  [ QASIRAH ]  (79,193)  Pustynia 45-130, Grobowce -1..-3 (wejscie 124,206)
  y=231
 ```
+
+Za ciesnina (x 160..167, sama woda) lezy **wschodni kontynent** (x 168..255) - endgame 230-1000:
+
+```
+ y=0    Lodowe Szczyty 400-560   schody na +1 (214,30) -> +2: Hrimgar (242,8,+2)
+ y=64   Przeklete Knieje 230-300 <- most (160..167, y 86-87, straznik: poziom 200) <- trakt z Varden
+                                    oboz za mostem (172..186 x 80..93, strefa ochronna, bez swiatyni)
+ y=112  Spalone Wyzyny 300-400   krater z lawa, Ignaroth (212,142)
+ y=172  Pustkowia Cienia 550-750 ruiny Kha'zuula (222..238 x 198..212), zejscie do Otchlani (196,216)
+        Otchlan -1..-5 750-1000  Mor'gath (240,170,-5)
+```
+
+Zachodni kontynent jest losowany ta sama sekwencja co przed rozszerzeniem (wschod ma osobny generator
+liczb), wiec stare zapisy i lochy sa nietkniete.
 
 ## Miasta (maks. 4, `towns=` w map.properties)
 
@@ -48,11 +62,19 @@ poziomow wyzsze od poziomu postaci, pojawia sie ostrzezenie. To informacja, nie 
 | Pustynia Qasirah | y 172..231 | 0..+5 | 45-130 | hieny, skorpiony, piaskowe upiory |
 | Grobowce Qasirah | 100..159 x 185..231 | -1 | 60-130 | skorpiony, piaskowe upiory |
 | Krypty Faraonow | 100..159 x 185..231 | -5..-2 | 180-230 | mumie |
+| Przeklete Knieje | 168..255 x 64..111 | 0..+5 | 230-300 | przeklete drzewce, upiorni rycerze |
+| Spalone Wyzyny | 168..255 x 112..171 | 0..+5 | 300-400 | ogniste zywiolaki, golemy lawy, Ignaroth |
+| Lodowe Szczyty | 168..255 x 0..63 | 0..+5 | 400-560 | lodowi olbrzymi, harpie burzy, lodowe smoki, Hrimgar |
+| Pustkowia Cienia | 168..255 x 172..231 | 0..+5 | 550-750 | cieniolowcy, tytani piasku, kaplani pustki, Kha'zuul |
+| Otchlan | 168..255 x 0..231 | -5..-1 | 750-1000 | demony, kosciane smoki, panowie Otchlani, Mor'gath |
 
 Potwory powyzej poziomu 15 nie stoja blizej niz 14 kafelkow od swiatyni, a poziom kazdego spawnu
 miesci sie w zalecanym zakresie regionu (test `spawnsAreValidAwayFromTownsAndMatchRegionLevels`).
 Nowa postac (poziom 8) idaca na polnoc lub poludnie trafia najpierw na ostrzezenie i potwory
-40+, ktore ja szybko pokonaja - nie da sie "przypadkiem" wejsc w endgame.
+40+, ktore ja szybko pokonaja - nie da sie "przypadkiem" wejsc w endgame. Na wschodni kontynent
+prowadzi jeden most, a straznik (`gates=160,86,167,87,0,200`) zawraca postacie ponizej poziomu 200
+z komunikatem; test `theBridgeGuardKeepsNewCharactersOutOfTheEndgame` sprawdza, ze poziomy 8, 120 i 199
+nie dojda na wschod zadna droga, a 200 przejdzie.
 
 ## Glebokie lochy biomow (etap 10)
 

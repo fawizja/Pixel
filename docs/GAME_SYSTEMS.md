@@ -85,6 +85,9 @@ Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie 
 - Pietra -5..+5 o wspolnym ukladzie wspolrzednych, mapy z plikow tekstowych + legenda.
 - Kolizje z cache (`boolean[]`), ruch w 8 kierunkach bez scinania rogow.
 - Schody, dziury, tunele, drabiny (UZYJ), miejsca na line.
+- Przejscia strzezone poziomem: `gates=x0,y0,x1,y1,z,poziom` w map.properties, `WorldMap.requiredLevelAt`;
+  `MovementSystem.step` zwraca `LEVEL_TOO_LOW`, sesja wypisuje ostrzezenie straznika (co 3 s), a klient online
+  nie przewiduje kroku na taki kafelek.
 
 ## Ruch (Z)
 
@@ -170,7 +173,7 @@ przy pauzie, utracie fokusu i zamknieciu.
 
 ## Swiat, miasta i regiony (Z)
 
-- Jedna mapa `maps/world` 160 x 232 x 11 pieter (`WorldLayout.WORLD_MAP`), generator `tools/mapgen/generate_world.py`.
+- Jedna mapa `maps/world` 256 x 232 x 11 pieter (wschodni kontynent x 168..255 = endgame) (`WorldLayout.WORLD_MAP`), generator `tools/mapgen/generate_world.py`.
 - `Town` (maks. 4, swiatynia musi byc w strefie ochronnej i przechodnia) i `Region` (prostokat, zakres pieter,
   zalecany poziom) wczytywane z `towns=` i `regions=` w map.properties.
 - `WorldMap.templeOf(miasto)` - odrodzenie po smierci; `regionAt(pozycja)`; `GameSession.checkRegion` wypisuje

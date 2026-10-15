@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.TestData;
+import pl.fawizja.pixel.balance.Balance;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.monster.MonsterRegistry;
 import pl.fawizja.pixel.monster.MonsterType;
@@ -28,13 +29,14 @@ class GameWorldTest {
     @BeforeAll
     static void load() {
         world = TestData.world();
-        reachable = explore(world.spawn());
+        reachable = explore(world.spawn(), 1000);
     }
 
     /** BFS po logice ruchu (krok + uzycie, z lina w plecaku) od podanej pozycji. */
-    static Set<Position> explore(Position start) {
+    static Set<Position> explore(Position start, int level) {
         MovementSystem ms = new MovementSystem(world, TestData.ITEMS.byKey("rope").id());
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        if (level > pc.level()) pc.addExperience(Balance.experienceForLevel(level) - pc.experience());
         Set<Position> seen = new HashSet<>();
         ArrayDeque<Position> q = new ArrayDeque<>();
         seen.add(start);
@@ -74,6 +76,19 @@ class GameWorldTest {
         for (int z = -5; z <= 5; z++) {
             final int fz = z;
             assertTrue(reachable.stream().anyMatch(p -> p.z() == fz), "floor " + z);
+        }
+    }
+
+    @Test
+    void theBridgeGuardKeepsNewCharactersOutOfTheEndgame() {
+        for (int level : new int[] {8, 120, 199}) {
+            for (Position p : explore(world.spawn(), level)) {
+                assertTrue(p.x() < 160, "level " + level + " reached the east continent at " + p);
+            }
+        }
+        assertTrue(explore(world.spawn(), 200).stream().anyMatch(p -> p.x() >= 168), "level 200 may cross");
+        for (Region r : world.regions()) {
+            if (r.levelMin() >= 230) assertTrue(r.x0() >= 168, r.name() + " lies behind the bridge");
         }
     }
 
