@@ -315,10 +315,11 @@ class NetworkSyncTest {
             });
             a.send("ATTACK", String.valueOf(piotrId)); // poziom 8 < 30: bez pojedynku byloby odrzucone
             await("ola wins", () -> logged(a, "Wygrywasz pojedynek"));
-            await("piotr at 1 hp, alive", () -> {
+            // przegrany zostal przy 1 HP (potem regeneracja dodaje troche zdrowia) i nie zginal - nadal na polu walki
+            await("piotr survived on the field", () -> {
                 try {
                     PlayerCharacter pc = self(b);
-                    return pc.health() == 1 && !pc.isDead();
+                    return !pc.isDead() && pc.health() < pc.maxHealth() / 2 && pc.position().distanceTo(field) <= 1;
                 } catch (Exception e) {
                     return false;
                 }
