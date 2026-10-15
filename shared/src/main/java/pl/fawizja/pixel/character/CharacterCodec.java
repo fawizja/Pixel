@@ -56,6 +56,7 @@ public final class CharacterCodec {
             ItemStack s = pc.depot().get(i);
             if (s != null) m.put("dp." + i, s.itemId() + "x" + s.count());
         }
+        for (int i = 0; i < pc.friends().size(); i++) m.put("fr." + i, pc.friends().names().get(i));
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
         }
@@ -139,6 +140,7 @@ public final class CharacterCodec {
         PlayerCharacter pc = new PlayerCharacter(require(m, "id"), require(m, "name"), voc,
                 Balance.levelForExperience(exp), p, items, bank, m.getOrDefault("hometown", "varden"));
         pc.restoreState(exp, Integer.parseInt(require(m, "health")), Integer.parseInt(require(m, "mana")));
+        java.util.TreeMap<Integer, String> friends = new java.util.TreeMap<>();
         for (Map.Entry<String, String> e : m.entrySet()) {
             String k = e.getKey();
             if (k.startsWith("bp.")) {
@@ -149,6 +151,8 @@ public final class CharacterCodec {
                 int slot = Integer.parseInt(k.substring(3));
                 ItemStack s = parseStack(e.getValue());
                 if (!pc.depot().putInSlot(slot, s).ok()) throw new IllegalArgumentException("bad depot slot " + slot);
+            } else if (k.startsWith("fr.")) {
+                friends.put(Integer.parseInt(k.substring(3)), e.getValue());
             } else if (k.startsWith("eq.")) {
                 EquipSlot slot = EquipSlot.valueOf(k.substring(3));
                 ItemStack s = parseStack(e.getValue());
@@ -173,6 +177,7 @@ public final class CharacterCodec {
             pc.restoreTimers(Long.parseLong(t[0]), Long.parseLong(t[1]), Integer.parseInt(t[2]), "1".equals(t[3]),
                     Long.parseLong(t[4]), items.byKey("torch").id());
         }
+        for (String f : friends.values()) pc.friends().restore(f);
         String ignore = m.getOrDefault("autoloot.ignore", "");
         if (!ignore.isEmpty()) {
             for (String id : ignore.split(",")) pc.autoLootFilter().ignore(Integer.parseInt(id.trim()));

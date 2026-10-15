@@ -10,6 +10,7 @@ package pl.fawizja.pixel.net;
  * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
  * "/kto" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO. Ranking: "/ranking [profesja]" -> RANK [profesja].
+ * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
  * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
@@ -66,12 +67,25 @@ public final class ChatCommands {
                 return w.length >= 2 ? prefixed("ADMIN", "MUTE", nameAndNumber(rest(t))) : null;
             case "/ranking":
                 return w.length == 1 ? new String[] {"RANK"} : new String[] {"RANK", rest(t)};
+            case "/znajomi":
+                return friends(t, w);
             case "/kto":
                 return w.length == 1 ? new String[] {"ADMIN", "WHO"} : null;
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:
                 return null;
+        }
+    }
+
+    private static String[] friends(String t, String[] w) {
+        if (w.length == 1) return new String[] {"FRIEND", "LIST"};
+        String arg = rest(rest(t));
+        if (arg.isEmpty()) return null;
+        switch (key(w[1])) {
+            case "dodaj": return new String[] {"FRIEND", "ADD", arg};
+            case "usun": return new String[] {"FRIEND", "REMOVE", arg};
+            default: return null;
         }
     }
 
@@ -117,5 +131,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

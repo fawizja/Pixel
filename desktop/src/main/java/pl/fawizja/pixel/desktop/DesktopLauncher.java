@@ -21,7 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc|depot|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|character|npc|depot|friends|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -110,6 +110,14 @@ public final class DesktopLauncher {
                     }
                     ((GameScreen) getScreen()).hud().openRanking(
                             new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
+                }
+                if ("friends".equals(open)) {
+                    // podglad listy znajomych (bez serwera)
+                    ((GameScreen) getScreen()).hud().openFriends(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Druid", 212),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", true, "Paladin", 98),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160))));
                 }
                 if ("depot".equals(open)) {
                     // podglad depozytu: kilka rzeczy juz odlozonych

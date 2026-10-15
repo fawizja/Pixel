@@ -160,6 +160,76 @@ final class ServerWorld {
         p.client.send(msg);
     }
 
+    /** FRIEND LIST | ADD imie | REMOVE imie; po kazdej zmianie klient dostaje liste (FRIENDS). */
+    private void friendCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        pl.fawizja.pixel.friends.FriendList list = p.session.character().friends();
+        switch (f[1]) {
+            case "ADD": {
+                if (f.length < 3) return;
+                String name = knownName(f[2].trim());
+                pl.fawizja.pixel.friends.FriendList.Result r = name == null
+                        ? pl.fawizja.pixel.friends.FriendList.Result.UNKNOWN : list.add(p.name(), name);
+                if (r != pl.fawizja.pixel.friends.FriendList.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                info(p, name + " dodany do znajomych.", now);
+                break;
+            }
+            case "REMOVE": {
+                if (f.length < 3) return;
+                pl.fawizja.pixel.friends.FriendList.Result r = list.remove(f[2]);
+                if (r != pl.fawizja.pixel.friends.FriendList.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                info(p, f[2].trim() + " usunięty ze znajomych.", now);
+                break;
+            }
+            case "LIST": break;
+            default: return;
+        }
+        sendFriends(p);
+    }
+
+    /** Imie postaci tak, jak je zapisano (online albo w rankingu), null gdy jej nie ma. */
+    private String knownName(String name) {
+        ServerPlayer o = find(name);
+        if (o != null) return o.name();
+        pl.fawizja.pixel.ranking.Ranking.Entry e = ranking.get(name);
+        return e == null ? null : e.name();
+    }
+
+    private void sendFriends(ServerPlayer p) {
+        java.util.List<pl.fawizja.pixel.friends.FriendsView.Row> rows = new java.util.ArrayList<>();
+        for (String n : p.session.character().friends().names()) {
+            ServerPlayer o = find(n);
+            if (o != null) {
+                PlayerCharacter c = o.session.character();
+                rows.add(new pl.fawizja.pixel.friends.FriendsView.Row(c.name(), true, c.vocation().displayName(), c.level()));
+            } else {
+                pl.fawizja.pixel.ranking.Ranking.Entry e = ranking.get(n);
+                rows.add(new pl.fawizja.pixel.friends.FriendsView.Row(n, false,
+                        e == null ? "-" : e.vocation().displayName(), e == null ? 0 : e.level()));
+            }
+        }
+        String[] f = new pl.fawizja.pixel.friends.FriendsView(rows).encode();
+        String[] msg = new String[f.length + 1];
+        msg[0] = "FRIENDS";
+        System.arraycopy(f, 0, msg, 1, f.length);
+        p.client.send(msg);
+    }
+
+    /** Powiadomienie znajomych o wejsciu / wyjsciu gracza. */
+    private void tellFriends(ServerPlayer p, String text, long now) {
+        for (ServerPlayer o : players.values()) {
+            if (o != p && o.session.character().friends().contains(p.name())) {
+                o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
+            }
+        }
+    }
+
     private String guildTag(String name) {
         pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(name);
         return g == null ? "-" : g.name();
@@ -373,6 +443,10 @@ final class ServerWorld {
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
+        tellFriends(p, "jest teraz w grze.", lastNow);
+        List<String> on = new ArrayList<>();
+        for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
+        if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
         LOG.info("join " + pc.name() + " (" + players.size() + " online)");
         return p;
     }
@@ -699,6 +773,7 @@ final class ServerWorld {
         partyLeft(p, lastNow);
         leftTrade(p);
         players.remove(p.id);
+        tellFriends(p, "wyszedł z gry.", lastNow);
         broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
         LOG.info("leave " + p.name() + " (" + players.size() + " online)");
     }
@@ -743,6 +818,7 @@ final class ServerWorld {
             case "PARTY": partyCommand(p, f, now); break;
             case "TRADE": tradeCommand(p, f, now); break;
             case "GUILD": guildCommand(p, f, now); break;
+            case "FRIEND": friendCommand(p, f, now); break;
             case "RANK":
                 if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
                 break;

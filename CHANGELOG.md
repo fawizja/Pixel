@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.28.0] - 2026-10-15
+
+### Dodano
+- Lista znajomych (do 30 postaci): `/znajomi` otwiera okno (w grze po lewej, poza grą po prawej, z profesją
+  i poziomem), `/znajomi dodaj Imię`, `/znajomi usuń Imię`. W menu gracza (dotknięcie postaci) nowy wiersz
+  "Dodaj do znajomych". Dotknięcie znajomego w grze otwiera czat z gotowym `/w Imię, `.
+- Powiadomienia: "Znajomy X jest teraz w grze." / "wyszedł z gry.", a po wejściu lista znajomych online.
+- Serwer przyjmuje tylko istniejące postacie (online albo z rankingu); imię zapisuje tak, jak ma je postać.
+  Lista zapisuje się z postacią (`fr.<i>`).
+- `-Dpixel.open=friends` - podgląd; nowa scena `friends` w regresji GUI (16 scen), wzorzec `player` odświeżony.
+- 4 nowe testy (lista, zapis, komunikat, sieciowy); łącznie 241.
+
 ## [0.27.0] - 2026-10-15
 
 ### Dodano

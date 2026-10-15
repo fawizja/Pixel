@@ -29,6 +29,9 @@ public final class Ranking {
 
     public synchronized void remove(String name) { byName.remove(key(name)); }
 
+    /** Wpis postaci o tym imieniu (wielkosc liter bez znaczenia) albo null. */
+    public synchronized Entry get(String name) { return name == null ? null : byName.get(key(name.trim())); }
+
     public synchronized int size(Vocation filter) { return sorted(filter).size(); }
 
     /** Pierwsze {@code n} miejsc (filter null = wszystkie profesje). */

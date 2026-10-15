@@ -650,6 +650,49 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void friendsAreToldWhenSomeoneComesAndGoesAndTheListIsSaved() throws Exception {
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            try (NetClient ula = connect()) {
+                ula.hello("Ula", "DRUID", "tajne-Ula");
+                await("welcome", () -> ula.selfSave() != null);
+                ola.send("FRIEND", "ADD", "ula");
+                String[][] got = new String[1][];
+                awaitMessage(ola, "friend list", m -> m[0].equals("FRIENDS") && (got[0] = m) != null);
+                pl.fawizja.pixel.friends.FriendsView v = pl.fawizja.pixel.friends.FriendsView.parse(got[0]);
+                assertEquals(1, v.rows().size());
+                assertEquals("Ula", v.rows().get(0).name(), "the name as the character has it");
+                assertTrue(v.rows().get(0).online());
+                assertEquals("Druid", v.rows().get(0).vocation());
+                ola.send("FRIEND", "ADD", "Ola");
+                awaitMessage(ola, "self", m -> m[0].equals("LOG") && m[2].contains("siebie"));
+                ola.send("FRIEND", "ADD", "Nikt Taki");
+                awaitMessage(ola, "unknown", m -> m[0].equals("LOG") && m[2].contains("Nie ma takiej postaci"));
+            }
+            awaitMessage(ola, "friend left", m -> m[0].equals("LOG") && m[2].contains("Znajomy Ula wyszedł z gry."));
+            try (NetClient ula = connect()) {
+                ula.hello("Ula", "DRUID", "tajne-Ula");
+                awaitMessage(ola, "friend came", m -> m[0].equals("LOG") && m[2].contains("Znajomy Ula jest teraz w grze."));
+            }
+            ola.send("FRIEND", "LIST");
+            String[][] got = new String[1][];
+            awaitMessage(ola, "offline friend", m -> m[0].equals("FRIENDS") && (got[0] = m) != null
+                    && !pl.fawizja.pixel.friends.FriendsView.parse(m).rows().get(0).online());
+            assertEquals(8, pl.fawizja.pixel.friends.FriendsView.parse(got[0]).rows().get(0).level(), "offline: from the ranking");
+            await("saved friends", () -> {
+                try {
+                    return self(ola).friends().contains("Ula");
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            ola.send("FRIEND", "REMOVE", "ULA");
+            awaitMessage(ola, "empty list", m -> m[0].equals("FRIENDS") && m.length == 1);
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

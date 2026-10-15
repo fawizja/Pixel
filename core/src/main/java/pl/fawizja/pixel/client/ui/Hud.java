@@ -68,6 +68,8 @@ public final class Hud {
     private PlayerMenu playerMenu;
     /** Okno rankingu z serwera (null = zamkniete). */
     private pl.fawizja.pixel.ranking.RankingView rankingView;
+    /** Okno znajomych z serwera (null = zamkniete). */
+    private pl.fawizja.pixel.friends.FriendsView friendsView;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
     /** U bankiera: widok depozytu przedmiotow zamiast konta. */
@@ -210,8 +212,9 @@ public final class Hud {
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
         playerMenu = null;
-        if (rankingView != null) {
+        if (rankingView != null || friendsView != null) {
             rankingView = null;
+            friendsView = null;
             menuOpen = false;
         }
         menuOpen = !(menuOpen && !npcMode);
@@ -280,6 +283,7 @@ public final class Hud {
     public void openRanking(pl.fawizja.pixel.ranking.RankingView view) {
         if (view == null || trade != null) return;
         rankingView = view;
+        friendsView = null;
         playerMenu = null;
         menuOpen = true;
         npcMode = false;
@@ -287,6 +291,24 @@ public final class Hud {
     }
 
     public boolean rankingOpen() { return menuOpen && rankingView != null; }
+
+    /** Lista znajomych z serwera: otwiera okno (handel ma pierwszenstwo). */
+    public void openFriends(pl.fawizja.pixel.friends.FriendsView view) {
+        if (view == null || trade != null) return;
+        friendsView = view;
+        rankingView = null;
+        playerMenu = null;
+        menuOpen = true;
+        npcMode = false;
+        bagOpen = false;
+    }
+
+    public boolean friendsOpen() { return menuOpen && friendsView != null; }
+
+    public void closeFriends() {
+        if (friendsView != null) menuOpen = false;
+        friendsView = null;
+    }
 
     public void closePlayerMenu() {
         if (playerMenu != null) menuOpen = false;
@@ -353,6 +375,10 @@ public final class Hud {
             rebuildRankingMenu();
             return;
         }
+        if (friendsView != null) {
+            rebuildFriendsMenu();
+            return;
+        }
         if (npcMode) {
             rebuildNpcMenu(session);
             return;
@@ -406,6 +432,7 @@ public final class Hud {
         rows.add(new MenuRow("player:trade:" + pm.name(), "Handel", "wymiana przedmiotów i złota (stojąc obok)", true));
         rows.add(new MenuRow("player:party:" + pm.name(), "Zaproś do drużyny", "wspólne doświadczenie, bez walki między sobą", true));
         rows.add(new MenuRow("player:guild:" + pm.name(), "Zaproś do gildii", "tylko lider gildii", true));
+        rows.add(new MenuRow("player:friend:" + pm.name(), "Dodaj do znajomych", "powiadomienie, gdy wejdzie do gry", true));
         rows.add(new MenuRow("player:attack:" + pm.id(), pm.attacking() ? "Przerwij atak" : "Atakuj",
                 pm.attacking() ? "koniec walki z tym graczem" : "PvP: biała czaszka, zasady serwera", !pm.ally()));
         float colW = (menuW - 30) / 2f;
@@ -416,6 +443,35 @@ public final class Hud {
             row.w = colW;
             row.h = rowH - 3;
             menuRows.add(row);
+        }
+    }
+
+    /** Znajomi: w grze po lewej (dotkniecie = prywatna wiadomosc), poza gra po prawej. */
+    private void rebuildFriendsMenu() {
+        List<MenuRow> left = new ArrayList<>();
+        List<MenuRow> right = new ArrayList<>();
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        left.add(new MenuRow("friend:none", "W grze (" + friendsView.online() + ")", "dotknij, aby napisać prywatnie", false));
+        right.add(new MenuRow("friend:none", "Poza grą (" + (friendsView.rows().size() - friendsView.online()) + ")",
+                "/znajomi usuń Imię - usuwa z listy", false));
+        for (pl.fawizja.pixel.friends.FriendsView.Row r : friendsView.rows()) {
+            String detail = r.level() > 0 ? r.vocation() + ", poziom " + r.level() : "postać nieznana";
+            if (r.online() && left.size() < perCol) left.add(new MenuRow("friend:pm:" + r.name(), r.name(), detail, true));
+            else if (!r.online() && right.size() < perCol) right.add(new MenuRow("friend:none", r.name(), detail, false));
+        }
+        if (friendsView.rows().isEmpty()) left.add(new MenuRow("friend:none", "Lista jest pusta",
+                "/znajomi dodaj Imię albo dotknij gracza", false));
+        float colW = (menuW - 30) / 2f;
+        for (int c = 0; c < 2; c++) {
+            List<MenuRow> col = c == 0 ? left : right;
+            for (int i = 0; i < col.size(); i++) {
+                MenuRow row = col.get(i);
+                row.x = menuX + 10 + c * (colW + 10);
+                row.y = menuY + menuH - 40 - (i + 1) * rowH;
+                row.w = colW;
+                row.h = rowH - 3;
+                menuRows.add(row);
+            }
         }
     }
 
@@ -650,6 +706,7 @@ public final class Hud {
                 else {
                     menuOpen = false;
                     rankingView = null;
+                    friendsView = null;
                 }
                 return true;
             }
@@ -672,7 +729,7 @@ public final class Hud {
                         customBar.assign(assignSlot, row.action.substring(5));
                         updateBar(session);
                         actions.onButton("bar_saved");
-                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none")) {
+                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none")) {
                         actions.onButton(row.action);
                     }
                     return true;
@@ -740,9 +797,10 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null;
+        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null && friendsView == null;
         if (playerMenu != null && !menuOpen) playerMenu = null;
         if (rankingView != null && !menuOpen) rankingView = null;
+        if (friendsView != null && !menuOpen) friendsView = null;
         fish.visible = session.canFish();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
@@ -882,6 +940,8 @@ public final class Hud {
         if (menuOpen) {
             if (trade == null && playerMenu != null) {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && friendsView != null) {
+                text(batch, "Znajomi (" + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && rankingView != null) {
                 text(batch, rankingView.title() + " (wg doświadczenia, " + rankingView.total() + " postaci)", menuX + 10, menuY + menuH - 14);
             } else if (trade != null) {

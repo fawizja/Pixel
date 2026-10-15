@@ -298,6 +298,7 @@ public final class GameScreen extends ScreenAdapter {
                         case "trade": net.send("TRADE", "REQUEST", f[2]); break;
                         case "party": net.send("PARTY", "INVITE", f[2]); break;
                         case "guild": net.send("GUILD", "INVITE", f[2]); break;
+                        case "friend": net.send("FRIEND", "ADD", f[2]); break;
                         case "attack": {
                             int pid = Integer.parseInt(f[2]);
                             boolean stop = pvpTargetId == pid;
@@ -312,6 +313,11 @@ public final class GameScreen extends ScreenAdapter {
                     if (id.equals("trade:accept")) net.send("TRADE", "ACCEPT");
                     else if (id.equals("trade:cancel")) net.send("TRADE", "CANCEL");
                     else if (id.startsWith("trade:offer:")) net.send("TRADE", "OFFER", id.substring(12));
+                } else if (id.startsWith("friend:pm:")) {
+                    hud.closeFriends();
+                    openChat("/w " + id.substring(10) + ", ");
+                } else if (id.startsWith("friend:")) {
+                    // naglowki listy znajomych
                 } else if (id.startsWith("ranking:")) {
                     // wiersze rankingu tylko do czytania
                 } else if (id.startsWith("spell:")) {
@@ -324,7 +330,10 @@ public final class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void openChat() {
+    private void openChat() { openChat(""); }
+
+    /** Okno czatu z gotowym poczatkiem tekstu (np. "/w Ula, "). */
+    private void openChat(String start) {
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
@@ -332,9 +341,9 @@ public final class GameScreen extends ScreenAdapter {
 
                 @Override
                 public void canceled() { }
-            }, "Czat", "", net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
+            }, "Czat", start, net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
         } else {
-            chatDraft = new StringBuilder();
+            chatDraft = new StringBuilder(start);
         }
     }
 
@@ -894,6 +903,9 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "RANK":
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
+                    break;
+                case "FRIENDS":
+                    hud.openFriends(pl.fawizja.pixel.friends.FriendsView.parse(m));
                     break;
                 case "PARTY":
                     party.clear();
