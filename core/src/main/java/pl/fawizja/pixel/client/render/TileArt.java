@@ -34,6 +34,9 @@ public final class TileArt implements Disposable {
     private static final int SPRITE_BASE = 512;
     private static final int MONSTER_BASE = 640;
     private static final int NPC_BASE = 800;
+    /** Kon (wierzchowiec): w prawo i w lewo. */
+    private static final int HORSE_CELL = 1000;
+    private TextureRegion[] horse;
 
     private final Texture atlas;
     private final Texture lightTexture;
@@ -76,6 +79,8 @@ public final class TileArt implements Disposable {
             int cell = NPC_BASE + i;
             paintNpc(pm, cellX(cell), cellY(cell), npcList.get(i));
         }
+        paintHorse(pm, cellX(HORSE_CELL), cellY(HORSE_CELL), false);
+        paintHorse(pm, cellX(HORSE_CELL + 1), cellY(HORSE_CELL + 1), true);
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -91,6 +96,7 @@ public final class TileArt implements Disposable {
         }
         for (int i = 0; i < mtypes.size(); i++) monsters.put(mtypes.get(i).key(), region(MONSTER_BASE + i));
         for (int i = 0; i < npcList.size(); i++) npcs.put(npcList.get(i).key(), region(NPC_BASE + i));
+        horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -109,6 +115,9 @@ public final class TileArt implements Disposable {
     public TextureRegion white() { return white; }
     public TextureRegion monster(String key) { return monsters.get(key); }
     public TextureRegion npc(String key) { return npcs.get(key); }
+
+    /** Kon pod jezdzcem, zwrocony w strone ruchu (w lewo albo w prawo). */
+    public TextureRegion horse(Direction facing) { return horse[facing != null && facing.dx < 0 ? 1 : 0]; }
     public Texture lightTexture() { return lightTexture; }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -577,6 +586,33 @@ public final class TileArt implements Disposable {
         if (v == Vocation.PALADIN) {
             rect(pm, ox, oy, 13, 2, 1, 10, Color.valueOf("#c9b37e")); // wlocznia
         }
+    }
+
+    /** Kon z boku: tulow, nogi, szyja i glowa z przodu, grzywa i ogon. */
+    private void paintHorse(Pixmap pm, int ox, int oy, boolean left) {
+        Color coat = Color.valueOf("#8a5a30");
+        Color dark = shade(coat, 0.6f);
+        Color mane = Color.valueOf("#2a1a10");
+        Color saddle = Color.valueOf("#b02a20");
+        int[][] parts = {
+            {2, 8, 11, 4},   // tulow
+            {3, 12, 2, 4},   // nogi
+            {6, 12, 1, 4},
+            {9, 12, 1, 4},
+            {11, 12, 2, 4},
+            {11, 4, 3, 5},   // szyja
+            {12, 3, 4, 3},   // glowa
+        };
+        disc(pm, ox, oy, 8f, 15f, 6f, new Color(0, 0, 0, 0.35f));
+        for (int i = 0; i < parts.length; i++) {
+            int[] r = parts[i];
+            int x = left ? 16 - r[0] - r[2] : r[0];
+            rect(pm, ox, oy, x, r[1], r[2], r[3], i >= 1 && i <= 4 ? dark : coat);
+        }
+        rect(pm, ox, oy, left ? 3 : 11, 3, 2, 5, mane);           // grzywa
+        rect(pm, ox, oy, left ? 14 : 0, 8, 2, 5, mane);           // ogon
+        rect(pm, ox, oy, left ? 6 : 5, 7, 5, 2, saddle);          // siodlo
+        px(pm, ox, oy, left ? 1 : 14, 4, Color.valueOf("#101010")); // oko
     }
 
     /** Sylwetki potworow wedlug ksztaltu z monsters.csv, barwione kolorem typu. */

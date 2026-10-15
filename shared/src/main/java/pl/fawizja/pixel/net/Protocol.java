@@ -16,7 +16,7 @@ import java.util.List;
  * TARGET idPotwora                      FRAME   czasSerwera            (poczatek klatki stanu)
  * CHAT   tekst                          ME      x y z KIERUNEK         (wlasna pozycja)
  *                                       TG      idPotwora | -          (cel walki)
- *                                       PL      id imie PROFESJA x y z hp% (inny gracz w zasiegu)
+ *                                       PL      id imie PROFESJA x y z hp% czaszka gildia M|- (inny gracz w zasiegu, M = na koniu)
  * BYE                                   MO      id klucz x y z hp%     (potwor w zasiegu)
  *                                       END                            (koniec klatki)
  *                                       LOG     RODZAJ tekst

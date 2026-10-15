@@ -106,6 +106,8 @@ public final class PlayerCharacter {
         quests.mirror(o.quests);
         homeTown = o.homeTown;
         running = o.running;
+        hasMount = o.hasMount;
+        mounted = o.mounted;
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
@@ -133,7 +135,21 @@ public final class PlayerCharacter {
     public int maxHealth() { return Balance.maxHealth(vocation, level); }
     public int maxMana() { return Balance.maxMana(vocation, level); }
     public int capacity() { return Balance.capacity(vocation, level); }
-    public int speed() { return Balance.speed(level); }
+    /** Premia szybkosci na wierzchowcu. */
+    public static final int MOUNT_SPEED = 60;
+
+    public int speed() { return Balance.speed(level) + (mounted ? MOUNT_SPEED : 0); }
+
+    private boolean hasMount;
+    private boolean mounted;
+
+    public boolean hasMount() { return hasMount; }
+    public void setHasMount(boolean v) {
+        hasMount = v;
+        if (!v) mounted = false;
+    }
+    public boolean isMounted() { return mounted; }
+    public void setMounted(boolean v) { mounted = v && hasMount; }
     public Position position() { return position; }
     public Container backpack() { return backpack; }
     public Equipment equipment() { return equipment; }

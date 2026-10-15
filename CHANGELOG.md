@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.33.0] - 2026-10-15
+
+### Dodano
+- Wierzchowiec: siodło (50 000 gp u kupców w Varden, Frostholm, Qasirah i Selvaran) użyte z plecaka oswaja konia
+  na stałe. Przycisk KOŃ (klawisz M) - wsiadanie i zsiadanie, +60 szybkości (na poziomie 8 o ok. 25% szybciej).
+  Pod ziemią nie można jechać - przy zejściu postać zostawia konia.
+- Koń rysowany pod postacią (własny sprite w atlasie), widoczny też u innych graczy (pole `M` w komunikacie PL).
+- Zapis: flagi `H` (ma konia) i `M` (jedzie).
+- Nowa scena `mount` w regresji GUI (21 scen); 2 nowe testy (sklep, siodło, szybkość, zapis, podziemia; sieciowy:
+  inni widzą jeźdźca); łącznie 256.
+
 ## [0.32.0] - 2026-10-15
 
 ### Dodano

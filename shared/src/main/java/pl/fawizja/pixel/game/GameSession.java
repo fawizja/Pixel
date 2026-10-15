@@ -408,7 +408,41 @@ public final class GameSession {
     /** Uzycie przedmiotu z plecaka (mikstura, jedzenie, runa). */
     public CastResult useSlot(int slot, long nowMs) {
         if (slot < 0 || slot >= pc.backpack().size()) return CastResult.MISSING_ITEM;
+        pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(slot);
+        if (st != null && items.get(st.itemId()).key().equals("saddle")) return useSaddle(slot, nowMs);
         return spells.useItem(slot, nowMs);
+    }
+
+    /** Siodlo: oswaja konia na stale (przedmiot znika). */
+    private CastResult useSaddle(int slot, long nowMs) {
+        if (pc.hasMount()) {
+            log.add(nowMs, EventLog.Kind.INFO, "Masz już wierzchowca. Wsiadasz przyciskiem KOŃ (klawisz M).");
+            return CastResult.OK;
+        }
+        if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
+        pc.setHasMount(true);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Oswojono konia! Wsiadaj przyciskiem KOŃ (klawisz M): +"
+                + PlayerCharacter.MOUNT_SPEED + " szybkości.");
+        return CastResult.OK;
+    }
+
+    /** Wsiadanie i zsiadanie z wierzchowca (pod ziemia nie mozna jechac). */
+    public void toggleMount(long nowMs) {
+        if (!pc.hasMount()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz wierzchowca - kup siodło u kupca i użyj go.");
+            return;
+        }
+        if (pc.isMounted()) {
+            pc.setMounted(false);
+            log.add(nowMs, EventLog.Kind.INFO, "Zsiadasz z konia.");
+            return;
+        }
+        if (pc.position().z() < 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Pod ziemią koń się nie zmieści.");
+            return;
+        }
+        pc.setMounted(true);
+        log.add(nowMs, EventLog.Kind.INFO, "Wsiadasz na konia (+" + PlayerCharacter.MOUNT_SPEED + " szybkości).");
     }
 
     public CastResult usePotion(String itemKey, long nowMs) {
@@ -443,6 +477,10 @@ public final class GameSession {
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
     public void update(long nowMs, Direction requested) {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
+        if (pc.isMounted() && pc.position().z() < 0) {
+            pc.setMounted(false);
+            log.add(nowMs, EventLog.Kind.INFO, "Zostawiasz konia przy zejściu pod ziemię.");
+        }
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt);

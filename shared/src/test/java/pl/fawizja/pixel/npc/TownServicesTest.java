@@ -291,6 +291,41 @@ class TownServicesTest {
     }
 
     @Test
+    void aSaddleFromTheMerchantTamesAHorseThatIsFasterButStaysAboveGround() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        GameSession s = session(pc, List.of());
+        long t = 1000;
+        s.toggleMount(t);
+        assertFalse(pc.isMounted(), "no horse yet");
+        s.teleport(talkSpot(npcs.get("varden_merchant")), t);
+        pl.fawizja.pixel.economy.Money.add(pc.backpack(), 50_000);
+        assertEquals(TradeResult.OK, s.buy(id("saddle"), 1, t));
+        int slot = -1;
+        for (int i = 0; i < pc.backpack().size(); i++) {
+            if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == id("saddle")) slot = i;
+        }
+        int walk = pc.speed();
+        s.useSlot(slot, t);
+        assertTrue(pc.hasMount());
+        assertEquals(0, pc.backpack().count(id("saddle")), "the saddle is used up");
+        s.toggleMount(t);
+        assertTrue(pc.isMounted());
+        assertEquals(walk + PlayerCharacter.MOUNT_SPEED, pc.speed());
+        CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
+        PlayerCharacter back = codec.decode(codec.encode(pc));
+        assertTrue(back.hasMount() && back.isMounted());
+        s.toggleMount(t);
+        assertFalse(pc.isMounted());
+        assertEquals(walk, pc.speed());
+        s.toggleMount(t);
+        pc.setPosition(new Position(pc.position().x(), pc.position().y(), -1));
+        s.update(t + 100, null);
+        assertFalse(pc.isMounted(), "no riding underground");
+        s.toggleMount(t + 200);
+        assertFalse(pc.isMounted());
+    }
+
+    @Test
     void killQuestCountsKillsAndPaysOnce() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         Position field = new Position(58, 72, 0);

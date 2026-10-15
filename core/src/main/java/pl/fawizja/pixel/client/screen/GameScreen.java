@@ -105,6 +105,7 @@ public final class GameScreen extends ScreenAdapter {
         int healthPercent;
         String skull = "NONE";
         String guild;
+        boolean mounted;
         boolean seen;
     }
 
@@ -244,6 +245,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.P: hud.toggleCharacter(); return true;
                     case Input.Keys.L: onButton("fish"); return true;
                     case Input.Keys.O: hud.openAchievements(false); return true;
+                    case Input.Keys.M: onButton("mount"); return true;
                     case Input.Keys.ESCAPE:
                         if (hud.npcOpen()) hud.toggleNpc(session);
                         else if (hud.bookOpen()) hud.toggleBook();
@@ -514,11 +516,21 @@ public final class GameScreen extends ScreenAdapter {
             for (RemotePlayer rp : remotePlayers.values()) {
                 if (rp.to.y() != row || rp.to.z() != z) continue;
                 float[] lg = lunges.get(rp.to);
+                float rise = 0f;
+                if (rp.mounted) {
+                    b.draw(game.art().horse(rp.facing), remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)), 1f, 1f);
+                    rise = 0.35f;
+                }
                 b.draw(game.art().character(rp.vocation, rp.facing), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
-                        worldRenderer.worldY(remoteY(rp, t) + (lg == null ? 0f : lg[1])), 1f, 1f);
+                        worldRenderer.worldY(remoteY(rp, t) - rise + (lg == null ? 0f : lg[1])), 1f, 1f);
             }
             if (row == playerRow) {
-                b.draw(game.art().character(pc.vocation(), session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
+                float rise = 0f;
+                if (pc.isMounted()) {
+                    b.draw(game.art().horse(session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
+                    rise = 0.35f;
+                }
+                b.draw(game.art().character(pc.vocation(), session.facing()), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
             }
         });
         batch.end();
@@ -896,6 +908,7 @@ public final class GameScreen extends ScreenAdapter {
                 rp.healthPercent = e.healthPercent();
                 rp.skull = e.mark();
                 rp.guild = e.guild();
+                rp.mounted = e.mounted();
                 rp.seen = true;
             }
             remotePlayers.values().removeIf(rp -> !rp.seen);

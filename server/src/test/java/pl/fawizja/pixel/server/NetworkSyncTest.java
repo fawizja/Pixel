@@ -817,6 +817,22 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void otherPlayersSeeWhoRidesAHorse() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("both see each other", () -> seen(ula, "Ola") != null);
+            assertFalse(seen(ula, "Ola").mounted());
+            server.enqueueTest(() -> server.world().find("Ola").session.character().setHasMount(true));
+            ola.send("ACT", "mount");
+            await("ola rides", () -> seen(ula, "Ola") != null && seen(ula, "Ola").mounted());
+            ola.send("ACT", "mount");
+            await("ola walks", () -> seen(ula, "Ola") != null && !seen(ula, "Ola").mounted());
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

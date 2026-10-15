@@ -13,6 +13,7 @@ public final class Actions {
         switch (action) {
             case "use": s.useNearby(now); return true;
             case "run": s.toggleRun(now); return true;
+            case "mount": s.toggleMount(now); return true;
             case "torch": s.toggleTorch(now); return true;
             case "pick": s.pickUpHere(now); return true;
             case "loot": s.searchCorpse(now); return true;

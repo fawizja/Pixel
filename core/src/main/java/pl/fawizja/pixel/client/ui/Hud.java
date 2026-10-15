@@ -58,6 +58,7 @@ public final class Hud {
     private final HudButton fish = new HudButton("fish", "ŁÓW");
     private final HudButton talk = new HudButton("talk", "ROZMOWA");
     private final HudButton chat = new HudButton("chat", "CZAT");
+    private final HudButton mount = new HudButton("mount", "KOŃ");
     private boolean chatEnabled;
     /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
     private boolean npcMode;
@@ -143,6 +144,7 @@ public final class Hud {
         buttons.add(fish);
         buttons.add(talk);
         buttons.add(chat);
+        buttons.add(mount);
         buttons.add(potionHp);
         buttons.add(potionMp);
         for (int i = 0; i < spellButtons.length; i++) {
@@ -178,6 +180,7 @@ public final class Hud {
         fish.x = bx - br * 4.8f; fish.y = by + br * 4.8f; fish.r = br;
         talk.x = bx; talk.y = by + br * 7.2f; talk.r = br;
         chat.x = bx - br * 2.4f; chat.y = by + br * 7.2f; chat.r = br;
+        mount.x = bx - br * 4.8f; mount.y = by + br * 7.2f; mount.r = br;
         // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
         float sr = Math.max(20, br * 0.72f);
         float sx0 = margin + jr * 2.6f + sr + 12;
@@ -956,6 +959,8 @@ public final class Hud {
         if (marketView != null && !menuOpen) marketView = null;
         if (achievementsView && !menuOpen) achievementsView = false;
         fish.visible = session.canFish();
+        mount.visible = pc.hasMount();
+        mount.active = pc.isMounted();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
         talk.active = npcOpen();

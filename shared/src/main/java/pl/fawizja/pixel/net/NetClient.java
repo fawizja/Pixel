@@ -164,7 +164,8 @@ public final class NetClient implements AutoCloseable {
                     case "TP": playerTargetId = f[1].equals("-") ? -1 : Integer.parseInt(f[1]); break;
                     case "PL":
                         players.add(new RemoteEntity("PL", Integer.parseInt(f[1]), f[3], f[2], pos(f, 4), Integer.parseInt(f[7]),
-                                f.length > 8 ? f[8] : "NONE", f.length > 9 && !f[9].equals("-") ? f[9] : null));
+                                f.length > 8 ? f[8] : "NONE", f.length > 9 && !f[9].equals("-") ? f[9] : null,
+                                f.length > 10 && f[10].equals("M")));
                         break;
                     case "MO":
                         monsters.add(new RemoteEntity("MO", Integer.parseInt(f[1]), f[2], f[2], pos(f, 3), Integer.parseInt(f[6])));

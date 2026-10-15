@@ -243,6 +243,12 @@ przy pauzie, utracie fokusu i zamknieciu.
   usuniecie konta usuwa gracza z gildii. Nazwa gildii w klatce stanu (10. pole PL).
 - Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GCHAT tekst`.
 
+## Wierzchowiec (Z logika, C rysowanie)
+
+Siodlo (`saddle`) uzyte z plecaka (`GameSession.useSlot` -> `useSaddle`) daje konia na stale (`hasMount`).
+`toggleMount` (akcja `mount`): +`PlayerCharacter.MOUNT_SPEED` (60) do szybkosci; pod ziemia (z < 0) zakaz i automatyczne
+zsiadanie w `update`. Online: pole `M` w PL, klient rysuje `TileArt.horse` pod postacia.
+
 ## Zadanie dnia (Z logika, C UI)
 
 `daily/DailyTask`: raz na dzien kalendarzowy (`GameSession.today()`, w testach `setToday`) potwor ze stalych spawnow
