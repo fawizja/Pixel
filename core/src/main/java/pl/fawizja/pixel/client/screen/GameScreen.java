@@ -287,6 +287,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.O: hud.openAchievements(false); return true;
                     case Input.Keys.M: onButton("mount"); return true;
                     case Input.Keys.J: hud.toggleMap(); return true;
+                    case Input.Keys.Z: hud.openJournal(); return true;
                     case Input.Keys.ESCAPE:
                         if (hud.mapOpen()) hud.toggleMap();
                         else if (hud.npcOpen()) hud.toggleNpc(session);
@@ -298,6 +299,9 @@ public final class GameScreen extends ScreenAdapter {
             }
         });
     }
+
+    /** Akcja przycisku/wiersza menu z zewnatrz (desktop: -Dpixel.button=id). */
+    public void press(String id) { onButton(id); }
 
     private void onButton(String id) {
         long t = now();
@@ -373,6 +377,18 @@ public final class GameScreen extends ScreenAdapter {
                     String[] f = id.split(":");
                     if (net != null && f.length == 3 && f[1].equals("buy")) net.send("MARKET", "BUY", f[2]);
                     if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
+                } else if (id.startsWith("journal:")) {
+                    // dziennik: marsz do zleceniodawcy (przewodnik = najblizszy przewodnik na pietrze)
+                    String key = id.startsWith("journal:goto:") ? id.substring(13) : null;
+                    pl.fawizja.pixel.npc.Npc target = key == null ? nearestGuide() : session.npcs().get(key);
+                    hud.openJournal(); // zamkniecie okna
+                    if (target == null || target.position().z() != session.character().position().z()) {
+                        session.log().add(t, EventLog.Kind.INFO, target == null ? "Nie znam drogi." : target.name() + " jest na innym piętrze.");
+                    } else if (session.npcNearby() == target) {
+                        hud.openNpc(session);
+                    } else if (walkTo(target.position(), t, false, true)) {
+                        walkNpc = target;
+                    }
                 } else if (id.startsWith("map:goto:")) {
                     String[] xy = id.substring(9).split(",");
                     walkTo(new Position(Integer.parseInt(xy[0]), Integer.parseInt(xy[1]), session.character().position().z()), t, false, false);
@@ -415,6 +431,10 @@ public final class GameScreen extends ScreenAdapter {
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        if (cmd.equals("/zadania") || cmd.equals("/dziennik")) {
+            hud.openJournal();
+            return;
+        }
         if (cmd.equals("/osiagniecia") || cmd.equals("/bestiariusz")) {
             hud.openAchievements(cmd.equals("/bestiariusz"));
             return;
@@ -492,6 +512,16 @@ public final class GameScreen extends ScreenAdapter {
     private List<Position> walkPath;
     private int walkIndex;
     private pl.fawizja.pixel.npc.Npc walkNpc;
+
+    private pl.fawizja.pixel.npc.Npc nearestGuide() {
+        pl.fawizja.pixel.npc.Npc best = null;
+        Position me = session.character().position();
+        for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
+            if (n.role() != pl.fawizja.pixel.npc.NpcRole.GUIDE || n.position().z() != me.z()) continue;
+            if (best == null || n.position().distanceTo(me) < best.position().distanceTo(me)) best = n;
+        }
+        return best;
+    }
 
     /** Marsz do pola na biezacym pietrze (dotkniecie duzej mapy; desktop: -Dpixel.walkto=x,y). */
     public void walkTo(Position goal) { walkTo(goal, now(), false, false); }

@@ -158,6 +158,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Pojedynki do pierwszej krwi bez czaszek (0.39.0)
 - [x] Nagroda za codzienne logowanie (seria 7 dni) (0.40.0)
 - [x] Dymki czatu nad postaciami (0.41.0)
+- [x] Dziennik zadan z marszem do zleceniodawcy (0.42.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

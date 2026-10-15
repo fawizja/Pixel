@@ -21,9 +21,10 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
+ *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|map|chat|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -149,11 +150,19 @@ public final class DesktopLauncher {
                     gs.hud().setWalkTarget(new Position(120, 150, 0));
                     gs.hud().toggleMap();
                 }
+                if ("journal".equals(open)) {
+                    // podglad dziennika: jedno zadanie w toku
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.session().character().quests().restore("varden_wolves", false, 3);
+                    gs.hud().openJournal();
+                }
                 if ("chat".equals(open)) {
                     // podglad dymka czatu nad wlasna postacia
                     GameScreen gs = (GameScreen) getScreen();
                     gs.say(gs.session().character().name(), "Witajcie w Varden! Ktoś idzie ze mną do kopalni goblinów?");
                 }
+                String button = System.getProperty("pixel.button");
+                if (button != null) ((GameScreen) getScreen()).press(button);
                 String tap = System.getProperty("pixel.tap");
                 if (tap != null) {
                     String[] w = tap.split(",");

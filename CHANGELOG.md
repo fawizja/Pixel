@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.42.0] - 2026-10-15
+
+### Dodano
+- Dziennik zadań (klawisz Z, `/zadania`, wiersz „Dziennik zadań” w księdze): zadanie dnia, zadania w toku
+  z postępem i zleceniodawcą (ODDAJ, gdy gotowe) oraz nowe zadania dostępne na obecnym poziomie.
+- Dotknięcie zadania prowadzi postać do zleceniodawcy (zadanie dnia: do najbliższego przewodnika) i otwiera
+  rozmowę po dojściu. Sprawdzone w grze: spod bramy Varden do Strażnika Orena.
+- Opcja deweloperska `-Dpixel.button=akcja`, scena `journal` w regresji GUI (25 scen). Testy 268/268.
+
 ## [0.41.0] - 2026-10-15
 
 ### Dodano

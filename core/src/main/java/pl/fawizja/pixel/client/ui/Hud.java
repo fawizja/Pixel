@@ -73,6 +73,8 @@ public final class Hud {
     private pl.fawizja.pixel.friends.FriendsView friendsView;
     /** Okno osiagniec (albo bestiariusza) - dane lokalnej postaci. */
     private boolean achievementsView;
+    /** Trzeci widok okna osiagniec: dziennik zadan (aktywne, do oddania, dostepne). */
+    private boolean journalMode;
     private boolean bestiaryMode;
     private java.util.function.Function<String, String> monsterNames = k -> k;
     /** Okno rynku z serwera (null = zamkniete). */
@@ -355,12 +357,13 @@ public final class Hud {
     /** Osiagniecia (bestiary = false) albo bestiariusz; ponowne wywolanie z tym samym widokiem zamyka okno. */
     public void openAchievements(boolean bestiary) {
         if (trade != null) return;
-        if (achievementsView && menuOpen && bestiaryMode == bestiary) {
+        if (achievementsView && menuOpen && bestiaryMode == bestiary && !journalMode) {
             achievementsView = false;
             menuOpen = false;
             return;
         }
         achievementsView = true;
+        journalMode = false;
         bestiaryMode = bestiary;
         rankingView = null;
         friendsView = null;
@@ -372,6 +375,21 @@ public final class Hud {
     }
 
     public boolean achievementsOpen() { return menuOpen && achievementsView; }
+
+    /** Dziennik zadan (klawisz Z, /zadania, wiersz w ksiedze); ponowne wywolanie zamyka. */
+    public void openJournal() {
+        if (trade != null) return;
+        if (journalOpen()) {
+            achievementsView = false;
+            journalMode = false;
+            menuOpen = false;
+            return;
+        }
+        openAchievements(false);
+        journalMode = true;
+    }
+
+    public boolean journalOpen() { return menuOpen && achievementsView && journalMode; }
 
     public void closeFriends() {
         if (friendsView != null) menuOpen = false;
@@ -451,6 +469,10 @@ public final class Hud {
             rebuildMarketMenu(session);
             return;
         }
+        if (achievementsView && journalMode) {
+            rebuildJournalMenu(session);
+            return;
+        }
         if (achievementsView) {
             rebuildAchievementsMenu(session);
             return;
@@ -470,6 +492,7 @@ public final class Hud {
         String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? "własny układ; dotknij, aby zmienić" : "pasek automatyczny; dotknij, aby zmienić")
                 : "teraz: " + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + "; dotknij, by wybrać następny";
         menuRows.add(new MenuRow("book:assign", assignLabel, assignDetail, true));
+        menuRows.add(new MenuRow("book:journal", "Dziennik zadań", "postęp zadań i drogi do zleceniodawców (Z)", true));
         // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
         List<Recipe> shown = new ArrayList<>();
         for (Recipe rc : session.recipes().all()) if (rc.minLevel() <= pc.level() + 100) shown.add(rc);
@@ -524,6 +547,48 @@ public final class Hud {
     }
 
     /** Osiagniecia w dwoch kolumnach albo bestiariusz (najczesciej zabijane potwory). */
+    /** Dziennik: zadanie dnia, zadania w toku i do oddania, potem dostepne; dotkniecie = marsz do zleceniodawcy. */
+    private void rebuildJournalMenu(GameSession session) {
+        PlayerCharacter pc = session.character();
+        List<MenuRow> rows = new ArrayList<>();
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        pl.fawizja.pixel.daily.DailyTask d = pc.daily();
+        long day = session.today();
+        String dd;
+        if (!d.activeOn(day)) dd = "do wzięcia u przewodnika w mieście";
+        else if (d.claimed()) dd = "wykonane - następne jutro";
+        else if (d.doneOn(day)) dd = "ODDAJ u przewodnika";
+        else dd = monsterNames.apply(d.monster()) + ": " + d.progress() + " / " + d.target();
+        rows.add(new MenuRow("journal:guide", "Zadanie dnia", dd, true));
+        pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
+        List<MenuRow> available = new ArrayList<>();
+        if (qs != null) {
+            for (pl.fawizja.pixel.quest.QuestType q : qs.registry().all()) {
+                pl.fawizja.pixel.quest.QuestLog.State st = pc.quests().state(q.key());
+                pl.fawizja.pixel.npc.Npc giver = session.npcs().get(q.giver());
+                String who = giver == null ? q.giver() : giver.name() + " (" + giver.town() + ")";
+                if (st == pl.fawizja.pixel.quest.QuestLog.State.ACTIVE) {
+                    boolean ready = qs.ready(pc, q);
+                    rows.add(new MenuRow("journal:goto:" + q.giver(), q.name(), ready ? "ODDAJ: " + who
+                            : qs.progress(pc, q) + " / " + q.amount() + " - " + who, true));
+                } else if (st == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && qs.unlocked(pc, q) && pc.level() >= q.minLevel()) {
+                    available.add(new MenuRow("journal:goto:" + q.giver(), "Nowe: " + q.name(), "u " + who + " - " + qs.rewardText(q), true));
+                }
+            }
+        }
+        if (rows.size() == 1) rows.add(new MenuRow("ach:none", "Brak zadań w toku", "przewodnicy w miastach mają zlecenia", false));
+        rows.addAll(available);
+        float colW = (menuW - 30) / 2f;
+        for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
+            MenuRow row = rows.get(i);
+            row.x = menuX + 10 + (i / perCol) * (colW + 10);
+            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+            menuRows.add(row);
+        }
+    }
+
     private void rebuildAchievementsMenu(GameSession session) {
         PlayerCharacter pc = session.character();
         List<MenuRow> rows = new ArrayList<>();
@@ -924,6 +989,8 @@ public final class Hud {
                         depotView = !depotView;
                     } else if (row.action.equals("book:page")) {
                         bookPage++;
+                    } else if (row.action.equals("book:journal")) {
+                        openJournal();
                     } else if (row.action.equals("book:assign")) {
                         assignSlot = assignSlot >= 3 ? -1 : assignSlot + 1;
                     } else if (assignSlot >= 0 && row.action.startsWith("cast:")) {
@@ -1154,6 +1221,9 @@ public final class Hud {
         if (menuOpen) {
             if (trade == null && playerMenu != null) {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && achievementsView && journalMode) {
+                text(batch, "Dziennik zadań - ukończone: " + session.character().quests().done().size()
+                        + " (dotknij zadania, aby iść do zleceniodawcy)", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && achievementsView) {
                 PlayerCharacter me = session.character();
                 text(batch, bestiaryMode ? "Bestiariusz - " + me.name()
