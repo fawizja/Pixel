@@ -275,7 +275,14 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private void sendChat(String text) {
-        if (net != null && text != null && !text.isBlank()) net.send("CHAT", text.trim());
+        if (net == null || text == null || text.isBlank()) return;
+        String[] msg = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
+        if (msg == null) {
+            session.log().add(now(), EventLog.Kind.INFO,
+                    pl.fawizja.pixel.net.ChatCommands.HELP);
+            return;
+        }
+        net.send(msg);
     }
 
     /** Dotkniecie swiata: wybor potwora jako celu. */

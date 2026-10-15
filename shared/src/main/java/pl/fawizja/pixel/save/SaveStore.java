@@ -77,6 +77,13 @@ public final class SaveStore {
         return new LoadResult<>(null, false, problem);
     }
 
+    /** Usuwa zapis i jego kopie (np. przy usunieciu konta). */
+    public synchronized void delete(String slot) throws IOException {
+        String s = sanitize(slot);
+        java.nio.file.Files.deleteIfExists(main(s).toPath());
+        java.nio.file.Files.deleteIfExists(backup(s).toPath());
+    }
+
     public boolean exists(String slot) {
         String s = sanitize(slot);
         return main(s).exists() || backup(s).exists();

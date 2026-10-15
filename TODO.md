@@ -129,7 +129,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] TLS: certyfikat serwera tworzony przy pierwszym starcie (poza repo), przypinanie odcisku w kliencie
 - [x] Limity polaczen/wiadomosci/czatu, asynchroniczna wysylka do klientow
 - [x] Kopie zapasowe katalogu serwera: zip przy starcie i co 6 h, 7 najnowszych
-- [ ] Zmiana hasla, usuwanie konta, limit kont z jednego adresu
+- [x] Zmiana hasla, usuwanie konta (polecenia w czacie), limit 5 nowych kont na dobe z jednego adresu
 - [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
 - [x] Protokol v3: niezmieniona klatka jako `KEEP` (mniej transferu)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka

@@ -401,4 +401,46 @@ class NetworkSyncTest {
             assertEquals(at, a.frame().self(), "KEEP repeats the last state");
         }
     }
+
+    static boolean logSays(NetClient c, String text) {
+        String[] m;
+        while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;
+        return false;
+    }
+
+    @Test
+    void playersCanChangeTheirPasswordAndDeleteTheirAccount() throws Exception {
+        try (NetClient a = connect()) {
+            a.hello("Lena", "MONK", "stare-haslo");
+            await("in", () -> a.playerId() > 0);
+            a.send("PASSWD", "zle-haslo", "nowe-haslo");
+            await("refused", () -> logSays(a, "Zle obecne haslo"));
+            a.send("PASSWD", "stare-haslo", "nowe-haslo");
+            await("changed", () -> logSays(a, "Haslo zmienione"));
+        }
+        await("left", () -> server.world().players().isEmpty());
+        assertFalse(accepted("Lena", "MONK", "stare-haslo"), "the old password no longer works");
+        try (NetClient a = connect()) {
+            a.hello("Lena", "MONK", "nowe-haslo");
+            await("in again", () -> a.playerId() > 0);
+            a.send("DELETE", "nowe-haslo");
+            await("deleted", () -> "Konto usuniete.".equals(a.error()));
+        }
+        await("gone", () -> server.world().players().isEmpty());
+        assertFalse(server.world().saved("Lena"), "the character save is removed");
+        assertTrue(accepted("Lena", "DRUID", "zupelnie-nowe"), "the name is free again");
+    }
+
+    @Test
+    void oneAddressCannotMassCreateAccounts() throws Exception {
+        server.world().maxNewAccountsPerAddress = 2;
+        assertTrue(accepted("Olaf", "MONK", "haslo-olafa"));
+        assertTrue(accepted("Petra", "MONK", "haslo-petry"));
+        try (NetClient c = connect()) {
+            c.hello("Quin", "MONK", "haslo-quina");
+            await("refused", () -> c.error() != null);
+            assertTrue(c.error().contains("Za duzo nowych kont"), c.error());
+        }
+        assertTrue(accepted("Olaf", "MONK", "haslo-olafa"), "existing accounts still log in");
+    }
 }

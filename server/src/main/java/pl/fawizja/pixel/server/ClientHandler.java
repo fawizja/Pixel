@@ -46,6 +46,9 @@ final class ClientHandler {
 
     void onClose(Runnable r) { onClose = r; }
 
+    /** Adres klienta (limit nowych kont z jednego adresu). */
+    java.net.InetAddress address() { return socket.getInetAddress(); }
+
     void start() {
         Thread t = new Thread(this::readLoop, "pixel-client-" + socket.getPort());
         t.setDaemon(true);

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.1] - 2026-10-15
+
+### Dodano
+- Zmiana hasla (`/haslo stare nowe`) i usuniecie konta wraz z postacia (`/usun-konto haslo`) z okna czatu;
+  hasla nie trafiaja na czat. Te same blokady po blednych probach co przy logowaniu.
+- Limit 5 nowych kont na dobe z jednego adresu IP.
+- 3 nowe testy (lacznie 191).
+
 ## [0.14.0] - 2026-10-15
 
 ### Dodano

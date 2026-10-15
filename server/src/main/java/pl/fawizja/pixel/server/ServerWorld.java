@@ -59,6 +59,10 @@ final class ServerWorld {
     final GroundItems ground = new GroundItems();
     /** Stan PvP po imieniu - przetrwa wylogowanie (czaszki nie znikaja po ponownym wejsciu). */
     private final Map<String, PvpRules.Status> pvp = new java.util.HashMap<>();
+    /** Limit zakladania kont: tyle nowych kont z jednego adresu na dobe. */
+    static final long NEW_ACCOUNT_WINDOW_MS = 24 * 3_600_000L;
+    int maxNewAccountsPerAddress = 5;
+    private final Map<java.net.InetAddress, java.util.ArrayDeque<Long>> newAccounts = new java.util.HashMap<>();
     private long lastNow;
     private final Random pvpRng = new Random();
     private final StartingConfig config = StartingConfig.loadDefault();
@@ -106,11 +110,18 @@ final class ServerWorld {
             client.send("ERR", "Niepoprawne imie: 3-20 liter, spacje i apostrof.");
             return null;
         }
-        if (!saved(name) && !accounts.exists(name)) {
+        boolean newAccount = !saved(name) && !accounts.exists(name);
+        if (newAccount) {
             try {
                 Vocation.valueOf(vocation);
             } catch (IllegalArgumentException e) {
                 client.send("ERR", "Nieznana profesja.");
+                return null;
+            }
+            java.util.ArrayDeque<Long> made = newAccounts.computeIfAbsent(client.address(), k -> new java.util.ArrayDeque<>());
+            while (!made.isEmpty() && now - made.peekFirst() > NEW_ACCOUNT_WINDOW_MS) made.pollFirst();
+            if (made.size() >= maxNewAccountsPerAddress) {
+                client.send("ERR", "Za duzo nowych kont z tego adresu - sprobuj jutro.");
                 return null;
             }
         }
@@ -126,6 +137,7 @@ final class ServerWorld {
                 return null;
             case CREATED:
                 LOG.info("new account " + name);
+                newAccounts.computeIfAbsent(client.address(), k -> new java.util.ArrayDeque<>()).addLast(now);
                 break;
             default:
         }
@@ -214,6 +226,24 @@ final class ServerWorld {
         }
     }
 
+    /** Po usunieciu konta: gracz znika ze swiata bez zapisu, a jego pliki sa kasowane. */
+    private void deleteCharacter(ServerPlayer p) {
+        String key = p.name().toLowerCase(java.util.Locale.ROOT);
+        players.remove(p.id);
+        pvp.remove(key);
+        try {
+            saves.delete("player_" + key);
+            saves.delete("pvp_" + key);
+        } catch (IOException e) {
+            LOG.warning("delete failed for " + p.name() + ": " + e.getMessage());
+        }
+        p.client.player = null;
+        p.client.send("ERR", "Konto usuniete.");
+        p.client.close();
+        broadcast(p, "LOG", "INFO", p.name() + " opuszcza gre.");
+        LOG.info("account deleted " + p.name());
+    }
+
     boolean saved(String name) { return saves.exists("player_" + name.toLowerCase(java.util.Locale.ROOT)); }
 
     void leave(ServerPlayer p) {
@@ -240,6 +270,26 @@ final class ServerWorld {
                         if (m.id() == id) p.session.targetAt(m.position());
                     }
                 }
+                break;
+            case "PASSWD":
+                if (f.length < 3) break;
+                switch (accounts.changePassword(p.name(), f[1], f[2], now)) {
+                    case OK: p.session.log().add(now, EventLog.Kind.SYSTEM, "Haslo zmienione."); break;
+                    case LOCKED: p.session.log().add(now, EventLog.Kind.WARNING, "Za duzo blednych prob - sprobuj za minute."); break;
+                    case BAD_PASSWORD:
+                        p.session.log().add(now, EventLog.Kind.WARNING, "Nowe haslo musi miec " + AccountStore.MIN_PASSWORD
+                                + "-" + AccountStore.MAX_PASSWORD + " znakow.");
+                        break;
+                    default: p.session.log().add(now, EventLog.Kind.WARNING, "Zle obecne haslo.");
+                }
+                break;
+            case "DELETE":
+                if (f.length < 2) break;
+                if (accounts.delete(p.name(), f[1], now) != AccountStore.Result.OK) {
+                    p.session.log().add(now, EventLog.Kind.WARNING, "Konto nie zostalo usuniete - zle haslo.");
+                    break;
+                }
+                deleteCharacter(p);
                 break;
             case "CHAT":
                 if (f.length > 1 && !f[1].isBlank()) {

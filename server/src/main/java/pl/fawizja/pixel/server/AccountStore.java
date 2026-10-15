@@ -56,12 +56,7 @@ final class AccountStore {
                 create(f, password);
                 return Result.CREATED;
             }
-            String[] parts = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8).trim().split(";");
-            if (parts.length != 4 || !parts[0].equals("pbkdf2-sha256")) throw new IOException("bad account file");
-            int iterations = Integer.parseInt(parts[1]);
-            byte[] salt = Base64.getDecoder().decode(parts[2]);
-            byte[] expected = Base64.getDecoder().decode(parts[3]);
-            if (MessageDigest.isEqual(expected, hash(password, salt, iterations))) {
+            if (matches(f, password)) {
                 failures.remove(key);
                 lockedUntil.remove(key);
                 return Result.OK;
@@ -69,12 +64,70 @@ final class AccountStore {
         } catch (IOException | RuntimeException e) {
             throw new IllegalStateException("konto " + name + ": " + e.getMessage(), e);
         }
+        return failed(key, now);
+    }
+
+    /** Zmiana hasla po podaniu obecnego (te same blokady co przy logowaniu). */
+    Result changePassword(String name, String oldPassword, String newPassword, long now) {
+        if (newPassword == null || newPassword.length() < MIN_PASSWORD || newPassword.length() > MAX_PASSWORD) {
+            return Result.BAD_PASSWORD;
+        }
+        Result r = verify(name, oldPassword, now);
+        if (r != Result.OK) return r;
+        try {
+            create(file(name), newPassword);
+        } catch (IOException e) {
+            throw new IllegalStateException("konto " + name + ": " + e.getMessage(), e);
+        }
+        return Result.OK;
+    }
+
+    /** Usuniecie konta po podaniu hasla. Zapis postaci usuwa wywolujacy. */
+    Result delete(String name, String password, long now) {
+        Result r = verify(name, password, now);
+        if (r != Result.OK) return r;
+        try {
+            Files.deleteIfExists(file(name).toPath());
+        } catch (IOException e) {
+            throw new IllegalStateException("konto " + name + ": " + e.getMessage(), e);
+        }
+        return Result.OK;
+    }
+
+    /** Sprawdzenie hasla istniejacego konta (bez zakladania nowego). */
+    private Result verify(String name, String password, long now) {
+        String key = key(name);
+        Long lock = lockedUntil.get(key);
+        if (lock != null && now < lock) return Result.LOCKED;
+        File f = file(name);
+        if (!f.isFile() || password == null) return failed(key, now);
+        try {
+            if (matches(f, password)) {
+                failures.remove(key);
+                return Result.OK;
+            }
+        } catch (IOException | RuntimeException e) {
+            throw new IllegalStateException("konto " + name + ": " + e.getMessage(), e);
+        }
+        return failed(key, now);
+    }
+
+    private Result failed(String key, long now) {
         int[] count = failures.computeIfAbsent(key, k -> new int[1]);
         if (++count[0] >= MAX_FAILURES) {
             count[0] = 0;
             lockedUntil.put(key, now + LOCK_MS);
         }
         return Result.WRONG_PASSWORD;
+    }
+
+    private static boolean matches(File f, String password) throws IOException {
+        String[] parts = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8).trim().split(";");
+        if (parts.length != 4 || !parts[0].equals("pbkdf2-sha256")) throw new IOException("bad account file");
+        int iterations = Integer.parseInt(parts[1]);
+        byte[] salt = Base64.getDecoder().decode(parts[2]);
+        byte[] expected = Base64.getDecoder().decode(parts[3]);
+        return MessageDigest.isEqual(expected, hash(password, salt, iterations));
     }
 
     private void create(File f, String password) throws IOException {

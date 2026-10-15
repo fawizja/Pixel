@@ -91,14 +91,15 @@ JAVA_OPTS="-Dpixel.server=127.0.0.1:7171 -Dpixel.autostart=Darek:PALADIN -Dpixel
 
 Bez `-Dpixel.autostart` klient pokazuje menu: "Graj lokalnie" albo "Graj online" (ekran logowania:
 adres serwera, imie, haslo). Pierwsze logowanie nowym imieniem zaklada konto; haslo serwer przechowuje
-tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`.
+tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`. W grze haslo zmienia polecenie czatu `/haslo stare nowe`,
+a konto usuwa `/usun-konto haslo`.
 
 Polaczenie jest szyfrowane TLS. Przy pierwszym starcie serwer tworzy wlasny certyfikat w
 `<katalog zapisow>/tls/` (klucz i haslo magazynu nigdy nie trafiaja do repozytorium) i wypisuje jego
 odcisk SHA-256. Klient zapamietuje odcisk przy pierwszym polaczeniu i odmawia, gdy sie zmieni
 (haslo nie jest wtedy wysylane). Serwer robi kopie zapasowe katalogu zapisow (`backups/*.zip`, przy
-starcie i co 6 h, 7 najnowszych) - zawieraja tez klucz TLS, wiec trzeba je chronic jak sam katalog. Przed wystawieniem serwera w internecie warto jeszcze dodac limity
-polaczen i kopie zapasowe katalogu zapisow.
+starcie i co 6 h, 7 najnowszych) - zawieraja tez klucz TLS, wiec trzeba je chronic jak sam katalog. Serwer ma
+limity polaczen, wiadomosci, czatu i zakladania kont z jednego adresu.
 
 ## Dokumentacja
 
