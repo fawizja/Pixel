@@ -833,6 +833,62 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void parcelsReachTheDepotOfOnlineAndOfflinePlayers() throws Exception {
+        int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
+        try (NetClient kuba = connect()) {
+            kuba.hello("Kuba", "MONK", "tajne-Kuba");
+            await("welcome", () -> kuba.selfSave() != null);
+        }
+        await("kuba left", () -> server.world().find("Kuba") == null);
+        Position banker = new Position(70, 78, 0);
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            ola.send("MAIL", "SEND", "Ula", "5 wilcze futro");
+            awaitMessage(ola, "not at a banker", m -> m[0].equals("LOG") && m[2].contains("bankier"));
+            server.enqueueTest(() -> {
+                ServerPlayer p = server.world().find("Ola");
+                p.session.teleport(banker, server.now());
+                p.session.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(pelt, 12));
+            });
+            await("at the banker", () -> {
+                try {
+                    return self(ola).position().equals(banker);
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            ola.send("MAIL", "SEND", "ula", "5 wilcze futro");
+            awaitMessage(ula, "parcel arrived", m -> m[0].equals("LOG") && m[2].startsWith("Poczta: Ola przysyła 5x Wilcze futro"));
+            ola.send("MAIL", "SEND", "Kuba", "7 wilcze futro");
+            awaitMessage(ola, "sent to offline", m -> m[0].equals("LOG") && m[2].contains("odbierze po wejściu"));
+            ola.send("MAIL", "SEND", "Nikt", "1 wilcze futro");
+            awaitMessage(ola, "unknown", m -> m[0].equals("LOG") && m[2].contains("Nie ma takiej postaci"));
+            await("items moved", () -> {
+                try {
+                    return self(ula).depot().count(pelt) == 5 && self(ola).backpack().count(pelt) == 0;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+        }
+        try (NetClient kuba = connect()) {
+            kuba.hello("Kuba", "MONK", "tajne-Kuba");
+            awaitMessage(kuba, "parcel on login", m -> m[0].equals("LOG") && m[2].contains("Ola przysyła 7x Wilcze futro"));
+            await("in kuba's depot", () -> {
+                try {
+                    return self(kuba).depot().count(pelt) == 7;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            assertTrue(server.world().mail.waiting("Kuba").isEmpty());
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

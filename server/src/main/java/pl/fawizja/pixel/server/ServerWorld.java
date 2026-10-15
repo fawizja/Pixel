@@ -95,6 +95,8 @@ final class ServerWorld {
     volatile java.util.function.LongSupplier wallClock = System::currentTimeMillis;
     private final File guildFile;
     private final File marketFile;
+    private final File mailFile;
+    final pl.fawizja.pixel.mail.Mailbox mail;
     final pl.fawizja.pixel.market.Market market;
     /** Prosby o handel: adresat -> (proszacy -> waznosc). */
     private final Map<String, Map<String, Long>> tradeRequests = new java.util.HashMap<>();
@@ -121,6 +123,9 @@ final class ServerWorld {
         marketFile = new File(saveDir, "market.txt");
         market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        mailFile = new File(saveDir, "mail.txt");
+        mail = pl.fawizja.pixel.mail.Mailbox.decode(mailFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(mailFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         loadRanking(saveDir);
     }
 
@@ -238,6 +243,79 @@ final class ServerWorld {
                 o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
             }
         }
+    }
+
+    private void saveMail() {
+        try {
+            File tmp = new File(mailFile.getParentFile(), "mail.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), mail.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), mailFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("mail save failed: " + e.getMessage());
+        }
+    }
+
+    /** MAIL SEND imie tekst: przesylka z plecaka do depozytu innej postaci (takze offline), tylko przy bankierze. */
+    private void mailCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 4 || !f[1].equals("SEND")) return;
+        if (!atBanker(p, now)) return;
+        String to = knownName(f[2].trim());
+        if (to == null) {
+            warn(p, "Nie ma takiej postaci.", now);
+            return;
+        }
+        if (to.equalsIgnoreCase(p.name())) {
+            warn(p, "Własne rzeczy odłóż do depozytu u bankiera.", now);
+            return;
+        }
+        pl.fawizja.pixel.trade.PlayerTrade.Parsed what = pl.fawizja.pixel.trade.PlayerTrade.parse(f[3], items);
+        if (what == null || what.itemId() < 0 || pl.fawizja.pixel.economy.Currency.isCoin(what.itemId())) {
+            warn(p, "Nie wiem, co wysłać. Złoto przekaż przez /handel albo rynek.", now);
+            return;
+        }
+        PlayerCharacter pc = p.session.character();
+        int count = (int) what.count();
+        String label = count + "x " + items.get(what.itemId()).name();
+        if (pc.backpack().count(what.itemId()) < count) {
+            warn(p, "Nie masz w plecaku " + label + ".", now);
+            return;
+        }
+        if (!mail.canAccept(to)) {
+            warn(p, to + " ma za dużo nieodebranych przesyłek.", now);
+            return;
+        }
+        if (!pc.backpack().remove(what.itemId(), count).ok()) return;
+        mail.add(new pl.fawizja.pixel.mail.Mailbox.Parcel(to, p.name(), what.itemId(), count));
+        ServerPlayer r = find(to);
+        if (r != null) deliverMail(r, now);
+        saveMail();
+        save(p);
+        info(p, "Wysłano " + label + " do " + to + (r == null ? " (odbierze po wejściu do gry)." : "."), now);
+    }
+
+    /** Dostarcza czekajace przesylki do depozytu odbiorcy (ile sie zmiesci). */
+    private void deliverMail(ServerPlayer r, long now) {
+        List<pl.fawizja.pixel.mail.Mailbox.Parcel> parcels = mail.take(r.name());
+        if (parcels.isEmpty()) return;
+        PlayerCharacter pc = r.session.character();
+        int delivered = 0;
+        for (pl.fawizja.pixel.mail.Mailbox.Parcel parcel : parcels) {
+            if (pc.depot().canAdd(parcel.itemId(), parcel.count())
+                    && pc.depot().add(new pl.fawizja.pixel.item.ItemStack(parcel.itemId(), parcel.count())).ok()) {
+                delivered++;
+                r.session.log().add(now, EventLog.Kind.SYSTEM, "Poczta: " + parcel.from() + " przysyła "
+                        + parcel.count() + "x " + items.get(parcel.itemId()).name() + " - czeka w depozycie u bankiera.");
+            } else {
+                mail.add(parcel);
+            }
+        }
+        if (delivered < parcels.size()) {
+            r.session.log().add(now, EventLog.Kind.WARNING, "Poczta: depozyt jest pełny, " + (parcels.size() - delivered)
+                    + " przesyłek czeka. Zrób miejsce i wejdź ponownie do gry.");
+        }
+        if (delivered > 0) save(r);
+        saveMail();
     }
 
     /** Zapis rynku: plik tymczasowy i podmiana. */
@@ -615,6 +693,7 @@ final class ServerWorld {
             s.log().add(lastNow, EventLog.Kind.SYSTEM, "Trwa inwazja: " + invasion.plan().name() + " atakują "
                     + invasion.plan().town() + " (zostało " + invasion.remaining() + " wrogów).");
         }
+        deliverMail(p, lastNow);
         long earned = market.takeEarnings(pc.name());
         if (earned > 0) {
             if (pc.bank().credit(earned).ok()) {
@@ -930,6 +1009,8 @@ final class ServerWorld {
         }
         market.forget(p.name());
         saveMarket();
+        mail.forget(p.name());
+        saveMail();
         players.remove(p.id);
         pvp.remove(key);
         ranking.remove(p.name());
@@ -1001,6 +1082,7 @@ final class ServerWorld {
             case "GUILD": guildCommand(p, f, now); break;
             case "FRIEND": friendCommand(p, f, now); break;
             case "MARKET": marketCommand(p, f, now); break;
+            case "MAIL": mailCommand(p, f, now); break;
             case "RANK":
                 if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
                 break;

@@ -243,6 +243,12 @@ przy pauzie, utracie fokusu i zamknieciu.
   usuniecie konta usuwa gracza z gildii. Nazwa gildii w klatce stanu (10. pole PL).
 - Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GCHAT tekst`.
 
+## Poczta (Z logika, S serwer)
+
+`mail/Mailbox`: przesylki (odbiorca, nadawca, przedmiot, ilosc) czekajace na serwerze w `mail.txt`. MAIL SEND imie tekst
+(`ServerWorld.mailCommand`, przy bankierze) zabiera przedmioty z plecaka; `deliverMail` wklada je do depozytu odbiorcy
+od razu (gdy jest w grze) albo przy wejsciu; co sie nie miesci, czeka dalej.
+
 ## Wierzchowiec (Z logika, C rysowanie)
 
 Siodlo (`saddle`) uzyte z plecaka (`GameSession.useSlot` -> `useSaddle`) daje konia na stale (`hasMount`).

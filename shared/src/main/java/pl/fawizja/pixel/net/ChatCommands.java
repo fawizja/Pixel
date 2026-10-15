@@ -12,7 +12,7 @@ package pl.fawizja.pixel.net;
  * "/kto", "/inwazja [miasto]" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION. Ranking: "/ranking [profesja]" -> RANK [profesja].
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
  * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
- * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12.
+ * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Poczta: "/wyslij Imie, 5 wilcze futro" -> MAIL SEND imie tekst.
  * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
@@ -73,6 +73,13 @@ public final class ChatCommands {
                 return friends(t, w);
             case "/rynek":
                 return market(t, w);
+            case "/wyslij": {
+                // "/wyślij Stary Wilk, 5 wilcze futro"
+                String r = rest(t);
+                int comma = r.indexOf(',');
+                if (comma <= 0 || r.substring(comma + 1).isBlank()) return null;
+                return new String[] {"MAIL", "SEND", r.substring(0, comma).trim(), r.substring(comma + 1).trim()};
+            }
             case "/inwazja":
                 return w.length == 1 ? new String[] {"ADMIN", "INVASION"} : new String[] {"ADMIN", "INVASION", rest(t)};
             case "/kto":
@@ -148,5 +155,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

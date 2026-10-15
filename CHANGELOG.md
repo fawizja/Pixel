@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.34.0] - 2026-10-15
+
+### Dodano
+- Poczta (online, u bankiera): `/wyślij Imię, 5 wilcze futro` wysyła przedmioty z plecaka do depozytu innej postaci.
+  Odbiorca w grze dostaje je od razu (z wiadomością), a nieobecny - przy następnym wejściu. Gdy depozyt jest pełny,
+  przesyłka czeka. Do 50 czekających przesyłek na odbiorcę, zapis w `mail.txt` na serwerze (przetrwa restart),
+  usunięcie konta kasuje jego przesyłki. Złota nie wysyła się pocztą.
+- 2 nowe testy (skrzynka i zapis, sieciowy do gracza w grze i offline); łącznie 258.
+
 ## [0.33.0] - 2026-10-15
 
 ### Dodano
