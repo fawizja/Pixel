@@ -98,6 +98,19 @@ public final class DesktopLauncher {
                     ((GameScreen) getScreen()).hud().setTrade(new pl.fawizja.pixel.trade.TradeView(
                             "Ula", "5x Mikstura zdrowia, 1x Lina", "700 gp", false, true));
                 }
+                if ("ranking".equals(open)) {
+                    // podglad okna rankingu (bez serwera): przykladowe miejsca
+                    java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
+                    String[][] sample = {{"Ula", "Druid", "212"}, {"Kuba", "Paladin", "198"}, {"Stary Wilk", "Monk", "175"},
+                            {"Mira", "Sorcerer", "160"}, {"Olaf", "Paladin", "142"}, {"Lena", "Druid", "120"},
+                            {"Test", "Paladin", "98"}, {"Kora", "Monk", "77"}, {"Petra", "Sorcerer", "61"}, {"Quin", "Druid", "40"}};
+                    for (int i = 0; i < sample.length; i++) {
+                        rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i + 1, sample[i][0], sample[i][1],
+                                Integer.parseInt(sample[i][2])));
+                    }
+                    ((GameScreen) getScreen()).hud().openRanking(
+                            new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
+                }
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().openNpc(gs.session());

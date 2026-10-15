@@ -66,6 +66,8 @@ public final class Hud {
     /** Menu innego gracza (po dotknieciu go): id, imie, czy wlasnie go atakuje. */
     private record PlayerMenu(int id, String name, boolean attacking, boolean ally) {}
     private PlayerMenu playerMenu;
+    /** Okno rankingu z serwera (null = zamkniete). */
+    private pl.fawizja.pixel.ranking.RankingView rankingView;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
     private int bookPage;
@@ -206,6 +208,10 @@ public final class Hud {
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
         playerMenu = null;
+        if (rankingView != null) {
+            rankingView = null;
+            menuOpen = false;
+        }
         menuOpen = !(menuOpen && !npcMode);
         npcMode = false;
         assignSlot = -1;
@@ -258,6 +264,18 @@ public final class Hud {
         npcMode = false;
         bagOpen = false;
     }
+
+    /** Ranking z serwera: otwiera okno (handel ma pierwszenstwo). */
+    public void openRanking(pl.fawizja.pixel.ranking.RankingView view) {
+        if (view == null || trade != null) return;
+        rankingView = view;
+        playerMenu = null;
+        menuOpen = true;
+        npcMode = false;
+        bagOpen = false;
+    }
+
+    public boolean rankingOpen() { return menuOpen && rankingView != null; }
 
     public void closePlayerMenu() {
         if (playerMenu != null) menuOpen = false;
@@ -318,6 +336,10 @@ public final class Hud {
         }
         if (playerMenu != null) {
             rebuildPlayerMenu();
+            return;
+        }
+        if (rankingView != null) {
+            rebuildRankingMenu();
             return;
         }
         if (npcMode) {
@@ -384,6 +406,32 @@ public final class Hud {
             row.h = rowH - 3;
             menuRows.add(row);
         }
+    }
+
+    /** Ranking: miejsca 1-5 po lewej, 6-10 po prawej, na dole miejsce gracza. */
+    private void rebuildRankingMenu() {
+        pl.fawizja.pixel.ranking.RankingView v = rankingView;
+        float colW = (menuW - 30) / 2f;
+        List<pl.fawizja.pixel.ranking.RankingView.Row> rows = v.rows();
+        int perCol = Math.max(5, (rows.size() + 1) / 2);
+        for (int i = 0; i < rows.size(); i++) {
+            pl.fawizja.pixel.ranking.RankingView.Row r = rows.get(i);
+            MenuRow row = new MenuRow("ranking:none", r.place() + ". " + r.name() + (r.place() == v.mine() ? "  (ty)" : ""),
+                    r.vocation() + ", poziom " + r.level(),
+                    true);
+            row.x = menuX + 10 + (i / perCol) * (colW + 10);
+            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+            menuRows.add(row);
+        }
+        String mine = v.mine() > 0 ? "Twoje miejsce: " + v.mine() + " z " + v.total() : "Nie ma cię w tym rankingu";
+        MenuRow me = new MenuRow("ranking:none", mine, "/ranking druid, paladin, mag, mnich - ranking profesji", true);
+        me.x = menuX + 10;
+        me.y = menuY + menuH - 40 - (perCol + 1) * rowH - 6;
+        me.w = menuW - 20;
+        me.h = rowH - 3;
+        menuRows.add(me);
     }
 
     /** Okno handlu: lewa kolumna - oferty i decyzje, prawa - przedmioty z plecaka do dodania. */
@@ -562,7 +610,10 @@ public final class Hud {
             if (menuClose.hit(p.x, p.y)) {
                 if (trade != null) actions.onButton("trade:cancel"); // zamkniecie okna = rezygnacja
                 else if (playerMenu != null) closePlayerMenu();
-                else menuOpen = false;
+                else {
+                    menuOpen = false;
+                    rankingView = null;
+                }
                 return true;
             }
             rebuildMenu(session);
@@ -650,8 +701,9 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode && trade == null && playerMenu == null;
+        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null;
         if (playerMenu != null && !menuOpen) playerMenu = null;
+        if (rankingView != null && !menuOpen) rankingView = null;
         fish.visible = session.canFish();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
@@ -791,6 +843,8 @@ public final class Hud {
         if (menuOpen) {
             if (trade == null && playerMenu != null) {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && rankingView != null) {
+                text(batch, rankingView.title() + " (wg doświadczenia, " + rankingView.total() + " postaci)", menuX + 10, menuY + menuH - 14);
             } else if (trade != null) {
                 text(batch, "Handel z " + trade.partner(), menuX + 10, menuY + menuH - 14);
                 text(batch, "Twój plecak (dotknij, aby dodać do oferty)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);

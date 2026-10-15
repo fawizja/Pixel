@@ -312,6 +312,8 @@ public final class GameScreen extends ScreenAdapter {
                     if (id.equals("trade:accept")) net.send("TRADE", "ACCEPT");
                     else if (id.equals("trade:cancel")) net.send("TRADE", "CANCEL");
                     else if (id.startsWith("trade:offer:")) net.send("TRADE", "OFFER", id.substring(12));
+                } else if (id.startsWith("ranking:")) {
+                    // wiersze rankingu tylko do czytania
                 } else if (id.startsWith("spell:")) {
                     String key = hud.barSpell(Integer.parseInt(id.substring(6)));
                     if (key != null) act("cast:" + key, t);
@@ -889,6 +891,9 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "TS":
                     hud.setTrade(pl.fawizja.pixel.trade.TradeView.parse(m));
+                    break;
+                case "RANK":
+                    hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
                     break;
                 case "PARTY":
                     party.clear();

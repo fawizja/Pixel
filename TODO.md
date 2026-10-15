@@ -142,6 +142,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Prywatne wiadomosci i moderacja (bany, wyciszenia, ogloszenia, konsola serwera) (0.23.0)
 - [x] Polskie litery w czcionce i pelne polskie napisy w grze (0.24.0)
 - [x] Polskie nazwy przedmiotow i potworow, handel przyjmuje obie nazwy (0.25.0)
+- [x] Ranking postaci (/ranking [profesja]), takze graczy offline (0.26.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.26.0] - 2026-10-15
+
+### Dodano
+- Ranking postaci na serwerze: `/ranking` (cały serwer) albo `/ranking druid|paladin|mag|mnich` otwiera okno
+  z 10 pierwszymi miejscami (imie, profesja, poziom) i miejscem gracza. Kolejnosc wg doswiadczenia.
+- Ranking obejmuje tez postacie offline: serwer buduje go przy starcie z zapisow, odswieza przy kazdym zapisie,
+  usuwa konto po jego skasowaniu.
+- `-Dpixel.open=ranking` - podglad okna; nowa scena `ranking` w regresji GUI (14 scen).
+- 5 nowych testow, w tym sieciowy (ranking po restarcie serwera, filtr profesji) - lacznie 236.
+
 ## [0.25.0] - 2026-10-15
 
 ### Zmieniono

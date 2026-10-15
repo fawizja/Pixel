@@ -614,6 +614,42 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void rankingListsOfflineCharactersAfterARestartAndFiltersByVocation() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            server.enqueueTest(() -> server.world().find("Ula").session.character().addExperience(500_000));
+            ola.send("RANK");
+            String[][] got = new String[1][];
+            awaitMessage(ola, "ranking", m -> m[0].equals("RANK") && (got[0] = m) != null);
+            pl.fawizja.pixel.ranking.RankingView v = pl.fawizja.pixel.ranking.RankingView.parse(got[0]);
+            assertEquals("Ula", v.rows().get(0).name(), "more experience = first place");
+            assertEquals(2, v.mine());
+            assertEquals(2, v.total());
+        }
+        await("left", () -> server.world().players().isEmpty());
+        server.close();
+        server = new PixelServer(0, saves);
+        server.start();
+        try (NetClient kuba = connect()) {
+            kuba.hello("Kuba", "MONK", "tajne-Kuba");
+            await("welcome", () -> kuba.selfSave() != null);
+            kuba.send("RANK", "druid");
+            String[][] got = new String[1][];
+            awaitMessage(kuba, "druid ranking", m -> m[0].equals("RANK") && (got[0] = m) != null);
+            pl.fawizja.pixel.ranking.RankingView v = pl.fawizja.pixel.ranking.RankingView.parse(got[0]);
+            assertEquals("Ranking: Druid", v.title());
+            assertEquals(1, v.total(), "offline druid from the saves");
+            assertEquals("Ula", v.rows().get(0).name());
+            assertEquals(0, v.mine(), "a monk is not in the druid ranking");
+            kuba.send("RANK", "rycerz");
+            awaitMessage(kuba, "unknown vocation", m -> m[0].equals("LOG") && m[2].contains("Nie znam profesji"));
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

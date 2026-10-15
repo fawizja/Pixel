@@ -12,3 +12,4 @@ east_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,84
 trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=trade
 player|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=player
 party|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=party
+ranking|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=ranking

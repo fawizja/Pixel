@@ -75,6 +75,8 @@ final class ServerWorld {
     private final ConsumableRegistry consumables;
     private final RecipeRegistry recipes;
     private final CharacterCodec codec = new CharacterCodec(items);
+    /** Ranking wszystkich postaci (takze offline), budowany z zapisow przy starcie. */
+    final pl.fawizja.pixel.ranking.Ranking ranking = new pl.fawizja.pixel.ranking.Ranking();
     private final SaveStore saves;
     private final AccountStore accounts;
     private final Random rng = new Random();
@@ -109,6 +111,53 @@ final class ServerWorld {
         guildFile = new File(saveDir, "guilds.txt");
         guilds = pl.fawizja.pixel.guild.GuildRegistry.decode(guildFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(guildFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        loadRanking(saveDir);
+    }
+
+    /** Ranking z zapisow postaci (player_*.save); uszkodzony zapis jest pomijany. */
+    private void loadRanking(File saveDir) {
+        File[] files = saveDir.listFiles((d, n) -> n.startsWith("player_") && n.endsWith(".save"));
+        if (files == null) return;
+        for (File f : files) {
+            String slot = f.getName().substring(0, f.getName().length() - ".save".length());
+            try {
+                PlayerCharacter pc = saves.read(slot, codec::decode).value();
+                if (pc != null) ranking.put(rankEntry(pc));
+            } catch (IOException | RuntimeException e) {
+                LOG.warning("ranking: pomijam " + f.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    private static pl.fawizja.pixel.ranking.Ranking.Entry rankEntry(PlayerCharacter pc) {
+        return new pl.fawizja.pixel.ranking.Ranking.Entry(pc.name(), pc.vocation(), pc.level(), pc.experience());
+    }
+
+    /** /ranking [profesja]: pierwsze miejsca i miejsce pytajacego. */
+    private void sendRanking(ServerPlayer p, String arg, long now) {
+        pl.fawizja.pixel.vocation.Vocation filter = null;
+        if (arg != null && !arg.isBlank()) {
+            filter = pl.fawizja.pixel.ranking.Ranking.vocationFrom(arg);
+            if (filter == null) {
+                warn(p, "Nie znam profesji \"" + arg.trim() + "\". Wpisz: /ranking, /ranking druid, paladin, mag albo mnich.", now);
+                return;
+            }
+        }
+        // gracze online: biezacy stan, nie z ostatniego zapisu
+        for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
+        String title = filter == null ? "Ranking serwera" : "Ranking: " + filter.displayName();
+        java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
+        int i = 1;
+        for (pl.fawizja.pixel.ranking.Ranking.Entry e : ranking.top(pl.fawizja.pixel.ranking.Ranking.SHOWN, filter)) {
+            rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i++, e.name(), e.vocation().displayName(), e.level()));
+        }
+        pl.fawizja.pixel.ranking.RankingView view = new pl.fawizja.pixel.ranking.RankingView(title,
+                ranking.position(p.name(), filter), ranking.size(filter), rows);
+        String[] f = view.encode();
+        String[] msg = new String[f.length + 1];
+        msg[0] = "RANK";
+        System.arraycopy(f, 0, msg, 1, f.length);
+        p.client.send(msg);
     }
 
     private String guildTag(String name) {
@@ -610,6 +659,7 @@ final class ServerWorld {
         String slot = "player_" + p.name().toLowerCase(java.util.Locale.ROOT);
         try {
             saves.write(slot, codec.encode(p.session.character()));
+            ranking.put(rankEntry(p.session.character()));
             saves.write("pvp_" + p.name().toLowerCase(java.util.Locale.ROOT), p.pvp.encode(lastNow, System.currentTimeMillis()));
         } catch (IOException e) {
             LOG.warning("save failed for " + p.name() + ": " + e.getMessage());
@@ -627,6 +677,7 @@ final class ServerWorld {
         }
         players.remove(p.id);
         pvp.remove(key);
+        ranking.remove(p.name());
         try {
             saves.delete("player_" + key);
             saves.delete("pvp_" + key);
@@ -692,6 +743,9 @@ final class ServerWorld {
             case "PARTY": partyCommand(p, f, now); break;
             case "TRADE": tradeCommand(p, f, now); break;
             case "GUILD": guildCommand(p, f, now); break;
+            case "RANK":
+                if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
+                break;
             case "PM": {
                 if (f.length < 3 || f[2].isBlank()) break;
                 ServerPlayer to = find(f[1].trim());

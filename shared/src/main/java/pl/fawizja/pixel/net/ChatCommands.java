@@ -9,7 +9,7 @@ package pl.fawizja.pixel.net;
  * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
  * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
- * "/kto" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO.
+ * "/kto" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO. Ranking: "/ranking [profesja]" -> RANK [profesja].
  * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
@@ -64,6 +64,8 @@ public final class ChatCommands {
                 return w.length >= 2 ? prefixed("ADMIN", "BAN", nameAndNumber(rest(t))) : null;
             case "/wycisz":
                 return w.length >= 2 ? prefixed("ADMIN", "MUTE", nameAndNumber(rest(t))) : null;
+            case "/ranking":
+                return w.length == 1 ? new String[] {"RANK"} : new String[] {"RANK", rest(t)};
             case "/kto":
                 return w.length == 1 ? new String[] {"ADMIN", "WHO"} : null;
             case "/d":
@@ -115,5 +117,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }
