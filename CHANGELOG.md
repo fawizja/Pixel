@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0] - 2026-10-15
+
+### Dodano
+- Obraz Docker serwera (`server/Dockerfile`, uzytkownik bez uprawnien root, dane w wolumenie `/data`) i instrukcja
+  `docs/SERVER.md`: Docker, systemd, kopie zapasowe, bezpieczenstwo, aktualizacja.
+- Zadanie CI `server-image`: budowa obrazu, start kontenera, sprawdzenie TLS i restartu z zachowaniem certyfikatu.
+
 ## [0.21.2] - 2026-10-15
 
 ### Dodano

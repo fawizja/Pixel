@@ -138,6 +138,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Bezpieczny handel miedzy graczami (oferty, podwojna akceptacja, atomowa wymiana) (0.20.0)
 - [x] Okno handlu w HUD (0.20.1)
 - [x] Gildie: zalozenie za 50 000 gp, zaproszenia, wyrzucanie, czat gildii, zapis na serwerze (0.21.0)
+- [x] Obraz Docker serwera, instrukcja VPS (docs/SERVER.md), test obrazu w CI (0.22.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

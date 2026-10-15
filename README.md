@@ -109,6 +109,7 @@ limity polaczen, wiadomosci, czatu i zakladania kont z jednego adresu.
 
 ## Dokumentacja
 
+- [docs/SERVER.md](docs/SERVER.md) - uruchomienie serwera na VPS (Docker, systemd, kopie, bezpieczenstwo)
 - [AI_WORK_STATE.md](AI_WORK_STATE.md) - aktualny stan, architektura, testy, punkt wznowienia
 - [TODO.md](TODO.md) - plan etapow i status zadan
 - [CHANGELOG.md](CHANGELOG.md) - historia zmian
