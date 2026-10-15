@@ -225,6 +225,27 @@ public final class GameSession {
         log.add(nowMs, EventLog.Kind.SYSTEM, "Mieszkasz teraz w " + n.town() + ". Tu bedziesz sie odradzac.");
     }
 
+    /**
+     * Rozmowa slowami kluczowymi z najblizszym NPC (data/dialogues.csv). Zwraca odpowiedz albo null,
+     * gdy nikogo nie ma w poblizu.
+     */
+    public String askNpc(String text, long nowMs) {
+        Npc n = npcNearby();
+        if (n == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, TradeResult.TOO_FAR.message());
+            return null;
+        }
+        pl.fawizja.pixel.npc.DialogueRegistry d = pl.fawizja.pixel.npc.DialogueRegistry.defaults();
+        String answer = d.answer(n, text);
+        if (answer == null) {
+            java.util.List<String> topics = d.topics(n);
+            answer = "Nie rozumiem. Zapytaj o: " + String.join(", ", topics.subList(0, Math.min(4, topics.size()))) + ".";
+        }
+        String line = n.name() + ": " + answer;
+        log.add(nowMs, EventLog.Kind.INFO, line);
+        return line;
+    }
+
     public QuestResult questAction(String questKey, long nowMs) {
         Npc n = talkTo(NpcRole.GUIDE, nowMs);
         QuestType q = quests == null ? null : quests.registry().get(questKey);
@@ -232,9 +253,11 @@ public final class GameSession {
         QuestResult r = quests.interact(pc, q);
         String text = r.message();
         if (r == QuestResult.COMPLETED) {
-            text = "Ukonczono \"" + q.name() + "\": +" + q.rewardExp() + " exp" + (q.rewardGold() > 0 ? ", +" + q.rewardGold() + " gp" : "");
+            text = "Ukonczono \"" + q.name() + "\". Nagroda: " + quests.rewardText(q) + ".";
         } else if (r == QuestResult.ACCEPTED) {
             text = "Przyjeto zadanie \"" + q.name() + "\".";
+        } else if (r == QuestResult.LOCKED) {
+            text = "Najpierw ukoncz \"" + quests.registry().get(q.requires()).name() + "\".";
         }
         log.add(nowMs, r == QuestResult.COMPLETED || r == QuestResult.ACCEPTED ? EventLog.Kind.SYSTEM : EventLog.Kind.WARNING, text);
         return r;

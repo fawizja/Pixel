@@ -107,7 +107,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Bank w UI: wplata wszystkiego, wyplaty; kaplan: leczenie i zamieszkanie (miejsce odrodzenia)
 - [x] 13 zadan (data/quests.csv): zabij N / przynies N, nagrody exp i gp, zapis postepu
 - [x] Klient: sprite i imiona NPC, przycisk ROZMOWA, dotkniecie NPC, okno rozmowy z rolami i stronami
-- [ ] Dialogi slowami kluczowymi, zadania wieloetapowe, nagrody przedmiotami
+- [x] Dialogi slowami kluczowymi, zadania wieloetapowe, nagrody przedmiotami
 ## Etap 13 - PvP i reguly serwerowe
 - [x] `pvp/PvpRules`: ochrona do poziomu 30, brak walki w PZ, zakaz atakowania postaci o ponad polowe slabszych
 - [x] Biala czaszka (15 min) za atak na niewinnego, czerwona (6 h) za 3 nieusprawiedliwione zabojstwa w 24 h

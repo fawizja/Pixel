@@ -1,0 +1,6 @@
+# Lancuchy zadan i nagrody przedmiotami: zadanie;wymagane wczesniej zadanie (albo -);przedmiot:ilosc (albo -)
+# Kolejny etap jest dostepny dopiero po ukonczeniu poprzedniego (ten sam zleceniodawca).
+varden_smug2;varden_smug1;health_potion:10
+varden_smug3;varden_smug2;miner_helmet:1
+selv_exp2;selv_exp1;croc_legs:1
+frost_storm;frost_yeti;great_health_potion:15

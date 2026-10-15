@@ -133,7 +133,7 @@ public final class GameScreen extends ScreenAdapter {
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
         if (net != null) lastSelf = net.selfSave();
-        hud.setChatEnabled(net != null);
+        hud.setChatEnabled(net != null); // offline przycisk czatu pojawia sie tylko obok NPC (rozmowa)
         lastSaveMs = now();
     }
 
@@ -273,7 +273,6 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private void openChat() {
-        if (net == null) return;
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
@@ -281,14 +280,27 @@ public final class GameScreen extends ScreenAdapter {
 
                 @Override
                 public void canceled() { }
-            }, "Czat", "", "Wiadomosc do wszystkich graczy");
+            }, "Czat", "", net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomosc albo slowo do NPC obok");
         } else {
             chatDraft = new StringBuilder();
         }
     }
 
     private void sendChat(String text) {
-        if (net == null || text == null || text.isBlank()) return;
+        if (text == null || text.isBlank()) return;
+        // obok NPC: slowa kluczowe trafiaja do niego (polecenia czatu zaczynaja sie od '/')
+        if (!text.startsWith("/") && session.npcNearby() != null) {
+            String said = pl.fawizja.pixel.npc.DialogueRegistry.normalize(text);
+            boolean known = pl.fawizja.pixel.npc.DialogueRegistry.defaults().answer(session.npcNearby(), said) != null;
+            if (!said.isEmpty() && (known || net == null)) {
+                act("npc:ask:" + said, now());
+                return;
+            }
+        }
+        if (net == null) {
+            session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami dziala online. Podejdz do NPC, aby z nim porozmawiac.");
+            return;
+        }
         String[] msg = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
         if (msg == null) {
             session.log().add(now(), EventLog.Kind.INFO,

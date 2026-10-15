@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.16.0] - 2026-10-15
+
+### Dodano
+- Zadania wieloetapowe z nagrodami w przedmiotach (`data/quest_chains.csv`): przemytnicy Varden (3 etapy),
+  zaginiona wyprawa w Selvaran (2 etapy), zamiec we Frostholm. Nastepny etap pojawia sie po ukonczeniu
+  poprzedniego; przy pelnym plecaku nagroda czeka.
+- Rozmowa z NPC slowami kluczowymi (`data/dialogues.csv`): tematy w oknie rozmowy i czat obok NPC
+  (takze w grze lokalnej), z tolerancja polskich znakow i odmiany. Wskazowki o miastach, lochach, rybach i nocy.
+- Wzorce regresji GUI zaktualizowane (przycisk CZAT obok NPC, tematy w oknie kupca).
+- 6 nowych testow (lacznie 204).
+
 ## [0.15.3] - 2026-10-15
 
 ### Dodano

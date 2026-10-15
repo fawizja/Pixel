@@ -21,3 +21,9 @@ camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1500000;0;600;K
 camp_khazuul;Pusty krol;camp_guide;KILL;khazuul;1;8000000;400000;650;Kha'zuul wola cienie z ruin. Rozprosz go.
 camp_lords;Panowie Otchlani;camp_guide;KILL;abyss_lord;15;6000000;300000;850;Panowie Otchlani gromadza armie. Pokonaj 15.
 camp_morgath;Serce Otchlani;camp_guide;KILL;morgath;1;20000000;1000000;900;Ostatnie zadanie swiata: zniszcz Mor'gatha.
+varden_smug1;Slady przemytnikow;varden_guide;KILL;bandit;8;8000;500;12;Bandyci na wschodnich drogach przemycaja towar. Rozbij 8 i dowiedz sie, dla kogo pracuja.
+varden_smug2;Szamani i runy;varden_guide;KILL;goblin_shaman;6;15000;800;15;Bandyci kupuja runy od szamanow goblinow w kopalni. Pokonaj 6 szamanow.
+varden_smug3;Ostatni transport;varden_guide;KILL;skeleton;12;30000;1200;20;Towar ukryto w starych grobach pod kopalnia (-3). Oczysc je z 12 szkieletow.
+selv_exp1;Zaginiona wyprawa;selv_guide;KILL;jungle_hunter;10;70000;2500;60;Lowcy z dzungli napadli wyprawe badaczy. Pokonaj 10 lowcow.
+selv_exp2;Sladem wezy;selv_guide;KILL;jungle_serpent;12;110000;3500;70;Ocalali badacze uciekli w gniazda wezy. Oczysc im droge.
+frost_storm;Zamiec;frost_guide;KILL;frost_witch;8;160000;5000;80;Wiedzmy mrozu sprowadzaja zamiec na Frostholm. Pokonaj 8.

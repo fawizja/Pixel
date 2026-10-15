@@ -19,7 +19,8 @@ public final class QuestRegistry {
 
     public static QuestRegistry loadDefault(ItemRegistry items, MonsterRegistry monsters) {
         try {
-            return parse(SpellRegistry.readLines("/data/quests.csv"), items, monsters);
+            QuestRegistry r = parse(SpellRegistry.readLines("/data/quests.csv"), items, monsters);
+            return r.withChains(SpellRegistry.readLines("/data/quest_chains.csv"), items);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read quests", e);
         }
@@ -43,6 +44,51 @@ public final class QuestRegistry {
                 if (map.put(q.key(), q) != null) throw new IllegalArgumentException("duplicate quest " + q.key());
             } catch (IllegalArgumentException e) {
                 throw new IOException("quests.csv line " + n + ": " + e.getMessage(), e);
+            }
+        }
+        return new QuestRegistry(map);
+    }
+
+    /**
+     * Lancuchy i nagrody przedmiotami (data/quest_chains.csv): klucz;wymagane zadanie albo -;przedmiot:ilosc albo -.
+     * Wymagane zadanie musi miec tego samego zleceniodawce i nie moze tworzyc petli.
+     */
+    public QuestRegistry withChains(List<String> lines, ItemRegistry items) throws IOException {
+        Map<String, QuestType> map = new LinkedHashMap<>(byKey);
+        int n = 0;
+        for (String line : lines) {
+            n++;
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 3) throw new IOException("quest_chains.csv line " + n + ": expected 3 fields");
+            QuestType q = map.get(f[0].trim());
+            if (q == null) throw new IOException("quest_chains.csv line " + n + ": unknown quest " + f[0]);
+            String req = f[1].trim().equals("-") ? null : f[1].trim();
+            if (req != null) {
+                QuestType prev = map.get(req);
+                if (prev == null) throw new IOException("quest_chains.csv line " + n + ": unknown required quest " + req);
+                if (!prev.giver().equals(q.giver())) throw new IOException("quest_chains.csv line " + n + ": chain across givers");
+            }
+            String item = null;
+            int count = 0;
+            if (!f[2].trim().equals("-")) {
+                String[] ic = f[2].trim().split(":");
+                if (ic.length != 2 || items.byKey(ic[0]) == null) throw new IOException("quest_chains.csv line " + n + ": bad reward " + f[2]);
+                item = ic[0];
+                try {
+                    count = Integer.parseInt(ic[1]);
+                } catch (NumberFormatException e) {
+                    throw new IOException("quest_chains.csv line " + n + ": bad reward count", e);
+                }
+                if (count < 1) throw new IOException("quest_chains.csv line " + n + ": bad reward count");
+            }
+            map.put(q.key(), q.withChain(req, item, count));
+        }
+        for (QuestType q : map.values()) {
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            for (QuestType c = q; c != null && c.requires() != null; c = map.get(c.requires())) {
+                if (!seen.add(c.key())) throw new IOException("quest_chains.csv: loop at " + q.key());
             }
         }
         return new QuestRegistry(map);

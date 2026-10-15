@@ -297,4 +297,66 @@ class TownServicesTest {
         assertEquals(1, pc.backpack().count(id("magma_spear")));
         assertEquals(0, pc.backpack().count(id("obsidian_shard")));
     }
+
+    @Test
+    void questChainsUnlockStageByStageAndPayItems() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(22) - pc.experience());
+        GameSession s = session(pc, List.of());
+        long t = 1000;
+        s.teleport(talkSpot(npcs.get("varden_guide")), t);
+        assertEquals(QuestResult.LOCKED, s.questAction("varden_smug2", t), "stage 2 needs stage 1");
+        assertEquals(QuestLog.State.AVAILABLE, pc.quests().state("varden_smug2"));
+        assertEquals(QuestResult.ACCEPTED, s.questAction("varden_smug1", t));
+        for (int i = 0; i < 8; i++) s.quests().onKill(pc, "bandit");
+        assertEquals(QuestResult.COMPLETED, s.questAction("varden_smug1", t));
+
+        assertEquals(QuestResult.ACCEPTED, s.questAction("varden_smug2", t));
+        for (int i = 0; i < 6; i++) s.quests().onKill(pc, "goblin_shaman");
+        int potions = pc.backpack().count(id("health_potion"));
+        assertEquals(QuestResult.COMPLETED, s.questAction("varden_smug2", t));
+        assertEquals(potions + 10, pc.backpack().count(id("health_potion")), "item reward");
+
+        assertEquals(QuestResult.ACCEPTED, s.questAction("varden_smug3", t));
+        for (int i = 0; i < 12; i++) s.quests().onKill(pc, "skeleton");
+        // pelny plecak: nagroda czeka, zadanie zostaje aktywne
+        while (pc.backpack().freeSlots() > 0) pc.backpack().add(new ItemStack(id("leather_helmet"), 1));
+        assertEquals(QuestResult.NO_SPACE, s.questAction("varden_smug3", t));
+        assertEquals(QuestLog.State.ACTIVE, pc.quests().state("varden_smug3"));
+        pc.backpack().remove(id("leather_helmet"), 1);
+        assertEquals(QuestResult.COMPLETED, s.questAction("varden_smug3", t));
+        assertEquals(1, pc.backpack().count(id("miner_helmet")));
+        assertTrue(s.log().latest(1).get(0).text().contains("Miner Helmet"), s.log().latest(1).get(0).text());
+    }
+
+    @Test
+    void everyChainStartsFromAQuestWithoutPrerequisites() {
+        int chained = 0;
+        for (QuestType q : quests.all()) {
+            if (q.requires() == null) continue;
+            chained++;
+            QuestType prev = quests.get(q.requires());
+            assertEquals(q.giver(), prev.giver());
+            assertTrue(prev.minLevel() <= q.minLevel(), q.key() + " is easier than its prerequisite");
+            if (q.rewardItem() != null) {
+                assertTrue(TestData.ITEMS.byKey(q.rewardItem()).minLevel() <= q.minLevel() + 40,
+                        q.key() + " reward would skip tiers");
+            }
+        }
+        assertTrue(chained >= 4);
+    }
+
+    @Test
+    void talkingToANearbyNpcAnswersInTheLogAndFarAwayNobodyListens() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = session(pc, List.of());
+        s.teleport(talkSpot(npcs.get("varden_guide")), 1000);
+        String line = s.askNpc("Jakie masz zadania?", 1000);
+        assertTrue(line.startsWith(npcs.get("varden_guide").name() + ": Ponizej masz"), line);
+        assertTrue(s.askNpc("pogoda", 1000).contains("Zapytaj o: przemytnicy"), "unknown word lists topics");
+        assertTrue(pl.fawizja.pixel.game.Actions.apply(s, "npc:ask:wieza", 1000));
+        assertTrue(s.log().latest(1).get(0).text().contains("piec pieter"));
+        s.teleport(TestData.world().spawn().translate(0, 6), 1000);
+        if (s.npcNearby() == null) assertNull(s.askNpc("czesc", 1000));
+    }
 }

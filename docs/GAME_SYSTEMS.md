@@ -89,6 +89,14 @@ Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie 
   `QuestSystem` (przyjecie, licznik zabic przez `CombatSystem.setKillListener`, oddanie z nagroda).
 - Klient: przycisk ROZMOWA (lub N / dotkniecie NPC), okno z kupnem (ilosc 1/5/25/100, strony), skupem,
   bankiem, uslugami kaplana i lista zadan ze stanem.
+- Lancuchy zadan (`data/quest_chains.csv`): kolejny etap jest widoczny i dostepny dopiero po ukonczeniu
+  poprzedniego (ten sam zleceniodawca, bez petli); nagrody przedmiotami dodawane atomowo razem ze zlotem
+  (pelny plecak = zadanie czeka). Teraz: przemytnicy Varden (3 etapy, helm gornika), wyprawa Selvaran
+  (2 etapy, nagolenniki z krokodyla), zamiec we Frostholm po yeti (mikstury).
+- Rozmowa slowami kluczowymi (`data/dialogues.csv`, `npc/DialogueRegistry`): wiersze "Zapytaj: ..." w oknie
+  NPC albo czat obok NPC (offline i online). Bez wielkosci liter i polskich znakow, z tolerancja odmiany
+  (praca / prace); linia NPC wygrywa z linia roli i wspolna. Odpowiedz idzie do dziennika jako "Imie: tekst";
+  online liczy ja serwer (akcja `npc:ask:<tekst>`).
 
 ## Oboz i kuznia endgame (Z logika, C UI)
 

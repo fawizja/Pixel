@@ -356,7 +356,9 @@ public final class Hud {
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;
                 for (pl.fawizja.pixel.quest.QuestType q : qs.registry().byGiver(npc.key())) {
-                    String reward = q.rewardExp() + " exp" + (q.rewardGold() > 0 ? ", " + q.rewardGold() + " gp" : "");
+                    // dalsze etapy lancucha widac dopiero po ukonczeniu poprzedniego
+                    if (pc.quests().state(q.key()) == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && !qs.unlocked(pc, q)) continue;
+                    String reward = qs.rewardText(q);
                     String detail;
                     boolean ok;
                     switch (pc.quests().state(q.key())) {
@@ -376,6 +378,12 @@ public final class Hud {
                 break;
             }
             default:
+        }
+        // tematy rozmowy (to samo mozna wpisac w czacie obok NPC)
+        for (String topic : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
+            MenuRow row = new MenuRow("npc:ask:" + topic, "Zapytaj: " + topic, "rozmowa", true);
+            if (right.size() < perCol) right.add(row);
+            else if (left.size() < perCol) left.add(row);
         }
         float colW = (menuW - 30) / 2f;
         for (int c = 0; c < 2; c++) {
@@ -510,7 +518,7 @@ public final class Hud {
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
         talk.active = npcOpen();
-        chat.visible = chatEnabled;
+        chat.visible = chatEnabled || near != null;
         if (npcMode && near != npc) {
             menuOpen = false;
             npcMode = false;
