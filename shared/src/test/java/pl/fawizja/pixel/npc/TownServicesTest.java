@@ -326,7 +326,7 @@ class TownServicesTest {
         pc.backpack().remove(id("leather_helmet"), 1);
         assertEquals(QuestResult.COMPLETED, s.questAction("varden_smug3", t));
         assertEquals(1, pc.backpack().count(id("miner_helmet")));
-        assertTrue(s.log().latest(1).get(0).text().contains("Miner Helmet"), s.log().latest(1).get(0).text());
+        assertTrue(s.log().latest(1).get(0).text().contains("Hełm górnika"), s.log().latest(1).get(0).text());
     }
 
     @Test

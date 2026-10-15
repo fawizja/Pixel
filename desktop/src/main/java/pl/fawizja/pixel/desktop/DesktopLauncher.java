@@ -96,7 +96,7 @@ public final class DesktopLauncher {
                 if ("trade".equals(open)) {
                     // podglad okna handlu (bez serwera): przykladowe oferty
                     ((GameScreen) getScreen()).hud().setTrade(new pl.fawizja.pixel.trade.TradeView(
-                            "Ula", "5x Health Potion, 1x Rope", "700 gp", false, true));
+                            "Ula", "5x Mikstura zdrowia, 1x Lina", "700 gp", false, true));
                 }
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();

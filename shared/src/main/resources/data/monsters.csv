@@ -1,43 +1,43 @@
 # key;name;level;hp;exp;speed;attackMin;attackMax;damageType;range;attackIntervalMs;armor;resistances(TYP:%);behavior;aggroRange;fleeHpPct;healAmount;boss;color;shape;biome;activity(NOCTURNAL/-);description
-wolf;Wolf;8;55;20;260;2;10;PHYSICAL;1;2000;2;;SKIRMISHER;6;20;0;0;#8a8a8a;beast;temperate;NOCTURNAL;Szybki drapieżnik, ucieka gdy jest ranny.
-boar;Boar;10;90;32;200;3;14;PHYSICAL;1;2000;6;EARTH:10;TANK;4;0;0;0;#6b4a2e;beast;temperate;-;Wytrzymały dzik o grubej skórze.
-forest_spider;Forest Spider;12;70;35;230;2;12;EARTH;1;1800;3;EARTH:50,FIRE:-20;MELEE;5;0;0;0;#3a3028;spider;temperate;-;Jadowity pająk leśny.
-bandit;Bandit;15;140;65;220;5;22;PHYSICAL;1;2000;5;;SKIRMISHER;6;15;0;0;#5a4a6a;humanoid;temperate;NOCTURNAL;Rabuś z traktu, ucieka gdy przegrywa.
+wolf;Wilk;8;55;20;260;2;10;PHYSICAL;1;2000;2;;SKIRMISHER;6;20;0;0;#8a8a8a;beast;temperate;NOCTURNAL;Szybki drapieżnik, ucieka gdy jest ranny.
+boar;Dzik;10;90;32;200;3;14;PHYSICAL;1;2000;6;EARTH:10;TANK;4;0;0;0;#6b4a2e;beast;temperate;-;Wytrzymały dzik o grubej skórze.
+forest_spider;Pająk leśny;12;70;35;230;2;12;EARTH;1;1800;3;EARTH:50,FIRE:-20;MELEE;5;0;0;0;#3a3028;spider;temperate;-;Jadowity pająk leśny.
+bandit;Bandyta;15;140;65;220;5;22;PHYSICAL;1;2000;5;;SKIRMISHER;6;15;0;0;#5a4a6a;humanoid;temperate;NOCTURNAL;Rabuś z traktu, ucieka gdy przegrywa.
 goblin;Goblin;12;60;30;220;2;12;PHYSICAL;4;2200;2;;RANGED;6;10;0;0;#6a9a3a;humanoid;underground;-;Rzuca kamieniami z dystansu.
-goblin_shaman;Goblin Shaman;18;90;70;200;6;20;FIRE;4;2500;1;FIRE:30,ICE:-20;HEALER;6;0;25;0;#4a7a8a;humanoid;underground;-;Leczy inne gobliny i rzuca ogniem.
-skeleton;Skeleton;22;160;90;200;6;26;PHYSICAL;1;2000;6;DEATH:100,HOLY:-30,EARTH:30;MELEE;6;0;0;0;#e0dcc8;humanoid;underground;NOCTURNAL;Nieumarły strażnik kopalni.
-cave_troll;Cave Troll;32;320;220;190;10;40;PHYSICAL;1;2200;10;PHYSICAL:10,FIRE:-20;TANK;5;0;0;0;#5a6a3a;humanoid;underground;-;Powolny, ale bardzo wytrzymały.
-crystal_golem;Crystal Golem;45;620;450;170;15;55;ENERGY;2;2400;18;PHYSICAL:25,EARTH:50,ENERGY:80,ICE:-25;MAGIC;5;0;0;0;#7fd8ff;golem;underground;-;Żywy kryształ rażący energią.
-grimtooth;Grimtooth the Mine King;60;3200;4000;200;40;160;PHYSICAL;1;1800;20;DEATH:50,FIRE:-10;TANK;8;0;400;1;#c8a040;boss;underground;-;Król kopalni. Leczy się raz i wpada w szał poniżej połowy zdrowia.
-snow_wolf;Snow Wolf;40;420;330;270;15;50;PHYSICAL;1;1800;8;ICE:50,FIRE:-15;SKIRMISHER;7;15;0;0;#dce8f0;beast;north;NOCTURNAL;Biały wilk polujący w stadach.
+goblin_shaman;Goblin szaman;18;90;70;200;6;20;FIRE;4;2500;1;FIRE:30,ICE:-20;HEALER;6;0;25;0;#4a7a8a;humanoid;underground;-;Leczy inne gobliny i rzuca ogniem.
+skeleton;Szkielet;22;160;90;200;6;26;PHYSICAL;1;2000;6;DEATH:100,HOLY:-30,EARTH:30;MELEE;6;0;0;0;#e0dcc8;humanoid;underground;NOCTURNAL;Nieumarły strażnik kopalni.
+cave_troll;Troll jaskiniowy;32;320;220;190;10;40;PHYSICAL;1;2200;10;PHYSICAL:10,FIRE:-20;TANK;5;0;0;0;#5a6a3a;humanoid;underground;-;Powolny, ale bardzo wytrzymały.
+crystal_golem;Kryształowy golem;45;620;450;170;15;55;ENERGY;2;2400;18;PHYSICAL:25,EARTH:50,ENERGY:80,ICE:-25;MAGIC;5;0;0;0;#7fd8ff;golem;underground;-;Żywy kryształ rażący energią.
+grimtooth;Grimtooth, Król Kopalni;60;3200;4000;200;40;160;PHYSICAL;1;1800;20;DEATH:50,FIRE:-10;TANK;8;0;400;1;#c8a040;boss;underground;-;Król kopalni. Leczy się raz i wpada w szał poniżej połowy zdrowia.
+snow_wolf;Śnieżny wilk;40;420;330;270;15;50;PHYSICAL;1;1800;8;ICE:50,FIRE:-15;SKIRMISHER;7;15;0;0;#dce8f0;beast;north;NOCTURNAL;Biały wilk polujący w stadach.
 yeti;Yeti;70;1100;950;200;30;95;PHYSICAL;1;2200;14;ICE:60,FIRE:-20;TANK;6;0;0;0;#f0f0e8;humanoid;north;-;Ogromny włochaty stwór gór.
-frost_witch;Frost Witch;85;800;1000;210;25;85;ICE;4;2300;6;ICE:90,FIRE:-25;MAGIC;7;0;0;0;#80b8e0;humanoid;north;-;Wiedźma rzucająca lodowe pociski z dystansu.
-ice_golem;Ice Golem;120;2600;2600;160;50;150;ICE;2;2400;30;ICE:100,PHYSICAL:20,FIRE:-30,ENERGY:-10;MAGIC;6;0;0;0;#a8d8f0;golem;north;-;Golem z wiecznego lodu.
-crocodile;Crocodile;55;650;520;180;20;70;PHYSICAL;1;2200;14;EARTH:20,ICE:-10;TANK;5;0;0;0;#4a6a30;beast;equatorial;-;Czai się przy bagnach.
-jungle_serpent;Jungle Serpent;75;760;800;260;20;80;EARTH;1;1800;8;EARTH:80,ICE:-20;SKIRMISHER;7;10;0;0;#7aa040;spider;equatorial;-;Jadowity wąż - szybki i zwinny.
-jungle_hunter;Jungle Hunter;65;600;650;220;25;75;PHYSICAL;4;2200;6;;RANGED;8;0;0;0;#8a5a3a;humanoid;equatorial;-;Myśliwy strzelający z dmuchawki.
-temple_guardian;Temple Guardian;180;4800;5200;170;70;210;PHYSICAL;1;2200;40;PHYSICAL:30,HOLY:50,DEATH:-20;TANK;5;0;0;0;#9a9a70;golem;equatorial;-;Kamienny strażnik zatopionej świątyni.
-hyena;Hyena;45;480;360;280;15;55;PHYSICAL;1;1800;6;;SKIRMISHER;7;20;0;0;#b89a60;beast;desert;NOCTURNAL;Padlinożerca polujący w grupach.
-scorpion;Scorpion;60;700;600;200;20;75;EARTH;1;2000;18;EARTH:60,ICE:-20;MELEE;5;0;0;0;#a06030;spider;desert;-;Pancerny skorpion z jadowitym kolcem.
-sand_wraith;Sand Wraith;130;1800;2300;220;40;130;DEATH;3;2300;10;DEATH:100,HOLY:-40,PHYSICAL:40;MAGIC;7;0;0;0;#c8b080;humanoid;desert;NOCTURNAL;Upiór z piasku i gniewu.
-mummy;Mummy;200;5200;6200;170;70;230;DEATH;1;2200;30;DEATH:80,FIRE:-30,HOLY:-30;TANK;5;0;0;0;#d8ccaa;humanoid;desert;NOCTURNAL;Prastary strażnik grobowców.
-frost_queen;Frost Queen Ysolde;150;9000;12000;210;60;180;ICE;4;1800;20;ICE:100,FIRE:-20;MAGIC;8;0;1200;1;#c8f0ff;boss;north;-;Królowa lodowych głębin. Razi lodem z dystansu, leczy się raz.
-ruin_colossus;Ruin Colossus;200;14000;19000;150;90;260;PHYSICAL;1;2000;50;PHYSICAL:40,EARTH:50,ENERGY:-20;TANK;7;0;2000;1;#8a8a60;boss;equatorial;-;Kamienny kolos w sercu ruin, otoczony magma.
-pharaoh;Pharaoh Neferakh;230;16000;22000;200;80;250;DEATH;3;1800;30;DEATH:100,HOLY:-30,FIRE:-20;MAGIC;8;0;2500;1;#e8c860;boss;desert;NOCTURNAL;Nieumarły faraon najgłębszej krypty.
-cursed_treant;Cursed Treant;240;5600;6400;160;105;330;EARTH;1;2400;40;EARTH:70,FIRE:-30;TANK;5;0;0;0;#4a5a2a;golem;temperate;-;Przeklęte drzewo Kniei - wolne, ale twarde jak skała.
-wraith_knight;Wraith Knight;280;5200;7000;220;135;390;DEATH;1;2000;30;DEATH:90,HOLY:-35,PHYSICAL:20;MELEE;7;0;0;0;#6a6a8a;humanoid;temperate;NOCTURNAL;Upiorny rycerz polujący w przeklętych lasach, w nocy groźniejszy.
-fire_elemental;Fire Elemental;320;5600;7500;230;150;450;FIRE;3;2300;10;FIRE:100,ICE:-30,PHYSICAL:30;MAGIC;7;0;0;0;#ff7020;golem;equatorial;-;Żywy ogień Spalonych Wyżyn, rzuca płomieniami z dystansu.
-lava_golem;Lava Golem;370;8600;10500;150;155;440;FIRE;1;2400;60;FIRE:100,PHYSICAL:30,ICE:-25,ENERGY:-10;TANK;5;0;0;0;#c84020;golem;equatorial;-;Golem ze stygnącej lawy. Lód go kruszy.
-ignaroth;Ignaroth the Molten;400;45000;60000;190;440;1230;FIRE;3;1800;50;FIRE:100,ICE:-20;MAGIC;8;0;4000;1;#ff4010;boss;equatorial;-;Pan wulkanu. Wymaga drużyny.
-frost_giant;Frost Giant;430;10500;12500;170;250;720;PHYSICAL;1;2400;55;ICE:80,FIRE:-25;TANK;6;0;0;0;#b8d8f0;humanoid;north;-;Olbrzym ze szczytów, miażdży maczugą z lodu.
-storm_harpy;Storm Harpy;470;8200;11000;300;235;755;ENERGY;3;2000;20;ENERGY:90,EARTH:-20;SKIRMISHER;8;15;0;0;#d8d0a0;beast;north;-;Szybka harpia burzy, ucieka ranna i wraca z piorunami.
-ice_dragon;Ice Dragon;520;13800;17000;200;430;1270;ICE;3;2300;45;ICE:100,FIRE:-30;MAGIC;7;0;0;0;#a8e8ff;beast;north;-;Lodowy smok - oddech mrozi z dystansu.
-hrimgar;Hrimgar the Glacier King;560;70000;95000;190;650;1900;ICE;1;1800;70;ICE:100,FIRE:-20,PHYSICAL:20;TANK;8;0;6000;1;#e0f4ff;boss;north;-;Król lodowych olbrzymów na szczycie świata.
-shadow_stalker;Shadow Stalker;590;11500;15500;290;340;990;DEATH;1;1800;30;DEATH:90,HOLY:-40;SKIRMISHER;8;15;0;0;#3a3050;beast;desert;NOCTURNAL;Drapieżnik z cienia, najgroźniejszy nocą.
-sand_titan;Sand Titan;650;17000;19500;150;340;985;PHYSICAL;1;2500;80;PHYSICAL:35,EARTH:60,ICE:-20;TANK;5;0;0;0;#b89a60;golem;desert;-;Tytan z piasku i kamienia, powolny i niezniszczalny z pozoru.
-void_priest;Void Priest;700;17600;23600;210;1050;1425;DEATH;4;2300;25;DEATH:100,HOLY:-40,EARTH:25;HEALER;8;0;1500;0;#5a3a7a;humanoid;desert;-;Kapłan pustki, leczy sojuszników i razi śmiercią.
-khazuul;Kha'zuul the Hollow;750;95000;130000;200;800;2250;DEATH;3;1800;60;DEATH:100,HOLY:-30;MAGIC;8;0;8000;1;#2a1a3a;boss;desert;NOCTURNAL;Władca Pustkowi Cienia. Wymaga drużyny.
-abyssal_demon;Abyssal Demon;800;18000;25000;230;480;1400;FIRE;1;2000;60;FIRE:90,HOLY:-30,ICE:-10;MELEE;7;0;0;0;#a02010;humanoid;underground;-;Demon z głębin Otchłani.
-bone_dragon;Bone Dragon;880;20000;28000;200;520;1520;DEATH;3;2200;50;DEATH:100,HOLY:-35,EARTH:30;MAGIC;7;0;0;0;#e8e0c8;beast;underground;-;Smok ze starych kości, zieje śmiercią.
-abyss_lord;Abyss Lord;950;28100;33500;180;1080;2000;PHYSICAL;1;2300;90;PHYSICAL:15,FIRE:50,DEATH:50,HOLY:-25;TANK;6;0;0;0;#601010;humanoid;underground;-;Pan Otchłani w zbroi z czarnego żelaza.
-morgath;Mor'gath, Heart of the Abyss;1000;160000;250000;210;1040;2990;DEATH;3;1700;90;DEATH:100,FIRE:50,HOLY:-25;MAGIC;9;0;12000;1;#ff3020;boss;underground;-;Serce Otchłani. Ostatni przeciwnik świata.
+frost_witch;Mroźna wiedźma;85;800;1000;210;25;85;ICE;4;2300;6;ICE:90,FIRE:-25;MAGIC;7;0;0;0;#80b8e0;humanoid;north;-;Wiedźma rzucająca lodowe pociski z dystansu.
+ice_golem;Lodowy golem;120;2600;2600;160;50;150;ICE;2;2400;30;ICE:100,PHYSICAL:20,FIRE:-30,ENERGY:-10;MAGIC;6;0;0;0;#a8d8f0;golem;north;-;Golem z wiecznego lodu.
+crocodile;Krokodyl;55;650;520;180;20;70;PHYSICAL;1;2200;14;EARTH:20,ICE:-10;TANK;5;0;0;0;#4a6a30;beast;equatorial;-;Czai się przy bagnach.
+jungle_serpent;Wąż z dżungli;75;760;800;260;20;80;EARTH;1;1800;8;EARTH:80,ICE:-20;SKIRMISHER;7;10;0;0;#7aa040;spider;equatorial;-;Jadowity wąż - szybki i zwinny.
+jungle_hunter;Łowca z dżungli;65;600;650;220;25;75;PHYSICAL;4;2200;6;;RANGED;8;0;0;0;#8a5a3a;humanoid;equatorial;-;Myśliwy strzelający z dmuchawki.
+temple_guardian;Strażnik świątyni;180;4800;5200;170;70;210;PHYSICAL;1;2200;40;PHYSICAL:30,HOLY:50,DEATH:-20;TANK;5;0;0;0;#9a9a70;golem;equatorial;-;Kamienny strażnik zatopionej świątyni.
+hyena;Hiena;45;480;360;280;15;55;PHYSICAL;1;1800;6;;SKIRMISHER;7;20;0;0;#b89a60;beast;desert;NOCTURNAL;Padlinożerca polujący w grupach.
+scorpion;Skorpion;60;700;600;200;20;75;EARTH;1;2000;18;EARTH:60,ICE:-20;MELEE;5;0;0;0;#a06030;spider;desert;-;Pancerny skorpion z jadowitym kolcem.
+sand_wraith;Piaskowy upiór;130;1800;2300;220;40;130;DEATH;3;2300;10;DEATH:100,HOLY:-40,PHYSICAL:40;MAGIC;7;0;0;0;#c8b080;humanoid;desert;NOCTURNAL;Upiór z piasku i gniewu.
+mummy;Mumia;200;5200;6200;170;70;230;DEATH;1;2200;30;DEATH:80,FIRE:-30,HOLY:-30;TANK;5;0;0;0;#d8ccaa;humanoid;desert;NOCTURNAL;Prastary strażnik grobowców.
+frost_queen;Ysolde, Królowa Lodu;150;9000;12000;210;60;180;ICE;4;1800;20;ICE:100,FIRE:-20;MAGIC;8;0;1200;1;#c8f0ff;boss;north;-;Królowa lodowych głębin. Razi lodem z dystansu, leczy się raz.
+ruin_colossus;Kolos z ruin;200;14000;19000;150;90;260;PHYSICAL;1;2000;50;PHYSICAL:40,EARTH:50,ENERGY:-20;TANK;7;0;2000;1;#8a8a60;boss;equatorial;-;Kamienny kolos w sercu ruin, otoczony magma.
+pharaoh;Faraon Neferakh;230;16000;22000;200;80;250;DEATH;3;1800;30;DEATH:100,HOLY:-30,FIRE:-20;MAGIC;8;0;2500;1;#e8c860;boss;desert;NOCTURNAL;Nieumarły faraon najgłębszej krypty.
+cursed_treant;Przeklęty drzewiec;240;5600;6400;160;105;330;EARTH;1;2400;40;EARTH:70,FIRE:-30;TANK;5;0;0;0;#4a5a2a;golem;temperate;-;Przeklęte drzewo Kniei - wolne, ale twarde jak skała.
+wraith_knight;Upiorny rycerz;280;5200;7000;220;135;390;DEATH;1;2000;30;DEATH:90,HOLY:-35,PHYSICAL:20;MELEE;7;0;0;0;#6a6a8a;humanoid;temperate;NOCTURNAL;Upiorny rycerz polujący w przeklętych lasach, w nocy groźniejszy.
+fire_elemental;Żywiołak ognia;320;5600;7500;230;150;450;FIRE;3;2300;10;FIRE:100,ICE:-30,PHYSICAL:30;MAGIC;7;0;0;0;#ff7020;golem;equatorial;-;Żywy ogień Spalonych Wyżyn, rzuca płomieniami z dystansu.
+lava_golem;Lawowy golem;370;8600;10500;150;155;440;FIRE;1;2400;60;FIRE:100,PHYSICAL:30,ICE:-25,ENERGY:-10;TANK;5;0;0;0;#c84020;golem;equatorial;-;Golem ze stygnącej lawy. Lód go kruszy.
+ignaroth;Ignaroth Roztopiony;400;45000;60000;190;440;1230;FIRE;3;1800;50;FIRE:100,ICE:-20;MAGIC;8;0;4000;1;#ff4010;boss;equatorial;-;Pan wulkanu. Wymaga drużyny.
+frost_giant;Mroźny olbrzym;430;10500;12500;170;250;720;PHYSICAL;1;2400;55;ICE:80,FIRE:-25;TANK;6;0;0;0;#b8d8f0;humanoid;north;-;Olbrzym ze szczytów, miażdży maczugą z lodu.
+storm_harpy;Harpia burzy;470;8200;11000;300;235;755;ENERGY;3;2000;20;ENERGY:90,EARTH:-20;SKIRMISHER;8;15;0;0;#d8d0a0;beast;north;-;Szybka harpia burzy, ucieka ranna i wraca z piorunami.
+ice_dragon;Lodowy smok;520;13800;17000;200;430;1270;ICE;3;2300;45;ICE:100,FIRE:-30;MAGIC;7;0;0;0;#a8e8ff;beast;north;-;Lodowy smok - oddech mrozi z dystansu.
+hrimgar;Hrimgar, Król Lodowców;560;70000;95000;190;650;1900;ICE;1;1800;70;ICE:100,FIRE:-20,PHYSICAL:20;TANK;8;0;6000;1;#e0f4ff;boss;north;-;Król lodowych olbrzymów na szczycie świata.
+shadow_stalker;Łowca cieni;590;11500;15500;290;340;990;DEATH;1;1800;30;DEATH:90,HOLY:-40;SKIRMISHER;8;15;0;0;#3a3050;beast;desert;NOCTURNAL;Drapieżnik z cienia, najgroźniejszy nocą.
+sand_titan;Piaskowy tytan;650;17000;19500;150;340;985;PHYSICAL;1;2500;80;PHYSICAL:35,EARTH:60,ICE:-20;TANK;5;0;0;0;#b89a60;golem;desert;-;Tytan z piasku i kamienia, powolny i niezniszczalny z pozoru.
+void_priest;Kapłan pustki;700;17600;23600;210;1050;1425;DEATH;4;2300;25;DEATH:100,HOLY:-40,EARTH:25;HEALER;8;0;1500;0;#5a3a7a;humanoid;desert;-;Kapłan pustki, leczy sojuszników i razi śmiercią.
+khazuul;Kha'zuul Pusty;750;95000;130000;200;800;2250;DEATH;3;1800;60;DEATH:100,HOLY:-30;MAGIC;8;0;8000;1;#2a1a3a;boss;desert;NOCTURNAL;Władca Pustkowi Cienia. Wymaga drużyny.
+abyssal_demon;Demon Otchłani;800;18000;25000;230;480;1400;FIRE;1;2000;60;FIRE:90,HOLY:-30,ICE:-10;MELEE;7;0;0;0;#a02010;humanoid;underground;-;Demon z głębin Otchłani.
+bone_dragon;Kościany smok;880;20000;28000;200;520;1520;DEATH;3;2200;50;DEATH:100,HOLY:-35,EARTH:30;MAGIC;7;0;0;0;#e8e0c8;beast;underground;-;Smok ze starych kości, zieje śmiercią.
+abyss_lord;Pan Otchłani;950;28100;33500;180;1080;2000;PHYSICAL;1;2300;90;PHYSICAL:15,FIRE:50,DEATH:50,HOLY:-25;TANK;6;0;0;0;#601010;humanoid;underground;-;Pan Otchłani w zbroi z czarnego żelaza.
+morgath;Mor'gath, Serce Otchłani;1000;160000;250000;210;1040;2990;DEATH;3;1700;90;DEATH:100,FIRE:50,HOLY:-25;MAGIC;9;0;12000;1;#ff3020;boss;underground;-;Serce Otchłani. Ostatni przeciwnik świata.

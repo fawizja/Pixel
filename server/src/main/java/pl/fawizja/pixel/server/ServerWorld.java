@@ -439,7 +439,7 @@ final class ServerWorld {
                     PlayerTrade t = new PlayerTrade(other.name(), p.name(), now);
                     trades.put(lower(p.name()), t);
                     trades.put(lower(other.name()), t);
-                    String how = "Dodaj ofertę: /oferuj 5 health potion albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
+                    String how = "Dodaj ofertę: /oferuj 5 mikstura zdrowia albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
                     info(p, "Wymiana z " + other.name() + " otwarta. " + how, now);
                     info(other, "Wymiana z " + p.name() + " otwarta. " + how, now);
                     sendTradeState(t);

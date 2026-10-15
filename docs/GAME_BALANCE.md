@@ -4,6 +4,9 @@ Wszystkie liczby balansu sa w jednym miejscu: `shared/.../balance/Balance.java` 
 `shared/.../vocation/Vocation.java` (profesje), `data/items.csv` (przedmioty) i
 `data/starting.properties` (start). Korekty robimy w danych i krzywych, nie wyjatkami w kodzie.
 
+Nazwy przedmiotow i potworow w tym dokumencie sa robocze (angielskie, jak klucze danych); w grze od 0.25.0
+wyswietlane sa polskie nazwy z `items.csv` / `monsters.csv`.
+
 ## Start postaci (konfigurowalny)
 
 | Ustawienie | Wartosc | Klucz w `starting.properties` |

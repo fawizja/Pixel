@@ -84,6 +84,10 @@ class PlayerTradeTest {
         assertEquals(new PlayerTrade.Parsed(33, 1), PlayerTrade.parse("Rope", REG));
         assertEquals(new PlayerTrade.Parsed(59, 2), PlayerTrade.parse("2 great health", REG), "unique prefix");
         assertNull(PlayerTrade.parse("2 great", REG), "ambiguous prefix");
+        // polska nazwa, z polskimi znakami albo bez, i angielski klucz to ten sam przedmiot
+        assertEquals(PlayerTrade.parse("5 health potion", REG), PlayerTrade.parse("5 Mikstura zdrowia", REG));
+        assertEquals(PlayerTrade.parse("spider silk", REG), PlayerTrade.parse("pajecza nic", REG));
+        assertEquals(PlayerTrade.parse("spider silk", REG), PlayerTrade.parse("Pajęcza nić", REG));
         assertNull(PlayerTrade.parse("0 rope", REG));
         assertNull(PlayerTrade.parse("99999 rope", REG));
         PlayerTrade t = new PlayerTrade("A", "B", 0);

@@ -28,7 +28,7 @@ public final class PlayerTrade {
         DONE("Wymiana zakończona."),
         WAITING("Zaakceptowano - czekam na drugą stronę."),
         NOT_PARTICIPANT("Nie bierzesz udziału w tej wymianie."),
-        UNKNOWN_ITEM("Nie ma takiego przedmiotu. Przykład: /oferuj 5 health potion albo /oferuj 1000 gp"),
+        UNKNOWN_ITEM("Nie ma takiego przedmiotu. Przykład: /oferuj 5 mikstura zdrowia albo /oferuj 1000 gp"),
         NOT_ENOUGH("Nie masz tylu w plecaku."),
         TOO_MANY_STACKS("Za dużo pozycji w ofercie (maks. " + MAX_STACKS + ")."),
         TOO_FAR("Stój obok drugiego gracza (maks. " + MAX_DISTANCE + " pola, to samo piętro)."),
@@ -167,6 +167,12 @@ public final class PlayerTrade {
     record Parsed(int itemId, long count) {}
 
     /** "5 health potion", "health_potion", "1000 gp" (takze "zloto"). Ilosc domyslnie 1. */
+    /** Bez polskich znakow: "złota moneta" = "zlota moneta". */
+    private static String plain(String s) {
+        String t = s.replace('ł', 'l').replace('Ł', 'L');
+        return java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+    }
+
     static Parsed parse(String text, ItemRegistry reg) {
         if (text == null) return null;
         String t = text.trim().toLowerCase(Locale.ROOT);
@@ -183,12 +189,12 @@ public final class PlayerTrade {
         if (count <= 0 || count > 1_000_000_000L || t.isEmpty()) return null;
         if (t.equals("gp") || t.equals("zloto") || t.equals("złoto") || t.equals("gold")) return new Parsed(-1, count);
         if (count > 10_000) return null;
-        String wanted = t.replace(' ', '_');
+        String wanted = plain(t).replace(' ', '_');
         ItemType prefix = null;
         int prefixHits = 0;
         for (ItemType it : reg.all()) {
             String key = it.key();
-            String name = it.name().toLowerCase(Locale.ROOT).replace(' ', '_');
+            String name = plain(it.name().toLowerCase(Locale.ROOT)).replace(' ', '_');
             if (key.equals(wanted) || name.equals(wanted)) return new Parsed(it.id(), count);
             if (key.startsWith(wanted) || name.startsWith(wanted)) {
                 prefix = it;

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.25.0] - 2026-10-15
+
+### Zmieniono
+- Polskie nazwy wszystkich 108 przedmiotow i 42 potworow (np. Mikstura zdrowia, Wilcze futro, Wilk,
+  Grimtooth, Król Kopalni). Klucze danych (`health_potion`, `wolf`) bez zmian, zapisy postaci zgodne.
+- Handel i `/oferuj` przyjmuja polska nazwe (z polskimi znakami albo bez) i angielski klucz:
+  `/oferuj 5 mikstura zdrowia` = `/oferuj 5 health potion`.
+- Waluty: Zlota, Platynowa i Krysztalowa moneta.
+
 ## [0.24.0] - 2026-10-15
 
 ### Dodano

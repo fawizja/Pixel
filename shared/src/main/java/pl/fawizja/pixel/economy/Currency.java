@@ -2,9 +2,9 @@ package pl.fawizja.pixel.economy;
 
 /** Waluty: 100 Gold = 1 Platinum, 100 Platinum = 1 Crystal. */
 public enum Currency {
-    GOLD(1, 1L, "Gold Coin"),
-    PLATINUM(2, 100L, "Platinum Coin"),
-    CRYSTAL(3, 10_000L, "Crystal Coin");
+    GOLD(1, 1L, "Złota moneta"),
+    PLATINUM(2, 100L, "Platynowa moneta"),
+    CRYSTAL(3, 10_000L, "Kryształowa moneta");
 
     public static final int EXCHANGE_RATE = 100;
 
