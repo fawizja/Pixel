@@ -1,0 +1,11 @@
+# nazwa|wlasciwosci uruchomienia (oprocz pixel.screenshot, pixel.saveDir, pixel.seed)
+menu|
+login|-Dpixel.open=login
+varden_day|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0
+varden_night|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=22 -Dpixel.teleport=79,80,0
+bag|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=bag
+spellbook|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=book
+character|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=character
+shop|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,78,0 -Dpixel.open=npc
+mine|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=56,87,-1
+east_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,84,0

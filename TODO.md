@@ -140,4 +140,4 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
 - [ ] Pomiar klatek na prawdziwym telefonie (wymaga urzadzenia), docelowa grafika w atlasie tekstur
-- [ ] Zestaw testow regresji GUI (zrzuty ekranu kluczowych miejsc porownywane automatycznie)
+- [x] Zestaw testow regresji GUI (zrzuty ekranu kluczowych miejsc porownywane automatycznie, zadanie CI)

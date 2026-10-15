@@ -38,10 +38,13 @@ Dane gry (latwe do balansowania bez zmian w kodzie) leza w `shared/src/main/reso
 ./gradlew :desktop:run            # gra na PC
 ./gradlew :android:assembleDebug  # APK (wymaga Android SDK)
 ./gradlew :android:installDebug   # instalacja na podlaczonym telefonie
+tools/gui-regression/run.sh       # regresja GUI: 10 scen porownanych z wzorcami (wymaga ekranu, np. Xvfb)
+tools/gui-regression/run.sh --update  # nowe wzorce po zamierzonej zmianie wygladu
 ```
 
 CI (GitHub Actions, `.github/workflows/build.yml`) uruchamia testy, kompiluje klienta i buduje APK debug
-jako artefakt `pixel-debug-apk`.
+jako artefakt `pixel-debug-apk`. Osobne zadanie `gui-regression` robi zrzuty ekranu pod Xvfb i porownuje je
+z wzorcami w `tools/gui-regression/reference` (roznice jako artefakt `gui-regression`).
 
 ### Sterowanie
 

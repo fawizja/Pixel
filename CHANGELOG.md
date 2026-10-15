@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.1] - 2026-10-15
+
+### Dodano
+- Automatyczna regresja GUI: `tools/gui-regression/run.sh` robi zrzuty 10 kluczowych scen (menu, logowanie,
+  Varden w dzien i w nocy, plecak, ksiega czarow, karta postaci, sklep, kopalnia, oboz na wschodzie)
+  i porownuje je z wzorcami (polowa rozdzielczosci, tolerancja koloru, prog 3% pikseli). Nowe zadanie CI.
+- `-Dpixel.seed` (stale ziarno potworow) i `-Dpixel.open=diag` w launcherze desktopowym.
+- 2 nowe testy porownywarki (lacznie 195).
+
 ## [0.15.0] - 2026-10-15
 
 ### Dodano

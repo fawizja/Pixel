@@ -21,7 +21,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
- *   -Dpixel.open=book|bag|character|npc        otwiera ksiege, plecak, karte postaci albo rozmowe z NPC (zrzuty ekranu)
+ *   -Dpixel.open=book|bag|character|npc|diag   otwiera ksiege, plecak, karte postaci, rozmowe z NPC albo diagnostyke
+ *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  */
 public final class DesktopLauncher {
 

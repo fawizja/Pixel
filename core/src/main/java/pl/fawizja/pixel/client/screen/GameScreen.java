@@ -118,7 +118,7 @@ public final class GameScreen extends ScreenAdapter {
     public GameScreen(PixelGame game, PlayerCharacter pc, NetClient net) {
         this.game = game;
         this.net = net;
-        long seed = TimeUtils.millis();
+        long seed = Long.getLong("pixel.seed", TimeUtils.millis()); // stale ziarno: regresja GUI
         MonsterManager monsters = new MonsterManager(game.world(), game.monsters(), game.spawns(), new Random(seed));
         if (net == null) monsters.populate(pc.position()); // online: potwory przychodza z serwera
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
