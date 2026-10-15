@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0] - 2026-10-15
+
+### Dodano
+- PvP czarami i runami: ofensywne czary i runy trafiaja gracza wybranego jako cel PvP (gdy nie ma celu-potwora),
+  z tymi samymi zasadami co atak (ochrona do poziomu 30, PZ, roznica poziomow, czaszki, blokada PZ, obrazenia x0,5).
+  Gdy zasady odmawiaja, mana i runa nie sa zuzywane.
+- Test PvP czarami (lacznie 188 testow).
+
 ## [0.13.2] - 2026-10-15
 
 ### Dodano

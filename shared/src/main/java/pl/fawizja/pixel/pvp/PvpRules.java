@@ -7,6 +7,7 @@ import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.combat.AttackProfile;
 import pl.fawizja.pixel.combat.CombatEvent;
 import pl.fawizja.pixel.combat.CombatFormulas;
+import pl.fawizja.pixel.combat.DamageType;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
 import pl.fawizja.pixel.world.WorldMap;
@@ -156,6 +157,26 @@ public final class PvpRules {
             return Outcome.OUT_OF_REACH;
         }
         as.nextAttackMs = now + ap.intervalMs();
+        int raw = CombatFormulas.roll(ap.maxDamage(), rng);
+        if (a.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
+        return hit(attacker, as, victim, vs, raw, ap.type(), now, rng);
+    }
+
+    /**
+     * Czar albo runa na gracza: te same zasady co atak (bez odstepu atakow - pilnuja go czasy odnowienia czarow).
+     * raw = wylosowana wartosc czaru przed modyfikatorem PvP.
+     */
+    public static Outcome spellHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
+                                   DamageType type, WorldMap world, long now, Random rng) {
+        if (check(attacker.character(), victim.character(), vs, world, now) != Verdict.OK) return Outcome.NOT_ALLOWED;
+        return hit(attacker, as, victim, vs, raw, type, now, rng);
+    }
+
+    /** Wspolna czesc trafienia: blokada PZ, czaszki, obrazenia x0,5, zdarzenia, smierc i czerwona czaszka. */
+    private static Outcome hit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
+                               DamageType type, long now, Random rng) {
+        PlayerCharacter a = attacker.character();
+        PlayerCharacter b = victim.character();
         as.fightUntil = Math.max(as.fightUntil, now + FIGHT_LOCK_MS);
         vs.fightUntil = Math.max(vs.fightUntil, now + FIGHT_LOCK_MS);
         attacker.lockProtectionZonesUntil(as.fightUntil);
@@ -165,10 +186,8 @@ public final class PvpRules {
             attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowales gracza " + b.name() + " - biala czaszka na 15 min.");
         }
         if (!justified) as.whiteUntil = Math.max(as.whiteUntil, now + WHITE_SKULL_MS);
-        int raw = CombatFormulas.roll(ap.maxDamage(), rng);
-        if (a.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         raw = (int) Math.round(raw * PVP_DAMAGE);
-        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, ap.type(), b.isDefensive(), rng);
+        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, b.isDefensive(), rng);
         int dealt = b.damage(dmg);
         CombatEvent.Kind kind = dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED;
         victim.combat().addEvent(new CombatEvent(now, b.position(), dealt, kind));

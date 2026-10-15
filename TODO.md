@@ -116,7 +116,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Klient: dotkniecie gracza = atak (drugie = koniec), czerwona ramka celu, kolor imienia wg czaszki
 - [x] Testy zasad + symulacja pojedynkow 4x4 profesji na poziomie 50 + test przez TCP
 - [x] Blokada wejscia do PZ po walce (60 s), zapis czaszek na dysku serwera (przetrwaja restart)
-- [ ] Czary i runy na graczy
+- [x] Czary i runy na graczy (te same zasady co atak, obszar tylko w wybrany cel)
 ## Etap 14 - Serwer i synchronizacja MMORPG
 - [x] Modul `server` (TCP, protokol tekstowy), wspolny swiat, wielu graczy, zapis postaci na serwerze
 - [x] Potwory wybieraja najblizszego gracza; atak trafia do sesji tego gracza

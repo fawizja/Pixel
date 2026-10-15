@@ -24,7 +24,9 @@ Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
   wiec czaszki i licznik zabojstw przetrwaja wylogowanie i restart serwera.
 - Blokada strefy ochronnej: kazdy atak PvP zamyka PZ dla atakujacego i ofiary na 60 s (wyjsc mozna, wejsc nie -
   takze schodami prowadzacymi do PZ). Blokada przetrwa ponowne zalogowanie.
-- Na razie tylko atak podstawowy; czary i runy dzialaja wylacznie na potwory.
+- Czary i runy ofensywne trafiaja gracza, gdy jest celem PvP, a postac nie ma celu-potwora
+  (`SpellSystem.PlayerTargeting`, na serwerze `PvpRules.spellHit`): te same zasady, czaszki, blokada PZ i x0,5.
+  Czary obszarowe trafiaja tylko wybranego gracza (nie przypadkowych przechodniow). Odmowa zasad = bez kosztu many/runy.
 
 ## Siec (etap 14)
 

@@ -7,6 +7,7 @@ import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.character.Skill;
 import pl.fawizja.pixel.combat.CombatEvent;
 import pl.fawizja.pixel.combat.CombatSystem;
+import pl.fawizja.pixel.combat.DamageType;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.inventory.Container;
 import pl.fawizja.pixel.inventory.InventoryResult;
@@ -41,6 +42,28 @@ public final class SpellSystem {
     private final EventLog log;
     private final Random rng;
     private final Cooldowns cooldowns = new Cooldowns();
+    private PlayerTargeting playerTarget;
+
+    /**
+     * Cel-gracz dla czarow i run (PvP, ustawia serwer). Uzywany, gdy postac nie ma celu-potwora.
+     * Zasady PvP (poziomy, PZ, czaszki) sprawdza implementacja w {@link #strike}.
+     */
+    public interface PlayerTargeting {
+        /** Pozycja atakowanego gracza albo null, gdy nie ma celu. */
+        Position position();
+
+        /** Zadaje obrazenia czaru; false, gdy zasady PvP na to nie pozwalaja. */
+        boolean strike(int amount, DamageType type, long now);
+    }
+
+    public void setPlayerTargeting(PlayerTargeting t) { playerTarget = t; }
+
+    /** Cel-gracz, gdy brak celu-potwora (inaczej null). */
+    private Position playerTargetPosition() {
+        Monster m = combat.target();
+        if (m != null && !m.isDead()) return null;
+        return playerTarget == null ? null : playerTarget.position();
+    }
 
     public SpellSystem(PlayerCharacter pc, WorldMap world, ItemRegistry items, SpellRegistry spells,
                        ConsumableRegistry consumables, CombatSystem combat, MonsterManager monsters, EventLog log, Random rng) {
@@ -116,11 +139,13 @@ public final class SpellSystem {
         if (s.kind().isOffensive() && world.isProtectionZone(pc.position())) return CastResult.PROTECTION_ZONE;
         if (s.kind().needsTarget()) {
             Monster t = combat.target();
-            if (t == null || t.isDead() || t.position().z() != pc.position().z()) return CastResult.NO_TARGET;
-            if (pc.position().distanceTo(t.position()) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
-            if (!world.hasLineOfSight(pc.position(), t.position())) return CastResult.NOT_VISIBLE;
+            Position tp = t != null && !t.isDead() ? t.position() : playerTargetPosition();
+            if (tp == null || tp.z() != pc.position().z()) return CastResult.NO_TARGET;
+            if (pc.position().distanceTo(tp) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
+            if (!world.hasLineOfSight(pc.position(), tp)) return CastResult.NOT_VISIBLE;
         }
-        if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), s.radius()).isEmpty()) return CastResult.NO_TARGET;
+        if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), s.radius()).isEmpty()
+                && !playerInArea(pc.position(), s.radius())) return CastResult.NO_TARGET;
         if (s.kind() == SpellKind.CONJURE && s.consumesItem() != null
                 && pc.backpack().count(items.byKey(s.consumesItem()).id()) < 1) return CastResult.MISSING_ITEM;
         return CastResult.OK;
@@ -137,14 +162,20 @@ public final class SpellSystem {
             }
             case ATTACK_TARGET:
             case RUNE_TARGET:
+                if (playerTargetPosition() != null) {
+                    return playerTarget.strike(roll(s), s.damageType(), now) ? CastResult.OK : CastResult.NOT_ALLOWED;
+                }
                 combat.damageMonster(combat.target(), roll(s), s.damageType(), now);
                 return CastResult.OK;
             case ATTACK_AREA:
                 for (Monster m : targetsAround(pc.position(), s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
+                if (playerInArea(pc.position(), s.radius())) playerTarget.strike(roll(s), s.damageType(), now);
                 return CastResult.OK;
             case RUNE_AREA: {
-                Position center = combat.target().position();
+                Position pvp = playerTargetPosition();
+                Position center = pvp != null ? pvp : combat.target().position();
                 for (Monster m : targetsAround(center, s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
+                if (playerInArea(center, s.radius())) playerTarget.strike(roll(s), s.damageType(), now);
                 return CastResult.OK;
             }
             case LIGHT:
@@ -165,6 +196,12 @@ public final class SpellSystem {
             default:
                 return CastResult.NOT_USABLE;
         }
+    }
+
+    /** Czy cel-gracz stoi w obszarze czaru (obszar trafia tylko w wybrany cel, nie w przypadkowych graczy). */
+    private boolean playerInArea(Position center, int radius) {
+        Position p = playerTarget == null ? null : playerTarget.position();
+        return p != null && p.z() == center.z() && p.distanceTo(center) <= radius && world.hasLineOfSight(center, p);
     }
 
     private List<Monster> targetsAround(Position center, int radius) {

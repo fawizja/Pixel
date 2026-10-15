@@ -207,4 +207,48 @@ class PvpRulesTest {
         assertEquals(Skull.NONE, Status.decode("smieci;;", 0, wall).skull(0));
         assertEquals(Skull.NONE, Status.decode(new Status().encode(5, wall), 5, wall).skull(5));
     }
+
+    /** Cel-gracz dla czarow tak jak na serwerze: zasady z PvpRules.spellHit. */
+    static void aim(GameSession caster, Status cs, GameSession victim, Status vs) {
+        caster.spells().setPlayerTargeting(new pl.fawizja.pixel.magic.SpellSystem.PlayerTargeting() {
+            public Position position() { return victim.character().position(); }
+
+            public boolean strike(int amount, pl.fawizja.pixel.combat.DamageType type, long now) {
+                return PvpRules.spellHit(caster, cs, victim, vs, amount, type, W, now, new Random(2)) != Outcome.NOT_ALLOWED;
+            }
+        });
+    }
+
+    @Test
+    void spellsAndRunesHitPlayersUnderTheSameRules() {
+        GameSession sorc = at("Castera", 60, FIELD);
+        GameSession knight = at("Targetb", 60, FIELD.translate(2, 0));
+        Status ss = new Status(), ks = new Status();
+        aim(sorc, ss, knight, ks);
+        int hp = knight.character().health();
+        int mana = sorc.character().mana();
+        assertEquals(pl.fawizja.pixel.magic.CastResult.OK, sorc.castSpell("holy_bolt", 10_000));
+        assertTrue(knight.character().health() < hp, "the spell hurts the player");
+        assertTrue(sorc.character().mana() < mana);
+        assertEquals(Skull.WHITE, ss.skull(10_000), "an unjustified spell gives a white skull");
+        assertTrue(knight.protectionZoneLockedUntil() > 10_000);
+
+        // runa na obszar trafia wybranego gracza; runa celowana tez
+        sorc.character().skills().set(pl.fawizja.pixel.character.Skill.MAGIC, 10, 0);
+        sorc.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(TestData.ITEMS.byKey("boulder_rune").id(), 1));
+        sorc.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(TestData.ITEMS.byKey("fireburst_rune").id(), 1));
+        int before = knight.character().health();
+        assertEquals(pl.fawizja.pixel.magic.CastResult.OK, sorc.spells().useFirst("boulder_rune", 20_000));
+        assertEquals(pl.fawizja.pixel.magic.CastResult.OK, sorc.spells().useFirst("fireburst_rune", 30_000));
+        assertTrue(knight.character().health() < before);
+
+        // ochrona nowych postaci obejmuje czary: bez obrazen i bez kosztu many
+        GameSession rookie = at("Rookiec", 20, FIELD.translate(2, 1));
+        aim(sorc, ss, rookie, new Status());
+        int rookieHp = rookie.character().health();
+        int manaBefore = sorc.character().mana();
+        assertEquals(pl.fawizja.pixel.magic.CastResult.NOT_ALLOWED, sorc.castSpell("holy_bolt", 40_000));
+        assertEquals(rookieHp, rookie.character().health());
+        assertEquals(manaBefore, sorc.character().mana());
+    }
 }

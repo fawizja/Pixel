@@ -151,6 +151,22 @@ final class ServerWorld {
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
                 pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));
         if (p.pvp.fightUntil() > now) s.lockProtectionZonesUntil(p.pvp.fightUntil());
+        s.spells().setPlayerTargeting(new pl.fawizja.pixel.magic.SpellSystem.PlayerTargeting() {
+            @Override
+            public Position position() {
+                ServerPlayer t = p.pvpTarget < 0 ? null : players.get(p.pvpTarget);
+                return t == null ? null : t.session.character().position();
+            }
+
+            @Override
+            public boolean strike(int amount, pl.fawizja.pixel.combat.DamageType type, long t) {
+                ServerPlayer v = p.pvpTarget < 0 ? null : players.get(p.pvpTarget);
+                if (v == null) return false;
+                PvpRules.Outcome o = PvpRules.spellHit(p.session, p.pvp, v.session, v.pvp, amount, type, world, t, pvpRng);
+                if (o == PvpRules.Outcome.KILLED) p.pvpTarget = -1;
+                return o != PvpRules.Outcome.NOT_ALLOWED;
+            }
+        });
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");

@@ -3,6 +3,7 @@ package pl.fawizja.pixel.magic;
 /** Wynik proby rzucenia czaru, uzycia runy, mikstury lub craftingu - z komunikatem dla gracza. */
 public enum CastResult {
     OK("OK"),
+    NOT_ALLOWED("Zasady PvP na to nie pozwalaja."),
     WRONG_VOCATION("Twoja profesja nie zna tego czaru."),
     LEVEL_TOO_LOW("Za niski poziom."),
     MAGIC_TOO_LOW("Za niski poziom magii."),
