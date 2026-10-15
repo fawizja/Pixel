@@ -97,7 +97,7 @@ JAVA_OPTS="-Dpixel.server=127.0.0.1:7171 -Dpixel.autostart=Darek:PALADIN -Dpixel
 Bez `-Dpixel.autostart` klient pokazuje menu: "Graj lokalnie" albo "Graj online" (ekran logowania:
 adres serwera, imie, haslo). Pierwsze logowanie nowym imieniem zaklada konto; haslo serwer przechowuje
 tylko jako skrot PBKDF2 w `<katalog zapisow>/accounts/`. W grze haslo zmienia polecenie czatu `/haslo stare nowe`,
-a konto usuwa `/usun-konto haslo`.
+a konto usuwa `/usun-konto haslo`. Druzyny: `/zapros Imie`, `/przyjmij Imie`, `/opusc`, czat druzyny `/d tekst`.
 
 Polaczenie jest szyfrowane TLS. Przy pierwszym starcie serwer tworzy wlasny certyfikat w
 `<katalog zapisow>/tls/` (klucz i haslo magazynu nigdy nie trafiaja do repozytorium) i wypisuje jego

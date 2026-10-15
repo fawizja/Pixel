@@ -415,6 +415,59 @@ class NetworkSyncTest {
         }
     }
 
+    /** Czeka na komunikat spelniajacy warunek (pozostale komunikaty sa pomijane). */
+    static void awaitMessage(NetClient c, String what, java.util.function.Predicate<String[]> cond) throws InterruptedException {
+        await(what, () -> {
+            String[] m;
+            while ((m = c.poll()) != null) if (cond.test(m)) return true;
+            return false;
+        });
+    }
+
+    @Test
+    void partiesShareExperienceChatTogetherAndCannotFightEachOther() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.playerId() > 0 && ula.playerId() > 0 && ula.selfSave() != null);
+            ola.send("PARTY", "INVITE", "ula");
+            awaitMessage(ula, "invite", m -> m[0].equals("LOG") && m[2].contains("/przyjmij Ola"));
+            ula.send("PARTY", "ACCEPT", "Ola");
+            awaitMessage(ola, "party list for ola", m -> m[0].equals("PARTY") && m[1].equals("Ola,Ula"));
+            awaitMessage(ula, "party list for ula", m -> m[0].equals("PARTY") && m[1].equals("Ola,Ula"));
+
+            ola.send("PCHAT", "idziemy na wilki");
+            awaitMessage(ula, "party chat", m -> m[0].equals("CHAT") && m[1].equals("[Druzyna] Ola") && m[2].equals("idziemy na wilki"));
+
+            long olaExp = self(ola).experience(), ulaExp = self(ula).experience();
+            pl.fawizja.pixel.monster.MonsterType wolf = pl.fawizja.pixel.monster.MonsterRegistry
+                    .loadDefault(ItemRegistry.loadDefault()).get("wolf");
+            long solo = pl.fawizja.pixel.balance.Balance.experienceReward(wolf.experience(), wolf.level(), 8);
+            boolean[] shared = new boolean[1];
+            server.enqueueTest(() -> {
+                ServerPlayer killer = server.world().find("Ola");
+                shared[0] = server.world().shareKill(killer, wolf, server.now());
+            });
+            long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2);
+            await("both got a share", () -> {
+                try {
+                    return self(ola).experience() == olaExp + each && self(ula).experience() == ulaExp + each;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            assertTrue(shared[0]);
+            assertTrue(each > solo / 2, "the party bonus beats an even split");
+
+            ola.send("ATTACK", String.valueOf(ula.playerId()));
+            awaitMessage(ola, "no friendly fire", m -> m[0].equals("LOG") && m[2].contains("druzyny"));
+
+            ula.send("BYE");
+            awaitMessage(ola, "party dissolved", m -> m[0].equals("PARTY") && m[1].equals("-"));
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

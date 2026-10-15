@@ -210,6 +210,16 @@ przy pauzie, utracie fokusu i zamknieciu.
 - Cios wrecz niesie pozycje atakujacego (`from`, `isMeleeStrike`): klient rysuje wypad atakujacego w strone celu
   (180 ms) i krotkie ciecie na celu. Dziala tez online (EV z 10 polami).
 
+## Druzyny (Z logika, S serwer)
+
+- `party/PartyManager`: zaproszenie przez lidera (wazne 60 s), przyjecie, wyjscie; maks. 8 osob; po wyjsciu lidera
+  przywodztwo przechodzi na nastepnego, przy jednej osobie druzyna sie rozpada. Wylogowanie = wyjscie z druzyny.
+- `party/PartyRules`: doswiadczenie dzielone, gdy >= 2 zywych czlonkow jest na pietrze zabojcy w promieniu 30
+  i najnizszy poziom >= 2/3 najwyzszego. Udzial = solo(wlasny poziom) * (1 + 0,2 * (n - 1)) / n.
+  Bez spelnienia warunkow zabojca dostaje doswiadczenie sam. Zabicie liczy sie do zadan tylko zabojcy.
+- `CombatSystem.setExperienceSharer` - punkt podpiecia serwera. PvP miedzy czlonkami jest zablokowane.
+- Protokol: `PARTY INVITE|ACCEPT imie`, `PARTY LEAVE`, `PCHAT tekst`; serwer odsyla `PARTY imie1,imie2` albo `PARTY -`.
+
 ## Dzwiek (Z synteza i dobor, C odtwarzanie)
 
 - `audio/SoundSynth`: 13 efektow syntezowanych w kodzie (fale, szum, obwiednie), deterministycznie, WAV PCM 16 bit

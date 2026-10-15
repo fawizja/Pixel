@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.19.0] - 2026-10-15
+
+### Dodano
+- Druzyny online (do 8 osob): `/zapros Imie`, `/przyjmij Imie` (zaproszenie wazne 60 s), `/opusc`, czat druzyny `/d tekst`.
+- Wspolne doswiadczenie: gdy co najmniej dwoch czlonkow jest na tym samym pietrze w promieniu 30 kafelkow i poziomy sa
+  zblizone (najnizszy >= 2/3 najwyzszego), kazdy dostaje (1 + 20% za kazdego kolejnego) / liczba osob doswiadczenia,
+  jakie zdobylby sam: 2 osoby po 60%, 4 po 40%. Wysoki poziom nie "wyholuje" nowej postaci.
+- Czlonkowie druzyny nie moga sie atakowac; ich imiona sa niebieskie z dopiskiem [druzyna].
+- 5 nowych testow, w tym sieciowy (lacznie 220).
+
 ## [0.18.1] - 2026-10-15
 
 ### Dodano

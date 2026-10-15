@@ -78,6 +78,7 @@ final class ServerWorld {
     private final AccountStore accounts;
     private final Random rng = new Random();
     private final Map<Integer, ServerPlayer> players = new LinkedHashMap<>();
+    private final pl.fawizja.pixel.party.PartyManager parties = new pl.fawizja.pixel.party.PartyManager();
     private int nextId = 1;
 
     ServerWorld(File saveDir) throws IOException {
@@ -179,12 +180,106 @@ final class ServerWorld {
                 return o != PvpRules.Outcome.NOT_ALLOWED;
             }
         });
+        s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
         LOG.info("join " + pc.name() + " (" + players.size() + " online)");
         return p;
     }
+
+    /**
+     * Doswiadczenie za potwora zabitego przez p dzielone w druzynie ({@link pl.fawizja.pixel.party.PartyRules}).
+     * false = brak warunkow (zabojca dostaje doswiadczenie sam).
+     */
+    boolean shareKill(ServerPlayer killer, pl.fawizja.pixel.monster.MonsterType type, long now) {
+        List<String> names = parties.members(killer.name());
+        if (names.size() < 2) return false;
+        Position at = killer.session.character().position();
+        List<ServerPlayer> eligible = new ArrayList<>();
+        List<Integer> levels = new ArrayList<>();
+        for (String n : names) {
+            ServerPlayer m = find(n);
+            if (m == null || m.session.character().isDead()) continue;
+            if (!pl.fawizja.pixel.party.PartyRules.inShareRange(at, m.session.character().position())) continue;
+            eligible.add(m);
+            levels.add(m.session.character().level());
+        }
+        if (eligible.size() < 2 || !pl.fawizja.pixel.party.PartyRules.levelsCompatible(levels)) return false;
+        for (ServerPlayer m : eligible) {
+            long solo = pl.fawizja.pixel.balance.Balance.experienceReward(type.experience(), type.level(),
+                    m.session.character().level());
+            long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size());
+            m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Druzyna pokonala: ") + type.name(), now);
+        }
+        return true;
+    }
+
+    /** Obsluga polecen druzyny: PARTY INVITE|ACCEPT imie, PARTY LEAVE. */
+    private void partyCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        String sub = f[1];
+        if (sub.equals("LEAVE")) {
+            if (parties.members(p.name()).isEmpty()) {
+                p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message);
+                return;
+            }
+            partyLeft(p, now);
+            p.session.log().add(now, EventLog.Kind.INFO, "Opusciles druzyne.");
+            return;
+        }
+        if (f.length < 3) return;
+        ServerPlayer other = find(f[2]);
+        if (other == null) {
+            p.session.log().add(now, EventLog.Kind.WARNING, "Gracz " + f[2] + " nie jest w grze.");
+            return;
+        }
+        if (sub.equals("INVITE")) {
+            pl.fawizja.pixel.party.PartyManager.Result r = parties.invite(p.name(), other.name(), now);
+            if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
+                p.session.log().add(now, EventLog.Kind.WARNING, r.message);
+                return;
+            }
+            p.session.log().add(now, EventLog.Kind.INFO, "Zaproszono " + other.name() + " do druzyny.");
+            other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cie do druzyny: /przyjmij " + p.name());
+        } else if (sub.equals("ACCEPT")) {
+            pl.fawizja.pixel.party.PartyManager.Result r = parties.accept(p.name(), other.name(), now);
+            if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
+                p.session.log().add(now, EventLog.Kind.WARNING, r.message);
+                return;
+            }
+            for (String n : parties.members(p.name())) {
+                ServerPlayer m = find(n);
+                if (m == null) continue;
+                m.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " dolacza do druzyny.");
+            }
+            sendParty(parties.members(p.name()));
+        }
+    }
+
+    /** Wyjscie z druzyny (polecenie, wylogowanie, usuniecie konta) z powiadomieniem pozostalych. */
+    private void partyLeft(ServerPlayer p, long now) {
+        List<String> rest = parties.leave(p.name());
+        if (rest.isEmpty()) return;
+        p.client.send("PARTY", "-");
+        for (String n : rest) {
+            ServerPlayer m = find(n);
+            if (m != null) m.session.log().add(now, EventLog.Kind.INFO, p.name() + " opuszcza druzyne.");
+        }
+        sendParty(rest);
+    }
+
+    /** Lista czlonkow do kazdego z nich ("-" gdy druzyna sie rozpadla). */
+    private void sendParty(List<String> names) {
+        for (String n : names) {
+            ServerPlayer m = find(n);
+            if (m == null) continue;
+            List<String> now = parties.members(n);
+            m.client.send("PARTY", now.isEmpty() ? "-" : String.join(",", now));
+        }
+    }
+
+    boolean sameParty(ServerPlayer a, ServerPlayer b) { return parties.sameParty(a.name(), b.name()); }
 
     /** Wolne pole najblizej p (bez innego gracza i przejscia), aby gracze nie stali jeden na drugim. */
     Position freeSpotNear(Position p) {
@@ -229,6 +324,7 @@ final class ServerWorld {
     /** Po usunieciu konta: gracz znika ze swiata bez zapisu, a jego pliki sa kasowane. */
     private void deleteCharacter(ServerPlayer p) {
         String key = p.name().toLowerCase(java.util.Locale.ROOT);
+        partyLeft(p, lastNow);
         players.remove(p.id);
         pvp.remove(key);
         try {
@@ -249,6 +345,7 @@ final class ServerWorld {
     void leave(ServerPlayer p) {
         if (!players.containsKey(p.id)) return;
         save(p); // najpierw zapis, potem usuniecie z listy graczy
+        partyLeft(p, lastNow);
         players.remove(p.id);
         broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
         LOG.info("leave " + p.name() + " (" + players.size() + " online)");
@@ -291,14 +388,25 @@ final class ServerWorld {
                 }
                 deleteCharacter(p);
                 break;
-            case "CHAT":
+            case "PARTY": partyCommand(p, f, now); break;
+            case "PCHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
-                    while (!p.chatTimes.isEmpty() && now - p.chatTimes.peekFirst() > CHAT_WINDOW_MS) p.chatTimes.pollFirst();
-                    if (p.chatTimes.size() >= CHAT_MAX) {
-                        p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za duzo wiadomosci na czacie.");
+                    List<String> team = parties.members(p.name());
+                    if (team.isEmpty()) {
+                        p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message);
                         break;
                     }
-                    p.chatTimes.addLast(now);
+                    if (!chatAllowed(p, now)) break;
+                    String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
+                    for (String n : team) {
+                        ServerPlayer m = find(n);
+                        if (m != null) m.client.send("CHAT", "[Druzyna] " + p.name(), text);
+                    }
+                }
+                break;
+            case "CHAT":
+                if (f.length > 1 && !f[1].isBlank()) {
+                    if (!chatAllowed(p, now)) break;
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
                     for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text);
                 }
@@ -307,10 +415,26 @@ final class ServerWorld {
         }
     }
 
+    /** Limit spamu wspolny dla czatu ogolnego i druzyny. */
+    private boolean chatAllowed(ServerPlayer p, long now) {
+        while (!p.chatTimes.isEmpty() && now - p.chatTimes.peekFirst() > CHAT_WINDOW_MS) p.chatTimes.pollFirst();
+        if (p.chatTimes.size() >= CHAT_MAX) {
+            p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za duzo wiadomosci na czacie.");
+            return false;
+        }
+        p.chatTimes.addLast(now);
+        return true;
+    }
+
     /** Wybor gracza do ataku: zasady sprawdzane od razu, by gracz dostal czytelna odpowiedz. */
     void attackPlayer(ServerPlayer p, int id, long now) {
         ServerPlayer t = players.get(id);
         if (t == null) {
+            p.pvpTarget = -1;
+            return;
+        }
+        if (sameParty(p, t)) {
+            p.session.log().add(now, EventLog.Kind.WARNING, "Nie atakujesz czlonka wlasnej druzyny.");
             p.pvpTarget = -1;
             return;
         }
@@ -388,7 +512,7 @@ final class ServerWorld {
         for (ServerPlayer p : players.values()) {
             if (p.pvpTarget < 0) continue;
             ServerPlayer t = players.get(p.pvpTarget);
-            if (t == null) {
+            if (t == null || sameParty(p, t)) {
                 p.pvpTarget = -1;
                 continue;
             }

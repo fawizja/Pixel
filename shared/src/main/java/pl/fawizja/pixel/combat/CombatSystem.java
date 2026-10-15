@@ -60,6 +60,23 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     /** Powiadomienie o zabiciu potwora przez gracza (np. licznik zadan). */
     public void setKillListener(java.util.function.Consumer<MonsterType> listener) { this.killListener = listener; }
+
+    /** Podzial doswiadczenia w druzynie (serwer); true = doswiadczenie juz rozdane, zabojca nie dostaje go sam. */
+    public interface ExperienceSharer { boolean share(MonsterType killed, long now); }
+
+    private ExperienceSharer experienceSharer;
+
+    public void setExperienceSharer(ExperienceSharer sharer) { this.experienceSharer = sharer; }
+
+    /** Przyznaje doswiadczenie z wpisem w dzienniku i zdarzeniem awansu. */
+    public void awardExperience(long exp, String what, long now) {
+        int levels = pc.addExperience(exp);
+        log.add(now, EventLog.Kind.INFO, what + " (+" + exp + " exp)");
+        if (levels > 0) {
+            log.add(now, EventLog.Kind.SYSTEM, "Awans na poziom " + pc.level() + "!");
+            push(new CombatEvent(now, pc.position(), pc.level(), CombatEvent.Kind.LEVEL_UP));
+        }
+    }
     public boolean autoLoot() { return autoLoot; }
     public void setAutoLoot(boolean v) { autoLoot = v; }
 
@@ -155,12 +172,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         MonsterType t = m.type();
         kills++;
         if (killListener != null) killListener.accept(t);
-        long exp = Balance.experienceReward(t.experience(), t.level(), pc.level());
-        int levels = pc.addExperience(exp);
-        log.add(now, EventLog.Kind.INFO, "Pokonano: " + t.name() + " (+" + exp + " exp)");
-        if (levels > 0) {
-            log.add(now, EventLog.Kind.SYSTEM, "Awans na poziom " + pc.level() + "!");
-            push(new CombatEvent(now, pc.position(), pc.level(), CombatEvent.Kind.LEVEL_UP));
+        if (experienceSharer == null || !experienceSharer.share(t, now)) {
+            awardExperience(Balance.experienceReward(t.experience(), t.level(), pc.level()), "Pokonano: " + t.name(), now);
         }
         Position corpse = m.position();
         List<ItemStack> drop = rollLoot(t);

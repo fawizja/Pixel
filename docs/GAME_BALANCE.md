@@ -22,6 +22,11 @@ Kwota startowa jest dodawana w najwyzszych nominalach (`Money.add`), wiec 10 000
 Wartosci sa liczone w `long` z kontrola przepelnienia (`Math.*Exact`), dodawanie doswiadczenia jest
 nasycane do maksimum poziomu 1000 (`Balance.addExperience`).
 
+### Druzyna (0.19.0)
+Udzial czlonka = doswiadczenie solo wg jego poziomu * (1 + 0,2 * (n - 1)) / n: 2 osoby po 60%, 4 po 40%, 8 po 30%.
+Druzyna zdobywa lacznie wiecej (premia za wspolprace), ale kazdy osobno mniej niz solo na tym samym potworze -
+oplaca sie na bossach i potworach za mocnych dla jednej osoby. Wymagane poziomy w stosunku 2/3, zasieg 30 kafelkow.
+
 ## Statystyki wg poziomu
 
 HP i mana na poziomie 8 sa wspolne (185 / 90), potem rosna o przyrost profesji.

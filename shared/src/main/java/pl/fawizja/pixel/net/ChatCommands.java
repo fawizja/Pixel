@@ -3,6 +3,8 @@ package pl.fawizja.pixel.net;
 /**
  * Polecenia wpisywane w okno czatu, zamieniane na komunikaty protokolu (zamiast wysylania tekstu innym):
  * "/haslo stare nowe" -> PASSWD, "/usun-konto haslo" -> DELETE. Zwykly tekst -> CHAT.
+ * Druzyna: "/zapros Imie" i "/przyjmij Imie" -> PARTY INVITE|ACCEPT imie, "/opusc" -> PARTY LEAVE,
+ * "/d tekst" -> PCHAT (czat druzyny).
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
 public final class ChatCommands {
@@ -20,11 +22,25 @@ public final class ChatCommands {
                 return w.length == 3 ? new String[] {"PASSWD", w[1], w[2]} : null;
             case "/usun-konto":
                 return w.length == 2 ? new String[] {"DELETE", w[1]} : null;
+            case "/zapros":
+                return w.length >= 2 ? new String[] {"PARTY", "INVITE", rest(t)} : null;
+            case "/przyjmij":
+                return w.length >= 2 ? new String[] {"PARTY", "ACCEPT", rest(t)} : null;
+            case "/opusc":
+                return w.length == 1 ? new String[] {"PARTY", "LEAVE"} : null;
+            case "/d":
+                return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:
                 return null;
         }
     }
 
+    /** Tekst po pierwszym slowie (imiona moga miec spacje). */
+    private static String rest(String t) {
+        int i = t.indexOf(' ');
+        return i < 0 ? "" : t.substring(i + 1).trim();
+    }
+
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /haslo stare nowe, /usun-konto haslo";
+    public static final String HELP = "Polecenia: /zapros Imie, /przyjmij Imie, /opusc, /d tekst (druzyna), /haslo stare nowe, /usun-konto haslo";
 }

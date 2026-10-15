@@ -108,6 +108,8 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private static final long REMOTE_STEP_MS = 300L;
+    /** Imiona czlonkow mojej druzyny (male litery) - z komunikatu PARTY serwera. */
+    private final java.util.Set<String> party = new java.util.HashSet<>();
     private final NetClient net;
     private final Map<Integer, RemotePlayer> remotePlayers = new java.util.HashMap<>();
     private long clockOffset;
@@ -671,10 +673,12 @@ public final class GameScreen extends ScreenAdapter {
             if (rp.to.z() != z) continue;
             projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
+            boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));
+            if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
+            else if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
             else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
             else font.setColor(0.55f, 1f, 0.55f, 1f);
-            String label = rp.name + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
+            String label = rp.name + (ally ? " [druzyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
                     + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "");
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
         }
@@ -815,6 +819,12 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "CHAT":
                     if (m.length >= 3) session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
+                    break;
+                case "PARTY":
+                    party.clear();
+                    if (m.length >= 2 && !m[1].equals("-")) {
+                        for (String n : m[1].split(",")) party.add(n.toLowerCase(java.util.Locale.ROOT));
+                    }
                     break;
                 case "EV":
                     if (m.length < 6) break;

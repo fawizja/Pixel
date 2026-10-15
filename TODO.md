@@ -134,6 +134,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Zmiana hasla, usuwanie konta (polecenia w czacie), limit 5 nowych kont na dobe z jednego adresu
 - [x] Przewidywanie ruchu po stronie klienta z korekta pozycji przez serwer
 - [x] Protokol v3: niezmieniona klatka jako `KEEP` (mniej transferu)
+- [x] Druzyny: zaproszenia, czat druzyny, wspolne doswiadczenie z premia, bez PvP w druzynie (0.19.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
