@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.37.0] - 2026-10-15
+
+### Dodano
+- Marsz do celu: dotknięcie miejsca na dużej mapie wyznacza najkrótszą trasę po piętrze (z ominięciem schodów
+  i drabin) i postać sama tam idzie, lokalnie i online. Cel widać na minimapie i dużej mapie (niebieski znacznik).
+  Joystick albo klawisze przerywają marsz; zepchnięta z trasy postać wyznacza ją od nowa.
+- `Pathfinder.path` - pełna trasa BFS na tablicach (całe piętro w jednym wywołaniu); opcja deweloperska
+  `-Dpixel.walkto=x,y`. 2 nowe testy (ciągłość trasy, cele nieosiągalne); łącznie 264.
+
 ## [0.36.0] - 2026-10-15
 
 ### Dodano

@@ -55,7 +55,7 @@ final class Minimap {
     }
 
     /** Wycinek tiles x tiles kafelkow wokol gracza w kwadracie (x, y, size). */
-    void drawAround(SpriteBatch batch, WorldMap w, Position p, float x, float y, float size, int tiles) {
+    void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, float x, float y, float size, int tiles) {
         Texture t = texture(w, p.z());
         if (t != null) {
             int half = tiles / 2;
@@ -71,26 +71,38 @@ final class Minimap {
             }
         }
         float px = size / tiles;
-        marker(batch, x + (tiles / 2 + 0.5f) * px, y + size - (tiles / 2 + 0.5f) * px, Math.max(4, px * 2));
+        if (target != null && target.z() == p.z()) {
+            int tx = target.x() - (p.x() - tiles / 2), ty = target.y() - (p.y() - tiles / 2);
+            if (tx >= 0 && ty >= 0 && tx < tiles && ty < tiles) {
+                marker(batch, x + (tx + 0.5f) * px, y + size - (ty + 0.5f) * px, Math.max(4, px * 2), TARGET);
+            }
+        }
+        marker(batch, x + (tiles / 2 + 0.5f) * px, y + size - (tiles / 2 + 0.5f) * px, Math.max(4, px * 2), PLAYER);
     }
 
     /** Cale pietro wpisane w prostokat; zwraca {x, y, skala} narysowanego obrazu (do podpisow). */
-    float[] drawWhole(SpriteBatch batch, WorldMap w, Position p, float x, float y, float bw, float bh) {
+    float[] drawWhole(SpriteBatch batch, WorldMap w, Position p, Position target, float x, float y, float bw, float bh) {
         Texture t = texture(w, p.z());
         if (t == null) return null;
         float scale = Math.min(bw / t.getWidth(), bh / t.getHeight());
         float iw = t.getWidth() * scale, ih = t.getHeight() * scale;
         float ix = x + (bw - iw) / 2f, iy = y + (bh - ih) / 2f;
         batch.draw(t, ix, iy, iw, ih, 0, 0, t.getWidth(), t.getHeight(), false, false);
-        marker(batch, ix + (p.x() + 0.5f) * scale, iy + ih - (p.y() + 0.5f) * scale, Math.max(5, scale * 2));
+        if (target != null && target.z() == p.z()) {
+            marker(batch, ix + (target.x() + 0.5f) * scale, iy + ih - (target.y() + 0.5f) * scale, Math.max(5, scale * 2), TARGET);
+        }
+        marker(batch, ix + (p.x() + 0.5f) * scale, iy + ih - (p.y() + 0.5f) * scale, Math.max(5, scale * 2), PLAYER);
         return new float[] {ix, iy, scale, ih};
     }
 
-    private void marker(SpriteBatch batch, float cx, float cy, float s) {
+    private static final Color PLAYER = new Color(1f, 0.2f, 0.2f, 1f);
+    private static final Color TARGET = new Color(0.3f, 0.9f, 1f, 1f);
+
+    private void marker(SpriteBatch batch, float cx, float cy, float s, Color c) {
         Color old = batch.getColor().cpy();
         batch.setColor(0, 0, 0, 1);
         batch.draw(dot(), cx - s / 2f - 1, cy - s / 2f - 1, s + 2, s + 2);
-        batch.setColor(1f, 0.2f, 0.2f, 1);
+        batch.setColor(c);
         batch.draw(dot(), cx - s / 2f, cy - s / 2f, s, s);
         batch.setColor(old);
     }

@@ -21,6 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
+ *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|map|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
@@ -141,7 +142,17 @@ public final class DesktopLauncher {
                     }
                     gs.session().toggleTorch(0L);
                 }
-                if ("map".equals(open)) ((GameScreen) getScreen()).hud().toggleMap();
+                if ("map".equals(open)) {
+                    // podglad duzej mapy z zaznaczonym celem marszu (bez ruchu - zrzut jest powtarzalny)
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.hud().setWalkTarget(new Position(120, 150, 0));
+                    gs.hud().toggleMap();
+                }
+                String walkTo = System.getProperty("pixel.walkto");
+                if (walkTo != null) {
+                    String[] w = walkTo.split(",");
+                    ((GameScreen) getScreen()).walkTo(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()), 0));
+                }
                 if ("market".equals(open)) {
                     // podglad rynku (bez serwera): przykladowe oferty
                     pl.fawizja.pixel.market.MarketView.Row[] r = {

@@ -333,6 +333,9 @@ public final class GameScreen extends ScreenAdapter {
                     String[] f = id.split(":");
                     if (net != null && f.length == 3 && f[1].equals("buy")) net.send("MARKET", "BUY", f[2]);
                     if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
+                } else if (id.startsWith("map:goto:")) {
+                    String[] xy = id.substring(9).split(",");
+                    walkTo(new Position(Integer.parseInt(xy[0]), Integer.parseInt(xy[1]), session.character().position().z()), t);
                 } else if (id.startsWith("friend:pm:")) {
                     hud.closeFriends();
                     openChat("/w " + id.substring(10) + ", ");
@@ -437,6 +440,69 @@ public final class GameScreen extends ScreenAdapter {
         return hit;
     }
 
+    /** Marsz do pola wskazanego na duzej mapie: trasa liczona raz, potem krok po kroku jak joystick. */
+    private List<Position> walkPath;
+    private int walkIndex;
+
+    /** Marsz do pola na biezacym pietrze (dotkniecie duzej mapy; desktop: -Dpixel.walkto=x,y). */
+    public void walkTo(Position goal) { walkTo(goal, now()); }
+
+    private void walkTo(Position goal, long now) {
+        Position from = session.character().position();
+        List<Position> path = pl.fawizja.pixel.movement.Pathfinder.path(session.world(), from, goal, WALK_MAX_NODES);
+        if (path.isEmpty()) {
+            stopWalk();
+            session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? "Już tu jesteś." : "Nie ma drogi do tego miejsca.");
+            return;
+        }
+        walkPath = path;
+        walkIndex = 0;
+        hud.setWalkTarget(goal);
+        session.log().add(now, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + path.size() + " pól). Joystick przerywa marsz.");
+    }
+
+    private void stopWalk() {
+        if (walkPath == null) return;
+        walkPath = null;
+        hud.setWalkTarget(null);
+    }
+
+    private Direction walkStep() {
+        Position pos = session.character().position();
+        Position goal = walkPath.get(walkPath.size() - 1);
+        if (pos.equals(goal) || pos.z() != goal.z()) {
+            stopWalk();
+            return null;
+        }
+        // postep: najdalsze pole trasy, na ktorym stoimy (od ostatniego miejsca, z zapasem jednego pola)
+        for (int i = Math.max(0, walkIndex - 1); i < walkPath.size(); i++) {
+            if (walkPath.get(i).equals(pos)) {
+                walkIndex = i + 1;
+                break;
+            }
+        }
+        Position next = walkPath.get(walkIndex);
+        int dx = next.x() - pos.x(), dy = next.y() - pos.y();
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+            // zepchniety z trasy (np. przez potwora): nowa trasa od biezacego pola
+            List<Position> again = pl.fawizja.pixel.movement.Pathfinder.path(session.world(), pos, goal, WALK_MAX_NODES);
+            if (again.isEmpty()) {
+                stopWalk();
+                return null;
+            }
+            walkPath = again;
+            walkIndex = 0;
+            next = again.get(0);
+            dx = next.x() - pos.x();
+            dy = next.y() - pos.y();
+        }
+        for (Direction d : Direction.values()) if (d.dx == dx && d.dy == dy) return d;
+        stopWalk();
+        return null;
+    }
+
+    private static final int WALK_MAX_NODES = 120_000;
+
     private Direction keyboardDirection() {
         int dx = 0, dy = 0;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) dx -= 1;
@@ -464,6 +530,8 @@ public final class GameScreen extends ScreenAdapter {
         if (dir == null && hud.joystick().active()) {
             dir = Direction.fromVector(hud.joystick().value().x, hud.joystick().value().y, 0.25f);
         }
+        if (dir != null) stopWalk(); // reczne sterowanie przerywa marsz do celu
+        else if (walkPath != null) dir = walkStep();
         if (net != null) syncWithServer(dir);
         final long t = now();
         if (net == null) session.update(t, dir);

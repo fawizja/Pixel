@@ -130,6 +130,11 @@ public final class Hud {
     private final Minimap minimap = new Minimap();
     private boolean bigMapOpen;
     private float mmX, mmY, mmSize;
+    /** Ostatnio narysowana duza mapa {x, y, skala, wysokosc} - do zamiany dotkniecia na pole. */
+    private float[] bigMapImg;
+    private pl.fawizja.pixel.world.Position walkTarget;
+
+    public void setWalkTarget(pl.fawizja.pixel.world.Position p) { walkTarget = p; }
     private static final int MINIMAP_TILES = 60;
     /** Ustawienia gracza pokazywane pod diagnostyka (klikalne wiersze "settings:*"). */
     private pl.fawizja.pixel.settings.GameSettings settings;
@@ -866,6 +871,14 @@ public final class Hud {
         }
         if (bigMapOpen) {
             bigMapOpen = false;
+            float[] img = bigMapImg;
+            if (img != null && p.x >= img[0] && p.y >= img[1] && p.y <= img[1] + img[3]) {
+                int tx = (int) ((p.x - img[0]) / img[2]);
+                int ty = (int) ((img[1] + img[3] - p.y) / img[2]);
+                if (tx < session.world().width() && ty >= 0 && ty < session.world().height()) {
+                    actions.onButton("map:goto:" + tx + "," + ty);
+                }
+            }
             return true;
         }
         if (minimapVisible() && p.x >= mmX - 3 && p.x <= mmX + mmSize + 3 && p.y >= mmY - 3 && p.y <= mmY + mmSize + 3) {
@@ -1176,7 +1189,7 @@ public final class Hud {
             }
             font.setColor(Color.WHITE);
         }
-        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), mmX, mmY, mmSize, MINIMAP_TILES);
+        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
             float dy = h - 50;
@@ -1196,8 +1209,9 @@ public final class Hud {
 
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
         pl.fawizja.pixel.world.Position p = session.character().position();
-        text(batch, "Mapa - piętro " + floor + " (dotknij, aby zamknąć)", menuX + 10, menuY + menuH - 8);
-        float[] img = minimap.drawWhole(batch, session.world(), p, menuX + 8, menuY + 8, menuW - 16, menuH - 34);
+        text(batch, "Mapa - piętro " + floor + " (dotknij miejsca, aby tam iść)", menuX + 10, menuY + menuH - 8);
+        float[] img = minimap.drawWhole(batch, session.world(), p, walkTarget, menuX + 8, menuY + 8, menuW - 16, menuH - 34);
+        bigMapImg = img;
         if (img == null) return;
         font.getData().setScale(0.85f);
         for (pl.fawizja.pixel.world.Town t : session.world().towns()) {
