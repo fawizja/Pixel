@@ -24,3 +24,20 @@ mummy;Mummy;200;5200;6200;170;70;230;DEATH;1;2200;30;DEATH:80,FIRE:-30,HOLY:-30;
 frost_queen;Frost Queen Ysolde;150;9000;12000;210;60;180;ICE;4;1800;20;ICE:100,FIRE:-20;MAGIC;8;0;1200;1;#c8f0ff;boss;north;-;Krolowa lodowych glebin. Razi lodem z dystansu, leczy sie raz.
 ruin_colossus;Ruin Colossus;200;14000;19000;150;90;260;PHYSICAL;1;2000;50;PHYSICAL:40,EARTH:50,ENERGY:-20;TANK;7;0;2000;1;#8a8a60;boss;equatorial;-;Kamienny kolos w sercu ruin, otoczony magma.
 pharaoh;Pharaoh Neferakh;230;16000;22000;200;80;250;DEATH;3;1800;30;DEATH:100,HOLY:-30,FIRE:-20;MAGIC;8;0;2500;1;#e8c860;boss;desert;NOCTURNAL;Nieumarly faraon najglebszej krypty.
+cursed_treant;Cursed Treant;240;5600;6400;160;105;330;EARTH;1;2400;40;EARTH:70,FIRE:-30;TANK;5;0;0;0;#4a5a2a;golem;temperate;-;Przeklete drzewo Kniei - wolne, ale twarde jak skala.
+wraith_knight;Wraith Knight;280;5200;7000;220;135;390;DEATH;1;2000;30;DEATH:90,HOLY:-35,PHYSICAL:20;MELEE;7;0;0;0;#6a6a8a;humanoid;temperate;NOCTURNAL;Upiorny rycerz polujacy w przekletych lasach, w nocy grozniejszy.
+fire_elemental;Fire Elemental;320;5600;7500;230;150;450;FIRE;3;2300;10;FIRE:100,ICE:-30,PHYSICAL:30;MAGIC;7;0;0;0;#ff7020;golem;equatorial;-;Zywy ogien Spalonych Wyzyn, rzuca plomieniami z dystansu.
+lava_golem;Lava Golem;370;8600;10500;150;155;440;FIRE;1;2400;60;FIRE:100,PHYSICAL:30,ICE:-25,ENERGY:-10;TANK;5;0;0;0;#c84020;golem;equatorial;-;Golem ze stygnacej lawy. Lod go kruszy.
+ignaroth;Ignaroth the Molten;400;45000;60000;190;440;1230;FIRE;3;1800;50;FIRE:100,ICE:-20;MAGIC;8;0;4000;1;#ff4010;boss;equatorial;-;Pan wulkanu. Wymaga druzyny.
+frost_giant;Frost Giant;430;10500;12500;170;250;720;PHYSICAL;1;2400;55;ICE:80,FIRE:-25;TANK;6;0;0;0;#b8d8f0;humanoid;north;-;Olbrzym ze szczytow, miazdzy maczuga z lodu.
+storm_harpy;Storm Harpy;470;8200;11000;300;235;755;ENERGY;3;2000;20;ENERGY:90,EARTH:-20;SKIRMISHER;8;15;0;0;#d8d0a0;beast;north;-;Szybka harpia burzy, ucieka ranna i wraca z piorunami.
+ice_dragon;Ice Dragon;520;13800;17000;200;430;1270;ICE;3;2300;45;ICE:100,FIRE:-30;MAGIC;7;0;0;0;#a8e8ff;beast;north;-;Lodowy smok - oddech mrozi z dystansu.
+hrimgar;Hrimgar the Glacier King;560;70000;95000;190;650;1900;ICE;1;1800;70;ICE:100,FIRE:-20,PHYSICAL:20;TANK;8;0;6000;1;#e0f4ff;boss;north;-;Krol lodowych olbrzymow na szczycie swiata.
+shadow_stalker;Shadow Stalker;590;11500;15500;290;340;990;DEATH;1;1800;30;DEATH:90,HOLY:-40;SKIRMISHER;8;15;0;0;#3a3050;beast;desert;NOCTURNAL;Drapieznik z cienia, najgrozniejszy noca.
+sand_titan;Sand Titan;650;17000;19500;150;340;985;PHYSICAL;1;2500;80;PHYSICAL:35,EARTH:60,ICE:-20;TANK;5;0;0;0;#b89a60;golem;desert;-;Tytan z piasku i kamienia, powolny i niezniszczalny z pozoru.
+void_priest;Void Priest;700;17600;23600;210;1050;1425;DEATH;4;2300;25;DEATH:100,HOLY:-40,EARTH:25;HEALER;8;0;1500;0;#5a3a7a;humanoid;desert;-;Kaplan pustki, leczy sojusznikow i razi smiercia.
+khazuul;Kha'zuul the Hollow;750;95000;130000;200;800;2250;DEATH;3;1800;60;DEATH:100,HOLY:-30;MAGIC;8;0;8000;1;#2a1a3a;boss;desert;NOCTURNAL;Wladca Pustkowi Cienia. Wymaga druzyny.
+abyssal_demon;Abyssal Demon;800;18000;25000;230;480;1400;FIRE;1;2000;60;FIRE:90,HOLY:-30,ICE:-10;MELEE;7;0;0;0;#a02010;humanoid;underground;-;Demon z glebin Otchlani.
+bone_dragon;Bone Dragon;880;20000;28000;200;520;1520;DEATH;3;2200;50;DEATH:100,HOLY:-35,EARTH:30;MAGIC;7;0;0;0;#e8e0c8;beast;underground;-;Smok ze starych kosci, zieje smiercia.
+abyss_lord;Abyss Lord;950;28100;33500;180;1080;2000;PHYSICAL;1;2300;90;PHYSICAL:15,FIRE:50,DEATH:50,HOLY:-25;TANK;6;0;0;0;#601010;humanoid;underground;-;Pan Otchlani w zbroi z czarnego zelaza.
+morgath;Mor'gath, Heart of the Abyss;1000;160000;250000;210;1040;2990;DEATH;3;1700;90;DEATH:100,FIRE:50,HOLY:-25;MAGIC;9;0;12000;1;#ff3020;boss;underground;-;Serce Otchlani. Ostatni przeciwnik swiata.

@@ -69,3 +69,36 @@
 85;frost_tiara;Frost Tiara;ARMOR;1;12000;HEAD;0;0;9;120;*;0;0;PHYSICAL;#c8f0ff;Diadem krolowej lodu.
 86;colossus_core;Colossus Core;MATERIAL;100;8000;NONE;0;0;0;0;*;2;0;PHYSICAL;#ff8a40;Zarzace sie serce kamiennego kolosa.
 87;pharaoh_scepter;Pharaoh Scepter;WEAPON;1;20000;WEAPON;58;0;0;150;SORCERER,DRUID;0;4;DEATH;#e8c860;Berlo faraona razace moca smierci.
+88;obsidian_shard;Obsidian Shard;MATERIAL;100;300;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a2a3a;Odlamek wulkanicznego szkla ze Spalonych Wyzyn.
+89;glacial_core;Glacial Core;MATERIAL;100;900;NONE;0;0;0;0;*;2;0;PHYSICAL;#9ad8ff;Rdzen wiecznego lodu z Lodowych Szczytow, slabo swieci.
+90;shadow_essence;Shadow Essence;MATERIAL;100;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#40305a;Skondensowany cien z Pustkowi Cienia.
+91;abyssal_ember;Abyssal Ember;MATERIAL;100;8000;NONE;0;0;0;0;*;3;0;PHYSICAL;#ff4020;Zar z dna Otchlani. Nigdy nie gasnie.
+92;magma_spear;Magma Spear;WEAPON;1;40000;WEAPON;64;0;0;250;PALADIN;0;4;PHYSICAL;#e05020;Wlocznia wykuta w lawie Spalonych Wyzyn.
+93;obsidian_wand;Obsidian Wand;WEAPON;1;38000;WEAPON;62;0;0;250;SORCERER;0;4;ENERGY;#7a5aa0;Rozdzka z obsydianu, w ktorym uwiezino blyskawice.
+94;rod_of_hoarfrost;Rod of Hoarfrost;WEAPON;1;38000;WEAPON;62;0;0;250;DRUID;0;4;ICE;#b8e0f0;Rozdzka szronu - ogniste stwory jej sie boja.
+95;molten_knuckles;Molten Knuckles;WEAPON;1;40000;WEAPON;62;10;0;250;MONK;0;1;PHYSICAL;#c84a20;Kastety ze stopionego obsydianu.
+96;frostfang_spear;Frostfang Spear;WEAPON;1;120000;WEAPON;82;0;0;450;PALADIN;0;4;PHYSICAL;#c8ecff;Wlocznia z kla lodowego smoka.
+97;wand_of_inferno;Wand of Inferno;WEAPON;1;115000;WEAPON;80;0;0;450;SORCERER;0;4;FIRE;#ff5020;Rozdzka piekielnego ognia - topi lod szczytow.
+98;rod_of_stoneroot;Rod of Stoneroot;WEAPON;1;115000;WEAPON;80;0;0;450;DRUID;0;4;EARTH;#7a6a4a;Rozdzka z korzenia, ktory przebil skale gor.
+99;frostbound_fists;Frostbound Fists;WEAPON;1;120000;WEAPON;80;14;0;450;MONK;0;1;PHYSICAL;#b0d8f0;Rekawice skute lodem olbrzymow.
+100;shadowpiercer;Shadowpiercer;WEAPON;1;350000;WEAPON;100;0;0;700;PALADIN;0;5;PHYSICAL;#5a4a7a;Wlocznia, ktora przebija cien i pancerz.
+101;stormcaller_wand;Stormcaller Wand;WEAPON;1;340000;WEAPON;98;0;0;700;SORCERER;0;4;ENERGY;#c0c8ff;Rozdzka przyzywajaca burze nad pustkowiami.
+102;rod_of_twilight;Rod of Twilight;WEAPON;1;340000;WEAPON;98;0;0;700;DRUID;0;4;ICE;#8a9ac8;Rozdzka zmierzchu - mrozi nawet kamien tytanow.
+103;umbral_grips;Umbral Grips;WEAPON;1;350000;WEAPON;98;18;0;700;MONK;0;1;PHYSICAL;#3a2a4a;Rekawice z cienia, lekkie jak mgla.
+104;obsidian_armor;Obsidian Armor;ARMOR;1;30000;ARMOR;0;0;12;250;*;0;0;PHYSICAL;#3a2a3a;Zbroja z plyt obsydianu.
+105;obsidian_helmet;Obsidian Helmet;ARMOR;1;20000;HEAD;0;0;8;250;*;0;0;PHYSICAL;#3a2a3a;Helm z obsydianu.
+106;obsidian_legs;Obsidian Legs;ARMOR;1;18000;LEGS;0;0;7;250;*;0;0;PHYSICAL;#3a2a3a;Nagolenniki z obsydianu.
+107;obsidian_shield;Obsidian Shield;SHIELD;1;25000;SHIELD;0;30;0;250;PALADIN,MONK;0;0;PHYSICAL;#3a2a3a;Tarcza z wulkanicznego szkla.
+108;glacial_plate;Glacial Plate;ARMOR;1;90000;ARMOR;0;0;15;450;*;0;0;PHYSICAL;#c8ecff;Plyty z lodu Lodowych Szczytow.
+109;glacial_helm;Glacial Helm;ARMOR;1;60000;HEAD;0;0;10;450;*;0;0;PHYSICAL;#c8ecff;Helm z lodowego krysztalu.
+110;glacial_legs;Glacial Legs;ARMOR;1;55000;LEGS;0;0;9;450;*;0;0;PHYSICAL;#c8ecff;Nagolenniki z lodowego krysztalu.
+111;glacial_shield;Glacial Shield;SHIELD;1;80000;SHIELD;0;36;0;450;PALADIN,MONK;0;0;PHYSICAL;#c8ecff;Tarcza z lodowego krysztalu.
+112;shadowweave_armor;Shadowweave Armor;ARMOR;1;250000;ARMOR;0;0;18;700;*;0;0;PHYSICAL;#40305a;Zbroja tkana z cienia.
+113;shadow_hood;Shadow Hood;ARMOR;1;170000;HEAD;0;0;12;700;*;0;0;PHYSICAL;#40305a;Kaptur z cienia.
+114;shadow_legs;Shadow Legs;ARMOR;1;160000;LEGS;0;0;11;700;*;0;0;PHYSICAL;#40305a;Spodnie z cienia.
+115;shadow_aegis;Shadow Aegis;SHIELD;1;230000;SHIELD;0;42;0;700;PALADIN,MONK;0;0;PHYSICAL;#40305a;Tarcza pochlaniajaca swiatlo.
+116;crown_of_the_abyss;Crown of the Abyss;ARMOR;1;900000;HEAD;0;0;16;900;*;2;0;PHYSICAL;#ff6040;Korona wladcy Otchlani. Najrzadszy przedmiot swiata.
+117;dawnspear;Dawnspear;WEAPON;1;600000;WEAPON;118;0;0;850;PALADIN;1;5;PHYSICAL;#fff0a0;Wlocznia switu - jedyne swiatlo, ktorego boi sie Otchlan.
+118;starfall_wand;Starfall Wand;WEAPON;1;580000;WEAPON;116;0;0;850;SORCERER;1;4;ENERGY;#d0d8ff;Rozdzka sciagajaca gwiazdy w glab ziemi.
+119;rod_of_eternal_winter;Rod of Eternal Winter;WEAPON;1;580000;WEAPON;136;0;0;850;DRUID;1;4;ICE;#c0f0ff;Rozdzka wiecznej zimy, gasi nawet ogien demonow.
+120;fists_of_the_abyss;Fists of the Abyss;WEAPON;1;600000;WEAPON;116;22;0;850;MONK;0;1;PHYSICAL;#802020;Rekawice wykute z serca Otchlani.
