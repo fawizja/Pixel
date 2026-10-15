@@ -85,6 +85,7 @@ public final class DesktopLauncher {
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
+                if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().openNpc(gs.session());

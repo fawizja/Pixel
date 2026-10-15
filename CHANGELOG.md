@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.15.0] - 2026-10-15
+
+### Dodano
+- Ustawienia gracza pod panelem diagnostyki (`i` / F3), zmieniane dotknieciem: limit FPS 30/60/90/120,
+  oszczedzanie baterii (30 FPS i swiatlo w polowie jakosci), jakosc swiatla, liczby obrazen.
+- Ustawienia zapisywane w Preferences `pixel-settings`, bledne wartosci wracaja do domyslnych.
+  Ochrona zasobow 90%/75% moze je tylko dodatkowo obnizyc.
+- 2 nowe testy (lacznie 193).
+
 ## [0.14.1] - 2026-10-15
 
 ### Dodano

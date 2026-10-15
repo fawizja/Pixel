@@ -53,7 +53,7 @@ jako artefakt `pixel-debug-apk`.
 | Pochodnia | POCH | T |
 | Plecak | PLECAK | B lub I |
 | Podnies przedmiot spod nog | PODNIES | G |
-| Diagnostyka | `i` w prawym gornym rogu | F3 |
+| Diagnostyka i ustawienia | `i` w prawym gornym rogu, wiersze ustawien pod panelem | F3, klikniecie wiersza |
 | Nastepny cel (atak automatyczny) | CEL albo dotkniecie potwora | Spacja / C |
 | Postawa obronna (zielony = wlaczona) | TARCZA | V |
 | Czary z paska (leczenie, atak, obszar, swiatlo) | 4 male przyciski na dole | 1-4 |

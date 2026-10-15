@@ -73,7 +73,8 @@ public final class GameScreen extends ScreenAdapter {
     private long lastSaveMs;
     private long lastGuardSampleMs;
     private float frameTimeAvg = 1f / 60f;
-    private int userFpsCap = 60;
+    private final pl.fawizja.pixel.settings.GameSettings settings;
+    private final com.badlogic.gdx.Preferences settingsPrefs;
     private GuardMode lastMode = GuardMode.NORMAL;
     private long frameStartNs;
     private boolean paused;
@@ -126,6 +127,9 @@ public final class GameScreen extends ScreenAdapter {
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
+        this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
+        this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
+        hud.setSettings(settings);
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
         if (net != null) lastSelf = net.selfSave();
@@ -225,6 +229,15 @@ public final class GameScreen extends ScreenAdapter {
         switch (id) {
             case "bag": hud.toggleBag(); break;
             case "diag": hud.toggleDiagnostics(); break;
+            case "settings:fps":
+            case "settings:battery":
+            case "settings:light":
+            case "settings:numbers":
+                settings.apply(id);
+                settingsPrefs.put(settings.toMap());
+                settingsPrefs.flush();
+                lastGuardSampleMs = 0; // nowy limit klatek od razu
+                break;
             case "book": hud.toggleBook(); break;
             case "talk": hud.toggleNpc(session); break;
             case "chat": openChat(); break;
@@ -396,7 +409,7 @@ public final class GameScreen extends ScreenAdapter {
         int minute = session.clock().minuteOfDay(t);
         float ambient = Lighting.ambientForFloor(z, session.clock().ambientLight(minute));
         lightRenderer.render(batch, camera, game.world().floor(z), game.world().height(), ambient,
-                guard.effectsQuality(), camX, camY, Lighting.playerLightRadius(pc, game.items()));
+                Math.min(settings.qualityCap(), guard.effectsQuality()), camX, camY, Lighting.playerLightRadius(pc, game.items()));
         batch.setColor(Color.WHITE);
         drawCombatOverlay(batch, game.shapes(), t, z);
 
@@ -475,6 +488,7 @@ public final class GameScreen extends ScreenAdapter {
         font.getData().setScale(scale);
         for (CombatEvent e : events) {
             if (e.position().z() != z) continue;
+            if (!settings.damageNumbers() && (e.kind() == CombatEvent.Kind.HIT_MONSTER || e.kind() == CombatEvent.Kind.HIT_PLAYER)) continue;
             float age = (t - e.timeMs()) / 1200f;
             projected.set(e.position().x() + 0.5f, worldRenderer.worldY(e.position().y()) + 0.9f + age * 0.8f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
@@ -642,7 +656,7 @@ public final class GameScreen extends ScreenAdapter {
         // czas klatki jako wskaznik posredni: udzial budzetu klatki przy docelowym FPS.
         // Pomijany przez pierwsze sekundy (ladowanie i rozgrzewka JIT zawyzaja wynik).
         if (TimeUtils.millis() - startMs > WARMUP_MS) {
-            float budget = 1f / Math.max(30, userFpsCap);
+            float budget = 1f / Math.max(30, settings.effectiveFpsCap());
             sample.put(Resource.FRAME_TIME, Math.min(1f, frameTimeAvg / (budget / 0.9f)));
         }
         GuardMode mode = guard.update(t, sample);
@@ -651,7 +665,7 @@ public final class GameScreen extends ScreenAdapter {
             Gdx.app.log("Pixel", "Resource guard -> " + guard.describe());
             lastMode = mode;
         }
-        int cap = guard.fpsCap(userFpsCap);
+        int cap = guard.fpsCap(settings.effectiveFpsCap());
         if (Gdx.app.getType() != Application.ApplicationType.Android) {
             Gdx.graphics.setForegroundFPS(cap);
         }
@@ -660,7 +674,7 @@ public final class GameScreen extends ScreenAdapter {
     /** Programowy limit FPS dla platform bez wbudowanego (Android). */
     private void limitFrameRate() {
         if (!game.platform().needsSoftwareFrameLimit()) return;
-        int cap = guard.fpsCap(userFpsCap);
+        int cap = guard.fpsCap(settings.effectiveFpsCap());
         if (cap <= 0) return;
         long target = 1_000_000_000L / cap;
         long elapsed = TimeUtils.nanoTime() - frameStartNs;
@@ -691,7 +705,7 @@ public final class GameScreen extends ScreenAdapter {
         if (thermal != null) l.add("Termika: " + thermal);
         l.add("Tryb: " + guard.describe());
         if (net != null) l.add("Siec: online, poprawki ruchu: " + predictor.corrections() + (net.isClosed() ? " (rozlaczono)" : ""));
-        l.add("Limit FPS: " + guard.fpsCap(userFpsCap));
+        l.add("Limit FPS: " + guard.fpsCap(settings.effectiveFpsCap()));
         return l;
     }
 

@@ -105,6 +105,8 @@ public final class Hud {
     private final HudButton bagUse = new HudButton("bag_use", "UZYJ");
     private final HudButton bagClose = new HudButton("bag_close", "X");
     private boolean diagnosticsOpen;
+    /** Ustawienia gracza pokazywane pod diagnostyka (klikalne wiersze "settings:*"). */
+    private pl.fawizja.pixel.settings.GameSettings settings;
 
     public Hud(TileArt art, BitmapFont font) {
         this.art = art;
@@ -391,6 +393,11 @@ public final class Hud {
 
     public void toggleDiagnostics() { diagnosticsOpen = !diagnosticsOpen; }
     public boolean diagnosticsOpen() { return diagnosticsOpen; }
+    public void setSettings(pl.fawizja.pixel.settings.GameSettings settings) { this.settings = settings; }
+
+    private static final float SETTINGS_ROW_H = 22f;
+    private float settingsRowY(int i) { return h - 290 - i * (SETTINGS_ROW_H + 4); }
+    private float settingsRowX() { return w - 250; }
     public int selectedSlot() { return selectedSlot; }
     public void clearSelection() { selectedSlot = -1; }
 
@@ -407,6 +414,16 @@ public final class Hud {
             // dotkniecie paskow HP/MP: karta postaci
             toggleCharacter();
             return true;
+        }
+        if (diagnosticsOpen && settings != null) {
+            String[][] rows = settings.rows();
+            for (int i = 0; i < rows.length; i++) {
+                float ry = settingsRowY(i);
+                if (p.x >= settingsRowX() && p.x <= settingsRowX() + 238 && p.y >= ry && p.y <= ry + SETTINGS_ROW_H) {
+                    actions.onButton(rows[i][0]);
+                    return true;
+                }
+            }
         }
         if (menuOpen) {
             if (menuClose.hit(p.x, p.y)) { menuOpen = false; return true; }
@@ -578,7 +595,14 @@ public final class Hud {
         }
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.6f);
-            shapes.rect(w - 250, h - 210, 238, 170);
+            shapes.rect(w - 250, h - 256, 238, 216);
+            if (settings != null) {
+                int n = settings.rows().length;
+                for (int i = 0; i < n; i++) {
+                    shapes.setColor(0.2f, 0.26f, 0.32f, 0.9f);
+                    shapes.rect(settingsRowX(), settingsRowY(i), 238, SETTINGS_ROW_H);
+                }
+            }
         }
         shapes.end();
 
@@ -646,6 +670,12 @@ public final class Hud {
             for (String line : diagInfo.lines()) {
                 text(batch, line, w - 244, dy);
                 dy -= 16;
+            }
+            if (settings != null) {
+                String[][] rows = settings.rows();
+                font.getData().setScale(0.85f);
+                for (int i = 0; i < rows.length; i++) text(batch, rows[i][1], settingsRowX() + 6, settingsRowY(i) + 16);
+                font.getData().setScale(1f);
             }
         }
         batch.end();

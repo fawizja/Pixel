@@ -137,6 +137,9 @@ Joystick ze strefa martwa, klawiatura na PC.
 - Pomiary: sterta aplikacji (desktop i Android), pamiec systemu i stan termiczny (Android API 29+),
   czas klatki (wskaznik posredni). CPU jest oznaczone jako niedostepne - Android nie udostepnia go aplikacjom.
 - Panel diagnostyki (`i` / F3): FPS, pamiec, CPU, temperatura, bateria, tryb i przyczyna.
+- Pod panelem ustawienia (`GameSettings`, zapis w Preferences `pixel-settings`): limit FPS 30/60/90/120,
+  oszczedzanie baterii (maks. 30 FPS, jakosc swiatla 0,5), jakosc swiatla, liczby obrazen.
+  Ostateczny limit = min(ustawienie, ochrona zasobow); jakosc swiatla = min(ustawienie, ochrona zasobow).
 
 ## Zapis (Z)
 

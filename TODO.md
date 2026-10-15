@@ -135,7 +135,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
-- [ ] Osobne ustawienia oszczedzania baterii, menu ustawien
+- [x] Ustawienia: oszczedzanie baterii, limit FPS, jakosc swiatla, liczby obrazen (zapis w Preferences)
 ## Etap 16 - Optymalizacja, regresja, przygotowanie Androida
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
