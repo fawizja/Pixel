@@ -288,7 +288,24 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             default:
-                if (id.startsWith("trade:")) {
+                if (id.startsWith("player:")) {
+                    hud.closePlayerMenu();
+                    if (net == null) break;
+                    String[] f = id.split(":", 3);
+                    switch (f[1]) {
+                        case "trade": net.send("TRADE", "REQUEST", f[2]); break;
+                        case "party": net.send("PARTY", "INVITE", f[2]); break;
+                        case "guild": net.send("GUILD", "INVITE", f[2]); break;
+                        case "attack": {
+                            int pid = Integer.parseInt(f[2]);
+                            boolean stop = pvpTargetId == pid;
+                            net.send("ATTACK", stop ? "-" : String.valueOf(pid));
+                            pvpTargetId = stop ? -1 : pid;
+                            break;
+                        }
+                        default:
+                    }
+                } else if (id.startsWith("trade:")) {
                     if (net == null) break;
                     if (id.equals("trade:accept")) net.send("TRADE", "ACCEPT");
                     else if (id.equals("trade:cancel")) net.send("TRADE", "CANCEL");
@@ -350,10 +367,10 @@ public final class GameScreen extends ScreenAdapter {
         if (net != null) {
             for (Map.Entry<Integer, RemotePlayer> e : remotePlayers.entrySet()) {
                 if (e.getValue().to.equals(p)) {
-                    // drugi dotyk tego samego gracza konczy atak
-                    boolean stop = pvpTargetId == e.getKey();
-                    net.send("ATTACK", stop ? "-" : String.valueOf(e.getKey()));
-                    pvpTargetId = stop ? -1 : e.getKey();
+                    // menu gracza zamiast natychmiastowego ataku (bez przypadkowej czaszki na ekranie dotykowym)
+                    RemotePlayer rp = e.getValue();
+                    hud.openPlayerMenu(e.getKey(), rp.name, pvpTargetId == e.getKey(),
+                            party.contains(rp.name.toLowerCase(java.util.Locale.ROOT)));
                     return true;
                 }
             }

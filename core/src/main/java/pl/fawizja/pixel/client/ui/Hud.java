@@ -63,6 +63,9 @@ public final class Hud {
     private boolean npcMode;
     /** Otwarta wymiana z innym graczem (okno handlu) albo null. */
     private pl.fawizja.pixel.trade.TradeView trade;
+    /** Menu innego gracza (po dotknieciu go): id, imie, czy wlasnie go atakuje. */
+    private record PlayerMenu(int id, String name, boolean attacking, boolean ally) {}
+    private PlayerMenu playerMenu;
     private pl.fawizja.pixel.npc.Npc npc;
     private int npcPage;
     private int bookPage;
@@ -202,6 +205,7 @@ public final class Hud {
     public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
+        playerMenu = null;
         menuOpen = !(menuOpen && !npcMode);
         npcMode = false;
         assignSlot = -1;
@@ -221,6 +225,7 @@ public final class Hud {
     public void openNpc(GameSession session) {
         pl.fawizja.pixel.npc.Npc n = session.npcNearby();
         if (n == null) return;
+        playerMenu = null;
         if (n != npc) npcPage = 0;
         npc = n;
         npcMode = true;
@@ -244,6 +249,22 @@ public final class Hud {
     }
 
     public boolean tradeOpen() { return trade != null; }
+
+    /** Menu gracza: atak, handel, druzyna, gildia - zamiast natychmiastowego ataku po dotknieciu. */
+    public void openPlayerMenu(int id, String name, boolean attacking, boolean ally) {
+        if (trade != null) return;
+        playerMenu = new PlayerMenu(id, name, attacking, ally);
+        menuOpen = true;
+        npcMode = false;
+        bagOpen = false;
+    }
+
+    public void closePlayerMenu() {
+        if (playerMenu != null) menuOpen = false;
+        playerMenu = null;
+    }
+
+    public boolean playerMenuOpen() { return menuOpen && playerMenu != null; }
     public boolean bookOpen() { return menuOpen; }
     public void toggleCharacter() { charOpen = !charOpen; }
     public boolean characterOpen() { return charOpen; }
@@ -295,6 +316,10 @@ public final class Hud {
             rebuildTradeMenu(session);
             return;
         }
+        if (playerMenu != null) {
+            rebuildPlayerMenu();
+            return;
+        }
         if (npcMode) {
             rebuildNpcMenu(session);
             return;
@@ -342,6 +367,25 @@ public final class Hud {
             row.h = rowH - 3;
         }
     }
+    private void rebuildPlayerMenu() {
+        PlayerMenu pm = playerMenu;
+        List<MenuRow> rows = new ArrayList<>();
+        rows.add(new MenuRow("player:trade:" + pm.name(), "Handel", "wymiana przedmiotow i zlota (stojac obok)", true));
+        rows.add(new MenuRow("player:party:" + pm.name(), "Zapros do druzyny", "wspolne doswiadczenie, bez walki miedzy soba", true));
+        rows.add(new MenuRow("player:guild:" + pm.name(), "Zapros do gildii", "tylko lider gildii", true));
+        rows.add(new MenuRow("player:attack:" + pm.id(), pm.attacking() ? "Przerwij atak" : "Atakuj",
+                pm.attacking() ? "koniec walki z tym graczem" : "PvP: biala czaszka, zasady serwera", !pm.ally()));
+        float colW = (menuW - 30) / 2f;
+        for (int i = 0; i < rows.size(); i++) {
+            MenuRow row = rows.get(i);
+            row.x = menuX + 10 + (i % 2) * (colW + 10);
+            row.y = menuY + menuH - 40 - (i / 2 + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+            menuRows.add(row);
+        }
+    }
+
     /** Okno handlu: lewa kolumna - oferty i decyzje, prawa - przedmioty z plecaka do dodania. */
     private void rebuildTradeMenu(GameSession session) {
         List<MenuRow> left = new ArrayList<>();
@@ -517,6 +561,7 @@ public final class Hud {
         if (menuOpen) {
             if (menuClose.hit(p.x, p.y)) {
                 if (trade != null) actions.onButton("trade:cancel"); // zamkniecie okna = rezygnacja
+                else if (playerMenu != null) closePlayerMenu();
                 else menuOpen = false;
                 return true;
             }
@@ -605,7 +650,8 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode && trade == null;
+        book.active = menuOpen && !npcMode && trade == null && playerMenu == null;
+        if (playerMenu != null && !menuOpen) playerMenu = null;
         fish.visible = session.canFish();
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
@@ -743,7 +789,9 @@ public final class Hud {
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
-            if (trade != null) {
+            if (trade == null && playerMenu != null) {
+                text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade != null) {
                 text(batch, "Handel z " + trade.partner(), menuX + 10, menuY + menuH - 14);
                 text(batch, "Twoj plecak (dotknij, aby dodac do oferty)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
             } else if (npcMode) {

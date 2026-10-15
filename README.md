@@ -38,7 +38,7 @@ Dane gry (latwe do balansowania bez zmian w kodzie) leza w `shared/src/main/reso
 ./gradlew :desktop:run            # gra na PC
 ./gradlew :android:assembleDebug  # APK (wymaga Android SDK)
 ./gradlew :android:installDebug   # instalacja na podlaczonym telefonie
-tools/gui-regression/run.sh       # regresja GUI: 11 scen porownanych z wzorcami (wymaga ekranu, np. Xvfb)
+tools/gui-regression/run.sh       # regresja GUI: 12 scen porownanych z wzorcami (wymaga ekranu, np. Xvfb)
 tools/gui-regression/run.sh --update  # nowe wzorce po zamierzonej zmianie wygladu
 tools/android-smoke/run.sh android/build/outputs/apk/debug  # APK na telefonie/emulatorze przez adb: start, 75 s gry, pomiar klatek
 ```
@@ -67,6 +67,7 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |
 | Karta postaci i umiejetnosci | dotknij paskow HP/MP | P |
 | Rozmowa z NPC (sklep, bank, kaplan, zadania) | ROZMOWA albo dotkniecie NPC | N |
+| Menu gracza online (handel, druzyna, gildia, atak) | dotkniecie gracza | klikniecie gracza |
 | Uzycie przedmiotu (mikstura, jedzenie, runa na cel) | PLECAK -> zaznacz -> UZYJ | - |
 
 W plecaku: dotknij przedmiotu, aby go zaznaczyc (statystyki), potem dotknij innego slotu, aby

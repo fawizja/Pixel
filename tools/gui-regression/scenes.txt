@@ -10,3 +10,4 @@ shop|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,78,0 -Dp
 mine|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=56,87,-1
 east_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,84,0
 trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=trade
+player|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=player

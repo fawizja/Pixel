@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.21.1] - 2026-10-15
+
+### Zmieniono
+- Dotkniecie innego gracza otwiera menu gracza: Handel, Zapros do druzyny, Zapros do gildii, Atakuj / Przerwij atak.
+  Atak wymaga swiadomego wyboru (wczesniej dotkniecie od razu atakowalo - latwo bylo przypadkiem dostac czaszke).
+  Czlonka wlasnej druzyny nie mozna wybrac do ataku.
+
+### Dodano
+- `-Dpixel.open=player` - podglad menu gracza; nowa scena `player` w regresji GUI (12 scen).
+
 ## [0.21.0] - 2026-10-15
 
 ### Dodano
