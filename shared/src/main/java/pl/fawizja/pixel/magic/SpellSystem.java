@@ -186,7 +186,7 @@ public final class SpellSystem {
             }
             case LIGHT:
                 pc.addLightBuff(s.radius(), LIGHT_SPELL_MS);
-                log.add(now, EventLog.Kind.INFO, "Swiatlo otacza postac.");
+                log.add(now, EventLog.Kind.INFO, "Światło otacza postać.");
                 return CastResult.OK;
             case CONJURE: {
                 Container copy = pc.backpack().copy();

@@ -17,7 +17,8 @@ import pl.fawizja.pixel.magic.SpellRegistry;
 public final class DialogueRegistry {
 
     /** Jedna linia: kto (klucz NPC, "@ROLA" albo "*"), slowa kluczowe i odpowiedz. */
-    public record Line(String who, List<String> keywords, String answer) { }
+    /** {@code topic} - pierwsze slowo kluczowe w oryginalnej pisowni (z polskimi znakami), do pokazania graczowi. */
+    public record Line(String who, List<String> keywords, String answer, String topic) { }
 
     public static final int MAX_TEXT = 60;
 
@@ -66,7 +67,7 @@ public final class DialogueRegistry {
                 if (!nk.isEmpty()) kws.add(nk);
             }
             if (kws.isEmpty()) throw new IOException("dialogues.csv line " + n + ": no keywords");
-            out.add(new Line(who, kws, f[2].trim()));
+            out.add(new Line(who, kws, f[2].trim(), f[1].split(",")[0].trim().toLowerCase(Locale.ROOT)));
         }
         return new DialogueRegistry(out);
     }
@@ -127,7 +128,7 @@ public final class DialogueRegistry {
     public List<String> topics(Npc npc) {
         Set<String> out = new LinkedHashSet<>();
         for (int r = 3; r >= 1; r--) {
-            for (Line line : lines) if (rank(line, npc) == r) out.add(line.keywords().get(0));
+            for (Line line : lines) if (rank(line, npc) == r) out.add(line.topic());
         }
         return new ArrayList<>(out);
     }

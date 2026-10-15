@@ -115,10 +115,10 @@ public final class GameSettings {
     public String[][] rows() {
         return new String[][] {
             {"settings:fps", "Limit FPS: " + fpsCap + (batterySaver ? " (bateria: " + effectiveFpsCap() + ")" : "")},
-            {"settings:battery", "Oszczedzanie baterii: " + (batterySaver ? "wlaczone" : "wylaczone")},
-            {"settings:light", "Swiatlo: " + (highLighting ? "wysoka jakosc" : "niska jakosc")},
-            {"settings:numbers", "Liczby obrazen: " + (damageNumbers ? "pokazuj" : "ukryj")},
-            {"settings:sound", "Dzwiek: " + (volume == 0 ? "wylaczony" : volume + "%")},
+            {"settings:battery", "Oszczędzanie baterii: " + (batterySaver ? "włączone" : "wyłączone")},
+            {"settings:light", "Światło: " + (highLighting ? "wysoka jakość" : "niska jakość")},
+            {"settings:numbers", "Liczby obrażeń: " + (damageNumbers ? "pokazuj" : "ukryj")},
+            {"settings:sound", "Dźwięk: " + (volume == 0 ? "wyłączony" : volume + "%")},
         };
     }
 }

@@ -81,7 +81,7 @@ public final class PixelServer implements AutoCloseable {
                 java.util.concurrent.atomic.AtomicInteger n = perAddress.computeIfAbsent(addr,
                         k -> new java.util.concurrent.atomic.AtomicInteger());
                 if (total.get() >= MAX_CONNECTIONS || n.get() >= MAX_PER_ADDRESS) {
-                    LOG.warning("odrzucono polaczenie z " + addr + " (limit)");
+                    LOG.warning("odrzucono połączenie z " + addr + " (limit)");
                     s.close();
                     continue;
                 }
@@ -149,11 +149,11 @@ public final class PixelServer implements AutoCloseable {
                 return;
             }
             if (!String.valueOf(Protocol.VERSION).equals(f[1])) {
-                c.send("ERR", "Niezgodna wersja protokolu (serwer " + Protocol.VERSION + ").");
+                c.send("ERR", "Niezgodna wersja protokołu (serwer " + Protocol.VERSION + ").");
                 return;
             }
             if (f.length < 5) {
-                c.send("ERR", "Podaj imie, profesje i haslo.");
+                c.send("ERR", "Podaj imię, profesję i hasło.");
                 return;
             }
             c.player = world.join(c, f[2], f[3], f[4], now);

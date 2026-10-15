@@ -5,11 +5,11 @@ public enum TradeResult {
     OK("Gotowe."),
     NOT_SOLD_HERE("Ten kupiec tego nie sprzedaje."),
     NOT_BOUGHT_HERE("Ten kupiec tego nie skupuje."),
-    NO_MONEY("Nie masz tyle pieniedzy w plecaku."),
+    NO_MONEY("Nie masz tyle pieniędzy w plecaku."),
     NO_SPACE("Brak miejsca w plecaku."),
     NOTHING_TO_SELL("Nie masz tego przedmiotu w plecaku."),
-    INVALID_AMOUNT("Nieprawidlowa ilosc."),
-    TOO_FAR("Podejdz blizej.");
+    INVALID_AMOUNT("Nieprawidłowa ilość."),
+    TOO_FAR("Podejdź bliżej.");
 
     private final String message;
 

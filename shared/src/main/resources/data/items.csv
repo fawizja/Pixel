@@ -1,109 +1,109 @@
 # id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations(* = wszystkie);light;range;damageType;color;description
-1;gold_coin;Gold Coin;CURRENCY;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#f2c230;Zolta moneta. 100 Gold = 1 Platinum.
+1;gold_coin;Gold Coin;CURRENCY;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#f2c230;Żółta moneta. 100 Gold = 1 Platinum.
 2;platinum_coin;Platinum Coin;CURRENCY;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;#b8c8dc;Srebrno-niebieska moneta. 100 Platinum = 1 Crystal.
-3;crystal_coin;Crystal Coin;CURRENCY;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;#4aa8ff;Niebieska krysztalowa moneta warta 10 000 gp.
-10;leather_helmet;Leather Helmet;ARMOR;1;12;HEAD;0;0;1;0;*;0;0;PHYSICAL;#8a5a2b;Prosty skorzany helm.
-11;leather_armor;Leather Armor;ARMOR;1;25;ARMOR;0;0;4;0;*;0;0;PHYSICAL;#8a5a2b;Lekka zbroja dla poczatkujacych.
-12;leather_legs;Leather Legs;ARMOR;1;10;LEGS;0;0;1;0;*;0;0;PHYSICAL;#8a5a2b;Skorzane spodnie.
-13;leather_boots;Leather Boots;ARMOR;1;8;FEET;0;0;1;0;*;0;0;PHYSICAL;#6b4423;Wygodne buty podroznika.
-20;hunting_spear;Hunting Spear;WEAPON;1;40;WEAPON;25;0;0;0;PALADIN;0;4;PHYSICAL;#c9b37e;Rzucana wlocznia paladyna, wraca do reki.
+3;crystal_coin;Crystal Coin;CURRENCY;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;#4aa8ff;Niebieska kryształowa moneta warta 10 000 gp.
+10;leather_helmet;Leather Helmet;ARMOR;1;12;HEAD;0;0;1;0;*;0;0;PHYSICAL;#8a5a2b;Prosty skórzany hełm.
+11;leather_armor;Leather Armor;ARMOR;1;25;ARMOR;0;0;4;0;*;0;0;PHYSICAL;#8a5a2b;Lekka zbroja dla początkujących.
+12;leather_legs;Leather Legs;ARMOR;1;10;LEGS;0;0;1;0;*;0;0;PHYSICAL;#8a5a2b;Skórzane spodnie.
+13;leather_boots;Leather Boots;ARMOR;1;8;FEET;0;0;1;0;*;0;0;PHYSICAL;#6b4423;Wygodne buty podróżnika.
+20;hunting_spear;Hunting Spear;WEAPON;1;40;WEAPON;25;0;0;0;PALADIN;0;4;PHYSICAL;#c9b37e;Rzucana włócznia paladyna, wraca do ręki.
 21;wooden_shield;Wooden Shield;SHIELD;1;15;SHIELD;0;12;0;0;PALADIN,MONK;0;0;PHYSICAL;#9c6b3c;Lekka drewniana tarcza.
-22;wand_of_embers;Wand of Embers;WEAPON;1;120;WEAPON;22;0;0;8;SORCERER;0;4;FIRE;#ff6a2b;Rozdzka czarodzieja, strzela iskrami ognia.
-23;thornroot_rod;Thornroot Rod;WEAPON;1;120;WEAPON;22;0;0;8;DRUID;0;4;EARTH;#58b04a;Rozdzka druida, rani kolcami ziemi.
-24;cloth_wraps;Cloth Wraps;WEAPON;1;35;WEAPON;20;4;0;0;MONK;0;1;PHYSICAL;#e8dcc0;Owijki na dlonie mnicha.
-25;training_sword;Training Sword;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK;0;1;PHYSICAL;#b0b0b8;Tepy miecz cwiczebny.
-30;health_potion;Health Potion;POTION;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8263c;Przywraca czesc zdrowia.
-31;mana_potion;Mana Potion;POTION;100;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a5bd8;Przywraca czesc many.
-32;torch;Torch;LIGHT;1;2;NONE;0;0;0;0;*;5;0;PHYSICAL;#ffb347;Pochodnia: rozjasnia ciemne podziemia.
-33;rope;Rope;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#c8a165;Lina do wspinania sie z dziur.
-34;shovel;Shovel;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#8f8f8f;Lopata do odkopywania przejsc.
-35;fishing_rod;Fishing Rod;TOOL;1;150;NONE;0;0;0;0;*;0;0;PHYSICAL;#a07040;Wedka do lowienia ryb.
-36;worm;Worm;BAIT;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#d48a8a;Przyneta na ryby.
+22;wand_of_embers;Wand of Embers;WEAPON;1;120;WEAPON;22;0;0;8;SORCERER;0;4;FIRE;#ff6a2b;Różdżka czarodzieja, strzela iskrami ognia.
+23;thornroot_rod;Thornroot Rod;WEAPON;1;120;WEAPON;22;0;0;8;DRUID;0;4;EARTH;#58b04a;Różdżka druida, rani kolcami ziemi.
+24;cloth_wraps;Cloth Wraps;WEAPON;1;35;WEAPON;20;4;0;0;MONK;0;1;PHYSICAL;#e8dcc0;Owijki na dłonie mnicha.
+25;training_sword;Training Sword;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK;0;1;PHYSICAL;#b0b0b8;Tępy miecz ćwiczebny.
+30;health_potion;Health Potion;POTION;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8263c;Przywraca część zdrowia.
+31;mana_potion;Mana Potion;POTION;100;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a5bd8;Przywraca część many.
+32;torch;Torch;LIGHT;1;2;NONE;0;0;0;0;*;5;0;PHYSICAL;#ffb347;Pochodnia: rozjaśnia ciemne podziemia.
+33;rope;Rope;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#c8a165;Lina do wspinania się z dziur.
+34;shovel;Shovel;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#8f8f8f;Łopata do odkopywania przejść.
+35;fishing_rod;Fishing Rod;TOOL;1;150;NONE;0;0;0;0;*;0;0;PHYSICAL;#a07040;Wędka do łowienia ryb.
+36;worm;Worm;BAIT;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#d48a8a;Przynęta na ryby.
 37;blank_rune;Blank Rune;RUNE;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#d0d0c0;Pusta runa do zaklinania.
 38;bread;Bread;FOOD;100;3;NONE;0;0;0;0;*;0;0;PHYSICAL;#d9a85b;Chleb z piekarni w Varden.
-39;spear;Spear;AMMUNITION;100;3;AMMO;20;0;0;0;PALADIN;0;4;PHYSICAL;#c9b37e;Zwykla wlocznia do rzucania.
-40;meat;Meat;FOOD;100;4;NONE;0;0;0;0;*;0;0;PHYSICAL;#b04a3a;Surowe mieso. Mozna zjesc albo sprzedac.
-41;wolf_pelt;Wolf Pelt;MATERIAL;100;12;NONE;0;0;0;0;*;0;0;PHYSICAL;#8a8a8a;Futro wilka, material dla kusnierzy.
-42;boar_tusk;Boar Tusk;MATERIAL;100;20;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e0c8;Kiel dzika.
-43;spider_silk;Spider Silk;MATERIAL;100;25;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e8f0;Mocna nic pajecza.
+39;spear;Spear;AMMUNITION;100;3;AMMO;20;0;0;0;PALADIN;0;4;PHYSICAL;#c9b37e;Zwykła włócznia do rzucania.
+40;meat;Meat;FOOD;100;4;NONE;0;0;0;0;*;0;0;PHYSICAL;#b04a3a;Surowe mięso. Można zjeść albo sprzedać.
+41;wolf_pelt;Wolf Pelt;MATERIAL;100;12;NONE;0;0;0;0;*;0;0;PHYSICAL;#8a8a8a;Futro wilka, materiał dla kuśnierzy.
+42;boar_tusk;Boar Tusk;MATERIAL;100;20;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e0c8;Kieł dzika.
+43;spider_silk;Spider Silk;MATERIAL;100;25;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e8f0;Mocna nić pajęcza.
 44;goblin_ear;Goblin Ear;MATERIAL;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#6a9a3a;Trofeum z goblina.
-45;bone;Bone;MATERIAL;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0dcc8;Kosc szkieletu.
-46;troll_hide;Troll Hide;MATERIAL;100;60;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a6a3a;Gruba skora trolla.
-47;crystal_shard;Crystal Shard;MATERIAL;100;150;NONE;0;0;0;0;*;3;0;PHYSICAL;#7fd8ff;Swiecacy odlamek krysztalu z glebin.
-48;iron_ore;Iron Ore;MATERIAL;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#7a6a62;Ruda zelaza z kopalni Varden.
-50;iron_sword;Iron Sword;WEAPON;1;250;WEAPON;24;12;0;15;PALADIN,MONK;0;1;PHYSICAL;#c8c8d0;Solidny miecz z zelaza z Varden.
-51;studded_armor;Studded Armor;ARMOR;1;180;ARMOR;0;0;6;12;*;0;0;PHYSICAL;#7a5a3a;Skorzana zbroja nabijana cwiekami.
-52;bone_shield;Bone Shield;SHIELD;1;140;SHIELD;0;17;0;14;PALADIN,MONK;0;0;PHYSICAL;#e0dcc8;Tarcza z kosci.
-53;wand_of_sparks;Wand of Sparks;WEAPON;1;900;WEAPON;26;0;0;25;SORCERER;0;4;ENERGY;#a0c8ff;Rozdzka energii.
-54;rod_of_frost;Rod of Frost;WEAPON;1;900;WEAPON;26;0;0;25;DRUID;0;4;ICE;#a0e8ff;Rozdzka lodu.
+45;bone;Bone;MATERIAL;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0dcc8;Kość szkieletu.
+46;troll_hide;Troll Hide;MATERIAL;100;60;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a6a3a;Gruba skóra trolla.
+47;crystal_shard;Crystal Shard;MATERIAL;100;150;NONE;0;0;0;0;*;3;0;PHYSICAL;#7fd8ff;Świecący odłamek kryształu z głębin.
+48;iron_ore;Iron Ore;MATERIAL;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#7a6a62;Ruda żelaza z kopalni Varden.
+50;iron_sword;Iron Sword;WEAPON;1;250;WEAPON;24;12;0;15;PALADIN,MONK;0;1;PHYSICAL;#c8c8d0;Solidny miecz z żelaza z Varden.
+51;studded_armor;Studded Armor;ARMOR;1;180;ARMOR;0;0;6;12;*;0;0;PHYSICAL;#7a5a3a;Skórzana zbroja nabijana ćwiekami.
+52;bone_shield;Bone Shield;SHIELD;1;140;SHIELD;0;17;0;14;PALADIN,MONK;0;0;PHYSICAL;#e0dcc8;Tarcza z kości.
+53;wand_of_sparks;Wand of Sparks;WEAPON;1;900;WEAPON;26;0;0;25;SORCERER;0;4;ENERGY;#a0c8ff;Różdżka energii.
+54;rod_of_frost;Rod of Frost;WEAPON;1;900;WEAPON;26;0;0;25;DRUID;0;4;ICE;#a0e8ff;Różdżka lodu.
 55;iron_knuckles;Iron Knuckles;WEAPON;1;600;WEAPON;30;6;0;20;MONK;0;1;PHYSICAL;#a8a8b0;Kastety mnicha.
-56;miner_helmet;Miner Helmet;ARMOR;1;300;HEAD;0;0;3;20;*;2;0;PHYSICAL;#d8b040;Helm gornika z lampka.
-57;grimtooth_crown;Grimtooth Crown;ARMOR;1;5000;HEAD;0;0;5;40;*;0;0;PHYSICAL;#e8c040;Korona Krola Kopalni.
-58;steel_spear;Steel Spear;WEAPON;1;800;WEAPON;34;0;0;25;PALADIN;0;4;PHYSICAL;#d8d8e0;Wywazona stalowa wlocznia, wraca do reki.
-59;great_health_potion;Great Health Potion;POTION;100;190;NONE;0;0;0;50;PALADIN,MONK;0;0;PHYSICAL;#a8102a;Silna mikstura zdrowia dla wojownikow od poziomu 50.
+56;miner_helmet;Miner Helmet;ARMOR;1;300;HEAD;0;0;3;20;*;2;0;PHYSICAL;#d8b040;Hełm górnika z lampką.
+57;grimtooth_crown;Grimtooth Crown;ARMOR;1;5000;HEAD;0;0;5;40;*;0;0;PHYSICAL;#e8c040;Korona Króla Kopalni.
+58;steel_spear;Steel Spear;WEAPON;1;800;WEAPON;34;0;0;25;PALADIN;0;4;PHYSICAL;#d8d8e0;Wyważona stalowa włócznia, wraca do ręki.
+59;great_health_potion;Great Health Potion;POTION;100;190;NONE;0;0;0;50;PALADIN,MONK;0;0;PHYSICAL;#a8102a;Silna mikstura zdrowia dla wojowników od poziomu 50.
 60;great_mana_potion;Great Mana Potion;POTION;100;120;NONE;0;0;0;50;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#2a2aa8;Silna mikstura many od poziomu 50.
-61;fireburst_rune;Fireburst Rune;RUNE;100;45;NONE;0;0;0;0;*;0;0;FIRE;#ff5a20;Runa: wybuch ognia wokol celu (promien 1).
-62;boulder_rune;Boulder Rune;RUNE;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#9a8a70;Runa: ciska glazem w cel.
-63;healing_rune;Healing Rune;RUNE;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#60e080;Runa: leczy uzytkownika.
-64;fish;Fish;FOOD;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa8c8;Swieza ryba z jeziora.
-65;pearl;Pearl;MATERIAL;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;#f0eef8;Rzadka perla z jeziora - cenna u jubilerow.
-66;frost_pelt;Frost Pelt;MATERIAL;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#dce8f0;Futro snieznego wilka.
-67;yeti_fur;Yeti Fur;MATERIAL;100;90;NONE;0;0;0;0;*;0;0;PHYSICAL;#f4f4f0;Gesta siersc yeti.
-68;frozen_heart;Frozen Heart;MATERIAL;100;400;NONE;0;0;0;0;*;2;0;PHYSICAL;#a8e8ff;Lodowe serce golema, slabo swieci.
-69;croc_leather;Crocodile Leather;MATERIAL;100;70;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Twarda skora krokodyla.
-70;snake_skin;Snake Skin;MATERIAL;100;55;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa040;Wylinka weza z dzungli.
-71;jungle_idol;Jungle Idol;MATERIAL;100;600;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8b040;Zloty posazek z zatopionych ruin.
+61;fireburst_rune;Fireburst Rune;RUNE;100;45;NONE;0;0;0;0;*;0;0;FIRE;#ff5a20;Runa: wybuch ognia wokół celu (promień 1).
+62;boulder_rune;Boulder Rune;RUNE;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#9a8a70;Runa: ciska głazem w cel.
+63;healing_rune;Healing Rune;RUNE;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#60e080;Runa: leczy użytkownika.
+64;fish;Fish;FOOD;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa8c8;Świeża ryba z jeziora.
+65;pearl;Pearl;MATERIAL;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;#f0eef8;Rzadka perła z jeziora - cenna u jubilerów.
+66;frost_pelt;Frost Pelt;MATERIAL;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#dce8f0;Futro śnieżnego wilka.
+67;yeti_fur;Yeti Fur;MATERIAL;100;90;NONE;0;0;0;0;*;0;0;PHYSICAL;#f4f4f0;Gęsta sierść yeti.
+68;frozen_heart;Frozen Heart;MATERIAL;100;400;NONE;0;0;0;0;*;2;0;PHYSICAL;#a8e8ff;Lodowe serce golema, słabo świeci.
+69;croc_leather;Crocodile Leather;MATERIAL;100;70;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Twarda skóra krokodyla.
+70;snake_skin;Snake Skin;MATERIAL;100;55;NONE;0;0;0;0;*;0;0;PHYSICAL;#7aa040;Wylinka węża z dżungli.
+71;jungle_idol;Jungle Idol;MATERIAL;100;600;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8b040;Złoty posążek z zatopionych ruin.
 72;scorpion_tail;Scorpion Tail;MATERIAL;100;40;NONE;0;0;0;0;*;0;0;PHYSICAL;#a06030;Kolec skorpiona.
-73;hyena_fang;Hyena Fang;MATERIAL;100;15;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e0c8;Kiel hieny.
-74;mummy_wrap;Mummy Wrap;MATERIAL;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8ccaa;Stary bandaz mumii.
-75;scarab_gem;Scarab Gem;MATERIAL;100;500;NONE;0;0;0;0;*;1;0;PHYSICAL;#40c0a0;Klejnot w ksztalcie skarabeusza.
+73;hyena_fang;Hyena Fang;MATERIAL;100;15;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8e0c8;Kieł hieny.
+74;mummy_wrap;Mummy Wrap;MATERIAL;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8ccaa;Stary bandaż mumii.
+75;scarab_gem;Scarab Gem;MATERIAL;100;500;NONE;0;0;0;0;*;1;0;PHYSICAL;#40c0a0;Klejnot w kształcie skarabeusza.
 76;frost_blade;Frost Blade;WEAPON;1;3000;WEAPON;40;16;0;60;PALADIN,MONK;0;1;PHYSICAL;#b8e0f8;Miecz z lodowego metalu Frostholm.
-77;fur_armor;Fur Armor;ARMOR;1;1500;ARMOR;0;0;8;40;*;0;0;PHYSICAL;#d8d0c0;Ciepla zbroja z futer.
-78;serpent_spear;Serpent Spear;WEAPON;1;3500;WEAPON;44;0;0;60;PALADIN;0;4;PHYSICAL;#80b050;Wlocznia z grotem jak kiel weza.
-79;wand_of_storms;Wand of Storms;WEAPON;1;3200;WEAPON;34;0;0;50;SORCERER;0;4;ENERGY;#c0d8ff;Rozdzka burzy.
-80;rod_of_vines;Rod of Vines;WEAPON;1;3200;WEAPON;34;0;0;50;DRUID;0;4;EARTH;#60b040;Rozdzka z zywego pnacza.
-81;desert_knuckles;Desert Knuckles;WEAPON;1;3600;WEAPON;42;8;0;60;MONK;0;1;PHYSICAL;#c8a060;Kastety z brazu pustyni.
-82;sandstone_shield;Sandstone Shield;SHIELD;1;2400;SHIELD;0;24;0;50;PALADIN,MONK;0;0;PHYSICAL;#c8a870;Ciezka tarcza z piaskowca.
-83;scarab_helmet;Scarab Helmet;ARMOR;1;4000;HEAD;0;0;6;70;*;0;0;PHYSICAL;#40a080;Helm zdobiony skarabeuszem.
-84;croc_legs;Crocodile Legs;ARMOR;1;2200;LEGS;0;0;5;55;*;0;0;PHYSICAL;#5a7a3a;Spodnie z krokodylej skory.
-85;frost_tiara;Frost Tiara;ARMOR;1;12000;HEAD;0;0;9;120;*;0;0;PHYSICAL;#c8f0ff;Diadem krolowej lodu.
-86;colossus_core;Colossus Core;MATERIAL;100;8000;NONE;0;0;0;0;*;2;0;PHYSICAL;#ff8a40;Zarzace sie serce kamiennego kolosa.
-87;pharaoh_scepter;Pharaoh Scepter;WEAPON;1;20000;WEAPON;58;0;0;150;SORCERER,DRUID;0;4;DEATH;#e8c860;Berlo faraona razace moca smierci.
-88;obsidian_shard;Obsidian Shard;MATERIAL;100;300;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a2a3a;Odlamek wulkanicznego szkla ze Spalonych Wyzyn.
-89;glacial_core;Glacial Core;MATERIAL;100;900;NONE;0;0;0;0;*;2;0;PHYSICAL;#9ad8ff;Rdzen wiecznego lodu z Lodowych Szczytow, slabo swieci.
-90;shadow_essence;Shadow Essence;MATERIAL;100;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#40305a;Skondensowany cien z Pustkowi Cienia.
-91;abyssal_ember;Abyssal Ember;MATERIAL;100;8000;NONE;0;0;0;0;*;3;0;PHYSICAL;#ff4020;Zar z dna Otchlani. Nigdy nie gasnie.
-92;magma_spear;Magma Spear;WEAPON;1;40000;WEAPON;64;0;0;250;PALADIN;0;4;PHYSICAL;#e05020;Wlocznia wykuta w lawie Spalonych Wyzyn.
-93;obsidian_wand;Obsidian Wand;WEAPON;1;38000;WEAPON;62;0;0;250;SORCERER;0;4;ENERGY;#7a5aa0;Rozdzka z obsydianu, w ktorym uwiezino blyskawice.
-94;rod_of_hoarfrost;Rod of Hoarfrost;WEAPON;1;38000;WEAPON;62;0;0;250;DRUID;0;4;ICE;#b8e0f0;Rozdzka szronu - ogniste stwory jej sie boja.
+77;fur_armor;Fur Armor;ARMOR;1;1500;ARMOR;0;0;8;40;*;0;0;PHYSICAL;#d8d0c0;Ciepła zbroja z futer.
+78;serpent_spear;Serpent Spear;WEAPON;1;3500;WEAPON;44;0;0;60;PALADIN;0;4;PHYSICAL;#80b050;Włócznia z grotem jak kieł węża.
+79;wand_of_storms;Wand of Storms;WEAPON;1;3200;WEAPON;34;0;0;50;SORCERER;0;4;ENERGY;#c0d8ff;Różdżka burzy.
+80;rod_of_vines;Rod of Vines;WEAPON;1;3200;WEAPON;34;0;0;50;DRUID;0;4;EARTH;#60b040;Różdżka z żywego pnącza.
+81;desert_knuckles;Desert Knuckles;WEAPON;1;3600;WEAPON;42;8;0;60;MONK;0;1;PHYSICAL;#c8a060;Kastety z brązu pustyni.
+82;sandstone_shield;Sandstone Shield;SHIELD;1;2400;SHIELD;0;24;0;50;PALADIN,MONK;0;0;PHYSICAL;#c8a870;Ciężka tarcza z piaskowca.
+83;scarab_helmet;Scarab Helmet;ARMOR;1;4000;HEAD;0;0;6;70;*;0;0;PHYSICAL;#40a080;Hełm zdobiony skarabeuszem.
+84;croc_legs;Crocodile Legs;ARMOR;1;2200;LEGS;0;0;5;55;*;0;0;PHYSICAL;#5a7a3a;Spodnie z krokodylej skóry.
+85;frost_tiara;Frost Tiara;ARMOR;1;12000;HEAD;0;0;9;120;*;0;0;PHYSICAL;#c8f0ff;Diadem królowej lodu.
+86;colossus_core;Colossus Core;MATERIAL;100;8000;NONE;0;0;0;0;*;2;0;PHYSICAL;#ff8a40;Żarzące się serce kamiennego kolosa.
+87;pharaoh_scepter;Pharaoh Scepter;WEAPON;1;20000;WEAPON;58;0;0;150;SORCERER,DRUID;0;4;DEATH;#e8c860;Berło faraona rażące mocą śmierci.
+88;obsidian_shard;Obsidian Shard;MATERIAL;100;300;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a2a3a;Odłamek wulkanicznego szkła ze Spalonych Wyżyn.
+89;glacial_core;Glacial Core;MATERIAL;100;900;NONE;0;0;0;0;*;2;0;PHYSICAL;#9ad8ff;Rdzeń wiecznego lodu z Lodowych Szczytów, słabo świeci.
+90;shadow_essence;Shadow Essence;MATERIAL;100;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#40305a;Skondensowany cień z Pustkowi Cienia.
+91;abyssal_ember;Abyssal Ember;MATERIAL;100;8000;NONE;0;0;0;0;*;3;0;PHYSICAL;#ff4020;Żar z dna Otchłani. Nigdy nie gaśnie.
+92;magma_spear;Magma Spear;WEAPON;1;40000;WEAPON;64;0;0;250;PALADIN;0;4;PHYSICAL;#e05020;Włócznia wykuta w lawie Spalonych Wyżyn.
+93;obsidian_wand;Obsidian Wand;WEAPON;1;38000;WEAPON;62;0;0;250;SORCERER;0;4;ENERGY;#7a5aa0;Różdżka z obsydianu, w którym uwięziono błyskawice.
+94;rod_of_hoarfrost;Rod of Hoarfrost;WEAPON;1;38000;WEAPON;62;0;0;250;DRUID;0;4;ICE;#b8e0f0;Różdżka szronu - ogniste stwory jej się boją.
 95;molten_knuckles;Molten Knuckles;WEAPON;1;40000;WEAPON;62;10;0;250;MONK;0;1;PHYSICAL;#c84a20;Kastety ze stopionego obsydianu.
-96;frostfang_spear;Frostfang Spear;WEAPON;1;120000;WEAPON;82;0;0;450;PALADIN;0;4;PHYSICAL;#c8ecff;Wlocznia z kla lodowego smoka.
-97;wand_of_inferno;Wand of Inferno;WEAPON;1;115000;WEAPON;80;0;0;450;SORCERER;0;4;FIRE;#ff5020;Rozdzka piekielnego ognia - topi lod szczytow.
-98;rod_of_stoneroot;Rod of Stoneroot;WEAPON;1;115000;WEAPON;80;0;0;450;DRUID;0;4;EARTH;#7a6a4a;Rozdzka z korzenia, ktory przebil skale gor.
-99;frostbound_fists;Frostbound Fists;WEAPON;1;120000;WEAPON;80;14;0;450;MONK;0;1;PHYSICAL;#b0d8f0;Rekawice skute lodem olbrzymow.
-100;shadowpiercer;Shadowpiercer;WEAPON;1;350000;WEAPON;100;0;0;700;PALADIN;0;5;PHYSICAL;#5a4a7a;Wlocznia, ktora przebija cien i pancerz.
-101;stormcaller_wand;Stormcaller Wand;WEAPON;1;340000;WEAPON;98;0;0;700;SORCERER;0;4;ENERGY;#c0c8ff;Rozdzka przyzywajaca burze nad pustkowiami.
-102;rod_of_twilight;Rod of Twilight;WEAPON;1;340000;WEAPON;98;0;0;700;DRUID;0;4;ICE;#8a9ac8;Rozdzka zmierzchu - mrozi nawet kamien tytanow.
-103;umbral_grips;Umbral Grips;WEAPON;1;350000;WEAPON;98;18;0;700;MONK;0;1;PHYSICAL;#3a2a4a;Rekawice z cienia, lekkie jak mgla.
-104;obsidian_armor;Obsidian Armor;ARMOR;1;30000;ARMOR;0;0;12;250;*;0;0;PHYSICAL;#3a2a3a;Zbroja z plyt obsydianu.
-105;obsidian_helmet;Obsidian Helmet;ARMOR;1;20000;HEAD;0;0;8;250;*;0;0;PHYSICAL;#3a2a3a;Helm z obsydianu.
+96;frostfang_spear;Frostfang Spear;WEAPON;1;120000;WEAPON;82;0;0;450;PALADIN;0;4;PHYSICAL;#c8ecff;Włócznia z kła lodowego smoka.
+97;wand_of_inferno;Wand of Inferno;WEAPON;1;115000;WEAPON;80;0;0;450;SORCERER;0;4;FIRE;#ff5020;Różdżka piekielnego ognia - topi lód szczytów.
+98;rod_of_stoneroot;Rod of Stoneroot;WEAPON;1;115000;WEAPON;80;0;0;450;DRUID;0;4;EARTH;#7a6a4a;Różdżka z korzenia, który przebił skały gór.
+99;frostbound_fists;Frostbound Fists;WEAPON;1;120000;WEAPON;80;14;0;450;MONK;0;1;PHYSICAL;#b0d8f0;Rękawice skute lodem olbrzymów.
+100;shadowpiercer;Shadowpiercer;WEAPON;1;350000;WEAPON;100;0;0;700;PALADIN;0;5;PHYSICAL;#5a4a7a;Włócznia, która przebija cień i pancerz.
+101;stormcaller_wand;Stormcaller Wand;WEAPON;1;340000;WEAPON;98;0;0;700;SORCERER;0;4;ENERGY;#c0c8ff;Różdżka przyzywająca burze nad pustkowiami.
+102;rod_of_twilight;Rod of Twilight;WEAPON;1;340000;WEAPON;98;0;0;700;DRUID;0;4;ICE;#8a9ac8;Różdżka zmierzchu - mrozi nawet kamień tytanów.
+103;umbral_grips;Umbral Grips;WEAPON;1;350000;WEAPON;98;18;0;700;MONK;0;1;PHYSICAL;#3a2a4a;Rękawice z cienia, lekkie jak mgła.
+104;obsidian_armor;Obsidian Armor;ARMOR;1;30000;ARMOR;0;0;12;250;*;0;0;PHYSICAL;#3a2a3a;Zbroja z płyt obsydianu.
+105;obsidian_helmet;Obsidian Helmet;ARMOR;1;20000;HEAD;0;0;8;250;*;0;0;PHYSICAL;#3a2a3a;Hełm z obsydianu.
 106;obsidian_legs;Obsidian Legs;ARMOR;1;18000;LEGS;0;0;7;250;*;0;0;PHYSICAL;#3a2a3a;Nagolenniki z obsydianu.
-107;obsidian_shield;Obsidian Shield;SHIELD;1;25000;SHIELD;0;30;0;250;PALADIN,MONK;0;0;PHYSICAL;#3a2a3a;Tarcza z wulkanicznego szkla.
-108;glacial_plate;Glacial Plate;ARMOR;1;90000;ARMOR;0;0;15;450;*;0;0;PHYSICAL;#c8ecff;Plyty z lodu Lodowych Szczytow.
-109;glacial_helm;Glacial Helm;ARMOR;1;60000;HEAD;0;0;10;450;*;0;0;PHYSICAL;#c8ecff;Helm z lodowego krysztalu.
-110;glacial_legs;Glacial Legs;ARMOR;1;55000;LEGS;0;0;9;450;*;0;0;PHYSICAL;#c8ecff;Nagolenniki z lodowego krysztalu.
-111;glacial_shield;Glacial Shield;SHIELD;1;80000;SHIELD;0;36;0;450;PALADIN,MONK;0;0;PHYSICAL;#c8ecff;Tarcza z lodowego krysztalu.
+107;obsidian_shield;Obsidian Shield;SHIELD;1;25000;SHIELD;0;30;0;250;PALADIN,MONK;0;0;PHYSICAL;#3a2a3a;Tarcza z wulkanicznego szkła.
+108;glacial_plate;Glacial Plate;ARMOR;1;90000;ARMOR;0;0;15;450;*;0;0;PHYSICAL;#c8ecff;Płyty z lodu Lodowych Szczytów.
+109;glacial_helm;Glacial Helm;ARMOR;1;60000;HEAD;0;0;10;450;*;0;0;PHYSICAL;#c8ecff;Hełm z lodowego kryształu.
+110;glacial_legs;Glacial Legs;ARMOR;1;55000;LEGS;0;0;9;450;*;0;0;PHYSICAL;#c8ecff;Nagolenniki z lodowego kryształu.
+111;glacial_shield;Glacial Shield;SHIELD;1;80000;SHIELD;0;36;0;450;PALADIN,MONK;0;0;PHYSICAL;#c8ecff;Tarcza z lodowego kryształu.
 112;shadowweave_armor;Shadowweave Armor;ARMOR;1;250000;ARMOR;0;0;18;700;*;0;0;PHYSICAL;#40305a;Zbroja tkana z cienia.
 113;shadow_hood;Shadow Hood;ARMOR;1;170000;HEAD;0;0;12;700;*;0;0;PHYSICAL;#40305a;Kaptur z cienia.
 114;shadow_legs;Shadow Legs;ARMOR;1;160000;LEGS;0;0;11;700;*;0;0;PHYSICAL;#40305a;Spodnie z cienia.
-115;shadow_aegis;Shadow Aegis;SHIELD;1;230000;SHIELD;0;42;0;700;PALADIN,MONK;0;0;PHYSICAL;#40305a;Tarcza pochlaniajaca swiatlo.
-116;crown_of_the_abyss;Crown of the Abyss;ARMOR;1;900000;HEAD;0;0;16;900;*;2;0;PHYSICAL;#ff6040;Korona wladcy Otchlani. Najrzadszy przedmiot swiata.
-117;dawnspear;Dawnspear;WEAPON;1;600000;WEAPON;118;0;0;850;PALADIN;1;5;PHYSICAL;#fff0a0;Wlocznia switu - jedyne swiatlo, ktorego boi sie Otchlan.
-118;starfall_wand;Starfall Wand;WEAPON;1;580000;WEAPON;116;0;0;850;SORCERER;1;4;ENERGY;#d0d8ff;Rozdzka sciagajaca gwiazdy w glab ziemi.
-119;rod_of_eternal_winter;Rod of Eternal Winter;WEAPON;1;580000;WEAPON;136;0;0;850;DRUID;1;4;ICE;#c0f0ff;Rozdzka wiecznej zimy, gasi nawet ogien demonow.
-120;fists_of_the_abyss;Fists of the Abyss;WEAPON;1;600000;WEAPON;116;22;0;850;MONK;0;1;PHYSICAL;#802020;Rekawice wykute z serca Otchlani.
+115;shadow_aegis;Shadow Aegis;SHIELD;1;230000;SHIELD;0;42;0;700;PALADIN,MONK;0;0;PHYSICAL;#40305a;Tarcza pochłaniająca światło.
+116;crown_of_the_abyss;Crown of the Abyss;ARMOR;1;900000;HEAD;0;0;16;900;*;2;0;PHYSICAL;#ff6040;Korona władcy Otchłani. Najrzadszy przedmiot świata.
+117;dawnspear;Dawnspear;WEAPON;1;600000;WEAPON;118;0;0;850;PALADIN;1;5;PHYSICAL;#fff0a0;Włócznia świtu - jedyne światło, którego boi się Otchłań.
+118;starfall_wand;Starfall Wand;WEAPON;1;580000;WEAPON;116;0;0;850;SORCERER;1;4;ENERGY;#d0d8ff;Różdżka ściągająca gwiazdy w głąb ziemi.
+119;rod_of_eternal_winter;Rod of Eternal Winter;WEAPON;1;580000;WEAPON;136;0;0;850;DRUID;1;4;ICE;#c0f0ff;Różdżka wiecznej zimy, gasi nawet ogień demonów.
+120;fists_of_the_abyss;Fists of the Abyss;WEAPON;1;600000;WEAPON;116;22;0;850;MONK;0;1;PHYSICAL;#802020;Rękawice wykute z serca Otchłani.
 121;supreme_health_potion;Supreme Health Potion;POTION;100;500;NONE;0;0;0;200;PALADIN,MONK;0;0;PHYSICAL;#d01040;Najsilniejsza mikstura zdrowia, warzona w obozie za mostem.
-122;supreme_mana_potion;Supreme Mana Potion;POTION;100;350;NONE;0;0;0;200;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#3030e0;Najsilniejsza mikstura many dla doswiadczonych magow.
-123;ice_cod;Ice Cod;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#b8d8f0;Tlusty dorsz spod lodu Mroznych Pustkowi. Syci na dlugo.
-124;swamp_eel;Swamp Eel;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Sliski wegorz z bagien Selvaran.
-125;oasis_carp;Oasis Carp;FOOD;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0a050;Zloty karp z oaz Qasirah.
+122;supreme_mana_potion;Supreme Mana Potion;POTION;100;350;NONE;0;0;0;200;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#3030e0;Najsilniejsza mikstura many dla doświadczonych magów.
+123;ice_cod;Ice Cod;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#b8d8f0;Tłusty dorsz spod lodu Mroźnych Pustkowi. Syci na długo.
+124;swamp_eel;Swamp Eel;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Śliski węgorz z bagien Selvaran.
+125;oasis_carp;Oasis Carp;FOOD;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0a050;Złoty karp z oaz Qasirah.

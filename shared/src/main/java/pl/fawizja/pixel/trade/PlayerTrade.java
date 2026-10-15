@@ -25,16 +25,16 @@ public final class PlayerTrade {
 
     public enum Result {
         OK("OK"),
-        DONE("Wymiana zakonczona."),
-        WAITING("Zaakceptowano - czekam na druga strone."),
-        NOT_PARTICIPANT("Nie bierzesz udzialu w tej wymianie."),
-        UNKNOWN_ITEM("Nie ma takiego przedmiotu. Przyklad: /oferuj 5 health potion albo /oferuj 1000 gp"),
+        DONE("Wymiana zakończona."),
+        WAITING("Zaakceptowano - czekam na drugą stronę."),
+        NOT_PARTICIPANT("Nie bierzesz udziału w tej wymianie."),
+        UNKNOWN_ITEM("Nie ma takiego przedmiotu. Przykład: /oferuj 5 health potion albo /oferuj 1000 gp"),
         NOT_ENOUGH("Nie masz tylu w plecaku."),
-        TOO_MANY_STACKS("Za duzo pozycji w ofercie (maks. " + MAX_STACKS + ")."),
-        TOO_FAR("Stoj obok drugiego gracza (maks. " + MAX_DISTANCE + " pola, to samo pietro)."),
+        TOO_MANY_STACKS("Za dużo pozycji w ofercie (maks. " + MAX_STACKS + ")."),
+        TOO_FAR("Stój obok drugiego gracza (maks. " + MAX_DISTANCE + " pola, to samo piętro)."),
         NO_SPACE("Wymiana anulowana: brak miejsca w plecaku."),
-        CHANGED("Wymiana anulowana: przedmiotow z oferty juz nie ma w plecaku."),
-        EMPTY("Obie oferty sa puste - nie ma czego wymieniac.");
+        CHANGED("Wymiana anulowana: przedmiotów z oferty już nie ma w plecaku."),
+        EMPTY("Obie oferty są puste - nie ma czego wymieniać.");
 
         public final String message;
 
@@ -181,7 +181,7 @@ public final class PlayerTrade {
             t = t.substring(sp + 1).trim();
         }
         if (count <= 0 || count > 1_000_000_000L || t.isEmpty()) return null;
-        if (t.equals("gp") || t.equals("zloto") || t.equals("gold")) return new Parsed(-1, count);
+        if (t.equals("gp") || t.equals("zloto") || t.equals("złoto") || t.equals("gold")) return new Parsed(-1, count);
         if (count > 10_000) return null;
         String wanted = t.replace(' ', '_');
         ItemType prefix = null;

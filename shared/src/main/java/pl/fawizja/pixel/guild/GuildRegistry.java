@@ -22,15 +22,15 @@ public final class GuildRegistry {
     public enum Result {
         OK("OK"),
         BAD_NAME("Nazwa gildii: 3-20 liter i spacji."),
-        NAME_TAKEN("Gildia o tej nazwie juz istnieje."),
-        ALREADY_MEMBER("Nalezysz juz do gildii (/gildia opusc)."),
-        TARGET_IN_GUILD("Ten gracz nalezy juz do gildii."),
-        NOT_MEMBER("Nie nalezysz do gildii."),
-        NOT_LEADER("Tylko lider gildii moze to zrobic."),
-        NO_INVITE("Nie masz zaproszenia do tej gildii (albo wygaslo)."),
-        FULL("Gildia jest pelna (maks. " + MAX_MEMBERS + ")."),
-        NOT_IN_THIS_GUILD("Ten gracz nie nalezy do twojej gildii."),
-        SELF("Nie mozesz tego zrobic samemu sobie.");
+        NAME_TAKEN("Gildia o tej nazwie już istnieje."),
+        ALREADY_MEMBER("Należysz już do gildii (/gildia opuść)."),
+        TARGET_IN_GUILD("Ten gracz należy już do gildii."),
+        NOT_MEMBER("Nie należysz do gildii."),
+        NOT_LEADER("Tylko lider gildii może to zrobić."),
+        NO_INVITE("Nie masz zaproszenia do tej gildii (albo wygasło)."),
+        FULL("Gildia jest pełna (maks. " + MAX_MEMBERS + ")."),
+        NOT_IN_THIS_GUILD("Ten gracz nie należy do twojej gildii."),
+        SELF("Nie możesz tego zrobić samemu sobie.");
 
         public final String message;
 

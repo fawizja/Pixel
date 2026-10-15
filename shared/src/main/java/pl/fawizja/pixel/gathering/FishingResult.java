@@ -2,14 +2,14 @@ package pl.fawizja.pixel.gathering;
 
 /** Wynik proby lowienia (z komunikatem dla gracza). */
 public enum FishingResult {
-    CAUGHT("Zlowiono!"),
+    CAUGHT("Złowiono!"),
     NOTHING("Nic nie bierze."),
-    NO_ROD("Potrzebujesz wedki w plecaku."),
-    NO_BAIT("Potrzebujesz robakow na przynete."),
-    NO_WATER("W poblizu nie ma lowiska."),
-    DEPLETED("Ryby w poblizu sie wystraszyly - sprobuj gdzie indziej albo poczekaj."),
+    NO_ROD("Potrzebujesz wędki w plecaku."),
+    NO_BAIT("Potrzebujesz robaków na przynętę."),
+    NO_WATER("W pobliżu nie ma łowiska."),
+    DEPLETED("Ryby w pobliżu się wystraszyły - spróbuj gdzie indziej albo poczekaj."),
     COOLDOWN(""),
-    BACKPACK_FULL("Plecak jest pelny.");
+    BACKPACK_FULL("Plecak jest pełny.");
 
     public final String message;
 

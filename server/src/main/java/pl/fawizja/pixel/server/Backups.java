@@ -70,7 +70,7 @@ final class Backups {
         if (all == null || all.length <= KEEP) return;
         Arrays.sort(all, (a, b) -> a.getName().compareTo(b.getName()));
         for (int i = 0; i < all.length - KEEP; i++) {
-            if (!all[i].delete()) LOG.warning("nie mozna usunac starej kopii " + all[i]);
+            if (!all[i].delete()) LOG.warning("nie można usunąć starej kopii " + all[i]);
         }
     }
 

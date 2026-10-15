@@ -51,7 +51,7 @@ class GameSettingsTest {
         s.cycleVolume();
         assertEquals(0, s.volume());
         assertEquals(0f, s.volumeFactor());
-        assertTrue(s.rows()[4][1].contains("wylaczony"));
+        assertTrue(s.rows()[4][1].contains("wyłączony"));
         assertEquals(0, GameSettings.fromMap(s.toMap()).volume());
         assertEquals(60, GameSettings.fromMap(Map.of("volume", "55")).volume(), "unsupported level falls back");
     }

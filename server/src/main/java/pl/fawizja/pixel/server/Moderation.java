@@ -64,7 +64,7 @@ final class Moderation {
     }
 
     private void save() throws IOException {
-        StringBuilder sb = new StringBuilder("# typ;imie;do (ms, 0 = bez konca)\n");
+        StringBuilder sb = new StringBuilder("# typ;imię;do (ms, 0 = bez końca)\n");
         for (Map.Entry<String, Long> e : bans.entrySet()) sb.append("ban;").append(e.getKey()).append(';').append(e.getValue()).append('\n');
         for (Map.Entry<String, Long> e : mutes.entrySet()) sb.append("mute;").append(e.getKey()).append(';').append(e.getValue()).append('\n');
         File tmp = new File(stateFile.getParentFile(), stateFile.getName() + ".tmp");

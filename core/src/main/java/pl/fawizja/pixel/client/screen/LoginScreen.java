@@ -26,7 +26,7 @@ import pl.fawizja.pixel.world.Direction;
 public final class LoginScreen extends ScreenAdapter {
 
     private static final int SERVER = 0, NAME = 1, PASSWORD = 2;
-    private static final String[] LABELS = {"Serwer (adres:port)", "Imie postaci", "Haslo (min. 6 znakow)"};
+    private static final String[] LABELS = {"Serwer (adres:port)", "Imię postaci", "Hasło (min. 6 znaków)"};
     private static final int[] MAX_LEN = {60, 20, 64};
 
     private final PixelGame game;
@@ -82,7 +82,7 @@ public final class LoginScreen extends ScreenAdapter {
                     prefs.remove("pin." + values[SERVER].toString().trim());
                     prefs.flush();
                     certificateChanged = false;
-                    message = "Zapomniano certyfikat - nastepne polaczenie zapamieta nowy.";
+                    message = "Zapomniano certyfikat - następne połączenie zapamięta nowy.";
                     return true;
                 }
                 if (connect.contains(p)) connect();
@@ -121,17 +121,17 @@ public final class LoginScreen extends ScreenAdapter {
         String name = values[NAME].toString().trim();
         String password = values[PASSWORD].toString();
         if (name.length() < 3) {
-            message = "Podaj imie (3-20 liter).";
+            message = "Podaj imię (3-20 liter).";
             focus = NAME;
             return;
         }
         if (password.length() < 6) {
-            message = "Haslo musi miec co najmniej 6 znakow.";
+            message = "Hasło musi mieć co najmniej 6 znaków.";
             focus = PASSWORD;
             return;
         }
         connecting = true;
-        message = "Laczenie z " + server + "...";
+        message = "Łączenie z " + server + "...";
         Gdx.input.setOnscreenKeyboardVisible(false);
         Vocation voc = vocation;
         String pinKey = "pin." + server;
@@ -147,7 +147,7 @@ public final class LoginScreen extends ScreenAdapter {
                 }
                 if (pinned == null && login.fingerprint() != null) {
                     prefs.putString(pinKey, login.fingerprint()); // pierwsze polaczenie: zapamietaj certyfikat
-                    Gdx.app.log("Pixel", "Zapamietano certyfikat serwera " + server + ": " + login.fingerprint());
+                    Gdx.app.log("Pixel", "Zapamiętano certyfikat serwera " + server + ": " + login.fingerprint());
                 }
                 prefs.putString("server", server);
                 prefs.putString("name", login.character().name());
@@ -234,14 +234,14 @@ public final class LoginScreen extends ScreenAdapter {
             game.font().setColor(Color.WHITE);
             game.font().draw(batch, v.displayName(), r.x + 38, r.y + r.height / 2f + 6);
         }
-        centered(batch, connecting ? "Laczenie..." : "Polacz", connect.x + connect.width / 2f, connect.y + connect.height / 2f, Color.WHITE);
+        centered(batch, connecting ? "Łączenie..." : "Połącz", connect.x + connect.width / 2f, connect.y + connect.height / 2f, Color.WHITE);
         centered(batch, "Wstecz", back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);
         if (!message.isEmpty()) centered(batch, message, w / 2f, back.y - 20, Color.SALMON);
         if (certificateChanged) {
             centered(batch, "Zapomnij certyfikat (gdy serwer przeinstalowano)",
                     forget.x + forget.width / 2f, forget.y + forget.height / 2f, Color.WHITE);
         }
-        centered(batch, "Pierwsze logowanie nowym imieniem zaklada konto. Polaczenie jest szyfrowane (TLS).",
+        centered(batch, "Pierwsze logowanie nowym imieniem zakłada konto. Połączenie jest szyfrowane (TLS).",
                 w / 2f, 14, Color.GRAY);
         batch.end();
     }

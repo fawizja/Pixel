@@ -1,27 +1,27 @@
 # Rozmowy slowami kluczowymi: kto (klucz NPC, @ROLA albo * - wszyscy);slowa (przecinki, pierwsze = temat w oknie);odpowiedz
 # W odpowiedzi: {imie}, {miasto}, {powitanie}. Wybierana jest najbardziej szczegolowa pasujaca linia (NPC > rola > wszyscy).
-*;czesc,witaj,hej,dzien dobry,hi,hello;{powitanie}
-*;imie,kim jestes,name;Nazywam sie {imie}. Mieszkam w {miasto}.
-*;zegnaj,do widzenia,bye;Bezpiecznej drogi.
-*;noc,ciemno;W nocy z lasow wychodza wilki i bandyci, a na pustyni hieny i upiory. Zapal pochodnie albo trzymaj sie miasta.
-@MERCHANT;handel,towar,kupie,trade;Dotknij towaru po lewej, aby kupic, a przedmiotu po prawej, aby sprzedac. Ilosc zmienisz pierwszym wierszem.
-@BANKER;bank,konto,zloto;Konto jest wspolne dla wszystkich miast. 100 gp to 1 platyna, 100 platyny to 1 krysztal.
-@PRIEST;leczenie,uzdrow,swiatynia;Ulecze rany kazdego wedrowca. Mozesz tez zamieszkac w tym miescie - tu bedziesz sie odradzac.
-@GUIDE;zadania,praca,quest;Ponizej masz moje zlecenia. Kolejne etapy dluzszych zadan odsloni sie, gdy skonczysz poprzednie.
-varden_guide;przemytnicy,bandyci;Bandyci z wschodnich drog handluja z goblinami z kopalni. Zacznij od zlecenia "Slady przemytnikow".
-varden_guide;kopalnia,gobliny;Wejscie do kopalni jest na zachod od swiatyni. Gobliny sa na pierwszych pietrach, glebiej - trolle i Grimtooth.
-varden_guide;wieza;Stara wieza na poludniowym wschodzie ma piec pieter. Na szczycie widac caly kraj.
-varden_guide;frostholm,polnoc;Frostholm lezy na polnocy, za zamarznietymi pustkowiami. Idz tam od poziomu 40.
-varden_guide;qasirah,pustynia;Qasirah jest na dalekim poludniu, za dzungla Selvaran. Pustynia nie wybacza slabym.
-varden_merchant;wedka,ryby;Wedke i robaki kupisz u mnie. Na polnocy i poludniu lowi sie inne ryby niz w naszym jeziorze.
-frost_guide;yeti,zamiec;Yeti napadaja na karawany, a wiedzmy mrozu sciagaja zamiec. Kto pokona yeti, temu powierze sprawe wiedzm.
-frost_guide;krolowa,jaskinie;Krolowa Lodu rzadzi najglebszym poziomem Lodowych Jaskin. Nie schodz tam sam.
-frost_merchant;dorsz,ryby;Lodowy dorsz spod lodu syci na dlugo. Skupuje go chetniej niz zwykle ryby.
-selv_guide;wyprawa,badacze;Wyprawa badaczy zaginela w dzungli. Najpierw rozpraw sie z lowcami, potem pojdz za sladem wezy.
-selv_guide;ruiny,kolos;W Zatopionych Ruinach spi kamienny kolos. Pilnuje serca ruin.
-selv_merchant;wegorz,bagna;Wegorze lowi sie prosto z bagien. Potrzebujesz tylko wedki i cierpliwosci.
-qas_guide;faraon,krypty;Neferakh spoczywa w najglebszej krypcie. Jego klatwa budzi mumie.
-qas_merchant;karp,oaza;Karpie z oaz sa zlote jak piasek. Placi sie za nie najlepiej na calej pustyni.
-camp_guide;most,straznik;Straznik mostu wpuszcza tylko od poziomu 200. Dalej jest kraina, z ktorej wielu nie wrocilo.
-camp_guide;otchlan,morgath;Na samym poludniowym wschodzie lezy Otchlan. Mor'gath czeka tam na najsilniejsze druzyny.
-camp_merchant;kuznia,obsydian;Z obsydianu, lodowych rdzeni i esencji cienia wykujesz najlepszy sprzet. Receptury masz w ksiedze.
+*;cześć,witaj,hej,dzień dobry,hi,hello;{powitanie}
+*;imię,kim jesteś,name;Nazywam się {imie}. Mieszkam w {miasto}.
+*;żegnaj,do widzenia,bye;Bezpiecznej drogi.
+*;noc,ciemno;W nocy z lasów wychodzą wilki i bandyci, a na pustyni hieny i upiory. Zapal pochodnię albo trzymaj się miasta.
+@MERCHANT;handel,towar,kupie,trade;Dotknij towaru po lewej, aby kupić, a przedmiotu po prawej, aby sprzedać. Ilość zmienisz pierwszym wierszem.
+@BANKER;bank,konto,złoto;Konto jest wspólne dla wszystkich miast. 100 gp to 1 platyna, 100 platyny to 1 kryształ.
+@PRIEST;leczenie,uzdrow,świątynia;Uleczę rany każdego wędrowca. Możesz też zamieszkać w tym mieście - tu będziesz się odradzać.
+@GUIDE;zadania,praca,quest;Poniżej masz moje zlecenia. Kolejne etapy dłuższych zadań odsłonią się, gdy skończysz poprzednie.
+varden_guide;przemytnicy,bandyci;Bandyci z wschodnich dróg handlują z goblinami z kopalni. Zacznij od zlecenia "Ślady przemytników".
+varden_guide;kopalnia,gobliny;Wejście do kopalni jest na zachód od świątyni. Gobliny są na pierwszych piętrach, głębiej - trolle i Grimtooth.
+varden_guide;wieża;Stara wieża na południowym wschodzie ma pięć pięter. Na szczycie widać cały kraj.
+varden_guide;frostholm,północ;Frostholm leży na północy, za zamarzniętymi pustkowiami. Idź tam od poziomu 40.
+varden_guide;qasirah,pustynia;Qasirah jest na dalekim południu, za dżunglą Selvaran. Pustynia nie wybacza słabym.
+varden_merchant;wędka,ryby;Wędkę i robaki kupisz u mnie. Na północy i południu łowi się inne ryby niż w naszym jeziorze.
+frost_guide;yeti,zamieć;Yeti napadają na karawany, a wiedźmy mrozu ściągają zamieć. Kto pokona yeti, temu powierzę sprawę wiedźm.
+frost_guide;królowa,jaskinie;Królowa Lodu rządzi najgłębszym poziomem Lodowych Jaskiń. Nie schodź tam sam.
+frost_merchant;dorsz,ryby;Lodowy dorsz spod lodu syci na długo. Skupuje go chętniej niż zwykłe ryby.
+selv_guide;wyprawa,badacze;Wyprawa badaczy zaginęła w dżungli. Najpierw rozpraw się z łowcami, potem pójdź za śladem węży.
+selv_guide;ruiny,kolos;W Zatopionych Ruinach śpi kamienny kolos. Pilnuje serca ruin.
+selv_merchant;węgorz,bagna;Węgorze łowi się prosto z bagien. Potrzebujesz tylko wędki i cierpliwości.
+qas_guide;faraon,krypty;Neferakh spoczywa w najgłębszej krypcie. Jego klątwa budzi mumie.
+qas_merchant;karp,oaza;Karpie z oaz są złote jak piasek. Płaci się za nie najlepiej na całej pustyni.
+camp_guide;most,strażnik;Strażnik mostu wpuszcza tylko od poziomu 200. Dalej jest kraina, z której wielu nie wróciło.
+camp_guide;otchłań,morgath;Na samym południowym wschodzie leży Otchłań. Mor'gath czeka tam na najsilniejsze drużyny.
+camp_merchant;kuźnia,obsydian;Z obsydianu, lodowych rdzeni i esencji cienia wykujesz najlepszy sprzęt. Receptury masz w księdze.

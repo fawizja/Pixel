@@ -80,7 +80,7 @@ class PlayerTradeTest {
         assertTrue(PlayerTrade.closeEnough(p, new Position(12, 9, 0)));
         assertFalse(PlayerTrade.closeEnough(p, new Position(13, 10, 0)));
         assertFalse(PlayerTrade.closeEnough(p, new Position(10, 10, 1)));
-        assertEquals(new PlayerTrade.Parsed(-1, 250), PlayerTrade.parse("250 zloto", REG));
+        assertEquals(new PlayerTrade.Parsed(-1, 250), PlayerTrade.parse("250 złoto", REG));
         assertEquals(new PlayerTrade.Parsed(33, 1), PlayerTrade.parse("Rope", REG));
         assertEquals(new PlayerTrade.Parsed(59, 2), PlayerTrade.parse("2 great health", REG), "unique prefix");
         assertNull(PlayerTrade.parse("2 great", REG), "ambiguous prefix");

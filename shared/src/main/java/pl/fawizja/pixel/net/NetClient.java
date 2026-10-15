@@ -101,7 +101,7 @@ public final class NetClient implements AutoCloseable {
                 if (chain == null || chain.length == 0) throw new java.security.cert.CertificateException("brak certyfikatu");
                 String fp = fingerprint(chain[0].getEncoded());
                 serverFingerprint = fp;
-                if (!pinning.accept(fp)) throw new java.security.cert.CertificateException("odcisk certyfikatu sie nie zgadza");
+                if (!pinning.accept(fp)) throw new java.security.cert.CertificateException("odcisk certyfikatu się nie zgadza");
             }
 
             @Override
@@ -193,7 +193,7 @@ public final class NetClient implements AutoCloseable {
                 }
             }
         } catch (IOException | RuntimeException e) {
-            if (!closed) error = "Polaczenie przerwane: " + e.getMessage();
+            if (!closed) error = "Połączenie przerwane: " + e.getMessage();
         } finally {
             closed = true;
         }
@@ -210,7 +210,7 @@ public final class NetClient implements AutoCloseable {
             out.write('\n');
             out.flush();
         } catch (IOException e) {
-            error = "Nie mozna wyslac: " + e.getMessage();
+            error = "Nie można wysłać: " + e.getMessage();
             closed = true;
         }
     }

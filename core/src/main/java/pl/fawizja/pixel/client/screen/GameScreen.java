@@ -330,7 +330,7 @@ public final class GameScreen extends ScreenAdapter {
 
                 @Override
                 public void canceled() { }
-            }, "Czat", "", net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomosc albo slowo do NPC obok");
+            }, "Czat", "", net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
         } else {
             chatDraft = new StringBuilder();
         }
@@ -348,7 +348,7 @@ public final class GameScreen extends ScreenAdapter {
             }
         }
         if (net == null) {
-            session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami dziala online. Podejdz do NPC, aby z nim porozmawiac.");
+            session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami działa online. Podejdź do NPC, aby z nim porozmawiać.");
             return;
         }
         String[] msg = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
@@ -380,7 +380,7 @@ public final class GameScreen extends ScreenAdapter {
         pl.fawizja.pixel.npc.Npc npc = session.npcs().at(p);
         if (npc != null) {
             if (session.npcNearby() == npc) hud.openNpc(session);
-            else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdz blizej, aby porozmawiac.");
+            else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
             return true;
         }
         boolean hit = session.targetAt(p);
@@ -703,7 +703,7 @@ public final class GameScreen extends ScreenAdapter {
             else if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
             else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
             else font.setColor(0.55f, 1f, 0.55f, 1f);
-            String label = rp.name + (ally ? " [druzyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
+            String label = rp.name + (ally ? " [drużyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
                     + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "") + (rp.guild == null ? "" : " <" + rp.guild + ">");
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
         }
@@ -752,7 +752,7 @@ public final class GameScreen extends ScreenAdapter {
         batch.setColor(Color.WHITE);
         font.getData().setScale(scale * 0.85f);
         font.setColor(0.45f, 0.75f, 1f, 1f);
-        font.draw(batch, "Druzyna", x, y);
+        font.draw(batch, "Drużyna", x, y);
         y -= 16 * scale;
         for (String n : partyNames) {
             if (n.equalsIgnoreCase(me)) continue;
@@ -831,9 +831,9 @@ public final class GameScreen extends ScreenAdapter {
             if (f.skull() != null && !f.skull().equals(mySkull)) {
                 if (!f.skull().equals("NONE")) {
                     session.log().add(now, EventLog.Kind.WARNING, f.skull().equals("RED")
-                            ? "Masz czerwona czaszke!" : "Masz biala czaszke (atak na gracza).");
+                            ? "Masz czerwoną czaszkę!" : "Masz biała czaszkę (atak na gracza).");
                 } else if (!mySkull.equals("NONE")) {
-                    session.log().add(now, EventLog.Kind.INFO, "Czaszka zniknela.");
+                    session.log().add(now, EventLog.Kind.INFO, "Czaszka zniknęła.");
                 }
                 mySkull = f.skull();
             }
@@ -918,12 +918,12 @@ public final class GameScreen extends ScreenAdapter {
         if (net.isClosed() && !disconnectShown) {
             disconnectShown = true;
             disconnectAtMs = TimeUtils.millis();
-            String why = net.error() != null ? net.error() : "serwer zamknal polaczenie";
-            session.log().add(now(), EventLog.Kind.WARNING, "Rozlaczono z serwerem: " + why);
+            String why = net.error() != null ? net.error() : "serwer zamknął połączenie";
+            session.log().add(now(), EventLog.Kind.WARNING, "Rozłączono z serwerem: " + why);
         }
         if (disconnectShown && TimeUtils.millis() - disconnectAtMs > 4_000L) {
-            String why = net.error() != null ? net.error() : "serwer zamknal polaczenie";
-            Gdx.app.postRunnable(() -> game.backToMenu("Rozlaczono z serwerem: " + why));
+            String why = net.error() != null ? net.error() : "serwer zamknął połączenie";
+            Gdx.app.postRunnable(() -> game.backToMenu("Rozłączono z serwerem: " + why));
             disconnectAtMs = Long.MAX_VALUE / 2;
         }
     }
@@ -941,7 +941,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         GuardMode mode = guard.update(t, sample);
         if (mode != lastMode) {
-            session.log().add(t, EventLog.Kind.SYSTEM, "Ochrona zasobow: " + guard.describe());
+            session.log().add(t, EventLog.Kind.SYSTEM, "Ochrona zasobów: " + guard.describe());
             Gdx.app.log("Pixel", "Resource guard -> " + guard.describe());
             lastMode = mode;
         }
@@ -973,7 +973,7 @@ public final class GameScreen extends ScreenAdapter {
         l.add("FPS: " + Gdx.graphics.getFramesPerSecond() + String.format("  (%.1f ms)", frameTimeAvg * 1000));
         Runtime rt = Runtime.getRuntime();
         long used = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
-        l.add("Pamiec aplikacji: " + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");
+        l.add("Pamięć aplikacji: " + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");
         Map<Resource, Float> last = guard.lastSample();
         for (Resource r : new Resource[] {Resource.SYSTEM_MEMORY, Resource.CPU, Resource.THERMAL, Resource.FRAME_TIME}) {
             Float v = last.get(r);
@@ -984,7 +984,7 @@ public final class GameScreen extends ScreenAdapter {
         String thermal = game.platform().thermalInfo();
         if (thermal != null) l.add("Termika: " + thermal);
         l.add("Tryb: " + guard.describe());
-        if (net != null) l.add("Siec: online, poprawki ruchu: " + predictor.corrections() + (net.isClosed() ? " (rozlaczono)" : ""));
+        if (net != null) l.add("Sieć: online, poprawki ruchu: " + predictor.corrections() + (net.isClosed() ? " (rozłączono)" : ""));
         l.add("Limit FPS: " + guard.fpsCap(settings.effectiveFpsCap()));
         return l;
     }

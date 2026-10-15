@@ -10,6 +10,7 @@ package pl.fawizja.pixel.net;
  * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
  * "/kto" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO.
+ * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
 public final class ChatCommands {
@@ -22,7 +23,7 @@ public final class ChatCommands {
         String t = text.trim();
         if (!t.startsWith("/")) return new String[] {"CHAT", t};
         String[] w = t.split("\\s+");
-        switch (w[0].toLowerCase(java.util.Locale.ROOT)) {
+        switch (key(w[0])) {
             case "/haslo":
                 return w.length == 3 ? new String[] {"PASSWD", w[1], w[2]} : null;
             case "/usun-konto":
@@ -75,7 +76,7 @@ public final class ChatCommands {
     private static String[] guild(String t, String[] w) {
         if (w.length == 1) return new String[] {"GUILD", "INFO"};
         String arg = rest(rest(t));
-        switch (w[1].toLowerCase(java.util.Locale.ROOT)) {
+        switch (key(w[1])) {
             case "zaloz": return arg.isEmpty() ? null : new String[] {"GUILD", "CREATE", arg};
             case "zapros": return arg.isEmpty() ? null : new String[] {"GUILD", "INVITE", arg};
             case "przyjmij": return arg.isEmpty() ? null : new String[] {"GUILD", "ACCEPT", arg};
@@ -83,6 +84,12 @@ public final class ChatCommands {
             case "opusc": return w.length == 2 ? new String[] {"GUILD", "LEAVE"} : null;
             default: return null;
         }
+    }
+
+    /** Nazwa polecenia bez wielkosci liter i polskich znakow: "/Zaproś" i "/zapros" to to samo. */
+    static String key(String word) {
+        String t = word.toLowerCase(java.util.Locale.ROOT).replace('ł', 'l');
+        return java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
     }
 
     /** "Stary Wilk 24" -> [Stary Wilk, 24]; "Ola" -> [Ola] (liczba na koncu = czas). */
@@ -108,5 +115,5 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
-    public static final String HELP = "Polecenia: /w Imie, tekst (prywatnie), /gildia [zaloz|zapros|przyjmij|wyrzuc|opusc], /g tekst, /handel Imie, /oferuj 5 health potion | 1000 gp, /akceptuj, /anuluj, /zapros Imie, /przyjmij Imie, /opusc, /d tekst (druzyna), /haslo stare nowe, /usun-konto haslo";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 health potion | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

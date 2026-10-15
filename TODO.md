@@ -140,6 +140,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Gildie: zalozenie za 50 000 gp, zaproszenia, wyrzucanie, czat gildii, zapis na serwerze (0.21.0)
 - [x] Obraz Docker serwera, instrukcja VPS (docs/SERVER.md), test obrazu w CI (0.22.0)
 - [x] Prywatne wiadomosci i moderacja (bany, wyciszenia, ogloszenia, konsola serwera) (0.23.0)
+- [x] Polskie litery w czcionce i pelne polskie napisy w grze (0.24.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

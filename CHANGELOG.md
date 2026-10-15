@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.24.0] - 2026-10-15
+
+### Dodano
+- Polskie litery w grze: czcionka domyslna libGDX uzupelniona w pamieci o ą ć ę ł ń ś ź ż (i wielkie), skladane
+  z liter bazowych, rysowanej kreski / kropki i ogonka z odbitej cedylli (`client/ui/PolishFont`, bez nowych plikow).
+  Czat z polskimi znakami wreszcie sie wyswietla.
+- Polecenia czatu dzialaja z polskimi znakami i bez (`/zaproś` = `/zapros`, `/gildia załóż` = `/gildia zaloz`),
+  handel przyjmuje `złoto`.
+- Test `PolishFontTest` (kazda litera istnieje i ma znak diakrytyczny); lacznie 232 testy.
+
+### Zmieniono
+- Napisy interfejsu, komunikaty serwera, opisy przedmiotow, potworow, czarow, zadan, NPC i rozmowy z pelnymi polskimi
+  znakami (np. UŻYJ, KSIĘGA, ŁÓW, "Zginąłeś", "Wędkarstwo"). Tematy rozmow z NPC wyswietlane z polskimi znakami.
+- Wzorce regresji GUI odswiezone (13 scen).
+
 ## [0.23.0] - 2026-10-15
 
 ### Dodano

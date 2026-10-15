@@ -12,9 +12,9 @@ public enum Vocation {
             2, 3,
             0.85, 1.25, 0.60, 0.85, 1.00,
             2000,
-            "Walczy z dystansu wloczniami i strzalami, wspiera sie swieta magia.",
-            "Bezpieczny dystans, dobra przezywalnosc, uniwersalne runy.",
-            "Slabsza magia obszarowa niz magowie, zuzywa amunicje."),
+            "Walczy z dystansu włóczniami i strzałami, wspiera się świętą magią.",
+            "Bezpieczny dystans, dobra przeżywalność, uniwersalne runy.",
+            "Słabsza magia obszarowa niż magowie, zużywa amunicję."),
 
     /** Leczenie, lod i ziemia; najlepsze wsparcie druzyny. */
     DRUID("Druid",
@@ -22,9 +22,9 @@ public enum Vocation {
             1, 4,
             0.50, 0.50, 1.00, 1.30, 0.80,
             2000,
-            "Mag natury: lod i ziemia, najsilniejsze leczenie siebie i innych.",
-            "Leczenie, kontrola tlumu, duza mana.",
-            "Niskie HP i slaba walka wrecz."),
+            "Mag natury: lód i ziemia, najsilniejsze leczenie siebie i innych.",
+            "Leczenie, kontrola tłumu, duża mana.",
+            "Niskie HP i słaba walka wręcz."),
 
     /** Ogien i energia; najwyzsze obrazenia magiczne, najmniejsza wytrzymalosc. */
     SORCERER("Sorcerer",
@@ -32,9 +32,9 @@ public enum Vocation {
             1, 4,
             0.50, 0.50, 1.25, 0.70, 0.75,
             2000,
-            "Mag zniszczenia: ogien, energia i smierc.",
-            "Najwyzsze obrazenia obszarowe i pojedyncze.",
-            "Najnizsza obrona i slabe leczenie."),
+            "Mag zniszczenia: ogień, energia i śmierć.",
+            "Najwyższe obrażenia obszarowe i pojedyncze.",
+            "Najniższa obrona i słabe leczenie."),
 
     /** Walka wrecz piesciami, szybkie ataki i kombinacje; wysoka wytrzymalosc. */
     MONK("Monk",
@@ -42,9 +42,9 @@ public enum Vocation {
             3, 2,
             1.25, 0.40, 0.50, 0.90, 1.15,
             1400,
-            "Mistrz walki wrecz: szybkie ciosy, kombinacje i samoleczenie skupieniem.",
-            "Najwiecej HP, najszybsze ataki, dobra obrona.",
-            "Musi stac przy celu, malo many, prawie brak magii dystansowej.");
+            "Mistrz walki wręcz: szybkie ciosy, kombinacje i samoleczenie skupieniem.",
+            "Najwięcej HP, najszybsze ataki, dobra obrona.",
+            "Musi stać przy celu, mało many, prawie brak magii dystansowej.");
 
     private final String displayName;
     private final int hpPerLevel;

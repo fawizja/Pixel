@@ -60,12 +60,12 @@ public final class DesktopLauncher {
             Vocation v = Vocation.valueOf(p.length > 1 ? p[1] : "PALADIN");
             String server = platform().serverAddress();
             if (server != null) {
-                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", "haslo-dev"));
+                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", "hasło-dev"));
                 if (login.problem() == null) {
                     startOnline(login);
                     return;
                 }
-                Gdx.app.error("Pixel", "Online niedostepne: " + login.problem());
+                Gdx.app.error("Pixel", "Online niedostępne: " + login.problem());
             }
             if (localSaveSummary() != null) playLocal();
             else createCharacter(p[0], v);

@@ -73,7 +73,7 @@ class CorpseTest {
         s.teleport(new Position(11, 12, 0), 1000);
         assertTrue(s.searchCorpse(1000));
         assertTrue(s.ground().corpseAt(AT).hasLoot(), "nothing fits, nothing is lost");
-        assertTrue(s.log().latest(1).get(0).text().contains("Plecak jest pelny"));
+        assertTrue(s.log().latest(1).get(0).text().contains("Plecak jest pełny"));
     }
 
     @Test

@@ -35,7 +35,7 @@ public final class SoundPlayer {
             }
             available = true;
         } catch (RuntimeException e) {
-            Gdx.app.log("Pixel", "Dzwiek niedostepny: " + e.getMessage());
+            Gdx.app.log("Pixel", "Dźwięk niedostępny: " + e.getMessage());
             dispose();
         }
     }

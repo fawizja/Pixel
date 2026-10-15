@@ -39,13 +39,13 @@ public final class PvpRules {
 
     public enum Verdict {
         OK(null),
-        SELF("Nie mozesz atakowac samego siebie."),
-        DEAD("Cel nie zyje."),
-        ATTACKER_PROTECTED("Do poziomu " + PROTECTION_LEVEL + " nie mozesz atakowac graczy."),
-        TARGET_PROTECTED("Ten gracz jest chroniony (ponizej poziomu " + PROTECTION_LEVEL + ")."),
+        SELF("Nie możesz atakować samego siebie."),
+        DEAD("Cel nie żyje."),
+        ATTACKER_PROTECTED("Do poziomu " + PROTECTION_LEVEL + " nie możesz atakować graczy."),
+        TARGET_PROTECTED("Ten gracz jest chroniony (poniżej poziomu " + PROTECTION_LEVEL + ")."),
         PROTECTION_ZONE("W strefie ochronnej nie ma walki."),
-        LEVEL_GAP("Ten gracz jest o wiele slabszy - nie mozesz go zaatakowac."),
-        OTHER_FLOOR("Cel jest na innym pietrze.");
+        LEVEL_GAP("Ten gracz jest o wiele słabszy - nie możesz go zaatakować."),
+        OTHER_FLOOR("Cel jest na innym piętrze.");
 
         public final String message;
 
@@ -183,7 +183,7 @@ public final class PvpRules {
         victim.lockProtectionZonesUntil(vs.fightUntil);
         boolean justified = vs.skull(now) != Skull.NONE;
         if (!justified && as.skull(now) == Skull.NONE) {
-            attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowales gracza " + b.name() + " - biala czaszka na 15 min.");
+            attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowałeś gracza " + b.name() + " - biała czaszka na 15 min.");
         }
         if (!justified) as.whiteUntil = Math.max(as.whiteUntil, now + WHITE_SKULL_MS);
         raw = (int) Math.round(raw * PVP_DAMAGE);
@@ -197,7 +197,7 @@ public final class PvpRules {
 
         boolean dropAll = vs.skull(now) == Skull.RED;
         victim.combat().diedFromPlayer(a.name(), dropAll, now);
-        attacker.log().add(now, EventLog.Kind.WARNING, "Zabiles gracza " + b.name() + ".");
+        attacker.log().add(now, EventLog.Kind.WARNING, "Zabiłeś gracza " + b.name() + ".");
         if (!justified) {
             as.unjustKills.addLast(now);
             if (as.unjustKills(now) >= RED_SKULL_KILLS) {

@@ -89,11 +89,11 @@ class NetworkSyncTest {
                 }
             });
 
-            bob.send("CHAT", "Czesc Alice!");
+            bob.send("CHAT", "Cześć Alice!");
             await("chat relayed", () -> {
                 String[] m;
                 while ((m = alice.poll()) != null) {
-                    if (m[0].equals("CHAT") && m[1].equals("Bob") && m[2].equals("Czesc Alice!")) return true;
+                    if (m[0].equals("CHAT") && m[1].equals("Bob") && m[2].equals("Cześć Alice!")) return true;
                 }
                 return false;
             });
@@ -110,7 +110,7 @@ class NetworkSyncTest {
             try (NetClient dup = connect()) {
                 dup.hello("carol", "MONK", "tajne-Carol");
                 await("duplicate rejected", () -> dup.error() != null);
-                assertTrue(dup.error().contains("juz w grze"));
+                assertTrue(dup.error().contains("już w grze"));
             }
             try (NetClient old = connect()) {
                 old.send("HELLO", "0", "Dave", "MONK");
@@ -285,22 +285,22 @@ class NetworkSyncTest {
 
     @Test
     void accountsRequireTheRightPasswordAndLockAfterFailures() throws Exception {
-        assertTrue(accepted("Kora", "DRUID", "pierwsze-haslo"), "first login creates the account");
+        assertTrue(accepted("Kora", "DRUID", "pierwsze-hasło"), "first login creates the account");
         await("left", () -> server.world().players().isEmpty());
-        assertFalse(accepted("Kora", "DRUID", "inne-haslo"));
+        assertFalse(accepted("Kora", "DRUID", "inne-hasło"));
         assertFalse(accepted("Nowa", "DRUID", "123"), "too short password");
-        assertTrue(accepted("Kora", "DRUID", "pierwsze-haslo"));
+        assertTrue(accepted("Kora", "DRUID", "pierwsze-hasło"));
         await("left", () -> server.world().players().isEmpty());
-        for (int i = 0; i < AccountStore.MAX_FAILURES; i++) assertFalse(accepted("Kora", "DRUID", "zle-haslo"));
+        for (int i = 0; i < AccountStore.MAX_FAILURES; i++) assertFalse(accepted("Kora", "DRUID", "źle-hasło"));
         try (NetClient c = connect()) {
-            c.hello("Kora", "DRUID", "pierwsze-haslo");
+            c.hello("Kora", "DRUID", "pierwsze-hasło");
             await("locked", () -> c.error() != null);
-            assertTrue(c.error().contains("Za duzo"), c.error());
+            assertTrue(c.error().contains("Za dużo"), c.error());
         }
         // plik konta nie zawiera hasla
         File acc = new File(new File(saves, "accounts"), "kora.acc");
         String content = new String(Files.readAllBytes(acc.toPath()));
-        assertFalse(content.contains("pierwsze-haslo"));
+        assertFalse(content.contains("pierwsze-hasło"));
         assertTrue(content.startsWith("pbkdf2-sha256;"));
     }
 
@@ -310,7 +310,7 @@ class NetworkSyncTest {
         assertEquals(32 * 3 - 1, server.fingerprint().length());
         try (NetClient c = connect()) {
             assertEquals(server.fingerprint(), c.serverFingerprint());
-            c.hello("Lena", "MONK", "haslo-lena");
+            c.hello("Lena", "MONK", "hasło-lena");
             await("tls login", () -> c.selfSave() != null);
         }
         // inny przypiety odcisk (np. podstawiony serwer) - polaczenie odrzucone przed wyslaniem hasla
@@ -326,7 +326,7 @@ class NetworkSyncTest {
             plain.start();
             assertNull(plain.fingerprint());
             try (NetClient c = new NetClient("127.0.0.1", plain.port(), 3000)) {
-                c.hello("Olaf", "PALADIN", "haslo-olaf");
+                c.hello("Olaf", "PALADIN", "hasło-olaf");
                 await("plain login", () -> c.selfSave() != null);
             }
         }
@@ -335,17 +335,17 @@ class NetworkSyncTest {
     @Test
     void floodingAndSilentConnectionsAreCutOffAndChatIsRateLimited() throws Exception {
         try (NetClient spam = connect()) {
-            spam.hello("Spammer", "MONK", "haslo-spam");
+            spam.hello("Spammer", "MONK", "hasło-spam");
             await("in", () -> spam.selfSave() != null);
             for (int i = 0; i < 300; i++) spam.send("MOVE", "-");
             await("flood cut off", () -> spam.isClosed());
-            assertTrue(String.valueOf(spam.error()).contains("Za duzo") || spam.error() == null || spam.isClosed());
+            assertTrue(String.valueOf(spam.error()).contains("Za dużo") || spam.error() == null || spam.isClosed());
         }
         try (NetClient talker = connect(); NetClient listener = connect()) {
-            talker.hello("Talker", "MONK", "haslo-talk");
-            listener.hello("Listener", "DRUID", "haslo-list");
+            talker.hello("Talker", "MONK", "hasło-talk");
+            listener.hello("Listener", "DRUID", "hasło-list");
             await("in", () -> talker.selfSave() != null && listener.selfSave() != null);
-            for (int i = 0; i < ServerWorld.CHAT_MAX + 3; i++) talker.send("CHAT", "wiadomosc " + i);
+            for (int i = 0; i < ServerWorld.CHAT_MAX + 3; i++) talker.send("CHAT", "wiadomość " + i);
             await("warned", () -> {
                 String[] m;
                 while ((m = talker.poll()) != null) if (m[0].equals("LOG") && m[2].contains("Zwolnij")) return true;
@@ -384,7 +384,7 @@ class NetworkSyncTest {
     @Test
     void backupsArchiveSavesAccountsAndKeepTheNewest() throws Exception {
         try (NetClient c = connect()) {
-            c.hello("Mila", "DRUID", "haslo-mila");
+            c.hello("Mila", "DRUID", "hasło-mila");
             await("in", () -> c.selfSave() != null);
         }
         await("saved", () -> server.world().saved("Mila"));
@@ -438,7 +438,7 @@ class NetworkSyncTest {
             awaitMessage(ula, "party list for ula", m -> m[0].equals("PARTY") && m[1].equals("Ola,Ula"));
 
             ola.send("PCHAT", "idziemy na wilki");
-            awaitMessage(ula, "party chat", m -> m[0].equals("CHAT") && m[1].equals("[Druzyna] Ola") && m[2].equals("idziemy na wilki"));
+            awaitMessage(ula, "party chat", m -> m[0].equals("CHAT") && m[1].equals("[Drużyna] Ola") && m[2].equals("idziemy na wilki"));
 
             long olaExp = self(ola).experience(), ulaExp = self(ula).experience();
             pl.fawizja.pixel.monster.MonsterType wolf = pl.fawizja.pixel.monster.MonsterRegistry
@@ -461,7 +461,7 @@ class NetworkSyncTest {
             assertTrue(each > solo / 2, "the party bonus beats an even split");
 
             ola.send("ATTACK", String.valueOf(ula.playerId()));
-            awaitMessage(ola, "no friendly fire", m -> m[0].equals("LOG") && m[2].contains("druzyny"));
+            awaitMessage(ola, "no friendly fire", m -> m[0].equals("LOG") && m[2].contains("drużyny"));
 
             ula.send("BYE");
             awaitMessage(ola, "party dissolved", m -> m[0].equals("PARTY") && m[1].equals("-"));
@@ -527,7 +527,7 @@ class NetworkSyncTest {
                 }
             });
             ola.send("GUILD", "CREATE", "Wilcze Kly");
-            awaitMessage(ola, "founded", m -> m[0].equals("LOG") && m[2].contains("Zalozono gildie"));
+            awaitMessage(ola, "founded", m -> m[0].equals("LOG") && m[2].contains("Założono gildię"));
             await("founding fee paid", () -> {
                 try {
                     return pl.fawizja.pixel.economy.Money.totalValue(self(ola).backpack())
@@ -577,7 +577,7 @@ class NetworkSyncTest {
             awaitMessage(ula, "echo", m -> m[0].equals("CHAT") && m[1].equals("[do Ola]"));
 
             ula.send("ADMIN", "KICK", "Ola");
-            awaitMessage(ula, "not an admin", m -> m[0].equals("LOG") && m[2].contains("Brak uprawnien"));
+            awaitMessage(ula, "not an admin", m -> m[0].equals("LOG") && m[2].contains("Brak uprawnień"));
             String[] answer = new String[1];
             server.enqueueTest(() -> answer[0] = server.world().moderate(new String[] {"ADMIN", "Ola"}, "konsola", server.now()));
             await("admin added", () -> answer[0] != null);
@@ -589,7 +589,7 @@ class NetworkSyncTest {
             awaitMessage(ula, "chat blocked", m -> m[0].equals("LOG") && m[2].contains("wyciszony"));
 
             ola.send("ADMIN", "SAY", "restart o 20:00");
-            awaitMessage(ula, "broadcast", m -> m[0].equals("CHAT") && m[1].equals("[Ogloszenie]"));
+            awaitMessage(ula, "broadcast", m -> m[0].equals("CHAT") && m[1].equals("[Ogłoszenie]"));
 
             ola.send("ADMIN", "BAN", "Ula", "2");
             await("ula kicked", () -> ula.error() != null && ula.error().contains("zablokowane"));
@@ -623,20 +623,20 @@ class NetworkSyncTest {
     @Test
     void playersCanChangeTheirPasswordAndDeleteTheirAccount() throws Exception {
         try (NetClient a = connect()) {
-            a.hello("Lena", "MONK", "stare-haslo");
+            a.hello("Lena", "MONK", "stare-hasło");
             await("in", () -> a.playerId() > 0);
-            a.send("PASSWD", "zle-haslo", "nowe-haslo");
-            await("refused", () -> logSays(a, "Zle obecne haslo"));
-            a.send("PASSWD", "stare-haslo", "nowe-haslo");
-            await("changed", () -> logSays(a, "Haslo zmienione"));
+            a.send("PASSWD", "źle-hasło", "nowe-hasło");
+            await("refused", () -> logSays(a, "Złe obecne hasło"));
+            a.send("PASSWD", "stare-hasło", "nowe-hasło");
+            await("changed", () -> logSays(a, "Hasło zmienione"));
         }
         await("left", () -> server.world().players().isEmpty());
-        assertFalse(accepted("Lena", "MONK", "stare-haslo"), "the old password no longer works");
+        assertFalse(accepted("Lena", "MONK", "stare-hasło"), "the old password no longer works");
         try (NetClient a = connect()) {
-            a.hello("Lena", "MONK", "nowe-haslo");
+            a.hello("Lena", "MONK", "nowe-hasło");
             await("in again", () -> a.playerId() > 0);
-            a.send("DELETE", "nowe-haslo");
-            await("deleted", () -> "Konto usuniete.".equals(a.error()));
+            a.send("DELETE", "nowe-hasło");
+            await("deleted", () -> "Konto usunięte.".equals(a.error()));
         }
         await("gone", () -> server.world().players().isEmpty());
         assertFalse(server.world().saved("Lena"), "the character save is removed");
@@ -646,13 +646,13 @@ class NetworkSyncTest {
     @Test
     void oneAddressCannotMassCreateAccounts() throws Exception {
         server.world().maxNewAccountsPerAddress = 2;
-        assertTrue(accepted("Olaf", "MONK", "haslo-olafa"));
-        assertTrue(accepted("Petra", "MONK", "haslo-petry"));
+        assertTrue(accepted("Olaf", "MONK", "hasło-olafa"));
+        assertTrue(accepted("Petra", "MONK", "hasło-petry"));
         try (NetClient c = connect()) {
-            c.hello("Quin", "MONK", "haslo-quina");
+            c.hello("Quin", "MONK", "hasło-quina");
             await("refused", () -> c.error() != null);
-            assertTrue(c.error().contains("Za duzo nowych kont"), c.error());
+            assertTrue(c.error().contains("Za dużo nowych kont"), c.error());
         }
-        assertTrue(accepted("Olaf", "MONK", "haslo-olafa"), "existing accounts still log in");
+        assertTrue(accepted("Olaf", "MONK", "hasło-olafa"), "existing accounts still log in");
     }
 }

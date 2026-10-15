@@ -44,24 +44,24 @@ class GuildTest {
         g.create("Ola", "Wilcze Kly");
         g.invite("Ola", "Ula", 0);
         g.accept("Ula", "Wilcze Kly", 0);
-        g.create("Kuba", "Nocna Straz");
-        GuildRegistry back = GuildRegistry.decode(g.encode() + "zle;\n;;\nX;Ktos\nWilcze Kly;Duplikat\n");
+        g.create("Kuba", "Nocna Straż");
+        GuildRegistry back = GuildRegistry.decode(g.encode() + "źle;\n;;\nX;Ktoś\nWilcze Kly;Duplikat\n");
         assertEquals(2, back.count());
         assertEquals(List.of("Ola", "Ula"), back.guildOf("ula").members());
-        assertEquals("Nocna Straz", back.guildOf("Kuba").name());
+        assertEquals("Nocna Straż", back.guildOf("Kuba").name());
         assertEquals(0, GuildRegistry.decode(null).count());
     }
 
     @Test
     void guildChatCommands() {
         assertArrayEquals(new String[] {"GUILD", "INFO"}, ChatCommands.toMessage("/gildia"));
-        assertArrayEquals(new String[] {"GUILD", "CREATE", "Wilcze Kly"}, ChatCommands.toMessage("/gildia zaloz Wilcze Kly"));
-        assertArrayEquals(new String[] {"GUILD", "INVITE", "Ula"}, ChatCommands.toMessage("/gildia zapros Ula"));
+        assertArrayEquals(new String[] {"GUILD", "CREATE", "Wilcze Kly"}, ChatCommands.toMessage("/gildia załóż Wilcze Kly"));
+        assertArrayEquals(new String[] {"GUILD", "INVITE", "Ula"}, ChatCommands.toMessage("/gildia zaproś Ula"));
         assertArrayEquals(new String[] {"GUILD", "ACCEPT", "Wilcze Kly"}, ChatCommands.toMessage("/gildia przyjmij Wilcze Kly"));
-        assertArrayEquals(new String[] {"GUILD", "KICK", "Ula"}, ChatCommands.toMessage("/gildia wyrzuc Ula"));
-        assertArrayEquals(new String[] {"GUILD", "LEAVE"}, ChatCommands.toMessage("/gildia opusc"));
+        assertArrayEquals(new String[] {"GUILD", "KICK", "Ula"}, ChatCommands.toMessage("/gildia wyrzuć Ula"));
+        assertArrayEquals(new String[] {"GUILD", "LEAVE"}, ChatCommands.toMessage("/gildia opuść"));
         assertArrayEquals(new String[] {"GCHAT", "zbiorka w Varden"}, ChatCommands.toMessage("/g zbiorka w Varden"));
-        assertNull(ChatCommands.toMessage("/gildia zaloz"));
+        assertNull(ChatCommands.toMessage("/gildia załóż"));
         assertNull(ChatCommands.toMessage("/gildia cos"));
     }
 }

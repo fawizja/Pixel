@@ -8,7 +8,7 @@ class ChatCommandsTest {
 
     @Test
     void commandsBecomeProtocolMessagesAndPasswordsNeverReachTheChat() {
-        assertArrayEquals(new String[] {"CHAT", "czesc"}, ChatCommands.toMessage("  czesc "));
+        assertArrayEquals(new String[] {"CHAT", "cześć"}, ChatCommands.toMessage("  cześć "));
         assertArrayEquals(new String[] {"PASSWD", "stare1", "nowe12"}, ChatCommands.toMessage("/haslo stare1 nowe12"));
         assertArrayEquals(new String[] {"DELETE", "sekret"}, ChatCommands.toMessage("/USUN-KONTO sekret"));
         assertNull(ChatCommands.toMessage("/haslo tylko-jedno"), "an incomplete command is not sent as chat");
@@ -18,7 +18,7 @@ class ChatCommandsTest {
 
     @Test
     void privateMessagesAndModeratorCommands() {
-        assertArrayEquals(new String[] {"PM", "Stary Wilk", "czesc, co slychac?"}, ChatCommands.toMessage("/w Stary Wilk, czesc, co slychac?"));
+        assertArrayEquals(new String[] {"PM", "Stary Wilk", "cześć, co słychać?"}, ChatCommands.toMessage("/w Stary Wilk, cześć, co słychać?"));
         assertArrayEquals(new String[] {"PM", "Ola", "hej tam"}, ChatCommands.toMessage("/w Ola hej tam"));
         assertNull(ChatCommands.toMessage("/w Ola"));
         assertArrayEquals(new String[] {"ADMIN", "SAY", "restart o 20:00"}, ChatCommands.toMessage("/ogloszenie restart o 20:00"));

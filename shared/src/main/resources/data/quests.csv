@@ -1,29 +1,29 @@
 # klucz;nazwa;zleceniodawca (npc);rodzaj (KILL/COLLECT);cel (potwor/przedmiot);ilosc;exp;gp;poziom min;opis
-varden_wolves;Plaga wilkow;varden_guide;KILL;wolf;10;2000;300;8;Wilki atakuja pasterzy na polach Varden. Pokonaj 10.
-varden_ears;Uszy goblinow;varden_guide;COLLECT;goblin_ear;10;6000;600;12;Przynies 10 uszu goblinow z kopalni jako dowod.
-varden_trolls;Trolle w glebinach;varden_guide;KILL;cave_troll;10;40000;2000;30;Trolle jaskiniowe niszcza chodniki kopalni.
-varden_king;Krol kopalni;varden_guide;KILL;grimtooth;1;60000;5000;45;Pokonaj Grimtootha na dnie kopalni Varden.
-frost_pelts;Futra na zime;frost_guide;COLLECT;frost_pelt;10;30000;1500;40;Frostholm potrzebuje futer wilkow snieznych.
-frost_yeti;Polowanie na yeti;frost_guide;KILL;yeti;15;120000;4000;65;Yeti napadaja na karawany. Pokonaj 15.
-frost_queen;Lodowa korona;frost_guide;KILL;frost_queen;1;600000;20000;140;Zakoncz panowanie Krolowej Lodu na dnie jaskin.
-selv_crocs;Krokodyle w kanalach;selv_guide;KILL;crocodile;20;90000;3000;50;Krokodyle zagrazaja rybakom Selvaran.
-selv_idols;Zaginione posazki;selv_guide;COLLECT;jungle_idol;3;150000;0;65;Odzyskaj 3 zlote posazki z zatopionych ruin.
+varden_wolves;Plaga wilków;varden_guide;KILL;wolf;10;2000;300;8;Wilki atakują pasterzy na polach Varden. Pokonaj 10.
+varden_ears;Uszy goblinów;varden_guide;COLLECT;goblin_ear;10;6000;600;12;Przynieś 10 uszu goblinów z kopalni jako dowód.
+varden_trolls;Trolle w głębinach;varden_guide;KILL;cave_troll;10;40000;2000;30;Trolle jaskiniowe niszczą chodniki kopalni.
+varden_king;Król kopalni;varden_guide;KILL;grimtooth;1;60000;5000;45;Pokonaj Grimtootha na dnie kopalni Varden.
+frost_pelts;Futra na zimę;frost_guide;COLLECT;frost_pelt;10;30000;1500;40;Frostholm potrzebuje futer wilków śnieżnych.
+frost_yeti;Polowanie na yeti;frost_guide;KILL;yeti;15;120000;4000;65;Yeti napadają na karawany. Pokonaj 15.
+frost_queen;Lodowa korona;frost_guide;KILL;frost_queen;1;600000;20000;140;Zakończ panowanie Królowej Lodu na dnie jaskiń.
+selv_crocs;Krokodyle w kanałach;selv_guide;KILL;crocodile;20;90000;3000;50;Krokodyle zagrażają rybakom Selvaran.
+selv_idols;Zaginione posążki;selv_guide;COLLECT;jungle_idol;3;150000;0;65;Odzyskaj 3 złote posążki z zatopionych ruin.
 selv_colossus;Serce ruin;selv_guide;KILL;ruin_colossus;1;1500000;40000;190;Zniszcz kamiennego kolosa w sercu ruin.
-qas_scorpions;Kolce skorpionow;qas_guide;COLLECT;scorpion_tail;15;80000;2000;55;Alchemicy Qasirah potrzebuja jadu skorpionow.
-qas_mummies;Spokoj zmarlych;qas_guide;KILL;mummy;10;900000;15000;180;Mumie wychodza z krypt. Odeslij 10 z powrotem.
-qas_pharaoh;Klatwa faraona;qas_guide;KILL;pharaoh;1;2500000;60000;210;Zdejmij klatwe Neferakha w najglebszej krypcie.
-camp_treants;Przeklety las;camp_guide;KILL;cursed_treant;25;300000;20000;230;Drzewce dusza droge od mostu. Wytnij 25.
-camp_golems;Rzeka lawy;camp_guide;KILL;lava_golem;20;500000;40000;320;Golemy lawy zalewaja szlak na poludnie. Rozbij 20.
-camp_ignaroth;Pan wulkanu;camp_guide;KILL;ignaroth;1;3000000;150000;350;Ignaroth budzi wulkan. Zbierz druzyne i zgas go.
-camp_dragons;Lodowe skrzydla;camp_guide;KILL;ice_dragon;20;800000;60000;450;Lodowe smoki porywaja zwiadowcow. Pokonaj 20.
-camp_hrimgar;Krol lodu;camp_guide;KILL;hrimgar;1;5000000;250000;500;Hrimgar zamyka przelecze. Stracz go ze szczytu.
-camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1500000;0;600;Kaplani obozu badaja cien. Przynies 10 esencji.
-camp_khazuul;Pusty krol;camp_guide;KILL;khazuul;1;8000000;400000;650;Kha'zuul wola cienie z ruin. Rozprosz go.
-camp_lords;Panowie Otchlani;camp_guide;KILL;abyss_lord;15;6000000;300000;850;Panowie Otchlani gromadza armie. Pokonaj 15.
-camp_morgath;Serce Otchlani;camp_guide;KILL;morgath;1;20000000;1000000;900;Ostatnie zadanie swiata: zniszcz Mor'gatha.
-varden_smug1;Slady przemytnikow;varden_guide;KILL;bandit;8;8000;500;12;Bandyci na wschodnich drogach przemycaja towar. Rozbij 8 i dowiedz sie, dla kogo pracuja.
-varden_smug2;Szamani i runy;varden_guide;KILL;goblin_shaman;6;15000;800;15;Bandyci kupuja runy od szamanow goblinow w kopalni. Pokonaj 6 szamanow.
-varden_smug3;Ostatni transport;varden_guide;KILL;skeleton;12;30000;1200;20;Towar ukryto w starych grobach pod kopalnia (-3). Oczysc je z 12 szkieletow.
-selv_exp1;Zaginiona wyprawa;selv_guide;KILL;jungle_hunter;10;70000;2500;60;Lowcy z dzungli napadli wyprawe badaczy. Pokonaj 10 lowcow.
-selv_exp2;Sladem wezy;selv_guide;KILL;jungle_serpent;12;110000;3500;70;Ocalali badacze uciekli w gniazda wezy. Oczysc im droge.
-frost_storm;Zamiec;frost_guide;KILL;frost_witch;8;160000;5000;80;Wiedzmy mrozu sprowadzaja zamiec na Frostholm. Pokonaj 8.
+qas_scorpions;Kolce skorpionów;qas_guide;COLLECT;scorpion_tail;15;80000;2000;55;Alchemicy Qasirah potrzebują jadu skorpionów.
+qas_mummies;Spokój zmarłych;qas_guide;KILL;mummy;10;900000;15000;180;Mumie wychodzą z krypt. Odeślij 10 z powrotem.
+qas_pharaoh;Klątwa faraona;qas_guide;KILL;pharaoh;1;2500000;60000;210;Zdejmij klątwę Neferakha w najgłębszej krypcie.
+camp_treants;Przeklęty las;camp_guide;KILL;cursed_treant;25;300000;20000;230;Drzewce duszą drogę od mostu. Wytnij 25.
+camp_golems;Rzeka lawy;camp_guide;KILL;lava_golem;20;500000;40000;320;Golemy lawy zalewają szlak na południe. Rozbij 20.
+camp_ignaroth;Pan wulkanu;camp_guide;KILL;ignaroth;1;3000000;150000;350;Ignaroth budzi wulkan. Zbierz drużynę i zgaś go.
+camp_dragons;Lodowe skrzydła;camp_guide;KILL;ice_dragon;20;800000;60000;450;Lodowe smoki porywają zwiadowców. Pokonaj 20.
+camp_hrimgar;Król lodu;camp_guide;KILL;hrimgar;1;5000000;250000;500;Hrimgar zamyka przełęcze. Strąć go ze szczytu.
+camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1500000;0;600;Kapłani obozu badają cień. Przynieś 10 esencji.
+camp_khazuul;Pusty król;camp_guide;KILL;khazuul;1;8000000;400000;650;Kha'zuul woła cienie z ruin. Rozprosz go.
+camp_lords;Panowie Otchłani;camp_guide;KILL;abyss_lord;15;6000000;300000;850;Panowie Otchłani gromadzą armie. Pokonaj 15.
+camp_morgath;Serce Otchłani;camp_guide;KILL;morgath;1;20000000;1000000;900;Ostatnie zadanie świata: zniszcz Mor'gatha.
+varden_smug1;Ślady przemytników;varden_guide;KILL;bandit;8;8000;500;12;Bandyci na wschodnich drogach przemycają towar. Rozbij 8 i dowiedz się, dla kogo pracują.
+varden_smug2;Szamani i runy;varden_guide;KILL;goblin_shaman;6;15000;800;15;Bandyci kupują runy od szamanów goblinów w kopalni. Pokonaj 6 szamanów.
+varden_smug3;Ostatni transport;varden_guide;KILL;skeleton;12;30000;1200;20;Towar ukryto w starych grobach pod kopalnią (-3). Oczyść je z 12 szkieletów.
+selv_exp1;Zaginiona wyprawa;selv_guide;KILL;jungle_hunter;10;70000;2500;60;Łowcy z dżungli napadli wyprawę badaczy. Pokonaj 10 łowców.
+selv_exp2;Śladem węży;selv_guide;KILL;jungle_serpent;12;110000;3500;70;Ocalali badacze uciekli w gniazda węży. Oczyść im drogę.
+frost_storm;Zamieć;frost_guide;KILL;frost_witch;8;160000;5000;80;Wiedźmy mrozu sprowadzają zamieć na Frostholm. Pokonaj 8.

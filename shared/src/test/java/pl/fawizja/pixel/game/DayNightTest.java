@@ -36,7 +36,7 @@ class DayNightTest {
         assertTrue(s.log().latest(3).stream().anyMatch(e -> e.text().startsWith("Zapada noc")));
         s.update(t + 9 * GAME_HOUR_MS + 3_000, null);
         assertFalse(s.monsters().isNight());
-        assertTrue(s.log().latest(3).stream().anyMatch(e -> e.text().equals("Wstaje dzien.")));
+        assertTrue(s.log().latest(3).stream().anyMatch(e -> e.text().equals("Wstaje dzień.")));
     }
 
     @Test

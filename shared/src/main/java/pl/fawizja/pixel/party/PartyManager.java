@@ -19,13 +19,13 @@ public final class PartyManager {
 
     public enum Result {
         OK("OK"),
-        SELF("Nie mozesz zaprosic samego siebie."),
-        NOT_LEADER("Tylko lider druzyny moze zapraszac."),
-        TARGET_IN_PARTY("Ten gracz jest juz w druzynie."),
-        FULL("Druzyna jest pelna (maks. " + MAX_MEMBERS + ")."),
-        NO_INVITE("Nie masz zaproszenia od tego gracza (albo wygaslo)."),
-        ALREADY_IN_PARTY("Najpierw opusc obecna druzyne (/opusc)."),
-        NOT_IN_PARTY("Nie jestes w druzynie.");
+        SELF("Nie możesz zaprosić samego siebie."),
+        NOT_LEADER("Tylko lider drużyny może zapraszać."),
+        TARGET_IN_PARTY("Ten gracz jest już w drużynie."),
+        FULL("Drużyna jest pełna (maks. " + MAX_MEMBERS + ")."),
+        NO_INVITE("Nie masz zaproszenia od tego gracza (albo wygasło)."),
+        ALREADY_IN_PARTY("Najpierw opuść obecną drużynę (/opuść)."),
+        NOT_IN_PARTY("Nie jesteś w drużynie.");
 
         public final String message;
 

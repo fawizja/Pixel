@@ -129,7 +129,7 @@ public final class GameSession {
         this.combat.setKillListener(t -> {
             QuestType done = quests == null ? null : quests.onKill(pc, t.key());
             if (done != null) {
-                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiagniety, wroc po nagrode.");
+                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiągnięty, wróć po nagrodę.");
             }
         });
         this.playerTarget = new MonsterManager.Target() {
@@ -197,7 +197,7 @@ public final class GameSession {
         long before = gold();
         InventoryResult r = pc.bank().depositAll(pc.backpack());
         log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
-                r.ok() ? "Wplacono " + before + " gp. Saldo: " + pc.bank().balance() + " gp." : "Nie masz monet do wplacenia.");
+                r.ok() ? "Wpłacono " + before + " gp. Saldo: " + pc.bank().balance() + " gp." : "Nie masz monet do wpłacenia.");
         return r;
     }
 
@@ -205,8 +205,8 @@ public final class GameSession {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return InventoryResult.INVALID_AMOUNT;
         InventoryResult r = pc.bank().withdraw(pc.backpack(), amount);
         log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
-                r.ok() ? "Wyplacono " + amount + " gp. Saldo: " + pc.bank().balance() + " gp."
-                        : r == InventoryResult.INSUFFICIENT_FUNDS ? "Za malo pieniedzy na koncie." : "Brak miejsca w plecaku.");
+                r.ok() ? "Wypłacono " + amount + " gp. Saldo: " + pc.bank().balance() + " gp."
+                        : r == InventoryResult.INSUFFICIENT_FUNDS ? "Za mało pieniędzy na koncie." : "Brak miejsca w plecaku.");
         return r;
     }
 
@@ -215,7 +215,7 @@ public final class GameSession {
         if (talkTo(NpcRole.PRIEST, nowMs) == null) return;
         pc.heal(pc.maxHealth());
         pc.restoreMana(pc.maxMana());
-        log.add(nowMs, EventLog.Kind.INFO, "Kaplan cie uleczyl.");
+        log.add(nowMs, EventLog.Kind.INFO, "Kapłan cię uleczył.");
     }
 
     /** Kaplan: zamieszkanie w miescie - tu postac odrodzi sie po smierci. */
@@ -223,7 +223,7 @@ public final class GameSession {
         Npc n = talkTo(NpcRole.PRIEST, nowMs);
         if (n == null) return;
         pc.setHomeTown(n.town().toLowerCase(java.util.Locale.ROOT));
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Mieszkasz teraz w " + n.town() + ". Tu bedziesz sie odradzac.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Mieszkasz teraz w " + n.town() + ". Tu będziesz się odradzać.");
     }
 
     /**
@@ -254,11 +254,11 @@ public final class GameSession {
         QuestResult r = quests.interact(pc, q);
         String text = r.message();
         if (r == QuestResult.COMPLETED) {
-            text = "Ukonczono \"" + q.name() + "\". Nagroda: " + quests.rewardText(q) + ".";
+            text = "Ukończono \"" + q.name() + "\". Nagroda: " + quests.rewardText(q) + ".";
         } else if (r == QuestResult.ACCEPTED) {
-            text = "Przyjeto zadanie \"" + q.name() + "\".";
+            text = "Przyjęto zadanie \"" + q.name() + "\".";
         } else if (r == QuestResult.LOCKED) {
-            text = "Najpierw ukoncz \"" + quests.registry().get(q.requires()).name() + "\".";
+            text = "Najpierw ukończ \"" + quests.registry().get(q.requires()).name() + "\".";
         }
         log.add(nowMs, r == QuestResult.COMPLETED || r == QuestResult.ACCEPTED ? EventLog.Kind.SYSTEM : EventLog.Kind.WARNING, text);
         return r;
@@ -283,7 +283,7 @@ public final class GameSession {
         FishingResult r = fishing.fish(pc, nowMs);
         switch (r) {
             case CAUGHT:
-                log.add(nowMs, EventLog.Kind.LOOT, "Zlowiono: " + items.get(fishing.lastCatchId()).name());
+                log.add(nowMs, EventLog.Kind.LOOT, "Złowiono: " + items.get(fishing.lastCatchId()).name());
                 break;
             case NOTHING:
                 log.add(nowMs, EventLog.Kind.INFO, r.message);
@@ -341,8 +341,8 @@ public final class GameSession {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt);
             switch (pc.tickTorch(dt, torchId)) {
-                case NEXT_LIT: log.add(nowMs, EventLog.Kind.INFO, "Pochodnia sie wypalila. Zapalasz nastepna."); break;
-                case BURNED_OUT: log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia sie wypalila. Nie masz kolejnej."); break;
+                case NEXT_LIT: log.add(nowMs, EventLog.Kind.INFO, "Pochodnia się wypaliła. Zapalasz następną."); break;
+                case BURNED_OUT: log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia się wypaliła. Nie masz kolejnej."); break;
                 default:
             }
         }
@@ -364,15 +364,15 @@ public final class GameSession {
                 onFloorChanged(nowMs);
             } else if (r == MoveResult.LEVEL_TOO_LOW && nowMs - lastGateWarningMs > 3000) {
                 lastGateWarningMs = nowMs;
-                log.add(nowMs, EventLog.Kind.WARNING, "Straznik: dalej wpuszczamy tylko od poziomu "
+                log.add(nowMs, EventLog.Kind.WARNING, "Strażnik: dalej wpuszczamy tylko od poziomu "
                         + world.requiredLevelAt(pc.position().translate(requested.dx, requested.dy)) + ".");
             }
         }
         ground.decay(nowMs);
         boolean night = isNight(nowMs);
         if (wasNight != null && night != wasNight) {
-            log.add(nowMs, EventLog.Kind.INFO, night ? "Zapada noc. Nocne drapiezniki sa grozniejsze."
-                    : "Wstaje dzien.");
+            log.add(nowMs, EventLog.Kind.INFO, night ? "Zapada noc. Nocne drapieżniki są groźniejsze."
+                    : "Wstaje dzień.");
         }
         wasNight = night;
         monsters.setNight(night);
@@ -429,7 +429,7 @@ public final class GameSession {
 
     public void cycleTarget(long nowMs) {
         Monster m = combat.cycleTarget();
-        if (m == null) log.add(nowMs, EventLog.Kind.INFO, "Brak celu w poblizu.");
+        if (m == null) log.add(nowMs, EventLog.Kind.INFO, "Brak celu w pobliżu.");
     }
 
     /** Wybor celu dotknieciem kafelka. Zwraca true, jesli trafiono potwora. */
@@ -456,7 +456,7 @@ public final class GameSession {
         if (!world.isProtectionZone(to) && (t == null || !world.isProtectionZone(t.to()))) return false;
         if (nowMs - lastPzWarningMs > 3000) {
             lastPzWarningMs = nowMs;
-            log.add(nowMs, EventLog.Kind.WARNING, "Walczysz z graczem - strefa ochronna zamknieta jeszcze "
+            log.add(nowMs, EventLog.Kind.WARNING, "Walczysz z graczem - strefa ochronna zamknięta jeszcze "
                     + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
         }
         return true;
@@ -515,8 +515,8 @@ public final class GameSession {
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
     public static String floorMessage(int z) {
-        if (z == 0) return "Jestes na powierzchni.";
-        return z > 0 ? "Pietro +" + z + "." : "Podziemia, poziom " + z + ".";
+        if (z == 0) return "Jesteś na powierzchni.";
+        return z > 0 ? "Piętro +" + z + "." : "Podziemia, poziom " + z + ".";
     }
 
     public void useNearby(long nowMs) {
@@ -529,13 +529,13 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
                 break;
             default:
-                if (!searchCorpse(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do uzycia.");
+                if (!searchCorpse(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
         }
     }
 
     public void toggleRun(long nowMs) {
         pc.setRunning(!pc.isRunning());
-        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Bieganie wlaczone." : "Bieganie wylaczone.");
+        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Bieganie włączone." : "Bieganie wyłączone.");
     }
 
     public void toggleTorch(long nowMs) {
@@ -577,10 +577,10 @@ public final class GameSession {
                 if (b.length() > 0) b.append(", ");
                 b.append(describe(s));
             }
-            log.add(nowMs, EventLog.Kind.LOOT, "Z ciala: " + b);
+            log.add(nowMs, EventLog.Kind.LOOT, "Z ciała: " + b);
         }
         if (ground.corpseAt(p) != null && ground.corpseAt(p).hasLoot()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pelny - reszta zostaje w ciele.");
+            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pełny - reszta zostaje w ciele.");
         }
         return true;
     }
@@ -596,7 +596,7 @@ public final class GameSession {
         if (r.ok()) {
             log.add(nowMs, EventLog.Kind.LOOT, "Podniesiono: " + describe(top));
         } else {
-            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pelny.");
+            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pełny.");
         }
     }
 
@@ -613,11 +613,11 @@ public final class GameSession {
     public void equipFromSlot(int slot, long nowMs) {
         InventoryResult r = pc.equipment().equipFromBackpack(pc.backpack(), slot, pc.vocation(), pc.level());
         switch (r) {
-            case OK: log.add(nowMs, EventLog.Kind.INFO, "Zalozono przedmiot."); break;
-            case WRONG_VOCATION: log.add(nowMs, EventLog.Kind.WARNING, "Twoja profesja nie moze tego uzywac."); break;
+            case OK: log.add(nowMs, EventLog.Kind.INFO, "Założono przedmiot."); break;
+            case WRONG_VOCATION: log.add(nowMs, EventLog.Kind.WARNING, "Twoja profesja nie może tego używać."); break;
             case LEVEL_TOO_LOW: log.add(nowMs, EventLog.Kind.WARNING, "Za niski poziom."); break;
-            case WRONG_SLOT_TYPE: log.add(nowMs, EventLog.Kind.WARNING, "Tego nie da sie zalozyc."); break;
-            default: log.add(nowMs, EventLog.Kind.WARNING, "Nie udalo sie: " + r);
+            case WRONG_SLOT_TYPE: log.add(nowMs, EventLog.Kind.WARNING, "Tego nie da się założyć."); break;
+            default: log.add(nowMs, EventLog.Kind.WARNING, "Nie udało się: " + r);
         }
     }
 

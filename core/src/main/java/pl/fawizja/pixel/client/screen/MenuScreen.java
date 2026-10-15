@@ -83,10 +83,10 @@ public final class MenuScreen extends ScreenAdapter {
         batch.begin();
         centered(batch, "PIXEL", w / 2f, h - 30, Color.GOLD);
         centered(batch, "1. Graj lokalnie", w / 2f, local.y + local.height - 18, Color.WHITE);
-        centered(batch, saveSummary != null ? "Kontynuuj: " + saveSummary : "Nowa postac na tym urzadzeniu",
+        centered(batch, saveSummary != null ? "Kontynuuj: " + saveSummary : "Nowa postać na tym urządzeniu",
                 w / 2f, local.y + 16, Color.LIGHT_GRAY);
         centered(batch, "2. Graj online", w / 2f, online.y + online.height - 18, Color.WHITE);
-        centered(batch, "Wspolny swiat z innymi graczami (serwer, imie, haslo)", w / 2f, online.y + 16, Color.LIGHT_GRAY);
+        centered(batch, "Wspólny świat z innymi graczami (serwer, imię, hasło)", w / 2f, online.y + 16, Color.LIGHT_GRAY);
         if (message != null) centered(batch, message, w / 2f, online.y - 24, Color.SALMON);
         batch.end();
     }

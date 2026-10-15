@@ -352,10 +352,10 @@ class TownServicesTest {
         GameSession s = session(pc, List.of());
         s.teleport(talkSpot(npcs.get("varden_guide")), 1000);
         String line = s.askNpc("Jakie masz zadania?", 1000);
-        assertTrue(line.startsWith(npcs.get("varden_guide").name() + ": Ponizej masz"), line);
+        assertTrue(line.startsWith(npcs.get("varden_guide").name() + ": Poniżej masz"), line);
         assertTrue(s.askNpc("pogoda", 1000).contains("Zapytaj o: przemytnicy"), "unknown word lists topics");
         assertTrue(pl.fawizja.pixel.game.Actions.apply(s, "npc:ask:wieza", 1000));
-        assertTrue(s.log().latest(1).get(0).text().contains("piec pieter"));
+        assertTrue(s.log().latest(1).get(0).text().contains("pięć pięter"));
         s.teleport(TestData.world().spawn().translate(0, 6), 1000);
         if (s.npcNearby() == null) assertNull(s.askNpc("czesc", 1000));
     }

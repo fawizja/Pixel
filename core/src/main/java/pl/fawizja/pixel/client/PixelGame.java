@@ -73,12 +73,17 @@ public class PixelGame extends Game {
             npcs = pl.fawizja.pixel.npc.NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
             quests = pl.fawizja.pixel.quest.QuestRegistry.loadDefault(items, monsters);
         } catch (IOException e) {
-            throw new IllegalStateException("Nie mozna wczytac mapy", e);
+            throw new IllegalStateException("Nie można wczytać mapy", e);
         }
         art = new TileArt(tiles, items, monsters, npcs.all());
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
-        font = new BitmapFont();
+        try {
+            font = pl.fawizja.pixel.client.ui.PolishFont.create();
+        } catch (RuntimeException e) {
+            Gdx.app.error("Pixel", "Czcionka bez polskich liter: " + e.getMessage());
+            font = new BitmapFont();
+        }
         sound = new pl.fawizja.pixel.client.audio.SoundPlayer();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         font.setUseIntegerPositions(true);
@@ -117,7 +122,7 @@ public class PixelGame extends Game {
             if (r.problem() != null) Gdx.app.error(TAG, "Problem z zapisem: " + r.problem());
             return r.value();
         } catch (IOException e) {
-            Gdx.app.error(TAG, "Nie mozna odczytac zapisu", e);
+            Gdx.app.error(TAG, "Nie można odczytać zapisu", e);
             return null;
         }
     }
@@ -162,7 +167,7 @@ public class PixelGame extends Game {
         try {
             if (colon > 0) port = Integer.parseInt(address.substring(colon + 1).trim());
         } catch (NumberFormatException e) {
-            return OnlineLogin.failed("Zly port w adresie serwera.");
+            return OnlineLogin.failed("Zły port w adresie serwera.");
         }
         if (host.isEmpty()) return OnlineLogin.failed("Podaj adres serwera.");
         pl.fawizja.pixel.net.NetClient net;
@@ -174,10 +179,10 @@ public class PixelGame extends Game {
             });
         } catch (IOException e) {
             if (changed[0]) {
-                return new OnlineLogin(null, null, "Certyfikat serwera sie zmienil - mozliwe podszycie! Haslo nie zostalo wyslane.",
+                return new OnlineLogin(null, null, "Certyfikat serwera się zmienił - możliwe podszycie! Hasło nie zostało wysłane.",
                         null, true);
             }
-            return OnlineLogin.failed("Brak polaczenia z " + host + ":" + port + " (szyfrowane TLS).");
+            return OnlineLogin.failed("Brak połączenia z " + host + ":" + port + " (szyfrowane TLS).");
         }
         net.hello(name.trim(), vocation, password);
         long deadline = System.currentTimeMillis() + 6000;
@@ -216,7 +221,7 @@ public class PixelGame extends Game {
             saveStore.write(SAVE_SLOT, codec.encode(pc));
             return true;
         } catch (IOException e) {
-            Gdx.app.error(TAG, "Zapis nie powiodl sie", e);
+            Gdx.app.error(TAG, "Zapis nie powiódł się", e);
             return false;
         }
     }

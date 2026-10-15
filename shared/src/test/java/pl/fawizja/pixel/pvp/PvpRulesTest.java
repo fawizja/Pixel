@@ -180,7 +180,7 @@ class PvpRulesTest {
         a.character().setPosition(edge);
         a.update(20_000, into);
         assertEquals(edge, a.character().position(), "locked out of the protection zone");
-        assertTrue(a.log().latest(5).stream().anyMatch(e -> e.text().contains("strefa ochronna zamknieta")));
+        assertTrue(a.log().latest(5).stream().anyMatch(e -> e.text().contains("strefa ochronna zamknięta")));
         a.update(20_000 + PvpRules.FIGHT_LOCK_MS, into);
         assertTrue(W.isProtectionZone(a.character().position()), "open again after the lock");
     }

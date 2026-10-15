@@ -46,16 +46,16 @@ public final class Hud {
     private final GlyphLayout layout = new GlyphLayout();
     private final VirtualJoystick joystick = new VirtualJoystick();
     private final List<HudButton> buttons = new ArrayList<>();
-    private final HudButton use = new HudButton("use", "UZYJ");
+    private final HudButton use = new HudButton("use", "UŻYJ");
     private final HudButton run = new HudButton("run", "BIEG");
     private final HudButton torch = new HudButton("torch", "POCH");
     private final HudButton bag = new HudButton("bag", "PLECAK");
-    private final HudButton pick = new HudButton("pick", "PODNIES");
+    private final HudButton pick = new HudButton("pick", "PODNIEŚ");
     private final HudButton diag = new HudButton("diag", "i");
     private final HudButton target = new HudButton("target", "CEL");
     private final HudButton defensive = new HudButton("defensive", "TARCZA");
-    private final HudButton book = new HudButton("book", "KSIEGA");
-    private final HudButton fish = new HudButton("fish", "LOW");
+    private final HudButton book = new HudButton("book", "KSIĘGA");
+    private final HudButton fish = new HudButton("fish", "ŁÓW");
     private final HudButton talk = new HudButton("talk", "ROZMOWA");
     private final HudButton chat = new HudButton("chat", "CZAT");
     private boolean chatEnabled;
@@ -108,9 +108,9 @@ public final class Hud {
     private boolean bagOpen;
     private int selectedSlot = -1;
     private float bagX, bagY, slotSize;
-    private final HudButton bagEquip = new HudButton("bag_equip", "ZALOZ");
-    private final HudButton bagDrop = new HudButton("bag_drop", "WYRZUC");
-    private final HudButton bagUse = new HudButton("bag_use", "UZYJ");
+    private final HudButton bagEquip = new HudButton("bag_equip", "ZAŁÓŻ");
+    private final HudButton bagDrop = new HudButton("bag_drop", "WYRZUĆ");
+    private final HudButton bagUse = new HudButton("bag_use", "UŻYJ");
     private final HudButton bagClose = new HudButton("bag_close", "X");
     private boolean diagnosticsOpen;
     /** Ustawienia gracza pokazywane pod diagnostyka (klikalne wiersze "settings:*"). */
@@ -331,9 +331,9 @@ public final class Hud {
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
         // ustawianie paska: wybierz przycisk, potem dotknij czaru (ten sam czar drugi raz = automat)
-        String assignLabel = assignSlot < 0 ? "Ustaw pasek czarow" : "Przycisk " + (assignSlot + 1) + ": dotknij czaru";
-        String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? "wlasny uklad; dotknij, aby zmienic" : "pasek automatyczny; dotknij, aby zmienic")
-                : "teraz: " + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + "; dotknij, by wybrac nastepny";
+        String assignLabel = assignSlot < 0 ? "Ustaw pasek czarów" : "Przycisk " + (assignSlot + 1) + ": dotknij czaru";
+        String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? "własny układ; dotknij, aby zmienić" : "pasek automatyczny; dotknij, aby zmienić")
+                : "teraz: " + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + "; dotknij, by wybrać następny";
         menuRows.add(new MenuRow("book:assign", assignLabel, assignDetail, true));
         // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
         List<Recipe> shown = new ArrayList<>();
@@ -352,7 +352,7 @@ public final class Hud {
             menuRows.add(new MenuRow("craft:" + rc.key(),
                     rc.resultCount() + "x " + session.items().get(rc.resultItemId()).name(), d.toString(), ok));
         }
-        if (bookPages > 1) menuRows.add(new MenuRow("book:page", "Nastepna strona receptur", (bookPage + 1) + " / " + bookPages, true));
+        if (bookPages > 1) menuRows.add(new MenuRow("book:page", "Następna strona receptur", (bookPage + 1) + " / " + bookPages, true));
         // dwie kolumny: czary po lewej, receptury po prawej
         float colW = (menuW - 30) / 2f;
         int spellsCount = 0;
@@ -370,11 +370,11 @@ public final class Hud {
     private void rebuildPlayerMenu() {
         PlayerMenu pm = playerMenu;
         List<MenuRow> rows = new ArrayList<>();
-        rows.add(new MenuRow("player:trade:" + pm.name(), "Handel", "wymiana przedmiotow i zlota (stojac obok)", true));
-        rows.add(new MenuRow("player:party:" + pm.name(), "Zapros do druzyny", "wspolne doswiadczenie, bez walki miedzy soba", true));
-        rows.add(new MenuRow("player:guild:" + pm.name(), "Zapros do gildii", "tylko lider gildii", true));
+        rows.add(new MenuRow("player:trade:" + pm.name(), "Handel", "wymiana przedmiotów i złota (stojąc obok)", true));
+        rows.add(new MenuRow("player:party:" + pm.name(), "Zaproś do drużyny", "wspólne doświadczenie, bez walki między sobą", true));
+        rows.add(new MenuRow("player:guild:" + pm.name(), "Zaproś do gildii", "tylko lider gildii", true));
         rows.add(new MenuRow("player:attack:" + pm.id(), pm.attacking() ? "Przerwij atak" : "Atakuj",
-                pm.attacking() ? "koniec walki z tym graczem" : "PvP: biala czaszka, zasady serwera", !pm.ally()));
+                pm.attacking() ? "koniec walki z tym graczem" : "PvP: biała czaszka, zasady serwera", !pm.ally()));
         float colW = (menuW - 30) / 2f;
         for (int i = 0; i < rows.size(); i++) {
             MenuRow row = rows.get(i);
@@ -392,14 +392,14 @@ public final class Hud {
         List<MenuRow> right = new ArrayList<>();
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         left.add(new MenuRow("trade:none", "Ty dajesz" + (trade.mineAccepted() ? " (zaakceptowano)" : ""), trade.mine(), false));
-        left.add(new MenuRow("trade:none", trade.partner() + " daje" + (trade.theirsAccepted() ? " (zaakceptowal)" : ""),
+        left.add(new MenuRow("trade:none", trade.partner() + " daje" + (trade.theirsAccepted() ? " (zaakceptował)" : ""),
                 trade.theirs(), false));
-        left.add(new MenuRow("trade:accept", trade.mineAccepted() ? "Czekam na druga strone" : "AKCEPTUJ",
+        left.add(new MenuRow("trade:accept", trade.mineAccepted() ? "Czekam na drugą stronę" : "AKCEPTUJ",
                 "zmiana oferty kasuje akceptacje obu stron", !trade.mineAccepted()));
         left.add(new MenuRow("trade:cancel", "ANULUJ", "nic nie zostanie wymienione", true));
         long gold = session.gold();
         for (long g : new long[] {100, 1_000, 10_000}) {
-            left.add(new MenuRow("trade:offer:" + g + " gp", "+" + String.format("%,d gp", g), "dodaj zloto do oferty", gold >= g));
+            left.add(new MenuRow("trade:offer:" + g + " gp", "+" + String.format("%,d gp", g), "dodaj złoto do oferty", gold >= g));
         }
         java.util.Map<Integer, Integer> counts = new java.util.LinkedHashMap<>();
         for (pl.fawizja.pixel.item.ItemStack st : session.character().backpack().contents()) {
@@ -410,9 +410,9 @@ public final class Hud {
             if (right.size() >= perCol) break;
             pl.fawizja.pixel.item.ItemType it = session.items().get(e.getKey());
             int n = Math.min(e.getValue(), 10_000);
-            right.add(new MenuRow("trade:offer:" + n + " " + it.key(), "Oferuj " + n + "x " + it.name(), "cala ilosc z plecaka", true));
+            right.add(new MenuRow("trade:offer:" + n + " " + it.key(), "Oferuj " + n + "x " + it.name(), "cała ilość z plecaka", true));
         }
-        if (right.isEmpty()) right.add(new MenuRow("trade:none", "Plecak bez przedmiotow", "mozesz oferowac zloto", false));
+        if (right.isEmpty()) right.add(new MenuRow("trade:none", "Plecak bez przedmiotów", "możesz oferować złoto", false));
         float colW = (menuW - 30) / 2f;
         for (int c = 0; c < 2; c++) {
             List<MenuRow> col = c == 0 ? left : right;
@@ -437,7 +437,7 @@ public final class Hud {
                 pl.fawizja.pixel.npc.Shop shop = session.shopOf(npc);
                 List<pl.fawizja.pixel.npc.ShopOffer> sold = new ArrayList<>();
                 for (pl.fawizja.pixel.npc.ShopOffer o : shop.offers()) if (o.sold()) sold.add(o);
-                left.add(new MenuRow("npc:qty", "Ilosc: " + npcQty + " (zmien)", "dotknij towaru, aby kupic", true));
+                left.add(new MenuRow("npc:qty", "Ilość: " + npcQty + " (zmień)", "dotknij towaru, aby kupić", true));
                 int per = perCol - 2;
                 int pages = Math.max(1, (sold.size() + per - 1) / per);
                 if (npcPage >= pages) npcPage = 0;
@@ -448,8 +448,8 @@ public final class Hud {
                     left.add(new MenuRow("npc:buy:" + o.itemId() + ":" + npcQty, session.items().get(o.itemId()).name(),
                             o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : ""), gold >= cost));
                 }
-                if (pages > 1) left.add(new MenuRow("npc:page", "Nastepna strona", (npcPage + 1) + " / " + pages, true));
-                right.add(new MenuRow("npc:none", "Skup", "dotknij przedmiotu, aby sprzedac wszystkie sztuki", false));
+                if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
+                right.add(new MenuRow("npc:none", "Skup", "dotknij przedmiotu, aby sprzedać wszystkie sztuki", false));
                 java.util.Set<Integer> seen = new java.util.LinkedHashSet<>();
                 for (ItemStack s : pc.backpack().contents()) if (s != null) seen.add(s.itemId());
                 for (int id : seen) {
@@ -458,23 +458,23 @@ public final class Hud {
                     right.add(new MenuRow("npc:sell:" + id, pc.backpack().count(id) + "x " + session.items().get(id).name(),
                             "sprzedaj za " + value + " gp", true));
                 }
-                if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do sprzedania", "kupiec skupuje lupy z potworow", false));
+                if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do sprzedania", "kupiec skupuje łupy z potworów", false));
                 break;
             }
             case BANKER: {
                 long bal = pc.bank().balance();
-                left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspolne dla wszystkich miast", false));
-                left.add(new MenuRow("npc:deposit", "Wplac wszystkie monety", String.format("w plecaku: %,d gp", session.gold()), session.gold() > 0));
+                left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspólne dla wszystkich miast", false));
+                left.add(new MenuRow("npc:deposit", "Wpłać wszystkie monety", String.format("w plecaku: %,d gp", session.gold()), session.gold() > 0));
                 for (long a : new long[] {1_000, 10_000, 100_000, 1_000_000}) {
-                    left.add(new MenuRow("npc:withdraw:" + a, String.format("Wyplac %,d gp", a), "monety trafia do plecaka", bal >= a));
+                    left.add(new MenuRow("npc:withdraw:" + a, String.format("Wypłać %,d gp", a), "monety trafią do plecaka", bal >= a));
                 }
                 break;
             }
             case PRIEST: {
-                left.add(new MenuRow("npc:heal", "Ulecz mnie", "pelne zdrowie i mana", pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
+                left.add(new MenuRow("npc:heal", "Ulecz mnie", "pełne zdrowie i mana", pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
                 boolean home = npc.town().equalsIgnoreCase(pc.homeTown());
                 left.add(new MenuRow("npc:settle", "Zamieszkaj w " + npc.town(),
-                        home ? "juz tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu bedziesz sie odradzac", !home));
+                        home ? "już tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu będziesz się odradzać", !home));
                 break;
             }
             case GUIDE: {
@@ -760,7 +760,7 @@ public final class Hud {
         int minute = clock.minuteOfDay(serverTimeMs);
         String floor = pc.position().z() == 0 ? "0" : (pc.position().z() > 0 ? "+" + pc.position().z() : String.valueOf(pc.position().z()));
         text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
-        text(batch, String.format("%02d:%02d  Pietro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
+        text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
 
         List<EventLog.Entry> entries = session.log().latest(4);
         float ly = y - 76;
@@ -793,7 +793,7 @@ public final class Hud {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
             } else if (trade != null) {
                 text(batch, "Handel z " + trade.partner(), menuX + 10, menuY + menuH - 14);
-                text(batch, "Twoj plecak (dotknij, aby dodac do oferty)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+                text(batch, "Twój plecak (dotknij, aby dodać do oferty)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
             } else if (npcMode) {
                 text(batch, npc.name() + " (" + npc.town() + ")", menuX + 10, menuY + menuH - 14);
                 font.getData().setScale(0.85f);
@@ -802,8 +802,8 @@ public final class Hud {
                 font.setColor(Color.WHITE);
                 font.getData().setScale(1f);
             } else {
-                text(batch, "Czary (dotknij, aby rzucic)", menuX + 10, menuY + menuH - 14);
-                text(batch, "Rzemioslo (dotknij, aby wytworzyc)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+                text(batch, "Czary (dotknij, aby rzucić)", menuX + 10, menuY + menuH - 14);
+                text(batch, "Rzemiosło (dotknij, aby wytworzyć)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
             }
             centered(batch, "X", menuClose.x, menuClose.y);
             for (MenuRow row : menuRows) {
@@ -832,7 +832,7 @@ public final class Hud {
         batch.end();
     }
 
-    private static final String[] SKILL_NAMES = {"Piesci", "Miecz", "Dystans", "Tarcza", "Magia", "Wedkarstwo"};
+    private static final String[] SKILL_NAMES = {"Pięści", "Miecz", "Dystans", "Tarcza", "Magia", "Wędkarstwo"};
 
     private void drawCharacterSheet(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
@@ -840,15 +840,15 @@ public final class Hud {
         text(batch, pc.name() + " - " + pc.vocation().displayName() + ", poziom " + pc.level(), x, y);
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
-        text(batch, "Szybkosc " + pc.speed() + "   Udzwig " + pc.capacity(), x, y - 36);
-        text(batch, "Sytosc: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Zabite: " + session.combat().kills(), x, y - 54);
+        text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity(), x, y - 36);
+        text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Zabite: " + session.combat().kills(), x, y - 54);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {
             text(batch, SKILL_NAMES[sk.ordinal()] + "  " + pc.skills().level(sk), x, yy);
             yy -= 22;
         }
         font.getData().setScale(0.8f);
-        text(batch, "Dotknij paskow HP/MP, aby zamknac", x, h - 404);
+        text(batch, "Dotknij pasków HP/MP, aby zamknąć", x, h - 404);
         font.getData().setScale(1f);
     }
 

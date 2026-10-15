@@ -67,7 +67,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
             public void canceled() {
                 waitingForName = false;
             }
-        }, "Imie postaci (" + v.displayName() + ")", "", "3-20 liter");
+        }, "Imię postaci (" + v.displayName() + ")", "", "3-20 liter");
     }
 
     private void create(String name, Vocation v) {
@@ -75,7 +75,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
         try {
             PlayerCharacter.validateName(name);
         } catch (IllegalArgumentException e) {
-            message = "Niepoprawne imie: 3-20 liter, spacje i apostrof.";
+            message = "Niepoprawne imię: 3-20 liter, spacje i apostrof.";
             return;
         }
         game.createCharacter(name.trim(), v);

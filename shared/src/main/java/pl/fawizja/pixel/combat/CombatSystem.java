@@ -189,9 +189,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
         // cialo zostaje zawsze (wyglad), a w nim lup, ktorego nie zabral autoloot
         ground.addCorpse(corpse, t.key(), left, now);
-        if (!looted.isEmpty()) log.add(now, EventLog.Kind.LOOT, "Lup: " + String.join(", ", looted));
+        if (!looted.isEmpty()) log.add(now, EventLog.Kind.LOOT, "Łup: " + String.join(", ", looted));
         if (!left.isEmpty()) {
-            log.add(now, EventLog.Kind.LOOT, "Czesc lupu zostala w ciele - przeszukaj je (UZYJ albo PODNIES obok).");
+            log.add(now, EventLog.Kind.LOOT, "Część łupu została w ciele - przeszukaj je (UŻYJ albo PODNIEŚ obok).");
         }
         monsters.kill(m, now);
         if (target == m) target = null;
@@ -241,8 +241,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
-        log.add(now, EventLog.Kind.WARNING, "Zginales (" + killer.type().name() + "). Strata: "
-                + (before - pc.experience()) + " exp. Odrodzenie w swiatyni.");
+        log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killer.type().name() + "). Strata: "
+                + (before - pc.experience()) + " exp. Odrodzenie w świątyni.");
     }
 
     /**
@@ -269,9 +269,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
-        log.add(now, EventLog.Kind.WARNING, "Zginales z reki gracza " + killer + ". Strata: "
-                + (before - pc.experience()) + " exp" + (dropped > 0 ? ", plecak zostal na ziemi" : "")
-                + ". Odrodzenie w swiatyni.");
+        log.add(now, EventLog.Kind.WARNING, "Zginąłeś z ręki gracza " + killer + ". Strata: "
+                + (before - pc.experience()) + " exp" + (dropped > 0 ? ", plecak został na ziemi" : "")
+                + ". Odrodzenie w świątyni.");
         return dropped;
     }
 

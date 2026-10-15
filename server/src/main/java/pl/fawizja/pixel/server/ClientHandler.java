@@ -75,7 +75,7 @@ final class ClientHandler {
                 tokens = Math.min(RATE_BURST, tokens + (now - last) / 1e9 * RATE_PER_SECOND);
                 last = now;
                 if (--tokens < 0) {
-                    send("ERR", "Za duzo wiadomosci - rozlaczono.");
+                    send("ERR", "Za dużo wiadomości - rozłączono.");
                     break;
                 }
                 String[] f = Protocol.parse(l);
@@ -83,7 +83,7 @@ final class ClientHandler {
                 if (f[0].equals("BYE")) break;
             }
         } catch (SocketTimeoutException e) {
-            send("ERR", "Brak logowania - rozlaczono.");
+            send("ERR", "Brak logowania - rozłączono.");
         } catch (IOException | RuntimeException e) {
             // klient zniknal albo przyslal smieci
         } finally {

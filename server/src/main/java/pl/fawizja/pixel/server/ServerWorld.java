@@ -148,7 +148,7 @@ final class ServerWorld {
                 if (r == pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
                     if (!pl.fawizja.pixel.economy.Money.pay(p.session.character().backpack(),
                             pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST).ok()) {
-                        warn(p, "Zalozenie gildii kosztuje " + String.format("%,d gp", pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST)
+                        warn(p, "Założenie gildii kosztuje " + String.format("%,d gp", pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST)
                                 + " (monety w plecaku).", now);
                         return;
                     }
@@ -160,7 +160,7 @@ final class ServerWorld {
                 }
                 saveGuilds();
                 save(p);
-                p.session.log().add(now, EventLog.Kind.SYSTEM, "Zalozono gildie " + f[2].trim() + ". Zapraszaj: /gildia zapros Imie");
+                p.session.log().add(now, EventLog.Kind.SYSTEM, "Założono gildię " + f[2].trim() + ". Zapraszaj: /gildia zaproś Imię");
                 LOG.info("guild created " + f[2].trim() + " by " + p.name());
                 return;
             }
@@ -177,7 +177,7 @@ final class ServerWorld {
                     return;
                 }
                 info(p, "Zaproszono " + other.name() + " do gildii " + mine.name() + ".", now);
-                other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cie do gildii " + mine.name()
+                other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cię do gildii " + mine.name()
                         + ": /gildia przyjmij " + mine.name());
                 return;
             }
@@ -189,7 +189,7 @@ final class ServerWorld {
                     return;
                 }
                 saveGuilds();
-                toGuild(guilds.guildOf(p.name()), p.name() + " dolacza do gildii.", now);
+                toGuild(guilds.guildOf(p.name()), p.name() + " dołącza do gildii.", now);
                 return;
             }
             case "LEAVE": {
@@ -199,8 +199,8 @@ final class ServerWorld {
                 }
                 guilds.leave(p.name());
                 saveGuilds();
-                info(p, "Opusciles gildie " + mine.name() + ".", now);
-                if (!mine.members().isEmpty()) toGuild(mine, p.name() + " opuszcza gildie. Lider: " + mine.leader(), now);
+                info(p, "Opuściłeś gildię " + mine.name() + ".", now);
+                if (!mine.members().isEmpty()) toGuild(mine, p.name() + " opuszcza gildię. Lider: " + mine.leader(), now);
                 return;
             }
             case "KICK": {
@@ -213,20 +213,20 @@ final class ServerWorld {
                     return;
                 }
                 saveGuilds();
-                toGuild(g, target + " zostaje usuniety z gildii.", now);
+                toGuild(g, target + " zostaje usunięty z gildii.", now);
                 ServerPlayer t = find(target);
-                if (t != null) warn(t, "Usunieto cie z gildii " + g.name() + ".", now);
+                if (t != null) warn(t, "Usunięto cię z gildii " + g.name() + ".", now);
                 return;
             }
             default: // INFO
                 if (mine == null) {
-                    info(p, "Nie nalezysz do gildii. Zaloz: /gildia zaloz Nazwa (" + String.format("%,d gp",
+                    info(p, "Nie należysz do gildii. Załóż: /gildia załóż Nazwa (" + String.format("%,d gp",
                             pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST) + ")", now);
                     return;
                 }
                 List<String> online = new ArrayList<>();
                 for (String n : mine.members()) if (find(n) != null) online.add(n);
-                info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", czlonkow " + mine.members().size()
+                info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", członków " + mine.members().size()
                         + ", w grze: " + String.join(", ", online), now);
         }
     }
@@ -243,7 +243,7 @@ final class ServerWorld {
         try {
             PlayerCharacter.validateName(name);
         } catch (IllegalArgumentException e) {
-            client.send("ERR", "Niepoprawne imie: 3-20 liter, spacje i apostrof.");
+            client.send("ERR", "Niepoprawne imię: 3-20 liter, spacje i apostrof.");
             return null;
         }
         boolean newAccount = !saved(name) && !accounts.exists(name);
@@ -257,19 +257,19 @@ final class ServerWorld {
             java.util.ArrayDeque<Long> made = newAccounts.computeIfAbsent(client.address(), k -> new java.util.ArrayDeque<>());
             while (!made.isEmpty() && now - made.peekFirst() > NEW_ACCOUNT_WINDOW_MS) made.pollFirst();
             if (made.size() >= maxNewAccountsPerAddress) {
-                client.send("ERR", "Za duzo nowych kont z tego adresu - sprobuj jutro.");
+                client.send("ERR", "Za dużo nowych kont z tego adresu - spróbuj jutro.");
                 return null;
             }
         }
         switch (accounts.login(name, password, now)) {
             case WRONG_PASSWORD:
-                client.send("ERR", "Zle haslo.");
+                client.send("ERR", "Złe hasło.");
                 return null;
             case LOCKED:
-                client.send("ERR", "Za duzo blednych prob - sprobuj za minute.");
+                client.send("ERR", "Za dużo błędnych prób - spróbuj za minutę.");
                 return null;
             case BAD_PASSWORD:
-                client.send("ERR", "Haslo musi miec " + AccountStore.MIN_PASSWORD + "-" + AccountStore.MAX_PASSWORD + " znakow.");
+                client.send("ERR", "Hasło musi mieć " + AccountStore.MIN_PASSWORD + "-" + AccountStore.MAX_PASSWORD + " znaków.");
                 return null;
             case CREATED:
                 LOG.info("new account " + name);
@@ -283,7 +283,7 @@ final class ServerWorld {
             return null;
         }
         if (find(name) != null) {
-            client.send("ERR", "Postac " + name + " jest juz w grze.");
+            client.send("ERR", "Postać " + name + " jest już w grze.");
             return null;
         }
         PlayerCharacter pc;
@@ -294,7 +294,7 @@ final class ServerWorld {
                         world.templeOf(config.startTown()));
             }
         } catch (IllegalArgumentException e) {
-            client.send("ERR", "Nieprawidlowe dane postaci: " + e.getMessage());
+            client.send("ERR", "Nieprawidłowe dane postaci: " + e.getMessage());
             return null;
         }
         pc.setPosition(freeSpotNear(pc.position()));
@@ -350,7 +350,7 @@ final class ServerWorld {
             long solo = pl.fawizja.pixel.balance.Balance.experienceReward(type.experience(), type.level(),
                     m.session.character().level());
             long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size());
-            m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Druzyna pokonala: ") + type.name(), now);
+            m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name(), now);
         }
         return true;
     }
@@ -365,7 +365,7 @@ final class ServerWorld {
                 return;
             }
             partyLeft(p, now);
-            p.session.log().add(now, EventLog.Kind.INFO, "Opusciles druzyne.");
+            p.session.log().add(now, EventLog.Kind.INFO, "Opuściłeś drużynę.");
             return;
         }
         if (f.length < 3) return;
@@ -380,8 +380,8 @@ final class ServerWorld {
                 p.session.log().add(now, EventLog.Kind.WARNING, r.message);
                 return;
             }
-            p.session.log().add(now, EventLog.Kind.INFO, "Zaproszono " + other.name() + " do druzyny.");
-            other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cie do druzyny: /przyjmij " + p.name());
+            p.session.log().add(now, EventLog.Kind.INFO, "Zaproszono " + other.name() + " do drużyny.");
+            other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cię do drużyny: /przyjmij " + p.name());
         } else if (sub.equals("ACCEPT")) {
             pl.fawizja.pixel.party.PartyManager.Result r = parties.accept(p.name(), other.name(), now);
             if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
@@ -391,7 +391,7 @@ final class ServerWorld {
             for (String n : parties.members(p.name())) {
                 ServerPlayer m = find(n);
                 if (m == null) continue;
-                m.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " dolacza do druzyny.");
+                m.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " dołącza do drużyny.");
             }
             sendParty(parties.members(p.name()));
         }
@@ -408,7 +408,7 @@ final class ServerWorld {
         if (f.length < 2) return;
         PlayerTrade open = trades.get(lower(p.name()));
         if (open != null && tradeBroken(open, now)) {
-            cancelTrade(open, "Wymiana anulowana (za daleko albo uplynal czas).", now);
+            cancelTrade(open, "Wymiana anulowana (za daleko albo upłynął czas).", now);
             open = null;
         }
         switch (f[1]) {
@@ -416,16 +416,16 @@ final class ServerWorld {
                 if (f.length < 3) return;
                 ServerPlayer other = find(f[2]);
                 if (other == null || other == p) {
-                    warn(p, other == p ? "Nie mozesz handlowac z samym soba." : "Gracz " + f[2] + " nie jest w grze.", now);
+                    warn(p, other == p ? "Nie możesz handlować z samym sobą." : "Gracz " + f[2] + " nie jest w grze.", now);
                     return;
                 }
                 if (open != null) {
-                    warn(p, "Najpierw zakoncz obecna wymiane (/anuluj).", now);
+                    warn(p, "Najpierw zakończ obecną wymianę (/anuluj).", now);
                     return;
                 }
                 PlayerTrade theirs = trades.get(lower(other.name()));
                 if (theirs != null && !tradeBroken(theirs, now)) {
-                    warn(p, other.name() + " juz z kims handluje.", now);
+                    warn(p, other.name() + " już z kimś handluje.", now);
                     return;
                 }
                 if (!PlayerTrade.closeEnough(p.session.character().position(), other.session.character().position())) {
@@ -439,7 +439,7 @@ final class ServerWorld {
                     PlayerTrade t = new PlayerTrade(other.name(), p.name(), now);
                     trades.put(lower(p.name()), t);
                     trades.put(lower(other.name()), t);
-                    String how = "Dodaj oferte: /oferuj 5 health potion albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
+                    String how = "Dodaj ofertę: /oferuj 5 health potion albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
                     info(p, "Wymiana z " + other.name() + " otwarta. " + how, now);
                     info(other, "Wymiana z " + p.name() + " otwarta. " + how, now);
                     sendTradeState(t);
@@ -447,7 +447,7 @@ final class ServerWorld {
                     tradeRequests.computeIfAbsent(lower(other.name()), k -> new java.util.HashMap<>())
                             .put(lower(p.name()), now + TRADE_REQUEST_MS);
                     info(p, "Zaproponowano handel graczowi " + other.name() + ".", now);
-                    other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " chce handlowac: /handel " + p.name());
+                    other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " chce handlować: /handel " + p.name());
                 }
                 return;
             }
@@ -456,17 +456,17 @@ final class ServerWorld {
                     warn(p, "Nie masz otwartej wymiany.", now);
                     return;
                 }
-                cancelTrade(open, p.name() + " anuluje wymiane.", now);
+                cancelTrade(open, p.name() + " anuluje wymianę.", now);
                 return;
             default:
         }
         if (open == null) {
-            warn(p, "Nie masz otwartej wymiany. Zacznij od /handel Imie.", now);
+            warn(p, "Nie masz otwartej wymiany. Zacznij od /handel Imię.", now);
             return;
         }
         ServerPlayer partner = find(open.partnerOf(p.name()));
         if (partner == null) {
-            cancelTrade(open, "Wymiana anulowana - drugi gracz wyszedl.", now);
+            cancelTrade(open, "Wymiana anulowana - drugi gracz wyszedł.", now);
             return;
         }
         if (f[1].equals("OFFER") && f.length >= 3) {
@@ -485,7 +485,7 @@ final class ServerWorld {
             if (r == PlayerTrade.Result.WAITING) {
                 info(p, r.message, now);
                 sendTradeState(open);
-                partner.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " akceptuje wymiane: "
+                partner.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " akceptuje wymianę: "
                         + open.offerOf(p.name()).describe(items) + " za " + open.offerOf(partner.name()).describe(items)
                         + ". /akceptuj albo /anuluj");
                 return;
@@ -502,7 +502,7 @@ final class ServerWorld {
             first.client.send("TS", "-");
             second.client.send("TS", "-");
             for (ServerPlayer x : new ServerPlayer[] {first, second}) {
-                if (done == PlayerTrade.Result.DONE) info(x, "Wymiana zakonczona: oddano " + open.offerOf(x.name()).describe(items)
+                if (done == PlayerTrade.Result.DONE) info(x, "Wymiana zakończona: oddano " + open.offerOf(x.name()).describe(items)
                         + ", otrzymano " + open.offerOf(open.partnerOf(x.name())).describe(items) + ".", now);
                 else warn(x, done.message, now);
             }
@@ -559,7 +559,7 @@ final class ServerWorld {
         p.client.send("PARTY", "-");
         for (String n : rest) {
             ServerPlayer m = find(n);
-            if (m != null) m.session.log().add(now, EventLog.Kind.INFO, p.name() + " opuszcza druzyne.");
+            if (m != null) m.session.log().add(now, EventLog.Kind.INFO, p.name() + " opuszcza drużynę.");
         }
         sendParty(rest);
     }
@@ -634,9 +634,9 @@ final class ServerWorld {
             LOG.warning("delete failed for " + p.name() + ": " + e.getMessage());
         }
         p.client.player = null;
-        p.client.send("ERR", "Konto usuniete.");
+        p.client.send("ERR", "Konto usunięte.");
         p.client.close();
-        broadcast(p, "LOG", "INFO", p.name() + " opuszcza gre.");
+        broadcast(p, "LOG", "INFO", p.name() + " opuszcza grę.");
         LOG.info("account deleted " + p.name());
     }
 
@@ -672,19 +672,19 @@ final class ServerWorld {
             case "PASSWD":
                 if (f.length < 3) break;
                 switch (accounts.changePassword(p.name(), f[1], f[2], now)) {
-                    case OK: p.session.log().add(now, EventLog.Kind.SYSTEM, "Haslo zmienione."); break;
-                    case LOCKED: p.session.log().add(now, EventLog.Kind.WARNING, "Za duzo blednych prob - sprobuj za minute."); break;
+                    case OK: p.session.log().add(now, EventLog.Kind.SYSTEM, "Hasło zmienione."); break;
+                    case LOCKED: p.session.log().add(now, EventLog.Kind.WARNING, "Za dużo błędnych prób - spróbuj za minutę."); break;
                     case BAD_PASSWORD:
-                        p.session.log().add(now, EventLog.Kind.WARNING, "Nowe haslo musi miec " + AccountStore.MIN_PASSWORD
-                                + "-" + AccountStore.MAX_PASSWORD + " znakow.");
+                        p.session.log().add(now, EventLog.Kind.WARNING, "Nowe hasło musi mieć " + AccountStore.MIN_PASSWORD
+                                + "-" + AccountStore.MAX_PASSWORD + " znaków.");
                         break;
-                    default: p.session.log().add(now, EventLog.Kind.WARNING, "Zle obecne haslo.");
+                    default: p.session.log().add(now, EventLog.Kind.WARNING, "Złe obecne hasło.");
                 }
                 break;
             case "DELETE":
                 if (f.length < 2) break;
                 if (accounts.delete(p.name(), f[1], now) != AccountStore.Result.OK) {
-                    p.session.log().add(now, EventLog.Kind.WARNING, "Konto nie zostalo usuniete - zle haslo.");
+                    p.session.log().add(now, EventLog.Kind.WARNING, "Konto nie zostało usunięte - złe hasło.");
                     break;
                 }
                 deleteCharacter(p);
@@ -707,7 +707,7 @@ final class ServerWorld {
             }
             case "ADMIN":
                 if (!moderation.isAdmin(p.name())) {
-                    warn(p, "Brak uprawnien administratora.", now);
+                    warn(p, "Brak uprawnień administratora.", now);
                     break;
                 }
                 String[] cmd = new String[f.length - 1];
@@ -742,7 +742,7 @@ final class ServerWorld {
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
                     for (String n : team) {
                         ServerPlayer m = find(n);
-                        if (m != null) m.client.send("CHAT", "[Druzyna] " + p.name(), text);
+                        if (m != null) m.client.send("CHAT", "[Drużyna] " + p.name(), text);
                     }
                 }
                 break;
@@ -768,9 +768,9 @@ final class ServerWorld {
         try {
             switch (c[0].toUpperCase(java.util.Locale.ROOT)) {
                 case "SAY": {
-                    if (c.length < 2 || c[1].isBlank()) return "Podaj tekst ogloszenia.";
-                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogloszenie]", c[1]);
-                    return "Wyslano ogloszenie do " + players.size() + " graczy.";
+                    if (c.length < 2 || c[1].isBlank()) return "Podaj tekst ogłoszenia.";
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", c[1]);
+                    return "Wysłano ogłoszenie do " + players.size() + " graczy.";
                 }
                 case "KICK": {
                     ServerPlayer t = c.length < 2 ? null : find(c[1].trim());
@@ -788,19 +788,19 @@ final class ServerWorld {
                     return "Zbanowano " + c[1].trim() + " " + until + ".";
                 }
                 case "UNBAN":
-                    if (c.length < 2) return "Podaj imie.";
-                    return moderation.unban(c[1].trim()) ? "Zdjeto bana: " + c[1].trim() + "." : "Ta postac nie ma bana.";
+                    if (c.length < 2) return "Podaj imię.";
+                    return moderation.unban(c[1].trim()) ? "Zdjęto bana: " + c[1].trim() + "." : "Ta postać nie ma bana.";
                 case "MUTE": {
-                    if (c.length < 2) return "Podaj imie.";
+                    if (c.length < 2) return "Podaj imię.";
                     long minutes = c.length > 2 ? Long.parseLong(c[2].trim()) : 60;
                     moderation.mute(c[1].trim(), minutes, wall);
                     ServerPlayer t = find(c[1].trim());
-                    if (t != null) warn(t, minutes > 0 ? "Wyciszono cie na " + minutes + " min." : "Wyciszenie zdjete.", now);
-                    return minutes > 0 ? "Wyciszono " + c[1].trim() + " na " + minutes + " min." : "Zdjeto wyciszenie: " + c[1].trim() + ".";
+                    if (t != null) warn(t, minutes > 0 ? "Wyciszono cię na " + minutes + " min." : "Wyciszenie zdjęte.", now);
+                    return minutes > 0 ? "Wyciszono " + c[1].trim() + " na " + minutes + " min." : "Zdjęto wyciszenie: " + c[1].trim() + ".";
                 }
                 case "ADMIN":
-                    if (!by.equals("konsola")) return "Administratorow dodaje tylko konsola serwera albo plik admins.txt.";
-                    if (c.length < 2) return "Podaj imie.";
+                    if (!by.equals("konsola")) return "Administratorów dodaje tylko konsola serwera albo plik admins.txt.";
+                    if (c.length < 2) return "Podaj imię.";
                     moderation.addAdmin(c[1].trim());
                     return "Dodano administratora: " + c[1].trim() + ".";
                 case "WHO": {
@@ -812,9 +812,9 @@ final class ServerWorld {
                     return "Nieznane polecenie. Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO";
             }
         } catch (NumberFormatException e) {
-            return "Czas musi byc liczba.";
+            return "Czas musi być liczbą.";
         } catch (IOException e) {
-            return "Blad zapisu: " + e.getMessage();
+            return "Błąd zapisu: " + e.getMessage();
         }
     }
 
@@ -829,12 +829,12 @@ final class ServerWorld {
     /** Limit spamu wspolny dla czatu ogolnego i druzyny. */
     private boolean chatAllowed(ServerPlayer p, long now) {
         if (moderation.isMuted(p.name(), wallClock.getAsLong())) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Jestes wyciszony przez administratora.");
+            p.session.log().add(now, EventLog.Kind.WARNING, "Jesteś wyciszony przez administratora.");
             return false;
         }
         while (!p.chatTimes.isEmpty() && now - p.chatTimes.peekFirst() > CHAT_WINDOW_MS) p.chatTimes.pollFirst();
         if (p.chatTimes.size() >= CHAT_MAX) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za duzo wiadomosci na czacie.");
+            p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za dużo wiadomości na czacie.");
             return false;
         }
         p.chatTimes.addLast(now);
@@ -849,7 +849,7 @@ final class ServerWorld {
             return;
         }
         if (sameParty(p, t)) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Nie atakujesz czlonka wlasnej druzyny.");
+            p.session.log().add(now, EventLog.Kind.WARNING, "Nie atakujesz członka własnej drużyny.");
             p.pvpTarget = -1;
             return;
         }

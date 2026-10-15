@@ -2,9 +2,9 @@ package pl.fawizja.pixel.balance;
 
 /** Orientacyjne przedzialy rozwoju (nie sa sztywnymi blokadami). */
 public enum LevelBracket {
-    BEGINNER(8, 20, "Poczatkujacy"),
+    BEGINNER(8, 20, "Początkujący"),
     BASIC(20, 60, "Podstawowe expowiska"),
-    INTERMEDIATE(60, 150, "Srednio zaawansowane regiony"),
+    INTERMEDIATE(60, 150, "Średnio zaawansowane regiony"),
     HARD(150, 300, "Trudniejsze obszary"),
     ADVANCED(300, 500, "Zaawansowane expowiska"),
     VERY_HARD(500, 750, "Bardzo trudne regiony"),
