@@ -48,7 +48,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Siatka przestrzenna, symulacja tylko w promieniu 20 kafelkow od gracza
 - [x] Klient: sprite potworow, paski HP, obwodka celu, liczby obrazen, panel celu, CEL / TARCZA
 - [x] Mikstury i czary leczace (etap 7)
-- [ ] Dzwiek, animacja ataku, cialo potwora z lupem do przeszukania
+- [x] Cialo potwora z lupem do przeszukania (UZYJ / PODNIES / dotkniecie obok), znika po 3 min
+- [ ] Dzwiek, animacja ataku
 
 ## Etap 7 - Czary, runy, mikstury, crafting
 - [x] 20 czarow i 3 efekty run (data/spells.csv): leczenie, ataki na cel i obszarowe, swiatlo, przywolanie wloczni, zaklinanie run

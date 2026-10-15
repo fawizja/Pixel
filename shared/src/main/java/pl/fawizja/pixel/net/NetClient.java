@@ -22,7 +22,11 @@ public final class NetClient implements AutoCloseable {
 
     /** Klatka stanu: czas serwera i widoczne byty. */
     public record Frame(long serverTime, Position self, String facing, int targetId, int playerTargetId, String skull,
-                        List<RemoteEntity> players, List<RemoteEntity> monsters, List<GroundStack> ground) {}
+                        List<RemoteEntity> players, List<RemoteEntity> monsters, List<GroundStack> ground,
+                        List<CorpseMark> corpses) {}
+
+    /** Cialo potwora widoczne w klatce (wyglad i czy jest w nim lup). */
+    public record CorpseMark(Position position, String monsterKey, boolean hasLoot) {}
 
     /** Stos przedmiotow na ziemi widoczny w klatce. */
     public record GroundStack(Position position, int itemId, int count) {}
@@ -135,6 +139,7 @@ public final class NetClient implements AutoCloseable {
         List<RemoteEntity> players = new ArrayList<>();
         List<RemoteEntity> monsters = new ArrayList<>();
         List<GroundStack> ground = new ArrayList<>();
+        List<CorpseMark> corpses = new ArrayList<>();
         try {
             String line;
             while ((line = in.readLine()) != null) {
@@ -148,6 +153,7 @@ public final class NetClient implements AutoCloseable {
                         players = new ArrayList<>();
                         monsters = new ArrayList<>();
                         ground = new ArrayList<>();
+                        corpses = new ArrayList<>();
                         break;
                     case "ME":
                         self = pos(f, 1);
@@ -166,18 +172,22 @@ public final class NetClient implements AutoCloseable {
                     case "GI":
                         ground.add(new GroundStack(pos(f, 1), Integer.parseInt(f[4]), Integer.parseInt(f[5])));
                         break;
+                    case "CO":
+                        corpses.add(new CorpseMark(pos(f, 1), f[4], "1".equals(f[5])));
+                        break;
                     case "KEEP": {
                         Frame last = frame;
                         if (last != null) {
                             frame = new Frame(Long.parseLong(f[1]), last.self(), last.facing(), last.targetId(),
-                                    last.playerTargetId(), last.skull(), last.players(), last.monsters(), last.ground());
+                                    last.playerTargetId(), last.skull(), last.players(), last.monsters(), last.ground(),
+                                    last.corpses());
                         }
                         break;
                     }
                     case "END":
                         frame = new Frame(frameTime, self, facing, targetId, playerTargetId, skull,
                                 Collections.unmodifiableList(players), Collections.unmodifiableList(monsters),
-                                Collections.unmodifiableList(ground));
+                                Collections.unmodifiableList(ground), Collections.unmodifiableList(corpses));
                         break;
                     default: messages.add(f); // LOG, CHAT, EV
                 }

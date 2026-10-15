@@ -139,6 +139,15 @@ Joystick ze strefa martwa, klawiatura na PC.
   nie jest blizej niz 9 kafelkow; zabite w nocy nie odradzaja sie za dnia. Teraz: wilki i bandyci przy Varden,
   sniezne wilki, hieny, piaskowe upiory i upiorni rycerze na wschodzie.
 
+## Ciala potworow i przedmioty na ziemi (Z logika, C UI)
+
+- Zabity potwor zostawia cialo (`GroundItems.Corpse`) z lupem, ktorego nie zabral autoloot (wylaczony,
+  filtr albo pelny plecak). Cialo znika po 3 min razem z zawartoscia.
+- Przeszukanie z kafelka ciala albo obok: UZYJ, PODNIES (G) albo dotkniecie ciala; do plecaka trafia to,
+  co sie miesci, reszta zostaje. Pusty trup jest ciemniejszy.
+- Przedmioty na ziemi (wyrzucone, plecak po smierci w PvP) znikaja po 30 min od ostatniego polozenia na kafelku.
+- Online: linia `CO x y z potwor 0|1` w klatce; przeszukanie to akcja `loot`.
+
 ## Pasek czarow (Z logika, C UI)
 
 - 4 przyciski. Domyslnie automat: najlepsze leczenie, atak na cel, atak obszarowy (lub drugi atak), poswiata.

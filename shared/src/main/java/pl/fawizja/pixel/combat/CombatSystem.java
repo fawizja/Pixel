@@ -163,17 +163,20 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         Position corpse = m.position();
         List<ItemStack> drop = rollLoot(t);
         List<String> looted = new ArrayList<>();
+        List<ItemStack> left = new ArrayList<>();
         for (ItemStack s : drop) {
             boolean taken = false;
             if (autoLoot && !pc.autoLootFilter().isIgnored(s.itemId()) && pc.position().distanceTo(corpse) <= 8) {
                 taken = pc.backpack().add(s) == InventoryResult.OK;
                 if (taken) looted.add(describe(s));
             }
-            if (!taken) ground.place(corpse, s);
+            if (!taken) left.add(s);
         }
+        // cialo zostaje zawsze (wyglad), a w nim lup, ktorego nie zabral autoloot
+        ground.addCorpse(corpse, t.key(), left, now);
         if (!looted.isEmpty()) log.add(now, EventLog.Kind.LOOT, "Lup: " + String.join(", ", looted));
-        if (drop.size() > looted.size()) {
-            log.add(now, EventLog.Kind.LOOT, "Czesc lupu zostala na ziemi.");
+        if (!left.isEmpty()) {
+            log.add(now, EventLog.Kind.LOOT, "Czesc lupu zostala w ciele - przeszukaj je (UZYJ albo PODNIES obok).");
         }
         monsters.kill(m, now);
         if (target == m) target = null;

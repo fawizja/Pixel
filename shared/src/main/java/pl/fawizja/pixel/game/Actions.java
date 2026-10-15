@@ -15,6 +15,7 @@ public final class Actions {
             case "run": s.toggleRun(now); return true;
             case "torch": s.toggleTorch(now); return true;
             case "pick": s.pickUpHere(now); return true;
+            case "loot": s.searchCorpse(now); return true;
             case "target": s.cycleTarget(now); return true;
             case "defensive": s.toggleDefensive(now); return true;
             case "fish": s.fish(now); return true;

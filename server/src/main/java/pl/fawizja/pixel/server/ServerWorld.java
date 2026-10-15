@@ -471,6 +471,9 @@ final class ServerWorld {
             ground.forEachNear(me, Protocol.VIEW_RADIUS, (gp, st) -> frame.append(Protocol.line("GI",
                     String.valueOf(gp.x()), String.valueOf(gp.y()), String.valueOf(gp.z()),
                     String.valueOf(st.itemId()), String.valueOf(st.count()))).append('\n'));
+            ground.forEachCorpseNear(me, Protocol.VIEW_RADIUS, (cp, c) -> frame.append(Protocol.line("CO",
+                    String.valueOf(cp.x()), String.valueOf(cp.y()), String.valueOf(cp.z()), c.monsterKey(),
+                    c.hasLoot() ? "1" : "0")).append('\n'));
             String body = frame.toString();
             if (body.equals(p.lastFrameBody)) {
                 // nic sie nie zmienilo: sam znacznik czasu zamiast calej klatki (oszczednosc transferu na telefonie)

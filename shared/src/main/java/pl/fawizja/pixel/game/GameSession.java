@@ -1,6 +1,7 @@
 package pl.fawizja.pixel.game;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.combat.CombatSystem;
@@ -367,6 +368,7 @@ public final class GameSession {
                         + world.requiredLevelAt(pc.position().translate(requested.dx, requested.dy)) + ".");
             }
         }
+        ground.decay(nowMs);
         boolean night = isNight(nowMs);
         if (wasNight != null && night != wasNight) {
             log.add(nowMs, EventLog.Kind.INFO, night ? "Zapada noc. Nocne drapiezniki sa grozniejsze."
@@ -527,7 +529,7 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
                 break;
             default:
-                log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do uzycia.");
+                if (!searchCorpse(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do uzycia.");
         }
     }
 
@@ -546,12 +548,49 @@ public final class GameSession {
     }
 
     public boolean itemsAtFeet() {
-        return !ground.at(pc.position()).isEmpty();
+        return !ground.at(pc.position()).isEmpty() || corpseToSearch() != null;
+    }
+
+    /** Najblizsze cialo z lupem na kafelku gracza albo obok (to samo pietro). */
+    public Position corpseToSearch() {
+        Position me = pc.position();
+        GroundItems.Corpse here = ground.corpseAt(me);
+        if (here != null && here.hasLoot()) return me;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                Position p = me.translate(dx, dy);
+                GroundItems.Corpse c = ground.corpseAt(p);
+                if (c != null && c.hasLoot()) return p;
+            }
+        }
+        return null;
+    }
+
+    /** Przeszukanie ciala obok: lup do plecaka (co sie zmiesci). Zwraca false, gdy nie ma czego szukac. */
+    public boolean searchCorpse(long nowMs) {
+        Position p = corpseToSearch();
+        if (p == null) return false;
+        List<ItemStack> taken = ground.lootCorpse(p, pc.backpack());
+        if (!taken.isEmpty()) {
+            StringBuilder b = new StringBuilder();
+            for (ItemStack s : taken) {
+                if (b.length() > 0) b.append(", ");
+                b.append(describe(s));
+            }
+            log.add(nowMs, EventLog.Kind.LOOT, "Z ciala: " + b);
+        }
+        if (ground.corpseAt(p) != null && ground.corpseAt(p).hasLoot()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pelny - reszta zostaje w ciele.");
+        }
+        return true;
     }
 
     public void pickUpHere(long nowMs) {
         Position p = pc.position();
-        if (ground.at(p).isEmpty()) return;
+        if (ground.at(p).isEmpty()) {
+            searchCorpse(nowMs);
+            return;
+        }
         ItemStack top = ground.at(p).get(ground.at(p).size() - 1);
         InventoryResult r = ground.pickUp(p, ground.at(p).size() - 1, pc.backpack());
         if (r.ok()) {

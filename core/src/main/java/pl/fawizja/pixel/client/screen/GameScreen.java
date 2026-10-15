@@ -353,6 +353,14 @@ public final class GameScreen extends ScreenAdapter {
             Monster m = session.combat().target();
             if (m != null) net.send("TARGET", String.valueOf(m.id()));
         }
+        if (!hit) {
+            // dotkniecie ciala obok: przeszukanie
+            pl.fawizja.pixel.world.GroundItems.Corpse c = session.ground().corpseAt(p);
+            if (c != null && c.hasLoot() && p.distanceTo(session.character().position()) <= 1) {
+                act("loot", now());
+                return true;
+            }
+        }
         return hit;
     }
 
@@ -407,6 +415,7 @@ public final class GameScreen extends ScreenAdapter {
         int radius = (int) Math.ceil(Math.max(viewport.getWorldWidth(), viewport.getWorldHeight()) / 2f) + 2;
         visibleMonsters.addAll(session.monsters().near(pc.position(), radius));
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
+            drawCorpses(b, row, z);
             for (int i = 0; i < visibleMonsters.size(); i++) {
                 Monster m = visibleMonsters.get(i);
                 if (m.position().y() != row || m.position().z() != z) continue;
@@ -442,6 +451,21 @@ public final class GameScreen extends ScreenAdapter {
 
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
         limitFrameRate();
+    }
+
+    /** Ciala potworow w danym wierszu: lezacy, przyciemniony sprite (jasniejszy, gdy jest w nim lup). */
+    private void drawCorpses(SpriteBatch b, int row, int z) {
+        Position me = session.character().position();
+        session.ground().forEachCorpseNear(me, 16, (p, c) -> {
+            if (p.y() != row || p.z() != z) return;
+            TextureRegion tr = game.art().monster(c.monsterKey());
+            if (tr == null) return;
+            float shade = c.hasLoot() ? 0.62f : 0.42f;
+            b.setColor(shade, shade * 0.9f, shade * 0.85f, 1f);
+            // obrot o 90 stopni wokol srodka kafelka, splaszczony
+            b.draw(tr, p.x(), worldRenderer.worldY(p.y()) - 0.12f, 0.5f, 0.5f, 1f, 1f, 0.9f, 0.75f, 90f);
+            b.setColor(Color.WHITE);
+        });
     }
 
     private static Color effectColor(String effect) {
@@ -719,6 +743,7 @@ public final class GameScreen extends ScreenAdapter {
             remotePlayers.values().removeIf(rp -> !rp.seen);
             session.ground().clear();
             for (NetClient.GroundStack g : f.ground()) session.ground().place(g.position(), new ItemStack(g.itemId(), g.count()));
+            for (NetClient.CorpseMark c : f.corpses()) session.ground().placeRemoteCorpse(c.position(), c.monsterKey(), c.hasLoot());
         }
         String[] m;
         while ((m = net.poll()) != null) {

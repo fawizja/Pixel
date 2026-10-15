@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.17.0] - 2026-10-15
+
+### Dodano
+- Ciala potworow: lup, ktorego nie zabral autoloot, czeka w ciele do przeszukania (UZYJ, PODNIES albo dotkniecie
+  obok). Cialo znika po 3 minutach. Widoczne takze online.
+- Przedmioty na ziemi znikaja po 30 minutach (serwer nie gromadzi ich bez konca).
+- 4 nowe testy, w tym sieciowy (lacznie 209).
+
 ## [0.16.2] - 2026-10-15
 
 ### Dodano

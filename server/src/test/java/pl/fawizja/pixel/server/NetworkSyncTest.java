@@ -204,6 +204,19 @@ class NetworkSyncTest {
                 while ((m = a.poll()) != null) if (m[0].equals("EV")) return true;
                 return false;
             });
+
+            // zabity wilk zostawia cialo widoczne w klatce klienta
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    if (!p.name().equals("Gina")) continue;
+                    for (pl.fawizja.pixel.monster.Monster m : server.world().monsters.near(p.session.character().position(), 3)) {
+                        if (m.isDead()) continue;
+                        p.session.combat().damageMonster(m, 1_000_000, pl.fawizja.pixel.combat.DamageType.PHYSICAL, server.now());
+                        break;
+                    }
+                }
+            });
+            await("corpse in frame", () -> a.frame() != null && !a.frame().corpses().isEmpty());
         }
     }
 

@@ -23,7 +23,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
  *   -Dpixel.open=book|bag|character|npc|diag   otwiera ksiege, plecak, karte postaci, rozmowe z NPC albo diagnostyke
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
- *   -Dpixel.fx=1                      tuz przed zrzutem pokazuje efekty: pocisk, wybuch ognia, mrozna fale, leczenie
+ *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
 public final class DesktopLauncher {
 
@@ -102,6 +102,9 @@ public final class DesktopLauncher {
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 100, me.translate(-4, 2), 2, "FIRE"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 220, me.translate(4, 3), 1, "ICE"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 150, me, 0, "HEAL"));
+                gs.session().ground().addCorpse(me.translate(1, 1), "wolf",
+                        java.util.List.of(new pl.fawizja.pixel.item.ItemStack(1, 12)), now);
+                gs.session().ground().addCorpse(me.translate(-1, 1), "goblin", java.util.List.of(), now);
             }
             super.render();
             if (screenshot != null && ++frame == frames) {
