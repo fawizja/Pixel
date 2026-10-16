@@ -221,6 +221,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Przyciski HP/MP używają najsilniejszych mikstur (0.102.0)
 - [x] Uzupełnianie najsilniejszych dozwolonych mikstur (0.103.0)
 - [x] Zlecenia łowcy u przewodnika (0.104.0)
+- [x] Osiągnięcie za zlecenia łowcy (0.105.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

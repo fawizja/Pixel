@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.105.0] - 2026-10-16
+
+### Dodano
+- Osiągnięcie „Zawodowy łowca” (tytuł) za 10 oddanych zleceń łowcy; razem 22 osiągnięcia.
+- Okno `/statystyki` pokazuje liczbę oddanych zleceń łowcy.
 ## [0.104.0] - 2026-10-16
 
 ### Dodano

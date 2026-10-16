@@ -22,4 +22,14 @@ class NewAchievementsTest {
         assertTrue(Achievement.PLAYTIME_10.reached(pc));
         assertEquals("Stały bywalec", Achievement.titleOf("PLAYTIME_10"));
     }
+
+    @Test
+    void tenHuntingTasksMakeAProfessionalHunter() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        pc.hunt().restore("-;0;9");
+        assertEquals(9, Achievement.HUNT_10.progress(pc));
+        assertFalse(Achievement.HUNT_10.reached(pc));
+        pc.hunt().complete();
+        assertTrue(Achievement.HUNT_10.reached(pc));
+    }
 }
