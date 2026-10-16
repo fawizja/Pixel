@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.130.0] - 2026-10-16
+
+### Dodano
+- 9 nowych czarów na poziomy 40-60: Płomienny grot i Burza energii (czarodziej), Lodowy kolec i Gniew ziemi
+  (druid), Boska włócznia i Boski gniew (paladyn), Pięść smoka, Burza ciosów i Głęboka medytacja (mnich).
+  Symulacje endgame nadal przechodzą.
+
+### Naprawiono
+- Księga czarów nie wychodzi poza okno: przy wielu czarach pokazuje te najbliższe poziomowi postaci,
+  a lista receptur ma stronę dopasowaną do wysokości okna.
 ## [0.129.0] - 2026-10-16
 
 ### Dodano

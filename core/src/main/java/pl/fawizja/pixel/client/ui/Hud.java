@@ -548,7 +548,15 @@ public final class Hud {
             return;
         }
         PlayerCharacter pc = session.character();
-        for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
+        // tyle wierszy miesci kolumna okna; czary ponad to (najwyzsze poziomy) czekaja, az zwolni sie miejsce
+        int bookRows = Math.max(5, (int) ((menuH - 40) / rowH));
+        List<SpellType> spells = new ArrayList<>(session.spells().registry().forVocation(pc.vocation()));
+        // za duzo: najpierw odpadaja najdalsze zapowiedzi, potem najslabsze (najnizsze) poznane czary
+        for (int i = spells.size() - 1; spells.size() > bookRows && i >= 0; i--) {
+            if (pc.level() < spells.get(i).minLevel()) spells.remove(i);
+        }
+        while (spells.size() > bookRows) spells.remove(0);
+        for (SpellType sp : spells) {
             boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
             String detail = sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
@@ -563,7 +571,7 @@ public final class Hud {
         // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
         List<Recipe> shown = new ArrayList<>();
         for (Recipe rc : session.recipes().all()) if (rc.minLevel() <= pc.level() + 100) shown.add(rc);
-        int perPage = Math.max(3, (int) ((menuH - 70) / rowH) - 2);
+        int perPage = Math.max(1, bookRows - 4); // 3 wiersze ksiegi + wiersz strony
         int bookPages = Math.max(1, (shown.size() + perPage - 1) / perPage);
         if (bookPage >= bookPages) bookPage = 0;
         for (Recipe rc : shown.subList(bookPage * perPage, Math.min(shown.size(), (bookPage + 1) * perPage))) {

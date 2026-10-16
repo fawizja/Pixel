@@ -250,7 +250,19 @@ Trening magii: proby = mana * min(1, magicFactor) (Druid/Sorcerer 1,0, Paladin 0
 | Swieta fala | Paladin | 30 | 80 | 4 s | swiete, promien 2 |
 | Cios tygrysa | Monk | 8 | 15 | 2 s | fizyczne wrecz, sf 1,2 |
 | Wirujace kopniecie | Monk | 20 | 40 | 4 s | fizyczne, promien 1 |
+| Gleboka medytacja | Monk | 40 | 45 | 1 s | leczenie 50 / 0,7 / - / 1,0 |
+| Plomienny grot | Sorcerer | 45 | 120 | 2 s | ogien 60 / 0,5 / 3,5, zasieg 4 |
+| Burza energii | Sorcerer | 60 | 220 | 4 s | energia 70 / 0,55 / 3,6, promien 3 |
+| Lodowy kolec | Druid | 45 | 110 | 2 s | lod 55 / 0,48 / 3,2, zasieg 4 |
+| Gniew ziemi | Druid | 60 | 210 | 4 s | ziemia 65 / 0,5 / 3,3, promien 3 |
+| Boska wlocznia | Paladin | 45 | 90 | 3 s | swiete 50 / 0,5 / 1,8 / 1,2, zasieg 4 |
+| Boski gniew | Paladin | 60 | 180 | 4 s | swiete 60 / 0,5 / 1,8 / 1,0, promien 3 |
+| Piesc smoka | Monk | 45 | 60 | 2 s | fizyczne wrecz 35 / 0,4 / - / 1,4 |
+| Burza ciosow | Monk | 60 | 120 | 4 s | fizyczne 40 / 0,45 / - / 1,5, promien 1 |
 | Poswiata | wszystkie | 8 | 20 | 2 s | swiatlo 4 kafelki na 5 min |
+
+Czary od poziomu 40-60 (0.130.0) dodane z kontrola symulacji endgame: Gleboka medytacja ma niski koszt many,
+bo mnich ma maly zapas many (test `manaShare <= 0,6`).
 
 Grupy: atak 2 s, leczenie 1 s, wsparcie 2 s, mikstury 1 s (osobne - mozna leczyc sie i atakowac).
 

@@ -3,17 +3,26 @@ mend;Opatrzenie ran;*;8;0;20;1000;HEALING;HEAL_SELF;PHYSICAL;20;0.4;2.0;0;0;0;;;
 greater_mend;Uzdrowienie;DRUID,SORCERER,PALADIN;20;0;60;1000;HEALING;HEAL_SELF;PHYSICAL;50;0.8;4.0;0;0;0;;;0;Mocniejsze leczenie.
 vital_surge;Przypływ życia;DRUID;35;0;120;1000;HEALING;HEAL_SELF;PHYSICAL;130;1.4;7.0;0;0;0;;;0;Najsilniejsze leczenie - specjalność druida.
 inner_calm;Wewnętrzny spokój;MONK;12;0;25;1000;HEALING;HEAL_SELF;PHYSICAL;30;0.6;0;0.8;0;0;;;0;Leczenie mnicha zależne od walki wręcz.
+deep_meditation;Głęboka medytacja;MONK;40;0;45;1000;HEALING;HEAL_SELF;PHYSICAL;50;0.7;0;1.0;0;0;;;0;Silne leczenie mnicha.
 ember_bolt;Żar;SORCERER;8;0;20;2000;ATTACK;ATTACK_TARGET;FIRE;15;0.3;2.5;0;4;0;;;0;Pocisk ognia w cel.
 spark_bolt;Iskra;SORCERER;14;0;30;2000;ATTACK;ATTACK_TARGET;ENERGY;20;0.35;2.8;0;4;0;;;0;Pocisk energii w cel.
 flame_ring;Krąg ognia;SORCERER;25;0;80;4000;ATTACK;ATTACK_AREA;FIRE;30;0.4;3.0;0;0;2;;;0;Ogień wokół czarodzieja (promień 2).
+inferno_bolt;Płomienny grot;SORCERER;45;0;120;2000;ATTACK;ATTACK_TARGET;FIRE;60;0.5;3.5;0;4;0;;;0;Potężny pocisk ognia w cel.
+storm_ring;Burza energii;SORCERER;60;0;220;4000;ATTACK;ATTACK_AREA;ENERGY;70;0.55;3.6;0;0;3;;;0;Wyładowania wokół czarodzieja (promień 3).
 frost_bolt;Lodowy pocisk;DRUID;8;0;20;2000;ATTACK;ATTACK_TARGET;ICE;14;0.3;2.3;0;4;0;;;0;Pocisk lodu w cel.
 thorn_burst;Wybuch cierni;DRUID;14;0;30;2000;ATTACK;ATTACK_TARGET;EARTH;18;0.32;2.5;0;4;0;;;0;Kolce ziemi w cel.
 frost_nova;Mroźna fala;DRUID;30;0;90;4000;ATTACK;ATTACK_AREA;ICE;26;0.35;2.6;0;0;2;;;0;Mróz wokół druida (promień 2).
+glacier_spike;Lodowy kolec;DRUID;45;0;110;2000;ATTACK;ATTACK_TARGET;ICE;55;0.48;3.2;0;4;0;;;0;Ostry sopel lodu w cel.
+earth_quake;Gniew ziemi;DRUID;60;0;210;4000;ATTACK;ATTACK_AREA;EARTH;65;0.5;3.3;0;0;3;;;0;Wstrząs ziemi wokół druida (promień 3).
 holy_bolt;Święty pocisk;PALADIN;8;0;20;2000;ATTACK;ATTACK_TARGET;HOLY;12;0.3;1.5;0.5;4;0;;;0;Swiete swiatlo w cel; mocne na nieumarłych.
 sacred_nova;Święta fala;PALADIN;30;0;80;4000;ATTACK;ATTACK_AREA;HOLY;25;0.35;1.5;0.6;0;2;;;0;Święte światło wokół paladyna (promień 2).
 piercing_throw;Przeszywający rzut;PALADIN;20;0;40;3000;ATTACK;ATTACK_TARGET;PHYSICAL;20;0.4;0;1.5;4;0;;;0;Silny rzut zależny od umiejętności dystansu.
+divine_spear;Boska włócznia;PALADIN;45;0;90;3000;ATTACK;ATTACK_TARGET;HOLY;50;0.5;1.8;1.2;4;0;;;0;Włócznia świętego światła w cel.
+divine_wrath;Boski gniew;PALADIN;60;0;180;4000;ATTACK;ATTACK_AREA;HOLY;60;0.5;1.8;1.0;0;3;;;0;Święty gniew wokół paladyna (promień 3).
 tiger_strike;Cios tygrysa;MONK;8;0;15;2000;ATTACK;ATTACK_TARGET;PHYSICAL;15;0.3;0;1.2;1;0;;;0;Silny cios wręcz.
 whirlwind_kick;Wirujące kopnięcie;MONK;20;0;40;4000;ATTACK;ATTACK_AREA;PHYSICAL;25;0.4;0;1.4;0;1;;;0;Kopnięcie trafia wszystko obok mnicha.
+dragon_fist;Pięść smoka;MONK;45;0;60;2000;ATTACK;ATTACK_TARGET;PHYSICAL;35;0.4;0;1.4;1;0;;;0;Potężny cios wręcz.
+storm_of_blows;Burza ciosów;MONK;60;0;120;4000;ATTACK;ATTACK_AREA;PHYSICAL;40;0.45;0;1.5;0;1;;;0;Grad ciosów we wszystko obok mnicha.
 glow;Poświata;*;8;0;20;2000;SUPPORT;LIGHT;PHYSICAL;0;0;0;0;0;4;;;0;Światło wokół postaci na 5 minut.
 conjure_spears;Przywołanie włóczni;PALADIN;10;0;40;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;spear;;5;Tworzy 5 włóczni.
 enchant_boulder;Zaklęcie głazu;PALADIN,DRUID,SORCERER;12;2;50;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;boulder_rune;blank_rune;2;Zamienia pustą runę w 2 runy głazu.
