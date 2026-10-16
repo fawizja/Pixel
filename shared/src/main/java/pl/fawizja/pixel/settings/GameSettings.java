@@ -30,6 +30,11 @@ public final class GameSettings {
     private boolean weather = true;
     private int autoHeal;
     private int autoMana;
+    private boolean autoEat;
+    /** Strona panelu ustawien (nie zapisywana). */
+    private int page;
+    /** Wierszy ustawien na stronie panelu (ostatni wiersz strony przelacza strone). */
+    public static final int PAGE_SIZE = 8;
 
     public int fpsCap() { return fpsCap; }
     public boolean batterySaver() { return batterySaver; }
@@ -44,6 +49,10 @@ public final class GameSettings {
     public int autoHeal() { return autoHeal; }
     /** Mikstura many sama, gdy mana spadnie ponizej tylu procent; 0 = wylaczona (te same progi co zdrowie). */
     public int autoMana() { return autoMana; }
+    /** Jedzenie z plecaka samo, gdy sytosc konczy sie (mniej niz minuta). */
+    public boolean autoEat() { return autoEat; }
+    public void toggleAutoEat() { autoEat = !autoEat; }
+    public int page() { return page; }
     /** Glosnosc 0..1 dla odtwarzacza. */
     public float volumeFactor() { return volume / 100f; }
 
@@ -100,6 +109,8 @@ public final class GameSettings {
             case "settings:weather": toggleWeather(); return true;
             case "settings:heal": cycleAutoHeal(); return true;
             case "settings:mana": cycleAutoMana(); return true;
+            case "settings:eat": toggleAutoEat(); return true;
+            case "settings:page": page = (page + 1) % pages(); return true;
             default: return false;
         }
     }
@@ -115,6 +126,7 @@ public final class GameSettings {
         m.put("weather", String.valueOf(weather));
         m.put("heal", String.valueOf(autoHeal));
         m.put("mana", String.valueOf(autoMana));
+        m.put("eat", String.valueOf(autoEat));
         return m;
     }
 
@@ -130,6 +142,7 @@ public final class GameSettings {
         s.weather = bool(m.get("weather"), true);
         s.autoHeal = choice(m.get("heal"), AUTO_HEAL_CHOICES, 0);
         s.autoMana = choice(m.get("mana"), AUTO_HEAL_CHOICES, 0);
+        s.autoEat = bool(m.get("eat"), false);
         return s;
     }
 
@@ -152,8 +165,21 @@ public final class GameSettings {
         return def;
     }
 
-    /** Wiersze panelu: akcja i opis. */
+    public int pages() { return (allRows().length + PAGE_SIZE - 1) / PAGE_SIZE; }
+
+    /** Wiersze biezacej strony panelu i na koncu wiersz zmiany strony (gdy stron jest wiecej niz jedna). */
     public String[][] rows() {
+        String[][] all = allRows();
+        if (all.length <= PAGE_SIZE + 1) return all;
+        int from = page * PAGE_SIZE, to = Math.min(all.length, from + PAGE_SIZE);
+        String[][] out = new String[to - from + 1][];
+        System.arraycopy(all, from, out, 0, to - from);
+        out[to - from] = new String[] {"settings:page", "Więcej ustawień (strona " + (page + 1) + " z " + pages() + ")"};
+        return out;
+    }
+
+    /** Wszystkie ustawienia: akcja i opis. */
+    public String[][] allRows() {
         return new String[][] {
             {"settings:fps", "Limit FPS: " + fpsCap + (batterySaver ? " (bateria: " + effectiveFpsCap() + ")" : "")},
             {"settings:battery", "Oszczędzanie baterii: " + (batterySaver ? "włączone" : "wyłączone")},
@@ -162,8 +188,9 @@ public final class GameSettings {
             {"settings:sound", "Dźwięk: " + (volume == 0 ? "wyłączony" : volume + "%")},
             {"settings:loot", "Łupy z ciał: " + (autoLoot ? "automatycznie" : "dotknięciem")},
             {"settings:weather", "Pogoda: " + (weather ? "pokazuj" : "ukryj")},
-            {"settings:heal", "Leczenie samo (czar, potem mikstura): " + (autoHeal == 0 ? "wyłączona" : "poniżej " + autoHeal + "% HP")},
+            {"settings:heal", "Leczenie samo: " + (autoHeal == 0 ? "wyłączone" : "poniżej " + autoHeal + "% HP")},
             {"settings:mana", "Mikstura many sama: " + (autoMana == 0 ? "wyłączona" : "poniżej " + autoMana + "% MP")},
+            {"settings:eat", "Jedzenie samo: " + (autoEat ? "gdy kończy się sytość" : "wyłączone")},
         };
     }
 }

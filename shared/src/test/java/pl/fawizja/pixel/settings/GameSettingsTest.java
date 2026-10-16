@@ -51,7 +51,7 @@ class GameSettingsTest {
         s.cycleVolume();
         assertEquals(0, s.volume());
         assertEquals(0f, s.volumeFactor());
-        assertTrue(s.rows()[4][1].contains("wyłączony"));
+        assertTrue(s.allRows()[4][1].contains("wyłączony"));
         assertEquals(0, GameSettings.fromMap(s.toMap()).volume());
         assertEquals(60, GameSettings.fromMap(Map.of("volume", "55")).volume(), "unsupported level falls back");
     }
@@ -62,7 +62,7 @@ class GameSettingsTest {
         assertTrue(s.autoLoot());
         assertTrue(s.apply("settings:loot"));
         assertFalse(s.autoLoot());
-        assertTrue(s.rows()[5][1].contains("dotknięciem"));
+        assertTrue(s.allRows()[5][1].contains("dotknięciem"));
         assertFalse(GameSettings.fromMap(s.toMap()).autoLoot());
         assertTrue(GameSettings.fromMap(Map.of("loot", "?")).autoLoot(), "bad value falls back");
     }
@@ -79,7 +79,7 @@ class GameSettingsTest {
         s.apply("settings:heal");
         s.apply("settings:heal");
         assertEquals(70, s.autoHeal());
-        assertTrue(s.rows()[7][1].contains("70%"));
+        assertTrue(s.allRows()[7][1].contains("70%"));
         GameSettings back = GameSettings.fromMap(s.toMap());
         assertFalse(back.weather());
         assertEquals(70, back.autoHeal());
@@ -96,8 +96,28 @@ class GameSettingsTest {
         s.apply("settings:mana");
         assertEquals(50, s.autoMana());
         assertEquals(0, s.autoHeal(), "independent from the health potion");
-        assertTrue(s.rows()[8][1].contains("50% MP"));
+        assertTrue(s.allRows()[8][1].contains("50% MP"));
         assertEquals(50, GameSettings.fromMap(s.toMap()).autoMana());
         assertEquals(0, GameSettings.fromMap(Map.of("mana", "99")).autoMana());
+    }
+
+    @Test
+    void autoEatIsSavedAndTheSecondPageHoldsTheRest() {
+        GameSettings s = new GameSettings();
+        assertFalse(s.autoEat());
+        assertEquals(2, s.pages());
+        String[][] first = s.rows();
+        assertEquals(GameSettings.PAGE_SIZE + 1, first.length);
+        assertEquals("settings:page", first[GameSettings.PAGE_SIZE][0]);
+        assertTrue(s.apply("settings:page"));
+        String[][] second = s.rows();
+        assertEquals("settings:mana", second[0][0]);
+        assertEquals("settings:eat", second[1][0]);
+        assertTrue(second[second.length - 1][1].contains("strona 2 z 2"));
+        assertTrue(s.apply("settings:eat"));
+        assertTrue(s.autoEat());
+        assertTrue(GameSettings.fromMap(s.toMap()).autoEat());
+        s.apply("settings:page");
+        assertEquals(0, s.page());
     }
 }

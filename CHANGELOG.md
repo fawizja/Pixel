@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.85.0] - 2026-10-16
+
+### Dodano
+- Ustawienie „Jedzenie samo”: gdy sytości zostaje mniej niż minuta, postać zjada pierwsze jedzenie z plecaka
+  (sytość podwaja regenerację).
+- Panel ustawień ma strony: ostatni wiersz „Więcej ustawień (strona 1 z 2)” przełącza stronę.
+
+### Zmieniono
+- Krótszy opis ustawienia leczenia („Leczenie samo”), żeby mieścił się w wierszu.
+- 1 nowy test; łącznie 338.
+
 ## [0.84.0] - 2026-10-16
 
 ### Dodano

@@ -346,6 +346,8 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:weather":
             case "settings:heal":
             case "settings:mana":
+            case "settings:eat":
+            case "settings:page":
                 settings.apply(id);
                 settingsPrefs.put(settings.toMap());
                 settingsPrefs.flush();
@@ -800,6 +802,23 @@ public final class GameScreen extends ScreenAdapter {
         act("potion_mp", t);
     }
 
+    /** Automatyczne jedzenie (ustawienie): pierwsze jedzenie z plecaka, gdy sytosci zostalo mniej niz minuta. */
+    private long autoEatAtMs;
+
+    private void autoEat(long t) {
+        PlayerCharacter pc = session.character();
+        if (!settings.autoEat() || t < autoEatAtMs || pc.isDead() || pc.fedMs() >= 60_000) return;
+        autoEatAtMs = t + 2000;
+        List<ItemStack> bag = pc.backpack().contents();
+        for (int i = 0; i < bag.size(); i++) {
+            ItemStack s = bag.get(i);
+            if (s != null && session.items().get(s.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.FOOD) {
+                act("slot_use:" + i, t);
+                return;
+            }
+        }
+    }
+
     private void autoLoot(long t) {
         if (!settings.autoLoot() || t < autoLootAtMs || session.character().isDead()) return;
         autoLootAtMs = t + 800;
@@ -931,6 +950,7 @@ public final class GameScreen extends ScreenAdapter {
         autoLoot(t);
         autoHeal(t);
         autoMana(t);
+        autoEat(t);
         updateHunt(t);
         checkDeath();
         updateGuard(t);
