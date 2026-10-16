@@ -248,6 +248,26 @@ public final class GameSession {
                 ? " Wróć jutro po większą." : " Pełny tydzień!"));
     }
 
+    /** Nagrody za progi poziomu: zloto na konto, zwoje nauki do plecaka (albo do depozytu, gdy brak miejsca). */
+    public void checkLevelRewards(long nowMs) {
+        if (pc.isDead()) return;
+        int m;
+        while ((m = pl.fawizja.pixel.character.LevelRewards.next(pc.rewardedLevel(), pc.level())) > 0) {
+            long gold = pl.fawizja.pixel.character.LevelRewards.gold(m);
+            if (!pc.bank().credit(gold).ok()) return; // pelne konto - sprobujemy pozniej
+            pc.setRewardedLevel(m);
+            String extra = "";
+            int n = pl.fawizja.pixel.character.LevelRewards.scrolls(m);
+            if (n > 0) {
+                pl.fawizja.pixel.item.ItemStack st = new pl.fawizja.pixel.item.ItemStack(items.byKey("exp_scroll").id(), n);
+                boolean bag = pc.backpack().canAdd(st.itemId(), n) && pc.backpack().add(st).ok();
+                if (bag || pc.depot().add(st).ok()) extra = " i " + n + "x " + items.get(st.itemId()).name() + (bag ? "" : " (w depozycie)");
+            }
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za poziom " + m + ": " + String.format("%,d gp", gold) + " na konto" + extra + ".");
+        }
+        pc.setRewardedLevel(pc.level());
+    }
+
     /** Nowe osiagniecia: wpis w dzienniku (sprawdzane przy zabiciu potwora i co sekunde). */
     public void checkAchievements(long nowMs) {
         achievementsCheckedMs = nowMs;
@@ -834,6 +854,7 @@ public final class GameSession {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         checkBoost(nowMs);
+        if (pc.level() > pc.rewardedLevel()) checkLevelRewards(nowMs);
         checkPet(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);

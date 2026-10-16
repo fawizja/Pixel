@@ -67,6 +67,7 @@ public final class PlayerCharacter {
         this.vocation = Objects.requireNonNull(vocation);
         if (level < Balance.MIN_LEVEL || level > Balance.MAX_LEVEL) throw new IllegalArgumentException("level " + level);
         this.level = level;
+        this.rewardedLevel = level;
         this.experience = Balance.experienceForLevel(level);
         this.position = Objects.requireNonNull(position);
         this.backpack = Container.backpack(registry);
@@ -117,6 +118,7 @@ public final class PlayerCharacter {
         hasMount = o.hasMount;
         mounted = o.mounted;
         blessed = o.blessed;
+        rewardedLevel = o.rewardedLevel;
         pet = o.pet;
         title = o.title;
         torchLit = o.torchLit;
@@ -157,6 +159,12 @@ public final class PlayerCharacter {
     private boolean blessed;
 
     public boolean isBlessed() { return blessed; }
+
+    /** Najwyzszy poziom, za ktory sprawdzono juz nagrody progow ({@link LevelRewards}). */
+    private int rewardedLevel;
+
+    public int rewardedLevel() { return rewardedLevel; }
+    public void setRewardedLevel(int v) { rewardedLevel = Math.max(0, v); }
 
     /** Przywolany pupil (klucz przedmiotu pet_*) albo null; ozdoba, chodzi za postacia. */
     private String pet;

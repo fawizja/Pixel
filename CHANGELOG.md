@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.70.0] - 2026-10-16
+
+### Dodano
+- Nagrody za progi poziomu 10, 20, 30, 50, 75, 100, 150, 200 i 250: złoto na konto (od 1 000 gp do 625 000 gp)
+  i od poziomu 20 zwoje nauki (do plecaka, a gdy brak miejsca do depozytu). Każdy próg raz na postać, także po
+  śmierci i ponownym awansie. Istniejące postacie dostają nagrody od swojego obecnego poziomu w górę.
+- 2 nowe testy; łącznie 320.
+
 ## [0.69.0] - 2026-10-16
 
 ### Dodano
