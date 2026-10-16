@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.106.0] - 2026-10-16
+
+### Zmieniono
+- Online w drużynie: potwór pokonany przez drużynę obok (w zasięgu podziału doświadczenia) liczy się każdemu
+  członkowi do zadania dnia, zlecenia łowcy i zadań na potwory, nie tylko temu, kto zadał ostatni cios.
 ## [0.105.0] - 2026-10-16
 
 ### Dodano

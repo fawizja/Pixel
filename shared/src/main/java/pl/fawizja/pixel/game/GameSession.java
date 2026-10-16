@@ -132,18 +132,9 @@ public final class GameSession {
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
             if (t.isElite()) pc.bestiary().recordElite();
-            if (pc.daily().onKill(t.key(), today())) {
-                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
-            }
-            if (pc.hunt().onKill(t.key())) {
-                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy wykonane! Wróć do przewodnika po nagrodę.");
-            }
+            taskKill(t);
             checkWeeklyBoss(t, lastUpdateMs);
             checkAchievements(lastUpdateMs);
-            QuestType done = quests == null ? null : quests.onKill(pc, t.key());
-            if (done != null) {
-                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiągnięty, wróć po nagrodę.");
-            }
         });
         this.playerTarget = new MonsterManager.Target() {
             @Override
@@ -190,6 +181,25 @@ public final class GameSession {
         d.claim();
         log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zadanie dnia: " + String.format("%,d gp", gold) + " na konto.");
         if (exp > 0) combat.awardExperience(exp, "Zadanie dnia", nowMs);
+    }
+
+    /** Zabicie liczone do zadan: zadanie dnia, zlecenie lowcy i zadania na potwory. */
+    private void taskKill(pl.fawizja.pixel.monster.MonsterType t) {
+        if (pc.daily().onKill(t.key(), today())) {
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
+        }
+        if (pc.hunt().onKill(t.key())) {
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy wykonane! Wróć do przewodnika po nagrodę.");
+        }
+        QuestType done = quests == null ? null : quests.onKill(pc, t.key());
+        if (done != null) {
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiągnięty, wróć po nagrodę.");
+        }
+    }
+
+    /** Potwor pokonany przez druzyne obok (serwer): liczy sie do zadan tego gracza jak wlasne zabicie. */
+    public void partyKill(pl.fawizja.pixel.monster.MonsterType t) {
+        taskKill(t);
     }
 
     /** Zlecenie lowcy: wziecie nowego, stan albo oddanie wykonanego (z nagroda). */

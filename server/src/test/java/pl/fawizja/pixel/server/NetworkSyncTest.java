@@ -537,13 +537,17 @@ class NetworkSyncTest {
                     .loadDefault(ItemRegistry.loadDefault()).get("wolf");
             boolean[] shared = new boolean[1];
             long[] soloExp = {-1};
+            int[] ulaHunt = {-1};
             server.enqueueTest(() -> {
                 ServerPlayer killer = server.world().find("Ola");
+                server.world().find("Ula").session.character().hunt().restore("wolf;3;0");
                 // z premia potwora dnia, gdy dzis sa nim wilki
                 soloExp[0] = killer.session.combat().killExperience(wolf, 8);
                 shared[0] = server.world().shareKill(killer, wolf, server.now());
+                ulaHunt[0] = server.world().find("Ula").session.character().hunt().progress();
             });
             await("kill shared", () -> soloExp[0] >= 0);
+            assertEquals(4, ulaHunt[0], "the party kill counts for Ula's hunting task");
             long solo = soloExp[0];
             long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2);
             await("both got a share", () -> {

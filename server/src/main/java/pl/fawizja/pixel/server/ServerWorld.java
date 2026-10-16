@@ -805,6 +805,7 @@ final class ServerWorld {
             long solo = m.session.combat().killExperience(type, m.session.character().level());
             long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size());
             m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name(), now);
+            if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
         }
         return true;
     }
