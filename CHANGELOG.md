@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.120.0] - 2026-10-16
+
+### Dodano
+- Nowa podpowiedź dla paladynów: gdy gniazdo amunicji jest puste, a w plecaku są włócznie, gra podpowiada,
+  żeby je założyć (od 0.118.0 zwiększają obrażenia).
 ## [0.119.0] - 2026-10-16
 
 ### Dodano

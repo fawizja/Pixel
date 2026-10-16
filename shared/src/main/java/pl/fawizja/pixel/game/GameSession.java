@@ -349,8 +349,21 @@ public final class GameSession {
         tipsCheckedMs = nowMs;
         if (pc.level() >= Tips.MAX_LEVEL || pc.isDead()) return;
         Tips.Situation s = new Tips.Situation(combat.threatNear(4), pc.bestiary().total(),
-                100 * pc.health() / Math.max(1, pc.maxHealth()), pc.backpack().freeSlots());
+                100 * pc.health() / Math.max(1, pc.maxHealth()), pc.backpack().freeSlots(), ammoIdle());
         for (String t : Tips.due(pc, s)) log.add(nowMs, EventLog.Kind.INFO, t);
+    }
+
+    /** Bron dystansowa bez amunicji w gniezdzie, choc w plecaku lezy pasujaca (podpowiedz AMMO). */
+    private boolean ammoIdle() {
+        pl.fawizja.pixel.item.ItemStack w = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.WEAPON);
+        pl.fawizja.pixel.item.ItemType weapon = w == null ? null : items.get(w.itemId());
+        if (weapon == null || weapon.range() <= 1 || weapon.damageType() != pl.fawizja.pixel.combat.DamageType.PHYSICAL) return false;
+        if (pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO) != null) return false;
+        for (pl.fawizja.pixel.item.ItemType t : items.all()) {
+            if (t.category() == pl.fawizja.pixel.item.ItemCategory.AMMUNITION && pc.backpack().count(t.id()) > 0
+                    && pc.equipment().canWear(t.id(), pc.vocation(), pc.level()).ok()) return true;
+        }
+        return false;
     }
 
     /** Komunikaty o odrodzeniu bossow (co BossWatch.CHECK_MS; online liczy serwer). */

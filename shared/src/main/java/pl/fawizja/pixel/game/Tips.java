@@ -19,7 +19,8 @@ public final class Tips {
         LOOT("Pokonany potwór zostawia ciało: dotknij go albo stań obok, a łupy trafią do plecaka (przycisk PLECAK)."),
         LOW_HEALTH("Mało zdrowia! Przycisk HP pije miksturę (klawisz Q); w ustawieniach jest też leczenie samo."),
         QUESTS("Zadania i nagrody daje przewodnik w mieście: wpisz /idź przewodnik albo otwórz dziennik (klawisz Z)."),
-        BAG_FULL("Plecak prawie pełny: u kupca „Sprzedaj cały łup”, a u bankiera odłożysz rzeczy do depozytu (/idź kupiec).");
+        BAG_FULL("Plecak prawie pełny: u kupca „Sprzedaj cały łup”, a u bankiera odłożysz rzeczy do depozytu (/idź kupiec)."),
+        AMMO("Włóż włócznie z plecaka do gniazda amunicji: każdy rzut zada więcej obrażeń (zużywa jedną).");
 
         public final String text;
 
@@ -29,7 +30,11 @@ public final class Tips {
     private Tips() {}
 
     /** Stan sytuacji do podpowiedzi (liczony w GameSession). */
-    public record Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots) {}
+    public record Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots, boolean ammoIdle) {
+        public Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots) {
+            this(monsterNear, kills, healthPercent, freeSlots, false);
+        }
+    }
 
     /** Podpowiedzi do pokazania teraz (i oznaczone jako pokazane). */
     public static List<String> due(PlayerCharacter pc, Situation s) {
@@ -41,6 +46,7 @@ public final class Tips {
         check(pc, Tip.LOW_HEALTH, s.healthPercent() < 40, out);
         check(pc, Tip.QUESTS, pc.level() >= 3, out);
         check(pc, Tip.BAG_FULL, s.freeSlots() <= 2, out);
+        check(pc, Tip.AMMO, s.ammoIdle(), out);
         return out;
     }
 

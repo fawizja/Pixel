@@ -28,6 +28,22 @@ class TipsTest {
     }
 
     @Test
+    void paladinsLearnAboutTheAmmunitionSlot() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc, null, new java.util.Random(1), 8);
+        List<String> seen = new java.util.ArrayList<>();
+        for (long t = 0; t < 10_000; t += 500) {
+            s.update(t, null);
+        }
+        for (EventLog.Entry e : s.log().latest(100)) seen.add(e.text());
+        assertTrue(seen.stream().anyMatch(x -> x.contains("gniazda amunicji")), seen.toString());
+        PlayerCharacter druid = TestData.newCharacter(Vocation.DRUID);
+        GameSession d = new GameSession(TestData.ITEMS, TestData.varden(), druid, null, new java.util.Random(1), 8);
+        for (long t = 0; t < 10_000; t += 500) d.update(t, null);
+        for (EventLog.Entry e : d.log().latest(100)) assertFalse(e.text().contains("gniazda amunicji"));
+    }
+
+    @Test
     void tipsCanBeTurnedOff() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc, null, new java.util.Random(1), 8);
