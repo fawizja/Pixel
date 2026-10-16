@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.147.0] - 2026-10-16
+
+### Zmieniono
+- Okno /pomoc podpowiada `/szukam` (drużyna) i `/kupię` (zamówienia kupna u bankiera).
 ## [0.146.0] - 2026-10-16
 
 ### Dodano

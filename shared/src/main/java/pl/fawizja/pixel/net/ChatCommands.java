@@ -254,11 +254,11 @@ public final class ChatCommands {
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {
             {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
-            {"/zaproś Imię", "zaproszenie do drużyny (/przyjmij, /opuść, /d tekst)"},
+            {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d tekst; /szukam"},
             {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
             {"/pojedynek Imię", "pojedynek; /nagroda Imię, 5000 za głowę"},
             {"/gildia załóż Nazwa", "zaproś, przyjmij, wyrzuć, wpłać; czat /g"},
-            {"/wyślij Imię, 5 futro", "poczta; złoto: /przelew Imię, 5000"},
+            {"/wyślij Imię, 5 futro", "poczta; /przelew Imię, 5000; /kupię u bankiera"},
             {"/hasło stare nowe", "zmiana hasła konta"},
         };
         for (String[] r : typed) rows.add(new String[] {r[0], r[1]});
