@@ -672,8 +672,8 @@ public final class Hud {
                     b.total(), b.species(), b.bossesDefeated()), true));
             for (String k : b.mostKilled()) {
                 if (rows.size() >= perCol * 2) break;
-                rows.add(new MenuRow("ach:none", monsterNames.apply(k) + (b.isBoss(k) ? " (boss)" : ""),
-                        String.format("pokonano %,d", b.kills(k)), true));
+                rows.add(new MenuRow("best:" + k, monsterNames.apply(k) + (b.isBoss(k) ? " (boss)" : ""),
+                        String.format("pokonano %,d; dotknij = karta", b.kills(k)), true));
             }
             if (rows.size() == 1) rows.add(new MenuRow("ach:none", "Jeszcze nic", "pokonane potwory pojawią się tutaj", false));
         }

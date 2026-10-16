@@ -399,6 +399,12 @@ public final class GameScreen extends ScreenAdapter {
                     bossReport(t);
                 } else if (id.equals("book:hunt")) {
                     openHunt();
+                } else if (id.startsWith("best:")) {
+                    // karta potwora z bestiariusza (dane z lokalnego rejestru, dziala tez online)
+                    String key = id.substring("best:".length());
+                    pl.fawizja.pixel.monster.MonsterType mt = game.monsters().contains(key) ? game.monsters().get(key) : null;
+                    if (mt != null) hud.openInfo(mt.name(), pl.fawizja.pixel.achievement.BestiaryCard.rows(mt,
+                            session.character().bestiary().kills(key), session.items()));
                 } else if (id.startsWith("ach:title:")) {
                     String key = id.substring("ach:title:".length());
                     if (key.equals(session.character().title())) key = "-"; // ponowne dotkniecie zdejmuje tytul

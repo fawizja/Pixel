@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.0] - 2026-10-16
+
+### Dodano
+- Karta potwora w bestiariuszu: dotknięcie potwora pokazuje poziom, zdrowie, doświadczenie i atak; od 10
+  pokonanych także odporności i pancerz, a od 25 listę łupów z szansami. Działa też online (dane z klienta).
+- 2 nowe testy; łącznie 306.
+
 ## [0.59.0] - 2026-10-16
 
 ### Dodano
