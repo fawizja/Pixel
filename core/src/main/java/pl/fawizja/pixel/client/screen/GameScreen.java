@@ -347,6 +347,7 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:heal":
             case "settings:mana":
             case "settings:eat":
+            case "settings:target":
             case "settings:page":
                 settings.apply(id);
                 settingsPrefs.put(settings.toMap());
@@ -819,6 +820,16 @@ public final class GameScreen extends ScreenAdapter {
         }
     }
 
+    /** Cel sam (ustawienie): bez celu i poza strefa ochronna wybiera potwora stojacego najwyzej 3 pola od postaci. */
+    private long autoTargetAtMs;
+
+    private void autoTarget(long t) {
+        if (!settings.autoTarget() || t < autoTargetAtMs || session.character().isDead()) return;
+        autoTargetAtMs = t + 500;
+        if (session.combat().target() != null || session.world().isProtectionZone(session.character().position())) return;
+        if (session.combat().threatNear(3)) onButton("target");
+    }
+
     private void autoLoot(long t) {
         if (!settings.autoLoot() || t < autoLootAtMs || session.character().isDead()) return;
         autoLootAtMs = t + 800;
@@ -951,6 +962,7 @@ public final class GameScreen extends ScreenAdapter {
         autoHeal(t);
         autoMana(t);
         autoEat(t);
+        autoTarget(t);
         updateHunt(t);
         checkDeath();
         updateGuard(t);

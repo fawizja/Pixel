@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.87.0] - 2026-10-16
+
+### Dodano
+- Ustawienie „Cel sam” (druga strona panelu): gdy postać nie ma celu i jest poza strefą ochronną, sama wybiera
+  potwora stojącego najwyżej 3 pola obok (działa też online, przez to samo polecenie co przycisk CEL).
+- 1 nowy test i rozszerzony test ustawień; łącznie 340.
+
 ## [0.86.0] - 2026-10-16
 
 ### Dodano

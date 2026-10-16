@@ -117,6 +117,9 @@ class GameSettingsTest {
         assertTrue(s.apply("settings:eat"));
         assertTrue(s.autoEat());
         assertTrue(GameSettings.fromMap(s.toMap()).autoEat());
+        assertEquals("settings:target", second[2][0]);
+        assertTrue(s.apply("settings:target"));
+        assertTrue(GameSettings.fromMap(s.toMap()).autoTarget());
         s.apply("settings:page");
         assertEquals(0, s.page());
     }

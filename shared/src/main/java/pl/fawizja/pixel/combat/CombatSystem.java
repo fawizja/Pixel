@@ -122,6 +122,15 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     }
 
     /** Wybiera nastepny najblizszy widoczny cel (przycisk CEL). */
+    /** Czy zywy potwor stoi najwyzej radius pol od postaci, na tym samym pietrze i w zasiegu wzroku (automatyczny cel). */
+    public boolean threatNear(int radius) {
+        for (Monster m : monsters.near(pc.position(), radius)) {
+            if (!m.isDead() && m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= radius
+                    && world.hasLineOfSight(pc.position(), m.position())) return true;
+        }
+        return false;
+    }
+
     public Monster cycleTarget() {
         List<Monster> near = monsters.near(pc.position(), 8);
         near.removeIf(m -> m.isDead() || !world.hasLineOfSight(pc.position(), m.position()));
