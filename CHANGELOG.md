@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.78.0] - 2026-10-16
+
+### Dodano
+- Okno „Ostatnie łupy” (`/łupy`, `/łup`): 30 ostatnich pokonanych potworów i co z nich wypadło (także to, co zostało w ciele),
+  z czasem („3 min temu”) i oznaczeniem rzadkiego łupu. Działa lokalnie i online (żądanie `LOOTLOG`).
+
+### Zmieniono
+- Wiersz `/analiza` w oknie `/pomoc` wskazuje też `/łupy`.
+- 1 nowy test i rozszerzony test rzadkiego łupu; łącznie 330.
+
 ## [0.77.0] - 2026-10-16
 
 ### Zmieniono

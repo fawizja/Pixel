@@ -230,6 +230,11 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         return best;
     }
 
+    private final LootLog lootLog = new LootLog();
+
+    /** Ostatnie lupy (okno /lupy). */
+    public LootLog lootLog() { return lootLog; }
+
     private void onMonsterDeath(Monster m, long now) {
         MonsterType t = m.type();
         kills++;
@@ -240,6 +245,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
         Position corpse = m.position();
         List<ItemStack> drop = rollLoot(t);
+        List<String> dropped = new ArrayList<>();
+        for (ItemStack s : drop) dropped.add(describe(s));
+        lootLog.record(now, t.name(), dropped, !rareRolled.isEmpty());
         for (ItemStack r : rareRolled) {
             log.add(now, EventLog.Kind.LOOT, "Rzadki łup: " + describe(r) + "!");
             if (rareDropListener != null) rareDropListener.rareDrop(t, r, now);

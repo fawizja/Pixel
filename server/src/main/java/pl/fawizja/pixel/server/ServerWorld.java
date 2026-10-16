@@ -1284,6 +1284,14 @@ final class ServerWorld {
             case "EVENTS":
                 p.client.send("EVENTS", invasionStatus(now));
                 break;
+            case "LOOTLOG": {
+                // ostatnie lupy tego gracza (wiersze jak w podsumowaniu smierci)
+                List<String> out = new ArrayList<>();
+                out.add("LOOTLOG");
+                java.util.Collections.addAll(out, pl.fawizja.pixel.combat.DeathRecap.encode(p.session.combat().lootLog().rows(now)));
+                p.client.send(out.toArray(new String[0]));
+                break;
+            }
             case "WHO": {
                 // lista graczy w grze: najwyzszy poziom na gorze (bez polozenia)
                 List<ServerPlayer> online = new ArrayList<>(players.values());

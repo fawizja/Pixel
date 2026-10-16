@@ -495,6 +495,11 @@ public final class GameScreen extends ScreenAdapter {
             else hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, null));
             return;
         }
+        if (cmd.equals("/lupy") || cmd.equals("/lup")) {
+            if (net != null) net.send("LOOTLOG");
+            else showLoot(session.combat().lootLog().rows(now()));
+            return;
+        }
         if (cmd.equals("/statystyki") || cmd.equals("/staty")) {
             hud.openInfo("Statystyki: " + session.character().name(), pl.fawizja.pixel.game.StatsReport.rows(session.character()));
             return;
@@ -639,6 +644,15 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         hud.openInfo("Ostatnia śmierć", rows);
+    }
+
+    /** Okno ostatnich lupow (/lupy). */
+    private void showLoot(List<String[]> rows) {
+        if (rows.isEmpty()) {
+            session.log().add(now(), EventLog.Kind.INFO, "Nie pokonałeś jeszcze potwora w tej sesji.");
+            return;
+        }
+        hud.openInfo("Ostatnie łupy", rows);
     }
 
     private void checkDeath() {
@@ -1435,6 +1449,9 @@ public final class GameScreen extends ScreenAdapter {
                     }
                     session.log().add(now, kind, m[2]);
                     if (m[2].startsWith("Zginąłeś")) net.send("DEATH"); // podsumowanie smierci z serwera
+                    break;
+                case "LOOTLOG":
+                    showLoot(pl.fawizja.pixel.combat.DeathRecap.decode(m, 1));
                     break;
                 case "DEATHLOG":
                     showDeath(pl.fawizja.pixel.combat.DeathRecap.decode(m, 1));

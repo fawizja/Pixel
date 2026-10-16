@@ -195,7 +195,7 @@ public final class ChatCommands {
         String[][] runnable = {
             {"/gracze", "kto jest teraz w grze"},
             {"/bossowie", "którzy bossowie żyją i kiedy wrócą"},
-            {"/analiza", "doświadczenie, zabicia i złoto na godzinę"},
+            {"/analiza", "exp, zabicia i złoto na godzinę (ostatnie łupy: /łupy)"},
             {"/wydarzenia", "inwazja, potwór dnia, zadanie dnia, nagrody"},
             {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
             {"/statystyki", "czas gry, zabicia, śmierci (dziennik zadań: /zadania)"},

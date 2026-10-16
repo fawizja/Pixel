@@ -52,6 +52,11 @@ class RareDropTest {
         assertTrue(golem.isDead());
         assertEquals(List.of("ice_golem:frost_blade"), heard);
         assertEquals(1, log.latest(50).stream().filter(e -> e.text().startsWith("Rzadki łup: ")).count());
+        List<String[]> loot = cs.lootLog().rows(1000);
+        assertEquals(1, loot.size(), "the kill is in the loot window, including what stayed in the corpse");
+        assertEquals(golem.type().name() + " (przed chwilą)", loot.get(0)[0]);
+        assertTrue(loot.get(0)[1].startsWith("rzadki łup! "), loot.get(0)[1]);
+        assertEquals(golem.type().name() + " (3 min temu)", cs.lootLog().rows(1000 + 180_000).get(0)[0]);
 
         // zwykly lup nie jest ogloszeniem
         List<ItemStack> plain = cs.rollLoot(REG.get("wolf"));

@@ -194,6 +194,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Automatyczna mikstura many w ustawieniach (0.75.0)
 - [x] Okno statystyk postaci /statystyki (0.76.0)
 - [x] Automatyczne leczenie czarem przed miksturą (0.77.0)
+- [x] Okno ostatnich łupów /łupy (0.78.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
