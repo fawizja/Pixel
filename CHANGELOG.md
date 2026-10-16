@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.91.0] - 2026-10-16
+
+### Dodano
+- W depozycie u bankiera wiersz „Odłóż cały łup”: jednym dotknięciem przenosi wszystkie materiały z plecaka
+  do depozytu, bez przedmiotów potrzebnych do aktywnych zadań i bez zapasów (akcja `npc:storeloot`, działa też online).
+- 1 nowy test; łącznie 343. Scena `depot` odświeżona.
+
 ## [0.90.0] - 2026-10-16
 
 ### Dodano

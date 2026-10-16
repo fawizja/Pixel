@@ -925,7 +925,7 @@ public final class Hud {
                                 "do plecaka", pc.backpack().spaceFor(id) > 0));
                     }
                     if (left.size() == 1) left.add(new MenuRow("npc:none", "Depozyt jest pusty", "odłóż coś z plecaka", false));
-                    right.add(new MenuRow("npc:none", "Plecak", "dotknij, aby odłożyć wszystkie sztuki", false));
+                    right.add(new MenuRow("npc:storeloot", "Odłóż cały łup", "materiały bez przedmiotów do zadań", true));
                     for (int id : distinctIds(pc.backpack())) {
                         if (pl.fawizja.pixel.economy.Currency.isCoin(id) || right.size() >= perCol) continue;
                         right.add(new MenuRow("npc:store:" + id, "Odłóż " + pc.backpack().count(id) + "x " + session.items().get(id).name(),

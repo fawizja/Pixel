@@ -469,15 +469,7 @@ public final class GameSession {
     public int sellLoot(long nowMs) {
         Npc n = talkTo(NpcRole.MERCHANT, nowMs);
         if (n == null) return 0;
-        java.util.Set<Integer> keep = new java.util.HashSet<>();
-        if (quests != null) {
-            for (String key : pc.quests().active().keySet()) {
-                pl.fawizja.pixel.quest.QuestType q = quests.registry().get(key);
-                if (q != null && q.kind() == pl.fawizja.pixel.quest.QuestKind.COLLECT && items.byKey(q.target()) != null) {
-                    keep.add(items.byKey(q.target()).id());
-                }
-            }
-        }
+        java.util.Set<Integer> keep = questItems();
         java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
         for (ItemStack s : pc.backpack().contents()) {
             if (s != null && items.get(s.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.MATERIAL) ids.add(s.itemId());
@@ -529,6 +521,38 @@ public final class GameSession {
      * Depozyt u bankiera: odklada wszystkie sztuki przedmiotu z plecaka (ile sie zmiesci). Monety ida na konto,
      * nie do depozytu. Zwraca liczbe przeniesionych sztuk.
      */
+    /** Przedmioty potrzebne do aktywnych zadan zbierania (nie sprzedajemy ich ani nie odkladamy hurtem). */
+    private java.util.Set<Integer> questItems() {
+        java.util.Set<Integer> keep = new java.util.HashSet<>();
+        if (quests == null) return keep;
+        for (String key : pc.quests().active().keySet()) {
+            pl.fawizja.pixel.quest.QuestType q = quests.registry().get(key);
+            if (q != null && q.kind() == pl.fawizja.pixel.quest.QuestKind.COLLECT && items.byKey(q.target()) != null) {
+                keep.add(items.byKey(q.target()).id());
+            }
+        }
+        return keep;
+    }
+
+    /** U bankiera: caly lup (materialy) z plecaka do depozytu jednym dotknieciem, bez przedmiotow do zadan. */
+    public int depotStoreLoot(long nowMs) {
+        if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
+        java.util.Set<Integer> keep = questItems();
+        java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
+        for (ItemStack s : pc.backpack().contents()) {
+            if (s != null && items.get(s.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.MATERIAL && !keep.contains(s.itemId())) {
+                ids.add(s.itemId());
+            }
+        }
+        if (ids.isEmpty()) {
+            log.add(nowMs, EventLog.Kind.INFO, "Nie masz łupu do odłożenia" + (keep.isEmpty() ? "." : " (przedmioty do zadań zostają)."));
+            return 0;
+        }
+        int moved = 0;
+        for (int id : ids) moved += moveAll(pc.backpack(), pc.depot(), id, nowMs, "Odłożono do depozytu", "Depozyt jest pełny.");
+        return moved;
+    }
+
     public int depotStore(int itemId, long nowMs) {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
         if (pl.fawizja.pixel.economy.Currency.isCoin(itemId)) {
