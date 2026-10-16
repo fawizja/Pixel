@@ -214,7 +214,7 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Nie mam teraz dla ciebie zlecenia.");
                 return;
             }
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy: pokonaj " + h.target() + "x " + monsterName(h.monster()) + whereToHunt(h.monster()) + ".");
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy: pokonaj " + h.target() + "x " + monsterName(h.monster()) + whereToHunt(h.monster()) + ". Droga: /idź łowisko");
             return;
         }
         if (!h.done()) {
@@ -364,6 +364,23 @@ public final class GameSession {
                     && pc.equipment().canWear(t.id(), pc.vocation(), pc.level()).ok()) return true;
         }
         return false;
+    }
+
+    /**
+     * Najblizsze legowisko potwora z niedokonczonego zlecenia lowcy, a bez niego z zadania dnia (to samo pietro);
+     * null, gdy nie ma czego szukac albo legowisko jest na innym pietrze.
+     */
+    public pl.fawizja.pixel.monster.SpawnPoint huntingGround() {
+        String key = pc.hunt().active() && !pc.hunt().done() ? pc.hunt().monster()
+                : pc.daily().activeOn(today()) && !pc.daily().doneOn(today()) ? pc.daily().monster() : null;
+        if (key == null) return null;
+        pl.fawizja.pixel.monster.SpawnPoint best = null;
+        Position me = pc.position();
+        for (pl.fawizja.pixel.monster.SpawnPoint sp : monsters.spawns()) {
+            if (!sp.monsterKey().equals(key) || sp.center().z() != me.z()) continue;
+            if (best == null || sp.center().distanceTo(me) < best.center().distanceTo(me)) best = sp;
+        }
+        return best;
     }
 
     /** " (Krainy Varden)" - gdzie szukac potwora z zadania; pusty tekst, gdy nie ma go na mapie. */

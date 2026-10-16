@@ -558,6 +558,18 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (cmd.startsWith("/idź ") || cmd.startsWith("/idz ")) {
             String q = text.substring(text.indexOf(' ') + 1).trim();
+            String fq = pl.fawizja.pixel.inventory.ItemSearch.fold(q);
+            if (fq.equals("lowisko") || fq.equals("polowanie") || fq.equals("zlecenie")) {
+                pl.fawizja.pixel.monster.SpawnPoint sp = session.huntingGround();
+                if (sp == null) {
+                    session.log().add(now(), EventLog.Kind.INFO, "Brak zadania z potworami na tym piętrze. Zlecenie da przewodnik (/idź przewodnik).");
+                } else if (walkTo(sp.center(), now(), true, true)) {
+                    session.log().add(now(), EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(sp.monsterKey()) + ".");
+                } else {
+                    session.log().add(now(), EventLog.Kind.INFO, "Nie znam drogi na łowisko" + session.whereToHunt(sp.monsterKey()) + ".");
+                }
+                return;
+            }
             pl.fawizja.pixel.npc.Npc n = pl.fawizja.pixel.npc.NpcFinder.find(session.npcs(), q, session.character().position());
             if (n == null) {
                 session.log().add(now(), EventLog.Kind.INFO, "Nie widzę tu nikogo takiego. Spróbuj: /idź kupiec, bank, kapłan, przewodnik, woźnica albo imię.");

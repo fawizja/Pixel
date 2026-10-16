@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.128.0] - 2026-10-16
+
+### Dodano
+- `/idź łowisko` prowadzi do najbliższego legowiska potwora ze zlecenia łowcy (a bez zlecenia z zadania dnia)
+  na tym piętrze; zlecenie przypomina o tym poleceniu.
 ## [0.127.0] - 2026-10-16
 
 ### Dodano
