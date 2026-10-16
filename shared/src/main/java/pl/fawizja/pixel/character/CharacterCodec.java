@@ -63,6 +63,7 @@ public final class CharacterCodec {
         if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
         if (pc.isBlessed()) m.put("bless", "1");
+        if (!pc.enchantments().encode().isEmpty()) m.put("ench", pc.enchantments().encode());
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
@@ -195,6 +196,7 @@ public final class CharacterCodec {
         pc.daily().restore(m.get("daily"));
         pc.loginStreak().restore(m.get("login"));
         pc.setBlessed("1".equals(m.get("bless")));
+        pc.enchantments().restore(m.get("ench"));
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
         if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));

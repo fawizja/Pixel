@@ -155,11 +155,12 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             target = attacker;
         }
         nextPlayerAttackMs = now + ap.intervalMs();
-        int raw = CombatFormulas.roll(ap.maxDamage(), rng);
+        int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng));
         if (pc.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
         if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
         int dealt = target.damage(dmg);
+        leech(dealt);
         monsters.provoke(target);
         if (!isTrivial(target.type())) pc.skills().addTries(ap.skill(), 1);
         // wrecz: "skad" = gracz (animacja wypadu na kliencie)
@@ -179,13 +180,29 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Obrazenia z czaru lub runy: odpornosci, zdarzenie, prowokacja, smierc. Zwraca zadane HP. */
     public int damageMonster(Monster m, int raw, DamageType type, long now) {
         if (m.isDead()) return 0;
-        int dmg = CombatFormulas.mitigateOnMonster(m.type(), raw, type, rng);
+        int dmg = CombatFormulas.mitigateOnMonster(m.type(), critical(raw), type, rng);
         int dealt = m.damage(dmg);
+        leech(dealt);
         push(new CombatEvent(now, m.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
         monsters.provoke(m);
         if (target == null) target = m;
         if (m.isDead()) onMonsterDeath(m, now);
         return dealt;
+    }
+
+    /** Zaklecie ciosu krytycznego: 10% szans na +50% obrazen. */
+    private int critical(int raw) {
+        pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
+        if (raw <= 0 || !e.active(pl.fawizja.pixel.item.Enchantments.Kind.CRIT)) return raw;
+        if (rng.nextInt(100) >= pl.fawizja.pixel.item.Enchantments.CRIT_CHANCE) return raw;
+        return raw + raw * pl.fawizja.pixel.item.Enchantments.CRIT_BONUS_PERCENT / 100;
+    }
+
+    /** Zaklecia kradziezy zycia i many po trafieniu potwora. */
+    private void leech(int dealt) {
+        pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
+        pc.heal(e.leech(pl.fawizja.pixel.item.Enchantments.Kind.LIFE, dealt));
+        if (!pc.isDead()) pc.restoreMana(e.leech(pl.fawizja.pixel.item.Enchantments.Kind.MANA, dealt));
     }
 
     /** Zdarzenie do wyswietlenia (leczenie z czaru, mikstury). */

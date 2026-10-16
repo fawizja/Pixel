@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.66.0] - 2026-10-16
+
+### Dodano
+- Zaklęcia u kowala (okno ulepszania u każdego kupca): kradzież życia (6% zadanych obrażeń leczy),
+  kradzież many (3% wraca jako mana) i cios krytyczny (10% szans na +50% obrażeń, także czarami).
+  Jeden zakup to godzina polowania, zapas do 3 godzin; czas płynie tylko poza strefą ochronną.
+  Cena rośnie z poziomem postaci. Zaklęcia są zapisywane i działają online.
+- 2 nowe testy; łącznie 314.
+
 ## [0.65.0] - 2026-10-16
 
 ### Dodano

@@ -182,6 +182,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Okno polecen /pomoc z wykonywaniem po dotknieciu (0.63.0)
 - [x] Lancuch zadan karawan w Qasirah, poziomy 45-170 (0.64.0)
 - [x] Zadania Selvaran (85, 150) i Frostholm (110) domykajace luki poziomow (0.65.0)
+- [x] Zaklecia u kowala: kradziez zycia, many, cios krytyczny (0.66.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

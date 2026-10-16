@@ -52,6 +52,7 @@ public final class Actions {
             case "heal": s.priestHeal(now); return true;
             case "bless": s.priestBless(now); return true;
             case "upgrade": s.upgradeEquipped(pl.fawizja.pixel.item.EquipSlot.valueOf(p[2]), now); return true;
+            case "enchant": s.buyEnchantment(pl.fawizja.pixel.item.Enchantments.Kind.valueOf(p[2]), now); return true;
             case "travel": s.travel(p[2], now); return true;
             case "settle": s.settleHere(now); return true;
             case "quest": s.questAction(p[2], now); return true;

@@ -861,9 +861,15 @@ public final class Hud {
                                 + pl.fawizja.pixel.item.Upgrade.chancePercent(next) + "%", money >= price));
                     }
                     if (left.size() == 1) left.add(new MenuRow("npc:none", "Nic do ulepszenia", "załóż broń, tarczę albo zbroję", false));
-                    right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; broń +6% ataku, zbroja +1 na poziom", false));
-                    right.add(new MenuRow("npc:none", "Nieudana próba", "zabiera tylko złoto, przedmiot zostaje", false));
-                    right.add(new MenuRow("npc:none", "Ulepszonych nie sprzedasz", "ani nie oddasz w handlu, na rynku i pocztą", false));
+                    right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; nieudana próba zabiera tylko złoto", false));
+                    pl.fawizja.pixel.item.Enchantments ench = pc.enchantments();
+                    for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
+                        long price = pl.fawizja.pixel.item.Enchantments.price(k, pc.level());
+                        String left0 = ench.active(k) ? ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k)) : "";
+                        right.add(new MenuRow("npc:enchant:" + k.name(), k.label() + " (1 h)", k.effect() + "; " + price + " gp" + left0,
+                                money >= price && ench.canExtend(k)));
+                    }
+                    right.add(new MenuRow("npc:none", "Czas zaklęć", "płynie tylko poza strefą ochronną, do 3 h zapasu", false));
                     break;
                 }
                 pl.fawizja.pixel.npc.Shop shop = session.shopOf(npc);

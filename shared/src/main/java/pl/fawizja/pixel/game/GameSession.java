@@ -697,6 +697,29 @@ public final class GameSession {
         return true;
     }
 
+    /** Zaklecie u kowala (kupca): godzina polowania, placi z plecaka, najwyzej 3 godziny zapasu. */
+    public boolean buyEnchantment(pl.fawizja.pixel.item.Enchantments.Kind kind, long nowMs) {
+        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        if (n == null) return false;
+        pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
+        if (!e.canExtend(kind)) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + kind.label().toLowerCase(java.util.Locale.ROOT)
+                    + " starczy jeszcze na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(kind)) + ". Wróć później.");
+            return false;
+        }
+        long price = pl.fawizja.pixel.item.Enchantments.price(kind, pc.level());
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": zaklęcie kosztuje " + price + " gp (monety w plecaku).");
+            return false;
+        }
+        pc.backpack().commitFrom(tx);
+        e.extend(kind);
+        log.add(nowMs, EventLog.Kind.SYSTEM, kind.label() + " na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(kind))
+                + " polowania (" + price + " gp).");
+        return true;
+    }
+
     /** Tytul z osiagniecia: key null albo "-" zdejmuje tytul; tylko zdobyte osiagniecia. */
     public boolean chooseTitle(String key, long nowMs) {
         if (key == null || key.equals("-")) {
@@ -805,6 +828,10 @@ public final class GameSession {
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt);
+            if (!world.isProtectionZone(pc.position())) {
+                pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);
+                if (gone != null) log.add(nowMs, EventLog.Kind.WARNING, "Zaklęcie wygasło: " + gone.label().toLowerCase(java.util.Locale.ROOT) + ".");
+            }
             switch (pc.tickTorch(dt, torchId)) {
                 case NEXT_LIT: log.add(nowMs, EventLog.Kind.INFO, "Pochodnia się wypaliła. Zapalasz następną."); break;
                 case BURNED_OUT: log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia się wypaliła. Nie masz kolejnej."); break;
