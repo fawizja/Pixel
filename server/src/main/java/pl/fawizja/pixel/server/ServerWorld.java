@@ -1200,6 +1200,7 @@ final class ServerWorld {
             case "MARKET": marketCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
+            case "TITLE": p.session.chooseTitle(f.length > 1 ? f[1] : null, now); break;
             case "DEATH": {
                 // podsumowanie ostatniej smierci tego gracza
                 pl.fawizja.pixel.combat.DeathRecap.Report r = p.session.combat().lastDeath();
@@ -1614,7 +1615,8 @@ final class ServerWorld {
                 frame.append(Protocol.line("PL", String.valueOf(o.id), oc.name(), oc.vocation().name(),
                         String.valueOf(op.x()), String.valueOf(op.y()), String.valueOf(op.z()),
                         String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())), o.pvp.skull(now).name(),
-                        guildTag(oc.name()), oc.isMounted() ? "M" : "-", oc.pet() == null ? "-" : oc.pet())).append('\n');
+                        guildTag(oc.name()), oc.isMounted() ? "M" : "-", oc.pet() == null ? "-" : oc.pet(),
+                        oc.title() == null ? "-" : oc.title())).append('\n');
             }
             for (Monster m : monsters.near(me, Protocol.VIEW_RADIUS)) {
                 if (m.isDead() || m.position().z() != me.z()) continue;

@@ -651,8 +651,10 @@ public final class Hud {
             for (pl.fawizja.pixel.achievement.Achievement a : pl.fawizja.pixel.achievement.Achievement.values()) {
                 boolean has = pc.achievements().has(a);
                 long p = Math.min(a.progress(pc), a.target());
-                String detail = has ? "zdobyte: " + a.goal() : a.goal() + String.format(" (%,d / %,d)", p, a.target());
-                all.add(new MenuRow("ach:none", (has ? "* " : "") + a.title(), detail, has));
+                boolean worn = a.name().equals(pc.title());
+                String detail = worn ? "twój tytuł (dotknij, aby zdjąć)"
+                        : has ? "zdobyte: " + a.goal() + "; dotknij = tytuł" : a.goal() + String.format(" (%,d / %,d)", p, a.target());
+                all.add(new MenuRow(has ? "ach:title:" + a.name() : "ach:none", (worn ? "> " : has ? "* " : "") + a.title(), detail, has));
             }
             int room = perCol * 2 - 1;
             if (all.size() <= room) {
@@ -1387,7 +1389,8 @@ public final class Hud {
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
         text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity() + "   Miasto: " + capitalized(pc.homeTown())
-                + (pc.isBlessed() ? "   Błogosławieństwo" : ""), x, y - 36);
+                + (pc.isBlessed() ? "   Błogosławieństwo" : "")
+                + (pc.title() == null ? "" : "   Tytuł: " + pl.fawizja.pixel.achievement.Achievement.titleOf(pc.title())), x, y - 36);
         text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Pokonane: " + pc.bestiary().total() + "   Osiągnięcia: " + pc.achievements().count() + " (O)", x, y - 54);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {

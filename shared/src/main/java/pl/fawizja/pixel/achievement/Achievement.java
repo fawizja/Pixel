@@ -67,4 +67,11 @@ public enum Achievement {
     }
 
     public boolean reached(PlayerCharacter pc) { return progress(pc) >= target; }
+
+    /** Tytul osiagniecia po kluczu (null = brak albo nieznany klucz, np. z nowszej wersji). */
+    public static String titleOf(String key) {
+        if (key == null) return null;
+        for (Achievement a : values()) if (a.name().equals(key)) return a.title;
+        return null;
+    }
 }

@@ -116,6 +116,7 @@ public final class PlayerCharacter {
         mounted = o.mounted;
         blessed = o.blessed;
         pet = o.pet;
+        title = o.title;
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
@@ -160,6 +161,12 @@ public final class PlayerCharacter {
 
     public String pet() { return pet; }
     public void setPet(String key) { pet = key == null || key.isEmpty() ? null : key; }
+
+    /** Wybrany tytul: klucz zdobytego osiagniecia albo null. */
+    private String title;
+
+    public String title() { return title; }
+    public void setTitle(String key) { title = key == null || key.isEmpty() || key.equals("-") ? null : key; }
     public void setBlessed(boolean v) { blessed = v; }
 
     public boolean hasMount() { return hasMount; }

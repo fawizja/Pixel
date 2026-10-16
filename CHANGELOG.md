@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.59.0] - 2026-10-16
+
+### Dodano
+- Tytuły: zdobyte osiągnięcie w oknie osiągnięć (O) można dotknąć, aby nosić jego nazwę jako tytuł (ponowne
+  dotknięcie go zdejmuje). Tytuł widać na karcie postaci, a online inni gracze widzą go złotym napisem nad
+  imieniem (komunikat PL, pole 13; żądanie `TITLE klucz|-`). Zapis postaci (`title`).
+- 2 nowe testy (w tym sieciowy: pupil i tytuł widoczne dla innego gracza); łącznie 304.
+
 ## [0.58.0] - 2026-10-16
 
 ### Dodano

@@ -64,6 +64,7 @@ public final class CharacterCodec {
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
         if (pc.isBlessed()) m.put("bless", "1");
         if (pc.pet() != null) m.put("pet", pc.pet());
+        if (pc.title() != null) m.put("title", pc.title());
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
@@ -195,6 +196,7 @@ public final class CharacterCodec {
         pc.loginStreak().restore(m.get("login"));
         pc.setBlessed("1".equals(m.get("bless")));
         pc.setPet(m.get("pet"));
+        pc.setTitle(m.get("title"));
         if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));
         String chests = m.get("chests");
         if (chests != null && !chests.isBlank()) for (String c : chests.split(",")) pc.openedChests().add(c.trim());

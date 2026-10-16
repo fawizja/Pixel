@@ -646,6 +646,24 @@ public final class GameSession {
         return CastResult.OK;
     }
 
+    /** Tytul z osiagniecia: key null albo "-" zdejmuje tytul; tylko zdobyte osiagniecia. */
+    public boolean chooseTitle(String key, long nowMs) {
+        if (key == null || key.equals("-")) {
+            if (pc.title() != null) log.add(nowMs, EventLog.Kind.INFO, "Zdejmujesz tytuł.");
+            pc.setTitle(null);
+            return true;
+        }
+        pl.fawizja.pixel.achievement.Achievement a = null;
+        for (pl.fawizja.pixel.achievement.Achievement x : pl.fawizja.pixel.achievement.Achievement.values()) if (x.name().equals(key)) a = x;
+        if (a == null || !pc.achievements().has(a)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Ten tytuł trzeba najpierw zdobyć (osiągnięcia, klawisz O).");
+            return false;
+        }
+        pc.setTitle(a.name());
+        log.add(nowMs, EventLog.Kind.INFO, "Twój tytuł: " + a.title() + ".");
+        return true;
+    }
+
     /** Pupil: przywolanie albo odeslanie (przedmiot zostaje w plecaku; bez niego pupil odchodzi). */
     private CastResult togglePet(pl.fawizja.pixel.item.ItemType pet, long nowMs) {
         if (pet.key().equals(pc.pet())) {

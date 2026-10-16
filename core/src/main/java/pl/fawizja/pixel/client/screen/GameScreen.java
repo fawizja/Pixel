@@ -108,6 +108,7 @@ public final class GameScreen extends ScreenAdapter {
         String guild;
         boolean mounted;
         String pet;
+        String title;
         final pl.fawizja.pixel.client.render.PetFollower petFollower = new pl.fawizja.pixel.client.render.PetFollower();
         boolean seen;
     }
@@ -398,6 +399,11 @@ public final class GameScreen extends ScreenAdapter {
                     bossReport(t);
                 } else if (id.equals("book:hunt")) {
                     openHunt();
+                } else if (id.startsWith("ach:title:")) {
+                    String key = id.substring("ach:title:".length());
+                    if (key.equals(session.character().title())) key = "-"; // ponowne dotkniecie zdejmuje tytul
+                    if (net != null) net.send("TITLE", key);
+                    else session.chooseTitle(key, t);
                 } else if (id.equals("hunt:reset")) {
                     hunt.reset(t, session.character());
                     session.log().add(t, EventLog.Kind.INFO, "Nowe polowanie: liczniki od zera.");
@@ -1153,6 +1159,12 @@ public final class GameScreen extends ScreenAdapter {
             String label = rp.name + (ally ? " [drużyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
                     + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "") + (rp.guild == null ? "" : " <" + rp.guild + ">");
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
+            if (rp.title != null) {
+                // tytul z osiagniecia nad imieniem
+                String tl = "\"" + rp.title + "\""; // cudzyslowy ASCII - pewne w kazdej czcionce
+                font.setColor(1f, 0.85f, 0.35f, 1f);
+                font.draw(batch, tl, projected.x - tl.length() * 2.8f * scale, projected.y + 14f * scale);
+            }
             drawBubble(batch, font, scale, rp.name, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)));
         }
         drawBubble(batch, font, scale, session.character().name(), session.renderX(t), worldRenderer.worldY(session.renderY(t)));
@@ -1314,6 +1326,7 @@ public final class GameScreen extends ScreenAdapter {
                 rp.guild = e.guild();
                 rp.mounted = e.mounted();
                 rp.pet = e.pet();
+                rp.title = pl.fawizja.pixel.achievement.Achievement.titleOf(e.title());
                 rp.seen = true;
             }
             remotePlayers.values().removeIf(rp -> !rp.seen);

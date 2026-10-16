@@ -932,6 +932,31 @@ class NetworkSyncTest {
     }
 
     @Test
+    void otherPlayersSeePetsAndTitles() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("both see each other", () -> seen(ula, "Ola") != null);
+            assertNull(seen(ula, "Ola").pet());
+            assertNull(seen(ula, "Ola").title());
+            ola.send("TITLE", "LEVEL_20");
+            awaitMessage(ola, "not earned yet", m -> m[0].equals("LOG") && m[2].startsWith("Ten tytuł trzeba najpierw zdobyć"));
+            server.enqueueTest(() -> {
+                pl.fawizja.pixel.character.PlayerCharacter pc = server.world().find("Ola").session.character();
+                pc.achievements().restore("LEVEL_20");
+                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(ItemRegistry.loadDefault().byKey("pet_raven").id(), 1));
+                pc.setPet("pet_raven");
+            });
+            ola.send("TITLE", "LEVEL_20");
+            await("ula sees the pet and the title", () -> seen(ula, "Ola") != null
+                    && "pet_raven".equals(seen(ula, "Ola").pet()) && "LEVEL_20".equals(seen(ula, "Ola").title()));
+            ola.send("TITLE", "-");
+            await("title removed", () -> seen(ula, "Ola") != null && seen(ula, "Ola").title() == null);
+        }
+    }
+
+    @Test
     void parcelsReachTheDepotOfOnlineAndOfflinePlayers() throws Exception {
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient kuba = connect()) {
