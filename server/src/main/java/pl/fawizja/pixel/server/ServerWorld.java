@@ -666,6 +666,7 @@ final class ServerWorld {
                     return;
                 }
                 market.sold(id);
+                market.recordSale(l.itemId(), l.count(), l.price());
                 pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(l.itemId(), l.count()));
                 long earned = l.price() - pl.fawizja.pixel.market.Market.fee(l.price());
                 String what = l.count() + "x " + items.get(l.itemId()).name();
@@ -706,6 +707,21 @@ final class ServerWorld {
                 return;
         }
         sendMarket(p, "");
+    }
+
+    /** Ceny z rynku graczy dla /cena: ostatnia sprzedaz, najtansza oferta i najwyzsze zamowienie kupna (za sztuke). */
+    private void marketPrice(ServerPlayer p, String key, long now) {
+        if (!items.containsKey(key)) return;
+        pl.fawizja.pixel.item.ItemType t = items.byKey(key);
+        long last = market.lastUnitPrice(t.id());
+        pl.fawizja.pixel.market.Market.Listing cheap = market.cheapest(t.id());
+        long bid = -1;
+        for (pl.fawizja.pixel.market.BuyOrders.Order o : orders.newestFirst()) {
+            if (o.itemId() == t.id()) bid = Math.max(bid, Math.max(1, o.price() / o.count()));
+        }
+        info(p, "Rynek graczy, " + t.name() + ": ostatnia sprzedaż " + (last < 0 ? "brak" : String.format("%,d gp/szt.", last))
+                + ", najtańsza oferta " + (cheap == null ? "brak" : String.format("%,d gp/szt. (#%d)", Math.max(1, cheap.price() / cheap.count()), cheap.id()))
+                + ", kupujący płacą " + (bid < 0 ? "brak zamówień" : String.format("%,d gp/szt.", bid)) + ".", now);
     }
 
     /** Zamowienia kupna: LIST, ADD "ilosc przedmiot cena", FILL id, CANCEL id (trzy ostatnie u bankiera). */
@@ -763,6 +779,8 @@ final class ServerWorld {
                 }
                 if (!pc.backpack().remove(o.itemId(), o.count()).ok() || !pc.bank().credit(o.price()).ok()) return;
                 orders.remove(id);
+                market.recordSale(o.itemId(), o.count(), o.price());
+                saveMarket();
                 mail.add(new pl.fawizja.pixel.mail.Mailbox.Parcel(o.buyer(), p.name(), o.itemId(), o.count()));
                 saveOrders();
                 saveMail();
@@ -1666,6 +1684,7 @@ final class ServerWorld {
             case "FRIEND": friendCommand(p, f, now); break;
             case "MARKET": marketCommand(p, f, now); break;
             case "WANT": wantCommand(p, f, now); break;
+            case "PRICE": marketPrice(p, f.length > 1 ? f[1] : "", now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "TRANSFER": transferCommand(p, f, now); break;
             case "BOUNTY": bountyCommand(p, f, now); break;

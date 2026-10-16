@@ -40,6 +40,8 @@ public final class Market {
     private final Map<String, Long> earnings = new HashMap<>();
     private final Map<String, String> earningNames = new HashMap<>();
     private int nextId = 1;
+    /** Ostatnia cena sprzedazy za sztuke (rynek i zamowienia kupna). */
+    private final Map<Integer, Long> lastUnitPrice = new HashMap<>();
 
     public static long fee(long price) { return price * FEE_PERCENT / 100; }
 
@@ -106,6 +108,24 @@ public final class Market {
 
     public synchronized int size() { return listings.size(); }
 
+    /** Zapamietuje cene transakcji (za sztuke, co najmniej 1 gp). */
+    public synchronized void recordSale(int itemId, int count, long price) {
+        if (count > 0 && price > 0) lastUnitPrice.put(itemId, Math.max(1, price / count));
+    }
+
+    /** Ostatnia cena za sztuke albo -1, gdy jeszcze nikt tego nie sprzedal. */
+    public synchronized long lastUnitPrice(int itemId) { return lastUnitPrice.getOrDefault(itemId, -1L); }
+
+    /** Najtansza oferta za sztuke (null = brak ofert). */
+    public synchronized Listing cheapest(int itemId) {
+        Listing best = null;
+        for (Listing l : listings.values()) {
+            if (l.itemId() != itemId) continue;
+            if (best == null || l.price() * best.count() < best.price() * l.count()) best = l;
+        }
+        return best;
+    }
+
     /** Usuniecie postaci: jej oferty i zarobki przepadaja. */
     public synchronized void forget(String seller) {
         listings.values().removeIf(l -> l.seller().equalsIgnoreCase(seller));
@@ -117,6 +137,9 @@ public final class Market {
         for (Listing l : listings.values()) {
             sb.append("L ").append(l.id()).append(';').append(l.itemId()).append(';').append(l.count()).append(';')
                     .append(l.price()).append(';').append(l.seller()).append('\n');
+        }
+        for (Map.Entry<Integer, Long> e : lastUnitPrice.entrySet()) {
+            sb.append("P ").append(e.getKey()).append(';').append(e.getValue()).append('\n');
         }
         for (Map.Entry<String, Long> e : earnings.entrySet()) {
             sb.append("E ").append(e.getValue()).append(';').append(earningNames.getOrDefault(e.getKey(), e.getKey())).append('\n');
@@ -137,6 +160,9 @@ public final class Market {
                     Listing l = new Listing(Integer.parseInt(f[0]), f[4], Integer.parseInt(f[1]), Integer.parseInt(f[2]), Long.parseLong(f[3]));
                     m.listings.put(l.id(), l);
                     m.nextId = Math.max(m.nextId, l.id() + 1);
+                } else if (line.startsWith("P ")) {
+                    String[] f = line.substring(2).split(";", 2);
+                    m.lastUnitPrice.put(Integer.parseInt(f[0]), Long.parseLong(f[1].trim()));
                 } else if (line.startsWith("E ")) {
                     String[] f = line.substring(2).split(";", 2);
                     m.addEarnings(f[1], Long.parseLong(f[0]));

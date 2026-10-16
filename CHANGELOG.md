@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.149.0] - 2026-10-16
+
+### Dodano
+- `/cena` w grze sieciowej podaje też ceny z rynku graczy: ostatnią sprzedaż, najtańszą ofertę i ile płacą
+  kupujący w zamówieniach (za sztukę).
 ## [0.148.0] - 2026-10-16
 
 ### Dodano

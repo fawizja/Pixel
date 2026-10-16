@@ -29,6 +29,20 @@ class BuyOrdersTest {
     }
 
     @Test
+    void theMarketRemembersPricesPerPiece() {
+        Market m = new Market();
+        assertEquals(-1, m.lastUnitPrice(5));
+        m.recordSale(5, 4, 1000);
+        assertEquals(250, m.lastUnitPrice(5));
+        m.add("Ola", 5, 10, 2000);
+        Market.Listing cheap = m.add("Ula", 5, 2, 300);
+        m.add("Iwo", 6, 1, 1);
+        assertEquals(cheap.id(), m.cheapest(5).id());
+        assertNull(m.cheapest(7));
+        assertEquals(250, Market.decode(m.encode()).lastUnitPrice(5), "saved");
+    }
+
+    @Test
     void oldOrdersExpireAndOldFilesStillLoad() {
         BuyOrders b = BuyOrders.decode("N 4\nO 3;10;5;900;Ola\n", 1_000);
         assertEquals("Ola", b.get(3).buyer());

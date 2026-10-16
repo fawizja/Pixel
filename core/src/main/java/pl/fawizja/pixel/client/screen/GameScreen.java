@@ -605,6 +605,7 @@ public final class GameScreen extends ScreenAdapter {
                 return;
             }
             hud.openInfo("Cena: " + it.name(), pl.fawizja.pixel.npc.PriceCheck.rows(it, session.npcs(), session.shops()));
+            if (net != null) net.send("PRICE", it.key()); // ceny z rynku graczy przychodza w dzienniku
             return;
         }
         if (cmd.equals("/ignoruj") || cmd.startsWith("/ignoruj ")) {

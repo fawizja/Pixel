@@ -920,6 +920,8 @@ class NetworkSyncTest {
             ula.send("WANT", "FILL", "1");
             awaitMessage(ola, "delivered", m -> m[0].equals("LOG") && m[2].startsWith("Poczta: Ula przysyła 5x Wilcze futro"));
             awaitMessage(ula, "paid", m -> m[0].equals("LOG") && m[2].startsWith("Zrealizowano zamówienie #1"));
+            ula.send("PRICE", "wolf_pelt");
+            awaitMessage(ula, "price", m -> m[0].equals("LOG") && m[2].startsWith("Rynek graczy, Wilcze futro: ostatnia sprzedaż 400"));
             ola.send("WANT", "ADD", "1 wilcze futro 700");
             awaitMessage(ola, "second order", m -> m[0].equals("WANT") && m.length == 2 && m[1].startsWith("#2 "));
             ola.send("WANT", "CANCEL", "2");
