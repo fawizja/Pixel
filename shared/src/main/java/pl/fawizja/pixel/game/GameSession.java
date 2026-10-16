@@ -383,6 +383,11 @@ public final class GameSession {
         return best;
     }
 
+    /** Odpoczynek: postac w strefie ochronnej, bez blokady po walce - szybsza regeneracja. */
+    public boolean isResting(long nowMs) {
+        return !pc.isDead() && nowMs >= pzLockedUntil && world.isProtectionZone(pc.position());
+    }
+
     /** " (Krainy Varden)" - gdzie szukac potwora z zadania; pusty tekst, gdy nie ma go na mapie. */
     public String whereToHunt(String monsterKey) {
         String where = pl.fawizja.pixel.achievement.BestiaryCard.habitats(monsterKey, monsters.spawns(), world);
@@ -1273,7 +1278,7 @@ public final class GameSession {
         }
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
-            pc.tickRegeneration(dt);
+            pc.tickRegeneration(dt, isResting(nowMs));
             pc.stats().addPlayTime(dt);
             if (!world.isProtectionZone(pc.position())) {
                 pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);

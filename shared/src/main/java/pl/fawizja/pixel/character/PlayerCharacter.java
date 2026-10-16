@@ -348,14 +348,20 @@ public final class PlayerCharacter {
     }
 
     /** Regeneracja zalezna od czasu gry (wywolywana z petli symulacji). */
-    public void tickRegeneration(long deltaMs) {
+    public void tickRegeneration(long deltaMs) { tickRegeneration(deltaMs, false); }
+
+    /** Odpoczynek w strefie ochronnej dodaje tyle krotnosci regeneracji (x3 glodny, x4 najedzony). */
+    public static final int REST_BONUS = 2;
+
+    /** resting = postac odpoczywa w strefie ochronnej (bez blokady po walce). */
+    public void tickRegeneration(long deltaMs, boolean resting) {
         if (isDead() || deltaMs <= 0) return;
         lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
         regenAccumulatorMs += deltaMs;
         long tick = Balance.REGEN_TICK_SECONDS * 1000L;
         while (regenAccumulatorMs >= tick) {
             regenAccumulatorMs -= tick;
-            int mult = fedMs > 0 ? 2 : 1;
+            int mult = (fedMs > 0 ? 2 : 1) + (resting ? REST_BONUS : 0);
             heal(Balance.healthRegenPerTick(vocation, level) * mult);
             restoreMana(Balance.manaRegenPerTick(vocation, level) * mult);
             fedMs = Math.max(0, fedMs - tick);

@@ -274,6 +274,8 @@ Grupy: atak 2 s, leczenie 1 s, wsparcie 2 s, mikstury 1 s (osobne - mozna leczyc
 | Great Mana Potion | 140-200 many | poziom 50, Druid / Sorcerer / Paladin |
 | Chleb / mieso / ryba | sytosc 5 / 3 / 4 min (podwojna regeneracja, maks. 20 min) | brak |
 
+Odpoczynek (0.133.0): w strefie ochronnej bez blokady po walce regeneracja HP i many jest x3 (x4 z sytoscia).
+
 Symulacje z botem (`SpellBotSimulationTest`): kazda profesja na poziomie 8 przez 10 minut przy
 wilkach pod Varden - zero smierci, co najmniej 5 zabitych; poziom 8 ze 100 miksturami przeciw
 Grimtoothowi - zawsze przegrywa (boss zadaje do 160 obrazen, wiecej niz mikstury nadrabiaja).

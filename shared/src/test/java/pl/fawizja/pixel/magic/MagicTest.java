@@ -247,6 +247,17 @@ class MagicTest {
     }
 
     @Test
+    void restingInAProtectionZoneTriplesRegeneration() {
+        PlayerCharacter resting = TestData.newCharacter(Vocation.MONK);
+        PlayerCharacter out = TestData.newCharacter(Vocation.MONK);
+        resting.damage(100);
+        out.damage(100);
+        resting.tickRegeneration(60_000, true);
+        out.tickRegeneration(60_000, false);
+        assertEquals((out.health() - 85) * 3, resting.health() - 85);
+    }
+
+    @org.junit.jupiter.api.Test
     void foodDoublesRegenerationAndCannotOverfill() {
         PlayerCharacter fed = TestData.newCharacter(Vocation.MONK);
         PlayerCharacter hungry = TestData.newCharacter(Vocation.MONK);

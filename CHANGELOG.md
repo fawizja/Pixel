@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.133.0] - 2026-10-16
+
+### Dodano
+- Odpoczynek: w strefie ochronnej (świątynia, miasto) zdrowie i mana odnawiają się trzy razy szybciej, a po
+  jedzeniu cztery razy. Nie działa w czasie blokady strefy po walce. Karta postaci pokazuje, kiedy odpoczywasz.
 ## [0.132.0] - 2026-10-16
 
 ### Zmieniono
