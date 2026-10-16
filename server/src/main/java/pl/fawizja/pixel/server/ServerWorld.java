@@ -1195,6 +1195,15 @@ final class ServerWorld {
             case "MARKET": marketCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
+            case "DEATH": {
+                // podsumowanie ostatniej smierci tego gracza
+                pl.fawizja.pixel.combat.DeathRecap.Report r = p.session.combat().lastDeath();
+                List<String> out = new ArrayList<>();
+                out.add("DEATHLOG");
+                if (r != null) java.util.Collections.addAll(out, pl.fawizja.pixel.combat.DeathRecap.encode(pl.fawizja.pixel.combat.DeathRecap.rows(r)));
+                p.client.send(out.toArray(new String[0]));
+                break;
+            }
             case "BOSS":
                 List<String> rows = new ArrayList<>();
                 rows.add("BOSS");

@@ -24,7 +24,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -101,6 +101,15 @@ public final class DesktopLauncher {
                             break;
                         }
                     }
+                }
+                if ("death".equals(open)) {
+                    // podglad podsumowania smierci: kilka trafien i smierc (okno otworzy sie samo)
+                    GameScreen gs = (GameScreen) getScreen();
+                    long t = gs.worldTime();
+                    pl.fawizja.pixel.combat.CombatSystem cs = gs.session().combat();
+                    for (int i = 0; i < 4; i++) cs.recordDamage("Wilk", 18 + i, t);
+                    for (int i = 0; i < 2; i++) cs.recordDamage("Goblin szaman", 44, t);
+                    cs.diedFromPlayer("Kuba", false, t);
                 }
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();

@@ -444,6 +444,12 @@ public final class GameScreen extends ScreenAdapter {
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        if (cmd.equals("/smierc")) {
+            if (net != null) net.send("DEATH");
+            else showDeath(session.combat().lastDeath() == null ? List.of()
+                    : pl.fawizja.pixel.combat.DeathRecap.rows(session.combat().lastDeath()));
+            return;
+        }
         if (cmd.equals("/analiza") || cmd.equals("/polowanie")) {
             openHunt();
             return;
@@ -564,6 +570,24 @@ public final class GameScreen extends ScreenAdapter {
         lastWeatherZ = p.z();
         lastWeather = k;
         return k;
+    }
+
+    /** Okno podsumowania smierci; lokalnie otwiera sie samo po nowej smierci (online po komunikacie DEATHLOG). */
+    private pl.fawizja.pixel.combat.DeathRecap.Report shownDeath;
+
+    private void showDeath(List<String[]> rows) {
+        if (rows.isEmpty()) {
+            session.log().add(now(), EventLog.Kind.INFO, "Jeszcze nie zginąłeś w tej sesji.");
+            return;
+        }
+        hud.openInfo("Ostatnia śmierć", rows);
+    }
+
+    private void checkDeath() {
+        pl.fawizja.pixel.combat.DeathRecap.Report d = session.combat().lastDeath();
+        if (net != null || d == null || d == shownDeath) return;
+        shownDeath = d;
+        showDeath(pl.fawizja.pixel.combat.DeathRecap.rows(d));
     }
 
     private static final String HUNT_TITLE = "Analiza polowania";
@@ -762,6 +786,7 @@ public final class GameScreen extends ScreenAdapter {
         autoLoot(t);
         autoHeal(t);
         updateHunt(t);
+        checkDeath();
         updateGuard(t);
 
         if (net == null && t - lastSaveMs >= AUTOSAVE_MS) {
@@ -1257,6 +1282,10 @@ public final class GameScreen extends ScreenAdapter {
                         kind = EventLog.Kind.INFO;
                     }
                     session.log().add(now, kind, m[2]);
+                    if (m[2].startsWith("Zginąłeś")) net.send("DEATH"); // podsumowanie smierci z serwera
+                    break;
+                case "DEATHLOG":
+                    showDeath(pl.fawizja.pixel.combat.DeathRecap.decode(m, 1));
                     break;
                 case "CHAT":
                     if (m.length >= 3) {

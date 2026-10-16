@@ -152,6 +152,12 @@ class CombatTest {
         assertEquals(pc.maxHealth(), pc.health());
         assertTrue(pc.level() <= level);
         assertTrue(pc.level() >= 8);
+        DeathRecap.Report d = cs.lastDeath();
+        assertNotNull(d, "death recap kept");
+        assertEquals(boss.type().name(), d.killer());
+        assertEquals(boss.type().name(), d.rows().get(0).source());
+        assertTrue(d.rows().get(0).total() > 0 && d.rows().get(0).hits() > 0);
+        assertTrue(d.expLost() > 0);
     }
 
     @Test

@@ -216,6 +216,7 @@ public final class PvpRules {
         raw = (int) Math.round(raw * PVP_DAMAGE);
         int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, b.isDefensive(), rng);
         int dealt = b.damage(dmg);
+        victim.combat().recordDamage(a.name() + " (gracz)", dealt, now);
         CombatEvent.Kind kind = dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED;
         victim.combat().addEvent(new CombatEvent(now, b.position(), dealt, kind));
         attacker.combat().addEvent(new CombatEvent(now, b.position(), dealt,

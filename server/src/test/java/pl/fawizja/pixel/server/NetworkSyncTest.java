@@ -288,6 +288,27 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void theServerSendsTheLastDeathRecap() throws Exception {
+        try (NetClient a = connect()) {
+            a.hello("Zosia", "DRUID", "tajne-Zosia");
+            await("welcome", () -> a.selfSave() != null);
+            a.send("DEATH");
+            awaitMessage(a, "no death yet", m -> m[0].equals("DEATHLOG") && m.length == 1);
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    p.session.combat().recordDamage("Wilk", 40, server.now());
+                    p.session.combat().diedFromPlayer("Kuba", false, server.now());
+                }
+            });
+            awaitMessage(a, "death log", m -> m[0].equals("LOG") && m[2].startsWith("Zginąłeś"));
+            a.send("DEATH");
+            awaitMessage(a, "recap", m -> m[0].equals("DEATHLOG")
+                    && pl.fawizja.pixel.combat.DeathRecap.decode(m, 1).get(0)[1].equals("Kuba (gracz)")
+                    && m[3].startsWith("Wilk;40 obrażeń"));
+        }
+    }
+
     static boolean logged(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

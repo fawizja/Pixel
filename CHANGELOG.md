@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.53.0] - 2026-10-16
+
+### Dodano
+- Podsumowanie śmierci: po śmierci samo otwiera się okno „Ostatnia śmierć” z zabójcą, stratą doświadczenia
+  i obrażeniami z ostatnich 30 s według źródła (potwory i gracze, suma i liczba ciosów). Ponownie: `/śmierć`.
+  Online serwer odsyła podsumowanie na komunikat `DEATH` (odpowiedź `DEATHLOG` z wierszami „etykieta;opis”),
+  a klient prosi o nie sam po komunikacie o śmierci.
+- `combat/DeathRecap`, `CombatSystem.recordDamage/lastDeath`, trafienia PvP też trafiają do podsumowania,
+  podgląd `-Dpixel.open=death`. 3 nowe testy (w tym sieciowy) i nowe sprawdzenia w teście śmierci; łącznie 291.
+
 ## [0.52.0] - 2026-10-16
 
 ### Dodano

@@ -159,6 +159,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Zdarzenie do wyswietlenia (leczenie z czaru, mikstury). */
     public void addEvent(CombatEvent e) { push(e); }
 
+    /** Trafienia postaci do podsumowania smierci i ostatnie podsumowanie (null = jeszcze nie zginela). */
+    private final DeathRecap recap = new DeathRecap();
+    private DeathRecap.Report lastDeath;
+
+    public void recordDamage(String source, int amount, long now) { recap.record(source, amount, now); }
+
+    public DeathRecap.Report lastDeath() { return lastDeath; }
+
     private boolean inReach(Monster m, int range) {
         return m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= range
                 && world.hasLineOfSight(pc.position(), m.position());
@@ -228,6 +236,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dmg = CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), pc.isDefensive(), rng);
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
+        recap.record(t.name(), dealt, now);
         if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t)) pc.skills().addTries(Skill.SHIELDING, 1);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 t.range() > 1 ? null : m.position(), null));
@@ -247,6 +256,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
+        lastDeath = recap.build(killer.type().name(), before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killer.type().name() + "). Strata: "
                 + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "")
                 + ". Odrodzenie w świątyni.");
@@ -276,6 +286,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
+        lastDeath = recap.build(killer + " (gracz)", before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś z ręki gracza " + killer + ". Strata: "
                 + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "") + (dropped > 0 ? ", plecak został na ziemi" : "")
                 + ". Odrodzenie w świątyni.");
