@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.119.0] - 2026-10-16
+
+### Dodano
+- Ranking umiejętności: `/ranking magia`, `miecz`, `dystans`, `pięści`, `tarcza`, `wędkarstwo` pokazuje
+  najlepszych w danej umiejętności (także graczy offline z zapisów) i Twoje miejsce.
 ## [0.118.0] - 2026-10-16
 
 ### Dodano

@@ -759,6 +759,14 @@ class NetworkSyncTest {
             assertEquals(0, v.mine(), "a monk is not in the druid ranking");
             kuba.send("RANK", "rycerz");
             awaitMessage(kuba, "unknown vocation", m -> m[0].equals("LOG") && m[2].contains("Nie znam profesji"));
+            kuba.send("RANK", "pięści");
+            String[][] skill = new String[1][];
+            awaitMessage(kuba, "skill ranking", m -> m[0].equals("RANK") && (skill[0] = m) != null);
+            pl.fawizja.pixel.ranking.RankingView sv = pl.fawizja.pixel.ranking.RankingView.parse(skill[0]);
+            assertEquals("Umiejętność: Pięści", sv.title());
+            assertEquals(3, sv.rows().size(), "online and offline characters");
+            assertTrue(sv.rows().get(0).level() > 0, "offline entries keep their skills");
+            assertTrue(sv.mine() > 0);
         }
     }
 

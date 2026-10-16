@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import pl.fawizja.pixel.character.Skill;
 import pl.fawizja.pixel.vocation.Vocation;
 
 /**
@@ -18,7 +19,17 @@ public final class Ranking {
     /** Tyle miejsc pokazuje polecenie /ranking. */
     public static final int SHOWN = 10;
 
-    public record Entry(String name, Vocation vocation, int level, long experience) {}
+    /** skills = poziomy umiejetnosci w kolejnosci {@link Skill#values()} (krotsza tablica = brakujace 0). */
+    public record Entry(String name, Vocation vocation, int level, long experience, int[] skills) {
+        public Entry(String name, Vocation vocation, int level, long experience) {
+            this(name, vocation, level, experience, new int[0]);
+        }
+
+        public int skill(Skill s) { return s.ordinal() < skills.length ? skills[s.ordinal()] : 0; }
+    }
+
+    /** Tytul rankingu umiejetnosci (klient pokazuje wtedy poziom umiejetnosci zamiast poziomu postaci). */
+    public static final String SKILL_TITLE = "Umiejętność: ";
 
     private static final Comparator<Entry> ORDER = Comparator.comparingLong(Entry::experience).reversed()
             .thenComparing(e -> e.name().toLowerCase(Locale.ROOT));
@@ -45,6 +56,37 @@ public final class Ranking {
         List<Entry> all = sorted(filter);
         for (int i = 0; i < all.size(); i++) if (all.get(i).name().equalsIgnoreCase(name)) return i + 1;
         return 0;
+    }
+
+    /** Pierwsze {@code n} miejsc wedlug umiejetnosci (rowne - wyzszy poziom postaci, potem alfabetycznie). */
+    public synchronized List<Entry> topSkill(int n, Skill skill) {
+        List<Entry> all = bySkill(skill);
+        return new ArrayList<>(all.subList(0, Math.min(n, all.size())));
+    }
+
+    /** Miejsce postaci w rankingu umiejetnosci (od 1) albo 0. */
+    public synchronized int positionSkill(String name, Skill skill) {
+        List<Entry> all = bySkill(skill);
+        for (int i = 0; i < all.size(); i++) if (all.get(i).name().equalsIgnoreCase(name)) return i + 1;
+        return 0;
+    }
+
+    private List<Entry> bySkill(Skill skill) {
+        List<Entry> out = new ArrayList<>(byName.values());
+        out.sort(Comparator.comparingInt((Entry e) -> e.skill(skill)).reversed().thenComparing(ORDER));
+        return out;
+    }
+
+    /** Umiejetnosc z tekstu gracza: "magia", "miecz", "dystans", "piesci", "tarcza", "wedkarstwo" (min. 3 litery); null gdy brak. */
+    public static Skill skillFrom(String text) {
+        if (text == null) return null;
+        String t = plain(text.trim());
+        if (t.length() < 3) return null;
+        for (Skill s : Skill.values()) {
+            if (plain(s.label()).startsWith(t) || plain(s.name()).startsWith(t)) return s;
+        }
+        if ("ryby".startsWith(t) || "lowienie".startsWith(t)) return Skill.FISHING;
+        return null;
     }
 
     private List<Entry> sorted(Vocation filter) {

@@ -169,7 +169,22 @@ final class ServerWorld {
     }
 
     private static pl.fawizja.pixel.ranking.Ranking.Entry rankEntry(PlayerCharacter pc) {
-        return new pl.fawizja.pixel.ranking.Ranking.Entry(pc.name(), pc.vocation(), pc.level(), pc.experience());
+        pl.fawizja.pixel.character.Skill[] all = pl.fawizja.pixel.character.Skill.values();
+        int[] skills = new int[all.length];
+        for (int i = 0; i < all.length; i++) skills[i] = pc.skills().level(all[i]);
+        return new pl.fawizja.pixel.ranking.Ranking.Entry(pc.name(), pc.vocation(), pc.level(), pc.experience(), skills);
+    }
+
+    /** /ranking magia, miecz...: pierwsze miejsca wedlug poziomu umiejetnosci. */
+    private void sendSkillRanking(ServerPlayer p, pl.fawizja.pixel.character.Skill skill) {
+        for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
+        java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
+        int i = 1;
+        for (pl.fawizja.pixel.ranking.Ranking.Entry e : ranking.topSkill(pl.fawizja.pixel.ranking.Ranking.SHOWN, skill)) {
+            rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i++, e.name(), e.vocation().displayName(), e.skill(skill)));
+        }
+        sendRank(p, new pl.fawizja.pixel.ranking.RankingView(pl.fawizja.pixel.ranking.Ranking.SKILL_TITLE + skill.label(),
+                ranking.positionSkill(p.name(), skill), ranking.size(null), rows));
     }
 
     /** /ranking [profesja]: pierwsze miejsca i miejsce pytajacego. */
@@ -184,8 +199,14 @@ final class ServerWorld {
         pl.fawizja.pixel.vocation.Vocation filter = null;
         if (arg != null && !arg.isBlank()) {
             filter = pl.fawizja.pixel.ranking.Ranking.vocationFrom(arg);
+            pl.fawizja.pixel.character.Skill skill = filter == null ? pl.fawizja.pixel.ranking.Ranking.skillFrom(arg) : null;
+            if (skill != null) {
+                sendSkillRanking(p, skill);
+                return;
+            }
             if (filter == null) {
-                warn(p, "Nie znam profesji \"" + arg.trim() + "\". Wpisz: /ranking, /ranking druid, paladin, mag, mnich albo gildie.", now);
+                warn(p, "Nie znam profesji ani umiejętności \"" + arg.trim() + "\". Wpisz: /ranking, /ranking druid, paladin, mag, mnich, "
+                        + "magia, miecz, dystans, pięści, tarcza, wędkarstwo albo gildie.", now);
                 return;
             }
         }

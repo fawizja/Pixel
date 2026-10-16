@@ -795,11 +795,12 @@ public final class Hud {
         float colW = (menuW - 30) / 2f;
         List<pl.fawizja.pixel.ranking.RankingView.Row> rows = v.rows();
         boolean guilds = pl.fawizja.pixel.ranking.GuildRanking.TITLE.equals(v.title());
+        boolean skillRank = v.title().startsWith(pl.fawizja.pixel.ranking.Ranking.SKILL_TITLE);
         int perCol = Math.max(5, (rows.size() + 1) / 2);
         for (int i = 0; i < rows.size(); i++) {
             pl.fawizja.pixel.ranking.RankingView.Row r = rows.get(i);
             MenuRow row = new MenuRow("ranking:none", r.place() + ". " + r.name() + (r.place() == v.mine() ? (guilds ? "  (twoja)" : "  (ty)") : ""),
-                    r.vocation() + (guilds ? ", suma poziomów " : ", poziom ") + r.level(),
+                    r.vocation() + (guilds ? ", suma poziomów " : skillRank ? ", umiejętność " : ", poziom ") + r.level(),
                     true);
             row.x = menuX + 10 + (i / perCol) * (colW + 10);
             row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;

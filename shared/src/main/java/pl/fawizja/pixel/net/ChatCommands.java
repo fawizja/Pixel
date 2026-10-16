@@ -206,7 +206,7 @@ public final class ChatCommands {
             {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
             {"/statystyki", "czas gry, zabicia; /szukaj nazwa, /cena nazwa"},
             {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
-            {"/ranking", "najlepsi gracze (także /ranking gildie)"},
+            {"/ranking", "najlepsi gracze; /ranking gildie, magia, miecz..."},
             {"/znajomi", "lista znajomych"},
             {"/znaczniki", "miejsca na mapie (/znacznik nazwa); /idź bank prowadzi do NPC"},
             {"/strój", "kolor stroju widoczny dla innych graczy"},
