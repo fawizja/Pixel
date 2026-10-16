@@ -196,6 +196,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Automatyczne leczenie czarem przed miksturą (0.77.0)
 - [x] Okno ostatnich łupów /łupy (0.78.0)
 - [x] Ostrzeżenia o końcu mikstur, run i amunicji (0.79.0)
+- [x] Boss tygodnia z nagrodą w złocie (0.80.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

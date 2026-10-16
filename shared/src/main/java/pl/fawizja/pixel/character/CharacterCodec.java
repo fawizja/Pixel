@@ -65,6 +65,7 @@ public final class CharacterCodec {
         if (pc.isBlessed()) m.put("bless", "1");
         m.put("lvlrew", String.valueOf(pc.rewardedLevel()));
         m.put("stats", pc.stats().encode());
+        if (pc.weeklyBossWeek() >= 0) m.put("wboss", String.valueOf(pc.weeklyBossWeek()));
         if (!pc.enchantments().encode().isEmpty()) m.put("ench", pc.enchantments().encode());
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
@@ -200,6 +201,7 @@ public final class CharacterCodec {
         pc.setBlessed("1".equals(m.get("bless")));
         if (m.containsKey("lvlrew")) pc.setRewardedLevel(Integer.parseInt(m.get("lvlrew")));
         pc.stats().restore(m.get("stats"));
+        if (m.containsKey("wboss")) pc.setWeeklyBossWeek(Long.parseLong(m.get("wboss")));
         pc.enchantments().restore(m.get("ench"));
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));

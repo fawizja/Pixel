@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.80.0] - 2026-10-16
+
+### Dodano
+- Boss tygodnia: co 7 dni jeden boss wspólny dla wszystkich graczy. Pierwsze pokonanie w tygodniu daje postaci
+  złoto na konto (2× doświadczenie bossa, co najmniej 5 000 gp); liczy się też jego elitarna odmiana.
+- Wiersz „Boss tygodnia” w oknie `/wydarzenia` (nagroda albo „nagroda odebrana, nowy za N dni”).
+- Zapis odebranej nagrody (`wboss`). 2 nowe testy; łącznie 333.
+
 ## [0.79.0] - 2026-10-16
 
 ### Dodano

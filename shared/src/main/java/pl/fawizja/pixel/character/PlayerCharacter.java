@@ -120,6 +120,7 @@ public final class PlayerCharacter {
         blessed = o.blessed;
         rewardedLevel = o.rewardedLevel;
         stats.copyFrom(o.stats);
+        weeklyBossWeek = o.weeklyBossWeek;
         pet = o.pet;
         title = o.title;
         torchLit = o.torchLit;
@@ -170,6 +171,12 @@ public final class PlayerCharacter {
     private final CharacterStats stats = new CharacterStats();
 
     public CharacterStats stats() { return stats; }
+
+    /** Tydzien, w ktorym postac odebrala nagrode za bossa tygodnia (-1 = nigdy). */
+    private long weeklyBossWeek = -1;
+
+    public long weeklyBossWeek() { return weeklyBossWeek; }
+    public void setWeeklyBossWeek(long week) { weeklyBossWeek = week; }
     public void setRewardedLevel(int v) { rewardedLevel = Math.max(0, v); }
 
     /** Przywolany pupil (klucz przedmiotu pet_*) albo null; ozdoba, chodzi za postacia. */

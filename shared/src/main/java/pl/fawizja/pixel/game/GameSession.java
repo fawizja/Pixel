@@ -135,6 +135,7 @@ public final class GameSession {
             if (pc.daily().onKill(t.key(), today())) {
                 log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
             }
+            checkWeeklyBoss(t, lastUpdateMs);
             checkAchievements(lastUpdateMs);
             QuestType done = quests == null ? null : quests.onKill(pc, t.key());
             if (done != null) {
@@ -203,6 +204,30 @@ public final class GameSession {
     private pl.fawizja.pixel.monster.MonsterType boosted;
 
     /** Potwor dnia (wspolny dla wszystkich, zmiana o polnocy); ustawia tez premie w walce. */
+    private long weeklyBossWeek = Long.MIN_VALUE;
+    private pl.fawizja.pixel.monster.MonsterType weeklyBoss;
+
+    /** Boss tygodnia (null bez bossow w swiecie). */
+    public pl.fawizja.pixel.monster.MonsterType weeklyBoss() {
+        long week = pl.fawizja.pixel.daily.WeeklyBoss.week(today());
+        if (week != weeklyBossWeek) {
+            weeklyBossWeek = week;
+            weeklyBoss = monsters == null ? null : pl.fawizja.pixel.daily.WeeklyBoss.pick(week, monsters.spawnedTypes());
+        }
+        return weeklyBoss;
+    }
+
+    /** Pierwsze w tygodniu pokonanie bossa tygodnia: zloto na konto. */
+    private void checkWeeklyBoss(pl.fawizja.pixel.monster.MonsterType t, long nowMs) {
+        pl.fawizja.pixel.monster.MonsterType boss = weeklyBoss();
+        long week = pl.fawizja.pixel.daily.WeeklyBoss.week(today());
+        if (boss == null || !boss.key().equals(t.key()) || pc.weeklyBossWeek() == week) return;
+        long gold = pl.fawizja.pixel.daily.WeeklyBoss.rewardGold(boss);
+        if (!pc.bank().credit(gold).ok()) return;
+        pc.setWeeklyBossWeek(week);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Pokonano bossa tygodnia! Nagroda: " + String.format("%,d gp", gold) + " na konto.");
+    }
+
     public pl.fawizja.pixel.monster.MonsterType boostedCreature() {
         long day = today();
         if (day != boostedDay) {

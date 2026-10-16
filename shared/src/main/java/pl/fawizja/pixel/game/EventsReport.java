@@ -20,6 +20,13 @@ public final class EventsReport {
         rows.add(new String[] {"Inwazja", invasion == null ? "tylko w grze na serwerze" : invasion});
         MonsterType boost = s.boostedCreature();
         rows.add(new String[] {"Potwór dnia", boost == null ? "brak" : pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
+        MonsterType boss = s.weeklyBoss();
+        if (boss != null) {
+            long week = pl.fawizja.pixel.daily.WeeklyBoss.week(today);
+            rows.add(new String[] {"Boss tygodnia", boss.name() + (pc.weeklyBossWeek() == week ? ": nagroda odebrana, nowy za "
+                    + (7 - Math.floorMod(today, 7)) + " dni" : ": " + String.format("%,d gp", pl.fawizja.pixel.daily.WeeklyBoss.rewardGold(boss))
+                    + " za pierwsze pokonanie")});
+        }
         rows.add(new String[] {"Zadanie dnia", daily(pc.daily(), today, s)});
         int streak = pc.loginStreak().lastDay() == today ? pc.loginStreak().streak() : 0;
         rows.add(new String[] {"Seria logowania", streak > 0 ? "dzień " + streak + " z " + pl.fawizja.pixel.daily.LoginStreak.DAYS
