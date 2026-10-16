@@ -7,6 +7,7 @@
 @MERCHANT;handel,towar,kupie,trade;Dotknij towaru po lewej, aby kupić, a przedmiotu po prawej, aby sprzedać. Ilość zmienisz pierwszym wierszem.
 @BANKER;bank,konto,złoto;Konto jest wspólne dla wszystkich miast. 100 gp to 1 platyna, 100 platyny to 1 kryształ.
 @PRIEST;leczenie,uzdrow,świątynia;Uleczę rany każdego wędrowca. Możesz też zamieszkać w tym mieście - tu będziesz się odradzać.
+@PRIEST;błogosławieństwo,bless;Za opłatę pobłogosławię cię: najbliższa śmierć zabierze ci połowę doświadczenia mniej. Cena rośnie z poziomem.
 @CARRIER;podróż,przejazd,wóz,jedź;Wybierz miasto z listy. Cena zależy od odległości, płacisz monetami z plecaka, a po walce z graczem musisz chwilę odczekać.
 @GUIDE;zadania,praca,quest;Poniżej masz moje zlecenia. Kolejne etapy dłuższych zadań odsłonią się, gdy skończysz poprzednie.
 varden_guide;przemytnicy,bandyci;Bandyci z wschodnich dróg handlują z goblinami z kopalni. Zacznij od zlecenia "Ślady przemytników".

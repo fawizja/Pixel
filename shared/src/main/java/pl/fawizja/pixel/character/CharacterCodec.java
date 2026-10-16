@@ -61,6 +61,7 @@ public final class CharacterCodec {
         if (pc.achievements().count() > 0) m.put("achievements", pc.achievements().encode());
         if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
+        if (pc.isBlessed()) m.put("bless", "1");
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
@@ -190,6 +191,7 @@ public final class CharacterCodec {
         pc.achievements().restore(m.get("achievements"));
         pc.daily().restore(m.get("daily"));
         pc.loginStreak().restore(m.get("login"));
+        pc.setBlessed("1".equals(m.get("bless")));
         String chests = m.get("chests");
         if (chests != null && !chests.isBlank()) for (String c : chests.split(",")) pc.openedChests().add(c.trim());
         String ignore = m.getOrDefault("autoloot.ignore", "");

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.51.0] - 2026-10-16
+
+### Dodano
+- Błogosławieństwo u kapłana: za monety z plecaka (200 gp za poziom, co najmniej 1000 gp) najbliższa śmierć
+  zabiera 2,5% zamiast 5% doświadczenia. Działa raz, także przy śmierci z ręki gracza (plecak przy czerwonej
+  czaszce i tak zostaje na ziemi). Zapisywane w postaci (`bless`), widoczne na karcie postaci i w rozmowie.
+- Karta postaci pokazuje miasto zamieszkania. Nazwy umiejętności z `Skill.label()`.
+- 2 nowe testy; łącznie 287.
+
+### Poprawiono
+- Niestabilny test sieciowy znajomych: lista była pobierana, zanim serwer obsłużył wyjście znajomego.
+
 ## [0.50.0] - 2026-10-16
 
 ### Dodano

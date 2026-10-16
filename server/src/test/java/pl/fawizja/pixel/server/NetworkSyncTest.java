@@ -744,6 +744,8 @@ class NetworkSyncTest {
                 ula.hello("Ula", "DRUID", "tajne-Ula");
                 awaitMessage(ola, "friend came", m -> m[0].equals("LOG") && m[2].contains("Znajomy Ula jest teraz w grze."));
             }
+            // dopiero gdy serwer obsluzy wyjscie, lista pokaze Ule jako offline (inaczej wyscig z rozlaczeniem)
+            awaitMessage(ola, "friend left again", m -> m[0].equals("LOG") && m[2].contains("Znajomy Ula wyszedł z gry."));
             ola.send("FRIEND", "LIST");
             String[][] got = new String[1][];
             awaitMessage(ola, "offline friend", m -> m[0].equals("FRIENDS") && (got[0] = m) != null

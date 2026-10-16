@@ -134,9 +134,19 @@ public final class Balance {
 
     /** Utrata doswiadczenia przy smierci: 5%, ale nie ponizej progu poziomu minLevel. */
     public static long experienceAfterDeath(long experience, int minLevel) {
+        return experienceAfterDeath(experience, minLevel, false);
+    }
+
+    /** Jak wyzej; z blogoslawienstwem strata 2,5%. */
+    public static long experienceAfterDeath(long experience, int minLevel, boolean blessed) {
         long floor = experienceForLevel(minLevel);
-        long after = experience - experience / 20;
+        long after = experience - experience / (blessed ? 40 : 20);
         return Math.max(Math.min(experience, floor), after);
+    }
+
+    /** Cena blogoslawienstwa u kaplana: 200 gp za poziom, co najmniej 1000 gp. */
+    public static long blessingPrice(int level) {
+        return Math.max(1000L, 200L * level);
     }
 
     /** Dodawanie doswiadczenia z nasyceniem: nigdy nie przekracza maksimum ani nie przepelnia long. */

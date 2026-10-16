@@ -242,13 +242,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     private void onPlayerDeath(Monster killer, long now) {
         long before = pc.experience();
-        pc.applyDeathPenalty(minLevel);
+        boolean blessed = pc.applyDeathPenalty(minLevel);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killer.type().name() + "). Strata: "
-                + (before - pc.experience()) + " exp. Odrodzenie w świątyni.");
+                + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "")
+                + ". Odrodzenie w świątyni.");
     }
 
     /**
@@ -270,13 +271,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             }
         }
         long before = pc.experience();
-        pc.applyDeathPenalty(minLevel);
+        boolean blessed = pc.applyDeathPenalty(minLevel);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś z ręki gracza " + killer + ". Strata: "
-                + (before - pc.experience()) + " exp" + (dropped > 0 ? ", plecak został na ziemi" : "")
+                + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "") + (dropped > 0 ? ", plecak został na ziemi" : "")
                 + ". Odrodzenie w świątyni.");
         return dropped;
     }

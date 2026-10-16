@@ -876,6 +876,11 @@ public final class Hud {
             case PRIEST: {
                 left.add(new MenuRow("npc:heal", "Ulecz mnie", "pełne zdrowie i mana", pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
                 boolean home = npc.town().equalsIgnoreCase(pc.homeTown());
+                long bless = pl.fawizja.pixel.balance.Balance.blessingPrice(pc.level());
+                left.add(new MenuRow("npc:bless", pc.isBlessed() ? "Błogosławieństwo: masz" : "Błogosławieństwo",
+                        pc.isBlessed() ? "najbliższa śmierć zabierze połowę exp mniej"
+                                : String.format("%,d gp - połowa straty exp przy najbliższej śmierci", bless),
+                        !pc.isBlessed() && session.gold() >= bless));
                 left.add(new MenuRow("npc:settle", "Zamieszkaj w " + npc.town(),
                         home ? "już tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu będziesz się odradzać", !home));
                 break;
@@ -1355,7 +1360,9 @@ public final class Hud {
         font.getData().setScale(1f);
     }
 
-    private static final String[] SKILL_NAMES = {"Pięści", "Miecz", "Dystans", "Tarcza", "Magia", "Wędkarstwo"};
+    private static String capitalized(String s) {
+        return s == null || s.isEmpty() ? "" : Character.toUpperCase(s.charAt(0)) + s.substring(1);
+    }
 
     private void drawCharacterSheet(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
@@ -1363,11 +1370,12 @@ public final class Hud {
         text(batch, pc.name() + " - " + pc.vocation().displayName() + ", poziom " + pc.level(), x, y);
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
-        text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity(), x, y - 36);
+        text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity() + "   Miasto: " + capitalized(pc.homeTown())
+                + (pc.isBlessed() ? "   Błogosławieństwo" : ""), x, y - 36);
         text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Pokonane: " + pc.bestiary().total() + "   Osiągnięcia: " + pc.achievements().count() + " (O)", x, y - 54);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {
-            text(batch, SKILL_NAMES[sk.ordinal()] + "  " + pc.skills().level(sk), x, yy);
+            text(batch, sk.label() + "  " + pc.skills().level(sk), x, yy);
             yy -= 22;
         }
         font.getData().setScale(0.8f);

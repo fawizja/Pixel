@@ -452,6 +452,27 @@ public final class GameSession {
         return true;
     }
 
+    /** Kaplan: blogoslawienstwo za monety z plecaka - najblizsza smierc zabierze polowe straty doswiadczenia. */
+    public boolean priestBless(long nowMs) {
+        Npc n = talkTo(NpcRole.PRIEST, nowMs);
+        if (n == null) return false;
+        if (pc.isBlessed()) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": już jesteś pobłogosławiony.");
+            return false;
+        }
+        long price = pl.fawizja.pixel.balance.Balance.blessingPrice(pc.level());
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": błogosławieństwo kosztuje " + price + " gp (monety w plecaku).");
+            return false;
+        }
+        pc.backpack().commitFrom(tx);
+        pc.setBlessed(true);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Otrzymujesz błogosławieństwo (" + price
+                + " gp). Najbliższa śmierć zabierze połowę doświadczenia mniej.");
+        return true;
+    }
+
     /** Kaplan: zamieszkanie w miescie - tu postac odrodzi sie po smierci. */
     public void settleHere(long nowMs) {
         Npc n = talkTo(NpcRole.PRIEST, nowMs);

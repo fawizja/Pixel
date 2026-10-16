@@ -114,6 +114,7 @@ public final class PlayerCharacter {
         running = o.running;
         hasMount = o.hasMount;
         mounted = o.mounted;
+        blessed = o.blessed;
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
@@ -148,6 +149,11 @@ public final class PlayerCharacter {
 
     private boolean hasMount;
     private boolean mounted;
+    /** Blogoslawienstwo kaplana: najblizsza smierc zabiera polowe zwyklej straty doswiadczenia. */
+    private boolean blessed;
+
+    public boolean isBlessed() { return blessed; }
+    public void setBlessed(boolean v) { blessed = v; }
 
     public boolean hasMount() { return hasMount; }
     public void setHasMount(boolean v) {
@@ -316,9 +322,13 @@ public final class PlayerCharacter {
     public int lightBuffRadius() { return lightBuffMs > 0 ? lightBuffRadius : 0; }
 
     /** Kara za smierc: utrata doswiadczenia (poziom moze spasc, ale nie ponizej minLevel). */
-    public void applyDeathPenalty(int minLevel) {
-        experience = Balance.experienceAfterDeath(experience, minLevel);
+    /** Kara za smierc; zwraca true, gdy zuzyto blogoslawienstwo (polowa straty). */
+    public boolean applyDeathPenalty(int minLevel) {
+        boolean used = blessed;
+        experience = Balance.experienceAfterDeath(experience, minLevel, used);
         level = Balance.levelForExperience(experience);
+        blessed = false;
+        return used;
     }
 
     /** Odrodzenie z pelnym zdrowiem i mana. */
