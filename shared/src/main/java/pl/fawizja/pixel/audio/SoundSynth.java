@@ -17,7 +17,7 @@ public final class SoundSynth {
     public enum Sfx {
         HIT, HURT, BLOCK, SHOOT, HEAL,
         SPELL_FIRE, SPELL_ICE, SPELL_ENERGY, SPELL_EARTH, SPELL_HOLY, SPELL_DEATH,
-        LEVEL_UP, DEATH;
+        LEVEL_UP, DEATH, ALARM;
 
         /** Nazwa pliku w pamieci podrecznej klienta. */
         public String fileName() { return name().toLowerCase() + ".wav"; }
@@ -41,6 +41,7 @@ public final class SoundSynth {
             case SPELL_DEATH: return render(0.42, (t, d) -> (tone(150 - 90 * t, t) * 0.5 + square(75, t) * 0.25) * env(t, d, 0.04, 0.32));
             case LEVEL_UP: return render(0.7, (t, d) -> arpeggio(t) * env(t, d, 0.01, 0.2));
             case DEATH: return render(0.9, (t, d) -> (tone(330 - 220 * t / d, t) * 0.5 + tone(165 - 110 * t / d, t) * 0.3) * env(t, d, 0.02, 0.6));
+            case ALARM: return render(0.32, (t, d) -> square(t < 0.16 ? 880 : 660, t) * 0.35 * env(t, d, 0.005, 0.12));
             default: throw new IllegalArgumentException(sfx.name());
         }
     }

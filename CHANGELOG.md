@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.84.0] - 2026-10-16
+
+### Dodano
+- Alarm niskiego zdrowia: gdy życie spadnie poniżej 25%, krawędzie ekranu pulsują na czerwono, a co 4 s gra
+  krótki sygnał (nowy dźwięk ALARM, głośność z ustawień). Znika, gdy zdrowie wróci powyżej progu.
+- 1 nowy test; łącznie 337.
+
 ## [0.83.0] - 2026-10-16
 
 ### Dodano

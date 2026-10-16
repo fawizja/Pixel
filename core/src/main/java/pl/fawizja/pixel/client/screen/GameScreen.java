@@ -1037,6 +1037,7 @@ public final class GameScreen extends ScreenAdapter {
             batch.end();
         }
         drawCombatOverlay(batch, game.shapes(), t, z);
+        drawLowHealth(game.shapes(), t);
 
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
         limitFrameRate();
@@ -1197,6 +1198,31 @@ public final class GameScreen extends ScreenAdapter {
         float y = worldRenderer.worldY(f.y());
         if (f.facingLeft()) b.draw(tr, f.x() + 1f, y, -1f, 1f);
         else b.draw(tr, f.x(), y, 1f, 1f);
+    }
+
+    /** Alarm niskiego zdrowia: pulsujaca czerwona ramka i sygnal co kilka sekund. */
+    private final pl.fawizja.pixel.combat.LowHealthAlarm lowHealth = new pl.fawizja.pixel.combat.LowHealthAlarm();
+
+    private void drawLowHealth(ShapeRenderer shapes, long t) {
+        PlayerCharacter pc = session.character();
+        if (lowHealth.update(pc.health(), pc.maxHealth(), t)) {
+            game.sound().play(List.of(new pl.fawizja.pixel.audio.SoundCues.Cue(pl.fawizja.pixel.audio.SoundSynth.Sfx.ALARM, 0.6f)),
+                    settings.volumeFactor());
+        }
+        if (!lowHealth.low()) return;
+        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
+        float b = Math.max(4f, Math.min(w, h) * 0.015f);
+        float alpha = 0.25f + 0.25f * (float) Math.abs(Math.sin(t / 300.0));
+        screenMatrix.setToOrtho2D(0, 0, w, h);
+        shapes.setProjectionMatrix(screenMatrix);
+        Gdx.gl.glEnable(com.badlogic.gdx.graphics.GL20.GL_BLEND);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(0.9f, 0.05f, 0.05f, alpha);
+        shapes.rect(0, 0, w, b);
+        shapes.rect(0, h - b, w, b);
+        shapes.rect(0, b, b, h - 2 * b);
+        shapes.rect(w - b, b, b, h - 2 * b);
+        shapes.end();
     }
 
     private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
