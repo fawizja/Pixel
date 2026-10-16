@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.160.0] - 2026-10-16
+
+### Dodano
+- Serwer: polecenie konsoli `shutdown 5` wyłącza serwer po odliczaniu z ogłoszeniami na czacie (30 min ... 10 s),
+  zapisuje wszystkie postacie i kończy proces, więc aktualizacja na VPS nie przerywa nikomu walki bez ostrzeżenia.
+  `shutdown -` odwołuje.
+- Test pilnujący, by klient nie używał `Stream.toList()`, `String.formatted()` ani `Files.readString/writeString`
+  (brak na Androidzie 11).
 ## [0.159.0] - 2026-10-16
 
 ### Dodano

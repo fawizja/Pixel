@@ -18,7 +18,8 @@ import org.junit.jupiter.api.Test;
 class AndroidApiTest {
 
     /** Wywolania nieobecne na Androidzie 11 (API 30). */
-    static final String[] FORBIDDEN = {".readAllBytes()", ".readNBytes(", ".transferTo(System", "InputStream.nullInputStream"};
+    static final String[] FORBIDDEN = {".readAllBytes()", ".readNBytes(", ".transferTo(System", "InputStream.nullInputStream",
+            ".toList()", ".formatted(", "Files.readString", "Files.writeString"};
 
     @Test
     void clientCodeAvoidsMethodsMissingOnAndroid30() throws IOException {

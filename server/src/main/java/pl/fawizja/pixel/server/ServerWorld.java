@@ -1156,6 +1156,10 @@ final class ServerWorld {
 
     /** Logowanie: wczytuje zapis postaci o tym imieniu albo tworzy nowa. Zwraca null z komunikatem bledu w client. */
     ServerPlayer join(ClientHandler client, String name, String vocation, String password, long now) {
+        if (shutdownDone) {
+            client.send("ERR", "Serwer jest wyłączany. Spróbuj za chwilę.");
+            return null;
+        }
         try {
             PlayerCharacter.validateName(name);
         } catch (IllegalArgumentException e) {
@@ -1909,7 +1913,65 @@ final class ServerWorld {
      * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
-    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT";
+    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT, SHUTDOWN";
+
+    /** Progi ostrzezen przed wylaczeniem (ms do konca), malejaco. */
+    static final long[] SHUTDOWN_WARN = {30 * 60_000L, 15 * 60_000L, 10 * 60_000L, 5 * 60_000L, 3 * 60_000L, 2 * 60_000L, 60_000L, 30_000L, 10_000L};
+    /** Zaplanowane wylaczenie (czas swiata ms) albo -1. */
+    private long shutdownAt = -1;
+    /** Ostatni ogloszony prog (ms do konca). */
+    private long shutdownAnnounced;
+    private boolean shutdownDone;
+
+    /** Po odliczaniu SHUTDOWN: gracze wyrzuceni i zapisani, petla serwera ma sie zakonczyc. */
+    boolean shutdownDone() { return shutdownDone; }
+
+    /** SHUTDOWN [minuty | Ns] (domyslnie 5 min), SHUTDOWN - odwoluje. */
+    private String shutdown(String[] c, String by, long now) {
+        if (!by.equals("konsola")) return "Wyłączenie serwera planuje tylko konsola serwera.";
+        String arg = c.length > 1 ? c[1].trim().toLowerCase(java.util.Locale.ROOT) : "5";
+        if (arg.equals("-")) {
+            if (shutdownAt < 0) return "Nie zaplanowano wyłączenia.";
+            shutdownAt = -1;
+            announce("Wyłączenie serwera odwołane.");
+            return "Odwołano wyłączenie.";
+        }
+        long ms = arg.endsWith("s") ? Long.parseLong(arg.substring(0, arg.length() - 1)) * 1000L : Long.parseLong(arg) * 60_000L;
+        if (ms < 0 || ms > 24 * 3600_000L) return "Podaj od 0 do 1440 minut.";
+        shutdownAt = now + ms;
+        shutdownAnnounced = ms;
+        announce("Serwer zostanie wyłączony za " + describeLeft(ms) + ". Zakończ walkę w bezpiecznym miejscu.");
+        LOG.info("shutdown in " + ms / 1000 + " s");
+        return "Wyłączenie za " + describeLeft(ms) + ". SHUTDOWN - odwołuje.";
+    }
+
+    private void updateShutdown(long now) {
+        if (shutdownAt < 0 || shutdownDone) return;
+        long left = shutdownAt - now;
+        if (left <= 0) {
+            for (ServerPlayer p : new ArrayList<>(players.values())) kick(p, "Serwer jest wyłączany. Postać zapisana, wróć za chwilę.");
+            saveAll();
+            shutdownDone = true;
+            LOG.info("shutdown: players saved");
+            return;
+        }
+        for (long w : SHUTDOWN_WARN) {
+            if (w < shutdownAnnounced && left <= w) {
+                shutdownAnnounced = w;
+                announce("Serwer zostanie wyłączony za " + describeLeft(w) + ".");
+                break;
+            }
+        }
+    }
+
+    static String describeLeft(long ms) {
+        long s = (ms + 999) / 1000;
+        return s >= 60 && s % 60 == 0 ? s / 60 + " min" : s >= 60 ? s / 60 + " min " + s % 60 + " s" : s + " s";
+    }
+
+    private void announce(String text) {
+        for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", text);
+    }
     /** Czas pierwszego taktu swiata (do czasu dzialania w STATUS); -1 przed pierwszym taktem. */
     private long firstTick = -1;
 
@@ -1918,9 +1980,10 @@ final class ServerWorld {
         Runtime rt = Runtime.getRuntime();
         long usedMb = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
         long up = firstTick < 0 ? 0 : Math.max(0, now - firstTick) / 1000;
-        return String.format(java.util.Locale.ROOT, "Działa %d h %02d min, graczy: %d, potworów: %d, inwazja: %s, pamięć: %d / %d MB.",
+        return String.format(java.util.Locale.ROOT, "Działa %d h %02d min, graczy: %d, potworów: %d, inwazja: %s, pamięć: %d / %d MB%s.",
                 up / 3600, up / 60 % 60, players.size(), monsters.monsters().size(),
-                invasion == null ? "brak" : invasion.plan().town() + " (" + invasion.remaining() + " z " + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024));
+                invasion == null ? "brak" : invasion.plan().town() + " (" + invasion.remaining() + " z " + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024),
+                shutdownAt < 0 ? "" : ", wyłączenie za " + describeLeft(Math.max(0, shutdownAt - now)));
     }
 
     String moderate(String[] c, String by, long now) {
@@ -1973,6 +2036,8 @@ final class ServerWorld {
                     return setMotd(c[1]);
                 case "EXPEVENT":
                     return expEvent(c, now);
+                case "SHUTDOWN":
+                    return shutdown(c, by, now);
                 case "SAVE":
                     saveAll();
                     return "Zapisano " + players.size() + " postaci.";
@@ -2079,6 +2144,7 @@ final class ServerWorld {
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         updateInvasion(now);
         updateDuels(now);
+        updateShutdown(now);
         if (players.isEmpty()) return;
         List<MonsterManager.Target> targets = new ArrayList<>();
         Map<MonsterManager.Target, ServerPlayer> byTarget = new LinkedHashMap<>();

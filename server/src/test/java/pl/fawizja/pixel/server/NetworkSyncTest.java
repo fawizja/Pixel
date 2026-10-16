@@ -1195,6 +1195,25 @@ class NetworkSyncTest {
     }
 
     @Test
+    void aScheduledShutdownWarnsSavesAndStopsTheServer() throws Exception {
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            java.util.concurrent.atomic.AtomicReference<String> r = new java.util.concurrent.atomic.AtomicReference<>();
+            server.enqueueTest(() -> r.set(server.world().moderate(new String[] {"SHUTDOWN", "12s"}, "Ola", server.now())));
+            await("refused for players", () -> r.get() != null);
+            assertTrue(r.get().contains("tylko konsola"), r.get());
+            server.enqueueTest(() -> server.world().moderate(new String[] {"SHUTDOWN", "4s"}, "konsola", server.now()));
+            awaitMessage(ola, "warning", m -> m[0].equals("CHAT") && m[2].contains("wyłączony za 4 s"));
+            await("kicked", () -> ola.error() != null && ola.error().contains("Serwer jest wyłączany"));
+        }
+        await("world stopped", () -> server.world().shutdownDone());
+        assertTrue(server.world().saved("Ola"));
+        assertEquals("1 min 30 s", ServerWorld.describeLeft(90_000));
+        assertEquals("5 min", ServerWorld.describeLeft(300_000));
+    }
+
+    @Test
     void messageOfTheDayGreetsJoiningPlayers() throws Exception {
         java.util.concurrent.atomic.AtomicReference<String> set = new java.util.concurrent.atomic.AtomicReference<>();
         server.enqueueTest(() -> set.set(server.world().moderate(new String[] {"MOTD", "Event w sobotę"}, "konsola", server.now())));

@@ -116,6 +116,10 @@ public final class PixelServer implements AutoCloseable {
             }
             try {
                 world.tick(now);
+                if (world.shutdownDone()) {
+                    running = false;
+                    break;
+                }
                 if (++tick % FRAME_EVERY_TICKS == 0) world.sendState(now);
             } catch (RuntimeException e) {
                 LOG.severe("tick failed: " + e);
@@ -134,6 +138,11 @@ public final class PixelServer implements AutoCloseable {
             }
         }
         world.saveAll();
+        try {
+            socket.close(); // po SHUTDOWN nikt juz nie obsluzy nowych polaczen
+        } catch (IOException ignored) {
+            // juz zamkniety
+        }
     }
 
     private void handle(ClientHandler c, String[] f, long now) {
@@ -197,7 +206,7 @@ public final class PixelServer implements AutoCloseable {
 
     /**
      * Konsola operatora (stdin, np. {@code docker attach} albo terminal): say tekst, kick imie, ban imie godziny,
-     * unban imie, mute imie minuty, admin imie, who, invasion [miasto], status, save, motd [tekst|-]. Polecenia wykonuje watek swiata.
+     * unban imie, mute imie minuty, admin imie, who, invasion [miasto], status, save, motd [tekst|-], shutdown [minuty|Ns|-]. Polecenia wykonuje watek swiata.
      */
     void startConsole(java.io.InputStream in) {
         Thread t = new Thread(() -> {
