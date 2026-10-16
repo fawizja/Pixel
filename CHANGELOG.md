@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.153.0] - 2026-10-16
+
+### Dodano
+- Okno /wydarzenia pokazuje w wierszu „Premia exp” także sztandar Twojej gildii i jego pozostały czas.
 ## [0.152.0] - 2026-10-16
 
 ### Dodano

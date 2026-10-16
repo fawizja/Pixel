@@ -222,6 +222,17 @@ final class ServerWorld {
     /** Nazwa gildii (male litery) -> koniec sztandaru (czas serwera). */
     private final Map<String, Long> guildBanners = new java.util.HashMap<>();
 
+    /** Opis premii exp gracza do okna wydarzen: wydarzenie serwera i sztandar gildii ("-" = brak). */
+    private String expBonusLine(ServerPlayer p, long now) {
+        List<String> parts = new ArrayList<>();
+        if (expEventPercent > 0) {
+            parts.add("+" + expEventPercent + "% za potwory, jeszcze " + Math.max(1, (expEventUntil - now + 59_999) / 60_000) + " min");
+        }
+        long banner = bannerUntil(p.name(), now);
+        if (banner > now) parts.add("sztandar gildii +" + BANNER_PERCENT + "%, " + Math.max(1, (banner - now + 59_999) / 60_000) + " min");
+        return parts.isEmpty() ? "-" : String.join("; ", parts);
+    }
+
     private long bannerUntil(String member, long now) {
         pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(member);
         return g == null ? 0 : guildBanners.getOrDefault(g.name().toLowerCase(java.util.Locale.ROOT), 0L);
@@ -1781,8 +1792,7 @@ final class ServerWorld {
                 p.client.send(rows.toArray(new String[0]));
                 break;
             case "EVENTS":
-                p.client.send("EVENTS", invasionStatus(now), expEventPercent > 0
-                        ? "+" + expEventPercent + "% za potwory, jeszcze " + Math.max(1, (expEventUntil - now + 59_999) / 60_000) + " min" : "-");
+                p.client.send("EVENTS", invasionStatus(now), expBonusLine(p, now));
                 break;
             case "LOOTLOG": {
                 // ostatnie lupy tego gracza (wiersze jak w podsumowaniu smierci)
