@@ -31,3 +31,4 @@ pet|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,90,0 -Dpi
 smith|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,78,0 -Dpixel.open=smith
 help|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.button=cmd:/pomoc
 markers|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=map -Dpixel.markers=Kopalnia|60,70,0;Wieza|100,60,0;Obok|84,80,0
+events|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.button=cmd:/wydarzenia

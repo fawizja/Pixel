@@ -1281,6 +1281,9 @@ final class ServerWorld {
                 for (MonsterManager.BossStatus b : monsters.bossReport(now)) rows.add(String.join(";", MonsterManager.row(b, now)));
                 p.client.send(rows.toArray(new String[0]));
                 break;
+            case "EVENTS":
+                p.client.send("EVENTS", invasionStatus(now));
+                break;
             case "WHO": {
                 // lista graczy w grze: najwyzszy poziom na gorze (bez polozenia)
                 List<ServerPlayer> online = new ArrayList<>(players.values());
@@ -1568,6 +1571,16 @@ final class ServerWorld {
     /** Ogloszenie wydarzenia dla wszystkich graczy w grze. */
     private void announce(String text, long now) {
         for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, text);
+    }
+
+    /** Opis inwazji do okna wydarzen: trwajaca albo czas do nastepnej. */
+    String invasionStatus(long now) {
+        if (invasion != null) {
+            return "trwa: " + invasion.plan().name() + " atakują " + invasion.plan().town() + " (zostało " + invasion.remaining() + ")";
+        }
+        long at = nextInvasionAt == 0 ? now + invasionEveryMs : nextInvasionAt;
+        long min = Math.max(0, (at - now + 59_999) / 60_000);
+        return "następna za " + (min >= 60 ? min / 60 + " h " + String.format("%02d", min % 60) + " min" : min + " min") + " (gdy ktoś jest w grze)";
     }
 
     /** Harmonogram inwazji: co pixel.invasionMinutes (domyslnie 120) minut, gdy ktos jest w grze. */

@@ -1092,6 +1092,16 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void theEventsWindowShowsTheNextInvasion() throws Exception {
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            ola.send("EVENTS");
+            awaitMessage(ola, "events", m -> m[0].equals("EVENTS") && m.length > 1 && m[1].startsWith("następna za"));
+        }
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

@@ -489,6 +489,11 @@ public final class GameScreen extends ScreenAdapter {
             hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
             return;
         }
+        if (cmd.equals("/wydarzenia") || cmd.equals("/dzis")) {
+            if (net != null) net.send("EVENTS");
+            else hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, null));
+            return;
+        }
         if (cmd.equals("/gracze") || cmd.equals("/online")) {
             if (net != null) net.send("WHO");
             else session.log().add(now(), EventLog.Kind.INFO, "Lista graczy działa online.");
@@ -1425,6 +1430,9 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "RANK":
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
+                    break;
+                case "EVENTS":
+                    hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, m.length > 1 ? m[1] : null));
                     break;
                 case "WHO": {
                     List<String[]> rows = new ArrayList<>();

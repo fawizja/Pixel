@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.74.0] - 2026-10-16
+
+### Dodano
+- Okno „Wydarzenia” (`/wydarzenia` albo `/dziś`): następna albo trwająca inwazja (z serwera), potwór dnia, postęp
+  zadania dnia, seria logowania, najbliższa nagroda za poziom i aktywne zaklęcia z pozostałym czasem.
+- Scena GUI `events` (33 sceny). W oknie `/pomoc` wiersz `/wydarzenia` zastąpił `/potwór` (polecenie dalej działa).
+- 2 nowe testy (w tym sieciowy); łącznie 325.
+
 ## [0.73.0] - 2026-10-16
 
 ### Dodano
