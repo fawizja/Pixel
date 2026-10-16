@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.110.0] - 2026-10-16
+
+### Dodano
+- Trwające wyzwanie jest widoczne na ekranie nad śledzeniem zadań: numer fali, potwór i pozostały czas.
 ## [0.109.0] - 2026-10-16
 
 ### Dodano

@@ -48,6 +48,7 @@ class ChallengeTest {
         assertNotNull(s.challenge());
         assertEquals("wolf", s.challenge().type().key());
         assertEquals(1, pc.backpack().count(TestData.ITEMS.byKey("challenge_scroll").id()), "the scroll is used up");
+        assertEquals("Wyzwanie: fala 1/3 (" + s.challenge().type().name() + "), 5:00", s.challenge().line(t));
         long bank = pc.bank().balance();
         for (int w = 0; w < Challenge.WAVES.length; w++) {
             assertEquals(w, s.challenge().wave());

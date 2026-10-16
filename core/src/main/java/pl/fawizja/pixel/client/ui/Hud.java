@@ -1356,6 +1356,12 @@ public final class Hud {
         float ly = y - 76;
         // sledzenie zadan pod stanem postaci, dziennik zdarzen nizej
         font.setColor(0.85f, 0.9f, 1f, 1f);
+        if (session.challenge() != null) {
+            font.setColor(1f, 0.75f, 0.45f, 1f);
+            text(batch, session.challenge().line(session.lastUpdateMs()), x, ly + 6);
+            ly -= 16;
+            font.setColor(0.85f, 0.9f, 1f, 1f);
+        }
         for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
                 session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()),
                 session.monsterName(pc.hunt().monster() == null ? "" : pc.hunt().monster()))) {

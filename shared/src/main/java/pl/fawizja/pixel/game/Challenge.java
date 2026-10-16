@@ -32,6 +32,13 @@ public final class Challenge {
     public MonsterType type() { return type; }
     public int wave() { return wave; }
     public Position center() { return center; }
+    public long untilMs() { return untilMs; }
+
+    /** Wiersz sledzenia na ekranie, np. "Wyzwanie: fala 2/3 (Wilk), 3:05". */
+    public String line(long nowMs) {
+        long s = Math.max(0, (untilMs - nowMs + 999) / 1000);
+        return "Wyzwanie: fala " + (wave + 1) + "/" + WAVES.length + " (" + type.name() + "), " + s / 60 + ":" + String.format("%02d", s % 60);
+    }
 
     public static int totalMonsters() {
         int n = 0;

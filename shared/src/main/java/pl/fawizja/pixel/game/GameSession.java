@@ -82,6 +82,9 @@ public final class GameSession {
     private boolean moving;
     private Direction facing = Direction.SOUTH;
     private long lastUpdateMs = -1;
+
+    /** Czas ostatniego kroku symulacji (ms). */
+    public long lastUpdateMs() { return lastUpdateMs; }
     private long lastGateWarningMs = -10_000;
     private long pzLockedUntil;
     private long lastPzWarningMs = -10_000;
