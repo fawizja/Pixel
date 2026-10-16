@@ -378,6 +378,8 @@ public final class GameScreen extends ScreenAdapter {
                     String[] f = id.split(":");
                     if (net != null && f.length == 3 && f[1].equals("buy")) net.send("MARKET", "BUY", f[2]);
                     if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
+                } else if (id.equals("npc:bosses")) {
+                    bossReport(t);
                 } else if (id.startsWith("journal:")) {
                     // dziennik: marsz do zleceniodawcy (przewodnik = najblizszy przewodnik na pietrze)
                     String key = id.startsWith("journal:goto:") ? id.substring(13) : null;
@@ -432,6 +434,10 @@ public final class GameScreen extends ScreenAdapter {
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        if (cmd.equals("/bossowie")) {
+            bossReport(now());
+            return;
+        }
         if (cmd.equals("/zadania") || cmd.equals("/dziennik")) {
             hud.openJournal();
             return;
@@ -513,6 +519,17 @@ public final class GameScreen extends ScreenAdapter {
     private List<Position> walkPath;
     private int walkIndex;
     private pl.fawizja.pixel.npc.Npc walkNpc;
+
+    /** Raport bossow: online od serwera (tam zyja potwory), lokalnie z wlasnego swiata. */
+    private void bossReport(long t) {
+        if (net != null) {
+            net.send("BOSS");
+            return;
+        }
+        List<String[]> rows = new ArrayList<>();
+        for (MonsterManager.BossStatus b : session.monsters().bossReport(t)) rows.add(MonsterManager.row(b, t));
+        hud.openInfo("Bossowie (" + rows.size() + ")", rows);
+    }
 
     private pl.fawizja.pixel.npc.Npc nearestGuide() {
         pl.fawizja.pixel.npc.Npc best = null;
@@ -1149,6 +1166,15 @@ public final class GameScreen extends ScreenAdapter {
                 case "RANK":
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
                     break;
+                case "BOSS": {
+                    List<String[]> rows = new ArrayList<>();
+                    for (int i = 1; i < m.length; i++) {
+                        String[] r = m[i].split(";", 3);
+                        if (r.length == 3) rows.add(r);
+                    }
+                    hud.openInfo("Bossowie (" + rows.size() + ")", rows);
+                    break;
+                }
                 case "MARKET":
                     hud.openMarket(pl.fawizja.pixel.market.MarketView.parse(m));
                     break;

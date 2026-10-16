@@ -1195,6 +1195,12 @@ final class ServerWorld {
             case "MARKET": marketCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
+            case "BOSS":
+                List<String> rows = new ArrayList<>();
+                rows.add("BOSS");
+                for (MonsterManager.BossStatus b : monsters.bossReport(now)) rows.add(String.join(";", MonsterManager.row(b, now)));
+                p.client.send(rows.toArray(new String[0]));
+                break;
             case "RANK":
                 if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
                 break;

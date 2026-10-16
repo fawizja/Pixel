@@ -75,6 +75,18 @@ public final class Hud {
     private boolean achievementsView;
     /** Trzeci widok okna osiagniec: dziennik zadan (aktywne, do oddania, dostepne). */
     private boolean journalMode;
+    /** Okno informacyjne (np. bossowie): tytul i wiersze {etykieta, miejsce, stan}; null = brak. */
+    private String infoTitle;
+    private List<String[]> infoRows = new ArrayList<>();
+
+    public void openInfo(String title, List<String[]> rows) {
+        if (trade != null) return;
+        achievementsView = false; // openAchievements nie zamknie wtedy okna
+        menuOpen = false;
+        openAchievements(false);
+        infoTitle = title;
+        infoRows = new ArrayList<>(rows);
+    }
     private boolean bestiaryMode;
     private java.util.function.Function<String, String> monsterNames = k -> k;
     /** Okno rynku z serwera (null = zamkniete). */
@@ -364,6 +376,7 @@ public final class Hud {
         }
         achievementsView = true;
         journalMode = false;
+        infoTitle = null;
         bestiaryMode = bestiary;
         rankingView = null;
         friendsView = null;
@@ -473,6 +486,10 @@ public final class Hud {
             rebuildJournalMenu(session);
             return;
         }
+        if (achievementsView && infoTitle != null) {
+            rebuildInfoMenu();
+            return;
+        }
         if (achievementsView) {
             rebuildAchievementsMenu(session);
             return;
@@ -547,6 +564,22 @@ public final class Hud {
     }
 
     /** Osiagniecia w dwoch kolumnach albo bestiariusz (najczesciej zabijane potwory). */
+    private void rebuildInfoMenu() {
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        float colW = (menuW - 30) / 2f;
+        List<MenuRow> rows = new ArrayList<>();
+        for (String[] r : infoRows) rows.add(new MenuRow("ach:none", r[0], r.length > 2 ? r[1] + " - " + r[2] : r[1], true));
+        if (rows.isEmpty()) rows.add(new MenuRow("ach:none", "Brak danych", "", false));
+        for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
+            MenuRow row = rows.get(i);
+            row.x = menuX + 10 + (i / perCol) * (colW + 10);
+            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+            menuRows.add(row);
+        }
+    }
+
     /** Dziennik: zadanie dnia, zadania w toku i do oddania, potem dostepne; dotkniecie = marsz do zleceniodawcy. */
     private void rebuildJournalMenu(GameSession session) {
         PlayerCharacter pc = session.character();
@@ -849,6 +882,7 @@ public final class Hud {
                     dd = "pokonano " + d.progress() + " / " + d.target();
                 }
                 left.add(new MenuRow("npc:daily", dl, dd, !d.activeOn(day) || d.doneOn(day) && !d.claimed()));
+                left.add(new MenuRow("npc:bosses", "Bossowie", "kto żyje, kto odrodzi się i kiedy (/bossowie)", true));
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;
                 for (pl.fawizja.pixel.quest.QuestType q : qs.registry().byGiver(npc.key())) {
@@ -1221,6 +1255,8 @@ public final class Hud {
         if (menuOpen) {
             if (trade == null && playerMenu != null) {
                 text(batch, "Gracz " + playerMenu.name(), menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && achievementsView && infoTitle != null && !journalMode) {
+                text(batch, infoTitle, menuX + 10, menuY + menuH - 14);
             } else if (trade == null && achievementsView && journalMode) {
                 text(batch, "Dziennik zadań - ukończone: " + session.character().quests().done().size()
                         + " (dotknij zadania, aby iść do zleceniodawcy)", menuX + 10, menuY + menuH - 14);

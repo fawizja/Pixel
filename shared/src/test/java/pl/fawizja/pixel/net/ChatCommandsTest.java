@@ -47,5 +47,6 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"DUEL", "REQUEST", "Stary Wilk"}, ChatCommands.toMessage("/pojedynek Stary Wilk"));
         assertArrayEquals(new String[] {"DUEL", "SURRENDER"}, ChatCommands.toMessage("/pojedynek poddaj"));
         assertArrayEquals(new String[] {"DUEL", "HELP"}, ChatCommands.toMessage("/pojedynek"));
+        assertArrayEquals(new String[] {"BOSS"}, ChatCommands.toMessage("/bossowie"));
     }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.44.0] - 2026-10-16
+
+### Dodano
+- Licznik bossów: okno „Bossowie” (wiersz u każdego przewodnika albo `/bossowie`) z listą bossów świata, miejscem
+  (kraina i piętro) i stanem: „żyje”, „odrodzi się za X min” (albo h) lub „odradza się lada chwila”.
+  Online dane przychodzą z serwera (komunikat BOSS), lokalnie z własnego świata.
+- Okno informacyjne w HUD (`Hud.openInfo`) do takich list. Scena `bosses` w regresji GUI (26 scen).
+- 3 nowe testy (raport i czas odrodzenia, komunikat serwera, komenda czatu); łącznie 271.
+
 ## [0.43.0] - 2026-10-15
 
 ### Dodano

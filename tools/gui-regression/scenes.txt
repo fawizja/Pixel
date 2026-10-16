@@ -24,3 +24,4 @@ chest|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -D
 map|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=map
 chat|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=chat
 journal|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=journal
+bosses|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.button=npc:bosses

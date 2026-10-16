@@ -277,6 +277,17 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void theServerReportsItsBosses() throws Exception {
+        try (NetClient a = connect()) {
+            a.hello("Ewa", "DRUID", "tajne-Ewa");
+            await("welcome", () -> a.selfSave() != null);
+            a.send("BOSS");
+            awaitMessage(a, "boss list", m -> m[0].equals("BOSS") && m.length >= 4
+                    && java.util.Arrays.stream(m).skip(1).allMatch(r -> r.split(";").length == 3 && r.endsWith(";żyje")));
+        }
+    }
+
     static boolean logged(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

@@ -119,6 +119,51 @@ public final class MonsterManager {
         return new ArrayList<>(out.values());
     }
 
+    /** Stan bossa ze stalego spawnu: zyje albo czas (ms zegara gry) najblizszego odrodzenia; respawnAt <= now = zaraz. */
+    public record BossStatus(String name, Position where, String region, boolean alive, long respawnAt) {}
+
+    public List<BossStatus> bossReport(long now) {
+        List<BossStatus> out = new ArrayList<>();
+        if (registry == null) return out;
+        for (SpawnPoint sp : spawns) {
+            MonsterType t;
+            try {
+                t = registry.get(sp.monsterKey());
+            } catch (IllegalArgumentException e) {
+                continue;
+            }
+            if (t == null || !t.boss()) continue;
+            boolean alive = false;
+            for (Monster m : monsters) if (m.spawn() == sp && !m.isDead()) alive = true;
+            long next = Long.MAX_VALUE;
+            for (long at : respawnQueue.getOrDefault(sp, Collections.emptyList())) next = Math.min(next, at);
+            pl.fawizja.pixel.world.Region r = world.regionAt(sp.center());
+            out.add(new BossStatus(t.name(), sp.center(), r == null ? null : r.name(), alive, alive ? 0 : next));
+        }
+        out.sort(java.util.Comparator.comparing(BossStatus::name));
+        return out;
+    }
+
+    /** Jedna linia raportu do dziennika, np. "Grimtooth (Kopalnia Varden, piętro -3): żyje". */
+    public static String describe(BossStatus b, long now) {
+        String[] r = row(b, now);
+        return r[0] + " (" + r[1] + "): " + r[2];
+    }
+
+    /** {imie, miejsce, stan} do okna bossow (i komunikatu BOSS). */
+    public static String[] row(BossStatus b, long now) {
+        int z = b.where().z();
+        String place = (b.region() == null ? "" : b.region() + ", ") + (z == 0 ? "powierzchnia" : "piętro " + (z > 0 ? "+" + z : String.valueOf(z)));
+        String state;
+        if (b.alive()) state = "żyje";
+        else if (b.respawnAt() == Long.MAX_VALUE || b.respawnAt() <= now) state = "odradza się lada chwila";
+        else {
+            long min = (b.respawnAt() - now + 59_999) / 60_000;
+            state = "odrodzi się za " + (min >= 60 ? min / 60 + " h " + min % 60 + " min" : min + " min");
+        }
+        return new String[] {b.name(), place, state};
+    }
+
     public Monster monsterAt(Position p) { return grid.at(p); }
 
     /** Noc na powierzchni: nocne drapiezniki widza dalej i atakuja szybciej. */
