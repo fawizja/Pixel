@@ -61,6 +61,7 @@ public final class CharacterCodec {
         if (pc.bestiary().eliteKills() > 0) m.put("elites", String.valueOf(pc.bestiary().eliteKills()));
         if (pc.achievements().count() > 0) m.put("achievements", pc.achievements().encode());
         if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
+        if (!pc.hunt().encode().isEmpty()) m.put("hunt", pc.hunt().encode());
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
         if (pc.isBlessed()) m.put("bless", "1");
         m.put("lvlrew", String.valueOf(pc.rewardedLevel()));
@@ -198,6 +199,7 @@ public final class CharacterCodec {
         for (String f : friends.values()) pc.friends().restore(f);
         pc.achievements().restore(m.get("achievements"));
         pc.daily().restore(m.get("daily"));
+        pc.hunt().restore(m.get("hunt"));
         pc.loginStreak().restore(m.get("login"));
         pc.setBlessed("1".equals(m.get("bless")));
         if (m.containsKey("lvlrew")) pc.setRewardedLevel(Integer.parseInt(m.get("lvlrew")));

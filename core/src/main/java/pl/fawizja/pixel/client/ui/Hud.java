@@ -995,6 +995,14 @@ public final class Hud {
                     dd = "pokonano " + d.progress() + " / " + d.target();
                 }
                 left.add(new MenuRow("npc:daily", dl, dd, !d.activeOn(day) || d.doneOn(day) && !d.claimed()));
+                pl.fawizja.pixel.quest.HuntTask hunt = pc.hunt();
+                if (!hunt.active()) {
+                    left.add(new MenuRow("npc:hunt", "Zlecenie łowcy", "50 potworów dla twojego poziomu, bez limitu dziennego", true));
+                } else {
+                    left.add(new MenuRow("npc:hunt", hunt.done() ? "Zlecenie łowcy: ODDAJ" : "Zlecenie: " + monsterNames.apply(hunt.monster()),
+                            hunt.done() ? "odbierz nagrodę" : "pokonano " + hunt.progress() + " / " + hunt.target(), hunt.done()));
+                    if (!hunt.done()) left.add(new MenuRow("npc:huntdrop", "Porzuć zlecenie", "możesz wziąć nowe", true));
+                }
                 left.add(new MenuRow("npc:bosses", "Bossowie", "kto żyje, kto odrodzi się i kiedy (/bossowie)", true));
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;

@@ -30,6 +30,7 @@ public final class PlayerCharacter {
     private final pl.fawizja.pixel.achievement.Bestiary bestiary = new pl.fawizja.pixel.achievement.Bestiary();
     private final pl.fawizja.pixel.achievement.Achievements achievements = new pl.fawizja.pixel.achievement.Achievements();
     private final pl.fawizja.pixel.daily.DailyTask daily = new pl.fawizja.pixel.daily.DailyTask();
+    private final pl.fawizja.pixel.quest.HuntTask hunt = new pl.fawizja.pixel.quest.HuntTask();
     private final pl.fawizja.pixel.daily.LoginStreak loginStreak = new pl.fawizja.pixel.daily.LoginStreak();
     private final pl.fawizja.pixel.item.Enchantments enchantments = new pl.fawizja.pixel.item.Enchantments();
     /** Otwarte skrzynie skarbow (identyfikatory). */
@@ -101,6 +102,7 @@ public final class PlayerCharacter {
         bestiary.copyFrom(o.bestiary);
         achievements.copyFrom(o.achievements);
         daily.copyFrom(o.daily);
+        hunt.copyFrom(o.hunt);
         loginStreak.copyFrom(o.loginStreak);
         enchantments.copyFrom(o.enchantments);
         openedChests.clear();
@@ -214,6 +216,8 @@ public final class PlayerCharacter {
     public pl.fawizja.pixel.achievement.Bestiary bestiary() { return bestiary; }
     public pl.fawizja.pixel.achievement.Achievements achievements() { return achievements; }
     public pl.fawizja.pixel.daily.DailyTask daily() { return daily; }
+    /** Zlecenie lowcy (przewodnik). */
+    public pl.fawizja.pixel.quest.HuntTask hunt() { return hunt; }
     public pl.fawizja.pixel.daily.LoginStreak loginStreak() { return loginStreak; }
     public pl.fawizja.pixel.item.Enchantments enchantments() { return enchantments; }
     public java.util.Set<String> openedChests() { return openedChests; }

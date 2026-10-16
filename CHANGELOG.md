@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.104.0] - 2026-10-16
+
+### Dodano
+- Zlecenia łowcy u przewodnika: pokonaj 50 potworów jednego rodzaju dobranego do poziomu, nagroda w złocie
+  na konto i doświadczeniu. Bez limitu dziennego (jedno zlecenie naraz), można porzucić i wziąć nowe.
+  Postęp zapisuje się w postaci i widać go w oknie `/wydarzenia`.
 ## [0.103.0] - 2026-10-16
 
 ### Zmieniono

@@ -28,6 +28,11 @@ public final class EventsReport {
                     + " za pierwsze pokonanie")});
         }
         rows.add(new String[] {"Zadanie dnia", daily(pc.daily(), today, s)});
+        pl.fawizja.pixel.quest.HuntTask hunt = pc.hunt();
+        if (hunt.active()) {
+            rows.add(new String[] {"Zlecenie łowcy", s.monsterName(hunt.monster()) + " " + hunt.progress() + " / " + hunt.target()
+                    + (hunt.done() ? " - oddaj u przewodnika" : "")});
+        }
         int streak = pc.loginStreak().lastDay() == today ? pc.loginStreak().streak() : 0;
         rows.add(new String[] {"Seria logowania", streak > 0 ? "dzień " + streak + " z " + pl.fawizja.pixel.daily.LoginStreak.DAYS
                 + (streak < pl.fawizja.pixel.daily.LoginStreak.DAYS ? ", jutro większa nagroda" : ", pełny tydzień") : "nagroda czeka po wejściu"});

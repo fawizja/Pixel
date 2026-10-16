@@ -135,6 +135,9 @@ public final class GameSession {
             if (pc.daily().onKill(t.key(), today())) {
                 log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
             }
+            if (pc.hunt().onKill(t.key())) {
+                log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy wykonane! Wróć do przewodnika po nagrodę.");
+            }
             checkWeeklyBoss(t, lastUpdateMs);
             checkAchievements(lastUpdateMs);
             QuestType done = quests == null ? null : quests.onKill(pc, t.key());
@@ -187,6 +190,39 @@ public final class GameSession {
         d.claim();
         log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zadanie dnia: " + String.format("%,d gp", gold) + " na konto.");
         if (exp > 0) combat.awardExperience(exp, "Zadanie dnia", nowMs);
+    }
+
+    /** Zlecenie lowcy: wziecie nowego, stan albo oddanie wykonanego (z nagroda). */
+    public void huntAction(long nowMs) {
+        if (talkTo(NpcRole.GUIDE, nowMs) == null) return;
+        pl.fawizja.pixel.quest.HuntTask h = pc.hunt();
+        if (!h.active()) {
+            if (!h.assign(pc.level(), monsters.spawnedTypes(), rng)) {
+                log.add(nowMs, EventLog.Kind.WARNING, "Nie mam teraz dla ciebie zlecenia.");
+                return;
+            }
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy: pokonaj " + h.target() + "x " + monsterName(h.monster()) + ".");
+            return;
+        }
+        if (!h.done()) {
+            log.add(nowMs, EventLog.Kind.INFO, "Zlecenie łowcy: " + monsterName(h.monster()) + " " + h.progress() + " / " + h.target()
+                    + ". Porzucić możesz u przewodnika.");
+            return;
+        }
+        pl.fawizja.pixel.monster.MonsterType t = monsterType(h.monster());
+        long gold = t == null ? 0 : pl.fawizja.pixel.quest.HuntTask.rewardGold(t);
+        long exp = t == null ? 0 : pl.fawizja.pixel.quest.HuntTask.rewardExp(t);
+        if (gold > 0 && !pc.bank().credit(gold).ok()) return;
+        h.complete();
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zlecenie łowcy: " + String.format("%,d gp", gold) + " na konto ("
+                + h.completed() + ". oddane zlecenie).");
+        if (exp > 0) combat.awardExperience(exp, "Zlecenie łowcy", nowMs);
+    }
+
+    public void huntDrop(long nowMs) {
+        if (talkTo(NpcRole.GUIDE, nowMs) == null || !pc.hunt().active()) return;
+        log.add(nowMs, EventLog.Kind.INFO, "Porzucono zlecenie: " + monsterName(pc.hunt().monster()) + ".");
+        pc.hunt().drop();
     }
 
     private pl.fawizja.pixel.monster.MonsterType monsterType(String key) {

@@ -14,6 +14,7 @@ import pl.fawizja.pixel.TestData;
 import pl.fawizja.pixel.character.CharacterCodec;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.economy.Money;
+import pl.fawizja.pixel.game.Actions;
 import pl.fawizja.pixel.game.GameSession;
 import pl.fawizja.pixel.inventory.InventoryResult;
 import pl.fawizja.pixel.item.ItemStack;
@@ -306,6 +307,37 @@ class TownServicesTest {
         s.dailyAction(t);
         assertTrue(pc.daily().activeOn(day[0]), "a new day, a new task");
         assertFalse(pc.daily().claimed());
+    }
+
+    @Test
+    void huntingTasksRepeatCanBeDroppedAndPayOnReturn() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
+        Position field = new Position(58, 72, 0);
+        GameSession s = session(pc, List.of(new SpawnPoint("wolf", field, 8, 60, 600)));
+        long t = 1000;
+        assertTrue(Actions.apply(s, "npc:hunt", t));
+        assertFalse(pc.hunt().active(), "only at a guide");
+        s.teleport(talkSpot(npcs.get("varden_guide")), t);
+        Actions.apply(s, "npc:hunt", t);
+        assertEquals("wolf", pc.hunt().monster());
+        Actions.apply(s, "npc:huntdrop", t);
+        assertFalse(pc.hunt().active(), "dropped");
+        Actions.apply(s, "npc:hunt", t);
+        for (Monster m : List.copyOf(s.monsters().monsters())) {
+            if (pc.hunt().done()) break;
+            s.combat().damageMonster(m, 100_000, pl.fawizja.pixel.combat.DamageType.FIRE, t++);
+        }
+        assertTrue(pc.hunt().done());
+        CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
+        assertTrue(codec.decode(codec.encode(pc)).hunt().done(), "progress is saved");
+        long bank = pc.bank().balance();
+        Actions.apply(s, "npc:hunt", t);
+        assertEquals(bank + pl.fawizja.pixel.quest.HuntTask.rewardGold(MONSTERS.get("wolf")), pc.bank().balance());
+        assertFalse(pc.hunt().active());
+        assertEquals(1, pc.hunt().completed());
+        Actions.apply(s, "npc:hunt", t);
+        assertTrue(pc.hunt().active(), "no daily limit: a new task right away");
+        assertEquals(1, codec.decode(codec.encode(pc)).hunt().completed());
     }
 
     @Test
