@@ -116,6 +116,8 @@ Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 60 miejsc, wspolny dla
 - NPC moga stac poza miastami (pole "miasto" = nazwa obozu), ale kaplan tylko w miescie ze swiatynia.
 - `camp_shop`: mikstury (w tym Supreme), skup materialow po 1/2 i sprzetu endgame po 1/4 wartosci.
 - Receptury endgame w `recipes.csv` (crafting z ksiegi, bez stanowiska); poziom receptury = poziom przedmiotu.
+- Receptury srednich poziomow (0.158.0): iron_knuckles (20), fur_armor (40), sandstone_shield (50), croc_legs (55),
+  serpent_spear i desert_knuckles (60), scarab_helmet (70) - z materialow krain (kly, futra, skory, ogony, bandaze).
 - Ksiega: receptury do poziomu postaci + 100, po kilka na strone ("Nastepna strona receptur").
 
 ## Mapa, kolizje, pietra (Z)

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.158.0] - 2026-10-16
+
+### Dodano
+- 7 receptur dla poziomów 20-70 z materiałów krain: kastety, futrzana zbroja, tarcza z piaskowca, nogawice
+  z krokodyla, wężowa włócznia, pustynne kastety i hełm skarabeusza. Dotąd rzemiosło miało dziurę między
+  poziomem 15 a 250.
 ## [0.157.0] - 2026-10-16
 
 ### Dodano

@@ -7,6 +7,14 @@ bone_shield;bone_shield;1;wooden_shield:1,bone:8;0;14;Drewniana tarcza wzmocnion
 spears;spear;5;iron_ore:1;10;8;Pięć włóczni do rzucania.
 blank_runes;blank_rune;2;crystal_shard:1;0;8;Dwie puste runy z odłamka kryształu.
 torches;torch;3;meat:1;5;8;Pochodnie nasączone tłuszczem.
+# --- srednie poziomy: materialy z krain (0.158.0) ---
+iron_knuckles;iron_knuckles;1;boar_tusk:6,iron_ore:2;100;20;Kastety z kłów dzika okute żelazem.
+fur_armor;fur_armor;1;frost_pelt:6,yeti_fur:2;300;40;Ciepła zbroja z mroźnych futer i sierści yeti.
+sandstone_shield;sandstone_shield;1;scorpion_tail:4,hyena_fang:6;500;50;Tarcza z kłów hien spięta ogonami skorpionów.
+croc_legs;croc_legs;1;croc_leather:6;400;55;Nogawice z twardej skóry krokodyla.
+serpent_spear;serpent_spear;1;snake_skin:6,iron_ore:4;700;60;Włócznia owinięta wężową skórą.
+desert_knuckles;desert_knuckles;1;scorpion_tail:6,iron_knuckles:1;700;60;Kastety z jadowymi kolcami skorpionów.
+scarab_helmet;scarab_helmet;1;scarab_gem:1,mummy_wrap:8;800;70;Hełm z bandaży mumii z klejnotem skarabeusza.
 # --- endgame: kuznia z materialow wschodniego kontynentu ---
 magma_spear;magma_spear;1;obsidian_shard:20;40000;250;Włócznia z obsydianu hartowana w lawie.
 obsidian_wand;obsidian_wand;1;obsidian_shard:20;40000;250;Różdżka z wulkanicznego szkła.
