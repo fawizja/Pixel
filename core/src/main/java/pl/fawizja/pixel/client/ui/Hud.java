@@ -1059,23 +1059,36 @@ public final class Hud {
                 left.add(new MenuRow("npc:bosses", "Bossowie", "kto żyje, kto odrodzi się i kiedy (/bossowie)", true));
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;
+                // kolejnosc: do oddania, w toku, dostepne; z przyszlych tylko najblizsze, ukonczone jednym wierszem
+                List<MenuRow> ready = new ArrayList<>(), active = new ArrayList<>(), avail = new ArrayList<>();
+                pl.fawizja.pixel.quest.QuestType next = null;
+                int done = 0;
                 for (pl.fawizja.pixel.quest.QuestType q : qs.registry().byGiver(npc.key())) {
                     // dalsze etapy lancucha widac dopiero po ukonczeniu poprzedniego
                     if (pc.quests().state(q.key()) == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && !qs.unlocked(pc, q)) continue;
                     String reward = qs.rewardText(q);
-                    String detail;
-                    boolean ok;
                     switch (pc.quests().state(q.key())) {
-                        case DONE: detail = "ukończone"; ok = false; break;
+                        case DONE: done++; break;
                         case ACTIVE:
-                            ok = qs.ready(pc, q);
-                            detail = ok ? "ODDAJ - nagroda: " + reward : "w toku: " + qs.progress(pc, q) + " / " + q.amount();
+                            if (qs.ready(pc, q)) ready.add(new MenuRow("npc:quest:" + q.key(), q.name(), "ODDAJ - nagroda: " + reward, true));
+                            else active.add(new MenuRow("npc:quest:" + q.key(), q.name(), "w toku: " + qs.progress(pc, q) + " / " + q.amount(), false));
                             break;
                         default:
-                            ok = pc.level() >= q.minLevel();
-                            detail = "przyjmij (poz. " + q.minLevel() + "): " + reward;
+                            if (pc.level() >= q.minLevel()) {
+                                avail.add(new MenuRow("npc:quest:" + q.key(), q.name(), "przyjmij (poz. " + q.minLevel() + "): " + reward, true));
+                            } else if (next == null || q.minLevel() < next.minLevel()) {
+                                next = q;
+                            }
                     }
-                    MenuRow row = new MenuRow("npc:quest:" + q.key(), q.name(), detail, ok);
+                }
+                List<MenuRow> questRows = new ArrayList<>(ready);
+                questRows.addAll(active);
+                questRows.addAll(avail);
+                if (next != null) {
+                    questRows.add(new MenuRow("npc:quest:" + next.key(), next.name(), "od poziomu " + next.minLevel() + ": " + qs.rewardText(next), false));
+                }
+                if (done > 0) questRows.add(new MenuRow("npc:none", "Ukończone zadania: " + done, "dziennik zadań: klawisz Z", false));
+                for (MenuRow row : questRows) {
                     if (left.size() < perCol) left.add(row);
                     else right.add(row);
                 }

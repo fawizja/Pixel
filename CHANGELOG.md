@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.156.0] - 2026-10-16
+
+### Zmieniono
+- Rozmowa z przewodnikiem jest czytelniejsza: najpierw zadania do oddania, w toku i dostępne, z przyszłych
+  tylko najbliższe, a ukończone zebrane w jeden wiersz. Wróciły ukryte wcześniej tematy rozmowy.
 ## [0.155.0] - 2026-10-16
 
 ### Dodano
