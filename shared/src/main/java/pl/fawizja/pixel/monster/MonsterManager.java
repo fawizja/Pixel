@@ -98,13 +98,20 @@ public final class MonsterManager {
             Position p = sp.center().translate(dx, dy);
             if (!canOccupy(p, avoid)) continue;
             if (avoid != null && p.distanceTo(avoid) <= 5) continue; // nie pojawiaj sie na oczach gracza
-            Monster m = new Monster(nextId++, registry.get(sp.monsterKey()), sp, p);
+            Monster m = new Monster(nextId, spawnType(sp, nextId), sp, p);
+            nextId++;
             m.setNextActionMs(now + 500 + rng.nextInt(2000));
             monsters.add(m);
             grid.add(m);
             return true;
         }
         return false;
+    }
+
+    /** Rodzaj z punktu spawnu; czasem (wg numeru potwora) odmiana elitarna. */
+    private MonsterType spawnType(SpawnPoint sp, int id) {
+        MonsterType t = registry.get(sp.monsterKey());
+        return MonsterType.eliteRoll(id) ? t.eliteVariant() : t;
     }
 
     public List<Monster> monsters() { return Collections.unmodifiableList(monsters); }
@@ -222,7 +229,9 @@ public final class MonsterManager {
             keep.add(e.id());
             Monster m = byId.get(e.id());
             if (m == null) {
-                m = new Monster(e.id(), registry.get(e.key()), new SpawnPoint(e.key(), e.position(), 0, 1, 60), e.position());
+                MonsterType type = registry.get(e.key());
+                if ("E".equals(e.mark())) type = type.eliteVariant(); // serwer oznacza elitarne
+                m = new Monster(e.id(), type, new SpawnPoint(e.key(), e.position(), 0, 1, 60), e.position());
                 monsters.add(m);
                 grid.add(m);
             } else if (!m.position().equals(e.position())) {
@@ -377,7 +386,8 @@ public final class MonsterManager {
                 if (t.position().equals(p) || p.distanceTo(t.position()) <= 5) seen = true;
             }
             if (seen || !canOccupy(p, null)) continue;
-            Monster m = new Monster(nextId++, registry.get(sp.monsterKey()), sp, p);
+            Monster m = new Monster(nextId, spawnType(sp, nextId), sp, p);
+            nextId++;
             m.setNextActionMs(now + 500 + rng.nextInt(2000));
             monsters.add(m);
             grid.add(m);

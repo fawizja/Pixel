@@ -1615,7 +1615,8 @@ final class ServerWorld {
                 if (m.isDead() || m.position().z() != me.z()) continue;
                 Position mp = m.position();
                 frame.append(Protocol.line("MO", String.valueOf(m.id()), m.type().key(), String.valueOf(mp.x()),
-                        String.valueOf(mp.y()), String.valueOf(mp.z()), String.valueOf(Math.round(100 * m.healthFraction()))))
+                        String.valueOf(mp.y()), String.valueOf(mp.z()), String.valueOf(Math.round(100 * m.healthFraction())),
+                        m.type().isElite() ? "E" : "-"))
                         .append('\n');
             }
             ground.forEachNear(me, Protocol.VIEW_RADIUS, (gp, st) -> frame.append(Protocol.line("GI",

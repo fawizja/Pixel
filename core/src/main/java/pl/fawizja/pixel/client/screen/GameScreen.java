@@ -829,7 +829,14 @@ public final class GameScreen extends ScreenAdapter {
                 float mx = m.renderX(t) + (lg == null ? 0f : lg[0]);
                 float my = worldRenderer.worldY(m.renderY(t) + (lg == null ? 0f : lg[1]));
                 boolean flip = m.facing() != null && m.facing().dx < 0;
-                b.draw(tr, flip ? mx + 1f : mx, my, flip ? -1f : 1f, 1f);
+                if (m.type().isElite()) {
+                    // elita: wiekszy i zlocisty
+                    b.setColor(1f, 0.85f, 0.45f, 1f);
+                    b.draw(tr, flip ? mx + 1.15f : mx - 0.15f, my, flip ? -1.3f : 1.3f, 1.3f);
+                    b.setColor(Color.WHITE);
+                } else {
+                    b.draw(tr, flip ? mx + 1f : mx, my, flip ? -1f : 1f, 1f);
+                }
             }
             for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
                 Position np = n.position();

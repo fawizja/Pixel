@@ -111,7 +111,8 @@ zamiast 2 s). Pozostale potwory bez zmian. Symulacje i test "godzina na wilkach"
 - Potwor: fizyczne minus `armor/2..armor`, potem odpornosc w % (ujemna = slabosc).
 - Gracz: fizyczne minus `0..pancerz/2` i `0..obrona/3` (tarcza * defenseFactor * shielding); zywioly ignoruja pancerz.
 - Exp za potwora: pelny do poziomu `4 * poziom_potwora + 20`, potem proporcjonalnie mniej (min. 10%,
-  ale realnie ~0 przy wielkiej roznicy). Smierc: -5% exp (-2,5% z blogoslawienstwem kaplana: 200 gp za poziom, min. 1000 gp, jednorazowe), nigdy ponizej poziomu startowego.
+  ale realnie ~0 przy wielkiej roznicy). Potwory elitarne (ok. 4% zwyklych): 2x HP, 1,3x obrazenia, 3x exp, 2x szansa lupow.
+  Smierc: -5% exp (-2,5% z blogoslawienstwem kaplana: 200 gp za poziom, min. 1000 gp, jednorazowe), nigdy ponizej poziomu startowego.
 
 ## Potwory Varden
 

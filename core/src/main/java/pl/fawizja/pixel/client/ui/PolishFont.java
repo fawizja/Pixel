@@ -77,16 +77,18 @@ public final class PolishFont {
             for (Layer l : layers) blit(page, l, box, w, h, alpha);
             if (stroke) stroke(alpha, w, h, box, base, upper);
             if (above) mark(alpha, w, ch == 'ż' || ch == 'Ż' ? DOT : ACUTE);
+            // ciemny obrys jak w oryginalnych literach (inaczej bialy znak znika na sniegu i piasku)
+            int[] outlined = outline(alpha, w, h);
             Glyph out = new Glyph();
             out.id = ch;
-            out.width = w;
-            out.height = h;
-            out.xoffset = box[0];
-            out.yoffset = box[1];
+            out.width = w + 2;
+            out.height = h + 2;
+            out.xoffset = box[0] - 1;
+            out.yoffset = box[1] - 1;
             out.xadvance = base.xadvance + (ch == 'ł' ? 1 : 0);
             out.page = 0;
             made.add(out);
-            pixels.add(alpha);
+            pixels.add(outlined);
         }
 
         // pas na dole strony, glify jeden obok drugiego
@@ -102,8 +104,7 @@ public final class PolishFont {
             gl.srcY = page.getHeight() + 1;
             for (int yy = 0; yy < gl.height; yy++) {
                 for (int xx = 0; xx < gl.width; xx++) {
-                    int av = al[yy * gl.width + xx];
-                    out.drawPixel(gl.srcX + xx, gl.srcY + yy, 0xffffff00 | av);
+                    out.drawPixel(gl.srcX + xx, gl.srcY + yy, al[yy * gl.width + xx]);
                 }
             }
             x += gl.width + 1;
@@ -194,7 +195,9 @@ public final class PolishFont {
             int outRow = box[3] - penY;
             for (int col = 0; col < s.width; col++) {
                 int srcCol = l.mirror() ? s.width - 1 - col : col;
-                int av = page.getPixel(s.srcX + srcCol, s.srcY + row) & 0xff;
+                int px = page.getPixel(s.srcX + srcCol, s.srcY + row);
+                // tylko biala czesc litery (jasnosc x krycie); czarny obrys zrodla dorysuje outline()
+                int av = (px & 0xff) * ((px >>> 24) & 0xff) / 255;
                 if (av == 0) continue;
                 int outCol = s.xoffset + l.dx() + col - box[0];
                 if (outRow < 0 || outRow >= h || outCol < 0 || outCol >= w) continue;
@@ -202,6 +205,33 @@ public final class PolishFont {
                 alpha[idx] = Math.max(alpha[idx], av);
             }
         }
+    }
+
+    /**
+     * Gotowe piksele RGBA8888 glifu z marginesem 1 px: biala litera (krycie z alpha) na polprzezroczystym czarnym
+     * obrysie (60% najwiekszego krycia sasiadow), jak w lsans-15.
+     */
+    static int[] outline(int[] alpha, int w, int h) {
+        int ow = w + 2, oh = h + 2;
+        int[] out = new int[ow * oh];
+        for (int y = 0; y < oh; y++) {
+            for (int x = 0; x < ow; x++) {
+                int ink = (x >= 1 && x <= w && y >= 1 && y <= h) ? alpha[(y - 1) * w + (x - 1)] : 0;
+                int near = 0;
+                for (int dy = -1; dy <= 1; dy++) {
+                    for (int dx = -1; dx <= 1; dx++) {
+                        int sx = x - 1 + dx, sy = y - 1 + dy;
+                        if (sx >= 0 && sx < w && sy >= 0 && sy < h) near = Math.max(near, alpha[sy * w + sx]);
+                    }
+                }
+                int shadow = near * 6 / 10;
+                // biel o kryciu ink nalozona na czern o kryciu shadow
+                int a = ink + shadow * (255 - ink) / 255;
+                int grey = a == 0 ? 0 : Math.min(255, 255 * ink / a);
+                out[y * ow + x] = (grey << 24) | (grey << 16) | (grey << 8) | a;
+            }
+        }
+        return out;
     }
 
     /** Ukosna kreska przez pionowa kreske litery l / L, na wysokosci ok. 55% litery. */

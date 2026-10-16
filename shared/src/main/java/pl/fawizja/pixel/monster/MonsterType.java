@@ -32,6 +32,12 @@ public final class MonsterType {
     private final boolean nocturnal;
     private final String description;
     private final List<LootEntry> loot;
+    /** Elitarna odmiana (wiekszy, silniejszy, wiecej doswiadczenia i lupow); ten sam klucz co zwykly. */
+    private boolean elite;
+    private MonsterType eliteVariant;
+
+    /** Szansa (promile) na elitarna odmiane zwyklego potwora przy pojawieniu sie. */
+    public static final int ELITE_PERMILLE = 40;
 
     public MonsterType(String key, String name, int level, int maxHealth, long experience, int speed,
                        int attackMin, int attackMax, DamageType damageType, int range, int attackIntervalMs,
@@ -97,4 +103,34 @@ public final class MonsterType {
     public boolean nocturnal() { return nocturnal; }
     public String description() { return description; }
     public List<LootEntry> loot() { return loot; }
+
+    public boolean isElite() { return elite; }
+
+    /**
+     * Elitarna odmiana: 2x zdrowie, 1,3x obrazenia, 3x doswiadczenie, 2x szansa na kazdy lup (do 100%).
+     * Bossowie i odmiany elitarne zwracaja siebie. Ten sam klucz: grafika, bestiariusz i zadania licza go jak zwyklego.
+     */
+    public synchronized MonsterType eliteVariant() {
+        if (boss || elite) return this;
+        if (eliteVariant == null) {
+            List<LootEntry> l = new java.util.ArrayList<>();
+            for (LootEntry e : loot) l.add(new LootEntry(e.itemId(), Math.min(1000, e.chancePermille() * 2), e.min(), e.max()));
+            MonsterType t = new MonsterType(key, name + " (elita)", level, maxHealth * 2, experience * 3, speed,
+                    (int) Math.round(attackMin * 1.3), (int) Math.round(attackMax * 1.3), damageType, range, attackIntervalMs,
+                    armor, resistances, behavior, aggroRange, fleeHealthPercent, healAmount, false, color, shape, biome,
+                    nocturnal, description, l);
+            t.elite = true;
+            eliteVariant = t;
+        }
+        return eliteVariant;
+    }
+
+    /** Czy potwor o danym numerze jest elitarny: los z numeru (bez zuzywania generatora - powtarzalne spawny). */
+    public static boolean eliteRoll(int monsterId) {
+        long x = monsterId * 0x9E3779B97F4A7C15L;
+        x ^= x >>> 31;
+        x *= 0xBF58476D1CE4E5B9L;
+        x ^= x >>> 29;
+        return Math.floorMod(x, 1000L) < ELITE_PERMILLE;
+    }
 }

@@ -168,7 +168,9 @@ public final class NetClient implements AutoCloseable {
                                 f.length > 10 && f[10].equals("M")));
                         break;
                     case "MO":
-                        monsters.add(new RemoteEntity("MO", Integer.parseInt(f[1]), f[2], f[2], pos(f, 3), Integer.parseInt(f[6])));
+                        // f[7] (od 0.54.0): "E" = odmiana elitarna
+                        monsters.add(new RemoteEntity("MO", Integer.parseInt(f[1]), f[2], f[2], pos(f, 3), Integer.parseInt(f[6]),
+                                f.length > 7 ? f[7] : "-", null));
                         break;
                     case "GI":
                         ground.add(new GroundStack(pos(f, 1), Integer.parseInt(f[4]), Integer.parseInt(f[5])));

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.54.0] - 2026-10-16
+
+### Dodano
+- Potwory elitarne: około 4% zwykłych potworów pojawia się jako „(elita)”: większe i złociste, 2x zdrowie,
+  1,3x obrażenia, 3x doświadczenie i podwójna szansa na każdy łup. Bossowie nie mają odmiany elitarnej.
+  Los zależy od numeru potwora (bez zużywania generatora, więc spawny zostają powtarzalne). Online serwer
+  oznacza elitę w klatce stanu (`MO ... E`, starsze klienty ignorują to pole).
+- `MonsterType.eliteVariant/isElite/eliteRoll`. 3 nowe testy; łącznie 294.
+
+### Poprawiono
+- Polskie litery składane w czcionce (ą, ę, ś, ż i inne) nie miały ciemnego obrysu jak reszta liter, więc
+  znikały na jasnym tle (śnieg, piasek). Teraz mają obrys jak pozostałe litery. Wzorce regresji GUI odświeżone.
+
 ## [0.53.0] - 2026-10-16
 
 ### Dodano
