@@ -32,4 +32,19 @@ class NewAchievementsTest {
         pc.hunt().complete();
         assertTrue(Achievement.HUNT_10.reached(pc));
     }
+
+    @Test
+    void fiveChallengesMakeAWaveSlayerAndAreSaved() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
+        for (int i = 0; i < 4; i++) pc.stats().recordChallenge();
+        assertFalse(Achievement.CHALLENGE_5.reached(pc));
+        pc.stats().recordChallenge();
+        assertTrue(Achievement.CHALLENGE_5.reached(pc));
+        pl.fawizja.pixel.character.CharacterCodec codec = new pl.fawizja.pixel.character.CharacterCodec(TestData.ITEMS);
+        assertEquals(5, codec.decode(codec.encode(pc)).stats().challenges());
+        pl.fawizja.pixel.character.CharacterStats old = new pl.fawizja.pixel.character.CharacterStats();
+        old.restore("60000,2,9");
+        assertEquals(0, old.challenges(), "older saves have no challenge count");
+        assertEquals(9, old.bestLevel());
+    }
 }

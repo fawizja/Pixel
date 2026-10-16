@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.111.0] - 2026-10-16
+
+### Dodano
+- Licznik ukończonych wyzwań w statystykach postaci (zapisywany; starsze zapisy zaczynają od zera)
+  i osiągnięcie „Pogromca fal” za 5 wyzwań; razem 23 osiągnięcia.
 ## [0.110.0] - 2026-10-16
 
 ### Dodano

@@ -976,6 +976,7 @@ public final class GameSession {
             return;
         }
         challenge = null;
+        pc.stats().recordChallenge();
         long gold = Challenge.rewardGold(c.type);
         pc.bank().credit(gold);
         log.add(nowMs, EventLog.Kind.SYSTEM, "Wyzwanie ukończone! " + String.format("%,d gp", gold) + " na konto.");

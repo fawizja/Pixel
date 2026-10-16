@@ -56,6 +56,7 @@ class ChallengeTest {
             s.update(t += 100, null);
         }
         assertNull(s.challenge(), "finished");
+        assertEquals(1, pc.stats().challenges());
         long reward = Challenge.rewardGold(pl.fawizja.pixel.monster.MonsterRegistry.loadDefault(TestData.ITEMS).get("wolf"));
         assertTrue(pc.bank().balance() - bank >= reward, "paid (the first update may also add the login bonus)");
         assertTrue(s.log().latest(50).stream().anyMatch(e -> e.text().startsWith("Wyzwanie ukończone")));
