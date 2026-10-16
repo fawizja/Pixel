@@ -546,7 +546,7 @@ class NetworkSyncTest {
                 shared[0] = server.world().shareKill(killer, wolf, server.now());
                 ulaHunt[0] = server.world().find("Ula").session.character().hunt().progress();
             });
-            await("kill shared", () -> soloExp[0] >= 0);
+            await("kill shared", () -> soloExp[0] >= 0 && ulaHunt[0] >= 0);
             assertEquals(4, ulaHunt[0], "the party kill counts for Ula's hunting task");
             long solo = soloExp[0];
             long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2);

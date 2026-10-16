@@ -51,7 +51,7 @@ public final class ItemSearch {
         return t != null && (fold(t.name()).contains(q) || fold(t.key()).contains(q));
     }
 
-    static String fold(String s) {
+    public static String fold(String s) {
         if (s == null) return "";
         String t = s.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l');
         return java.text.Normalizer.normalize(t, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");

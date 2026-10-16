@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.108.0] - 2026-10-16
+
+### Dodano
+- `/cena nazwa`: wartość przedmiotu i lista kupców NPC ze wszystkich miast, od najwyższej ceny skupu,
+  z ceną sprzedaży (np. `/cena wilcze futro`).
+
+### Naprawiono
+- Wyścig w teście sieciowym drużyny (sprawdzenie postępu zlecenia przed jego zapisaniem).
 ## [0.107.0] - 2026-10-16
 
 ### Dodano

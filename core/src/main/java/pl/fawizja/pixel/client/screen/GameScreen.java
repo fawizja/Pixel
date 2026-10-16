@@ -547,6 +547,17 @@ public final class GameScreen extends ScreenAdapter {
             hud.openInfo("Strój", rows);
             return;
         }
+        if (cmd.equals("/cena") || cmd.startsWith("/cena ")) {
+            String q = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
+            pl.fawizja.pixel.item.ItemType it = pl.fawizja.pixel.npc.PriceCheck.find(session.items(), q);
+            if (it == null) {
+                session.log().add(now(), EventLog.Kind.INFO, q.isEmpty() ? "Wpisz nazwę przedmiotu, np. /cena wilcze futro."
+                        : "Nie znam przedmiotu \"" + q + "\".");
+                return;
+            }
+            hud.openInfo("Cena: " + it.name(), pl.fawizja.pixel.npc.PriceCheck.rows(it, session.npcs(), session.shops()));
+            return;
+        }
         if (cmd.equals("/ignoruj") || cmd.startsWith("/ignoruj ")) {
             String who = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
             if (who.isEmpty()) {
