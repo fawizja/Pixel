@@ -388,6 +388,51 @@ public final class GameSession {
         return r;
     }
 
+    /**
+     * Sprzedaz calego lupu (materialy skupowane przez tego kupca) jednym dotknieciem. Pomija przedmioty
+     * potrzebne do aktywnych zadan zbierania; zwraca liczbe sprzedanych sztuk.
+     */
+    public int sellLoot(long nowMs) {
+        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        if (n == null) return 0;
+        java.util.Set<Integer> keep = new java.util.HashSet<>();
+        if (quests != null) {
+            for (String key : pc.quests().active().keySet()) {
+                pl.fawizja.pixel.quest.QuestType q = quests.registry().get(key);
+                if (q != null && q.kind() == pl.fawizja.pixel.quest.QuestKind.COLLECT && items.byKey(q.target()) != null) {
+                    keep.add(items.byKey(q.target()).id());
+                }
+            }
+        }
+        java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
+        for (ItemStack s : pc.backpack().contents()) {
+            if (s != null && items.get(s.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.MATERIAL) ids.add(s.itemId());
+        }
+        int sold = 0;
+        long total = 0;
+        boolean kept = false;
+        for (int id : ids) {
+            if (keep.contains(id)) {
+                kept = true;
+                continue;
+            }
+            long value = TradeSystem.sellValue(pc.backpack(), shopOf(n), id);
+            int count = pc.backpack().countPlain(id);
+            if (value <= 0 || count <= 0) continue;
+            if (TradeSystem.sellAll(pc.backpack(), shopOf(n), id).ok()) {
+                sold += count;
+                total += value;
+            }
+        }
+        if (sold == 0) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": nie masz łupu, który skupuję" + (kept ? " (przedmioty do zadań zostają)." : "."));
+        } else {
+            log.add(nowMs, EventLog.Kind.LOOT, "Sprzedano łup: " + sold + " szt. za " + String.format("%,d gp", total)
+                    + (kept ? ". Przedmioty do zadań zostają w plecaku." : "."));
+        }
+        return sold;
+    }
+
     public InventoryResult depositAll(long nowMs) {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return InventoryResult.INVALID_AMOUNT;
         long before = gold();

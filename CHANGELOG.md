@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.73.0] - 2026-10-16
+
+### Dodano
+- „Sprzedaj cały łup” u kupca: jedno dotknięcie sprzedaje wszystkie materiały z potworów, które kupiec skupuje.
+  Przedmioty potrzebne do aktywnych zadań zbierania zostają w plecaku; wyposażenie, mikstury i narzędzia też.
+- 1 nowy test; łącznie 323.
+
 ## [0.72.0] - 2026-10-16
 
 ### Dodano

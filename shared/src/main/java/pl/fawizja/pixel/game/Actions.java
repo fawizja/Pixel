@@ -45,6 +45,7 @@ public final class Actions {
         switch (p[1]) {
             case "buy": s.buy(Integer.parseInt(p[2]), Integer.parseInt(p[3]), now); return true;
             case "sell": s.sellAll(Integer.parseInt(p[2]), now); return true;
+            case "sellloot": s.sellLoot(now); return true;
             case "deposit": s.depositAll(now); return true;
             case "withdraw": s.withdraw(Long.parseLong(p[2]), now); return true;
             case "store": s.depotStore(Integer.parseInt(p[2]), now); return true;
