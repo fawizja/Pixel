@@ -1010,6 +1010,20 @@ class NetworkSyncTest {
     }
 
     @Test
+    void messageOfTheDayGreetsJoiningPlayers() throws Exception {
+        java.util.concurrent.atomic.AtomicReference<String> set = new java.util.concurrent.atomic.AtomicReference<>();
+        server.enqueueTest(() -> set.set(server.world().moderate(new String[] {"MOTD", "Event w sobotę"}, "konsola", server.now())));
+        await("motd set", () -> set.get() != null);
+        assertEquals("Event w sobotę", server.world().motd());
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            awaitMessage(ola, "motd shown", m -> m[0].equals("LOG") && m[2].contains("Wiadomość dnia: Event w sobotę"));
+        }
+        server.enqueueTest(() -> server.world().moderate(new String[] {"MOTD", "-"}, "konsola", server.now()));
+        await("motd cleared", () -> server.world().motd().isEmpty());
+    }
+
+    @Test
     void parcelsReachTheDepotOfOnlineAndOfflinePlayers() throws Exception {
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient kuba = connect()) {

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.117.0] - 2026-10-16
+
+### Dodano
+- Wiadomość dnia serwera: administrator ustawia ją `/motd tekst` w grze albo `MOTD tekst` w konsoli
+  (`/motd -` usuwa). Każdy wchodzący gracz widzi ją w dzienniku; zapis w `motd.txt` przetrwa restart.
 ## [0.116.0] - 2026-10-16
 
 ### Dodano

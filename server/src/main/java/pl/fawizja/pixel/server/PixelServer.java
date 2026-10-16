@@ -197,7 +197,7 @@ public final class PixelServer implements AutoCloseable {
 
     /**
      * Konsola operatora (stdin, np. {@code docker attach} albo terminal): say tekst, kick imie, ban imie godziny,
-     * unban imie, mute imie minuty, admin imie, who, invasion [miasto], status, save. Polecenia wykonuje watek swiata.
+     * unban imie, mute imie minuty, admin imie, who, invasion [miasto], status, save, motd [tekst|-]. Polecenia wykonuje watek swiata.
      */
     void startConsole(java.io.InputStream in) {
         Thread t = new Thread(() -> {
@@ -224,7 +224,7 @@ public final class PixelServer implements AutoCloseable {
         int sp = t.indexOf(' ');
         String cmd = (sp < 0 ? t : t.substring(0, sp)).toUpperCase(java.util.Locale.ROOT);
         String rest = sp < 0 ? "" : t.substring(sp + 1).trim();
-        if (cmd.equals("SAY")) return new String[] {cmd, rest};
+        if (cmd.equals("SAY") || cmd.equals("MOTD")) return rest.isEmpty() ? new String[] {cmd} : new String[] {cmd, rest};
         if ((cmd.equals("BAN") || cmd.equals("MUTE")) && !rest.isEmpty()) {
             String[] nn = pl.fawizja.pixel.net.ChatCommands.nameAndNumber(rest);
             return nn.length == 2 ? new String[] {cmd, nn[0], nn[1]} : new String[] {cmd, nn[0]};

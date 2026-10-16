@@ -97,6 +97,10 @@ final class ServerWorld {
     private final File guildFile;
     private final File marketFile;
     private final File mailFile;
+    /** Wiadomosc dnia serwera (motd.txt, polecenie MOTD); pusta = brak. */
+    private final File motdFile;
+    private String motd = "";
+    static final int MOTD_MAX = 200;
     final pl.fawizja.pixel.mail.Mailbox mail;
     final pl.fawizja.pixel.market.Market market;
     /** Prosby o handel: adresat -> (proszacy -> waznosc). */
@@ -128,7 +132,25 @@ final class ServerWorld {
         mailFile = new File(saveDir, "mail.txt");
         mail = pl.fawizja.pixel.mail.Mailbox.decode(mailFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(mailFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        motdFile = new File(saveDir, "motd.txt");
+        if (motdFile.isFile()) {
+            motd = cleanMotd(new String(java.nio.file.Files.readAllBytes(motdFile.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+        }
         loadRanking(saveDir);
+    }
+
+    static String cleanMotd(String s) {
+        String t = s == null ? "" : s.replace('\r', ' ').replace('\n', ' ').trim();
+        return t.length() > MOTD_MAX ? t.substring(0, MOTD_MAX) : t;
+    }
+
+    String motd() { return motd; }
+
+    /** Nowa wiadomosc dnia ("-" albo pusta czysci); zapis do motd.txt. */
+    String setMotd(String text) throws IOException {
+        motd = text == null || text.trim().equals("-") ? "" : cleanMotd(text);
+        java.nio.file.Files.write(motdFile.toPath(), motd.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        return motd.isEmpty() ? "Wiadomość dnia usunięta." : "Wiadomość dnia: " + motd;
     }
 
     /** Ranking z zapisow postaci (player_*.save); uszkodzony zapis jest pomijany. */
@@ -759,6 +781,7 @@ final class ServerWorld {
         List<String> on = new ArrayList<>();
         for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
         if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
+        if (!motd.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość dnia: " + motd);
         pl.fawizja.pixel.guild.GuildRegistry.Guild guild = guilds.guildOf(pc.name());
         if (guild != null && guild.motd() != null) {
             s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość gildii " + guild.name() + ": " + guild.motd());
@@ -1387,7 +1410,7 @@ final class ServerWorld {
      * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
-    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE";
+    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD";
     /** Czas pierwszego taktu swiata (do czasu dzialania w STATUS); -1 przed pierwszym taktem. */
     private long firstTick = -1;
 
@@ -1446,6 +1469,9 @@ final class ServerWorld {
                     return startInvasion(c.length > 1 ? c[1] : null, now);
                 case "STATUS":
                     return status(now);
+                case "MOTD":
+                    if (c.length < 2 || c[1].isBlank()) return motd.isEmpty() ? "Brak wiadomości dnia. MOTD tekst ustawia, MOTD - usuwa." : "Wiadomość dnia: " + motd;
+                    return setMotd(c[1]);
                 case "SAVE":
                     saveAll();
                     return "Zapisano " + players.size() + " postaci.";

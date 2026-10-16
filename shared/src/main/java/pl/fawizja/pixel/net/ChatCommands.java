@@ -103,6 +103,8 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"ADMIN", "STATUS"} : null;
             case "/zapisz":
                 return w.length == 1 ? new String[] {"ADMIN", "SAVE"} : null;
+            case "/motd":
+                return w.length == 1 ? new String[] {"ADMIN", "MOTD"} : new String[] {"ADMIN", "MOTD", rest(t)};
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:

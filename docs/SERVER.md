@@ -70,6 +70,7 @@ Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pi
 | `who` | `/kto` | kto jest w grze |
 | `status` | `/serwer` | czas dzialania, liczba graczy i potworow, inwazja, zuzycie pamieci |
 | `save` | `/zapisz` | natychmiastowy zapis wszystkich postaci w grze |
+| `motd tekst` | `/motd tekst` | wiadomosc dnia pokazywana kazdemu przy wejsciu (`motd -` usuwa, `<dane>/motd.txt`) |
 | `invasion Varden` | `/inwazja Varden` | inwazja na miasto teraz (bez nazwy - kolejne miasto) |
 | `admin Imie` | - | nowy administrator (tylko konsola) |
 
