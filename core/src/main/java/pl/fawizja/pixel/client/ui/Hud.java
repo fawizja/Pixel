@@ -989,8 +989,12 @@ public final class Hud {
                 for (int i = npcPage * per; i < Math.min(sold.size(), (npcPage + 1) * per); i++) {
                     pl.fawizja.pixel.npc.ShopOffer o = sold.get(i);
                     long cost = o.buyPrice() * npcQty;
-                    left.add(new MenuRow("npc:buy:" + o.itemId() + ":" + npcQty, session.items().get(o.itemId()).name(),
-                            o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : ""), gold >= cost));
+                    pl.fawizja.pixel.item.ItemType it = session.items().get(o.itemId());
+                    pl.fawizja.pixel.item.ItemStack worn = it.slot() == pl.fawizja.pixel.item.EquipSlot.NONE ? null : pc.equipment().get(it.slot());
+                    String delta = pl.fawizja.pixel.item.ItemCompare.shopDelta(it, worn == null ? null : session.items().get(worn.itemId()),
+                            worn == null ? 0 : worn.upgrade(), pc);
+                    left.add(new MenuRow("npc:buy:" + o.itemId() + ":" + npcQty, it.name(),
+                            o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : "") + (delta.isEmpty() ? "" : "; " + delta), gold >= cost));
                 }
                 if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
                 right.add(new MenuRow("npc:smith", "Ulepsz wyposażenie", "kowal: broń, tarcza i zbroja do +5", true));

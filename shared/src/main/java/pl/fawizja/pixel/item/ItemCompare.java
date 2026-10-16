@@ -27,6 +27,28 @@ public final class ItemCompare {
         return b.toString();
     }
 
+    /**
+     * Krotka roznica do wiersza sklepu: "atak +5, pancerz -1" wzgledem zalozonego (equipped z ulepszeniem eu),
+     * "jak założone" przy braku zmian, "nie dla ciebie" / "od poz. 20", gdy postac nie moze tego nosic; pusty tekst
+     * dla przedmiotow, ktorych sie nie zaklada.
+     */
+    public static String shopDelta(ItemType t, ItemType equipped, int eu, PlayerCharacter pc) {
+        if (t.slot() == EquipSlot.NONE) return "";
+        if (!t.vocations().contains(pc.vocation())) return "nie dla ciebie";
+        StringBuilder b = new StringBuilder();
+        delta(b, "atak", t.attack(), equipped == null ? 0 : Upgrade.attack(equipped, eu));
+        delta(b, "obrona", t.defense(), equipped == null ? 0 : Upgrade.defense(equipped, eu));
+        delta(b, "pancerz", t.armor(), equipped == null ? 0 : Upgrade.armor(equipped, eu));
+        String out = b.length() == 0 ? "jak założone" : b.toString();
+        return pc.level() < t.minLevel() ? out + ", od poz. " + t.minLevel() : out;
+    }
+
+    private static void delta(StringBuilder b, String label, int value, int current) {
+        if (value == current) return;
+        if (b.length() > 0) b.append(", ");
+        b.append(label).append(' ').append(value > current ? "+" : "").append(value - current);
+    }
+
     private static void stat(StringBuilder b, String label, int value, int current, boolean compare) {
         if (value <= 0 && current <= 0) return;
         b.append("  ").append(label).append(' ').append(value);

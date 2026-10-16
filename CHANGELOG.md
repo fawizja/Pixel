@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.159.0] - 2026-10-16
+
+### Dodano
+- Sklep: przy broni i zbroi widać, co zmieni się względem założonego przedmiotu (np. "atak +5, pancerz -1"),
+  czy profesja może go nosić i od którego poziomu.
 ## [0.158.0] - 2026-10-16
 
 ### Dodano

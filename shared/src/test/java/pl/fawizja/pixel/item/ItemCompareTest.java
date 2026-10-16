@@ -33,4 +33,17 @@ class ItemCompareTest {
         PlayerCharacter paladin = TestData.newCharacter(Vocation.PALADIN);
         assertFalse(ItemCompare.requirements(items.byKey("training_sword"), paladin).contains("nie dla ciebie"));
     }
+
+    @Test
+    void shopRowsShowWhatChangesAgainstTheWornItem() {
+        PlayerCharacter knight = TestData.newCharacter(Vocation.PALADIN);
+        ItemType sword = items.byKey("iron_sword");
+        ItemType training = items.byKey("training_sword");
+        String d = ItemCompare.shopDelta(sword, training, 0, knight);
+        assertTrue(d.startsWith("atak +" + (sword.attack() - training.attack())), d);
+        assertTrue(d.endsWith("od poz. 15"), d);
+        assertEquals("jak założone", ItemCompare.shopDelta(training, training, 0, knight));
+        assertEquals("", ItemCompare.shopDelta(items.byKey("health_potion"), null, 0, knight));
+        assertEquals("nie dla ciebie", ItemCompare.shopDelta(sword, null, 0, TestData.newCharacter(Vocation.DRUID)));
+    }
 }
