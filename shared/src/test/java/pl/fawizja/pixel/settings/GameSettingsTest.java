@@ -120,6 +120,11 @@ class GameSettingsTest {
         assertEquals("settings:target", second[2][0]);
         assertTrue(s.apply("settings:target"));
         assertTrue(GameSettings.fromMap(s.toMap()).autoTarget());
+        assertEquals("settings:vibrate", second[3][0]);
+        assertTrue(s.vibrate(), "on by default");
+        assertTrue(s.apply("settings:vibrate"));
+        assertFalse(GameSettings.fromMap(s.toMap()).vibrate());
+        assertTrue(GameSettings.fromMap(new java.util.HashMap<>()).vibrate(), "old settings keep vibration on");
         s.apply("settings:page");
         assertEquals(0, s.page());
     }

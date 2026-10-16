@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.144.0] - 2026-10-16
+
+### Dodano
+- Wibracje na telefonie przy alarmie niskiego zdrowia (ustawienia, strona 2; domyślnie włączone).
 ## [0.143.0] - 2026-10-16
 
 ### Dodano

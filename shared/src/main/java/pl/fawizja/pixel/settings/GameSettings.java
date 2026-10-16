@@ -31,6 +31,8 @@ public final class GameSettings {
     private int autoHeal;
     private int autoMana;
     private boolean autoEat;
+    /** Wibracja telefonu przy alarmie niskiego zdrowia (na komputerze bez skutku). */
+    private boolean vibrate = true;
     private boolean autoTarget;
     /** Strona panelu ustawien (nie zapisywana). */
     private int page;
@@ -53,6 +55,8 @@ public final class GameSettings {
     /** Jedzenie z plecaka samo, gdy sytosc konczy sie (mniej niz minuta). */
     public boolean autoEat() { return autoEat; }
     public void toggleAutoEat() { autoEat = !autoEat; }
+    public boolean vibrate() { return vibrate; }
+    public void toggleVibrate() { vibrate = !vibrate; }
     /** Cel sam: najblizszy potwor obok postaci, gdy nie ma celu (poza strefa ochronna). */
     public boolean autoTarget() { return autoTarget; }
     public void toggleAutoTarget() { autoTarget = !autoTarget; }
@@ -114,6 +118,7 @@ public final class GameSettings {
             case "settings:heal": cycleAutoHeal(); return true;
             case "settings:mana": cycleAutoMana(); return true;
             case "settings:eat": toggleAutoEat(); return true;
+            case "settings:vibrate": toggleVibrate(); return true;
             case "settings:target": toggleAutoTarget(); return true;
             case "settings:page": page = (page + 1) % pages(); return true;
             default: return false;
@@ -132,6 +137,7 @@ public final class GameSettings {
         m.put("heal", String.valueOf(autoHeal));
         m.put("mana", String.valueOf(autoMana));
         m.put("eat", String.valueOf(autoEat));
+        m.put("vibrate", String.valueOf(vibrate));
         m.put("target", String.valueOf(autoTarget));
         return m;
     }
@@ -149,6 +155,7 @@ public final class GameSettings {
         s.autoHeal = choice(m.get("heal"), AUTO_HEAL_CHOICES, 0);
         s.autoMana = choice(m.get("mana"), AUTO_HEAL_CHOICES, 0);
         s.autoEat = bool(m.get("eat"), false);
+        s.vibrate = bool(m.get("vibrate"), true);
         s.autoTarget = bool(m.get("target"), false);
         return s;
     }
@@ -199,6 +206,7 @@ public final class GameSettings {
             {"settings:mana", "Mikstura many sama: " + (autoMana == 0 ? "wyłączona" : "poniżej " + autoMana + "% MP")},
             {"settings:eat", "Jedzenie samo: " + (autoEat ? "gdy kończy się sytość" : "wyłączone")},
             {"settings:target", "Cel sam: " + (autoTarget ? "najbliższy potwór obok" : "wyłączony")},
+            {"settings:vibrate", "Wibracje: " + (vibrate ? "przy niskim zdrowiu" : "wyłączone")},
         };
     }
 }

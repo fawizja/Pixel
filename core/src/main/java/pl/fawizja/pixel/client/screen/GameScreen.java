@@ -1362,6 +1362,7 @@ public final class GameScreen extends ScreenAdapter {
         if (lowHealth.update(pc.health(), pc.maxHealth(), t)) {
             game.sound().play(List.of(new pl.fawizja.pixel.audio.SoundCues.Cue(pl.fawizja.pixel.audio.SoundSynth.Sfx.ALARM, 0.6f)),
                     settings.volumeFactor());
+            if (settings.vibrate()) Gdx.input.vibrate(150);
         }
         if (!lowHealth.low()) return;
         float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
