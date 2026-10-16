@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.76.0] - 2026-10-16
+
+### Dodano
+- Okno „Statystyki” (`/statystyki`, `/staty`): czas gry, poziom (z najwyższym osiągniętym), pokonane potwory i gatunki,
+  elity i bossowie, śmierci, ukończone zadania, otwarte skrzynie, osiągnięcia i złoto w banku.
+- Postać liczy czas gry, śmierci i najwyższy poziom (zapis `stats`, przenoszony też do klienta online).
+- Scena regresji GUI `stats` (34 sceny).
+
+### Zmieniono
+- W oknie `/pomoc` wiersz `/zadania` zastąpiony wierszem `/statystyki` (dziennik zadań nadal pod `/zadania`, klawiszem Z i w KSIĘDZE).
+- 2 nowe testy; łącznie 328.
+
 ## [0.75.0] - 2026-10-16
 
 ### Dodano

@@ -900,6 +900,7 @@ public final class GameSession {
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         checkBoost(nowMs);
         if (pc.level() > pc.rewardedLevel()) checkLevelRewards(nowMs);
+        pc.stats().noteLevel(pc.level());
         checkPet(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);
@@ -910,6 +911,7 @@ public final class GameSession {
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt);
+            pc.stats().addPlayTime(dt);
             if (!world.isProtectionZone(pc.position())) {
                 pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);
                 if (gone != null) log.add(nowMs, EventLog.Kind.WARNING, "Zaklęcie wygasło: " + gone.label().toLowerCase(java.util.Locale.ROOT) + ".");

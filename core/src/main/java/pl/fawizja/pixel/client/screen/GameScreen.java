@@ -495,6 +495,10 @@ public final class GameScreen extends ScreenAdapter {
             else hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, null));
             return;
         }
+        if (cmd.equals("/statystyki") || cmd.equals("/staty")) {
+            hud.openInfo("Statystyki: " + session.character().name(), pl.fawizja.pixel.game.StatsReport.rows(session.character()));
+            return;
+        }
         if (cmd.equals("/gracze") || cmd.equals("/online")) {
             if (net != null) net.send("WHO");
             else session.log().add(now(), EventLog.Kind.INFO, "Lista graczy działa online.");

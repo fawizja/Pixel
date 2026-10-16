@@ -119,6 +119,7 @@ public final class PlayerCharacter {
         mounted = o.mounted;
         blessed = o.blessed;
         rewardedLevel = o.rewardedLevel;
+        stats.copyFrom(o.stats);
         pet = o.pet;
         title = o.title;
         torchLit = o.torchLit;
@@ -164,6 +165,11 @@ public final class PlayerCharacter {
     private int rewardedLevel;
 
     public int rewardedLevel() { return rewardedLevel; }
+
+    /** Liczniki do okna /statystyki. */
+    private final CharacterStats stats = new CharacterStats();
+
+    public CharacterStats stats() { return stats; }
     public void setRewardedLevel(int v) { rewardedLevel = Math.max(0, v); }
 
     /** Przywolany pupil (klucz przedmiotu pet_*) albo null; ozdoba, chodzi za postacia. */
@@ -350,6 +356,7 @@ public final class PlayerCharacter {
     /** Kara za smierc; zwraca true, gdy zuzyto blogoslawienstwo (polowa straty). */
     public boolean applyDeathPenalty(int minLevel) {
         boolean used = blessed;
+        stats.recordDeath();
         experience = Balance.experienceAfterDeath(experience, minLevel, used);
         level = Balance.levelForExperience(experience);
         blessed = false;

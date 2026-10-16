@@ -198,7 +198,7 @@ public final class ChatCommands {
             {"/analiza", "doświadczenie, zabicia i złoto na godzinę"},
             {"/wydarzenia", "inwazja, potwór dnia, zadanie dnia, nagrody"},
             {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
-            {"/zadania", "dziennik zadań"},
+            {"/statystyki", "czas gry, zabicia, śmierci (dziennik zadań: /zadania)"},
             {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
             {"/ranking", "najlepsi gracze (także /ranking gildie)"},
             {"/znajomi", "lista znajomych"},
