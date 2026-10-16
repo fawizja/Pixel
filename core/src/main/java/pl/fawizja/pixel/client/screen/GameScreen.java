@@ -1056,10 +1056,21 @@ public final class GameScreen extends ScreenAdapter {
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapes.setProjectionMatrix(camera.combined);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
+        session.boostedCreature(); // online klient nie wola update - ustawia klucz premii w walce
         for (Monster m : visibleMonsters) {
             if (m.isDead() || m.position().z() != z) continue;
             float mx = m.renderX(t);
             float my = worldRenderer.worldY(m.renderY(t));
+            if (session.combat().isBoosted(m.type())) {
+                // potwor dnia: zloty romb nad glowa
+                float cx = mx + 0.5f, cy = my + 1.3f;
+                shapes.setColor(0.15f, 0.1f, 0f, 0.8f);
+                shapes.triangle(cx - 0.17f, cy, cx + 0.17f, cy, cx, cy + 0.17f);
+                shapes.triangle(cx - 0.17f, cy, cx + 0.17f, cy, cx, cy - 0.17f);
+                shapes.setColor(1f, 0.82f, 0.2f, 1f);
+                shapes.triangle(cx - 0.12f, cy, cx + 0.12f, cy, cx, cy + 0.12f);
+                shapes.triangle(cx - 0.12f, cy, cx + 0.12f, cy, cx, cy - 0.12f);
+            }
             boolean hurt = m.healthFraction() < 1f;
             if (!hurt && m != target) continue;
             float f = m.healthFraction();

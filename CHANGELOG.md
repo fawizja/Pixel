@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.57.0] - 2026-10-16
+
+### Dodano
+- Rzadki łup: przedmiot z szansą bazową najwyżej 1% (dla elit liczona przed podwojeniem) daje wpis
+  „Rzadki łup: …!” w dzienniku, a na serwerze pozostali gracze widzą „Imię zdobywa rzadki łup: przedmiot (potwór)!”.
+- Potwór dnia ma złoty romb nad głową w świecie (także online).
+- 2 nowe testy; łącznie 300.
+
 ## [0.56.0] - 2026-10-16
 
 ### Dodano

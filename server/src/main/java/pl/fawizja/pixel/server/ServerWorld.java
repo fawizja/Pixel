@@ -686,6 +686,12 @@ final class ServerWorld {
         });
         s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
         s.combat().setDeathListener(m -> invasionKill(p, m));
+        s.combat().setRareDropListener((type, item, t) -> {
+            String what = items.get(item.itemId()).name() + " (" + type.name() + ")";
+            for (ServerPlayer o : players.values()) {
+                if (o != p) o.session.log().add(t, EventLog.Kind.SYSTEM, p.name() + " zdobywa rzadki łup: " + what + "!");
+            }
+        });
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");

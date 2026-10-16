@@ -73,6 +73,23 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public void setExperienceSharer(ExperienceSharer sharer) { this.experienceSharer = sharer; }
 
+    /** Lup z szansa bazowa najwyzej 1% jest rzadki (ogloszenie w dzienniku, na serwerze dla wszystkich). */
+    public static final int RARE_PERMILLE = 10;
+
+    public interface RareDropListener { void rareDrop(MonsterType from, ItemStack item, long now); }
+
+    private RareDropListener rareDropListener;
+    /** Rzadkie przedmioty z ostatniego {@link #rollLoot}. */
+    private final List<ItemStack> rareRolled = new ArrayList<>();
+
+    public void setRareDropListener(RareDropListener listener) { this.rareDropListener = listener; }
+
+    /** Szansa bazowa wpisu lupu (elita ma tabele z podwojona szansa). */
+    static boolean isRare(MonsterType t, int chancePermille) {
+        int base = t.isElite() ? chancePermille / 2 : chancePermille;
+        return base <= RARE_PERMILLE;
+    }
+
     /** Klucz potwora dnia ({@link pl.fawizja.pixel.daily.BoostedCreature}); null = brak premii. */
     private String boostedKey;
 
@@ -206,6 +223,10 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
         Position corpse = m.position();
         List<ItemStack> drop = rollLoot(t);
+        for (ItemStack r : rareRolled) {
+            log.add(now, EventLog.Kind.LOOT, "Rzadki łup: " + describe(r) + "!");
+            if (rareDropListener != null) rareDropListener.rareDrop(t, r, now);
+        }
         List<String> looted = new ArrayList<>();
         List<ItemStack> left = new ArrayList<>();
         for (ItemStack s : drop) {
@@ -229,10 +250,12 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Losuje lup z tabeli potwora. */
     public List<ItemStack> rollLoot(MonsterType t) {
         List<ItemStack> out = new ArrayList<>();
+        rareRolled.clear();
         for (LootEntry e : t.loot()) {
             int chance = isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostChance(e.chancePermille()) : e.chancePermille();
             if (rng.nextInt(1000) < chance) {
                 int count = CombatFormulas.rollBetween(e.min(), e.max(), rng);
+                if (isRare(t, e.chancePermille())) rareRolled.add(new ItemStack(e.itemId(), count));
                 int max = items.maxStack(e.itemId());
                 while (count > 0) {
                     int c = Math.min(count, max);
