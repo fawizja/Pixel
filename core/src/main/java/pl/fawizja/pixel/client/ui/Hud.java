@@ -778,11 +778,12 @@ public final class Hud {
         pl.fawizja.pixel.ranking.RankingView v = rankingView;
         float colW = (menuW - 30) / 2f;
         List<pl.fawizja.pixel.ranking.RankingView.Row> rows = v.rows();
+        boolean guilds = pl.fawizja.pixel.ranking.GuildRanking.TITLE.equals(v.title());
         int perCol = Math.max(5, (rows.size() + 1) / 2);
         for (int i = 0; i < rows.size(); i++) {
             pl.fawizja.pixel.ranking.RankingView.Row r = rows.get(i);
-            MenuRow row = new MenuRow("ranking:none", r.place() + ". " + r.name() + (r.place() == v.mine() ? "  (ty)" : ""),
-                    r.vocation() + ", poziom " + r.level(),
+            MenuRow row = new MenuRow("ranking:none", r.place() + ". " + r.name() + (r.place() == v.mine() ? (guilds ? "  (twoja)" : "  (ty)") : ""),
+                    r.vocation() + (guilds ? ", suma poziomów " : ", poziom ") + r.level(),
                     true);
             row.x = menuX + 10 + (i / perCol) * (colW + 10);
             row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
@@ -790,8 +791,9 @@ public final class Hud {
             row.h = rowH - 3;
             menuRows.add(row);
         }
-        String mine = v.mine() > 0 ? "Twoje miejsce: " + v.mine() + " z " + v.total() : "Nie ma cię w tym rankingu";
-        MenuRow me = new MenuRow("ranking:none", mine, "/ranking druid, paladin, mag, mnich - ranking profesji", true);
+        String mine = guilds ? (v.mine() > 0 ? "Twoja gildia: " + v.mine() + ". miejsce z " + v.total() : "Nie należysz do gildii z rankingu")
+                : v.mine() > 0 ? "Twoje miejsce: " + v.mine() + " z " + v.total() : "Nie ma cię w tym rankingu";
+        MenuRow me = new MenuRow("ranking:none", mine, "/ranking druid, paladin, mag, mnich, gildie", true);
         me.x = menuX + 10;
         me.y = menuY + menuH - 40 - (perCol + 1) * rowH - 6;
         me.w = menuW - 20;

@@ -152,11 +152,18 @@ final class ServerWorld {
 
     /** /ranking [profesja]: pierwsze miejsca i miejsce pytajacego. */
     private void sendRanking(ServerPlayer p, String arg, long now) {
+        if (pl.fawizja.pixel.ranking.GuildRanking.isGuildArg(arg)) {
+            for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
+            pl.fawizja.pixel.guild.GuildRegistry.Guild mine = guilds.guildOf(p.name());
+            sendRank(p, pl.fawizja.pixel.ranking.GuildRanking.view(
+                    pl.fawizja.pixel.ranking.GuildRanking.scores(guilds.all(), ranking), mine == null ? null : mine.name()));
+            return;
+        }
         pl.fawizja.pixel.vocation.Vocation filter = null;
         if (arg != null && !arg.isBlank()) {
             filter = pl.fawizja.pixel.ranking.Ranking.vocationFrom(arg);
             if (filter == null) {
-                warn(p, "Nie znam profesji \"" + arg.trim() + "\". Wpisz: /ranking, /ranking druid, paladin, mag albo mnich.", now);
+                warn(p, "Nie znam profesji \"" + arg.trim() + "\". Wpisz: /ranking, /ranking druid, paladin, mag, mnich albo gildie.", now);
                 return;
             }
         }
@@ -168,8 +175,10 @@ final class ServerWorld {
         for (pl.fawizja.pixel.ranking.Ranking.Entry e : ranking.top(pl.fawizja.pixel.ranking.Ranking.SHOWN, filter)) {
             rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i++, e.name(), e.vocation().displayName(), e.level()));
         }
-        pl.fawizja.pixel.ranking.RankingView view = new pl.fawizja.pixel.ranking.RankingView(title,
-                ranking.position(p.name(), filter), ranking.size(filter), rows);
+        sendRank(p, new pl.fawizja.pixel.ranking.RankingView(title, ranking.position(p.name(), filter), ranking.size(filter), rows));
+    }
+
+    private void sendRank(ServerPlayer p, pl.fawizja.pixel.ranking.RankingView view) {
         String[] f = view.encode();
         String[] msg = new String[f.length + 1];
         msg[0] = "RANK";

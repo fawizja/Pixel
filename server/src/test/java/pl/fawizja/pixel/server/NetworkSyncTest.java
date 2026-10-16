@@ -645,6 +645,13 @@ class NetworkSyncTest {
             awaitMessage(ula, "only the leader", m -> m[0].equals("LOG") && m[2].contains("Tylko lider"));
             ola.send("GUILD", "MOTD", "Zbiórka o 20:00");
             awaitMessage(ula, "motd broadcast", m -> m[0].equals("LOG") && m[2].contains("Wiadomość gildii: Zbiórka o 20:00"));
+            ula.send("RANK", "gildie");
+            String[][] rank = new String[1][];
+            awaitMessage(ula, "guild ranking", m -> m[0].equals("RANK") && (rank[0] = m) != null);
+            pl.fawizja.pixel.ranking.RankingView gv = pl.fawizja.pixel.ranking.RankingView.parse(rank[0]);
+            assertEquals(pl.fawizja.pixel.ranking.GuildRanking.TITLE, gv.title());
+            assertEquals(1, gv.mine());
+            assertEquals("Wilcze Kly", gv.rows().get(0).name());
         }
         await("both left", () -> server.world().players().isEmpty());
         server.close();

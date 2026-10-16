@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.72.0] - 2026-10-16
+
+### Dodano
+- Ranking gildii: `/ranking gildie` pokazuje 10 najsilniejszych gildii według sumy poziomów członków (także
+  offline) i miejsce twojej gildii.
+- 1 nowy test i rozszerzony test sieciowy gildii; łącznie 322.
+
 ## [0.71.0] - 2026-10-16
 
 ### Dodano

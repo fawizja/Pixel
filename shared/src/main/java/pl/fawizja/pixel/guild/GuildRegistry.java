@@ -154,6 +154,8 @@ public final class GuildRegistry {
 
     public int count() { return byName.size(); }
 
+    public java.util.Collection<Guild> all() { return Collections.unmodifiableCollection(byName.values()); }
+
     /** Zapis tekstowy: linia na gildie "Nazwa;Lider,Czlonek,...[;wiadomosc dnia]". */
     public String encode() {
         StringBuilder sb = new StringBuilder();

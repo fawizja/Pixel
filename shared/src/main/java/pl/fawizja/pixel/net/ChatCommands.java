@@ -9,7 +9,7 @@ package pl.fawizja.pixel.net;
  * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
  * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
- * "/kto", "/inwazja [miasto]" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION. Ranking: "/ranking [profesja]" -> RANK [profesja].
+ * "/kto", "/inwazja [miasto]" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION. Ranking: "/ranking [profesja|gildie]" -> RANK [profesja].
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
  * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
  * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Poczta: "/wyslij Imie, 5 wilcze futro" -> MAIL SEND imie tekst.
@@ -200,7 +200,7 @@ public final class ChatCommands {
             {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
             {"/zadania", "dziennik zadań"},
             {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
-            {"/ranking", "najlepsi gracze serwera"},
+            {"/ranking", "najlepsi gracze (także /ranking gildie)"},
             {"/znajomi", "lista znajomych"},
             {"/rynek", "oferty rynku (u bankiera)"},
             {"/znaczniki", "własne miejsca na mapie (/znacznik nazwa zapisuje)"},
