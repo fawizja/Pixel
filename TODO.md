@@ -214,6 +214,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Znacznik miejsca śmierci na mapie (0.95.0)
 - [x] Boss tygodnia i miejsce śmierci w oknie /znaczniki (0.96.0)
 - [x] Komunikat o odrodzeniu bossa (0.97.0)
+- [x] Polecenia serwera status i save (0.98.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

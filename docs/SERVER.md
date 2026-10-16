@@ -68,6 +68,8 @@ Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pi
 | `unban Imie` | `/unban Imie` | zdjecie bana |
 | `mute Imie 30` | `/wycisz Imie 30` | wyciszenie czatu na 30 min (0 = zdjecie) |
 | `who` | `/kto` | kto jest w grze |
+| `status` | `/serwer` | czas dzialania, liczba graczy i potworow, inwazja, zuzycie pamieci |
+| `save` | `/zapisz` | natychmiastowy zapis wszystkich postaci w grze |
 | `invasion Varden` | `/inwazja Varden` | inwazja na miasto teraz (bez nazwy - kolejne miasto) |
 | `admin Imie` | - | nowy administrator (tylko konsola) |
 

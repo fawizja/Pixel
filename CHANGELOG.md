@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.98.0] - 2026-10-16
+
+### Dodano
+- Polecenia serwera `status` (czas działania, gracze, potwory, inwazja, pamięć) i `save` (zapis wszystkich postaci)
+  w konsoli oraz dla administratorów w czacie: `/serwer`, `/zapisz`. Opis w docs/SERVER.md.
 ## [0.97.0] - 2026-10-16
 
 ### Dodano

@@ -901,6 +901,14 @@ class NetworkSyncTest {
             server.enqueueTest(() -> answer[0] = server.world().moderate(new String[] {"INVASION", "Varden"}, "konsola", server.now()));
             await("started", () -> answer[0] != null);
             assertTrue(answer[0].startsWith("Inwazja na Varden rozpoczęta"), answer[0]);
+            String[] status = new String[2];
+            server.enqueueTest(() -> {
+                status[0] = server.world().moderate(new String[] {"STATUS"}, "konsola", server.now());
+                status[1] = server.world().moderate(new String[] {"SAVE"}, "konsola", server.now());
+            });
+            await("status", () -> status[1] != null);
+            assertTrue(status[0].contains("graczy: 1") && status[0].contains("inwazja: Varden"), status[0]);
+            assertEquals("Zapisano 1 postaci.", status[1]);
             awaitMessage(ola, "announced", m -> m[0].equals("LOG") && m[2].startsWith("Inwazja! Bandyci atakują Varden"));
             int[] total = new int[1];
             server.enqueueTest(() -> {

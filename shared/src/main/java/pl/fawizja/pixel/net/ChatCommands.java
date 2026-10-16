@@ -9,7 +9,7 @@ package pl.fawizja.pixel.net;
  * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
  * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
- * "/kto", "/inwazja [miasto]" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION. Ranking: "/ranking [profesja|gildie]" -> RANK [profesja].
+ * "/kto", "/inwazja [miasto]", "/serwer", "/zapisz" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION|STATUS|SAVE. Ranking: "/ranking [profesja|gildie]" -> RANK [profesja].
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
  * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
  * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Poczta: "/wyslij Imie, 5 wilcze futro" -> MAIL SEND imie tekst.
@@ -99,6 +99,10 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"ADMIN", "INVASION"} : new String[] {"ADMIN", "INVASION", rest(t)};
             case "/kto":
                 return w.length == 1 ? new String[] {"ADMIN", "WHO"} : null;
+            case "/serwer":
+                return w.length == 1 ? new String[] {"ADMIN", "STATUS"} : null;
+            case "/zapisz":
+                return w.length == 1 ? new String[] {"ADMIN", "SAVE"} : null;
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:

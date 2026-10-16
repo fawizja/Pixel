@@ -1385,8 +1385,22 @@ final class ServerWorld {
      * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
+    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE";
+    /** Czas pierwszego taktu swiata (do czasu dzialania w STATUS); -1 przed pierwszym taktem. */
+    private long firstTick = -1;
+
+    /** Stan serwera dla operatora: czas dzialania, gracze, potwory, inwazja, pamiec. */
+    String status(long now) {
+        Runtime rt = Runtime.getRuntime();
+        long usedMb = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
+        long up = firstTick < 0 ? 0 : Math.max(0, now - firstTick) / 1000;
+        return String.format(java.util.Locale.ROOT, "Działa %d h %02d min, graczy: %d, potworów: %d, inwazja: %s, pamięć: %d / %d MB.",
+                up / 3600, up / 60 % 60, players.size(), monsters.monsters().size(),
+                invasion == null ? "brak" : invasion.plan().town() + " (" + invasion.remaining() + " z " + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024));
+    }
+
     String moderate(String[] c, String by, long now) {
-        if (c.length == 0) return "Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION";
+        if (c.length == 0) return "Polecenia: " + COMMANDS;
         long wall = wallClock.getAsLong();
         try {
             switch (c[0].toUpperCase(java.util.Locale.ROOT)) {
@@ -1428,13 +1442,18 @@ final class ServerWorld {
                     return "Dodano administratora: " + c[1].trim() + ".";
                 case "INVASION":
                     return startInvasion(c.length > 1 ? c[1] : null, now);
+                case "STATUS":
+                    return status(now);
+                case "SAVE":
+                    saveAll();
+                    return "Zapisano " + players.size() + " postaci.";
                 case "WHO": {
                     List<String> names = new ArrayList<>();
                     for (ServerPlayer o : players.values()) names.add(o.name() + " (" + o.session.character().level() + ")");
                     return players.size() + " w grze: " + String.join(", ", names);
                 }
                 default:
-                    return "Nieznane polecenie. Polecenia: SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION";
+                    return "Nieznane polecenie. Polecenia: " + COMMANDS;
             }
         } catch (NumberFormatException e) {
             return "Czas musi być liczbą.";
@@ -1525,6 +1544,7 @@ final class ServerWorld {
 
     void tick(long now) {
         lastNow = now;
+        if (firstTick < 0) firstTick = now;
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         updateInvasion(now);
         updateDuels(now);
