@@ -38,6 +38,7 @@ class WeeklyBossTest {
         MonsterType grim = MONSTERS.get("grimtooth");
         long week = WeeklyBoss.week(s.today());
         assertEquals(grim.key(), s.weeklyBoss().key());
+        assertEquals(new pl.fawizja.pixel.world.Position(12, 12, 0), s.weeklyBossPlace(), "the boss spawn is marked on the map");
         assertEquals(bank + WeeklyBoss.rewardGold(grim), pc.bank().balance());
         assertEquals(week, pc.weeklyBossWeek());
         String row = EventsReport.rows(s, null).stream().filter(r -> r[0].equals("Boss tygodnia")).findFirst().orElseThrow()[1];

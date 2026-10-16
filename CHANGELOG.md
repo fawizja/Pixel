@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.93.0] - 2026-10-16
+
+### Dodano
+- Miejsce bossa tygodnia jest zaznaczone na minimapie i dużej mapie (żółta kropka z podpisem „Boss tygodnia: …”
+  na mapie piętra, na którym się odradza).
+- Rozszerzony test bossa tygodnia.
+
 ## [0.92.0] - 2026-10-16
 
 ### Dodano

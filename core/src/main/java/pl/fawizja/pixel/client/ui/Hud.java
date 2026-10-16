@@ -170,9 +170,19 @@ public final class Hud {
 
     public void setMarkers(pl.fawizja.pixel.settings.MapMarkers m) { markers = m; }
 
-    private List<pl.fawizja.pixel.world.Position> markerPositions() {
+    /** Znaczniki gracza i znacznik bossa tygodnia (gdy znane jest jego miejsce). */
+    private List<pl.fawizja.pixel.settings.MapMarkers.Marker> allMarkers(GameSession session) {
+        List<pl.fawizja.pixel.settings.MapMarkers.Marker> out = new ArrayList<>(markers.all());
+        pl.fawizja.pixel.world.Position boss = session.weeklyBossPlace();
+        if (boss != null && session.weeklyBoss() != null) {
+            out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Boss tygodnia: " + session.weeklyBoss().name(), boss));
+        }
+        return out;
+    }
+
+    private List<pl.fawizja.pixel.world.Position> markerPositions(GameSession session) {
         List<pl.fawizja.pixel.world.Position> out = new ArrayList<>();
-        for (pl.fawizja.pixel.settings.MapMarkers.Marker m : markers.all()) out.add(m.at());
+        for (pl.fawizja.pixel.settings.MapMarkers.Marker m : allMarkers(session)) out.add(m.at());
         return out;
     }
     private static final int MINIMAP_TILES = 60;
@@ -1410,7 +1420,7 @@ public final class Hud {
             }
             font.setColor(Color.WHITE);
         }
-        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(), mmX, mmY, mmSize, MINIMAP_TILES);
+        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
             float dy = h - 50;
@@ -1431,7 +1441,7 @@ public final class Hud {
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
         pl.fawizja.pixel.world.Position p = session.character().position();
         text(batch, "Mapa - piętro " + floor + " (dotknij miejsca, aby tam iść)", menuX + 10, menuY + menuH - 8);
-        float[] img = minimap.drawWhole(batch, session.world(), p, walkTarget, markerPositions(), menuX + 8, menuY + 8, menuW - 16, menuH - 34);
+        float[] img = minimap.drawWhole(batch, session.world(), p, walkTarget, markerPositions(session), menuX + 8, menuY + 8, menuW - 16, menuH - 34);
         bigMapImg = img;
         if (img == null) return;
         font.getData().setScale(0.85f);
@@ -1442,7 +1452,7 @@ public final class Hud {
             text(batch, t.name(), tx - 20, ty + 14);
         }
         font.setColor(new Color(1f, 0.85f, 0.2f, 1f));
-        for (pl.fawizja.pixel.settings.MapMarkers.Marker m : markers.all()) {
+        for (pl.fawizja.pixel.settings.MapMarkers.Marker m : allMarkers(session)) {
             if (m.at().z() != p.z()) continue;
             text(batch, m.name(), img[0] + m.at().x() * img[2] + 6, img[1] + img[3] - m.at().y() * img[2] + 6);
         }

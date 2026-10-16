@@ -217,6 +217,28 @@ public final class GameSession {
         return weeklyBoss;
     }
 
+    private long weeklyBossPlaceWeek = Long.MIN_VALUE;
+    private Position weeklyBossPlace;
+
+    /** Miejsce odradzania bossa tygodnia (znacznik na mapie) albo null. */
+    public Position weeklyBossPlace() {
+        long week = pl.fawizja.pixel.daily.WeeklyBoss.week(today());
+        if (week != weeklyBossPlaceWeek) {
+            weeklyBossPlaceWeek = week;
+            weeklyBossPlace = null;
+            pl.fawizja.pixel.monster.MonsterType boss = weeklyBoss();
+            if (boss != null && monsters != null) {
+                for (MonsterManager.BossStatus b : monsters.bossReport(lastUpdateMs < 0 ? 0 : lastUpdateMs)) {
+                    if (b.name().equals(boss.name())) {
+                        weeklyBossPlace = b.where();
+                        break;
+                    }
+                }
+            }
+        }
+        return weeklyBossPlace;
+    }
+
     /** Pierwsze w tygodniu pokonanie bossa tygodnia: zloto na konto. */
     private void checkWeeklyBoss(pl.fawizja.pixel.monster.MonsterType t, long nowMs) {
         pl.fawizja.pixel.monster.MonsterType boss = weeklyBoss();
