@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.48.0] - 2026-10-16
+
+### Dodano
+- Manekiny treningowe: po 2 w strefie ochronnej każdego miasta (w Varden przy fontannie przed świątynią).
+  UŻYJ obok manekina (albo dotknięcie go) zaczyna trening: co 3 s próba umiejętności broni (pięści, miecz,
+  dystans albo magia, zależnie od broni) i co 6 s tarczy, bez doświadczenia i bez kosztów. Ruch, śmierć albo
+  ponowne UŻYJ kończy trening; awans umiejętności pojawia się w dzienniku. Dotknięcie dalekiego manekina
+  prowadzi do niego. Działa lokalnie i online (logika w sesji, serwer liczy te same miejsca z mapy).
+- `training/TrainingDummies` (miejsca liczone powtarzalnie z mapy i pozycji NPC), `Skill.label()`, grafika
+  `TileArt.dummy`. 2 nowe testy; łącznie 279.
+
 ## [0.47.0] - 2026-10-16
 
 ### Dodano

@@ -164,6 +164,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Porownanie przedmiotu z zalozonym w plecaku (0.45.0)
 - [x] Zwoj powrotu do swiatyni (0.46.0)
 - [x] Analiza polowania: exp, zabicia i zloto na godzine (0.47.0)
+- [x] Manekiny treningowe w miastach (umiejetnosci bez doswiadczenia) (0.48.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

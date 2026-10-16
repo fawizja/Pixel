@@ -260,6 +260,14 @@ na inne pietra) i co klatke kierunek do nastepnego pola, podawany jak z joystick
 Dotkniecie swiata (`GameScreen.tapTile`): gracz online -> menu gracza, NPC blisko -> rozmowa, NPC daleko -> marsz na
 pole obok (`pathNextTo`) i rozmowa po dojsciu, potwor -> cel, cialo obok -> lup, wolne pole -> marsz bez komunikatu.
 
+## Manekiny treningowe (Z logika)
+
+`training/TrainingDummies.generate(world, npcSpots)`: BFS od swiatyni kazdego miasta po polach strefy ochronnej,
+pierwsze 2 pola z 8 przechodnimi sasiadami, bez obiektow i przejsc, >= 3 pola od swiatyni, od siebie i od NPC.
+`GameSession.useNearby` -> `toggleTraining` (manekin obok); `updateTraining`: co `TRAIN_MS` (3 s) 1 proba
+umiejetnosci z `CombatFormulas.attackProfile`, co druga takze `SHIELDING`; zmiana pola albo smierc konczy.
+Rownowaga: walka daje probe co atak (ok. 2 s) plus doswiadczenie, wiec polowanie zostaje szybsze.
+
 ## Analiza polowania (Z logika)
 
 `stats/HuntAnalyzer`: `reset` zapamietuje doswiadczenie, `bestiary().total()` i `Money.totalValue(plecak)`; `report`

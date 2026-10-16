@@ -40,6 +40,9 @@ public final class TileArt implements Disposable {
     /** Skrzynia skarbow: zamknieta i otwarta. */
     private static final int CHEST_CELL = 1002;
     private TextureRegion[] chest;
+    /** Manekin treningowy. */
+    private static final int DUMMY_CELL = 1004;
+    private TextureRegion dummy;
 
     private final Texture atlas;
     private final Texture lightTexture;
@@ -86,6 +89,7 @@ public final class TileArt implements Disposable {
         paintHorse(pm, cellX(HORSE_CELL + 1), cellY(HORSE_CELL + 1), true);
         paintChest(pm, cellX(CHEST_CELL), cellY(CHEST_CELL), false);
         paintChest(pm, cellX(CHEST_CELL + 1), cellY(CHEST_CELL + 1), true);
+        paintDummy(pm, cellX(DUMMY_CELL), cellY(DUMMY_CELL));
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -103,6 +107,7 @@ public final class TileArt implements Disposable {
         for (int i = 0; i < npcList.size(); i++) npcs.put(npcList.get(i).key(), region(NPC_BASE + i));
         horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
         chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
+        dummy = region(DUMMY_CELL);
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -126,6 +131,8 @@ public final class TileArt implements Disposable {
     public TextureRegion horse(Direction facing) { return horse[facing != null && facing.dx < 0 ? 1 : 0]; }
 
     public TextureRegion chest(boolean open) { return chest[open ? 1 : 0]; }
+
+    public TextureRegion dummy() { return dummy; }
     public Texture lightTexture() { return lightTexture; }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -597,6 +604,25 @@ public final class TileArt implements Disposable {
     }
 
     /** Skrzynia: drewno z okuciami i zamkiem; otwarta - podniesione wieko i ciemne, puste wnetrze. */
+    /** Manekin: slup na podstawie, worek ze sloma jako tulow, poprzeczka na ramiona i glowa z tarcza celu. */
+    private void paintDummy(Pixmap pm, int ox, int oy) {
+        Color wood = Color.valueOf("#7a5230");
+        Color sack = Color.valueOf("#c8a868");
+        Color straw = Color.valueOf("#e0c060");
+        Color red = Color.valueOf("#b02a20");
+        disc(pm, ox, oy, 8f, 15f, 5f, new Color(0, 0, 0, 0.35f));
+        rect(pm, ox, oy, 5, 14, 6, 2, shade(wood, 0.7f)); // podstawa
+        rect(pm, ox, oy, 7, 2, 2, 13, wood);              // slup
+        rect(pm, ox, oy, 2, 6, 12, 2, wood);              // ramiona
+        rect(pm, ox, oy, 5, 7, 6, 6, sack);               // tulow
+        rect(pm, ox, oy, 5, 12, 6, 1, shade(sack, 0.75f));
+        rect(pm, ox, oy, 4, 10, 1, 2, straw);             // wystajaca sloma
+        rect(pm, ox, oy, 11, 9, 1, 2, straw);
+        disc(pm, ox, oy, 8f, 9.5f, 1.6f, red);            // tarcza celu
+        disc(pm, ox, oy, 8f, 9.5f, 0.7f, Color.WHITE);
+        disc(pm, ox, oy, 8f, 3.5f, 2.2f, sack);           // glowa
+    }
+
     private void paintChest(Pixmap pm, int ox, int oy, boolean open) {
         Color wood = Color.valueOf("#8a5a2a");
         Color dark = shade(wood, 0.6f);

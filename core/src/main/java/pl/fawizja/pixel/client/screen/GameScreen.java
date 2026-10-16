@@ -507,6 +507,12 @@ public final class GameScreen extends ScreenAdapter {
             else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
             return true;
         }
+        if (session.dummies().at(p)) {
+            // manekin: obok = trening (jak UZYJ), dalej = marsz na pole obok
+            if (p.distanceTo(session.character().position()) <= 1) onButton("use");
+            else walkTo(p, now(), true, true);
+            return true;
+        }
         boolean hit = session.targetAt(p);
         if (hit && net != null) {
             Monster m = session.combat().target();
@@ -814,6 +820,9 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Skrzynie skarbow w danym wierszu: zamknieta albo otwarta (gdy ta postac juz ja oproznila). */
     private void drawChests(SpriteBatch b, int row, int z) {
+        for (Position p : session.dummies().all()) {
+            if (p.y() == row && p.z() == z) b.draw(game.art().dummy(), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
+        }
         if (game.chests() == null) return;
         for (pl.fawizja.pixel.treasure.TreasureChests.Chest c : game.chests().all()) {
             Position p = c.position();

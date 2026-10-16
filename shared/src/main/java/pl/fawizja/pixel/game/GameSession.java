@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
+import pl.fawizja.pixel.character.Skill;
+import pl.fawizja.pixel.combat.CombatFormulas;
 import pl.fawizja.pixel.combat.CombatSystem;
 import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.monster.MonsterManager;
@@ -125,7 +127,7 @@ public final class GameSession {
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
         this.fishing = new FishingSystem(world, items, rng);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
-        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null);
+        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p));
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
             if (pc.daily().onKill(t.key(), today())) {
@@ -235,6 +237,66 @@ public final class GameSession {
         this.npcs = java.util.Objects.requireNonNull(npcs);
         this.shops = shops;
         this.quests = quests == null ? null : new QuestSystem(quests, items);
+        List<Position> npcSpots = new java.util.ArrayList<>();
+        for (pl.fawizja.pixel.npc.Npc n : npcs.all()) npcSpots.add(n.position());
+        this.dummies = pl.fawizja.pixel.training.TrainingDummies.generate(world, npcSpots);
+    }
+
+    /** Manekiny treningowe w miastach (liczone z mapy i miejsc NPC; puste bez uslug miejskich). */
+    private pl.fawizja.pixel.training.TrainingDummies dummies = new pl.fawizja.pixel.training.TrainingDummies(List.of());
+
+    public pl.fawizja.pixel.training.TrainingDummies dummies() { return dummies; }
+
+    /** Trening przy manekinie: co TRAIN_MS proba umiejetnosci broni, co druga takze tarczy; bez doswiadczenia. */
+    public static final long TRAIN_MS = 3_000;
+    private Position trainingAt;
+    private Position trainingFrom;
+    private long trainNextMs;
+    private int trainTicks;
+
+    public boolean training() { return trainingAt != null; }
+
+    private boolean toggleTraining(long nowMs) {
+        Position d = dummies.near(pc.position());
+        if (d == null) return false;
+        if (trainingAt != null) {
+            stopTraining(nowMs, "Kończysz trening.");
+            return true;
+        }
+        trainingAt = d;
+        trainingFrom = pc.position();
+        trainNextMs = nowMs + TRAIN_MS;
+        trainTicks = 0;
+        Skill sk = CombatFormulas.attackProfile(pc, items).skill();
+        log.add(nowMs, EventLog.Kind.INFO, "Trenujesz przy manekinie: " + sk.label()
+                + " (bez doświadczenia). Ruch albo UŻYJ kończy trening.");
+        return true;
+    }
+
+    private void stopTraining(long nowMs, String why) {
+        trainingAt = null;
+        log.add(nowMs, EventLog.Kind.INFO, why);
+    }
+
+    private void updateTraining(long nowMs) {
+        if (trainingAt == null) return;
+        if (!pc.position().equals(trainingFrom) || pc.isDead()) {
+            stopTraining(nowMs, "Trening przerwany.");
+            return;
+        }
+        while (nowMs >= trainNextMs && trainingAt != null) {
+            trainNextMs += TRAIN_MS;
+            trainTicks++;
+            Skill sk = CombatFormulas.attackProfile(pc, items).skill();
+            trainSkill(nowMs, sk);
+            if (trainTicks % 2 == 0) trainSkill(nowMs, Skill.SHIELDING);
+        }
+    }
+
+    private void trainSkill(long nowMs, Skill sk) {
+        if (pc.skills().addTries(sk, 1) > 0) {
+            log.add(nowMs, EventLog.Kind.SYSTEM, sk.label() + ": poziom " + pc.skills().level(sk) + ".");
+        }
     }
 
     public NpcRegistry npcs() { return npcs; }
@@ -543,6 +605,7 @@ public final class GameSession {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         updateRecall(nowMs);
+        updateTraining(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
             pc.setMounted(false);
             log.add(nowMs, EventLog.Kind.INFO, "Zostawiasz konia przy zejściu pod ziemię.");
@@ -739,6 +802,7 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
                 break;
             default:
+                if (toggleTraining(nowMs)) break;
                 if (openChest(nowMs)) break;
                 if (!searchCorpse(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
         }
