@@ -84,6 +84,12 @@ public final class SaveStore {
         java.nio.file.Files.deleteIfExists(backup(s).toPath());
     }
 
+    /** Czas ostatniego zapisu (ms epoki) albo 0, gdy zapisu nie ma. */
+    public long lastModified(String slot) {
+        String s = sanitize(slot);
+        return main(s).exists() ? main(s).lastModified() : backup(s).lastModified();
+    }
+
     public boolean exists(String slot) {
         String s = sanitize(slot);
         return main(s).exists() || backup(s).exists();

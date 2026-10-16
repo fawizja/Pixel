@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.161.0] - 2026-10-16
+
+### Dodano
+- Znajomi: przy osobach poza grą widać, kiedy ostatnio grały ("3 h temu", "5 dni temu").
 ## [0.160.0] - 2026-10-16
 
 ### Dodano

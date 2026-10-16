@@ -894,6 +894,7 @@ class NetworkSyncTest {
             awaitMessage(ola, "offline friend", m -> m[0].equals("FRIENDS") && (got[0] = m) != null
                     && !pl.fawizja.pixel.friends.FriendsView.parse(m).rows().get(0).online());
             assertEquals(8, pl.fawizja.pixel.friends.FriendsView.parse(got[0]).rows().get(0).level(), "offline: from the ranking");
+            assertEquals(0, pl.fawizja.pixel.friends.FriendsView.parse(got[0]).rows().get(0).minutesAgo(), "just saved on leaving");
             await("saved friends", () -> {
                 try {
                     return self(ola).friends().contains("Ula");

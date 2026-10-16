@@ -377,8 +377,10 @@ final class ServerWorld {
                 rows.add(new pl.fawizja.pixel.friends.FriendsView.Row(c.name(), true, c.vocation().displayName(), c.level()));
             } else {
                 pl.fawizja.pixel.ranking.Ranking.Entry e = ranking.get(n);
+                long saved = saves.lastModified("player_" + n.toLowerCase(java.util.Locale.ROOT));
                 rows.add(new pl.fawizja.pixel.friends.FriendsView.Row(n, false,
-                        e == null ? "-" : e.vocation().displayName(), e == null ? 0 : e.level()));
+                        e == null ? "-" : e.vocation().displayName(), e == null ? 0 : e.level(),
+                        saved <= 0 ? -1 : Math.max(0, (wallClock.getAsLong() - saved) / 60_000L)));
             }
         }
         String[] f = new pl.fawizja.pixel.friends.FriendsView(rows).encode();

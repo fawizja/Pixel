@@ -845,6 +845,8 @@ public final class Hud {
                 "/znajomi usuń Imię - usuwa z listy", false));
         for (pl.fawizja.pixel.friends.FriendsView.Row r : friendsView.rows()) {
             String detail = r.level() > 0 ? r.vocation() + ", poziom " + r.level() : "postać nieznana";
+            String ago = r.online() ? "" : pl.fawizja.pixel.friends.FriendsView.describeAgo(r.minutesAgo());
+            if (!ago.isEmpty()) detail += ", " + ago;
             if (r.online() && left.size() < perCol) left.add(new MenuRow("friend:pm:" + r.name(), r.name(), detail, true));
             else if (!r.online() && right.size() < perCol) right.add(new MenuRow("friend:none", r.name(), detail, false));
         }

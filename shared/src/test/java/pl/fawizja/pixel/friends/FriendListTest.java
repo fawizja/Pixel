@@ -38,7 +38,7 @@ class FriendListTest {
     @Test
     void viewRoundTrip() {
         FriendsView v = new FriendsView(List.of(new FriendsView.Row("Ula", true, "Druid", 40),
-                new FriendsView.Row("Stary Wilk", false, "-", 0)));
+                new FriendsView.Row("Stary Wilk", false, "-", 0, 190)));
         String[] enc = v.encode();
         String[] msg = new String[enc.length + 1];
         msg[0] = "FRIENDS";
@@ -46,5 +46,15 @@ class FriendListTest {
         assertEquals(v, FriendsView.parse(msg));
         assertEquals(1, v.online());
         assertNull(FriendsView.parse(new String[] {"RANK"}));
+        assertEquals(-1, FriendsView.parse(new String[] {"FRIENDS", "Ula;0;Druid;40"}).rows().get(0).minutesAgo());
+    }
+
+    @Test
+    void offlineFriendsShowWhenTheyWereLastSeen() {
+        assertEquals("", FriendsView.describeAgo(-1));
+        assertEquals("przed chwilą", FriendsView.describeAgo(1));
+        assertEquals("25 min temu", FriendsView.describeAgo(25));
+        assertEquals("3 h temu", FriendsView.describeAgo(200));
+        assertEquals("4 dni temu", FriendsView.describeAgo(4 * 24 * 60 + 30));
     }
 }

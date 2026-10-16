@@ -218,9 +218,9 @@ public final class DesktopLauncher {
                     // podglad listy znajomych (bez serwera)
                     ((GameScreen) getScreen()).hud().openFriends(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
                             new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Druid", 212),
-                            new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175, 3 * 60 + 20),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", true, "Paladin", 98),
-                            new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160))));
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160, 5 * 24 * 60))));
                 }
                 if ("smith".equals(open)) {
                     // podglad kowala: zalozona tarcza juz +2 (obok kupca)
