@@ -99,6 +99,9 @@ final class ServerWorld {
     /** Nagrody za glowy (bounties.txt). */
     private final File bountiesFile;
     private final pl.fawizja.pixel.pvp.Bounties bounties;
+    /** Zamowienia kupna (buyorders.txt). */
+    private final File ordersFile;
+    private final pl.fawizja.pixel.market.BuyOrders orders;
     private final File mailFile;
     /** Wiadomosc dnia serwera (motd.txt, polecenie MOTD); pusta = brak. */
     private final File motdFile;
@@ -132,6 +135,9 @@ final class ServerWorld {
         bountiesFile = new File(saveDir, "bounties.txt");
         bounties = pl.fawizja.pixel.pvp.Bounties.decode(bountiesFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(bountiesFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        ordersFile = new File(saveDir, "buyorders.txt");
+        orders = pl.fawizja.pixel.market.BuyOrders.decode(ordersFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(ordersFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         marketFile = new File(saveDir, "market.txt");
         market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
@@ -667,6 +673,121 @@ final class ServerWorld {
                 return;
         }
         sendMarket(p, "");
+    }
+
+    /** Zamowienia kupna: LIST, ADD "ilosc przedmiot cena", FILL id, CANCEL id (trzy ostatnie u bankiera). */
+    private void wantCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        PlayerCharacter pc = p.session.character();
+        String arg = f.length > 2 ? f[2].trim() : "";
+        switch (f[1]) {
+            case "LIST":
+                break;
+            case "ADD": {
+                if (!atBanker(p, now)) return;
+                int sp = arg.lastIndexOf(' ');
+                long price = sp < 0 ? -1 : pl.fawizja.pixel.net.ChatCommands.amount(arg.substring(sp + 1));
+                pl.fawizja.pixel.trade.PlayerTrade.Parsed what = price <= 0 ? null
+                        : pl.fawizja.pixel.trade.PlayerTrade.parse(arg.substring(0, sp), items);
+                if (what == null || what.itemId() < 0 || pl.fawizja.pixel.economy.Currency.isCoin(what.itemId())) {
+                    warn(p, "Wpisz: /kupię 20 wilcze futro 2000 (ilość, przedmiot, cena za wszystko w gp).", now);
+                    return;
+                }
+                int count = (int) Math.min(Integer.MAX_VALUE, what.count());
+                pl.fawizja.pixel.market.BuyOrders.Result r = orders.canPlace(p.name(), count, price);
+                if (r != pl.fawizja.pixel.market.BuyOrders.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                if (!pc.bank().debit(price).ok()) {
+                    warn(p, "Na koncie brakuje złota: zamówienie blokuje " + String.format("%,d gp", price) + " do realizacji.", now);
+                    return;
+                }
+                pl.fawizja.pixel.market.BuyOrders.Order o = orders.place(p.name(), what.itemId(), count, price);
+                saveOrders();
+                save(p);
+                info(p, "Zamówienie #" + o.id() + ": kupisz " + count + "x " + items.get(o.itemId()).name() + " za "
+                        + String.format("%,d gp", price) + ". Złoto czeka zablokowane, przedmioty przyjdą do depozytu.", now);
+                break;
+            }
+            case "FILL": {
+                if (!atBanker(p, now)) return;
+                int id = parseInt(arg);
+                pl.fawizja.pixel.market.BuyOrders.Result r = orders.checkFill(id, p.name());
+                if (r != pl.fawizja.pixel.market.BuyOrders.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                pl.fawizja.pixel.market.BuyOrders.Order o = orders.get(id);
+                String what = o.count() + "x " + items.get(o.itemId()).name();
+                if (pc.backpack().countPlain(o.itemId()) < o.count()) {
+                    warn(p, "Zamówienie wymaga " + what + " w plecaku (bez ulepszeń).", now);
+                    return;
+                }
+                if (!mail.canAccept(o.buyer())) {
+                    warn(p, "Skrzynka zamawiającego jest pełna. Spróbuj później.", now);
+                    return;
+                }
+                if (!pc.backpack().remove(o.itemId(), o.count()).ok() || !pc.bank().credit(o.price()).ok()) return;
+                orders.remove(id);
+                mail.add(new pl.fawizja.pixel.mail.Mailbox.Parcel(o.buyer(), p.name(), o.itemId(), o.count()));
+                saveOrders();
+                saveMail();
+                save(p);
+                info(p, "Zrealizowano zamówienie #" + id + ": " + what + " dla " + o.buyer() + ". Na konto wpłynęło "
+                        + String.format("%,d gp", o.price()) + ".", now);
+                ServerPlayer buyer = find(o.buyer());
+                if (buyer != null) deliverMail(buyer, now);
+                break;
+            }
+            case "CANCEL": {
+                if (!atBanker(p, now)) return;
+                int id = parseInt(arg);
+                pl.fawizja.pixel.market.BuyOrders.Result r = orders.checkCancel(id, p.name());
+                if (r != pl.fawizja.pixel.market.BuyOrders.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                pl.fawizja.pixel.market.BuyOrders.Order o = orders.remove(id);
+                pc.bank().credit(o.price());
+                saveOrders();
+                save(p);
+                info(p, "Wycofano zamówienie #" + id + ". " + String.format("%,d gp", o.price()) + " wraca na konto.", now);
+                break;
+            }
+            default:
+                return;
+        }
+        sendOrders(p);
+    }
+
+    /** Okno zamowien: wlasne, potem najnowsze cudze (wiersze "etykieta;opis"). */
+    private void sendOrders(ServerPlayer p) {
+        List<String> out = new ArrayList<>();
+        out.add("WANT");
+        for (pl.fawizja.pixel.market.BuyOrders.Order o : orders.byBuyer(p.name())) {
+            out.add("#" + o.id() + " " + o.count() + "x " + items.get(o.itemId()).name() + ";"
+                    + String.format("%,d gp", o.price()) + ", Twoje (/kupię anuluj " + o.id() + ")");
+        }
+        int shown = 0;
+        for (pl.fawizja.pixel.market.BuyOrders.Order o : orders.newestFirst()) {
+            if (o.buyer().equalsIgnoreCase(p.name())) continue;
+            if (shown++ >= pl.fawizja.pixel.market.BuyOrders.SHOWN) break;
+            out.add("#" + o.id() + " " + o.count() + "x " + items.get(o.itemId()).name() + ";"
+                    + String.format("%,d gp", o.price()) + ", " + o.buyer() + " (/sprzedaj " + o.id() + ")");
+        }
+        p.client.send(out.toArray(new String[0]));
+    }
+
+    private void saveOrders() {
+        try {
+            File tmp = new File(ordersFile.getParentFile(), "buyorders.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), orders.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), ordersFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("buy orders save failed: " + e.getMessage());
+        }
     }
 
     /** Okno rynku: najpierw wlasne oferty, potem najnowsze cudze (opcjonalnie tylko pasujace do nazwy). */
@@ -1487,6 +1608,7 @@ final class ServerWorld {
             case "GUILD": guildCommand(p, f, now); break;
             case "FRIEND": friendCommand(p, f, now); break;
             case "MARKET": marketCommand(p, f, now); break;
+            case "WANT": wantCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "TRANSFER": transferCommand(p, f, now); break;
             case "BOUNTY": bountyCommand(p, f, now); break;

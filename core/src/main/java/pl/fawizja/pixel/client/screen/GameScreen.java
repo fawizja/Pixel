@@ -1694,6 +1694,16 @@ public final class GameScreen extends ScreenAdapter {
                     hud.openInfo("W grze (" + rows.size() + ")", rows);
                     break;
                 }
+                case "WANT": {
+                    List<String[]> rows = new ArrayList<>();
+                    for (int i = 1; i < m.length; i++) {
+                        String[] r = m[i].split(";", 2);
+                        if (r.length == 2) rows.add(r);
+                    }
+                    if (rows.isEmpty()) rows.add(new String[] {"Brak zamówień", "/kupię 20 wilcze futro 2000 u bankiera"});
+                    hud.openInfo("Zamówienia kupna (" + (m.length - 1) + ")", rows);
+                    break;
+                }
                 case "BOSS": {
                     List<String[]> rows = new ArrayList<>();
                     for (int i = 1; i < m.length; i++) {

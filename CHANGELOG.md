@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.138.0] - 2026-10-16
+
+### Dodano
+- Zamówienia kupna (gra sieciowa): u bankiera `/kupię 20 wilcze futro 2000` blokuje złoto z konta i ogłasza
+  zamówienie. `/kupię` otwiera listę, `/sprzedaj 3` realizuje cudze zamówienie (złoto bez prowizji od razu na konto,
+  przedmioty pocztą do depozytu kupującego), `/kupię anuluj 3` zwraca złoto.
 ## [0.137.0] - 2026-10-16
 
 ### Dodano

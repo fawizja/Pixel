@@ -80,7 +80,7 @@ Gracze moga pisac prywatnie: `/w Imie, tekst`.
 
 Inwazje na miasta startuja same co 120 minut (gdy ktos jest w grze); odstep zmienia `-Dpixel.invasionMinutes=60`
 (w Dockerze: `JAVA_OPTS`). Trwaja do pokonania wszystkich najezdzcow albo 20 minut. Nagrody (100 gp za wroga,
-1 000 gp za herszta) trafiaja na konta graczy obecnych w grze przy koncu inwazji. Rynek graczy zapisuje sie w `<dane>/market.txt`, poczta w `<dane>/mail.txt`, nagrody za glowy w `<dane>/bounties.txt`.
+1 000 gp za herszta) trafiaja na konta graczy obecnych w grze przy koncu inwazji. Rynek graczy zapisuje sie w `<dane>/market.txt`, poczta w `<dane>/mail.txt`, nagrody za glowy w `<dane>/bounties.txt`, zamowienia kupna w `<dane>/buyorders.txt`.
 
 ## Aktualizacja
 

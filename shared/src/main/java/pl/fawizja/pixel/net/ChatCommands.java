@@ -12,7 +12,8 @@ package pl.fawizja.pixel.net;
  * "/kto", "/inwazja [miasto]", "/serwer", "/zapisz" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION|STATUS|SAVE. Ranking: "/ranking [profesja|gildie]" -> RANK [profesja].
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
  * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
- * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Poczta: "/wyslij Imie, 5 wilcze futro" -> MAIL SEND imie tekst.
+ * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Zamowienia: "/kupię 20 wilcze futro 2000" -> WANT ADD,
+ * "/kupię" -> WANT LIST, "/kupię anuluj 3" -> WANT CANCEL 3, "/sprzedaj 3" -> WANT FILL 3. Poczta: "/wyslij Imie, 5 wilcze futro" -> MAIL SEND imie tekst.
  * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
@@ -105,6 +106,11 @@ public final class ChatCommands {
                 if (amount <= 0) return null;
                 return new String[] {"BOUNTY", r.substring(0, comma).trim(), String.valueOf(amount)};
             }
+            case "/kupie":
+            case "/zamowienia":
+                return wanted(t, w);
+            case "/sprzedaj":
+                return w.length == 2 && w[1].matches("#?\\d+") ? new String[] {"WANT", "FILL", w[1].replace("#", "")} : null;
             case "/nagrody":
                 return w.length == 1 ? new String[] {"BOUNTY"} : null;
             case "/inwazja":
@@ -135,6 +141,16 @@ public final class ChatCommands {
             case "wycofaj": return arg.matches("#?\\d+") ? new String[] {"MARKET", "CANCEL", arg.replace("#", "")} : null;
             default: return new String[] {"MARKET", "LIST", rest(t)};
         }
+    }
+
+    /** "/kupię" lista, "/kupię 20 wilcze futro 2000" zamowienie, "/kupię anuluj 3" wycofanie. */
+    private static String[] wanted(String t, String[] w) {
+        if (w.length == 1) return new String[] {"WANT", "LIST"};
+        if (key(w[1]).equals("anuluj") || key(w[1]).equals("wycofaj")) {
+            String arg = rest(rest(t));
+            return arg.matches("#?\\d+") ? new String[] {"WANT", "CANCEL", arg.replace("#", "")} : null;
+        }
+        return new String[] {"WANT", "ADD", rest(t)};
     }
 
     private static String[] friends(String t, String[] w) {

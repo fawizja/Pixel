@@ -242,6 +242,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Premia exp w oknie wydarzeń, miejsca występowania w bestiariuszu, /idź łowisko (0.125.0-0.129.0)
 - [x] Czary poziomów 40-60 (0.130.0), okno „Co nowego” (0.131.0, poprawka Androida 0.133.1)
 - [x] Odpoczynek w strefie ochronnej (0.133.0) i premia exp za wypoczęcie (0.134.0), podpowiedź o odpoczynku (0.135.0)
+- [x] Nagrody na liście /gracze (0.136.0), osiągnięcie „Wypoczęty łowca” (0.137.0), zamówienia kupna /kupię (0.138.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

@@ -877,6 +877,55 @@ class NetworkSyncTest {
     }
 
     @Test
+    void buyOrdersLockGoldAndDeliverItemsToTheBuyersDepot() throws Exception {
+        Position banker = new Position(70, 78, 0);
+        int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            ola.send("WANT", "ADD", "5 wilcze futro 2000");
+            awaitMessage(ola, "not at a banker", m -> m[0].equals("LOG") && m[2].contains("bankier"));
+            long[] banks = new long[2];
+            java.util.concurrent.atomic.AtomicBoolean ready = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) p.session.teleport(banker, server.now());
+                PlayerCharacter o = server.world().find("Ola").session.character();
+                o.bank().credit(5_000);
+                server.world().find("Ula").session.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(pelt, 10));
+                banks[0] = o.bank().balance();
+                banks[1] = server.world().find("Ula").session.character().bank().balance();
+                ready.set(true);
+            });
+            await("ready", ready::get);
+            ola.send("WANT", "ADD", "5 wilcze futro 2000");
+            awaitMessage(ola, "order listed", m -> m[0].equals("WANT") && m.length == 2 && m[1].startsWith("#1 5x Wilcze futro;")
+                    && m[1].contains("Twoje"));
+            ula.send("WANT", "FILL", "1");
+            awaitMessage(ola, "delivered", m -> m[0].equals("LOG") && m[2].startsWith("Poczta: Ula przysyła 5x Wilcze futro"));
+            awaitMessage(ula, "paid", m -> m[0].equals("LOG") && m[2].startsWith("Zrealizowano zamówienie #1"));
+            ola.send("WANT", "ADD", "1 wilcze futro 700");
+            awaitMessage(ola, "second order", m -> m[0].equals("WANT") && m.length == 2 && m[1].startsWith("#2 "));
+            ola.send("WANT", "CANCEL", "2");
+            awaitMessage(ola, "cancelled", m -> m[0].equals("LOG") && m[2].startsWith("Wycofano zamówienie #2"));
+            long[] after = new long[3];
+            java.util.concurrent.atomic.AtomicBoolean checked = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                PlayerCharacter o = server.world().find("Ola").session.character();
+                after[0] = o.bank().balance();
+                after[1] = server.world().find("Ula").session.character().bank().balance();
+                after[2] = o.depot().count(pelt);
+                checked.set(true);
+            });
+            await("checked", checked::get);
+            assertEquals(banks[0] - 2000, after[0], "buyer paid once, cancelled order refunded");
+            assertEquals(banks[1] + 2000, after[1], "seller paid without fee");
+            assertEquals(5, after[2], "items in the buyer's depot");
+        }
+    }
+
+    @Test
     void theMarketSellsToOthersAndPaysSellersEvenWhenTheyAreOffline() throws Exception {
         java.util.function.Function<NetClient, pl.fawizja.pixel.market.MarketView> view = c -> {
             String[][] got = new String[1][];

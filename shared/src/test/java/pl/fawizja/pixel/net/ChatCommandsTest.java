@@ -57,6 +57,11 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"MARKET", "BUY", "12"}, ChatCommands.toMessage("/rynek kup #12"));
         assertArrayEquals(new String[] {"MARKET", "CANCEL", "3"}, ChatCommands.toMessage("/rynek wycofaj 3"));
         assertNull(ChatCommands.toMessage("/rynek kup tanio"));
+        assertArrayEquals(new String[] {"WANT", "LIST"}, ChatCommands.toMessage("/kupię"));
+        assertArrayEquals(new String[] {"WANT", "ADD", "20 wilcze futro 2000"}, ChatCommands.toMessage("/kupię 20 wilcze futro 2000"));
+        assertArrayEquals(new String[] {"WANT", "CANCEL", "3"}, ChatCommands.toMessage("/kupie anuluj #3"));
+        assertArrayEquals(new String[] {"WANT", "FILL", "7"}, ChatCommands.toMessage("/sprzedaj 7"));
+        assertNull(ChatCommands.toMessage("/sprzedaj wszystko"));
         assertArrayEquals(new String[] {"ADMIN", "INVASION"}, ChatCommands.toMessage("/inwazja"));
         assertArrayEquals(new String[] {"MAIL", "SEND", "Stary Wilk", "5 wilcze futro"}, ChatCommands.toMessage("/wyślij Stary Wilk, 5 wilcze futro"));
         assertNull(ChatCommands.toMessage("/wyslij Ola 5 lina"), "the comma separates the name");
