@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.121.0] - 2026-10-16
+
+### Dodano
+- Nagrody za głowy (online): `/nagroda imię, kwota` dokłada złoto z konta do nagrody za postać (min. 1 000 gp),
+  `/nagrody` pokazuje listę. Kto pokona tę postać w walce PvP, dostaje całość na konto (nie działa w pojedynku
+  ani w tej samej drużynie lub gildii). Serwer ogłasza wpłaty i odbiór, nagrody przetrwają restart.
 ## [0.120.0] - 2026-10-16
 
 ### Dodano

@@ -42,6 +42,9 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"ADMIN", "STATUS"}, ChatCommands.toMessage("/serwer"));
         assertArrayEquals(new String[] {"ADMIN", "SAVE"}, ChatCommands.toMessage("/zapisz"));
         assertArrayEquals(new String[] {"ADMIN", "MOTD"}, ChatCommands.toMessage("/motd"));
+        assertArrayEquals(new String[] {"BOUNTY", "Stary Wilk", "5000"}, ChatCommands.toMessage("/nagroda Stary Wilk, 5k"));
+        assertArrayEquals(new String[] {"BOUNTY"}, ChatCommands.toMessage("/nagroda"));
+        assertArrayEquals(new String[] {"BOUNTY"}, ChatCommands.toMessage("/nagrody"));
         assertArrayEquals(new String[] {"ADMIN", "MOTD", "Event w sobotę"}, ChatCommands.toMessage("/motd Event w sobotę"));
         assertArrayEquals(new String[] {"RANK"}, ChatCommands.toMessage("/ranking"));
         assertArrayEquals(new String[] {"FRIEND", "LIST"}, ChatCommands.toMessage("/znajomi"));

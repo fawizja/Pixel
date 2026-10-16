@@ -236,6 +236,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Wiadomość dnia serwera /motd (0.117.0)
 - [x] Zużycie amunicji przy strzałach (0.118.0)
 - [x] Ranking umiejętności /ranking magia (0.119.0)
+- [x] Nagrody za głowy /nagroda (0.121.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

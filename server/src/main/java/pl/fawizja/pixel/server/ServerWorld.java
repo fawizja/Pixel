@@ -96,6 +96,9 @@ final class ServerWorld {
     volatile java.util.function.LongSupplier wallClock = System::currentTimeMillis;
     private final File guildFile;
     private final File marketFile;
+    /** Nagrody za glowy (bounties.txt). */
+    private final File bountiesFile;
+    private final pl.fawizja.pixel.pvp.Bounties bounties;
     private final File mailFile;
     /** Wiadomosc dnia serwera (motd.txt, polecenie MOTD); pusta = brak. */
     private final File motdFile;
@@ -126,6 +129,9 @@ final class ServerWorld {
         guildFile = new File(saveDir, "guilds.txt");
         guilds = pl.fawizja.pixel.guild.GuildRegistry.decode(guildFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(guildFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        bountiesFile = new File(saveDir, "bounties.txt");
+        bounties = pl.fawizja.pixel.pvp.Bounties.decode(bountiesFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(bountiesFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         marketFile = new File(saveDir, "market.txt");
         market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
@@ -385,6 +391,79 @@ final class ServerWorld {
         save(p);
         LOG.info("transfer " + p.name() + " -> " + to + " " + amount);
         info(p, "Przelano " + label + " do " + to + (r == null ? " (wpłynie po wejściu do gry)." : "."), now);
+    }
+
+    /** BOUNTY: lista nagrod; BOUNTY imie kwota: doplata z konta do nagrody za glowe postaci. */
+    private void bountyCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 3) {
+            List<pl.fawizja.pixel.pvp.Bounties.Bounty> top = bounties.top(pl.fawizja.pixel.pvp.Bounties.SHOWN);
+            if (top.isEmpty()) {
+                info(p, "Nie ma nagród za głowy. /nagroda imię, kwota wyznacza nagrodę.", now);
+                return;
+            }
+            StringBuilder sb = new StringBuilder("Nagrody za głowy:");
+            for (pl.fawizja.pixel.pvp.Bounties.Bounty b : top) sb.append(' ').append(b.name()).append(String.format(" %,d gp;", b.amount()));
+            info(p, sb.substring(0, sb.length() - 1), now);
+            return;
+        }
+        long amount;
+        try {
+            amount = Long.parseLong(f[2]);
+        } catch (NumberFormatException e) {
+            return;
+        }
+        if (amount < pl.fawizja.pixel.pvp.Bounties.MIN) {
+            warn(p, String.format("Najmniejsza nagroda to %,d gp.", pl.fawizja.pixel.pvp.Bounties.MIN), now);
+            return;
+        }
+        String to = knownName(f[1].trim());
+        if (to == null) {
+            warn(p, "Nie ma takiej postaci.", now);
+            return;
+        }
+        if (to.equalsIgnoreCase(p.name())) {
+            warn(p, "Nie możesz wyznaczyć nagrody za własną głowę.", now);
+            return;
+        }
+        PlayerCharacter pc = p.session.character();
+        if (!pc.bank().debit(amount).ok()) {
+            warn(p, "Na koncie masz tylko " + String.format("%,d gp", pc.bank().balance()) + ". Wpłać monety u bankiera.", now);
+            return;
+        }
+        long total = bounties.add(to, amount);
+        saveBounties();
+        save(p);
+        LOG.info("bounty " + p.name() + " -> " + to + " " + amount);
+        String msg = "Nagroda za głowę " + to + String.format(" wynosi teraz %,d gp", total) + " (dołożył " + p.name() + ").";
+        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, msg);
+    }
+
+    /** Zabojca dostaje nagrode za glowe ofiary (nie ta sama druzyna ani gildia). */
+    private void claimBounty(ServerPlayer killer, ServerPlayer victim, long now) {
+        if (bounties.amount(victim.name()) <= 0 || sameParty(killer, victim)) return;
+        pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(killer.name());
+        if (g != null && g == guilds.guildOf(victim.name())) return;
+        long amount = bounties.claim(victim.name());
+        if (!killer.session.character().bank().credit(amount).ok()) {
+            bounties.add(victim.name(), amount);
+            return;
+        }
+        saveBounties();
+        save(killer);
+        LOG.info("bounty claimed " + killer.name() + " <- " + victim.name() + " " + amount);
+        String msg = killer.name() + " odbiera nagrodę za głowę " + victim.name() + String.format(" (%,d gp na konto).", amount);
+        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, msg);
+    }
+
+    private void saveBounties() {
+        try {
+            File tmp = new File(bountiesFile.getParentFile(), "bounties.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), bounties.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), bountiesFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("bounties save failed: " + e.getMessage());
+        }
     }
 
     /** Dostarcza czekajace przesylki do depozytu odbiorcy (ile sie zmiesci). */
@@ -782,7 +861,10 @@ final class ServerWorld {
                 ServerPlayer v = p.pvpTarget < 0 ? null : players.get(p.pvpTarget);
                 if (v == null) return false;
                 PvpRules.Outcome o = PvpRules.spellHit(p.session, p.pvp, v.session, v.pvp, amount, type, world, t, pvpRng);
-                if (o == PvpRules.Outcome.KILLED) p.pvpTarget = -1;
+                if (o == PvpRules.Outcome.KILLED) {
+                    p.pvpTarget = -1;
+                    claimBounty(p, v, t);
+                }
                 if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
                 return o != PvpRules.Outcome.NOT_ALLOWED;
             }
@@ -1309,6 +1391,7 @@ final class ServerWorld {
             case "MARKET": marketCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "TRANSFER": transferCommand(p, f, now); break;
+            case "BOUNTY": bountyCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
             case "TITLE": p.session.chooseTitle(f.length > 1 ? f[1] : null, now); break;
             case "OUTFIT": p.session.chooseOutfit(f.length > 1 ? f[1] : null, now); break;
@@ -1634,7 +1717,10 @@ final class ServerWorld {
                 continue;
             }
             PvpRules.Outcome o = PvpRules.attack(p.session, p.pvp, t.session, t.pvp, world, now, pvpRng);
-            if (o == PvpRules.Outcome.KILLED) p.pvpTarget = -1;
+            if (o == PvpRules.Outcome.KILLED) {
+                p.pvpTarget = -1;
+                claimBounty(p, t, now);
+            }
             if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, t, now);
         }
         for (ServerPlayer p : players.values()) {

@@ -27,6 +27,9 @@ Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
 - Czary i runy ofensywne trafiaja gracza, gdy jest celem PvP, a postac nie ma celu-potwora
   (`SpellSystem.PlayerTargeting`, na serwerze `PvpRules.spellHit`): te same zasady, czaszki, blokada PZ i x0,5.
   Czary obszarowe trafiaja tylko wybranego gracza (nie przypadkowych przechodniow). Odmowa zasad = bez kosztu many/runy.
+- Nagrody za glowy (0.121.0, `pvp/Bounties`): `/nagroda imie, kwota` (min. 1 000 gp, z konta) dokłada do nagrody,
+  `/nagrody` pokazuje 10 najwyzszych. Kto pokona postac w PvP (nie pojedynek, nie ta sama druzyna ani gildia),
+  dostaje calosc na konto; serwer oglasza wplaty i odbior. Zapis `<dane>/bounties.txt`.
 
 ## Siec (etap 14)
 

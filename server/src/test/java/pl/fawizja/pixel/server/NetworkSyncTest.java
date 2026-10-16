@@ -278,6 +278,50 @@ class NetworkSyncTest {
     }
 
     @Test
+    void bountiesArePaidToTheKiller() throws Exception {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
+            a.hello("Ivo", "PALADIN", "tajne-Ivo");
+            b.hello("Jan", "MONK", "tajne-Jan");
+            await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
+            int janId = b.playerId();
+            a.send("BOUNTY", "Jan", "500");
+            awaitMessage(a, "too small", m -> m[0].equals("LOG") && m[2].contains("Najmniejsza nagroda"));
+            a.send("BOUNTY", "Ivo", "5000");
+            awaitMessage(a, "own head", m -> m[0].equals("LOG") && m[2].contains("własną głowę"));
+            Position field = new Position(58, 75, 0);
+            java.util.concurrent.atomic.AtomicBoolean ready = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                int i = 0;
+                for (ServerPlayer p : server.world().players()) {
+                    PlayerCharacter pc = p.session.character();
+                    pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(40) - pc.experience());
+                    pc.heal(pc.maxHealth());
+                    pc.bank().credit(10_000);
+                    p.session.teleport(field.translate(i++, 0), server.now());
+                }
+                ready.set(true);
+            });
+            await("ready", ready::get);
+            a.send("BOUNTY", "jan", "5000");
+            awaitMessage(b, "announced", m -> m[0].equals("LOG") && m[2].startsWith("Nagroda za głowę Jan wynosi teraz 5"));
+            b.send("BOUNTY");
+            awaitMessage(b, "listed", m -> m[0].equals("LOG") && m[2].startsWith("Nagrody za głowy: Jan"));
+            java.util.concurrent.atomic.AtomicBoolean weak = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                PlayerCharacter jan = server.world().find("Jan").session.character();
+                jan.damage(jan.health() - 1);
+                weak.set(true);
+            });
+            await("weak", weak::get);
+            a.send("ATTACK", String.valueOf(janId));
+            awaitMessage(a, "claimed", m -> m[0].equals("LOG") && m[2].startsWith("Ivo odbiera nagrodę za głowę Jan"));
+            b.send("BOUNTY");
+            awaitMessage(b, "none left", m -> m[0].equals("LOG") && m[2].startsWith("Nie ma nagród"));
+        }
+    }
+
+    @Test
     void theServerReportsItsBosses() throws Exception {
         try (NetClient a = connect()) {
             a.hello("Ewa", "DRUID", "tajne-Ewa");

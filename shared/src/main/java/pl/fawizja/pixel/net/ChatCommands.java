@@ -95,6 +95,18 @@ public final class ChatCommands {
                 if (amount <= 0) return null;
                 return new String[] {"TRANSFER", r.substring(0, comma).trim(), String.valueOf(amount)};
             }
+            case "/nagroda": {
+                // "/nagroda Stary Wilk, 5000"; samo /nagroda = lista
+                if (w.length == 1) return new String[] {"BOUNTY"};
+                String r = rest(t);
+                int comma = r.indexOf(',');
+                if (comma <= 0) return null;
+                long amount = amount(r.substring(comma + 1));
+                if (amount <= 0) return null;
+                return new String[] {"BOUNTY", r.substring(0, comma).trim(), String.valueOf(amount)};
+            }
+            case "/nagrody":
+                return w.length == 1 ? new String[] {"BOUNTY"} : null;
             case "/inwazja":
                 return w.length == 1 ? new String[] {"ADMIN", "INVASION"} : new String[] {"ADMIN", "INVASION", rest(t)};
             case "/kto":
