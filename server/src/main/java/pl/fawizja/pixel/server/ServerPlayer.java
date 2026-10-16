@@ -24,6 +24,8 @@ final class ServerPlayer {
     long lastSaveMs;
     /** Ostatnio wyslany wiersz wyzwania ("-" = brak). */
     String lastChallenge = "-";
+    /** Gracz oglosil, ze szuka druzyny (/szukam; tylko w pamieci). */
+    boolean lookingForParty;
 
     ServerPlayer(int id, GameSession session, ClientHandler client, long now, pl.fawizja.pixel.pvp.PvpRules.Status pvp) {
         this.pvp = pvp;

@@ -1108,6 +1108,12 @@ class NetworkSyncTest {
             ula.send("WHO");
             awaitMessage(ula, "player list", m -> m[0].equals("WHO") && m.length == 3
                     && m[1].startsWith("Ula;") && m[1].contains("poziom 2") && m[2].startsWith("Ola;Paladin, poziom 8"));
+            ola.send("LFG");
+            awaitMessage(ola, "lfg on", m -> m[0].equals("LOG") && m[2].startsWith("Szukasz drużyny") && m[2].contains("Powiadomieni gracze o podobnym poziomie: 0"));
+            ula.send("WHO");
+            awaitMessage(ula, "lfg in list", m -> m[0].equals("WHO") && m.length == 3 && m[2].startsWith("Ola;") && m[2].contains("szuka drużyny"));
+            ola.send("LFG");
+            awaitMessage(ola, "lfg off", m -> m[0].equals("LOG") && m[2].startsWith("Nie szukasz już drużyny"));
         }
     }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.146.0] - 2026-10-16
+
+### Dodano
+- `/szukam` (gra sieciowa): ogłoszenie, że szukasz drużyny. Gracze o podobnym poziomie bez drużyny dostają
+  wiadomość z poleceniem `/zaproś`, a lista `/gracze` pokazuje „szuka drużyny”.
 ## [0.145.0] - 2026-10-16
 
 ### Dodano

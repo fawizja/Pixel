@@ -448,6 +448,38 @@ final class ServerWorld {
     }
 
     /** BOUNTY: lista nagrod; BOUNTY imie kwota: doplata z konta do nagrody za glowe postaci. */
+    /** Szuka druzyny i jeszcze w zadnej nie jest. */
+    private boolean seeksParty(ServerPlayer o) {
+        return o.lookingForParty && parties.members(o.name()).isEmpty();
+    }
+
+    /** /szukam: przelacza ogloszenie; gracze bez druzyny o podobnym poziomie dostaja wiadomosc. */
+    private void lookingForParty(ServerPlayer p, long now) {
+        if (p.lookingForParty) {
+            p.lookingForParty = false;
+            info(p, "Nie szukasz już drużyny.", now);
+            return;
+        }
+        if (!parties.members(p.name()).isEmpty()) {
+            warn(p, "Jesteś już w drużynie.", now);
+            return;
+        }
+        if (!chatAllowed(p, now)) return;
+        p.lookingForParty = true;
+        PlayerCharacter pc = p.session.character();
+        int told = 0;
+        for (ServerPlayer o : players.values()) {
+            if (o == p || !parties.members(o.name()).isEmpty()) continue;
+            int lvl = o.session.character().level();
+            if (lvl * 3 < pc.level() * 2 || lvl * 2 > pc.level() * 3) continue; // poziom w granicach 2/3 .. 3/2
+            o.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " (" + pc.vocation().displayName() + ", poziom " + pc.level()
+                    + ") szuka drużyny: /zaproś " + p.name());
+            told++;
+        }
+        info(p, "Szukasz drużyny (widać to w /gracze). Powiadomieni gracze o podobnym poziomie: " + told
+                + ". Ponowne /szukam wyłącza.", now);
+    }
+
     /** ", nagroda 5,000 gp" do listy graczy, gdy ktos wyznaczyl nagrode za postac. */
     private String bountyNote(String name) {
         long amount = bounties.amount(name);
@@ -1628,6 +1660,7 @@ final class ServerWorld {
                 deleteCharacter(p);
                 break;
             case "PARTY": partyCommand(p, f, now); break;
+            case "LFG": lookingForParty(p, now); break;
             case "TRADE": tradeCommand(p, f, now); break;
             case "GUILD": guildCommand(p, f, now); break;
             case "FRIEND": friendCommand(p, f, now); break;
@@ -1682,7 +1715,7 @@ final class ServerWorld {
                     String title = pl.fawizja.pixel.achievement.Achievement.titleOf(oc.title());
                     out.add(oc.name() + ";" + oc.vocation().displayName() + ", poziom " + oc.level()
                             + (tag == null || tag.equals("-") ? "" : " <" + tag + ">") + (title == null ? "" : ", " + title)
-                            + bountyNote(oc.name()));
+                            + bountyNote(oc.name()) + (seeksParty(o) ? ", szuka drużyny" : ""));
                 }
                 p.client.send(out.toArray(new String[0]));
                 break;

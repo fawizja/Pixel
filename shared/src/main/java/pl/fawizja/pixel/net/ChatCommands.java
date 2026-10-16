@@ -36,6 +36,8 @@ public final class ChatCommands {
                 return w.length >= 2 ? new String[] {"PARTY", "INVITE", rest(t)} : null;
             case "/przyjmij":
                 return w.length >= 2 ? new String[] {"PARTY", "ACCEPT", rest(t)} : null;
+            case "/szukam":
+                return w.length == 1 ? new String[] {"LFG"} : null;
             case "/opusc":
                 return w.length == 1 ? new String[] {"PARTY", "LEAVE"} : null;
             case "/handel":
