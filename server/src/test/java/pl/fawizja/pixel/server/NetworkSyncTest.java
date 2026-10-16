@@ -317,8 +317,11 @@ class NetworkSyncTest {
             await("challenge reaches piotr", () -> logged(b, "wyzywa cię na pojedynek"));
             b.send("DUEL", "REQUEST", "Ola");
             await("duel starts", () -> logged(a, "Pojedynek z Piotr"));
-            // szybszy koniec: Piotr ma juz malo zdrowia
+            // szybszy koniec: Piotr ma juz malo zdrowia; potwory z okolicy usuniete, by nie dobily go przy 1 HP
             server.enqueueTest(() -> {
+                for (pl.fawizja.pixel.monster.Monster m : server.world().monsters.near(field, 25)) {
+                    server.world().monsters.kill(m, server.now());
+                }
                 for (ServerPlayer p : server.world().players()) {
                     PlayerCharacter pc = p.session.character();
                     if (pc.name().equals("Piotr")) pc.damage(pc.health() - 3);

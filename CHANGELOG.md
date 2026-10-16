@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.52.0] - 2026-10-16
+
+### Dodano
+- Ustawienie „Mikstura zdrowia sama”: wyłączona, poniżej 30%, 50% albo 70% HP. Klient sam używa mikstury
+  zdrowia z plecaka (ta sama akcja co przycisk HP, najwyżej raz na sekundę, więc online decyduje serwer).
+  Domyślnie wyłączone.
+- Ustawienie „Pogoda: pokazuj/ukryj” (słabsze telefony, nagrania).
+- 1 nowy test; łącznie 288.
+
+### Poprawiono
+- Test pojedynku online czasem nie przechodził pod obciążeniem. Prawdopodobna przyczyna (wniosek, nie
+  potwierdzona): potwór z okolicy dobijał przegranego przy 1 HP. Test usuwa teraz potwory z okolicy pola walki.
+
 ## [0.51.0] - 2026-10-16
 
 ### Dodano

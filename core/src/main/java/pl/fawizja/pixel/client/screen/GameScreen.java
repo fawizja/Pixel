@@ -320,6 +320,8 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:numbers":
             case "settings:sound":
             case "settings:loot":
+            case "settings:weather":
+            case "settings:heal":
                 settings.apply(id);
                 settingsPrefs.put(settings.toMap());
                 settingsPrefs.flush();
@@ -552,7 +554,8 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Pogoda nad graczem; zmiana rodzaju trafia do dziennika. */
     private Weather.Kind weatherAt(Position p, long wallMs) {
-        Weather.Kind k = forcedWeather != null ? (p.z() < 0 ? Weather.Kind.CLEAR : forcedWeather)
+        Weather.Kind k = !settings.weather() ? Weather.Kind.CLEAR
+                : forcedWeather != null ? (p.z() < 0 ? Weather.Kind.CLEAR : forcedWeather)
                 : Weather.at(wallMs, game.world().regionAt(p), p.z());
         // komunikat tylko przy zmianie pogody na miejscu (nie przy zejsciu pod ziemie i powrocie)
         if (lastWeather != null && k != lastWeather && p.z() >= 0 && lastWeatherZ >= 0) {
@@ -615,6 +618,18 @@ public final class GameScreen extends ScreenAdapter {
     /** Automatyczne lupy: cialo z lupem obok postaci przeszukiwane co 0,8 s; najwyzej 2 proby na cialo (pelny plecak). */
     private long autoLootAtMs;
     private final Map<Position, Integer> autoLootTries = new java.util.HashMap<>();
+
+    /** Automatyczna mikstura zdrowia (ustawienie): ta sama akcja co przycisk HP, najwyzej raz na sekunde. */
+    private long autoHealAtMs;
+
+    private void autoHeal(long t) {
+        int pct = settings.autoHeal();
+        PlayerCharacter pc = session.character();
+        if (pct == 0 || t < autoHealAtMs || pc.isDead() || pc.health() * 100L >= (long) pc.maxHealth() * pct) return;
+        if (pc.backpack().count(session.items().byKey("health_potion").id()) == 0) return;
+        autoHealAtMs = t + 1000;
+        act("potion_hp", t);
+    }
 
     private void autoLoot(long t) {
         if (!settings.autoLoot() || t < autoLootAtMs || session.character().isDead()) return;
@@ -745,6 +760,7 @@ public final class GameScreen extends ScreenAdapter {
         final long t = now();
         if (net == null) session.update(t, dir);
         autoLoot(t);
+        autoHeal(t);
         updateHunt(t);
         updateGuard(t);
 

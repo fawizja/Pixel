@@ -168,6 +168,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Pogoda: deszcz, snieg, burza piaskowa wg krainy (0.49.0)
 - [x] Woznice: platne przejazdy miedzy miastami (0.50.0)
 - [x] Blogoslawienstwo kaplana: polowa straty exp przy smierci (0.51.0)
+- [x] Ustawienia: automatyczna mikstura zdrowia, wylaczenie pogody (0.52.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

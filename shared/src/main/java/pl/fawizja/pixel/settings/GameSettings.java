@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * Ustawienia gracza (etap 15): limit klatek, oszczedzanie baterii, jakosc swiatla, liczby obrazen, glosnosc
- * i automatyczne lupy.
+ * automatyczne lupy, pogoda i automatyczna mikstura zdrowia.
  * Zapisywane jako pary tekstowe (na kliencie w Preferences); bledne wartosci wracaja do domyslnych.
  * Ochrona zasobow 90% / 75% dziala niezaleznie i moze tylko dodatkowo obnizyc te limity.
  */
@@ -18,6 +18,8 @@ public final class GameSettings {
     public static final float LOW_LIGHT_QUALITY = 0.5f;
     /** Glosnosc efektow w procentach; 0 = wylaczone. */
     public static final int[] VOLUME_CHOICES = {0, 30, 60, 100};
+    /** Prog zdrowia (%) automatycznej mikstury; 0 = wylaczona. */
+    public static final int[] AUTO_HEAL_CHOICES = {0, 30, 50, 70};
 
     private int fpsCap = 60;
     private boolean batterySaver;
@@ -25,6 +27,8 @@ public final class GameSettings {
     private boolean damageNumbers = true;
     private int volume = 60;
     private boolean autoLoot = true;
+    private boolean weather = true;
+    private int autoHeal;
 
     public int fpsCap() { return fpsCap; }
     public boolean batterySaver() { return batterySaver; }
@@ -33,6 +37,10 @@ public final class GameSettings {
     public int volume() { return volume; }
     /** Przeszukiwanie cial obok postaci bez dotykania (lup do plecaka). */
     public boolean autoLoot() { return autoLoot; }
+    /** Rysowanie opadow (deszcz, snieg, burza piaskowa). */
+    public boolean weather() { return weather; }
+    /** Mikstura zdrowia sama, gdy zdrowie spadnie ponizej tylu procent; 0 = wylaczona. */
+    public int autoHeal() { return autoHeal; }
     /** Glosnosc 0..1 dla odtwarzacza. */
     public float volumeFactor() { return volume / 100f; }
 
@@ -63,6 +71,13 @@ public final class GameSettings {
     public void toggleHighLighting() { highLighting = !highLighting; }
     public void toggleDamageNumbers() { damageNumbers = !damageNumbers; }
     public void toggleAutoLoot() { autoLoot = !autoLoot; }
+    public void toggleWeather() { weather = !weather; }
+
+    public void cycleAutoHeal() {
+        int i = 0;
+        while (i < AUTO_HEAL_CHOICES.length && AUTO_HEAL_CHOICES[i] != autoHeal) i++;
+        autoHeal = AUTO_HEAL_CHOICES[(i + 1) % AUTO_HEAL_CHOICES.length];
+    }
 
     /** Obsluga przycisku z panelu ustawien ("settings:fps" itd.); false dla nieznanej akcji. */
     public boolean apply(String action) {
@@ -73,6 +88,8 @@ public final class GameSettings {
             case "settings:numbers": toggleDamageNumbers(); return true;
             case "settings:sound": cycleVolume(); return true;
             case "settings:loot": toggleAutoLoot(); return true;
+            case "settings:weather": toggleWeather(); return true;
+            case "settings:heal": cycleAutoHeal(); return true;
             default: return false;
         }
     }
@@ -85,6 +102,8 @@ public final class GameSettings {
         m.put("numbers", String.valueOf(damageNumbers));
         m.put("volume", String.valueOf(volume));
         m.put("loot", String.valueOf(autoLoot));
+        m.put("weather", String.valueOf(weather));
+        m.put("heal", String.valueOf(autoHeal));
         return m;
     }
 
@@ -97,6 +116,8 @@ public final class GameSettings {
         s.highLighting = bool(m.get("light"), true);
         s.damageNumbers = bool(m.get("numbers"), true);
         s.autoLoot = bool(m.get("loot"), true);
+        s.weather = bool(m.get("weather"), true);
+        s.autoHeal = choice(m.get("heal"), AUTO_HEAL_CHOICES, 0);
         return s;
     }
 
@@ -128,6 +149,8 @@ public final class GameSettings {
             {"settings:numbers", "Liczby obrażeń: " + (damageNumbers ? "pokazuj" : "ukryj")},
             {"settings:sound", "Dźwięk: " + (volume == 0 ? "wyłączony" : volume + "%")},
             {"settings:loot", "Łupy z ciał: " + (autoLoot ? "automatycznie" : "dotknięciem")},
+            {"settings:weather", "Pogoda: " + (weather ? "pokazuj" : "ukryj")},
+            {"settings:heal", "Mikstura zdrowia sama: " + (autoHeal == 0 ? "wyłączona" : "poniżej " + autoHeal + "% HP")},
         };
     }
 }

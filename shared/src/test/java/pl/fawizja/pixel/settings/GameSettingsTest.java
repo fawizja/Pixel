@@ -66,4 +66,25 @@ class GameSettingsTest {
         assertFalse(GameSettings.fromMap(s.toMap()).autoLoot());
         assertTrue(GameSettings.fromMap(Map.of("loot", "?")).autoLoot(), "bad value falls back");
     }
+
+    @Test
+    void weatherAndAutoHealAreSaved() {
+        GameSettings s = new GameSettings();
+        assertTrue(s.weather());
+        assertEquals(0, s.autoHeal(), "off by default");
+        assertTrue(s.apply("settings:weather"));
+        assertFalse(s.weather());
+        assertTrue(s.apply("settings:heal"));
+        assertEquals(30, s.autoHeal());
+        s.apply("settings:heal");
+        s.apply("settings:heal");
+        assertEquals(70, s.autoHeal());
+        assertTrue(s.rows()[7][1].contains("70%"));
+        GameSettings back = GameSettings.fromMap(s.toMap());
+        assertFalse(back.weather());
+        assertEquals(70, back.autoHeal());
+        s.apply("settings:heal");
+        assertEquals(0, s.autoHeal(), "cycles back to off");
+        assertEquals(0, GameSettings.fromMap(Map.of("heal", "45")).autoHeal(), "unsupported value falls back");
+    }
 }
