@@ -967,6 +967,7 @@ public final class Hud {
                     break;
                 }
                 left.add(new MenuRow("npc:market", "Rynek graczy", "kupno i sprzedaż, także gdy sprzedawca jest offline", true));
+                right.add(new MenuRow("npc:orders", "Zamówienia kupna", "/kupię 20 wilcze futro 2000, /sprzedaj numer", true));
                 left.add(new MenuRow("npc:depot", "Depozyt przedmiotów", (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc, wspólny dla miast", true));
                 long bal = pc.bank().balance();
                 left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspólne dla wszystkich miast", false));

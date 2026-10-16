@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.139.0] - 2026-10-16
+
+### Dodano
+- U bankiera wiersz „Zamówienia kupna” otwiera listę zamówień jednym dotknięciem.
 ## [0.138.0] - 2026-10-16
 
 ### Dodano

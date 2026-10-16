@@ -421,6 +421,9 @@ public final class GameScreen extends ScreenAdapter {
                 } else if (id.equals("npc:market")) {
                     if (net == null) session.log().add(t, EventLog.Kind.INFO, "Rynek graczy działa online.");
                     else net.send("MARKET", "LIST");
+                } else if (id.equals("npc:orders")) {
+                    if (net == null) session.log().add(t, EventLog.Kind.INFO, "Zamówienia kupna działają online.");
+                    else net.send("WANT", "LIST");
                 } else if (id.startsWith("market:")) {
                     String[] f = id.split(":");
                     if (net != null && f.length == 3 && f[1].equals("buy")) net.send("MARKET", "BUY", f[2]);
