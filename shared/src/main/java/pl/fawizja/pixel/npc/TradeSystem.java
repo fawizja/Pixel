@@ -41,7 +41,7 @@ public final class TradeSystem {
     public static TradeResult sellAll(Container backpack, Shop shop, int itemId) {
         ShopOffer o = shop.offer(itemId);
         if (o == null || !o.bought()) return TradeResult.NOT_BOUGHT_HERE;
-        int have = backpack.count(itemId);
+        int have = backpack.countPlain(itemId); // ulepszonych nie sprzedajemy hurtem
         if (have == 0) return TradeResult.NOTHING_TO_SELL;
         Container tx = backpack.copy();
         if (!tx.remove(itemId, have).ok()) return TradeResult.NOTHING_TO_SELL;
@@ -53,6 +53,6 @@ public final class TradeSystem {
     /** Wartosc skupu wszystkich sztuk w plecaku (0, gdy kupiec nie skupuje). */
     public static long sellValue(Container backpack, Shop shop, int itemId) {
         ShopOffer o = shop.offer(itemId);
-        return o == null || !o.bought() ? 0 : o.sellPrice() * backpack.count(itemId);
+        return o == null || !o.bought() ? 0 : o.sellPrice() * backpack.countPlain(itemId);
     }
 }

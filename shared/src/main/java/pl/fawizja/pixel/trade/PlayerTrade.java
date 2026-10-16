@@ -103,7 +103,7 @@ public final class PlayerTrade {
             if (Money.totalValue(backpack) < o.gold + p.count) return Result.NOT_ENOUGH;
             o.gold += p.count;
         } else {
-            if (backpack.count(p.itemId) < o.countOf(p.itemId) + p.count) return Result.NOT_ENOUGH;
+            if (backpack.countPlain(p.itemId) < o.countOf(p.itemId) + p.count) return Result.NOT_ENOUGH; // bez ulepszonych
             if (o.items.size() >= MAX_STACKS) return Result.TOO_MANY_STACKS;
             o.items.add(new ItemStack(p.itemId, (int) p.count));
         }

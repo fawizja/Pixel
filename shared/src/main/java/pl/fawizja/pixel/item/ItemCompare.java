@@ -13,11 +13,16 @@ public final class ItemCompare {
 
     /** Pierwsza linia: nazwa i statystyki z roznicami; equipped = przedmiot w tym samym miejscu albo null. */
     public static String stats(ItemType t, ItemType equipped) {
-        StringBuilder b = new StringBuilder(t.name());
-        if (equipped == t) return b.append(" (założone)").toString();
-        stat(b, "atak", t.attack(), equipped == null ? 0 : equipped.attack(), equipped != null);
-        stat(b, "obrona", t.defense(), equipped == null ? 0 : equipped.defense(), equipped != null);
-        stat(b, "pancerz", t.armor(), equipped == null ? 0 : equipped.armor(), equipped != null);
+        return stats(t, 0, equipped, 0);
+    }
+
+    /** Jak wyzej, z poziomami ulepszenia (u - ogladany przedmiot, eu - zalozony). */
+    public static String stats(ItemType t, int u, ItemType equipped, int eu) {
+        StringBuilder b = new StringBuilder(Upgrade.name(t, u));
+        if (equipped == t && u == eu) return b.append(" (założone)").toString();
+        stat(b, "atak", Upgrade.attack(t, u), equipped == null ? 0 : Upgrade.attack(equipped, eu), equipped != null);
+        stat(b, "obrona", Upgrade.defense(t, u), equipped == null ? 0 : Upgrade.defense(equipped, eu), equipped != null);
+        stat(b, "pancerz", Upgrade.armor(t, u), equipped == null ? 0 : Upgrade.armor(equipped, eu), equipped != null);
         if (t.range() > 1) b.append("  zasięg ").append(t.range());
         return b.toString();
     }

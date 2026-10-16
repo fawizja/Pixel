@@ -50,11 +50,11 @@ public final class CharacterCodec {
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack s = pc.backpack().get(i);
-            if (s != null) m.put("bp." + i, s.itemId() + "x" + s.count());
+            if (s != null) m.put("bp." + i, stackText(s));
         }
         for (int i = 0; i < pc.depot().size(); i++) {
             ItemStack s = pc.depot().get(i);
-            if (s != null) m.put("dp." + i, s.itemId() + "x" + s.count());
+            if (s != null) m.put("dp." + i, stackText(s));
         }
         for (int i = 0; i < pc.friends().size(); i++) m.put("fr." + i, pc.friends().names().get(i));
         for (String k : pc.bestiary().keys()) m.put("kill." + k, pc.bestiary().encodeValue(k));
@@ -67,7 +67,7 @@ public final class CharacterCodec {
         if (pc.title() != null) m.put("title", pc.title());
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
-            m.put("eq." + e.getKey().name(), e.getValue().itemId() + "x" + e.getValue().count());
+            m.put("eq." + e.getKey().name(), stackText(e.getValue()));
         }
         for (Skill s : Skill.values()) {
             m.put("skill." + s.name(), pc.skills().level(s) + "/" + pc.skills().tries(s));
@@ -207,9 +207,16 @@ public final class CharacterCodec {
         return pc;
     }
 
+    /** "idxilosc", z ulepszeniem "idxilosc+poziom" (0.62.0). */
+    private static String stackText(ItemStack s) {
+        return s.itemId() + "x" + s.count() + (s.upgrade() > 0 ? "+" + s.upgrade() : "");
+    }
+
     private ItemStack parseStack(String v) {
-        String[] f = v.split("x");
-        ItemStack s = new ItemStack(Integer.parseInt(f[0]), Integer.parseInt(f[1]));
+        int plus = v.indexOf('+');
+        int upgrade = plus < 0 ? 0 : Integer.parseInt(v.substring(plus + 1));
+        String[] f = (plus < 0 ? v : v.substring(0, plus)).split("x");
+        ItemStack s = new ItemStack(Integer.parseInt(f[0]), Integer.parseInt(f[1]), upgrade);
         if (s.count() > items.maxStack(s.itemId())) throw new IllegalArgumentException("stack too large " + v);
         return s;
     }

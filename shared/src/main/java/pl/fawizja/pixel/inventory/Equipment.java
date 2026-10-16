@@ -72,18 +72,18 @@ public final class Equipment {
 
     public int totalArmor() {
         int sum = 0;
-        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).armor();
+        for (ItemStack s : worn.values()) sum += pl.fawizja.pixel.item.Upgrade.armor(registry.get(s.itemId()), s.upgrade());
         return sum;
     }
 
     public int totalDefense() {
         int sum = 0;
-        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).defense();
+        for (ItemStack s : worn.values()) sum += pl.fawizja.pixel.item.Upgrade.defense(registry.get(s.itemId()), s.upgrade());
         return sum;
     }
 
     public int weaponAttack() {
         ItemStack w = worn.get(EquipSlot.WEAPON);
-        return w == null ? 0 : registry.get(w.itemId()).attack();
+        return w == null ? 0 : pl.fawizja.pixel.item.Upgrade.attack(registry.get(w.itemId()), w.upgrade());
     }
 }

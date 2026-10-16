@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.62.0] - 2026-10-16
+
+### Dodano
+- Kowalstwo u kupców („Ulepsz wyposażenie”): założoną broń, tarczę i zbroję można ulepszyć do +5. Broń zyskuje
+  6% ataku na poziom (co najmniej +1), zbroja i tarcza +1 pancerza i obrony. Szansa 100/90/75/55/35%, cena
+  max(200 gp × poziom², 2 × wartość × poziom); nieudana próba zabiera tylko złoto.
+- Poziom ulepszenia jest częścią przedmiotu (`ItemStack.upgrade`), zapis `idxilość+poziom`. Plecak pokazuje „+N”,
+  a porównanie przedmiotów liczy ulepszenia.
+- Ulepszonych przedmiotów nie można sprzedać hurtem u kupca, oddać w handlu, wystawić na rynku ani wysłać pocztą
+  (liczą się tylko zwykłe sztuki). Depozyt przenosi je bez utraty poziomu. Przy zdejmowaniu przedmiotów
+  (płatności, zadania) najpierw idą zwykłe sztuki.
+- Scena GUI `smith` (30 scen), opcja `-Dpixel.open=smith`.
+- 3 nowe testy; łącznie 310.
+
 ## [0.61.0] - 2026-10-16
 
 ### Dodano

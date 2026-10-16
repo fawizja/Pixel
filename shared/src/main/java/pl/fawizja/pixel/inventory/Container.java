@@ -92,7 +92,7 @@ public final class Container {
         for (int i = 0; i < slots.length && remaining > 0; i++) {
             if (slots[i] == null) {
                 int put = Math.min(max, remaining);
-                slots[i] = new ItemStack(stack.itemId(), put);
+                slots[i] = stack.withCount(put); // zachowuje ulepszenie
                 remaining -= put;
             }
         }
@@ -100,20 +100,32 @@ public final class Container {
         return InventoryResult.OK;
     }
 
-    /** Usuwa podana ilosc przedmiotu z dowolnych stosow (od konca) albo nic, gdy jest za malo. */
+    /**
+     * Usuwa podana ilosc przedmiotu z dowolnych stosow (od konca) albo nic, gdy jest za malo.
+     * Najpierw zwykle sztuki, ulepszone dopiero na koncu.
+     */
     public InventoryResult remove(int itemId, int count) {
         if (count <= 0) return InventoryResult.INVALID_AMOUNT;
         if (count(itemId) < count) return InventoryResult.NOT_ENOUGH_ITEMS;
         int remaining = count;
-        for (int i = slots.length - 1; i >= 0 && remaining > 0; i--) {
-            ItemStack s = slots[i];
-            if (s != null && s.itemId() == itemId) {
-                int take = Math.min(s.count(), remaining);
-                slots[i] = take == s.count() ? null : s.withCount(s.count() - take);
-                remaining -= take;
+        for (int pass = 0; pass < 2 && remaining > 0; pass++) {
+            for (int i = slots.length - 1; i >= 0 && remaining > 0; i--) {
+                ItemStack s = slots[i];
+                if (s != null && s.itemId() == itemId && (s.upgrade() > 0) == (pass == 1)) {
+                    int take = Math.min(s.count(), remaining);
+                    slots[i] = take == s.count() ? null : s.withCount(s.count() - take);
+                    remaining -= take;
+                }
             }
         }
         return InventoryResult.OK;
+    }
+
+    /** Ilosc sztuk bez ulepszenia (tylko takie mozna sprzedac, oddac w handlu, wystawic albo wyslac). */
+    public int countPlain(int itemId) {
+        int n = 0;
+        for (ItemStack s : slots) if (s != null && s.itemId() == itemId && s.upgrade() == 0) n += s.count();
+        return n;
     }
 
     /** Wyjmuje czesc lub caly stos ze slotu. Zwraca wyjety stos albo null przy blednych danych. */

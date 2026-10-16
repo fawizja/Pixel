@@ -111,6 +111,7 @@ public final class GameSession {
                        GroundItems sharedGround, Random rng, int minLevel, SpellRegistry spellRegistry,
                        ConsumableRegistry consumables, RecipeRegistry recipes) {
         this.sharedWorld = sharedGround != null;
+        this.rng = rng;
         this.ground = sharedGround != null ? sharedGround : new GroundItems();
         this.items = items;
         this.recipes = recipes;
@@ -360,7 +361,7 @@ public final class GameSession {
         Npc n = talkTo(NpcRole.MERCHANT, nowMs);
         if (n == null) return TradeResult.TOO_FAR;
         long value = TradeSystem.sellValue(pc.backpack(), shopOf(n), itemId);
-        int count = pc.backpack().count(itemId);
+        int count = pc.backpack().countPlain(itemId);
         TradeResult r = TradeSystem.sellAll(pc.backpack(), shopOf(n), itemId);
         log.add(nowMs, r.ok() ? EventLog.Kind.LOOT : EventLog.Kind.WARNING,
                 r.ok() ? "Sprzedano: " + count + "x " + items.get(itemId).name() + " za " + value + " gp" : r.message());
@@ -413,12 +414,20 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, full);
             return 0;
         }
-        // atomowo: najpierw zdejmujemy, potem dodajemy (miejsce sprawdzone wyzej)
-        if (!from.remove(itemId, n).ok()) return 0;
-        if (!to.add(new ItemStack(itemId, n)).ok()) {
-            from.add(new ItemStack(itemId, n)); // nie powinno sie zdarzyc - oddajemy
-            return 0;
+        // stos po stosie (zachowuje ulepszenia); miejsce sprawdzone wyzej
+        int moved = 0;
+        for (int i = 0; i < from.size() && moved < n; i++) {
+            ItemStack s = from.get(i);
+            if (s == null || s.itemId() != itemId) continue;
+            ItemStack part = from.takeFromSlot(i, Math.min(s.count(), n - moved));
+            if (!to.add(part).ok()) {
+                from.add(part); // nie powinno sie zdarzyc - oddajemy
+                break;
+            }
+            moved += part.count();
         }
+        if (moved <= 0) return 0;
+        n = moved;
         String name = items.get(itemId).name();
         log.add(nowMs, EventLog.Kind.INFO, done + ": " + n + "x " + name + (n < have ? " (reszta się nie zmieściła)" : "") + ".");
         return n;
@@ -644,6 +653,48 @@ public final class GameSession {
         log.add(nowMs, EventLog.Kind.SYSTEM, "Oswojono konia! Wsiadaj przyciskiem KOŃ (klawisz M): +"
                 + PlayerCharacter.MOUNT_SPEED + " szybkości.");
         return CastResult.OK;
+    }
+
+    private final Random rng;
+
+    /**
+     * Ulepszenie zalozonego przedmiotu u kupca: platnosc z plecaka, szansa wg {@link pl.fawizja.pixel.item.Upgrade};
+     * nieudana proba zabiera zloto, przedmiot zostaje bez zmian.
+     */
+    public boolean upgradeEquipped(pl.fawizja.pixel.item.EquipSlot slot, long nowMs) {
+        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        if (n == null) return false;
+        ItemStack worn = pc.equipment().get(slot);
+        if (worn == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": nic tam nie nosisz.");
+            return false;
+        }
+        pl.fawizja.pixel.item.ItemType t = items.get(worn.itemId());
+        if (!pl.fawizja.pixel.item.Upgrade.upgradable(t)) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": tego nie da się ulepszyć.");
+            return false;
+        }
+        int next = worn.upgrade() + 1;
+        if (next > pl.fawizja.pixel.item.Upgrade.MAX) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade())
+                    + " jest już ulepszony do końca.");
+            return false;
+        }
+        long price = pl.fawizja.pixel.item.Upgrade.price(t, next);
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": ulepszenie do +" + next + " kosztuje " + price + " gp (monety w plecaku).");
+            return false;
+        }
+        pc.backpack().commitFrom(tx);
+        if (rng.nextInt(100) >= pl.fawizja.pixel.item.Upgrade.chancePercent(next)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie udało się (" + price + " gp). " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade())
+                    + " zostaje bez zmian.");
+            return false;
+        }
+        pc.equipment().setDirect(slot, worn.withUpgrade(next));
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Udało się! " + pl.fawizja.pixel.item.Upgrade.name(t, next) + " (" + price + " gp).");
+        return true;
     }
 
     /** Tytul z osiagniecia: key null albo "-" zdejmuje tytul; tylko zdobyte osiagniecia. */

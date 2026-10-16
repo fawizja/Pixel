@@ -106,6 +106,8 @@ public final class Hud {
     private int npcPage;
     /** U bankiera: widok depozytu przedmiotow zamiast konta. */
     private boolean depotView;
+    /** Rozmowa z kupcem w widoku kowala (ulepszanie wyposazenia). */
+    private boolean smithView;
     private int bookPage;
     /** Strona listy osiagniec (gdy nie mieszcza sie w dwoch kolumnach). */
     private int achPage;
@@ -291,6 +293,12 @@ public final class Hud {
         depotView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER;
     }
 
+    /** Rozmowa z kupcem od razu w widoku kowala (podglad GUI). */
+    public void openSmith(GameSession session) {
+        openNpc(session);
+        smithView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT;
+    }
+
     public void openNpc(GameSession session) {
         pl.fawizja.pixel.npc.Npc n = session.npcNearby();
         if (n == null) return;
@@ -298,6 +306,7 @@ public final class Hud {
         if (n != npc) {
             npcPage = 0;
             depotView = false;
+            smithView = false;
         }
         npc = n;
         npcMode = true;
@@ -833,6 +842,30 @@ public final class Hud {
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         switch (npc.role()) {
             case MERCHANT: {
+                if (smithView) {
+                    left.add(new MenuRow("npc:smith", "Wróć do sklepu", "ulepszanie zakładanego wyposażenia", true));
+                    long money = session.gold();
+                    for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
+                        ItemStack worn = slot == pl.fawizja.pixel.item.EquipSlot.NONE ? null : pc.equipment().get(slot);
+                        if (worn == null || left.size() >= perCol) continue;
+                        pl.fawizja.pixel.item.ItemType t = session.items().get(worn.itemId());
+                        if (!pl.fawizja.pixel.item.Upgrade.upgradable(t)) continue;
+                        int next = worn.upgrade() + 1;
+                        String label = "Ulepsz: " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade());
+                        if (next > pl.fawizja.pixel.item.Upgrade.MAX) {
+                            left.add(new MenuRow("npc:none", label, "ulepszone do końca", false));
+                            continue;
+                        }
+                        long price = pl.fawizja.pixel.item.Upgrade.price(t, next);
+                        left.add(new MenuRow("npc:upgrade:" + slot.name(), label, "do +" + next + ": " + price + " gp, szansa "
+                                + pl.fawizja.pixel.item.Upgrade.chancePercent(next) + "%", money >= price));
+                    }
+                    if (left.size() == 1) left.add(new MenuRow("npc:none", "Nic do ulepszenia", "załóż broń, tarczę albo zbroję", false));
+                    right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; broń +6% ataku, zbroja +1 na poziom", false));
+                    right.add(new MenuRow("npc:none", "Nieudana próba", "zabiera tylko złoto, przedmiot zostaje", false));
+                    right.add(new MenuRow("npc:none", "Ulepszonych nie sprzedasz", "ani nie oddasz w handlu, na rynku i pocztą", false));
+                    break;
+                }
                 pl.fawizja.pixel.npc.Shop shop = session.shopOf(npc);
                 List<pl.fawizja.pixel.npc.ShopOffer> sold = new ArrayList<>();
                 for (pl.fawizja.pixel.npc.ShopOffer o : shop.offers()) if (o.sold()) sold.add(o);
@@ -848,16 +881,17 @@ public final class Hud {
                             o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : ""), gold >= cost));
                 }
                 if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
+                right.add(new MenuRow("npc:smith", "Ulepsz wyposażenie", "kowal: broń, tarcza i zbroja do +5", true));
                 right.add(new MenuRow("npc:none", "Skup", "dotknij przedmiotu, aby sprzedać wszystkie sztuki", false));
                 java.util.Set<Integer> seen = new java.util.LinkedHashSet<>();
                 for (ItemStack s : pc.backpack().contents()) if (s != null) seen.add(s.itemId());
                 for (int id : seen) {
                     long value = pl.fawizja.pixel.npc.TradeSystem.sellValue(pc.backpack(), shop, id);
                     if (value <= 0 || right.size() >= perCol) continue;
-                    right.add(new MenuRow("npc:sell:" + id, pc.backpack().count(id) + "x " + session.items().get(id).name(),
+                    right.add(new MenuRow("npc:sell:" + id, pc.backpack().countPlain(id) + "x " + session.items().get(id).name(),
                             "sprzedaj za " + value + " gp", true));
                 }
-                if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do sprzedania", "kupiec skupuje łupy z potworów", false));
+                if (right.size() == 2) right.add(new MenuRow("npc:none", "Nic do sprzedania", "kupiec skupuje łupy z potworów", false));
                 break;
             }
             case BANKER: {
@@ -955,7 +989,8 @@ public final class Hud {
             default:
         }
         // tematy rozmowy (to samo mozna wpisac w czacie obok NPC)
-        boolean depotRows = depotView && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER;
+        boolean depotRows = depotView && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER
+                || smithView && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT;
         for (String topic : depotRows ? java.util.List.<String>of() : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
             MenuRow row = new MenuRow("npc:ask:" + topic, "Zapytaj: " + topic, "rozmowa", true);
             if (right.size() < perCol) right.add(row);
@@ -1067,6 +1102,8 @@ public final class Hud {
                         bestiaryMode = !bestiaryMode;
                     } else if (row.action.equals("npc:depot")) {
                         depotView = !depotView;
+                    } else if (row.action.equals("npc:smith")) {
+                        smithView = !smithView;
                     } else if (row.action.equals("ach:page")) {
                         achPage++;
                     } else if (row.action.equals("book:page")) {
@@ -1442,6 +1479,7 @@ public final class Hud {
             TextureRegion r = art.item(s.itemId());
             if (r != null) batch.draw(r, sx + 5, sy + 5, slotSize - 10, slotSize - 10);
             if (s.count() > 1) text(batch, String.valueOf(s.count()), sx + 5, sy + 15);
+            if (s.upgrade() > 0) text(batch, "+" + s.upgrade(), sx + slotSize - 24, sy + slotSize - 6);
         }
         if (selectedSlot >= 0) {
             ItemStack s = pc.backpack().get(selectedSlot);
@@ -1451,7 +1489,7 @@ public final class Hud {
                 ItemStack worn = t.slot() == EquipSlot.NONE ? null : pc.equipment().get(t.slot());
                 ItemType wornType = worn == null ? null : session.items().get(worn.itemId());
                 float ty = bagY + slotSize * 4 + 66;
-                text(batch, pl.fawizja.pixel.item.ItemCompare.stats(t, wornType), bagTipX() + 6, ty);
+                text(batch, pl.fawizja.pixel.item.ItemCompare.stats(t, s.upgrade(), wornType, worn == null ? 0 : worn.upgrade()), bagTipX() + 6, ty);
                 String req = pl.fawizja.pixel.item.ItemCompare.requirements(t, pc);
                 if (!req.isEmpty()) text(batch, req, bagTipX() + 6, ty - 17);
                 if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);

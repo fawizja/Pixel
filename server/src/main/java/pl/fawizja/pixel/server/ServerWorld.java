@@ -279,8 +279,8 @@ final class ServerWorld {
         PlayerCharacter pc = p.session.character();
         int count = (int) what.count();
         String label = count + "x " + items.get(what.itemId()).name();
-        if (pc.backpack().count(what.itemId()) < count) {
-            warn(p, "Nie masz w plecaku " + label + ".", now);
+        if (pc.backpack().countPlain(what.itemId()) < count) {
+            warn(p, "Nie masz w plecaku " + label + " (ulepszonych przedmiotów nie można wysłać).", now);
             return;
         }
         if (!mail.canAccept(to)) {
@@ -365,8 +365,9 @@ final class ServerWorld {
                     return;
                 }
                 int count = (int) what.count();
-                if (pc.backpack().count(what.itemId()) < count) {
-                    warn(p, "Nie masz w plecaku " + count + "x " + items.get(what.itemId()).name() + ".", now);
+                if (pc.backpack().countPlain(what.itemId()) < count) {
+                    warn(p, "Nie masz w plecaku " + count + "x " + items.get(what.itemId()).name()
+                            + " (ulepszonych przedmiotów nie można wystawić).", now);
                     return;
                 }
                 pl.fawizja.pixel.market.Market.Result r = market.canList(p.name(), price);

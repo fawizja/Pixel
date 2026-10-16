@@ -24,7 +24,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -221,6 +221,14 @@ public final class DesktopLauncher {
                             new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", true, "Paladin", 98),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160))));
+                }
+                if ("smith".equals(open)) {
+                    // podglad kowala: zalozona tarcza juz +2 (obok kupca)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pl.fawizja.pixel.item.ItemStack shield = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.SHIELD);
+                    if (shield != null) pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.SHIELD, shield.withUpgrade(2));
+                    gs.hud().openSmith(gs.session());
                 }
                 if ("depot".equals(open)) {
                     // podglad depozytu: kilka rzeczy juz odlozonych

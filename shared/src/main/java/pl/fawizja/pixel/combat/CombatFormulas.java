@@ -31,7 +31,7 @@ public final class CombatFormulas {
         Vocation v = pc.vocation();
         ItemStack w = pc.equipment().get(EquipSlot.WEAPON);
         ItemType weapon = w == null ? null : items.get(w.itemId());
-        int attack = weapon == null ? FIST_ATTACK : weapon.attack();
+        int attack = weapon == null ? FIST_ATTACK : pl.fawizja.pixel.item.Upgrade.attack(weapon, w.upgrade());
         int range = weapon == null ? 1 : Math.max(1, weapon.range());
         DamageType type = weapon == null ? DamageType.PHYSICAL : weapon.damageType();
         double bonus = pc.level() / 5.0;
