@@ -137,7 +137,8 @@ final class ServerWorld {
                 ? new String(java.nio.file.Files.readAllBytes(bountiesFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         ordersFile = new File(saveDir, "buyorders.txt");
         orders = pl.fawizja.pixel.market.BuyOrders.decode(ordersFile.isFile()
-                ? new String(java.nio.file.Files.readAllBytes(ordersFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+                ? new String(java.nio.file.Files.readAllBytes(ordersFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null,
+                System.currentTimeMillis());
         marketFile = new File(saveDir, "market.txt");
         market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
@@ -703,7 +704,7 @@ final class ServerWorld {
                     warn(p, "Na koncie brakuje złota: zamówienie blokuje " + String.format("%,d gp", price) + " do realizacji.", now);
                     return;
                 }
-                pl.fawizja.pixel.market.BuyOrders.Order o = orders.place(p.name(), what.itemId(), count, price);
+                pl.fawizja.pixel.market.BuyOrders.Order o = orders.place(p.name(), what.itemId(), count, price, wallClock.getAsLong());
                 saveOrders();
                 save(p);
                 info(p, "Zamówienie #" + o.id() + ": kupisz " + count + "x " + items.get(o.itemId()).name() + " za "
@@ -777,6 +778,27 @@ final class ServerWorld {
                     + String.format("%,d gp", o.price()) + ", " + o.buyer() + " (/sprzedaj " + o.id() + ")");
         }
         p.client.send(out.toArray(new String[0]));
+    }
+
+    private long ordersCheckedMs = -60_000;
+
+    /** Wygasle zamowienia kupna: zloto wraca na konto (offline - przy nastepnym wejsciu, jak zarobek z rynku). */
+    void expireOrders(long now) {
+        ordersCheckedMs = now;
+        List<pl.fawizja.pixel.market.BuyOrders.Order> gone = orders.expire(wallClock.getAsLong());
+        if (gone.isEmpty()) return;
+        for (pl.fawizja.pixel.market.BuyOrders.Order o : gone) {
+            ServerPlayer b = find(o.buyer());
+            if (b != null && b.session.character().bank().credit(o.price()).ok()) {
+                b.session.log().add(now, EventLog.Kind.SYSTEM, "Zamówienie #" + o.id() + " (" + o.count() + "x "
+                        + items.get(o.itemId()).name() + ") wygasło po 7 dniach. " + String.format("%,d gp", o.price()) + " wraca na konto.");
+                save(b);
+            } else {
+                market.addEarnings(o.buyer(), o.price());
+            }
+        }
+        saveOrders();
+        saveMarket();
     }
 
     private void saveOrders() {
@@ -1904,6 +1926,7 @@ final class ServerWorld {
         lastNow = now;
         if (firstTick < 0) firstTick = now;
         updateExpEvent(now);
+        if (now - ordersCheckedMs >= 60_000 || now < ordersCheckedMs) expireOrders(now);
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         updateInvasion(now);
         updateDuels(now);

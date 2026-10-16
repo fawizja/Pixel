@@ -33,7 +33,7 @@ Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
 - Zamowienia kupna (0.138.0, `market/BuyOrders`): u bankiera `/kupię 20 wilcze futro 2000` blokuje zloto z konta
   (max 5 zamowien na gracza). `/kupię` pokazuje zamowienia, `/sprzedaj numer` realizuje cudze (sprzedajacy oddaje
   przedmioty z plecaka i dostaje calosc bez prowizji, przedmioty ida poczta do depozytu kupujacego),
-  `/kupię anuluj numer` zwraca zloto. Zapis `<dane>/buyorders.txt`.
+  `/kupię anuluj numer` zwraca zloto. Po 7 dniach zamowienie wygasa i zloto wraca (offline - przy wejsciu). Zapis `<dane>/buyorders.txt`.
 
 ## Siec (etap 14)
 

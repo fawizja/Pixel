@@ -9,7 +9,9 @@ import java.util.Map;
 /**
  * Zamowienia kupna na rynku: gracz wplaca zloto z konta i oglasza "kupie 20x wilcze futro za 2 000 gp".
  * Inny gracz u bankiera realizuje zamowienie - oddaje przedmioty, dostaje zloto (bez prowizji rynku),
- * a przedmioty ida poczta do depozytu zamawiajacego. Zapis w buyorders.txt: "N nastepneId" i "O id;przedmiot;ilosc;cena;kupujacy".
+ * a przedmioty ida poczta do depozytu zamawiajacego. Po {@link #EXPIRE_MS} zamowienie wygasa, a zloto wraca.
+ * Zapis w buyorders.txt: "N nastepneId" i "O id;przedmiot;ilosc;cena;utworzone(ms epoki);kupujacy"
+ * (starsze linie bez daty dostaja czas wczytania).
  */
 public final class BuyOrders {
 
@@ -17,8 +19,10 @@ public final class BuyOrders {
     public static final int MAX_TOTAL = 1000;
     /** Tyle zamowien pokazuje lista. */
     public static final int SHOWN = 15;
+    /** Zamowienie wygasa po 7 dniach. */
+    public static final long EXPIRE_MS = 7L * 24 * 3600_000L;
 
-    public record Order(int id, String buyer, int itemId, int count, long price) {}
+    public record Order(int id, String buyer, int itemId, int count, long price, long createdMs) {}
 
     public enum Result {
         OK(""),
@@ -44,8 +48,8 @@ public final class BuyOrders {
         return Result.OK;
     }
 
-    public synchronized Order place(String buyer, int itemId, int count, long price) {
-        Order o = new Order(nextId++, buyer, itemId, count, price);
+    public synchronized Order place(String buyer, int itemId, int count, long price, long nowMs) {
+        Order o = new Order(nextId++, buyer, itemId, count, price, nowMs);
         orders.put(o.id(), o);
         return o;
     }
@@ -83,17 +87,30 @@ public final class BuyOrders {
 
     public synchronized int size() { return orders.size(); }
 
+    /** Usuwa i zwraca zamowienia starsze niz EXPIRE_MS (zloto do zwrotu kupujacym). */
+    public synchronized List<Order> expire(long nowMs) {
+        List<Order> out = new ArrayList<>();
+        for (java.util.Iterator<Order> it = orders.values().iterator(); it.hasNext(); ) {
+            Order o = it.next();
+            if (nowMs - o.createdMs() >= EXPIRE_MS) {
+                out.add(o);
+                it.remove();
+            }
+        }
+        return out;
+    }
+
     public synchronized String encode() {
         StringBuilder sb = new StringBuilder("N ").append(nextId).append('\n');
         for (Order o : orders.values()) {
             sb.append("O ").append(o.id()).append(';').append(o.itemId()).append(';').append(o.count()).append(';')
-                    .append(o.price()).append(';').append(o.buyer()).append('\n');
+                    .append(o.price()).append(';').append(o.createdMs()).append(';').append(o.buyer()).append('\n');
         }
         return sb.toString();
     }
 
-    /** Odczyt zapisu (null = pusto); zle linie sa pomijane. */
-    public static BuyOrders decode(String text) {
+    /** Odczyt zapisu (null = pusto); zle linie sa pomijane, linie bez daty dostaja nowMs. */
+    public static BuyOrders decode(String text, long nowMs) {
         BuyOrders b = new BuyOrders();
         if (text == null) return b;
         for (String line : text.split("\n")) {
@@ -101,8 +118,10 @@ public final class BuyOrders {
                 if (line.startsWith("N ")) {
                     b.nextId = Math.max(b.nextId, Integer.parseInt(line.substring(2).trim()));
                 } else if (line.startsWith("O ")) {
-                    String[] f = line.substring(2).split(";", 5);
-                    Order o = new Order(Integer.parseInt(f[0]), f[4].trim(), Integer.parseInt(f[1]), Integer.parseInt(f[2]), Long.parseLong(f[3]));
+                    String[] f = line.substring(2).split(";", 6);
+                    boolean dated = f.length == 6;
+                    Order o = new Order(Integer.parseInt(f[0]), f[dated ? 5 : 4].trim(), Integer.parseInt(f[1]), Integer.parseInt(f[2]),
+                            Long.parseLong(f[3]), dated ? Long.parseLong(f[4]) : nowMs);
                     if (o.count() < 1 || o.price() <= 0 || o.buyer().isEmpty()) continue;
                     b.orders.put(o.id(), o);
                     b.nextId = Math.max(b.nextId, o.id() + 1);

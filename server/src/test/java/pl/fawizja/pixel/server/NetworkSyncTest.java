@@ -923,6 +923,14 @@ class NetworkSyncTest {
             assertEquals(banks[0] - 2000, after[0], "buyer paid once, cancelled order refunded");
             assertEquals(banks[1] + 2000, after[1], "seller paid without fee");
             assertEquals(5, after[2], "items in the buyer's depot");
+            ola.send("WANT", "ADD", "2 wilcze futro 900");
+            awaitMessage(ola, "third order", m -> m[0].equals("WANT") && m.length == 2 && m[1].startsWith("#3 "));
+            long base = server.world().wallClock.getAsLong();
+            server.enqueueTest(() -> {
+                server.world().wallClock = () -> base + pl.fawizja.pixel.market.BuyOrders.EXPIRE_MS + 60_000;
+                server.world().expireOrders(server.now());
+            });
+            awaitMessage(ola, "expired", m -> m[0].equals("LOG") && m[2].startsWith("Zamówienie #3") && m[2].contains("wygasło"));
         }
     }
 

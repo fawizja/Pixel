@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.142.0] - 2026-10-16
+
+### Zmieniono
+- Zamówienia kupna wygasają po 7 dniach, a zablokowane złoto wraca na konto (graczom offline przy następnym wejściu).
 ## [0.141.0] - 2026-10-16
 
 ### Dodano
