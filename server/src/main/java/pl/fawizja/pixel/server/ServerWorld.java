@@ -761,6 +761,50 @@ final class ServerWorld {
                 toGuild(mine, mine.motd() == null ? "Lider usunął wiadomość gildii." : "Wiadomość gildii: " + mine.motd(), now);
                 return;
             }
+            case "DEPOSIT":
+            case "WITHDRAW": {
+                long amount;
+                try {
+                    amount = f.length > 2 ? Long.parseLong(f[2].trim()) : 0;
+                } catch (NumberFormatException e) {
+                    return;
+                }
+                PlayerCharacter pc = p.session.character();
+                boolean in = f[1].equals("DEPOSIT");
+                if (in) {
+                    if (mine == null) {
+                        warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                        return;
+                    }
+                    if (amount <= 0 || !pc.bank().debit(amount).ok()) {
+                        warn(p, "Na koncie masz tylko " + String.format("%,d gp", pc.bank().balance()) + ". Wpłać monety u bankiera.", now);
+                        return;
+                    }
+                    r = guilds.deposit(p.name(), amount);
+                    if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                        pc.bank().credit(amount);
+                        warn(p, r.message, now);
+                        return;
+                    }
+                } else {
+                    r = guilds.withdraw(p.name(), amount);
+                    if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                        warn(p, r.message, now);
+                        return;
+                    }
+                    if (!pc.bank().credit(amount).ok()) {
+                        guilds.deposit(p.name(), amount);
+                        warn(p, "Konto jest pełne.", now);
+                        return;
+                    }
+                }
+                saveGuilds();
+                save(p);
+                LOG.info("guild " + (in ? "deposit " : "withdraw ") + p.name() + " " + mine.name() + " " + amount);
+                toGuild(mine, p.name() + (in ? " wpłaca " : " wypłaca ") + String.format("%,d gp", amount)
+                        + (in ? " do skarbca" : " ze skarbca") + String.format(" (w skarbcu: %,d gp).", mine.treasury()), now);
+                return;
+            }
             default: // INFO
                 if (mine == null) {
                     info(p, "Nie należysz do gildii. Załóż: /gildia załóż Nazwa (" + String.format("%,d gp",
@@ -770,7 +814,7 @@ final class ServerWorld {
                 List<String> online = new ArrayList<>();
                 for (String n : mine.members()) if (find(n) != null) online.add(n);
                 info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", członków " + mine.members().size()
-                        + ", w grze: " + String.join(", ", online), now);
+                        + ", w grze: " + String.join(", ", online) + String.format(", skarbiec: %,d gp", mine.treasury()), now);
                 if (mine.motd() != null) info(p, "Wiadomość gildii: " + mine.motd(), now);
         }
     }

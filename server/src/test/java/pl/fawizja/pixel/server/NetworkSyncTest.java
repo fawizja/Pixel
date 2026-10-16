@@ -693,6 +693,20 @@ class NetworkSyncTest {
             awaitMessage(ula, "only the leader", m -> m[0].equals("LOG") && m[2].contains("Tylko lider"));
             ola.send("GUILD", "MOTD", "Zbiórka o 20:00");
             awaitMessage(ula, "motd broadcast", m -> m[0].equals("LOG") && m[2].contains("Wiadomość gildii: Zbiórka o 20:00"));
+            java.util.concurrent.atomic.AtomicBoolean rich = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                server.world().find("Ula").session.character().bank().credit(1000);
+                rich.set(true);
+            });
+            await("ula has gold", rich::get);
+            ula.send("GUILD", "DEPOSIT", "200");
+            awaitMessage(ola, "deposit", m -> m[0].equals("LOG") && m[2].startsWith("[Gildia] Ula wpłaca 200 gp do skarbca"));
+            ula.send("GUILD", "WITHDRAW", "100");
+            awaitMessage(ula, "only the leader withdraws", m -> m[0].equals("LOG") && m[2].contains("Tylko lider"));
+            ola.send("GUILD", "WITHDRAW", "500");
+            awaitMessage(ola, "not enough", m -> m[0].equals("LOG") && m[2].contains("nie ma tyle"));
+            ola.send("GUILD", "WITHDRAW", "150");
+            awaitMessage(ula, "withdrawn", m -> m[0].equals("LOG") && m[2].startsWith("[Gildia] Ola wypłaca 150 gp ze skarbca (w skarbcu: 50 gp)"));
             ula.send("RANK", "gildie");
             String[][] rank = new String[1][];
             awaitMessage(ula, "guild ranking", m -> m[0].equals("RANK") && (rank[0] = m) != null);

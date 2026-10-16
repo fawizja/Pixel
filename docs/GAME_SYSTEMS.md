@@ -248,7 +248,10 @@ przy pauzie, utracie fokusu i zamknieciu.
   Zapis tekstowy "Nazwa;Lider,Czlonek,..." (bledne linie pomijane).
 - Serwer: oplata 50 000 gp pobierana z plecaka przed zalozeniem; `guilds.txt` zapisywany atomowo po kazdej zmianie;
   usuniecie konta usuwa gracza z gildii. Nazwa gildii w klatce stanu (10. pole PL).
-- Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GCHAT tekst`.
+- Protokol: `GUILD CREATE|INVITE|ACCEPT|KICK x`, `GUILD LEAVE`, `GUILD INFO`, `GUILD DEPOSIT|WITHDRAW kwota`, `GCHAT tekst`.
+- Skarbiec (0.123.0): `/gildia wpłać 5k` przelewa z konta do skarbca (kazdy czlonek), `/gildia wypłać 5k` tylko lider;
+  kazda operacja ogloszona w kanale gildii, stan w `/gildia`. Zapis jako pole `bank=zloto` przed wiadomoscia dnia
+  (stare linie bez tego pola dzialaja).
 
 ## Skrzynie skarbow (Z logika, C rysowanie)
 

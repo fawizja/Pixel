@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.123.0] - 2026-10-16
+
+### Dodano
+- Skarbiec gildii (online): `/gildia wpłać kwota` przelewa złoto z konta do wspólnego skarbca, `/gildia wypłać kwota`
+  może tylko lider. Każda wpłata i wypłata jest ogłaszana członkom, stan skarbca widać w `/gildia`.
 ## [0.122.0] - 2026-10-16
 
 ### Dodano

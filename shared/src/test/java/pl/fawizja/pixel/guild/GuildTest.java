@@ -74,6 +74,33 @@ class GuildTest {
     }
 
     @Test
+    void treasuryTakesDepositsAndOnlyTheLeaderWithdraws() {
+        GuildRegistry g = new GuildRegistry();
+        g.create("Ola", "Wilcze Kly");
+        g.invite("Ola", "Ula", 0);
+        g.accept("Ula", "Wilcze Kly", 1);
+        assertEquals(GuildRegistry.Result.OK, g.deposit("Ula", 5000));
+        assertEquals(GuildRegistry.Result.NOT_MEMBER, g.deposit("Kuba", 5000));
+        assertEquals(GuildRegistry.Result.BAD_AMOUNT, g.deposit("Ula", 0));
+        assertEquals(GuildRegistry.Result.NOT_LEADER, g.withdraw("Ula", 100));
+        assertEquals(GuildRegistry.Result.TREASURY_LOW, g.withdraw("Ola", 6000));
+        assertEquals(GuildRegistry.Result.OK, g.withdraw("Ola", 1000));
+        assertEquals(4000, g.guildOf("Ula").treasury());
+        g.setMotd("Ola", "bank=5; zbiórka");
+        GuildRegistry back = GuildRegistry.decode(g.encode());
+        assertEquals(4000, back.guildOf("Ola").treasury());
+        assertEquals("bank=5; zbiórka", back.guildOf("Ola").motd(), "a message that looks like the bank field survives");
+        g.setMotd("Ola", "");
+        back = GuildRegistry.decode(g.encode());
+        assertEquals(4000, back.guildOf("Ola").treasury());
+        assertNull(back.guildOf("Ola").motd());
+        assertEquals(0, GuildRegistry.decode("Stara Gildia;Ola;Witajcie\n").guildOf("Ola").treasury(), "old saves");
+        assertArrayEquals(new String[] {"GUILD", "DEPOSIT", "5000"}, ChatCommands.toMessage("/gildia wpłać 5k"));
+        assertArrayEquals(new String[] {"GUILD", "WITHDRAW", "200"}, ChatCommands.toMessage("/gildia wypłać 200"));
+        assertNull(ChatCommands.toMessage("/gildia wpłać"));
+    }
+
+    @Test
     void guildChatCommands() {
         assertArrayEquals(new String[] {"GUILD", "INFO"}, ChatCommands.toMessage("/gildia"));
         assertArrayEquals(new String[] {"GUILD", "CREATE", "Wilcze Kly"}, ChatCommands.toMessage("/gildia załóż Wilcze Kly"));

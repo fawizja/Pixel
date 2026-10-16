@@ -30,6 +30,8 @@ public final class GuildRegistry {
         NO_INVITE("Nie masz zaproszenia do tej gildii (albo wygasło)."),
         FULL("Gildia jest pełna (maks. " + MAX_MEMBERS + ")."),
         NOT_IN_THIS_GUILD("Ten gracz nie należy do twojej gildii."),
+        TREASURY_LOW("W skarbcu gildii nie ma tyle złota."),
+        BAD_AMOUNT("Podaj kwotę większą od zera."),
         SELF("Nie możesz tego zrobić samemu sobie.");
 
         public final String message;
@@ -43,10 +45,13 @@ public final class GuildRegistry {
         private final List<String> members = new ArrayList<>();
         /** Wiadomosc dnia od lidera (null = brak). */
         private String motd;
+        /** Skarbiec gildii w gp (wplaca kazdy czlonek, wyplaca lider). */
+        private long treasury;
 
         Guild(String name) { this.name = name; }
 
         public String motd() { return motd; }
+        public long treasury() { return treasury; }
 
         public String name() { return name; }
         public String leader() { return members.get(0); }
@@ -142,6 +147,26 @@ public final class GuildRegistry {
         return Result.OK;
     }
 
+    /** Wplata czlonka do skarbca (zloto pobiera wolajacy przed wywolaniem). */
+    public Result deposit(String member, long amount) {
+        if (amount <= 0) return Result.BAD_AMOUNT;
+        Guild g = byMember.get(key(member));
+        if (g == null) return Result.NOT_MEMBER;
+        g.treasury = g.treasury > Long.MAX_VALUE - amount ? Long.MAX_VALUE : g.treasury + amount;
+        return Result.OK;
+    }
+
+    /** Wyplata ze skarbca - tylko lider (zloto oddaje wolajacy po OK). */
+    public Result withdraw(String leader, long amount) {
+        if (amount <= 0) return Result.BAD_AMOUNT;
+        Guild g = byMember.get(key(leader));
+        if (g == null) return Result.NOT_MEMBER;
+        if (!key(g.leader()).equals(key(leader))) return Result.NOT_LEADER;
+        if (g.treasury < amount) return Result.TREASURY_LOW;
+        g.treasury -= amount;
+        return Result.OK;
+    }
+
     public Guild guildOf(String name) { return byMember.get(key(name)); }
 
     public Guild byName(String name) { return byName.get(key(name)); }
@@ -156,11 +181,12 @@ public final class GuildRegistry {
 
     public java.util.Collection<Guild> all() { return Collections.unmodifiableCollection(byName.values()); }
 
-    /** Zapis tekstowy: linia na gildie "Nazwa;Lider,Czlonek,...[;wiadomosc dnia]". */
+    /** Zapis tekstowy: linia na gildie "Nazwa;Lider,Czlonek,...[;bank=zloto][;wiadomosc dnia]". */
     public String encode() {
         StringBuilder sb = new StringBuilder();
         for (Guild g : byName.values()) {
             sb.append(g.name).append(';').append(String.join(",", g.members));
+            if (g.treasury > 0) sb.append(";bank=").append(g.treasury);
             if (g.motd != null) sb.append(';').append(g.motd);
             sb.append('\n');
         }
@@ -181,7 +207,16 @@ public final class GuildRegistry {
                 g.members.add(n);
                 r.byMember.put(key(n), g);
             }
-            if (f.length == 3 && !f[2].isBlank()) g.motd = f[2].trim();
+            String rest = f.length == 3 ? f[2] : "";
+            if (rest.startsWith("bank=")) {
+                int semi = rest.indexOf(';');
+                String num = semi < 0 ? rest.substring(5) : rest.substring(5, semi);
+                if (num.matches("\\d{1,18}")) {
+                    g.treasury = Long.parseLong(num);
+                    rest = semi < 0 ? "" : rest.substring(semi + 1);
+                }
+            }
+            if (!rest.isBlank()) g.motd = rest.trim();
             if (!g.members.isEmpty()) r.byName.put(key(g.name), g);
         }
         return r;

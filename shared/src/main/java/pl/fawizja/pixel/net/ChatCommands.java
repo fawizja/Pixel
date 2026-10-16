@@ -7,7 +7,7 @@ package pl.fawizja.pixel.net;
  * "/d tekst" -> PCHAT (czat druzyny). Handel: "/handel Imie" -> TRADE REQUEST, "/oferuj 5 mikstura zdrowia"
  * albo "/oferuj 1000 gp" -> TRADE OFFER, "/akceptuj" -> TRADE ACCEPT, "/anuluj" -> TRADE CANCEL.
  * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
- * "/gildia opusc" -> GUILD LEAVE, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
+ * "/gildia opusc" -> GUILD LEAVE, "/gildia wplac|wyplac 5k" -> GUILD DEPOSIT|WITHDRAW kwota, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
  * "/kto", "/inwazja [miasto]", "/serwer", "/zapisz" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION|STATUS|SAVE. Ranking: "/ranking [profesja|gildie]" -> RANK [profesja].
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
@@ -156,6 +156,14 @@ public final class ChatCommands {
             case "wyrzuc": return arg.isEmpty() ? null : new String[] {"GUILD", "KICK", arg};
             case "opusc": return w.length == 2 ? new String[] {"GUILD", "LEAVE"} : null;
             case "wiadomosc": return new String[] {"GUILD", "MOTD", arg};
+            case "wplac": {
+                long a = arg.isEmpty() ? 0 : amount(arg);
+                return a > 0 ? new String[] {"GUILD", "DEPOSIT", String.valueOf(a)} : null;
+            }
+            case "wyplac": {
+                long a = arg.isEmpty() ? 0 : amount(arg);
+                return a > 0 ? new String[] {"GUILD", "WITHDRAW", String.valueOf(a)} : null;
+            }
             default: return null;
         }
     }
