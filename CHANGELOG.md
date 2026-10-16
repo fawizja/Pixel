@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.95.0] - 2026-10-16
+
+### Dodano
+- Miejsce ostatniej śmierci jest zaznaczone na minimapie i dużej mapie („Miejsce śmierci”), także po śmierci z ręki gracza.
 ## [0.94.0] - 2026-10-16
 
 ### Zmieniono

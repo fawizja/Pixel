@@ -147,7 +147,9 @@ class CombatTest {
         mm.populate(null);
         Monster boss = mm.monsters().get(0);
         CombatSystem cs = system(pc, new Random(2), mm);
+        assertNull(cs.lastDeathPlace(), "no death yet, no map marker");
         for (int i = 0; i < 200 && pc.position().z() == -5; i++) cs.monsterAttacks(boss, i * 1000L);
+        assertEquals(new Position(12, 27, -5), cs.lastDeathPlace(), "the death place is remembered for the map");
         assertEquals(TestData.varden().spawn(), pc.position());
         assertEquals(pc.maxHealth(), pc.health());
         assertTrue(pc.level() <= level);

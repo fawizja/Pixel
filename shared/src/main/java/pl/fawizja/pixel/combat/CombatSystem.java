@@ -224,6 +224,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public void recordDamage(String source, int amount, long now) { recap.record(source, amount, now); }
 
     public DeathRecap.Report lastDeath() { return lastDeath; }
+    /** Miejsce ostatniej smierci w tej sesji (znacznik na mapie); null, gdy postac nie ginela. */
+    private Position lastDeathPlace;
+    public Position lastDeathPlace() { return lastDeathPlace; }
 
     private boolean inReach(Monster m, int range) {
         return m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= range
@@ -324,6 +327,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     private void onPlayerDeath(Monster killer, long now) {
         long before = pc.experience();
+        lastDeathPlace = pc.position();
         boolean blessed = pc.applyDeathPenalty(minLevel);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
@@ -341,6 +345,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
      */
     public int diedFromPlayer(String killer, boolean dropBackpack, long now) {
         Position at = pc.position();
+        lastDeathPlace = at;
         int dropped = 0;
         if (dropBackpack) {
             for (int i = 0; i < pc.backpack().size(); i++) {
