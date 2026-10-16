@@ -85,6 +85,8 @@ public final class GameScreen extends ScreenAdapter {
     private final com.badlogic.gdx.Preferences settingsPrefs;
     private final com.badlogic.gdx.Preferences barPrefs;
     private final com.badlogic.gdx.Preferences markerPrefs;
+    /** Ignorowani gracze (na urzadzeniu, per postac, w tych samych Preferences co znaczniki). */
+    private final pl.fawizja.pixel.settings.IgnoreList ignored;
     private final pl.fawizja.pixel.settings.MapMarkers markers;
 
     private static String barKey(PlayerCharacter pc) {
@@ -221,6 +223,7 @@ public final class GameScreen extends ScreenAdapter {
         hud.setSpellBar(pl.fawizja.pixel.settings.SpellBar.decode(barPrefs.getString(barKey(pc), null)));
         this.markerPrefs = Gdx.app.getPreferences("pixel-markers");
         this.markers = pl.fawizja.pixel.settings.MapMarkers.decode(markerPrefs.getString(barKey(pc), System.getProperty("pixel.markers")));
+        this.ignored = pl.fawizja.pixel.settings.IgnoreList.decode(markerPrefs.getString("ignore:" + barKey(pc), ""));
         hud.setMarkers(markers);
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
@@ -542,6 +545,22 @@ public final class GameScreen extends ScreenAdapter {
                 rows.add(new String[] {"Kolor " + pl.fawizja.pixel.character.Outfit.name(i), i == now ? "noszony teraz" : "dotknij, aby założyć", "", "outfit:" + i});
             }
             hud.openInfo("Strój", rows);
+            return;
+        }
+        if (cmd.equals("/ignoruj") || cmd.startsWith("/ignoruj ")) {
+            String who = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
+            if (who.isEmpty()) {
+                List<String> all = ignored.all();
+                session.log().add(now(), EventLog.Kind.INFO, all.isEmpty() ? "Nikogo nie ignorujesz. /ignoruj Imię ukrywa wiadomości gracza."
+                        : "Ignorujesz: " + String.join(", ", all) + " (ponowne /ignoruj Imię przywraca).");
+                return;
+            }
+            boolean on = ignored.toggle(who);
+            session.log().add(now(), EventLog.Kind.SYSTEM, on ? "Ignorujesz " + who + ": wiadomości od tej osoby będą ukryte."
+                    : ignored.all().size() >= pl.fawizja.pixel.settings.IgnoreList.MAX && !ignored.ignores(who) && !who.isEmpty()
+                    ? "Lista ignorowanych jest pełna (" + pl.fawizja.pixel.settings.IgnoreList.MAX + ")." : "Nie ignorujesz już " + who + ".");
+            markerPrefs.putString("ignore:" + barKey(session.character()), ignored.encode());
+            markerPrefs.flush();
             return;
         }
         if (cmd.equals("/statystyki") || cmd.equals("/staty")) {
@@ -1566,7 +1585,7 @@ public final class GameScreen extends ScreenAdapter {
                     showDeath(pl.fawizja.pixel.combat.DeathRecap.decode(m, 1));
                     break;
                 case "CHAT":
-                    if (m.length >= 3) {
+                    if (m.length >= 3 && !ignored.hides(m[1])) {
                         session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
                         if (!m[1].startsWith("[")) say(m[1], m[2]); // czat ogolny: dymek nad mowiacym
                     }

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.101.0] - 2026-10-16
+
+### Dodano
+- Ignorowanie graczy: `/ignoruj Imię` ukrywa (albo przywraca) wiadomości gracza w czacie ogólnym, prywatnym, gildii
+  i drużynie; `/ignoruj` pokazuje listę. Lista jest zapisana na urządzeniu dla każdej postaci, najwyżej 50 imion.
+  Ogłoszeń administratora nie da się ukryć.
 ## [0.100.0] - 2026-10-16
 
 ### Dodano

@@ -211,7 +211,7 @@ public final class ChatCommands {
         };
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {
-            {"/w Imię, tekst", "wiadomość prywatna"},
+            {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
             {"/zaproś Imię", "zaproszenie do drużyny (/przyjmij, /opuść, /d tekst)"},
             {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
             {"/pojedynek Imię", "pojedynek do pierwszej krwi"},
