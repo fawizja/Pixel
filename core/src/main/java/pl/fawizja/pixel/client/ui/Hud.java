@@ -1307,7 +1307,7 @@ public final class Hud {
         }
         if (charOpen) {
             shapes.setColor(0.06f, 0.06f, 0.08f, 0.88f);
-            shapes.rect(10, h - 420, 270, 300);
+            shapes.rect(10, h - 420, Math.min(w - 20, 490), 300);
             float yy = h - 250;
             for (Skill sk : Skill.values()) {
                 double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
@@ -1362,20 +1362,21 @@ public final class Hud {
         // sledzenie zadan pod stanem postaci, dziennik zdarzen nizej
         font.setColor(0.85f, 0.9f, 1f, 1f);
         String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
+        if (charOpen) chLine = null; // karta postaci zajmuje to miejsce - bez nakladania tekstu
         if (chLine != null) {
             font.setColor(1f, 0.75f, 0.45f, 1f);
             text(batch, chLine, x, ly + 6);
             ly -= 16;
             font.setColor(0.85f, 0.9f, 1f, 1f);
         }
-        for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
+        if (!charOpen) for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
                 session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()),
                 session.monsterName(pc.hunt().monster() == null ? "" : pc.hunt().monster()))) {
             text(batch, q, x, ly + 6);
             ly -= 16;
         }
         font.setColor(Color.WHITE);
-        List<EventLog.Entry> entries = session.log().latest(4);
+        List<EventLog.Entry> entries = charOpen ? List.of() : session.log().latest(4);
         for (EventLog.Entry e : entries) {
             float age = (serverTimeMs - e.timeMs()) / 1000f;
             if (age > 8f) continue;
@@ -1499,6 +1500,14 @@ public final class Hud {
                 + (pc.isBlessed() ? "   Błogosławieństwo" : "")
                 + (pc.title() == null ? "" : "   Tytuł: " + pl.fawizja.pixel.achievement.Achievement.titleOf(pc.title())), x, y - 36);
         text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Pokonane: " + pc.bestiary().total() + "   Osiągnięcia: " + pc.achievements().count() + " (O)", x, y - 54);
+        pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
+        String attack = "Atak: do " + ap.maxDamage() + " (" + ap.skill().label().toLowerCase(java.util.Locale.ROOT) + ")";
+        if (ap.skill() == Skill.DISTANCE) {
+            pl.fawizja.pixel.item.ItemType ammo = pl.fawizja.pixel.combat.CombatFormulas.ammunition(pc, session.items());
+            attack += ammo == null ? "   Amunicja: brak"
+                    : "   Amunicja: " + ammo.name() + " x" + pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO).count();
+        }
+        text(batch, attack, x, y - 72);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {
             text(batch, sk.label() + "  " + pc.skills().level(sk) + "  (" + pc.skills().percentToNext(sk) + "%)", x, yy);

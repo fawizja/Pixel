@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.122.0] - 2026-10-16
+
+### Dodano
+- Karta postaci pokazuje maksymalny atak z umiejętnością, a u broni dystansowej założoną amunicję i jej liczbę.
+
+### Naprawiono
+- Dziennik zdarzeń i śledzenie zadań nie nachodzą już na otwartą kartę postaci; karta jest szersza
+  i mieści cały tekst.
 ## [0.121.0] - 2026-10-16
 
 ### Dodano
