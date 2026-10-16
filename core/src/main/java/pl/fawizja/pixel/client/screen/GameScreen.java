@@ -426,8 +426,13 @@ public final class GameScreen extends ScreenAdapter {
                     // karta potwora z bestiariusza (dane z lokalnego rejestru, dziala tez online)
                     String key = id.substring("best:".length());
                     pl.fawizja.pixel.monster.MonsterType mt = game.monsters().contains(key) ? game.monsters().get(key) : null;
-                    if (mt != null) hud.openInfo(mt.name(), pl.fawizja.pixel.achievement.BestiaryCard.rows(mt,
-                            session.character().bestiary().kills(key), session.items()));
+                    if (mt != null) {
+                        java.util.List<String[]> card = pl.fawizja.pixel.achievement.BestiaryCard.rows(mt,
+                                session.character().bestiary().kills(key), session.items());
+                        String where = pl.fawizja.pixel.achievement.BestiaryCard.habitats(key, session.monsters().spawns(), session.world());
+                        if (!where.isEmpty() && session.character().bestiary().kills(key) > 0) card.add(1, new String[] {"Występuje", where});
+                        hud.openInfo(mt.name(), card);
+                    }
                 } else if (id.startsWith("outfit:")) {
                     chooseOutfit(id.substring("outfit:".length()));
                 } else if (id.startsWith("ach:title:")) {

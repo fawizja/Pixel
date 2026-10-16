@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.126.0] - 2026-10-16
+
+### Dodano
+- Karta potwora w bestiariuszu podaje, gdzie go szukać: krainy z jego legowiskami (z dopiskiem „nocą”, gdy
+  pojawia się tylko po zmroku).
 ## [0.125.0] - 2026-10-16
 
 ### Dodano

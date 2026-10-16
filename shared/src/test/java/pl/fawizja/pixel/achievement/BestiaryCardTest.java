@@ -43,4 +43,17 @@ class BestiaryCardTest {
         assertFalse(golem.isEmpty());
         assertTrue(golem.contains("lód") || golem.contains("pancerz"), golem);
     }
+
+    @Test
+    void habitatsNameTheRegionsWhereTheMonsterSpawns() {
+        pl.fawizja.pixel.world.WorldMap world = pl.fawizja.pixel.TestData.world();
+        java.util.List<pl.fawizja.pixel.monster.SpawnPoint> spawns = java.util.List.of(
+                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(58, 72, 0), 4, 2, 60),
+                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(62, 94, 0), 3, 2, 60),
+                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(30, 40, 0), 3, 2, 60, true),
+                new pl.fawizja.pixel.monster.SpawnPoint("bat", new pl.fawizja.pixel.world.Position(30, 40, -1), 3, 2, 60));
+        assertEquals("Krainy Varden, Mrozne Pustkowia nocą", BestiaryCard.habitats("wolf", spawns, world));
+        assertEquals("Lodowe Jaskinie", BestiaryCard.habitats("bat", spawns, world));
+        assertEquals("", BestiaryCard.habitats("dragon", spawns, world));
+    }
 }

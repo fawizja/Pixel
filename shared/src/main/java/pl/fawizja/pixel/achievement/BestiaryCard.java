@@ -62,6 +62,31 @@ public final class BestiaryCard {
         return rows;
     }
 
+    /** Najwyzej tyle krain wymienia wiersz "Występuje". */
+    public static final int HABITATS_SHOWN = 3;
+
+    /**
+     * Krainy, w ktorych potwor sie odradza (nazwy regionow mapy, bez powtorzen, w kolejnosci spawnow);
+     * "noca" przy krainie, gdzie pojawia sie tylko po zmroku. Pusty tekst, gdy brak spawnow (np. boss z wydarzenia).
+     */
+    public static String habitats(String key, List<pl.fawizja.pixel.monster.SpawnPoint> spawns, pl.fawizja.pixel.world.WorldMap world) {
+        java.util.LinkedHashMap<String, Boolean> names = new java.util.LinkedHashMap<>(); // nazwa -> tylko noca
+        for (pl.fawizja.pixel.monster.SpawnPoint sp : spawns) {
+            if (!sp.monsterKey().equals(key)) continue;
+            pl.fawizja.pixel.world.Region r = world.regionAt(sp.center());
+            String name = r == null ? "dzicz" : r.name();
+            names.merge(name, sp.nightOnly(), (a, b) -> a && b);
+        }
+        List<String> out = new ArrayList<>();
+        for (Map.Entry<String, Boolean> e : names.entrySet()) out.add(e.getKey() + (e.getValue() ? " nocą" : ""));
+        if (out.size() > HABITATS_SHOWN) {
+            int more = out.size() - HABITATS_SHOWN;
+            out = new ArrayList<>(out.subList(0, HABITATS_SHOWN));
+            out.add("i " + more + " inne");
+        }
+        return String.join(", ", out);
+    }
+
     static String resistances(MonsterType t) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<DamageType, Integer> e : t.resistances().entrySet()) {
