@@ -71,6 +71,7 @@ Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pi
 | `status` | `/serwer` | czas dzialania, liczba graczy i potworow, inwazja, zuzycie pamieci |
 | `save` | `/zapisz` | natychmiastowy zapis wszystkich postaci w grze |
 | `motd tekst` | `/motd tekst` | wiadomosc dnia pokazywana kazdemu przy wejsciu (`motd -` usuwa, `<dane>/motd.txt`) |
+| `expevent 50 60` | `/bonusexp 50 60` | +50% doswiadczenia za potwory dla wszystkich przez 60 min (`expevent 0` konczy; bez argumentow - stan) |
 | `invasion Varden` | `/inwazja Varden` | inwazja na miasto teraz (bez nazwy - kolejne miasto) |
 | `admin Imie` | - | nowy administrator (tylko konsola) |
 

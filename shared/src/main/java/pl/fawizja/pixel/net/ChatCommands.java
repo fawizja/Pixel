@@ -115,6 +115,8 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"ADMIN", "STATUS"} : null;
             case "/zapisz":
                 return w.length == 1 ? new String[] {"ADMIN", "SAVE"} : null;
+            case "/bonusexp":
+                return w.length == 1 ? new String[] {"ADMIN", "EXPEVENT"} : new String[] {"ADMIN", "EXPEVENT", rest(t)};
             case "/motd":
                 return w.length == 1 ? new String[] {"ADMIN", "MOTD"} : new String[] {"ADMIN", "MOTD", rest(t)};
             case "/d":

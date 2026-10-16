@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.124.0] - 2026-10-16
+
+### Dodano
+- Wydarzenie premii doświadczenia: administrator włącza `/bonusexp 50 60` (albo `expevent 50 60` w konsoli),
+  a wszyscy dostają +50% doświadczenia za potwory przez 60 minut. Start i koniec są ogłaszane, a wchodzący
+  gracze widzą, ile zostało.
 ## [0.123.0] - 2026-10-16
 
 ### Dodano

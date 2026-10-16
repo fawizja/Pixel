@@ -102,8 +102,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Doswiadczenie za potwora dla poziomu postaci, z premia zwoju nauki i potwora dnia. */
     public long killExperience(MonsterType t, int level) {
         long exp = pc.enchantments().experience(Balance.experienceReward(t.experience(), t.level(), level));
-        return isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostExp(exp) : exp;
+        if (isBoosted(t)) exp = pl.fawizja.pixel.daily.BoostedCreature.boostExp(exp);
+        return bonusExpPercent > 0 ? exp * (100 + bonusExpPercent) / 100 : exp;
     }
+
+    /** Premia doswiadczenia z wydarzenia serwera (procent, 0 = brak). */
+    private int bonusExpPercent;
+    public void setBonusExpPercent(int percent) { bonusExpPercent = Math.max(0, percent); }
+    public int bonusExpPercent() { return bonusExpPercent; }
 
     /** Przyznaje doswiadczenie z wpisem w dzienniku i zdarzeniem awansu. */
     public void awardExperience(long exp, String what, long now) {

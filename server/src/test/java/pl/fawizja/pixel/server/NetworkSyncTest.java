@@ -1090,6 +1090,25 @@ class NetworkSyncTest {
     }
 
     @Test
+    void anExperienceEventBoostsEveryoneUntilItEnds() throws Exception {
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            java.util.concurrent.atomic.AtomicReference<String> answer = new java.util.concurrent.atomic.AtomicReference<>();
+            server.enqueueTest(() -> answer.set(server.world().moderate(new String[] {"EXPEVENT", "50 30"}, "konsola", server.now())));
+            awaitMessage(ola, "announced", m -> m[0].equals("LOG") && m[2].startsWith("Wydarzenie: +50% doświadczenia"));
+            assertTrue(answer.get().contains("30 min"), answer.get());
+            await("bonus applied", () -> server.world().find("Ola").session.combat().bonusExpPercent() == 50);
+            server.enqueueTest(() -> answer.set(server.world().moderate(new String[] {"EXPEVENT", "abc"}, "konsola", server.now())));
+            await("usage", () -> answer.get().startsWith("Użycie"));
+            server.enqueueTest(() -> server.world().moderate(new String[] {"EXPEVENT", "0"}, "konsola", server.now()));
+            awaitMessage(ola, "ended", m -> m[0].equals("LOG") && m[2].contains("dobiegło końca"));
+            await("bonus removed", () -> server.world().find("Ola").session.combat().bonusExpPercent() == 0);
+        }
+        assertArrayEquals(new String[] {"ADMIN", "EXPEVENT", "50 60"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/bonusexp 50 60"));
+    }
+
+    @Test
     void parcelsReachTheDepotOfOnlineAndOfflinePlayers() throws Exception {
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient kuba = connect()) {

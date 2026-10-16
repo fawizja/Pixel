@@ -152,6 +152,53 @@ final class ServerWorld {
 
     String motd() { return motd; }
 
+    /** Wydarzenie premii doswiadczenia (EXPEVENT procent [minuty]); 0 = brak. Tylko w pamieci. */
+    private int expEventPercent;
+    private long expEventUntil;
+    static final int EXP_EVENT_MAX = 200;
+
+    /** EXPEVENT: stan; EXPEVENT 50 [60]: +50% na 60 min (domyslnie 60); EXPEVENT 0: koniec. */
+    String expEvent(String[] c, long now) {
+        List<String> a = new ArrayList<>();
+        for (int i = 1; i < c.length; i++) for (String t : c[i].trim().split("\\s+")) if (!t.isEmpty()) a.add(t);
+        if (a.isEmpty()) return expEventPercent > 0 ? expEventLine(now) : "Brak wydarzenia. EXPEVENT procent [minuty] je zaczyna.";
+        int pct;
+        int minutes = 60;
+        try {
+            pct = Integer.parseInt(a.get(0));
+            if (a.size() > 1) minutes = Integer.parseInt(a.get(1));
+        } catch (NumberFormatException e) {
+            return "Użycie: EXPEVENT procent [minuty], np. EXPEVENT 50 60; EXPEVENT 0 kończy.";
+        }
+        if (pct <= 0) {
+            if (expEventPercent == 0) return "Brak wydarzenia.";
+            endExpEvent(now);
+            return "Wydarzenie zakończone.";
+        }
+        if (pct > EXP_EVENT_MAX || minutes <= 0 || minutes > 24 * 60) return "Procent 1-" + EXP_EVENT_MAX + ", czas 1-1440 minut.";
+        expEventPercent = pct;
+        expEventUntil = now + minutes * 60_000L;
+        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, expEventLine(now));
+        LOG.info("exp event +" + pct + "% for " + minutes + " min");
+        return expEventLine(now);
+    }
+
+    private String expEventLine(long now) {
+        long min = Math.max(1, (expEventUntil - now + 59_999) / 60_000);
+        return "Wydarzenie: +" + expEventPercent + "% doświadczenia za potwory jeszcze przez " + min + " min!";
+    }
+
+    private void updateExpEvent(long now) {
+        if (expEventPercent > 0 && now >= expEventUntil) endExpEvent(now);
+        for (ServerPlayer p : players.values()) p.session.combat().setBonusExpPercent(expEventPercent);
+    }
+
+    private void endExpEvent(long now) {
+        expEventPercent = 0;
+        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, "Wydarzenie premii doświadczenia dobiegło końca.");
+        LOG.info("exp event ended");
+    }
+
     /** Nowa wiadomosc dnia ("-" albo pusta czysci); zapis do motd.txt. */
     String setMotd(String text) throws IOException {
         motd = text == null || text.trim().equals("-") ? "" : cleanMotd(text);
@@ -929,6 +976,7 @@ final class ServerWorld {
         for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
         if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
         if (!motd.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość dnia: " + motd);
+        if (expEventPercent > 0) s.log().add(lastNow, EventLog.Kind.SYSTEM, expEventLine(lastNow));
         pl.fawizja.pixel.guild.GuildRegistry.Guild guild = guilds.guildOf(pc.name());
         if (guild != null && guild.motd() != null) {
             s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość gildii " + guild.name() + ": " + guild.motd());
@@ -1558,7 +1606,7 @@ final class ServerWorld {
      * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
-    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD";
+    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT";
     /** Czas pierwszego taktu swiata (do czasu dzialania w STATUS); -1 przed pierwszym taktem. */
     private long firstTick = -1;
 
@@ -1620,6 +1668,8 @@ final class ServerWorld {
                 case "MOTD":
                     if (c.length < 2 || c[1].isBlank()) return motd.isEmpty() ? "Brak wiadomości dnia. MOTD tekst ustawia, MOTD - usuwa." : "Wiadomość dnia: " + motd;
                     return setMotd(c[1]);
+                case "EXPEVENT":
+                    return expEvent(c, now);
                 case "SAVE":
                     saveAll();
                     return "Zapisano " + players.size() + " postaci.";
@@ -1721,6 +1771,7 @@ final class ServerWorld {
     void tick(long now) {
         lastNow = now;
         if (firstTick < 0) firstTick = now;
+        updateExpEvent(now);
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         updateInvasion(now);
         updateDuels(now);

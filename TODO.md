@@ -238,6 +238,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Ranking umiejętności /ranking magia (0.119.0)
 - [x] Nagrody za głowy /nagroda (0.121.0)
 - [x] Skarbiec gildii (0.123.0)
+- [x] Wydarzenie premii doświadczenia /bonusexp (0.124.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

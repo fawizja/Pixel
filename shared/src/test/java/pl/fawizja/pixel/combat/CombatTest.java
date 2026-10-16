@@ -212,6 +212,17 @@ class CombatTest {
         assertNull(CombatFormulas.ammunition(monk, TestData.ITEMS));
     }
 
+    @Test
+    void serverEventsAddBonusExperience() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        CombatSystem cs = system(pc, new Random(1), null);
+        long base = cs.killExperience(REG.get("wolf"), pc.level());
+        cs.setBonusExpPercent(50);
+        assertEquals(base * 150 / 100, cs.killExperience(REG.get("wolf"), pc.level()));
+        cs.setBonusExpPercent(-5);
+        assertEquals(base, cs.killExperience(REG.get("wolf"), pc.level()));
+    }
+
     static CombatSystem system(PlayerCharacter pc, Random rng, MonsterManager mm) {
         MonsterManager m = mm != null ? mm : new MonsterManager(TestData.varden(), REG, Collections.emptyList(), rng);
         return new CombatSystem(pc, TestData.varden(), TestData.ITEMS, m, new GroundItems(), new EventLog(50), rng, 8);
