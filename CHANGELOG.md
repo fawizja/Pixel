@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.155.0] - 2026-10-16
+
+### Dodano
+- Znacznik „Oddaj zadanie” na mapie: gdy zadanie dnia albo zlecenie łowcy jest wykonane, mapa wskazuje
+  najbliższego przewodnika.
 ## [0.154.0] - 2026-10-16
 
 ### Dodano

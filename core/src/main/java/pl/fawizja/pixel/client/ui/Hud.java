@@ -187,7 +187,18 @@ public final class Hud {
         if (t - huntGroundCheckedMs >= 1000 || t < huntGroundCheckedMs) {
             huntGroundCheckedMs = t; // szukanie po wszystkich spawnach - najwyzej raz na sekunde
             huntGround = session.huntingGround();
+            turnIn = null;
+            PlayerCharacter pc = session.character();
+            long day = session.today();
+            if (pc.daily().doneOn(day) && !pc.daily().claimed() || pc.hunt().active() && pc.hunt().done()) {
+                // zadanie gotowe do oddania - najblizszy przewodnik na tym pietrze
+                for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
+                    if (n.role() != pl.fawizja.pixel.npc.NpcRole.GUIDE || n.position().z() != pc.position().z()) continue;
+                    if (turnIn == null || n.position().distanceTo(pc.position()) < turnIn.position().distanceTo(pc.position())) turnIn = n;
+                }
+            }
         }
+        if (turnIn != null) out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Oddaj zadanie: " + turnIn.name(), turnIn.position()));
         if (huntGround != null) {
             out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Łowisko: " + monsterNames.apply(huntGround.monsterKey()), huntGround.center()));
         }
@@ -196,6 +207,8 @@ public final class Hud {
 
     /** Najblizsze lowisko zlecenia albo zadania dnia (znacznik na mapie), odswiezane co sekunde. */
     private pl.fawizja.pixel.monster.SpawnPoint huntGround;
+    /** Przewodnik, u ktorego czeka nagroda za wykonane zadanie dnia albo zlecenie. */
+    private pl.fawizja.pixel.npc.Npc turnIn;
     private long huntGroundCheckedMs = Long.MIN_VALUE / 2;
 
     private List<pl.fawizja.pixel.world.Position> markerPositions(GameSession session) {
