@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.142.1] - 2026-10-16
+
+### Naprawiono
+- Niestabilny test sieciowy nagród za głowy (CI 0.140.0): cel regenerował się między chybionymi strzałami.
 ## [0.142.0] - 2026-10-16
 
 ### Zmieniono

@@ -318,7 +318,21 @@ class NetworkSyncTest {
             });
             await("weak", weak::get);
             a.send("ATTACK", String.valueOf(janId));
-            awaitMessage(a, "claimed", m -> m[0].equals("LOG") && m[2].startsWith("Ivo odbiera nagrodę za głowę Jan"));
+            // Jan regeneruje sie miedzy ciosami (paladyn moze chybic) - oslabiamy go ponownie, az padnie
+            long[] lastWeaken = {System.currentTimeMillis()};
+            await("claimed", () -> {
+                if (logged(a, "Ivo odbiera nagrodę za głowę Jan")) return true;
+                if (System.currentTimeMillis() - lastWeaken[0] > 1000) {
+                    lastWeaken[0] = System.currentTimeMillis();
+                    server.enqueueTest(() -> {
+                        ServerPlayer j = server.world().find("Jan");
+                        if (j != null && !j.session.character().isDead()) {
+                            j.session.character().damage(j.session.character().health() - 1);
+                        }
+                    });
+                }
+                return false;
+            });
             b.send("BOUNTY");
             awaitMessage(b, "none left", m -> m[0].equals("LOG") && m[2].startsWith("Nie ma nagród"));
         }
