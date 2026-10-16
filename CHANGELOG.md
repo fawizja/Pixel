@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.133.1] - 2026-10-16
+
+### Naprawiono
+- Gra na Androidzie zamykała się przy starcie od 0.131.0 (wczytywanie okna „Co nowego” używało metody Javy,
+  której Android 11 nie ma). Nowy test pilnuje takich wywołań w kodzie klienta.
 ## [0.133.0] - 2026-10-16
 
 ### Dodano

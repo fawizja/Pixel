@@ -22,7 +22,12 @@ public final class WhatsNew {
     /** Tresc dziennika zmian z zasobow albo null. */
     public static String load() {
         try (InputStream in = WhatsNew.class.getResourceAsStream(RESOURCE)) {
-            return in == null ? null : new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            if (in == null) return null;
+            // bez InputStream.readAllBytes - nie ma go na Androidzie przed API 33
+            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[8192];
+            for (int n; (n = in.read(buf)) > 0; ) out.write(buf, 0, n);
+            return new String(out.toByteArray(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             return null;
         }
@@ -46,7 +51,7 @@ public final class WhatsNew {
         int seen = 0;
         StringBuilder item = null;
         for (String raw : changelog.split("\n")) {
-            String line = raw.stripTrailing();
+            String line = raw.replaceAll("\\s+$", "");
             String v = version(line);
             if (v != null || line.startsWith("- ") || line.startsWith("#") || line.isBlank()) {
                 if (item != null) add(out, current, item.toString(), maxRows);
