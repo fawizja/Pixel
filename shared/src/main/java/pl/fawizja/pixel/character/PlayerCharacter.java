@@ -47,6 +47,7 @@ public final class PlayerCharacter {
     private long regenAccumulatorMs;
     /** Pozostaly czas sytosci (podwojna regeneracja) i swiatla z czaru. */
     private long fedMs;
+    private long restedMs;
     private long lightBuffMs;
     private int lightBuffRadius;
     /** Pozostaly czas palenia biezacej pochodni (0 = nowa, nieuzywana). */
@@ -130,6 +131,7 @@ public final class PlayerCharacter {
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
+        restedMs = o.restedMs;
         lightBuffMs = o.lightBuffMs;
         lightBuffRadius = o.lightBuffRadius;
         torchBurnMs = o.torchBurnMs;
@@ -357,6 +359,7 @@ public final class PlayerCharacter {
     public void tickRegeneration(long deltaMs, boolean resting) {
         if (isDead() || deltaMs <= 0) return;
         lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
+        if (resting) restedMs = Math.min(MAX_RESTED_MS, restedMs + deltaMs);
         regenAccumulatorMs += deltaMs;
         long tick = Balance.REGEN_TICK_SECONDS * 1000L;
         while (regenAccumulatorMs >= tick) {
@@ -369,6 +372,27 @@ public final class PlayerCharacter {
     }
 
     public long fedMs() { return fedMs; }
+
+    /** Wypoczecie: odpoczynek w strefie ochronnej zbiera czas (do 30 min), a kazda walka zuzywa jego czesc. */
+    public static final long MAX_RESTED_MS = 30 * 60_000L;
+    /** Tyle wypoczecia zuzywa jedno pokonanie potwora (30 min = 90 walk). */
+    public static final long RESTED_PER_KILL_MS = 20_000L;
+    /** Premia doswiadczenia za potwora pokonanego wypoczetym (procent). */
+    public static final int RESTED_EXP_PERCENT = 50;
+
+    public long restedMs() { return restedMs; }
+
+    /** Ile walk z premia zostalo (zaokraglone w gore). */
+    public int restedKills() { return (int) ((restedMs + RESTED_PER_KILL_MS - 1) / RESTED_PER_KILL_MS); }
+
+    /** Zuzywa wypoczecie na jedna walke; false, gdy go nie ma. */
+    public boolean useRested() {
+        if (restedMs <= 0) return false;
+        restedMs = Math.max(0, restedMs - RESTED_PER_KILL_MS);
+        return true;
+    }
+
+    public void restoreRested(long ms) { restedMs = Math.max(0, Math.min(MAX_RESTED_MS, ms)); }
 
     /** Jedzenie: dodaje sytosc; false, gdy postac jest najedzona (nic nie zuzyto). */
     public boolean feed(long ms) {

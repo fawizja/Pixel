@@ -48,6 +48,7 @@ public final class CharacterCodec {
         m.put("flags", (pc.isRunning() ? "R" : "") + (pc.isDefensive() ? "D" : "") + (pc.hasMount() ? "H" : "") + (pc.isMounted() ? "M" : ""));
         m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
+        if (pc.restedMs() > 0) m.put("rested", Long.toString(pc.restedMs()));
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack s = pc.backpack().get(i);
             if (s != null) m.put("bp." + i, stackText(s));
@@ -196,6 +197,14 @@ public final class CharacterCodec {
             String[] t = timers.split(",");
             pc.restoreTimers(Long.parseLong(t[0]), Long.parseLong(t[1]), Integer.parseInt(t[2]), "1".equals(t[3]),
                     Long.parseLong(t[4]), items.byKey("torch").id());
+        }
+        String rested = m.get("rested");
+        if (rested != null) {
+            try {
+                pc.restoreRested(Long.parseLong(rested.trim()));
+            } catch (NumberFormatException e) {
+                // stary lub uszkodzony zapis - bez wypoczecia
+            }
         }
         for (String f : friends.values()) pc.friends().restore(f);
         pc.achievements().restore(m.get("achievements"));

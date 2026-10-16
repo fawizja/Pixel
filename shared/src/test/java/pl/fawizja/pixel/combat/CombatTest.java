@@ -213,6 +213,30 @@ class CombatTest {
     }
 
     @Test
+    void restedCharactersGetBonusExperienceForAFewKills() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        pc.tickRegeneration(PlayerCharacter.MAX_RESTED_MS + 60_000, true);
+        assertEquals(PlayerCharacter.MAX_RESTED_MS, pc.restedMs(), "capped");
+        assertEquals(90, pc.restedKills());
+        pc.restoreRested(PlayerCharacter.RESTED_PER_KILL_MS);
+        pc.setPosition(new Position(10, 12, 0));
+        SpawnPoint sp = new SpawnPoint("wolf", new Position(11, 12, 0), 0, 1, 60);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, List.of(sp), new Random(3));
+        mm.populate(null);
+        Monster wolf = mm.monsters().get(0);
+        CombatSystem cs = system(pc, new Random(5), mm);
+        cs.setTarget(wolf);
+        long exp = pc.experience();
+        for (long t = 0; t < 120_000 && !wolf.isDead(); t += 100) cs.update(t);
+        assertTrue(wolf.isDead());
+        assertEquals(exp + 30, pc.experience(), "20 exp + 50%");
+        assertEquals(0, pc.restedKills(), "used up");
+        pc.restoreRested(12_345);
+        pl.fawizja.pixel.character.CharacterCodec codec = new pl.fawizja.pixel.character.CharacterCodec(TestData.ITEMS);
+        assertEquals(12_345, codec.decode(codec.encode(pc)).restedMs(), "saved");
+    }
+
+    @Test
     void serverEventsAddBonusExperience() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
         CombatSystem cs = system(pc, new Random(1), null);

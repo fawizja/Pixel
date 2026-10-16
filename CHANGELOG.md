@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.134.0] - 2026-10-16
+
+### Dodano
+- Wypoczęcie: czas odpoczynku w strefie ochronnej (do 30 minut) zamienia się w premię +50% doświadczenia
+  za kolejne pokonane potwory (20 sekund odpoczynku na walkę, 30 minut = 90 walk). Karta postaci pokazuje,
+  na ile walk wystarczy wypoczęcia, a wpis w dzienniku dopisuje „wypoczęty”.
 ## [0.133.1] - 2026-10-16
 
 ### Naprawiono

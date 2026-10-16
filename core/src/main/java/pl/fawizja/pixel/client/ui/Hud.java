@@ -1522,7 +1522,8 @@ public final class Hud {
             attack += ammo == null ? "   Amunicja: brak"
                     : "   Amunicja: " + ammo.name() + " x" + pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO).count();
         }
-        if (session.isResting(session.lastUpdateMs())) attack += "   Odpoczynek: regeneracja x" + (1 + PlayerCharacter.REST_BONUS);
+        if (session.isResting(session.lastUpdateMs())) attack += "   Odpoczynek x" + (1 + PlayerCharacter.REST_BONUS);
+        if (pc.restedKills() > 0) attack += "   Wypoczęty: " + pc.restedKills() + " walk";
         text(batch, attack, x, y - 72);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {

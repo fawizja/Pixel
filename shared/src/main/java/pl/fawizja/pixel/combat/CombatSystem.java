@@ -280,7 +280,10 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
         if (experienceSharer == null || !experienceSharer.share(t, now)) {
-            awardExperience(killExperience(t, pc.level()), "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : ""), now);
+            long exp = killExperience(t, pc.level());
+            boolean rested = pc.useRested();
+            if (rested) exp = exp * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
+            awardExperience(exp, "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : ""), now);
         }
         Position corpse = m.position();
         List<ItemStack> drop = rollLoot(t);
