@@ -45,6 +45,8 @@ public final class TileArt implements Disposable {
     /** Pupile (0.58.0), zwrocone w prawo; w lewo rysowane odbiciem. */
     private static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec"};
     private static final int PET_CELL = 1005;
+    /** Stroje w kolorach (Outfit 1..): profesja * kolory * 4 kierunki od tej komorki. */
+    private static final int OUTFIT_BASE = 1100;
     private final java.util.Map<String, TextureRegion> pets = new java.util.HashMap<>();
     private TextureRegion dummy;
 
@@ -76,7 +78,11 @@ public final class TileArt implements Disposable {
         for (Vocation v : Vocation.values()) {
             for (int d = 0; d < 4; d++) {
                 int cell = SPRITE_BASE + v.ordinal() * 4 + d;
-                paintCharacter(pm, cellX(cell), cellY(cell), v, d);
+                paintCharacter(pm, cellX(cell), cellY(cell), v, d, null);
+                for (int o = 1; o < pl.fawizja.pixel.character.Outfit.count(); o++) {
+                    int oc = outfitCell(v, o, d);
+                    paintCharacter(pm, cellX(oc), cellY(oc), v, d, Color.valueOf(pl.fawizja.pixel.character.Outfit.COLORS[o]));
+                }
             }
         }
         List<MonsterType> mtypes = new ArrayList<>(monsterRegistry.all());
@@ -107,6 +113,9 @@ public final class TileArt implements Disposable {
         for (ItemType it : itemRegistry.all()) items[it.id()] = region(ITEM_BASE + it.id());
         for (Vocation v : Vocation.values()) {
             for (int d = 0; d < 4; d++) characters[v.ordinal()][d] = region(SPRITE_BASE + v.ordinal() * 4 + d);
+            for (int o = 1; o < pl.fawizja.pixel.character.Outfit.count(); o++) {
+                for (int d = 0; d < 4; d++) outfits.put(outfitCell(v, o, d), region(outfitCell(v, o, d)));
+            }
         }
         for (int i = 0; i < mtypes.size(); i++) monsters.put(mtypes.get(i).key(), region(MONSTER_BASE + i));
         for (int i = 0; i < npcList.size(); i++) npcs.put(npcList.get(i).key(), region(NPC_BASE + i));
@@ -143,6 +152,22 @@ public final class TileArt implements Disposable {
     /** Pupil po kluczu przedmiotu (null = nieznany). */
     public TextureRegion pet(String key) { return key == null ? null : pets.get(key); }
     public Texture lightTexture() { return lightTexture; }
+
+    private final java.util.Map<Integer, TextureRegion> outfits = new java.util.HashMap<>();
+
+    private static int outfitCell(Vocation v, int outfit, int dir) {
+        return OUTFIT_BASE + (v.ordinal() * pl.fawizja.pixel.character.Outfit.count() + outfit) * 4 + dir;
+    }
+
+    /** Sprite postaci w kolorze stroju (0 = kolor profesji). */
+    public TextureRegion character(Vocation v, Direction facing, int outfit) {
+        TextureRegion base = character(v, facing);
+        if (outfit <= 0 || outfit >= pl.fawizja.pixel.character.Outfit.count()) return base;
+        int d = 0;
+        for (int i = 0; i < 4; i++) if (characters[v.ordinal()][i] == base) d = i;
+        TextureRegion r = outfits.get(outfitCell(v, outfit, d));
+        return r == null ? base : r;
+    }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
     public TextureRegion character(Vocation v, Direction facing) {
@@ -572,7 +597,7 @@ public final class TileArt implements Disposable {
         }
     }
 
-    private void paintCharacter(Pixmap pm, int ox, int oy, Vocation v, int dir) {
+    private void paintCharacter(Pixmap pm, int ox, int oy, Vocation v, int dir, Color custom) {
         Color outfit;
         Color accent;
         switch (v) {
@@ -581,6 +606,7 @@ public final class TileArt implements Disposable {
             case SORCERER: outfit = Color.valueOf("#4a3fa8"); accent = Color.valueOf("#ff7a30"); break;
             default: outfit = Color.valueOf("#d0882a"); accent = Color.valueOf("#f2e0b0"); break;
         }
+        if (custom != null) outfit = custom; // wybrany kolor stroju; pas i dodatki zostaja w kolorach profesji
         Color skin = Color.valueOf("#f0c8a0");
         Color hair = Color.valueOf("#5a3a1e");
         Color outline = Color.valueOf("#1a1410");

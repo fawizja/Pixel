@@ -988,6 +988,9 @@ class NetworkSyncTest {
                     && "pet_raven".equals(seen(ula, "Ola").pet()) && "LEVEL_20".equals(seen(ula, "Ola").title()));
             ola.send("TITLE", "-");
             await("title removed", () -> seen(ula, "Ola") != null && seen(ula, "Ola").title() == null);
+            assertEquals(0, seen(ula, "Ola").outfit());
+            ola.send("OUTFIT", "złoty");
+            await("ula sees the gold outfit", () -> seen(ula, "Ola") != null && seen(ula, "Ola").outfit() == 7);
         }
     }
 

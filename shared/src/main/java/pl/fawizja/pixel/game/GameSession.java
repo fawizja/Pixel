@@ -971,6 +971,18 @@ public final class GameSession {
         return true;
     }
 
+    /** Kolor stroju (Outfit); false dla nieznanego koloru. */
+    public boolean chooseOutfit(String color, long nowMs) {
+        int i = pl.fawizja.pixel.character.Outfit.parse(color);
+        if (i < 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie ma takiego koloru stroju. Kolory: " + String.join(", ", pl.fawizja.pixel.character.Outfit.NAMES) + ".");
+            return false;
+        }
+        pc.setOutfit(i);
+        log.add(nowMs, EventLog.Kind.INFO, i == 0 ? "Strój w kolorze profesji." : "Strój: " + pl.fawizja.pixel.character.Outfit.name(i) + ".");
+        return true;
+    }
+
     /** Pupil: przywolanie albo odeslanie (przedmiot zostaje w plecaku; bez niego pupil odchodzi). */
     private CastResult togglePet(pl.fawizja.pixel.item.ItemType pet, long nowMs) {
         if (pet.key().equals(pc.pet())) {

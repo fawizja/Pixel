@@ -111,6 +111,7 @@ public final class GameScreen extends ScreenAdapter {
         boolean mounted;
         String pet;
         String title;
+        int outfit;
         final pl.fawizja.pixel.client.render.PetFollower petFollower = new pl.fawizja.pixel.client.render.PetFollower();
         boolean seen;
     }
@@ -421,6 +422,8 @@ public final class GameScreen extends ScreenAdapter {
                     pl.fawizja.pixel.monster.MonsterType mt = game.monsters().contains(key) ? game.monsters().get(key) : null;
                     if (mt != null) hud.openInfo(mt.name(), pl.fawizja.pixel.achievement.BestiaryCard.rows(mt,
                             session.character().bestiary().kills(key), session.items()));
+                } else if (id.startsWith("outfit:")) {
+                    chooseOutfit(id.substring("outfit:".length()));
                 } else if (id.startsWith("ach:title:")) {
                     String key = id.substring("ach:title:".length());
                     if (key.equals(session.character().title())) key = "-"; // ponowne dotkniecie zdejmuje tytul
@@ -522,6 +525,20 @@ public final class GameScreen extends ScreenAdapter {
             List<String[]> rows = pl.fawizja.pixel.inventory.ItemSearch.rows(session.character(), session.items(), q);
             if (rows.isEmpty()) session.log().add(now(), EventLog.Kind.INFO, "Nie masz przedmiotu \"" + q + "\" w plecaku, wyposażeniu ani depozycie.");
             else hud.openInfo("Szukaj: " + q, rows);
+            return;
+        }
+        if (cmd.equals("/strój") || cmd.equals("/stroj") || cmd.startsWith("/strój ") || cmd.startsWith("/stroj ")) {
+            String color = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
+            if (!color.isEmpty()) {
+                chooseOutfit(color);
+                return;
+            }
+            List<String[]> rows = new ArrayList<>();
+            int now = session.character().outfit();
+            for (int i = 0; i < pl.fawizja.pixel.character.Outfit.count(); i++) {
+                rows.add(new String[] {"Kolor " + pl.fawizja.pixel.character.Outfit.name(i), i == now ? "noszony teraz" : "dotknij, aby założyć", "", "outfit:" + i});
+            }
+            hud.openInfo("Strój", rows);
             return;
         }
         if (cmd.equals("/statystyki") || cmd.equals("/staty")) {
@@ -690,6 +707,12 @@ public final class GameScreen extends ScreenAdapter {
     /** Licznik polowania (od wejscia do gry albo od "Zacznij od nowa"); liczy z danych postaci, dziala tez online. */
     private pl.fawizja.pixel.stats.HuntAnalyzer hunt;
     private long huntRefreshMs;
+
+    /** Kolor stroju: online wybiera serwer (widza go inni gracze), offline sesja. */
+    private void chooseOutfit(String color) {
+        if (net != null) net.send("OUTFIT", color);
+        else session.chooseOutfit(color, now());
+    }
 
     /** /znacznik nazwa (tu), /znacznik usuń nazwa, /znaczniki (lista z marszem, z bossem tygodnia i miejscem śmierci). */
     private void markerCommand(String text, String cmd) {
@@ -1036,7 +1059,7 @@ public final class GameScreen extends ScreenAdapter {
                     b.draw(game.art().horse(rp.facing), remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)), 1f, 1f);
                     rise = 0.35f;
                 }
-                b.draw(game.art().character(rp.vocation, rp.facing), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
+                b.draw(game.art().character(rp.vocation, rp.facing, rp.outfit), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
                         worldRenderer.worldY(remoteY(rp, t) - rise + (lg == null ? 0f : lg[1])), 1f, 1f);
             }
             if (row == playerRow) {
@@ -1045,7 +1068,7 @@ public final class GameScreen extends ScreenAdapter {
                     b.draw(game.art().horse(session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
                     rise = 0.35f;
                 }
-                b.draw(game.art().character(pc.vocation(), session.facing()), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
+                b.draw(game.art().character(pc.vocation(), session.facing(), pc.outfit()), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
             }
         });
         batch.end();
@@ -1507,6 +1530,7 @@ public final class GameScreen extends ScreenAdapter {
                 rp.mounted = e.mounted();
                 rp.pet = e.pet();
                 rp.title = pl.fawizja.pixel.achievement.Achievement.titleOf(e.title());
+                rp.outfit = e.outfit();
                 rp.seen = true;
             }
             remotePlayers.values().removeIf(rp -> !rp.seen);

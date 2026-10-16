@@ -5,9 +5,15 @@ import pl.fawizja.pixel.world.Position;
 /**
  * Inny gracz albo potwor widziany w klatce stanu z serwera. kind = PL lub MO.
  * mark = czaszka PvP gracza (NONE, WHITE, RED); dla potworow NONE. guild = nazwa gildii gracza albo null.
+ * outfit = kolor stroju gracza (Outfit, od 0.99.0; 0 = kolor profesji).
  */
 public record RemoteEntity(String kind, int id, String key, String name, Position position, int healthPercent, String mark,
-                           String guild, boolean mounted, String pet, String title) {
+                           String guild, boolean mounted, String pet, String title, int outfit) {
+
+    public RemoteEntity(String kind, int id, String key, String name, Position position, int healthPercent, String mark,
+                        String guild, boolean mounted, String pet, String title) {
+        this(kind, id, key, name, position, healthPercent, mark, guild, mounted, pet, title, 0);
+    }
 
     public RemoteEntity(String kind, int id, String key, String name, Position position, int healthPercent, String mark,
                         String guild, boolean mounted, String pet) {

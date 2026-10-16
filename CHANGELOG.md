@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.99.0] - 2026-10-16
+
+### Dodano
+- Kolor stroju: `/strój` otwiera okno z 8 kolorami (kolor profesji, czerwony, niebieski, zielony, czarny, biały,
+  fioletowy, złoty), `/strój złoty` zakłada od razu. Kolor jest zapisywany w postaci i online widzą go inni gracze.
+- `/strój` w oknie poleceń (zamiast `/rynek`, który działa dalej u bankiera); nowa scena GUI outfit (35 scen).
 ## [0.98.0] - 2026-10-16
 
 ### Dodano

@@ -123,6 +123,7 @@ public final class PlayerCharacter {
         weeklyBossWeek = o.weeklyBossWeek;
         pet = o.pet;
         title = o.title;
+        outfit = o.outfit;
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
@@ -187,6 +188,11 @@ public final class PlayerCharacter {
 
     /** Wybrany tytul: klucz zdobytego osiagniecia albo null. */
     private String title;
+    /** Kolor stroju (Outfit); 0 = kolor profesji. */
+    private int outfit;
+
+    public int outfit() { return outfit; }
+    public void setOutfit(int i) { outfit = Outfit.clamp(i); }
 
     public String title() { return title; }
     public void setTitle(String key) { title = key == null || key.isEmpty() || key.equals("-") ? null : key; }

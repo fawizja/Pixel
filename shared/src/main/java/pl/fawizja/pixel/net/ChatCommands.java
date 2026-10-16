@@ -206,8 +206,8 @@ public final class ChatCommands {
             {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
             {"/ranking", "najlepsi gracze (także /ranking gildie)"},
             {"/znajomi", "lista znajomych"},
-            {"/rynek", "oferty rynku (u bankiera)"},
             {"/znaczniki", "własne miejsca na mapie (/znacznik nazwa zapisuje)"},
+            {"/strój", "kolor stroju widoczny dla innych graczy"},
         };
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {

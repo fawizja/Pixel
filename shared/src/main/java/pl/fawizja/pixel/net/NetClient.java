@@ -166,7 +166,8 @@ public final class NetClient implements AutoCloseable {
                         players.add(new RemoteEntity("PL", Integer.parseInt(f[1]), f[3], f[2], pos(f, 4), Integer.parseInt(f[7]),
                                 f.length > 8 ? f[8] : "NONE", f.length > 9 && !f[9].equals("-") ? f[9] : null,
                                 f.length > 10 && f[10].equals("M"), f.length > 11 && !f[11].equals("-") ? f[11] : null,
-                                f.length > 12 && !f[12].equals("-") ? f[12] : null));
+                                f.length > 12 && !f[12].equals("-") ? f[12] : null,
+                                f.length > 13 ? pl.fawizja.pixel.character.Outfit.clamp(intOr(f[13], 0)) : 0));
                         break;
                     case "MO":
                         // f[7] (od 0.54.0): "E" = odmiana elitarna
@@ -240,6 +241,14 @@ public final class NetClient implements AutoCloseable {
             socket.close();
         } catch (IOException ignored) {
             // zamykamy
+        }
+    }
+
+    private static int intOr(String s, int def) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return def;
         }
     }
 }
