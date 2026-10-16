@@ -1729,6 +1729,12 @@ final class ServerWorld {
                 }
                 p.lastSelfMs = now;
             }
+            pl.fawizja.pixel.game.Challenge ch = p.session.challenge();
+            String chLine = ch == null ? "-" : ch.line(now);
+            if (!chLine.equals(p.lastChallenge)) {
+                p.client.send("CHAL", chLine); // stan wyzwania ze zwoju (zmienia sie co sekunde)
+                p.lastChallenge = chLine;
+            }
             Position me = p.session.character().position();
             StringBuilder frame = new StringBuilder();
             frame.append(Protocol.line("ME", String.valueOf(me.x()), String.valueOf(me.y()), String.valueOf(me.z()),

@@ -1617,6 +1617,9 @@ public final class GameScreen extends ScreenAdapter {
                     session.log().add(now, kind, m[2]);
                     if (m[2].startsWith("Zginąłeś")) net.send("DEATH"); // podsumowanie smierci z serwera
                     break;
+                case "CHAL":
+                    hud.setOnlineChallenge(m.length > 1 ? m[1] : null);
+                    break;
                 case "LOOTLOG":
                     showLoot(pl.fawizja.pixel.combat.DeathRecap.decode(m, 1));
                     break;

@@ -22,6 +22,8 @@ final class ServerPlayer {
     String lastSelf;
     long lastSelfMs = -1_000_000;
     long lastSaveMs;
+    /** Ostatnio wyslany wiersz wyzwania ("-" = brak). */
+    String lastChallenge = "-";
 
     ServerPlayer(int id, GameSession session, ClientHandler client, long now, pl.fawizja.pixel.pvp.PvpRules.Status pvp) {
         this.pvp = pvp;

@@ -995,6 +995,17 @@ class NetworkSyncTest {
             assertEquals(0, seen(ula, "Ola").outfit());
             ola.send("OUTFIT", "złoty");
             await("ula sees the gold outfit", () -> seen(ula, "Ola") != null && seen(ula, "Ola").outfit() == 7);
+            server.enqueueTest(() -> {
+                pl.fawizja.pixel.character.PlayerCharacter pc = server.world().find("Ola").session.character();
+                server.world().find("Ola").session.teleport(new pl.fawizja.pixel.world.Position(58, 72, 0), server.now());
+                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(ItemRegistry.loadDefault().byKey("challenge_scroll").id(), 1));
+                int slot = -1;
+                for (int i = 0; i < pc.backpack().size(); i++) {
+                    if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == ItemRegistry.loadDefault().byKey("challenge_scroll").id()) slot = i;
+                }
+                server.world().find("Ola").session.useSlot(slot, server.now());
+            });
+            awaitMessage(ola, "challenge line sent", m -> m[0].equals("CHAL") && m[1].startsWith("Wyzwanie: fala 1/3"));
         }
     }
 

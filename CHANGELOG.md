@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.116.0] - 2026-10-16
+
+### Dodano
+- Online: serwer wysyła stan wyzwania (komunikat CHAL), więc fala i pozostały czas są widoczne na ekranie
+  także w grze sieciowej, nie tylko offline.
 ## [0.115.0] - 2026-10-16
 
 ### Dodano

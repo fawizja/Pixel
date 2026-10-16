@@ -232,6 +232,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Podpowiedzi dla nowych postaci (0.113.0)
 - [x] Wyłączanie podpowiedzi (0.114.0)
 - [x] Trudność celu nad potworem (0.115.0)
+- [x] Wyzwanie na ekranie także online (0.116.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

@@ -170,6 +170,10 @@ public final class Hud {
 
     public void setMarkers(pl.fawizja.pixel.settings.MapMarkers m) { markers = m; }
 
+    /** Wiersz wyzwania z serwera (online); null = brak. */
+    private String onlineChallenge;
+    public void setOnlineChallenge(String line) { onlineChallenge = line == null || line.equals("-") ? null : line; }
+
     /** Znaczniki gracza, bossa tygodnia (gdy znane jest jego miejsce) i miejsca ostatniej smierci. */
     public List<pl.fawizja.pixel.settings.MapMarkers.Marker> allMarkers(GameSession session) {
         List<pl.fawizja.pixel.settings.MapMarkers.Marker> out = new ArrayList<>(markers.all());
@@ -1356,9 +1360,10 @@ public final class Hud {
         float ly = y - 76;
         // sledzenie zadan pod stanem postaci, dziennik zdarzen nizej
         font.setColor(0.85f, 0.9f, 1f, 1f);
-        if (session.challenge() != null) {
+        String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
+        if (chLine != null) {
             font.setColor(1f, 0.75f, 0.45f, 1f);
-            text(batch, session.challenge().line(session.lastUpdateMs()), x, ly + 6);
+            text(batch, chLine, x, ly + 6);
             ly -= 16;
             font.setColor(0.85f, 0.9f, 1f, 1f);
         }
