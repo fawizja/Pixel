@@ -204,6 +204,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Automatyczne jedzenie, strony w panelu ustawień (0.85.0)
 - [x] Śledzenie zadań na ekranie (0.86.0)
 - [x] Ustawienie: cel sam (0.87.0)
+- [x] Procent postępu exp i umiejętności na karcie postaci (0.88.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

@@ -49,6 +49,14 @@ public final class Balance {
         return Math.multiplyExact(50L, poly) / 3L;
     }
 
+    /** Postep doswiadczenia do nastepnego poziomu w procentach (0..99; 100 na poziomie maksymalnym). */
+    public static int percentToNextLevel(long experience, int level) {
+        if (level >= MAX_LEVEL) return 100;
+        long cur = experienceForLevel(level), next = experienceForLevel(level + 1);
+        if (next <= cur) return 100;
+        return (int) Math.max(0, Math.min(99, (experience - cur) * 100 / (next - cur)));
+    }
+
     public static long experienceForLevel(int level) {
         if (level <= MIN_LEVEL) return 0L;
         if (level > MAX_LEVEL + 1) throw new IllegalArgumentException("level > " + (MAX_LEVEL + 1));

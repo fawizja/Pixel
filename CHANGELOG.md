@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.88.0] - 2026-10-16
+
+### Dodano
+- Karta postaci pokazuje postęp do następnego poziomu w procentach: przy doświadczeniu („Exp: … (42%)”)
+  i przy każdej umiejętności („Miecz 12 (35%)”).
+- 1 nowy test; łącznie 341. Scena `character` odświeżona.
+
 ## [0.87.0] - 2026-10-16
 
 ### Dodano

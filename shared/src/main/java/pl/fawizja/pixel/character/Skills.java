@@ -24,6 +24,13 @@ public final class Skills {
     public int level(Skill s) { return levels.get(s); }
     public long tries(Skill s) { return tries.get(s); }
 
+    /** Postep do nastepnego poziomu umiejetnosci w procentach (0..99; 100 na maksimum). */
+    public int percentToNext(Skill s) {
+        int lvl = levels.get(s);
+        if (lvl >= MAX_SKILL) return 100;
+        return (int) Math.min(99, tries.get(s) * 100 / Math.max(1, triesForNext(lvl)));
+    }
+
     /** Liczba prob potrzebna do przejscia z poziomu level na level+1. */
     public static long triesForNext(int level) {
         double v = 50.0 * Math.pow(1.1, Math.max(0, level - START_SKILL));

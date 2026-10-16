@@ -1459,14 +1459,15 @@ public final class Hud {
         float x = 20, y = h - 130;
         text(batch, pc.name() + " - " + pc.vocation().displayName() + ", poziom " + pc.level(), x, y);
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
-        text(batch, String.format("Exp: %,d / %,d", pc.experience(), next), x, y - 18);
+        text(batch, String.format("Exp: %,d / %,d (%d%%)", pc.experience(), next,
+                pl.fawizja.pixel.balance.Balance.percentToNextLevel(pc.experience(), pc.level())), x, y - 18);
         text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity() + "   Miasto: " + capitalized(pc.homeTown())
                 + (pc.isBlessed() ? "   Błogosławieństwo" : "")
                 + (pc.title() == null ? "" : "   Tytuł: " + pl.fawizja.pixel.achievement.Achievement.titleOf(pc.title())), x, y - 36);
         text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Pokonane: " + pc.bestiary().total() + "   Osiągnięcia: " + pc.achievements().count() + " (O)", x, y - 54);
         float yy = h - 250;
         for (Skill sk : Skill.values()) {
-            text(batch, sk.label() + "  " + pc.skills().level(sk), x, yy);
+            text(batch, sk.label() + "  " + pc.skills().level(sk) + "  (" + pc.skills().percentToNext(sk) + "%)", x, yy);
             yy -= 22;
         }
         font.getData().setScale(0.8f);
