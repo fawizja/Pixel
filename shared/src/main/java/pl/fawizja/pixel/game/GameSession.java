@@ -166,7 +166,7 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Dziś nie mam dla ciebie zadania.");
                 return;
             }
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Zadanie dnia: pokonaj " + d.target() + "x " + monsterName(d.monster()) + ".");
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Zadanie dnia: pokonaj " + d.target() + "x " + monsterName(d.monster()) + whereToHunt(d.monster()) + ".");
             return;
         }
         if (d.claimed()) {
@@ -214,7 +214,7 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, "Nie mam teraz dla ciebie zlecenia.");
                 return;
             }
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy: pokonaj " + h.target() + "x " + monsterName(h.monster()) + ".");
+            log.add(nowMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy: pokonaj " + h.target() + "x " + monsterName(h.monster()) + whereToHunt(h.monster()) + ".");
             return;
         }
         if (!h.done()) {
@@ -364,6 +364,12 @@ public final class GameSession {
                     && pc.equipment().canWear(t.id(), pc.vocation(), pc.level()).ok()) return true;
         }
         return false;
+    }
+
+    /** " (Krainy Varden)" - gdzie szukac potwora z zadania; pusty tekst, gdy nie ma go na mapie. */
+    public String whereToHunt(String monsterKey) {
+        String where = pl.fawizja.pixel.achievement.BestiaryCard.habitats(monsterKey, monsters.spawns(), world);
+        return where.isEmpty() ? "" : " (" + where + ")";
     }
 
     /** Komunikaty o odrodzeniu bossow (co BossWatch.CHECK_MS; online liczy serwer). */

@@ -320,6 +320,8 @@ class TownServicesTest {
         s.teleport(talkSpot(npcs.get("varden_guide")), t);
         Actions.apply(s, "npc:hunt", t);
         assertEquals("wolf", pc.hunt().monster());
+        assertTrue(s.log().latest(3).stream().anyMatch(e -> e.text().equals("Zlecenie łowcy: pokonaj 50x Wilk (Krainy Varden).")),
+                "the task says where to hunt");
         Actions.apply(s, "npc:huntdrop", t);
         assertFalse(pc.hunt().active(), "dropped");
         Actions.apply(s, "npc:hunt", t);

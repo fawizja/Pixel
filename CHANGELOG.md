@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.127.0] - 2026-10-16
+
+### Dodano
+- Zadanie dnia i zlecenie łowcy mówią, gdzie szukać potwora, np. „pokonaj 50x Wilk (Krainy Varden)”.
 ## [0.126.0] - 2026-10-16
 
 ### Dodano
