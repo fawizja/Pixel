@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.145.0] - 2026-10-16
+
+### Dodano
+- Nagłówek bestiariusza pokazuje, ile gatunków potworów już poznano spośród wszystkich w grze.
 ## [0.144.0] - 2026-10-16
 
 ### Dodano

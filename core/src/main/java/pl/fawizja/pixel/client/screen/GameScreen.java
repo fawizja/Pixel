@@ -215,6 +215,7 @@ public final class GameScreen extends ScreenAdapter {
                 return k; // potwor z nowszej wersji danych
             }
         });
+        if (game.monsters() != null) hud.setMonsterSpecies(game.monsters().all().size());
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
         hud.setSettings(settings);

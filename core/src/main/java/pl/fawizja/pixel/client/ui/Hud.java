@@ -414,6 +414,9 @@ public final class Hud {
 
     /** Nazwy potworow do bestiariusza (klucz z monsters.csv -> nazwa). */
     public void setMonsterNames(java.util.function.Function<String, String> names) { this.monsterNames = names; }
+    /** Liczba gatunkow potworow w grze (naglowek bestiariusza; 0 = nieznana). */
+    private int monsterSpecies;
+    public void setMonsterSpecies(int n) { this.monsterSpecies = n; }
 
     /** Osiagniecia (bestiary = false) albo bestiariusz; ponowne wywolanie z tym samym widokiem zamyka okno. */
     public void openAchievements(boolean bestiary) {
@@ -1427,7 +1430,8 @@ public final class Hud {
                         + " (dotknij zadania, aby iść do zleceniodawcy)", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && achievementsView) {
                 PlayerCharacter me = session.character();
-                text(batch, bestiaryMode ? "Bestiariusz - " + me.name()
+                text(batch, bestiaryMode ? "Bestiariusz - " + me.name() + (monsterSpecies > 0
+                                ? " (poznane gatunki: " + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
                         : "Osiągnięcia " + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length,
                         menuX + 10, menuY + menuH - 14);
             } else if (trade == null && marketView != null) {
