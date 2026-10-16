@@ -38,3 +38,10 @@ qas_caravan3;Złodziej klejnotów;qas_guide;COLLECT;scarab_gem;3;700000;12000;17
 selv_skins;Skóry węży;selv_guide;COLLECT;snake_skin;15;180000;5000;85;Garbarze z Selvaran szyją z wężowych skór buty dla tropicieli. Przynieś 15.
 selv_temple;Strażnicy świątyni;selv_guide;KILL;temple_guardian;10;900000;15000;150;Ocaleni badacze mówią o świątyni strzeżonej przez kamiennych strażników. Pokonaj 10.
 frost_hearts;Serce mrozu;frost_guide;COLLECT;frozen_heart;3;400000;10000;110;Wiedźmy ożywiły lodowe golemy. Przynieś 3 zamarznięte serca, a zamieć ucichnie na dobre.
+varden_boars;Dziki w zbożu;varden_guide;KILL;boar;10;3000;350;10;Dziki ryją pola na południe od Varden. Przegoń je, pokonując 10.
+varden_spiders;Pajęcze gniazda;varden_guide;KILL;forest_spider;12;5000;450;12;Pająki leśne oplatają ścieżkę do lasu. Pokonaj 12, zanim złożą jaja.
+varden_crystals;Kryształowe serca;varden_guide;KILL;crystal_golem;10;60000;2500;40;W głębi kopalni ożyły kryształowe golemy. Rozbij 10, żeby górnicy mogli wrócić.
+camp_elementals;Płonące pola;camp_guide;KILL;fire_elemental;20;450000;35000;300;Żywiołaki ognia palą zapasy obozu. Ugaś 20.
+camp_harpies;Burza nad przełęczą;camp_guide;KILL;storm_harpy;20;700000;55000;460;Harpie burzy strącają zwiadowców z grani. Pokonaj 20.
+camp_titans;Piaskowe kolosy;camp_guide;KILL;sand_titan;15;1000000;80000;640;Piaskowe tytany zasypują drogę do ruin. Pokonaj 15.
+camp_bones;Kościane skrzydła;camp_guide;KILL;bone_dragon;10;2000000;150000;870;Kościane smoki krążą nad Otchłanią. Strąć 10.

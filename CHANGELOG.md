@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.140.0] - 2026-10-16
+
+### Dodano
+- 7 nowych zadań na potwory, które ich dotąd nie miały: dziki, pająki leśne i kryształowe golemy w Varden
+  (poziomy 10-40) oraz żywiołaki ognia, harpie burzy, piaskowe tytany i kościane smoki w obozie (300-870).
 ## [0.139.0] - 2026-10-16
 
 ### Dodano
