@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.107.0] - 2026-10-16
+
+### Dodano
+- Śledzenie zadań na ekranie pokazuje też postęp zlecenia łowcy, gdy jest wolny wiersz.
 ## [0.106.0] - 2026-10-16
 
 ### Zmieniono

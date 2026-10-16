@@ -23,5 +23,7 @@ class QuestTrackerTest {
         assertEquals(List.of("Zadanie: " + kill.name() + " 2/" + kill.amount()), QuestTracker.lines(pc, quests, 100, "Wilk"));
         pc.quests().restore(kill.key(), false, kill.amount());
         assertTrue(QuestTracker.lines(pc, quests, 100, "Wilk").get(0).endsWith("gotowe, wróć po nagrodę"));
+        pc.hunt().restore("wolf;7;0");
+        assertEquals("Zlecenie: Wilk 7/50", QuestTracker.lines(pc, quests, 100, "x", "Wilk").get(1), "the hunting task fills the free line");
     }
 }

@@ -11,8 +11,12 @@ public final class QuestTracker {
 
     private QuestTracker() {}
 
-    /** dailyName: nazwa potwora zadania dnia (albo klucz); today: biezacy dzien. */
     public static List<String> lines(PlayerCharacter pc, QuestSystem quests, long today, String dailyName) {
+        return lines(pc, quests, today, dailyName, pc.hunt().monster());
+    }
+
+    /** dailyName / huntName: nazwy potworow zadania dnia i zlecenia lowcy (albo klucze); today: biezacy dzien. */
+    public static List<String> lines(PlayerCharacter pc, QuestSystem quests, long today, String dailyName, String huntName) {
         List<String> out = new ArrayList<>();
         if (quests != null) {
             for (String key : pc.quests().active().keySet()) {
@@ -27,6 +31,11 @@ public final class QuestTracker {
         if (d.activeOn(today) && !d.claimed() && out.size() < MAX_LINES) {
             out.add(d.doneOn(today) ? "Zadanie dnia: gotowe, wróć do przewodnika"
                     : "Zadanie dnia: " + dailyName + " " + d.progress() + "/" + d.target());
+        }
+        HuntTask h = pc.hunt();
+        if (h.active() && out.size() < MAX_LINES) {
+            out.add(h.done() ? "Zlecenie łowcy: gotowe, wróć do przewodnika"
+                    : "Zlecenie: " + huntName + " " + h.progress() + "/" + h.target());
         }
         return out;
     }
