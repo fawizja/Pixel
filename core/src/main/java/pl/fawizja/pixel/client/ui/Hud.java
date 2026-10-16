@@ -183,8 +183,20 @@ public final class Hud {
         }
         pl.fawizja.pixel.world.Position died = session.combat().lastDeathPlace();
         if (died != null) out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Miejsce śmierci", died));
+        long t = session.lastUpdateMs();
+        if (t - huntGroundCheckedMs >= 1000 || t < huntGroundCheckedMs) {
+            huntGroundCheckedMs = t; // szukanie po wszystkich spawnach - najwyzej raz na sekunde
+            huntGround = session.huntingGround();
+        }
+        if (huntGround != null) {
+            out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Łowisko: " + monsterNames.apply(huntGround.monsterKey()), huntGround.center()));
+        }
         return out;
     }
+
+    /** Najblizsze lowisko zlecenia albo zadania dnia (znacznik na mapie), odswiezane co sekunde. */
+    private pl.fawizja.pixel.monster.SpawnPoint huntGround;
+    private long huntGroundCheckedMs = Long.MIN_VALUE / 2;
 
     private List<pl.fawizja.pixel.world.Position> markerPositions(GameSession session) {
         List<pl.fawizja.pixel.world.Position> out = new ArrayList<>();
@@ -1403,7 +1415,7 @@ public final class Hud {
         for (EventLog.Entry e : entries) {
             float age = (serverTimeMs - e.timeMs()) / 1000f;
             if (age > 8f) continue;
-            if (menuOpen && ly - 14 < menuY + menuH) break; // nie zaslaniaj naglowka otwartego okna
+            if ((menuOpen || bigMapOpen) && ly - 14 < menuY + menuH) break; // nie zaslaniaj naglowka otwartego okna
             float a = Math.max(0f, Math.min(1f, (8f - age) / 2f));
             font.setColor(e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.6f, 0.4f, a)
                     : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a) : new Color(1f, 1f, 1f, a));

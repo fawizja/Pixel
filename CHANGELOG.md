@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.154.0] - 2026-10-16
+
+### Dodano
+- Znacznik „Łowisko” na minimapie i dużej mapie: najbliższe miejsce potworów z zadania dnia albo zlecenia łowcy.
+
+### Naprawiono
+- Dziennik zdarzeń nie zasłania już tytułu dużej mapy.
 ## [0.153.0] - 2026-10-16
 
 ### Dodano
