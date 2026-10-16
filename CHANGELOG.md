@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.82.0] - 2026-10-16
+
+### Dodano
+- Wyszukiwanie przedmiotów `/szukaj nazwa`: okno z liczbą sztuk w plecaku, w depozycie i informacją, czy przedmiot
+  jest założony. Działa bez polskich znaków i wielkości liter, także po angielskim kluczu (np. `/szukaj futro`).
+
+### Zmieniono
+- Wiersz `/statystyki` w `/pomoc` podpowiada `/szukaj`.
+- 1 nowy test; łącznie 335.
+
 ## [0.81.0] - 2026-10-16
 
 ### Dodano

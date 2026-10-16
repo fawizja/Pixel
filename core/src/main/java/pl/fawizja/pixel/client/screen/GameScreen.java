@@ -500,6 +500,17 @@ public final class GameScreen extends ScreenAdapter {
             else showLoot(session.combat().lootLog().rows(now()));
             return;
         }
+        if (cmd.equals("/szukaj") || cmd.startsWith("/szukaj ")) {
+            String q = text.trim().length() > 7 ? text.trim().substring(7).trim() : "";
+            if (q.length() < pl.fawizja.pixel.inventory.ItemSearch.MIN_QUERY) {
+                session.log().add(now(), EventLog.Kind.INFO, "Wpisz co najmniej 2 litery nazwy, np. /szukaj futro.");
+                return;
+            }
+            List<String[]> rows = pl.fawizja.pixel.inventory.ItemSearch.rows(session.character(), session.items(), q);
+            if (rows.isEmpty()) session.log().add(now(), EventLog.Kind.INFO, "Nie masz przedmiotu \"" + q + "\" w plecaku, wyposażeniu ani depozycie.");
+            else hud.openInfo("Szukaj: " + q, rows);
+            return;
+        }
         if (cmd.equals("/statystyki") || cmd.equals("/staty")) {
             hud.openInfo("Statystyki: " + session.character().name(), pl.fawizja.pixel.game.StatsReport.rows(session.character()));
             return;
