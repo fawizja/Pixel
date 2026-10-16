@@ -1332,8 +1332,16 @@ public final class Hud {
         text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
         text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
 
-        List<EventLog.Entry> entries = session.log().latest(4);
         float ly = y - 76;
+        // sledzenie zadan pod stanem postaci, dziennik zdarzen nizej
+        font.setColor(0.85f, 0.9f, 1f, 1f);
+        for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
+                session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()))) {
+            text(batch, q, x, ly + 6);
+            ly -= 16;
+        }
+        font.setColor(Color.WHITE);
+        List<EventLog.Entry> entries = session.log().latest(4);
         for (EventLog.Entry e : entries) {
             float age = (serverTimeMs - e.timeMs()) / 1000f;
             if (age > 8f) continue;

@@ -202,6 +202,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Historia czatu (strzałki, podpowiedź na Androidzie) (0.83.0)
 - [x] Alarm niskiego zdrowia (ramka i dźwięk) (0.84.0)
 - [x] Automatyczne jedzenie, strony w panelu ustawień (0.85.0)
+- [x] Śledzenie zadań na ekranie (0.86.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

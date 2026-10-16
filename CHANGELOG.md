@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.86.0] - 2026-10-16
+
+### Dodano
+- Śledzenie zadań na ekranie: pod stanem postaci widać postęp aktywnego zadania („Zadanie: Plaga wilków 3/10”)
+  i zadania dnia, a gdy cel jest osiągnięty, przypomnienie o odbiorze nagrody. Najwyżej 2 wiersze.
+- 1 nowy test; łącznie 339. Scena `journal` odświeżona.
+
 ## [0.85.0] - 2026-10-16
 
 ### Dodano
