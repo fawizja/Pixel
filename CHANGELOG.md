@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.150.0] - 2026-10-16
+
+### Dodano
+- Osiągnięcia „Kronikarz” (40 różnych potworów) i „Legenda krainy” (40 zadań). Razem 29 osiągnięć.
 ## [0.149.0] - 2026-10-16
 
 ### Dodano
