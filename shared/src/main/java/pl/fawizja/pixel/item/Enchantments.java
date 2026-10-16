@@ -9,20 +9,26 @@ import java.util.Map;
  */
 public final class Enchantments {
     public enum Kind {
-        LIFE("Kradzież życia", "6% zadanych obrażeń leczy"),
-        MANA("Kradzież many", "3% zadanych obrażeń wraca jako mana"),
-        CRIT("Cios krytyczny", "10% szans na +50% obrażeń");
+        LIFE("Kradzież życia", "6% zadanych obrażeń leczy", true),
+        MANA("Kradzież many", "3% zadanych obrażeń wraca jako mana", true),
+        CRIT("Cios krytyczny", "10% szans na +50% obrażeń", true),
+        /** Zwoj nauki z plecaka (nie u kowala): +30% doswiadczenia za potwory. */
+        EXP("Zwój nauki", "+30% doświadczenia za potwory", false);
 
         private final String label;
         private final String effect;
+        private final boolean smith;
 
-        Kind(String label, String effect) {
+        Kind(String label, String effect, boolean smith) {
             this.label = label;
             this.effect = effect;
+            this.smith = smith;
         }
 
         public String label() { return label; }
         public String effect() { return effect; }
+        /** Czy zaklecie sprzedaje kowal (EXP pochodzi ze zwoju). */
+        public boolean smith() { return smith; }
     }
 
     public static final long DURATION_MS = 3_600_000L;
@@ -31,6 +37,12 @@ public final class Enchantments {
     public static final int MANA_PERCENT = 3;
     public static final int CRIT_CHANCE = 10;
     public static final int CRIT_BONUS_PERCENT = 50;
+    public static final int EXP_BONUS_PERCENT = 30;
+
+    /** Doswiadczenie ze zwojem nauki. */
+    public long experience(long exp) {
+        return active(Kind.EXP) ? exp + exp * EXP_BONUS_PERCENT / 100 : exp;
+    }
 
     private final EnumMap<Kind, Long> remaining = new EnumMap<>(Kind.class);
 

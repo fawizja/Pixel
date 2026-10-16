@@ -99,9 +99,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Potwor dnia (takze jego odmiana elitarna, bo ma ten sam klucz). */
     public boolean isBoosted(MonsterType t) { return boostedKey != null && t != null && boostedKey.equals(t.key()); }
 
-    /** Doswiadczenie za potwora dla poziomu postaci, z premia potwora dnia. */
+    /** Doswiadczenie za potwora dla poziomu postaci, z premia zwoju nauki i potwora dnia. */
     public long killExperience(MonsterType t, int level) {
-        long exp = Balance.experienceReward(t.experience(), t.level(), level);
+        long exp = pc.enchantments().experience(Balance.experienceReward(t.experience(), t.level(), level));
         return isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostExp(exp) : exp;
     }
 

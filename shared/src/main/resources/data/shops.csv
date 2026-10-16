@@ -189,3 +189,7 @@ varden_general;return_scroll;300;0
 frost_shop;return_scroll;300;0
 qas_shop;return_scroll;300;0
 selv_shop;return_scroll;300;0
+varden_general;exp_scroll;2000;0
+frost_shop;exp_scroll;2000;0
+qas_shop;exp_scroll;2000;0
+selv_shop;exp_scroll;2000;0

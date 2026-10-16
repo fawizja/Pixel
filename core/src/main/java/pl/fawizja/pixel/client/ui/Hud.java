@@ -864,6 +864,7 @@ public final class Hud {
                     right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; nieudana próba zabiera tylko złoto", false));
                     pl.fawizja.pixel.item.Enchantments ench = pc.enchantments();
                     for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
+                        if (!k.smith()) continue;
                         long price = pl.fawizja.pixel.item.Enchantments.price(k, pc.level());
                         String left0 = ench.active(k) ? ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k)) : "";
                         right.add(new MenuRow("npc:enchant:" + k.name(), k.label() + " (1 h)", k.effect() + "; " + price + " gp" + left0,

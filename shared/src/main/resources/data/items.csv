@@ -113,3 +113,4 @@
 129;pet_cat;Kocię;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#e09a40;Rude kocię z Selvaran. Użyj, aby chodziło za tobą (i jeszcze raz, aby odpoczęło).
 130;pet_raven;Kruk;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#303040;Oswojony kruk z Frostholm. Użyj, aby leciał za tobą (i jeszcze raz, aby odpoczął).
 131;pet_fennec;Fenek;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8c890;Pustynny lisek z Qasirah. Użyj, aby biegł za tobą (i jeszcze raz, aby odpoczął).
+132;exp_scroll;Zwój nauki;TOOL;20;400;NONE;0;0;0;0;*;0;0;PHYSICAL;#9fd4ee;Przeczytany daje +30% doświadczenia za potwory przez godzinę polowania (czas płynie tylko poza strefą ochronną).

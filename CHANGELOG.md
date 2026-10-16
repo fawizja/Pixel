@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.68.0] - 2026-10-16
+
+### Dodano
+- Zwój nauki (u kupców w czterech miastach, 2000 gp): UŻYJ w plecaku daje +30% doświadczenia za potwory
+  przez godzinę polowania (do 3 godzin zapasu; czas płynie tylko poza strefą ochronną). Działa też w drużynie
+  i łączy się z potworem dnia. Pozostały czas widać w oknie analizy polowania.
+- 1 nowy test; łącznie 317.
+
 ## [0.67.0] - 2026-10-16
 
 ### Dodano

@@ -73,4 +73,28 @@ class EnchantmentTest {
         assertTrue(s.combat().damageMonster(m, 200, DamageType.PHYSICAL, 11_000) > 0);
         assertTrue(pc.health() > hp, "life leech heals after a hit");
     }
+
+    @Test
+    void scrollOfLearningGivesMoreExperienceAndIsSoldInEveryTown() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
+        GameSession s = new TownServicesTest().session(pc, List.of());
+        int scroll = TestData.ITEMS.byKey("exp_scroll").id();
+        for (String shop : new String[] {"varden_general", "selv_shop", "frost_shop", "qas_shop"}) {
+            assertNotNull(TownServicesTest.shops.get(shop).offer(scroll), shop + " sells the scroll");
+        }
+        pl.fawizja.pixel.monster.MonsterType troll = TownServicesTest.MONSTERS.get("boar");
+        long plain = s.combat().killExperience(troll, pc.level());
+        pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(scroll, 4));
+        int slot = -1;
+        for (int i = 0; i < pc.backpack().size(); i++) if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == scroll) slot = i;
+        s.useSlot(slot, 1000);
+        assertEquals(3, pc.backpack().count(scroll), "reading uses up one scroll");
+        assertTrue(pc.enchantments().active(Kind.EXP));
+        assertEquals(plain + plain * Enchantments.EXP_BONUS_PERCENT / 100, s.combat().killExperience(troll, pc.level()));
+        s.useSlot(slot, 1100);
+        s.useSlot(slot, 1200);
+        s.useSlot(slot, 1300);
+        assertEquals(1, pc.backpack().count(scroll), "no more than 3 hours in stock");
+        assertFalse(Kind.EXP.smith(), "the smith does not sell it");
+    }
 }

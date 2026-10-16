@@ -596,6 +596,7 @@ public final class GameSession {
         pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(slot);
         if (st != null && items.get(st.itemId()).key().equals("saddle")) return useSaddle(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("return_scroll")) return startRecall(nowMs);
+        if (st != null && items.get(st.itemId()).key().equals("exp_scroll")) return readExpScroll(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
         return spells.useItem(slot, nowMs);
     }
@@ -643,6 +644,21 @@ public final class GameSession {
     }
 
     /** Siodlo: oswaja konia na stale (przedmiot znika). */
+    /** Zwoj nauki: godzina +30% doswiadczenia za potwory (do 3 godzin zapasu). */
+    private CastResult readExpScroll(int slot, long nowMs) {
+        pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
+        pl.fawizja.pixel.item.Enchantments.Kind k = pl.fawizja.pixel.item.Enchantments.Kind.EXP;
+        if (!e.canExtend(k)) {
+            log.add(nowMs, EventLog.Kind.INFO, "Wiedzy ze zwojów starczy jeszcze na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + ".");
+            return CastResult.OK;
+        }
+        if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
+        e.extend(k);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Zwój nauki: +" + pl.fawizja.pixel.item.Enchantments.EXP_BONUS_PERCENT
+                + "% doświadczenia za potwory przez " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
+        return CastResult.OK;
+    }
+
     private CastResult useSaddle(int slot, long nowMs) {
         if (pc.hasMount()) {
             log.add(nowMs, EventLog.Kind.INFO, "Masz już wierzchowca. Wsiadasz przyciskiem KOŃ (klawisz M).");
