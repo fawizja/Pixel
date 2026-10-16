@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.49.0] - 2026-10-16
+
+### Dodano
+- Pogoda na powierzchni: w około 30% dwudziestominutowych okien pada. Rodzaj zależy od krainy: deszcz
+  (Varden, dżungla), śnieg (mroźne krainy), burza piaskowa (pustynia Qasirah). Opady narastają i zanikają
+  na brzegach okna, lekko przyciemniają świat, a zmiana pogody pojawia się w dzienniku. Pod ziemią zawsze
+  pogodnie. Pogoda wynika z zegara i nazwy krainy, więc gracze online widzą to samo bez nowych komunikatów.
+  Przy oszczędzaniu zasobów rysowanych jest mniej kropli.
+- Analiza polowania liczy też wartość zebranych przedmiotów (cena z items.csv) i jej tempo na godzinę.
+- `world/Weather`, `client/render/WeatherRenderer` (bez stanu, bez alokacji), opcja `-Dpixel.weather=rain|snow|sandstorm|clear`,
+  scena `rain` w regresji GUI (28 scen). Manekin ma ciemny obrys (widoczny na piasku). 3 nowe testy; łącznie 282.
+
 ## [0.48.0] - 2026-10-16
 
 ### Dodano

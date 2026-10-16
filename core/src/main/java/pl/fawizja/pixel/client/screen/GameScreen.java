@@ -38,6 +38,7 @@ import pl.fawizja.pixel.perf.ResourceGuard;
 import pl.fawizja.pixel.time.WorldClock;
 import pl.fawizja.pixel.world.Direction;
 import pl.fawizja.pixel.world.Lighting;
+import pl.fawizja.pixel.world.Weather;
 import pl.fawizja.pixel.world.Position;
 import pl.fawizja.pixel.game.Actions;
 import pl.fawizja.pixel.game.MovePredictor;
@@ -537,9 +538,34 @@ public final class GameScreen extends ScreenAdapter {
     private int walkIndex;
     private pl.fawizja.pixel.npc.Npc walkNpc;
 
+    /**
+     * Pogoda: -Dpixel.weather=rain|snow|sandstorm|clear wymusza rodzaj (narzedzia, zrzuty); przy -Dpixel.hour
+     * bez niej zawsze pogodnie, by regresja GUI nie zalezala od zegara.
+     */
+    private final Weather.Kind forcedWeather = Weather.parse(System.getProperty("pixel.weather",
+            System.getProperty("pixel.hour") != null ? "clear" : null));
+    private final pl.fawizja.pixel.client.render.WeatherRenderer weatherRenderer = new pl.fawizja.pixel.client.render.WeatherRenderer();
+    /** Przy -Dpixel.hour opady stoja w miejscu: zrzut regresji GUI nie zalezy od czasu klatki. */
+    private final boolean frozenWeather = System.getProperty("pixel.hour") != null;
+    private Weather.Kind lastWeather;
+    private int lastWeatherZ;
+
+    /** Pogoda nad graczem; zmiana rodzaju trafia do dziennika. */
+    private Weather.Kind weatherAt(Position p, long wallMs) {
+        Weather.Kind k = forcedWeather != null ? (p.z() < 0 ? Weather.Kind.CLEAR : forcedWeather)
+                : Weather.at(wallMs, game.world().regionAt(p), p.z());
+        // komunikat tylko przy zmianie pogody na miejscu (nie przy zejsciu pod ziemie i powrocie)
+        if (lastWeather != null && k != lastWeather && p.z() >= 0 && lastWeatherZ >= 0) {
+            session.log().add(now(), EventLog.Kind.INFO, Weather.describe(k));
+        }
+        lastWeatherZ = p.z();
+        lastWeather = k;
+        return k;
+    }
+
     private static final String HUNT_TITLE = "Analiza polowania";
     /** Licznik polowania (od wejscia do gry albo od "Zacznij od nowa"); liczy z danych postaci, dziala tez online. */
-    private final pl.fawizja.pixel.stats.HuntAnalyzer hunt = new pl.fawizja.pixel.stats.HuntAnalyzer();
+    private pl.fawizja.pixel.stats.HuntAnalyzer hunt;
     private long huntRefreshMs;
 
     private List<String[]> huntRows(long t) {
@@ -550,12 +576,14 @@ public final class GameScreen extends ScreenAdapter {
 
     private void openHunt() {
         long t = now();
+        updateHunt(t);
         hud.openInfo(HUNT_TITLE, huntRows(t));
         huntRefreshMs = t;
     }
 
     /** Odswiezanie otwartego okna analizy co sekunde; licznik startuje z pierwsza klatka gry. */
     private void updateHunt(long t) {
+        if (hunt == null) hunt = new pl.fawizja.pixel.stats.HuntAnalyzer(session.items());
         if (!hunt.started()) hunt.reset(t, session.character());
         if (t - huntRefreshMs >= 1000 && hud.infoOpen(HUNT_TITLE)) {
             hud.updateInfo(HUNT_TITLE, huntRows(t));
@@ -791,10 +819,23 @@ public final class GameScreen extends ScreenAdapter {
         batch.end();
 
         int minute = session.clock().minuteOfDay(t);
-        float ambient = Lighting.ambientForFloor(z, session.clock().ambientLight(minute));
+        long wallMs = System.currentTimeMillis();
+        Weather.Kind weather = weatherAt(pc.position(), wallMs);
+        float rain = forcedWeather != null ? 1f : Weather.intensity(wallMs);
+        float quality = Math.min(settings.qualityCap(), guard.effectsQuality());
+        float ambient = Lighting.ambientForFloor(z, session.clock().ambientLight(minute)) * Weather.ambientFactor(weather, rain);
         lightRenderer.render(batch, camera, game.world().floor(z), game.world().height(), ambient,
-                Math.min(settings.qualityCap(), guard.effectsQuality()), camX, camY, Lighting.playerLightRadius(pc, game.items()));
+                quality, camX, camY, Lighting.playerLightRadius(pc, game.items()));
         batch.setColor(Color.WHITE);
+        if (weather != Weather.Kind.CLEAR) {
+            batch.setProjectionMatrix(camera.combined);
+            batch.begin();
+            float vw = viewport.getWorldWidth();
+            float vh = viewport.getWorldHeight();
+            weatherRenderer.render(batch, game.art().white(), weather, rain, quality,
+                    camera.position.x - vw / 2f, camera.position.y - vh / 2f, vw, vh, frozenWeather ? 0L : t);
+            batch.end();
+        }
         drawCombatOverlay(batch, game.shapes(), t, z);
 
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);

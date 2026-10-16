@@ -614,12 +614,14 @@ public final class TileArt implements Disposable {
         rect(pm, ox, oy, 5, 14, 6, 2, shade(wood, 0.7f)); // podstawa
         rect(pm, ox, oy, 7, 2, 2, 13, wood);              // slup
         rect(pm, ox, oy, 2, 6, 12, 2, wood);              // ramiona
+        rect(pm, ox, oy, 4, 7, 8, 7, shade(wood, 0.6f));  // obrys tulowia
         rect(pm, ox, oy, 5, 7, 6, 6, sack);               // tulow
         rect(pm, ox, oy, 5, 12, 6, 1, shade(sack, 0.75f));
         rect(pm, ox, oy, 4, 10, 1, 2, straw);             // wystajaca sloma
         rect(pm, ox, oy, 11, 9, 1, 2, straw);
         disc(pm, ox, oy, 8f, 9.5f, 1.6f, red);            // tarcza celu
         disc(pm, ox, oy, 8f, 9.5f, 0.7f, Color.WHITE);
+        disc(pm, ox, oy, 8f, 3.5f, 2.9f, shade(wood, 0.6f)); // obrys glowy (widoczny tez na piasku)
         disc(pm, ox, oy, 8f, 3.5f, 2.2f, sack);           // glowa
     }
 

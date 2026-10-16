@@ -26,3 +26,4 @@ chat|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dp
 journal|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.open=journal
 bosses|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.button=npc:bosses
 bagitem|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.open=bagitem -Dpixel.teleport=79,84,0
+rain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.weather=rain -Dpixel.teleport=79,90,0
