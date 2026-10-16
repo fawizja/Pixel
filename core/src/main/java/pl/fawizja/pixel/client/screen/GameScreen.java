@@ -225,6 +225,15 @@ public final class GameScreen extends ScreenAdapter {
         this.markers = pl.fawizja.pixel.settings.MapMarkers.decode(markerPrefs.getString(barKey(pc), System.getProperty("pixel.markers")));
         this.ignored = pl.fawizja.pixel.settings.IgnoreList.decode(markerPrefs.getString("ignore:" + barKey(pc), ""));
         hud.setMarkers(markers);
+        // po aktualizacji gry raz pokaz "Co nowego" (pierwsze uruchomienie tylko zapamietuje wersje)
+        String changelog = pl.fawizja.pixel.game.WhatsNew.load();
+        String latest = pl.fawizja.pixel.game.WhatsNew.latestVersion(changelog);
+        String seenVersion = settingsPrefs.getString("whatsnew", null);
+        if (latest != null && !latest.equals(seenVersion)) {
+            if (seenVersion != null) showWhatsNew();
+            settingsPrefs.putString("whatsnew", latest);
+            settingsPrefs.flush();
+        }
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
         if (net != null) lastSelf = net.selfSave();
@@ -518,6 +527,10 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (cmd.equals("/pomoc") || cmd.equals("/polecenia") || cmd.equals("/help")) {
             hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
+            return;
+        }
+        if (cmd.equals("/nowosci") || cmd.equals("/nowości") || cmd.equals("/zmiany")) {
+            showWhatsNew();
             return;
         }
         if (cmd.equals("/wydarzenia") || cmd.equals("/dzis")) {
@@ -939,6 +952,12 @@ public final class GameScreen extends ScreenAdapter {
      * quiet: dotkniecie swiata (bez komunikatow); nextTo: zatrzymanie na polu obok celu (NPC, cialo).
      * Zwraca, czy marsz sie zaczal.
      */
+    /** Okno "Co nowego" z dziennika zmian dolaczonego do gry (3 ostatnie wersje). */
+    private void showWhatsNew() {
+        java.util.List<String[]> rows = pl.fawizja.pixel.game.WhatsNew.rows(pl.fawizja.pixel.game.WhatsNew.load(), 5, 18);
+        hud.openInfo("Co nowego w grze", rows);
+    }
+
     /** Marsz do najblizszego legowiska potwora ze zlecenia lowcy albo zadania dnia (/idz lowisko, dziennik). */
     private void goHunting(long now) {
         pl.fawizja.pixel.monster.SpawnPoint sp = session.huntingGround();

@@ -5,3 +5,8 @@ description = 'Pixel - logika gry wspolna dla klienta i serwera'
 dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
 }
+
+// dziennik zmian w grze (okno "Co nowego")
+processResources {
+    from(rootProject.file('CHANGELOG.md')) { into 'data' }
+}

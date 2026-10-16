@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.131.0] - 2026-10-16
+
+### Dodano
+- Okno „Co nowego w grze” (`/nowości` albo `/zmiany`) z punktami pięciu ostatnich wersji. Po aktualizacji
+  gry otwiera się samo raz; dziennik zmian jest dołączony do gry.
 ## [0.130.0] - 2026-10-16
 
 ### Dodano
