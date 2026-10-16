@@ -164,6 +164,17 @@ public final class Hud {
     private pl.fawizja.pixel.world.Position walkTarget;
 
     public void setWalkTarget(pl.fawizja.pixel.world.Position p) { walkTarget = p; }
+
+    /** Wlasne znaczniki gracza (zolte kropki na minimapie i mapie pietra). */
+    private pl.fawizja.pixel.settings.MapMarkers markers = new pl.fawizja.pixel.settings.MapMarkers();
+
+    public void setMarkers(pl.fawizja.pixel.settings.MapMarkers m) { markers = m; }
+
+    private List<pl.fawizja.pixel.world.Position> markerPositions() {
+        List<pl.fawizja.pixel.world.Position> out = new ArrayList<>();
+        for (pl.fawizja.pixel.settings.MapMarkers.Marker m : markers.all()) out.add(m.at());
+        return out;
+    }
     private static final int MINIMAP_TILES = 60;
     /** Ustawienia gracza pokazywane pod diagnostyka (klikalne wiersze "settings:*"). */
     private pl.fawizja.pixel.settings.GameSettings settings;
@@ -1388,7 +1399,7 @@ public final class Hud {
             }
             font.setColor(Color.WHITE);
         }
-        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, mmX, mmY, mmSize, MINIMAP_TILES);
+        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
             float dy = h - 50;
@@ -1409,7 +1420,7 @@ public final class Hud {
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
         pl.fawizja.pixel.world.Position p = session.character().position();
         text(batch, "Mapa - piętro " + floor + " (dotknij miejsca, aby tam iść)", menuX + 10, menuY + menuH - 8);
-        float[] img = minimap.drawWhole(batch, session.world(), p, walkTarget, menuX + 8, menuY + 8, menuW - 16, menuH - 34);
+        float[] img = minimap.drawWhole(batch, session.world(), p, walkTarget, markerPositions(), menuX + 8, menuY + 8, menuW - 16, menuH - 34);
         bigMapImg = img;
         if (img == null) return;
         font.getData().setScale(0.85f);
@@ -1419,6 +1430,12 @@ public final class Hud {
             float ty = img[1] + img[3] - t.temple().y() * img[2];
             text(batch, t.name(), tx - 20, ty + 14);
         }
+        font.setColor(new Color(1f, 0.85f, 0.2f, 1f));
+        for (pl.fawizja.pixel.settings.MapMarkers.Marker m : markers.all()) {
+            if (m.at().z() != p.z()) continue;
+            text(batch, m.name(), img[0] + m.at().x() * img[2] + 6, img[1] + img[3] - m.at().y() * img[2] + 6);
+        }
+        font.setColor(Color.WHITE);
         font.getData().setScale(1f);
     }
 

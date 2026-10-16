@@ -199,11 +199,11 @@ public final class ChatCommands {
             {"/potwór", "dzisiejszy potwór z premią"},
             {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
             {"/zadania", "dziennik zadań"},
-            {"/osiągnięcia", "osiągnięcia i tytuły"},
-            {"/bestiariusz", "pokonane potwory i ich karty"},
+            {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
             {"/ranking", "najlepsi gracze serwera"},
             {"/znajomi", "lista znajomych"},
             {"/rynek", "oferty rynku (u bankiera)"},
+            {"/znaczniki", "własne miejsca na mapie (/znacznik nazwa zapisuje)"},
         };
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {
@@ -219,5 +219,5 @@ public final class ChatCommands {
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /znacznik nazwa, /znaczniki, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

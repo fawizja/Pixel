@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.71.0] - 2026-10-16
+
+### Dodano
+- Własne znaczniki na mapie: `/znacznik nazwa` zapisuje miejsce, w którym stoisz (żółta kropka na minimapie,
+  podpis na mapie piętra), `/znaczniki` pokazuje listę z odległością, a dotknięcie prowadzi postać na miejsce.
+  `/znacznik usuń nazwa` kasuje. Do 20 znaczników na postać, zapisywane na urządzeniu.
+- Scena GUI `markers` (32 sceny). Wiersz `/znaczniki` w oknie `/pomoc`.
+- 1 nowy test; łącznie 321.
+
 ## [0.70.0] - 2026-10-16
 
 ### Dodano

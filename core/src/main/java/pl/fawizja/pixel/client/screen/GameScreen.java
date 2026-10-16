@@ -84,6 +84,8 @@ public final class GameScreen extends ScreenAdapter {
     private final java.util.Map<Position, float[]> lunges = new java.util.HashMap<>();
     private final com.badlogic.gdx.Preferences settingsPrefs;
     private final com.badlogic.gdx.Preferences barPrefs;
+    private final com.badlogic.gdx.Preferences markerPrefs;
+    private final pl.fawizja.pixel.settings.MapMarkers markers;
 
     private static String barKey(PlayerCharacter pc) {
         return pc.name().trim().toLowerCase(java.util.Locale.ROOT);
@@ -212,6 +214,9 @@ public final class GameScreen extends ScreenAdapter {
         // wlasny uklad paska czarow, osobno dla kazdej postaci
         this.barPrefs = Gdx.app.getPreferences("pixel-bar");
         hud.setSpellBar(pl.fawizja.pixel.settings.SpellBar.decode(barPrefs.getString(barKey(pc), null)));
+        this.markerPrefs = Gdx.app.getPreferences("pixel-markers");
+        this.markers = pl.fawizja.pixel.settings.MapMarkers.decode(markerPrefs.getString(barKey(pc), System.getProperty("pixel.markers")));
+        hud.setMarkers(markers);
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
         if (net != null) lastSelf = net.selfSave();
@@ -493,6 +498,10 @@ public final class GameScreen extends ScreenAdapter {
             session.log().add(now(), EventLog.Kind.SYSTEM, "Potwór dnia: " + pl.fawizja.pixel.daily.BoostedCreature.describe(session.boostedCreature()) + ".");
             return;
         }
+        if (cmd.equals("/znaczniki") || cmd.startsWith("/znacznik ") || cmd.equals("/znacznik")) {
+            markerCommand(text.trim(), cmd);
+            return;
+        }
         if (cmd.equals("/bossowie")) {
             bossReport(now());
             return;
@@ -633,6 +642,38 @@ public final class GameScreen extends ScreenAdapter {
     /** Licznik polowania (od wejscia do gry albo od "Zacznij od nowa"); liczy z danych postaci, dziala tez online. */
     private pl.fawizja.pixel.stats.HuntAnalyzer hunt;
     private long huntRefreshMs;
+
+    /** /znacznik nazwa (tu), /znacznik usuń nazwa, /znaczniki (lista z marszem). */
+    private void markerCommand(String text, String cmd) {
+        long t = now();
+        PlayerCharacter pc = session.character();
+        int sp = text.indexOf(' ');
+        String arg = sp < 0 ? "" : text.substring(sp + 1).trim();
+        if (cmd.startsWith("/znacznik ") && (cmd.startsWith("/znacznik usun ") || cmd.startsWith("/znacznik usuń "))) {
+            String name = arg.substring(arg.indexOf(' ') + 1);
+            session.log().add(t, EventLog.Kind.INFO, markers.remove(name) ? "Usunięto znacznik " + name + "." : "Nie ma znacznika " + name + ".");
+        } else if (cmd.startsWith("/znacznik ") && !arg.isEmpty()) {
+            if (markers.put(arg, pc.position())) {
+                session.log().add(t, EventLog.Kind.SYSTEM, "Znacznik " + pl.fawizja.pixel.settings.MapMarkers.cleanName(arg) + " zapisany tutaj (żółta kropka na mapie).");
+            } else {
+                session.log().add(t, EventLog.Kind.WARNING, "Najwyżej " + pl.fawizja.pixel.settings.MapMarkers.MAX + " znaczników. Usuń któryś: /znacznik usuń nazwa");
+            }
+        } else {
+            List<String[]> rows = new ArrayList<>();
+            for (pl.fawizja.pixel.settings.MapMarkers.Marker m : markers.all()) {
+                boolean here = m.at().z() == pc.position().z();
+                int dist = here ? Math.max(Math.abs(m.at().x() - pc.position().x()), Math.abs(m.at().y() - pc.position().y())) : -1;
+                rows.add(here ? new String[] {m.name(), dist + " pól stąd (dotknij, aby iść)", "", "map:goto:" + m.at().x() + "," + m.at().y()}
+                        : new String[] {m.name(), "inne piętro (" + m.at().z() + ")"});
+            }
+            if (rows.isEmpty()) rows.add(new String[] {"Brak znaczników", "/znacznik nazwa zapisuje miejsce, w którym stoisz"});
+            rows.add(new String[] {"Usuwanie", "/znacznik usuń nazwa"});
+            hud.openInfo("Znaczniki", rows);
+            return;
+        }
+        markerPrefs.putString(barKey(pc), markers.encode());
+        markerPrefs.flush();
+    }
 
     private List<String[]> huntRows(long t) {
         List<String[]> rows = pl.fawizja.pixel.stats.HuntAnalyzer.rows(hunt.report(t, session.character()));

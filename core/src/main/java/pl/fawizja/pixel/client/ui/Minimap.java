@@ -55,7 +55,8 @@ final class Minimap {
     }
 
     /** Wycinek tiles x tiles kafelkow wokol gracza w kwadracie (x, y, size). */
-    void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, float x, float y, float size, int tiles) {
+    void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+                    float x, float y, float size, int tiles) {
         Texture t = texture(w, p.z());
         if (t != null) {
             int half = tiles / 2;
@@ -71,6 +72,13 @@ final class Minimap {
             }
         }
         float px = size / tiles;
+        for (Position m : marks) {
+            if (m.z() != p.z()) continue;
+            int mx = m.x() - (p.x() - tiles / 2), my = m.y() - (p.y() - tiles / 2);
+            if (mx >= 0 && my >= 0 && mx < tiles && my < tiles) {
+                marker(batch, x + (mx + 0.5f) * px, y + size - (my + 0.5f) * px, Math.max(4, px * 2), MARK);
+            }
+        }
         if (target != null && target.z() == p.z()) {
             int tx = target.x() - (p.x() - tiles / 2), ty = target.y() - (p.y() - tiles / 2);
             if (tx >= 0 && ty >= 0 && tx < tiles && ty < tiles) {
@@ -81,13 +89,17 @@ final class Minimap {
     }
 
     /** Cale pietro wpisane w prostokat; zwraca {x, y, skala} narysowanego obrazu (do podpisow). */
-    float[] drawWhole(SpriteBatch batch, WorldMap w, Position p, Position target, float x, float y, float bw, float bh) {
+    float[] drawWhole(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+                      float x, float y, float bw, float bh) {
         Texture t = texture(w, p.z());
         if (t == null) return null;
         float scale = Math.min(bw / t.getWidth(), bh / t.getHeight());
         float iw = t.getWidth() * scale, ih = t.getHeight() * scale;
         float ix = x + (bw - iw) / 2f, iy = y + (bh - ih) / 2f;
         batch.draw(t, ix, iy, iw, ih, 0, 0, t.getWidth(), t.getHeight(), false, false);
+        for (Position m : marks) {
+            if (m.z() == p.z()) marker(batch, ix + (m.x() + 0.5f) * scale, iy + ih - (m.y() + 0.5f) * scale, Math.max(5, scale * 2), MARK);
+        }
         if (target != null && target.z() == p.z()) {
             marker(batch, ix + (target.x() + 0.5f) * scale, iy + ih - (target.y() + 0.5f) * scale, Math.max(5, scale * 2), TARGET);
         }
@@ -97,6 +109,7 @@ final class Minimap {
 
     private static final Color PLAYER = new Color(1f, 0.2f, 0.2f, 1f);
     private static final Color TARGET = new Color(0.3f, 0.9f, 1f, 1f);
+    private static final Color MARK = new Color(1f, 0.85f, 0.2f, 1f);
 
     private void marker(SpriteBatch batch, float cx, float cy, float s, Color c) {
         Color old = batch.getColor().cpy();
