@@ -210,6 +210,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Odłożenie całego łupu do depozytu jednym dotknięciem (0.91.0)
 - [x] Osiągnięcia: boss tygodnia i 10 godzin gry (0.92.0)
 - [x] Znacznik bossa tygodnia na mapie (0.93.0)
+- [x] Uzupełnianie run i amunicji u kupca (0.94.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

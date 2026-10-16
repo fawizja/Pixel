@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.94.0] - 2026-10-16
+
+### Zmieniono
+- „Uzupełnij zapasy” u kupca dokupuje teraz także runy niesione w plecaku (do 20) i amunicję
+  (z plecaka i z gniazda amunicji, do 100), a nie tylko mikstury.
+- Jaśniejszy komunikat, gdy zapasy są pełne albo brakuje monet.
 ## [0.93.0] - 2026-10-16
 
 ### Dodano

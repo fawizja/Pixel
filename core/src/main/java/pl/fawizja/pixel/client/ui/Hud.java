@@ -912,7 +912,8 @@ public final class Hud {
                 }
                 if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
                 right.add(new MenuRow("npc:smith", "Ulepsz wyposażenie", "kowal: broń, tarcza i zbroja do +5", true));
-                right.add(new MenuRow("npc:refill", "Uzupełnij mikstury", "zdrowia i many do " + pl.fawizja.pixel.game.GameSession.REFILL_TO + " sztuk", true));
+                right.add(new MenuRow("npc:refill", "Uzupełnij zapasy", "mikstury i runy do " + pl.fawizja.pixel.game.GameSession.REFILL_TO
+                        + ", amunicja do " + pl.fawizja.pixel.game.GameSession.REFILL_AMMO_TO, true));
                 right.add(new MenuRow("npc:sellloot", "Sprzedaj cały łup", "materiały bez przedmiotów do zadań; pojedynczo: dotknij", true));
                 java.util.Set<Integer> seen = new java.util.LinkedHashSet<>();
                 for (ItemStack s : pc.backpack().contents()) if (s != null) seen.add(s.itemId());

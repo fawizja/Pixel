@@ -40,4 +40,17 @@ class RefillTest {
         assertEquals(0, s.refillSupplies(1400));
         assertEquals(GameSession.REFILL_TO - 10, pc.backpack().count(hp));
     }
+
+    @Test
+    void carriedAmmunitionIsToppedUpToOneHundred() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        GameSession s = new TownServicesTest().session(pc, List.of());
+        int spear = TestData.ITEMS.byKey("spear").id();
+        pl.fawizja.pixel.item.ItemStack worn = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO);
+        int wornSpears = worn != null && worn.itemId() == spear ? worn.count() : 0;
+        pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(spear, 30));
+        s.teleport(TownServicesTest.talkSpot(TownServicesTest.npcs.get("varden_merchant")), 1100);
+        assertTrue(s.refillSupplies(1200) > 0);
+        assertEquals(GameSession.REFILL_AMMO_TO, pc.backpack().count(spear) + wornSpears);
+    }
 }

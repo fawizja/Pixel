@@ -439,9 +439,22 @@ public final class GameSession {
     static final String[] REFILL_KEYS = {"health_potion", "mana_potion"};
 
     /**
-     * Uzupelnienie mikstur zdrowia i many do {@link #REFILL_TO} sztuk jednym dotknieciem (tyle, na ile starczy monet).
+     * Uzupelnienie zapasow jednym dotknieciem (tyle, na ile starczy monet): mikstury zdrowia i many oraz noszone runy
+     * do {@link #REFILL_TO} sztuk, noszona amunicja do {@link #REFILL_AMMO_TO}.
      * Zwraca liczbe kupionych sztuk.
      */
+    /** Docelowa liczba sztuk amunicji po uzupelnieniu. */
+    public static final int REFILL_AMMO_TO = 100;
+
+    private static boolean isRefillable(pl.fawizja.pixel.item.ItemType t) {
+        return t != null && (t.category() == pl.fawizja.pixel.item.ItemCategory.POTION || t.category() == pl.fawizja.pixel.item.ItemCategory.RUNE
+                || t.category() == pl.fawizja.pixel.item.ItemCategory.AMMUNITION);
+    }
+
+    static int refillTarget(pl.fawizja.pixel.item.ItemType t) {
+        return t.category() == pl.fawizja.pixel.item.ItemCategory.AMMUNITION ? REFILL_AMMO_TO : REFILL_TO;
+    }
+
     public int refillSupplies(long nowMs) {
         Npc n = talkTo(NpcRole.MERCHANT, nowMs);
         if (n == null) return 0;
@@ -449,10 +462,17 @@ public final class GameSession {
         List<String> bought = new java.util.ArrayList<>();
         int total = 0;
         boolean poor = false;
-        for (String key : REFILL_KEYS) {
-            pl.fawizja.pixel.item.ItemType t = items.byKey(key);
+        // mikstury zdrowia i many zawsze, a do tego kazde runy i amunicja, ktore postac ma przy sobie
+        java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
+        for (String key : REFILL_KEYS) if (items.byKey(key) != null) ids.add(items.byKey(key).id());
+        for (ItemStack st : pc.backpack().contents()) if (st != null && isRefillable(items.get(st.itemId()))) ids.add(st.itemId());
+        ItemStack ammo = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO);
+        if (ammo != null && isRefillable(items.get(ammo.itemId()))) ids.add(ammo.itemId());
+        for (int id : ids) {
+            pl.fawizja.pixel.item.ItemType t = items.get(id);
             if (t == null || shop == null || shop.offer(t.id()) == null || !shop.offer(t.id()).sold()) continue;
-            int want = REFILL_TO - pc.backpack().count(t.id());
+            int carried = pc.backpack().count(t.id()) + (ammo != null && ammo.itemId() == t.id() ? ammo.count() : 0);
+            int want = refillTarget(t) - carried;
             if (want <= 0) continue;
             long price = shop.offer(t.id()).buyPrice();
             int afford = (int) Math.min(want, price <= 0 ? want : pl.fawizja.pixel.economy.Money.totalValue(pc.backpack()) / price);
@@ -468,7 +488,8 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.LOOT, "Kupiono: " + String.join(", ", bought) + (poor ? " (zabrakło monet na resztę)." : "."));
         } else {
             log.add(nowMs, poor ? EventLog.Kind.WARNING : EventLog.Kind.INFO,
-                    poor ? "Za mało monet w plecaku na mikstury." : "Masz już po " + REFILL_TO + " mikstur zdrowia i many.");
+                    poor ? "Za mało monet w plecaku na zapasy." : "Masz już pełne zapasy (" + REFILL_TO + " mikstur i run, "
+                            + REFILL_AMMO_TO + " sztuk amunicji).");
         }
         return total;
     }
