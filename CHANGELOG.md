@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.69.0] - 2026-10-16
+
+### Dodano
+- Wiadomość dnia gildii: lider ustawia ją poleceniem `/gildia wiadomość tekst` (pusty tekst usuwa, do 120 znaków).
+  Członkowie dostają ją od razu, przy każdym wejściu do gry i w `/gildia`. Zapisywana w guilds.txt
+  (stare pliki bez wiadomości wczytują się bez zmian).
+- 1 nowy test i rozszerzony test sieciowy gildii; łącznie 318.
+
 ## [0.68.0] - 2026-10-16
 
 ### Dodano

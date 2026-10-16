@@ -641,6 +641,10 @@ class NetworkSyncTest {
             });
             ula.send("GCHAT", "hej");
             awaitMessage(ola, "guild chat", m -> m[0].equals("CHAT") && m[1].equals("[Wilcze Kly] Ula") && m[2].equals("hej"));
+            ula.send("GUILD", "MOTD", "ja tu rządzę");
+            awaitMessage(ula, "only the leader", m -> m[0].equals("LOG") && m[2].contains("Tylko lider"));
+            ola.send("GUILD", "MOTD", "Zbiórka o 20:00");
+            awaitMessage(ula, "motd broadcast", m -> m[0].equals("LOG") && m[2].contains("Wiadomość gildii: Zbiórka o 20:00"));
         }
         await("both left", () -> server.world().players().isEmpty());
         server.close();
@@ -654,6 +658,7 @@ class NetworkSyncTest {
                 RemoteEntity u = seen(a, "Ula");
                 return u != null && "Wilcze Kly".equals(u.guild());
             });
+            awaitMessage(b, "motd on login", m -> m[0].equals("LOG") && m[2].contains("Wiadomość gildii Wilcze Kly: Zbiórka o 20:00"));
         }
     }
 

@@ -53,6 +53,27 @@ class GuildTest {
     }
 
     @Test
+    void leaderSetsAMessageOfTheDayThatIsSaved() {
+        GuildRegistry g = new GuildRegistry();
+        assertEquals(GuildRegistry.Result.OK, g.create("Ola", "Wilcze Kly"));
+        assertEquals(GuildRegistry.Result.OK, g.invite("Ola", "Ula", 0));
+        assertEquals(GuildRegistry.Result.OK, g.accept("Ula", "Wilcze Kly", 1));
+        assertEquals(GuildRegistry.Result.NOT_LEADER, g.setMotd("Ula", "hej"));
+        assertEquals(GuildRegistry.Result.NOT_MEMBER, g.setMotd("Kuba", "hej"));
+        assertEquals(GuildRegistry.Result.OK, g.setMotd("Ola", "Wyprawa na smoka o 20:00; zbiórka w Varden\nnowa linia"));
+        assertEquals("Wyprawa na smoka o 20:00; zbiórka w Varden nowa linia", g.guildOf("Ula").motd());
+        GuildRegistry back = GuildRegistry.decode(g.encode());
+        assertEquals(g.guildOf("Ula").motd(), back.guildOf("Ula").motd(), "a semicolon in the message survives");
+        assertEquals(2, back.byName("Wilcze Kly").members().size());
+        g.setMotd("Ola", "x".repeat(500));
+        assertEquals(GuildRegistry.MOTD_MAX, g.guildOf("Ola").motd().length());
+        g.setMotd("Ola", "  ");
+        assertNull(g.guildOf("Ola").motd());
+        assertNull(GuildRegistry.decode(g.encode()).guildOf("Ola").motd());
+        assertArrayEquals(new String[] {"GUILD", "MOTD", "zbiórka o 20"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/gildia wiadomość zbiórka o 20"));
+    }
+
+    @Test
     void guildChatCommands() {
         assertArrayEquals(new String[] {"GUILD", "INFO"}, ChatCommands.toMessage("/gildia"));
         assertArrayEquals(new String[] {"GUILD", "CREATE", "Wilcze Kly"}, ChatCommands.toMessage("/gildia załóż Wilcze Kly"));

@@ -41,8 +41,12 @@ public final class GuildRegistry {
     public static final class Guild {
         private final String name;
         private final List<String> members = new ArrayList<>();
+        /** Wiadomosc dnia od lidera (null = brak). */
+        private String motd;
 
         Guild(String name) { this.name = name; }
+
+        public String motd() { return motd; }
 
         public String name() { return name; }
         public String leader() { return members.get(0); }
@@ -125,6 +129,19 @@ public final class GuildRegistry {
         return Result.OK;
     }
 
+    public static final int MOTD_MAX = 120;
+
+    /** Wiadomosc dnia gildii (tylko lider); pusty tekst ja usuwa, dluga jest przycinana. */
+    public Result setMotd(String leader, String text) {
+        Guild g = byMember.get(key(leader));
+        if (g == null) return Result.NOT_MEMBER;
+        if (!key(g.leader()).equals(key(leader))) return Result.NOT_LEADER;
+        String t = text == null ? "" : text.replace('\n', ' ').replace('\r', ' ').trim();
+        if (t.length() > MOTD_MAX) t = t.substring(0, MOTD_MAX);
+        g.motd = t.isEmpty() ? null : t;
+        return Result.OK;
+    }
+
     public Guild guildOf(String name) { return byMember.get(key(name)); }
 
     public Guild byName(String name) { return byName.get(key(name)); }
@@ -137,10 +154,14 @@ public final class GuildRegistry {
 
     public int count() { return byName.size(); }
 
-    /** Zapis tekstowy: linia na gildie "Nazwa;Lider,Czlonek,...". */
+    /** Zapis tekstowy: linia na gildie "Nazwa;Lider,Czlonek,...[;wiadomosc dnia]". */
     public String encode() {
         StringBuilder sb = new StringBuilder();
-        for (Guild g : byName.values()) sb.append(g.name).append(';').append(String.join(",", g.members)).append('\n');
+        for (Guild g : byName.values()) {
+            sb.append(g.name).append(';').append(String.join(",", g.members));
+            if (g.motd != null) sb.append(';').append(g.motd);
+            sb.append('\n');
+        }
         return sb.toString();
     }
 
@@ -149,7 +170,7 @@ public final class GuildRegistry {
         GuildRegistry r = new GuildRegistry();
         if (text == null) return r;
         for (String line : text.split("\n")) {
-            String[] f = line.split(";", 2);
+            String[] f = line.split(";", 3);
             if (f.length < 2 || !validName(f[0]) || r.byName.containsKey(key(f[0]))) continue;
             Guild g = new Guild(f[0].trim());
             for (String m : f[1].split(",")) {
@@ -158,6 +179,7 @@ public final class GuildRegistry {
                 g.members.add(n);
                 r.byMember.put(key(n), g);
             }
+            if (f.length == 3 && !f[2].isBlank()) g.motd = f[2].trim();
             if (!g.members.isEmpty()) r.byName.put(key(g.name), g);
         }
         return r;

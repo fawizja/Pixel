@@ -185,6 +185,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Zaklecia u kowala: kradziez zycia, many, cios krytyczny (0.66.0)
 - [x] Przelewy zlota miedzy kontami /przelew (0.67.0)
 - [x] Zwoj nauki: +30% exp za potwory przez godzine polowania (0.68.0)
+- [x] Wiadomosc dnia gildii /gildia wiadomosc (0.69.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

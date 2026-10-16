@@ -137,6 +137,7 @@ public final class ChatCommands {
             case "przyjmij": return arg.isEmpty() ? null : new String[] {"GUILD", "ACCEPT", arg};
             case "wyrzuc": return arg.isEmpty() ? null : new String[] {"GUILD", "KICK", arg};
             case "opusc": return w.length == 2 ? new String[] {"GUILD", "LEAVE"} : null;
+            case "wiadomosc": return new String[] {"GUILD", "MOTD", arg};
             default: return null;
         }
     }
@@ -210,7 +211,7 @@ public final class ChatCommands {
             {"/zaproś Imię", "zaproszenie do drużyny (/przyjmij, /opuść, /d tekst)"},
             {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
             {"/pojedynek Imię", "pojedynek do pierwszej krwi"},
-            {"/gildia załóż Nazwa", "gildie (zaproś, przyjmij, wyrzuć, opuść; /g tekst)"},
+            {"/gildia załóż Nazwa", "gildie (zaproś, przyjmij, wyrzuć, opuść, wiadomość; /g tekst)"},
             {"/wyślij Imię, 5 futro", "poczta do depozytu; złoto: /przelew Imię, 5000 (u bankiera)"},
             {"/hasło stare nowe", "zmiana hasła konta"},
         };
@@ -218,5 +219,5 @@ public final class ChatCommands {
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

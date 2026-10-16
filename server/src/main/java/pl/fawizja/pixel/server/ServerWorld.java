@@ -620,6 +620,16 @@ final class ServerWorld {
                 if (t != null) warn(t, "Usunięto cię z gildii " + g.name() + ".", now);
                 return;
             }
+            case "MOTD": {
+                r = guilds.setMotd(p.name(), f.length > 2 ? f[2] : "");
+                if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    warn(p, r.message, now);
+                    return;
+                }
+                saveGuilds();
+                toGuild(mine, mine.motd() == null ? "Lider usunął wiadomość gildii." : "Wiadomość gildii: " + mine.motd(), now);
+                return;
+            }
             default: // INFO
                 if (mine == null) {
                     info(p, "Nie należysz do gildii. Załóż: /gildia załóż Nazwa (" + String.format("%,d gp",
@@ -630,6 +640,7 @@ final class ServerWorld {
                 for (String n : mine.members()) if (find(n) != null) online.add(n);
                 info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", członków " + mine.members().size()
                         + ", w grze: " + String.join(", ", online), now);
+                if (mine.motd() != null) info(p, "Wiadomość gildii: " + mine.motd(), now);
         }
     }
 
@@ -739,6 +750,10 @@ final class ServerWorld {
         List<String> on = new ArrayList<>();
         for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
         if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
+        pl.fawizja.pixel.guild.GuildRegistry.Guild guild = guilds.guildOf(pc.name());
+        if (guild != null && guild.motd() != null) {
+            s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość gildii " + guild.name() + ": " + guild.motd());
+        }
         if (invasion != null) {
             s.log().add(lastNow, EventLog.Kind.SYSTEM, "Trwa inwazja: " + invasion.plan().name() + " atakują "
                     + invasion.plan().town() + " (zostało " + invasion.remaining() + " wrogów).");
