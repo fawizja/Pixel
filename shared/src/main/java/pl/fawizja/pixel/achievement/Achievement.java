@@ -29,9 +29,11 @@ public enum Achievement {
     HUNT_10("Zawodowy łowca", "oddaj 10 zleceń łowcy", Kind.HUNTS, 10),
     CHALLENGE_5("Pogromca fal", "ukończ 5 wyzwań ze zwojów", Kind.CHALLENGES, 5),
     RESTED_100("Wypoczęty łowca", "pokonaj 100 potworów z premią wypoczęcia", Kind.RESTED, 100),
-    DUELS_10("Mistrz pojedynków", "wygraj 10 pojedynków", Kind.DUELS, 10);
+    DUELS_10("Mistrz pojedynków", "wygraj 10 pojedynków", Kind.DUELS, 10),
+    RARE_1("Szczęściarz", "zdobądź rzadki łup", Kind.RARE, 1),
+    RARE_10("Ulubieniec losu", "zdobądź 10 rzadkich łupów", Kind.RARE, 10);
 
-    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS, WEEKLY, PLAYTIME, HUNTS, CHALLENGES, RESTED, DUELS }
+    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS, WEEKLY, PLAYTIME, HUNTS, CHALLENGES, RESTED, DUELS, RARE }
 
     private final String title;
     private final String goal;
@@ -74,6 +76,7 @@ public enum Achievement {
             case CHALLENGES: return pc.stats().challenges();
             case RESTED: return pc.stats().restedKills();
             case DUELS: return pc.stats().duelsWon();
+            case RARE: return pc.stats().rareDrops();
             default: return 0;
         }
     }

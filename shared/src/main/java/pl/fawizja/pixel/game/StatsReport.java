@@ -18,7 +18,8 @@ public final class StatsReport {
         rows.add(new String[] {"Czas gry", CharacterStats.describePlayTime(st.playMs())});
         rows.add(new String[] {"Poziom", pc.level() + (st.bestLevel() > pc.level() ? " (najwyższy " + st.bestLevel() + ")" : "")});
         rows.add(new String[] {"Pokonane potwory", String.format("%,d", b.total()) + " (gatunki: " + b.species() + ")"});
-        rows.add(new String[] {"Elity i bossowie", b.eliteKills() + " elit, " + b.bossesDefeated() + " bossów"});
+        rows.add(new String[] {"Elity i bossowie", b.eliteKills() + " elit, " + b.bossesDefeated() + " bossów"
+                + (st.rareDrops() > 0 ? ", rzadkie łupy: " + st.rareDrops() : "")});
         rows.add(new String[] {"Śmierci", st.deaths() + (st.duelsWon() > 0 ? " (wygrane pojedynki: " + st.duelsWon() + ")" : "")});
         rows.add(new String[] {"Ukończone zadania", pc.quests().done().size() + " (zlecenia łowcy: " + pc.hunt().completed() + ", wyzwania: " + pc.stats().challenges() + ")"});
         rows.add(new String[] {"Otwarte skrzynie", String.valueOf(pc.openedChests().size())});

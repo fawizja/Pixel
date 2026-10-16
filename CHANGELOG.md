@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.143.0] - 2026-10-16
+
+### Dodano
+- Licznik rzadkich łupów (w /statystyki) i dwa osiągnięcia: „Szczęściarz” (pierwszy rzadki łup)
+  i „Ulubieniec losu” (10 rzadkich łupów). Razem 27 osiągnięć.
 ## [0.142.1] - 2026-10-16
 
 ### Naprawiono

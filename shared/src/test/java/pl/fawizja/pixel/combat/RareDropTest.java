@@ -51,6 +51,8 @@ class RareDropTest {
         cs.damageMonster(golem, 1_000_000, DamageType.FIRE, 1000);
         assertTrue(golem.isDead());
         assertEquals(List.of("ice_golem:frost_blade"), heard);
+        assertEquals(1, pc.stats().rareDrops(), "counted for the achievements");
+        assertTrue(pl.fawizja.pixel.achievement.Achievement.RARE_1.reached(pc));
         assertEquals(1, log.latest(50).stream().filter(e -> e.text().startsWith("Rzadki łup: ")).count());
         List<String[]> loot = cs.lootLog().rows(1000);
         assertEquals(1, loot.size(), "the kill is in the loot window, including what stayed in the corpse");

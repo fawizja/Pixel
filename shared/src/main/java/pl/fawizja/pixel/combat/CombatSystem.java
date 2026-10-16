@@ -295,6 +295,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         lootLog.record(now, t.name(), dropped, !rareRolled.isEmpty());
         for (ItemStack r : rareRolled) {
             log.add(now, EventLog.Kind.LOOT, "Rzadki łup: " + describe(r) + "!");
+            pc.stats().recordRareDrop();
             if (rareDropListener != null) rareDropListener.rareDrop(t, r, now);
         }
         List<String> looted = new ArrayList<>();
