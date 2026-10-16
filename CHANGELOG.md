@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.136.0] - 2026-10-16
+
+### Dodano
+- Lista /gracze pokazuje nagrodę za głowę przy postaciach, za które ktoś ją wyznaczył.
 ## [0.135.0] - 2026-10-16
 
 ### Dodano

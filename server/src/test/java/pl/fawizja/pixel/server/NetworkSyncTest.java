@@ -307,6 +307,9 @@ class NetworkSyncTest {
             awaitMessage(b, "announced", m -> m[0].equals("LOG") && m[2].startsWith("Nagroda za głowę Jan wynosi teraz 5"));
             b.send("BOUNTY");
             awaitMessage(b, "listed", m -> m[0].equals("LOG") && m[2].startsWith("Nagrody za głowy: Jan"));
+            b.send("WHO");
+            awaitMessage(b, "bounty in player list", m -> m[0].equals("WHO")
+                    && java.util.Arrays.stream(m).anyMatch(r -> r.startsWith("Jan;") && r.contains("nagroda 5")));
             java.util.concurrent.atomic.AtomicBoolean weak = new java.util.concurrent.atomic.AtomicBoolean();
             server.enqueueTest(() -> {
                 PlayerCharacter jan = server.world().find("Jan").session.character();

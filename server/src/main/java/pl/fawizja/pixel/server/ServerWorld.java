@@ -441,6 +441,12 @@ final class ServerWorld {
     }
 
     /** BOUNTY: lista nagrod; BOUNTY imie kwota: doplata z konta do nagrody za glowe postaci. */
+    /** ", nagroda 5,000 gp" do listy graczy, gdy ktos wyznaczyl nagrode za postac. */
+    private String bountyNote(String name) {
+        long amount = bounties.amount(name);
+        return amount > 0 ? String.format(", nagroda %,d gp", amount) : "";
+    }
+
     private void bountyCommand(ServerPlayer p, String[] f, long now) {
         if (f.length < 3) {
             List<pl.fawizja.pixel.pvp.Bounties.Bounty> top = bounties.top(pl.fawizja.pixel.pvp.Bounties.SHOWN);
@@ -1529,7 +1535,8 @@ final class ServerWorld {
                     String tag = guildTag(oc.name());
                     String title = pl.fawizja.pixel.achievement.Achievement.titleOf(oc.title());
                     out.add(oc.name() + ";" + oc.vocation().displayName() + ", poziom " + oc.level()
-                            + (tag == null || tag.equals("-") ? "" : " <" + tag + ">") + (title == null ? "" : ", " + title));
+                            + (tag == null || tag.equals("-") ? "" : " <" + tag + ">") + (title == null ? "" : ", " + title)
+                            + bountyNote(oc.name()));
                 }
                 p.client.send(out.toArray(new String[0]));
                 break;
