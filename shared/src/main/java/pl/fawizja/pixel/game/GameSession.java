@@ -287,6 +287,17 @@ public final class GameSession {
         for (String w : supplies.check(pc.backpack(), !world.isProtectionZone(pc.position()))) log.add(nowMs, EventLog.Kind.WARNING, w);
     }
 
+    /** Komunikaty o odrodzeniu bossow (co BossWatch.CHECK_MS; online liczy serwer). */
+    private final BossWatch bossWatch = new BossWatch();
+    private long bossesCheckedMs = Long.MIN_VALUE / 2;
+
+    private void checkBosses(long nowMs) {
+        bossesCheckedMs = nowMs;
+        for (pl.fawizja.pixel.monster.MonsterManager.BossStatus b : bossWatch.update(monsters.bossReport(nowMs))) {
+            log.add(nowMs, EventLog.Kind.SYSTEM, BossWatch.message(b, nowMs));
+        }
+    }
+
     public void checkLoginReward(long nowMs) {
         loginCheckedMs = nowMs;
         if (pc.isDead()) return;
@@ -1044,6 +1055,7 @@ public final class GameSession {
         pc.stats().noteLevel(pc.level());
         checkPet(nowMs);
         if (nowMs - suppliesCheckedMs >= 500 || nowMs < suppliesCheckedMs) checkSupplies(nowMs);
+        if (nowMs - bossesCheckedMs >= BossWatch.CHECK_MS || nowMs < bossesCheckedMs) checkBosses(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {

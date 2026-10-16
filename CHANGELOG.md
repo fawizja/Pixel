@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.97.0] - 2026-10-16
+
+### Dodano
+- Komunikat w dzienniku, gdy boss się odrodzi („Boss Grimtooth odrodził się (…)”); online liczy go serwer
+  dla każdego gracza. Bossowie żywi przy wejściu do gry nie są ogłaszani.
 ## [0.96.0] - 2026-10-16
 
 ### Zmieniono

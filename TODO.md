@@ -213,6 +213,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Uzupełnianie run i amunicji u kupca (0.94.0)
 - [x] Znacznik miejsca śmierci na mapie (0.95.0)
 - [x] Boss tygodnia i miejsce śmierci w oknie /znaczniki (0.96.0)
+- [x] Komunikat o odrodzeniu bossa (0.97.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
