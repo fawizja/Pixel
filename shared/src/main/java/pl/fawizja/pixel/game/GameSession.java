@@ -339,6 +339,12 @@ public final class GameSession {
     /** Podpowiedzi dla nowych postaci (co sekunde). */
     private long tipsCheckedMs = Long.MIN_VALUE / 2;
 
+    /** Wylaczenie podpowiedzi (wszystkie oznaczone jako pokazane). */
+    public void disableTips(long nowMs) {
+        for (Tips.Tip t : Tips.Tip.values()) pc.markTip(t.ordinal());
+        log.add(nowMs, EventLog.Kind.INFO, "Podpowiedzi wyłączone.");
+    }
+
     private void checkTips(long nowMs) {
         tipsCheckedMs = nowMs;
         if (pc.level() >= Tips.MAX_LEVEL || pc.isDead()) return;

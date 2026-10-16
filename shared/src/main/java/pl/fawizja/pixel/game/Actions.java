@@ -22,6 +22,7 @@ public final class Actions {
             case "fish": s.fish(now); return true;
             case "potion_hp": s.usePotion("health_potion", now); return true;
             case "potion_mp": s.usePotion("mana_potion", now); return true;
+            case "tips_off": s.disableTips(now); return true;
             default:
         }
         String[] p = action.split(":");

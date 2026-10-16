@@ -28,6 +28,14 @@ class TipsTest {
     }
 
     @Test
+    void tipsCanBeTurnedOff() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc, null, new java.util.Random(1), 8);
+        assertTrue(Actions.apply(s, "tips_off", 0));
+        assertEquals(List.of(), Tips.due(pc, new Tips.Situation(true, 5, 10, 0)));
+    }
+
+    @Test
     void experiencedCharactersGetNoTips() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         pc.addExperience(50_000_000);

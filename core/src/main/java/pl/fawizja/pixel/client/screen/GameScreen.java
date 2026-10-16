@@ -547,6 +547,10 @@ public final class GameScreen extends ScreenAdapter {
             hud.openInfo("Strój", rows);
             return;
         }
+        if (cmd.equals("/podpowiedzi")) {
+            act("tips_off", now());
+            return;
+        }
         if (cmd.startsWith("/idź ") || cmd.startsWith("/idz ")) {
             String q = text.substring(text.indexOf(' ') + 1).trim();
             pl.fawizja.pixel.npc.Npc n = pl.fawizja.pixel.npc.NpcFinder.find(session.npcs(), q, session.character().position());

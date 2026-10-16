@@ -47,6 +47,6 @@ public final class Tips {
     private static void check(PlayerCharacter pc, Tip t, boolean when, List<String> out) {
         if (!when || pc.tipShown(t.ordinal()) || !out.isEmpty()) return; // najwyzej jedna naraz
         pc.markTip(t.ordinal());
-        out.add("Podpowiedź: " + t.text);
+        out.add("Podpowiedź: " + t.text + (t == Tip.WELCOME ? " (/podpowiedzi wyłącza podpowiedzi)" : ""));
     }
 }

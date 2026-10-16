@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.114.0] - 2026-10-16
+
+### Dodano
+- `/podpowiedzi` wyłącza podpowiedzi dla nowych postaci (działa też online); pierwsza podpowiedź o tym mówi.
 ## [0.113.0] - 2026-10-16
 
 ### Dodano
