@@ -669,6 +669,7 @@ public final class Hud {
         rows.add(new MenuRow("player:guild:" + pm.name(), "Zaproś do gildii", "tylko lider gildii", true));
         rows.add(new MenuRow("player:friend:" + pm.name(), "Dodaj do znajomych", "powiadomienie, gdy wejdzie do gry", true));
         rows.add(new MenuRow("player:duel:" + pm.name(), "Pojedynek", "do pierwszej krwi, bez czaszek i śmierci", true));
+        rows.add(new MenuRow("player:inspect:" + pm.name(), "Obejrzyj", "poziom, gildia i założony sprzęt", true));
         rows.add(new MenuRow("player:attack:" + pm.id(), pm.attacking() ? "Przerwij atak" : "Atakuj",
                 pm.attacking() ? "koniec walki z tym graczem" : "PvP: biała czaszka, zasady serwera", !pm.ally()));
         float colW = (menuW - 30) / 2f;

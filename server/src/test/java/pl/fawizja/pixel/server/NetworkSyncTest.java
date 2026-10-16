@@ -1218,6 +1218,21 @@ class NetworkSyncTest {
     }
 
     @Test
+    void playersCanInspectEachOthersEquipment() throws Exception {
+        try (NetClient ola = connect(); NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            ola.send("INSPECT", "ula");
+            awaitMessage(ola, "header", m -> m[0].equals("LOG") && m[2].startsWith("Ula: Druid, poziom "));
+            awaitMessage(ola, "gear", m -> m[0].equals("LOG") && (m[2].startsWith("Założone: ") || m[2].startsWith("Nic nie ma")));
+            awaitMessage(ula, "told", m -> m[0].equals("LOG") && m[2].contains("Ola ogląda twój ekwipunek."));
+            ola.send("INSPECT", "Nikt");
+            awaitMessage(ola, "missing", m -> m[0].equals("LOG") && m[2].contains("Nie ma takiego gracza"));
+        }
+    }
+
+    @Test
     void messageOfTheDayGreetsJoiningPlayers() throws Exception {
         java.util.concurrent.atomic.AtomicReference<String> set = new java.util.concurrent.atomic.AtomicReference<>();
         server.enqueueTest(() -> set.set(server.world().moderate(new String[] {"MOTD", "Event w sobotę"}, "konsola", server.now())));

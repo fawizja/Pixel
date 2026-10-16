@@ -327,6 +327,26 @@ final class ServerWorld {
         p.client.send(msg);
     }
 
+    /** Opis gracza dla /obejrzyj: profesja, poziom, gildia, tytul i zalozony sprzet z ulepszeniami. */
+    List<String> inspectLines(ServerPlayer o) {
+        PlayerCharacter c = o.session.character();
+        String tag = guildTag(c.name());
+        String title = pl.fawizja.pixel.achievement.Achievement.titleOf(c.title());
+        List<String> out = new ArrayList<>();
+        out.add(c.name() + ": " + c.vocation().displayName() + ", poziom " + c.level()
+                + (tag == null || tag.equals("-") ? "" : ", gildia <" + tag + ">") + (title == null ? "" : ", " + title) + ".");
+        List<String> worn = new ArrayList<>();
+        for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
+            pl.fawizja.pixel.item.ItemStack st = c.equipment().get(slot);
+            if (st == null) continue;
+            pl.fawizja.pixel.item.ItemType t = items.get(st.itemId());
+            if (t == null) continue;
+            worn.add(t.name() + (st.upgrade() > 0 ? " +" + st.upgrade() : "") + (st.count() > 1 ? " x" + st.count() : ""));
+        }
+        out.add(worn.isEmpty() ? "Nic nie ma na sobie." : "Założone: " + String.join(", ", worn) + ".");
+        return out;
+    }
+
     /** Czlonkowie gildii: najpierw w grze, potem wg poziomu; przy nieobecnych - kiedy ostatnio grali. Po 6 na linie. */
     List<String> guildMemberLines(pl.fawizja.pixel.guild.GuildRegistry.Guild g) {
         record M(String name, boolean online, int level, long ago) {}
@@ -1851,6 +1871,16 @@ final class ServerWorld {
                 out.add("LOOTLOG");
                 java.util.Collections.addAll(out, pl.fawizja.pixel.combat.DeathRecap.encode(p.session.combat().lootLog().rows(now)));
                 p.client.send(out.toArray(new String[0]));
+                break;
+            }
+            case "INSPECT": {
+                ServerPlayer o = f.length < 2 ? null : find(f[1].trim());
+                if (o == null) {
+                    warn(p, "Nie ma takiego gracza w grze.", now);
+                    break;
+                }
+                for (String line : inspectLines(o)) info(p, line, now);
+                if (o != p) o.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " ogląda twój ekwipunek.");
                 break;
             }
             case "WHO": {

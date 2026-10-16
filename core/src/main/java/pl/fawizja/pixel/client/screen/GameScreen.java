@@ -418,6 +418,7 @@ public final class GameScreen extends ScreenAdapter {
                         case "guild": net.send("GUILD", "INVITE", f[2]); break;
                         case "friend": net.send("FRIEND", "ADD", f[2]); break;
                         case "duel": net.send("DUEL", "REQUEST", f[2]); break;
+                        case "inspect": net.send("INSPECT", f[2]); break;
                         case "attack": {
                             int pid = Integer.parseInt(f[2]);
                             boolean stop = pvpTargetId == pid;

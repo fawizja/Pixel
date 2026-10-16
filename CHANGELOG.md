@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.163.0] - 2026-10-16
+
+### Dodano
+- Oglądanie innego gracza: `/obejrzyj Imię` albo "Obejrzyj" po dotknięciu postaci pokazuje profesję, poziom, gildię,
+  tytuł i założony sprzęt z ulepszeniami. Oglądany dostaje o tym informację.
 ## [0.162.0] - 2026-10-16
 
 ### Dodano

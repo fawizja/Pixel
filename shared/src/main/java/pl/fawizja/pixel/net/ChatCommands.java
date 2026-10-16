@@ -74,6 +74,8 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"RANK"} : new String[] {"RANK", rest(t)};
             case "/bossowie":
                 return new String[] {"BOSS"};
+            case "/obejrzyj":
+                return w.length >= 2 ? new String[] {"INSPECT", rest(t)} : null;
             case "/pojedynek":
                 if (w.length < 2) return new String[] {"DUEL", "HELP"};
                 if (key(w[1]).equals("poddaj")) return new String[] {"DUEL", "SURRENDER"};
@@ -267,5 +269,5 @@ public final class ChatCommands {
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /obejrzyj Imię, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }
