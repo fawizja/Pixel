@@ -92,6 +92,7 @@ public final class ItemRegistry {
     }
 
     public boolean contains(int id) { return byId.containsKey(id); }
+    public boolean containsKey(String key) { return byKey.containsKey(key); }
 
     public int maxStack(int id) { return get(id).maxStack(); }
 

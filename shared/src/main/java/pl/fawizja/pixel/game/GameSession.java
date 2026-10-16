@@ -1029,7 +1029,26 @@ public final class GameSession {
         log.add(nowMs, EventLog.Kind.INFO, "Wsiadasz na konia (+" + PlayerCharacter.MOUNT_SPEED + " szybkości).");
     }
 
+    /** Mikstury szybkich przyciskow od najsilniejszej; przycisk HP/MP uzywa najsilniejszej dozwolonej, ktora masz. */
+    static final String[] HP_TIERS = {"supreme_health_potion", "great_health_potion", "health_potion"};
+    static final String[] MP_TIERS = {"supreme_mana_potion", "great_mana_potion", "mana_potion"};
+
+    /** Klucz mikstury dla przycisku HP (mana = false) albo MP; bez zadnej w plecaku - zwykla. */
+    public String quickPotion(boolean mana) {
+        String[] tiers = mana ? MP_TIERS : HP_TIERS;
+        for (String k : tiers) {
+            if (!items.containsKey(k)) continue;
+            pl.fawizja.pixel.item.ItemType t = items.byKey(k);
+            if (pc.level() < t.minLevel() || !t.vocations().contains(pc.vocation())) continue;
+            if (pc.backpack().count(t.id()) > 0) return k;
+        }
+        return tiers[tiers.length - 1];
+    }
+
+    /** "health_potion"/"mana_potion" (przyciski HP/MP) biora najsilniejsza dozwolona miksture z plecaka. */
     public CastResult usePotion(String itemKey, long nowMs) {
+        if (itemKey.equals("health_potion")) itemKey = quickPotion(false);
+        else if (itemKey.equals("mana_potion")) itemKey = quickPotion(true);
         return spells.useFirst(itemKey, nowMs);
     }
 

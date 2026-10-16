@@ -218,6 +218,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Kolor stroju widoczny dla innych graczy (0.99.0)
 - [x] Ostrzeżenie o czerwonej czaszce w pobliżu (0.100.0)
 - [x] Ignorowanie graczy w czacie (0.101.0)
+- [x] Przyciski HP/MP używają najsilniejszych mikstur (0.102.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

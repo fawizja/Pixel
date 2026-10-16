@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.102.0] - 2026-10-16
+
+### Zmieniono
+- Przyciski HP i MP (oraz klawisze i automatyczna mikstura) piją najsilniejszą miksturę, którą postać ma w plecaku
+  i może użyć (najwyższa, silna, zwykła), a licznik na przycisku pokazuje liczbę właśnie tych mikstur.
 ## [0.101.0] - 2026-10-16
 
 ### Dodano

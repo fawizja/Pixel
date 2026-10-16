@@ -229,6 +229,24 @@ class MagicTest {
     }
 
     @Test
+    void quickPotionButtonsUseTheStrongestAllowedPotionCarried() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        GameSession s = session(pc, null, null);
+        pc.backpack().add(new ItemStack(id("health_potion"), 3));
+        pc.backpack().add(new ItemStack(id("great_health_potion"), 2));
+        int basic = pc.backpack().count(id("health_potion"));
+        int mana = pc.backpack().count(id("mana_potion"));
+        assertEquals("health_potion", s.quickPotion(false), "level too low for the great potion");
+        pc.addExperience(10_000_000);
+        assertEquals("great_health_potion", s.quickPotion(false));
+        pc.damage(pc.maxHealth() / 2);
+        assertEquals(CastResult.OK, s.usePotion("health_potion", 0));
+        assertEquals(1, pc.backpack().count(id("great_health_potion")), "the HP button drank the great potion");
+        assertEquals(basic, pc.backpack().count(id("health_potion")));
+        assertEquals("mana_potion", s.quickPotion(true), mana + " basic mana potions, no stronger ones");
+    }
+
+    @Test
     void foodDoublesRegenerationAndCannotOverfill() {
         PlayerCharacter fed = TestData.newCharacter(Vocation.MONK);
         PlayerCharacter hungry = TestData.newCharacter(Vocation.MONK);

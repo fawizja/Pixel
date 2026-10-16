@@ -1237,8 +1237,8 @@ public final class Hud {
             npcMode = false;
         }
         updateBar(session);
-        int hpCount = pc.backpack().count(session.items().byKey("health_potion").id());
-        int mpCount = pc.backpack().count(session.items().byKey("mana_potion").id());
+        int hpCount = pc.backpack().count(session.items().byKey(session.quickPotion(false)).id());
+        int mpCount = pc.backpack().count(session.items().byKey(session.quickPotion(true)).id());
         potionHp.label = "HP " + hpCount;
         potionMp.label = "MP " + mpCount;
         Monster tgt = session.combat().target();
