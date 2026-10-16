@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.65.0] - 2026-10-16
+
+### Dodano
+- Selvaran: „Skóry węży” (15 wężowych skór, poziom 85) i „Strażnicy świątyni” (10 strażników świątyni, poziom 150,
+  po „Wyprawie badaczy”, nagroda 20 wielkich mikstur zdrowia). Frostholm: „Serce mrozu” (3 zamarznięte serca,
+  poziom 110, po „Zamieci”, nagroda 15 wielkich mikstur many). Zamyka luki poziomów 70-190 i 80-140.
+- Nowe tematy rozmowy u przewodników: świątynia, golemy.
+
 ## [0.64.0] - 2026-10-16
 
 ### Dodano

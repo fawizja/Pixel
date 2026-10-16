@@ -30,3 +30,6 @@ frost_storm;Zamieć;frost_guide;KILL;frost_witch;8;160000;5000;80;Wiedźmy mrozu
 qas_caravan1;Napadnięta karawana;qas_guide;COLLECT;hyena_fang;12;40000;1500;45;Hieny rozszarpały karawanę pod miastem. Przynieś 12 kłów jako dowód polowania.
 qas_caravan2;Szepty w piasku;qas_guide;KILL;sand_wraith;10;220000;6000;100;Piaskowe upiory nawiedzają szlak karawan. Pokonaj 10, zanim wyruszy następna.
 qas_caravan3;Złodziej klejnotów;qas_guide;COLLECT;scarab_gem;3;700000;12000;170;Ktoś wykrada klejnoty skarabeuszy z krypt. Odzyskaj 3 od mumii.
+selv_skins;Skóry węży;selv_guide;COLLECT;snake_skin;15;180000;5000;85;Garbarze z Selvaran szyją z wężowych skór buty dla tropicieli. Przynieś 15.
+selv_temple;Strażnicy świątyni;selv_guide;KILL;temple_guardian;10;900000;15000;150;Ocaleni badacze mówią o świątyni strzeżonej przez kamiennych strażników. Pokonaj 10.
+frost_hearts;Serce mrozu;frost_guide;COLLECT;frozen_heart;3;400000;10000;110;Wiedźmy ożywiły lodowe golemy. Przynieś 3 zamarznięte serca, a zamieć ucichnie na dobre.
