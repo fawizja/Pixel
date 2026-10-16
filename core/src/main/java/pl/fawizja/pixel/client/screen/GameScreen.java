@@ -444,6 +444,9 @@ public final class GameScreen extends ScreenAdapter {
                     hunt.reset(t, session.character());
                     session.log().add(t, EventLog.Kind.INFO, "Nowe polowanie: liczniki od zera.");
                     hud.updateInfo(HUNT_TITLE, huntRows(t));
+                } else if (id.equals("journal:hunt")) {
+                    hud.openJournal(); // zamkniecie okna
+                    goHunting(t);
                 } else if (id.startsWith("journal:")) {
                     // dziennik: marsz do zleceniodawcy (przewodnik = najblizszy przewodnik na pietrze)
                     String key = id.startsWith("journal:goto:") ? id.substring(13) : null;
@@ -560,14 +563,7 @@ public final class GameScreen extends ScreenAdapter {
             String q = text.substring(text.indexOf(' ') + 1).trim();
             String fq = pl.fawizja.pixel.inventory.ItemSearch.fold(q);
             if (fq.equals("lowisko") || fq.equals("polowanie") || fq.equals("zlecenie")) {
-                pl.fawizja.pixel.monster.SpawnPoint sp = session.huntingGround();
-                if (sp == null) {
-                    session.log().add(now(), EventLog.Kind.INFO, "Brak zadania z potworami na tym piętrze. Zlecenie da przewodnik (/idź przewodnik).");
-                } else if (walkTo(sp.center(), now(), true, true)) {
-                    session.log().add(now(), EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(sp.monsterKey()) + ".");
-                } else {
-                    session.log().add(now(), EventLog.Kind.INFO, "Nie znam drogi na łowisko" + session.whereToHunt(sp.monsterKey()) + ".");
-                }
+                goHunting(now());
                 return;
             }
             pl.fawizja.pixel.npc.Npc n = pl.fawizja.pixel.npc.NpcFinder.find(session.npcs(), q, session.character().position());
@@ -943,6 +939,18 @@ public final class GameScreen extends ScreenAdapter {
      * quiet: dotkniecie swiata (bez komunikatow); nextTo: zatrzymanie na polu obok celu (NPC, cialo).
      * Zwraca, czy marsz sie zaczal.
      */
+    /** Marsz do najblizszego legowiska potwora ze zlecenia lowcy albo zadania dnia (/idz lowisko, dziennik). */
+    private void goHunting(long now) {
+        pl.fawizja.pixel.monster.SpawnPoint sp = session.huntingGround();
+        if (sp == null) {
+            session.log().add(now, EventLog.Kind.INFO, "Brak zadania z potworami na tym piętrze. Zlecenie da przewodnik (/idź przewodnik).");
+        } else if (walkTo(sp.center(), now, true, true)) {
+            session.log().add(now, EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(sp.monsterKey()) + ".");
+        } else {
+            session.log().add(now, EventLog.Kind.INFO, "Nie znam drogi na łowisko" + session.whereToHunt(sp.monsterKey()) + ".");
+        }
+    }
+
     private boolean walkTo(Position goal, long now, boolean quiet, boolean nextTo) {
         Position from = session.character().position();
         if (nextTo && from.distanceTo(goal) <= 1) return false;

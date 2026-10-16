@@ -646,7 +646,13 @@ public final class Hud {
         else if (d.claimed()) dd = "wykonane - następne jutro";
         else if (d.doneOn(day)) dd = "ODDAJ u przewodnika";
         else dd = monsterNames.apply(d.monster()) + ": " + d.progress() + " / " + d.target();
-        rows.add(new MenuRow("journal:guide", "Zadanie dnia", dd, true));
+        boolean dailyHunting = d.activeOn(day) && !d.claimed() && !d.doneOn(day);
+        rows.add(new MenuRow(dailyHunting ? "journal:hunt" : "journal:guide", "Zadanie dnia", dd, true));
+        pl.fawizja.pixel.quest.HuntTask h = pc.hunt();
+        if (h.active()) {
+            rows.add(new MenuRow(h.done() ? "journal:guide" : "journal:hunt", "Zlecenie łowcy", h.done() ? "ODDAJ u przewodnika"
+                    : monsterNames.apply(h.monster()) + ": " + h.progress() + " / " + h.target() + " - dotknij, aby iść", true));
+        }
         pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
         List<MenuRow> available = new ArrayList<>();
         if (qs != null) {
@@ -663,7 +669,7 @@ public final class Hud {
                 }
             }
         }
-        if (rows.size() == 1) rows.add(new MenuRow("ach:none", "Brak zadań w toku", "przewodnicy w miastach mają zlecenia", false));
+        if (rows.size() == (h.active() ? 2 : 1)) rows.add(new MenuRow("ach:none", "Brak zadań w toku", "przewodnicy w miastach mają zlecenia", false));
         rows.addAll(available);
         float colW = (menuW - 30) / 2f;
         for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
@@ -1380,6 +1386,7 @@ public final class Hud {
         for (EventLog.Entry e : entries) {
             float age = (serverTimeMs - e.timeMs()) / 1000f;
             if (age > 8f) continue;
+            if (menuOpen && ly - 14 < menuY + menuH) break; // nie zaslaniaj naglowka otwartego okna
             float a = Math.max(0f, Math.min(1f, (8f - age) / 2f));
             font.setColor(e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.6f, 0.4f, a)
                     : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a) : new Color(1f, 1f, 1f, a));

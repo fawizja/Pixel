@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.129.0] - 2026-10-16
+
+### Dodano
+- Dziennik zadań pokazuje zlecenie łowcy z postępem; dotknięcie go (albo zadania dnia w toku) prowadzi na łowisko.
+
+### Naprawiono
+- Dziennik zdarzeń nie zasłania już nagłówka otwartego okna (np. dziennika zadań).
 ## [0.128.0] - 2026-10-16
 
 ### Dodano
