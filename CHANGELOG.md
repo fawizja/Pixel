@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.47.0] - 2026-10-16
+
+### Dodano
+- Analiza polowania: okno z czasem polowania, zdobytym doświadczeniem, liczbą zabitych potworów i bilansem złota
+  w plecaku, każde także na godzinę, oraz czasem do następnego poziomu przy obecnym tempie. Otwiera je klawisz H,
+  `/analiza` (albo `/polowanie`) lub wiersz w księdze; okno odświeża się co sekundę, „Zacznij od nowa” zeruje liczniki.
+  Liczy z danych postaci, więc działa lokalnie i online.
+- `stats/HuntAnalyzer`, `Hud.infoOpen/updateInfo`, wiersze okna informacyjnego mogą mieć akcję. 3 nowe testy; łącznie 277.
+
 ## [0.46.0] - 2026-10-16
 
 ### Dodano

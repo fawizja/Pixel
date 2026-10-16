@@ -87,6 +87,17 @@ public final class Hud {
         infoTitle = title;
         infoRows = new ArrayList<>(rows);
     }
+
+    /** Okno informacyjne o tytule zaczynajacym sie od prefix jest otwarte (np. do odswiezania na zywo). */
+    public boolean infoOpen(String prefix) {
+        return achievementsView && !journalMode && infoTitle != null && infoTitle.startsWith(prefix);
+    }
+
+    /** Nowa tresc otwartego okna informacyjnego bez zamykania go. */
+    public void updateInfo(String title, List<String[]> rows) {
+        infoTitle = title;
+        infoRows = new ArrayList<>(rows);
+    }
     private boolean bestiaryMode;
     private java.util.function.Function<String, String> monsterNames = k -> k;
     /** Okno rynku z serwera (null = zamkniete). */
@@ -510,6 +521,7 @@ public final class Hud {
                 : "teraz: " + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + "; dotknij, by wybrać następny";
         menuRows.add(new MenuRow("book:assign", assignLabel, assignDetail, true));
         menuRows.add(new MenuRow("book:journal", "Dziennik zadań", "postęp zadań i drogi do zleceniodawców (Z)", true));
+        menuRows.add(new MenuRow("book:hunt", "Analiza polowania", "doświadczenie, zabicia i złoto na godzinę (H)", true));
         // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
         List<Recipe> shown = new ArrayList<>();
         for (Recipe rc : session.recipes().all()) if (rc.minLevel() <= pc.level() + 100) shown.add(rc);
@@ -568,7 +580,11 @@ public final class Hud {
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         float colW = (menuW - 30) / 2f;
         List<MenuRow> rows = new ArrayList<>();
-        for (String[] r : infoRows) rows.add(new MenuRow("ach:none", r[0], r.length > 2 ? r[1] + " - " + r[2] : r[1], true));
+        // wiersz {etykieta, opis[, stan[, akcja]]}; bez akcji wiersz tylko informuje
+        for (String[] r : infoRows) {
+            String detail = r.length > 2 && !r[2].isEmpty() ? r[1] + " - " + r[2] : r[1];
+            rows.add(new MenuRow(r.length > 3 ? r[3] : "ach:none", r[0], detail, true));
+        }
         if (rows.isEmpty()) rows.add(new MenuRow("ach:none", "Brak danych", "", false));
         for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
             MenuRow row = rows.get(i);

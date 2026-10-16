@@ -288,6 +288,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.M: onButton("mount"); return true;
                     case Input.Keys.J: hud.toggleMap(); return true;
                     case Input.Keys.Z: hud.openJournal(); return true;
+                    case Input.Keys.H: openHunt(); return true;
                     case Input.Keys.ESCAPE:
                         if (hud.mapOpen()) hud.toggleMap();
                         else if (hud.npcOpen()) hud.toggleNpc(session);
@@ -380,6 +381,12 @@ public final class GameScreen extends ScreenAdapter {
                     if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
                 } else if (id.equals("npc:bosses")) {
                     bossReport(t);
+                } else if (id.equals("book:hunt")) {
+                    openHunt();
+                } else if (id.equals("hunt:reset")) {
+                    hunt.reset(t, session.character());
+                    session.log().add(t, EventLog.Kind.INFO, "Nowe polowanie: liczniki od zera.");
+                    hud.updateInfo(HUNT_TITLE, huntRows(t));
                 } else if (id.startsWith("journal:")) {
                     // dziennik: marsz do zleceniodawcy (przewodnik = najblizszy przewodnik na pietrze)
                     String key = id.startsWith("journal:goto:") ? id.substring(13) : null;
@@ -434,6 +441,10 @@ public final class GameScreen extends ScreenAdapter {
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        if (cmd.equals("/analiza") || cmd.equals("/polowanie")) {
+            openHunt();
+            return;
+        }
         if (cmd.equals("/bossowie")) {
             bossReport(now());
             return;
@@ -519,6 +530,32 @@ public final class GameScreen extends ScreenAdapter {
     private List<Position> walkPath;
     private int walkIndex;
     private pl.fawizja.pixel.npc.Npc walkNpc;
+
+    private static final String HUNT_TITLE = "Analiza polowania";
+    /** Licznik polowania (od wejscia do gry albo od "Zacznij od nowa"); liczy z danych postaci, dziala tez online. */
+    private final pl.fawizja.pixel.stats.HuntAnalyzer hunt = new pl.fawizja.pixel.stats.HuntAnalyzer();
+    private long huntRefreshMs;
+
+    private List<String[]> huntRows(long t) {
+        List<String[]> rows = pl.fawizja.pixel.stats.HuntAnalyzer.rows(hunt.report(t, session.character()));
+        rows.add(new String[] {"Zacznij od nowa", "zeruje liczniki polowania", "", "hunt:reset"});
+        return rows;
+    }
+
+    private void openHunt() {
+        long t = now();
+        hud.openInfo(HUNT_TITLE, huntRows(t));
+        huntRefreshMs = t;
+    }
+
+    /** Odswiezanie otwartego okna analizy co sekunde; licznik startuje z pierwsza klatka gry. */
+    private void updateHunt(long t) {
+        if (!hunt.started()) hunt.reset(t, session.character());
+        if (t - huntRefreshMs >= 1000 && hud.infoOpen(HUNT_TITLE)) {
+            hud.updateInfo(HUNT_TITLE, huntRows(t));
+            huntRefreshMs = t;
+        }
+    }
 
     /** Raport bossow: online od serwera (tam zyja potwory), lokalnie z wlasnego swiata. */
     private void bossReport(long t) {
@@ -674,6 +711,7 @@ public final class GameScreen extends ScreenAdapter {
         final long t = now();
         if (net == null) session.update(t, dir);
         autoLoot(t);
+        updateHunt(t);
         updateGuard(t);
 
         if (net == null && t - lastSaveMs >= AUTOSAVE_MS) {
