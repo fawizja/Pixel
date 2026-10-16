@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.115.0] - 2026-10-16
+
+### Dodano
+- Nad wybranym celem widać imię potwora z oceną trudności względem poziomu postaci (bardzo łatwy, łatwy,
+  wyrównany, trudny, śmiertelny) w kolorze od szarego do czerwonego.
+
+### Zmieniono
+- Krótsza pierwsza podpowiedź, mieści się w szerokości ekranu telefonu.
 ## [0.114.0] - 2026-10-16
 
 ### Dodano

@@ -1402,6 +1402,15 @@ public final class GameScreen extends ScreenAdapter {
             font.setColor(0.75f, 0.95f, 1f, 1f);
             font.draw(batch, n.name(), projected.x - n.name().length() * 2.8f * scale, projected.y);
         }
+        if (target != null && !target.isDead() && target.position().z() == z) {
+            // imie celu w kolorze trudnosci wzgledem poziomu postaci
+            pl.fawizja.pixel.monster.Difficulty d = pl.fawizja.pixel.monster.Difficulty.of(target.type().level(), session.character().level());
+            projected.set(target.renderX(t) + 0.5f, worldRenderer.worldY(target.renderY(t)) + 1.3f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            String label = target.type().name() + " (" + d.label + ")";
+            font.setColor(d.r, d.g, d.b, 1f);
+            font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
+        }
         for (RemotePlayer rp : remotePlayers.values()) {
             if (rp.to.z() != z) continue;
             projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);

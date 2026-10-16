@@ -14,7 +14,7 @@ public final class Tips {
     public static final int MAX_LEVEL = 30;
 
     public enum Tip {
-        WELCOME("Witaj! Chodzisz joystickiem (na komputerze WASD lub strzałki). Dotknij NPC, aby porozmawiać; /pomoc pokazuje polecenia."),
+        WELCOME("Witaj! Joystick (WASD) to ruch, dotknięcie NPC to rozmowa, /pomoc to polecenia."),
         MONSTER("Potwór w pobliżu: dotknij go albo przycisku CEL, a postać zacznie walczyć sama."),
         LOOT("Pokonany potwór zostawia ciało: dotknij go albo stań obok, a łupy trafią do plecaka (przycisk PLECAK)."),
         LOW_HEALTH("Mało zdrowia! Przycisk HP pije miksturę (klawisz Q); w ustawieniach jest też leczenie samo."),
@@ -47,6 +47,6 @@ public final class Tips {
     private static void check(PlayerCharacter pc, Tip t, boolean when, List<String> out) {
         if (!when || pc.tipShown(t.ordinal()) || !out.isEmpty()) return; // najwyzej jedna naraz
         pc.markTip(t.ordinal());
-        out.add("Podpowiedź: " + t.text + (t == Tip.WELCOME ? " (/podpowiedzi wyłącza podpowiedzi)" : ""));
+        out.add("Podpowiedź: " + t.text + (t == Tip.WELCOME ? " Wyłączysz je: /podpowiedzi" : ""));
     }
 }

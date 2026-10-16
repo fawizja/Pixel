@@ -15,7 +15,7 @@ class TipsTest {
     @Test
     void eachTipIsShownOnceOneAtATimeWhenItFits() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
-        assertTrue(Tips.due(pc, CALM).get(0).contains("joystickiem"), "welcome first");
+        assertTrue(Tips.due(pc, CALM).get(0).contains("Joystick"), "welcome first");
         assertTrue(Tips.due(pc, CALM).get(0).contains("przewodnik"), "level 8: quests next");
         assertEquals(List.of(), Tips.due(pc, CALM), "nothing else fits");
         Tips.Situation fight = new Tips.Situation(true, 1, 30, 1);
