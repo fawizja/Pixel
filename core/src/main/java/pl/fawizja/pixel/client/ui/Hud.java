@@ -313,6 +313,39 @@ public final class Hud {
     public VirtualJoystick joystick() { return joystick; }
     public boolean bagOpen() { return bagOpen; }
     public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
+    /** Klawisz Wstecz / Esc: zamyka okno na wierzchu; false, gdy nic nie bylo otwarte (handel zamyka sie przyciskiem). */
+    public boolean closeTop(GameSession session) {
+        if (trade != null) return true;
+        if (bigMapOpen) {
+            toggleMap();
+            return true;
+        }
+        if (menuOpen) {
+            if (npcMode) {
+                toggleNpc(session);
+            } else {
+                playerMenu = null;
+                rankingView = null;
+                friendsView = null;
+                marketView = null;
+                achievementsView = false;
+                journalMode = false;
+                assignSlot = -1;
+                menuOpen = false;
+            }
+            return true;
+        }
+        if (bagOpen) {
+            toggleBag();
+            return true;
+        }
+        if (charOpen) {
+            charOpen = false;
+            return true;
+        }
+        return false;
+    }
+
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
         playerMenu = null;

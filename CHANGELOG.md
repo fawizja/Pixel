@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.157.0] - 2026-10-16
+
+### Dodano
+- Android: przycisk Wstecz zamyka otwarte okno (mapa, rozmowa, plecak, karta postaci, osiągnięcia...).
+  Gdy nic nie jest otwarte, dwukrotne Wstecz w ciągu 2 sekund wychodzi z gry zamiast zamykać ją od razu.
+
+### Naprawiono
+- Esc przy otwartym oknie osiągnięć, rankingu albo rynku otwierał księgę czarów zamiast zamknąć okno.
 ## [0.156.0] - 2026-10-16
 
 ### Zmieniono

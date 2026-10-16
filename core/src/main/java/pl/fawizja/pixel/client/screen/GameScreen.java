@@ -216,6 +216,7 @@ public final class GameScreen extends ScreenAdapter {
             }
         });
         if (game.monsters() != null) hud.setMonsterSpecies(game.monsters().all().size());
+        Gdx.input.setCatchKey(Input.Keys.BACK, true); // Wstecz na Androidzie zamyka okna zamiast konczyc gre
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
         hud.setSettings(settings);
@@ -298,7 +299,7 @@ public final class GameScreen extends ScreenAdapter {
                     } else if (keycode == Input.Keys.UP || keycode == Input.Keys.DOWN) {
                         String h = keycode == Input.Keys.UP ? chatHistory.older() : chatHistory.newer();
                         if (h != null) chatDraft = new StringBuilder(h);
-                    } else if (keycode == Input.Keys.ESCAPE) {
+                    } else if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK) {
                         chatDraft = null;
                     }
                     return true; // klawisze ida do czatu, nie do gry
@@ -331,16 +332,28 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.Z: hud.openJournal(); return true;
                     case Input.Keys.H: openHunt(); return true;
                     case Input.Keys.ESCAPE:
-                        if (hud.mapOpen()) hud.toggleMap();
-                        else if (hud.npcOpen()) hud.toggleNpc(session);
-                        else if (hud.bookOpen()) hud.toggleBook();
-                        else if (hud.bagOpen()) hud.toggleBag();
+                        hud.closeTop(session);
                         return true;
+                    case Input.Keys.BACK: {
+                        // Android: Wstecz zamyka okna; gdy nic nie jest otwarte - dwa razy w ciagu 2 s wychodzi z gry
+                        if (hud.closeTop(session)) return true;
+                        long t = System.currentTimeMillis();
+                        if (t - backPressedMs <= 2000) {
+                            Gdx.app.exit();
+                        } else {
+                            backPressedMs = t;
+                            session.log().add(now(), EventLog.Kind.INFO, "Naciśnij Wstecz jeszcze raz, aby wyjść z gry.");
+                        }
+                        return true;
+                    }
                     default: return false;
                 }
             }
         });
     }
+
+    /** Czas ostatniego Wstecz bez otwartego okna (wyjscie po drugim nacisnieciu). */
+    private long backPressedMs = -10_000;
 
     /** Akcja przycisku/wiersza menu z zewnatrz (desktop: -Dpixel.button=id). */
     public void press(String id) { onButton(id); }
