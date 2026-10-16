@@ -340,6 +340,7 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:loot":
             case "settings:weather":
             case "settings:heal":
+            case "settings:mana":
                 settings.apply(id);
                 settingsPrefs.put(settings.toMap());
                 settingsPrefs.flush();
@@ -746,6 +747,19 @@ public final class GameScreen extends ScreenAdapter {
         act("potion_hp", t);
     }
 
+    /** Automatyczna mikstura many (ustawienie): po zdrowiu, najwyzej raz na sekunde i nie w tej samej chwili. */
+    private long autoManaAtMs;
+
+    private void autoMana(long t) {
+        int pct = settings.autoMana();
+        PlayerCharacter pc = session.character();
+        if (pct == 0 || t < autoManaAtMs || t < autoHealAtMs - 500 || pc.isDead() || pc.maxMana() <= 0
+                || pc.mana() * 100L >= (long) pc.maxMana() * pct) return;
+        if (pc.backpack().count(session.items().byKey("mana_potion").id()) == 0) return;
+        autoManaAtMs = t + 1000;
+        act("potion_mp", t);
+    }
+
     private void autoLoot(long t) {
         if (!settings.autoLoot() || t < autoLootAtMs || session.character().isDead()) return;
         autoLootAtMs = t + 800;
@@ -876,6 +890,7 @@ public final class GameScreen extends ScreenAdapter {
         if (net == null) session.update(t, dir);
         autoLoot(t);
         autoHeal(t);
+        autoMana(t);
         updateHunt(t);
         checkDeath();
         updateGuard(t);

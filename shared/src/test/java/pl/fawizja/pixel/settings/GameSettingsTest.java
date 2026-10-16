@@ -87,4 +87,17 @@ class GameSettingsTest {
         assertEquals(0, s.autoHeal(), "cycles back to off");
         assertEquals(0, GameSettings.fromMap(Map.of("heal", "45")).autoHeal(), "unsupported value falls back");
     }
+
+    @Test
+    void autoManaHasItsOwnThresholdAndIsSaved() {
+        GameSettings s = new GameSettings();
+        assertEquals(0, s.autoMana(), "off by default");
+        assertTrue(s.apply("settings:mana"));
+        s.apply("settings:mana");
+        assertEquals(50, s.autoMana());
+        assertEquals(0, s.autoHeal(), "independent from the health potion");
+        assertTrue(s.rows()[8][1].contains("50% MP"));
+        assertEquals(50, GameSettings.fromMap(s.toMap()).autoMana());
+        assertEquals(0, GameSettings.fromMap(Map.of("mana", "99")).autoMana());
+    }
 }

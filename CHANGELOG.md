@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.75.0] - 2026-10-16
+
+### Dodano
+- Ustawienie „Mikstura many sama” (wyłączona, poniżej 30%, 50% albo 70% MP), niezależne od mikstury zdrowia.
+  Zdrowie ma pierwszeństwo: mikstura many nie pije się w tej samej chwili co mikstura zdrowia.
+
+### Zmieniono
+- Panel ustawień przesunięty wyżej, żeby dziewiąty wiersz nie zachodził na przycisk KSIĘGA.
+- 1 nowy test; łącznie 326.
+
 ## [0.74.0] - 2026-10-16
 
 ### Dodano

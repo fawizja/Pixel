@@ -1050,7 +1050,7 @@ public final class Hud {
     public void setSettings(pl.fawizja.pixel.settings.GameSettings settings) { this.settings = settings; }
 
     private static final float SETTINGS_ROW_H = 22f;
-    private float settingsRowY(int i) { return h - 290 - i * (SETTINGS_ROW_H + 4); }
+    private float settingsRowY(int i) { return h - 260 - i * (SETTINGS_ROW_H + 4); }
     private float settingsRowX() { return w - 250; }
     public int selectedSlot() { return selectedSlot; }
     public void clearSelection() { selectedSlot = -1; }

@@ -29,6 +29,7 @@ public final class GameSettings {
     private boolean autoLoot = true;
     private boolean weather = true;
     private int autoHeal;
+    private int autoMana;
 
     public int fpsCap() { return fpsCap; }
     public boolean batterySaver() { return batterySaver; }
@@ -41,6 +42,8 @@ public final class GameSettings {
     public boolean weather() { return weather; }
     /** Mikstura zdrowia sama, gdy zdrowie spadnie ponizej tylu procent; 0 = wylaczona. */
     public int autoHeal() { return autoHeal; }
+    /** Mikstura many sama, gdy mana spadnie ponizej tylu procent; 0 = wylaczona (te same progi co zdrowie). */
+    public int autoMana() { return autoMana; }
     /** Glosnosc 0..1 dla odtwarzacza. */
     public float volumeFactor() { return volume / 100f; }
 
@@ -79,6 +82,12 @@ public final class GameSettings {
         autoHeal = AUTO_HEAL_CHOICES[(i + 1) % AUTO_HEAL_CHOICES.length];
     }
 
+    public void cycleAutoMana() {
+        int i = 0;
+        while (i < AUTO_HEAL_CHOICES.length && AUTO_HEAL_CHOICES[i] != autoMana) i++;
+        autoMana = AUTO_HEAL_CHOICES[(i + 1) % AUTO_HEAL_CHOICES.length];
+    }
+
     /** Obsluga przycisku z panelu ustawien ("settings:fps" itd.); false dla nieznanej akcji. */
     public boolean apply(String action) {
         switch (action) {
@@ -90,6 +99,7 @@ public final class GameSettings {
             case "settings:loot": toggleAutoLoot(); return true;
             case "settings:weather": toggleWeather(); return true;
             case "settings:heal": cycleAutoHeal(); return true;
+            case "settings:mana": cycleAutoMana(); return true;
             default: return false;
         }
     }
@@ -104,6 +114,7 @@ public final class GameSettings {
         m.put("loot", String.valueOf(autoLoot));
         m.put("weather", String.valueOf(weather));
         m.put("heal", String.valueOf(autoHeal));
+        m.put("mana", String.valueOf(autoMana));
         return m;
     }
 
@@ -118,6 +129,7 @@ public final class GameSettings {
         s.autoLoot = bool(m.get("loot"), true);
         s.weather = bool(m.get("weather"), true);
         s.autoHeal = choice(m.get("heal"), AUTO_HEAL_CHOICES, 0);
+        s.autoMana = choice(m.get("mana"), AUTO_HEAL_CHOICES, 0);
         return s;
     }
 
@@ -151,6 +163,7 @@ public final class GameSettings {
             {"settings:loot", "Łupy z ciał: " + (autoLoot ? "automatycznie" : "dotknięciem")},
             {"settings:weather", "Pogoda: " + (weather ? "pokazuj" : "ukryj")},
             {"settings:heal", "Mikstura zdrowia sama: " + (autoHeal == 0 ? "wyłączona" : "poniżej " + autoHeal + "% HP")},
+            {"settings:mana", "Mikstura many sama: " + (autoMana == 0 ? "wyłączona" : "poniżej " + autoMana + "% MP")},
         };
     }
 }
