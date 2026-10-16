@@ -116,6 +116,16 @@ public final class SpellSystem {
 
     // ------------------------------------------------------------------ czary
 
+    /** Najsilniejszy czar leczacy, ktory postac moze rzucic teraz (profesja, poziom, mana, odnowienie), albo null. */
+    public String bestHeal(long now) {
+        SpellType best = null;
+        for (SpellType s : spells.all()) {
+            if (s.kind() != SpellKind.HEAL_SELF || check(s, now, true) != CastResult.OK) continue;
+            if (best == null || baseValue(s, pc) > baseValue(best, pc)) best = s;
+        }
+        return best == null ? null : best.key();
+    }
+
     public CastResult cast(String key, long now) {
         SpellType s = spells.find(key);
         if (s == null || s.kind().isRune()) return CastResult.NOT_USABLE;

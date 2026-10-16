@@ -75,6 +75,22 @@ class MagicTest {
     }
 
     @Test
+    void autoHealPicksTheStrongestHealingSpellThatCanBeCastNow() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = session(pc, null, null);
+        assertEquals("mend", s.spells().bestHeal(0), "greater mend needs level 20");
+        assertEquals(CastResult.OK, s.castSpell("mend", 1000));
+        assertNull(s.spells().bestHeal(1500), "on cooldown");
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(20) - pc.experience());
+        pc.restoreMana(pc.maxMana());
+        assertEquals("greater_mend", s.spells().bestHeal(5000));
+        pc.spendMana(pc.mana() - 30);
+        assertEquals("mend", s.spells().bestHeal(5000), "not enough mana for greater mend");
+        pc.spendMana(pc.mana());
+        assertNull(s.spells().bestHeal(5000), "no mana - the potion is used instead");
+    }
+
+    @Test
     void druidHealsMoreThanSorcerer() {
         PlayerCharacter d = TestData.newCharacter(Vocation.DRUID);
         PlayerCharacter so = TestData.newCharacter(Vocation.SORCERER);

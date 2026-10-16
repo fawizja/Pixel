@@ -739,16 +739,17 @@ public final class GameScreen extends ScreenAdapter {
     private long autoLootAtMs;
     private final Map<Position, Integer> autoLootTries = new java.util.HashMap<>();
 
-    /** Automatyczna mikstura zdrowia (ustawienie): ta sama akcja co przycisk HP, najwyzej raz na sekunde. */
+    /** Automatyczne leczenie (ustawienie): najpierw najsilniejszy dostepny czar leczacy, bez many - mikstura; najwyzej raz na sekunde. */
     private long autoHealAtMs;
 
     private void autoHeal(long t) {
         int pct = settings.autoHeal();
         PlayerCharacter pc = session.character();
         if (pct == 0 || t < autoHealAtMs || pc.isDead() || pc.health() * 100L >= (long) pc.maxHealth() * pct) return;
-        if (pc.backpack().count(session.items().byKey("health_potion").id()) == 0) return;
+        String spell = session.spells().bestHeal(t);
+        if (spell == null && pc.backpack().count(session.items().byKey("health_potion").id()) == 0) return;
         autoHealAtMs = t + 1000;
-        act("potion_hp", t);
+        act(spell != null ? "cast:" + spell : "potion_hp", t);
     }
 
     /** Automatyczna mikstura many (ustawienie): po zdrowiu, najwyzej raz na sekunde i nie w tej samej chwili. */

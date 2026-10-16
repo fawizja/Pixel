@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.77.0] - 2026-10-16
+
+### Zmieniono
+- Ustawienie automatycznego leczenia najpierw rzuca najsilniejszy dostępny czar leczący (Opatrzenie ran, Uzdrowienie),
+  a miksturę zdrowia pije dopiero, gdy brak many albo czar się odnawia. Wiersz ustawień: „Leczenie samo (czar, potem mikstura)”.
+- 1 nowy test; łącznie 329.
+
 ## [0.76.0] - 2026-10-16
 
 ### Dodano

@@ -162,7 +162,7 @@ public final class GameSettings {
             {"settings:sound", "Dźwięk: " + (volume == 0 ? "wyłączony" : volume + "%")},
             {"settings:loot", "Łupy z ciał: " + (autoLoot ? "automatycznie" : "dotknięciem")},
             {"settings:weather", "Pogoda: " + (weather ? "pokazuj" : "ukryj")},
-            {"settings:heal", "Mikstura zdrowia sama: " + (autoHeal == 0 ? "wyłączona" : "poniżej " + autoHeal + "% HP")},
+            {"settings:heal", "Leczenie samo (czar, potem mikstura): " + (autoHeal == 0 ? "wyłączona" : "poniżej " + autoHeal + "% HP")},
             {"settings:mana", "Mikstura many sama: " + (autoMana == 0 ? "wyłączona" : "poniżej " + autoMana + "% MP")},
         };
     }
