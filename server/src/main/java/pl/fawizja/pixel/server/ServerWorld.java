@@ -1503,7 +1503,8 @@ final class ServerWorld {
                 p.client.send(rows.toArray(new String[0]));
                 break;
             case "EVENTS":
-                p.client.send("EVENTS", invasionStatus(now));
+                p.client.send("EVENTS", invasionStatus(now), expEventPercent > 0
+                        ? "+" + expEventPercent + "% za potwory, jeszcze " + Math.max(1, (expEventUntil - now + 59_999) / 60_000) + " min" : "-");
                 break;
             case "LOOTLOG": {
                 // ostatnie lupy tego gracza (wiersze jak w podsumowaniu smierci)

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.125.0] - 2026-10-16
+
+### Dodano
+- Okno `/wydarzenia` w grze online pokazuje trwającą premię doświadczenia i ile minut jej zostało.
 ## [0.124.0] - 2026-10-16
 
 ### Dodano

@@ -13,11 +13,15 @@ public final class EventsReport {
     private EventsReport() {}
 
     /** invasion: opis inwazji od serwera albo null (gra bez serwera). */
-    public static List<String[]> rows(GameSession s, String invasion) {
+    public static List<String[]> rows(GameSession s, String invasion) { return rows(s, invasion, null); }
+
+    /** expEvent = opis wydarzenia premii doswiadczenia z serwera (null albo "-" = brak). */
+    public static List<String[]> rows(GameSession s, String invasion, String expEvent) {
         PlayerCharacter pc = s.character();
         long today = s.today();
         List<String[]> rows = new ArrayList<>();
         rows.add(new String[] {"Inwazja", invasion == null ? "tylko w grze na serwerze" : invasion});
+        if (expEvent != null && !expEvent.equals("-")) rows.add(new String[] {"Premia exp", expEvent});
         MonsterType boost = s.boostedCreature();
         rows.add(new String[] {"Potwór dnia", boost == null ? "brak" : pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
         MonsterType boss = s.weeklyBoss();

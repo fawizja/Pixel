@@ -1099,6 +1099,8 @@ class NetworkSyncTest {
             awaitMessage(ola, "announced", m -> m[0].equals("LOG") && m[2].startsWith("Wydarzenie: +50% doświadczenia"));
             assertTrue(answer.get().contains("30 min"), answer.get());
             await("bonus applied", () -> server.world().find("Ola").session.combat().bonusExpPercent() == 50);
+            ola.send("EVENTS");
+            awaitMessage(ola, "event in the report", m -> m[0].equals("EVENTS") && m.length == 3 && m[2].startsWith("+50% za potwory, jeszcze 30 min"));
             server.enqueueTest(() -> answer.set(server.world().moderate(new String[] {"EXPEVENT", "abc"}, "konsola", server.now())));
             await("usage", () -> answer.get().startsWith("Użycie"));
             server.enqueueTest(() -> server.world().moderate(new String[] {"EXPEVENT", "0"}, "konsola", server.now()));

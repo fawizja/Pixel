@@ -27,6 +27,9 @@ class EventsReportTest {
         rows = EventsReport.rows(s, "następna za 47 min");
         assertEquals("następna za 47 min", value(rows, "Inwazja"));
         assertEquals("Cios krytyczny 1 h 00 min", value(rows, "Zaklęcia"));
+        assertTrue(rows.stream().noneMatch(r -> r[0].equals("Premia exp")));
+        assertEquals("+50% za potwory, jeszcze 12 min", value(EventsReport.rows(s, "-", "+50% za potwory, jeszcze 12 min"), "Premia exp"));
+        assertTrue(EventsReport.rows(s, "-", "-").stream().noneMatch(r -> r[0].equals("Premia exp")));
     }
 
     private static String value(List<String[]> rows, String label) {
