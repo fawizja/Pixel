@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.132.0] - 2026-10-16
+
+### Zmieniono
+- Okno `/pomoc` ma wiersz `/nowości` i wspomina o `/idź łowisko`, `/nagroda` i wpłatach do gildii; krótsze opisy
+  nie wychodzą już poza okno.
 ## [0.131.0] - 2026-10-16
 
 ### Dodano

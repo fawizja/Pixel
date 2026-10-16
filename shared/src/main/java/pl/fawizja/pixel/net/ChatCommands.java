@@ -221,16 +221,16 @@ public final class ChatCommands {
     public static java.util.List<String[]> helpRows() {
         java.util.List<String[]> rows = new java.util.ArrayList<>();
         String[][] runnable = {
-            {"/gracze", "kto jest teraz w grze"},
+            {"/gracze", "kto jest teraz w grze (znajomi: /znajomi)"},
             {"/bossowie", "którzy bossowie żyją i kiedy wrócą"},
-            {"/analiza", "exp, zabicia i złoto na godzinę (ostatnie łupy: /łupy)"},
+            {"/analiza", "exp i złoto na godzinę; łupy: /łupy"},
             {"/wydarzenia", "inwazja, potwór dnia, zadanie dnia, nagrody"},
             {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
             {"/statystyki", "czas gry, zabicia; /szukaj nazwa, /cena nazwa"},
             {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
             {"/ranking", "najlepsi gracze; /ranking gildie, magia, miecz..."},
-            {"/znajomi", "lista znajomych"},
-            {"/znaczniki", "miejsca na mapie (/znacznik nazwa); /idź bank prowadzi do NPC"},
+            {"/nowości", "co nowego w ostatnich wersjach gry"},
+            {"/znaczniki", "miejsca na mapie; /idź bank, /idź łowisko"},
             {"/strój", "kolor stroju widoczny dla innych graczy"},
         };
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
@@ -238,9 +238,9 @@ public final class ChatCommands {
             {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
             {"/zaproś Imię", "zaproszenie do drużyny (/przyjmij, /opuść, /d tekst)"},
             {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
-            {"/pojedynek Imię", "pojedynek do pierwszej krwi"},
-            {"/gildia załóż Nazwa", "gildie (zaproś, przyjmij, wyrzuć, opuść, wiadomość; /g tekst)"},
-            {"/wyślij Imię, 5 futro", "poczta do depozytu; złoto: /przelew Imię, 5000 (u bankiera)"},
+            {"/pojedynek Imię", "pojedynek; /nagroda Imię, 5000 za głowę"},
+            {"/gildia załóż Nazwa", "zaproś, przyjmij, wyrzuć, wpłać; czat /g"},
+            {"/wyślij Imię, 5 futro", "poczta; złoto: /przelew Imię, 5000"},
             {"/hasło stare nowe", "zmiana hasła konta"},
         };
         for (String[] r : typed) rows.add(new String[] {r[0], r[1]});
