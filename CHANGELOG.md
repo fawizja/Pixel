@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.103.0] - 2026-10-16
+
+### Zmieniono
+- „Uzupełnij zapasy” kupuje najsilniejsze mikstury zdrowia i many, których postać może używać i które sprzedaje
+  ten kupiec (np. druid od poziomu 50 dostaje silne mikstury many, ale nie silne mikstury zdrowia).
 ## [0.102.0] - 2026-10-16
 
 ### Zmieniono

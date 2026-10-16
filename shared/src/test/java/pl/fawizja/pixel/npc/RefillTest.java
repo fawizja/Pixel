@@ -53,4 +53,17 @@ class RefillTest {
         assertTrue(s.refillSupplies(1200) > 0);
         assertEquals(GameSession.REFILL_AMMO_TO, pc.backpack().count(spear) + wornSpears);
     }
+
+    @Test
+    void aStrongDruidGetsTheStrongestManaPotionsTheShopSells() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        pc.addExperience(10_000_000);
+        GameSession s = new TownServicesTest().session(pc, List.of());
+        pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(TestData.ITEMS.byKey("platinum_coin").id(), 100));
+        int great = TestData.ITEMS.byKey("great_mana_potion").id();
+        s.teleport(TownServicesTest.talkSpot(TownServicesTest.npcs.get("varden_mage")), 1100);
+        assertTrue(s.refillSupplies(1200) > 0);
+        assertEquals(GameSession.REFILL_TO, pc.backpack().count(great), "druids may drink great mana potions");
+        assertEquals(0, pc.backpack().count(TestData.ITEMS.byKey("great_health_potion").id()), "but not great health ones");
+    }
 }

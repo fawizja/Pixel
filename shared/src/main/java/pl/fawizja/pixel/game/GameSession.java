@@ -447,7 +447,6 @@ public final class GameSession {
 
     /** Docelowa liczba mikstur zdrowia i many po uzupelnieniu u kupca. */
     public static final int REFILL_TO = 20;
-    static final String[] REFILL_KEYS = {"health_potion", "mana_potion"};
 
     /**
      * Uzupelnienie zapasow jednym dotknieciem (tyle, na ile starczy monet): mikstury zdrowia i many oraz noszone runy
@@ -473,9 +472,20 @@ public final class GameSession {
         List<String> bought = new java.util.ArrayList<>();
         int total = 0;
         boolean poor = false;
-        // mikstury zdrowia i many zawsze, a do tego kazde runy i amunicja, ktore postac ma przy sobie
+        // mikstury zdrowia i many zawsze (najsilniejsze dozwolone z tego sklepu), a do tego kazde mikstury, runy
+        // i amunicja, ktore postac ma przy sobie
         java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
-        for (String key : REFILL_KEYS) if (items.byKey(key) != null) ids.add(items.byKey(key).id());
+        for (String[] tiers : new String[][] {HP_TIERS, MP_TIERS}) {
+            for (String key : tiers) {
+                if (!items.containsKey(key)) continue;
+                pl.fawizja.pixel.item.ItemType t = items.byKey(key);
+                boolean allowed = pc.level() >= t.minLevel() && t.vocations().contains(pc.vocation());
+                if (allowed && shop != null && shop.offer(t.id()) != null && shop.offer(t.id()).sold()) {
+                    ids.add(t.id());
+                    break;
+                }
+            }
+        }
         for (ItemStack st : pc.backpack().contents()) if (st != null && isRefillable(items.get(st.itemId()))) ids.add(st.itemId());
         ItemStack ammo = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO);
         if (ammo != null && isRefillable(items.get(ammo.itemId()))) ids.add(ammo.itemId());
