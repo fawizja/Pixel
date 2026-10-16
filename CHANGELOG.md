@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.46.0] - 2026-10-16
+
+### Dodano
+- Zwój powrotu (`return_scroll`, 300 gp u kupców we wszystkich 4 miastach): użyty z plecaka po 3 s skupienia
+  przenosi do świątyni miasta postaci. Ruch albo otrzymane obrażenia przerywają skupienie (zwój zostaje),
+  nie działa w czasie blokady po walce z graczem. Zwój znika dopiero po udanym przeniesieniu. Działa lokalnie
+  i online (logika w sesji, serwer wykonuje ją przy ACT slot_use).
+- Test zwoju (przeniesienie, przerwanie ruchem); łącznie 274.
+
 ## [0.45.0] - 2026-10-16
 
 ### Dodano

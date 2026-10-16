@@ -431,7 +431,50 @@ public final class GameSession {
         if (slot < 0 || slot >= pc.backpack().size()) return CastResult.MISSING_ITEM;
         pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(slot);
         if (st != null && items.get(st.itemId()).key().equals("saddle")) return useSaddle(slot, nowMs);
+        if (st != null && items.get(st.itemId()).key().equals("return_scroll")) return startRecall(nowMs);
         return spells.useItem(slot, nowMs);
+    }
+
+    /** Zwoj powrotu: 3 s skupienia (ruch albo obrazenia przerywaja), potem swiatynia miasta postaci; zwoj znika na koncu. */
+    public static final long RECALL_MS = 3_000;
+    private long recallAtMs = -1;
+    private Position recallFrom;
+    private int recallHealth;
+
+    public boolean recalling() { return recallAtMs >= 0; }
+
+    private CastResult startRecall(long nowMs) {
+        if (nowMs < pzLockedUntil) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Po walce z graczem zwój nie działa jeszcze przez "
+                    + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
+            return CastResult.OK;
+        }
+        if (world.templeOf(pc.homeTown()) == null) return CastResult.OK;
+        recallAtMs = nowMs + RECALL_MS;
+        recallFrom = pc.position();
+        recallHealth = pc.health();
+        log.add(nowMs, EventLog.Kind.INFO, "Czytasz zwój powrotu... nie ruszaj się przez 3 s.");
+        return CastResult.OK;
+    }
+
+    private void updateRecall(long nowMs) {
+        if (recallAtMs < 0) return;
+        if (!pc.position().equals(recallFrom) || pc.health() < recallHealth || pc.isDead() || nowMs < pzLockedUntil) {
+            recallAtMs = -1;
+            log.add(nowMs, EventLog.Kind.WARNING, "Skupienie przerwane - zwój nie zadziałał.");
+            return;
+        }
+        recallHealth = Math.max(recallHealth, pc.health());
+        if (nowMs < recallAtMs) return;
+        recallAtMs = -1;
+        int scroll = items.byKey("return_scroll").id();
+        int slot = -1;
+        for (int i = 0; i < pc.backpack().size(); i++) {
+            if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == scroll) slot = i;
+        }
+        if (slot < 0 || pc.backpack().takeFromSlot(slot, 1) == null) return;
+        teleport(world.templeOf(pc.homeTown()), nowMs);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Zwój rozsypuje się w pył. Jesteś w świątyni " + pc.homeTown() + ".");
     }
 
     /** Siodlo: oswaja konia na stale (przedmiot znika). */
@@ -499,6 +542,7 @@ public final class GameSession {
     public void update(long nowMs, Direction requested) {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
+        updateRecall(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
             pc.setMounted(false);
             log.add(nowMs, EventLog.Kind.INFO, "Zostawiasz konia przy zejściu pod ziemię.");

@@ -162,6 +162,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Automatyczne lupy z cial obok postaci (0.43.0)
 - [x] Licznik bossow (zyje / odrodzi sie za) (0.44.0)
 - [x] Porownanie przedmiotu z zalozonym w plecaku (0.45.0)
+- [x] Zwoj powrotu do swiatyni (0.46.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

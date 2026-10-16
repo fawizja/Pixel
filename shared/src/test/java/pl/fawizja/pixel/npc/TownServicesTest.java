@@ -490,4 +490,33 @@ class TownServicesTest {
         assertEquals(2, pc.loginStreak().streak(), "next day continues the streak");
         assertEquals(before + 300 + 500, pc.bank().balance());
     }
+
+    @Test
+    void theReturnScrollTakesYouToTheTempleUnlessYouMove() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = session(pc, List.of());
+        int scroll = TestData.ITEMS.byKey("return_scroll").id();
+        pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(scroll, 2));
+        pl.fawizja.pixel.world.Position field = talkSpot(npcs.get("varden_guide")).translate(0, 12);
+        s.teleport(field, 0);
+        s.update(1, null);
+        int slot = -1;
+        for (int i = 0; i < pc.backpack().size(); i++) if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == scroll) slot = i;
+        s.useSlot(slot, 100);
+        assertTrue(s.recalling());
+        s.update(2_000, null);
+        assertEquals(field, pc.position(), "still focusing");
+        s.update(3_200, null);
+        assertEquals(world.templeOf(pc.homeTown()), pc.position());
+        assertEquals(1, pc.backpack().count(scroll), "one scroll used");
+        // ruch przerywa skupienie i zwoj zostaje
+        s.teleport(field, 4_000);
+        s.useSlot(slot, 4_100);
+        s.teleport(field.translate(1, 0), 4_500);
+        s.update(4_600, null);
+        assertFalse(s.recalling());
+        s.update(8_000, null);
+        assertEquals(field.translate(1, 0), pc.position());
+        assertEquals(1, pc.backpack().count(scroll));
+    }
 }

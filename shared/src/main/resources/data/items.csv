@@ -108,3 +108,4 @@
 124;swamp_eel;Bagienny węgorz;FOOD;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#5a7a3a;Śliski węgorz z bagien Selvaran.
 125;oasis_carp;Karp z oazy;FOOD;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#e0a050;Złoty karp z oaz Qasirah.
 126;saddle;Siodło;TOOL;1;25000;NONE;0;0;0;0;*;0;0;PHYSICAL;#8a5a30;Siodło z wodzami. Użyj, aby oswoić konia: wierzchowiec zostaje na zawsze i dodaje 60 szybkości.
+127;return_scroll;Zwój powrotu;TOOL;20;150;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8d9a0;Zwój z modlitwą kapłanów: po 3 s skupienia przenosi do świątyni twojego miasta. Nie działa w walce z graczem.
