@@ -6,6 +6,11 @@ public final class CharacterStats {
     private int deaths;
     private int bestLevel;
     private int challenges;
+    private int restedKills;
+
+    /** Potwory pokonane z premia wypoczecia. */
+    public int restedKills() { return restedKills; }
+    public void recordRestedKill() { if (restedKills < Integer.MAX_VALUE) restedKills++; }
 
     /** Ukonczone wyzwania ze zwojow. */
     public int challenges() { return challenges; }
@@ -31,14 +36,15 @@ public final class CharacterStats {
         return (h >= 24 ? (h / 24) + " d " + (h % 24) + " h " : h + " h ") + String.format("%02d", min % 60) + " min";
     }
 
-    /** Zapis: "czasMs,smierci,poziom,wyzwania" (starsze zapisy bez wyzwan). */
-    public String encode() { return playMs + "," + deaths + "," + bestLevel + "," + challenges; }
+    /** Zapis: "czasMs,smierci,poziom,wyzwania,wypoczete" (starsze zapisy bez dwoch ostatnich). */
+    public String encode() { return playMs + "," + deaths + "," + bestLevel + "," + challenges + "," + restedKills; }
 
     public void restore(String text) {
         playMs = 0;
         deaths = 0;
         bestLevel = 0;
         challenges = 0;
+        restedKills = 0;
         if (text == null || text.isBlank()) return;
         String[] f = text.split(",");
         try {
@@ -46,6 +52,7 @@ public final class CharacterStats {
             if (f.length > 1) deaths = Math.max(0, Integer.parseInt(f[1].trim()));
             if (f.length > 2) bestLevel = Math.max(0, Integer.parseInt(f[2].trim()));
             if (f.length > 3) challenges = Math.max(0, Integer.parseInt(f[3].trim()));
+            if (f.length > 4) restedKills = Math.max(0, Integer.parseInt(f[4].trim()));
         } catch (NumberFormatException ignored) {
             // uszkodzony wpis - liczniki od zera
         }
@@ -56,5 +63,6 @@ public final class CharacterStats {
         deaths = o.deaths;
         bestLevel = o.bestLevel;
         challenges = o.challenges;
+        restedKills = o.restedKills;
     }
 }

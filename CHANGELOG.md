@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.137.0] - 2026-10-16
+
+### Dodano
+- Osiągnięcie „Wypoczęty łowca”: pokonaj 100 potworów z premią wypoczęcia (razem 24 osiągnięcia).
 ## [0.136.0] - 2026-10-16
 
 ### Dodano

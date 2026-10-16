@@ -27,9 +27,10 @@ public enum Achievement {
     WEEKLY_BOSS("Łowca tygodnia", "pokonaj bossa tygodnia", Kind.WEEKLY, 1),
     PLAYTIME_10("Stały bywalec", "spędź w grze 10 godzin", Kind.PLAYTIME, 10),
     HUNT_10("Zawodowy łowca", "oddaj 10 zleceń łowcy", Kind.HUNTS, 10),
-    CHALLENGE_5("Pogromca fal", "ukończ 5 wyzwań ze zwojów", Kind.CHALLENGES, 5);
+    CHALLENGE_5("Pogromca fal", "ukończ 5 wyzwań ze zwojów", Kind.CHALLENGES, 5),
+    RESTED_100("Wypoczęty łowca", "pokonaj 100 potworów z premią wypoczęcia", Kind.RESTED, 100);
 
-    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS, WEEKLY, PLAYTIME, HUNTS, CHALLENGES }
+    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS, WEEKLY, PLAYTIME, HUNTS, CHALLENGES, RESTED }
 
     private final String title;
     private final String goal;
@@ -70,6 +71,7 @@ public enum Achievement {
             case PLAYTIME: return pc.stats().playMs() / 3_600_000L; // pelne godziny
             case HUNTS: return pc.hunt().completed();
             case CHALLENGES: return pc.stats().challenges();
+            case RESTED: return pc.stats().restedKills();
             default: return 0;
         }
     }

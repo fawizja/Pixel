@@ -231,6 +231,7 @@ class CombatTest {
         assertTrue(wolf.isDead());
         assertEquals(exp + 30, pc.experience(), "20 exp + 50%");
         assertEquals(0, pc.restedKills(), "used up");
+        assertEquals(1, pc.stats().restedKills(), "counted for the achievement");
         pc.restoreRested(12_345);
         pl.fawizja.pixel.character.CharacterCodec codec = new pl.fawizja.pixel.character.CharacterCodec(TestData.ITEMS);
         assertEquals(12_345, codec.decode(codec.encode(pc)).restedMs(), "saved");
