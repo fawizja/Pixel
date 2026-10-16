@@ -1,0 +1,43 @@
+package pl.fawizja.pixel.npc;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import pl.fawizja.pixel.TestData;
+import pl.fawizja.pixel.character.PlayerCharacter;
+import pl.fawizja.pixel.economy.Money;
+import pl.fawizja.pixel.game.Actions;
+import pl.fawizja.pixel.game.GameSession;
+import pl.fawizja.pixel.vocation.Vocation;
+
+class RefillTest {
+    @BeforeAll
+    static void load() throws Exception {
+        TownServicesTest.load();
+    }
+
+    @Test
+    void oneTapTopsUpPotionsToTwentyAsFarAsMoneyAllows() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = new TownServicesTest().session(pc, List.of());
+        int hp = TestData.ITEMS.byKey("health_potion").id();
+        int mp = TestData.ITEMS.byKey("mana_potion").id();
+        assertEquals(0, s.refillSupplies(1000), "only at a merchant");
+        s.teleport(TownServicesTest.talkSpot(TownServicesTest.npcs.get("varden_merchant")), 1100);
+        int haveHp = pc.backpack().count(hp);
+        assertTrue(haveHp < GameSession.REFILL_TO);
+        assertTrue(Actions.apply(s, "npc:refill", 1200));
+        assertEquals(GameSession.REFILL_TO, pc.backpack().count(hp));
+        assertEquals(GameSession.REFILL_TO, pc.backpack().count(mp));
+        assertEquals(0, s.refillSupplies(1300), "already full");
+
+        // bez monet: nic nie kupuje
+        pc.backpack().remove(hp, 10);
+        long coins = Money.totalValue(pc.backpack());
+        assertTrue(Money.pay(pc.backpack(), coins).ok());
+        assertEquals(0, s.refillSupplies(1400));
+        assertEquals(GameSession.REFILL_TO - 10, pc.backpack().count(hp));
+    }
+}

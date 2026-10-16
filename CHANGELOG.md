@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.81.0] - 2026-10-16
+
+### Dodano
+- U kupca wiersz „Uzupełnij mikstury”: jednym dotknięciem dokupuje mikstury zdrowia i many do 20 sztuk każdej,
+  tyle, na ile starczy monet w plecaku (akcja `npc:refill`, działa też online).
+- 1 nowy test; łącznie 334. Scena `shop` odświeżona.
+
 ## [0.80.0] - 2026-10-16
 
 ### Dodano

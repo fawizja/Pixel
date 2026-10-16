@@ -412,6 +412,45 @@ public final class GameSession {
         return r;
     }
 
+    /** Docelowa liczba mikstur zdrowia i many po uzupelnieniu u kupca. */
+    public static final int REFILL_TO = 20;
+    static final String[] REFILL_KEYS = {"health_potion", "mana_potion"};
+
+    /**
+     * Uzupelnienie mikstur zdrowia i many do {@link #REFILL_TO} sztuk jednym dotknieciem (tyle, na ile starczy monet).
+     * Zwraca liczbe kupionych sztuk.
+     */
+    public int refillSupplies(long nowMs) {
+        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        if (n == null) return 0;
+        Shop shop = shopOf(n);
+        List<String> bought = new java.util.ArrayList<>();
+        int total = 0;
+        boolean poor = false;
+        for (String key : REFILL_KEYS) {
+            pl.fawizja.pixel.item.ItemType t = items.byKey(key);
+            if (t == null || shop == null || shop.offer(t.id()) == null || !shop.offer(t.id()).sold()) continue;
+            int want = REFILL_TO - pc.backpack().count(t.id());
+            if (want <= 0) continue;
+            long price = shop.offer(t.id()).buyPrice();
+            int afford = (int) Math.min(want, price <= 0 ? want : pl.fawizja.pixel.economy.Money.totalValue(pc.backpack()) / price);
+            if (afford < want) poor = true;
+            if (afford > 0 && TradeSystem.buy(pc.backpack(), items, shop, t.id(), afford).ok()) {
+                bought.add(afford + "x " + t.name());
+                total += afford;
+            } else if (afford > 0) {
+                poor = true;
+            }
+        }
+        if (total > 0) {
+            log.add(nowMs, EventLog.Kind.LOOT, "Kupiono: " + String.join(", ", bought) + (poor ? " (zabrakło monet na resztę)." : "."));
+        } else {
+            log.add(nowMs, poor ? EventLog.Kind.WARNING : EventLog.Kind.INFO,
+                    poor ? "Za mało monet w plecaku na mikstury." : "Masz już po " + REFILL_TO + " mikstur zdrowia i many.");
+        }
+        return total;
+    }
+
     public TradeResult sellAll(int itemId, long nowMs) {
         Npc n = talkTo(NpcRole.MERCHANT, nowMs);
         if (n == null) return TradeResult.TOO_FAR;
