@@ -535,12 +535,16 @@ class NetworkSyncTest {
             long olaExp = self(ola).experience(), ulaExp = self(ula).experience();
             pl.fawizja.pixel.monster.MonsterType wolf = pl.fawizja.pixel.monster.MonsterRegistry
                     .loadDefault(ItemRegistry.loadDefault()).get("wolf");
-            long solo = pl.fawizja.pixel.balance.Balance.experienceReward(wolf.experience(), wolf.level(), 8);
             boolean[] shared = new boolean[1];
+            long[] soloExp = {-1};
             server.enqueueTest(() -> {
                 ServerPlayer killer = server.world().find("Ola");
+                // z premia potwora dnia, gdy dzis sa nim wilki
+                soloExp[0] = killer.session.combat().killExperience(wolf, 8);
                 shared[0] = server.world().shareKill(killer, wolf, server.now());
             });
+            await("kill shared", () -> soloExp[0] >= 0);
+            long solo = soloExp[0];
             long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2);
             await("both got a share", () -> {
                 try {

@@ -183,6 +183,12 @@ public final class GameScreen extends ScreenAdapter {
                 game.startingConfig().startLevel());
         session.setTownServices(game.npcs(), game.shops(), game.quests());
         session.setChests(game.chests());
+        // -Dpixel.day=N ustala dzien (potwor dnia, zadanie dnia); przy -Dpixel.hour staly dzien dla regresji GUI
+        Long day = Long.getLong("pixel.day", System.getProperty("pixel.hour") != null ? 20_000L : null);
+        if (day != null) {
+            long d = day;
+            session.setToday(() -> d);
+        }
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
@@ -454,6 +460,10 @@ public final class GameScreen extends ScreenAdapter {
             openHunt();
             return;
         }
+        if (cmd.equals("/potwor") || cmd.equals("/bonus")) {
+            session.log().add(now(), EventLog.Kind.SYSTEM, "Potwór dnia: " + pl.fawizja.pixel.daily.BoostedCreature.describe(session.boostedCreature()) + ".");
+            return;
+        }
         if (cmd.equals("/bossowie")) {
             bossReport(now());
             return;
@@ -597,6 +607,8 @@ public final class GameScreen extends ScreenAdapter {
 
     private List<String[]> huntRows(long t) {
         List<String[]> rows = pl.fawizja.pixel.stats.HuntAnalyzer.rows(hunt.report(t, session.character()));
+        pl.fawizja.pixel.monster.MonsterType boost = session.boostedCreature();
+        if (boost != null) rows.add(new String[] {"Potwór dnia", pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
         rows.add(new String[] {"Zacznij od nowa", "zeruje liczniki polowania", "", "hunt:reset"});
         return rows;
     }

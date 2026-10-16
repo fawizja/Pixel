@@ -73,6 +73,21 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public void setExperienceSharer(ExperienceSharer sharer) { this.experienceSharer = sharer; }
 
+    /** Klucz potwora dnia ({@link pl.fawizja.pixel.daily.BoostedCreature}); null = brak premii. */
+    private String boostedKey;
+
+    public void setBoostedKey(String key) { this.boostedKey = key; }
+    public String boostedKey() { return boostedKey; }
+
+    /** Potwor dnia (takze jego odmiana elitarna, bo ma ten sam klucz). */
+    public boolean isBoosted(MonsterType t) { return boostedKey != null && t != null && boostedKey.equals(t.key()); }
+
+    /** Doswiadczenie za potwora dla poziomu postaci, z premia potwora dnia. */
+    public long killExperience(MonsterType t, int level) {
+        long exp = Balance.experienceReward(t.experience(), t.level(), level);
+        return isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostExp(exp) : exp;
+    }
+
     /** Przyznaje doswiadczenie z wpisem w dzienniku i zdarzeniem awansu. */
     public void awardExperience(long exp, String what, long now) {
         int levels = pc.addExperience(exp);
@@ -187,7 +202,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
         if (experienceSharer == null || !experienceSharer.share(t, now)) {
-            awardExperience(Balance.experienceReward(t.experience(), t.level(), pc.level()), "Pokonano: " + t.name(), now);
+            awardExperience(killExperience(t, pc.level()), "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : ""), now);
         }
         Position corpse = m.position();
         List<ItemStack> drop = rollLoot(t);
@@ -215,7 +230,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public List<ItemStack> rollLoot(MonsterType t) {
         List<ItemStack> out = new ArrayList<>();
         for (LootEntry e : t.loot()) {
-            if (rng.nextInt(1000) < e.chancePermille()) {
+            int chance = isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostChance(e.chancePermille()) : e.chancePermille();
+            if (rng.nextInt(1000) < chance) {
                 int count = CombatFormulas.rollBetween(e.min(), e.max(), rng);
                 int max = items.maxStack(e.itemId());
                 while (count > 0) {

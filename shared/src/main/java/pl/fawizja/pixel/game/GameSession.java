@@ -198,6 +198,31 @@ public final class GameSession {
         return t == null ? key : t.name();
     }
 
+    private long boostedDay = Long.MIN_VALUE;
+    private pl.fawizja.pixel.monster.MonsterType boosted;
+
+    /** Potwor dnia (wspolny dla wszystkich, zmiana o polnocy); ustawia tez premie w walce. */
+    public pl.fawizja.pixel.monster.MonsterType boostedCreature() {
+        long day = today();
+        if (day != boostedDay) {
+            boostedDay = day;
+            boosted = monsters == null ? null : pl.fawizja.pixel.daily.BoostedCreature.pick(day, monsters.spawnedTypes());
+            combat.setBoostedKey(boosted == null ? null : boosted.key());
+        }
+        return boosted;
+    }
+
+    /** Ogloszenie potwora dnia przy wejsciu i po polnocy. */
+    private String announcedBoost;
+
+    private void checkBoost(long nowMs) {
+        pl.fawizja.pixel.monster.MonsterType b = boostedCreature();
+        String key = b == null ? null : b.key();
+        if (key == null || key.equals(announcedBoost)) return;
+        announcedBoost = key;
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Potwór dnia: " + pl.fawizja.pixel.daily.BoostedCreature.describe(b) + ".");
+    }
+
     private long achievementsCheckedMs;
     private boolean achievementsChecked;
 
@@ -672,6 +697,7 @@ public final class GameSession {
     public void update(long nowMs, Direction requested) {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
+        checkBoost(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {

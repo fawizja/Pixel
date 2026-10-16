@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.56.0] - 2026-10-16
+
+### Dodano
+- Potwór dnia: każdego dnia jeden rodzaj potwora (nie boss, ze stałych spawnów) daje +50% doświadczenia
+  i +50% szansy na każdy łup, także w odmianie elitarnej i przy podziale w drużynie. Wybór zależy tylko
+  od daty, więc klient i serwer liczą go tak samo. Ogłoszenie w dzienniku po wejściu i o północy, wiersz
+  w analizie polowania (H) i polecenie `/potwór` (albo `/bonus`).
+- Opcja deweloperska `-Dpixel.day=N` ustala dzień gry; przy `-Dpixel.hour` dzień jest stały (regresja GUI).
+- 3 nowe testy; łącznie 298.
+
 ## [0.55.0] - 2026-10-16
 
 ### Dodano

@@ -732,8 +732,7 @@ final class ServerWorld {
         }
         if (eligible.size() < 2 || !pl.fawizja.pixel.party.PartyRules.levelsCompatible(levels)) return false;
         for (ServerPlayer m : eligible) {
-            long solo = pl.fawizja.pixel.balance.Balance.experienceReward(type.experience(), type.level(),
-                    m.session.character().level());
+            long solo = m.session.combat().killExperience(type, m.session.character().level());
             long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size());
             m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name(), now);
         }
