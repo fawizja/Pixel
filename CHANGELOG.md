@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.64.0] - 2026-10-16
+
+### Dodano
+- Łańcuch zadań w Qasirah dla poziomów 45-170 (dotąd luka między 55 a 180): „Napadnięta karawana” (12 kłów hien),
+  „Szepty w piasku” (10 piaskowych upiorów, nagroda 10 silnych mikstur many) i „Złodziej klejnotów”
+  (3 klejnoty skarabeuszy, nagroda Tarcza z piaskowca). Nowy temat rozmowy u przewodnika: karawana.
+- Test: cel każdego zadania da się zdobyć w świecie (potwór ma spawn albo przedmiot wypada z takiego potwora).
+- 1 nowy test; łącznie 312.
+
 ## [0.63.0] - 2026-10-16
 
 ### Dodano

@@ -27,3 +27,6 @@ varden_smug3;Ostatni transport;varden_guide;KILL;skeleton;12;30000;1200;20;Towar
 selv_exp1;Zaginiona wyprawa;selv_guide;KILL;jungle_hunter;10;70000;2500;60;Łowcy z dżungli napadli wyprawę badaczy. Pokonaj 10 łowców.
 selv_exp2;Śladem węży;selv_guide;KILL;jungle_serpent;12;110000;3500;70;Ocalali badacze uciekli w gniazda węży. Oczyść im drogę.
 frost_storm;Zamieć;frost_guide;KILL;frost_witch;8;160000;5000;80;Wiedźmy mrozu sprowadzają zamieć na Frostholm. Pokonaj 8.
+qas_caravan1;Napadnięta karawana;qas_guide;COLLECT;hyena_fang;12;40000;1500;45;Hieny rozszarpały karawanę pod miastem. Przynieś 12 kłów jako dowód polowania.
+qas_caravan2;Szepty w piasku;qas_guide;KILL;sand_wraith;10;220000;6000;100;Piaskowe upiory nawiedzają szlak karawan. Pokonaj 10, zanim wyruszy następna.
+qas_caravan3;Złodziej klejnotów;qas_guide;COLLECT;scarab_gem;3;700000;12000;170;Ktoś wykrada klejnoty skarabeuszy z krypt. Odzyskaj 3 od mumii.

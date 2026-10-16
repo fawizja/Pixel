@@ -137,6 +137,24 @@ class TownServicesTest {
         }
     }
 
+    @Test
+    void everyQuestTargetCanBeFoundInTheWorld() throws Exception {
+        java.util.Set<String> spawned = new HashSet<>();
+        for (SpawnPoint sp : pl.fawizja.pixel.monster.SpawnTable.load(WorldLayout.WORLD_MAP, world, MONSTERS)) spawned.add(sp.monsterKey());
+        java.util.Set<Integer> dropped = new HashSet<>();
+        for (pl.fawizja.pixel.monster.MonsterType t : MONSTERS.all()) {
+            if (!spawned.contains(t.key())) continue;
+            for (pl.fawizja.pixel.monster.LootEntry e : t.loot()) dropped.add(e.itemId());
+        }
+        for (QuestType q : quests.all()) {
+            if (q.kind() == QuestKind.KILL) assertTrue(spawned.contains(q.target()), q.key() + ": " + q.target() + " spawns");
+            else assertTrue(dropped.contains(id(q.target())), q.key() + ": " + q.target() + " drops from a spawned monster");
+        }
+        // pustynny lancuch Qasirah (0.64.0)
+        assertEquals("qas_caravan1", quests.get("qas_caravan2").requires());
+        assertEquals("qas_caravan2", quests.get("qas_caravan3").requires());
+    }
+
     static long cheapestBuy(int itemId) {
         long best = 0;
         for (Shop s : shops.all()) {
