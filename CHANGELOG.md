@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.113.0] - 2026-10-16
+
+### Dodano
+- Podpowiedzi dla nowych postaci (do poziomu 29): sterowanie, walka z pierwszym potworem, łupy z ciała,
+  niskie zdrowie, przewodnik z zadaniami i pełny plecak. Każda pokazuje się raz w dzienniku, gdy pasuje
+  do sytuacji; pokazane zapisują się w postaci (online liczy je serwer). Wszystkie sceny GUI odświeżone.
 ## [0.112.0] - 2026-10-16
 
 ### Dodano

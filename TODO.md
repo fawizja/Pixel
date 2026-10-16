@@ -229,6 +229,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Wyzwanie na ekranie (fala, czas) (0.110.0)
 - [x] Licznik wyzwań i osiągnięcie Pogromca fal (0.111.0)
 - [x] /idź do NPC (0.112.0)
+- [x] Podpowiedzi dla nowych postaci (0.113.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

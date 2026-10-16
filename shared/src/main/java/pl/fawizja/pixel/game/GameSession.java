@@ -336,6 +336,17 @@ public final class GameSession {
         for (String w : supplies.check(pc.backpack(), !world.isProtectionZone(pc.position()))) log.add(nowMs, EventLog.Kind.WARNING, w);
     }
 
+    /** Podpowiedzi dla nowych postaci (co sekunde). */
+    private long tipsCheckedMs = Long.MIN_VALUE / 2;
+
+    private void checkTips(long nowMs) {
+        tipsCheckedMs = nowMs;
+        if (pc.level() >= Tips.MAX_LEVEL || pc.isDead()) return;
+        Tips.Situation s = new Tips.Situation(combat.threatNear(4), pc.bestiary().total(),
+                100 * pc.health() / Math.max(1, pc.maxHealth()), pc.backpack().freeSlots());
+        for (String t : Tips.due(pc, s)) log.add(nowMs, EventLog.Kind.INFO, t);
+    }
+
     /** Komunikaty o odrodzeniu bossow (co BossWatch.CHECK_MS; online liczy serwer). */
     private final BossWatch bossWatch = new BossWatch();
     private long bossesCheckedMs = Long.MIN_VALUE / 2;
@@ -1208,6 +1219,7 @@ public final class GameSession {
         if (pc.level() > pc.rewardedLevel()) checkLevelRewards(nowMs);
         pc.stats().noteLevel(pc.level());
         checkPet(nowMs);
+        if (nowMs - tipsCheckedMs >= 1000 || nowMs < tipsCheckedMs) checkTips(nowMs);
         if (nowMs - suppliesCheckedMs >= 500 || nowMs < suppliesCheckedMs) checkSupplies(nowMs);
         if (nowMs - bossesCheckedMs >= BossWatch.CHECK_MS || nowMs < bossesCheckedMs) checkBosses(nowMs);
         updateRecall(nowMs);

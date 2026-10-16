@@ -126,6 +126,7 @@ public final class PlayerCharacter {
         pet = o.pet;
         title = o.title;
         outfit = o.outfit;
+        tips = o.tips;
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
@@ -190,6 +191,14 @@ public final class PlayerCharacter {
 
     /** Wybrany tytul: klucz zdobytego osiagniecia albo null. */
     private String title;
+    /** Pokazane podpowiedzi (bity Tips.Tip). */
+    private long tips;
+
+    public boolean tipShown(int bit) { return (tips & (1L << bit)) != 0; }
+    public void markTip(int bit) { tips |= 1L << bit; }
+    public long tips() { return tips; }
+    public void restoreTips(long mask) { tips = mask; }
+
     /** Kolor stroju (Outfit); 0 = kolor profesji. */
     private int outfit;
 
