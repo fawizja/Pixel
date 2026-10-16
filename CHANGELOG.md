@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.109.0] - 2026-10-16
+
+### Dodano
+- Zwój wyzwania (1 000 gp u kupców ogólnych w 4 miastach): odczytany poza miastem przywołuje 3 fale potworów
+  dobranych do poziomu (3, 4 i 5 sztuk). Kolejna fala rusza po pokonaniu poprzedniej; po ostatniej złoto na konto
+  i premia doświadczenia. Wyzwanie przepada po 5 minutach, po śmierci albo po odejściu dalej niż 12 pól.
 ## [0.108.0] - 2026-10-16
 
 ### Dodano

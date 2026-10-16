@@ -193,3 +193,7 @@ varden_general;exp_scroll;2000;0
 frost_shop;exp_scroll;2000;0
 qas_shop;exp_scroll;2000;0
 selv_shop;exp_scroll;2000;0
+varden_general;challenge_scroll;1000;0
+frost_shop;challenge_scroll;1000;0
+qas_shop;challenge_scroll;1000;0
+selv_shop;challenge_scroll;1000;0

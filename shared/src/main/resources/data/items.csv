@@ -114,3 +114,4 @@
 130;pet_raven;Kruk;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#303040;Oswojony kruk z Frostholm. Użyj, aby leciał za tobą (i jeszcze raz, aby odpoczął).
 131;pet_fennec;Fenek;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;#e8c890;Pustynny lisek z Qasirah. Użyj, aby biegł za tobą (i jeszcze raz, aby odpoczął).
 132;exp_scroll;Zwój nauki;TOOL;20;400;NONE;0;0;0;0;*;0;0;PHYSICAL;#9fd4ee;Przeczytany daje +30% doświadczenia za potwory przez godzinę polowania (czas płynie tylko poza strefą ochronną).
+133;challenge_scroll;Zwój wyzwania;TOOL;20;250;NONE;0;0;0;0;*;0;0;PHYSICAL;#e07050;Odczytany poza miastem przywołuje 3 fale potworów dobranych do poziomu. Pokonaj je w 5 minut, nie oddalając się, a dostaniesz złoto i doświadczenie.

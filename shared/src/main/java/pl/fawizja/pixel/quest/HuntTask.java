@@ -28,6 +28,15 @@ public final class HuntTask {
 
     /** Nowe zlecenie: losowy potwor (nie boss, nie elita) z przedzialu poziomu jak w zadaniu dnia. */
     public boolean assign(int level, Collection<MonsterType> candidates, Random rng) {
+        MonsterType pick = pick(level, candidates, rng);
+        if (pick == null) return false;
+        monster = pick.key();
+        progress = 0;
+        return true;
+    }
+
+    /** Potwor dla poziomu: nie boss ani elita, poziom od polowy do 120% (+5) poziomu postaci; gdy brak - najblizszy. */
+    public static MonsterType pick(int level, Collection<MonsterType> candidates, Random rng) {
         List<MonsterType> ok = new ArrayList<>();
         MonsterType nearest = null;
         for (MonsterType t : candidates) {
@@ -36,11 +45,7 @@ public final class HuntTask {
             if (nearest == null || Math.abs(t.level() - level) < Math.abs(nearest.level() - level)) nearest = t;
         }
         ok.sort((a, b) -> a.key().compareTo(b.key()));
-        MonsterType pick = ok.isEmpty() ? nearest : ok.get(rng.nextInt(ok.size()));
-        if (pick == null) return false;
-        monster = pick.key();
-        progress = 0;
-        return true;
+        return ok.isEmpty() ? nearest : ok.get(rng.nextInt(ok.size()));
     }
 
     /** Pokonany potwor; true, gdy wlasnie osiagnieto cel. */

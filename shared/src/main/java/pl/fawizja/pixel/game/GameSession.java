@@ -870,6 +870,7 @@ public final class GameSession {
         if (st != null && items.get(st.itemId()).key().equals("saddle")) return useSaddle(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("return_scroll")) return startRecall(nowMs);
         if (st != null && items.get(st.itemId()).key().equals("exp_scroll")) return readExpScroll(slot, nowMs);
+        if (st != null && items.get(st.itemId()).key().equals("challenge_scroll")) return startChallenge(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
         return spells.useItem(slot, nowMs);
     }
@@ -914,6 +915,68 @@ public final class GameSession {
         if (slot < 0 || pc.backpack().takeFromSlot(slot, 1) == null) return;
         teleport(world.templeOf(pc.homeTown()), nowMs);
         log.add(nowMs, EventLog.Kind.SYSTEM, "Zwój rozsypuje się w pył. Jesteś w świątyni " + pc.homeTown() + ".");
+    }
+
+    /** Wyzwanie ze zwoju (Challenge); null, gdy nie trwa. */
+    private Challenge challenge;
+
+    public Challenge challenge() { return challenge; }
+
+    private CastResult startChallenge(int slot, long nowMs) {
+        if (challenge != null) {
+            log.add(nowMs, EventLog.Kind.INFO, "Wyzwanie już trwa: fala " + (challenge.wave + 1) + " z " + Challenge.WAVES.length + ".");
+            return CastResult.OK;
+        }
+        if (world.isProtectionZone(pc.position())) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Zwoju wyzwania nie da się odczytać w strefie ochronnej.");
+            return CastResult.OK;
+        }
+        pl.fawizja.pixel.monster.MonsterType t = pl.fawizja.pixel.quest.HuntTask.pick(pc.level(), monsters.spawnedTypes(), rng);
+        if (t == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Zwój milczy: w tej krainie nie ma z kim walczyć.");
+            return CastResult.OK;
+        }
+        if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
+        challenge = new Challenge(t, pc.position(), nowMs + Challenge.TIME_MS);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Wyzwanie: " + Challenge.WAVES.length + " fale - " + t.name()
+                + ". Pokonaj je w " + (Challenge.TIME_MS / 60_000) + " min i nie oddalaj się.");
+        spawnWave(nowMs);
+        return CastResult.OK;
+    }
+
+    private void spawnWave(long nowMs) {
+        Challenge c = challenge;
+        c.ids.clear();
+        for (pl.fawizja.pixel.monster.Monster m : monsters.spawnEvent(c.type.key(), c.center, Challenge.RADIUS, Challenge.WAVES[c.wave], nowMs)) {
+            c.ids.add(m.id());
+        }
+        log.add(nowMs, EventLog.Kind.WARNING, "Fala " + (c.wave + 1) + " z " + Challenge.WAVES.length + ": " + c.ids.size() + "x " + c.type.name() + "!");
+    }
+
+    private void updateChallenge(long nowMs) {
+        Challenge c = challenge;
+        if (c == null) return;
+        boolean left = pc.position().z() != c.center.z()
+                || Math.max(Math.abs(pc.position().x() - c.center.x()), Math.abs(pc.position().y() - c.center.y())) > Challenge.LEAVE;
+        if (pc.isDead() || left || nowMs >= c.untilMs) {
+            monsters.clearEvent(c.ids);
+            challenge = null;
+            log.add(nowMs, EventLog.Kind.WARNING, "Wyzwanie przepadło" + (left ? " (za daleko od miejsca zwoju)." : nowMs >= c.untilMs ? " (koniec czasu)." : "."));
+            return;
+        }
+        for (pl.fawizja.pixel.monster.Monster m : monsters.monsters()) {
+            if (!m.isDead() && c.ids.contains(m.id())) return; // fala jeszcze walczy
+        }
+        c.wave++;
+        if (c.wave < Challenge.WAVES.length) {
+            spawnWave(nowMs);
+            return;
+        }
+        challenge = null;
+        long gold = Challenge.rewardGold(c.type);
+        pc.bank().credit(gold);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Wyzwanie ukończone! " + String.format("%,d gp", gold) + " na konto.");
+        combat.awardExperience(Challenge.rewardExp(c.type), "Wyzwanie", nowMs);
     }
 
     /** Siodlo: oswaja konia na stale (przedmiot znika). */
@@ -1145,6 +1208,7 @@ public final class GameSession {
         if (nowMs - bossesCheckedMs >= BossWatch.CHECK_MS || nowMs < bossesCheckedMs) checkBosses(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);
+        updateChallenge(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
             pc.setMounted(false);
             log.add(nowMs, EventLog.Kind.INFO, "Zostawiasz konia przy zejściu pod ziemię.");
