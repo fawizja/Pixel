@@ -880,6 +880,14 @@ public final class Hud {
                         home ? "już tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu będziesz się odradzać", !home));
                 break;
             }
+            case CARRIER: {
+                long gold = session.gold();
+                for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
+                    left.add(new MenuRow("npc:travel:" + r.to().town(), "Jedź do " + r.to().town(),
+                            String.format("%,d gp", r.price()) + (gold < r.price() ? " - za mało monet w plecaku" : ""), gold >= r.price()));
+                }
+                break;
+            }
             case GUIDE: {
                 pl.fawizja.pixel.daily.DailyTask d = pc.daily();
                 long day = session.today();

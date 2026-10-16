@@ -50,6 +50,7 @@ public final class Actions {
             case "store": s.depotStore(Integer.parseInt(p[2]), now); return true;
             case "take": s.depotTake(Integer.parseInt(p[2]), now); return true;
             case "heal": s.priestHeal(now); return true;
+            case "travel": s.travel(p[2], now); return true;
             case "settle": s.settleHere(now); return true;
             case "quest": s.questAction(p[2], now); return true;
             case "daily": s.dailyAction(now); return true;

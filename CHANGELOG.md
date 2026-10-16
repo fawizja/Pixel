@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.50.0] - 2026-10-16
+
+### Dodano
+- Woźnice: w każdym z 4 miast przy fontannie przed świątynią stoi woźnica (nowa rola NPC `CARRIER`).
+  W rozmowie wybierasz miasto, płacisz monetami z plecaka (3 gp za pole odległości, co najmniej 100 gp;
+  z Varden: Frostholm 160, Selvaran 260, Qasirah 340 gp) i stajesz obok woźnicy w mieście docelowym.
+  Po walce z graczem trzeba odczekać blokadę. Działa lokalnie i online (akcja `npc:travel:Miasto`).
+- `npc/Travel` (ceny i trasy), rozmowa o podróży, strój woźnicy (kapelusz, bat), woźnice w generatorze mapy.
+  3 nowe testy; łącznie 285.
+
 ## [0.49.0] - 2026-10-16
 
 ### Dodano

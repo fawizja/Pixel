@@ -46,8 +46,8 @@ public final class NpcRegistry {
                 if (!world.isWalkable(p)) throw new IllegalArgumentException("not walkable " + p);
                 if (!world.isProtectionZone(p)) throw new IllegalArgumentException("outside protection zone " + p);
                 if (world.transitionAt(p) != null) throw new IllegalArgumentException("on a transition " + p);
-                // kaplan (odrodzenie) tylko w miescie; kupiec, bankier i przewodnik moga stac w obozie poza miastem
-                if (npc.town().isEmpty() || (npc.role() == NpcRole.PRIEST && world.town(npc.town()) == null)) {
+                // kaplan (odrodzenie) i woznica tylko w miescie; kupiec, bankier i przewodnik moga stac w obozie poza miastem
+                if (npc.town().isEmpty() || ((npc.role() == NpcRole.PRIEST || npc.role() == NpcRole.CARRIER) && world.town(npc.town()) == null)) {
                     throw new IllegalArgumentException("unknown town " + npc.town());
                 }
                 if (npc.shopKey() != null && !shops.contains(npc.shopKey())) {

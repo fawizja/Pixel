@@ -406,6 +406,52 @@ public final class GameSession {
         log.add(nowMs, EventLog.Kind.INFO, "Kapłan cię uleczył.");
     }
 
+    /**
+     * Woznica: przejazd do woznicy w innym miescie za monety z plecaka. Nie w blokadzie po walce z graczem.
+     * Postac staje na wolnym polu obok woznicy docelowego.
+     */
+    public boolean travel(String town, long nowMs) {
+        Npc n = talkTo(NpcRole.CARRIER, nowMs);
+        if (n == null) return false;
+        pl.fawizja.pixel.npc.Travel.Route route = null;
+        for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(npcs, n)) {
+            if (r.to().town().equalsIgnoreCase(town)) route = r;
+        }
+        if (route == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": tam nie jeżdżę.");
+            return false;
+        }
+        if (nowMs < pzLockedUntil) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": po walce z graczem nie zabiorę cię jeszcze przez "
+                    + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
+            return false;
+        }
+        Position dest = null;
+        for (int[] d : new int[][] {{0, 1}, {-1, 0}, {1, 0}, {0, -1}}) {
+            Position q = route.to().position().translate(d[0], d[1]);
+            if (world.isWalkable(q) && npcs.at(q) == null && !dummies.at(q) && world.transitionAt(q) == null) {
+                dest = q;
+                break;
+            }
+        }
+        if (dest == null) return false;
+        if (world.requiredLevelAt(dest) > pc.level()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + route.to().town() + " jest dla postaci od poziomu "
+                    + world.requiredLevelAt(dest) + ".");
+            return false;
+        }
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) < route.price() || !Money.pay(tx, route.price()).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": przejazd do " + route.to().town() + " kosztuje "
+                    + route.price() + " gp (monety w plecaku).");
+            return false;
+        }
+        pc.backpack().commitFrom(tx);
+        teleport(dest, nowMs);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Po podróży (" + route.price() + " gp) jesteś w " + route.to().town() + ".");
+        return true;
+    }
+
     /** Kaplan: zamieszkanie w miescie - tu postac odrodzi sie po smierci. */
     public void settleHere(long nowMs) {
         Npc n = talkTo(NpcRole.PRIEST, nowMs);

@@ -636,6 +636,8 @@ def main():
          'Niech swiatlo cie prowadzi. Moge cie uleczyc.'),
         ('varden_guide', 'Straznik Oren', 'GUIDE', 'Varden', 29 + VX, 16 + VY, '-', '#607080',
          'Okolica potrzebuje pomocy. Mam dla ciebie zadania.'),
+        ('varden_carrier', 'Woznica Jarek', 'CARRIER', 'Varden', 37 + VX, 22 + VY, '-', '#8a6a4a',
+         'Woz do innych miast odjezdza, kiedy tylko zechcesz. Placisz monetami.'),
     ]
     for key, name, (x0, y0, x1, y1), temple, shop, colors in [
         ('frost', 'Frostholm', (64, 20, 95, 43), frost, 'frost_shop', ('#c0d8e8', '#6080a0')),
@@ -652,6 +654,8 @@ def main():
              'Swiatynia ' + name + ' wita wedrowca.'),
             (key + '_guide', 'Przewodnik ' + name, 'GUIDE', name, cx - 2, ty0 + 4, '-', colors[1],
              'Okolice ' + name + ' sa niebezpieczne. Pomozesz?'),
+            (key + '_carrier', 'Woznica ' + name, 'CARRIER', name, cx + 6, ty0 + 10, '-', '#8a6a4a',
+             'Woz do innych miast czeka. Placisz monetami.'),
         ]
     camp = 'Oboz Zwiadowcow'
     npcs += [

@@ -9,5 +9,7 @@ public enum NpcRole {
     /** Kaplan: leczenie i zamieszkanie w miescie (miejsce odrodzenia). */
     PRIEST,
     /** Przewodnik: zadania z data/quests.csv. */
-    GUIDE
+    GUIDE,
+    /** Woznica: platny przejazd do innych miast (cena z odleglosci, {@link Travel}). */
+    CARRIER
 }

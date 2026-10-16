@@ -553,6 +553,12 @@ public final class TileArt implements Disposable {
             case PRIEST: rect(pm, ox, oy, 5, 0, 6, 1, Color.valueOf("#ffe680")); break;
             case BANKER: rect(pm, ox, oy, 11, 10, 3, 3, Color.valueOf("#e8c040")); break;
             case GUIDE: rect(pm, ox, oy, 13, 2, 1, 12, Color.valueOf("#8a6a42")); break;
+            case CARRIER: // kapelusz z rondem i bat
+                rect(pm, ox, oy, 5, 0, 6, 1, Color.valueOf("#3a2a1a"));
+                rect(pm, ox, oy, 4, 1, 8, 1, Color.valueOf("#3a2a1a"));
+                rect(pm, ox, oy, 13, 3, 1, 10, Color.valueOf("#5a3a1a"));
+                px(pm, ox, oy, 14, 2, Color.valueOf("#5a3a1a"));
+                break;
             default: rect(pm, ox, oy, 4, 10, 8, 1, Color.valueOf("#e8d8b0")); break;
         }
     }

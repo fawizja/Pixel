@@ -45,6 +45,7 @@ liczb), wiec stare zapisy i lochy sa nietkniete.
 
 Kazde miasto ma swiatynie w strefie ochronnej (miejsce odrodzenia po smierci - `homeTown`), plac z
 fontanna i latarniami oraz domy. NPC i uslugi przyjda w etapie 12.
+Kazde miasto ma woznice przy fontannie (przejazdy miedzy miastami, 0.50.0) i 2 manekiny treningowe w strefie ochronnej (0.48.0).
 
 ## Regiony (`regions=`) i zalecane poziomy
 

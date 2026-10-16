@@ -16,6 +16,10 @@ qas_banker;Bankier Qasirah;BANKER;Qasirah;68;190;0;-;#d8c070;Bank Qasirah prowad
 qas_merchant;Kupiec Qasirah;MERCHANT;Qasirah;90;190;0;qas_shop;#e0c080;Towary z Qasirah i skup łupów z okolicy.
 qas_priest;Kapłan Qasirah;PRIEST;Qasirah;82;191;0;-;#f0f0f0;Świątynia Qasirah wita wędrowca.
 qas_guide;Przewodnik Qasirah;GUIDE;Qasirah;77;193;0;-;#c09050;Okolice Qasirah są niebezpieczne. Pomożesz?
+varden_carrier;Woźnica Jarek;CARRIER;Varden;85;86;0;-;#8a6a4a;Wóz do innych miast odjeżdża, kiedy tylko zechcesz. Płacisz monetami.
+frost_carrier;Woźnica Frostholm;CARRIER;Frostholm;85;32;0;-;#8a6a4a;Sanie do innych miast czekają. Płacisz monetami.
+selv_carrier;Woźnica Selvaran;CARRIER;Selvaran;119;140;0;-;#8a6a4a;Wóz do innych miast czeka. Płacisz monetami.
+qas_carrier;Woźnica Qasirah;CARRIER;Qasirah;85;199;0;-;#8a6a4a;Karawana do innych miast czeka. Płacisz monetami.
 camp_merchant;Kwatermistrz Bren;MERCHANT;Oboz Zwiadowcow;183;84;0;camp_shop;#a07040;Mikstury dla twardych i skup wszystkiego, co przyniesiesz zza mostu.
 camp_banker;Skarbniczka Wena;BANKER;Oboz Zwiadowcow;175;88;0;-;#d8c070;Konto jest wspólne ze wszystkimi bankami miast.
 camp_guide;Zwiadowczyni Ilka;GUIDE;Oboz Zwiadowcow;179;82;0;-;#506040;Za obozem zaczyna się prawdziwe niebezpieczeństwo. Mam zadania dla najsilniejszych.
