@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.148.0] - 2026-10-16
+
+### Dodano
+- Zmiana zadania dnia u przewodnika: raz dziennie, za 50 gp za poziom postaci, losuje innego potwora
+  (postęp od zera).
 ## [0.147.0] - 2026-10-16
 
 ### Zmieniono

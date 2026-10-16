@@ -1018,6 +1018,11 @@ public final class Hud {
                     dd = "pokonano " + d.progress() + " / " + d.target();
                 }
                 left.add(new MenuRow("npc:daily", dl, dd, !d.activeOn(day) || d.doneOn(day) && !d.claimed()));
+                if (d.canReroll(day) && !d.doneOn(day)) {
+                    long price = pl.fawizja.pixel.daily.DailyTask.rerollPrice(pc.level());
+                    left.add(new MenuRow("npc:dailyreroll", "Zmień zadanie dnia", String.format("inny potwór za %,d gp, raz dziennie", price),
+                            session.gold() >= price));
+                }
                 pl.fawizja.pixel.quest.HuntTask hunt = pc.hunt();
                 if (!hunt.active()) {
                     left.add(new MenuRow("npc:hunt", "Zlecenie łowcy", "50 potworów dla twojego poziomu, bez limitu dziennego", true));

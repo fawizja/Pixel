@@ -17,12 +17,34 @@ public final class DailyTask {
     private int target;
     private int progress;
     private boolean claimed;
+    /** Zadanie zmienione dzis u przewodnika (raz dziennie). */
+    private boolean rerolled;
 
     public long day() { return day; }
     public String monster() { return monster; }
     public int target() { return target; }
     public int progress() { return progress; }
     public boolean claimed() { return claimed; }
+    public boolean rerolled() { return rerolled; }
+
+    /** Cena zmiany zadania dnia: 50 gp za poziom. */
+    public static long rerollPrice(int level) { return 50L * Math.max(1, level); }
+
+    /** Czy mozna dzis zmienic zadanie (wziete, nieodebrane, jeszcze niezmieniane). */
+    public boolean canReroll(long today) { return activeOn(today) && !claimed && !rerolled; }
+
+    /** Inny potwor na dzis (postep od zera); false, gdy nie ma innego kandydata. */
+    public boolean reroll(String owner, long today, int level, Collection<MonsterType> candidates) {
+        if (!canReroll(today)) return false;
+        List<MonsterType> others = new ArrayList<>();
+        for (MonsterType t : candidates) if (!t.key().equals(monster)) others.add(t);
+        MonsterType pick = pick(owner + "#2", today, level, others);
+        if (pick == null) return false;
+        monster = pick.key();
+        progress = 0;
+        rerolled = true;
+        return true;
+    }
 
     public boolean activeOn(long today) { return day == today && monster != null; }
     public boolean doneOn(long today) { return activeOn(today) && progress >= target; }
@@ -37,6 +59,7 @@ public final class DailyTask {
         this.target = 20 + r.nextInt(21);
         this.progress = 0;
         this.claimed = false;
+        this.rerolled = false;
     }
 
     /** Potwor dla poziomu: nie boss, poziom miedzy polowa a 120% poziomu postaci (+5); gdy brak - najblizszy poziomem. */
@@ -67,20 +90,22 @@ public final class DailyTask {
 
     public static long rewardGold(MonsterType t, int count) { return (long) t.level() * count * 3L; }
 
-    /** Zapis: "dzien;potwor;cel;postep;odebrane". */
+    /** Zapis: "dzien;potwor;cel;postep;odebrane;zmienione" (starsze zapisy bez ostatniego pola). */
     public String encode() {
-        return day == Long.MIN_VALUE || monster == null ? "" : day + ";" + monster + ";" + target + ";" + progress + ";" + (claimed ? 1 : 0);
+        return day == Long.MIN_VALUE || monster == null ? ""
+                : day + ";" + monster + ";" + target + ";" + progress + ";" + (claimed ? 1 : 0) + ";" + (rerolled ? 1 : 0);
     }
 
     public void restore(String text) {
         if (text == null || text.isBlank()) return;
         String[] f = text.split(";");
-        if (f.length != 5) return;
+        if (f.length != 5 && f.length != 6) return;
         day = Long.parseLong(f[0]);
         monster = f[1];
         target = Integer.parseInt(f[2]);
         progress = Integer.parseInt(f[3]);
         claimed = "1".equals(f[4]);
+        rerolled = f.length == 6 && "1".equals(f[5]);
     }
 
     public void copyFrom(DailyTask o) {
@@ -89,5 +114,6 @@ public final class DailyTask {
         target = o.target;
         progress = o.progress;
         claimed = o.claimed;
+        rerolled = o.rerolled;
     }
 }

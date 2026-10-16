@@ -186,6 +186,32 @@ public final class GameSession {
         if (exp > 0) combat.awardExperience(exp, "Zadanie dnia", nowMs);
     }
 
+    /** Zmiana zadania dnia u przewodnika (raz dziennie, za monety z plecaka). */
+    public boolean dailyReroll(long nowMs) {
+        if (talkTo(NpcRole.GUIDE, nowMs) == null) return false;
+        pl.fawizja.pixel.daily.DailyTask d = pc.daily();
+        long day = today();
+        if (!d.canReroll(day)) {
+            log.add(nowMs, EventLog.Kind.INFO, d.activeOn(day) && !d.claimed() ? "Zadanie dnia można zmienić tylko raz dziennie."
+                    : "Najpierw weź zadanie dnia.");
+            return false;
+        }
+        long price = pl.fawizja.pixel.daily.DailyTask.rerollPrice(pc.level());
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Zmiana zadania dnia kosztuje " + String.format("%,d gp", price) + " (monety w plecaku).");
+            return false;
+        }
+        if (!d.reroll(pc.name(), day, pc.level(), monsters.spawnedTypes())) {
+            log.add(nowMs, EventLog.Kind.INFO, "Nie mam dziś dla ciebie innego zadania.");
+            return false;
+        }
+        pc.backpack().commitFrom(tx);
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Nowe zadanie dnia: pokonaj " + d.target() + "x " + monsterName(d.monster())
+                + whereToHunt(d.monster()) + " (" + String.format("%,d gp", price) + ").");
+        return true;
+    }
+
     /** Zabicie liczone do zadan: zadanie dnia, zlecenie lowcy i zadania na potwory. */
     private void taskKill(pl.fawizja.pixel.monster.MonsterType t) {
         if (pc.daily().onKill(t.key(), today())) {

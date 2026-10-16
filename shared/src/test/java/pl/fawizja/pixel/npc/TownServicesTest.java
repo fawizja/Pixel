@@ -265,6 +265,31 @@ class TownServicesTest {
     }
 
     @Test
+    void theDailyTaskCanBeChangedOnceADayForGold() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
+        GameSession s = session(pc, List.of(new SpawnPoint("wolf", new Position(58, 72, 0), 4, 5, 600),
+                new SpawnPoint("boar", new Position(60, 72, 0), 4, 5, 600)));
+        s.setToday(() -> 20_000L);
+        long t = 1000;
+        s.teleport(talkSpot(npcs.get("varden_guide")), t);
+        assertFalse(s.dailyReroll(t), "take a task first");
+        s.dailyAction(t);
+        String first = pc.daily().monster();
+        long gold = s.gold();
+        assertTrue(s.dailyReroll(t));
+        assertNotEquals(first, pc.daily().monster());
+        assertEquals(0, pc.daily().progress());
+        assertEquals(gold - pl.fawizja.pixel.daily.DailyTask.rerollPrice(pc.level()), s.gold());
+        assertFalse(s.dailyReroll(t), "once a day");
+        pl.fawizja.pixel.daily.DailyTask back = new pl.fawizja.pixel.daily.DailyTask();
+        back.restore(pc.daily().encode());
+        assertTrue(back.rerolled(), "saved");
+        back.restore("20000;wolf;25;3;0");
+        assertFalse(back.rerolled(), "old saves load");
+        assertEquals(3, back.progress());
+    }
+
+    @Test
     void theDailyTaskIsGivenOncePerDayCountsKillsAndPaysToTheBank() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         Position field = new Position(58, 72, 0);
