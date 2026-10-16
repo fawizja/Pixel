@@ -176,6 +176,7 @@ public final class GameScreen extends ScreenAdapter {
     private int pvpTargetId = -1;
     /** Wpisywana wiadomosc czatu (desktop: Enter otwiera, Enter wysyla, Esc anuluje) albo null. */
     private StringBuilder chatDraft;
+    private final pl.fawizja.pixel.settings.ChatHistory chatHistory = new pl.fawizja.pixel.settings.ChatHistory();
     private String mySkull = "NONE";
 
     public GameScreen(PixelGame game, PlayerCharacter pc) {
@@ -274,8 +275,12 @@ public final class GameScreen extends ScreenAdapter {
             public boolean keyDown(int keycode) {
                 if (chatDraft != null) {
                     if (keycode == Input.Keys.ENTER) {
+                        chatHistory.add(chatDraft.toString());
                         sendChat(chatDraft.toString());
                         chatDraft = null;
+                    } else if (keycode == Input.Keys.UP || keycode == Input.Keys.DOWN) {
+                        String h = keycode == Input.Keys.UP ? chatHistory.older() : chatHistory.newer();
+                        if (h != null) chatDraft = new StringBuilder(h);
                     } else if (keycode == Input.Keys.ESCAPE) {
                         chatDraft = null;
                     }
@@ -461,12 +466,17 @@ public final class GameScreen extends ScreenAdapter {
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
             Gdx.input.getTextInput(new Input.TextInputListener() {
                 @Override
-                public void input(String text) { sendChat(text); }
+                public void input(String text) {
+                    chatHistory.add(text);
+                    sendChat(text);
+                }
 
                 @Override
                 public void canceled() { }
-            }, "Czat", start, net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
+            }, "Czat", start, chatHistory.last() != null ? "Ostatnio: " + chatHistory.last()
+                    : net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
         } else {
+            chatHistory.resetCursor();
             chatDraft = new StringBuilder(start);
         }
     }

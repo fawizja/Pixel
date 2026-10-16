@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.83.0] - 2026-10-16
+
+### Dodano
+- Historia czatu: strzałki w górę i w dół w polu czatu (desktop) przywracają 20 ostatnich wiadomości i poleceń.
+  Na Androidzie okno czatu podpowiada ostatnią wiadomość („Ostatnio: …”).
+- 1 nowy test; łącznie 336.
+
 ## [0.82.0] - 2026-10-16
 
 ### Dodano
