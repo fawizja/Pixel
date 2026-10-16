@@ -954,6 +954,7 @@ public final class Hud {
     private float settingsRowX() { return w - 250; }
     public int selectedSlot() { return selectedSlot; }
     public void clearSelection() { selectedSlot = -1; }
+    public void selectSlot(int slot) { selectedSlot = slot; }
 
     // ------------------------------------------------------------------ wejscie
 
@@ -1350,9 +1351,16 @@ public final class Hud {
         font.getData().setScale(1f);
     }
 
+    private float bagTipW() { return Math.min(w - 20, Math.max(slotSize * 5 + 16, 420)); }
+    private float bagTipX() { return bagX + slotSize * 2.5f - bagTipW() / 2f; }
+
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
         shapes.setColor(0.1f, 0.08f, 0.06f, 0.88f);
         shapes.rect(bagX - 8, bagY - 50, slotSize * 5 + 16, slotSize * 4 + 80);
+        if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
+            shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
+            shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);
+        }
         for (int i = 0; i < 20; i++) {
             float sx = bagX + (i % 5) * slotSize;
             float sy = bagY + (3 - i / 5) * slotSize;
@@ -1388,11 +1396,13 @@ public final class Hud {
             ItemStack s = pc.backpack().get(selectedSlot);
             if (s != null) {
                 ItemType t = session.items().get(s.itemId());
-                String stats = t.name();
-                if (t.attack() > 0) stats += "  atk " + t.attack();
-                if (t.defense() > 0) stats += "  def " + t.defense();
-                if (t.armor() > 0) stats += "  arm " + t.armor();
-                text(batch, stats, bagX, bagY - 12);
+                // opis nad plecakiem: statystyki z roznica wzgledem zalozonego przedmiotu i wymagania
+                ItemStack worn = t.slot() == EquipSlot.NONE ? null : pc.equipment().get(t.slot());
+                ItemType wornType = worn == null ? null : session.items().get(worn.itemId());
+                float ty = bagY + slotSize * 4 + 66;
+                text(batch, pl.fawizja.pixel.item.ItemCompare.stats(t, wornType), bagTipX() + 6, ty);
+                String req = pl.fawizja.pixel.item.ItemCompare.requirements(t, pc);
+                if (!req.isEmpty()) text(batch, req, bagTipX() + 6, ty - 17);
                 if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
                 centered(batch, bagUse.label, bagUse.x, bagUse.y);

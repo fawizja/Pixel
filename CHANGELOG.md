@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.45.0] - 2026-10-16
+
+### Dodano
+- Opis przedmiotu w plecaku: po dotknięciu przedmiotu nad plecakiem pojawia się ramka ze statystykami i różnicą
+  względem tego, co postać ma założone w tym miejscu (np. „atak 24 (+4)”), oraz z wymaganiami: poziom
+  („za niski”), profesje („nie dla ciebie”) i wartość.
+- `item/ItemCompare`, scena `bagitem` w regresji GUI (27 scen). 2 nowe testy; łącznie 273.
+
 ## [0.44.0] - 2026-10-16
 
 ### Dodano

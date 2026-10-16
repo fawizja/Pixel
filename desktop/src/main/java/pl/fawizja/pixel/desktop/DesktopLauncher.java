@@ -24,7 +24,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|character|npc|depot|friends|market|mount|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -89,6 +89,19 @@ public final class DesktopLauncher {
                 String open = System.getProperty("pixel.open");
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
+                if ("bagitem".equals(open)) {
+                    // podglad opisu przedmiotu: pierwszy przedmiot z miejscem na ciele
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.hud().toggleBag();
+                    pl.fawizja.pixel.inventory.Container bp = gs.session().character().backpack();
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(gs.session().items().byKey("iron_sword").id(), 1));
+                    for (int i = 0; i < bp.size(); i++) {
+                        if (bp.get(i) != null && gs.session().items().get(bp.get(i).itemId()).slot() != pl.fawizja.pixel.item.EquipSlot.NONE) {
+                            gs.hud().selectSlot(i);
+                            break;
+                        }
+                    }
+                }
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
                 if ("party".equals(open)) {
