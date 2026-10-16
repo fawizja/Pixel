@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.58.0] - 2026-10-16
+
+### Dodano
+- Pupile: Szczenię (Varden), Kocię (Selvaran), Kruk (Frostholm) i Fenek (Qasirah) u kupców po 5 000 gp.
+  UŻYJ w plecaku przywołuje pupila, który chodzi pole za postacią (ponowne UŻYJ go odsyła). Przedmiot się
+  nie zużywa; gdy zniknie z plecaka (sprzedaż, handel, wyrzucenie), pupil odchodzi. Zapis postaci (`pet`)
+  i online: inni gracze widzą pupila (komunikat PL, pole 12).
+- Opcja deweloperska `-Dpixel.open=pet` (`-Dpixel.pet=pet_cat` itd.), scena GUI `pet` (29 scen).
+- 2 nowe testy; łącznie 302.
+
 ## [0.57.0] - 2026-10-16
 
 ### Dodano

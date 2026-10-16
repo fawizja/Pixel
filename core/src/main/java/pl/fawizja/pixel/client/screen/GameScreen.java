@@ -107,8 +107,14 @@ public final class GameScreen extends ScreenAdapter {
         String skull = "NONE";
         String guild;
         boolean mounted;
+        String pet;
+        final pl.fawizja.pixel.client.render.PetFollower petFollower = new pl.fawizja.pixel.client.render.PetFollower();
         boolean seen;
     }
+
+    /** Wlasny pupil i czas ostatniej klatki (plynne podazanie). */
+    private final pl.fawizja.pixel.client.render.PetFollower myPet = new pl.fawizja.pixel.client.render.PetFollower();
+    private long lastPetMs = -1;
 
     private static final long REMOTE_STEP_MS = 300L;
 
@@ -827,6 +833,10 @@ public final class GameScreen extends ScreenAdapter {
         int radius = (int) Math.ceil(Math.max(viewport.getWorldWidth(), viewport.getWorldHeight()) / 2f) + 2;
         visibleMonsters.addAll(session.monsters().near(pc.position(), radius));
         collectLunges(t);
+        long petDt = lastPetMs < 0 ? 0 : t - lastPetMs;
+        lastPetMs = t;
+        if (pc.pet() != null) myPet.update(pc.position(), petDt);
+        for (RemotePlayer rp : remotePlayers.values()) if (rp.pet != null) rp.petFollower.update(rp.to, petDt);
         float[] myLunge = lunges.get(pc.position());
         float lx = myLunge == null ? 0f : myLunge[0], ly = myLunge == null ? 0f : myLunge[1];
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
@@ -856,6 +866,8 @@ public final class GameScreen extends ScreenAdapter {
                 TextureRegion tr = game.art().npc(n.key());
                 if (tr != null) b.draw(tr, np.x(), worldRenderer.worldY(np.y()), 1f, 1f);
             }
+            drawPet(b, pc.pet(), myPet, row, z);
+            for (RemotePlayer rp : remotePlayers.values()) if (rp.pet != null) drawPet(b, rp.pet, rp.petFollower, row, z);
             for (RemotePlayer rp : remotePlayers.values()) {
                 if (rp.to.y() != row || rp.to.z() != z) continue;
                 float[] lg = lunges.get(rp.to);
@@ -1050,6 +1062,15 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     /** Paski zycia potworow, obwodka celu i liczby obrazen (rysowane po swietle, zawsze czytelne). */
+    private void drawPet(SpriteBatch b, String key, pl.fawizja.pixel.client.render.PetFollower f, int row, int z) {
+        if (key == null || f.row() != row || f.z() != z) return;
+        TextureRegion tr = game.art().pet(key);
+        if (tr == null) return;
+        float y = worldRenderer.worldY(f.y());
+        if (f.facingLeft()) b.draw(tr, f.x() + 1f, y, -1f, 1f);
+        else b.draw(tr, f.x(), y, 1f, 1f);
+    }
+
     private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
         Monster target = session.combat().target();
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -1292,6 +1313,7 @@ public final class GameScreen extends ScreenAdapter {
                 rp.skull = e.mark();
                 rp.guild = e.guild();
                 rp.mounted = e.mounted();
+                rp.pet = e.pet();
                 rp.seen = true;
             }
             remotePlayers.values().removeIf(rp -> !rp.seen);

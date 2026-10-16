@@ -587,6 +587,7 @@ public final class GameSession {
         pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(slot);
         if (st != null && items.get(st.itemId()).key().equals("saddle")) return useSaddle(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("return_scroll")) return startRecall(nowMs);
+        if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
         return spells.useItem(slot, nowMs);
     }
 
@@ -645,6 +646,33 @@ public final class GameSession {
         return CastResult.OK;
     }
 
+    /** Pupil: przywolanie albo odeslanie (przedmiot zostaje w plecaku; bez niego pupil odchodzi). */
+    private CastResult togglePet(pl.fawizja.pixel.item.ItemType pet, long nowMs) {
+        if (pet.key().equals(pc.pet())) {
+            pc.setPet(null);
+            log.add(nowMs, EventLog.Kind.INFO, pet.name() + " odpoczywa w plecaku.");
+        } else {
+            pc.setPet(pet.key());
+            log.add(nowMs, EventLog.Kind.INFO, pet.name() + " chodzi teraz za tobą.");
+        }
+        return CastResult.OK;
+    }
+
+    /** Pupil odchodzi, gdy jego przedmiotu nie ma juz w plecaku (sprzedany, oddany, wyrzucony). */
+    private void checkPet(long nowMs) {
+        String key = pc.pet();
+        if (key == null) return;
+        pl.fawizja.pixel.item.ItemType t;
+        try {
+            t = items.byKey(key);
+        } catch (IllegalArgumentException e) {
+            t = null; // pupil z nowszej wersji danych
+        }
+        if (t != null && pc.backpack().count(t.id()) > 0) return;
+        pc.setPet(null);
+        if (t != null) log.add(nowMs, EventLog.Kind.INFO, t.name() + " odchodzi, bo nie masz go już w plecaku.");
+    }
+
     /** Wsiadanie i zsiadanie z wierzchowca (pod ziemia nie mozna jechac). */
     public void toggleMount(long nowMs) {
         if (!pc.hasMount()) {
@@ -698,6 +726,7 @@ public final class GameSession {
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         checkBoost(nowMs);
+        checkPet(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {

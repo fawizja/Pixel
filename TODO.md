@@ -174,6 +174,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] 4 nowe osiagniecia, strony w oknie osiagniec (0.55.0)
 - [x] Potwor dnia: +50% exp i lupu, /potwor, wiersz w analizie polowania (0.56.0)
 - [x] Ogloszenie rzadkiego lupu (<= 1%) dla wszystkich graczy, znacznik potwora dnia (0.57.0)
+- [x] Pupile chodzace za postacia, widoczne online (0.58.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

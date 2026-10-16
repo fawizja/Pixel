@@ -115,6 +115,7 @@ public final class PlayerCharacter {
         hasMount = o.hasMount;
         mounted = o.mounted;
         blessed = o.blessed;
+        pet = o.pet;
         torchLit = o.torchLit;
         defensive = o.defensive;
         fedMs = o.fedMs;
@@ -153,6 +154,12 @@ public final class PlayerCharacter {
     private boolean blessed;
 
     public boolean isBlessed() { return blessed; }
+
+    /** Przywolany pupil (klucz przedmiotu pet_*) albo null; ozdoba, chodzi za postacia. */
+    private String pet;
+
+    public String pet() { return pet; }
+    public void setPet(String key) { pet = key == null || key.isEmpty() ? null : key; }
     public void setBlessed(boolean v) { blessed = v; }
 
     public boolean hasMount() { return hasMount; }

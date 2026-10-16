@@ -24,7 +24,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -152,6 +152,14 @@ public final class DesktopLauncher {
                     pl.fawizja.pixel.character.PlayerCharacter pc = ((GameScreen) getScreen()).session().character();
                     pc.setHasMount(true);
                     pc.setMounted(true);
+                }
+                if ("pet".equals(open)) {
+                    // podglad: pupil chodzi za postacia (-Dpixel.pet=pet_cat itd., domyslnie szczenie)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    String pet = System.getProperty("pixel.pet", "pet_dog");
+                    pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(gs.session().items().byKey(pet).id(), 1));
+                    pc.setPet(pet);
                 }
                 if ("chest".equals(open)) {
                     // podglad: obok pierwszej skrzyni na pietrze -1 (z pochodnia, zeby bylo widac)

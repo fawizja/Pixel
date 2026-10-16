@@ -42,6 +42,10 @@ public final class TileArt implements Disposable {
     private TextureRegion[] chest;
     /** Manekin treningowy. */
     private static final int DUMMY_CELL = 1004;
+    /** Pupile (0.58.0), zwrocone w prawo; w lewo rysowane odbiciem. */
+    private static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec"};
+    private static final int PET_CELL = 1005;
+    private final java.util.Map<String, TextureRegion> pets = new java.util.HashMap<>();
     private TextureRegion dummy;
 
     private final Texture atlas;
@@ -90,6 +94,7 @@ public final class TileArt implements Disposable {
         paintChest(pm, cellX(CHEST_CELL), cellY(CHEST_CELL), false);
         paintChest(pm, cellX(CHEST_CELL + 1), cellY(CHEST_CELL + 1), true);
         paintDummy(pm, cellX(DUMMY_CELL), cellY(DUMMY_CELL));
+        for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(PET_CELL + i), cellY(PET_CELL + i), PETS[i]);
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -108,6 +113,7 @@ public final class TileArt implements Disposable {
         horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
         chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
         dummy = region(DUMMY_CELL);
+        for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(PET_CELL + i));
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -133,6 +139,9 @@ public final class TileArt implements Disposable {
     public TextureRegion chest(boolean open) { return chest[open ? 1 : 0]; }
 
     public TextureRegion dummy() { return dummy; }
+
+    /** Pupil po kluczu przedmiotu (null = nieznany). */
+    public TextureRegion pet(String key) { return key == null ? null : pets.get(key); }
     public Texture lightTexture() { return lightTexture; }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -629,6 +638,79 @@ public final class TileArt implements Disposable {
         disc(pm, ox, oy, 8f, 9.5f, 0.7f, Color.WHITE);
         disc(pm, ox, oy, 8f, 3.5f, 2.9f, shade(wood, 0.6f)); // obrys glowy (widoczny tez na piasku)
         disc(pm, ox, oy, 8f, 3.5f, 2.2f, sack);           // glowa
+    }
+
+    /** Male zwierze w dolnej czesci kafelka, glowa po prawej. */
+    private void paintPet(Pixmap pm, int ox, int oy, String key) {
+        Color eye = Color.valueOf("#101010");
+        disc(pm, ox, oy, 8f, 15f, 4.5f, new Color(0, 0, 0, 0.3f));
+        switch (key) {
+            case "pet_dog": {
+                Color fur = Color.valueOf("#b07a40");
+                Color dark = shade(fur, 0.6f);
+                rect(pm, ox, oy, 4, 9, 7, 4, dark);     // obrys tulowia
+                rect(pm, ox, oy, 5, 10, 6, 3, fur);     // tulow
+                rect(pm, ox, oy, 5, 13, 1, 2, dark);    // lapy
+                rect(pm, ox, oy, 9, 13, 1, 2, dark);
+                rect(pm, ox, oy, 3, 8, 1, 3, fur);      // ogon
+                rect(pm, ox, oy, 9, 6, 5, 4, dark);     // glowa
+                rect(pm, ox, oy, 10, 7, 3, 3, fur);
+                rect(pm, ox, oy, 13, 8, 2, 2, fur);     // pysk
+                rect(pm, ox, oy, 14, 8, 1, 1, eye);     // nos
+                rect(pm, ox, oy, 9, 5, 2, 2, shade(fur, 0.45f)); // ucho
+                rect(pm, ox, oy, 12, 7, 1, 1, eye);
+                break;
+            }
+            case "pet_cat": {
+                Color fur = Color.valueOf("#e09a40");
+                Color dark = shade(fur, 0.6f);
+                rect(pm, ox, oy, 4, 10, 7, 3, dark);
+                rect(pm, ox, oy, 5, 10, 5, 3, fur);
+                rect(pm, ox, oy, 6, 11, 1, 2, dark);    // pregi
+                rect(pm, ox, oy, 8, 11, 1, 2, dark);
+                rect(pm, ox, oy, 5, 13, 1, 2, dark);
+                rect(pm, ox, oy, 9, 13, 1, 2, dark);
+                rect(pm, ox, oy, 2, 6, 1, 4, fur);      // ogon do gory
+                rect(pm, ox, oy, 3, 9, 2, 1, fur);
+                rect(pm, ox, oy, 10, 7, 4, 4, dark);    // glowa
+                rect(pm, ox, oy, 11, 8, 2, 3, fur);
+                rect(pm, ox, oy, 10, 6, 1, 1, dark);    // uszy
+                rect(pm, ox, oy, 13, 6, 1, 1, dark);
+                rect(pm, ox, oy, 12, 8, 1, 1, Color.valueOf("#40a040"));
+                break;
+            }
+            case "pet_raven": {
+                Color body = Color.valueOf("#303040");
+                Color edge = Color.valueOf("#8a8aa0");
+                rect(pm, ox, oy, 5, 8, 6, 4, edge);     // jasny obrys (widoczny na ciemnym)
+                rect(pm, ox, oy, 6, 9, 5, 3, body);
+                rect(pm, ox, oy, 3, 9, 3, 2, body);     // ogon
+                rect(pm, ox, oy, 6, 7, 4, 2, shade(body, 1.4f)); // skrzydlo
+                rect(pm, ox, oy, 10, 6, 3, 3, body);    // glowa
+                rect(pm, ox, oy, 13, 7, 2, 1, Color.valueOf("#d0a030")); // dziob
+                rect(pm, ox, oy, 11, 7, 1, 1, Color.WHITE);
+                rect(pm, ox, oy, 7, 12, 1, 2, Color.valueOf("#d0a030")); // nogi
+                rect(pm, ox, oy, 9, 12, 1, 2, Color.valueOf("#d0a030"));
+                break;
+            }
+            default: { // pet_fennec
+                Color fur = Color.valueOf("#e8c890");
+                Color dark = shade(fur, 0.6f);
+                rect(pm, ox, oy, 4, 10, 7, 3, dark);
+                rect(pm, ox, oy, 5, 10, 5, 3, fur);
+                rect(pm, ox, oy, 5, 13, 1, 2, dark);
+                rect(pm, ox, oy, 9, 13, 1, 2, dark);
+                rect(pm, ox, oy, 1, 10, 4, 2, fur);     // puszysty ogon
+                rect(pm, ox, oy, 1, 10, 1, 2, Color.WHITE);
+                rect(pm, ox, oy, 10, 8, 4, 3, dark);    // glowa
+                rect(pm, ox, oy, 11, 9, 2, 2, fur);
+                rect(pm, ox, oy, 14, 10, 1, 1, eye);    // nos
+                rect(pm, ox, oy, 10, 4, 2, 4, dark);    // wielkie uszy
+                rect(pm, ox, oy, 13, 4, 2, 4, dark);
+                rect(pm, ox, oy, 11, 5, 1, 3, Color.valueOf("#f0a0a0"));
+                rect(pm, ox, oy, 12, 9, 1, 1, eye);
+            }
+        }
     }
 
     private void paintChest(Pixmap pm, int ox, int oy, boolean open) {
