@@ -260,6 +260,8 @@ przy pauzie, utracie fokusu i zamknieciu.
 - Skarbiec (0.123.0): `/gildia wpłać 5k` przelewa z konta do skarbca (kazdy czlonek), `/gildia wypłać 5k` tylko lider;
   kazda operacja ogloszona w kanale gildii, stan w `/gildia`. Zapis jako pole `bank=zloto` przed wiadomoscia dnia
   (stare linie bez tego pola dzialaja).
+- Lista czlonkow (0.162.0): `/gildia członkowie` (GUILD MEMBERS) - najpierw w grze, potem wg poziomu, lider oznaczony,
+  przy nieobecnych czas od ostatniego zapisu postaci ("3 h temu"); po 6 osob na linie dziennika.
 - Sztandar gildii (0.152.0): `/gildia sztandar` (lider) placi 100 000 gp ze skarbca - czlonkowie dostaja +10% exp za
   potwory przez godzine (kolejny sztandar przedluza). Sumuje sie z wydarzeniem /bonusexp. Tylko w pamieci serwera.
 

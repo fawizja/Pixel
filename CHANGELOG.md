@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.162.0] - 2026-10-16
+
+### Dodano
+- `/gildia członkowie`: lista członków gildii z poziomami - najpierw obecni w grze, przy pozostałych kiedy ostatnio grali.
 ## [0.161.0] - 2026-10-16
 
 ### Dodano

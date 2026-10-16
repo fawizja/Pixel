@@ -740,6 +740,9 @@ class NetworkSyncTest {
             await("members get the bonus", () -> server.world().find("Ula").session.combat().bonusExpPercent() == ServerWorld.BANNER_PERCENT);
             ula.send("EVENTS");
             awaitMessage(ula, "banner in events", m -> m[0].equals("EVENTS") && m.length > 2 && m[2].startsWith("sztandar gildii +10%, 60 min"));
+            ula.send("GUILD", "MEMBERS");
+            awaitMessage(ula, "member list", m -> m[0].equals("LOG") && m[2].startsWith("Członkowie Wilcze Kly (2, w grze 2): ")
+                    && m[2].contains("Ola [lider] (poz. ") && m[2].contains("w grze"));
             ula.send("RANK", "gildie");
             String[][] rank = new String[1][];
             awaitMessage(ula, "guild ranking", m -> m[0].equals("RANK") && (rank[0] = m) != null);

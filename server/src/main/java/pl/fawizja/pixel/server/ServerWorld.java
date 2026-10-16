@@ -327,6 +327,43 @@ final class ServerWorld {
         p.client.send(msg);
     }
 
+    /** Czlonkowie gildii: najpierw w grze, potem wg poziomu; przy nieobecnych - kiedy ostatnio grali. Po 6 na linie. */
+    List<String> guildMemberLines(pl.fawizja.pixel.guild.GuildRegistry.Guild g) {
+        record M(String name, boolean online, int level, long ago) {}
+        List<M> all = new ArrayList<>();
+        for (String n : g.members()) {
+            ServerPlayer o = find(n);
+            if (o != null) {
+                all.add(new M(o.name(), true, o.session.character().level(), 0));
+            } else {
+                pl.fawizja.pixel.ranking.Ranking.Entry e = ranking.get(n);
+                long saved = saves.lastModified("player_" + n.toLowerCase(java.util.Locale.ROOT));
+                all.add(new M(e == null ? n : e.name(), false, e == null ? 0 : e.level(),
+                        saved <= 0 ? -1 : Math.max(0, (wallClock.getAsLong() - saved) / 60_000L)));
+            }
+        }
+        all.sort(java.util.Comparator.comparing((M m) -> !m.online()).thenComparing(M::level, java.util.Comparator.reverseOrder()));
+        List<String> out = new ArrayList<>();
+        int online = 0;
+        for (M m : all) if (m.online()) online++;
+        StringBuilder sb = new StringBuilder("Członkowie " + g.name() + " (" + all.size() + ", w grze " + online + "): ");
+        for (int i = 0; i < all.size(); i++) {
+            M m = all.get(i);
+            String ago = pl.fawizja.pixel.friends.FriendsView.describeAgo(m.ago());
+            if (i > 0 && i % 6 == 0) {
+                out.add(sb.toString());
+                sb = new StringBuilder();
+            } else if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(m.name()).append(m.name().equalsIgnoreCase(g.leader()) ? " [lider]" : "")
+                    .append(" (").append(m.level() > 0 ? "poz. " + m.level() + ", " : "")
+                    .append(m.online() ? "w grze" : ago.isEmpty() ? "poza grą" : ago).append(')');
+        }
+        out.add(sb.toString());
+        return out;
+    }
+
     /** FRIEND LIST | ADD imie | REMOVE imie; po kazdej zmianie klient dostaje liste (FRIENDS). */
     private void friendCommand(ServerPlayer p, String[] f, long now) {
         if (f.length < 2) return;
@@ -1129,6 +1166,14 @@ final class ServerWorld {
                 toGuild(mine, p.name() + " wznosi sztandar gildii: +" + BANNER_PERCENT + "% doświadczenia za potwory przez "
                         + (until - now) / 60_000 + " min" + String.format(" (w skarbcu: %,d gp).", mine.treasury()), now);
                 updateExpEvent(now);
+                return;
+            }
+            case "MEMBERS": {
+                if (mine == null) {
+                    warn(p, "Nie należysz do gildii.", now);
+                    return;
+                }
+                for (String line : guildMemberLines(mine)) info(p, line, now);
                 return;
             }
             default: // INFO
