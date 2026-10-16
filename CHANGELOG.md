@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.89.0] - 2026-10-16
+
+### Dodano
+- 5 nowych zadań strażnika obozu na wschodzie, wypełniających luki poziomów 230-900:
+  „Upiorna straż” (270, upiorni rycerze), „Mroźni olbrzymi” (420), „Polowanie w cieniu” (570, łowcy cieni),
+  „Kapłani pustki” (700) i „Demony u bram” (780). Test `everyQuestTargetCanBeFoundInTheWorld` potwierdza, że cele występują w świecie.
+
 ## [0.88.0] - 2026-10-16
 
 ### Dodano

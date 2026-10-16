@@ -13,12 +13,17 @@ qas_scorpions;Kolce skorpionów;qas_guide;COLLECT;scorpion_tail;15;80000;2000;55
 qas_mummies;Spokój zmarłych;qas_guide;KILL;mummy;10;900000;15000;180;Mumie wychodzą z krypt. Odeślij 10 z powrotem.
 qas_pharaoh;Klątwa faraona;qas_guide;KILL;pharaoh;1;2500000;60000;210;Zdejmij klątwę Neferakha w najgłębszej krypcie.
 camp_treants;Przeklęty las;camp_guide;KILL;cursed_treant;25;300000;20000;230;Drzewce duszą drogę od mostu. Wytnij 25.
+camp_knights;Upiorna straż;camp_guide;KILL;wraith_knight;25;400000;30000;270;Upiorni rycerze pilnują ruin za lasem. Pokonaj 25.
 camp_golems;Rzeka lawy;camp_guide;KILL;lava_golem;20;500000;40000;320;Golemy lawy zalewają szlak na południe. Rozbij 20.
 camp_ignaroth;Pan wulkanu;camp_guide;KILL;ignaroth;1;3000000;150000;350;Ignaroth budzi wulkan. Zbierz drużynę i zgaś go.
+camp_giants;Mroźni olbrzymi;camp_guide;KILL;frost_giant;20;650000;50000;420;Olbrzymi zrzucają lawiny na szlak. Pokonaj 20.
 camp_dragons;Lodowe skrzydła;camp_guide;KILL;ice_dragon;20;800000;60000;450;Lodowe smoki porywają zwiadowców. Pokonaj 20.
 camp_hrimgar;Król lodu;camp_guide;KILL;hrimgar;1;5000000;250000;500;Hrimgar zamyka przełęcze. Strąć go ze szczytu.
+camp_stalkers;Polowanie w cieniu;camp_guide;KILL;shadow_stalker;20;900000;70000;570;Łowcy cieni porywają zwiadowców nocą. Pokonaj 20.
 camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1500000;0;600;Kapłani obozu badają cień. Przynieś 10 esencji.
 camp_khazuul;Pusty król;camp_guide;KILL;khazuul;1;8000000;400000;650;Kha'zuul woła cienie z ruin. Rozprosz go.
+camp_priests;Kapłani pustki;camp_guide;KILL;void_priest;15;1200000;90000;700;Kapłani pustki odprawiają rytuał przy Otchłani. Przerwij go, pokonując 15.
+camp_demons;Demony u bram;camp_guide;KILL;abyssal_demon;15;1500000;110000;780;Demony Otchłani szturmują ostatnie umocnienia. Pokonaj 15.
 camp_lords;Panowie Otchłani;camp_guide;KILL;abyss_lord;15;6000000;300000;850;Panowie Otchłani gromadzą armie. Pokonaj 15.
 camp_morgath;Serce Otchłani;camp_guide;KILL;morgath;1;20000000;1000000;900;Ostatnie zadanie świata: zniszcz Mor'gatha.
 varden_smug1;Ślady przemytników;varden_guide;KILL;bandit;8;8000;500;12;Bandyci na wschodnich drogach przemycają towar. Rozbij 8 i dowiedz się, dla kogo pracują.
