@@ -867,7 +867,7 @@ class NetworkSyncTest {
         }
         try (NetClient ola = connect()) {
             ola.hello("Ola", "PALADIN", "tajne-Ola");
-            awaitMessage(ola, "paid on return", m -> m[0].equals("LOG") && m[2].contains("pod Twoją nieobecność"));
+            awaitMessage(ola, "paid on return", m -> m[0].equals("LOG") && m[2].contains("Pod Twoją nieobecność"));
             await("balance", () -> {
                 try {
                     return self(ola).bank().balance() == 294 + 980 + LOGIN_BONUS; // drugie wejscie tego dnia: bez nowej nagrody
@@ -1024,6 +1024,59 @@ class NetworkSyncTest {
                 }
             });
             assertTrue(server.world().mail.waiting("Kuba").isEmpty());
+        }
+    }
+
+    @Test
+    void goldCanBeTransferredBetweenBankAccounts() throws Exception {
+        try (NetClient kuba = connect()) {
+            kuba.hello("Kuba", "MONK", "tajne-Kuba");
+            await("welcome", () -> kuba.selfSave() != null);
+        }
+        await("kuba left", () -> server.world().find("Kuba") == null);
+        Position banker = new Position(70, 78, 0);
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            awaitMessage(ula, "login bonus first", m -> m[0].equals("LOG") && m[2].startsWith("Nagroda za wejście"));
+            ola.send("TRANSFER", "Ula", "100");
+            awaitMessage(ola, "not at a banker", m -> m[0].equals("LOG") && m[2].contains("bankier"));
+            long[] before = new long[2];
+            server.enqueueTest(() -> {
+                ServerPlayer p = server.world().find("Ola");
+                p.session.teleport(banker, server.now());
+                p.session.character().bank().credit(10_000);
+                before[0] = p.session.character().bank().balance();
+                before[1] = server.world().find("Ula").session.character().bank().balance();
+            });
+            await("at the banker", () -> {
+                try {
+                    return self(ola).position().equals(banker) && before[0] > 0;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            ola.send("TRANSFER", "ula", "3000");
+            awaitMessage(ula, "money arrived", m -> m[0].equals("LOG") && m[2].startsWith("Przelew: Ola przesyła"));
+            ola.send("TRANSFER", "Kuba", "2000");
+            awaitMessage(ola, "sent to offline", m -> m[0].equals("LOG") && m[2].contains("po wejściu do gry"));
+            ola.send("TRANSFER", "Ula", "99999999");
+            awaitMessage(ola, "not enough", m -> m[0].equals("LOG") && m[2].contains("Na koncie masz tylko"));
+            ola.send("TRANSFER", "Ola", "10");
+            awaitMessage(ola, "not to self", m -> m[0].equals("LOG") && m[2].contains("samemu sobie"));
+            await("balances moved", () -> {
+                try {
+                    return self(ola).bank().balance() == before[0] - 5_000 && self(ula).bank().balance() == before[1] + 3_000;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+        }
+        try (NetClient kuba = connect()) {
+            kuba.hello("Kuba", "MONK", "tajne-Kuba");
+            awaitMessage(kuba, "paid on login", m -> m[0].equals("LOG") && m[2].contains("Pod Twoją nieobecność") && m[2].contains("przelewy"));
         }
     }
 

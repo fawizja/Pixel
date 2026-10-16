@@ -17,6 +17,17 @@ class ChatCommandsTest {
     }
 
     @Test
+    void bankTransfersAcceptCommonAmountFormats() {
+        assertArrayEquals(new String[] {"TRANSFER", "Stary Wilk", "5000"}, ChatCommands.toMessage("/przelew Stary Wilk, 5000"));
+        assertArrayEquals(new String[] {"TRANSFER", "Ola", "12000"}, ChatCommands.toMessage("/przelew Ola, 12 000 gp"));
+        assertArrayEquals(new String[] {"TRANSFER", "Ola", "5000"}, ChatCommands.toMessage("/przelew Ola, 5k"));
+        assertArrayEquals(new String[] {"TRANSFER", "Ola", "2000000"}, ChatCommands.toMessage("/przelew Ola, 2kk"));
+        assertNull(ChatCommands.toMessage("/przelew Ola 5000"), "the comma separates the name");
+        assertNull(ChatCommands.toMessage("/przelew Ola, -5"));
+        assertNull(ChatCommands.toMessage("/przelew Ola, dużo"));
+    }
+
+    @Test
     void privateMessagesAndModeratorCommands() {
         assertArrayEquals(new String[] {"PM", "Stary Wilk", "cześć, co słychać?"}, ChatCommands.toMessage("/w Stary Wilk, cześć, co słychać?"));
         assertArrayEquals(new String[] {"PM", "Ola", "hej tam"}, ChatCommands.toMessage("/w Ola hej tam"));

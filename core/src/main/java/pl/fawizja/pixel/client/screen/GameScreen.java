@@ -638,6 +638,10 @@ public final class GameScreen extends ScreenAdapter {
         List<String[]> rows = pl.fawizja.pixel.stats.HuntAnalyzer.rows(hunt.report(t, session.character()));
         pl.fawizja.pixel.monster.MonsterType boost = session.boostedCreature();
         if (boost != null) rows.add(new String[] {"Potwór dnia", pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
+        pl.fawizja.pixel.item.Enchantments ench = session.character().enchantments();
+        for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
+            if (ench.active(k)) rows.add(new String[] {k.label(), "zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k))});
+        }
         rows.add(new String[] {"Zacznij od nowa", "zeruje liczniki polowania", "", "hunt:reset"});
         return rows;
     }

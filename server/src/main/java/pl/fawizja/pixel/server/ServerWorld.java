@@ -296,6 +296,45 @@ final class ServerWorld {
         info(p, "Wysłano " + label + " do " + to + (r == null ? " (odbierze po wejściu do gry)." : "."), now);
     }
 
+    /** TRANSFER imie kwota: zloto z konta na konto innej postaci (takze offline), tylko przy bankierze. */
+    private void transferCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 3) return;
+        long amount;
+        try {
+            amount = Long.parseLong(f[2]);
+        } catch (NumberFormatException e) {
+            return;
+        }
+        if (amount <= 0) return;
+        if (!atBanker(p, now)) return;
+        String to = knownName(f[1].trim());
+        if (to == null) {
+            warn(p, "Nie ma takiej postaci.", now);
+            return;
+        }
+        if (to.equalsIgnoreCase(p.name())) {
+            warn(p, "Nie możesz przelać złota samemu sobie.", now);
+            return;
+        }
+        PlayerCharacter pc = p.session.character();
+        if (!pc.bank().debit(amount).ok()) {
+            warn(p, "Na koncie masz tylko " + String.format("%,d gp", pc.bank().balance()) + ". Wpłać monety u bankiera.", now);
+            return;
+        }
+        String label = String.format("%,d gp", amount);
+        ServerPlayer r = find(to);
+        if (r != null && r.session.character().bank().credit(amount).ok()) {
+            r.session.log().add(now, EventLog.Kind.SYSTEM, "Przelew: " + p.name() + " przesyła " + label + " na Twoje konto.");
+            save(r);
+        } else {
+            market.addEarnings(to, amount);
+            saveMarket();
+        }
+        save(p);
+        LOG.info("transfer " + p.name() + " -> " + to + " " + amount);
+        info(p, "Przelano " + label + " do " + to + (r == null ? " (wpłynie po wejściu do gry)." : "."), now);
+    }
+
     /** Dostarcza czekajace przesylki do depozytu odbiorcy (ile sie zmiesci). */
     private void deliverMail(ServerPlayer r, long now) {
         List<pl.fawizja.pixel.mail.Mailbox.Parcel> parcels = mail.take(r.name());
@@ -708,8 +747,8 @@ final class ServerWorld {
         long earned = market.takeEarnings(pc.name());
         if (earned > 0) {
             if (pc.bank().credit(earned).ok()) {
-                s.log().add(lastNow, EventLog.Kind.SYSTEM, "Rynek: pod Twoją nieobecność sprzedano przedmioty. Na konto wpłynęło "
-                        + String.format("%,d gp", earned) + ".");
+                s.log().add(lastNow, EventLog.Kind.SYSTEM, "Pod Twoją nieobecność na konto wpłynęło "
+                        + String.format("%,d gp", earned) + " (rynek i przelewy).");
                 save(p);
             } else {
                 market.addEarnings(pc.name(), earned);
@@ -1200,6 +1239,7 @@ final class ServerWorld {
             case "FRIEND": friendCommand(p, f, now); break;
             case "MARKET": marketCommand(p, f, now); break;
             case "MAIL": mailCommand(p, f, now); break;
+            case "TRANSFER": transferCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
             case "TITLE": p.session.chooseTitle(f.length > 1 ? f[1] : null, now); break;
             case "DEATH": {

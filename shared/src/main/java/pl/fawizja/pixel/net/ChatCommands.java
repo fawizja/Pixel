@@ -86,6 +86,15 @@ public final class ChatCommands {
                 if (comma <= 0 || r.substring(comma + 1).isBlank()) return null;
                 return new String[] {"MAIL", "SEND", r.substring(0, comma).trim(), r.substring(comma + 1).trim()};
             }
+            case "/przelew": {
+                // "/przelew Stary Wilk, 5000" (takze 5 000, 5k, 5000 gp)
+                String r = rest(t);
+                int comma = r.indexOf(',');
+                if (comma <= 0) return null;
+                long amount = amount(r.substring(comma + 1));
+                if (amount <= 0) return null;
+                return new String[] {"TRANSFER", r.substring(0, comma).trim(), String.valueOf(amount)};
+            }
             case "/inwazja":
                 return w.length == 1 ? new String[] {"ADMIN", "INVASION"} : new String[] {"ADMIN", "INVASION", rest(t)};
             case "/kto":
@@ -155,6 +164,21 @@ public final class ChatCommands {
     }
 
     /** Tekst po pierwszym slowie (imiona moga miec spacje). */
+    /** Kwota przelewu: "5000", "5 000", "5.000", "5k", "5000 gp"; 0, gdy niepoprawna. */
+    public static long amount(String text) {
+        String a = text.trim().toLowerCase(java.util.Locale.ROOT).replace("gp", "").replace(" ", "").replace(".", "");
+        long mult = 1;
+        if (a.endsWith("kk")) {
+            mult = 1_000_000;
+            a = a.substring(0, a.length() - 2);
+        } else if (a.endsWith("k")) {
+            mult = 1_000;
+            a = a.substring(0, a.length() - 1);
+        }
+        if (!a.matches("\\d{1,10}")) return 0;
+        return Long.parseLong(a) * mult;
+    }
+
     private static String rest(String t) {
         int i = t.indexOf(' ');
         return i < 0 ? "" : t.substring(i + 1).trim();
@@ -187,12 +211,12 @@ public final class ChatCommands {
             {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
             {"/pojedynek Imię", "pojedynek do pierwszej krwi"},
             {"/gildia załóż Nazwa", "gildie (zaproś, przyjmij, wyrzuć, opuść; /g tekst)"},
-            {"/wyślij Imię, 5 futro", "poczta do depozytu (u bankiera)"},
+            {"/wyślij Imię, 5 futro", "poczta do depozytu; złoto: /przelew Imię, 5000 (u bankiera)"},
             {"/hasło stare nowe", "zmiana hasła konta"},
         };
         for (String[] r : typed) rows.add(new String[] {r[0], r[1]});
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.67.0] - 2026-10-16
+
+### Dodano
+- Przelewy złota u bankiera: `/przelew Imię, 5000` (także `5 000`, `5k`, `2kk`). Złoto schodzi z konta nadawcy
+  i trafia na konto odbiorcy; gracz offline dostaje je przy następnym wejściu.
+- Aktywne zaklęcia z pozostałym czasem w oknie analizy polowania (klawisz H).
+- 2 nowe testy (w tym sieciowy); łącznie 316.
+
 ## [0.66.0] - 2026-10-16
 
 ### Dodano
