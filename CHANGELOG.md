@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.92.0] - 2026-10-16
+
+### Dodano
+- 2 nowe osiągnięcia (razem 21): „Łowca tygodnia” za pokonanie bossa tygodnia i „Stały bywalec” za 10 godzin gry
+  (czas z okna `/statystyki`). Oba dają tytuł nad imieniem.
+- 1 nowy test. Sceny `achievements` i `stats` odświeżone.
+
 ## [0.91.0] - 2026-10-16
 
 ### Dodano
