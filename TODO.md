@@ -179,6 +179,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Karta potwora w bestiariuszu (odpornosci od 10, lupy od 25 pokonanych) (0.60.0)
 - [x] Lista graczy online /gracze (0.61.0)
 - [x] Ulepszanie wyposazenia do +5 u kupca (0.62.0)
+- [x] Okno polecen /pomoc z wykonywaniem po dotknieciu (0.63.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

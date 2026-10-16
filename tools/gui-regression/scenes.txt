@@ -29,3 +29,4 @@ bagitem|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.open=bagitem -Dpixel
 rain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.weather=rain -Dpixel.teleport=79,90,0
 pet|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,90,0 -Dpixel.open=pet
 smith|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,78,0 -Dpixel.open=smith
+help|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.button=cmd:/pomoc

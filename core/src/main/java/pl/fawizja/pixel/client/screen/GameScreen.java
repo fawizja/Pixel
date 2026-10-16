@@ -399,6 +399,8 @@ public final class GameScreen extends ScreenAdapter {
                     bossReport(t);
                 } else if (id.equals("book:hunt")) {
                     openHunt();
+                } else if (id.startsWith("cmd:")) {
+                    sendChat(id.substring("cmd:".length())); // polecenie z okna /pomoc
                 } else if (id.startsWith("best:")) {
                     // karta potwora z bestiariusza (dane z lokalnego rejestru, dziala tez online)
                     String key = id.substring("best:".length());
@@ -478,6 +480,10 @@ public final class GameScreen extends ScreenAdapter {
             openHunt();
             return;
         }
+        if (cmd.equals("/pomoc") || cmd.equals("/polecenia") || cmd.equals("/help")) {
+            hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
+            return;
+        }
         if (cmd.equals("/gracze") || cmd.equals("/online")) {
             if (net != null) net.send("WHO");
             else session.log().add(now(), EventLog.Kind.INFO, "Lista graczy działa online.");
@@ -514,8 +520,8 @@ public final class GameScreen extends ScreenAdapter {
         }
         String[] msg = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
         if (msg == null) {
-            session.log().add(now(), EventLog.Kind.INFO,
-                    pl.fawizja.pixel.net.ChatCommands.HELP);
+            session.log().add(now(), EventLog.Kind.INFO, "Nieznane polecenie. Lista: /pomoc");
+            hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
             return;
         }
         net.send(msg);

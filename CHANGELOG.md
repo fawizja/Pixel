@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.63.0] - 2026-10-16
+
+### Dodano
+- Okno „Polecenia” (`/pomoc`, także po nieznanym poleceniu): polecenia bez argumentów wykonują się po dotknięciu
+  (bez pisania na telefonie), a te z argumentami mają przykład i opis. Akcja wiersza `cmd:/polecenie`.
+- Scena GUI `help` (31 scen).
+- 1 nowy test; łącznie 311.
+
 ## [0.62.0] - 2026-10-16
 
 ### Dodano

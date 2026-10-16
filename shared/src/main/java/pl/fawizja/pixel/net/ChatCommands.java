@@ -161,5 +161,38 @@ public final class ChatCommands {
     }
 
     /** Podpowiedz dla gracza, gdy polecenie jest nieznane lub niepelne. */
+    /**
+     * Poradnik polecen do okna /pomoc: {polecenie, opis[, "", akcja]}; polecenia bez argumentow
+     * maja akcje "cmd:..." (dotkniecie wykonuje je jak wpisane w czacie).
+     */
+    public static java.util.List<String[]> helpRows() {
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        String[][] runnable = {
+            {"/gracze", "kto jest teraz w grze"},
+            {"/bossowie", "którzy bossowie żyją i kiedy wrócą"},
+            {"/analiza", "doświadczenie, zabicia i złoto na godzinę"},
+            {"/potwór", "dzisiejszy potwór z premią"},
+            {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
+            {"/zadania", "dziennik zadań"},
+            {"/osiągnięcia", "osiągnięcia i tytuły"},
+            {"/bestiariusz", "pokonane potwory i ich karty"},
+            {"/ranking", "najlepsi gracze serwera"},
+            {"/znajomi", "lista znajomych"},
+            {"/rynek", "oferty rynku (u bankiera)"},
+        };
+        for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
+        String[][] typed = {
+            {"/w Imię, tekst", "wiadomość prywatna"},
+            {"/zaproś Imię", "zaproszenie do drużyny (/przyjmij, /opuść, /d tekst)"},
+            {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
+            {"/pojedynek Imię", "pojedynek do pierwszej krwi"},
+            {"/gildia załóż Nazwa", "gildie (zaproś, przyjmij, wyrzuć, opuść; /g tekst)"},
+            {"/wyślij Imię, 5 futro", "poczta do depozytu (u bankiera)"},
+            {"/hasło stare nowe", "zmiana hasła konta"},
+        };
+        for (String[] r : typed) rows.add(new String[] {r[0], r[1]});
+        return rows;
+    }
+
     public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /gracze, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }

@@ -49,4 +49,16 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"DUEL", "HELP"}, ChatCommands.toMessage("/pojedynek"));
         assertArrayEquals(new String[] {"BOSS"}, ChatCommands.toMessage("/bossowie"));
     }
+
+    @org.junit.jupiter.api.Test
+    void helpWindowListsRunnableAndTypedCommands() {
+        java.util.List<String[]> rows = ChatCommands.helpRows();
+        assertTrue(rows.size() >= 15 && rows.size() <= 18, "fits two columns: " + rows.size());
+        long runnable = rows.stream().filter(r -> r.length > 3).count();
+        assertTrue(runnable >= 10);
+        for (String[] r : rows) {
+            assertTrue(r[0].startsWith("/"), r[0]);
+            if (r.length > 3) assertEquals("cmd:" + r[0], r[3], "a tap runs the listed command");
+        }
+    }
 }
