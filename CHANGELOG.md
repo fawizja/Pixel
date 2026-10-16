@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.79.0] - 2026-10-16
+
+### Dodano
+- Ostrzeżenia o końcu zapasów na polowaniu: gdy mikstur, run albo amunicji w plecaku spadnie do 5 sztuk
+  („Zostało tylko 5: Mikstura zdrowia.”) i gdy skończą się całkiem. W strefie ochronnej (zakupy, depozyt) bez komunikatów.
+- 1 nowy test; łącznie 331.
+
 ## [0.78.0] - 2026-10-16
 
 ### Dodano

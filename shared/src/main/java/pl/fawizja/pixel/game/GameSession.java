@@ -230,6 +230,16 @@ public final class GameSession {
     /** Nagroda za codzienne wejscie: sprawdzana przy pierwszym kroku i potem co minute (zmiana dnia w grze). */
     private long loginCheckedMs = Long.MIN_VALUE / 2;
 
+    /** Ostrzezenia o koncu mikstur, run i amunicji (co 0,5 s). */
+    private SupplyWatch supplies;
+    private long suppliesCheckedMs = Long.MIN_VALUE / 2;
+
+    private void checkSupplies(long nowMs) {
+        if (supplies == null) supplies = new SupplyWatch(items);
+        suppliesCheckedMs = nowMs;
+        for (String w : supplies.check(pc.backpack(), !world.isProtectionZone(pc.position()))) log.add(nowMs, EventLog.Kind.WARNING, w);
+    }
+
     public void checkLoginReward(long nowMs) {
         loginCheckedMs = nowMs;
         if (pc.isDead()) return;
@@ -902,6 +912,7 @@ public final class GameSession {
         if (pc.level() > pc.rewardedLevel()) checkLevelRewards(nowMs);
         pc.stats().noteLevel(pc.level());
         checkPet(nowMs);
+        if (nowMs - suppliesCheckedMs >= 500 || nowMs < suppliesCheckedMs) checkSupplies(nowMs);
         updateRecall(nowMs);
         updateTraining(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
