@@ -691,7 +691,7 @@ public final class GameScreen extends ScreenAdapter {
     private pl.fawizja.pixel.stats.HuntAnalyzer hunt;
     private long huntRefreshMs;
 
-    /** /znacznik nazwa (tu), /znacznik usuń nazwa, /znaczniki (lista z marszem). */
+    /** /znacznik nazwa (tu), /znacznik usuń nazwa, /znaczniki (lista z marszem, z bossem tygodnia i miejscem śmierci). */
     private void markerCommand(String text, String cmd) {
         long t = now();
         PlayerCharacter pc = session.character();
@@ -708,7 +708,7 @@ public final class GameScreen extends ScreenAdapter {
             }
         } else {
             List<String[]> rows = new ArrayList<>();
-            for (pl.fawizja.pixel.settings.MapMarkers.Marker m : markers.all()) {
+            for (pl.fawizja.pixel.settings.MapMarkers.Marker m : hud.allMarkers(session)) {
                 boolean here = m.at().z() == pc.position().z();
                 int dist = here ? Math.max(Math.abs(m.at().x() - pc.position().x()), Math.abs(m.at().y() - pc.position().y())) : -1;
                 rows.add(here ? new String[] {m.name(), dist + " pól stąd (dotknij, aby iść)", "", "map:goto:" + m.at().x() + "," + m.at().y()}

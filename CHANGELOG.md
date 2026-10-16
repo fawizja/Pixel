@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.96.0] - 2026-10-16
+
+### Zmieniono
+- Okno `/znaczniki` pokazuje także bossa tygodnia i miejsce ostatniej śmierci; dotknięcie wiersza prowadzi postać na miejsce.
 ## [0.95.0] - 2026-10-16
 
 ### Dodano

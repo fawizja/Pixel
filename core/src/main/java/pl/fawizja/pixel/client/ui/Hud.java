@@ -171,7 +171,7 @@ public final class Hud {
     public void setMarkers(pl.fawizja.pixel.settings.MapMarkers m) { markers = m; }
 
     /** Znaczniki gracza, bossa tygodnia (gdy znane jest jego miejsce) i miejsca ostatniej smierci. */
-    private List<pl.fawizja.pixel.settings.MapMarkers.Marker> allMarkers(GameSession session) {
+    public List<pl.fawizja.pixel.settings.MapMarkers.Marker> allMarkers(GameSession session) {
         List<pl.fawizja.pixel.settings.MapMarkers.Marker> out = new ArrayList<>(markers.all());
         pl.fawizja.pixel.world.Position boss = session.weeklyBossPlace();
         if (boss != null && session.weeklyBoss() != null) {
