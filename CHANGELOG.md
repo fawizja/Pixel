@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.61.0] - 2026-10-16
+
+### Dodano
+- `/gracze` (albo `/online`): okno „W grze” z listą graczy online (profesja, poziom, gildia, tytuł),
+  od najwyższego poziomu. Bez położenia graczy. Żądanie `WHO` dla każdego (dotąd tylko administrator: `/kto`).
+- 1 nowy test sieciowy; łącznie 307.
+
 ## [0.60.0] - 2026-10-16
 
 ### Dodano

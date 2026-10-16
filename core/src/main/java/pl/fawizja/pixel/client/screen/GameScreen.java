@@ -478,6 +478,11 @@ public final class GameScreen extends ScreenAdapter {
             openHunt();
             return;
         }
+        if (cmd.equals("/gracze") || cmd.equals("/online")) {
+            if (net != null) net.send("WHO");
+            else session.log().add(now(), EventLog.Kind.INFO, "Lista graczy działa online.");
+            return;
+        }
         if (cmd.equals("/potwor") || cmd.equals("/bonus")) {
             session.log().add(now(), EventLog.Kind.SYSTEM, "Potwór dnia: " + pl.fawizja.pixel.daily.BoostedCreature.describe(session.boostedCreature()) + ".");
             return;
@@ -1370,6 +1375,15 @@ public final class GameScreen extends ScreenAdapter {
                 case "RANK":
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
                     break;
+                case "WHO": {
+                    List<String[]> rows = new ArrayList<>();
+                    for (int i = 1; i < m.length; i++) {
+                        String[] r = m[i].split(";", 2);
+                        if (r.length == 2) rows.add(r);
+                    }
+                    hud.openInfo("W grze (" + rows.size() + ")", rows);
+                    break;
+                }
                 case "BOSS": {
                     List<String[]> rows = new ArrayList<>();
                     for (int i = 1; i < m.length; i++) {

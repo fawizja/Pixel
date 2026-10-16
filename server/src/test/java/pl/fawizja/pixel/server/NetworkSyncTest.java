@@ -932,6 +932,21 @@ class NetworkSyncTest {
     }
 
     @Test
+    void anyoneCanListPlayersInGame() throws Exception {
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("both see each other", () -> seen(ula, "Ola") != null);
+            server.enqueueTest(() -> server.world().find("Ula").session.character().addExperience(
+                    pl.fawizja.pixel.balance.Balance.experienceForLevel(20)));
+            ula.send("WHO");
+            awaitMessage(ula, "player list", m -> m[0].equals("WHO") && m.length == 3
+                    && m[1].startsWith("Ula;") && m[1].contains("poziom 2") && m[2].startsWith("Ola;Paladin, poziom 8"));
+        }
+    }
+
+    @Test
     void otherPlayersSeePetsAndTitles() throws Exception {
         try (NetClient ola = connect();
              NetClient ula = connect()) {

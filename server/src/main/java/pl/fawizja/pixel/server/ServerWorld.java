@@ -1216,6 +1216,26 @@ final class ServerWorld {
                 for (MonsterManager.BossStatus b : monsters.bossReport(now)) rows.add(String.join(";", MonsterManager.row(b, now)));
                 p.client.send(rows.toArray(new String[0]));
                 break;
+            case "WHO": {
+                // lista graczy w grze: najwyzszy poziom na gorze (bez polozenia)
+                List<ServerPlayer> online = new ArrayList<>(players.values());
+                online.sort((a, b) -> {
+                    int c = Integer.compare(b.session.character().level(), a.session.character().level());
+                    return c != 0 ? c : a.name().compareToIgnoreCase(b.name());
+                });
+                List<String> out = new ArrayList<>();
+                out.add("WHO");
+                for (ServerPlayer o : online) {
+                    if (out.size() > 100) break;
+                    PlayerCharacter oc = o.session.character();
+                    String tag = guildTag(oc.name());
+                    String title = pl.fawizja.pixel.achievement.Achievement.titleOf(oc.title());
+                    out.add(oc.name() + ";" + oc.vocation().displayName() + ", poziom " + oc.level()
+                            + (tag == null || tag.equals("-") ? "" : " <" + tag + ">") + (title == null ? "" : ", " + title));
+                }
+                p.client.send(out.toArray(new String[0]));
+                break;
+            }
             case "RANK":
                 if (chatAllowed(p, now)) sendRanking(p, f.length > 1 ? f[1] : null, now);
                 break;

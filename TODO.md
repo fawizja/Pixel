@@ -177,6 +177,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Pupile chodzace za postacia, widoczne online (0.58.0)
 - [x] Tytuly z osiagniec nad imieniem gracza (0.59.0)
 - [x] Karta potwora w bestiariuszu (odpornosci od 10, lupy od 25 pokonanych) (0.60.0)
+- [x] Lista graczy online /gracze (0.61.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
