@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.118.0] - 2026-10-16
+
+### Dodano
+- Amunicja ma znaczenie: włócznie w gnieździe amunicji zwiększają obrażenia włóczni paladyna o 1/4 swojego
+  ataku, każdy strzał zużywa jedną, a gdy stos się skończy, uzupełnia się z plecaka (z komunikatem).
+  Bez amunicji broń dystansowa działa jak dotąd.
 ## [0.117.0] - 2026-10-16
 
 ### Dodano

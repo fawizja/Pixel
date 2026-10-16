@@ -26,6 +26,20 @@ public final class CombatFormulas {
 
     private CombatFormulas() {}
 
+    /** Amunicja w gniezdzie dodaje do ataku broni dystansowej 1/4 swojego ataku (zuzywana po sztuce na strzal). */
+    public static final int AMMO_ATTACK_DIVISOR = 4;
+
+    /** Amunicja zalozona do strzalow fizyczna bronia dystansowa; null, gdy brak albo bron jej nie uzywa. */
+    public static ItemType ammunition(PlayerCharacter pc, ItemRegistry items) {
+        ItemStack w = pc.equipment().get(EquipSlot.WEAPON);
+        ItemType weapon = w == null ? null : items.get(w.itemId());
+        if (weapon == null || weapon.range() <= 1 || weapon.damageType() != DamageType.PHYSICAL) return null;
+        ItemStack a = pc.equipment().get(EquipSlot.AMMO);
+        if (a == null || a.count() <= 0) return null;
+        ItemType t = items.get(a.itemId());
+        return t != null && t.category() == pl.fawizja.pixel.item.ItemCategory.AMMUNITION ? t : null;
+    }
+
     /** Profil ataku postaci na podstawie broni, umiejetnosci i profesji. */
     public static AttackProfile attackProfile(PlayerCharacter pc, ItemRegistry items) {
         Vocation v = pc.vocation();
@@ -42,6 +56,8 @@ public final class CombatFormulas {
             max = attack * (1.0 + pc.skills().level(Skill.MAGIC) / 25.0) * v.magicFactor() + bonus;
         } else if (range > 1) {
             skill = Skill.DISTANCE;
+            ItemType ammo = ammunition(pc, items);
+            if (ammo != null) attack += ammo.attack() / AMMO_ATTACK_DIVISOR;
             max = attack * (pc.skills().level(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() + bonus;
         } else {
             skill = v == Vocation.MONK ? Skill.FIST : Skill.SWORD;

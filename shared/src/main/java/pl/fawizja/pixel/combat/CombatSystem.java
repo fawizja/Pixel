@@ -168,6 +168,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (pc.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
         if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
+        if (ap.range() > 1) useAmmunition(now);
         int dealt = target.damage(dmg);
         leech(dealt);
         monsters.provoke(target);
@@ -197,6 +198,26 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (target == null) target = m;
         if (m.isDead()) onMonsterDeath(m, now);
         return dealt;
+    }
+
+    /**
+     * Strzal zuzywa sztuke amunicji z gniazda; pusty stos uzupelnia sie tym samym rodzajem z plecaka.
+     */
+    private void useAmmunition(long now) {
+        if (CombatFormulas.ammunition(pc, items) == null) return;
+        ItemStack a = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO);
+        if (a.count() > 1) {
+            pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.AMMO, a.withCount(a.count() - 1));
+            return;
+        }
+        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.AMMO, null);
+        int spare = Math.min(pc.backpack().countPlain(a.itemId()), items.get(a.itemId()).maxStack());
+        if (spare > 0 && pc.backpack().remove(a.itemId(), spare).ok()) {
+            pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.AMMO, new ItemStack(a.itemId(), spare));
+            log.add(now, EventLog.Kind.INFO, "Amunicja uzupełniona z plecaka (" + spare + ").");
+        } else {
+            log.add(now, EventLog.Kind.SYSTEM, "Skończyła się amunicja: " + items.get(a.itemId()).name() + ".");
+        }
     }
 
     /** Zaklecie ciosu krytycznego: 10% szans na +50% obrazen. */

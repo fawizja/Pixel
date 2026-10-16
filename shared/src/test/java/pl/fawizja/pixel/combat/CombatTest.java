@@ -185,6 +185,33 @@ class CombatTest {
         assertFalse(bite.isVisualEffect(), "melee strikes are not drawn as projectiles");
     }
 
+    @Test
+    void distanceShotsUseUpAmmunitionAndRestockFromTheBackpack() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        int spear = TestData.ITEMS.byKey("spear").id();
+        int without = CombatFormulas.attackProfile(pc, TestData.ITEMS).maxDamage();
+        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.AMMO, new ItemStack(spear, 2));
+        assertTrue(CombatFormulas.attackProfile(pc, TestData.ITEMS).maxDamage() > without, "ammunition adds damage");
+        int spare = pc.backpack().count(spear);
+        assertTrue(spare > 0, "paladin starts with spears");
+        pc.setPosition(new Position(10, 12, 0));
+        SpawnPoint sp = new SpawnPoint("cave_troll", new Position(12, 12, 0), 0, 1, 60);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, List.of(sp), new Random(3));
+        mm.populate(null);
+        Monster troll = mm.monsters().get(0);
+        CombatSystem cs = system(pc, new Random(5), mm);
+        cs.setTarget(troll);
+        cs.update(0);
+        assertEquals(1, pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO).count());
+        cs.update(10_000);
+        assertEquals(spare, pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO).count(), "restocked");
+        assertEquals(0, pc.backpack().count(spear));
+        // melee nie zuzywa amunicji
+        PlayerCharacter monk = TestData.newCharacter(Vocation.MONK);
+        monk.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.AMMO, new ItemStack(spear, 5));
+        assertNull(CombatFormulas.ammunition(monk, TestData.ITEMS));
+    }
+
     static CombatSystem system(PlayerCharacter pc, Random rng, MonsterManager mm) {
         MonsterManager m = mm != null ? mm : new MonsterManager(TestData.varden(), REG, Collections.emptyList(), rng);
         return new CombatSystem(pc, TestData.varden(), TestData.ITEMS, m, new GroundItems(), new EventLog(50), rng, 8);

@@ -70,6 +70,8 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
 - Kazda operacja jest atomowa - pelny plecak niczego nie zmienia (brak utraty i duplikacji).
 - Ekwipunek: helm, zbroja, nogi, buty, bron, tarcza, amulet, pierscien, amunicja; wymagania profesji i poziomu;
   zamiana z plecakiem.
+- Amunicja (0.118.0): wlocznie w gniezdzie amunicji dodaja 1/4 swojego ataku do fizycznej broni dystansowej;
+  kazdy strzal zuzywa sztuke, pusty stos uzupelnia sie tym samym rodzajem z plecaka. Bez amunicji bron dziala jak dotad.
 - Wyrzucanie na ziemie i podnoszenie (`GroundItems`), lista przedmiotow ignorowanych przez autoloot.
 - UI: okno plecaka z ikonami, statystykami zaznaczonego przedmiotu, ZALOZ / WYRZUC, przenoszenie dotykiem.
 

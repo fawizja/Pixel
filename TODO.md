@@ -234,6 +234,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Trudność celu nad potworem (0.115.0)
 - [x] Wyzwanie na ekranie także online (0.116.0)
 - [x] Wiadomość dnia serwera /motd (0.117.0)
+- [x] Zużycie amunicji przy strzałach (0.118.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
