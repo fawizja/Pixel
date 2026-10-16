@@ -58,6 +58,7 @@ public final class CharacterCodec {
         }
         for (int i = 0; i < pc.friends().size(); i++) m.put("fr." + i, pc.friends().names().get(i));
         for (String k : pc.bestiary().keys()) m.put("kill." + k, pc.bestiary().encodeValue(k));
+        if (pc.bestiary().eliteKills() > 0) m.put("elites", String.valueOf(pc.bestiary().eliteKills()));
         if (pc.achievements().count() > 0) m.put("achievements", pc.achievements().encode());
         if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
@@ -192,6 +193,7 @@ public final class CharacterCodec {
         pc.daily().restore(m.get("daily"));
         pc.loginStreak().restore(m.get("login"));
         pc.setBlessed("1".equals(m.get("bless")));
+        if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));
         String chests = m.get("chests");
         if (chests != null && !chests.isBlank()) for (String c : chests.split(",")) pc.openedChests().add(c.trim());
         String ignore = m.getOrDefault("autoloot.ignore", "");

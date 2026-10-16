@@ -171,6 +171,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Ustawienia: automatyczna mikstura zdrowia, wylaczenie pogody (0.52.0)
 - [x] Podsumowanie smierci: zabojca, strata, obrazenia wg zrodla (0.53.0)
 - [x] Potwory elitarne (ok. 4%, wiecej exp i lupow) (0.54.0)
+- [x] 4 nowe osiagniecia, strony w oknie osiagniec (0.55.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

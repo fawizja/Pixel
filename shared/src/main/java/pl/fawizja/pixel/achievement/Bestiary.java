@@ -12,6 +12,20 @@ public final class Bestiary {
 
     private final Map<String, Integer> kills = new LinkedHashMap<>();
     private final Set<String> bosses = new LinkedHashSet<>();
+    /** Pokonane potwory elitarne (wszystkich rodzajow). */
+    private int eliteKills;
+
+    public int eliteKills() { return eliteKills; }
+
+    public void recordElite() { if (eliteKills < Integer.MAX_VALUE) eliteKills++; }
+
+    public void restoreElites(String value) {
+        try {
+            eliteKills = Math.max(0, Integer.parseInt(value.trim()));
+        } catch (NumberFormatException e) {
+            eliteKills = 0;
+        }
+    }
 
     public void record(String monsterKey, boolean boss) {
         kills.merge(monsterKey, 1, (a, b) -> a == Integer.MAX_VALUE ? a : a + b);
@@ -59,5 +73,6 @@ public final class Bestiary {
         kills.putAll(o.kills);
         bosses.clear();
         bosses.addAll(o.bosses);
+        eliteKills = o.eliteKills;
     }
 }

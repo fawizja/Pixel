@@ -107,6 +107,8 @@ public final class Hud {
     /** U bankiera: widok depozytu przedmiotow zamiast konta. */
     private boolean depotView;
     private int bookPage;
+    /** Strona listy osiagniec (gdy nie mieszcza sie w dwoch kolumnach). */
+    private int achPage;
     private int npcQty = 1;
     private static final int[] QUANTITIES = {1, 5, 25, 100};
     private boolean charOpen;
@@ -645,11 +647,23 @@ public final class Hud {
         pl.fawizja.pixel.achievement.Bestiary b = pc.bestiary();
         if (!bestiaryMode) {
             rows.add(new MenuRow("ach:toggle", "Pokaż bestiariusz", String.format("%,d pokonanych, %d rodzajów", b.total(), b.species()), true));
+            List<MenuRow> all = new ArrayList<>();
             for (pl.fawizja.pixel.achievement.Achievement a : pl.fawizja.pixel.achievement.Achievement.values()) {
                 boolean has = pc.achievements().has(a);
                 long p = Math.min(a.progress(pc), a.target());
                 String detail = has ? "zdobyte: " + a.goal() : a.goal() + String.format(" (%,d / %,d)", p, a.target());
-                rows.add(new MenuRow("ach:none", (has ? "* " : "") + a.title(), detail, has));
+                all.add(new MenuRow("ach:none", (has ? "* " : "") + a.title(), detail, has));
+            }
+            int room = perCol * 2 - 1;
+            if (all.size() <= room) {
+                rows.addAll(all);
+            } else {
+                // strony: ostatnie miejsce na przycisk nastepnej strony
+                int per = room - 1;
+                int pages = (all.size() + per - 1) / per;
+                if (achPage >= pages) achPage = 0;
+                rows.addAll(all.subList(achPage * per, Math.min(all.size(), (achPage + 1) * per)));
+                rows.add(new MenuRow("ach:page", "Strona " + (achPage + 1) + " / " + pages, "dotknij, aby zobaczyć następną", true));
             }
         } else {
             rows.add(new MenuRow("ach:toggle", "Pokaż osiągnięcia", String.format("%,d pokonanych, %d rodzajów, %d bossów",
@@ -1051,6 +1065,8 @@ public final class Hud {
                         bestiaryMode = !bestiaryMode;
                     } else if (row.action.equals("npc:depot")) {
                         depotView = !depotView;
+                    } else if (row.action.equals("ach:page")) {
+                        achPage++;
                     } else if (row.action.equals("book:page")) {
                         bookPage++;
                     } else if (row.action.equals("book:journal")) {

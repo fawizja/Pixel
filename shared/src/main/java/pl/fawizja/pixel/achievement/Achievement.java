@@ -1,6 +1,7 @@
 package pl.fawizja.pixel.achievement;
 
 import pl.fawizja.pixel.character.PlayerCharacter;
+import pl.fawizja.pixel.character.Skill;
 
 /** Osiagniecia postaci: liczone ze stanu postaci, zdobyte zapamietywane w zapisie. */
 public enum Achievement {
@@ -18,9 +19,13 @@ public enum Achievement {
     QUESTS_5("Pomocna dłoń", "ukończ 5 zadań", Kind.QUESTS, 5),
     QUESTS_20("Bohater ludu", "ukończ 20 zadań", Kind.QUESTS, 20),
     RICH("Bogacz", "zgromadź 1 000 000 gp na koncie", Kind.BANK, 1_000_000),
-    FRIENDS_5("Towarzyski", "miej 5 znajomych", Kind.FRIENDS, 5);
+    FRIENDS_5("Towarzyski", "miej 5 znajomych", Kind.FRIENDS, 5),
+    ELITE_1("Czempion", "pokonaj potwora elitarnego", Kind.ELITES, 1),
+    ELITE_25("Łowca elity", "pokonaj 25 potworów elitarnych", Kind.ELITES, 25),
+    SKILL_40("Mistrz broni", "osiągnij 40 w umiejętności walki", Kind.SKILL, 40),
+    CHESTS_10("Poszukiwacz skarbów", "otwórz 10 skrzyń skarbów", Kind.CHESTS, 10);
 
-    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS }
+    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS }
 
     private final String title;
     private final String goal;
@@ -49,6 +54,14 @@ public enum Achievement {
             case QUESTS: return pc.quests().done().size();
             case BANK: return pc.bank().balance();
             case FRIENDS: return pc.friends().size();
+            case ELITES: return pc.bestiary().eliteKills();
+            case SKILL: {
+                // najlepsza umiejetnosc walki (piesci, miecz, dystans, magia)
+                int best = 0;
+                for (Skill s : new Skill[] {Skill.FIST, Skill.SWORD, Skill.DISTANCE, Skill.MAGIC}) best = Math.max(best, pc.skills().level(s));
+                return best;
+            }
+            case CHESTS: return pc.openedChests().size();
             default: return 0;
         }
     }

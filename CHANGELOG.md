@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.55.0] - 2026-10-16
+
+### Dodano
+- 4 nowe osiągnięcia (łącznie 19): Czempion (pokonaj potwora elitarnego), Łowca elity (25 elitarnych),
+  Mistrz broni (40 w umiejętności walki), Poszukiwacz skarbów (10 skrzyń). Postać liczy pokonane
+  potwory elitarne (zapis `elites`).
+- Okno osiągnięć ma strony, gdy lista nie mieści się w dwóch kolumnach (mały ekran).
+- 1 nowy test; łącznie 295.
+
 ## [0.54.0] - 2026-10-16
 
 ### Dodano

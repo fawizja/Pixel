@@ -130,6 +130,7 @@ public final class GameSession {
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p));
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
+            if (t.isElite()) pc.bestiary().recordElite();
             if (pc.daily().onKill(t.key(), today())) {
                 log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
             }
