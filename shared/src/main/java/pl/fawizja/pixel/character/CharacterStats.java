@@ -7,6 +7,11 @@ public final class CharacterStats {
     private int bestLevel;
     private int challenges;
     private int restedKills;
+    private int duelsWon;
+
+    /** Wygrane pojedynki (liczy serwer). */
+    public int duelsWon() { return duelsWon; }
+    public void recordDuelWin() { if (duelsWon < Integer.MAX_VALUE) duelsWon++; }
 
     /** Potwory pokonane z premia wypoczecia. */
     public int restedKills() { return restedKills; }
@@ -36,8 +41,8 @@ public final class CharacterStats {
         return (h >= 24 ? (h / 24) + " d " + (h % 24) + " h " : h + " h ") + String.format("%02d", min % 60) + " min";
     }
 
-    /** Zapis: "czasMs,smierci,poziom,wyzwania,wypoczete" (starsze zapisy bez dwoch ostatnich). */
-    public String encode() { return playMs + "," + deaths + "," + bestLevel + "," + challenges + "," + restedKills; }
+    /** Zapis: "czasMs,smierci,poziom,wyzwania,wypoczete,pojedynki" (starsze zapisy bez koncowych pol). */
+    public String encode() { return playMs + "," + deaths + "," + bestLevel + "," + challenges + "," + restedKills + "," + duelsWon; }
 
     public void restore(String text) {
         playMs = 0;
@@ -45,6 +50,7 @@ public final class CharacterStats {
         bestLevel = 0;
         challenges = 0;
         restedKills = 0;
+        duelsWon = 0;
         if (text == null || text.isBlank()) return;
         String[] f = text.split(",");
         try {
@@ -53,6 +59,7 @@ public final class CharacterStats {
             if (f.length > 2) bestLevel = Math.max(0, Integer.parseInt(f[2].trim()));
             if (f.length > 3) challenges = Math.max(0, Integer.parseInt(f[3].trim()));
             if (f.length > 4) restedKills = Math.max(0, Integer.parseInt(f[4].trim()));
+            if (f.length > 5) duelsWon = Math.max(0, Integer.parseInt(f[5].trim()));
         } catch (NumberFormatException ignored) {
             // uszkodzony wpis - liczniki od zera
         }
@@ -64,5 +71,6 @@ public final class CharacterStats {
         bestLevel = o.bestLevel;
         challenges = o.challenges;
         restedKills = o.restedKills;
+        duelsWon = o.duelsWon;
     }
 }

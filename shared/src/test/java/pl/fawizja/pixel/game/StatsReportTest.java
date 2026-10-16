@@ -47,11 +47,13 @@ class StatsReportTest {
         assertEquals("2 d 3 h 00 min", CharacterStats.describePlayTime((51 * 60) * 60_000L));
         CharacterStats st = new CharacterStats();
         st.restore("zepsute");
-        assertEquals("0,0,0,0,0", st.encode());
+        assertEquals("0,0,0,0,0,0", st.encode());
         st.restore("5000,3");
-        assertEquals("5000,3,0,0,0", st.encode());
+        assertEquals("5000,3,0,0,0,0", st.encode());
         st.restore("5000,3,40,2,7");
         assertEquals(7, st.restedKills());
+        st.restore("5000,3,40,2,7,4");
+        assertEquals(4, st.duelsWon());
     }
 
     private static String value(List<String[]> rows, String label) {

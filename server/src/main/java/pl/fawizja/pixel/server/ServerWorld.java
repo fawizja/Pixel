@@ -1275,6 +1275,8 @@ final class ServerWorld {
     private void duelOver(ServerPlayer winner, ServerPlayer loser, long now) {
         if (winner.pvpTarget == loser.id) winner.pvpTarget = -1;
         if (loser.pvpTarget == winner.id) loser.pvpTarget = -1;
+        winner.session.character().stats().recordDuelWin();
+        save(winner);
         for (ServerPlayer o : players.values()) {
             if (o != winner && o != loser && o.session.character().position().distanceTo(winner.session.character().position()) <= Protocol.VIEW_RADIUS) {
                 info(o, winner.name() + " wygrywa pojedynek z " + loser.name() + ".", now);

@@ -397,6 +397,7 @@ class NetworkSyncTest {
             });
             a.send("ATTACK", String.valueOf(piotrId)); // poziom 8 < 30: bez pojedynku byloby odrzucone
             await("ola wins", () -> logged(a, "Wygrywasz pojedynek"));
+            await("win counted", () -> server.world().find("Ola").session.character().stats().duelsWon() == 1);
             // przegrany zostal przy 1 HP (potem regeneracja dodaje troche zdrowia) i nie zginal - nadal na polu walki
             await("piotr survived on the field", () -> {
                 try {

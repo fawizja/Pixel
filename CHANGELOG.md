@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.141.0] - 2026-10-16
+
+### Dodano
+- Licznik wygranych pojedynków (w /statystyki) i osiągnięcie „Mistrz pojedynków” za 10 zwycięstw (razem 25).
 ## [0.140.0] - 2026-10-16
 
 ### Dodano
