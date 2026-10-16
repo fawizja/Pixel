@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.152.0] - 2026-10-16
+
+### Dodano
+- Sztandar gildii: lider za 100 000 gp ze skarbca daje wszystkim członkom +10% doświadczenia za potwory
+  na godzinę (`/gildia sztandar`; kolejny przedłuża czas).
 ## [0.151.0] - 2026-10-16
 
 ### Dodano

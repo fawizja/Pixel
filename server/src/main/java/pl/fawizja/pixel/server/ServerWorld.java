@@ -203,7 +203,28 @@ final class ServerWorld {
 
     private void updateExpEvent(long now) {
         if (expEventPercent > 0 && now >= expEventUntil) endExpEvent(now);
-        for (ServerPlayer p : players.values()) p.session.combat().setBonusExpPercent(expEventPercent);
+        for (java.util.Iterator<Map.Entry<String, Long>> it = guildBanners.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, Long> e = it.next();
+            if (now < e.getValue()) continue;
+            it.remove();
+            pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.byName(e.getKey());
+            if (g != null) toGuild(g, "Sztandar gildii opadł: premia doświadczenia minęła.", now);
+        }
+        for (ServerPlayer p : players.values()) {
+            p.session.combat().setBonusExpPercent(expEventPercent + (bannerUntil(p.name(), now) > now ? BANNER_PERCENT : 0));
+        }
+    }
+
+    /** Sztandar gildii: lider placi ze skarbca, czlonkowie dostaja premie exp na godzine (tylko w pamieci serwera). */
+    static final long BANNER_COST = 100_000;
+    static final int BANNER_PERCENT = 10;
+    static final long BANNER_MS = 60 * 60_000L;
+    /** Nazwa gildii (male litery) -> koniec sztandaru (czas serwera). */
+    private final Map<String, Long> guildBanners = new java.util.HashMap<>();
+
+    private long bannerUntil(String member, long now) {
+        pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(member);
+        return g == null ? 0 : guildBanners.getOrDefault(g.name().toLowerCase(java.util.Locale.ROOT), 0L);
     }
 
     private void endExpEvent(long now) {
@@ -1076,6 +1097,27 @@ final class ServerWorld {
                         + (in ? " do skarbca" : " ze skarbca") + String.format(" (w skarbcu: %,d gp).", mine.treasury()), now);
                 return;
             }
+            case "BANNER": {
+                if (mine == null) {
+                    warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                    return;
+                }
+                r = guilds.withdraw(p.name(), BANNER_COST);
+                if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
+                    warn(p, r == pl.fawizja.pixel.guild.GuildRegistry.Result.TREASURY_LOW
+                            ? "Sztandar kosztuje " + String.format("%,d gp", BANNER_COST) + " ze skarbca gildii." : r.message, now);
+                    return;
+                }
+                String gk = mine.name().toLowerCase(java.util.Locale.ROOT);
+                long until = Math.max(now, guildBanners.getOrDefault(gk, now)) + BANNER_MS;
+                guildBanners.put(gk, until);
+                saveGuilds();
+                LOG.info("guild banner " + mine.name() + " by " + p.name());
+                toGuild(mine, p.name() + " wznosi sztandar gildii: +" + BANNER_PERCENT + "% doświadczenia za potwory przez "
+                        + (until - now) / 60_000 + " min" + String.format(" (w skarbcu: %,d gp).", mine.treasury()), now);
+                updateExpEvent(now);
+                return;
+            }
             default: // INFO
                 if (mine == null) {
                     info(p, "Nie należysz do gildii. Załóż: /gildia załóż Nazwa (" + String.format("%,d gp",
@@ -1087,6 +1129,10 @@ final class ServerWorld {
                 info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", członków " + mine.members().size()
                         + ", w grze: " + String.join(", ", online) + String.format(", skarbiec: %,d gp", mine.treasury()), now);
                 if (mine.motd() != null) info(p, "Wiadomość gildii: " + mine.motd(), now);
+                long banner = bannerUntil(p.name(), now);
+                info(p, banner > now ? "Sztandar gildii: +" + BANNER_PERCENT + "% exp jeszcze " + Math.max(1, (banner - now + 59_999) / 60_000) + " min."
+                        : "Sztandar gildii (lider, /gildia sztandar): +" + BANNER_PERCENT + "% exp na godzinę za "
+                        + String.format("%,d gp", BANNER_COST) + " ze skarbca.", now);
         }
     }
 

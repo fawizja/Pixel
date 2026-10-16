@@ -725,6 +725,19 @@ class NetworkSyncTest {
             awaitMessage(ola, "not enough", m -> m[0].equals("LOG") && m[2].contains("nie ma tyle"));
             ola.send("GUILD", "WITHDRAW", "150");
             awaitMessage(ula, "withdrawn", m -> m[0].equals("LOG") && m[2].startsWith("[Gildia] Ola wypłaca 150 gp ze skarbca (w skarbcu: 50 gp)"));
+            ola.send("GUILD", "BANNER");
+            awaitMessage(ola, "banner too expensive", m -> m[0].equals("LOG") && m[2].startsWith("Sztandar kosztuje"));
+            java.util.concurrent.atomic.AtomicBoolean funded = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                server.world().find("Ula").session.character().bank().credit(ServerWorld.BANNER_COST);
+                funded.set(true);
+            });
+            await("funded", funded::get);
+            ula.send("GUILD", "DEPOSIT", String.valueOf(ServerWorld.BANNER_COST));
+            awaitMessage(ola, "big deposit", m -> m[0].equals("LOG") && m[2].startsWith("[Gildia] Ula wpłaca"));
+            ola.send("GUILD", "BANNER");
+            awaitMessage(ula, "banner raised", m -> m[0].equals("LOG") && m[2].startsWith("[Gildia] Ola wznosi sztandar gildii: +10%"));
+            await("members get the bonus", () -> server.world().find("Ula").session.combat().bonusExpPercent() == ServerWorld.BANNER_PERCENT);
             ula.send("RANK", "gildie");
             String[][] rank = new String[1][];
             awaitMessage(ula, "guild ranking", m -> m[0].equals("RANK") && (rank[0] = m) != null);

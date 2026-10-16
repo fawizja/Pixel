@@ -176,6 +176,7 @@ public final class ChatCommands {
             case "wyrzuc": return arg.isEmpty() ? null : new String[] {"GUILD", "KICK", arg};
             case "opusc": return w.length == 2 ? new String[] {"GUILD", "LEAVE"} : null;
             case "wiadomosc": return new String[] {"GUILD", "MOTD", arg};
+            case "sztandar": return w.length == 2 ? new String[] {"GUILD", "BANNER"} : null;
             case "wplac": {
                 long a = arg.isEmpty() ? 0 : amount(arg);
                 return a > 0 ? new String[] {"GUILD", "DEPOSIT", String.valueOf(a)} : null;
