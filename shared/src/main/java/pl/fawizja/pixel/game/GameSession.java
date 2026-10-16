@@ -349,7 +349,7 @@ public final class GameSession {
         tipsCheckedMs = nowMs;
         if (pc.level() >= Tips.MAX_LEVEL || pc.isDead()) return;
         Tips.Situation s = new Tips.Situation(combat.threatNear(4), pc.bestiary().total(),
-                100 * pc.health() / Math.max(1, pc.maxHealth()), pc.backpack().freeSlots(), ammoIdle());
+                100 * pc.health() / Math.max(1, pc.maxHealth()), pc.backpack().freeSlots(), ammoIdle(), isResting(nowMs));
         for (String t : Tips.due(pc, s)) log.add(nowMs, EventLog.Kind.INFO, t);
     }
 

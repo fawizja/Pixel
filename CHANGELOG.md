@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.135.0] - 2026-10-16
+
+### Dodano
+- Podpowiedź o odpoczynku: po pierwszych walkach, gdy postać wróci do strefy ochronnej, dziennik wyjaśnia
+  szybszą regenerację i premię za wypoczęcie.
 ## [0.134.0] - 2026-10-16
 
 ### Dodano

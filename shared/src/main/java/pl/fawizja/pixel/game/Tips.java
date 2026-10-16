@@ -20,7 +20,8 @@ public final class Tips {
         LOW_HEALTH("Mało zdrowia! Przycisk HP pije miksturę (klawisz Q); w ustawieniach jest też leczenie samo."),
         QUESTS("Zadania i nagrody daje przewodnik w mieście: wpisz /idź przewodnik albo otwórz dziennik (klawisz Z)."),
         BAG_FULL("Plecak prawie pełny: u kupca „Sprzedaj cały łup”, a u bankiera odłożysz rzeczy do depozytu (/idź kupiec)."),
-        AMMO("Włóż włócznie z plecaka do gniazda amunicji: każdy rzut zada więcej obrażeń (zużywa jedną).");
+        AMMO("Włóż włócznie z plecaka do gniazda amunicji: każdy rzut zada więcej obrażeń (zużywa jedną)."),
+        REST("Odpoczywasz w strefie ochronnej: regeneracja jest szybsza, a wypoczęcie da +50% exp za kolejne walki (karta postaci).");
 
         public final String text;
 
@@ -30,9 +31,13 @@ public final class Tips {
     private Tips() {}
 
     /** Stan sytuacji do podpowiedzi (liczony w GameSession). */
-    public record Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots, boolean ammoIdle) {
+    public record Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots, boolean ammoIdle,
+                            boolean resting) {
         public Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots) {
-            this(monsterNear, kills, healthPercent, freeSlots, false);
+            this(monsterNear, kills, healthPercent, freeSlots, false, false);
+        }
+        public Situation(boolean monsterNear, long kills, int healthPercent, int freeSlots, boolean ammoIdle) {
+            this(monsterNear, kills, healthPercent, freeSlots, ammoIdle, false);
         }
     }
 
@@ -47,6 +52,7 @@ public final class Tips {
         check(pc, Tip.QUESTS, pc.level() >= 3, out);
         check(pc, Tip.BAG_FULL, s.freeSlots() <= 2, out);
         check(pc, Tip.AMMO, s.ammoIdle(), out);
+        check(pc, Tip.REST, s.resting() && s.kills() > 0, out); // wraca do miasta po pierwszych walkach
         return out;
     }
 

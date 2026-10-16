@@ -44,6 +44,17 @@ class TipsTest {
     }
 
     @Test
+    void restingAfterTheFirstFightsExplainsTheRestedBonus() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        for (Tips.Tip t : Tips.Tip.values()) if (t != Tips.Tip.REST) pc.markTip(t.ordinal());
+        assertEquals(List.of(), Tips.due(pc, new Tips.Situation(false, 0, 100, 10, false, true)), "no fights yet");
+        List<String> due = Tips.due(pc, new Tips.Situation(false, 3, 100, 10, false, true));
+        assertEquals(1, due.size());
+        assertTrue(due.get(0).contains("wypoczęcie"));
+        assertEquals(List.of(), Tips.due(pc, new Tips.Situation(false, 3, 100, 10, false, true)), "only once");
+    }
+
+    @Test
     void tipsCanBeTurnedOff() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc, null, new java.util.Random(1), 8);
