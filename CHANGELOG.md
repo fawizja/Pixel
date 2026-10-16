@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.90.0] - 2026-10-16
+
+### Dodano
+- Analiza polowania liczy zużyte zapasy (mikstury, runy, amunicja: sztuki i wartość) i pokazuje „Bilans polowania”:
+  złoto i łup minus koszt zapasów, także na godzinę.
+
+### Zmieniono
+- „Wartość przedmiotów” w analizie nie liczy już zapasów, więc wypite mikstury nie zaniżają łupu.
+- 1 nowy test; łącznie 342.
+
 ## [0.89.0] - 2026-10-16
 
 ### Dodano

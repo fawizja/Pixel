@@ -62,8 +62,28 @@ class HuntAnalyzerTest {
         assertEquals("2 h 5 min", rows.get(0)[1]);
         assertTrue(rows.get(3)[1].startsWith("-100 gp"), rows.get(3)[1]);
         assertEquals("Wartość przedmiotów", rows.get(4)[0]);
-        assertEquals("brak danych (poluj dalej)", rows.get(6)[1]);
+        assertEquals("brak danych (poluj dalej)", rows.get(8)[1]);
         assertEquals("45 s", HuntAnalyzer.duration(45_000));
         assertEquals("12 min", HuntAnalyzer.duration(12 * 60_000));
+    }
+
+    @Test
+    void usedSuppliesAreSubtractedFromTheBalance() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        int hp = TestData.ITEMS.byKey("health_potion").id();
+        pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(hp, 10));
+        HuntAnalyzer hunt = new HuntAnalyzer(TestData.ITEMS);
+        hunt.reset(0, pc);
+        pc.backpack().remove(hp, 4);
+        HuntAnalyzer.Report r = hunt.report(120_000, pc);
+        long value = TestData.ITEMS.get(hp).value();
+        assertEquals(4, r.suppliesUsed());
+        assertEquals(4 * value, r.suppliesValue());
+        assertEquals(0, r.loot(), "potions are supplies, not loot");
+        assertEquals(-4 * value, r.profit());
+        List<String[]> rows = HuntAnalyzer.rows(r);
+        assertEquals("Zużyte zapasy", rows.get(5)[0]);
+        assertEquals("4 szt. (" + 4 * value + " gp)", rows.get(5)[1]);
+        assertTrue(rows.get(6)[1].startsWith("-" + 4 * value + " gp"), rows.get(6)[1]);
     }
 }

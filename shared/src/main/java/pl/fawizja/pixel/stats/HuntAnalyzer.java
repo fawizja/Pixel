@@ -18,7 +18,11 @@ import pl.fawizja.pixel.item.ItemType;
 public final class HuntAnalyzer {
 
     public record Report(long elapsedMs, long experience, long expPerHour, long kills, long killsPerHour,
-                         long gold, long goldPerHour, long loot, long lootPerHour, long expToLevel, long etaMs) { }
+                         long gold, long goldPerHour, long loot, long lootPerHour, long expToLevel, long etaMs,
+                         long suppliesUsed, long suppliesValue) {
+        /** Bilans polowania: zloto i lup minus wartosc zuzytych zapasow. */
+        public long profit() { return gold + loot - suppliesValue; }
+    }
 
     private boolean started;
     private long startMs;
@@ -26,6 +30,8 @@ public final class HuntAnalyzer {
     private long startKills;
     private long startGold;
     private long startLoot;
+    private long startSupplies;
+    private long startSuppliesValue;
     private final ItemRegistry items;
 
     public HuntAnalyzer(ItemRegistry items) { this.items = items; }
@@ -38,16 +44,34 @@ public final class HuntAnalyzer {
         startKills = pc.bestiary().total();
         startGold = Money.totalValue(pc.backpack());
         startLoot = itemsValue(pc);
+        startSupplies = supplies(pc, false);
+        startSuppliesValue = supplies(pc, true);
     }
 
-    /** Wartosc przedmiotow w plecaku bez monet (cena z items.csv razy ilosc). */
+    static boolean isSupply(ItemType t) {
+        return t.category() == ItemCategory.POTION || t.category() == ItemCategory.RUNE || t.category() == ItemCategory.AMMUNITION;
+    }
+
+    /** Zapasy w plecaku (mikstury, runy, amunicja): sztuki albo wartosc. */
+    long supplies(PlayerCharacter pc, boolean value) {
+        long sum = 0;
+        for (int i = 0; i < pc.backpack().size(); i++) {
+            ItemStack st = pc.backpack().get(i);
+            if (st == null) continue;
+            ItemType t = items.get(st.itemId());
+            if (t != null && isSupply(t)) sum += (value ? t.value() : 1) * st.count();
+        }
+        return sum;
+    }
+
+    /** Wartosc przedmiotow w plecaku bez monet i zapasow (cena z items.csv razy ilosc). */
     long itemsValue(PlayerCharacter pc) {
         long sum = 0;
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack st = pc.backpack().get(i);
             if (st == null) continue;
             ItemType t = items.get(st.itemId());
-            if (t != null && t.category() != ItemCategory.CURRENCY) sum += t.value() * st.count();
+            if (t != null && t.category() != ItemCategory.CURRENCY && !isSupply(t)) sum += t.value() * st.count();
         }
         return sum;
     }
@@ -65,7 +89,10 @@ public final class HuntAnalyzer {
                 : Math.max(0, Balance.experienceForLevel(pc.level() + 1) - pc.experience());
         long expH = perHour(exp, elapsed);
         long eta = toLevel > 0 && expH > 0 ? (long) Math.ceil(toLevel * 3_600_000.0 / expH) : -1;
-        return new Report(elapsed, exp, expH, kills, perHour(kills, elapsed), gold, perHour(gold, elapsed), loot, perHour(loot, elapsed), toLevel, eta);
+        long used = Math.max(0, startSupplies - supplies(pc, false));
+        long usedValue = Math.max(0, startSuppliesValue - supplies(pc, true));
+        return new Report(elapsed, exp, expH, kills, perHour(kills, elapsed), gold, perHour(gold, elapsed), loot, perHour(loot, elapsed), toLevel, eta,
+                used, usedValue);
     }
 
     /** Wartosc na godzine; przez pierwsza minute brak wiarygodnej predkosci (0). */
@@ -82,6 +109,8 @@ public final class HuntAnalyzer {
         rows.add(new String[] {"Zabite potwory", r.kills() + rate(r.killsPerHour(), r.elapsedMs())});
         rows.add(new String[] {"Bilans złota", signed(r.gold()) + " gp" + rate(r.goldPerHour(), r.elapsedMs())});
         rows.add(new String[] {"Wartość przedmiotów", signed(r.loot()) + " gp" + rate(r.lootPerHour(), r.elapsedMs())});
+        rows.add(new String[] {"Zużyte zapasy", r.suppliesUsed() + " szt. (" + r.suppliesValue() + " gp)"});
+        rows.add(new String[] {"Bilans polowania", signed(r.profit()) + " gp" + rate(perHour(r.profit(), r.elapsedMs()), r.elapsedMs())});
         rows.add(new String[] {"Do następnego poziomu", r.expToLevel() == 0 ? "maksymalny poziom" : r.expToLevel() + " exp"});
         rows.add(new String[] {"Następny poziom za", r.etaMs() < 0 ? "brak danych (poluj dalej)" : duration(r.etaMs())});
         return rows;

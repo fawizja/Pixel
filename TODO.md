@@ -206,6 +206,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Ustawienie: cel sam (0.87.0)
 - [x] Procent postępu exp i umiejętności na karcie postaci (0.88.0)
 - [x] 5 zadań obozu wschodniego dla poziomów 270-780 (0.89.0)
+- [x] Bilans polowania z kosztem zapasów (0.90.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki
