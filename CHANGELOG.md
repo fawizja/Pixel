@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.100.0] - 2026-10-16
+
+### Dodano
+- Online: ostrzeżenie w dzienniku, gdy w zasięgu wzroku pojawi się gracz z czerwoną czaszką
+  (raz na każde pojawienie się; po zniknięciu z widoku i powrocie ostrzega znowu).
 ## [0.99.0] - 2026-10-16
 
 ### Dodano

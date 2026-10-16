@@ -216,6 +216,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Komunikat o odrodzeniu bossa (0.97.0)
 - [x] Polecenia serwera status i save (0.98.0)
 - [x] Kolor stroju widoczny dla innych graczy (0.99.0)
+- [x] Ostrzeżenie o czerwonej czaszce w pobliżu (0.100.0)
 ## Etap 15 - Ochrona zasobow 90%/75% i diagnostyka
 - [x] Logika NORMAL / LIMITED / RECOVERING z testami
 - [x] Pomiary desktop i Android (pamiec, termika, bateria), panel diagnostyki

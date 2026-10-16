@@ -98,6 +98,9 @@ public final class GameScreen extends ScreenAdapter {
     private final Vector3 projected = new Vector3();
 
     /** Inny gracz widziany w trybie online (interpolowany miedzy klatkami). */
+    /** Ostrzezenia o czerwonych czaszkach w widoku (online). */
+    private final pl.fawizja.pixel.pvp.SkullWatch skullWatch = new pl.fawizja.pixel.pvp.SkullWatch();
+
     private static final class RemotePlayer {
         String name;
         Vocation vocation;
@@ -1533,6 +1536,9 @@ public final class GameScreen extends ScreenAdapter {
                 rp.outfit = e.outfit();
                 rp.seen = true;
             }
+            Map<String, String> skulls = new java.util.HashMap<>();
+            for (RemoteEntity e : f.players()) skulls.put(e.name(), e.mark());
+            for (String w : skullWatch.update(skulls)) session.log().add(now, EventLog.Kind.WARNING, w);
             remotePlayers.values().removeIf(rp -> !rp.seen);
             session.ground().clear();
             for (NetClient.GroundStack g : f.ground()) session.ground().place(g.position(), new ItemStack(g.itemId(), g.count()));
