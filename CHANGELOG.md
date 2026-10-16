@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.112.0] - 2026-10-16
+
+### Dodano
+- `/idź kupiec` (także bank, kapłan, przewodnik, woźnica albo fragment imienia): postać idzie do najbliższego
+  takiego NPC na piętrze, a po dojściu otwiera się rozmowa. Podpowiedź w oknie `/pomoc`.
 ## [0.111.0] - 2026-10-16
 
 ### Dodano

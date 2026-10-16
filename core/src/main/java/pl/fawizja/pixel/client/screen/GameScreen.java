@@ -547,6 +547,21 @@ public final class GameScreen extends ScreenAdapter {
             hud.openInfo("Strój", rows);
             return;
         }
+        if (cmd.startsWith("/idź ") || cmd.startsWith("/idz ")) {
+            String q = text.substring(text.indexOf(' ') + 1).trim();
+            pl.fawizja.pixel.npc.Npc n = pl.fawizja.pixel.npc.NpcFinder.find(session.npcs(), q, session.character().position());
+            if (n == null) {
+                session.log().add(now(), EventLog.Kind.INFO, "Nie widzę tu nikogo takiego. Spróbuj: /idź kupiec, bank, kapłan, przewodnik, woźnica albo imię.");
+            } else if (session.npcNearby() == n) {
+                hud.openNpc(session);
+            } else if (walkTo(n.position(), now(), true, true)) {
+                walkNpc = n; // rozmowa otworzy sie po dojsciu
+                session.log().add(now(), EventLog.Kind.INFO, "Idziesz do: " + n.name() + ".");
+            } else {
+                session.log().add(now(), EventLog.Kind.INFO, "Nie znam drogi do: " + n.name() + ".");
+            }
+            return;
+        }
         if (cmd.equals("/cena") || cmd.startsWith("/cena ")) {
             String q = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
             pl.fawizja.pixel.item.ItemType it = pl.fawizja.pixel.npc.PriceCheck.find(session.items(), q);
