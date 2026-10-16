@@ -892,6 +892,27 @@ class NetworkSyncTest {
     }
 
     @Test
+    void privateMessagesToOfflinePlayersWaitAsLetters() throws Exception {
+        try (NetClient ula = connect()) {
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ula.selfSave() != null);
+        }
+        await("ula left", () -> server.world().find("Ula") == null);
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            ola.send("PM", "Nikt", "halo");
+            awaitMessage(ola, "no such character", m -> m[0].equals("LOG") && m[2].startsWith("Nie ma postaci Nikt"));
+            ola.send("PM", "Ula", "spotkajmy się przy moście");
+            awaitMessage(ola, "letter left", m -> m[0].equals("LOG") && m[2].startsWith("Ula nie jest w grze"));
+        }
+        try (NetClient ula = connect()) {
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            awaitMessage(ula, "letter delivered", m -> m[0].equals("CHAT") && m[1].equals("[list] Ola") && m[2].equals("spotkajmy się przy moście"));
+        }
+    }
+
+    @Test
     void buyOrdersLockGoldAndDeliverItemsToTheBuyersDepot() throws Exception {
         Position banker = new Position(70, 78, 0);
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();

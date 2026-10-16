@@ -103,6 +103,9 @@ final class ServerWorld {
     private final File ordersFile;
     private final pl.fawizja.pixel.market.BuyOrders orders;
     private final File mailFile;
+    /** Listy do graczy offline (letters.txt). */
+    private final File lettersFile;
+    private final pl.fawizja.pixel.mail.Letters letters;
     /** Wiadomosc dnia serwera (motd.txt, polecenie MOTD); pusta = brak. */
     private final File motdFile;
     private String motd = "";
@@ -142,6 +145,9 @@ final class ServerWorld {
         marketFile = new File(saveDir, "market.txt");
         market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
+        lettersFile = new File(saveDir, "letters.txt");
+        letters = pl.fawizja.pixel.mail.Letters.decode(lettersFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(lettersFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         mailFile = new File(saveDir, "mail.txt");
         mail = pl.fawizja.pixel.mail.Mailbox.decode(mailFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(mailFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
@@ -357,6 +363,25 @@ final class ServerWorld {
                 o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
             }
         }
+    }
+
+    private void saveLetters() {
+        try {
+            File tmp = new File(lettersFile.getParentFile(), "letters.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), letters.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), lettersFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("letters save failed: " + e.getMessage());
+        }
+    }
+
+    /** Listy czekajace na gracza: jako wiadomosci prywatne (klient ukrywa ignorowanych). */
+    private void deliverLetters(ServerPlayer p) {
+        List<pl.fawizja.pixel.mail.Letters.Letter> got = letters.take(p.name());
+        if (got.isEmpty()) return;
+        for (pl.fawizja.pixel.mail.Letters.Letter l : got) p.client.send("CHAT", "[list] " + l.from(), l.text());
+        saveLetters();
     }
 
     private void saveMail() {
@@ -1185,6 +1210,7 @@ final class ServerWorld {
                     + invasion.plan().town() + " (zostało " + invasion.remaining() + " wrogów).");
         }
         deliverMail(p, lastNow);
+        deliverLetters(p);
         long earned = market.takeEarnings(pc.name());
         if (earned > 0) {
             if (pc.bank().credit(earned).ok()) {
@@ -1610,6 +1636,8 @@ final class ServerWorld {
         saveMarket();
         mail.forget(p.name());
         saveMail();
+        letters.forget(p.name());
+        saveLetters();
         players.remove(p.id);
         pvp.remove(key);
         ranking.remove(p.name());
@@ -1746,7 +1774,20 @@ final class ServerWorld {
                 if (f.length < 3 || f[2].isBlank()) break;
                 ServerPlayer to = find(f[1].trim());
                 if (to == null) {
-                    warn(p, "Gracz " + f[1].trim() + " nie jest w grze.", now);
+                    // offline: list czeka do wejscia, jesli taka postac istnieje
+                    String who = f[1].trim();
+                    if (!saved(who)) {
+                        warn(p, "Nie ma postaci " + who + ".", now);
+                        break;
+                    }
+                    if (!chatAllowed(p, now)) break;
+                    if (!letters.canAccept(who)) {
+                        warn(p, who + " ma już za dużo nieprzeczytanych listów.", now);
+                        break;
+                    }
+                    letters.add(who, p.name(), f[2]);
+                    saveLetters();
+                    info(p, who + " nie jest w grze - wiadomość czeka i pokaże się po wejściu.", now);
                     break;
                 }
                 if (!chatAllowed(p, now)) break;

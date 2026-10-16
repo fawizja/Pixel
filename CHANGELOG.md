@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.151.0] - 2026-10-16
+
+### Dodano
+- Wiadomość prywatna (`/w Imię, tekst`) do gracza, którego nie ma w grze, czeka jako list i pokazuje się
+  po jego wejściu (do 20 listów na gracza).
 ## [0.150.0] - 2026-10-16
 
 ### Dodano
