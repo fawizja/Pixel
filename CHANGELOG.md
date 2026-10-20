@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.166.2] - 2026-10-20
+
+### Naprawiono
+- Sklep: włócznie do rzucania pokazywały "atak +20" (porównanie z pustym miejscem na amunicję). Teraz: "amunicja, atak 20".
 ## [0.166.1] - 2026-10-20
 
 ### Testy

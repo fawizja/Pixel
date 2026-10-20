@@ -45,5 +45,6 @@ class ItemCompareTest {
         assertEquals("jak założone", ItemCompare.shopDelta(training, training, 0, knight));
         assertEquals("", ItemCompare.shopDelta(items.byKey("health_potion"), null, 0, knight));
         assertEquals("nie dla ciebie", ItemCompare.shopDelta(sword, null, 0, TestData.newCharacter(Vocation.DRUID)));
+        assertEquals("amunicja, atak 20", ItemCompare.shopDelta(items.byKey("spear"), null, 0, knight), "not '+20' over an empty slot");
     }
 }

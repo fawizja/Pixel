@@ -35,6 +35,7 @@ public final class ItemCompare {
     public static String shopDelta(ItemType t, ItemType equipped, int eu, PlayerCharacter pc) {
         if (t.slot() == EquipSlot.NONE) return "";
         if (!t.vocations().contains(pc.vocation())) return "nie dla ciebie";
+        if (t.slot() == EquipSlot.AMMO && equipped == null) return "amunicja, atak " + t.attack();
         StringBuilder b = new StringBuilder();
         delta(b, "atak", t.attack(), equipped == null ? 0 : Upgrade.attack(equipped, eu));
         delta(b, "obrona", t.defense(), equipped == null ? 0 : Upgrade.defense(equipped, eu));
