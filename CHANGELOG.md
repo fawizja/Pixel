@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.166.0] - 2026-10-20
+
+### Dodano
+- Administracja: `reports` w konsoli albo `/zgłoszenia` w grze pokazuje 5 ostatnich zgłoszeń graczy.
 ## [0.165.0] - 2026-10-20
 
 ### Dodano

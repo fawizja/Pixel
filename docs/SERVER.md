@@ -73,6 +73,7 @@ Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pi
 | `motd tekst` | `/motd tekst` | wiadomosc dnia pokazywana kazdemu przy wejsciu (`motd -` usuwa, `<dane>/motd.txt`) |
 | `expevent 50 60` | `/bonusexp 50 60` | +50% doswiadczenia za potwory dla wszystkich przez 60 min (`expevent 0` konczy; bez argumentow - stan) |
 | `invasion Varden` | `/inwazja Varden` | inwazja na miasto teraz (bez nazwy - kolejne miasto) |
+| `reports` | `/zgłoszenia` | 5 ostatnich zgloszen graczy z `<dane>/reports.txt` |
 | `admin Imie` | - | nowy administrator (tylko konsola) |
 | `shutdown 5` | - | wylaczenie za 5 min z ostrzezeniami na czacie (30/15/10/5/3/2/1 min, 30 s, 10 s), potem zapis i wyjscie; `shutdown 30s` w sekundach, `shutdown -` odwoluje. Kontener z `--restart unless-stopped` wstaje od razu ponownie (np. po wymianie pliku jar w wolumenie albo dla czystego restartu) |
 

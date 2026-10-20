@@ -332,6 +332,18 @@ final class ServerWorld {
         p.client.send(msg);
     }
 
+    /** Ostatnie zgloszenia graczy (najnowsze na koncu) dla REPORTS. */
+    String recentReports(int n) throws IOException {
+        if (!reportsFile.isFile()) return "Brak zgłoszeń.";
+        List<String> lines = java.nio.file.Files.readAllLines(reportsFile.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+        List<String> out = new ArrayList<>();
+        for (String l : lines.subList(Math.max(0, lines.size() - n), lines.size())) {
+            String[] f = l.split(";", 4);
+            if (f.length == 4) out.add(f[0].replace('T', ' ').replaceAll("\\.\\d+Z$|Z$", "") + " " + f[1] + " -> " + f[2] + ": " + f[3]);
+        }
+        return "Zgłoszenia (" + lines.size() + ", ostatnie " + out.size() + "): " + String.join(" | ", out);
+    }
+
     /** REPORT imie powod: zapis w reports.txt i ostrzezenie dla administratorow w grze. */
     private void report(ServerPlayer p, String[] f, long now) {
         String who = f.length > 1 ? f[1].trim() : "";
@@ -2034,7 +2046,7 @@ final class ServerWorld {
      * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
-    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT, SHUTDOWN";
+    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT, SHUTDOWN, REPORTS";
 
     /** Progi ostrzezen przed wylaczeniem (ms do konca), malejaco. */
     static final long[] SHUTDOWN_WARN = {30 * 60_000L, 15 * 60_000L, 10 * 60_000L, 5 * 60_000L, 3 * 60_000L, 2 * 60_000L, 60_000L, 30_000L, 10_000L};
@@ -2159,6 +2171,8 @@ final class ServerWorld {
                     return expEvent(c, now);
                 case "SHUTDOWN":
                     return shutdown(c, by, now);
+                case "REPORTS":
+                    return recentReports(5);
                 case "SAVE":
                     saveAll();
                     return "Zapisano " + players.size() + " postaci.";

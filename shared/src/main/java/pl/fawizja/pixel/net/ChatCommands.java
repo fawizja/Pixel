@@ -62,6 +62,8 @@ public final class ChatCommands {
             }
             case "/ogloszenie":
                 return w.length >= 2 ? new String[] {"ADMIN", "SAY", rest(t)} : null;
+            case "/zgloszenia":
+                return w.length == 1 ? new String[] {"ADMIN", "REPORTS"} : null;
             case "/kick":
                 return w.length >= 2 ? new String[] {"ADMIN", "KICK", rest(t)} : null;
             case "/unban":

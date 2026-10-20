@@ -37,6 +37,7 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"ADMIN", "BAN", "Oszust"}, ChatCommands.toMessage("/ban Oszust"));
         assertArrayEquals(new String[] {"ADMIN", "MUTE", "Ola", "15"}, ChatCommands.toMessage("/wycisz Ola 15"));
         assertArrayEquals(new String[] {"ADMIN", "KICK", "Ola"}, ChatCommands.toMessage("/kick Ola"));
+        assertArrayEquals(new String[] {"ADMIN", "REPORTS"}, ChatCommands.toMessage("/zgłoszenia"));
         assertArrayEquals(new String[] {"ADMIN", "UNBAN", "Ola"}, ChatCommands.toMessage("/unban Ola"));
         assertArrayEquals(new String[] {"ADMIN", "WHO"}, ChatCommands.toMessage("/kto"));
         assertArrayEquals(new String[] {"ADMIN", "STATUS"}, ChatCommands.toMessage("/serwer"));

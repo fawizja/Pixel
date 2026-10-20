@@ -1250,6 +1250,9 @@ class NetworkSyncTest {
             ula.send("REPORT", "Ola", "drugie");
             awaitMessage(ula, "rate limited", m -> m[0].equals("LOG") && m[2].contains("za minutę"));
             assertTrue(Files.readString(new File(saves, "reports.txt").toPath()).contains(";Ula;Ola;test zgłoszenia"));
+            ola.send("ADMIN", "REPORTS");
+            awaitMessage(ola, "admin reads reports", m -> m[0].equals("LOG") && m[2].startsWith("Zgłoszenia (1, ostatnie 1): ")
+                    && m[2].contains(" Ula -> Ola: test zgłoszenia"));
         }
     }
 
