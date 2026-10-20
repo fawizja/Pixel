@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.166.1] - 2026-10-20
+
+### Testy
+- Nowa scena regresji GUI `shopgear`: strona sprzętu u kupca z porównaniem do założonego ("atak -11, obrona +8", "nie dla ciebie").
 ## [0.166.0] - 2026-10-20
 
 ### Dodano

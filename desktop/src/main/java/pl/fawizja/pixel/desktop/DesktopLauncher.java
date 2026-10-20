@@ -21,6 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
+ *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
@@ -242,6 +243,7 @@ public final class DesktopLauncher {
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().openNpc(gs.session());
+                    gs.hud().previewNpcPage(Integer.getInteger("pixel.npcPage", 0));
                 }
             }
             if (Boolean.getBoolean("pixel.fx") && frame == frames - 8 && getScreen() instanceof GameScreen) {

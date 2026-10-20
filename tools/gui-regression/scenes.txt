@@ -7,6 +7,7 @@ bag|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel
 spellbook|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=book
 character|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=character
 shop|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,78,0 -Dpixel.open=npc
+shopgear|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,78,0 -Dpixel.open=npc -Dpixel.npcPage=2
 mine|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=56,87,-1
 east_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,84,0
 trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=trade

@@ -384,6 +384,9 @@ public final class Hud {
         smithView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT;
     }
 
+    /** Podglad (zrzuty ekranu): strona listy kupca. */
+    public void previewNpcPage(int page) { npcPage = page; }
+
     public void openNpc(GameSession session) {
         pl.fawizja.pixel.npc.Npc n = session.npcNearby();
         if (n == null) return;
