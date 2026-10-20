@@ -12,7 +12,8 @@ import java.util.Map;
 /**
  * Ranking tygodnia: doswiadczenie zdobyte od poniedzialku (tydzien ISO, UTC). Serwer zapisuje stan postaci przy kazdym
  * zapisie ({@link #observe}); pierwsza obserwacja w tygodniu staje sie punktem odniesienia.
- * Zapis w weekly.txt: "tydzien;imie;doswiadczenie na poczatku" (np. "2026-43;Ola;1500000").
+ * Zapis w weekly.txt: "tydzien;imie;doswiadczenie na poczatku" (np. "2026-43;Ola;1500000") i "C tydzien" - tydzien,
+ * ktory jeszcze trwa (po jego koncu {@link #closeWeek} wylania podium i nagrody).
  */
 public final class WeeklyRanking {
 
@@ -20,7 +21,38 @@ public final class WeeklyRanking {
 
     private record Base(String week, String name, long exp) {}
 
+    /** Nagrody za podium tygodnia (miejsca 1-3). */
+    public static final long[] PRIZES = {100_000, 50_000, 25_000};
+
     private final Map<String, Base> byName = new HashMap<>();
+    /** Tydzien, ktory sledzimy (null przed pierwszym uzyciem). */
+    private String current;
+
+    /**
+     * Gdy zaczal sie nowy tydzien: zamyka poprzedni i zwraca jego podium (najwyzej 3 miejsca, level = zdobyte exp).
+     * Wywolywac przed {@link #observe}, bo obserwacja w nowym tygodniu nadpisuje punkty odniesienia.
+     */
+    public synchronized List<RankingView.Row> closeWeek(Ranking ranking, long nowMs) {
+        String w = week(nowMs);
+        List<RankingView.Row> podium = new ArrayList<>();
+        if (current == null || current.equals(w)) {
+            current = w;
+            return podium;
+        }
+        record G(Ranking.Entry e, long gained) {}
+        List<G> all = new ArrayList<>();
+        for (Ranking.Entry e : ranking.top(Integer.MAX_VALUE, null)) {
+            Base b = byName.get(key(e.name()));
+            if (b != null && b.week().equals(current) && e.experience() > b.exp()) all.add(new G(e, e.experience() - b.exp()));
+        }
+        all.sort((a, b) -> a.gained() != b.gained() ? Long.compare(b.gained(), a.gained()) : a.e().name().compareToIgnoreCase(b.e().name()));
+        for (int i = 0; i < all.size() && i < PRIZES.length; i++) {
+            G g = all.get(i);
+            podium.add(new RankingView.Row(i + 1, g.e().name(), g.e().vocation().displayName(), (int) Math.min(Integer.MAX_VALUE, g.gained())));
+        }
+        current = w;
+        return podium;
+    }
 
     /** Numer tygodnia ISO ("2026-43") dla chwili w ms epoki. */
     public static String week(long epochMs) {
@@ -71,6 +103,7 @@ public final class WeeklyRanking {
 
     public synchronized String encode() {
         StringBuilder sb = new StringBuilder();
+        if (current != null) sb.append("C ").append(current).append('\n');
         for (Base b : byName.values()) sb.append(b.week()).append(';').append(b.name()).append(';').append(b.exp()).append('\n');
         return sb.toString();
     }
@@ -79,6 +112,10 @@ public final class WeeklyRanking {
         WeeklyRanking w = new WeeklyRanking();
         if (text == null) return w;
         for (String line : text.split("\n")) {
+            if (line.startsWith("C ")) {
+                w.current = line.substring(2).trim();
+                continue;
+            }
             String[] f = line.split(";");
             if (f.length != 3 || f[1].isBlank()) continue;
             try {

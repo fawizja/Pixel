@@ -300,6 +300,7 @@ final class ServerWorld {
     private void sendRanking(ServerPlayer p, String arg, long now) {
         if (pl.fawizja.pixel.ranking.WeeklyRanking.isWeeklyArg(arg)) {
             long wall = wallClock.getAsLong();
+            weeklyRollover(now);
             for (ServerPlayer o : players.values()) {
                 ranking.put(rankEntry(o.session.character()));
                 weekly.observe(o.name(), o.session.character().experience(), wall);
@@ -521,6 +522,31 @@ final class ServerWorld {
             if (o != p && o.session.character().friends().contains(p.name())) {
                 o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
             }
+        }
+    }
+
+    /** Koniec tygodnia: nagrody na konta (offline - przy wejsciu) i ogloszenie podium. */
+    private void weeklyRollover(long now) {
+        for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
+        List<pl.fawizja.pixel.ranking.RankingView.Row> podium = weekly.closeWeek(ranking, wallClock.getAsLong());
+        if (podium.isEmpty()) return;
+        List<String> names = new ArrayList<>();
+        for (pl.fawizja.pixel.ranking.RankingView.Row r : podium) {
+            long prize = pl.fawizja.pixel.ranking.WeeklyRanking.PRIZES[r.place() - 1];
+            ServerPlayer o = find(r.name());
+            if (o != null && o.session.character().bank().credit(prize).ok()) {
+                o.session.log().add(now, EventLog.Kind.SYSTEM, "Ranking tygodnia: " + r.place() + ". miejsce, "
+                        + String.format("%,d gp", prize) + " na Twoje konto.");
+            } else {
+                market.addEarnings(r.name(), prize);
+            }
+            names.add(r.place() + ". " + r.name() + String.format(" (+%,d exp)", r.level()));
+        }
+        saveMarket();
+        saveWeekly();
+        LOG.info("weekly podium: " + names);
+        for (ServerPlayer o : players.values()) {
+            o.client.send("CHAT", "[Ogłoszenie]", "Koniec tygodnia! Najwięcej doświadczenia: " + String.join(", ", names) + ". Nagrody trafiły na konta.");
         }
     }
 
@@ -1823,6 +1849,7 @@ final class ServerWorld {
         try {
             saves.write(slot, codec.encode(p.session.character()));
             ranking.put(rankEntry(p.session.character()));
+            weeklyRollover(lastNow);
             weekly.observe(p.name(), p.session.character().experience(), wallClock.getAsLong());
             saveWeekly();
             saves.write("pvp_" + p.name().toLowerCase(java.util.Locale.ROOT), p.pvp.encode(lastNow, System.currentTimeMillis()));
@@ -2304,7 +2331,10 @@ final class ServerWorld {
         lastNow = now;
         if (firstTick < 0) firstTick = now;
         updateExpEvent(now);
-        if (now - ordersCheckedMs >= 60_000 || now < ordersCheckedMs) expireOrders(now);
+        if (now - ordersCheckedMs >= 60_000 || now < ordersCheckedMs) {
+            expireOrders(now);
+            weeklyRollover(now);
+        }
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
         updateInvasion(now);
         updateDuels(now);

@@ -32,4 +32,24 @@ class WeeklyRankingTest {
         assertTrue(WeeklyRanking.isWeeklyArg("tydzień"));
         assertEquals("2026-43", WeeklyRanking.week(MONDAY));
     }
+
+    @Test
+    void whenTheWeekEndsThePodiumIsReturnedOnce() {
+        WeeklyRanking w = new WeeklyRanking();
+        Ranking r = new Ranking();
+        assertTrue(w.closeWeek(r, MONDAY).isEmpty(), "first use only starts tracking");
+        w.observe("Ola", 1_000, MONDAY);
+        w.observe("Ula", 5_000, MONDAY);
+        w.observe("Kuba", 0, MONDAY);
+        r.put(new Ranking.Entry("Ola", Vocation.PALADIN, 30, 41_000));
+        r.put(new Ranking.Entry("Ula", Vocation.DRUID, 40, 15_000));
+        r.put(new Ranking.Entry("Kuba", Vocation.MONK, 50, 0));
+        assertTrue(w.closeWeek(r, MONDAY + 3 * DAY).isEmpty(), "same week");
+        WeeklyRanking saved = WeeklyRanking.decode(w.encode());
+        java.util.List<RankingView.Row> podium = saved.closeWeek(r, MONDAY + 7 * DAY);
+        assertEquals(2, podium.size(), "no gain, no place");
+        assertEquals("Ola", podium.get(0).name());
+        assertEquals(40_000, podium.get(0).level());
+        assertTrue(saved.closeWeek(r, MONDAY + 7 * DAY + 60_000).isEmpty(), "paid once");
+    }
 }

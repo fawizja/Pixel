@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.168.0] - 2026-10-20
+
+### Dodano
+- Nagrody rankingu tygodnia: w poniedziałek trzy osoby z największym przyrostem doświadczenia dostają 100 000,
+  50 000 i 25 000 gp na konto (nieobecni po wejściu do gry), a serwer ogłasza podium wszystkim graczom.
 ## [0.167.0] - 2026-10-20
 
 ### Dodano

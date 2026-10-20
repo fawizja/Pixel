@@ -893,7 +893,9 @@ public final class Hud {
         }
         String mine = guilds ? (v.mine() > 0 ? "Twoja gildia: " + v.mine() + ". miejsce z " + v.total() : "Nie należysz do gildii z rankingu")
                 : v.mine() > 0 ? "Twoje miejsce: " + v.mine() + " z " + v.total() : "Nie ma cię w tym rankingu";
-        MenuRow me = new MenuRow("ranking:none", mine, "/ranking druid, paladin, mag, mnich, gildie, tydzień", true);
+        MenuRow me = new MenuRow("ranking:none", mine, weeklyRank
+                ? "w poniedziałek nagrody: 100 000 / 50 000 / 25 000 gp za miejsca 1-3"
+                : "/ranking druid, paladin, mag, mnich, gildie, tydzień", true);
         me.x = menuX + 10;
         me.y = menuY + menuH - 40 - (perCol + 1) * rowH - 6;
         me.w = menuW - 20;

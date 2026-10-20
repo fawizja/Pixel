@@ -1275,6 +1275,33 @@ class NetworkSyncTest {
     }
 
     @Test
+    void theWeeklyPodiumIsPaidWhenTheWeekEnds() throws Exception {
+        long monday = java.time.Instant.parse("2026-10-19T08:00:00Z").toEpochMilli();
+        java.util.concurrent.atomic.AtomicLong clock = new java.util.concurrent.atomic.AtomicLong(monday);
+        server.world().wallClock = clock::get;
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            ola.send("RANK", "tydzień");
+            awaitMessage(ola, "week tracked", m -> m[0].equals("RANK") && m[1].equals("Ranking tygodnia"));
+            long[] bank = new long[1];
+            server.enqueueTest(() -> {
+                PlayerCharacter pc = server.world().find("Ola").session.character();
+                pc.addExperience(7_000);
+                bank[0] = pc.bank().balance();
+            });
+            ola.send("RANK", "tydzień");
+            awaitMessage(ola, "gained", m -> m[0].equals("RANK") && m[1].equals("Ranking tygodnia") && m.length > 4);
+            clock.set(monday + 7 * 24 * 3600_000L);
+            ola.send("RANK", "tydzień");
+            awaitMessage(ola, "podium announced", m -> m[0].equals("CHAT") && m[2].contains("Koniec tygodnia! Najwięcej doświadczenia: 1. Ola (+7,000 exp)"));
+            awaitMessage(ola, "prize paid", m -> m[0].equals("LOG") && m[2].contains("Ranking tygodnia: 1. miejsce, 100,000 gp na Twoje konto."));
+            // + 100 000 za podium (nowy dzien moze dorzucic tez nagrode za wejscie)
+            assertTrue(server.world().find("Ola").session.character().bank().balance() >= bank[0] + 100_000);
+        }
+    }
+
+    @Test
     void messageOfTheDayGreetsJoiningPlayers() throws Exception {
         java.util.concurrent.atomic.AtomicReference<String> set = new java.util.concurrent.atomic.AtomicReference<>();
         server.enqueueTest(() -> set.set(server.world().moderate(new String[] {"MOTD", "Event w sobotę"}, "konsola", server.now())));
