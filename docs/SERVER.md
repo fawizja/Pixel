@@ -76,6 +76,7 @@ Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pi
 | `admin Imie` | - | nowy administrator (tylko konsola) |
 | `shutdown 5` | - | wylaczenie za 5 min z ostrzezeniami na czacie (30/15/10/5/3/2/1 min, 30 s, 10 s), potem zapis i wyjscie; `shutdown 30s` w sekundach, `shutdown -` odwoluje. Kontener z `--restart unless-stopped` wstaje od razu ponownie (np. po wymianie pliku jar w wolumenie albo dla czystego restartu) |
 
+Gracze zglaszaja naruszenia przez `/zgłoś Imię, powód` (raz na minute): zgloszenie widza administratorzy w grze, a wszystkie trafiaja do `<dane>/reports.txt` (czas UTC;zglaszajacy;zgloszony;powod).
 Bany i wyciszenia sa w `<dane>/moderation.txt` (przetrwaja restart), dzialania administratorow w logu serwera.
 Gracze moga pisac prywatnie: `/w Imie, tekst`.
 

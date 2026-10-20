@@ -105,6 +105,10 @@ final class ServerWorld {
     private final File mailFile;
     /** Listy do graczy offline (letters.txt). */
     private final File lettersFile;
+    /** Zgloszenia graczy dla administracji (dopisywane, jedna linia na zgloszenie). */
+    private final File reportsFile;
+    static final int REPORT_MAX = 200;
+    static final long REPORT_EVERY_MS = 60_000;
     private final pl.fawizja.pixel.mail.Letters letters;
     /** Wiadomosc dnia serwera (motd.txt, polecenie MOTD); pusta = brak. */
     private final File motdFile;
@@ -146,6 +150,7 @@ final class ServerWorld {
         market = pl.fawizja.pixel.market.Market.decode(marketFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         lettersFile = new File(saveDir, "letters.txt");
+        reportsFile = new File(saveDir, "reports.txt");
         letters = pl.fawizja.pixel.mail.Letters.decode(lettersFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(lettersFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         mailFile = new File(saveDir, "mail.txt");
@@ -325,6 +330,42 @@ final class ServerWorld {
         msg[0] = "RANK";
         System.arraycopy(f, 0, msg, 1, f.length);
         p.client.send(msg);
+    }
+
+    /** REPORT imie powod: zapis w reports.txt i ostrzezenie dla administratorow w grze. */
+    private void report(ServerPlayer p, String[] f, long now) {
+        String who = f.length > 1 ? f[1].trim() : "";
+        String why = f.length > 2 ? f[2].replace('\n', ' ').trim() : "";
+        if (who.isEmpty() || why.isEmpty()) {
+            warn(p, "Napisz: /zgłoś Imię, co się stało.", now);
+            return;
+        }
+        if (!saved(who) && find(who) == null) {
+            warn(p, "Nie ma takiej postaci.", now);
+            return;
+        }
+        if (now - p.lastReportMs < REPORT_EVERY_MS) {
+            warn(p, "Kolejne zgłoszenie możesz wysłać za minutę.", now);
+            return;
+        }
+        p.lastReportMs = now;
+        if (why.length() > REPORT_MAX) why = why.substring(0, REPORT_MAX);
+        String line = java.time.Instant.ofEpochMilli(wallClock.getAsLong()) + ";" + p.name() + ";" + who + ";" + why + "\n";
+        try {
+            java.nio.file.Files.write(reportsFile.toPath(), line.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            LOG.warning("report not saved: " + e.getMessage());
+        }
+        LOG.info("report " + p.name() + " -> " + who + ": " + why);
+        int admins = 0;
+        for (ServerPlayer o : players.values()) {
+            if (moderation.isAdmin(o.name())) {
+                warn(o, "[Zgłoszenie] " + p.name() + " zgłasza " + who + ": " + why, now);
+                admins++;
+            }
+        }
+        info(p, "Zgłoszenie wysłane do administracji" + (admins > 0 ? " (w grze: " + admins + ")." : ". Przeczytają je po powrocie."), now);
     }
 
     /** Opis gracza dla /obejrzyj: profesja, poziom, gildia, tytul i zalozony sprzet z ulepszeniami. */
@@ -1933,6 +1974,9 @@ final class ServerWorld {
                 p.client.send("CHAT", "[do " + to.name() + "]", text);
                 break;
             }
+            case "REPORT":
+                report(p, f, now);
+                break;
             case "ADMIN":
                 if (!moderation.isAdmin(p.name())) {
                     warn(p, "Brak uprawnień administratora.", now);

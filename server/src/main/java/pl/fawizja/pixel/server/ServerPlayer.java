@@ -22,6 +22,8 @@ final class ServerPlayer {
     String lastSelf;
     long lastSelfMs = -1_000_000;
     long lastSaveMs;
+    /** Ostatnie zgloszenie gracza (/zgłoś), limit 1 na minute. */
+    long lastReportMs = -1_000_000;
     /** Ostatnio wyslany wiersz wyzwania ("-" = brak). */
     String lastChallenge = "-";
     /** Gracz oglosil, ze szuka druzyny (/szukam; tylko w pamieci). */

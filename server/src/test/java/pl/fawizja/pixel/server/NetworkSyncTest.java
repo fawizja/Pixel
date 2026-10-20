@@ -1233,6 +1233,27 @@ class NetworkSyncTest {
     }
 
     @Test
+    void reportsReachOnlineAdminsAndAreSaved() throws Exception {
+        try (NetClient ola = connect(); NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            java.util.concurrent.atomic.AtomicBoolean admin = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                server.world().moderate(new String[] {"ADMIN", "Ola"}, "konsola", server.now());
+                admin.set(true);
+            });
+            await("admin", admin::get);
+            ula.send("REPORT", "Ola", "test zgłoszenia");
+            awaitMessage(ola, "admin warned", m -> m[0].equals("LOG") && m[2].contains("[Zgłoszenie] Ula zgłasza Ola: test zgłoszenia"));
+            awaitMessage(ula, "confirmed", m -> m[0].equals("LOG") && m[2].startsWith("Zgłoszenie wysłane do administracji (w grze: 1)"));
+            ula.send("REPORT", "Ola", "drugie");
+            awaitMessage(ula, "rate limited", m -> m[0].equals("LOG") && m[2].contains("za minutę"));
+            assertTrue(Files.readString(new File(saves, "reports.txt").toPath()).contains(";Ula;Ola;test zgłoszenia"));
+        }
+    }
+
+    @Test
     void messageOfTheDayGreetsJoiningPlayers() throws Exception {
         java.util.concurrent.atomic.AtomicReference<String> set = new java.util.concurrent.atomic.AtomicReference<>();
         server.enqueueTest(() -> set.set(server.world().moderate(new String[] {"MOTD", "Event w sobotę"}, "konsola", server.now())));

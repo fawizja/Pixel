@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.165.0] - 2026-10-20
+
+### Dodano
+- `/zgłoś Imię, powód`: zgłoszenie gracza do administracji. Administratorzy w grze widzą je od razu, a serwer zapisuje
+  wszystkie w `reports.txt`. Jedno zgłoszenie na minutę.
 ## [0.164.0] - 2026-10-20
 
 ### Dodano

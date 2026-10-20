@@ -62,6 +62,8 @@ class ChatCommandsTest {
         assertArrayEquals(new String[] {"GUILD", "BANNER"}, ChatCommands.toMessage("/gildia sztandar"));
         assertArrayEquals(new String[] {"GUILD", "MEMBERS"}, ChatCommands.toMessage("/gildia członkowie"));
         assertArrayEquals(new String[] {"INSPECT", "Stary Wilk"}, ChatCommands.toMessage("/obejrzyj Stary Wilk"));
+        assertArrayEquals(new String[] {"REPORT", "Stary Wilk", "wyzywa na czacie"}, ChatCommands.toMessage("/zgłoś Stary Wilk, wyzywa na czacie"));
+        assertNull(ChatCommands.toMessage("/zgłoś Stary Wilk"));
         assertArrayEquals(new String[] {"WANT", "ADD", "20 wilcze futro 2000"}, ChatCommands.toMessage("/kupię 20 wilcze futro 2000"));
         assertArrayEquals(new String[] {"WANT", "CANCEL", "3"}, ChatCommands.toMessage("/kupie anuluj #3"));
         assertArrayEquals(new String[] {"WANT", "FILL", "7"}, ChatCommands.toMessage("/sprzedaj 7"));

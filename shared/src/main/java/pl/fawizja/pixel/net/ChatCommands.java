@@ -84,6 +84,13 @@ public final class ChatCommands {
                 return friends(t, w);
             case "/rynek":
                 return market(t, w);
+            case "/zglos": {
+                // "/zgłoś Stary Wilk, wyzywa na czacie"
+                String r = rest(t);
+                int comma = r.indexOf(',');
+                if (comma <= 0 || r.substring(comma + 1).isBlank()) return null;
+                return new String[] {"REPORT", r.substring(0, comma).trim(), r.substring(comma + 1).trim()};
+            }
             case "/wyslij": {
                 // "/wyślij Stary Wilk, 5 wilcze futro"
                 String r = rest(t);
@@ -269,5 +276,5 @@ public final class ChatCommands {
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /obejrzyj Imię, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło";
 }
