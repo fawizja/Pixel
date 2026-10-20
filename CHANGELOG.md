@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.167.0] - 2026-10-20
+
+### Dodano
+- Ranking tygodnia: `/ranking tydzień` pokazuje, kto zdobył najwięcej doświadczenia od poniedziałku. W każdym tygodniu
+  wszyscy zaczynają od zera, więc nowi gracze też mają szansę na podium.
 ## [0.166.2] - 2026-10-20
 
 ### Naprawiono

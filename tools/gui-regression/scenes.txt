@@ -14,6 +14,7 @@ trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -D
 player|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=player
 party|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=party
 ranking|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=ranking
+weekly|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=weekly
 depot|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=70,78,0 -Dpixel.open=depot
 friends|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=friends
 market|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=70,78,0 -Dpixel.open=market

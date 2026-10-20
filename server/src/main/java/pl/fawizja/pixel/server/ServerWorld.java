@@ -107,6 +107,9 @@ final class ServerWorld {
     private final File lettersFile;
     /** Zgloszenia graczy dla administracji (dopisywane, jedna linia na zgloszenie). */
     private final File reportsFile;
+    /** Ranking tygodnia (weekly.txt). */
+    private final File weeklyFile;
+    private final pl.fawizja.pixel.ranking.WeeklyRanking weekly;
     static final int REPORT_MAX = 200;
     static final long REPORT_EVERY_MS = 60_000;
     private final pl.fawizja.pixel.mail.Letters letters;
@@ -151,6 +154,9 @@ final class ServerWorld {
                 ? new String(java.nio.file.Files.readAllBytes(marketFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         lettersFile = new File(saveDir, "letters.txt");
         reportsFile = new File(saveDir, "reports.txt");
+        weeklyFile = new File(saveDir, "weekly.txt");
+        weekly = pl.fawizja.pixel.ranking.WeeklyRanking.decode(weeklyFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(weeklyFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         letters = pl.fawizja.pixel.mail.Letters.decode(lettersFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(lettersFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
         mailFile = new File(saveDir, "mail.txt");
@@ -292,6 +298,15 @@ final class ServerWorld {
 
     /** /ranking [profesja]: pierwsze miejsca i miejsce pytajacego. */
     private void sendRanking(ServerPlayer p, String arg, long now) {
+        if (pl.fawizja.pixel.ranking.WeeklyRanking.isWeeklyArg(arg)) {
+            long wall = wallClock.getAsLong();
+            for (ServerPlayer o : players.values()) {
+                ranking.put(rankEntry(o.session.character()));
+                weekly.observe(o.name(), o.session.character().experience(), wall);
+            }
+            sendRank(p, weekly.view(ranking, p.name(), pl.fawizja.pixel.ranking.Ranking.SHOWN, wall));
+            return;
+        }
         if (pl.fawizja.pixel.ranking.GuildRanking.isGuildArg(arg)) {
             for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
             pl.fawizja.pixel.guild.GuildRegistry.Guild mine = guilds.guildOf(p.name());
@@ -506,6 +521,17 @@ final class ServerWorld {
             if (o != p && o.session.character().friends().contains(p.name())) {
                 o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
             }
+        }
+    }
+
+    private void saveWeekly() {
+        try {
+            File tmp = new File(weeklyFile.getParentFile(), "weekly.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), weekly.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), weeklyFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("weekly ranking not saved: " + e.getMessage());
         }
     }
 
@@ -1797,6 +1823,8 @@ final class ServerWorld {
         try {
             saves.write(slot, codec.encode(p.session.character()));
             ranking.put(rankEntry(p.session.character()));
+            weekly.observe(p.name(), p.session.character().experience(), wallClock.getAsLong());
+            saveWeekly();
             saves.write("pvp_" + p.name().toLowerCase(java.util.Locale.ROOT), p.pvp.encode(lastNow, System.currentTimeMillis()));
         } catch (IOException e) {
             LOG.warning("save failed for " + p.name() + ": " + e.getMessage());
@@ -1822,6 +1850,7 @@ final class ServerWorld {
         players.remove(p.id);
         pvp.remove(key);
         ranking.remove(p.name());
+        weekly.remove(p.name());
         try {
             saves.delete("player_" + key);
             saves.delete("pvp_" + key);

@@ -1257,6 +1257,24 @@ class NetworkSyncTest {
     }
 
     @Test
+    void theWeeklyRankingCountsExperienceGainedThisWeek() throws Exception {
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            ola.send("RANK", "tydzień");
+            awaitMessage(ola, "empty week", m -> m[0].equals("RANK") && m[1].equals("Ranking tygodnia") && m[3].equals("0"));
+            server.enqueueTest(() -> server.world().find("Ola").session.character().addExperience(5_000));
+            ola.send("RANK", "tydzien");
+            String[][] got = new String[1][];
+            awaitMessage(ola, "gained", m -> m[0].equals("RANK") && m[1].equals("Ranking tygodnia") && m.length > 4 && (got[0] = m) != null);
+            pl.fawizja.pixel.ranking.RankingView v = pl.fawizja.pixel.ranking.RankingView.parse(got[0]);
+            assertEquals(1, v.mine());
+            assertEquals("Ola", v.rows().get(0).name());
+            assertEquals(5_000, v.rows().get(0).level());
+        }
+    }
+
+    @Test
     void messageOfTheDayGreetsJoiningPlayers() throws Exception {
         java.util.concurrent.atomic.AtomicReference<String> set = new java.util.concurrent.atomic.AtomicReference<>();
         server.enqueueTest(() -> set.set(server.world().moderate(new String[] {"MOTD", "Event w sobotę"}, "konsola", server.now())));

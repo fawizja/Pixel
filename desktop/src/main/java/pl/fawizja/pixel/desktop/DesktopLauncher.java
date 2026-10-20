@@ -137,6 +137,18 @@ public final class DesktopLauncher {
                     ((GameScreen) getScreen()).hud().openRanking(
                             new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
                 }
+                if ("weekly".equals(open)) {
+                    // podglad rankingu tygodnia: zdobyte doswiadczenie
+                    java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
+                    String[][] sample = {{"Kuba", "Paladin", "4820000"}, {"Ula", "Druid", "3915000"}, {"Mira", "Sorcerer", "2210500"},
+                            {"Test", "Paladin", "1840000"}, {"Olaf", "Paladin", "960000"}, {"Kora", "Monk", "412300"}};
+                    for (int i = 0; i < sample.length; i++) {
+                        rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i + 1, sample[i][0], sample[i][1],
+                                Integer.parseInt(sample[i][2])));
+                    }
+                    ((GameScreen) getScreen()).hud().openRanking(
+                            new pl.fawizja.pixel.ranking.RankingView(pl.fawizja.pixel.ranking.WeeklyRanking.TITLE, 4, 6, rows));
+                }
                 if ("achievements".equals(open) || "bestiary".equals(open)) {
                     // podglad: troche pokonanych potworow i jeden boss
                     GameScreen gs = (GameScreen) getScreen();
