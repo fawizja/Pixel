@@ -525,6 +525,24 @@ final class ServerWorld {
         }
     }
 
+    /** Wiersz "Ranking tygodnia" okna Wydarzenia: miejsce gracza i ile do konca tygodnia. */
+    String weeklyLine(ServerPlayer p, long now) {
+        long wall = wallClock.getAsLong();
+        weeklyRollover(now);
+        for (ServerPlayer o : players.values()) {
+            ranking.put(rankEntry(o.session.character()));
+            weekly.observe(o.name(), o.session.character().experience(), wall);
+        }
+        pl.fawizja.pixel.ranking.RankingView v = weekly.view(ranking, p.name(), pl.fawizja.pixel.ranking.Ranking.SHOWN, wall);
+        java.time.ZonedDateTime t = java.time.Instant.ofEpochMilli(wall).atZone(java.time.ZoneOffset.UTC);
+        long hours = java.time.Duration.between(t, t.toLocalDate()
+                .with(java.time.temporal.TemporalAdjusters.next(java.time.DayOfWeek.MONDAY)).atStartOfDay(java.time.ZoneOffset.UTC)).toHours();
+        String left = hours >= 48 ? hours / 24 + " dni" : Math.max(1, hours) + " h";
+        long gained = weekly.gained(p.name(), p.session.character().experience(), wall);
+        return (v.mine() > 0 ? v.mine() + ". miejsce z " + v.total() + String.format(" (+%,d exp)", gained) : "zdobądź doświadczenie, by wejść")
+                + ", nagrody za " + left;
+    }
+
     /** Koniec tygodnia: nagrody na konta (offline - przy wejsciu) i ogloszenie podium. */
     private void weeklyRollover(long now) {
         for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
@@ -1972,7 +1990,7 @@ final class ServerWorld {
                 p.client.send(rows.toArray(new String[0]));
                 break;
             case "EVENTS":
-                p.client.send("EVENTS", invasionStatus(now), expBonusLine(p, now));
+                p.client.send("EVENTS", invasionStatus(now), expBonusLine(p, now), weeklyLine(p, now));
                 break;
             case "LOOTLOG": {
                 // ostatnie lupy tego gracza (wiersze jak w podsumowaniu smierci)

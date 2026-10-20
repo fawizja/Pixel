@@ -1703,7 +1703,8 @@ public final class GameScreen extends ScreenAdapter {
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
                     break;
                 case "EVENTS":
-                    hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, m.length > 1 ? m[1] : null, m.length > 2 ? m[2] : null));
+                    hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, m.length > 1 ? m[1] : null, m.length > 2 ? m[2] : null,
+                            m.length > 3 ? m[3] : null));
                     break;
                 case "WHO": {
                     List<String[]> rows = new ArrayList<>();

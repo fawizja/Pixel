@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.169.0] - 2026-10-21
+
+### Dodano
+- Okno Wydarzenia pokazuje miejsce w rankingu tygodnia, zdobyte doświadczenie i ile zostało do nagród.
 ## [0.168.0] - 2026-10-20
 
 ### Dodano

@@ -1271,6 +1271,8 @@ class NetworkSyncTest {
             assertEquals(1, v.mine());
             assertEquals("Ola", v.rows().get(0).name());
             assertEquals(5_000, v.rows().get(0).level());
+            ola.send("EVENTS");
+            awaitMessage(ola, "events line", m -> m[0].equals("EVENTS") && m.length > 3 && m[3].startsWith("1. miejsce z 1 (+5,000 exp), nagrody za "));
         }
     }
 
@@ -1326,7 +1328,7 @@ class NetworkSyncTest {
             assertTrue(answer.get().contains("30 min"), answer.get());
             await("bonus applied", () -> server.world().find("Ola").session.combat().bonusExpPercent() == 50);
             ola.send("EVENTS");
-            awaitMessage(ola, "event in the report", m -> m[0].equals("EVENTS") && m.length == 3 && m[2].startsWith("+50% za potwory, jeszcze 30 min"));
+            awaitMessage(ola, "event in the report", m -> m[0].equals("EVENTS") && m.length >= 3 && m[2].startsWith("+50% za potwory, jeszcze 30 min"));
             server.enqueueTest(() -> answer.set(server.world().moderate(new String[] {"EXPEVENT", "abc"}, "konsola", server.now())));
             await("usage", () -> answer.get().startsWith("Użycie"));
             server.enqueueTest(() -> server.world().moderate(new String[] {"EXPEVENT", "0"}, "konsola", server.now()));

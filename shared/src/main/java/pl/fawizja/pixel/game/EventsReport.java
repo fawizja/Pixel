@@ -16,12 +16,16 @@ public final class EventsReport {
     public static List<String[]> rows(GameSession s, String invasion) { return rows(s, invasion, null); }
 
     /** expEvent = opis wydarzenia premii doswiadczenia z serwera (null albo "-" = brak). */
-    public static List<String[]> rows(GameSession s, String invasion, String expEvent) {
+    public static List<String[]> rows(GameSession s, String invasion, String expEvent) { return rows(s, invasion, expEvent, null); }
+
+    /** weekly = miejsce w rankingu tygodnia od serwera (null = gra bez serwera). */
+    public static List<String[]> rows(GameSession s, String invasion, String expEvent, String weekly) {
         PlayerCharacter pc = s.character();
         long today = s.today();
         List<String[]> rows = new ArrayList<>();
         rows.add(new String[] {"Inwazja", invasion == null ? "tylko w grze na serwerze" : invasion});
         if (expEvent != null && !expEvent.equals("-")) rows.add(new String[] {"Premia exp", expEvent});
+        rows.add(new String[] {"Ranking tygodnia", weekly == null || weekly.equals("-") ? "tylko w grze na serwerze" : weekly});
         MonsterType boost = s.boostedCreature();
         rows.add(new String[] {"Potwór dnia", boost == null ? "brak" : pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
         MonsterType boss = s.weeklyBoss();
