@@ -6,6 +6,8 @@ great_mana_potion;0;0;140;200;1000;0
 bread;0;0;0;0;0;300
 meat;0;0;0;0;0;180
 fish;0;0;0;0;0;240
+strong_health_potion;420;560;0;0;1000;0
+strong_mana_potion;0;0;240;330;1000;0
 supreme_health_potion;800;1100;0;0;1000;0
 supreme_mana_potion;0;0;400;600;1000;0
 ice_cod;0;0;0;0;0;420

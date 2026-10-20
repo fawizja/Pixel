@@ -244,6 +244,9 @@ class MagicTest {
         assertEquals(1, pc.backpack().count(id("great_health_potion")), "the HP button drank the great potion");
         assertEquals(basic, pc.backpack().count(id("health_potion")));
         assertEquals("mana_potion", s.quickPotion(true), mana + " basic mana potions, no stronger ones");
+        pc.backpack().add(new ItemStack(id("strong_health_potion"), 1));
+        while (pc.level() < 100) pc.addExperience(50_000_000);
+        assertEquals("strong_health_potion", s.quickPotion(false), "level " + pc.level() + ": the level 100 tier");
     }
 
     @Test

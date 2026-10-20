@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.164.0] - 2026-10-20
+
+### Dodano
+- Potężne mikstury zdrowia (420-560) i many (240-330) od poziomu 100, między silnymi a najwyższymi: w sklepach
+  Mroźnych Pustkowi, Selvaran, Qasirah i obozu, czasem z Strażnika świątyni i Mumii. Przyciski HP/MP biorą je same.
 ## [0.163.0] - 2026-10-16
 
 ### Dodano

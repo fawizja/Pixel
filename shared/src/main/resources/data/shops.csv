@@ -57,6 +57,8 @@ frost_shop;health_potion;50;0
 frost_shop;mana_potion;55;0
 frost_shop;great_health_potion;200;0
 frost_shop;great_mana_potion;130;0
+frost_shop;strong_health_potion;360;0
+frost_shop;strong_mana_potion;250;0
 frost_shop;blank_rune;15;0
 frost_shop;spear;4;0
 frost_shop;fur_armor;3000;750
@@ -86,6 +88,8 @@ selv_shop;health_potion;50;0
 selv_shop;mana_potion;55;0
 selv_shop;great_health_potion;200;0
 selv_shop;great_mana_potion;130;0
+selv_shop;strong_health_potion;360;0
+selv_shop;strong_mana_potion;250;0
 selv_shop;blank_rune;15;0
 selv_shop;spear;4;0
 selv_shop;serpent_spear;7000;1750
@@ -116,6 +120,8 @@ qas_shop;health_potion;50;0
 qas_shop;mana_potion;55;0
 qas_shop;great_health_potion;200;0
 qas_shop;great_mana_potion;130;0
+qas_shop;strong_health_potion;360;0
+qas_shop;strong_mana_potion;250;0
 qas_shop;blank_rune;15;0
 qas_shop;spear;4;0
 qas_shop;wand_of_storms;6400;1600
@@ -146,6 +152,8 @@ camp_shop;health_potion;50;0
 camp_shop;mana_potion;55;0
 camp_shop;great_health_potion;200;0
 camp_shop;great_mana_potion;130;0
+camp_shop;strong_health_potion;360;0
+camp_shop;strong_mana_potion;250;0
 camp_shop;supreme_health_potion;650;0
 camp_shop;supreme_mana_potion;450;0
 camp_shop;blank_rune;15;0
