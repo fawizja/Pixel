@@ -1104,6 +1104,7 @@ public final class Hud {
                     if (!hunt.done()) left.add(new MenuRow("npc:huntdrop", "Porzuć zlecenie", "możesz wziąć nowe", true));
                 }
                 left.add(new MenuRow("npc:bosses", "Bossowie", "kto żyje, kto odrodzi się i kiedy (/bossowie)", true));
+                left.add(new MenuRow("npc:hunting", "Gdzie polować?", "potwory dla twojego poziomu (/łowiska)", true));
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;
                 // kolejnosc: do oddania, w toku, dostepne; z przyszlych tylko najblizsze, ukonczone jednym wierszem

@@ -443,6 +443,8 @@ public final class GameScreen extends ScreenAdapter {
                     String[] f = id.split(":");
                     if (net != null && f.length == 3 && f[1].equals("buy")) net.send("MARKET", "BUY", f[2]);
                     if (net != null && f.length == 3 && f[1].equals("cancel")) net.send("MARKET", "CANCEL", f[2]);
+                } else if (id.equals("npc:hunting")) {
+                    huntingGrounds();
                 } else if (id.equals("npc:bosses")) {
                     bossReport(t);
                 } else if (id.equals("book:hunt")) {
@@ -537,6 +539,10 @@ public final class GameScreen extends ScreenAdapter {
             if (net != null) net.send("DEATH");
             else showDeath(session.combat().lastDeath() == null ? List.of()
                     : pl.fawizja.pixel.combat.DeathRecap.rows(session.combat().lastDeath()));
+            return;
+        }
+        if (cmd.equals("/lowiska") || cmd.equals("/lowisko")) {
+            huntingGrounds();
             return;
         }
         if (cmd.equals("/analiza") || cmd.equals("/polowanie")) {
@@ -873,6 +879,10 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     /** Raport bossow: online od serwera (tam zyja potwory), lokalnie z wlasnego swiata. */
+    private void huntingGrounds() {
+        hud.openInfo("Gdzie polować (poziom " + session.character().level() + ")", pl.fawizja.pixel.game.HuntingAdvisor.rows(session));
+    }
+
     private void bossReport(long t) {
         if (net != null) {
             net.send("BOSS");

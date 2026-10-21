@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.170.0] - 2026-10-21
+
+### Dodano
+- "Gdzie polować?" u przewodnika i `/łowiska`: lista potworów dobranych do poziomu postaci z doświadczeniem
+  i krainami, w których żyją (potwór dnia oznaczony).
 ## [0.169.0] - 2026-10-21
 
 ### Dodano
