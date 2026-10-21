@@ -1052,7 +1052,7 @@ public final class GameScreen extends ScreenAdapter {
         Position from = session.character().position();
         if (nextTo && from.distanceTo(goal) <= 1) return false;
         List<Position> path = nextTo ? pathNextTo(from, goal)
-                : pl.fawizja.pixel.movement.Pathfinder.path(session.world(), from, goal, WALK_MAX_NODES);
+                : pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, goal, WALK_MAX_NODES, this::isTrap);
         if (path.isEmpty()) {
             stopWalk();
             if (!quiet) session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? "Już tu jesteś." : "Nie ma drogi do tego miejsca.");
@@ -1072,7 +1072,7 @@ public final class GameScreen extends ScreenAdapter {
         for (Direction d : Direction.values()) {
             Position n = goal.translate(d.dx, d.dy);
             if (session.npcs().at(n) != null) continue;
-            List<Position> p = pl.fawizja.pixel.movement.Pathfinder.path(session.world(), from, n, WALK_MAX_NODES);
+            List<Position> p = pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, n, WALK_MAX_NODES, this::isTrap);
             if (!p.isEmpty() && (best.isEmpty() || p.size() < best.size())) best = p;
         }
         return best;
@@ -1105,7 +1105,7 @@ public final class GameScreen extends ScreenAdapter {
         int dx = next.x() - pos.x(), dy = next.y() - pos.y();
         if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
             // zepchniety z trasy (np. przez potwora): nowa trasa od biezacego pola
-            List<Position> again = pl.fawizja.pixel.movement.Pathfinder.path(session.world(), pos, goal, WALK_MAX_NODES);
+            List<Position> again = pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), pos, goal, WALK_MAX_NODES, this::isTrap);
             if (again.isEmpty()) {
                 stopWalk();
                 return null;
@@ -1287,6 +1287,11 @@ public final class GameScreen extends ScreenAdapter {
             int dy = Integer.signum(e.position().y() - e.from().y());
             lunges.put(e.from(), new float[] {dx * amount, dy * amount});
         }
+    }
+
+    /** Pole z pulapka z kolcami - marsz po mapie je omija, jesli sie da. */
+    private boolean isTrap(Position p) {
+        return game.chests() != null && game.chests().trapAt(p);
     }
 
     /** Skrzynie skarbow w danym wierszu: zamknieta albo otwarta (gdy ta postac juz ja oproznila). */

@@ -37,4 +37,20 @@ class PathfinderPathTest {
         assertTrue(Pathfinder.path(world, from, from, 100_000).isEmpty(), "already there");
         assertTrue(Pathfinder.path(world, from, new Position(53, 22, 0), 5).isEmpty(), "node limit");
     }
+
+    @Test
+    void walkingRouteAvoidsTrapsWhenThereIsAnotherWay() {
+        Position from = world.spawn();
+        Position goal = new Position(53, 22, 0);
+        List<Position> plain = Pathfinder.path(world, from, goal, 100_000);
+        Position trap = plain.get(plain.size() / 2); // pulapka w polowie najkrotszej drogi
+        List<Position> safe = Pathfinder.pathAvoiding(world, from, goal, 100_000, trap::equals);
+        assertFalse(safe.isEmpty());
+        assertFalse(safe.contains(trap));
+        assertEquals(goal, safe.get(safe.size() - 1));
+        // gdy kazda droga prowadzi przez pulapke, marsz i tak dochodzi do celu
+        List<Position> forced = Pathfinder.pathAvoiding(world, from, goal, 100_000, p -> !p.equals(goal));
+        assertEquals(plain, forced);
+        assertEquals(List.of(goal).get(0), Pathfinder.pathAvoiding(world, from, goal, 100_000, goal::equals).get(plain.size() - 1));
+    }
 }

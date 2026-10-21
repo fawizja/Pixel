@@ -53,6 +53,20 @@ public final class Pathfinder {
      * chyba ze sa celem. Tablice zamiast map - wystarcza na cale pietro przy jednym wywolaniu.
      */
     public static List<Position> path(WorldMap world, Position from, Position goal, int maxNodes) {
+        return path(world, from, goal, maxNodes, null);
+    }
+
+    /**
+     * Droga omijajaca pola {@code avoid} (np. pulapki), a gdy takiej nie ma - zwykla najkrotsza droga.
+     */
+    public static List<Position> pathAvoiding(WorldMap world, Position from, Position goal, int maxNodes,
+                                              java.util.function.Predicate<Position> avoid) {
+        List<Position> safe = path(world, from, goal, maxNodes, avoid);
+        return safe.isEmpty() ? path(world, from, goal, maxNodes, null) : safe;
+    }
+
+    private static List<Position> path(WorldMap world, Position from, Position goal, int maxNodes,
+                                       java.util.function.Predicate<Position> avoid) {
         if (from.z() != goal.z() || from.equals(goal) || !world.isWalkable(goal)) return Collections.emptyList();
         int w = world.width(), h = world.height();
         if (goal.x() < 0 || goal.y() < 0 || goal.x() >= w || goal.y() >= h) return Collections.emptyList();
@@ -79,6 +93,7 @@ public final class Pathfinder {
                 if (d.diagonal() && (!world.isWalkable(new Position(cx + d.dx, cy, z))
                         || !world.isWalkable(new Position(cx, cy + d.dy, z)))) continue;
                 if (n != target && world.transitionAt(np) != null) continue;
+                if (n != target && avoid != null && avoid.test(np)) continue;
                 parent[n] = cur;
                 if (n == target) {
                     List<Position> out = new ArrayList<>();

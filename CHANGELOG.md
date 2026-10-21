@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.177.1] - 2026-10-21
+
+### Zmieniono
+- Marsz po dotknięciu mapy, znacznika albo łowiska omija pułapki z kolcami, jeśli jest inna droga.
 ## [0.177.0] - 2026-10-21
 
 ### Dodano
