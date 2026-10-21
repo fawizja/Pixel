@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.192.1] - 2026-10-21
+
+### Zmieniono
+- Na szerokim ekranie okna (księga, NPC, rynek, mapa) otwierają się nad widokiem gry, a prawy panel
+  (minimapa, ekwipunek, lista walki, pasek akcji) zostaje widoczny. Na telefonie okna dalej zajmują cały ekran.
+
 ## [0.192.0] - 2026-10-21
 
 ### Zmieniono

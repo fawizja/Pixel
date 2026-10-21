@@ -374,7 +374,8 @@ public final class Hud {
         barW = Math.min(170, gw * 0.28f);
         menuW = Math.min(w - 40, 620);
         menuH = Math.min(h - 40, 400);
-        menuX = (w - menuW) / 2f;
+        // na szerokim ekranie okna stoja nad widokiem gry, a prawy panel zostaje odsloniety
+        menuX = panelX - 8 >= menuW ? (panelX - menuW) / 2f : (w - menuW) / 2f;
         menuY = (h - menuH) / 2f;
         rowH = Math.max(26, Math.min(36, (menuH - 50) / 10f));
         menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 16; menuClose.r = 14;
@@ -1457,8 +1458,13 @@ public final class Hud {
     }
     public boolean mapOpen() { return bigMapOpen; }
 
+    /** Czy otwarte okno (ksiega, NPC, mapa...) zachodzi na prawy panel. */
+    private boolean windowOverPanel() {
+        return (menuOpen || bigMapOpen) && menuX + menuW > panelX;
+    }
+
     private boolean minimapVisible() {
-        return mmSize >= 56 && !menuOpen && !bigMapOpen;
+        return mmSize >= 56 && !windowOverPanel();
     }
 
     public void dispose() { minimap.dispose(); }
@@ -2239,7 +2245,7 @@ public final class Hud {
     private static final long CON_KEEP_MS = 30_000;
 
     private boolean consoleVisible() {
-        return !menuOpen && !bigMapOpen && conH > 8;
+        return !((menuOpen || bigMapOpen) && menuY < conY + conH) && conH > 8;
     }
 
     /** Konsola pod panelem postaci: zadania i wyzwanie na gorze, potem ostatnie zdarzenia i czat (najnowsze na dole). */
@@ -2323,7 +2329,7 @@ public final class Hud {
     }
 
     private boolean battleVisible() {
-        return blH >= 23 + BATTLE_ROW && !menuOpen && !bigMapOpen;
+        return blH >= 23 + BATTLE_ROW && !windowOverPanel();
     }
 
     /** Lista walki w panelu (jak battle list w Tibii): imie potwora, pasek zycia, czerwona ramka przy celu. */
@@ -2392,7 +2398,7 @@ public final class Hud {
     }
 
     private boolean equipPanelVisible() {
-        return !charOpen && !menuOpen && !bigMapOpen;
+        return !charOpen && !windowOverPanel();
     }
 
     private float[] epCellPos(int i) {
