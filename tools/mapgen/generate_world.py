@@ -667,6 +667,14 @@ def selvaran(floors, transitions):
             {CLIFFS: ']', (156, 152): '['}, r)
     dungeon(floors[2], (146, 140, 159, 170), [(156, 152), (150, 164), (156, 144)], 'σ', 'J', 'hτ', 3,
             {(156, 152): ']'}, r)
+    # skaly zostaja tylko na krawedziach polek; reszta pietra jest pusta (widac dzungle ponizej)
+    for z, (ax0, ay0, ax1, ay1) in ((1, (144, 112, 159, 170)), (2, (146, 140, 159, 170))):
+        fl = floors[z]
+        edge = [(x, y) for y in range(ay0, ay1 + 1) for x in range(ax0, ax1 + 1) if fl[y][x] == '\u03c3'
+                and not any(fl[y + dy][x + dx] in WALKABLE for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+                            if 0 <= x + dx < W and 0 <= y + dy < H)]
+        for x, y in edge:
+            fl[y][x] = ' '
     transitions.extend([(CLIFFS[0], CLIFFS[1], 0, 'STAIRS', CLIFFS[0], CLIFFS[1] - 1, 1),
                         (CLIFFS[0], CLIFFS[1], 1, 'STAIRS', CLIFFS[0], CLIFFS[1] + 1, 0),
                         (156, 152, 1, 'STAIRS', 156, 153, 2), (156, 152, 2, 'STAIRS', 155, 152, 1)])

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.182.1] - 2026-10-21
+
+### Zmieniono
+- Manekiny treningowe nie stają już w świątyniach, tylko na placu lub ulicy obok.
+- Klify Selvaran: skały tylko na krawędziach półek, w dole widać dżunglę.
 ## [0.182.0] - 2026-10-21
 
 ### Dodano

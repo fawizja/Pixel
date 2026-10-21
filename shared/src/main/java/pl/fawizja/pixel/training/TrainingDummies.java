@@ -15,7 +15,7 @@ import pl.fawizja.pixel.world.WorldMap;
 /**
  * Manekiny treningowe: po 2 w strefie ochronnej kazdego miasta. Miejsca liczone powtarzalnie z mapy (klient
  * i serwer dostaja te same): najblizsze swiatyni wolne pola na otwartej przestrzeni (8 sasiadow przechodnich),
- * bez obiektow i przejsc, co najmniej 3 pola od swiatyni, 3 od siebie i 3 od NPC. Manekin blokuje ruch.
+ * bez obiektow i przejsc, poza kamienna posadzka swiatyn, co najmniej 3 pola od swiatyni, 3 od siebie i 3 od NPC. Manekin blokuje ruch.
  */
 public final class TrainingDummies {
 
@@ -75,12 +75,20 @@ public final class TrainingDummies {
         return found;
     }
 
+    /** Kamienna posadzka to wnetrze swiatyni: manekin ma stac na placu albo ulicy, nie przed oltarzem. */
+    private static boolean indoors(WorldMap world, FloorMap f, Position p) {
+        if (world.tiles() == null) return false;
+        pl.fawizja.pixel.world.TileType t = world.tiles().get(f.get(Layer.GROUND, p.x(), p.y()));
+        return t != null && t.key().equals("stone_floor");
+    }
+
     private static boolean suitable(WorldMap world, FloorMap f, Position p, Position temple, List<Position> found,
                                     java.util.Collection<Position> avoid) {
         if (chebyshev(p, temple) < MIN_FROM_TEMPLE) return false;
         for (Position o : found) if (chebyshev(p, o) < MIN_APART) return false;
         for (Position o : avoid) if (o.z() == p.z() && chebyshev(p, o) < MIN_APART) return false;
         if (f.get(Layer.OBJECT, p.x(), p.y()) != 0 || world.transitionAt(p) != null) return false;
+        if (indoors(world, f, p)) return false;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 Position q = p.translate(dx, dy);
