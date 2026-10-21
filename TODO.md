@@ -251,6 +251,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
 - [x] Grafika w jednym atlasie tekstur (TileArt)
+- [x] Podmiana grafik plikami PNG (assets/art, 16 albo 32 px), 180 grafik z OpenTibia Sprite Pack (CC BY 4.0), /autorzy
+- [ ] Brakujace grafiki (wilk, smoki, golemy, schody, sciany lodu i dzungli, kon, skrzynie) - czekaja na grafiki od Darka
 - [x] Pomiar klatek w kliencie (logcat co 30 s) i test APK na emulatorze w CI (`android-smoke`)
 - [ ] Pomiar klatek na prawdziwym telefonie (wymaga urzadzenia: `tools/android-smoke/run.sh` przez adb)
 - [x] Zestaw testow regresji GUI (zrzuty ekranu kluczowych miejsc porownywane automatycznie, zadanie CI)

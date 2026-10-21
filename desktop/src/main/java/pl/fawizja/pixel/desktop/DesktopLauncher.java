@@ -24,6 +24,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
+ *   -Dpixel.exportArt=dir zapisuje obecne grafiki jako PNG pod nazwami z docs/GRAPHICS.md (dla grafikow)
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
@@ -34,6 +35,7 @@ import pl.fawizja.pixel.world.Position;
 public final class DesktopLauncher {
 
     public static void main(String[] args) {
+        pl.fawizja.pixel.client.render.TileArt.exportDir = System.getProperty("pixel.exportArt");
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Pixel");
         config.setWindowedMode(Integer.getInteger("pixel.width", 1280), Integer.getInteger("pixel.height", 720));

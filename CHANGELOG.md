@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.181.0] - 2026-10-21
+
+### Dodano
+- Nowa grafika: 180 obrazków z OpenTibia Sprite Pack (darmowe grafiki społeczności OpenTibia, licencja CC BY 4.0):
+  trawa, piasek, bruk, woda i inne podłoża, drzewa i kamienie, gobliny, dziki, szkielety i 19 innych potworów,
+  wszyscy NPC, postacie czterech profesji w 4 kierunkach, broń, zbroje, mikstury i monety.
+- Grafiki 32×32 są wyświetlane w pełnej rozdzielczości (osobny atlas), więc nie tracą szczegółów.
+- /autorzy: lista autorów grafik w grze (pełna lista też w docs/CREDITS.md).
 ## [0.180.0] - 2026-10-21
 
 ### Dodano

@@ -264,7 +264,7 @@ public final class ChatCommands {
             {"/statystyki", "czas gry, zabicia; /szukaj nazwa, /cena nazwa"},
             {"/osiągnięcia", "osiągnięcia, tytuły i bestiariusz (/bestiariusz)"},
             {"/ranking", "najlepsi gracze; /ranking gildie, magia, miecz..."},
-            {"/nowości", "co nowego w ostatnich wersjach gry"},
+            {"/nowości", "co nowego w grze; autorzy grafik: /autorzy"},
             {"/znaczniki", "miejsca na mapie; /idź bank, /idź łowisko"},
             {"/emotki", "taniec, ukłon, machanie nad głową; strój: /strój"},
         };

@@ -119,6 +119,7 @@ limity polaczen, wiadomosci, czatu i zakladania kont z jednego adresu.
 
 ## Zasoby i licencje
 
-Cala grafika jest generowana proceduralnie w kodzie (`TileArt`) i jest wlasna. Projekt nie zawiera
-grafik, map ani danych z gier komercyjnych. Obecna grafika jest tymczasowa (placeholder) i zostanie
-zastapiona docelowymi atlasami.
+Grafika jest generowana proceduralnie w kodzie (`TileArt`), a pliki PNG z `assets/art/` podmieniaja wybrane
+obrazki (lista nazw: [docs/GRAPHICS.md](docs/GRAPHICS.md)). Obecne pliki PNG pochodza z OpenTibia Sprite Pack
+(grafiki spolecznosci OpenTibia, licencja CC BY 4.0, autorzy: [docs/CREDITS.md](docs/CREDITS.md) i /autorzy w grze).
+Projekt nie zawiera grafik, map ani danych z gier komercyjnych (nie ma tu grafik CipSoft/Tibii).

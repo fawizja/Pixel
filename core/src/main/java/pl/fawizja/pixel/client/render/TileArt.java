@@ -114,6 +114,12 @@ public final class TileArt implements Disposable {
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         pm.dispose();
+        if (hiPm != null) {
+            hiAtlas = new Texture(hiPm);
+            hiAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            hiPm.dispose();
+            hiPm = null;
+        }
 
         for (TileType t : tileRegistry.all()) tiles[t.id()] = region(t.id());
         for (ItemType it : itemRegistry.all()) items[it.id()] = region(ITEM_BASE + it.id());
@@ -141,12 +147,33 @@ public final class TileArt implements Disposable {
 
     /**
      * Grafiki od grafikow: plik PNG w assets/art/ zastepuje wygenerowany obrazek o tej nazwie (np. items/health_potion.png,
-     * monsters/wolf.png, characters/paladin_down.png). Dowolny kwadratowy rozmiar - skalowany do 16x16 bez rozmywania.
+     * monsters/wolf.png, characters/paladin_down.png). Obrazki do 16 px trafiaja do atlasu 16x16, wieksze sa trzymane
+     * w osobnym atlasie 32x32 (pelne szczegoly np. grafik 32 px). Skalowanie zawsze bez rozmywania.
      * Brakujace pliki zostaja wygenerowane. Lista nazw: docs/GRAPHICS.md.
      */
     private void applyOverrides(Pixmap pm, TileRegistry tileRegistry, ItemRegistry itemRegistry, List<MonsterType> mtypes,
                                 List<pl.fawizja.pixel.npc.Npc> npcList) {
         if (Gdx.files == null) return;
+        try {
+            overrideAll(pm, tileRegistry, itemRegistry, mtypes, npcList);
+        } finally {
+            if (exportDir != null) exportNamed(pm);
+        }
+    }
+
+    private void exportNamed(Pixmap pm) {
+        for (Map.Entry<String, Integer> e : namedCells.entrySet()) {
+            Pixmap one = new Pixmap(SIZE, SIZE, Pixmap.Format.RGBA8888);
+            one.setBlending(Pixmap.Blending.None);
+            one.drawPixmap(pm, cellX(e.getValue()), cellY(e.getValue()), SIZE, SIZE, 0, 0, SIZE, SIZE);
+            com.badlogic.gdx.graphics.PixmapIO.writePNG(Gdx.files.absolute(exportDir + "/" + e.getKey() + ".png"), one);
+            one.dispose();
+        }
+        Gdx.app.log("TileArt", "Zapisano " + namedCells.size() + " obrazków do " + exportDir);
+    }
+
+    private void overrideAll(Pixmap pm, TileRegistry tileRegistry, ItemRegistry itemRegistry, List<MonsterType> mtypes,
+                             List<pl.fawizja.pixel.npc.Npc> npcList) {
         for (TileType t : tileRegistry.all()) override(pm, t.id(), "tiles/" + t.key());
         for (ItemType it : itemRegistry.all()) override(pm, ITEM_BASE + it.id(), "items/" + it.key());
         for (Vocation v : Vocation.values()) {
@@ -175,7 +202,12 @@ public final class TileArt implements Disposable {
     /** Ile obrazkow podmieniono plikami PNG (diagnostyka). */
     public int overrides() { return overrides; }
 
+    /** Narzedzie dla grafikow (desktop -Dpixel.exportArt=katalog): zapisuje obecne obrazki pod nazwami z docs/GRAPHICS.md. */
+    public static String exportDir;
+    private final Map<String, Integer> namedCells = new java.util.LinkedHashMap<>();
+
     private boolean override(Pixmap pm, int cell, String name) {
+        namedCells.put(name, cell);
         com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name + ".png");
         if (!f.exists()) f = Gdx.files.internal("assets/art/" + name + ".png"); // desktop uruchamiany z katalogu repozytorium
         if (!f.exists()) return false;
@@ -185,6 +217,17 @@ public final class TileArt implements Disposable {
             pm.fillRectangle(cellX(cell), cellY(cell), SIZE, SIZE);
             pm.setFilter(Pixmap.Filter.NearestNeighbour);
             pm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(), cellX(cell), cellY(cell), SIZE, SIZE);
+            if (src.getWidth() > SIZE && hiCells.size() < HI_COLS * HI_COLS) {
+                if (hiPm == null) {
+                    hiPm = new Pixmap(HI_COLS * HI_SIZE, HI_COLS * HI_SIZE, Pixmap.Format.RGBA8888);
+                    hiPm.setBlending(Pixmap.Blending.None);
+                    hiPm.setFilter(Pixmap.Filter.NearestNeighbour);
+                }
+                int slot = hiCells.size();
+                hiCells.put(cell, slot);
+                hiPm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
+                        (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
+            }
             src.dispose();
             overrides++;
             return true;
@@ -197,7 +240,20 @@ public final class TileArt implements Disposable {
     private static int cellX(int cell) { return (cell % COLS) * SIZE; }
     private static int cellY(int cell) { return (cell / COLS) * SIZE; }
 
+    /** Atlas grafik wiekszych niz 16 px (rozmiar komorki 32), tworzony tylko gdy takie pliki istnieja. */
+    private static final int HI_SIZE = 32, HI_COLS = 32;
+    private Pixmap hiPm;
+    private Texture hiAtlas;
+    private final Map<Integer, Integer> hiCells = new java.util.HashMap<>();
+
+    /** Ile obrazkow trzymanych w pelnej rozdzielczosci 32 px (diagnostyka). */
+    public int hiResOverrides() { return hiCells.size(); }
+
     private TextureRegion region(int cell) {
+        Integer slot = hiCells.get(cell);
+        if (slot != null && hiAtlas != null) {
+            return new TextureRegion(hiAtlas, (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
+        }
         return new TextureRegion(atlas, cellX(cell), cellY(cell), SIZE, SIZE);
     }
 
@@ -967,6 +1023,7 @@ public final class TileArt implements Disposable {
     @Override
     public void dispose() {
         atlas.dispose();
+        if (hiAtlas != null) hiAtlas.dispose();
         lightTexture.dispose();
     }
 }

@@ -15,12 +15,16 @@ def rows(path):
                 yield line.split(";")
 
 
+def has(folder, key):
+    return os.path.exists(os.path.join(ROOT, "assets/art", folder, key + ".png"))
+
+
 def section(title, folder, entries, note=""):
     out = [f"## {title} (`assets/art/{folder}/`)", ""]
     if note:
         out += [note, ""]
-    out += ["| Plik | Co to jest |", "|---|---|"]
-    out += [f"| `{folder}/{k}.png` | {d} |" for k, d in entries]
+    out += ["| Plik | Co to jest | Jest |", "|---|---|---|"]
+    out += [f"| `{folder}/{k}.png` | {d} | {'tak' if has(folder, k) else ''} |" for k, d in entries]
     return out + [""]
 
 
@@ -35,21 +39,25 @@ objects = [("chest_closed", "skrzynia skarbów, zamknięta"), ("chest_open", "sk
            ("horse_right", "koń, w prawo"), ("horse_left", "koń, w lewo")]
 pets = [("pet_dog", "szczenię"), ("pet_cat", "kot"), ("pet_raven", "kruk"), ("pet_fennec", "fenek")]
 
+done = sum(has(f, k) for f, entries in (("tiles", tiles), ("items", items), ("monsters", monsters), ("npcs", npcs),
+            ("characters", chars), ("objects", objects), ("pets", pets)) for k, _ in entries)
 lines = [
     "# Grafiki do podmiany",
     "",
-    "Wszystkie obrazki gry są dziś rysowane przez kod (`TileArt`). Plik PNG o nazwie z tej listy, położony w",
+    "Obrazki gry są rysowane przez kod (`TileArt`). Plik PNG o nazwie z tej listy, położony w",
     "`assets/art/`, zastępuje wygenerowany obrazek; brakujące pliki zostają wygenerowane, więc można podmieniać",
     "po kawałku.",
     "",
-    "- PNG z przezroczystym tłem, kwadrat. Najlepiej 16×16 px; większe (32×32, 64×64) gra zmniejsza bez rozmywania.",
+    "- PNG z przezroczystym tłem, kwadrat. 16×16 px albo 32×32 px (większe gra zmniejsza do 32 bez rozmywania).",
     "- Kafelki podłoża wypełniają cały kwadrat; postacie, potwory i przedmioty stoją na przezroczystym tle,",
     "  stopami przy dolnej krawędzi.",
     "- Kolorowe stroje (/strój) są generowane z kolorów; profesja z podmienioną postacią zawsze wygląda jak na grafice.",
     "- Grafiki muszą być własne albo na wolnej licencji (bez kopii z Tibii i innych gier komercyjnych).",
+    "- Kolumna „Jest”: plik już istnieje. Obecne pliki pochodzą z OpenTibia Sprite Pack (CC BY 4.0), autorzy w",
+    "  docs/CREDITS.md i w grze (/autorzy). Mapowanie nazw: `tools/art/otsp_import.py`.",
     "",
     f"Razem: {len(tiles)} kafelków, {len(items)} przedmiotów, {len(monsters)} potworów, {len(npcs)} NPC, "
-    f"{len(chars)} obrazków postaci, {len(objects)} obiektów, {len(pets)} pupili.",
+    f"{len(chars)} obrazków postaci, {len(objects)} obiektów, {len(pets)} pupili. Podmienione: {done}.",
     "",
     "Lista jest generowana: `python3 tools/art/list_graphics.py`.",
     "",

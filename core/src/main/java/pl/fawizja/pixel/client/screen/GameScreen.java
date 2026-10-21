@@ -600,6 +600,10 @@ public final class GameScreen extends ScreenAdapter {
             else hud.openInfo("Szukaj: " + q, rows);
             return;
         }
+        if (cmd.equals("/autorzy") || cmd.equals("/grafiki")) {
+            hud.openInfo("Autorzy grafik", pl.fawizja.pixel.game.Credits.rows());
+            return;
+        }
         if (cmd.equals("/emotki")) {
             hud.openInfo("Emotki", pl.fawizja.pixel.net.Emotes.rows());
             return;
