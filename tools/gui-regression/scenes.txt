@@ -39,3 +39,4 @@ stats|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -D
 outfit|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,84,0 -Dpixel.button=outfit:7
 selvaran|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=119,142,0
 phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2
+battle|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=56,87,-1 -Dpixel.open=battle

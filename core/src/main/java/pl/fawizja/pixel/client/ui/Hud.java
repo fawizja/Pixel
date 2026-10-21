@@ -1479,6 +1479,7 @@ public final class Hud {
         potionHp.label = "HP " + hpCount;
         potionMp.label = "MP " + mpCount;
         Monster tgt = session.combat().target();
+        currentTarget = tgt;
         target.active = tgt != null;
         layoutHotbar();
         layoutConsole(session, serverTimeMs);
@@ -1865,6 +1866,11 @@ public final class Hud {
     private final List<ConLine> conLines = new ArrayList<>();
     private float conX, conY, conW, conH;
     private boolean consoleMin;
+    /** Zakladka "Walka" (lista potworow w poblizu jak battle list w Tibii) zamiast konsoli. */
+    private boolean battleTab;
+    private final List<Monster> battle = new ArrayList<>();
+    private static final float BATTLE_ROW = 18;
+    private float conTabX;
     private static final float CON_SCALE = 0.8f;
     /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
     private static final long CON_KEEP_MS = 30_000;
@@ -1883,6 +1889,18 @@ public final class Hud {
         float maxBody = Math.min(8 * 14f, top - joyTop - 10 - 23 - 6);
         conLines.clear();
         if (maxBody < 14) { conW = 0; return; }
+        battle.clear();
+        for (Monster m : session.monsters().monsters()) {
+            if (m.isDead() || m.position().z() != pc.position().z() || m.position().distanceTo(pc.position()) > 7) continue;
+            battle.add(m);
+        }
+        battle.sort(java.util.Comparator.comparingInt(m -> m.position().distanceTo(pc.position())));
+        if (battleTab) {
+            float body = Math.max(BATTLE_ROW, Math.min(maxBody, battle.size() * BATTLE_ROW));
+            conH = consoleMin ? 23 : 23 + body + 6;
+            conY = top - conH;
+            return;
+        }
         float tw = conW - 14;
         font.getData().setScale(CON_SCALE);
         List<ConLine> fixed = new ArrayList<>();
@@ -1926,15 +1944,27 @@ public final class Hud {
 
     private void drawConsole(SpriteBatch batch) {
         if (!consoleVisible()) return;
+        font.setColor(battleTab ? Color.GRAY : Color.WHITE);
         text(batch, "Konsola", conX + 8, conY + conH - 6);
+        layout.setText(font, "Konsola");
+        conTabX = conX + 8 + layout.width + 14;
+        font.setColor(battleTab ? Color.WHITE : Color.GRAY);
+        text(batch, "Walka (" + battle.size() + ")", conTabX, conY + conH - 6);
+        font.setColor(Color.WHITE);
         if (minimizeImg != null) batch.draw(minimizeImg, conX + conW - 19, conY + conH - 19, 14, 14);
         font.getData().setScale(0.7f);
         font.setColor(0.75f, 0.75f, 0.7f, 1f);
-        layout.setText(font, "dotknij, aby pisać");
-        text(batch, "dotknij, aby pisać", conX + conW - 26 - layout.width, conY + conH - 8);
+        String hint = battleTab ? "dotknij, aby atakować" : "dotknij, aby pisać";
+        layout.setText(font, hint);
+        if (conX + conW - 26 - layout.width > conTabX + 70) text(batch, hint, conX + conW - 26 - layout.width, conY + conH - 8);
         font.setColor(Color.WHITE);
         if (consoleMin) { font.getData().setScale(1f); return; }
         font.getData().setScale(CON_SCALE);
+        if (battleTab) {
+            drawBattle(batch);
+            font.getData().setScale(1f);
+            return;
+        }
         float yy = conY + conH - 23 - 4;
         for (ConLine l : conLines) {
             if (yy - l.height() < conY - 2) break;
@@ -1946,13 +1976,55 @@ public final class Hud {
         font.getData().setScale(1f);
     }
 
-    /** Dotkniecie konsoli: naglowek zwija/rozwija, tresc otwiera czat. */
+    /** Dotkniecie konsoli: naglowek zwija/rozwija i przelacza zakladki, tresc otwiera czat albo wybiera cel. */
     private boolean consoleTouch(float px, float py, Actions actions) {
         if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
-        if (py >= conY + conH - 23 && px >= conX + conW - 30) consoleMin = !consoleMin;
-        else actions.onButton("chat");
+        if (py >= conY + conH - 23) {
+            if (px >= conX + conW - 30) consoleMin = !consoleMin;
+            else battleTab = px >= conTabX - 6;
+            return true;
+        }
+        if (battleTab) {
+            int i = (int) ((conY + conH - 23 - 4 - py) / BATTLE_ROW);
+            if (i >= 0 && i < battle.size()) actions.onButton("battle:" + battle.get(i).id());
+            return true;
+        }
+        actions.onButton("chat");
         return true;
     }
+
+    /** Lista walki: imie potwora, pasek zycia, czerwona ramka przy obecnym celu. */
+    private void drawBattle(SpriteBatch batch) {
+        Monster tgt = currentTarget;
+        float yy = conY + conH - 23 - 4;
+        if (battle.isEmpty()) {
+            font.setColor(0.75f, 0.75f, 0.7f, 1f);
+            text(batch, "Brak potworów w pobliżu.", conX + 8, yy);
+            font.setColor(Color.WHITE);
+            return;
+        }
+        for (Monster m : battle) {
+            if (yy - BATTLE_ROW < conY) break;
+            float rowY = yy - BATTLE_ROW + 1;
+            if (m == tgt) outline(batch, conX + 4, rowY, conW - 8, BATTLE_ROW - 1, new Color(0.95f, 0.25f, 0.2f, 1f));
+            TextureRegion icon = art.monster(m.type().key());
+            if (icon != null) batch.draw(icon, conX + 7, rowY + 1, BATTLE_ROW - 3, BATTLE_ROW - 3);
+            text(batch, m.type().name(), conX + 7 + BATTLE_ROW, yy - 2);
+            float bw = Math.min(90, conW * 0.3f), bx = conX + conW - 10 - bw;
+            batch.setColor(0, 0, 0, 0.7f);
+            batch.draw(art.white(), bx - 1, rowY + 5, bw + 2, 6);
+            float f = m.healthFraction();
+            batch.setColor(f > 0.6f ? new Color(0.2f, 0.8f, 0.2f, 1f) : f > 0.3f ? new Color(0.9f, 0.75f, 0.15f, 1f) : new Color(0.9f, 0.2f, 0.15f, 1f));
+            batch.draw(art.white(), bx, rowY + 6, bw * f, 4);
+            batch.setColor(Color.WHITE);
+            yy -= BATTLE_ROW;
+        }
+    }
+
+    private Monster currentTarget;
+
+    /** Zakladka Walka w konsoli (podglad i klawisz). */
+    public void showBattle(boolean on) { battleTab = on; consoleMin = false; }
 
     // ------------------------------------------------------------------ staly panel ekwipunku pod minimapa
 

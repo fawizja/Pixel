@@ -250,6 +250,7 @@ public final class DesktopLauncher {
                     gs.session().character().quests().restore("varden_wolves", false, 3);
                     gs.hud().openJournal();
                 }
+                if ("battle".equals(open)) ((GameScreen) getScreen()).hud().showBattle(true);
                 if ("chat".equals(open)) {
                     // podglad dymka czatu nad wlasna postacia
                     GameScreen gs = (GameScreen) getScreen();

@@ -522,6 +522,14 @@ public final class GameScreen extends ScreenAdapter {
                     // naglowki listy znajomych
                 } else if (id.startsWith("ranking:")) {
                     // wiersze rankingu tylko do czytania
+                } else if (id.startsWith("battle:")) {
+                    // lista walki w konsoli: wybor celu po id potwora
+                    int mid = Integer.parseInt(id.substring(7));
+                    for (Monster m : session.monsters().monsters()) {
+                        if (m.id() != mid || m.isDead()) continue;
+                        session.combat().setTarget(m);
+                        if (net != null) net.send("TARGET", String.valueOf(m.id()));
+                    }
                 } else if (id.startsWith("spell:")) {
                     String key = hud.barSpell(Integer.parseInt(id.substring(6)));
                     if (key != null) act("cast:" + key, t);

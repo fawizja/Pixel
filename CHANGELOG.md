@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.189.0] - 2026-10-21
+
+### Dodano
+- Lista walki jak w Tibii: zakładka „Walka (n)” w konsoli pokazuje potwory w pobliżu (do 7 pól, na tym samym piętrze)
+  z ikoną i paskiem życia, najbliższe na górze. Dotknięcie potwora ustawia go jako cel (także online), obecny cel ma czerwoną ramkę.
+  Nowa scena regresji GUI `battle`.
 ## [0.188.0] - 2026-10-21
 
 ### Zmieniono

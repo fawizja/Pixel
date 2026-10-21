@@ -67,6 +67,7 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |
 | Okna Ekwipunek i Umiejetnosci (dotkniecie przedmiotu zdejmuje go) | dotknij paskow HP/MP | P |
 | Konsola (czat i zdarzenia) | dotknij konsoli, aby pisac; `-` zwija | Enter |
+| Lista walki (potwory w poblizu, wybor celu) | zakladka Walka w konsoli | - |
 | Rozmowa z NPC (sklep, bank z depozytem przedmiotow, kaplan, zadania) | ROZMOWA albo dotkniecie NPC | N |
 | Menu gracza online (handel, druzyna, gildia, atak) | dotkniecie gracza | klikniecie gracza |
 | Uzycie przedmiotu (mikstura, jedzenie, runa na cel) | PLECAK -> zaznacz -> UZYJ | - |
