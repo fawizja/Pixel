@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.193.2] - 2026-10-21
+
+### Zmieniono
+- Pola paska z miksturą albo runą pokazują odnowienie tak jak czary: ciemna zasłona opada z góry ikony.
+
 ## [0.193.1] - 2026-10-21
 
 ### Zmieniono

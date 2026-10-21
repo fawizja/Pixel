@@ -125,6 +125,8 @@ public final class Hud {
     private Actions pressActions;
     /** Wybor akcji dla pola (-1 = zamkniety) i wybrany rodzaj (null = lista rodzajow). */
     private int pickSlot = -1;
+    /** Odnowienie pol z mikstura albo runa (0..1, czesc zakryta od gory). */
+    private final float[] itemCd = new float[pl.fawizja.pixel.settings.SpellBar.SLOTS];
     private String pickCat;
     /** Wlasny uklad paska (null = tylko automat) i przycisk, ktoremu przypisujemy czar w ksiedze (-1 = brak). */
     private pl.fawizja.pixel.settings.SpellBar customBar = new pl.fawizja.pixel.settings.SpellBar();
@@ -1829,6 +1831,24 @@ public final class Hud {
                 shapes.rect(b.x - in, b.y - in, in * 2, in * 2);
             }
         }
+        // mikstury i runy: ta sama opadajaca zaslona odnowienia
+        java.util.Arrays.fill(itemCd, 0f);
+        for (int i = 0; i < spellButtons.length; i++) {
+            HudButton b = spellButtons[i];
+            String e = barEntries[i];
+            if (!b.visible || e == null || e.startsWith("cast:")) continue;
+            long rem;
+            float full;
+            SpellType rune = e.startsWith("item:") ? session.spells().registry().find(e.substring(5)) : null;
+            if (rune != null) {
+                rem = session.spells().cooldowns().remaining(rune, serverTimeMs);
+                full = Math.max(rune.cooldownMs(), rune.group().groupCooldownMs);
+            } else {
+                rem = session.spells().cooldowns().groupRemaining(pl.fawizja.pixel.magic.SpellGroup.POTION, serverTimeMs);
+                full = pl.fawizja.pixel.magic.SpellGroup.POTION.groupCooldownMs;
+            }
+            itemCd[i] = rem <= 0 ? 0f : Math.min(1f, rem / Math.max(1f, full)); // rysowane na ikonie, w przebiegu obrazkow
+        }
 
         if (pressSlot >= 0) {
             // przytrzymanie pola: zolta ramka rosnie, az otworzy sie wybor akcji
@@ -1930,6 +1950,13 @@ public final class Hud {
                 // pole paska z mikstura albo runa: duza ikona, liczba sztuk w prawym dolnym rogu
                 float is = b.r * 1.7f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
+                float cd = itemCd[Integer.parseInt(b.id.substring(6))];
+                if (cd > 0) {
+                    float in = b.r - 3;
+                    batch.setColor(0, 0, 0, 0.6f);
+                    batch.draw(art.white(), b.x - in, b.y + in - in * 2 * cd, in * 2, in * 2 * cd);
+                    batch.setColor(Color.WHITE);
+                }
                 font.getData().setScale(Math.min(0.7f, b.r / 28f));
                 layout.setText(font, b.label);
                 text(batch, b.label, b.x + b.hw - 3 - layout.width, b.y - b.r + 3 + layout.height);

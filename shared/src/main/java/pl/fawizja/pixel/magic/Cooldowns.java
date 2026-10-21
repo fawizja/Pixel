@@ -23,6 +23,11 @@ public final class Cooldowns {
         return groups.getOrDefault(g, 0L) <= now;
     }
 
+    /** Ile zostalo do konca odnowienia grupy (np. mikstur). */
+    public long groupRemaining(SpellGroup g, long now) {
+        return Math.max(0, groups.getOrDefault(g, 0L) - now);
+    }
+
     public void trigger(SpellType s, long now) {
         spells.put(s.key(), now + s.cooldownMs());
         groups.put(s.group(), now + s.group().groupCooldownMs);
