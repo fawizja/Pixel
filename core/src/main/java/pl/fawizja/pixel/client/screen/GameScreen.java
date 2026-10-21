@@ -1595,6 +1595,7 @@ public final class GameScreen extends ScreenAdapter {
                 case HEAL: font.setColor(0.4f, 1f, 0.4f, 1f - age); text = "+" + e.amount(); break;
                 case BLOCKED: font.setColor(0.6f, 0.8f, 1f, 1f - age); text = "blok"; break;
                 case LEVEL_UP: font.setColor(1f, 0.9f, 0.3f, 1f - age); text = "POZIOM " + e.amount() + "!"; break;
+                case EXP: font.setColor(1f, 1f, 1f, 1f - age); text = e.amount() + " exp"; break; // jak w Tibii: biala liczba doswiadczenia
                 default: continue;
             }
             font.draw(batch, text, projected.x - text.length() * 3.5f * scale, projected.y);

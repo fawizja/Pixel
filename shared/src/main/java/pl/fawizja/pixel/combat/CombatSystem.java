@@ -115,6 +115,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public void awardExperience(long exp, String what, long now) {
         int levels = pc.addExperience(exp);
         log.add(now, EventLog.Kind.INFO, what + " (+" + exp + " exp)");
+        if (exp > 0) push(new CombatEvent(now, pc.position(), (int) Math.min(Integer.MAX_VALUE, exp), CombatEvent.Kind.EXP));
         if (levels > 0) {
             log.add(now, EventLog.Kind.SYSTEM, "Awans na poziom " + pc.level() + "!");
             push(new CombatEvent(now, pc.position(), pc.level(), CombatEvent.Kind.LEVEL_UP));

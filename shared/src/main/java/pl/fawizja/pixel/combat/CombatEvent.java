@@ -8,7 +8,7 @@ import pl.fawizja.pixel.world.Position;
  * w promieniu {@code amount}. effect = nazwa {@link DamageType} albo "HEAL".
  */
 public record CombatEvent(long timeMs, Position position, int amount, Kind kind, Position from, String effect) {
-    public enum Kind { HIT_MONSTER, HIT_PLAYER, HEAL, BLOCKED, LEVEL_UP, DEATH, PROJECTILE, AREA }
+    public enum Kind { HIT_MONSTER, HIT_PLAYER, HEAL, BLOCKED, LEVEL_UP, DEATH, PROJECTILE, AREA, EXP }
 
     /** Czas lotu pocisku i trwania efektu obszarowego (klient). */
     public static final long PROJECTILE_MS = 260L;

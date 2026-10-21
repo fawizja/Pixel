@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.190.1] - 2026-10-21
+
+### Dodano
+- Zdobyte doświadczenie unosi się nad postacią jako biała liczba („123 exp”), jak w Tibii (nowe zdarzenie walki EXP,
+  przesyłane też z serwera).
 ## [0.190.0] - 2026-10-21
 
 ### Dodano
