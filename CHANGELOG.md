@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.184.0] - 2026-10-21
+
+### Zmieniono
+- Nowy układ HUD w stylu mobilnego klienta (wzorowany na układzie OTClientV8 mobile, własne rysowanie):
+  joystick w obramowaniu po lewej z przyciskiem czatu, duży przycisk ATAK w prawym dolnym rogu,
+  wokół niego 8 akcji na dwóch łukach (czary, mikstury HP/MP z ikoną i liczbą, tarcza, użyj),
+  nad nim bieg i pochodnia, na dole pasek: plecak, księga, rozmowa, podnieś, łów, koń.
+- Minimapa przeniesiona do lewego górnego rogu, obok niej paski HP/MP/EXP i stan postaci w jednym panelu.
+- Ikony przedmiotów na przyciskach (miecz, tarcza, pochodnia, mikstury, wędka).
 ## [0.183.1] - 2026-10-21
 
 ### Zmieniono

@@ -52,7 +52,7 @@ public final class Hud {
     private final HudButton bag = new HudButton("bag", "PLECAK");
     private final HudButton pick = new HudButton("pick", "PODNIEŚ");
     private final HudButton diag = new HudButton("diag", "i");
-    private final HudButton target = new HudButton("target", "CEL");
+    private final HudButton target = new HudButton("target", "ATAK");
     private final HudButton defensive = new HudButton("defensive", "TARCZA");
     private final HudButton book = new HudButton("book", "KSIĘGA");
     private final HudButton fish = new HudButton("fish", "ŁÓW");
@@ -260,42 +260,35 @@ public final class Hud {
         float jr = Math.min(70, Math.min(w, h) * 0.16f);
         joystick.layout(margin + jr * 1.3f, margin + jr * 1.3f, jr);
         float br = Math.max(26, jr * 0.48f);
-        float bx = w - margin - br;
-        float by = margin + br;
-        run.x = bx; run.y = by; run.r = br;
-        use.x = bx - br * 2.4f; use.y = by; use.r = br;
-        torch.x = bx; torch.y = by + br * 2.4f; torch.r = br;
-        bag.x = bx - br * 2.4f; bag.y = by + br * 2.4f; bag.r = br;
-        pick.x = bx - br * 4.8f; pick.y = by; pick.r = br;
-        target.x = bx - br * 4.8f; target.y = by + br * 2.4f; target.r = br;
-        defensive.x = bx; defensive.y = by + br * 4.8f; defensive.r = br;
-        book.x = bx - br * 2.4f; book.y = by + br * 4.8f; book.r = br;
-        fish.x = bx - br * 4.8f; fish.y = by + br * 4.8f; fish.r = br;
-        talk.x = bx; talk.y = by + br * 7.2f; talk.r = br;
-        chat.x = bx - br * 2.4f; chat.y = by + br * 7.2f; chat.r = br;
-        mount.x = bx - br * 4.8f; mount.y = by + br * 7.2f; mount.r = br;
-        // minimapa pod przyciskiem diagnostyki, nad najwyzszym rzedem przyciskow
-        mmSize = Math.min(120, h - margin - 34 - (talk.y + br) - 12);
-        mmX = w - margin - mmSize;
-        mmY = h - margin - 34 - mmSize;
-        // pasek czarow i mikstur: rzad nad joystickiem/przyciskami, od lewej
-        float sr = Math.max(20, br * 0.72f);
-        float sx0 = margin + jr * 2.6f + sr + 12;
-        float sy = margin + sr;
-        for (int i = 0; i < spellButtons.length; i++) {
-            spellButtons[i].x = sx0 + i * sr * 2.3f;
-            spellButtons[i].y = sy;
-            spellButtons[i].r = sr;
-        }
-        potionHp.x = sx0 + 4 * sr * 2.3f; potionHp.y = sy; potionHp.r = sr;
-        potionMp.x = sx0 + 5 * sr * 2.3f; potionMp.y = sy; potionMp.r = sr;
-        if (potionMp.x + sr > pick.x - br - 6) {
-            // waski ekran: pasek w drugim rzedzie nad joystickiem
-            float sy2 = margin + jr * 2.6f + sr + 8;
-            for (int i = 0; i < spellButtons.length; i++) { spellButtons[i].x = margin + sr + i * sr * 2.3f; spellButtons[i].y = sy2; }
-            potionHp.x = margin + sr + 4 * sr * 2.3f; potionHp.y = sy2;
-            potionMp.x = margin + sr + 5 * sr * 2.3f; potionMp.y = sy2;
-        }
+        // uklad jak w mobilnym kliencie: duzy przycisk ataku w prawym dolnym rogu,
+        // wokol niego 8 akcji na dwoch lukach (3 blizej, 5 dalej), nad nim bieg i pochodnia
+        float ar = br * 1.5f;
+        float ax = w - margin - ar, ay = margin + ar;
+        target.x = ax; target.y = ay; target.r = ar;
+        float sr = br * 0.8f;
+        float d1 = ar + sr + 8, d2 = d1 + sr * 2 + 8;
+        HudButton[] inner = {spellButtons[0], spellButtons[1], spellButtons[2]};
+        HudButton[] outer = {defensive, spellButtons[3], potionHp, potionMp, use};
+        for (int i = 0; i < inner.length; i++) place(inner[i], ax, ay, d1, 90 + i * 45, sr);
+        for (int i = 0; i < outer.length; i++) place(outer[i], ax, ay, d2, 90 + i * 22.5f, sr);
+        float small = br * 0.62f;
+        float colY = ay + d2 + sr + 8 + small;
+        run.x = w - margin - small; run.y = colY; run.r = small;
+        torch.x = run.x; torch.y = colY + small * 2.3f; torch.r = small;
+        // czat przy joysticku (jak w kliencie mobilnym)
+        chat.x = margin + jr * 2.45f; chat.y = margin + jr * 2.45f; chat.r = small;
+        // dolny pasek (plecak, ksiega i przyciski zalezne od sytuacji) miedzy joystickiem a lukiem akcji
+        hbLeft = margin + jr * 2.6f + 10;
+        hbRight = ax - d2 - sr - 10;
+        hbHalfH = br * 0.62f;
+        hbY = margin + hbHalfH;
+        hbSlotHw = br * 1.05f;
+        // panel w lewym gornym rogu: minimapa, obok paski HP/MP/EXP i stan postaci
+        mmSize = Math.min(110, h * 0.27f);
+        mmX = margin - 3;
+        mmY = h - margin + 3 - mmSize;
+        barX = mmX + mmSize + 12;
+        barW = Math.min(200, w * 0.32f);
         menuW = Math.min(w - 40, 620);
         menuH = Math.min(h - 40, 400);
         menuX = (w - menuW) / 2f;
@@ -312,6 +305,35 @@ public final class Hud {
         bagSort.x = bagUse.x; bagSort.y = bagUse.y; bagSort.r = bbr;
         bagKeep.x = bagUse.x; bagKeep.y = bagY - bbr * 3.0f; bagKeep.r = bbr;
         bagClose.x = bagX + slotSize * 5f + 4; bagClose.y = bagY + slotSize * 4f + 18; bagClose.r = 14;
+    }
+
+    /** Dolny pasek przyciskow (granice) i polowa wysokosci / szerokosci jego pola. */
+    private float hbLeft, hbRight, hbY, hbHalfH, hbSlotHw;
+    /** Paski HP/MP obok minimapy. */
+    private float barX, barW;
+    private final HudButton[] hotbar = {bag, book, talk, pick, fish, mount};
+
+    private static void place(HudButton b, float cx, float cy, float dist, float deg, float r) {
+        double a = Math.toRadians(deg);
+        b.x = cx + (float) Math.cos(a) * dist;
+        b.y = cy + (float) Math.sin(a) * dist;
+        b.r = r;
+    }
+
+    /** Rozklada widoczne przyciski dolnego paska od srodka wolnego miejsca. */
+    private void layoutHotbar() {
+        int n = 0;
+        for (HudButton b : hotbar) if (b.visible) n++;
+        if (n == 0) return;
+        float gap = 6;
+        float hw = Math.min(hbSlotHw, ((hbRight - hbLeft) - gap * (n - 1)) / (2f * n));
+        float total = n * hw * 2 + gap * (n - 1);
+        float x = (hbLeft + hbRight) / 2f - total / 2f + hw;
+        for (HudButton b : hotbar) {
+            if (!b.visible) continue;
+            b.x = x; b.y = hbY; b.r = hbHalfH; b.hw = hw;
+            x += hw * 2 + gap;
+        }
     }
 
     public VirtualJoystick joystick() { return joystick; }
@@ -1182,7 +1204,7 @@ public final class Hud {
     public boolean mapOpen() { return bigMapOpen; }
 
     private boolean minimapVisible() {
-        return mmSize >= 56 && !diagnosticsOpen && !menuOpen && !bagOpen && !bigMapOpen;
+        return mmSize >= 56 && !charOpen && !menuOpen && !bagOpen && !bigMapOpen;
     }
 
     public void dispose() { minimap.dispose(); }
@@ -1205,7 +1227,7 @@ public final class Hud {
     /** Zwraca true, jesli dotyk zostal obsluzony przez interfejs. */
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
-        if (p.x <= Math.min(240, w * 0.45f) && p.y >= h - 62) {
+        if (p.x >= barX - 8 && p.x <= barX + barW + 8 && p.y >= h - 62) {
             // dotkniecie paskow HP/MP: karta postaci
             toggleCharacter();
             return true;
@@ -1371,29 +1393,66 @@ public final class Hud {
         potionMp.label = "MP " + mpCount;
         Monster tgt = session.combat().target();
         target.active = tgt != null;
+        layoutHotbar();
+        target.icon = itemIcon(session, "iron_sword");
+        defensive.icon = itemIcon(session, "wooden_shield");
+        torch.icon = itemIcon(session, "torch");
+        fish.icon = itemIcon(session, "fishing_rod");
+        potionHp.icon = itemIcon(session, session.quickPotion(false));
+        potionMp.icon = itemIcon(session, session.quickPotion(true));
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapes.setProjectionMatrix(viewport.getCamera().combined);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
 
-        // paski HP / MP / EXP
-        float barW = Math.min(220, w * 0.42f);
-        float x = 12, y = h - 22;
+        // panel stanu postaci (pod minimapa i paskami), paski HP / MP / EXP
+        float margin = 16;
+        float x = barX, y = h - 22;
+        // bez minimapy (otwarte okno) panel obejmuje tylko paski
+        float panelBottom = minimapVisible() ? Math.min(y - 66, mmY - 6) : y - 66;
+        float panelLeft = minimapVisible() ? mmX - 6 : barX - 8;
+        frame(shapes, panelLeft, panelBottom, barX + barW + 8 - panelLeft, h - panelBottom - margin + 6);
         bar(shapes, x, y, barW, 12, pc.health() / (float) pc.maxHealth(), new Color(0.85f, 0.15f, 0.2f, 1));
         bar(shapes, x, y - 17, barW, 12, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
         bar(shapes, x, y - 31, barW, 6, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
 
-        // joystick
-        shapes.setColor(1, 1, 1, joystick.active() ? 0.22f : 0.12f);
-        shapes.circle(joystick.baseX(), joystick.baseY(), joystick.radius(), 40);
-        shapes.setColor(1, 1, 1, joystick.active() ? 0.55f : 0.35f);
-        shapes.circle(joystick.knob().x, joystick.knob().y, joystick.radius() * 0.45f, 30);
+        // joystick: obramowana podstawa i galka
+        float jx = joystick.baseX(), jy = joystick.baseY(), jrad = joystick.radius();
+        shapes.setColor(BORDER.r, BORDER.g, BORDER.b, joystick.active() ? 0.8f : 0.55f);
+        shapes.circle(jx, jy, jrad + 3, 44);
+        shapes.setColor(0.06f, 0.06f, 0.07f, joystick.active() ? 0.6f : 0.45f);
+        shapes.circle(jx, jy, jrad, 44);
+        shapes.setColor(1, 1, 1, 0.08f);
+        shapes.circle(jx, jy, jrad * 0.6f, 36);
+        shapes.setColor(BORDER.r, BORDER.g, BORDER.b, 0.9f);
+        shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f + 2, 30);
+        shapes.setColor(0.32f, 0.3f, 0.28f, joystick.active() ? 0.95f : 0.8f);
+        shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
+
+        // tlo dolnego paska pod widocznymi przyciskami
+        float hbMin = Float.MAX_VALUE, hbMax = -Float.MAX_VALUE;
+        for (HudButton b : hotbar) {
+            if (!b.visible) continue;
+            hbMin = Math.min(hbMin, b.x - b.hw);
+            hbMax = Math.max(hbMax, b.x + b.hw);
+        }
+        if (hbMin < hbMax) frame(shapes, hbMin - 5, hbY - hbHalfH - 5, hbMax - hbMin + 10, hbHalfH * 2 + 10);
 
         for (HudButton b : buttons) {
             if (!b.visible) continue;
-            shapes.setColor(b.active ? new Color(0.15f, 0.7f, 0.25f, 0.85f) : new Color(0.08f, 0.08f, 0.1f, 0.6f));
-            shapes.circle(b.x, b.y, b.r, 32);
+            Color fill = b.active ? ACTIVE : b == target ? ATTACK : FILL;
+            if (b.hw > 0) {
+                shapes.setColor(BORDER);
+                shapes.rect(b.x - b.hw - 2, b.y - b.r - 2, b.hw * 2 + 4, b.r * 2 + 4);
+                shapes.setColor(fill);
+                shapes.rect(b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
+            } else {
+                shapes.setColor(BORDER);
+                shapes.circle(b.x, b.y, b.r, 32);
+                shapes.setColor(fill);
+                shapes.circle(b.x, b.y, b.r - Math.max(2f, b.r * 0.08f), 32);
+            }
         }
         for (int i = 0; i < spellButtons.length; i++) {
             HudButton b = spellButtons[i];
@@ -1416,9 +1475,9 @@ public final class Hud {
 
         if (tgt != null) {
             float tw = Math.min(200, w * 0.36f);
-            shapes.setColor(0, 0, 0, 0.55f);
-            shapes.rect(w / 2f - tw / 2f - 6, h - 44, tw + 12, 38);
-            bar(shapes, w / 2f - tw / 2f, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
+            float tx = targetBarX(tw);
+            frame(shapes, tx - 6, h - 44, tw + 12, 38);
+            bar(shapes, tx, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
         }
         if (charOpen) {
             shapes.setColor(0.06f, 0.06f, 0.08f, 0.88f);
@@ -1443,8 +1502,10 @@ public final class Hud {
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
         if (minimapVisible()) {
-            shapes.setColor(0.05f, 0.05f, 0.07f, 0.85f);
+            shapes.setColor(BORDER);
             shapes.rect(mmX - 3, mmY - 3, mmSize + 6, mmSize + 6);
+            shapes.setColor(0.05f, 0.05f, 0.07f, 1f);
+            shapes.rect(mmX - 1, mmY - 1, mmSize + 2, mmSize + 2);
         }
         if (bigMapOpen) {
             shapes.setColor(0.04f, 0.04f, 0.06f, 0.94f);
@@ -1473,7 +1534,8 @@ public final class Hud {
         text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
         text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
 
-        float ly = y - 76;
+        x = 12;
+        float ly = Math.min(y - 76, mmY - 14);
         // sledzenie zadan pod stanem postaci, dziennik zdarzen nizej
         font.setColor(0.85f, 0.9f, 1f, 1f);
         String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
@@ -1507,13 +1569,22 @@ public final class Hud {
         for (HudButton b : buttons) {
             if (!b.visible) continue;
             layout.setText(font, b.label);
-            float fit = layout.width > b.r * 1.8f ? b.r * 1.8f / layout.width : 1f;
-            font.getData().setScale(fit);
-            centered(batch, b.label, b.x, b.y);
+            float room = (b.hw > 0 ? b.hw : b.r) * 1.8f;
+            float fit = layout.width > room ? room / layout.width : 1f;
+            if (b.icon != null && b.hw == 0) {
+                float is = b.r * 1.1f;
+                batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.35f, is, is);
+                font.getData().setScale(Math.min(fit, 0.75f));
+                centered(batch, b.label, b.x, b.y - b.r * 0.55f);
+            } else {
+                font.getData().setScale(fit);
+                centered(batch, b.label, b.x, b.y);
+            }
             font.getData().setScale(1f);
         }
         if (tgt != null) {
-            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", w / 2f, h - 16);
+            float tw = Math.min(200, w * 0.36f);
+            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", targetBarX(tw) + tw / 2f, h - 16);
         }
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
@@ -1579,6 +1650,32 @@ public final class Hud {
             }
         }
         batch.end();
+    }
+
+    private static final Color BORDER = new Color(0.5f, 0.44f, 0.32f, 0.85f);
+    private static final Color FILL = new Color(0.1f, 0.09f, 0.08f, 0.72f);
+    private static final Color ACTIVE = new Color(0.15f, 0.6f, 0.25f, 0.88f);
+    private static final Color ATTACK = new Color(0.4f, 0.1f, 0.07f, 0.8f);
+
+    private TextureRegion itemIcon(GameSession session, String key) {
+        try {
+            return art.item(session.items().byKey(key).id());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /** Ciemne okienko z jasniejsza ramka (styl klienta mobilnego). */
+    private static void frame(ShapeRenderer shapes, float fx, float fy, float fw, float fh) {
+        shapes.setColor(BORDER);
+        shapes.rect(fx, fy, fw, fh);
+        shapes.setColor(0.07f, 0.065f, 0.06f, 0.78f);
+        shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
+    }
+
+    /** Pasek celu: na srodku, chyba ze zaslonilby panel postaci (waski ekran). */
+    private float targetBarX(float tw) {
+        return Math.max(w / 2f - tw / 2f, barX + barW + 18);
     }
 
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
