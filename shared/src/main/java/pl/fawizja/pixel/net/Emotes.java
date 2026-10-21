@@ -45,6 +45,29 @@ public final class Emotes {
         return a == null || w.length > 1 ? null : "* " + a + " *";
     }
 
+    /**
+     * Ruch postaci w trakcie emotki (w kafelkach, dodatni = w gore): taniec i wiwaty to podskoki, uklon
+     * i siadanie lekko obnizaja postac, inne emotki stoja w miejscu.
+     */
+    public static float rise(String chatText, long ms) {
+        if (!isEmote(chatText)) return 0f;
+        switch (chatText) {
+            case "* tańczy *":
+            case "* wiwatuje *":
+                return 0.18f * (float) Math.abs(Math.sin(ms * Math.PI / 400.0));
+            case "* macha *":
+            case "* klaszcze *":
+            case "* śmieje się *":
+                return 0.06f * (float) Math.abs(Math.sin(ms * Math.PI / 250.0));
+            case "* kłania się *":
+            case "* siada *":
+            case "* drzemie *":
+                return -0.12f;
+            default:
+                return 0f;
+        }
+    }
+
     public static boolean isEmote(String chatText) {
         return chatText != null && chatText.length() >= 4 && chatText.startsWith("* ") && chatText.endsWith(" *");
     }

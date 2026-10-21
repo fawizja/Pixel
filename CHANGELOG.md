@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.174.1] - 2026-10-21
+
+### Dodano
+- Emotki poruszają postacią: przy /taniec i /hura podskakuje, przy /machaj, /brawo i /śmiech lekko się kołysze,
+  a przy /ukłon, /siad i /zzz przykuca. Ruch widać też u innych graczy, dopóki wisi dymek.
 ## [0.174.0] - 2026-10-21
 
 ### Dodano

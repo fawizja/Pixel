@@ -137,6 +137,13 @@ public final class GameScreen extends ScreenAdapter {
         bubbles.put(name.toLowerCase(java.util.Locale.ROOT), new Object[] {t, TimeUtils.millis() + Math.min(9_000, 4_000 + 60L * t.length())});
     }
 
+    /** Podskok albo przykucniecie postaci w trakcie emotki z jej dymka (kafelki, dodatni = w gore). */
+    private float emoteRise(String name) {
+        Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
+        if (b == null || (Long) b[1] <= TimeUtils.millis()) return 0f;
+        return pl.fawizja.pixel.net.Emotes.rise((String) b[0], TimeUtils.millis());
+    }
+
     private void drawBubble(SpriteBatch batch, BitmapFont font, float scale, String name, float wx, float wy) {
         Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
         if (b == null) return;
@@ -1215,7 +1222,7 @@ public final class GameScreen extends ScreenAdapter {
             for (RemotePlayer rp : remotePlayers.values()) {
                 if (rp.to.y() != row || rp.to.z() != z) continue;
                 float[] lg = lunges.get(rp.to);
-                float rise = 0f;
+                float rise = rp.mounted ? 0f : emoteRise(rp.name);
                 if (rp.mounted) {
                     b.draw(game.art().horse(rp.facing), remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)), 1f, 1f);
                     rise = 0.35f;
@@ -1224,7 +1231,7 @@ public final class GameScreen extends ScreenAdapter {
                         worldRenderer.worldY(remoteY(rp, t) - rise + (lg == null ? 0f : lg[1])), 1f, 1f);
             }
             if (row == playerRow) {
-                float rise = 0f;
+                float rise = pc.isMounted() ? 0f : emoteRise(pc.name());
                 if (pc.isMounted()) {
                     b.draw(game.art().horse(session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
                     rise = 0.35f;

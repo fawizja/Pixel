@@ -25,4 +25,13 @@ class EmotesTest {
         assertFalse(Emotes.isEmote("* *"));
         assertTrue(Emotes.text("/ja " + "a".repeat(200)).length() <= 84, "long /ja is trimmed");
     }
+
+    @Test
+    void danceHopsBowCrouchesAndPlainChatStandsStill() {
+        assertEquals(0f, Emotes.rise("cześć", 200));
+        assertTrue(Emotes.rise("* tańczy *", 200) > 0.1f);
+        assertEquals(0f, Emotes.rise("* tańczy *", 0), 1e-6);
+        assertTrue(Emotes.rise("* kłania się *", 200) < 0f);
+        assertEquals(0f, Emotes.rise("* ostrzy miecz *", 200));
+    }
 }
