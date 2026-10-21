@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.193.3] - 2026-10-21
+
+### Zmieniono
+- Dotknięcie założonego przedmiotu (panel i okno Ekwipunek) najpierw opisuje go w konsoli (atak, obrona,
+  pancerz, ulepszenie); dopiero drugie dotknięcie w ciągu 2 s zdejmuje go do plecaka. Koniec przypadkowego zdejmowania.
+
 ## [0.193.2] - 2026-10-21
 
 ### Zmieniono

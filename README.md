@@ -65,7 +65,7 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Mikstura zdrowia / many | pola 5 i 6 paska (automat) | Q / F |
 | Ksiega czarow i rzemiosla | KSIEGA | K |
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |
-| Okna Ekwipunek i Umiejetnosci (dotkniecie przedmiotu zdejmuje go) | dotknij paskow HP/MP u gory | P |
+| Okna Ekwipunek i Umiejetnosci (dotkniecie przedmiotu: opis, drugie dotkniecie zdejmuje go) | dotknij paskow HP/MP u gory | P |
 | Konsola (czat i zdarzenia) | pod widokiem gry; dotknij, aby pisac | Enter |
 | Lista walki (potwory w poblizu, wybor celu) | okno Walka w prawym panelu | - |
 | Rozmowa z NPC (sklep, bank z depozytem przedmiotow, kaplan, zadania) | ROZMOWA albo dotkniecie NPC | N |

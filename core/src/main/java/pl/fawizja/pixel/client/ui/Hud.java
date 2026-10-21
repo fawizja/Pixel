@@ -2499,12 +2499,37 @@ public final class Hud {
         return new float[] {epX + 4 + EQ_COMPACT[i][0] * (epCell + 2), epY + epH - 4 - epCell - EQ_COMPACT[i][1] * (epCell + 2)};
     }
 
+    /** Pierwsze dotkniecie zalozonego przedmiotu opisuje go w konsoli, drugie (do 2 s) zdejmuje do plecaka. */
+    private int eqTapSlot = -1;
+    private long eqTapMs;
+
+    private void equipTap(int i, GameSession session, Actions actions) {
+        ItemStack st = session.character().equipment().get(EQ_SLOTS[i]);
+        if (st == null) return;
+        long now = com.badlogic.gdx.utils.TimeUtils.millis();
+        if (eqTapSlot == i && now - eqTapMs <= 2000) {
+            actions.onButton("unequip:" + EQ_SLOTS[i].name());
+            eqTapSlot = -1;
+            return;
+        }
+        eqTapSlot = i;
+        eqTapMs = now;
+        ItemType it = session.items().get(st.itemId());
+        StringBuilder d = new StringBuilder(it.name());
+        if (st.upgrade() > 0) d.append(" +").append(st.upgrade());
+        if (it.attack() > 0) d.append(", atak ").append(it.attack());
+        if (it.defense() > 0) d.append(", obrona ").append(it.defense());
+        if (it.armor() > 0) d.append(", pancerz ").append(it.armor());
+        d.append(". Dotknij ponownie, aby zdjąć.");
+        session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, d.toString());
+    }
+
     private boolean equipPanelTouch(float px, float py, GameSession session, Actions actions) {
         if (!equipPanelVisible() || px < epX || px > epX + epW || py < epY || py > epY + epH) return false;
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = epCellPos(i);
             if (px >= c[0] && px <= c[0] + epCell && py >= c[1] && py <= c[1] + epCell) {
-                if (session.character().equipment().get(EQ_SLOTS[i]) != null) actions.onButton("unequip:" + EQ_SLOTS[i].name());
+                equipTap(i, session, actions);
                 break;
             }
         }
@@ -2577,7 +2602,7 @@ public final class Hud {
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = eqCellPos(i);
             if (px >= c[0] && px <= c[0] + eqCell && py >= c[1] && py <= c[1] + eqCell) {
-                if (session.character().equipment().get(EQ_SLOTS[i]) != null) actions.onButton("unequip:" + EQ_SLOTS[i].name());
+                equipTap(i, session, actions);
                 return true;
             }
         }
