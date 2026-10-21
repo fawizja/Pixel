@@ -1307,6 +1307,7 @@ public final class Hud {
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
         if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
+        if (statusTouch(p.x, p.y, session)) return true;
         if (equipPanelTouch(p.x, p.y, session, actions)) return true;
         if (!bagOpen && consoleTouch(p.x, p.y, actions)) return true;
         if (p.x >= barX - 8 && p.x <= barX + barW + 8 && p.y >= h - 62) {
@@ -1502,12 +1503,14 @@ public final class Hud {
         float margin = 16;
         float x = barX, y = h - 22;
         // bez minimapy (otwarte okno) panel obejmuje tylko paski
-        float panelBottom = y - 66;
+        float panelBottom = y - 66 - STATUS_ROW;
+        statusIcons(session, serverTimeMs);
         float panelLeft = barX - 8;
         frame(shapes, panelLeft, panelBottom, barX + barW + 8 - panelLeft, h - panelBottom - margin + 6);
         bar(shapes, x, y, barW, 12, pc.health() / (float) pc.maxHealth(), new Color(0.85f, 0.15f, 0.2f, 1));
         bar(shapes, x, y - 17, barW, 12, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
         bar(shapes, x, y - 31, barW, 6, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
+        drawStatusIcons(shapes, x, y - 66 - STATUS_ROW + 3);
 
         // pad jak w Tibii mobile: sama kulka, w 90% przezroczysta (wyrazniejsza w trakcie ruchu)
         float jrad = joystick.radius();
@@ -1762,6 +1765,100 @@ public final class Hud {
         shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
     }
 
+    // ------------------------------------------------------------------ ikony stanu (jak w Tibii pod paskami)
+
+    private enum Status {
+        PZ("Strefa ochronna: odpoczynek, szybsza regeneracja", new Color(0.2f, 0.55f, 0.25f, 1f)),
+        BATTLE("Walka: nie wejdziesz do strefy ochronnej", new Color(0.7f, 0.15f, 0.12f, 1f)),
+        FED("Najedzony: szybsza regeneracja", new Color(0.55f, 0.4f, 0.2f, 1f)),
+        HUNGRY("Głodny: zjedz coś, aby szybciej się regenerować", new Color(0.5f, 0.45f, 0.4f, 1f)),
+        BLESSED("Błogosławieństwo: mniejsze straty po śmierci", new Color(0.75f, 0.62f, 0.2f, 1f)),
+        RUNNING("Bieg: szybszy ruch", new Color(0.2f, 0.4f, 0.7f, 1f)),
+        LIGHT("Światło: pochodnia albo czar", new Color(0.7f, 0.6f, 0.15f, 1f)),
+        ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f));
+
+        final String desc;
+        final Color color;
+
+        Status(String desc, Color color) {
+            this.desc = desc;
+            this.color = color;
+        }
+    }
+
+    private static final float STATUS_ROW = 18;
+    private static final float STATUS_SIZE = 14;
+    private final List<Status> statuses = new ArrayList<>();
+
+    private void statusIcons(GameSession session, long nowMs) {
+        PlayerCharacter pc = session.character();
+        statuses.clear();
+        if (session.isResting(nowMs)) statuses.add(Status.PZ);
+        if (nowMs < session.protectionZoneLockedUntil()) statuses.add(Status.BATTLE);
+        statuses.add(pc.fedMs() > 0 ? Status.FED : Status.HUNGRY);
+        if (pc.isBlessed()) statuses.add(Status.BLESSED);
+        if (pc.isRunning()) statuses.add(Status.RUNNING);
+        if (pc.isTorchLit() || pc.lightBuffMs() > 0) statuses.add(Status.LIGHT);
+        for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
+            if (pc.enchantments().active(k)) { statuses.add(Status.ENCHANT); break; }
+        }
+    }
+
+    private void drawStatusIcons(ShapeRenderer s, float x0, float y0) {
+        float sz = STATUS_SIZE;
+        for (int i = 0; i < statuses.size(); i++) {
+            Status st = statuses.get(i);
+            float x = x0 + i * (sz + 3), cx = x + sz / 2f, cy = y0 + sz / 2f;
+            s.setColor(0, 0, 0, 0.8f);
+            s.rect(x - 1, y0 - 1, sz + 2, sz + 2);
+            s.setColor(st.color);
+            s.rect(x, y0, sz, sz);
+            s.setColor(1, 1, 1, 0.9f);
+            switch (st) {
+                case PZ: // tarcza
+                    s.rect(cx - 4, cy - 1, 8, 5);
+                    s.triangle(cx - 4, cy - 1, cx + 4, cy - 1, cx, cy - 6);
+                    break;
+                case BATTLE: // skrzyzowane miecze
+                    s.rectLine(cx - 5, cy - 5, cx + 5, cy + 5, 1.6f);
+                    s.rectLine(cx - 5, cy + 5, cx + 5, cy - 5, 1.6f);
+                    break;
+                case FED: // bochenek
+                    s.ellipse(cx - 5, cy - 3, 10, 6);
+                    break;
+                case HUNGRY: // pusty talerz
+                    s.circle(cx, cy, 5, 12);
+                    s.setColor(st.color);
+                    s.circle(cx, cy, 3.4f, 12);
+                    break;
+                case BLESSED: // gwiazda (romb)
+                    s.triangle(cx, cy + 5, cx - 4, cy, cx + 4, cy);
+                    s.triangle(cx, cy - 5, cx - 4, cy, cx + 4, cy);
+                    break;
+                case RUNNING: // >>
+                    s.triangle(cx - 5, cy + 4, cx - 5, cy - 4, cx, cy);
+                    s.triangle(cx, cy + 4, cx, cy - 4, cx + 5, cy);
+                    break;
+                case LIGHT: // plomien
+                    s.triangle(cx - 3, cy - 3, cx + 3, cy - 3, cx, cy + 5);
+                    s.circle(cx, cy - 3, 3, 10);
+                    break;
+                default: // blysk zaklecia
+                    s.rectLine(cx - 4, cy - 5, cx + 1, cy + 1, 1.6f);
+                    s.rectLine(cx - 1, cy - 1, cx + 4, cy + 5, 1.6f);
+            }
+        }
+    }
+
+    /** Dotkniecie ikon stanu: opis kazdej w konsoli. */
+    private boolean statusTouch(float px, float py, GameSession session) {
+        float y0 = h - 22 - 66 - STATUS_ROW + 3;
+        if (statuses.isEmpty() || py < y0 - 3 || py > y0 + STATUS_SIZE + 3 || px < barX - 4
+                || px > barX + statuses.size() * (STATUS_SIZE + 3) + 4) return false;
+        for (Status st : statuses) session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, st.desc);
+        return true;
+    }
+
     /** Tlo pola czaru wg zywiolu, jak kolorowe ikony czarow w Tibii. */
     private static Color spellColor(SpellType sp) {
         if (sp.kind().isHeal()) return new Color(0.2f, 0.55f, 0.35f, 0.85f);
@@ -1941,7 +2038,7 @@ public final class Hud {
     private void layoutConsole(GameSession session, long serverTimeMs) {
         PlayerCharacter pc = session.character();
         float margin = 16;
-        float top = h - 22 - 66 - 4;
+        float top = h - 22 - 66 - STATUS_ROW - 4;
         conX = barX - 8;
         conW = Math.min(460, Math.max(220, w * 0.5f));
         float maxBody = Math.min(8 * 14f, top - joyTop - 10 - 23 - 6);

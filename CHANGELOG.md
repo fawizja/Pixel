@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.190.0] - 2026-10-21
+
+### Dodano
+- Ikony stanu pod paskami jak w Tibii: strefa ochronna, walka (blokada strefy), najedzony / głodny, błogosławieństwo,
+  bieg, światło i zaklęcie broni. Dotknięcie ikon wypisuje ich opis w konsoli.
 ## [0.189.1] - 2026-10-21
 
 ### Zmieniono
