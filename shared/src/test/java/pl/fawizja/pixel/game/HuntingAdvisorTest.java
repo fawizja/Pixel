@@ -21,6 +21,7 @@ class HuntingAdvisorTest {
         List<String[]> low = HuntingAdvisor.rows(s);
         assertFalse(low.isEmpty());
         assertTrue(low.size() <= HuntingAdvisor.SHOWN);
+        assertTrue(low.get(0)[3].startsWith("hunt:go:"), "rows lead to the hunting ground");
         for (String[] r : low) assertTrue(level(r) <= 40, "a level " + pc.level() + " character gets easy monsters: " + r[0] + " " + r[1]);
         while (pc.level() < 300) pc.addExperience(500_000_000L);
         List<String[]> high = HuntingAdvisor.rows(s);

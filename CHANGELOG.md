@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.170.1] - 2026-10-21
+
+### Dodano
+- Dotknięcie potwora w oknie "Gdzie polować" prowadzi postać do jego najbliższego legowiska (albo mówi, w której
+  krainie go szukać, gdy jest daleko).
 ## [0.170.0] - 2026-10-21
 
 ### Dodano

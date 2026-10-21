@@ -7,7 +7,7 @@ import pl.fawizja.pixel.monster.MonsterType;
 
 /**
  * Okno "Gdzie polować" (/łowiska, przewodnik): potwory na mape dobrane do poziomu postaci - najblizsze poziomem,
- * z doswiadczeniem i krainami. Wiersze {nazwa, szczegol}.
+ * z doswiadczeniem i krainami. Wiersze {nazwa, szczegol, "", akcja}; dotkniecie prowadzi na najblizsze legowisko.
  */
 public final class HuntingAdvisor {
     private HuntingAdvisor() {}
@@ -32,7 +32,8 @@ public final class HuntingAdvisor {
         for (MonsterType t : picked) {
             String where = pl.fawizja.pixel.achievement.BestiaryCard.habitats(t.key(), s.monsters().spawns(), s.world());
             rows.add(new String[] {t.name() + (boosted != null && boosted.key().equals(t.key()) ? " (potwór dnia)" : ""),
-                    "poz. " + t.level() + String.format(", %,d exp", t.experience()) + (where.isEmpty() ? "" : ", " + where)});
+                    "poz. " + t.level() + String.format(", %,d exp", t.experience()) + (where.isEmpty() ? "" : ", " + where),
+                    "", "hunt:go:" + t.key()});
         }
         if (rows.isEmpty()) rows.add(new String[] {"Brak potworów", "na tej mapie nie ma nikogo do polowania"});
         return rows;

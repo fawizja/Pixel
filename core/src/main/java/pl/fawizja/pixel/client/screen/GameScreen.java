@@ -449,6 +449,9 @@ public final class GameScreen extends ScreenAdapter {
                     bossReport(t);
                 } else if (id.equals("book:hunt")) {
                     openHunt();
+                } else if (id.startsWith("hunt:go:")) {
+                    hud.closeTop(session);
+                    goHunting(id.substring("hunt:go:".length()), t);
                 } else if (id.startsWith("cmd:")) {
                     sendChat(id.substring("cmd:".length())); // polecenie z okna /pomoc
                 } else if (id.startsWith("best:")) {
@@ -996,6 +999,22 @@ public final class GameScreen extends ScreenAdapter {
             session.log().add(now, EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(sp.monsterKey()) + ".");
         } else {
             session.log().add(now, EventLog.Kind.INFO, "Nie znam drogi na łowisko" + session.whereToHunt(sp.monsterKey()) + ".");
+        }
+    }
+
+    /** Marsz do najblizszego legowiska wybranego potwora (okno "Gdzie polowac"). */
+    private void goHunting(String monsterKey, long now) {
+        pl.fawizja.pixel.monster.SpawnPoint best = null;
+        Position me = session.character().position();
+        for (pl.fawizja.pixel.monster.SpawnPoint sp : session.monsters().spawns()) {
+            if (!sp.monsterKey().equals(monsterKey) || sp.center().z() != me.z()) continue;
+            if (best == null || sp.center().distanceTo(me) < best.center().distanceTo(me)) best = sp;
+        }
+        if (best != null && walkTo(best.center(), now, true, true)) {
+            session.log().add(now, EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(monsterKey) + ".");
+        } else {
+            session.log().add(now, EventLog.Kind.INFO, "Stąd nie dojdziesz - szukaj: " + session.monsterName(monsterKey)
+                    + session.whereToHunt(monsterKey) + ". Woźnice przy fontannach wożą między miastami.");
         }
     }
 
