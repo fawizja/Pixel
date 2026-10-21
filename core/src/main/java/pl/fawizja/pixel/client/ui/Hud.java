@@ -224,7 +224,6 @@ public final class Hud {
 
     /** Ramki okien, przyciski i pad z OTClientV8 (MIT, assets/ui/otc); null = rysowanie ksztaltami. */
     private com.badlogic.gdx.graphics.g2d.NinePatch windowPatch, buttonPatch, buttonDownPatch;
-    private TextureRegion keypad, keypadPointer;
     private com.badlogic.gdx.graphics.g2d.NinePatch barPatch, miniPatch, panelPatch;
     /** Pole przedmiotu i przyciski malych okien (zamknij, zwin) z OTClientV8. */
     private TextureRegion slotImg, closeImg, minimizeImg;
@@ -264,10 +263,6 @@ public final class Hud {
                 closeImg = new TextureRegion(mb, 28, 0, 14, 14);
                 minimizeImg = new TextureRegion(mb, 0, 0, 14, 14);
             }
-            com.badlogic.gdx.graphics.Texture pad = uiTexture("keypad.png");
-            if (pad != null) keypad = new TextureRegion(pad);
-            com.badlogic.gdx.graphics.Texture ptr = uiTexture("keypad_pointer.png");
-            if (ptr != null) keypadPointer = new TextureRegion(ptr);
         } catch (RuntimeException e) {
             Gdx.app.error("Hud", "Brak grafik interfejsu, rysuje ksztaltami: " + e.getMessage());
         }
@@ -314,26 +309,29 @@ public final class Hud {
         float jr = Math.min(70, Math.min(w, h) * 0.16f);
         joystick.layout(margin + jr * 1.3f, margin + jr * 1.3f, jr);
         float br = Math.max(26, jr * 0.48f);
-        // uklad jak w mobilnym kliencie: duzy przycisk ataku w prawym dolnym rogu,
-        // wokol niego 8 akcji na dwoch lukach (3 blizej, 5 dalej), nad nim bieg i pochodnia
-        float ar = br * 1.5f;
-        float ax = w - margin - ar, ay = margin + ar;
-        target.x = ax; target.y = ay; target.r = ar;
-        float sr = br * 0.8f;
-        float d1 = ar + sr + 8, d2 = d1 + sr * 2 + 8;
-        HudButton[] inner = {spellButtons[0], spellButtons[1], spellButtons[2]};
-        HudButton[] outer = {defensive, spellButtons[3], potionHp, potionMp, use};
-        for (int i = 0; i < inner.length; i++) place(inner[i], ax, ay, d1, 90 + i * 45, sr);
-        for (int i = 0; i < outer.length; i++) place(outer[i], ax, ay, d2, 90 + i * 22.5f, sr);
-        float small = br * 0.62f;
-        float clusterTop = ay + d2 + sr;
-        // czat przy joysticku (jak w kliencie mobilnym)
-        chat.x = margin + jr * 2.6f + small + 2; chat.y = margin + small + 2; chat.r = small;
-        // dolny pasek (plecak, ksiega i przyciski zalezne od sytuacji) miedzy czatem a lukiem akcji
-        hbLeft = chat.x + small + 10;
+        // pasek akcji jak w Tibii: kwadratowe pola 4x2 w prawym dolnym rogu
+        // (gora: czary 1-4, dol: mikstury HP/MP, UZYJ, ATAK)
+        float cell = Math.max(34, Math.min(46, br * 1.35f));
+        float gap = 3;
+        float abW = cell * 4 + gap * 3;
+        float abX = w - margin - abW;
+        HudButton[][] rows = {{spellButtons[0], spellButtons[1], spellButtons[2], spellButtons[3]},
+                {potionHp, potionMp, use, target}};
+        for (int r = 0; r < rows.length; r++) {
+            for (int c = 0; c < 4; c++) {
+                HudButton b = rows[r][c];
+                b.x = abX + c * (cell + gap) + cell / 2f;
+                b.y = margin + (1 - r) * (cell + gap) + cell / 2f;
+                b.r = cell / 2f;
+                b.hw = cell / 2f;
+            }
+        }
+        float clusterTop = margin + cell * 2 + gap;
+        // dolny pasek (plecak, ksiega, czat i przyciski zalezne od sytuacji) miedzy padem a paskiem akcji
+        hbLeft = margin + jr * 2.6f + 10;
         joyTop = margin + jr * 2.6f;
-        hbRight = ax - d2 - sr - 10;
-        hbHalfH = br * 0.62f;
+        hbRight = abX - 10;
+        hbHalfH = cell / 2f;
         hbY = margin + hbHalfH;
         hbSlotHw = br * 1.05f;
         // lewy gorny rog: paski HP/MP/EXP i stan postaci
@@ -344,9 +342,15 @@ public final class Hud {
         mmX = w - margin + 3 - mmSize;
         mmY = h - margin + 3 - mmSize;
         layoutEquipPanel(margin, clusterTop);
-        // bieg i pochodnia na lewo od ekwipunku
-        run.x = Math.min(epX, mmX - 3) - small - 8; run.y = epY + epH - small; run.r = small;
-        torch.x = run.x; torch.y = run.y - small * 2.3f; torch.r = small;
+        // jak przyciski obok ekwipunku w Tibii: bieg, postawa obronna, pochodnia - kolumna na lewo
+        float sc = Math.max(28, cell * 0.8f);
+        HudButton[] col = {run, defensive, torch};
+        for (int i = 0; i < col.length; i++) {
+            col[i].x = Math.min(epX, mmX - 3) - 6 - sc / 2f;
+            col[i].y = epY + epH - sc / 2f - i * (sc + gap);
+            col[i].r = sc / 2f;
+            col[i].hw = sc / 2f;
+        }
         menuW = Math.min(w - 40, 620);
         menuH = Math.min(h - 40, 400);
         menuX = (w - menuW) / 2f;
@@ -371,7 +375,12 @@ public final class Hud {
     private float barX, barW;
     /** Gorna krawedz strefy joysticka (konsola konczy sie nad nia). */
     private float joyTop;
-    private final HudButton[] hotbar = {bag, book, talk, pick, fish, mount};
+    private final HudButton[] hotbar = {bag, book, chat, talk, pick, fish, mount};
+    /** Kwadratowe pola jak w Tibii (pasek akcji i przyciski obok ekwipunku). */
+    private HudButton[] slotButtons() {
+        return new HudButton[] {spellButtons[0], spellButtons[1], spellButtons[2], spellButtons[3],
+                potionHp, potionMp, use, target, run, defensive, torch};
+    }
 
     private static void place(HudButton b, float cx, float cy, float dist, float deg, float r) {
         double a = Math.toRadians(deg);
@@ -1498,32 +1507,10 @@ public final class Hud {
         bar(shapes, x, y - 17, barW, 12, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
         bar(shapes, x, y - 31, barW, 6, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
 
-        // joystick: obramowana podstawa i galka (pad z OTClientV8, gdy jest grafika)
-        float jx = joystick.baseX(), jy = joystick.baseY(), jrad = joystick.radius();
-        if (keypad != null && keypadPointer != null) {
-            shapes.setColor(0.04f, 0.04f, 0.05f, 0.4f); // ciemne tlo pod polprzezroczystym padem
-            shapes.circle(jx, jy, jrad * 1.1f, 44);
-            shapes.end();
-            batch.begin();
-            batch.setColor(1, 1, 1, joystick.active() ? 1f : 0.8f);
-            float ks = jrad * 2.3f, ps = jrad * 0.95f;
-            batch.draw(keypad, jx - ks / 2f, jy - ks / 2f, ks, ks);
-            batch.draw(keypadPointer, joystick.knob().x - ps / 2f, joystick.knob().y - ps / 2f, ps, ps);
-            batch.setColor(Color.WHITE);
-            batch.end();
-            shapes.begin(ShapeRenderer.ShapeType.Filled);
-        } else {
-        shapes.setColor(BORDER.r, BORDER.g, BORDER.b, joystick.active() ? 0.8f : 0.55f);
-        shapes.circle(jx, jy, jrad + 3, 44);
-        shapes.setColor(0.06f, 0.06f, 0.07f, joystick.active() ? 0.6f : 0.45f);
-        shapes.circle(jx, jy, jrad, 44);
-        shapes.setColor(1, 1, 1, 0.08f);
-        shapes.circle(jx, jy, jrad * 0.6f, 36);
-        shapes.setColor(BORDER.r, BORDER.g, BORDER.b, 0.9f);
-        shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f + 2, 30);
-        shapes.setColor(0.32f, 0.3f, 0.28f, joystick.active() ? 0.95f : 0.8f);
+        // pad jak w Tibii mobile: sama kulka, w 90% przezroczysta (wyrazniejsza w trakcie ruchu)
+        float jrad = joystick.radius();
+        shapes.setColor(1, 1, 1, joystick.active() ? 0.22f : 0.1f);
         shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
-        }
 
         // tlo dolnego paska pod widocznymi przyciskami
         float hbMin = Float.MAX_VALUE, hbMax = -Float.MAX_VALUE;
@@ -1537,8 +1524,8 @@ public final class Hud {
         for (HudButton b : buttons) {
             if (!b.visible) continue;
             Color fill = b.active ? ACTIVE : b == target ? ATTACK : FILL;
-            if (b.hw > 0 && buttonPatch != null) {
-                continue; // przyciski paska z obrazka - nizej, w jednym przebiegu
+            if (b.hw > 0 && buttonPatch != null && slotImg != null) {
+                continue; // pola i przyciski paska z obrazkow - nizej, w jednym przebiegu
             } else if (b.hw > 0) {
                 shapes.setColor(BORDER);
                 shapes.rect(b.x - b.hw - 2, b.y - b.r - 2, b.hw * 2 + 4, b.r * 2 + 4);
@@ -1560,8 +1547,14 @@ public final class Hud {
                 (b.active ? buttonDownPatch : buttonPatch).draw(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
                 batch.setColor(Color.WHITE);
             }
+            if (slotImg != null) for (HudButton b : slotButtons()) {
+                if (!b.visible) continue;
+                batch.draw(slotImg, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
+                if (b.active) outline(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2,
+                        b == target ? new Color(0.95f, 0.25f, 0.2f, 1f) : new Color(0.3f, 0.9f, 0.35f, 1f));
+            }
             batch.end();
-            shapes.begin(ShapeRenderer.ShapeType.Filled);
+            resumeShapes(shapes);
         }
         for (int i = 0; i < spellButtons.length; i++) {
             HudButton b = spellButtons[i];
@@ -1569,16 +1562,18 @@ public final class Hud {
             SpellType sp = session.spells().registry().get(barSpells[i]);
             shapes.setColor(sp.kind() == SpellKind.HEAL_SELF ? new Color(0.2f, 0.6f, 0.3f, 0.55f)
                     : sp.kind().isOffensive() ? new Color(0.65f, 0.2f, 0.15f, 0.55f) : new Color(0.3f, 0.3f, 0.6f, 0.55f));
-            shapes.circle(b.x, b.y, b.r * 0.92f, 28);
+            float in = b.r - 3;
+            shapes.rect(b.x - in, b.y - in, in * 2, in * 2);
             long rem = session.spells().cooldowns().remaining(sp, serverTimeMs);
             if (rem > 0) {
+                // odnowienie jak w Tibii: ciemna zaslona opadajaca z gory
                 float frac = Math.min(1f, rem / (float) Math.max(sp.cooldownMs(), sp.group().groupCooldownMs));
                 shapes.setColor(0, 0, 0, 0.6f);
-                shapes.arc(b.x, b.y, b.r * 0.92f, 90, 360 * frac, 28);
+                shapes.rect(b.x - in, b.y + in - in * 2 * frac, in * 2, in * 2 * frac);
             }
             if (pc.mana() < sp.mana()) {
                 shapes.setColor(0.1f, 0.1f, 0.4f, 0.55f);
-                shapes.circle(b.x, b.y, b.r * 0.92f, 28);
+                shapes.rect(b.x - in, b.y - in, in * 2, in * 2);
             }
         }
 
@@ -1655,11 +1650,11 @@ public final class Hud {
             layout.setText(font, b.label);
             float room = (b.hw > 0 ? b.hw : b.r) * 1.8f;
             float fit = layout.width > room ? room / layout.width : 1f;
-            if (b.icon != null && b.hw == 0) {
-                float is = b.r * 1.1f;
-                batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.35f, is, is);
-                font.getData().setScale(Math.min(fit, 0.75f));
-                centered(batch, b.label, b.x, b.y - b.r * 0.55f);
+            if (b.icon != null) {
+                float is = b.r * 1.15f;
+                batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.3f, is, is);
+                font.getData().setScale(Math.min(fit, Math.min(0.7f, b.r / 30f)));
+                centered(batch, b.label, b.x, b.y - b.r * 0.6f);
             } else {
                 font.getData().setScale(fit);
                 centered(batch, b.label, b.x, b.y);
@@ -1762,6 +1757,13 @@ public final class Hud {
         shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
     }
 
+    /** Wznawia ShapeRenderer po wstawce batcha (batch.end() wylacza mieszanie - polprzezroczystosc znika). */
+    private static void resumeShapes(ShapeRenderer shapes) {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+    }
+
     /** Rysuje 9-patch w trakcie przebiegu ShapeRenderera (przerywa go na chwile). */
     private void patch(ShapeRenderer shapes, com.badlogic.gdx.graphics.g2d.NinePatch np, float fx, float fy, float fw, float fh, float alpha) {
         shapes.end();
@@ -1771,7 +1773,7 @@ public final class Hud {
         np.draw(uiBatch, fx, fy, fw, fh);
         uiBatch.setColor(Color.WHITE);
         uiBatch.end();
-        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        resumeShapes(shapes);
     }
 
     /** Male okno z naglowkiem 23 px (plecak, ekwipunek, umiejetnosci, konsola). */
@@ -1808,7 +1810,7 @@ public final class Hud {
             windowPatch.draw(uiBatch, fx, fy, fw, fh);
             uiBatch.setColor(Color.WHITE);
             uiBatch.end();
-            shapes.begin(ShapeRenderer.ShapeType.Filled);
+            resumeShapes(shapes);
             return;
         }
         shapes.setColor(0.02f, 0.02f, 0.02f, 0.9f);

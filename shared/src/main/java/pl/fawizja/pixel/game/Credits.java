@@ -34,7 +34,7 @@ public final class Credits {
             line.append(name);
         }
         if (line.length() > 0) rows.add(new String[] {rows.size() == 3 ? "Autorzy" : "", line.toString()});
-        rows.add(new String[] {"Interfejs", UI_PACK + " (" + UI_LICENSE + "): ramki okien, przyciski, pad"});
+        rows.add(new String[] {"Interfejs", UI_PACK + " (" + UI_LICENSE + "): ramki okien, pola, przyciski"});
         rows.add(new String[] {"Źródło", UI_URL});
         rows.add(new String[] {"Reszta", "grafiki rysowane przez kod gry"});
         return rows;

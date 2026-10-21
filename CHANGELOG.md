@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.188.0] - 2026-10-21
+
+### Zmieniono
+- Układ jak w Tibii:
+  - pasek akcji z kwadratowymi polami 4x2 w prawym dolnym rogu: czary 1-4 (odnowienie opada z góry jak w Tibii),
+    mikstury HP/MP z ikoną i liczbą, UŻYJ i ATAK (czerwona ramka, gdy jest cel);
+  - BIEG, TARCZA i POCH jako kwadratowe przyciski obok okna ekwipunku (jak przyciski walki w Tibii);
+  - CZAT w dolnym pasku obok PLECAK i KSIĘGA.
+- Pad ruchu to sama kulka, w 90% przezroczysta, bez strzałek i bez tła.
+- Naprawiona półprzezroczystość HUD po rysowaniu ramek z obrazków (wcześniej część kształtów była nieprzezroczysta).
 ## [0.187.0] - 2026-10-21
 
 ### Zmieniono

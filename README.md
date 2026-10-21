@@ -59,9 +59,9 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Plecak | PLECAK | B lub I |
 | Podnies przedmiot spod nog | PODNIES | G |
 | Diagnostyka i ustawienia | `i` w prawym gornym rogu, wiersze ustawien pod panelem | F3, klikniecie wiersza |
-| Nastepny cel (atak automatyczny) | duzy ATAK w prawym dolnym rogu albo dotkniecie potwora | Spacja / C |
+| Nastepny cel (atak automatyczny) | ATAK w pasku akcji (prawy dolny rog) albo dotkniecie potwora | Spacja / C |
 | Postawa obronna (zielony = wlaczona) | TARCZA | V |
-| Czary z paska (leczenie, atak, obszar, swiatlo) | okragle przyciski na luku wokol ATAK (pusty "+" = dotknij, aby przypisac czar) | 1-4 |
+| Czary z paska (leczenie, atak, obszar, swiatlo) | gorny rzad paska akcji (pusty "+" = dotknij, aby przypisac czar) | 1-4 |
 | Mikstura zdrowia / many | HP / MP | Q / F |
 | Ksiega czarow i rzemiosla | KSIEGA | K |
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |

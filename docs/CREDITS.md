@@ -71,8 +71,7 @@ Some people didn't make the sprites themselves, but paid for them and made them 
 
 ## OTClientV8 (MIT)
 
-Ramki okien (`window.png`), przyciski dolnego paska (`button.png`) oraz pad joysticka
-(`keypad.png`, `keypad_pointer.png`) i nakładka pasków (`progressbar.png`),
+Ramki okien (`window.png`), przyciski dolnego paska (`button.png`) oraz nakładka pasków (`progressbar.png`),
 małe okna (`miniwindow.png`, `miniwindow_buttons.png`), pola przedmiotów (`item.png`) i ramka panelu (`panel_map.png`) w `assets/ui/otc/` pochodzą z klienta **OTClientV8**:
 https://github.com/OTCv8/otclientv8 (na bazie OTClient, https://github.com/edubart/otclient).
 
