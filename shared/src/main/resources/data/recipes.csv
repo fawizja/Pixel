@@ -1,4 +1,5 @@
 # klucz;wynik;ilosc;skladniki (przedmiot:ilosc,...);koszt gp;poziom min;opis
+herbal_health_potion;health_potion;1;healing_herb:4;10;8;Mikstura zdrowia z czterech ziół leczniczych.
 leather_helmet;leather_helmet;1;wolf_pelt:2;0;8;Hełm z dwóch wilczych futer.
 leather_armor;leather_armor;1;wolf_pelt:4,spider_silk:1;0;8;Zbroja z futer zszyta pajęczą nicią.
 studded_armor;studded_armor;1;leather_armor:1,iron_ore:3;50;12;Skórzana zbroja nabita ćwiekami z rudy.

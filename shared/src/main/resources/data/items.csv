@@ -117,3 +117,4 @@
 133;challenge_scroll;Zwój wyzwania;TOOL;20;250;NONE;0;0;0;0;*;0;0;PHYSICAL;#e07050;Odczytany poza miastem przywołuje 3 fale potworów dobranych do poziomu. Pokonaj je w 5 minut, nie oddalając się, a dostaniesz złoto i doświadczenie.
 134;strong_health_potion;Potężna mikstura zdrowia;POTION;100;290;NONE;0;0;0;100;PALADIN,MONK;0;0;PHYSICAL;#c01838;Potężna mikstura zdrowia dla wojowników od poziomu 100.
 135;strong_mana_potion;Potężna mikstura many;POTION;100;190;NONE;0;0;0;100;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;#2828c8;Potężna mikstura many dla magów od poziomu 100.
+136;healing_herb;Ziele lecznicze;MATERIAL;100;8;NONE;0;0;0;0;*;0;0;PHYSICAL;#6fbf4a;Pachnące ziele z krzaków wokół Varden (UŻYJ obok krzaka). Z 4 ziół wytworzysz miksturę zdrowia.

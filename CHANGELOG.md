@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.176.0] - 2026-10-21
+
+### Dodano
+- Zbieranie ziół: UŻYJ obok krzaka (wokół Varden jest ich 18) daje 1–2 ziela lecznicze, a krzak odrasta po
+  10 minutach. Z 4 ziół i 10 gp wytworzysz w księdze miksturę zdrowia; ziele skupuje też kupiec w Varden.
 ## [0.175.0] - 2026-10-21
 
 ### Dodano

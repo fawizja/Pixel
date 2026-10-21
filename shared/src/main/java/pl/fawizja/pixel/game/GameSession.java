@@ -66,6 +66,7 @@ public final class GameSession {
     private final SpellSystem spells;
     private final RecipeRegistry recipes;
     private final FishingSystem fishing;
+    private final pl.fawizja.pixel.gathering.HerbGathering herbs;
     /** Zegar swiata; czas sesji 0 = 09:00 czasu gry. W trybie online czas poda serwer. */
     private WorldClock clock = new WorldClock(-9L * 150_000L, 60L * 60L * 1000L, 0.38f);
     private Boolean wasNight;
@@ -130,6 +131,7 @@ public final class GameSession {
                 : new MonsterManager(world, null, Collections.emptyList(), rng);
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
         this.fishing = new FishingSystem(world, items, rng);
+        this.herbs = new pl.fawizja.pixel.gathering.HerbGathering(world);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p));
         this.combat.setKillListener(t -> {
@@ -1501,7 +1503,37 @@ public final class GameSession {
             default:
                 if (toggleTraining(nowMs)) break;
                 if (openChest(nowMs)) break;
-                if (!searchCorpse(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
+                if (searchCorpse(nowMs)) break;
+                if (!gatherHerbs(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
+        }
+    }
+
+    public pl.fawizja.pixel.gathering.HerbGathering herbs() { return herbs; }
+
+    /** Krzak obok: ziela lecznicze do plecaka (krzak odrasta 10 min). false = nie ma krzaka obok. */
+    public boolean gatherHerbs(long nowMs) {
+        if (!items.containsKey("healing_herb")) return false;
+        int herbId = items.byKey("healing_herb").id();
+        if (herbs.readyNear(pc.position(), nowMs) && !pc.backpack().canAdd(herbId, 2)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
+            return true;
+        }
+        pl.fawizja.pixel.gathering.HerbGathering.Result r = herbs.gather(pc.position(), rng, nowMs);
+        switch (r.outcome()) {
+            case NO_BUSH:
+                return false;
+            case REGROWING:
+                log.add(nowMs, EventLog.Kind.INFO, "Ten krzak jest już obrany. Ziele odrośnie za " + Math.max(1, (r.readyInMs() + 59_999) / 60_000) + " min.");
+                return true;
+            default:
+                int id = items.byKey("healing_herb").id();
+                if (!pc.backpack().add(new ItemStack(id, r.count())).ok()) {
+                    log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
+                    return true;
+                }
+                log.add(nowMs, EventLog.Kind.LOOT, "Zebrano: " + r.count() + "x " + items.get(id).name()
+                        + " (masz " + pc.backpack().count(id) + "; 4 ziela = mikstura zdrowia w księdze).");
+                return true;
         }
     }
 
