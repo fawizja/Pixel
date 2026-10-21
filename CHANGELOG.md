@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.192.2] - 2026-10-21
+
+### Zmieniono
+- Telefon: górny pasek pokazuje poziom i złoto obok HP/MP (pełny opis z godziną i piętrem na szerszym ekranie),
+  przyciski dolnego rzędu są węższe.
+
 ## [0.192.1] - 2026-10-21
 
 ### Zmieniono

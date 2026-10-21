@@ -365,7 +365,7 @@ public final class Hud {
         hbRight = panelX - pad;
         hbHalfH = hbH / 2f;
         hbY = conY + conH + 4 + hbHalfH;
-        hbSlotHw = h >= 500 ? 48 : 40;
+        hbSlotHw = h >= 500 ? 48 : 34;
         // pad (sama kulka) w lewym dolnym rogu widoku gry
         float jr = Math.min(70, Math.min(gw, gh) * 0.2f);
         joystick.layout(gx + 12 + jr * 1.3f, gy + 12 + jr * 1.3f, jr);
@@ -1848,6 +1848,11 @@ public final class Hud {
         centered(batch, pc.mana() + " / " + pc.maxMana(), x + barW * 1.5f + 6, y + 6.5f);
         String info = "Lv " + pc.level() + "   " + String.format("%02d:%02d   Piętro %s   %,d gp", minute / 60, minute % 60, floor, session.gold());
         layout.setText(font, info);
+        if (x + barW * 2 + 14 + layout.width >= statusX() - 6) {
+            // waski ekran (telefon): sam poziom i zloto
+            info = "Lv " + pc.level() + "  " + String.format("%,d gp", session.gold());
+            layout.setText(font, info);
+        }
         if (x + barW * 2 + 14 + layout.width < statusX() - 6) text(batch, info, x + barW * 2 + 14, h - 7);
         font.getData().setScale(1f);
         drawBattle(batch);
