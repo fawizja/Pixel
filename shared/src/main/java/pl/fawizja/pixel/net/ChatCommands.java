@@ -26,6 +26,8 @@ public final class ChatCommands {
         if (text == null || text.isBlank()) return null;
         String t = text.trim();
         if (!t.startsWith("/")) return new String[] {"CHAT", t};
+        int dice = Emotes.diceSides(t);
+        if (dice > 0) return new String[] {"ROLL", String.valueOf(dice)};
         String emote = Emotes.text(t);
         if (emote != null) return new String[] {"CHAT", emote};
         String[] w = t.split("\\s+");

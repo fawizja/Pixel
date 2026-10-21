@@ -470,7 +470,8 @@ public final class GameScreen extends ScreenAdapter {
                     goHunting(id.substring("hunt:go:".length()), t);
                 } else if (id.startsWith("cmd:")) {
                     // emotka z okna /emotki: zamknij okno, zeby bylo widac dymek i ruch postaci
-                    if (pl.fawizja.pixel.net.Emotes.text(id.substring("cmd:".length())) != null) hud.closeTop(session);
+                    String typed = id.substring("cmd:".length());
+                    if (pl.fawizja.pixel.net.Emotes.text(typed) != null || pl.fawizja.pixel.net.Emotes.diceSides(typed) > 0) hud.closeTop(session);
                     sendChat(id.substring("cmd:".length())); // polecenie z okna /pomoc
                 } else if (id.startsWith("best:")) {
                     // karta potwora z bestiariusza (dane z lokalnego rejestru, dziala tez online)
@@ -708,6 +709,8 @@ public final class GameScreen extends ScreenAdapter {
             }
         }
         String emote = pl.fawizja.pixel.net.Emotes.text(text);
+        int dice = pl.fawizja.pixel.net.Emotes.diceSides(text);
+        if (net == null && dice > 0) emote = pl.fawizja.pixel.net.Emotes.diceText(dice, 1 + com.badlogic.gdx.math.MathUtils.random(dice - 1));
         if (net == null && emote != null) {
             // bez serwera emotka i tak pokazuje sie nad wlasna postacia
             String me = session.character().name();

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.179.0] - 2026-10-21
+
+### Dodano
+- Rzut kostką: /kostka (k6) albo /kostka 20. Wynik losuje serwer, więc nikt go nie podrobi, a widzą go wszyscy
+  w dymku nad postacią. Kostka jest też w oknie „Emotki”.
 ## [0.178.0] - 2026-10-21
 
 ### Dodano

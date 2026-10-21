@@ -99,6 +99,15 @@ class NetworkSyncTest {
                 }
                 return false;
             });
+
+            bob.send("ROLL", "20");
+            await("dice roll from the server", () -> {
+                String[] m;
+                while ((m = alice.poll()) != null) {
+                    if (m[0].equals("CHAT") && m[1].equals("Bob") && m[2].matches("\\* rzuca kostką k20: ([1-9]|1[0-9]|20) \\*")) return true;
+                }
+                return false;
+            });
         }
         await("players left and saved", () -> server.world().players().isEmpty());
         assertTrue(server.world().saved("Alice") && server.world().saved("Bob"));

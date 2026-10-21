@@ -2104,6 +2104,19 @@ final class ServerWorld {
                     }
                 }
                 break;
+            case "ROLL": {
+                // rzut kostka: wynik losuje serwer i widza go wszyscy (jak czat, z ta sama moderacja)
+                if (!chatAllowed(p, now)) break;
+                int sides = 6;
+                try {
+                    if (f.length > 1) sides = Math.max(2, Math.min(100, Integer.parseInt(f[1].trim())));
+                } catch (NumberFormatException ignored) {
+                    // zostaje k6
+                }
+                String text = pl.fawizja.pixel.net.Emotes.diceText(sides, 1 + rng.nextInt(sides));
+                for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text);
+                break;
+            }
             case "CHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
                     if (!chatAllowed(p, now)) break;

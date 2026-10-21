@@ -29,11 +29,34 @@ public final class Emotes {
     /** Lista do pomocy: "/taniec, /machaj, ...". */
     public static final String LIST = "/taniec, /machaj, /ukłon, /śmiech, /brawo, /hura, /płacz, /siad, /zzz, /ja tekst";
 
+    /**
+     * "/kostka" albo "/kostka 20" -> liczba scian (2..100, domyslnie 6); -1 gdy to nie rzut kostka.
+     * Wynik losuje serwer (online), zeby nikt go nie podrobil.
+     */
+    public static int diceSides(String typed) {
+        if (typed == null) return -1;
+        String[] w = typed.trim().split("\\s+");
+        if (w.length > 2 || !ChatCommands.key(w[0]).equals("/kostka")) return -1;
+        if (w.length == 1) return 6;
+        try {
+            int n = Integer.parseInt(w[1].replaceFirst("^[kKdD]", ""));
+            return Math.max(2, Math.min(100, n));
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    /** Tekst rzutu w dymku: "* rzuca kostką k6: 4 *". */
+    public static String diceText(int sides, int result) {
+        return "* rzuca kostką k" + sides + ": " + result + " *";
+    }
+
     /** Wiersze okna /emotki: polecenie, czynnosc, "", akcja "cmd:/polecenie" (dotkniecie wysyla emotke). */
     public static java.util.List<String[]> rows() {
         String[] shown = {"/taniec", "/machaj", "/ukłon", "/śmiech", "/brawo", "/hura", "/płacz", "/siad", "/zzz"};
         java.util.List<String[]> rows = new java.util.ArrayList<>();
         for (String c : shown) rows.add(new String[] {c, ACTIONS.get(ChatCommands.key(c)) + " (dotknij)", "", "cmd:" + c});
+        rows.add(new String[] {"/kostka", "rzut kostką k6 widoczny dla innych (dotknij); /kostka 20", "", "cmd:/kostka"});
         rows.add(new String[] {"/ja tekst", "własna czynność, np. /ja ostrzy miecz"});
         return rows;
     }

@@ -38,12 +38,25 @@ class EmotesTest {
     @Test
     void emoteWindowRowsSendTheirEmoteWhenTapped() {
         java.util.List<String[]> rows = Emotes.rows();
-        assertEquals(10, rows.size());
+        assertEquals(11, rows.size());
         for (String[] r : rows) {
-            if (r.length < 4) continue;
+            if (r.length < 4 || r[3].equals("cmd:/kostka")) continue;
             assertTrue(r[3].startsWith("cmd:/"));
             assertNotNull(Emotes.text(r[3].substring(4)), r[3]);
         }
         assertTrue(rows.get(0)[1].startsWith("tańczy"));
+    }
+
+    @Test
+    void diceRollIsAskedFromTheServer() {
+        assertArrayEquals(new String[] {"ROLL", "6"}, ChatCommands.toMessage("/kostka"));
+        assertArrayEquals(new String[] {"ROLL", "20"}, ChatCommands.toMessage("/kostka 20"));
+        assertArrayEquals(new String[] {"ROLL", "20"}, ChatCommands.toMessage("/kostka k20"));
+        assertEquals(100, Emotes.diceSides("/kostka 5000"));
+        assertEquals(2, Emotes.diceSides("/kostka 1"));
+        assertEquals(-1, Emotes.diceSides("/kostka abc"));
+        assertEquals(-1, Emotes.diceSides("/taniec"));
+        assertEquals("* rzuca kostką k6: 4 *", Emotes.diceText(6, 4));
+        assertTrue(Emotes.isEmote(Emotes.diceText(6, 4)));
     }
 }
