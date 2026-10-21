@@ -1495,8 +1495,7 @@ public final class Hud {
             bar(shapes, tx, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
         }
         if (charOpen) {
-            shapes.setColor(0.06f, 0.06f, 0.08f, 0.88f);
-            shapes.rect(10, h - 420, Math.min(w - 20, 490), 300);
+            window(shapes, 10, h - 420, Math.min(w - 20, 490), 300, false);
             float yy = h - 250;
             for (Skill sk : Skill.values()) {
                 double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
@@ -1507,8 +1506,7 @@ public final class Hud {
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
             rebuildMenu(session);
-            shapes.setColor(0.08f, 0.07f, 0.1f, 0.92f);
-            shapes.rect(menuX, menuY, menuW, menuH);
+            window(shapes, menuX, menuY, menuW, menuH, true);
             for (MenuRow row : menuRows) {
                 shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
@@ -1523,8 +1521,7 @@ public final class Hud {
             shapes.rect(mmX - 1, mmY - 1, mmSize + 2, mmSize + 2);
         }
         if (bigMapOpen) {
-            shapes.setColor(0.04f, 0.04f, 0.06f, 0.94f);
-            shapes.rect(menuX, menuY, menuW, menuH);
+            window(shapes, menuX, menuY, menuW, menuH, true);
         }
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.6f);
@@ -1688,6 +1685,22 @@ public final class Hud {
         shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
     }
 
+    /** Okno w stylu klienta mobilnego: jasna ramka, ciemne wnetrze i (opcjonalnie) pasek tytulu u gory. */
+    private static void window(ShapeRenderer shapes, float fx, float fy, float fw, float fh, boolean titleBar) {
+        shapes.setColor(0.02f, 0.02f, 0.02f, 0.9f);
+        shapes.rect(fx - 1, fy - 1, fw + 2, fh + 2);
+        shapes.setColor(BORDER.r, BORDER.g, BORDER.b, 1f);
+        shapes.rect(fx, fy, fw, fh);
+        shapes.setColor(0.08f, 0.075f, 0.07f, 0.94f);
+        shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
+        if (titleBar) {
+            shapes.setColor(0.2f, 0.17f, 0.12f, 0.95f);
+            shapes.rect(fx + 2, fy + fh - 24, fw - 4, 22);
+            shapes.setColor(BORDER.r, BORDER.g, BORDER.b, 0.7f);
+            shapes.rect(fx + 2, fy + fh - 25, fw - 4, 1);
+        }
+    }
+
     /** Pasek celu: na srodku, chyba ze zaslonilby panel postaci (waski ekran). */
     private float targetBarX(float tw) {
         return Math.max(w / 2f - tw / 2f, barX + barW + 18);
@@ -1754,9 +1767,8 @@ public final class Hud {
     private float bagTipX() { return bagX + slotSize * 2.5f - bagTipW() / 2f; }
 
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
-        shapes.setColor(0.1f, 0.08f, 0.06f, 0.88f);
         float extra = selectedSlot >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
-        shapes.rect(bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
+        window(shapes, bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra, true);
         if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
             shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
             shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);

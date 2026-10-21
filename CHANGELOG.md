@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.184.2] - 2026-10-21
+
+### Zmieniono
+- Okna (księga, sklep, plecak, mapa, karta postaci) mają ramkę i pasek tytułu w stylu klienta mobilnego.
 ## [0.184.1] - 2026-10-21
 
 ### Dodano
