@@ -252,6 +252,8 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
 - [x] Grafika w jednym atlasie tekstur (TileArt)
+- [x] Pasek akcji 10 pol 5x2 z wyborem czar leczacy / atakujacy / mikstura / runa po przytrzymaniu (0.191.0)
+- [ ] Uklad Tibii w jednej bryle: widok gry w ramce, panele obok (nastepny krok)
 - [x] Okna Ekwipunek, Umiejętności, Plecak i Konsola w stylu OTClient (0.186.0)
 - [x] Ramki okien, przyciski i pad z OTClientV8 (MIT) w assets/ui/otc (0.185.0)
 - [x] HUD w stylu klienta mobilnego: joystick, ATAK + 8 akcji na łukach, dolny pasek, minimapa z paskami (0.184.0)

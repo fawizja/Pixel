@@ -29,7 +29,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagkeep|trap   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -251,6 +251,11 @@ public final class DesktopLauncher {
                     gs.hud().openJournal();
                 }
                 if ("battle".equals(open)) ((GameScreen) getScreen()).hud().showBattle(true);
+                if ("picker".equals(open)) ((GameScreen) getScreen()).hud().openPicker(6);
+                if ("pickerrune".equals(open)) {
+                    ((GameScreen) getScreen()).hud().openPicker(6);
+                    ((GameScreen) getScreen()).hud().pickCategory("rune");
+                }
                 if ("chat".equals(open)) {
                     // podglad dymka czatu nad wlasna postacia
                     GameScreen gs = (GameScreen) getScreen();

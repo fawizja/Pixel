@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.191.0] - 2026-10-21
+
+### Zmieniono
+- Pasek akcji jak w Tibii na telefonie: 10 mniejszych pól 5x2 w prawym dolnym rogu, obok UŻYJ i ATAK.
+  Każde pole może trzymać czar, miksturę albo runę (duża ikona i liczba sztuk z plecaka).
+- Długie przytrzymanie pola (0,45 s) otwiera wybór: czar leczący, czar atakujący, mikstura, runa, inny czar,
+  automat albo wyczyszczenie pola. Krótkie dotknięcie używa akcji, puste pole „+” od razu otwiera wybór.
+- Układ zapisuje się osobno dla każdej postaci; stary zapis 4 czarów jest wczytywany. Klawisze 1-9 i 0 na komputerze.
+- Napisy pasków i przycisków nie przebijają już przez otwarte okno.
+
+### Dodano
+- Akcja `item:<klucz>` (także na serwerze): użycie mikstury albo runy z plecaka z pola paska.
+
 ## [0.190.1] - 2026-10-21
 
 ### Dodano

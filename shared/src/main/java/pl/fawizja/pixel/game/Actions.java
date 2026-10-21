@@ -31,6 +31,7 @@ public final class Actions {
             switch (p[0]) {
                 case "cast": s.castSpell(p[1], now); return true;
                 case "craft": s.craft(p[1], now); return true;
+                case "item": return useBarItem(s, p[1], now);
                 case "slot_use": s.useSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_equip": s.equipFromSlot(Integer.parseInt(p[1]), now); return true;
                 case "unequip": s.unequip(pl.fawizja.pixel.item.EquipSlot.valueOf(p[1]), now); return true;
@@ -43,6 +44,15 @@ public final class Actions {
         } catch (RuntimeException e) {
             return false; // zle sformatowana akcja od klienta - ignorujemy
         }
+    }
+
+    /** Pole paska akcji z mikstura albo runa: pierwsza taka sztuka z plecaka. */
+    private static boolean useBarItem(GameSession s, String key, long now) {
+        if (!s.items().containsKey(key)) return false;
+        pl.fawizja.pixel.item.ItemCategory c = s.items().byKey(key).category();
+        if (c != pl.fawizja.pixel.item.ItemCategory.POTION && c != pl.fawizja.pixel.item.ItemCategory.RUNE) return false;
+        s.usePotion(key, now);
+        return true;
     }
 
     private static boolean npc(GameSession s, String[] p, long now) {

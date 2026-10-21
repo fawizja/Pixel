@@ -331,6 +331,12 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.NUM_2: onButton("spell:1"); return true;
                     case Input.Keys.NUM_3: onButton("spell:2"); return true;
                     case Input.Keys.NUM_4: onButton("spell:3"); return true;
+                    case Input.Keys.NUM_5: onButton("spell:4"); return true;
+                    case Input.Keys.NUM_6: onButton("spell:5"); return true;
+                    case Input.Keys.NUM_7: onButton("spell:6"); return true;
+                    case Input.Keys.NUM_8: onButton("spell:7"); return true;
+                    case Input.Keys.NUM_9: onButton("spell:8"); return true;
+                    case Input.Keys.NUM_0: onButton("spell:9"); return true;
                     case Input.Keys.Q: onButton("potion_hp"); return true;
                     case Input.Keys.F: onButton("potion_mp"); return true;
                     case Input.Keys.K: onButton("book"); return true;
@@ -531,8 +537,9 @@ public final class GameScreen extends ScreenAdapter {
                         if (net != null) net.send("TARGET", String.valueOf(m.id()));
                     }
                 } else if (id.startsWith("spell:")) {
-                    String key = hud.barSpell(Integer.parseInt(id.substring(6)));
-                    if (key != null) act("cast:" + key, t);
+                    // pole paska: czar, mikstura albo runa - akcja gotowa do wyslania
+                    String entry = hud.barEntry(Integer.parseInt(id.substring(6)));
+                    if (entry != null) act(entry, t);
                 } else {
                     // use, run, torch, pick, defensive, fish, potion_*, cast:, craft:, slot_move:, npc:*
                     act(id, t);

@@ -4,22 +4,35 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * Wlasny uklad paska czarow: kazdy z 4 przyciskow moze miec przypisany czar, a pusty przycisk
- * dziala automatycznie (najlepsze leczenie, atak, obszar, poswiata). Przypisanie nieznanego juz czaru
- * (np. po zmianie postaci) wraca do automatu. Zapis jako "klucz,klucz,-,-" (na kliencie w Preferences).
+ * Wlasny uklad paska akcji (10 pol jak w Tibii na telefonie). Kazde pole trzyma akcje:
+ * "cast:klucz" (czar), "item:klucz" (mikstura albo runa z plecaka), "potion_hp"/"potion_mp"
+ * (najsilniejsza mikstura) albo {@link #NONE} (pole celowo puste). Pole bez wpisu dziala automatycznie.
+ * Przypisany czar, ktorego postac nie zna (np. po zmianie postaci), wraca do automatu.
+ * Zapis jako "cast:mend,-,item:sudden_death,..." (na kliencie w Preferences); stary zapis
+ * samych kluczy czarow ("mend,-,-,-") jest czytany jako czary.
  */
 public final class SpellBar {
 
-    public static final int SLOTS = 4;
+    public static final int SLOTS = 10;
+    /** Pole wyczyszczone przez gracza: nie bierze wyboru automatycznego. */
+    public static final String NONE = "none";
+
+    private static final String KEY = "[a-z0-9_]{1,40}";
 
     private final String[] custom = new String[SLOTS];
 
     public String custom(int slot) { return slot >= 0 && slot < SLOTS ? custom[slot] : null; }
 
-    /** Przypisuje czar do przycisku; ponowne przypisanie tego samego czaru przywraca automat. */
-    public void assign(int slot, String spellKey) {
+    /** Przypisuje akcje do pola; ponowne przypisanie tej samej akcji (albo null) przywraca automat. */
+    public void assign(int slot, String entry) {
         if (slot < 0 || slot >= SLOTS) return;
-        custom[slot] = spellKey == null || spellKey.equals(custom[slot]) ? null : spellKey;
+        custom[slot] = entry == null || entry.equals(custom[slot]) || !valid(entry) ? null : entry;
+    }
+
+    /** Ustawia akcje bez przelaczania (wybor z listy zawsze ustawia). */
+    public void set(int slot, String entry) {
+        if (slot < 0 || slot >= SLOTS) return;
+        custom[slot] = entry == null || !valid(entry) ? null : entry;
     }
 
     public boolean isCustom() {
@@ -27,11 +40,22 @@ public final class SpellBar {
         return false;
     }
 
-    /** Ostateczny pasek: przypisany czar, jesli postac go zna, w przeciwnym razie wybor automatyczny. */
-    public String[] resolve(String[] auto, Set<String> known) {
+    /** Czy tekst jest poprawna akcja pola (chroni przed smieciami w zapisie). */
+    public static boolean valid(String e) {
+        return e.equals(NONE) || e.equals("potion_hp") || e.equals("potion_mp") || e.matches("(cast|item):" + KEY);
+    }
+
+    /**
+     * Ostateczny pasek: wpis gracza (czar tylko, gdy postac go zna), inaczej wybor automatyczny.
+     * Puste pole ({@link #NONE} albo brak automatu) daje null.
+     */
+    public String[] resolve(String[] auto, Set<String> knownSpells) {
         String[] out = new String[SLOTS];
         for (int i = 0; i < SLOTS; i++) {
-            out[i] = custom[i] != null && known.contains(custom[i]) ? custom[i] : (auto != null && i < auto.length ? auto[i] : null);
+            String c = custom[i];
+            boolean ok = c != null && (!c.startsWith("cast:") || knownSpells.contains(c.substring(5)));
+            String e = ok ? c : (auto != null && i < auto.length ? auto[i] : null);
+            out[i] = NONE.equals(e) ? null : e;
         }
         return out;
     }
@@ -51,7 +75,9 @@ public final class SpellBar {
         String[] p = s.split(",", -1);
         for (int i = 0; i < Math.min(SLOTS, p.length); i++) {
             String k = p[i].trim();
-            if (!k.isEmpty() && !k.equals("-") && k.matches("[a-z0-9_]{1,40}")) bar.custom[i] = k;
+            if (k.isEmpty() || k.equals("-")) continue;
+            if (valid(k)) bar.custom[i] = k;
+            else if (k.matches(KEY)) bar.custom[i] = "cast:" + k; // stary zapis: sam klucz czaru
         }
         return bar;
     }

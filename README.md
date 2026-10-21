@@ -61,8 +61,8 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Diagnostyka i ustawienia | `i` w prawym gornym rogu, wiersze ustawien pod panelem | F3, klikniecie wiersza |
 | Nastepny cel (atak automatyczny) | ATAK w pasku akcji (prawy dolny rog) albo dotkniecie potwora | Spacja / C |
 | Postawa obronna (zielony = wlaczona) | TARCZA | V |
-| Czary z paska (leczenie, atak, obszar, swiatlo) | gorny rzad paska akcji (pusty "+" = dotknij, aby przypisac czar) | 1-4 |
-| Mikstura zdrowia / many | HP / MP | Q / F |
+| Pasek akcji 5x2: czary, mikstury, runy | dotknij pola; przytrzymaj, aby wybrac czar leczacy, atakujacy, miksture albo rune | 1-9, 0 |
+| Mikstura zdrowia / many | pola 5 i 6 paska (automat) | Q / F |
 | Ksiega czarow i rzemiosla | KSIEGA | K |
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |
 | Okna Ekwipunek i Umiejetnosci (dotkniecie przedmiotu zdejmuje go) | dotknij paskow HP/MP | P |

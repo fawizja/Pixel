@@ -114,10 +114,18 @@ public final class Hud {
     private int npcQty = 1;
     private static final int[] QUANTITIES = {1, 5, 25, 100};
     private boolean charOpen;
-    private final HudButton potionHp = new HudButton("potion_hp", "HP");
-    private final HudButton potionMp = new HudButton("potion_mp", "MP");
-    private final HudButton[] spellButtons = new HudButton[4];
-    private final String[] barSpells = new String[4];
+    /** Pasek akcji 5x2 jak w Tibii na telefonie: czar, mikstura albo runa w kazdym polu. */
+    private final HudButton[] spellButtons = new HudButton[pl.fawizja.pixel.settings.SpellBar.SLOTS];
+    /** Akcja kazdego pola ("cast:...", "item:...", "potion_hp"...) albo null dla pustego. */
+    private final String[] barEntries = new String[pl.fawizja.pixel.settings.SpellBar.SLOTS];
+    /** Dlugie przytrzymanie pola paska otwiera wybor akcji; krotkie dotkniecie uzywa jej po puszczeniu. */
+    private static final long LONG_PRESS_MS = 450;
+    private int pressSlot = -1, pressPointer = -1;
+    private long pressStart;
+    private Actions pressActions;
+    /** Wybor akcji dla pola (-1 = zamkniety) i wybrany rodzaj (null = lista rodzajow). */
+    private int pickSlot = -1;
+    private String pickCat;
     /** Wlasny uklad paska (null = tylko automat) i przycisk, ktoremu przypisujemy czar w ksiedze (-1 = brak). */
     private pl.fawizja.pixel.settings.SpellBar customBar = new pl.fawizja.pixel.settings.SpellBar();
     private int assignSlot = -1;
@@ -285,8 +293,6 @@ public final class Hud {
         buttons.add(talk);
         buttons.add(chat);
         buttons.add(mount);
-        buttons.add(potionHp);
-        buttons.add(potionMp);
         for (int i = 0; i < spellButtons.length; i++) {
             spellButtons[i] = new HudButton("spell:" + i, "");
             buttons.add(spellButtons[i]);
@@ -309,23 +315,28 @@ public final class Hud {
         float jr = Math.min(70, Math.min(w, h) * 0.16f);
         joystick.layout(margin + jr * 1.3f, margin + jr * 1.3f, jr);
         float br = Math.max(26, jr * 0.48f);
-        // pasek akcji jak w Tibii: kwadratowe pola 4x2 w prawym dolnym rogu
-        // (gora: czary 1-4, dol: mikstury HP/MP, UZYJ, ATAK)
-        float cell = Math.max(34, Math.min(46, br * 1.35f));
+        // pasek akcji jak w Tibii na telefonie: 10 kwadratowych pol 5x2 w prawym dolnym rogu
+        // (czary, mikstury, runy - dlugie przytrzymanie zmienia pole), obok UZYJ i ATAK
+        float cell = Math.max(32, Math.min(42, br * 1.2f));
         float gap = 3;
-        float abW = cell * 4 + gap * 3;
+        int cols = spellButtons.length / 2;
+        float abW = cell * cols + gap * (cols - 1);
         float abX = w - margin - abW;
-        HudButton[][] rows = {{spellButtons[0], spellButtons[1], spellButtons[2], spellButtons[3]},
-                {potionHp, potionMp, use, target}};
-        for (int r = 0; r < rows.length; r++) {
-            for (int c = 0; c < 4; c++) {
-                HudButton b = rows[r][c];
-                b.x = abX + c * (cell + gap) + cell / 2f;
-                b.y = margin + (1 - r) * (cell + gap) + cell / 2f;
-                b.r = cell / 2f;
-                b.hw = cell / 2f;
-            }
+        for (int i = 0; i < spellButtons.length; i++) {
+            HudButton b = spellButtons[i];
+            b.x = abX + (i % cols) * (cell + gap) + cell / 2f;
+            b.y = margin + (1 - i / cols) * (cell + gap) + cell / 2f;
+            b.r = cell / 2f;
+            b.hw = cell / 2f;
         }
+        HudButton[] side = {use, target};
+        for (int i = 0; i < side.length; i++) {
+            side[i].x = abX - gap * 3 - cell / 2f;
+            side[i].y = margin + (1 - i) * (cell + gap) + cell / 2f;
+            side[i].r = cell / 2f;
+            side[i].hw = cell / 2f;
+        }
+        abX -= gap * 3 + cell;
         float clusterTop = margin + cell * 2 + gap;
         // dolny pasek (plecak, ksiega, czat i przyciski zalezne od sytuacji) miedzy padem a paskiem akcji
         hbLeft = margin + jr * 2.6f + 10;
@@ -378,8 +389,10 @@ public final class Hud {
     private final HudButton[] hotbar = {bag, book, chat, talk, pick, fish, mount};
     /** Kwadratowe pola jak w Tibii (pasek akcji i przyciski obok ekwipunku). */
     private HudButton[] slotButtons() {
-        return new HudButton[] {spellButtons[0], spellButtons[1], spellButtons[2], spellButtons[3],
-                potionHp, potionMp, use, target, run, defensive, torch};
+        HudButton[] out = java.util.Arrays.copyOf(spellButtons, spellButtons.length + 5);
+        HudButton[] rest = {use, target, run, defensive, torch};
+        System.arraycopy(rest, 0, out, spellButtons.length, rest.length);
+        return out;
     }
 
     private static void place(HudButton b, float cx, float cy, float dist, float deg, float r) {
@@ -636,7 +649,8 @@ public final class Hud {
     public boolean characterOpen() { return charOpen; }
 
     /** Klucz czaru na pasku (0..3) albo null. */
-    public String barSpell(int i) { return i >= 0 && i < barSpells.length ? barSpells[i] : null; }
+    /** Akcja pola paska (do wyslania jak przycisk) albo null dla pustego pola. */
+    public String barEntry(int i) { return i >= 0 && i < barEntries.length ? barEntries[i] : null; }
 
     /**
      * Automatyczny pasek: najlepsze leczenie, najlepszy atak na cel, atak obszarowy (lub drugi atak),
@@ -655,18 +669,46 @@ public final class Hud {
             }
         }
         SpellType[] bar = {heal, attack, area != null ? area : attack2, extra};
-        String[] auto = new String[4];
-        for (int i = 0; i < 4; i++) auto[i] = bar[i] == null ? null : bar[i].key();
+        String[] auto = new String[pl.fawizja.pixel.settings.SpellBar.SLOTS];
+        for (int i = 0; i < bar.length; i++) auto[i] = bar[i] == null ? null : "cast:" + bar[i].key();
+        auto[4] = "potion_hp";
+        auto[5] = "potion_mp";
+        // pierwsza runa z plecaka (bez pustej) trafia sama na wolne pole
+        for (ItemStack st : session.character().backpack().contents()) {
+            ItemType it = session.items().get(st.itemId());
+            if (it.category() == pl.fawizja.pixel.item.ItemCategory.RUNE && session.spells().registry().find(it.key()) != null) {
+                auto[6] = "item:" + it.key();
+                break;
+            }
+        }
         java.util.Set<String> knownKeys = new java.util.HashSet<>();
         for (SpellType sp : known) knownKeys.add(sp.key());
         String[] resolved = customBar.resolve(auto, knownKeys);
-        for (int i = 0; i < 4; i++) {
-            SpellType sp = resolved[i] == null ? null : session.spells().registry().get(resolved[i]);
-            barSpells[i] = sp == null ? null : sp.key();
-            // pusty przycisk akcji zostaje widoczny jako "+" - dotkniecie przypisuje do niego czar
-            spellButtons[i].visible = true;
-            spellButtons[i].label = sp == null ? "+" : shortName(sp.name());
-            spellButtons[i].labelBottom = sp != null;
+        PlayerCharacter pc = session.character();
+        for (int i = 0; i < spellButtons.length; i++) {
+            String e = resolved[i];
+            HudButton b = spellButtons[i];
+            b.visible = true;
+            b.icon = null;
+            b.labelBottom = false;
+            barEntries[i] = null;
+            if (e != null && e.startsWith("cast:")) {
+                SpellType sp = session.spells().registry().find(e.substring(5));
+                if (sp != null) {
+                    barEntries[i] = e;
+                    b.label = shortName(sp.name());
+                    b.labelBottom = true;
+                }
+            } else if (e != null) {
+                String key = e.equals("potion_hp") ? session.quickPotion(false) : e.equals("potion_mp") ? session.quickPotion(true) : e.substring(5);
+                if (session.items().containsKey(key)) {
+                    barEntries[i] = e;
+                    b.icon = itemIcon(session, key);
+                    b.label = String.valueOf(pc.backpack().count(session.items().byKey(key).id()));
+                }
+            }
+            // puste pole zostaje widoczne jako "+" - dotkniecie otwiera wybor akcji
+            if (barEntries[i] == null) b.label = "+";
         }
     }
 
@@ -682,6 +724,10 @@ public final class Hud {
         menuRows.clear();
         if (trade != null) {
             rebuildTradeMenu(session);
+            return;
+        }
+        if (pickSlot >= 0) {
+            rebuildPickMenu(session);
             return;
         }
         if (playerMenu != null) {
@@ -769,6 +815,116 @@ public final class Hud {
             row.h = rowH - 3;
         }
     }
+    /** Otwiera wybor akcji dla pola paska (rodzaj, potem konkretny czar, mikstura albo runa). */
+    public void openPicker(int slot) {
+        if (trade != null || slot < 0 || slot >= spellButtons.length) return;
+        playerMenu = null;
+        rankingView = null;
+        friendsView = null;
+        marketView = null;
+        achievementsView = false;
+        npcMode = false;
+        assignSlot = -1;
+        bagOpen = false;
+        menuOpen = true;
+        pickSlot = slot;
+        pickCat = null;
+    }
+
+    public int pickerSlot() { return pickSlot; }
+
+    /** Czy punkt lezy pod otwartym oknem (napisy pod nim nie przebijaja przez okno). */
+    private boolean underMenu(float px, float py) {
+        return (menuOpen || bigMapOpen) && px >= menuX && px <= menuX + menuW && py >= menuY && py <= menuY + menuH;
+    }
+
+    /** Rodzaj w otwartym wyborze akcji (heal, attack, potion, rune, support). */
+    public void pickCategory(String cat) { if (pickSlot >= 0) pickCat = cat; }
+
+    private static String pickTitle(String cat) {
+        switch (cat) {
+            case "heal": return "czar leczący";
+            case "attack": return "czar atakujący";
+            case "support": return "inny czar";
+            case "potion": return "mikstura";
+            default: return "runa";
+        }
+    }
+
+    private void pickRow(String a, GameSession session, Actions actions) {
+        if (a.startsWith("cat:")) {
+            pickCat = a.substring(4);
+            return;
+        }
+        if (a.equals("back")) {
+            pickCat = null;
+            return;
+        }
+        if (a.equals("none")) return; // wiersz tylko informuje
+        customBar.set(pickSlot, a.equals("auto") ? null : a.equals("clear") ? pl.fawizja.pixel.settings.SpellBar.NONE : a.substring(4));
+        updateBar(session);
+        actions.onButton("bar_saved");
+        menuOpen = false;
+        pickSlot = -1;
+        pickCat = null;
+    }
+
+    private void rebuildPickMenu(GameSession session) {
+        PlayerCharacter pc = session.character();
+        List<MenuRow> rows = new ArrayList<>();
+        if (pickCat == null) {
+            rows.add(new MenuRow("pick:cat:heal", "Czar leczący", "leczenie siebie", true));
+            rows.add(new MenuRow("pick:cat:attack", "Czar atakujący", "na cel albo obszarowy", true));
+            rows.add(new MenuRow("pick:cat:potion", "Mikstura", "zdrowie albo mana z plecaka", true));
+            rows.add(new MenuRow("pick:cat:rune", "Runa", "z plecaka, bez many", true));
+            rows.add(new MenuRow("pick:cat:support", "Inny czar", "światło, tworzenie run i strzał", true));
+            rows.add(new MenuRow("pick:auto", "Automat", "gra sama dobiera akcję pola", true));
+            rows.add(new MenuRow("pick:clear", "Wyczyść pole", "pole zostaje puste", true));
+        } else if (pickCat.equals("potion") || pickCat.equals("rune")) {
+            boolean potion = pickCat.equals("potion");
+            if (potion) {
+                rows.add(new MenuRow("pick:set:potion_hp", "Najlepsza mikstura zdrowia", "najsilniejsza dozwolona z plecaka", true));
+                rows.add(new MenuRow("pick:set:potion_mp", "Najlepsza mikstura many", "najsilniejsza dozwolona z plecaka", true));
+            }
+            List<ItemType> list = new ArrayList<>();
+            for (ItemType it : session.items().all()) {
+                boolean rune = it.category() == pl.fawizja.pixel.item.ItemCategory.RUNE && session.spells().registry().find(it.key()) != null;
+                boolean pot = it.category() == pl.fawizja.pixel.item.ItemCategory.POTION;
+                if ((potion ? pot : rune) && it.usableBy(pc.vocation())) list.add(it);
+            }
+            list.sort(java.util.Comparator.comparingInt(ItemType::minLevel).thenComparing(ItemType::name));
+            for (ItemType it : list) {
+                int n = pc.backpack().count(it.id());
+                rows.add(new MenuRow("pick:set:item:" + it.key(), it.name(),
+                        "w plecaku: " + n + (it.minLevel() > 0 ? ", poz. " + it.minLevel() : ""), pc.level() >= it.minLevel()));
+            }
+        } else {
+            for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
+                pl.fawizja.pixel.magic.SpellKind k = sp.kind();
+                boolean match = pickCat.equals("heal") ? k == pl.fawizja.pixel.magic.SpellKind.HEAL_SELF
+                        : pickCat.equals("attack") ? k.isOffensive() : !k.isHeal() && !k.isOffensive();
+                if (!match) continue;
+                boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
+                rows.add(new MenuRow(ok ? "pick:set:cast:" + sp.key() : "pick:none", sp.name(),
+                        sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : ""), ok));
+            }
+            if (rows.isEmpty()) rows.add(new MenuRow("pick:none", "Brak czarów tego rodzaju", "dla tej profesji", false));
+        }
+        if (pickCat != null) rows.add(new MenuRow("pick:back", "Wstecz", "inny rodzaj akcji", true));
+        int perCol = Math.max(3, (int) ((menuH - 50) / rowH));
+        int max = perCol * 2;
+        if (rows.size() > max) rows.subList(max - (pickCat != null ? 1 : 0), rows.size() - (pickCat != null ? 1 : 0)).clear();
+        float colW = (menuW - 30) / 2f;
+        for (int i = 0; i < rows.size(); i++) {
+            MenuRow row = rows.get(i);
+            row.x = menuX + 10 + (i / perCol) * (colW + 10);
+            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
+            row.w = colW;
+            row.h = rowH - 3;
+            menuRows.add(row);
+        }
+    }
+
     private void rebuildPlayerMenu() {
         PlayerMenu pm = playerMenu;
         List<MenuRow> rows = new ArrayList<>();
@@ -1375,10 +1531,12 @@ public final class Hud {
                         bookPage++;
                     } else if (row.action.equals("book:journal")) {
                         openJournal();
+                    } else if (row.action.startsWith("pick:")) {
+                        pickRow(row.action.substring(5), session, actions);
                     } else if (row.action.equals("book:assign")) {
-                        assignSlot = assignSlot >= 3 ? -1 : assignSlot + 1;
+                        assignSlot = assignSlot >= spellButtons.length - 1 ? -1 : assignSlot + 1;
                     } else if (assignSlot >= 0 && row.action.startsWith("cast:")) {
-                        customBar.assign(assignSlot, row.action.substring(5));
+                        customBar.assign(assignSlot, row.action);
                         updateBar(session);
                         actions.onButton("bar_saved");
                     } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none") && !row.action.equals("market:none") && !row.action.equals("ach:none")) {
@@ -1410,10 +1568,16 @@ public final class Hud {
             }
         }
         for (int i = 0; i < spellButtons.length; i++) {
-            if (barSpells[i] == null && spellButtons[i].hit(p.x, p.y)) {
-                openAssign(i);
-                return true;
+            if (!spellButtons[i].hit(p.x, p.y)) continue;
+            if (barEntries[i] == null) {
+                openPicker(i);
+            } else {
+                pressSlot = i;
+                pressPointer = pointer;
+                pressStart = com.badlogic.gdx.utils.TimeUtils.millis();
+                pressActions = actions;
             }
+            return true;
         }
         for (HudButton b : buttons) {
             if (b.hit(p.x, p.y)) {
@@ -1433,6 +1597,12 @@ public final class Hud {
     }
 
     public boolean touchUp(int sx, int sy, int pointer) {
+        if (pressSlot >= 0 && pointer == pressPointer) {
+            // krotkie dotkniecie pola: uzyj akcji (dlugie juz otworzylo wybor i wyczyscilo pressSlot)
+            pressActions.onButton("spell:" + pressSlot);
+            pressSlot = -1;
+            return true;
+        }
         return joystick.touchUp(pointer);
     }
 
@@ -1458,7 +1628,7 @@ public final class Hud {
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         defensive.active = pc.isDefensive();
-        book.active = menuOpen && !npcMode && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null && !achievementsView;
+        book.active = menuOpen && !npcMode && pickSlot < 0 && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null && !achievementsView;
         if (playerMenu != null && !menuOpen) playerMenu = null;
         if (rankingView != null && !menuOpen) rankingView = null;
         if (friendsView != null && !menuOpen) friendsView = null;
@@ -1476,10 +1646,14 @@ public final class Hud {
             npcMode = false;
         }
         updateBar(session);
-        int hpCount = pc.backpack().count(session.items().byKey(session.quickPotion(false)).id());
-        int mpCount = pc.backpack().count(session.items().byKey(session.quickPotion(true)).id());
-        potionHp.label = "HP " + hpCount;
-        potionMp.label = "MP " + mpCount;
+        if (pressSlot >= 0 && com.badlogic.gdx.utils.TimeUtils.millis() - pressStart >= LONG_PRESS_MS) {
+            openPicker(pressSlot);
+            pressSlot = -1;
+        }
+        if (!menuOpen) {
+            pickSlot = -1;
+            pickCat = null;
+        }
         Monster tgt = session.combat().target();
         currentTarget = tgt;
         target.active = tgt != null;
@@ -1489,8 +1663,6 @@ public final class Hud {
         defensive.icon = itemIcon(session, "wooden_shield");
         torch.icon = itemIcon(session, "torch");
         fish.icon = itemIcon(session, "fishing_rod");
-        potionHp.icon = itemIcon(session, session.quickPotion(false));
-        potionMp.icon = itemIcon(session, session.quickPotion(true));
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -1563,8 +1735,8 @@ public final class Hud {
         }
         for (int i = 0; i < spellButtons.length; i++) {
             HudButton b = spellButtons[i];
-            if (!b.visible || barSpells[i] == null) continue;
-            SpellType sp = session.spells().registry().get(barSpells[i]);
+            if (!b.visible || barEntries[i] == null || !barEntries[i].startsWith("cast:")) continue;
+            SpellType sp = session.spells().registry().get(barEntries[i].substring(5));
             float in = b.r - 3;
             shapes.setColor(spellColor(sp));
             shapes.rect(b.x - in, b.y - in, in * 2, in * 2);
@@ -1641,23 +1813,32 @@ public final class Hud {
         batch.begin();
         drawBarOverlays(batch);
         font.setColor(Color.WHITE);
-        text(batch, pc.health() + " / " + pc.maxHealth(), x + 4, y + 10);
-        text(batch, pc.mana() + " / " + pc.maxMana(), x + 4, y - 7);
         int minute = clock.minuteOfDay(serverTimeMs);
         String floor = pc.position().z() == 0 ? "0" : (pc.position().z() > 0 ? "+" + pc.position().z() : String.valueOf(pc.position().z()));
-        text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
-        text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
+        if (!underMenu(x + barW / 2f, y - 30)) {
+            text(batch, pc.health() + " / " + pc.maxHealth(), x + 4, y + 10);
+            text(batch, pc.mana() + " / " + pc.maxMana(), x + 4, y - 7);
+            text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
+            text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
+        }
 
         drawConsole(batch);
 
         for (HudButton b : buttons) {
-            if (!b.visible) continue;
+            if (!b.visible || underMenu(b.x, b.y)) continue;
             layout.setText(font, b.label);
             float room = (b.hw > 0 ? b.hw : b.r) * 1.8f;
             float fit = layout.width > room ? room / layout.width : 1f;
             if (b.labelBottom) {
                 font.getData().setScale(Math.min(fit, Math.min(0.65f, b.r / 32f)));
                 centered(batch, b.label, b.x, b.y - b.r * 0.6f);
+            } else if (b.icon != null && b.id.startsWith("spell:")) {
+                // pole paska z mikstura albo runa: duza ikona, liczba sztuk w prawym dolnym rogu
+                float is = b.r * 1.7f;
+                batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
+                font.getData().setScale(Math.min(0.7f, b.r / 28f));
+                layout.setText(font, b.label);
+                text(batch, b.label, b.x + b.hw - 3 - layout.width, b.y - b.r + 3 + layout.height);
             } else if (b.icon != null) {
                 float is = b.r * 1.15f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.3f, is, is);
@@ -1688,6 +1869,9 @@ public final class Hud {
                 text(batch, bestiaryMode ? "Bestiariusz - " + me.name() + (monsterSpecies > 0
                                 ? " (poznane gatunki: " + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
                         : "Osiągnięcia " + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length,
+                        menuX + 10, menuY + menuH - 14);
+            } else if (trade == null && pickSlot >= 0) {
+                text(batch, "Pole " + (pickSlot + 1) + " paska: " + (pickCat == null ? "co ma robić?" : pickTitle(pickCat)),
                         menuX + 10, menuY + menuH - 14);
             } else if (trade == null && marketView != null) {
                 text(batch, "Rynek graczy (" + marketView.total() + " ofert)", menuX + 10, menuY + menuH - 14);
