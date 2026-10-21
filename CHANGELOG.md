@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.171.0] - 2026-10-21
+
+### Dodano
+- Czary na poziom 100, po jednym dla profesji: Meteor (czarodziej), Śnieżyca (druid), Ostrze światła (paladyn)
+  i Pięść feniksa (mnich). Dotąd najsilniejsze czary kończyły się na poziomie 60.
 ## [0.170.1] - 2026-10-21
 
 ### Dodano

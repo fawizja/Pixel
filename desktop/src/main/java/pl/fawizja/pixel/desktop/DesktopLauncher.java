@@ -21,6 +21,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
  *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
+ *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
@@ -87,6 +88,9 @@ public final class DesktopLauncher {
                 ((GameScreen) getScreen()).session().teleport(
                         new Position(Integer.parseInt(p[0].trim()), Integer.parseInt(p[1].trim()), Integer.parseInt(p[2].trim())), 0L);
                 teleported = true;
+                int level = Integer.getInteger("pixel.level", 0);
+                pl.fawizja.pixel.character.PlayerCharacter me = ((GameScreen) getScreen()).session().character();
+                while (me.level() < level) me.addExperience(Math.max(1000L, me.experience()));
                 String open = System.getProperty("pixel.open");
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
