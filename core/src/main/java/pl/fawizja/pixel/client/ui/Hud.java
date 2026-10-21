@@ -666,6 +666,7 @@ public final class Hud {
             // pusty przycisk akcji zostaje widoczny jako "+" - dotkniecie przypisuje do niego czar
             spellButtons[i].visible = true;
             spellButtons[i].label = sp == null ? "+" : shortName(sp.name());
+            spellButtons[i].labelBottom = sp != null;
         }
     }
 
@@ -1561,10 +1562,10 @@ public final class Hud {
             HudButton b = spellButtons[i];
             if (!b.visible || barSpells[i] == null) continue;
             SpellType sp = session.spells().registry().get(barSpells[i]);
-            shapes.setColor(sp.kind() == SpellKind.HEAL_SELF ? new Color(0.2f, 0.6f, 0.3f, 0.55f)
-                    : sp.kind().isOffensive() ? new Color(0.65f, 0.2f, 0.15f, 0.55f) : new Color(0.3f, 0.3f, 0.6f, 0.55f));
             float in = b.r - 3;
+            shapes.setColor(spellColor(sp));
             shapes.rect(b.x - in, b.y - in, in * 2, in * 2);
+            spellGlyph(shapes, sp.kind(), b.x, b.y + in * 0.2f, in * 0.55f);
             long rem = session.spells().cooldowns().remaining(sp, serverTimeMs);
             if (rem > 0) {
                 // odnowienie jak w Tibii: ciemna zaslona opadajaca z gory
@@ -1651,7 +1652,10 @@ public final class Hud {
             layout.setText(font, b.label);
             float room = (b.hw > 0 ? b.hw : b.r) * 1.8f;
             float fit = layout.width > room ? room / layout.width : 1f;
-            if (b.icon != null) {
+            if (b.labelBottom) {
+                font.getData().setScale(Math.min(fit, Math.min(0.65f, b.r / 32f)));
+                centered(batch, b.label, b.x, b.y - b.r * 0.6f);
+            } else if (b.icon != null) {
                 float is = b.r * 1.15f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.3f, is, is);
                 font.getData().setScale(Math.min(fit, Math.min(0.7f, b.r / 30f)));
@@ -1756,6 +1760,60 @@ public final class Hud {
         shapes.rect(fx, fy, fw, fh);
         shapes.setColor(0.07f, 0.065f, 0.06f, 0.78f);
         shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
+    }
+
+    /** Tlo pola czaru wg zywiolu, jak kolorowe ikony czarow w Tibii. */
+    private static Color spellColor(SpellType sp) {
+        if (sp.kind().isHeal()) return new Color(0.2f, 0.55f, 0.35f, 0.85f);
+        if (sp.kind() == SpellKind.LIGHT) return new Color(0.6f, 0.52f, 0.15f, 0.85f);
+        switch (sp.damageType()) {
+            case FIRE: return new Color(0.7f, 0.25f, 0.1f, 0.85f);
+            case ICE: return new Color(0.25f, 0.5f, 0.75f, 0.85f);
+            case EARTH: return new Color(0.3f, 0.5f, 0.15f, 0.85f);
+            case ENERGY: return new Color(0.45f, 0.25f, 0.7f, 0.85f);
+            case HOLY: return new Color(0.75f, 0.65f, 0.25f, 0.85f);
+            case DEATH: return new Color(0.3f, 0.2f, 0.3f, 0.85f);
+            default: return new Color(0.45f, 0.35f, 0.25f, 0.85f);
+        }
+    }
+
+    /** Prosty znak rodzaju czaru: krzyz (leczenie), pocisk (cel), wybuch (obszar), slonce (swiatlo), runa (tworzenie). */
+    private static void spellGlyph(ShapeRenderer s, SpellKind kind, float cx, float cy, float r) {
+        s.setColor(1f, 1f, 1f, 0.85f);
+        float t = Math.max(2f, r * 0.28f);
+        switch (kind) {
+            case HEAL_SELF:
+            case RUNE_HEAL:
+                s.rect(cx - t / 2f, cy - r, t, r * 2);
+                s.rect(cx - r, cy - t / 2f, r * 2, t);
+                break;
+            case ATTACK_TARGET:
+            case RUNE_TARGET:
+                s.rectLine(cx - r, cy - r, cx + r * 0.4f, cy + r * 0.4f, t);
+                s.triangle(cx + r, cy + r, cx + r * 0.05f, cy + r * 0.7f, cx + r * 0.7f, cy + r * 0.05f);
+                break;
+            case ATTACK_AREA:
+            case RUNE_AREA:
+                s.circle(cx, cy, r * 0.45f, 16);
+                for (int i = 0; i < 8; i++) {
+                    double a = Math.PI / 4 * i;
+                    s.rectLine(cx + (float) Math.cos(a) * r * 0.6f, cy + (float) Math.sin(a) * r * 0.6f,
+                            cx + (float) Math.cos(a) * r, cy + (float) Math.sin(a) * r, t * 0.7f);
+                }
+                break;
+            case LIGHT:
+                s.circle(cx, cy, r * 0.55f, 16);
+                for (int i = 0; i < 4; i++) {
+                    double a = Math.PI / 4 + Math.PI / 2 * i;
+                    s.rectLine(cx + (float) Math.cos(a) * r * 0.7f, cy + (float) Math.sin(a) * r * 0.7f,
+                            cx + (float) Math.cos(a) * r, cy + (float) Math.sin(a) * r, t * 0.7f);
+                }
+                break;
+            default:
+                s.rect(cx - r * 0.6f, cy - r * 0.8f, r * 1.2f, r * 1.6f);
+                s.setColor(0, 0, 0, 0.4f);
+                s.rect(cx - r * 0.3f, cy - r * 0.4f, r * 0.6f, r * 0.8f);
+        }
     }
 
     /** Wznawia ShapeRenderer po wstawce batcha (batch.end() wylacza mieszanie - polprzezroczystosc znika). */

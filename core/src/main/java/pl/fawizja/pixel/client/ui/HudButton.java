@@ -13,6 +13,8 @@ public final class HudButton {
     public float hw;
     /** Ikona przedmiotu nad etykieta (np. miecz na przycisku ataku); null = sama etykieta. */
     public com.badlogic.gdx.graphics.g2d.TextureRegion icon;
+    /** Etykieta mala, u dolu pola (nad nia rysowany jest znak czaru). */
+    public boolean labelBottom;
 
     public HudButton(String id, String label) {
         this.id = id;

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.189.1] - 2026-10-21
+
+### Zmieniono
+- Pola czarów w pasku akcji mają kolor żywiołu (ogień, lód, ziemia, energia, święty, śmierć) i znak rodzaju czaru:
+  krzyż – leczenie, pocisk – atak na cel, wybuch – obszar, słońce – światło. Nazwa jest małym napisem u dołu.
 ## [0.189.0] - 2026-10-21
 
 ### Dodano
