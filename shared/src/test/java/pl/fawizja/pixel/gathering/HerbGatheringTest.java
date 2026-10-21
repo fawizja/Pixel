@@ -50,6 +50,13 @@ class HerbGatheringTest {
 
         Actions.apply(s, "use", 1000 + HerbGathering.REGROW_MS);
         assertTrue(pc.backpack().count(herb) > got, "regrown after 10 minutes");
+        assertEquals(pc.backpack().count(herb), pc.stats().herbs(), "herbs are counted for the Zielarz achievement");
+        pl.fawizja.pixel.character.CharacterStats back = new pl.fawizja.pixel.character.CharacterStats();
+        back.restore(pc.stats().encode());
+        assertEquals(pc.stats().herbs(), back.herbs());
+        back.recordHerbs(50);
+        pc.stats().copyFrom(back);
+        assertTrue(pl.fawizja.pixel.achievement.Achievement.HERBS_50.reached(pc));
     }
 
     @Test

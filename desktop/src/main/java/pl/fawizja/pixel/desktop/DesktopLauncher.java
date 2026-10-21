@@ -24,6 +24,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
+ *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagkeep|trap   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
@@ -253,6 +254,8 @@ public final class DesktopLauncher {
                 }
                 String button = System.getProperty("pixel.button");
                 if (button != null) ((GameScreen) getScreen()).press(button);
+                String button2 = System.getProperty("pixel.button2");
+                if (button2 != null) ((GameScreen) getScreen()).press(button2);
                 String tap = System.getProperty("pixel.tap");
                 if (tap != null) {
                     String[] w = tap.split(",");

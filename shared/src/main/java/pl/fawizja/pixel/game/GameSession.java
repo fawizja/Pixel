@@ -1543,6 +1543,7 @@ public final class GameSession {
                     log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
                     return true;
                 }
+                pc.stats().recordHerbs(r.count());
                 log.add(nowMs, EventLog.Kind.LOOT, "Zebrano: " + r.count() + "x " + items.get(id).name()
                         + " (masz " + pc.backpack().count(id) + "; 4 ziela = mikstura zdrowia w księdze).");
                 return true;

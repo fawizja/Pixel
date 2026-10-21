@@ -33,9 +33,10 @@ public enum Achievement {
     RESTED_100("Wypoczęty łowca", "pokonaj 100 potworów z premią wypoczęcia", Kind.RESTED, 100),
     DUELS_10("Mistrz pojedynków", "wygraj 10 pojedynków", Kind.DUELS, 10),
     RARE_1("Szczęściarz", "zdobądź rzadki łup", Kind.RARE, 1),
-    RARE_10("Ulubieniec losu", "zdobądź 10 rzadkich łupów", Kind.RARE, 10);
+    RARE_10("Ulubieniec losu", "zdobądź 10 rzadkich łupów", Kind.RARE, 10),
+    HERBS_50("Zielarz", "zbierz 50 ziół leczniczych", Kind.HERBS, 50);
 
-    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS, WEEKLY, PLAYTIME, HUNTS, CHALLENGES, RESTED, DUELS, RARE }
+    public enum Kind { LEVEL, KILLS, SPECIES, BOSSES, QUESTS, BANK, FRIENDS, ELITES, SKILL, CHESTS, WEEKLY, PLAYTIME, HUNTS, CHALLENGES, RESTED, DUELS, RARE, HERBS }
 
     private final String title;
     private final String goal;
@@ -79,6 +80,7 @@ public enum Achievement {
             case RESTED: return pc.stats().restedKills();
             case DUELS: return pc.stats().duelsWon();
             case RARE: return pc.stats().rareDrops();
+            case HERBS: return pc.stats().herbs();
             default: return 0;
         }
     }

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.178.0] - 2026-10-21
+
+### Dodano
+- Osiągnięcie „Zielarz” za zebranie 50 ziół leczniczych (daje też tytuł). Liczbę zebranych ziół widać w /statystyki.
 ## [0.177.2] - 2026-10-21
 
 ### Dodano

@@ -22,7 +22,7 @@ public final class StatsReport {
                 + (st.rareDrops() > 0 ? ", rzadkie łupy: " + st.rareDrops() : "")});
         rows.add(new String[] {"Śmierci", st.deaths() + (st.duelsWon() > 0 ? " (wygrane pojedynki: " + st.duelsWon() + ")" : "")});
         rows.add(new String[] {"Ukończone zadania", pc.quests().done().size() + " (zlecenia łowcy: " + pc.hunt().completed() + ", wyzwania: " + pc.stats().challenges() + ")"});
-        rows.add(new String[] {"Otwarte skrzynie", String.valueOf(pc.openedChests().size())});
+        rows.add(new String[] {"Otwarte skrzynie", pc.openedChests().size() + (st.herbs() > 0 ? " (zebrane zioła: " + st.herbs() + ")" : "")});
         rows.add(new String[] {"Osiągnięcia", pc.achievements().count() + " / " + Achievement.values().length});
         rows.add(new String[] {"Złoto w banku", String.format("%,d gp", pc.bank().balance())});
         return rows;

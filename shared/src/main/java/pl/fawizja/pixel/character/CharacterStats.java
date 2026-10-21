@@ -9,6 +9,11 @@ public final class CharacterStats {
     private int restedKills;
     private int duelsWon;
     private int rareDrops;
+    private int herbs;
+
+    /** Zebrane ziela lecznicze. */
+    public int herbs() { return herbs; }
+    public void recordHerbs(int n) { if (n > 0) herbs = (int) Math.min(Integer.MAX_VALUE, (long) herbs + n); }
 
     /** Zdobyte rzadkie lupy. */
     public int rareDrops() { return rareDrops; }
@@ -46,8 +51,8 @@ public final class CharacterStats {
         return (h >= 24 ? (h / 24) + " d " + (h % 24) + " h " : h + " h ") + String.format("%02d", min % 60) + " min";
     }
 
-    /** Zapis: "czasMs,smierci,poziom,wyzwania,wypoczete,pojedynki,rzadkie" (starsze zapisy bez koncowych pol). */
-    public String encode() { return playMs + "," + deaths + "," + bestLevel + "," + challenges + "," + restedKills + "," + duelsWon + "," + rareDrops; }
+    /** Zapis: "czasMs,smierci,poziom,wyzwania,wypoczete,pojedynki,rzadkie,ziola" (starsze zapisy bez koncowych pol). */
+    public String encode() { return playMs + "," + deaths + "," + bestLevel + "," + challenges + "," + restedKills + "," + duelsWon + "," + rareDrops + "," + herbs; }
 
     public void restore(String text) {
         playMs = 0;
@@ -57,6 +62,7 @@ public final class CharacterStats {
         restedKills = 0;
         duelsWon = 0;
         rareDrops = 0;
+        herbs = 0;
         if (text == null || text.isBlank()) return;
         String[] f = text.split(",");
         try {
@@ -67,6 +73,7 @@ public final class CharacterStats {
             if (f.length > 4) restedKills = Math.max(0, Integer.parseInt(f[4].trim()));
             if (f.length > 5) duelsWon = Math.max(0, Integer.parseInt(f[5].trim()));
             if (f.length > 6) rareDrops = Math.max(0, Integer.parseInt(f[6].trim()));
+            if (f.length > 7) herbs = Math.max(0, Integer.parseInt(f[7].trim()));
         } catch (NumberFormatException ignored) {
             // uszkodzony wpis - liczniki od zera
         }
@@ -80,5 +87,6 @@ public final class CharacterStats {
         restedKills = o.restedKills;
         duelsWon = o.duelsWon;
         rareDrops = o.rareDrops;
+        herbs = o.herbs;
     }
 }
