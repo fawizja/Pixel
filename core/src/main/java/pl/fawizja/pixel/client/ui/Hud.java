@@ -349,6 +349,15 @@ public final class Hud {
         blW = iw;
         blY = abTop + pad;
         blH = epY - pad - blY;
+        // wysoki ekran: okno umiejetnosci pod ekwipunkiem (jak w Tibii), lista walki pod nim
+        float skH = 23 + PSK_ROW * (2 + Skill.values().length) + 6;
+        if (blH - skH - pad >= 23 + BATTLE_ROW * 3 + 4) {
+            pskX = blX; pskW = blW; pskH = skH;
+            pskY = epY - pad - skH;
+            blH -= skH + pad;
+        } else {
+            pskH = 0;
+        }
         // dolny pasek pod widokiem gry: rzad przyciskow i konsola
         topH = 24;
         float hbH = h >= 500 ? 30 : 26;
@@ -393,6 +402,44 @@ public final class Hud {
 
     /** Widok gry w ramce (jednostki interfejsu), lewa krawedz prawego panelu, wysokosc gornego paska. */
     private float gx, gy, gw, gh, panelX, topH;
+    /** Okno umiejetnosci w panelu (pskH = 0: brak miejsca). */
+    private float pskX, pskY, pskW, pskH;
+    private static final float PSK_ROW = 15;
+
+    private boolean panelSkillsVisible() { return pskH > 0 && !charOpen && !windowOverPanel(); }
+
+    /** Umiejetnosci w panelu: poziom, doswiadczenie i skille z paskiem postepu. */
+    private void drawPanelSkills(SpriteBatch batch, PlayerCharacter pc) {
+        if (!panelSkillsVisible()) return;
+        text(batch, "Umiejętności", pskX + 6, pskY + pskH - 6);
+        font.getData().setScale(CON_SCALE);
+        float yy = pskY + pskH - 23 - 3;
+        String[][] rows = new String[2 + Skill.values().length][];
+        rows[0] = new String[] {"Poziom", String.valueOf(pc.level())};
+        rows[1] = new String[] {"Doświadczenie", (int) (pc.levelProgress() * 100) + "%"};
+        int i = 2;
+        for (Skill sk : Skill.values()) rows[i++] = new String[] {sk.label(), String.valueOf(pc.skills().level(sk))};
+        for (String[] r : rows) {
+            text(batch, r[0], pskX + 8, yy);
+            layout.setText(font, r[1]);
+            text(batch, r[1], pskX + pskW - 8 - layout.width, yy);
+            yy -= PSK_ROW;
+        }
+        font.getData().setScale(1f);
+    }
+
+    /** Paski postepu skilli pod ich wierszami (w przebiegu ksztaltow). */
+    private void drawPanelSkillBars(ShapeRenderer shapes, PlayerCharacter pc) {
+        if (!panelSkillsVisible()) return;
+        miniWindow(shapes, pskX, pskY, pskW, pskH);
+        float yy = pskY + pskH - 23 - 3 - PSK_ROW * 2;
+        for (Skill sk : Skill.values()) {
+            double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
+            bar(shapes, pskX + 8, yy - PSK_ROW + 2, pskW - 16, 2, (float) prog, new Color(0.3f, 0.75f, 0.4f, 1));
+            yy -= PSK_ROW;
+        }
+    }
+
     /** Lista walki w panelu i gorna krawedz paska akcji. */
     private float blX, blY, blW, blH, abTop;
 
@@ -1718,6 +1765,7 @@ public final class Hud {
         bar(shapes, x, y - 5, barW * 2 + 6, 3, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
         drawStatusIcons(shapes, statusX(), h - 4 - STATUS_SIZE);
         miniWindow(shapes, blX, blY, blW, blH);
+        drawPanelSkillBars(shapes, pc);
         frame(shapes, panelX + 4, 4, w - panelX - 8, abTop - 4);
 
         // pad jak w Tibii mobile: sama kulka, w 90% przezroczysta (wyrazniejsza w trakcie ruchu)
@@ -1856,6 +1904,7 @@ public final class Hud {
         if (x + barW * 2 + 14 + layout.width < statusX() - 6) text(batch, info, x + barW * 2 + 14, h - 7);
         font.getData().setScale(1f);
         drawBattle(batch);
+        drawPanelSkills(batch, pc);
 
         drawConsole(batch);
 

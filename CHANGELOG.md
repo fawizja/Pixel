@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.193.0] - 2026-10-21
+
+### Dodano
+- Okno „Umiejętności” w prawym panelu na wysokim ekranie (jak w Tibii): poziom, doświadczenie i wszystkie
+  umiejętności z paskami postępu, pod ekwipunkiem; lista walki zostaje pod nim.
+
 ## [0.192.2] - 2026-10-21
 
 ### Zmieniono
