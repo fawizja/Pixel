@@ -15,7 +15,7 @@ public final class Tips {
 
     public enum Tip {
         WELCOME("Witaj! Joystick (WASD) to ruch, dotknięcie NPC to rozmowa, /pomoc to polecenia."),
-        MONSTER("Potwór w pobliżu: dotknij go albo przycisku CEL, a postać zacznie walczyć sama."),
+        MONSTER("Potwór w pobliżu: dotknij go albo przycisku ATAK, a postać zacznie walczyć sama."),
         LOOT("Pokonany potwór zostawia ciało: dotknij go albo stań obok, a łupy trafią do plecaka (przycisk PLECAK)."),
         LOW_HEALTH("Mało zdrowia! Przycisk HP pije miksturę (klawisz Q); w ustawieniach jest też leczenie samo."),
         QUESTS("Zadania i nagrody daje przewodnik w mieście: wpisz /idź przewodnik albo otwórz dziennik (klawisz Z)."),

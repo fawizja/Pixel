@@ -33,6 +33,7 @@ public final class Actions {
                 case "craft": s.craft(p[1], now); return true;
                 case "slot_use": s.useSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_equip": s.equipFromSlot(Integer.parseInt(p[1]), now); return true;
+                case "unequip": s.unequip(pl.fawizja.pixel.item.EquipSlot.valueOf(p[1]), now); return true;
                 case "slot_keep": s.toggleKeepSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_drop": s.dropFromSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_move": s.moveSlot(Integer.parseInt(p[1]), Integer.parseInt(p[2])); return true;

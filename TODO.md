@@ -252,6 +252,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
 - [x] Grafika w jednym atlasie tekstur (TileArt)
+- [x] Okna Ekwipunek, Umiejętności, Plecak i Konsola w stylu OTClient (0.186.0)
 - [x] Ramki okien, przyciski i pad z OTClientV8 (MIT) w assets/ui/otc (0.185.0)
 - [x] HUD w stylu klienta mobilnego: joystick, ATAK + 8 akcji na łukach, dolny pasek, minimapa z paskami (0.184.0)
 - [x] Widok jak w Tibii: dachy znikajace po wejsciu, wysokie sciany z licem, wyzsze pietra widoczne z dolu (0.183.0)

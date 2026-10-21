@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.186.0] - 2026-10-21
+
+### Dodano
+- Okna jak w OTClient (grafiki OTClientV8, MIT):
+  - **Ekwipunek**: lalka z 9 gniazdami (amulet, hełm, broń, zbroja, tarcza, pierścień, nogi, amunicja, buty);
+    dotknięcie założonego przedmiotu zdejmuje go do plecaka (nowa akcja `unequip:GNIAZDO`, działa też online).
+  - **Umiejętności**: poziom, doświadczenie, zdrowie, mana, szybkość, udźwig, atak, sytość i umiejętności z paskiem postępu.
+    Oba okna otwiera dotknięcie pasków HP/MP (P), zamyka krzyżyk.
+  - **Plecak**: małe okno z nagłówkiem i polami przedmiotów z OTClientV8.
+  - **Konsola**: stałe okno czatu i zdarzeń pod panelem postaci (zadania, wyzwanie, łupy, ostrzeżenia, wiadomości);
+    dotknięcie otwiera pisanie, przycisk „–” zwija okno.
+- Ramka panelu z minimapą i paskami oraz dolnego paska z OTClientV8 (panel_map.png).
+
+### Zmieniono
+- Przycisk CZAT stoi przy joysticku na dole; podpowiedź o walce wskazuje przycisk ATAK.
 ## [0.185.1] - 2026-10-21
 
 ### Zmieniono

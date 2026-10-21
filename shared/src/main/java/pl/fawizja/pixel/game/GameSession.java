@@ -1684,6 +1684,18 @@ public final class GameSession {
         }
     }
 
+    /** Zdejmuje przedmiot z gniazda ekwipunku do plecaka (okno ekwipunku). */
+    public InventoryResult unequip(pl.fawizja.pixel.item.EquipSlot slot, long nowMs) {
+        if (slot == pl.fawizja.pixel.item.EquipSlot.NONE) return InventoryResult.EMPTY_SLOT;
+        InventoryResult r = pc.equipment().unequipToBackpack(slot, pc.backpack());
+        switch (r) {
+            case OK: log.add(nowMs, EventLog.Kind.INFO, "Zdjęto przedmiot do plecaka."); break;
+            case EMPTY_SLOT: break;
+            default: log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pełny - nie da się zdjąć przedmiotu.");
+        }
+        return r;
+    }
+
     public InventoryResult moveSlot(int from, int to) {
         ItemStack s = pc.backpack().get(from);
         return s == null ? InventoryResult.EMPTY_SLOT : pc.backpack().move(from, to, s.count());

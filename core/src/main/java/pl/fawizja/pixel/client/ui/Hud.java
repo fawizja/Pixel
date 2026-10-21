@@ -225,7 +225,9 @@ public final class Hud {
     /** Ramki okien, przyciski i pad z OTClientV8 (MIT, assets/ui/otc); null = rysowanie ksztaltami. */
     private com.badlogic.gdx.graphics.g2d.NinePatch windowPatch, buttonPatch, buttonDownPatch;
     private TextureRegion keypad, keypadPointer;
-    private com.badlogic.gdx.graphics.g2d.NinePatch barPatch;
+    private com.badlogic.gdx.graphics.g2d.NinePatch barPatch, miniPatch, panelPatch;
+    /** Pole przedmiotu i przyciski malych okien (zamknij, zwin) z OTClientV8. */
+    private TextureRegion slotImg, closeImg, minimizeImg;
     private final List<float[]> barRects = new ArrayList<>();
     /** Batch biezacej klatki - okna z obrazkow rysowane sa w trakcie przebiegu ShapeRenderera. */
     private SpriteBatch uiBatch;
@@ -251,6 +253,17 @@ public final class Hud {
             }
             com.badlogic.gdx.graphics.Texture pb = uiTexture("progressbar.png");
             if (pb != null) barPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(pb, 1, 1, 1, 1);
+            com.badlogic.gdx.graphics.Texture mini = uiTexture("miniwindow.png");
+            if (mini != null) miniPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(mini, 4, 4, 23, 4);
+            com.badlogic.gdx.graphics.Texture pm = uiTexture("panel_map.png");
+            if (pm != null) panelPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(pm, 2, 2, 2, 2);
+            com.badlogic.gdx.graphics.Texture slot = uiTexture("item.png");
+            if (slot != null) slotImg = new TextureRegion(slot);
+            com.badlogic.gdx.graphics.Texture mb = uiTexture("miniwindow_buttons.png");
+            if (mb != null) {
+                closeImg = new TextureRegion(mb, 28, 0, 14, 14);
+                minimizeImg = new TextureRegion(mb, 0, 0, 14, 14);
+            }
             com.badlogic.gdx.graphics.Texture pad = uiTexture("keypad.png");
             if (pad != null) keypad = new TextureRegion(pad);
             com.badlogic.gdx.graphics.Texture ptr = uiTexture("keypad_pointer.png");
@@ -315,9 +328,10 @@ public final class Hud {
         run.x = w - margin - small; run.y = colY; run.r = small;
         torch.x = run.x; torch.y = colY + small * 2.3f; torch.r = small;
         // czat przy joysticku (jak w kliencie mobilnym)
-        chat.x = margin + jr * 2.45f; chat.y = margin + jr * 2.45f; chat.r = small;
-        // dolny pasek (plecak, ksiega i przyciski zalezne od sytuacji) miedzy joystickiem a lukiem akcji
-        hbLeft = margin + jr * 2.6f + 10;
+        chat.x = margin + jr * 2.6f + small + 2; chat.y = margin + small + 2; chat.r = small;
+        // dolny pasek (plecak, ksiega i przyciski zalezne od sytuacji) miedzy czatem a lukiem akcji
+        hbLeft = chat.x + small + 10;
+        joyTop = margin + jr * 2.6f;
         hbRight = ax - d2 - sr - 10;
         hbHalfH = br * 0.62f;
         hbY = margin + hbHalfH;
@@ -350,6 +364,8 @@ public final class Hud {
     private float hbLeft, hbRight, hbY, hbHalfH, hbSlotHw;
     /** Paski HP/MP obok minimapy. */
     private float barX, barW;
+    /** Gorna krawedz strefy joysticka (konsola konczy sie nad nia). */
+    private float joyTop;
     private final HudButton[] hotbar = {bag, book, talk, pick, fish, mount};
 
     private static void place(HudButton b, float cx, float cy, float dist, float deg, float r) {
@@ -1275,6 +1291,8 @@ public final class Hud {
     /** Zwraca true, jesli dotyk zostal obsluzony przez interfejs. */
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
+        if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
+        if (!bagOpen && consoleTouch(p.x, p.y, actions)) return true;
         if (p.x >= barX - 8 && p.x <= barX + barW + 8 && p.y >= h - 62) {
             // dotkniecie paskow HP/MP: karta postaci
             toggleCharacter();
@@ -1448,6 +1466,7 @@ public final class Hud {
         Monster tgt = session.combat().target();
         target.active = tgt != null;
         layoutHotbar();
+        layoutConsole(session, serverTimeMs);
         target.icon = itemIcon(session, "iron_sword");
         defensive.icon = itemIcon(session, "wooden_shield");
         torch.icon = itemIcon(session, "torch");
@@ -1564,14 +1583,17 @@ public final class Hud {
             bar(shapes, tx, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
         }
         if (charOpen) {
-            window(shapes, 10, h - 420, Math.min(w - 20, 490), 300, false);
-            float yy = h - 250;
+            layoutCharWindows();
+            miniWindow(shapes, eqX, eqY, eqW, eqH);
+            miniWindow(shapes, skX, skY, skW, skH);
+            float yy = skY + skH - 23 - SK_ROW * (SK_INFO_ROWS + 1);
             for (Skill sk : Skill.values()) {
                 double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
-                bar(shapes, 150, yy - 10, 110, 6, (float) prog, new Color(0.3f, 0.75f, 0.4f, 1));
-                yy -= 22;
+                bar(shapes, skX + 8, yy - SK_ROW + 1, skW - 16, 3, (float) prog, new Color(0.3f, 0.75f, 0.4f, 1));
+                yy -= SK_ROW;
             }
         }
+        if (consoleVisible()) miniWindow(shapes, conX, conY, conW, conH);
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
             rebuildMenu(session);
@@ -1616,37 +1638,7 @@ public final class Hud {
         text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
         text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
 
-        x = 12;
-        float ly = Math.min(y - 76, mmY - 14);
-        // sledzenie zadan pod stanem postaci, dziennik zdarzen nizej
-        font.setColor(0.85f, 0.9f, 1f, 1f);
-        String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
-        if (charOpen) chLine = null; // karta postaci zajmuje to miejsce - bez nakladania tekstu
-        if (chLine != null) {
-            font.setColor(1f, 0.75f, 0.45f, 1f);
-            text(batch, chLine, x, ly + 6);
-            ly -= 16;
-            font.setColor(0.85f, 0.9f, 1f, 1f);
-        }
-        if (!charOpen) for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
-                session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()),
-                session.monsterName(pc.hunt().monster() == null ? "" : pc.hunt().monster()))) {
-            text(batch, q, x, ly + 6);
-            ly -= 16;
-        }
-        font.setColor(Color.WHITE);
-        List<EventLog.Entry> entries = charOpen ? List.of() : session.log().latest(4);
-        for (EventLog.Entry e : entries) {
-            float age = (serverTimeMs - e.timeMs()) / 1000f;
-            if (age > 8f) continue;
-            if ((menuOpen || bigMapOpen) && ly - 14 < menuY + menuH) break; // nie zaslaniaj naglowka otwartego okna
-            float a = Math.max(0f, Math.min(1f, (8f - age) / 2f));
-            font.setColor(e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.6f, 0.4f, a)
-                    : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a) : new Color(1f, 1f, 1f, a));
-            text(batch, e.text(), x, ly);
-            ly -= 16;
-        }
-        font.setColor(Color.WHITE);
+        drawConsole(batch);
 
         for (HudButton b : buttons) {
             if (!b.visible) continue;
@@ -1748,11 +1740,50 @@ public final class Hud {
     }
 
     /** Ciemne okienko z jasniejsza ramka (styl klienta mobilnego). */
-    private static void frame(ShapeRenderer shapes, float fx, float fy, float fw, float fh) {
+    private void frame(ShapeRenderer shapes, float fx, float fy, float fw, float fh) {
+        if (panelPatch != null && uiBatch != null) {
+            patch(shapes, panelPatch, fx, fy, fw, fh, 0.92f);
+            return;
+        }
         shapes.setColor(BORDER);
         shapes.rect(fx, fy, fw, fh);
         shapes.setColor(0.07f, 0.065f, 0.06f, 0.78f);
         shapes.rect(fx + 2, fy + 2, fw - 4, fh - 4);
+    }
+
+    /** Rysuje 9-patch w trakcie przebiegu ShapeRenderera (przerywa go na chwile). */
+    private void patch(ShapeRenderer shapes, com.badlogic.gdx.graphics.g2d.NinePatch np, float fx, float fy, float fw, float fh, float alpha) {
+        shapes.end();
+        uiBatch.begin();
+        drawBarOverlays(uiBatch);
+        uiBatch.setColor(1, 1, 1, alpha);
+        np.draw(uiBatch, fx, fy, fw, fh);
+        uiBatch.setColor(Color.WHITE);
+        uiBatch.end();
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+    }
+
+    /** Male okno z naglowkiem 23 px (plecak, ekwipunek, umiejetnosci, konsola). */
+    private void miniWindow(ShapeRenderer shapes, float fx, float fy, float fw, float fh) {
+        if (miniPatch != null && uiBatch != null) patch(shapes, miniPatch, fx, fy, fw, fh, 0.96f);
+        else window(shapes, fx, fy, fw, fh, true);
+    }
+
+    /** Ramka 2 px w batchu (zaznaczenie pola). */
+    private void outline(SpriteBatch batch, float ox, float oy, float ow, float oh, Color c) {
+        batch.setColor(c);
+        TextureRegion px = art.white();
+        batch.draw(px, ox, oy, ow, 2);
+        batch.draw(px, ox, oy + oh - 2, ow, 2);
+        batch.draw(px, ox, oy, 2, oh);
+        batch.draw(px, ox + ow - 2, oy, 2, oh);
+        batch.setColor(Color.WHITE);
+    }
+
+    /** Przycisk zamkniecia okna (obrazek z OTClientV8 albo tekst X). */
+    private void closeButton(SpriteBatch batch, float cx, float cy) {
+        if (closeImg != null) batch.draw(closeImg, cx - 7, cy - 7, 14, 14);
+        else centered(batch, "X", cx, cy);
     }
 
     /** Okno w stylu klienta mobilnego: jasna ramka, ciemne wnetrze i (opcjonalnie) pasek tytulu u gory. */
@@ -1814,35 +1845,217 @@ public final class Hud {
         return s == null || s.isEmpty() ? "" : Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
+    // ------------------------------------------------------------------ konsola (czat i zdarzenia)
+
+    /** Wiersz konsoli: tekst, kolor i wysokosc po zawinieciu. */
+    private record ConLine(String text, Color color, float height) {}
+    private final List<ConLine> conLines = new ArrayList<>();
+    private float conX, conY, conW, conH;
+    private boolean consoleMin;
+    private static final float CON_SCALE = 0.8f;
+    /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
+    private static final long CON_KEEP_MS = 30_000;
+
+    private boolean consoleVisible() {
+        return !charOpen && !menuOpen && !bigMapOpen && conW > 0;
+    }
+
+    /** Konsola pod panelem postaci: zadania i wyzwanie na gorze, potem ostatnie zdarzenia i czat (najnowsze na dole). */
+    private void layoutConsole(GameSession session, long serverTimeMs) {
+        PlayerCharacter pc = session.character();
+        float margin = 16;
+        float top = Math.min(h - 22 - 66, h - margin + 3 - mmSize - 6) - 4;
+        conX = mmX - 6;
+        conW = Math.min(460, Math.max(220, w * 0.5f));
+        float maxBody = Math.min(8 * 14f, top - joyTop - 10 - 23 - 6);
+        conLines.clear();
+        if (maxBody < 14) { conW = 0; return; }
+        float tw = conW - 14;
+        font.getData().setScale(CON_SCALE);
+        List<ConLine> fixed = new ArrayList<>();
+        String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
+        if (chLine != null) fixed.add(conLine(chLine, new Color(1f, 0.75f, 0.45f, 1f), tw));
+        for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
+                session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()),
+                session.monsterName(pc.hunt().monster() == null ? "" : pc.hunt().monster()))) {
+            fixed.add(conLine(q, new Color(0.85f, 0.9f, 1f, 1f), tw));
+        }
+        float used = 0;
+        for (ConLine l : fixed) used += l.height();
+        List<ConLine> recent = new ArrayList<>();
+        List<EventLog.Entry> entries = session.log().latest(12);
+        for (int i = entries.size() - 1; i >= 0; i--) {
+            EventLog.Entry e = entries.get(i);
+            long age = serverTimeMs - e.timeMs();
+            if (age > CON_KEEP_MS) continue;
+            float a = age > CON_KEEP_MS - 5000 ? Math.max(0.3f, (CON_KEEP_MS - age) / 5000f) : 1f;
+            Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.6f, 0.4f, a)
+                    : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a) : new Color(1f, 1f, 1f, a);
+            ConLine l = conLine(e.text(), c, tw);
+            if (used + l.height() > maxBody) break;
+            used += l.height();
+            recent.add(0, l);
+        }
+        font.getData().setScale(1f);
+        conLines.addAll(fixed);
+        conLines.addAll(recent);
+        float body = 0;
+        for (ConLine l : conLines) body += l.height();
+        body = Math.max(14, Math.min(maxBody, body));
+        conH = consoleMin ? 23 : 23 + body + 6;
+        conY = top - conH;
+    }
+
+    private ConLine conLine(String text, Color c, float width) {
+        layout.setText(font, text, c, width, com.badlogic.gdx.utils.Align.left, true);
+        return new ConLine(text, c, layout.height + 4);
+    }
+
+    private void drawConsole(SpriteBatch batch) {
+        if (!consoleVisible()) return;
+        text(batch, "Konsola", conX + 8, conY + conH - 6);
+        if (minimizeImg != null) batch.draw(minimizeImg, conX + conW - 19, conY + conH - 19, 14, 14);
+        font.getData().setScale(0.7f);
+        font.setColor(0.75f, 0.75f, 0.7f, 1f);
+        layout.setText(font, "dotknij, aby pisać");
+        text(batch, "dotknij, aby pisać", conX + conW - 26 - layout.width, conY + conH - 8);
+        font.setColor(Color.WHITE);
+        if (consoleMin) { font.getData().setScale(1f); return; }
+        font.getData().setScale(CON_SCALE);
+        float yy = conY + conH - 23 - 4;
+        for (ConLine l : conLines) {
+            if (yy - l.height() < conY - 2) break;
+            font.setColor(l.color());
+            font.draw(batch, l.text(), conX + 7, yy, conW - 14, com.badlogic.gdx.utils.Align.left, true);
+            yy -= l.height();
+        }
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+    }
+
+    /** Dotkniecie konsoli: naglowek zwija/rozwija, tresc otwiera czat. */
+    private boolean consoleTouch(float px, float py, Actions actions) {
+        if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
+        if (py >= conY + conH - 23 && px >= conX + conW - 30) consoleMin = !consoleMin;
+        else actions.onButton("chat");
+        return true;
+    }
+
+    // ------------------------------------------------------------------ okna ekwipunku i umiejetnosci
+
+    /** Uklad lalki ekwipunku: {kolumna, wiersz} od gory. */
+    private static final EquipSlot[] EQ_SLOTS = {EquipSlot.AMULET, EquipSlot.HEAD, EquipSlot.WEAPON, EquipSlot.ARMOR,
+            EquipSlot.SHIELD, EquipSlot.RING, EquipSlot.LEGS, EquipSlot.AMMO, EquipSlot.FEET};
+    private static final int[][] EQ_CELLS = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}, {1, 3}};
+    private static final String[] EQ_NAMES = {"Amulet", "Hełm", "Broń", "Zbroja", "Tarcza", "Pierśc.", "Nogi", "Amun.", "Buty"};
+    private static final float SK_ROW = 15;
+    private static final int SK_INFO_ROWS = 9;
+    private float eqX, eqY, eqW, eqH, eqCell, skX, skY, skW, skH;
+
+    private void layoutCharWindows() {
+        eqCell = Math.max(28, Math.min(40, (h - 110) / 5.2f));
+        eqW = eqCell * 3 + 6 * 2 + 16;
+        eqH = 23 + eqCell * 4 + 6 * 3 + 12;
+        skW = Math.min(250, w - eqW - 40);
+        skH = 23 + SK_ROW * (SK_INFO_ROWS + 1 + Skill.values().length) + 8;
+        float total = eqW + 8 + skW;
+        float x0 = Math.max(8, (w - total) / 2f);
+        float top = Math.min(h - 8, h / 2f + Math.max(eqH, skH) / 2f);
+        eqX = x0; eqY = top - eqH;
+        skX = x0 + eqW + 8; skY = top - skH;
+    }
+
+    private float[] eqCellPos(int i) {
+        return new float[] {eqX + 8 + EQ_CELLS[i][0] * (eqCell + 6), eqY + eqH - 23 - 6 - eqCell - EQ_CELLS[i][1] * (eqCell + 6)};
+    }
+
+    /** Dotkniecie przy otwartych oknach postaci: zamkniecie, zdjecie przedmiotu albo nic (okno pod palcem). */
+    private boolean charWindowsTouch(float px, float py, GameSession session, Actions actions) {
+        if (inside(px, py, eqX + eqW - 12, eqY + eqH - 12, 11) || inside(px, py, skX + skW - 12, skY + skH - 12, 11)) {
+            charOpen = false;
+            return true;
+        }
+        for (int i = 0; i < EQ_SLOTS.length; i++) {
+            float[] c = eqCellPos(i);
+            if (px >= c[0] && px <= c[0] + eqCell && py >= c[1] && py <= c[1] + eqCell) {
+                if (session.character().equipment().get(EQ_SLOTS[i]) != null) actions.onButton("unequip:" + EQ_SLOTS[i].name());
+                return true;
+            }
+        }
+        return px >= eqX && px <= skX + skW && py >= Math.min(eqY, skY) && py <= Math.max(eqY + eqH, skY + skH);
+    }
+
+    private static boolean inside(float px, float py, float cx, float cy, float r) {
+        return Math.abs(px - cx) <= r && Math.abs(py - cy) <= r;
+    }
+
     private void drawCharacterSheet(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
-        float x = 20, y = h - 130;
-        text(batch, pc.name() + " - " + pc.vocation().displayName() + ", poziom " + pc.level(), x, y);
-        long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
-        text(batch, String.format("Exp: %,d / %,d (%d%%)", pc.experience(), next,
-                pl.fawizja.pixel.balance.Balance.percentToNextLevel(pc.experience(), pc.level())), x, y - 18);
-        text(batch, "Szybkość " + pc.speed() + "   Udźwig " + pc.capacity() + "   Miasto: " + capitalized(pc.homeTown())
-                + (pc.isBlessed() ? "   Błogosławieństwo" : "")
-                + (pc.title() == null ? "" : "   Tytuł: " + pl.fawizja.pixel.achievement.Achievement.titleOf(pc.title())), x, y - 36);
-        text(batch, "Sytość: " + (pc.fedMs() / 60_000) + " min   Pochodnia: " + (pc.isTorchLit() ? (pc.torchBurnMs() + 59_999) / 60_000 + " min" : "zgaszona") + "   Pokonane: " + pc.bestiary().total() + "   Osiągnięcia: " + pc.achievements().count() + " (O)", x, y - 54);
-        pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
-        String attack = "Atak: do " + ap.maxDamage() + " (" + ap.skill().label().toLowerCase(java.util.Locale.ROOT) + ")";
-        if (ap.skill() == Skill.DISTANCE) {
-            pl.fawizja.pixel.item.ItemType ammo = pl.fawizja.pixel.combat.CombatFormulas.ammunition(pc, session.items());
-            attack += ammo == null ? "   Amunicja: brak"
-                    : "   Amunicja: " + ammo.name() + " x" + pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO).count();
+        // ekwipunek
+        text(batch, "Ekwipunek", eqX + 8, eqY + eqH - 6);
+        closeButton(batch, eqX + eqW - 12, eqY + eqH - 12);
+        for (int i = 0; i < EQ_SLOTS.length; i++) {
+            float[] c = eqCellPos(i);
+            if (slotImg != null) batch.draw(slotImg, c[0], c[1], eqCell, eqCell);
+            ItemStack st = pc.equipment().get(EQ_SLOTS[i]);
+            TextureRegion r = st == null ? null : art.item(st.itemId());
+            if (r != null) {
+                batch.draw(r, c[0] + 3, c[1] + 3, eqCell - 6, eqCell - 6);
+                font.getData().setScale(0.7f);
+                if (st.count() > 1) text(batch, String.valueOf(st.count()), c[0] + 3, c[1] + 11);
+                if (st.upgrade() > 0) text(batch, "+" + st.upgrade(), c[0] + eqCell - 16, c[1] + eqCell - 3);
+                font.getData().setScale(1f);
+            } else {
+                font.getData().setScale(0.6f);
+                font.setColor(0.6f, 0.6f, 0.6f, 1f);
+                centered(batch, EQ_NAMES[i], c[0] + eqCell / 2f, c[1] + eqCell / 2f);
+                font.setColor(Color.WHITE);
+                font.getData().setScale(1f);
+            }
         }
-        if (session.isResting(session.lastUpdateMs())) attack += "   Odpoczynek x" + (1 + PlayerCharacter.REST_BONUS);
-        if (pc.restedKills() > 0) attack += "   Wypoczęty: " + pc.restedKills() + " walk";
-        text(batch, attack, x, y - 72);
-        float yy = h - 250;
-        for (Skill sk : Skill.values()) {
-            text(batch, sk.label() + "  " + pc.skills().level(sk) + "  (" + pc.skills().percentToNext(sk) + "%)", x, yy);
-            yy -= 22;
-        }
-        font.getData().setScale(0.8f);
-        text(batch, "Dotknij pasków HP/MP, aby zamknąć", x, h - 404);
+        font.getData().setScale(0.7f);
+        font.setColor(0.8f, 0.8f, 0.75f, 1f);
+        text(batch, "Dotknij, aby zdjąć", eqX + 8, eqY + 14);
+        font.setColor(Color.WHITE);
         font.getData().setScale(1f);
+
+        // umiejetnosci (jak okno Skills): stan postaci, potem umiejetnosci z paskiem postepu
+        text(batch, "Umiejętności", skX + 8, skY + skH - 6);
+        closeButton(batch, skX + skW - 12, skY + skH - 12);
+        long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
+        pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
+        String[][] info = {
+                {"Poziom", String.valueOf(pc.level())},
+                {"Doświadczenie", String.format("%,d", pc.experience())},
+                {"Do poziomu", pl.fawizja.pixel.balance.Balance.percentToNextLevel(pc.experience(), pc.level()) + "% (" + String.format("%,d", Math.max(0, next - pc.experience())) + ")"},
+                {"Zdrowie", pc.health() + " / " + pc.maxHealth()},
+                {"Mana", pc.mana() + " / " + pc.maxMana()},
+                {"Szybkość", String.valueOf(pc.speed())},
+                {"Udźwig", String.valueOf(pc.capacity())},
+                {"Atak", "do " + ap.maxDamage() + " (" + ap.skill().label().toLowerCase(java.util.Locale.ROOT) + ")"},
+                {"Sytość", (pc.fedMs() / 60_000) + " min" + (pc.restedKills() > 0 ? ", wypoczęty " + pc.restedKills() : "")},
+        };
+        float yy = skY + skH - 23 - 3;
+        font.getData().setScale(0.8f);
+        for (String[] row : info) {
+            row(batch, row[0], row[1], yy);
+            yy -= SK_ROW;
+        }
+        yy -= SK_ROW; // odstep jak separator
+        for (Skill sk : Skill.values()) {
+            row(batch, sk.label(), pc.skills().level(sk) + "  (" + pc.skills().percentToNext(sk) + "%)", yy);
+            yy -= SK_ROW;
+        }
+        font.getData().setScale(1f);
+    }
+
+    /** Wiersz okna umiejetnosci: etykieta z lewej, wartosc z prawej. */
+    private void row(SpriteBatch batch, String label, String value, float yy) {
+        font.setColor(0.85f, 0.85f, 0.8f, 1f);
+        text(batch, label, skX + 8, yy);
+        font.setColor(Color.WHITE);
+        layout.setText(font, value);
+        text(batch, value, skX + skW - 8 - layout.width, yy);
     }
 
     private float bagTipW() { return Math.min(w - 20, Math.max(slotSize * 5 + 16, 420)); }
@@ -1850,12 +2063,12 @@ public final class Hud {
 
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
         float extra = selectedSlot >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
-        window(shapes, bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra, true);
+        miniWindow(shapes, bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
         if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
             shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
             shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);
         }
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 20 && slotImg == null; i++) {
             float sx = bagX + (i % 5) * slotSize;
             float sy = bagY + (3 - i / 5) * slotSize;
             shapes.setColor(i == selectedSlot ? new Color(0.9f, 0.75f, 0.2f, 1f) : new Color(0.35f, 0.3f, 0.25f, 1f));
@@ -1880,14 +2093,31 @@ public final class Hud {
             shapes.setColor(0.3f, 0.35f, 0.5f, 0.95f);
             shapes.rect(bagSort.x - bagSort.r * 1.6f, bagSort.y - bagSort.r * 0.6f, bagSort.r * 3.2f, bagSort.r * 1.2f);
         }
-        shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
-        shapes.circle(bagClose.x, bagClose.y, bagClose.r, 20);
+        if (closeImg == null) {
+            shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
+            shapes.circle(bagClose.x, bagClose.y, bagClose.r, 20);
+        }
     }
 
     private void drawBagContents(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
         text(batch, "Plecak (" + (20 - pc.backpack().freeSlots()) + "/20)", bagX, bagY + slotSize * 4 + 22);
-        centered(batch, "X", bagClose.x, bagClose.y);
+        closeButton(batch, bagClose.x, bagClose.y);
+        if (slotImg != null) {
+            // pola plecaka z OTClientV8: zaznaczone - zolta ramka, zachowane - zloty rog
+            for (int i = 0; i < 20; i++) {
+                float sx = bagX + (i % 5) * slotSize;
+                float sy = bagY + (3 - i / 5) * slotSize;
+                batch.draw(slotImg, sx + 1, sy + 1, slotSize - 2, slotSize - 2);
+                ItemStack st = pc.backpack().get(i);
+                if (i == selectedSlot) outline(batch, sx + 1, sy + 1, slotSize - 2, slotSize - 2, new Color(0.95f, 0.8f, 0.25f, 1f));
+                if (st != null && pc.isKept(st.itemId())) {
+                    batch.setColor(0.95f, 0.8f, 0.25f, 1f);
+                    batch.draw(art.white(), sx + slotSize - 10, sy + slotSize - 10, 7, 7);
+                    batch.setColor(Color.WHITE);
+                }
+            }
+        }
         for (int i = 0; i < 20; i++) {
             ItemStack s = pc.backpack().get(i);
             if (s == null) continue;
