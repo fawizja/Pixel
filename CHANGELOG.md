@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.193.1] - 2026-10-21
+
+### Zmieniono
+- Przytrzymanie pola paska akcji pokazuje rosnącą żółtą ramkę, aż otworzy się wybór akcji (widać, ile trzymać).
+
 ## [0.193.0] - 2026-10-21
 
 ### Dodano

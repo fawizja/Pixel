@@ -1830,6 +1830,16 @@ public final class Hud {
             }
         }
 
+        if (pressSlot >= 0) {
+            // przytrzymanie pola: zolta ramka rosnie, az otworzy sie wybor akcji
+            HudButton b = spellButtons[pressSlot];
+            float f = Math.min(1f, (com.badlogic.gdx.utils.TimeUtils.millis() - pressStart) / (float) LONG_PRESS_MS);
+            shapes.setColor(1f, 0.85f, 0.25f, 0.35f + 0.4f * f);
+            float bh = b.r * 2 * f;
+            shapes.rect(b.x - b.hw, b.y - b.r, 3, bh);
+            shapes.rect(b.x + b.hw - 3, b.y - b.r, 3, bh);
+            shapes.rect(b.x - b.hw, b.y - b.r, b.hw * 2 * f, 3);
+        }
         if (tgt != null) {
             float tw = Math.min(200, gw * 0.4f);
             float tx = targetBarX(tw);
