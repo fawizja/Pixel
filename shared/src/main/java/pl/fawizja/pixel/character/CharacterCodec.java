@@ -86,6 +86,12 @@ public final class CharacterCodec {
             ids.append(id);
         }
         m.put("autoloot.ignore", ids.toString());
+        StringBuilder kept = new StringBuilder();
+        for (int id : pc.keptItems()) {
+            if (kept.length() > 0) kept.append(',');
+            kept.append(id);
+        }
+        if (kept.length() > 0) m.put("kept", kept.toString());
 
         StringBuilder body = new StringBuilder();
         for (Map.Entry<String, String> e : m.entrySet()) {
@@ -226,6 +232,10 @@ public final class CharacterCodec {
         String ignore = m.getOrDefault("autoloot.ignore", "");
         if (!ignore.isEmpty()) {
             for (String id : ignore.split(",")) pc.autoLootFilter().ignore(Integer.parseInt(id.trim()));
+        }
+        String kept = m.getOrDefault("kept", "");
+        if (!kept.isEmpty()) {
+            for (String id : kept.split(",")) pc.keptItems().add(Integer.parseInt(id.trim()));
         }
         return pc;
     }

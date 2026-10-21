@@ -688,10 +688,10 @@ public final class GameSession {
             }
         }
         if (sold == 0) {
-            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": nie masz łupu, który skupuję" + (kept ? " (przedmioty do zadań zostają)." : "."));
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": nie masz łupu, który skupuję" + (kept ? " (przedmioty do zadań i zachowane zostają)." : "."));
         } else {
             log.add(nowMs, EventLog.Kind.LOOT, "Sprzedano łup: " + sold + " szt. za " + String.format("%,d gp", total)
-                    + (kept ? ". Przedmioty do zadań zostają w plecaku." : "."));
+                    + (kept ? ". Przedmioty do zadań i zachowane zostają w plecaku." : "."));
         }
         return sold;
     }
@@ -718,9 +718,9 @@ public final class GameSession {
      * Depozyt u bankiera: odklada wszystkie sztuki przedmiotu z plecaka (ile sie zmiesci). Monety ida na konto,
      * nie do depozytu. Zwraca liczbe przeniesionych sztuk.
      */
-    /** Przedmioty potrzebne do aktywnych zadan zbierania (nie sprzedajemy ich ani nie odkladamy hurtem). */
+    /** Przedmioty potrzebne do aktywnych zadan zbierania i oznaczone "Zachowaj" (nie sprzedajemy ich ani nie odkladamy hurtem). */
     private java.util.Set<Integer> questItems() {
-        java.util.Set<Integer> keep = new java.util.HashSet<>();
+        java.util.Set<Integer> keep = new java.util.HashSet<>(pc.keptItems());
         if (quests == null) return keep;
         for (String key : pc.quests().active().keySet()) {
             pl.fawizja.pixel.quest.QuestType q = quests.registry().get(key);
@@ -742,7 +742,7 @@ public final class GameSession {
             }
         }
         if (ids.isEmpty()) {
-            log.add(nowMs, EventLog.Kind.INFO, "Nie masz łupu do odłożenia" + (keep.isEmpty() ? "." : " (przedmioty do zadań zostają)."));
+            log.add(nowMs, EventLog.Kind.INFO, "Nie masz łupu do odłożenia" + (keep.isEmpty() ? "." : " (przedmioty do zadań i zachowane zostają)."));
             return 0;
         }
         int moved = 0;
@@ -1605,11 +1605,27 @@ public final class GameSession {
     public void dropFromSlot(int slot, long nowMs) {
         ItemStack s = pc.backpack().get(slot);
         if (s == null) return;
+        if (pc.isKept(s.itemId())) {
+            log.add(nowMs, EventLog.Kind.WARNING, items.get(s.itemId()).name() + " jest oznaczony jako zachowany. Najpierw go odblokuj.");
+            return;
+        }
         if (s.itemId() == torchId && pc.isTorchLit() && pc.backpack().count(torchId) == 1) {
             pc.setTorchLit(false, torchId);
         }
         InventoryResult r = ground.dropFrom(pc.backpack(), slot, s.count(), pc.position(), world);
         if (r.ok()) log.add(nowMs, EventLog.Kind.INFO, "Wyrzucono: " + describe(s));
+    }
+
+    /** Przelacza "Zachowaj" dla rodzaju przedmiotu w slocie plecaka. */
+    public boolean toggleKeepSlot(int slot, long nowMs) {
+        ItemStack s = pc.backpack().get(slot);
+        if (s == null) return false;
+        boolean on = pc.toggleKept(s.itemId());
+        String name = items.get(s.itemId()).name();
+        log.add(nowMs, EventLog.Kind.INFO, on
+                ? "Zachowany: " + name + ". Nie sprzedasz go hurtem, nie odłożysz hurtem do depozytu i nie wyrzucisz przypadkiem."
+                : "Odblokowano: " + name + ".");
+        return on;
     }
 
     public void equipFromSlot(int slot, long nowMs) {

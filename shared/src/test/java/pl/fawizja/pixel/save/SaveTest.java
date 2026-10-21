@@ -31,6 +31,7 @@ class SaveTest {
         pc.bank().deposit(pc.backpack(), 1234);
         pc.skills().addTries(Skill.FISHING, 500);
         pc.autoLootFilter().ignore(36);
+        pc.toggleKept(30);
         PlayerCharacter back = codec.decode(codec.encode(pc));
         assertEquals(pc.id(), back.id());
         assertEquals(pc.name(), back.name());
@@ -46,6 +47,8 @@ class SaveTest {
         assertEquals(pc.equipment().get(EquipSlot.WEAPON), back.equipment().get(EquipSlot.WEAPON));
         assertEquals(pc.skills().level(Skill.FISHING), back.skills().level(Skill.FISHING));
         assertTrue(back.autoLootFilter().isIgnored(36));
+        assertTrue(back.isKept(30));
+        assertFalse(back.isKept(31));
     }
 
     @Test

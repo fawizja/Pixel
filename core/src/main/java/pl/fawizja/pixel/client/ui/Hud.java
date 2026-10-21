@@ -155,6 +155,7 @@ public final class Hud {
     private final HudButton bagUse = new HudButton("bag_use", "UŻYJ");
     private final HudButton bagClose = new HudButton("bag_close", "X");
     private final HudButton bagSort = new HudButton("bag_sort", "SORTUJ");
+    private final HudButton bagKeep = new HudButton("bag_keep", "ZACHOWAJ");
     private boolean diagnosticsOpen;
     /** Minimapa w prawym gornym rogu i duza mapa calego pietra (dotkniecie minimapy / klawisz J). */
     private final Minimap minimap = new Minimap();
@@ -309,6 +310,7 @@ public final class Hud {
         bagDrop.x = bagX + slotSize * 4.0f; bagDrop.y = bagY - bbr * 1.4f; bagDrop.r = bbr;
         bagUse.x = bagX + slotSize * 2.5f; bagUse.y = bagY - bbr * 1.4f; bagUse.r = bbr;
         bagSort.x = bagUse.x; bagSort.y = bagUse.y; bagSort.r = bbr;
+        bagKeep.x = bagUse.x; bagKeep.y = bagY - bbr * 3.0f; bagKeep.r = bbr;
         bagClose.x = bagX + slotSize * 5f + 4; bagClose.y = bagY + slotSize * 4f + 18; bagClose.r = 14;
     }
 
@@ -1287,6 +1289,7 @@ public final class Hud {
             if (selectedSlot >= 0 && bagEquip.hit(p.x, p.y)) { actions.onButton("bag_equip"); return true; }
             if (selectedSlot >= 0 && bagDrop.hit(p.x, p.y)) { actions.onButton("bag_drop"); return true; }
             if (selectedSlot >= 0 && bagUse.hit(p.x, p.y)) { actions.onButton("bag_use"); return true; }
+            if (selectedSlot >= 0 && bagKeep.hit(p.x, p.y)) { actions.onButton("bag_keep"); return true; }
             if (selectedSlot < 0 && bagSort.hit(p.x, p.y)) { actions.onButton("bag_sort"); return true; }
             int slot = slotAt(p.x, p.y);
             if (slot >= 0) {
@@ -1639,7 +1642,8 @@ public final class Hud {
 
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
         shapes.setColor(0.1f, 0.08f, 0.06f, 0.88f);
-        shapes.rect(bagX - 8, bagY - 50, slotSize * 5 + 16, slotSize * 4 + 80);
+        float extra = selectedSlot >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
+        shapes.rect(bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
         if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
             shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
             shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);
@@ -1651,12 +1655,20 @@ public final class Hud {
             shapes.rect(sx + 2, sy + 2, slotSize - 4, slotSize - 4);
             shapes.setColor(0.18f, 0.15f, 0.12f, 1f);
             shapes.rect(sx + 4, sy + 4, slotSize - 8, slotSize - 8);
+            ItemStack st = session.character().backpack().get(i);
+            if (st != null && session.character().isKept(st.itemId())) {
+                // znaczek "zachowany": zloty rog slotu
+                shapes.setColor(0.95f, 0.8f, 0.25f, 1f);
+                shapes.triangle(sx + slotSize - 4, sy + slotSize - 4, sx + slotSize - 16, sy + slotSize - 4, sx + slotSize - 4, sy + slotSize - 16);
+            }
         }
         if (selectedSlot >= 0) {
             for (HudButton b : new HudButton[] {bagEquip, bagDrop, bagUse}) {
                 shapes.setColor(0.25f, 0.45f, 0.3f, 0.95f);
                 shapes.rect(b.x - b.r * 1.3f, b.y - b.r * 0.6f, b.r * 2.6f, b.r * 1.2f);
             }
+            shapes.setColor(0.55f, 0.45f, 0.15f, 0.95f);
+            shapes.rect(bagKeep.x - bagKeep.r * 1.8f, bagKeep.y - bagKeep.r * 0.6f, bagKeep.r * 3.6f, bagKeep.r * 1.2f);
         } else {
             shapes.setColor(0.3f, 0.35f, 0.5f, 0.95f);
             shapes.rect(bagSort.x - bagSort.r * 1.6f, bagSort.y - bagSort.r * 0.6f, bagSort.r * 3.2f, bagSort.r * 1.2f);
@@ -1693,6 +1705,7 @@ public final class Hud {
                 if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
                 centered(batch, bagUse.label, bagUse.x, bagUse.y);
+                centered(batch, pc.isKept(s.itemId()) ? "ODBLOKUJ" : bagKeep.label, bagKeep.x, bagKeep.y);
             }
         } else {
             centered(batch, bagSort.label, bagSort.x, bagSort.y);

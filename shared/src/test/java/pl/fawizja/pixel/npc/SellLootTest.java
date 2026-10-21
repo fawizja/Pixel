@@ -40,4 +40,26 @@ class SellLootTest {
         assertEquals(gold + 7 * 12, s.gold());
         assertEquals(0, s.sellLoot(1300), "nothing left to sell");
     }
+
+    @Test
+    void keptItemsAreNeitherSoldInBulkNorDropped() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        GameSession s = new TownServicesTest().session(pc, List.of());
+        int pelt = TestData.ITEMS.byKey("wolf_pelt").id();
+        pc.backpack().clear();
+        pc.backpack().putInSlot(0, new ItemStack(pelt, 5));
+        assertTrue(Actions.apply(s, "slot_keep:0", 900));
+        assertTrue(pc.isKept(pelt));
+
+        Actions.apply(s, "slot_drop:0", 950);
+        assertEquals(5, pc.backpack().count(pelt), "a kept item is not dropped");
+
+        s.teleport(TownServicesTest.talkSpot(TownServicesTest.npcs.get("varden_merchant")), 1000);
+        assertEquals(0, s.sellLoot(1100));
+        assertEquals(5, pc.backpack().count(pelt));
+
+        Actions.apply(s, "slot_keep:0", 1200);
+        assertFalse(pc.isKept(pelt));
+        assertEquals(5, s.sellLoot(1300));
+    }
 }

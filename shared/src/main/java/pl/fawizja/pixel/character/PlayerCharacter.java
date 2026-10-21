@@ -39,6 +39,8 @@ public final class PlayerCharacter {
     public static final int DEPOT_SLOTS = 60;
     private final Skills skills = new Skills();
     private final AutoLootFilter autoLootFilter = new AutoLootFilter();
+    /** Rodzaje przedmiotow oznaczone "Zachowaj": nie ida do hurtowej sprzedazy lupu, depozytu ani na ziemie. */
+    private final java.util.Set<Integer> keptItems = new java.util.TreeSet<>();
     private final pl.fawizja.pixel.quest.QuestLog quests = new pl.fawizja.pixel.quest.QuestLog();
     private String homeTown;
     private boolean running;
@@ -234,6 +236,14 @@ public final class PlayerCharacter {
     public java.util.Set<String> openedChests() { return openedChests; }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
+    public java.util.Set<Integer> keptItems() { return keptItems; }
+    public boolean isKept(int itemId) { return keptItems.contains(itemId); }
+    /** Przelacza oznaczenie "Zachowaj"; zwraca nowy stan. */
+    public boolean toggleKept(int itemId) {
+        if (keptItems.remove(itemId)) return false;
+        keptItems.add(itemId);
+        return true;
+    }
     public String homeTown() { return homeTown; }
     public pl.fawizja.pixel.quest.QuestLog quests() { return quests; }
 

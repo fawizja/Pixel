@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.173.0] - 2026-10-21
+
+### Dodano
+- Przycisk ZACHOWAJ pod zaznaczonym przedmiotem w plecaku. Zachowany rodzaj przedmiotu ma złoty róg slotu i nie
+  zostanie sprzedany ani odłożony do depozytu jednym dotknięciem („cały łup”) ani wyrzucony przypadkiem.
+  ODBLOKUJ zdejmuje oznaczenie. Oznaczenia zapisują się z postacią, także na serwerze.
 ## [0.172.0] - 2026-10-21
 
 ### Dodano
