@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.187.0] - 2026-10-21
+
+### Zmieniono
+- Prawy górny róg jak w Tibii: na stałe minimapa, a pod nią okno ekwipunku (dotknięcie przedmiotu zdejmuje go).
+  Na niskich ekranach ekwipunek jest zwartym paskiem 5x2. Paski HP/MP i konsola są po lewej.
+- `-Dpixel.uiScale=2` pokazuje na komputerze układ jak na telefonie; nowa scena regresji GUI `phone`.
 ## [0.186.0] - 2026-10-21
 
 ### Dodano

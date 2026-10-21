@@ -14,6 +14,7 @@ import pl.fawizja.pixel.world.Position;
  * Uruchamianie na PC: ./gradlew :desktop:run
  *
  * Opcje deweloperskie (wlasciwosci systemowe, przydatne w CI i do zrzutow ekranu):
+ *   -Dpixel.uiScale=2                 uklad HUD jak na telefonie (skala interfejsu)
  *   -Dpixel.autostart=Imie:PALADIN    pomija menu: gra lokalna (tworzy postac, jesli nie ma zapisu)
  *   -Dpixel.server=host:port          z autostart: logowanie na serwer (haslo -Dpixel.password, domyslnie haslo-dev)
  *                                     bez autostart: domyslny adres w ekranie logowania

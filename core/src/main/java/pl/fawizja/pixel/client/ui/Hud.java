@@ -303,6 +303,8 @@ public final class Hud {
 
     public void resize(int width, int height) {
         float density = Gdx.graphics.getDensity();
+        String forced = System.getProperty("pixel.uiScale"); // podglad ukladu telefonu na komputerze
+        if (forced != null) density = Float.parseFloat(forced);
         uiScale = Math.max(1f, Math.min(3.5f, density));
         viewport.setUnitsPerPixel(1f / uiScale);
         viewport.update(width, height, true);
@@ -324,9 +326,7 @@ public final class Hud {
         for (int i = 0; i < inner.length; i++) place(inner[i], ax, ay, d1, 90 + i * 45, sr);
         for (int i = 0; i < outer.length; i++) place(outer[i], ax, ay, d2, 90 + i * 22.5f, sr);
         float small = br * 0.62f;
-        float colY = ay + d2 + sr + 8 + small;
-        run.x = w - margin - small; run.y = colY; run.r = small;
-        torch.x = run.x; torch.y = colY + small * 2.3f; torch.r = small;
+        float clusterTop = ay + d2 + sr;
         // czat przy joysticku (jak w kliencie mobilnym)
         chat.x = margin + jr * 2.6f + small + 2; chat.y = margin + small + 2; chat.r = small;
         // dolny pasek (plecak, ksiega i przyciski zalezne od sytuacji) miedzy czatem a lukiem akcji
@@ -336,18 +336,23 @@ public final class Hud {
         hbHalfH = br * 0.62f;
         hbY = margin + hbHalfH;
         hbSlotHw = br * 1.05f;
-        // panel w lewym gornym rogu: minimapa, obok paski HP/MP/EXP i stan postaci
-        mmSize = Math.min(110, h * 0.27f);
-        mmX = margin - 3;
-        mmY = h - margin + 3 - mmSize;
-        barX = mmX + mmSize + 12;
+        // lewy gorny rog: paski HP/MP/EXP i stan postaci
+        barX = 12;
         barW = Math.min(200, w * 0.32f);
+        // prawy gorny rog na stale: minimapa, pod nia ekwipunek (jak prawy panel w Tibii)
+        mmSize = Math.min(110, h * 0.2f);
+        mmX = w - margin + 3 - mmSize;
+        mmY = h - margin + 3 - mmSize;
+        layoutEquipPanel(margin, clusterTop);
+        // bieg i pochodnia na lewo od ekwipunku
+        run.x = Math.min(epX, mmX - 3) - small - 8; run.y = epY + epH - small; run.r = small;
+        torch.x = run.x; torch.y = run.y - small * 2.3f; torch.r = small;
         menuW = Math.min(w - 40, 620);
         menuH = Math.min(h - 40, 400);
         menuX = (w - menuW) / 2f;
         menuY = (h - menuH) / 2f;
         rowH = Math.max(26, Math.min(36, (menuH - 50) / 10f));
-        menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 16; menuClose.r = 14;        diag.x = w - margin - 14; diag.y = h - margin - 14; diag.r = 14;
+        menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 16; menuClose.r = 14;        diag.x = mmX - 3 - 22; diag.y = h - margin - 14; diag.r = 14;
         slotSize = Math.min(44, Math.min(w, h) / 9f);
         bagX = w / 2f - slotSize * 2.5f;
         bagY = h / 2f - slotSize * 2f;
@@ -1268,7 +1273,7 @@ public final class Hud {
     public boolean mapOpen() { return bigMapOpen; }
 
     private boolean minimapVisible() {
-        return mmSize >= 56 && !charOpen && !menuOpen && !bagOpen && !bigMapOpen;
+        return mmSize >= 56 && !diagnosticsOpen && !charOpen && !menuOpen && !bigMapOpen;
     }
 
     public void dispose() { minimap.dispose(); }
@@ -1292,6 +1297,7 @@ public final class Hud {
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
         if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
+        if (equipPanelTouch(p.x, p.y, session, actions)) return true;
         if (!bagOpen && consoleTouch(p.x, p.y, actions)) return true;
         if (p.x >= barX - 8 && p.x <= barX + barW + 8 && p.y >= h - 62) {
             // dotkniecie paskow HP/MP: karta postaci
@@ -1485,8 +1491,8 @@ public final class Hud {
         float margin = 16;
         float x = barX, y = h - 22;
         // bez minimapy (otwarte okno) panel obejmuje tylko paski
-        float panelBottom = minimapVisible() ? Math.min(y - 66, mmY - 6) : y - 66;
-        float panelLeft = minimapVisible() ? mmX - 6 : barX - 8;
+        float panelBottom = y - 66;
+        float panelLeft = barX - 8;
         frame(shapes, panelLeft, panelBottom, barX + barW + 8 - panelLeft, h - panelBottom - margin + 6);
         bar(shapes, x, y, barW, 12, pc.health() / (float) pc.maxHealth(), new Color(0.85f, 0.15f, 0.2f, 1));
         bar(shapes, x, y - 17, barW, 12, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
@@ -1605,6 +1611,10 @@ public final class Hud {
             shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
+        if (equipPanelVisible()) {
+            if (epTibia) miniWindow(shapes, epX, epY, epW, epH);
+            else frame(shapes, epX, epY, epW, epH);
+        }
         if (minimapVisible()) {
             shapes.setColor(BORDER);
             shapes.rect(mmX - 3, mmY - 3, mmSize + 6, mmSize + 6);
@@ -1708,6 +1718,7 @@ public final class Hud {
             font.setColor(Color.WHITE);
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
+        if (equipPanelVisible()) drawEquipPanel(batch, session);
         if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
@@ -1864,8 +1875,8 @@ public final class Hud {
     private void layoutConsole(GameSession session, long serverTimeMs) {
         PlayerCharacter pc = session.character();
         float margin = 16;
-        float top = Math.min(h - 22 - 66, h - margin + 3 - mmSize - 6) - 4;
-        conX = mmX - 6;
+        float top = h - 22 - 66 - 4;
+        conX = barX - 8;
         conW = Math.min(460, Math.max(220, w * 0.5f));
         float maxBody = Math.min(8 * 14f, top - joyTop - 10 - 23 - 6);
         conLines.clear();
@@ -1941,6 +1952,83 @@ public final class Hud {
         return true;
     }
 
+    // ------------------------------------------------------------------ staly panel ekwipunku pod minimapa
+
+    /** Uklad 5x2 na niskich ekranach: {kolumna, wiersz} dla EQ_SLOTS. */
+    private static final int[][] EQ_COMPACT = {{1, 0}, {0, 0}, {0, 1}, {2, 0}, {1, 1}, {2, 1}, {3, 0}, {3, 1}, {4, 0}};
+    private float epX, epY, epW, epH, epCell;
+    /** true = okno jak w Tibii (naglowek, 3x4), false = zwarty pasek 5x2 bez naglowka. */
+    private boolean epTibia;
+
+    private void layoutEquipPanel(float margin, float clusterTop) {
+        float top = mmY - 3 - 5;
+        float room = top - clusterTop - 8;
+        epTibia = room >= 23 + 4 * 28 + 3 * 3 + 8;
+        if (epTibia) {
+            epCell = Math.min(36, (room - 23 - 9 - 8) / 4f);
+            epW = epCell * 3 + 3 * 2 + 12;
+            epH = 23 + epCell * 4 + 3 * 3 + 8;
+        } else {
+            epCell = Math.max(16, Math.min(32, (room - 2 - 8) / 2f));
+            epW = epCell * 5 + 2 * 4 + 8;
+            epH = epCell * 2 + 2 + 8;
+        }
+        epX = w - margin + 3 - epW;
+        epY = top - epH;
+    }
+
+    private boolean equipPanelVisible() {
+        return !charOpen && !menuOpen && !bigMapOpen && !diagnosticsOpen;
+    }
+
+    private float[] epCellPos(int i) {
+        if (epTibia) {
+            return new float[] {epX + 6 + EQ_CELLS[i][0] * (epCell + 3), epY + epH - 23 - 4 - epCell - EQ_CELLS[i][1] * (epCell + 3)};
+        }
+        return new float[] {epX + 4 + EQ_COMPACT[i][0] * (epCell + 2), epY + epH - 4 - epCell - EQ_COMPACT[i][1] * (epCell + 2)};
+    }
+
+    private boolean equipPanelTouch(float px, float py, GameSession session, Actions actions) {
+        if (!equipPanelVisible() || px < epX || px > epX + epW || py < epY || py > epY + epH) return false;
+        for (int i = 0; i < EQ_SLOTS.length; i++) {
+            float[] c = epCellPos(i);
+            if (px >= c[0] && px <= c[0] + epCell && py >= c[1] && py <= c[1] + epCell) {
+                if (session.character().equipment().get(EQ_SLOTS[i]) != null) actions.onButton("unequip:" + EQ_SLOTS[i].name());
+                break;
+            }
+        }
+        return true;
+    }
+
+    private void drawEquipPanel(SpriteBatch batch, GameSession session) {
+        if (epTibia) text(batch, "Ekwipunek", epX + 6, epY + epH - 6);
+        for (int i = 0; i < EQ_SLOTS.length; i++) {
+            float[] c = epCellPos(i);
+            drawEquipSlot(batch, session.character().equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], epCell);
+        }
+    }
+
+    /** Pole ekwipunku: tlo z OTClientV8, przedmiot albo szara nazwa gniazda. */
+    private void drawEquipSlot(SpriteBatch batch, ItemStack st, String name, float x, float y, float cell) {
+        if (slotImg != null) batch.draw(slotImg, x, y, cell, cell);
+        TextureRegion r = st == null ? null : art.item(st.itemId());
+        if (r != null) {
+            float pad = Math.max(2, cell * 0.08f);
+            batch.draw(r, x + pad, y + pad, cell - pad * 2, cell - pad * 2);
+            font.getData().setScale(Math.min(0.7f, cell / 50f));
+            if (st.count() > 1) text(batch, String.valueOf(st.count()), x + 2, y + cell * 0.32f);
+            if (st.upgrade() > 0) text(batch, "+" + st.upgrade(), x + cell * 0.55f, y + cell - 2);
+            font.getData().setScale(1f);
+        } else {
+            font.getData().setScale(Math.min(0.6f, cell / 60f));
+            font.setColor(0.6f, 0.6f, 0.6f, 1f);
+            layout.setText(font, name);
+            if (layout.width < cell - 2) centered(batch, name, x + cell / 2f, y + cell / 2f);
+            font.setColor(Color.WHITE);
+            font.getData().setScale(1f);
+        }
+    }
+
     // ------------------------------------------------------------------ okna ekwipunku i umiejetnosci
 
     /** Uklad lalki ekwipunku: {kolumna, wiersz} od gory. */
@@ -1996,22 +2084,7 @@ public final class Hud {
         closeButton(batch, eqX + eqW - 12, eqY + eqH - 12);
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = eqCellPos(i);
-            if (slotImg != null) batch.draw(slotImg, c[0], c[1], eqCell, eqCell);
-            ItemStack st = pc.equipment().get(EQ_SLOTS[i]);
-            TextureRegion r = st == null ? null : art.item(st.itemId());
-            if (r != null) {
-                batch.draw(r, c[0] + 3, c[1] + 3, eqCell - 6, eqCell - 6);
-                font.getData().setScale(0.7f);
-                if (st.count() > 1) text(batch, String.valueOf(st.count()), c[0] + 3, c[1] + 11);
-                if (st.upgrade() > 0) text(batch, "+" + st.upgrade(), c[0] + eqCell - 16, c[1] + eqCell - 3);
-                font.getData().setScale(1f);
-            } else {
-                font.getData().setScale(0.6f);
-                font.setColor(0.6f, 0.6f, 0.6f, 1f);
-                centered(batch, EQ_NAMES[i], c[0] + eqCell / 2f, c[1] + eqCell / 2f);
-                font.setColor(Color.WHITE);
-                font.getData().setScale(1f);
-            }
+            drawEquipSlot(batch, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], eqCell);
         }
         font.getData().setScale(0.7f);
         font.setColor(0.8f, 0.8f, 0.75f, 1f);
