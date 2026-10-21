@@ -153,7 +153,9 @@ public final class GameScreen extends ScreenAdapter {
         // dymek: ciemne tlo pod tekstem, kilka linii rosnie w gore
         float oldScale = font.getData().scaleX;
         font.getData().setScale(scale);
-        bubbleLayout.setText(font, text, new com.badlogic.gdx.graphics.Color(1f, 0.95f, 0.6f, alpha), width, com.badlogic.gdx.utils.Align.center, true);
+        com.badlogic.gdx.graphics.Color ink = pl.fawizja.pixel.net.Emotes.isEmote(text)
+                ? new com.badlogic.gdx.graphics.Color(0.6f, 0.9f, 1f, alpha) : new com.badlogic.gdx.graphics.Color(1f, 0.95f, 0.6f, alpha);
+        bubbleLayout.setText(font, text, ink, width, com.badlogic.gdx.utils.Align.center, true);
         float pad = 4 * scale;
         float top = projected.y + bubbleLayout.height;
         float bx = projected.x - bubbleLayout.width / 2 - pad;
@@ -691,6 +693,14 @@ public final class GameScreen extends ScreenAdapter {
                 act("npc:ask:" + said, now());
                 return;
             }
+        }
+        String emote = pl.fawizja.pixel.net.Emotes.text(text);
+        if (net == null && emote != null) {
+            // bez serwera emotka i tak pokazuje sie nad wlasna postacia
+            String me = session.character().name();
+            session.log().add(now(), EventLog.Kind.INFO, me + ": " + emote);
+            say(me, emote);
+            return;
         }
         if (net == null) {
             session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami działa online. Podejdź do NPC, aby z nim porozmawiać.");

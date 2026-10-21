@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.174.0] - 2026-10-21
+
+### Dodano
+- Emotki na czacie: /taniec, /machaj, /ukłon, /śmiech, /brawo, /hura, /płacz, /siad, /zzz oraz /ja tekst.
+  Nad postacią pojawia się niebieski dymek, np. „* tańczy *”, widoczny dla innych graczy online.
 ## [0.173.0] - 2026-10-21
 
 ### Dodano
