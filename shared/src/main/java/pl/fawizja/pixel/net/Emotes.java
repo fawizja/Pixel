@@ -29,6 +29,15 @@ public final class Emotes {
     /** Lista do pomocy: "/taniec, /machaj, ...". */
     public static final String LIST = "/taniec, /machaj, /ukłon, /śmiech, /brawo, /hura, /płacz, /siad, /zzz, /ja tekst";
 
+    /** Wiersze okna /emotki: polecenie, czynnosc, "", akcja "cmd:/polecenie" (dotkniecie wysyla emotke). */
+    public static java.util.List<String[]> rows() {
+        String[] shown = {"/taniec", "/machaj", "/ukłon", "/śmiech", "/brawo", "/hura", "/płacz", "/siad", "/zzz"};
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        for (String c : shown) rows.add(new String[] {c, ACTIONS.get(ChatCommands.key(c)) + " (dotknij)", "", "cmd:" + c});
+        rows.add(new String[] {"/ja tekst", "własna czynność, np. /ja ostrzy miecz"});
+        return rows;
+    }
+
     /** Tekst emotki albo null, gdy to nie emotka. */
     public static String text(String typed) {
         if (typed == null) return null;

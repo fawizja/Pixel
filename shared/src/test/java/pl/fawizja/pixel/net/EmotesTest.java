@@ -34,4 +34,16 @@ class EmotesTest {
         assertTrue(Emotes.rise("* kłania się *", 200) < 0f);
         assertEquals(0f, Emotes.rise("* ostrzy miecz *", 200));
     }
+
+    @Test
+    void emoteWindowRowsSendTheirEmoteWhenTapped() {
+        java.util.List<String[]> rows = Emotes.rows();
+        assertEquals(10, rows.size());
+        for (String[] r : rows) {
+            if (r.length < 4) continue;
+            assertTrue(r[3].startsWith("cmd:/"));
+            assertNotNull(Emotes.text(r[3].substring(4)), r[3]);
+        }
+        assertTrue(rows.get(0)[1].startsWith("tańczy"));
+    }
 }

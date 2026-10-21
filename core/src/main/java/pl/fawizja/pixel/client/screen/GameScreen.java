@@ -469,6 +469,8 @@ public final class GameScreen extends ScreenAdapter {
                     hud.closeTop(session);
                     goHunting(id.substring("hunt:go:".length()), t);
                 } else if (id.startsWith("cmd:")) {
+                    // emotka z okna /emotki: zamknij okno, zeby bylo widac dymek i ruch postaci
+                    if (pl.fawizja.pixel.net.Emotes.text(id.substring("cmd:".length())) != null) hud.closeTop(session);
                     sendChat(id.substring("cmd:".length())); // polecenie z okna /pomoc
                 } else if (id.startsWith("best:")) {
                     // karta potwora z bestiariusza (dane z lokalnego rejestru, dziala tez online)
@@ -595,6 +597,10 @@ public final class GameScreen extends ScreenAdapter {
             List<String[]> rows = pl.fawizja.pixel.inventory.ItemSearch.rows(session.character(), session.items(), q);
             if (rows.isEmpty()) session.log().add(now(), EventLog.Kind.INFO, "Nie masz przedmiotu \"" + q + "\" w plecaku, wyposażeniu ani depozycie.");
             else hud.openInfo("Szukaj: " + q, rows);
+            return;
+        }
+        if (cmd.equals("/emotki")) {
+            hud.openInfo("Emotki", pl.fawizja.pixel.net.Emotes.rows());
             return;
         }
         if (cmd.equals("/strój") || cmd.equals("/stroj") || cmd.startsWith("/strój ") || cmd.startsWith("/stroj ")) {

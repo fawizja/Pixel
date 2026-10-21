@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.175.0] - 2026-10-21
+
+### Dodano
+- Okno „Emotki” (/emotki albo z listy /pomoc): dotknięcie emotki od razu ją wykonuje, bez pisania na telefonie.
 ## [0.174.1] - 2026-10-21
 
 ### Dodano

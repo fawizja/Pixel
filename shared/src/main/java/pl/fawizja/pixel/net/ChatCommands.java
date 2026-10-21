@@ -264,7 +264,7 @@ public final class ChatCommands {
             {"/ranking", "najlepsi gracze; /ranking gildie, magia, miecz..."},
             {"/nowości", "co nowego w ostatnich wersjach gry"},
             {"/znaczniki", "miejsca na mapie; /idź bank, /idź łowisko"},
-            {"/strój", "kolor stroju; emotki: /taniec, /machaj, /ukłon"},
+            {"/emotki", "taniec, ukłon, machanie nad głową; strój: /strój"},
         };
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {
