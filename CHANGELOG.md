@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.177.0] - 2026-10-21
+
+### Dodano
+- Pułapki z kolcami w głębszych lochach (piętra -2 do -5): metalowe płyty w korytarzach. Wejście na płytę zabiera
+  5% zdrowia na każde piętro głębokości (na -5 to 25%), ale pułapka nigdy nie zabija. Widać je na mapie, więc
+  można je omijać.
 ## [0.176.0] - 2026-10-21
 
 ### Dodano

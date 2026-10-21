@@ -1295,6 +1295,9 @@ public final class GameScreen extends ScreenAdapter {
             if (p.y() == row && p.z() == z) b.draw(game.art().dummy(), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
         }
         if (game.chests() == null) return;
+        for (Position p : game.chests().traps()) {
+            if (p.y() == row && p.z() == z) b.draw(game.art().trap(), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
+        }
         for (pl.fawizja.pixel.treasure.TreasureChests.Chest c : game.chests().all()) {
             Position p = c.position();
             if (p.y() != row || p.z() != z) continue;

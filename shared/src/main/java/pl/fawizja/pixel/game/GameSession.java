@@ -1328,6 +1328,7 @@ public final class GameSession {
             MoveResult r = pzLocked(before, requested, nowMs) ? MoveResult.BLOCKED : movement.step(pc, requested);
             if (r == MoveResult.MOVED || r == MoveResult.CHANGED_FLOOR) checkRegion(nowMs);
             if (r == MoveResult.MOVED) {
+                stepOnTrap(nowMs);
                 stepFrom = before;
                 stepStartMs = nowMs;
                 stepDurationMs = MovementSystem.stepDurationMs(pc, requested);
@@ -1509,6 +1510,17 @@ public final class GameSession {
     }
 
     public pl.fawizja.pixel.gathering.HerbGathering herbs() { return herbs; }
+
+    private long lastTrapMs = Long.MIN_VALUE / 2;
+
+    /** Wejscie na pulapke z kolcami (lochy -2..-5): rani, ale nie zabija; raz na 1,5 s. */
+    private void stepOnTrap(long nowMs) {
+        if (chests == null || !chests.trapAt(pc.position()) || nowMs - lastTrapMs < 1500) return;
+        lastTrapMs = nowMs;
+        int dmg = pl.fawizja.pixel.treasure.TreasureChests.trapDamage(pc.maxHealth(), pc.health(), pc.position().z());
+        int dealt = combat.environmentHit("Pułapka z kolcami", dmg, nowMs);
+        log.add(nowMs, EventLog.Kind.WARNING, "Pułapka z kolcami! -" + dealt + " HP. Omijaj metalowe płyty w lochach.");
+    }
 
     /** Krzak obok: ziela lecznicze do plecaka (krzak odrasta 10 min). false = nie ma krzaka obok. */
     public boolean gatherHerbs(long nowMs) {

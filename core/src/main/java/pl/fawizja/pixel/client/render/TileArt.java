@@ -45,6 +45,9 @@ public final class TileArt implements Disposable {
     /** Pupile (0.58.0), zwrocone w prawo; w lewo rysowane odbiciem. */
     private static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec"};
     private static final int PET_CELL = 1005;
+    /** Pulapka z kolcami (lochy). */
+    private static final int TRAP_CELL = 1010;
+    private TextureRegion trap;
     /** Stroje w kolorach (Outfit 1..): profesja * kolory * 4 kierunki od tej komorki. */
     private static final int OUTFIT_BASE = 1100;
     private final java.util.Map<String, TextureRegion> pets = new java.util.HashMap<>();
@@ -100,6 +103,7 @@ public final class TileArt implements Disposable {
         paintChest(pm, cellX(CHEST_CELL), cellY(CHEST_CELL), false);
         paintChest(pm, cellX(CHEST_CELL + 1), cellY(CHEST_CELL + 1), true);
         paintDummy(pm, cellX(DUMMY_CELL), cellY(DUMMY_CELL));
+        paintTrap(pm, cellX(TRAP_CELL), cellY(TRAP_CELL));
         for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(PET_CELL + i), cellY(PET_CELL + i), PETS[i]);
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
@@ -122,6 +126,7 @@ public final class TileArt implements Disposable {
         horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
         chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
         dummy = region(DUMMY_CELL);
+        trap = region(TRAP_CELL);
         for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(PET_CELL + i));
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
@@ -148,6 +153,7 @@ public final class TileArt implements Disposable {
     public TextureRegion chest(boolean open) { return chest[open ? 1 : 0]; }
 
     public TextureRegion dummy() { return dummy; }
+    public TextureRegion trap() { return trap; }
 
     /** Pupil po kluczu przedmiotu (null = nieznany). */
     public TextureRegion pet(String key) { return key == null ? null : pets.get(key); }
@@ -664,6 +670,24 @@ public final class TileArt implements Disposable {
         disc(pm, ox, oy, 8f, 9.5f, 0.7f, Color.WHITE);
         disc(pm, ox, oy, 8f, 3.5f, 2.9f, shade(wood, 0.6f)); // obrys glowy (widoczny tez na piasku)
         disc(pm, ox, oy, 8f, 3.5f, 2.2f, sack);           // glowa
+    }
+
+    /** Metalowa plyta z kolcami na podlodze lochu. */
+    private void paintTrap(Pixmap pm, int ox, int oy) {
+        Color plate = Color.valueOf("#5a5a62");
+        Color edge = shade(plate, 0.6f);
+        Color spike = Color.valueOf("#c8ccd4");
+        Color blood = Color.valueOf("#8a1a1a");
+        rect(pm, ox, oy, 2, 2, 12, 12, edge);
+        rect(pm, ox, oy, 3, 3, 10, 10, plate);
+        for (int y = 4; y <= 10; y += 3) {
+            for (int x = 4; x <= 10; x += 3) {
+                rect(pm, ox, oy, x, y + 1, 2, 1, edge);   // cien kolca
+                rect(pm, ox, oy, x, y, 2, 1, spike);       // kolec
+                rect(pm, ox, oy, x, y - 1, 1, 1, Color.WHITE);
+            }
+        }
+        rect(pm, ox, oy, 10, 11, 2, 1, blood);
     }
 
     /** Male zwierze w dolnej czesci kafelka, glowa po prawej. */

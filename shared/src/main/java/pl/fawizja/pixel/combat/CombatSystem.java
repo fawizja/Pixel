@@ -359,6 +359,15 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (amount > 0) push(new CombatEvent(now, healed.position(), amount, CombatEvent.Kind.HEAL));
     }
 
+    /** Obrazenia z otoczenia (pulapka): liczba nad postacia i wpis w podsumowaniu smierci; nie zabijaja. */
+    public int environmentHit(String source, int amount, long now) {
+        if (pc.isDead() || amount <= 0) return 0;
+        int dealt = pc.damage(Math.min(amount, pc.health() - 1));
+        recap.record(source, dealt, now);
+        push(new CombatEvent(now, pc.position(), dealt, CombatEvent.Kind.HIT_PLAYER, null, null));
+        return dealt;
+    }
+
     private void onPlayerDeath(Monster killer, long now) {
         long before = pc.experience();
         lastDeathPlace = pc.position();

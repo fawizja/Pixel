@@ -25,12 +25,34 @@ public final class TreasureChests {
 
     public static final long SEED = 20261015L;
 
+    /** Pulapki z kolcami na pietrach -2..-5: na pietrze tyle, ile wynosi glebokosc razy 4. */
+    public static final int TRAPS_PER_DEPTH = 4;
+
     private final List<Chest> chests;
     private final Map<Position, Chest> byPosition = new HashMap<>();
+    private final List<Position> traps;
+    private final java.util.Set<Position> trapSet;
 
     public TreasureChests(List<Chest> chests) {
+        this(chests, List.of());
+    }
+
+    public TreasureChests(List<Chest> chests, List<Position> traps) {
         this.chests = List.copyOf(chests);
         for (Chest c : chests) byPosition.put(c.position(), c);
+        this.traps = List.copyOf(traps);
+        this.trapSet = new java.util.HashSet<>(traps);
+    }
+
+    /** Pulapki z kolcami (widoczne): wejscie rani o czesc zdrowia, ale nie zabija. */
+    public List<Position> traps() { return traps; }
+
+    public boolean trapAt(Position p) { return trapSet.contains(p); }
+
+    /** Obrazenia pulapki: 5% maks. zdrowia na kazde pietro glebokosci, zawsze zostaje co najmniej 1 HP. */
+    public static int trapDamage(int maxHealth, int health, int z) {
+        int dmg = Math.max(1, Math.round(maxHealth * 0.05f * Math.max(1, -z)));
+        return Math.max(0, Math.min(dmg, health - 1));
     }
 
     public List<Chest> all() { return chests; }
@@ -68,6 +90,7 @@ public final class TreasureChests {
         int w = world.width(), h = world.height();
         Map<Integer, BitSet> reach = reachable(world);
         List<Chest> out = new ArrayList<>();
+        List<Position> traps = new ArrayList<>();
         int[] floors = {-1, -2, -3, -4, -5, 1, 2, 3};
         for (int z : floors) {
             BitSet r = reach.get(z);
@@ -102,8 +125,21 @@ public final class TreasureChests {
                 }
             }
             for (int i = 0; i < picked.size(); i++) out.add(stock("c" + z + "_" + i, picked.get(i)));
+            if (z <= -2) {
+                // pulapki: z dala od skrzyn (3 pola) i od siebie (5 pol); kolejnosc z innego ziarna
+                Collections.shuffle(cand, new Random(SEED * 31 + z));
+                List<Position> placed = new ArrayList<>();
+                for (Position p : cand) {
+                    if (placed.size() >= TRAPS_PER_DEPTH * -z) break;
+                    boolean ok = true;
+                    for (Position q : picked) if (Math.max(Math.abs(q.x() - p.x()), Math.abs(q.y() - p.y())) < 3) ok = false;
+                    for (Position q : placed) if (Math.max(Math.abs(q.x() - p.x()), Math.abs(q.y() - p.y())) < 5) ok = false;
+                    if (ok) placed.add(p);
+                }
+                traps.addAll(placed);
+            }
         }
-        return new TreasureChests(out);
+        return new TreasureChests(out, traps);
     }
 
     /** Kafelki osiagalne z miejsca startu: ruch w 4 kierunkach i kazde przejscie (schody, liny, tunele). */

@@ -66,4 +66,47 @@ class TreasureChestsTest {
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         assertTrue(codec.decode(codec.encode(pc)).openedChests().contains(chest.id()));
     }
+
+    @Test
+    void spikeTrapsLieDeeperHurtButNeverKill() {
+        WorldMap world = TestData.world();
+        TreasureChests c = TreasureChests.generate(world);
+        assertTrue(c.traps().stream().noneMatch(p -> p.z() > -2), "no traps on the first dungeon floor");
+        for (int z = -2; z >= -5; z--) {
+            final int fz = z;
+            long n = c.traps().stream().filter(p -> p.z() == fz).count();
+            assertTrue(n > 0 && n <= TreasureChests.TRAPS_PER_DEPTH * -z, "floor " + z + ": " + n);
+        }
+        for (pl.fawizja.pixel.world.Position p : c.traps()) {
+            assertTrue(world.isWalkable(p));
+            assertFalse(world.isProtectionZone(p));
+            assertNull(c.near(p), "trap next to a chest at " + p);
+        }
+        assertEquals(c.traps(), TreasureChests.generate(world).traps());
+        assertEquals(10, TreasureChests.trapDamage(100, 100, -2));
+        assertEquals(25, TreasureChests.trapDamage(100, 100, -5));
+        assertEquals(4, TreasureChests.trapDamage(100, 5, -5), "a trap leaves 1 HP");
+        assertEquals(0, TreasureChests.trapDamage(100, 1, -5));
+
+        // wejscie na pulapke w symulacji ruchu
+        pl.fawizja.pixel.world.Position trap = c.traps().get(0);
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = new GameSession(TestData.ITEMS, world, pc,
+                new MonsterManager(world, null, List.of(), new Random(1)), new Random(2), 8);
+        s.setChests(c);
+        pl.fawizja.pixel.world.Direction in = null;
+        for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+            pl.fawizja.pixel.world.Position from = trap.translate(-d.dx, -d.dy);
+            if (d.dx * d.dy == 0 && world.isWalkable(from) && world.transitionAt(from) == null) {
+                s.teleport(from, 0);
+                in = d;
+                break;
+            }
+        }
+        assertNotNull(in);
+        int hp = pc.health();
+        s.update(10_000, in);
+        assertEquals(trap, pc.position());
+        assertEquals(hp - TreasureChests.trapDamage(pc.maxHealth(), hp, trap.z()), pc.health());
+    }
 }
