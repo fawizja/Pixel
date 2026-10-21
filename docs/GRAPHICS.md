@@ -12,7 +12,7 @@ po kawałku.
 - Kolumna „Jest”: plik już istnieje. Obecne pliki pochodzą z OpenTibia Sprite Pack (CC BY 4.0), autorzy w
   docs/CREDITS.md i w grze (/autorzy). Mapowanie nazw: `tools/art/otsp_import.py`.
 
-Razem: 67 kafelków, 119 przedmiotów, 42 potworów, 24 NPC, 16 obrazków postaci, 6 obiektów, 4 pupili. Podmienione: 180.
+Razem: 67 kafelków, 119 przedmiotów, 42 potworów, 26 NPC, 16 obrazków postaci, 6 obiektów, 4 pupili. Podmienione: 182.
 
 Lista jest generowana: `python3 tools/art/list_graphics.py`.
 
@@ -106,8 +106,10 @@ Każda profesja w 4 kierunkach.
 | `npcs/selv_banker.png` | Bankier Selvaran | tak |
 | `npcs/selv_carrier.png` | Woźnica Selvaran | tak |
 | `npcs/selv_guide.png` | Przewodnik Selvaran | tak |
+| `npcs/selv_mage.png` | Zielarka Selvaran | tak |
 | `npcs/selv_merchant.png` | Kupiec Selvaran | tak |
 | `npcs/selv_priest.png` | Kapłan Selvaran | tak |
+| `npcs/selv_smith.png` | Płatnerz Selvaran | tak |
 | `npcs/varden_banker.png` | Bankier Aldric | tak |
 | `npcs/varden_carrier.png` | Woźnica Jarek | tak |
 | `npcs/varden_guide.png` | Strażnik Oren | tak |

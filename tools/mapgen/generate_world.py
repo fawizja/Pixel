@@ -95,6 +95,9 @@ EXTRA_LEGEND = [
     ('\u03bb', 'abyss_floor', '-', 'stairs_down', '-'),
     ('\u03bc', 'abyss_floor', '-', 'stairs_up', '-'),
     ('\u03be', 'abyss_floor', '-', 'wall_torch', '-'),
+    # Selvaran (przebudowa 0.182): skaly i krzaki w dzungli Skalnego Wawozu
+    ('\u03c3', 'jungle_grass', '-', 'rock', '-'),
+    ('\u03c4', 'jungle_grass', '-', 'bush', '-'),
 ]
 WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578'
                + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be')
@@ -521,6 +524,176 @@ def highlands(g, floors, transitions):
     return spawns, [('turnie', TURNIE), ('mesa', MESA)]
 
 
+
+# ------------------------------------------------------------------ Selvaran (miasto na kilku pietrach)
+
+SELV = (100, 120, 143, 159)          # mury miasta (strefa ochronna wewnatrz)
+SEWER = (116, 147)                   # wlaz do kanalow (plac -> -1)
+CANYON_CAVE = (153, 126)             # zejscie z Wawozu do kanalow (-1)
+CLIFFS = (151, 142)                  # schody na Klify (+1 -> +2)
+DEEP = (140, 150)                    # dziura do Krysztalowej Glebi (-1 -> -2)
+SELV_NPC_SPOTS = [(105, 132), (138, 131), (138, 147), (125, 154), (124, 126), (118, 137), (104, 143)]
+
+
+def selvaran(floors, transitions):
+    """Miasto dzungli: mury z 4 wiezami (taras na +1), swiatynia z dzwonnica, depozyt, 3 sklepy, domy z pietrem,
+    kanaly (-1) z Krysztalowa Glebia (-2) i Skalny Wawoz z Klifami (+1, +2). Wlasne ziarno: reszta swiata bez zmian."""
+    r = random.Random(20261021)
+    g, up = floors[0], floors[1]
+    X0, Y0, X1, Y1 = SELV
+    cx = (X0 + X1) // 2                # 121: ulica polnoc-poludnie (cx, cx+1)
+    gy = 140                           # ulica zachod-wschod (gy, gy+1), droga z Varden wchodzi na y=140
+    rect(g, X0, Y0, X1, Y1, 'J')
+    for x in range(X0, X1 + 1):
+        g[Y0][x] = g[Y1][x] = 'M'
+        up[Y0][x] = up[Y1][x] = '-'
+    for y in range(Y0, Y1 + 1):
+        g[y][X0] = g[y][X1] = 'M'
+        up[y][X0] = up[y][X1] = '-'
+    # bramy na 4 strony i ulice
+    for x, y in [(cx, Y0), (cx + 1, Y0), (cx, Y1), (cx + 1, Y1), (X0, gy), (X0, gy + 1), (X1, gy), (X1, gy + 1)]:
+        g[y][x] = '='
+    rect(g, cx, Y0 + 1, cx + 1, Y1 - 1, '=')
+    rect(g, X0 + 1, gy, X1 - 1, gy + 1, '=')
+    rect(g, X0 + 6, Y0 + 1, X1 - 6, Y0 + 2, '=')            # ulica pod murem polnocnym (obejscie swiatyni)
+    rect(g, X0 + 9, Y0 + 1, X0 + 10, gy, '=')
+    rect(g, X1 - 10, Y0 + 1, X1 - 9, gy, '=')
+    for x in (cx - 1, cx + 2):
+        g[Y0 + 1][x] = 't'
+        g[Y1 - 1][x] = 't'
+    # wieze w rogach: wnetrze z kamienia, schody na taras (+1) z pochodniami
+    for tx, ty, door in [(X0, Y0, (4, 2)), (X1 - 4, Y0, (0, 2)), (X0, Y1 - 4, (4, 2)), (X1 - 4, Y1 - 4, (0, 2))]:
+        box(g, tx, ty, tx + 4, ty + 4, 'M', '-')
+        g[ty + door[1]][tx + door[0]] = 'd'
+        g[ty + 2][tx + 2] = '<'
+        rect(up, tx, ty, tx + 4, ty + 4, '-')
+        for lx, ly in [(tx, ty), (tx + 4, ty), (tx, ty + 4), (tx + 4, ty + 4)]:
+            up[ly][lx] = 'l'
+        up[ty + 2][tx + 2] = '>'
+        transitions.extend([(tx + 2, ty + 2, 0, 'STAIRS', tx + 2, ty + 1, 1),
+                            (tx + 2, ty + 2, 1, 'STAIRS', tx + 2, ty + 3, 0)])
+    # plac z fontanna
+    rect(g, cx - 6, gy - 5, cx + 7, gy + 6, '=')
+    rect(g, cx, gy - 2, cx + 1, gy - 1, 'u')
+    for lx, ly in [(cx - 6, gy - 5), (cx + 7, gy - 5), (cx - 6, gy + 6), (cx + 7, gy + 6)]:
+        g[ly][lx] = 't'
+    # swiatynia (polnoc): kolumny, dywan do oltarza, dzwonnica na +1
+    box(g, cx - 9, Y0 + 3, cx + 10, Y0 + 13, '#', '-')
+    rect(g, cx, Y0 + 5, cx + 1, Y0 + 12, 'R')
+    g[Y0 + 4][cx] = g[Y0 + 4][cx + 1] = 'a'
+    g[Y0 + 13][cx] = g[Y0 + 13][cx + 1] = 'd'
+    for lx in (cx - 8, cx + 9):
+        g[Y0 + 4][lx] = g[Y0 + 12][lx] = 'l'
+    for px in (cx - 5, cx + 6):
+        g[Y0 + 7][px] = g[Y0 + 10][px] = 'M'
+    bell = (cx + 8, Y0 + 6)
+    g[bell[1]][bell[0]] = '<'
+    rect(up, cx + 5, Y0 + 3, cx + 10, Y0 + 8, '-')
+    up[Y0 + 3][cx + 5] = up[Y0 + 3][cx + 10] = up[Y0 + 8][cx + 5] = up[Y0 + 8][cx + 10] = 'l'
+    up[bell[1]][bell[0]] = '>'
+    transitions.extend([(bell[0], bell[1], 0, 'STAIRS', bell[0], bell[1] - 1, 1),
+                        (bell[0], bell[1], 1, 'STAIRS', bell[0], bell[1] + 1, 0)])
+    temple = (cx, Y0 + 9)
+    # depozyt (zachod): kamienne mury, lada, skrzynie, skarbiec na pietrze
+    box(g, X0 + 2, Y0 + 7, X0 + 8, Y0 + 17, '#', '_')
+    rect(g, X0 + 3, Y0 + 9, X0 + 7, Y0 + 9, 'B')
+    for x in (X0 + 3, X0 + 7):
+        g[Y0 + 8][x] = 'x'
+        g[Y0 + 16][x] = 'x'
+    g[Y0 + 17][X0 + 5] = 'd'
+    g[Y0 + 15][X0 + 7] = '<'
+    box(up, X0 + 2, Y0 + 7, X0 + 8, Y0 + 17, '%', '_')
+    up[Y0 + 15][X0 + 7] = '>'
+    up[Y0 + 9][X0 + 4] = up[Y0 + 9][X0 + 6] = 'x'
+    transitions.extend([(X0 + 7, Y0 + 15, 0, 'STAIRS', X0 + 6, Y0 + 15, 1),
+                        (X0 + 7, Y0 + 15, 1, 'STAIRS', X0 + 6, Y0 + 15, 0)])
+    # sklepy (wschod): kupiec, platnerz; zielarka na poludniu
+    for sx0, sy0 in [(X1 - 10, Y0 + 7), (X1 - 10, Y0 + 23)]:
+        box(g, sx0, sy0, sx0 + 8, sy0 + 6, '%', '_')
+        rect(g, sx0 + 4, sy0 + 2, sx0 + 7, sy0 + 2, 'B')
+        g[sy0 + 1][sx0 + 7] = 'x'
+        g[sy0 + 3][sx0] = 'D'
+        g[sy0 + 5][sx0 + 7] = 'L'
+    box(g, cx + 1, Y1 - 9, cx + 8, Y1 - 3, '%', '_')
+    rect(g, cx + 2, Y1 - 6, cx + 7, Y1 - 6, 'B')
+    g[Y1 - 4][cx + 7] = 'x'
+    g[Y1 - 9][cx + 4] = 'D'
+    # domy (poludniowy zachod) z pietrem
+    houses = [(X0 + 6, gy + 3), (X0 + 6, gy + 10), (X0 + 14, gy + 10)]
+    for hx, hy in houses:
+        box(g, hx, hy, hx + 6, hy + 5, '%', '_')
+        g[hy][hx + 3] = 'D'
+        g[hy + 4][hx + 5] = '<'
+        box(up, hx, hy, hx + 6, hy + 5, '%', '_')
+        up[hy + 4][hx + 5] = '>'
+        up[hy + 1][hx + 1] = 'x'
+        transitions.extend([(hx + 5, hy + 4, 0, 'STAIRS', hx + 4, hy + 4, 1),
+                            (hx + 5, hy + 4, 1, 'STAIRS', hx + 4, hy + 4, 0)])
+    # wlaz do kanalow na placu
+    sx, sy = SEWER
+    rect(g, sx - 1, sy - 1, sx + 1, sy + 1, '-')
+    g[sy][sx] = ']'
+    # zielen w miescie: palmy i paprocie, bez odcinania przejsc
+    keep = {(x, y) for y in range(Y0, Y1 + 1) for x in range(X0, X1 + 1) if g[y][x] != 'J'}
+    reserved = {(x + dx, y + dy) for (x, y) in SELV_NPC_SPOTS for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    walk = len(reachable(g, temple))
+    for _ in range(70):
+        x, y = r.randint(X0 + 1, X1 - 1), r.randint(Y0 + 1, Y1 - 1)
+        if g[y][x] != 'J' or (x, y) in reserved or any((x + dx, y + dy) in keep and g[y + dy][x + dx] in 'DdB]<' for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+            continue
+        if r.random() < 0.45:
+            g[y][x] = 'h'
+            continue
+        g[y][x] = 'P' if r.random() < 0.6 else 'τ'
+        if len(reachable(g, temple)) != walk - 1:
+            g[y][x] = 'J'
+        else:
+            walk -= 1
+
+    # Skalny Wawoz na wschod od murow: skaly i krzaki, schody na Klify, zejscie do kanalow
+    for y in range(112, 172):
+        for x in range(X1 + 1, OLD_W - 2):
+            v = r.random()
+            g[y][x] = 'σ' if v < 0.14 else ('U' if v < 0.19 else ('h' if v < 0.32 else 'J'))
+    for (ex, ey) in (CANYON_CAVE, CLIFFS):
+        rect(g, ex - 1, ey - 1, ex + 1, ey + 1, 'J')
+    rect(g, X1 + 1, gy, CLIFFS[0], gy + 1, ':')
+    rect(g, CANYON_CAVE[0], CANYON_CAVE[1] + 1, CANYON_CAVE[0] + 1, gy, ':')
+    rect(g, CLIFFS[0], CLIFFS[1] - 1, CLIFFS[0] + 1, gy + 1, ':')
+    g[CANYON_CAVE[1]][CANYON_CAVE[0]] = '|'
+    g[CLIFFS[1]][CLIFFS[0]] = '['
+    # Klify (+1, +2): polki skalne w dzungli
+    dungeon(floors[1], (144, 112, 159, 170), [CLIFFS, (156, 116), (150, 166), (156, 152)], 'σ', 'J', 'hτhτ', 5,
+            {CLIFFS: ']', (156, 152): '['}, r)
+    dungeon(floors[2], (146, 140, 159, 170), [(156, 152), (150, 164), (156, 144)], 'σ', 'J', 'hτ', 3,
+            {(156, 152): ']'}, r)
+    transitions.extend([(CLIFFS[0], CLIFFS[1], 0, 'STAIRS', CLIFFS[0], CLIFFS[1] - 1, 1),
+                        (CLIFFS[0], CLIFFS[1], 1, 'STAIRS', CLIFFS[0], CLIFFS[1] + 1, 0),
+                        (156, 152, 1, 'STAIRS', 156, 153, 2), (156, 152, 2, 'STAIRS', 155, 152, 1)])
+    # Kanaly (-1) pod miastem z wyjsciem do Wawozu, dziura do Krysztalowej Glebi (-2)
+    dungeon(floors[-1], (104, 118, 158, 168), [SEWER, (128, 128), CANYON_CAVE, DEEP, (118, 162), (150, 164)],
+            'N', 'c', 'jj8m8', 6, {SEWER: '(', CANYON_CAVE: '(', DEEP: 'O'}, r)
+    dungeon(floors[-2], (106, 120, 158, 168), [DEEP, (120, 130), (152, 126), (116, 162), (154, 162)],
+            'C', 'c', 'gg8gm8', 6, {DEEP: 'H'}, r)
+    transitions.extend([(SEWER[0], SEWER[1], 0, 'STAIRS', SEWER[0], SEWER[1] + 1, -1),
+                        (SEWER[0], SEWER[1], -1, 'STAIRS', SEWER[0] + 1, SEWER[1], 0),
+                        (CANYON_CAVE[0], CANYON_CAVE[1], 0, 'STAIRS', CANYON_CAVE[0], CANYON_CAVE[1] + 1, -1),
+                        (CANYON_CAVE[0], CANYON_CAVE[1], -1, 'STAIRS', CANYON_CAVE[0], CANYON_CAVE[1] + 1, 0),
+                        (DEEP[0], DEEP[1], -1, 'HOLE', DEEP[0] + 1, DEEP[1], -2),
+                        (DEEP[0], DEEP[1], -2, 'LADDER', DEEP[0], DEEP[1] - 1, -1)])
+    spawns = [
+        '# Skalny Wawoz i Klify Selvaran',
+        'jungle_hunter;152;118;0;4;2;120', 'jungle_serpent;154;160;0;4;2;120', 'crocodile;137;165;0;4;2;120',
+        'jungle_hunter;156;118;1;4;2;120', 'scorpion;150;164;1;4;2;120', 'jungle_serpent;152;132;1;4;2;120',
+        'jungle_hunter;150;162;2;3;2;120', 'jungle_serpent;156;146;2;3;2;120',
+        '# Kanaly Selvaran (-1) i Krysztalowa Glebia (-2)',
+        'jungle_serpent;128;128;-1;4;3;120', 'crocodile;118;160;-1;4;2;120', 'jungle_serpent;150;164;-1;4;2;120',
+        'crystal_golem;120;130;-2;4;3;180', 'crystal_golem;152;128;-2;4;2;180', 'scorpion;116;160;-2;4;3;120',
+        'crystal_golem;152;160;-2;4;2;180',
+    ]
+    entrances = [('selv_cave', CANYON_CAVE), ('selv_cliffs', CLIFFS), ('selv_sewer', SEWER)]
+    return temple, spawns, entrances
+
 # ------------------------------------------------------------------ swiat
 
 def main():
@@ -541,7 +714,6 @@ def main():
     # Frostholm (snieg)
     frost = town(g, 64, 20, 95, 43, 'A', '=', '%', '_', 'D')
     # Selvaran (rownik) - mury z omszalego kamienia
-    selv = town(g, 100, 128, 127, 151, 'M', '=', '%', '_', 'D')
     # Qasirah (pustynia) - piaskowiec
     qas = town(g, 64, 187, 95, 210, 'Z', 'X', 'Z', 'X', 'd')
 
@@ -556,6 +728,9 @@ def main():
     for line in read_lines('transitions.csv'):
         x, y, z, typ, tx, ty, tz = line.split(';')
         transitions.append((int(x) + VX, int(y) + VY, int(z), typ, int(tx) + VX, int(ty) + VY, int(tz)))
+
+    # Selvaran: miasto z murami, wiezami, swiatynia, depozytem, sklepami, kanalami i Skalnym Wawozem
+    selv, selv_spawns, selv_entrances = selvaran(floors, transitions)
 
     # jaskinie lodu pod Frostholm: wejscie (20,30) -> -1 -> -2
     g[30][20] = '{'
@@ -641,7 +816,6 @@ def main():
     ]
     for key, name, (x0, y0, x1, y1), temple, shop, colors in [
         ('frost', 'Frostholm', (64, 20, 95, 43), frost, 'frost_shop', ('#c0d8e8', '#6080a0')),
-        ('selv', 'Selvaran', (100, 128, 127, 151), selv, 'selv_shop', ('#60a060', '#80a040')),
         ('qas', 'Qasirah', (64, 187, 95, 210), qas, 'qas_shop', ('#e0c080', '#c09050')),
     ]:
         cx, ty0 = (x0 + x1) // 2, y0 + 2
@@ -657,6 +831,22 @@ def main():
             (key + '_carrier', 'Woznica ' + name, 'CARRIER', name, cx + 6, ty0 + 10, '-', '#8a6a4a',
              'Woz do innych miast czeka. Placisz monetami.'),
         ]
+    npcs += [
+        ('selv_banker', 'Bankier Selvaran', 'BANKER', 'Selvaran', 105, 132, '-', '#d8c070',
+         'Bank i depozyt Selvaran prowadza konta we wszystkich miastach.'),
+        ('selv_merchant', 'Kupiec Selvaran', 'MERCHANT', 'Selvaran', 138, 131, 'selv_shop', '#60a060',
+         'Towary z Selvaran i skup lupow z okolicy.'),
+        ('selv_smith', 'Platnerz Selvaran', 'MERCHANT', 'Selvaran', 138, 147, 'selv_arms', '#909090',
+         'Bron i zbroje z calego swiata. Skupuje tez uzywany sprzet.'),
+        ('selv_mage', 'Zielarka Selvaran', 'MERCHANT', 'Selvaran', 125, 154, 'selv_magic', '#8060c0',
+         'Mikstury, runy i rozdzki. Skupuje krysztaly i perly.'),
+        ('selv_priest', 'Kaplan Selvaran', 'PRIEST', 'Selvaran', 124, 126, '-', '#f0f0f0',
+         'Swiatynia Selvaran wita wedrowca.'),
+        ('selv_guide', 'Przewodnik Selvaran', 'GUIDE', 'Selvaran', 118, 137, '-', '#80a040',
+         'Okolice Selvaran sa niebezpieczne. Pomozesz?'),
+        ('selv_carrier', 'Woznica Selvaran', 'CARRIER', 'Selvaran', 104, 143, '-', '#8a6a4a',
+         'Woz do innych miast czeka. Placisz monetami.'),
+    ]
     camp = 'Oboz Zwiadowcow'
     npcs += [
         ('camp_merchant', 'Kwatermistrz Bren', 'MERCHANT', camp, CAMP[2] - 3, CAMP[1] + 4, 'camp_shop', '#a07040',
@@ -677,7 +867,7 @@ def main():
     for (x, y, z, *_r) in transitions:
         if z == 0:
             assert (x, y) in reach, f'entrance {x},{y} unreachable'
-    for name, pos in east_entrances:
+    for name, pos in east_entrances + selv_entrances:
         assert pos in reach, f'{name} unreachable from Varden'
 
     # zapis pieter
@@ -707,11 +897,15 @@ def main():
     for r in props['pz'].split(';'):
         x0, y0, x1, y1, z = (int(v) for v in r.split(','))
         pz.append(f'{x0 + VX},{y0 + VY},{x1 + VX},{y1 + VY},{z}')
-    pz += ['65,21,94,42,0', '101,129,126,150,0', '65,188,94,209,0']
+    pz += ['65,21,94,42,0', f'{SELV[0] + 1},{SELV[1] + 1},{SELV[2] - 1},{SELV[3] - 1},0', '65,188,94,209,0']
     pz += [f'{CAMP[0] + 1},{CAMP[1] + 1},{CAMP[2] - 1},{CAMP[3] - 1},0']   # oboz za mostem (bez swiatyni)
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
     regions = [
+        'Klify Selvaran;140;112;159;171;1;2;60;80',
+        'Skalny Wawoz;144;112;159;171;0;0;55;80',
+        'Kanaly Selvaran;100;112;159;171;-1;-1;45;75',
+        'Krysztalowa Glebia;100;112;159;171;-2;-2;45;80',
         'Mrozne Turnie;20;0;64;24;1;5;40;90',
         'Plaskowyz Qasirah;14;186;60;231;1;5;45;130',
         'Mrozne Pustkowia;0;0;159;63;0;5;40;90',
@@ -773,7 +967,7 @@ def main():
         'ruin_colossus;60;150;-5;2;1;1800',
         'mummy;130;196;-4;4;3;300', 'mummy;140;226;-4;3;2;300', 'mummy;120;214;-4;4;2;300',
         'pharaoh;126;198;-5;2;1;1800',
-    ] + east_spawns + high_spawns + [
+    ] + selv_spawns + east_spawns + high_spawns + [
         '# --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---',
         'wolf;58;72;0;5;3;60;noc', 'bandit;106;96;0;3;2;120;noc', 'snow_wolf;50;12;0;6;3;90;noc',
         'hyena;40;190;0;6;3;90;noc', 'sand_wraith;20;226;0;5;2;180;noc', 'wraith_knight;186;103;0;5;3;240;noc',

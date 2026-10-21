@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.182.0] - 2026-10-21
+
+### Dodano
+- Nowe Selvaran: miasto w dżungli przebudowane od zera. Mury z czterema wieżami, po których można chodzić
+  (taras na piętrze +1), świątynia z kolumnami i dzwonnicą, depozyt ze skarbcem na piętrze, plac z fontanną,
+  trzy sklepy (kupiec, płatnerz z bronią i zbrojami z całego świata, zielarka z miksturami i różdżkami) oraz domy
+  z piętrem.
+- Nowe expowiska wokół Selvaran: Skalny Wąwóz (skały, krzaki, łowcy i węże), Klify na piętrach +1 i +2,
+  Kanały pod miastem (-1, wejście włazem z placu) i Kryształowa Głębia (-2, kryształowe golemy).
 ## [0.181.0] - 2026-10-21
 
 ### Dodano

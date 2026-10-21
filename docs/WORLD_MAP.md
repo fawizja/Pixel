@@ -40,7 +40,7 @@ liczb), wiec stare zapisy i lochy sa nietkniete.
 |---|---|---|---|
 | **Varden** | 79,80,0 | umiarkowany | miasto startowe: swiatynia, bank, sklepy, wieza 0..+5 |
 | **Frostholm** | 79,26,0 | snieg i lod | mury z lodu, drewniane domy, zamarzniete posadzki |
-| **Selvaran** | 113,134,0 | rownik (dzungla, bagna) | mury porosniete mchem, palmy, bagna wokol |
+| **Selvaran** | 121,129,0 | rownik (dzungla, bagna) | najwieksze miasto (0.182.0): mury z 4 wiezami, swiatynia z dzwonnica, depozyt, 3 sklepy, kanaly |
 | **Qasirah** | 79,193,0 | pustynia | piaskowiec, oaza, kaktusy |
 
 Kazde miasto ma swiatynie w strefie ochronnej (miejsce odrodzenia po smierci - `homeTown`), plac z
@@ -60,6 +60,10 @@ poziomow wyzsze od poziomu postaci, pojawia sie ostrzezenie. To informacja, nie 
 | Glebokie Lodowe Jaskinie | y 0..63 | -5..-2 | 100-150 | lodowe golemy |
 | Mrozne Turnie | x 20..64, y 0..24 | +1..+5 (generowane +1..+3) | 40-90 | wilki sniezne, yeti, lodowe wiedzmy |
 | Plaskowyz Qasirah | x 14..60, y 186..231 | +1..+5 (generowane +1..+2) | 45-130 | skorpiony, hieny, piaskowe upiory |
+| Klify Selvaran | 140..159 x 112..171 | +1..+2 | 60-80 | mysliwi z dzungli, weze, skorpiony |
+| Skalny Wawoz | 144..159 x 112..171 | 0 | 55-80 | mysliwi z dzungli, weze |
+| Kanaly Selvaran | 100..159 x 112..171 | -1 | 45-75 | weze, krokodyle |
+| Krysztalowa Glebia | 100..159 x 112..171 | -2 | 45-80 | krysztalowe golemy, skorpiony |
 | Dzungla Selvaran | y 112..171 | 0..+5 | 55-80 | krokodyle, weze, mysliwi |
 | Zatopione Ruiny | 30..90 x 130..185 | -1 | 65-90 | weze dzungli |
 | Serce Ruin | 30..90 x 130..185 | -5..-2 | 150-200 | straznicy swiatyni |
@@ -79,6 +83,22 @@ Nowa postac (poziom 8) idaca na polnoc lub poludnie trafia najpierw na ostrzezen
 prowadzi jeden most, a straznik (`gates=160,86,167,87,0,200`) zawraca postacie ponizej poziomu 200
 z komunikatem; test `theBridgeGuardKeepsNewCharactersOutOfTheEndgame` sprawdza, ze poziomy 8, 120 i 199
 nie dojda na wschod zadna droga, a 200 przejdzie.
+
+## Selvaran (0.182.0)
+
+Miasto 100..143 x 120..159 (`selvaran()` w `tools/mapgen/generate_world.py`, wlasne ziarno 20261021):
+
+- Mury z mchu z bramami na 4 strony i 4 wieze w rogach; z kazdej wiezy schody na taras (+1), a po
+  murach na +1 da sie obejsc cale miasto.
+- Swiatynia na polnocy (kolumny, dywan do oltarza, kaplan) z dzwonnica na +1.
+- Depozyt na zachodzie (bankier, lada, skrzynie, skarbiec na pietrze).
+- Sklepy: kupiec (selv_shop), platnerz (selv_arms - bron i zbroje z calego swiata), zielarka (selv_magic).
+- Plac z fontanna, przewodnik, woznica przy zachodniej bramie, 3 domy z pietrem.
+- Wlaz na placu (116,147) do Kanalow (-1); kanaly wychodza do Skalnego Wawozu (153,126), a dziura
+  (140,150) prowadzi do Krysztalowej Glebi (-2, drabina w gore).
+- Skalny Wawoz na wschod od murow: skaly, krzaki, schody (151,142) na Klify (+1) i dalej (156,152) na +2.
+
+NPC w `npcs.csv` sa edytowane recznie (polskie znaki) - po uruchomieniu generatora przywroc plik i popraw tylko pozycje.
 
 ## Glebokie lochy biomow (etap 10)
 

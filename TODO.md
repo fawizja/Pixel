@@ -87,6 +87,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Oboz za mostem: kupiec ze skupem materialow, bankier, zwiadowczyni z 9 zadaniami endgame
 - [x] Kuznia endgame: 28 receptur z obsydianu, lodowych rdzeni, esencji cienia i zaru Otchlani
 - [x] Ryby zalezne od biomu
+- [x] Selvaran przebudowane (0.182.0): mury z wiezami i tarasami +1, swiatynia z dzwonnica, depozyt, 3 sklepy, domy z pietrem; Skalny Wawoz, Klify +1/+2, Kanaly -1, Krysztalowa Glebia -2
 ## Etap 10 - Pietra +5..-5, jaskinie, oswietlenie
 - [x] Pietra -5..+5, schody, dziury, drabiny, liny; test dostepnosci wszystkich pieter
 - [x] Ciemne podziemia, pochodnie na mapie i w plecaku, poswiata postaci
