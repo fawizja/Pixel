@@ -169,7 +169,7 @@ public final class WorldRenderer {
                     byte kind = roofs.at(x, y, z);
                     if (kind == Roofs.NONE) continue;
                     if (upper != null && upper.get(Layer.GROUND, x, y) != 0) continue;
-                    batch.draw(art.roof(kind == Roofs.SLATE), x, wy, 1f, 1f);
+                    batch.draw(art.roof(kind), x, wy, 1f, 1f);
                 }
             }
         }

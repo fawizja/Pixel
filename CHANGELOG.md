@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.183.1] - 2026-10-21
+
+### Zmieniono
+- Domy z piaskowca w Qasirah mają piaskowy dach zamiast niebieskiego.
 ## [0.183.0] - 2026-10-21
 
 ### Dodano

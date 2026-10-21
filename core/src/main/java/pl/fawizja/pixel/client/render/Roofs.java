@@ -14,12 +14,12 @@ import pl.fawizja.pixel.world.WorldMap;
 
 /**
  * Dachy budynkow liczone z mapy (widok jak w Tibii): budynek to zamkniety murami obszar posadzki, do ktorego
- * wchodzi sie tylko przez drzwi. Dach przykrywa posadzke, drzwi i otaczajace mury; znika, gdy gracz stoi pod
+ * wchodzi sie tylko przez drzwi. Dachowka nad drewnem, lupek nad kamieniem, piaskowa dachowka nad piaskowcem. Dach przykrywa posadzke, drzwi i otaczajace mury; znika, gdy gracz stoi pod
  * dachem albo pod wyzszym pietrem.
  */
 public final class Roofs {
 
-    public static final byte NONE = 0, RED = 1, SLATE = 2;
+    public static final byte NONE = 0, RED = 1, SLATE = 2, SAND = 3;
     static final Set<String> INTERIOR = Set.of("wood_floor", "stone_floor", "sandstone_floor", "frozen_floor", "tomb_floor");
     static final int MAX_BUILDING = 900;
 
@@ -63,11 +63,13 @@ public final class Roofs {
                 q.add(new int[] {x, y});
                 seen[y * w + x] = true;
                 boolean enclosed = true;
-                int stone = 0;
+                int stone = 0, sand = 0;
                 while (!q.isEmpty()) {
                     int[] c = q.poll();
                     cells.add(c);
-                    if (!key(f, c[0], c[1]).equals("wood_floor")) stone++;
+                    String k = key(f, c[0], c[1]);
+                    if (!k.equals("wood_floor")) stone++;
+                    if (k.equals("sandstone_floor")) sand++;
                     if (door(f, c[0], c[1])) continue;            // drzwi naleza do budynku, ale nie prowadza dalej
                     for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
                         int nx = c[0] + d[0], ny = c[1] + d[1];
@@ -79,7 +81,7 @@ public final class Roofs {
                     }
                 }
                 if (!enclosed || cells.size() > MAX_BUILDING) continue;
-                byte kind = stone * 2 > cells.size() ? SLATE : RED;
+                byte kind = sand * 2 > cells.size() ? SAND : stone * 2 > cells.size() ? SLATE : RED;
                 for (int[] c : cells) {
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dx = -1; dx <= 1; dx++) {
