@@ -222,9 +222,44 @@ public final class Hud {
     /** Ustawienia gracza pokazywane pod diagnostyka (klikalne wiersze "settings:*"). */
     private pl.fawizja.pixel.settings.GameSettings settings;
 
+    /** Ramki okien, przyciski i pad z OTClientV8 (MIT, assets/ui/otc); null = rysowanie ksztaltami. */
+    private com.badlogic.gdx.graphics.g2d.NinePatch windowPatch, buttonPatch, buttonDownPatch;
+    private TextureRegion keypad, keypadPointer;
+    /** Batch biezacej klatki - okna z obrazkow rysowane sa w trakcie przebiegu ShapeRenderera. */
+    private SpriteBatch uiBatch;
+
+    private static com.badlogic.gdx.graphics.Texture uiTexture(String name) {
+        if (Gdx.files == null) return null;
+        com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("ui/otc/" + name);
+        if (!f.exists()) f = Gdx.files.internal("assets/ui/otc/" + name); // desktop z katalogu repozytorium
+        if (!f.exists()) return null;
+        com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(f);
+        t.setFilter(com.badlogic.gdx.graphics.Texture.TextureFilter.Linear, com.badlogic.gdx.graphics.Texture.TextureFilter.Linear);
+        return t;
+    }
+
+    private void loadUiImages() {
+        try {
+            com.badlogic.gdx.graphics.Texture win = uiTexture("window.png");
+            if (win != null) windowPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(win, 6, 6, 27, 6);
+            com.badlogic.gdx.graphics.Texture btn = uiTexture("button.png");
+            if (btn != null) {
+                buttonPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(new TextureRegion(btn, 0, 0, 22, 23), 3, 3, 3, 3);
+                buttonDownPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(new TextureRegion(btn, 0, 46, 22, 23), 3, 3, 3, 3);
+            }
+            com.badlogic.gdx.graphics.Texture pad = uiTexture("keypad.png");
+            if (pad != null) keypad = new TextureRegion(pad);
+            com.badlogic.gdx.graphics.Texture ptr = uiTexture("keypad_pointer.png");
+            if (ptr != null) keypadPointer = new TextureRegion(ptr);
+        } catch (RuntimeException e) {
+            Gdx.app.error("Hud", "Brak grafik interfejsu, rysuje ksztaltami: " + e.getMessage());
+        }
+    }
+
     public Hud(TileArt art, BitmapFont font) {
         this.art = art;
         this.font = font;
+        loadUiImages();
         buttons.add(use);
         buttons.add(run);
         buttons.add(torch);
@@ -1419,6 +1454,8 @@ public final class Hud {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapes.setProjectionMatrix(viewport.getCamera().combined);
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        uiBatch = batch;
         shapes.begin(ShapeRenderer.ShapeType.Filled);
 
         // panel stanu postaci (pod minimapa i paskami), paski HP / MP / EXP
@@ -1432,8 +1469,21 @@ public final class Hud {
         bar(shapes, x, y - 17, barW, 12, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
         bar(shapes, x, y - 31, barW, 6, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
 
-        // joystick: obramowana podstawa i galka
+        // joystick: obramowana podstawa i galka (pad z OTClientV8, gdy jest grafika)
         float jx = joystick.baseX(), jy = joystick.baseY(), jrad = joystick.radius();
+        if (keypad != null && keypadPointer != null) {
+            shapes.setColor(0.04f, 0.04f, 0.05f, 0.4f); // ciemne tlo pod polprzezroczystym padem
+            shapes.circle(jx, jy, jrad * 1.1f, 44);
+            shapes.end();
+            batch.begin();
+            batch.setColor(1, 1, 1, joystick.active() ? 1f : 0.8f);
+            float ks = jrad * 2.3f, ps = jrad * 0.95f;
+            batch.draw(keypad, jx - ks / 2f, jy - ks / 2f, ks, ks);
+            batch.draw(keypadPointer, joystick.knob().x - ps / 2f, joystick.knob().y - ps / 2f, ps, ps);
+            batch.setColor(Color.WHITE);
+            batch.end();
+            shapes.begin(ShapeRenderer.ShapeType.Filled);
+        } else {
         shapes.setColor(BORDER.r, BORDER.g, BORDER.b, joystick.active() ? 0.8f : 0.55f);
         shapes.circle(jx, jy, jrad + 3, 44);
         shapes.setColor(0.06f, 0.06f, 0.07f, joystick.active() ? 0.6f : 0.45f);
@@ -1444,6 +1494,7 @@ public final class Hud {
         shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f + 2, 30);
         shapes.setColor(0.32f, 0.3f, 0.28f, joystick.active() ? 0.95f : 0.8f);
         shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
+        }
 
         // tlo dolnego paska pod widocznymi przyciskami
         float hbMin = Float.MAX_VALUE, hbMax = -Float.MAX_VALUE;
@@ -1457,7 +1508,9 @@ public final class Hud {
         for (HudButton b : buttons) {
             if (!b.visible) continue;
             Color fill = b.active ? ACTIVE : b == target ? ATTACK : FILL;
-            if (b.hw > 0) {
+            if (b.hw > 0 && buttonPatch != null) {
+                continue; // przyciski paska z obrazka - nizej, w jednym przebiegu
+            } else if (b.hw > 0) {
                 shapes.setColor(BORDER);
                 shapes.rect(b.x - b.hw - 2, b.y - b.r - 2, b.hw * 2 + 4, b.r * 2 + 4);
                 shapes.setColor(fill);
@@ -1468,6 +1521,18 @@ public final class Hud {
                 shapes.setColor(fill);
                 shapes.circle(b.x, b.y, b.r - Math.max(2f, b.r * 0.08f), 32);
             }
+        }
+        if (buttonPatch != null) {
+            shapes.end();
+            batch.begin();
+            for (HudButton b : hotbar) {
+                if (!b.visible) continue;
+                if (b.active) batch.setColor(0.6f, 1f, 0.6f, 1f);
+                (b.active ? buttonDownPatch : buttonPatch).draw(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
+                batch.setColor(Color.WHITE);
+            }
+            batch.end();
+            shapes.begin(ShapeRenderer.ShapeType.Filled);
         }
         for (int i = 0; i < spellButtons.length; i++) {
             HudButton b = spellButtons[i];
@@ -1686,7 +1751,18 @@ public final class Hud {
     }
 
     /** Okno w stylu klienta mobilnego: jasna ramka, ciemne wnetrze i (opcjonalnie) pasek tytulu u gory. */
-    private static void window(ShapeRenderer shapes, float fx, float fy, float fw, float fh, boolean titleBar) {
+    private void window(ShapeRenderer shapes, float fx, float fy, float fw, float fh, boolean titleBar) {
+        if (windowPatch != null && uiBatch != null) {
+            // ramka okna z OTClientV8 (naglowek 27 px u gory)
+            shapes.end();
+            uiBatch.begin();
+            uiBatch.setColor(1, 1, 1, 0.97f);
+            windowPatch.draw(uiBatch, fx, fy, fw, fh);
+            uiBatch.setColor(Color.WHITE);
+            uiBatch.end();
+            shapes.begin(ShapeRenderer.ShapeType.Filled);
+            return;
+        }
         shapes.setColor(0.02f, 0.02f, 0.02f, 0.9f);
         shapes.rect(fx - 1, fy - 1, fw + 2, fh + 2);
         shapes.setColor(BORDER.r, BORDER.g, BORDER.b, 1f);

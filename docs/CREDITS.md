@@ -68,3 +68,14 @@ alphabetical order:
 
 Some people didn't make the sprites themselves, but paid for them and made them available. The artist is already credited above, here the list of Mecenas:
 - Sajgon - [@OTLand](https://otland.net/members/sajgon.221620/);
+
+## OTClientV8 (MIT)
+
+Ramki okien (`window.png`), przyciski dolnego paska (`button.png`) oraz pad joysticka
+(`keypad.png`, `keypad_pointer.png`) w `assets/ui/otc/` pochodzą z klienta **OTClientV8**:
+https://github.com/OTCv8/otclientv8 (na bazie OTClient, https://github.com/edubart/otclient).
+
+Copyright (c) 2010-2017 OTClient, Copyright (c) 2018-2023 OTClientV8. Licencja MIT,
+pełny tekst: `assets/ui/otc/LICENSE-OTCV8.txt`. Pliki są użyte bez zmian; gra rysuje je jako
+rozciągane ramki (9-patch). Nie użyto ikon z napisami ani grafik postaci z tego klienta.
+

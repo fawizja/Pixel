@@ -16,5 +16,6 @@ class CreditsTest {
         for (String name : Credits.AUTHORS.split(", ")) assertTrue(all.toString().contains(name), name);
         assertEquals("Autorzy", rows.get(3)[0]);
         for (String[] r : rows) assertTrue(r[1].length() <= 60, r[1]);
+        assertTrue(all.toString().contains("OTClientV8 (MIT)"));
     }
 }

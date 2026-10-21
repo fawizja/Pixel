@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.185.0] - 2026-10-21
+
+### Zmieniono
+- Grafiki interfejsu z OTClientV8 (licencja MIT): ramki okien z nagłówkiem (księga, sklep, plecak, mapa,
+  karta postaci), przyciski dolnego paska i pad joysticka ze strzałkami. Autorzy w `/autorzy`
+  i docs/CREDITS.md, licencja w `assets/ui/otc/LICENSE-OTCV8.txt`.
 ## [0.184.2] - 2026-10-21
 
 ### Zmieniono

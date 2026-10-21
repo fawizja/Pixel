@@ -11,6 +11,11 @@ public final class Credits {
     public static final String LICENSE = "CC BY 4.0";
     public static final String URL = "github.com/peonso/opentibia_sprite_pack";
 
+    /** Ramki okien, przyciski i pad joysticka (assets/ui/otc). */
+    public static final String UI_PACK = "OTClientV8";
+    public static final String UI_LICENSE = "MIT";
+    public static final String UI_URL = "github.com/OTCv8/otclientv8";
+
     /** Autorzy paczki w kolejnosci alfabetycznej (z AUTHORS.md paczki). */
     public static final String AUTHORS = "2Rec, 3visan, Anevis, Andreéw, Arkan'., BeachboyX, BrenoNeto, Cat, Celix, Corvo, dami1310, Daniel, DawTorr, Despute, ElderDark, Erick Etchebeur, Frevius, Galiant, GhostX, HalfAway, Hunter Killer, Jacobs, Landera, Leshrot, lionkobin, Madarada, markindoot, maxmillerxd, Nechros, Nogard, Nordberg, Noxz, Nu77, Peonso, Ranzor, Sam Drost, Saphron, Sherice, Shiva Shadowsong, Slaake, Somni, Thorn, Tokume, Venesis, wesleyt10, Way20, Weto, Worr, Sajgon";
 
@@ -29,6 +34,8 @@ public final class Credits {
             line.append(name);
         }
         if (line.length() > 0) rows.add(new String[] {rows.size() == 3 ? "Autorzy" : "", line.toString()});
+        rows.add(new String[] {"Interfejs", UI_PACK + " (" + UI_LICENSE + "): ramki okien, przyciski, pad"});
+        rows.add(new String[] {"Źródło", UI_URL});
         rows.add(new String[] {"Reszta", "grafiki rysowane przez kod gry"});
         return rows;
     }
