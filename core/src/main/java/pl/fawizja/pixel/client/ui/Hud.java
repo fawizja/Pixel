@@ -225,6 +225,8 @@ public final class Hud {
     /** Ramki okien, przyciski i pad z OTClientV8 (MIT, assets/ui/otc); null = rysowanie ksztaltami. */
     private com.badlogic.gdx.graphics.g2d.NinePatch windowPatch, buttonPatch, buttonDownPatch;
     private TextureRegion keypad, keypadPointer;
+    private com.badlogic.gdx.graphics.g2d.NinePatch barPatch;
+    private final List<float[]> barRects = new ArrayList<>();
     /** Batch biezacej klatki - okna z obrazkow rysowane sa w trakcie przebiegu ShapeRenderera. */
     private SpriteBatch uiBatch;
 
@@ -247,6 +249,8 @@ public final class Hud {
                 buttonPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(new TextureRegion(btn, 0, 0, 22, 23), 3, 3, 3, 3);
                 buttonDownPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(new TextureRegion(btn, 0, 46, 22, 23), 3, 3, 3, 3);
             }
+            com.badlogic.gdx.graphics.Texture pb = uiTexture("progressbar.png");
+            if (pb != null) barPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(pb, 1, 1, 1, 1);
             com.badlogic.gdx.graphics.Texture pad = uiTexture("keypad.png");
             if (pad != null) keypad = new TextureRegion(pad);
             com.badlogic.gdx.graphics.Texture ptr = uiTexture("keypad_pointer.png");
@@ -1603,6 +1607,7 @@ public final class Hud {
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
+        drawBarOverlays(batch);
         font.setColor(Color.WHITE);
         text(batch, pc.health() + " / " + pc.maxHealth(), x + 4, y + 10);
         text(batch, pc.mana() + " / " + pc.maxMana(), x + 4, y - 7);
@@ -1756,6 +1761,7 @@ public final class Hud {
             // ramka okna z OTClientV8 (naglowek 27 px u gory)
             shapes.end();
             uiBatch.begin();
+            drawBarOverlays(uiBatch); // paski pod oknem dostaja nakladke przed zasloneciem
             uiBatch.setColor(1, 1, 1, 0.97f);
             windowPatch.draw(uiBatch, fx, fy, fw, fh);
             uiBatch.setColor(Color.WHITE);
@@ -1918,6 +1924,14 @@ public final class Hud {
         s.rect(x - 1, y - 1, width + 2, height + 2);
         s.setColor(c);
         s.rect(x, y, width * Math.max(0f, Math.min(1f, fill)), height);
+        if (barPatch != null) barRects.add(new float[] {x - 1, y - 1, width + 2, height + 2});
+    }
+
+    /** Nakladka paska (cieniowanie i ramka z OTClientV8) na paski narysowane w tej klatce. */
+    private void drawBarOverlays(SpriteBatch batch) {
+        if (barPatch == null) return;
+        for (float[] r : barRects) barPatch.draw(batch, r[0], r[1], r[2], r[3]);
+        barRects.clear();
     }
 
     private void text(SpriteBatch batch, String s, float x, float y) {

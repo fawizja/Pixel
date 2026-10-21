@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.185.1] - 2026-10-21
+
+### Zmieniono
+- Paski HP, MP, doświadczenia, celu i umiejętności mają cieniowanie i ramkę z OTClientV8 (progressbar.png, MIT).
 ## [0.185.0] - 2026-10-21
 
 ### Zmieniono
