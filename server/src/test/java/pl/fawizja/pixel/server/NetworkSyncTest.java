@@ -44,7 +44,11 @@ class NetworkSyncTest {
     }
 
     static void await(String what, BooleanSupplier cond) throws InterruptedException {
-        long end = System.currentTimeMillis() + 10_000;
+        await(what, cond, 10_000);
+    }
+
+    static void await(String what, BooleanSupplier cond, long timeoutMs) throws InterruptedException {
+        long end = System.currentTimeMillis() + timeoutMs;
         while (!cond.getAsBoolean()) {
             if (System.currentTimeMillis() > end) fail("timeout waiting for " + what);
             Thread.sleep(20);
@@ -331,7 +335,7 @@ class NetworkSyncTest {
             long[] lastWeaken = {System.currentTimeMillis()};
             await("claimed", () -> {
                 if (logged(a, "Ivo odbiera nagrodę za głowę Jan")) return true;
-                if (System.currentTimeMillis() - lastWeaken[0] > 1000) {
+                if (System.currentTimeMillis() - lastWeaken[0] > 400) {
                     lastWeaken[0] = System.currentTimeMillis();
                     server.enqueueTest(() -> {
                         ServerPlayer j = server.world().find("Jan");
@@ -341,7 +345,7 @@ class NetworkSyncTest {
                     });
                 }
                 return false;
-            });
+            }, 30_000); // trafienie zalezy od rzutu (paladyn moze chybiac), a CI bywa obciazone
             b.send("BOUNTY");
             awaitMessage(b, "none left", m -> m[0].equals("LOG") && m[2].startsWith("Nie ma nagród"));
         }

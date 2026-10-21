@@ -252,7 +252,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Budzet wydajnosci petli serwera (200 graczy, cala mapa) jako test regresji
 - [x] Mniej transferu: klatki bez zmian jako `KEEP`
 - [x] Grafika w jednym atlasie tekstur (TileArt)
-- [ ] Niestabilny test NetworkSyncTest.bountiesArePaidToTheKiller (raz timeout, 3 powtorki zielone) - zbadac zaleznosc od czasu
+- [x] Niestabilny test NetworkSyncTest.bountiesArePaidToTheKiller: czestsze oslabianie celu i 30 s limitu (0.193.1)
 - [x] Pasek akcji 10 pol 5x2 z wyborem czar leczacy / atakujacy / mikstura / runa po przytrzymaniu (0.191.0)
 - [x] Uklad Tibii w jednej bryle: widok gry w ramce, panel prawy, paski u gory, konsola na dole (0.192.0)
 - [x] Okna Ekwipunek, Umiejętności, Plecak i Konsola w stylu OTClient (0.186.0)
