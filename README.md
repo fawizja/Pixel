@@ -61,7 +61,7 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Diagnostyka i ustawienia | `i` w prawym gornym rogu, wiersze ustawien pod panelem | F3, klikniecie wiersza |
 | Nastepny cel (atak automatyczny) | duzy ATAK w prawym dolnym rogu albo dotkniecie potwora | Spacja / C |
 | Postawa obronna (zielony = wlaczona) | TARCZA | V |
-| Czary z paska (leczenie, atak, obszar, swiatlo) | okragle przyciski na luku wokol ATAK | 1-4 |
+| Czary z paska (leczenie, atak, obszar, swiatlo) | okragle przyciski na luku wokol ATAK (pusty "+" = dotknij, aby przypisac czar) | 1-4 |
 | Mikstura zdrowia / many | HP / MP | Q / F |
 | Ksiega czarow i rzemiosla | KSIEGA | K |
 | Lowienie ryb (przy wodzie, wedka + robaki) | LOW | L |

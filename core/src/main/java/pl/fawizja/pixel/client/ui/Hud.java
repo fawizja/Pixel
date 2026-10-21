@@ -388,6 +388,14 @@ public final class Hud {
         if (menuOpen) bagOpen = false;
     }
 
+    /** Ksiega czarow w trybie przypisywania czaru do przycisku akcji nr slot (0-3). */
+    public void openAssign(int slot) {
+        if (trade != null) return;
+        if (!book.active) toggleBook();
+        if (!menuOpen) return;
+        assignSlot = slot;
+    }
+
     /** Otwiera lub zamyka rozmowe z NPC w zasiegu. */
     public void toggleNpc(GameSession session) {
         if (menuOpen && npcMode) {
@@ -586,8 +594,9 @@ public final class Hud {
         for (int i = 0; i < 4; i++) {
             SpellType sp = resolved[i] == null ? null : session.spells().registry().get(resolved[i]);
             barSpells[i] = sp == null ? null : sp.key();
-            spellButtons[i].visible = sp != null;
-            spellButtons[i].label = sp == null ? "" : shortName(sp.name());
+            // pusty przycisk akcji zostaje widoczny jako "+" - dotkniecie przypisuje do niego czar
+            spellButtons[i].visible = true;
+            spellButtons[i].label = sp == null ? "+" : shortName(sp.name());
         }
     }
 
@@ -1323,6 +1332,12 @@ public final class Hud {
                     actions.onButton("slot_move:" + selectedSlot + ":" + slot);
                     selectedSlot = -1;
                 }
+                return true;
+            }
+        }
+        for (int i = 0; i < spellButtons.length; i++) {
+            if (barSpells[i] == null && spellButtons[i].hit(p.x, p.y)) {
+                openAssign(i);
                 return true;
             }
         }

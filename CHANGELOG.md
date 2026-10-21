@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.184.1] - 2026-10-21
+
+### Dodano
+- Pusty przycisk akcji na łuku pokazuje „+”. Dotknięcie otwiera księgę czarów w trybie przypisywania:
+  wybrany czar trafia na ten przycisk (zapisywane jak dotychczasowy własny pasek).
 ## [0.184.0] - 2026-10-21
 
 ### Zmieniono
