@@ -27,6 +27,8 @@ OBJECTS = {
     "sandstone_rock": 1627, "ice_crystal": 1650, "crystal": 1277, "obsidian_rock": 1633, "rubble": 1613,
     "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000,
 }
+# Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
+ROOFS = {"roof_red": 183, "roof_slate": 187}
 ITEMS = {
     "iron_sword": 1683, "training_sword": 1702, "frost_blade": 1680, "shadowpiercer": 1734, "spear": 1893,
     "hunting_spear": 1880, "steel_spear": 1821, "dawnspear": 1909, "serpent_spear": 1830, "magma_spear": 1842,
@@ -129,6 +131,8 @@ def main(client, art):
         save(ot.compose(spr, things["item"][i]), f"{art}/tiles/{name}.png"); n += 1
     for name, i in OBJECTS.items():
         save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
+    for name, i in ROOFS.items():
+        save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ITEMS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/items/{name}.png"); n += 1
     south = ot.DIRS.index("down")

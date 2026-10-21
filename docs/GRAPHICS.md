@@ -12,7 +12,7 @@ po kawałku.
 - Kolumna „Jest”: plik już istnieje. Obecne pliki pochodzą z OpenTibia Sprite Pack (CC BY 4.0), autorzy w
   docs/CREDITS.md i w grze (/autorzy). Mapowanie nazw: `tools/art/otsp_import.py`.
 
-Razem: 67 kafelków, 119 przedmiotów, 42 potworów, 26 NPC, 16 obrazków postaci, 6 obiektów, 4 pupili. Podmienione: 182.
+Razem: 67 kafelków, 119 przedmiotów, 42 potworów, 26 NPC, 16 obrazków postaci, 8 obiektów, 4 pupili. Podmienione: 184.
 
 Lista jest generowana: `python3 tools/art/list_graphics.py`.
 
@@ -323,6 +323,8 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 | `objects/chest_open.png` | skrzynia skarbów, otwarta |  |
 | `objects/training_dummy.png` | manekin treningowy |  |
 | `objects/spike_trap.png` | pułapka z kolcami |  |
+| `objects/roof_red.png` | dach z dachówki (drewniane domy) | tak |
+| `objects/roof_slate.png` | dach z łupku (kamienne budynki) | tak |
 | `objects/horse_right.png` | koń, w prawo |  |
 | `objects/horse_left.png` | koń, w lewo |  |
 

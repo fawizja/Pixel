@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.183.0] - 2026-10-21
+
+### Dodano
+- Widok jak w Tibii: budynki mają dachy (dachówka nad drewnianymi domami, niebieski dach nad kamiennymi),
+  które znikają, kiedy wejdziesz do środka. Wyższe piętra (tarasy na murach, piętra domów) są widoczne z dołu.
+- Ściany mają wysokość: wierzch muru jest podniesiony, a pod nim widać ciemniejsze lico, więc mur zasłania to,
+  co stoi tuż za nim. Drzewa i palmy są wyższe niż kafelek.
 ## [0.182.1] - 2026-10-21
 
 ### Zmieniono

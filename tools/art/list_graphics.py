@@ -36,6 +36,7 @@ dirs = [("down", "przód"), ("up", "tył"), ("left", "w lewo"), ("right", "w pra
 chars = [(f"{v}_{d}", f"{name}, {dn}") for v, name in [("paladin", "Paladyn"), ("druid", "Druid"), ("sorcerer", "Czarodziej"), ("monk", "Mnich")] for d, dn in dirs]
 objects = [("chest_closed", "skrzynia skarbów, zamknięta"), ("chest_open", "skrzynia skarbów, otwarta"),
            ("training_dummy", "manekin treningowy"), ("spike_trap", "pułapka z kolcami"),
+           ("roof_red", "dach z dachówki (drewniane domy)"), ("roof_slate", "dach z łupku (kamienne budynki)"),
            ("horse_right", "koń, w prawo"), ("horse_left", "koń, w lewo")]
 pets = [("pet_dog", "szczenię"), ("pet_cat", "kot"), ("pet_raven", "kruk"), ("pet_fennec", "fenek")]
 

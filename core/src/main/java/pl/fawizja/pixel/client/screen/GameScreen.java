@@ -66,6 +66,7 @@ public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final ExtendViewport viewport = new ExtendViewport(VIEW_TILES_W, VIEW_TILES_H, camera);
     private final WorldRenderer worldRenderer;
+    private final pl.fawizja.pixel.client.render.Roofs roofs;
     private final LightRenderer lightRenderer;
     private final Hud hud;
     private final ResourceGuard guard = new ResourceGuard();
@@ -215,6 +216,7 @@ public final class GameScreen extends ScreenAdapter {
             session.setToday(() -> d);
         }
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
+        this.roofs = new pl.fawizja.pixel.client.render.Roofs(game.world());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
         hud.setMonsterNames(k -> {
@@ -1252,6 +1254,7 @@ public final class GameScreen extends ScreenAdapter {
                 b.draw(game.art().character(pc.vocation(), session.facing(), pc.outfit()), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
             }
         });
+        worldRenderer.renderAbove(batch, camera, pc.position(), roofs);
         batch.end();
 
         int minute = session.clock().minuteOfDay(t);
