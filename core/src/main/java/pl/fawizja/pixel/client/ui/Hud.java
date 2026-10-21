@@ -311,63 +311,73 @@ public final class Hud {
         viewport.update(width, height, true);
         w = viewport.getWorldWidth();
         h = viewport.getWorldHeight();
-        float margin = 16;
-        float jr = Math.min(70, Math.min(w, h) * 0.16f);
-        joystick.layout(margin + jr * 1.3f, margin + jr * 1.3f, jr);
-        float br = Math.max(26, jr * 0.48f);
-        // pasek akcji jak w Tibii na telefonie: 10 kwadratowych pol 5x2 w prawym dolnym rogu
-        // (czary, mikstury, runy - dlugie przytrzymanie zmienia pole), obok UZYJ i ATAK
-        float cell = Math.max(32, Math.min(42, br * 1.2f));
-        float gap = 3;
+        // jedna bryla jak klasyczny klient Tibii: widok gry w ramce, po prawej panel (minimapa, ekwipunek,
+        // lista walki, pasek akcji), u gory paski HP/MP, na dole przyciski i konsola
+        float pad = 4, gap = 3;
+        float pw = Math.max(180, Math.min(280, w * 0.3f));
+        panelX = w - pw;
+        float iw = pw - pad * 2;
+        // pasek akcji 5x2 na dole panelu
         int cols = spellButtons.length / 2;
+        float cell = Math.min(40, (iw - 8 - gap * (cols - 1)) / cols);
         float abW = cell * cols + gap * (cols - 1);
-        float abX = w - margin - abW;
+        float abX = panelX + pad + (iw - abW) / 2f;
         for (int i = 0; i < spellButtons.length; i++) {
             HudButton b = spellButtons[i];
             b.x = abX + (i % cols) * (cell + gap) + cell / 2f;
-            b.y = margin + (1 - i / cols) * (cell + gap) + cell / 2f;
+            b.y = pad + 4 + (1 - i / cols) * (cell + gap) + cell / 2f;
             b.r = cell / 2f;
             b.hw = cell / 2f;
         }
-        HudButton[] side = {use, target};
-        for (int i = 0; i < side.length; i++) {
-            side[i].x = abX - gap * 3 - cell / 2f;
-            side[i].y = margin + (1 - i) * (cell + gap) + cell / 2f;
-            side[i].r = cell / 2f;
-            side[i].hw = cell / 2f;
-        }
-        abX -= gap * 3 + cell;
-        float clusterTop = margin + cell * 2 + gap;
-        // dolny pasek (plecak, ksiega, czat i przyciski zalezne od sytuacji) miedzy padem a paskiem akcji
-        hbLeft = margin + jr * 2.6f + 10;
-        joyTop = margin + jr * 2.6f;
-        hbRight = abX - 10;
-        hbHalfH = cell / 2f;
-        hbY = margin + hbHalfH;
-        hbSlotHw = br * 1.05f;
-        // lewy gorny rog: paski HP/MP/EXP i stan postaci
-        barX = 12;
-        barW = Math.min(200, w * 0.32f);
-        // prawy gorny rog na stale: minimapa, pod nia ekwipunek (jak prawy panel w Tibii)
-        mmSize = Math.min(110, h * 0.2f);
-        mmX = w - margin + 3 - mmSize;
-        mmY = h - margin + 3 - mmSize;
-        layoutEquipPanel(margin, clusterTop);
-        // jak przyciski obok ekwipunku w Tibii: bieg, postawa obronna, pochodnia - kolumna na lewo
-        float sc = Math.max(28, cell * 0.8f);
-        HudButton[] col = {run, defensive, torch};
+        abTop = pad + 8 + cell * 2 + gap;
+        // u gory panelu minimapa, na lewo od niej kolumna: diagnostyka, bieg, postawa obronna, pochodnia
+        float sc = Math.max(22, Math.min(30, cell * 0.8f));
+        mmSize = Math.min(180, Math.min(iw - sc - 10, h * 0.3f));
+        mmX = w - pad - 3 - mmSize;
+        mmY = h - pad - 3 - mmSize;
+        HudButton[] col = {diag, run, defensive, torch};
         for (int i = 0; i < col.length; i++) {
-            col[i].x = Math.min(epX, mmX - 3) - 6 - sc / 2f;
-            col[i].y = epY + epH - sc / 2f - i * (sc + gap);
+            col[i].x = mmX - 3 - 4 - sc / 2f;
+            col[i].y = h - pad - sc / 2f - i * (sc + gap);
             col[i].r = sc / 2f;
             col[i].hw = sc / 2f;
         }
+        float colBottom = h - pad - col.length * (sc + gap);
+        // pod minimapa ekwipunek, miedzy nim a paskiem akcji lista walki
+        layoutEquipPanel(Math.min(mmY - 3, colBottom) - pad, abTop + pad + 23 + BATTLE_ROW * 2 + 6);
+        blX = panelX + pad;
+        blW = iw;
+        blY = abTop + pad;
+        blH = epY - pad - blY;
+        // dolny pasek pod widokiem gry: rzad przyciskow i konsola
+        topH = 24;
+        float hbH = h >= 500 ? 30 : 26;
+        float conBody = (h >= 500 ? 6 : 3) * 13 + 8;
+        gx = pad;
+        gy = pad + conBody + 4 + hbH + 4;
+        gw = panelX - pad - gx;
+        gh = h - topH - gy;
+        conX = pad;
+        conY = pad;
+        conW = gw;
+        conH = conBody;
+        hbLeft = pad;
+        hbRight = panelX - pad;
+        hbHalfH = hbH / 2f;
+        hbY = conY + conH + 4 + hbHalfH;
+        hbSlotHw = h >= 500 ? 48 : 40;
+        // pad (sama kulka) w lewym dolnym rogu widoku gry
+        float jr = Math.min(70, Math.min(gw, gh) * 0.2f);
+        joystick.layout(gx + 12 + jr * 1.3f, gy + 12 + jr * 1.3f, jr);
+        // gorny pasek: HP i MP nad widokiem gry
+        barX = gx + 4;
+        barW = Math.min(170, gw * 0.28f);
         menuW = Math.min(w - 40, 620);
         menuH = Math.min(h - 40, 400);
         menuX = (w - menuW) / 2f;
         menuY = (h - menuH) / 2f;
         rowH = Math.max(26, Math.min(36, (menuH - 50) / 10f));
-        menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 16; menuClose.r = 14;        diag.x = mmX - 3 - 22; diag.y = h - margin - 14; diag.r = 14;
+        menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 16; menuClose.r = 14;
         slotSize = Math.min(44, Math.min(w, h) / 9f);
         bagX = w / 2f - slotSize * 2.5f;
         bagY = h / 2f - slotSize * 2f;
@@ -380,17 +390,27 @@ public final class Hud {
         bagClose.x = bagX + slotSize * 5f + 4; bagClose.y = bagY + slotSize * 4f + 18; bagClose.r = 14;
     }
 
+    /** Widok gry w ramce (jednostki interfejsu), lewa krawedz prawego panelu, wysokosc gornego paska. */
+    private float gx, gy, gw, gh, panelX, topH;
+    /** Lista walki w panelu i gorna krawedz paska akcji. */
+    private float blX, blY, blW, blH, abTop;
+
+    /** Widok gry w pikselach ekranu {x, y, szerokosc, wysokosc} - tam GameScreen rysuje swiat. */
+    public float[] gameView() { return new float[] {gx * uiScale, gy * uiScale, gw * uiScale, gh * uiScale}; }
+
+    private boolean inGameView(float px, float py) {
+        return px >= gx && px <= gx + gw && py >= gy && py <= gy + gh;
+    }
+
     /** Dolny pasek przyciskow (granice) i polowa wysokosci / szerokosci jego pola. */
     private float hbLeft, hbRight, hbY, hbHalfH, hbSlotHw;
     /** Paski HP/MP obok minimapy. */
     private float barX, barW;
-    /** Gorna krawedz strefy joysticka (konsola konczy sie nad nia). */
-    private float joyTop;
-    private final HudButton[] hotbar = {bag, book, chat, talk, pick, fish, mount};
+    private final HudButton[] hotbar = {target, use, bag, book, chat, talk, pick, fish, mount};
     /** Kwadratowe pola jak w Tibii (pasek akcji i przyciski obok ekwipunku). */
     private HudButton[] slotButtons() {
-        HudButton[] out = java.util.Arrays.copyOf(spellButtons, spellButtons.length + 5);
-        HudButton[] rest = {use, target, run, defensive, torch};
+        HudButton[] out = java.util.Arrays.copyOf(spellButtons, spellButtons.length + 4);
+        HudButton[] rest = {diag, run, defensive, torch};
         System.arraycopy(rest, 0, out, spellButtons.length, rest.length);
         return out;
     }
@@ -409,8 +429,7 @@ public final class Hud {
         if (n == 0) return;
         float gap = 6;
         float hw = Math.min(hbSlotHw, ((hbRight - hbLeft) - gap * (n - 1)) / (2f * n));
-        float total = n * hw * 2 + gap * (n - 1);
-        float x = (hbLeft + hbRight) / 2f - total / 2f + hw;
+        float x = hbLeft + hw;
         for (HudButton b : hotbar) {
             if (!b.visible) continue;
             b.x = x; b.y = hbY; b.r = hbHalfH; b.hw = hw;
@@ -1439,7 +1458,7 @@ public final class Hud {
     public boolean mapOpen() { return bigMapOpen; }
 
     private boolean minimapVisible() {
-        return mmSize >= 56 && !diagnosticsOpen && !charOpen && !menuOpen && !bigMapOpen;
+        return mmSize >= 56 && !menuOpen && !bigMapOpen;
     }
 
     public void dispose() { minimap.dispose(); }
@@ -1466,7 +1485,8 @@ public final class Hud {
         if (statusTouch(p.x, p.y, session)) return true;
         if (equipPanelTouch(p.x, p.y, session, actions)) return true;
         if (!bagOpen && consoleTouch(p.x, p.y, actions)) return true;
-        if (p.x >= barX - 8 && p.x <= barX + barW + 8 && p.y >= h - 62) {
+        if (!bagOpen && battleTouch(p.x, p.y, actions)) return true;
+        if (p.x >= barX - 4 && p.x <= barX + barW * 2 + 12 && p.y >= h - topH) {
             // dotkniecie paskow HP/MP: karta postaci
             toggleCharacter();
             return true;
@@ -1588,6 +1608,7 @@ public final class Hud {
         if (bagOpen && p.x >= bagX - 8 && p.x <= bagX + slotSize * 5 + 8 && p.y >= bagY - 50 && p.y <= bagY + slotSize * 4 + 30) {
             return true;
         }
+        if (!inGameView(p.x, p.y)) return true; // panele interfejsu nie przepuszczaja dotyku na mape
         return joystick.touchDown(p.x, p.y, pointer);
     }
 
@@ -1671,32 +1692,33 @@ public final class Hud {
         uiBatch = batch;
         shapes.begin(ShapeRenderer.ShapeType.Filled);
 
-        // panel stanu postaci (pod minimapa i paskami), paski HP / MP / EXP
+        // tlo bryly: prawy panel, dolny pasek, gorny pasek i ramka wokol widoku gry
         float margin = 16;
-        float x = barX, y = h - 22;
-        // bez minimapy (otwarte okno) panel obejmuje tylko paski
-        float panelBottom = y - 66 - STATUS_ROW;
+        shapes.setColor(PANEL_BG);
+        shapes.rect(panelX, 0, w - panelX, h);
+        shapes.rect(0, 0, panelX, gy);
+        shapes.rect(0, gy + gh, panelX, h - gy - gh);
+        shapes.rect(0, gy, gx, gh);
+        shapes.setColor(BORDER);
+        shapes.rect(gx - 2, gy - 2, gw + 4, 2);
+        shapes.rect(gx - 2, gy + gh, gw + 4, 2);
+        shapes.rect(gx - 2, gy, 2, gh);
+        shapes.rect(gx + gw, gy, 2, gh);
+        // gorny pasek: HP i MP obok siebie, pod nimi doswiadczenie, po prawej ikony stanu
+        float x = barX, y = h - 4 - 13;
         statusIcons(session, serverTimeMs);
-        float panelLeft = barX - 8;
-        frame(shapes, panelLeft, panelBottom, barX + barW + 8 - panelLeft, h - panelBottom - margin + 6);
-        bar(shapes, x, y, barW, 12, pc.health() / (float) pc.maxHealth(), new Color(0.85f, 0.15f, 0.2f, 1));
-        bar(shapes, x, y - 17, barW, 12, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
-        bar(shapes, x, y - 31, barW, 6, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
-        drawStatusIcons(shapes, x, y - 66 - STATUS_ROW + 3);
+        bar(shapes, x, y, barW, 13, pc.health() / (float) pc.maxHealth(), new Color(0.85f, 0.15f, 0.2f, 1));
+        bar(shapes, x + barW + 6, y, barW, 13, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
+        bar(shapes, x, y - 5, barW * 2 + 6, 3, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
+        drawStatusIcons(shapes, statusX(), h - 4 - STATUS_SIZE);
+        miniWindow(shapes, blX, blY, blW, blH);
+        frame(shapes, panelX + 4, 4, w - panelX - 8, abTop - 4);
 
         // pad jak w Tibii mobile: sama kulka, w 90% przezroczysta (wyrazniejsza w trakcie ruchu)
         float jrad = joystick.radius();
         shapes.setColor(1, 1, 1, joystick.active() ? 0.22f : 0.1f);
         shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
 
-        // tlo dolnego paska pod widocznymi przyciskami
-        float hbMin = Float.MAX_VALUE, hbMax = -Float.MAX_VALUE;
-        for (HudButton b : hotbar) {
-            if (!b.visible) continue;
-            hbMin = Math.min(hbMin, b.x - b.hw);
-            hbMax = Math.max(hbMax, b.x + b.hw);
-        }
-        if (hbMin < hbMax) frame(shapes, hbMin - 5, hbY - hbHalfH - 5, hbMax - hbMin + 10, hbHalfH * 2 + 10);
 
         for (HudButton b : buttons) {
             if (!b.visible) continue;
@@ -1755,10 +1777,10 @@ public final class Hud {
         }
 
         if (tgt != null) {
-            float tw = Math.min(200, w * 0.36f);
+            float tw = Math.min(200, gw * 0.4f);
             float tx = targetBarX(tw);
-            frame(shapes, tx - 6, h - 44, tw + 12, 38);
-            bar(shapes, tx, h - 38, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
+            frame(shapes, tx - 6, gy + gh - 42, tw + 12, 38);
+            bar(shapes, tx, gy + gh - 36, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
         }
         if (charOpen) {
             layoutCharWindows();
@@ -1771,7 +1793,7 @@ public final class Hud {
                 yy -= SK_ROW;
             }
         }
-        if (consoleVisible()) miniWindow(shapes, conX, conY, conW, conH);
+        if (consoleVisible()) frame(shapes, conX, conY, conW, conH);
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
             rebuildMenu(session);
@@ -1815,12 +1837,14 @@ public final class Hud {
         font.setColor(Color.WHITE);
         int minute = clock.minuteOfDay(serverTimeMs);
         String floor = pc.position().z() == 0 ? "0" : (pc.position().z() > 0 ? "+" + pc.position().z() : String.valueOf(pc.position().z()));
-        if (!underMenu(x + barW / 2f, y - 30)) {
-            text(batch, pc.health() + " / " + pc.maxHealth(), x + 4, y + 10);
-            text(batch, pc.mana() + " / " + pc.maxMana(), x + 4, y - 7);
-            text(batch, pc.name() + "  " + pc.vocation().displayName() + "  Lv " + pc.level(), x, y - 38);
-            text(batch, String.format("%02d:%02d  Piętro %s  %,d gp", minute / 60, minute % 60, floor, session.gold()), x, y - 54);
-        }
+        font.getData().setScale(0.8f);
+        centered(batch, pc.health() + " / " + pc.maxHealth(), x + barW / 2f, y + 6.5f);
+        centered(batch, pc.mana() + " / " + pc.maxMana(), x + barW * 1.5f + 6, y + 6.5f);
+        String info = "Lv " + pc.level() + "   " + String.format("%02d:%02d   Piętro %s   %,d gp", minute / 60, minute % 60, floor, session.gold());
+        layout.setText(font, info);
+        if (x + barW * 2 + 14 + layout.width < statusX() - 6) text(batch, info, x + barW * 2 + 14, h - 7);
+        font.getData().setScale(1f);
+        drawBattle(batch);
 
         drawConsole(batch);
 
@@ -1851,8 +1875,8 @@ public final class Hud {
             font.getData().setScale(1f);
         }
         if (tgt != null) {
-            float tw = Math.min(200, w * 0.36f);
-            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", targetBarX(tw) + tw / 2f, h - 16);
+            float tw = Math.min(200, gw * 0.4f);
+            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", targetBarX(tw) + tw / 2f, gy + gh - 14);
         }
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
@@ -1925,6 +1949,8 @@ public final class Hud {
     }
 
     private static final Color BORDER = new Color(0.5f, 0.44f, 0.32f, 0.85f);
+    /** Tlo paneli bryly (prawy panel, paski nad i pod widokiem gry). */
+    private static final Color PANEL_BG = new Color(0.17f, 0.16f, 0.15f, 1f);
     private static final Color FILL = new Color(0.1f, 0.09f, 0.08f, 0.72f);
     private static final Color ACTIVE = new Color(0.15f, 0.6f, 0.25f, 0.88f);
     private static final Color ATTACK = new Color(0.4f, 0.1f, 0.07f, 0.8f);
@@ -1988,6 +2014,9 @@ public final class Hud {
         }
     }
 
+    /** Ikony stanu wyrownane do prawej krawedzi gornego paska. */
+    private float statusX() { return gx + gw - 2 - statuses.size() * (STATUS_SIZE + 3); }
+
     private void drawStatusIcons(ShapeRenderer s, float x0, float y0) {
         float sz = STATUS_SIZE;
         for (int i = 0; i < statuses.size(); i++) {
@@ -2036,9 +2065,8 @@ public final class Hud {
 
     /** Dotkniecie ikon stanu: opis kazdej w konsoli. */
     private boolean statusTouch(float px, float py, GameSession session) {
-        float y0 = h - 22 - 66 - STATUS_ROW + 3;
-        if (statuses.isEmpty() || py < y0 - 3 || py > y0 + STATUS_SIZE + 3 || px < barX - 4
-                || px > barX + statuses.size() * (STATUS_SIZE + 3) + 4) return false;
+        float y0 = h - 4 - STATUS_SIZE;
+        if (statuses.isEmpty() || py < y0 - 3 || py > h || px < statusX() - 4 || px > gx + gw) return false;
         for (Status st : statuses) session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, st.desc);
         return true;
     }
@@ -2169,7 +2197,7 @@ public final class Hud {
 
     /** Pasek celu: na srodku, chyba ze zaslonilby panel postaci (waski ekran). */
     private float targetBarX(float tw) {
-        return Math.max(w / 2f - tw / 2f, barX + barW + 18);
+        return gx + gw / 2f - tw / 2f;
     }
 
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
@@ -2204,42 +2232,27 @@ public final class Hud {
     private record ConLine(String text, Color color, float height) {}
     private final List<ConLine> conLines = new ArrayList<>();
     private float conX, conY, conW, conH;
-    private boolean consoleMin;
-    /** Zakladka "Walka" (lista potworow w poblizu jak battle list w Tibii) zamiast konsoli. */
-    private boolean battleTab;
     private final List<Monster> battle = new ArrayList<>();
     private static final float BATTLE_ROW = 18;
-    private float conTabX;
     private static final float CON_SCALE = 0.8f;
     /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
     private static final long CON_KEEP_MS = 30_000;
 
     private boolean consoleVisible() {
-        return !charOpen && !menuOpen && !bigMapOpen && conW > 0;
+        return !menuOpen && !bigMapOpen && conH > 8;
     }
 
     /** Konsola pod panelem postaci: zadania i wyzwanie na gorze, potem ostatnie zdarzenia i czat (najnowsze na dole). */
     private void layoutConsole(GameSession session, long serverTimeMs) {
         PlayerCharacter pc = session.character();
-        float margin = 16;
-        float top = h - 22 - 66 - STATUS_ROW - 4;
-        conX = barX - 8;
-        conW = Math.min(460, Math.max(220, w * 0.5f));
-        float maxBody = Math.min(8 * 14f, top - joyTop - 10 - 23 - 6);
+        float maxBody = conH - 8;
         conLines.clear();
-        if (maxBody < 14) { conW = 0; return; }
         battle.clear();
         for (Monster m : session.monsters().monsters()) {
             if (m.isDead() || m.position().z() != pc.position().z() || m.position().distanceTo(pc.position()) > 7) continue;
             battle.add(m);
         }
         battle.sort(java.util.Comparator.comparingInt(m -> m.position().distanceTo(pc.position())));
-        if (battleTab) {
-            float body = Math.max(BATTLE_ROW, Math.min(maxBody, battle.size() * BATTLE_ROW));
-            conH = consoleMin ? 23 : 23 + body + 6;
-            conY = top - conH;
-            return;
-        }
         float tw = conW - 14;
         font.getData().setScale(CON_SCALE);
         List<ConLine> fixed = new ArrayList<>();
@@ -2269,11 +2282,6 @@ public final class Hud {
         font.getData().setScale(1f);
         conLines.addAll(fixed);
         conLines.addAll(recent);
-        float body = 0;
-        for (ConLine l : conLines) body += l.height();
-        body = Math.max(14, Math.min(maxBody, body));
-        conH = consoleMin ? 23 : 23 + body + 6;
-        conY = top - conH;
     }
 
     private ConLine conLine(String text, Color c, float width) {
@@ -2283,73 +2291,68 @@ public final class Hud {
 
     private void drawConsole(SpriteBatch batch) {
         if (!consoleVisible()) return;
-        font.setColor(battleTab ? Color.GRAY : Color.WHITE);
-        text(batch, "Konsola", conX + 8, conY + conH - 6);
-        layout.setText(font, "Konsola");
-        conTabX = conX + 8 + layout.width + 14;
-        font.setColor(battleTab ? Color.WHITE : Color.GRAY);
-        text(batch, "Walka (" + battle.size() + ")", conTabX, conY + conH - 6);
-        font.setColor(Color.WHITE);
-        if (minimizeImg != null) batch.draw(minimizeImg, conX + conW - 19, conY + conH - 19, 14, 14);
-        font.getData().setScale(0.7f);
-        font.setColor(0.75f, 0.75f, 0.7f, 1f);
-        String hint = battleTab ? "dotknij, aby atakować" : "dotknij, aby pisać";
-        layout.setText(font, hint);
-        if (conX + conW - 26 - layout.width > conTabX + 70) text(batch, hint, conX + conW - 26 - layout.width, conY + conH - 8);
-        font.setColor(Color.WHITE);
-        if (consoleMin) { font.getData().setScale(1f); return; }
         font.getData().setScale(CON_SCALE);
-        if (battleTab) {
-            drawBattle(batch);
-            font.getData().setScale(1f);
-            return;
-        }
-        float yy = conY + conH - 23 - 4;
+        float yy = conY + conH - 4;
         for (ConLine l : conLines) {
             if (yy - l.height() < conY - 2) break;
             font.setColor(l.color());
             font.draw(batch, l.text(), conX + 7, yy, conW - 14, com.badlogic.gdx.utils.Align.left, true);
             yy -= l.height();
         }
+        if (conLines.isEmpty()) {
+            font.setColor(0.6f, 0.6f, 0.55f, 1f);
+            text(batch, "Konsola: dotknij, aby pisać", conX + 7, yy);
+        }
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
     }
 
-    /** Dotkniecie konsoli: naglowek zwija/rozwija i przelacza zakladki, tresc otwiera czat albo wybiera cel. */
+    /** Dotkniecie konsoli otwiera czat. */
     private boolean consoleTouch(float px, float py, Actions actions) {
         if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
-        if (py >= conY + conH - 23) {
-            if (px >= conX + conW - 30) consoleMin = !consoleMin;
-            else battleTab = px >= conTabX - 6;
-            return true;
-        }
-        if (battleTab) {
-            int i = (int) ((conY + conH - 23 - 4 - py) / BATTLE_ROW);
-            if (i >= 0 && i < battle.size()) actions.onButton("battle:" + battle.get(i).id());
-            return true;
-        }
         actions.onButton("chat");
         return true;
     }
 
-    /** Lista walki: imie potwora, pasek zycia, czerwona ramka przy obecnym celu. */
+    /** Dotkniecie listy walki wybiera cel. */
+    private boolean battleTouch(float px, float py, Actions actions) {
+        if (!battleVisible() || px < blX || px > blX + blW || py < blY || py > blY + blH) return false;
+        int i = (int) ((blY + blH - 23 - 4 - py) / BATTLE_ROW);
+        if (i >= 0 && i < battle.size()) actions.onButton("battle:" + battle.get(i).id());
+        return true;
+    }
+
+    private boolean battleVisible() {
+        return blH >= 23 + BATTLE_ROW && !menuOpen && !bigMapOpen;
+    }
+
+    /** Lista walki w panelu (jak battle list w Tibii): imie potwora, pasek zycia, czerwona ramka przy celu. */
     private void drawBattle(SpriteBatch batch) {
+        if (!battleVisible()) return;
+        text(batch, "Walka (" + battle.size() + ")", blX + 6, blY + blH - 6);
         Monster tgt = currentTarget;
-        float yy = conY + conH - 23 - 4;
+        float yy = blY + blH - 23 - 4;
+        font.getData().setScale(CON_SCALE);
         if (battle.isEmpty()) {
             font.setColor(0.75f, 0.75f, 0.7f, 1f);
-            text(batch, "Brak potworów w pobliżu.", conX + 8, yy);
+            text(batch, "Brak potworów w pobliżu.", blX + 8, yy);
             font.setColor(Color.WHITE);
+            font.getData().setScale(1f);
             return;
         }
         for (Monster m : battle) {
-            if (yy - BATTLE_ROW < conY) break;
+            if (yy - BATTLE_ROW < blY + 2) break;
             float rowY = yy - BATTLE_ROW + 1;
-            if (m == tgt) outline(batch, conX + 4, rowY, conW - 8, BATTLE_ROW - 1, new Color(0.95f, 0.25f, 0.2f, 1f));
+            if (m == tgt) outline(batch, blX + 4, rowY, blW - 8, BATTLE_ROW - 1, new Color(0.95f, 0.25f, 0.2f, 1f));
             TextureRegion icon = art.monster(m.type().key());
-            if (icon != null) batch.draw(icon, conX + 7, rowY + 1, BATTLE_ROW - 3, BATTLE_ROW - 3);
-            text(batch, m.type().name(), conX + 7 + BATTLE_ROW, yy - 2);
-            float bw = Math.min(90, conW * 0.3f), bx = conX + conW - 10 - bw;
+            if (icon != null) batch.draw(icon, blX + 7, rowY + 1, BATTLE_ROW - 3, BATTLE_ROW - 3);
+            float bw = Math.min(70, blW * 0.3f), bx = blX + blW - 10 - bw;
+            String name = m.type().name();
+            layout.setText(font, name);
+            float room = bx - 6 - (blX + 7 + BATTLE_ROW);
+            if (layout.width > room) font.getData().setScale(CON_SCALE * Math.max(0.6f, room / layout.width));
+            text(batch, name, blX + 7 + BATTLE_ROW, yy - 2);
+            font.getData().setScale(CON_SCALE);
             batch.setColor(0, 0, 0, 0.7f);
             batch.draw(art.white(), bx - 1, rowY + 5, bw + 2, 6);
             float f = m.healthFraction();
@@ -2358,12 +2361,10 @@ public final class Hud {
             batch.setColor(Color.WHITE);
             yy -= BATTLE_ROW;
         }
+        font.getData().setScale(1f);
     }
 
     private Monster currentTarget;
-
-    /** Zakladka Walka w konsoli (podglad i klawisz). */
-    public void showBattle(boolean on) { battleTab = on; consoleMin = false; }
 
     // ------------------------------------------------------------------ staly panel ekwipunku pod minimapa
 
@@ -2373,25 +2374,25 @@ public final class Hud {
     /** true = okno jak w Tibii (naglowek, 3x4), false = zwarty pasek 5x2 bez naglowka. */
     private boolean epTibia;
 
-    private void layoutEquipPanel(float margin, float clusterTop) {
-        float top = mmY - 3 - 5;
-        float room = top - clusterTop - 8;
+    /** Ekwipunek w panelu pod minimapa: od top w dol, zostawiajac miejsce do bottom (lista walki). */
+    private void layoutEquipPanel(float top, float bottom) {
+        float room = top - bottom;
         epTibia = room >= 23 + 4 * 28 + 3 * 3 + 8;
         if (epTibia) {
             epCell = Math.min(36, (room - 23 - 9 - 8) / 4f);
             epW = epCell * 3 + 3 * 2 + 12;
             epH = 23 + epCell * 4 + 3 * 3 + 8;
         } else {
-            epCell = Math.max(16, Math.min(32, (room - 2 - 8) / 2f));
+            epCell = Math.max(16, Math.min(Math.min(32, (w - panelX - 16 - 8) / 5f), (room - 2 - 8) / 2f));
             epW = epCell * 5 + 2 * 4 + 8;
             epH = epCell * 2 + 2 + 8;
         }
-        epX = w - margin + 3 - epW;
+        epX = panelX + (w - panelX - epW) / 2f;
         epY = top - epH;
     }
 
     private boolean equipPanelVisible() {
-        return !charOpen && !menuOpen && !bigMapOpen && !diagnosticsOpen;
+        return !charOpen && !menuOpen && !bigMapOpen;
     }
 
     private float[] epCellPos(int i) {

@@ -250,7 +250,6 @@ public final class DesktopLauncher {
                     gs.session().character().quests().restore("varden_wolves", false, 3);
                     gs.hud().openJournal();
                 }
-                if ("battle".equals(open)) ((GameScreen) getScreen()).hud().showBattle(true);
                 if ("picker".equals(open)) ((GameScreen) getScreen()).hud().openPicker(6);
                 if ("pickerrune".equals(open)) {
                     ((GameScreen) getScreen()).hud().openPicker(6);

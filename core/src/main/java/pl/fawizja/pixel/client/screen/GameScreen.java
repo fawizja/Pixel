@@ -1200,7 +1200,7 @@ public final class GameScreen extends ScreenAdapter {
         float camY = worldRenderer.worldY(py) + 0.5f;
         // przyciaganie kamery do siatki pikseli - ostre krawedzie kafelkow
         float ppu = Gdx.graphics.getBackBufferWidth() / viewport.getWorldWidth();
-        camera.position.set(Math.round(camX * ppu) / ppu, Math.round(camY * ppu) / ppu, 0);
+        camera.position.set(Math.round((camX - viewOffX) * ppu) / ppu, Math.round((camY - viewOffY) * ppu) / ppu, 0);
         camera.update();
 
         ScreenUtils.clear(0, 0, 0, 1);
@@ -1473,18 +1473,20 @@ public final class GameScreen extends ScreenAdapter {
             if (settings.vibrate()) Gdx.input.vibrate(150);
         }
         if (!lowHealth.low()) return;
-        float w = Gdx.graphics.getWidth(), h = Gdx.graphics.getHeight();
+        // czerwona ramka wokol widoku gry
+        float[] r = hud.gameView();
+        float x0 = r[0], y0 = r[1], w = r[2], h = r[3];
         float b = Math.max(4f, Math.min(w, h) * 0.015f);
         float alpha = 0.25f + 0.25f * (float) Math.abs(Math.sin(t / 300.0));
-        screenMatrix.setToOrtho2D(0, 0, w, h);
+        screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         shapes.setProjectionMatrix(screenMatrix);
         Gdx.gl.glEnable(com.badlogic.gdx.graphics.GL20.GL_BLEND);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         shapes.setColor(0.9f, 0.05f, 0.05f, alpha);
-        shapes.rect(0, 0, w, b);
-        shapes.rect(0, h - b, w, b);
-        shapes.rect(0, b, b, h - 2 * b);
-        shapes.rect(w - b, b, b, h - 2 * b);
+        shapes.rect(x0, y0, w, b);
+        shapes.rect(x0, y0 + h - b, w, b);
+        shapes.rect(x0, y0 + b, b, h - 2 * b);
+        shapes.rect(x0 + w - b, y0 + b, b, h - 2 * b);
         shapes.end();
     }
 
@@ -1934,9 +1936,20 @@ public final class GameScreen extends ScreenAdapter {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, false);
         hud.resize(width, height);
+        // swiat rysuje sie na calym ekranie, ale skala i kamera sa ustawione tak, by co najmniej 15x11 pol
+        // miescilo sie w ramce widoku gry z HUD-u (panele interfejsu zaslaniaja reszte jak w kliencie Tibii)
+        float[] r = hud.gameView();
+        float ppu = Math.max(1f, Math.min(r[2] / VIEW_TILES_W, r[3] / VIEW_TILES_H));
+        viewport.setMinWorldWidth(width / ppu);
+        viewport.setMinWorldHeight(height / ppu);
+        viewport.update(width, height, false);
+        viewOffX = (r[0] + r[2] / 2f - width / 2f) / ppu;
+        viewOffY = (r[1] + r[3] / 2f - height / 2f) / ppu;
     }
+
+    /** Przesuniecie srodka ramki widoku gry wzgledem srodka ekranu (w polach). */
+    private float viewOffX, viewOffY;
 
     @Override
     public void pause() {

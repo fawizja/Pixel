@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.192.0] - 2026-10-21
+
+### Zmieniono
+- Układ jak klasyczny klient Tibii, wszystko w jednej bryle: świat w ramce (co najmniej 15x11 pól, postać
+  na środku ramki), po prawej stały panel z minimapą i przyciskami (i, BIEG, TARCZA, POCH), ekwipunkiem,
+  listą walki i paskiem akcji 5x2, u góry paski HP i MP z doświadczeniem, poziomem, złotem i ikonami stanu,
+  na dole rząd przycisków (ATAK, UŻYJ, PLECAK, KSIĘGA...) i konsola. Na mapie leży tylko pad i pasek celu.
+- Lista walki przeniesiona z zakładki konsoli do własnego okna w panelu.
+- Dotyk na panelach nie przechodzi już na mapę; czerwona ramka niskiego HP obejmuje widok gry.
+
 ## [0.191.0] - 2026-10-21
 
 ### Zmieniono
