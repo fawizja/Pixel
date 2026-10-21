@@ -15,3 +15,6 @@ dependencies {
 tasks.named('run') {
     workingDir = rootProject.file('.')
 }
+
+// wspolne zasoby (assets/art - grafiki od grafikow) w klasach, zeby dzialaly tez z installDist i jara
+sourceSets.main.resources.srcDirs += rootProject.file('assets')

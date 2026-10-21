@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.render;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -105,6 +106,7 @@ public final class TileArt implements Disposable {
         paintDummy(pm, cellX(DUMMY_CELL), cellY(DUMMY_CELL));
         paintTrap(pm, cellX(TRAP_CELL), cellY(TRAP_CELL));
         for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(PET_CELL + i), cellY(PET_CELL + i), PETS[i]);
+        applyOverrides(pm, tileRegistry, itemRegistry, mtypes, npcList);
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
@@ -132,6 +134,64 @@ public final class TileArt implements Disposable {
         white = new TextureRegion(w, 4, 4, 8, 8);
 
         lightTexture = buildLightTexture();
+    }
+
+    /** Kierunki postaci w nazwach plikow: przod, tyl, lewo, prawo (jak indeksy d). */
+    public static final String[] DIRS = {"down", "up", "left", "right"};
+
+    /**
+     * Grafiki od grafikow: plik PNG w assets/art/ zastepuje wygenerowany obrazek o tej nazwie (np. items/health_potion.png,
+     * monsters/wolf.png, characters/paladin_down.png). Dowolny kwadratowy rozmiar - skalowany do 16x16 bez rozmywania.
+     * Brakujace pliki zostaja wygenerowane. Lista nazw: docs/GRAPHICS.md.
+     */
+    private void applyOverrides(Pixmap pm, TileRegistry tileRegistry, ItemRegistry itemRegistry, List<MonsterType> mtypes,
+                                List<pl.fawizja.pixel.npc.Npc> npcList) {
+        if (Gdx.files == null) return;
+        for (TileType t : tileRegistry.all()) override(pm, t.id(), "tiles/" + t.key());
+        for (ItemType it : itemRegistry.all()) override(pm, ITEM_BASE + it.id(), "items/" + it.key());
+        for (Vocation v : Vocation.values()) {
+            for (int d = 0; d < 4; d++) {
+                if (override(pm, SPRITE_BASE + v.ordinal() * 4 + d, "characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + DIRS[d])) {
+                    drawnCharacters[v.ordinal()] = true;
+                }
+            }
+        }
+        for (int i = 0; i < mtypes.size(); i++) override(pm, MONSTER_BASE + i, "monsters/" + mtypes.get(i).key());
+        for (int i = 0; i < npcList.size(); i++) override(pm, NPC_BASE + i, "npcs/" + npcList.get(i).key());
+        override(pm, HORSE_CELL, "objects/horse_right");
+        override(pm, HORSE_CELL + 1, "objects/horse_left");
+        override(pm, CHEST_CELL, "objects/chest_closed");
+        override(pm, CHEST_CELL + 1, "objects/chest_open");
+        override(pm, DUMMY_CELL, "objects/training_dummy");
+        override(pm, TRAP_CELL, "objects/spike_trap");
+        for (int i = 0; i < PETS.length; i++) override(pm, PET_CELL + i, "pets/" + PETS[i]);
+        if (overrides > 0) Gdx.app.log("TileArt", "Grafiki z assets/art: " + overrides);
+    }
+
+    private int overrides;
+    /** Profesje z postacia podmieniona plikiem PNG: kolorowe stroje z kodu do niej nie pasuja, wiec ich nie uzywamy. */
+    private final boolean[] drawnCharacters = new boolean[Vocation.values().length];
+
+    /** Ile obrazkow podmieniono plikami PNG (diagnostyka). */
+    public int overrides() { return overrides; }
+
+    private boolean override(Pixmap pm, int cell, String name) {
+        com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name + ".png");
+        if (!f.exists()) f = Gdx.files.internal("assets/art/" + name + ".png"); // desktop uruchamiany z katalogu repozytorium
+        if (!f.exists()) return false;
+        try {
+            Pixmap src = new Pixmap(f);
+            pm.setColor(0, 0, 0, 0);
+            pm.fillRectangle(cellX(cell), cellY(cell), SIZE, SIZE);
+            pm.setFilter(Pixmap.Filter.NearestNeighbour);
+            pm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(), cellX(cell), cellY(cell), SIZE, SIZE);
+            src.dispose();
+            overrides++;
+            return true;
+        } catch (RuntimeException e) {
+            Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+            return false;
+        }
     }
 
     private static int cellX(int cell) { return (cell % COLS) * SIZE; }
@@ -168,7 +228,7 @@ public final class TileArt implements Disposable {
     /** Sprite postaci w kolorze stroju (0 = kolor profesji). */
     public TextureRegion character(Vocation v, Direction facing, int outfit) {
         TextureRegion base = character(v, facing);
-        if (outfit <= 0 || outfit >= pl.fawizja.pixel.character.Outfit.count()) return base;
+        if (outfit <= 0 || outfit >= pl.fawizja.pixel.character.Outfit.count() || drawnCharacters[v.ordinal()]) return base;
         int d = 0;
         for (int i = 0; i < 4; i++) if (characters[v.ordinal()][i] == base) d = i;
         TextureRegion r = outfits.get(outfitCell(v, outfit, d));

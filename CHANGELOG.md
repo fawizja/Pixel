@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.180.0] - 2026-10-21
+
+### Dodano
+- Grafiki od grafików: plik PNG w `assets/art/` (np. `monsters/wolf.png`, `characters/paladin_down.png`) zastępuje
+  obrazek rysowany przez kod, a brakujące zostają takie jak dotąd. Pełna lista 278 nazw: docs/GRAPHICS.md.
 ## [0.179.0] - 2026-10-21
 
 ### Dodano
