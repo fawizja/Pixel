@@ -1562,6 +1562,7 @@ public final class Hud {
             }
             font.setColor(Color.WHITE);
         }
+        if (session.chests() != null) minimap.setHazards(session.chests().traps());
         if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.177.2] - 2026-10-21
+
+### Dodano
+- Pułapki z kolcami widać na minimapie i dużej mapie jako pomarańczowe punkty.
 ## [0.177.1] - 2026-10-21
 
 ### Zmieniono

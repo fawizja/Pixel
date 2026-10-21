@@ -20,6 +20,15 @@ final class Minimap {
     private final Map<Integer, Texture> floors = new HashMap<>();
     private Texture dot;
     private WorldMap world;
+    /** Pulapki z kolcami: wpisane w obraz pietra jako pomaranczowe punkty. */
+    private java.util.List<Position> hazards = java.util.List.of();
+
+    void setHazards(java.util.List<Position> traps) {
+        if (traps == null || traps.equals(hazards)) return;
+        hazards = traps;
+        for (Texture t : floors.values()) t.dispose();
+        floors.clear();
+    }
 
     private Texture texture(WorldMap w, int z) {
         if (w != world) {
@@ -35,6 +44,9 @@ final class Minimap {
         pm.setBlending(Pixmap.Blending.None);
         for (int y = 0; y < f.height(); y++) {
             for (int x = 0; x < f.width(); x++) pm.drawPixel(x, y, img[y * f.width() + x]);
+        }
+        for (Position h : hazards) {
+            if (h.z() == z && f.inBounds(h.x(), h.y())) pm.drawPixel(h.x(), h.y(), Color.rgba8888(1f, 0.45f, 0.1f, 1f));
         }
         t = new Texture(pm);
         t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
