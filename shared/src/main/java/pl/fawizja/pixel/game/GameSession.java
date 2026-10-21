@@ -1628,6 +1628,13 @@ public final class GameSession {
         return s == null ? InventoryResult.EMPTY_SLOT : pc.backpack().move(from, to, s.count());
     }
 
+    /** Porzadkuje plecak (przycisk SORTUJ, akcja "sort"). */
+    public boolean sortBackpack(long nowMs) {
+        boolean moved = pc.backpack().sort();
+        log.add(nowMs, EventLog.Kind.INFO, moved ? "Plecak uporządkowany." : "Plecak jest już uporządkowany.");
+        return moved;
+    }
+
     public long gold() { return Money.totalValue(pc.backpack()); }
 
     public String describe(ItemStack s) {

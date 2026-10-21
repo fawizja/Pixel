@@ -154,6 +154,7 @@ public final class Hud {
     private final HudButton bagDrop = new HudButton("bag_drop", "WYRZUĆ");
     private final HudButton bagUse = new HudButton("bag_use", "UŻYJ");
     private final HudButton bagClose = new HudButton("bag_close", "X");
+    private final HudButton bagSort = new HudButton("bag_sort", "SORTUJ");
     private boolean diagnosticsOpen;
     /** Minimapa w prawym gornym rogu i duza mapa calego pietra (dotkniecie minimapy / klawisz J). */
     private final Minimap minimap = new Minimap();
@@ -307,6 +308,7 @@ public final class Hud {
         bagEquip.x = bagX + slotSize * 1.0f; bagEquip.y = bagY - bbr * 1.4f; bagEquip.r = bbr;
         bagDrop.x = bagX + slotSize * 4.0f; bagDrop.y = bagY - bbr * 1.4f; bagDrop.r = bbr;
         bagUse.x = bagX + slotSize * 2.5f; bagUse.y = bagY - bbr * 1.4f; bagUse.r = bbr;
+        bagSort.x = bagUse.x; bagSort.y = bagUse.y; bagSort.r = bbr;
         bagClose.x = bagX + slotSize * 5f + 4; bagClose.y = bagY + slotSize * 4f + 18; bagClose.r = 14;
     }
 
@@ -1285,6 +1287,7 @@ public final class Hud {
             if (selectedSlot >= 0 && bagEquip.hit(p.x, p.y)) { actions.onButton("bag_equip"); return true; }
             if (selectedSlot >= 0 && bagDrop.hit(p.x, p.y)) { actions.onButton("bag_drop"); return true; }
             if (selectedSlot >= 0 && bagUse.hit(p.x, p.y)) { actions.onButton("bag_use"); return true; }
+            if (selectedSlot < 0 && bagSort.hit(p.x, p.y)) { actions.onButton("bag_sort"); return true; }
             int slot = slotAt(p.x, p.y);
             if (slot >= 0) {
                 if (selectedSlot < 0) {
@@ -1654,6 +1657,9 @@ public final class Hud {
                 shapes.setColor(0.25f, 0.45f, 0.3f, 0.95f);
                 shapes.rect(b.x - b.r * 1.3f, b.y - b.r * 0.6f, b.r * 2.6f, b.r * 1.2f);
             }
+        } else {
+            shapes.setColor(0.3f, 0.35f, 0.5f, 0.95f);
+            shapes.rect(bagSort.x - bagSort.r * 1.6f, bagSort.y - bagSort.r * 0.6f, bagSort.r * 3.2f, bagSort.r * 1.2f);
         }
         shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
         shapes.circle(bagClose.x, bagClose.y, bagClose.r, 20);
@@ -1688,6 +1694,8 @@ public final class Hud {
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
                 centered(batch, bagUse.label, bagUse.x, bagUse.y);
             }
+        } else {
+            centered(batch, bagSort.label, bagSort.x, bagSort.y);
         }
     }
 

@@ -26,7 +26,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -105,6 +105,20 @@ public final class DesktopLauncher {
                             gs.hud().selectSlot(i);
                             break;
                         }
+                    }
+                }
+                if ("bagmess".equals(open)) {
+                    // podglad porzadkowania: rozrzucone stosy i dziury w plecaku (z -Dpixel.button=bag_sort po sortowaniu)
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.hud().toggleBag();
+                    pl.fawizja.pixel.inventory.Container bp = gs.session().character().backpack();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    String[][] mess = {{"health_potion", "3", "13"}, {"iron_sword", "1", "2"}, {"mana_potion", "4", "18"},
+                            {"health_potion", "5", "7"}, {"leather_armor", "1", "11"}, {"mana_potion", "2", "4"}};
+                    for (String[] m : mess) {
+                        if (!reg.containsKey(m[0])) continue;
+                        int slot = Integer.parseInt(m[2]);
+                        if (bp.get(slot) == null) bp.putInSlot(slot, new pl.fawizja.pixel.item.ItemStack(reg.byKey(m[0]).id(), Integer.parseInt(m[1])));
                     }
                 }
                 if ("death".equals(open)) {

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.172.0] - 2026-10-21
+
+### Dodano
+- Przycisk SORTUJ w plecaku: łączy rozrzucone stosy (np. mikstury) i układa przedmioty według rodzaju
+  (monety, broń, tarcze, zbroje, amunicja, mikstury...), lepiej ulepszone najpierw. Działa też w grze online.
 ## [0.171.0] - 2026-10-21
 
 ### Dodano

@@ -96,6 +96,39 @@ class ContainerTest {
     }
 
     @Test
+    void sortMergesStacksGroupsByCategoryAndClosesGaps() {
+        Container c = bp();
+        c.putInSlot(13, new ItemStack(POTION, 30));
+        c.putInSlot(2, new ItemStack(50, 1, 1));
+        c.putInSlot(18, new ItemStack(31, 4));
+        c.putInSlot(7, new ItemStack(POTION, 50));
+        c.putInSlot(11, new ItemStack(11, 1));
+        c.putInSlot(15, new ItemStack(50, 1, 3));
+        c.putInSlot(19, new ItemStack(1, 7));
+        assertTrue(c.sort());
+        // monety, bron (najpierw +3), zbroja, mikstury zdrowia (polaczone), many
+        assertEquals(new ItemStack(1, 7), c.get(0));
+        assertEquals(new ItemStack(50, 1, 3), c.get(1));
+        assertEquals(new ItemStack(50, 1, 1), c.get(2));
+        assertEquals(new ItemStack(11, 1), c.get(3));
+        assertEquals(new ItemStack(POTION, 80), c.get(4));
+        assertEquals(new ItemStack(31, 4), c.get(5));
+        assertEquals(14, c.freeSlots());
+        for (int i = 6; i < 20; i++) assertNull(c.get(i));
+        assertFalse(c.sort(), "drugie sortowanie niczego nie zmienia");
+    }
+
+    @Test
+    void sortActionWorksThroughSessionLog() {
+        pl.fawizja.pixel.game.GameSession s = new pl.fawizja.pixel.game.GameSession(TestData.ITEMS, TestData.varden(), TestData.newCharacter(Vocation.DRUID));
+        Container b = s.character().backpack();
+        b.clear();
+        b.putInSlot(19, new ItemStack(POTION, 5));
+        assertTrue(pl.fawizja.pixel.game.Actions.apply(s, "sort", 1000));
+        assertEquals(new ItemStack(POTION, 5), b.get(0));
+    }
+
+    @Test
     void equipAndUnequipKeepItemsSafe() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
         Container bp = pc.backpack();

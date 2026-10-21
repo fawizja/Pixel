@@ -403,6 +403,10 @@ public final class GameScreen extends ScreenAdapter {
                 act("slot_equip:" + hud.selectedSlot(), t);
                 hud.clearSelection();
                 break;
+            case "bag_sort":
+                act("sort", t);
+                hud.clearSelection();
+                break;
             case "bag_drop":
                 act("slot_drop:" + hud.selectedSlot(), t);
                 hud.clearSelection();

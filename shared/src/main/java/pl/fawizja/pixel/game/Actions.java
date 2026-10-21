@@ -20,6 +20,7 @@ public final class Actions {
             case "target": s.cycleTarget(now); return true;
             case "defensive": s.toggleDefensive(now); return true;
             case "fish": s.fish(now); return true;
+            case "sort": s.sortBackpack(now); return true;
             case "potion_hp": s.usePotion("health_potion", now); return true;
             case "potion_mp": s.usePotion("mana_potion", now); return true;
             case "tips_off": s.disableTips(now); return true;

@@ -194,6 +194,25 @@ public final class Container {
         }
     }
 
+    /**
+     * Porzadkuje plecak: laczy stosy, potem ustawia przedmioty wg kategorii (monety, bron, tarcze, zbroje,
+     * amunicja, mikstury...), w kategorii wg rodzaju i od najwyzszego ulepszenia. Puste sloty trafiaja na koniec.
+     * Zwraca true, gdy cokolwiek sie przesunelo.
+     */
+    public boolean sort() {
+        ItemStack[] before = slots.clone();
+        compactStacks();
+        List<ItemStack> items = contents();
+        items.sort(java.util.Comparator
+                .comparingInt((ItemStack s) -> registry.get(s.itemId()).category().ordinal())
+                .thenComparingInt(ItemStack::itemId)
+                .thenComparing(ItemStack::upgrade, java.util.Comparator.reverseOrder())
+                .thenComparing(ItemStack::count, java.util.Comparator.reverseOrder()));
+        Arrays.fill(slots, null);
+        for (int i = 0; i < items.size(); i++) slots[i] = items.get(i);
+        return !Arrays.equals(before, slots);
+    }
+
     /** Kopia do bezpiecznych operacji transakcyjnych (zmien kopie, potem commitFrom). */
     public Container copy() {
         Container c = new Container(registry, slots.length);
