@@ -39,7 +39,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 17. Sterowanie mobilne | ZAKONCZONY | 11f56db |
 | 18. Optymalizacja | ZAKONCZONY | 9895785 |
 | 19. Testy koncowe | ZAKONCZONY | 22a8d8a |
-| 20. ZIP i debug APK | ZAKONCZONY | (ten commit) |
+| 20. ZIP i debug APK | ZAKONCZONY | 5636854 |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
