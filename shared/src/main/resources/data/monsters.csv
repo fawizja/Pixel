@@ -48,3 +48,8 @@ pirate_cutthroat;Pirat rzezimieszek;350;6200;8200;240;160;460;PHYSICAL;1;1900;30
 pirate_gunner;Pirat kanonier;400;7000;9600;200;200;560;FIRE;4;2400;25;FIRE:40,ICE:-15;RANGED;8;0;0;0;#4a4a5a;humanoid;equatorial;-;Strzela z garłacza z daleka, z bliska jest słabszy.
 mist_wraith;Upiór mgły;540;9800;13200;260;300;880;DEATH;3;2100;20;DEATH:100,PHYSICAL:40,HOLY:-40,FIRE:-15;MAGIC;8;0;0;0;#b0c0c8;humanoid;equatorial;-;Zjawa z mgieł wyspy, rzuca klątwy z dystansu.
 magma_drake;Smok magmy;690;16000;21000;210;400;1150;FIRE;3;2300;50;FIRE:100,ICE:-30,EARTH:20;MAGIC;7;0;0;0;#e05010;beast;equatorial;-;Smok z wnętrza wulkanu, zieje magmą.
+wyvern_matriarch;Matka Wiwern;360;30000;40000;240;260;700;EARTH;1;1800;35;EARTH:90,ICE:-20;MELEE;8;0;2500;1;#4a7a3a;boss;temperate;-;Najstarsza wiwerna, strzeże jaj na dnie gniazda. Wymaga drużyny.
+bloodbeard;Kapitan Krwawa Broda;420;38000;52000;230;300;850;PHYSICAL;1;1800;40;PHYSICAL:20,HOLY:-15;MELEE;8;0;3000;1;#8a2020;boss;equatorial;-;Herszt piratów ukryty w grocie przemytników. Wymaga drużyny.
+skaldra;Skaldra, Lodowa Matka;540;85000;110000;200;600;1700;ICE;3;1800;55;ICE:100,FIRE:-25;MAGIC;8;0;5000;1;#a0d8ff;boss;north;-;Matka lodowych smoków z dna Lodowych Grot. Wymaga drużyny.
+morvena;Morvena, Pani Mgieł;640;100000;140000;220;700;2000;DEATH;3;1800;45;DEATH:100,HOLY:-35,PHYSICAL:30;MAGIC;8;0;7000;1;#c0c8d8;boss;equatorial;-;Władczyni mgieł, której nikt nie widział dwa razy. Wymaga drużyny.
+pyrrax;Pyrrax, Serce Wulkanu;780;140000;200000;190;850;2400;FIRE;3;1800;70;FIRE:100,ICE:-25,PHYSICAL:25;MAGIC;8;0;10000;1;#ff6010;boss;equatorial;-;Żywe serce wulkanu. Wymaga silnej drużyny.

@@ -89,6 +89,18 @@ Każda profesja w 4 kierunkach.
 | `monsters/wolf.png` | Wilk, poziom 8 |  |
 | `monsters/wraith_knight.png` | Upiorny rycerz, poziom 280 | tak |
 | `monsters/yeti.png` | Yeti, poziom 70 |  |
+| `monsters/wyvern.png` | wiwerna (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/coral_crab.png` | krab koralowy (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/drowned_sailor.png` | topielec (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/pirate_cutthroat.png` | pirat rzezimieszek (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/pirate_gunner.png` | pirat kanonier (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/mist_wraith.png` | upiór mgły (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/magma_drake.png` | smok magmy (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/wyvern_matriarch.png` | Matka Wiwern (boss) (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/bloodbeard.png` | Kapitan Krwawa Broda (boss) (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/skaldra.png` | Skaldra (boss) (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/morvena.png` | Morvena (boss) (OTSP, przebarwiony, etap 8/10) | tak |
+| `monsters/pyrrax.png` | Pyrrax (boss) (OTSP, przebarwiony, etap 8/10) | tak |
 
 ## NPC (`assets/art/npcs/`)
 
@@ -134,6 +146,14 @@ Każda profesja w 4 kierunkach.
 | `npcs/qas_housing.png` | Zarządca Karim (etap 6) | tak |
 | `npcs/selv_fishmonger.png` | Rybaczka Mara (etap 6) | tak |
 | `npcs/selv_housing.png` | Zarządca Tomasz (etap 6) | tak |
+| `npcs/selv_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/qas_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/east_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/coral_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/pirate_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/mist_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/ice_captain.png` | kapitan statku (etap 7) | tak |
+| `npcs/volcano_captain.png` | kapitan statku (etap 7) | tak |
 
 ## Przedmioty (`assets/art/items/`)
 
@@ -258,6 +278,14 @@ Każda profesja w 4 kierunkach.
 | `items/wooden_shield.png` | Drewniana tarcza (shield) | tak |
 | `items/worm.png` | Robak (bait) |  |
 | `items/yeti_fur.png` | Sierść yeti (material) |  |
+| `items/tidal_harpoon.png` | Harpun przypływu (weapon), etap 10 | tak |
+| `items/wand_of_the_deep.png` | Różdżka głębin (weapon), etap 10 | tak |
+| `items/rod_of_tides.png` | Laska przypływów (weapon), etap 10 | tak |
+| `items/reef_gauntlets.png` | Rękawice rafy (weapon), etap 10 | tak |
+| `items/coral_helmet.png` | Hełm głębin (armor), etap 10 | tak |
+| `items/coral_armor.png` | Koralowa zbroja (armor), etap 10 | tak |
+| `items/coral_legs.png` | Koralowe nagolenniki (armor), etap 10 | tak |
+| `items/coral_shield.png` | Tarcza z muszli (shield), etap 10 | tak |
 
 ## Kafelki mapy (`assets/art/tiles/`)
 

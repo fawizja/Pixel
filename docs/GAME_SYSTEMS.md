@@ -365,6 +365,11 @@ Siodlo (`saddle`) uzyte z plecaka (`GameSession.useSlot` -> `useSaddle`) daje ko
 `toggleMount` (akcja `mount`): +`PlayerCharacter.MOUNT_SPEED` (60) do szybkosci; pod ziemia (z < 0) zakaz i automatyczne
 zsiadanie w `update`. Online: pole `M` w PL, klient rysuje `TileArt.horse` pod postacia.
 
+Bossowie lochow 300+ (etap 10): Matka Wiwern (360, Gniazdo Wiwern -2), Kapitan Krwawa Broda (420, Grota
+Przemytnikow -3), Skaldra (540, Lodowe Groty -3), Morvena (640, Krypta Mgiel -3), Pyrrax (780, Serce Wulkanu -4);
+respawn 1 h, czesty loot z zestawu koralowego (poziom 350: harpun, rozdzka, laska, rekawice, helm, zbroja,
+nagolenniki, tarcza) albo wyzszych zestawow. Zestaw koralowy wypada tez rzadko z potworow wysp.
+
 ## Zadanie dnia (Z logika, C UI)
 
 `daily/DailyTask`: raz na dzien kalendarzowy (`GameSession.today()`, w testach `setToday`) potwor ze stalych spawnow

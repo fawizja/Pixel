@@ -29,8 +29,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 7. Mosty, statki, podroze | ZAKONCZONY | d9b2950 |
 | 8. Expowiska na powierzchni | ZAKONCZONY | 7312299 |
 | 9. Wielopoziomowe lochy | ZAKONCZONY | 35ddade |
-| 10. Potwory, bossowie, loot | nastepny | - |
-| 11-20 | do zrobienia | - |
+| 10. Potwory, bossowie, loot | ZAKONCZONY | (ten commit) |
+| 11. Profesje i poziomy | nastepny | - |
+| 12-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -180,15 +181,26 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   Krypta Mgiel (Wyspa Mgiel, -1..-3), Gniazdo Wiwern (pod Dolina Wiwern, -1..-2, region 300-360).
 - Pietra lacza schody, a w lochach wysp miedzy glebszymi pietrami dziura i drabina. Wejscia na powierzchni maja
   nowe symbole schodow (popiol, przeklete trawy, trawa).
-- Lacznie swiat ma teraz lochy pod kazdym miastem i wyspa endgame: Kopalnia Varden, Lodowe Jaskinie, Zatopione
-  Ruiny, Kanaly Selvaran, Grobowce Qasirah, Kopalnia Frostholm, Otchlan (wszystkie -1..-5) i 5 nowych.
+- Lacznie swiat ma lochy: Kopalnia Varden, Lodowe Jaskinie, Zatopione Ruiny, Grobowce Qasirah i Otchlan (-1..-5),
+  Kanaly Selvaran (-1..-2), Kopalnia Frostholm (-1) oraz 5 nowych.
 - Nowy test: kazdy nowy loch ma osiagalne pietra do najglebszego i potwory na najglebszym; co najmniej 4 dziury
   w lochach 300+. Testy 437 OK, regresja GUI: zmieniony tylko wzorzec chest (inna pierwsza skrzynia skarbow).
 
+## Etap 10 - potwory, bossowie, loot (2026-10-22)
+- 5 bossow na dnie lochow z etapu 9 (monsters.csv, loot.csv, grafika OTSP przebarwiona): Matka Wiwern 360,
+  Kapitan Krwawa Broda 420, Skaldra 540, Morvena 640, Pyrrax 780; respawn 3600 s, sami w spawnie.
+- Nowy zestaw przedmiotow poziomu 350 (luka miedzy obsydianem 250 a lodem 450): bron dla kazdej profesji
+  (harpun, rozdzka, laska, rekawice) i helm/zbroja/nagolenniki/tarcza; ikony z OTSP. Wypada z bossow (20-30%)
+  i rzadko z potworow wysp.
+- Grafika kraba koralowego poprawiona (stroj OTSP 24 zamiast skorpiona). docs/GRAPHICS.md uzupelnione o grafiki
+  etapow 7, 8 i 10.
+- Regresja GUI: wzorzec chest z etapu 9 byl skopiowany w zlym formacie (pelny rozmiar) - odtworzony przez
+  run.sh --update. Testy 439 OK (nowy DungeonBossTest), regresja GUI 42/42.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 10: potwory, bossowie, loot (bossowie na dnie nowych lochow, grafika kraba, loot dla 300+).
-2. Etap 11: profesje i poziomy.
-3. Etap 12: ruch i walka, utani hur / utani gran hur.
+1. Etap 11: profesje i poziomy (przeglad 4 profesji, krzywa doswiadczenia i statystyki dla 300+).
+2. Etap 12: ruch i walka, utani hur / utani gran hur.
+3. Etap 13: czary, runy, mikstury.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

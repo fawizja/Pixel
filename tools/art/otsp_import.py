@@ -76,6 +76,9 @@ ITEMS = {
     "crystal_shard": 2207, "pearl": 2191, "scarab_gem": 2219, "obsidian_shard": 2205, "iron_ore": 2201,
     "bone": 2166, "spider_silk": 2170, "wolf_pelt": 2162,
     "gold_coin": 2192, "platinum_coin": 2191, "crystal_coin": 2218,
+    # etap 10: zestaw koralowy (poziom 350)
+    "tidal_harpoon": 1828, "wand_of_the_deep": 1801, "rod_of_tides": 1798, "reef_gauntlets": 2153,
+    "coral_helmet": 1947, "coral_armor": 2055, "coral_legs": 2078, "coral_shield": 1919,
 }
 # Stroje: (numer, kolory glowa/tulow/nogi/stopy dla strojow z maska kolorow albo None).
 MONSTERS = {
@@ -98,9 +101,12 @@ TINTED = {
     "hrimgar": (39, (190, 230, 255)), "khazuul": (37, (210, 170, 90)), "abyss_lord": (46, (190, 120, 255)),
     "morgath": (38, (255, 80, 80)),
     # etap 8: expowiska na wyspach i Smoczym Grzbiecie
-    "wyvern": (25, (130, 180, 90)), "coral_crab": (13, (255, 130, 100)), "drowned_sailor": (3, (130, 190, 200)),
+    "wyvern": (25, (130, 180, 90)), "coral_crab": (24, (255, 120, 90)), "drowned_sailor": (3, (130, 190, 200)),
     "pirate_cutthroat": (19, (210, 100, 80)), "pirate_gunner": (19, (110, 110, 140)),
     "mist_wraith": (40, (205, 220, 230)), "magma_drake": (25, (235, 80, 25)),
+    # etap 10: bossowie nowych lochow
+    "wyvern_matriarch": (25, (80, 140, 50)), "bloodbeard": (19, (170, 50, 50)), "skaldra": (35, (160, 210, 255)),
+    "morvena": (34, (190, 200, 220)), "pyrrax": (46, (255, 120, 30)),
 }
 CHARACTERS = {
     "paladin": (19, None),
