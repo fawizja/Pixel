@@ -24,6 +24,9 @@ public final class CharacterFactory {
         this.items = items;
     }
 
+    /** Poziom, od ktorego umiejetnosci zaczynaja sie od wartosci bazowych (wyzej - typowe dla poziomu). */
+    static final int BASE_LEVEL = 8;
+
     public PlayerCharacter create(String name, Vocation vocation, Position startTemple) {
         return create(name, vocation, startTemple, config.startLevel());
     }
@@ -36,7 +39,7 @@ public final class CharacterFactory {
     public PlayerCharacter create(String name, Vocation vocation, Position startTemple, int level) {
         PlayerCharacter pc = new PlayerCharacter(UUID.randomUUID().toString(), name, vocation,
                 level, startTemple, items, config.startBankBalance(), config.startTown());
-        if (level > config.startLevel()) skillsForLevel(pc);
+        if (level > BASE_LEVEL) skillsForLevel(pc);
         for (String key : StarterKits.equipped(vocation)) {
             ItemStack s = ItemStack.of(items.byKey(key).id());
             EquipSlot slot = items.get(s.itemId()).slot();

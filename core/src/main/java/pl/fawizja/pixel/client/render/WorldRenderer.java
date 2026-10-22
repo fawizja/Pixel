@@ -91,7 +91,9 @@ public final class WorldRenderer {
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
             for (int x = x0; x <= x1; x++) {
-                draw(batch, f.get(Layer.GROUND, x, y), x, wy);
+                int g = f.get(Layer.GROUND, x, y);
+                draw(batch, g, x, wy);
+                drawBorders(batch, f, g, x, y, wy);
                 draw(batch, f.get(Layer.DECORATION, x, y), x, wy);
             }
         }
@@ -113,6 +115,39 @@ public final class WorldRenderer {
             if (rows != null) rows.drawRow(batch, y);
         }
     }
+
+    private static final int[] SIDE_DX = {0, 1, 0, -1, 1, 1, -1, -1};
+    private static final int[] SIDE_DY = {-1, 0, 1, 0, -1, 1, 1, -1};
+
+    /**
+     * Obrzeza jak w Tibii: podloze sasiada o wyzszym priorytecie nachodzi na to pole poszarpana krawedzia.
+     * Rog po skosie tylko wtedy, gdy obie sasiednie krawedzie maja inne podloze (inaczej juz go przykrywaja).
+     */
+    private void drawBorders(SpriteBatch batch, FloorMap f, int g, int x, int y, float wy) {
+        GroundBorders b = art.borders();
+        if (b == null || g == 0) return;
+        int own = b.priority(g);
+        if (own < 0) return;
+        int[] side = sideTiles;
+        for (int k = 0; k < 8; k++) {
+            int nx = x + SIDE_DX[k], ny = y + SIDE_DY[k];
+            side[k] = f.inBounds(nx, ny) ? f.get(Layer.GROUND, nx, ny) : 0;
+        }
+        for (int k = 0; k < 8; k++) {
+            int n = side[k];
+            if (n == 0 || n == g || b.priority(n) <= own) continue;
+            if (k >= 4) {
+                int a = k == GroundBorders.NE ? GroundBorders.N : k == GroundBorders.SE ? GroundBorders.S
+                        : k == GroundBorders.SW ? GroundBorders.S : GroundBorders.N;
+                int c = k == GroundBorders.NE || k == GroundBorders.SE ? GroundBorders.E : GroundBorders.W;
+                if (side[a] == n || side[c] == n) continue;
+            }
+            TextureRegion r = b.piece(n, k);
+            if (r != null) batch.draw(r, x, wy, 1f, 1f);
+        }
+    }
+
+    private final int[] sideTiles = new int[8];
 
     private void drawObject(SpriteBatch batch, int id, float x, float wy) {
         if (id == 0) return;

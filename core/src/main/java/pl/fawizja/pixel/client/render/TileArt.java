@@ -121,6 +121,19 @@ public final class TileArt implements Disposable {
         pm.setColor(Color.WHITE);
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
 
+        final Pixmap base = pm;
+        borders = new GroundBorders(tileRegistry, t -> {
+            Pixmap out = new Pixmap(HI_SIZE, HI_SIZE, Pixmap.Format.RGBA8888);
+            out.setBlending(Pixmap.Blending.None);
+            out.setFilter(Pixmap.Filter.NearestNeighbour);
+            Integer slot = hiCells.get(t.id());
+            if (slot != null && hiPm != null) {
+                out.drawPixmap(hiPm, (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE, 0, 0, HI_SIZE, HI_SIZE);
+            } else {
+                out.drawPixmap(base, cellX(t.id()), cellY(t.id()), SIZE, SIZE, 0, 0, HI_SIZE, HI_SIZE);
+            }
+            return out;
+        });
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         pm.dispose();
@@ -389,6 +402,10 @@ public final class TileArt implements Disposable {
         }
         return new TextureRegion(atlas, cellX(cell), cellY(cell), SIZE, SIZE);
     }
+
+    /** Obrzeza podloza (trawa na ziemi, piasek na wodzie...). */
+    public GroundBorders borders() { return borders; }
+    private GroundBorders borders;
 
     public TextureRegion tile(int id) { return id > 0 && id < tiles.length ? tiles[id] : null; }
     public TextureRegion item(int id) { return id > 0 && id < items.length ? items[id] : null; }
@@ -1202,6 +1219,7 @@ public final class TileArt implements Disposable {
     @Override
     public void dispose() {
         atlas.dispose();
+        if (borders != null) borders.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();
         lightTexture.dispose();

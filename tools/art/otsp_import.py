@@ -26,16 +26,20 @@ OBJECTS = {
     "tree": 1505, "pine": 1580, "dead_tree": 1501, "bush": 1483, "rock": 1625, "snow_rock": 1651,
     "sandstone_rock": 1627, "ice_crystal": 1650, "crystal": 1277, "obsidian_rock": 1633, "rubble": 1613,
     "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000,
+    "stairs_up": 1005, "stairs_down": 1008, "ladder": 1009, "counter": 1189, "altar": 1193, "wall_torch": 1254,
 }
 # Mury jak w Tibii: cienka sciana na krawedzi pola z wysokoscia rysowana w gore i w lewo (obrazek 64x64,
 # prawy dolny kwadrat to pole muru). Kolejno: pionowy, poziomy, slupek, naroznik.
 WALLS = {
     "stone_wall": (534, 535, 536, 537), "wood_wall": (680, 681, 682, 683), "sandstone_wall": (552, 553, 554, 555),
     "mossy_wall": (518, 519, 520, 521), "log_wall": (878, 879, 880, 881),
+    "ice_wall": (719, 720, 721, 722), "obsidian_wall": (576, 577, 583, 578),
 }
 WALL_SHAPES = ("v", "h", "pole", "corner")
 # Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
 ROOFS = {"roof_red": 183, "roof_slate": 187}
+# Sciany jaskin (bryly): przyciemniony kamien laczacy sie w jednolita skale zamiast cegiel.
+CAVE_WALLS = {"cave_wall": 159}
 # Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
 EXTRA_OBJECTS = {"backpack": 2099}
 ITEMS = {
@@ -73,11 +77,21 @@ MONSTERS = {
     "bandit": (19, None), "jungle_hunter": (16, ((150, 90, 50), (70, 120, 50), (90, 70, 40), (60, 40, 30))),
     "mummy": (17, ((230, 220, 190), (220, 210, 180), (210, 200, 170), (200, 190, 160))),
 }
+# Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
+TINTED = {
+    "wolf": (1, (150, 140, 130)), "snow_wolf": (1, (235, 240, 255)), "hyena": (11, (200, 160, 110)),
+    "yeti": (12, (240, 245, 255)), "crystal_golem": (12, (150, 220, 240)), "ice_golem": (12, (190, 220, 255)),
+    "lava_golem": (12, (255, 120, 50)), "ruin_colossus": (12, (190, 180, 160)), "sand_titan": (12, (230, 200, 130)),
+    "grimtooth": (7, (200, 90, 70)), "frost_queen": (35, (200, 235, 255)), "frost_giant": (46, (150, 190, 255)),
+    "ice_dragon": (25, (150, 210, 255)), "bone_dragon": (25, (235, 225, 200)), "ignaroth": (25, (255, 110, 60)),
+    "hrimgar": (39, (190, 230, 255)), "khazuul": (37, (210, 170, 90)), "abyss_lord": (46, (190, 120, 255)),
+    "morgath": (38, (255, 80, 80)),
+}
 CHARACTERS = {
     "paladin": (19, None),
     "druid": (32, None),
     "sorcerer": (15, None),
-    "monk": (16, ((200, 160, 90), (200, 120, 40), (120, 70, 30), (80, 50, 30))),
+    "monk": (26, None),  # brazowa szata z kapturem (wczesniej stroj 16 z czerwona czapka)
 }
 _ROLE = {
     "banker": (21, ((90, 70, 50), (60, 60, 110), (50, 50, 60), (40, 30, 30))),
@@ -127,15 +141,34 @@ def trim_square(img, box=None):
     return out
 
 
+def tint(img, rgb):
+    """Przebarwienie: barwa * jasnosc piksela (kontury i cienie zostaja ciemne)."""
+    img = img.copy()
+    px = img.load()
+    lums = sorted(0.3 * px[x, y][0] + 0.59 * px[x, y][1] + 0.11 * px[x, y][2]
+                  for y in range(img.height) for x in range(img.width) if px[x, y][3])
+    # ciemne stroje (czarny wilk) rozciagniete: 90. percentyl jasnosci = pelna barwa
+    top = max(lums[int(len(lums) * 0.9)] if lums else 255, 40)
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b, a = px[x, y]
+            if a:
+                lum = min(255, int(255 * ((0.3 * r + 0.59 * g + 0.11 * b) / top) ** 0.8))
+                px[x, y] = (rgb[0] * lum // 255, rgb[1] * lum // 255, rgb[2] * lum // 255, a)
+    return img
+
+
 def walk_frames(t):
     """Klatki stroju: 0 = postoj, dwie klatki kroku (w paczce 3 klatki: postoj i dwa kroki)."""
     n = t["frames"]
     return [0, 1, 2] if n == 3 else [0, max(1, n // 4), max(1, 3 * n // 4)] if n > 1 else [0]
 
 
-def save_outfit(spr, t, d, colors, path):
+def save_outfit(spr, t, d, colors, path, rgb=None):
     """Postoj jako path.png i kroki jako path_walk1.png / path_walk2.png, przyciete wspolnym prostokatem (bez drgan)."""
     imgs = [outfit(spr, t, d, colors, f) for f in walk_frames(t)]
+    if rgb:
+        imgs = [tint(i, rgb) for i in imgs]
     boxes = [i.getbbox() for i in imgs if i.getbbox()]
     box = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
     save(trim_square(imgs[0], box), path + ".png")
@@ -157,6 +190,10 @@ def main(client, art):
         save(ot.compose(spr, things["item"][i]), f"{art}/tiles/{name}.png"); n += 1
     for name, i in OBJECTS.items():
         save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
+    for name, ground in CAVE_WALLS.items():
+        img = ot.compose(spr, things["item"][ground]).convert("RGBA")
+        img = Image.merge("RGBA", [b.point(lambda v: v * 7 // 10) for b in img.split()[:3]] + [img.split()[3]])
+        save(img, f"{art}/tiles/{name}.png"); n += 1
     for name, ids in WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
             save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
@@ -170,6 +207,8 @@ def main(client, art):
     for folder, table in (("monsters", MONSTERS), ("npcs", NPCS), ("pets", PETS)):
         for name, (i, colors) in table.items():
             n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}")
+    for name, (i, rgb) in TINTED.items():
+        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)
     for voc, (i, colors) in CHARACTERS.items():
         for d, dname in enumerate(ot.DIRS):
             n += save_outfit(spr, things["outfit"][i], d, colors, f"{art}/characters/{voc}_{dname}")
