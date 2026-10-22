@@ -182,6 +182,8 @@ Joystick ze strefa martwa, klawiatura na PC.
   na calym ekranie, panele go zaslaniaja.
 - Prawy panel: minimapa z kolumna (i, BIEG, TARCZA, POCH), ekwipunek (3x4 albo 5x2), Umiejetnosci (wysoki ekran),
   lista walki, pasek akcji. U gory paski HP/MP/doswiadczenie i ikony stanu, na dole rzad przyciskow i konsola.
+- Pad w lewym dolnym rogu ekranu (nachodzi na widok gry i dolny pasek); konsola i przyciski zaczynaja sie za nim.
+  Prawy panel ma 20% szerokosci (170-260 jednostek UI).
 - Dotyk poza widokiem gry nie trafia na mape. Na szerokim ekranie okna (ksiega, NPC, mapa) stoja nad widokiem gry.
 
 ## Efekty graficzne czarow (Z zdarzenia, C rysowanie)

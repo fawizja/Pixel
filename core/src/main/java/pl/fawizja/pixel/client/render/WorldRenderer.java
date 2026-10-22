@@ -27,12 +27,16 @@ public final class WorldRenderer {
     /** Sciany sa "wysokie" jak w Tibii: wierzch podniesiony o tyle kafelka, pod nim ciemniejsze lico. */
     public static final float WALL_RAISE = 0.4f;
     private static final float TALL = 1.4f;
+    /** Pietro wyzej (i dach) przesuniete o pole w gore i w lewo, jak w Tibii - lezy na wierzchu murow. */
+    private static final float UP = 1f;
 
     private final WorldMap world;
     private final TileArt art;
     private final Color tmp = new Color();
     /** Drzewa i palmy rysowane wieksze niz kafelek (wystaja ponad sasiednie pola). */
     private final boolean[] tall;
+    /** Drzwi lacza mury (mur obok drzwi nie konczy sie slupkiem). */
+    private final java.util.Set<Integer> doors;
 
     public WorldRenderer(WorldMap world, TileArt art) {
         this.world = world;
@@ -40,6 +44,9 @@ public final class WorldRenderer {
         int max = 0;
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) max = Math.max(max, t.id());
         tall = new boolean[max + 1];
+        java.util.Set<Integer> doors = new java.util.HashSet<>();
+        for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) if (t.key().startsWith("door")) doors.add(t.id());
+        this.doors = doors;
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
             tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree").contains(t.key());
         }
@@ -101,7 +108,7 @@ public final class WorldRenderer {
             }
             for (int x = x0; x <= x1; x++) {
                 drawObject(batch, f.get(Layer.OBJECT, x, y), x, wy);
-                drawWall(batch, f, x, y, wy);
+                drawWall(batch, f, x, y, x, wy);
             }
             if (rows != null) rows.drawRow(batch, y);
         }
@@ -115,18 +122,41 @@ public final class WorldRenderer {
         else batch.draw(r, x, wy, 1f, 1f);
     }
 
-    private void drawWall(SpriteBatch batch, FloorMap f, int x, int y, float wy) {
+    private void drawWall(SpriteBatch batch, FloorMap f, int x, int y, float sx, float wy) {
         int id = f.get(Layer.WALL, x, y);
         if (id == 0) return;
+        TextureRegion piece = art.wallPiece(id, wallShape(f, x, y));
+        if (piece != null) {
+            // mur jak w Tibii: sciana na prawej/dolnej krawedzi pola, wysokosc w gore i w lewo (2x2 pola)
+            batch.draw(piece, sx - 1, wy, 2f, 2f);
+            return;
+        }
         TextureRegion r = art.tile(id);
         if (r == null) return;
         if (f.get(Layer.WALL, x, y + 1) == 0) {
             tmp.set(batch.getColor());
             batch.setColor(tmp.r * 0.62f, tmp.g * 0.62f, tmp.b * 0.62f, tmp.a);
-            batch.draw(r, x, wy, 1f, WALL_RAISE);
+            batch.draw(r, sx, wy, 1f, WALL_RAISE);
             batch.setColor(tmp);
         }
-        batch.draw(r, x, wy + WALL_RAISE, 1f, 1f);
+        batch.draw(r, sx, wy + WALL_RAISE, 1f, 1f);
+    }
+
+    /**
+     * Ksztalt muru z sasiadow (drzwi lacza mury): mur na polnoc i zachod - naroznik, na polnoc albo poludnie - pionowy,
+     * na zachod - poziomy, inaczej slupek (mury odchodzace na wschod i poludnie zaczynaja sie w jego rogu).
+     */
+    int wallShape(FloorMap f, int x, int y) {
+        boolean n = joins(f, x, y - 1), s = joins(f, x, y + 1), w = joins(f, x - 1, y);
+        if (n && w) return TileArt.WALL_CORNER;
+        if (n || (s && !joins(f, x + 1, y))) return TileArt.WALL_V;
+        if (w) return TileArt.WALL_H;
+        return TileArt.WALL_POLE;
+    }
+
+    private boolean joins(FloorMap f, int x, int y) {
+        if (!f.inBounds(x, y)) return false;
+        return f.get(Layer.WALL, x, y) != 0 || doors.contains(f.get(Layer.OBJECT, x, y));
     }
 
     /**
@@ -138,8 +168,8 @@ public final class WorldRenderer {
         float halfW = cam.viewportWidth * cam.zoom / 2f;
         float halfH = cam.viewportHeight * cam.zoom / 2f;
         int x0 = Math.max(0, (int) Math.floor(cam.position.x - halfW) - 1);
-        int x1 = Math.min(world.width() - 1, (int) Math.ceil(cam.position.x + halfW) + 1);
-        int wy0 = (int) Math.floor(cam.position.y - halfH) - 1;
+        int x1 = Math.min(world.width() - 1, (int) Math.ceil(cam.position.x + halfW) + 2);
+        int wy0 = (int) Math.floor(cam.position.y - halfH) - 2;
         int wy1 = (int) Math.ceil(cam.position.y + halfH) + 2;
         int y0 = Math.max(0, world.height() - 1 - wy1);
         int y1 = Math.min(world.height() - 1, world.height() - 1 - wy0);
@@ -148,28 +178,28 @@ public final class WorldRenderer {
             if (f == null) continue;
             if (z > player.z()) {
                 for (int y = y0; y <= y1; y++) {
-                    float wy = worldY(y) + WALL_RAISE;
+                    float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
-                        draw(batch, f.get(Layer.GROUND, x, y), x, wy);
-                        draw(batch, f.get(Layer.DECORATION, x, y), x, wy);
+                        draw(batch, f.get(Layer.GROUND, x, y), x - UP, wy);
+                        draw(batch, f.get(Layer.DECORATION, x, y), x - UP, wy);
                     }
                 }
                 for (int y = y0; y <= y1; y++) {
-                    float wy = worldY(y) + WALL_RAISE;
+                    float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
-                        drawObject(batch, f.get(Layer.OBJECT, x, y), x, wy);
-                        drawWall(batch, f, x, y, wy);
+                        drawObject(batch, f.get(Layer.OBJECT, x, y), x - UP, wy);
+                        drawWall(batch, f, x, y, x - UP, wy);
                     }
                 }
             }
             FloorMap upper = world.floor(z + 1);
             for (int y = y0; y <= y1; y++) {
-                float wy = worldY(y) + WALL_RAISE;
+                float wy = worldY(y) + UP;
                 for (int x = x0; x <= x1; x++) {
                     byte kind = roofs.at(x, y, z);
                     if (kind == Roofs.NONE) continue;
                     if (upper != null && upper.get(Layer.GROUND, x, y) != 0) continue;
-                    batch.draw(art.roof(kind), x, wy, 1f, 1f);
+                    batch.draw(art.roof(kind), x - UP, wy, 1f, 1f);
                 }
             }
         }

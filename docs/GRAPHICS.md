@@ -7,6 +7,10 @@ po kawałku.
 - PNG z przezroczystym tłem, kwadrat. 16×16 px albo 32×32 px (większe gra zmniejsza do 32 bez rozmywania).
 - Kafelki podłoża wypełniają cały kwadrat; postacie, potwory i przedmioty stoją na przezroczystym tle,
   stopami przy dolnej krawędzi.
+- Animacja chodu: obok `nazwa.png` mogą leżeć `nazwa_walk1.png` i `nazwa_walk2.png` (klatki kroku, ten sam kadr);
+  działa dla `characters/*` i `monsters/*`.
+- Mury jak w Tibii: `walls/<klucz muru>_{v,h,pole,corner}.png` (64×64, prawy dolny kwadrat to pole muru) zamieniają
+  bryłę muru na cienką ścianę; bez kompletu czterech plików mur zostaje bryłą.
 - Kolorowe stroje (/strój) są generowane z kolorów; profesja z podmienioną postacią zawsze wygląda jak na grafice.
 - Grafiki muszą być własne albo na wolnej licencji (bez kopii z Tibii i innych gier komercyjnych).
 - Kolumna „Jest”: plik już istnieje. Obecne pliki pochodzą z OpenTibia Sprite Pack (CC BY 4.0), autorzy w

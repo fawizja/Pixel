@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.195.0] - 2026-10-22
+
+### Zmieniono
+- Układ ekranu: pad w lewym dolnym rogu ekranu (także nad dolnym paskiem), konsola i rząd przycisków zaczynają się
+  za padem, prawy panel węższy (20% szerokości zamiast 30%), więc widok gry jest szerszy.
+- Mury budynków jak w Tibii: cienkie ściany na krawędzi pola z wysokością rysowaną w górę i w lewo (kamień,
+  drewno, piaskowiec, mech, bale; kształt z sąsiadów: pionowy, poziomy, narożnik, słupek). Dachy i wyższe piętra
+  przesunięte o pole w górę i w lewo, leżą na murach. Mury jaskiń zostają bryłą.
+
+### Dodano
+- Animacja chodu: postacie graczy (4 kierunki) i potwory przebierają nogami w trakcie kroku (dwie klatki kroku
+  z OpenTibia Sprite Pack, pliki `*_walk1.png` / `*_walk2.png`).
+
 ## [0.194.0] - 2026-10-22
 
 ### Zmieniono

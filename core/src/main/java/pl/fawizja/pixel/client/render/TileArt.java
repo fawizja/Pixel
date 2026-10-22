@@ -120,6 +120,20 @@ public final class TileArt implements Disposable {
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         pm.dispose();
+        if (wallPm != null) {
+            wallAtlas = new Texture(wallPm);
+            wallAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            wallPm.dispose();
+            wallPm = null;
+            for (Map.Entry<Integer, int[]> e : wallSlots.entrySet()) {
+                TextureRegion[] pieces = new TextureRegion[WALL_SHAPES.length];
+                for (int k = 0; k < pieces.length; k++) {
+                    int slot = e.getValue()[k];
+                    pieces[k] = new TextureRegion(wallAtlas, (slot % WALL_COLS) * WALL_PX, (slot / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
+                }
+                wallPieces.put(e.getKey(), pieces);
+            }
+        }
         if (hiPm != null) {
             hiAtlas = new Texture(hiPm);
             hiAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -143,6 +157,10 @@ public final class TileArt implements Disposable {
         trap = region(TRAP_CELL);
         roof = new TextureRegion[] {region(ROOF_CELL), region(ROOF_CELL + 1), region(ROOF_CELL + 2)};
         for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(PET_CELL + i));
+        for (Map.Entry<String, Integer> e : walkCells.entrySet()) {
+            if (hiAtlas == null || !hiCells.containsKey(e.getValue()) || !hiCells.containsKey(e.getValue() + 1)) continue;
+            walk.put(e.getKey(), new TextureRegion[] {region(e.getValue()), region(e.getValue() + 1)});
+        }
         TextureRegion w = region(whiteCell);
         white = new TextureRegion(w, 4, 4, 8, 8);
 
@@ -192,6 +210,11 @@ public final class TileArt implements Disposable {
         }
         for (int i = 0; i < mtypes.size(); i++) override(pm, MONSTER_BASE + i, "monsters/" + mtypes.get(i).key());
         for (int i = 0; i < npcList.size(); i++) override(pm, NPC_BASE + i, "npcs/" + npcList.get(i).key());
+        for (Vocation v : Vocation.values()) {
+            for (String d : DIRS) loadWalk("characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + d);
+        }
+        for (MonsterType m : mtypes) loadWalk("monsters/" + m.key());
+        for (TileType t : tileRegistry.all()) loadWallPieces(t);
         override(pm, HORSE_CELL, "objects/horse_right");
         override(pm, HORSE_CELL + 1, "objects/horse_left");
         override(pm, CHEST_CELL, "objects/chest_closed");
@@ -227,17 +250,7 @@ public final class TileArt implements Disposable {
             pm.fillRectangle(cellX(cell), cellY(cell), SIZE, SIZE);
             pm.setFilter(Pixmap.Filter.NearestNeighbour);
             pm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(), cellX(cell), cellY(cell), SIZE, SIZE);
-            if (src.getWidth() > SIZE && hiCells.size() < HI_COLS * HI_COLS) {
-                if (hiPm == null) {
-                    hiPm = new Pixmap(HI_COLS * HI_SIZE, HI_COLS * HI_SIZE, Pixmap.Format.RGBA8888);
-                    hiPm.setBlending(Pixmap.Blending.None);
-                    hiPm.setFilter(Pixmap.Filter.NearestNeighbour);
-                }
-                int slot = hiCells.size();
-                hiCells.put(cell, slot);
-                hiPm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
-                        (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
-            }
+            if (src.getWidth() > SIZE) putHi(cell, src);
             src.dispose();
             overrides++;
             return true;
@@ -245,6 +258,110 @@ public final class TileArt implements Disposable {
             Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
             return false;
         }
+    }
+
+    private void putHi(int cell, Pixmap src) {
+        if (hiCells.size() >= HI_COLS * HI_COLS) return;
+        if (hiPm == null) {
+            hiPm = new Pixmap(HI_COLS * HI_SIZE, HI_COLS * HI_SIZE, Pixmap.Format.RGBA8888);
+            hiPm.setBlending(Pixmap.Blending.None);
+            hiPm.setFilter(Pixmap.Filter.NearestNeighbour);
+        }
+        int slot = hiCells.size();
+        hiCells.put(cell, slot);
+        hiPm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
+                (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
+    }
+
+    /** Ksztalty murow jak w Tibii (pliki walls/klucz_ksztalt.png, 64x64): pionowy, poziomy, slupek, naroznik. */
+    public static final String[] WALL_SHAPES = {"v", "h", "pole", "corner"};
+    public static final int WALL_V = 0, WALL_H = 1, WALL_POLE = 2, WALL_CORNER = 3;
+    private static final int WALL_PX = 64, WALL_COLS = 8;
+    private Pixmap wallPm;
+    private Texture wallAtlas;
+    private final Map<Integer, int[]> wallSlots = new HashMap<>();
+    private final Map<Integer, TextureRegion[]> wallPieces = new HashMap<>();
+    private int wallSlotCount;
+
+    /** Wczytuje komplet ksztaltow muru (wszystkie cztery albo zaden - wtedy mur zostaje bryla). */
+    private void loadWallPieces(TileType t) {
+        com.badlogic.gdx.files.FileHandle[] files = new com.badlogic.gdx.files.FileHandle[WALL_SHAPES.length];
+        for (int k = 0; k < files.length; k++) {
+            String name = "walls/" + t.key() + "_" + WALL_SHAPES[k] + ".png";
+            files[k] = Gdx.files.internal("art/" + name);
+            if (!files[k].exists()) files[k] = Gdx.files.internal("assets/art/" + name);
+            if (!files[k].exists()) return;
+        }
+        if (wallSlotCount + files.length > WALL_COLS * WALL_COLS) return;
+        try {
+            if (wallPm == null) {
+                wallPm = new Pixmap(WALL_COLS * WALL_PX, WALL_COLS * WALL_PX, Pixmap.Format.RGBA8888);
+                wallPm.setBlending(Pixmap.Blending.None);
+                wallPm.setFilter(Pixmap.Filter.NearestNeighbour);
+            }
+            int[] slots = new int[files.length];
+            for (int k = 0; k < files.length; k++) {
+                Pixmap src = new Pixmap(files[k]);
+                slots[k] = wallSlotCount + k;
+                wallPm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
+                        (slots[k] % WALL_COLS) * WALL_PX, (slots[k] / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
+                src.dispose();
+            }
+            wallSlotCount += files.length;
+            wallSlots.put(t.id(), slots);
+        } catch (RuntimeException e) {
+            Gdx.app.error("TileArt", "Nie można wczytać murów " + t.key() + ": " + e.getMessage());
+        }
+    }
+
+    /** Ksztalt muru jak w Tibii (2x2 pola, prawy dolny = pole muru) albo null, gdy mur jest rysowany bryla. */
+    public TextureRegion wallPiece(int tileId, int shape) {
+        TextureRegion[] p = wallPieces.get(tileId);
+        return p == null ? null : p[shape];
+    }
+
+    /** Komorki klatek kroku (tylko w atlasie 32 px): numery poza atlasem 16 px. */
+    private static final int WALK_BASE = 1 << 20;
+    private final Map<String, Integer> walkCells = new HashMap<>();
+    private final Map<String, TextureRegion[]> walk = new HashMap<>();
+
+    /** Klatki kroku name_walk1/name_walk2 z assets/art (obie albo zadna). */
+    private void loadWalk(String name) {
+        int[] cells = new int[2];
+        for (int k = 0; k < 2; k++) {
+            com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name + "_walk" + (k + 1) + ".png");
+            if (!f.exists()) f = Gdx.files.internal("assets/art/" + name + "_walk" + (k + 1) + ".png");
+            if (!f.exists()) return;
+            cells[k] = WALK_BASE + walkCells.size() * 2 + k;
+        }
+        try {
+            for (int k = 0; k < 2; k++) {
+                com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name + "_walk" + (k + 1) + ".png");
+                if (!f.exists()) f = Gdx.files.internal("assets/art/" + name + "_walk" + (k + 1) + ".png");
+                Pixmap src = new Pixmap(f);
+                putHi(cells[k], src);
+                src.dispose();
+            }
+            walkCells.put(name, cells[0]);
+        } catch (RuntimeException e) {
+            Gdx.app.error("TileArt", "Nie można wczytać klatek kroku " + name + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Klatka chodu jak w Tibii: 0 = postoj, 1 i 2 = kroki. Bez plikow klatek zawsze postoj.
+     * Kroki zmieniaja sie w polowie przejscia pola i na kolejnych polach (lewa, prawa noga).
+     */
+    public static int walkFrame(float renderX, float renderY, int tileX, int tileY) {
+        float progress = Math.abs(renderX - tileX) + Math.abs(renderY - tileY);
+        if (progress < 0.02f) return 0;
+        return 1 + ((tileX + tileY + (progress < 0.5f ? 0 : 1)) & 1);
+    }
+
+    private TextureRegion walkOr(String name, TextureRegion idle, int frame) {
+        if (frame <= 0) return idle;
+        TextureRegion[] w = walk.get(name);
+        return w == null ? idle : w[Math.min(frame, 2) - 1];
     }
 
     private static int cellX(int cell) { return (cell % COLS) * SIZE; }
@@ -271,6 +388,9 @@ public final class TileArt implements Disposable {
     public TextureRegion item(int id) { return id > 0 && id < items.length ? items[id] : null; }
     public TextureRegion white() { return white; }
     public TextureRegion monster(String key) { return monsters.get(key); }
+
+    /** Potwor w klatce chodu ({@link #walkFrame}). */
+    public TextureRegion monster(String key, int frame) { return walkOr("monsters/" + key, monsters.get(key), frame); }
     public TextureRegion npc(String key) { return npcs.get(key); }
 
     /** Kon pod jezdzcem, zwrocony w strone ruchu (w lewo albo w prawo). */
@@ -302,6 +422,21 @@ public final class TileArt implements Disposable {
         for (int i = 0; i < 4; i++) if (characters[v.ordinal()][i] == base) d = i;
         TextureRegion r = outfits.get(outfitCell(v, outfit, d));
         return r == null ? base : r;
+    }
+
+    /** Postac w klatce chodu ({@link #walkFrame}); stroje w kolorach z kodu nie maja klatek kroku. */
+    public TextureRegion character(Vocation v, Direction facing, int outfit, int frame) {
+        TextureRegion r = character(v, facing, outfit);
+        if (frame <= 0 || r != character(v, facing)) return r;
+        return walkOr("characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + DIRS[dirIndex(facing)], r, frame);
+    }
+
+    private static int dirIndex(Direction facing) {
+        if (facing == null) return 0;
+        if (facing.dy < 0 && facing.dx == 0) return 1;
+        if (facing.dx < 0) return 2;
+        if (facing.dx > 0) return 3;
+        return 0;
     }
 
     /** Sprite postaci: 0 = dol, 1 = gora, 2 = lewo, 3 = prawo. */
@@ -1049,6 +1184,7 @@ public final class TileArt implements Disposable {
     public void dispose() {
         atlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
+        if (wallAtlas != null) wallAtlas.dispose();
         lightTexture.dispose();
     }
 }

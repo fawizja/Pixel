@@ -316,7 +316,7 @@ public final class Hud {
         // jedna bryla jak klasyczny klient Tibii: widok gry w ramce, po prawej panel (minimapa, ekwipunek,
         // lista walki, pasek akcji), u gory paski HP/MP, na dole przyciski i konsola
         float pad = 4, gap = 3;
-        float pw = Math.max(180, Math.min(280, w * 0.3f));
+        float pw = Math.max(170, Math.min(260, w * 0.2f)); // waski panel: wiecej miejsca na widok gry
         panelX = w - pw;
         float iw = pw - pad * 2;
         // pasek akcji 5x2 na dole panelu
@@ -368,18 +368,19 @@ public final class Hud {
         gy = pad + conBody + 4 + hbH + 4;
         gw = panelX - pad - gx;
         gh = h - topH - gy;
-        conX = pad;
+        // pad w lewym dolnym rogu ekranu (na widoku gry i dolnym pasku), konsola i przyciski zaczynaja sie za nim
+        float jr = Math.min(60, Math.min(w, h) * 0.14f);
+        joystick.layout(pad + 10 + jr * 1.3f, pad + 10 + jr * 1.3f, jr);
+        float padW = pad + 10 + jr * 2.6f + 6;
+        conX = padW;
         conY = pad;
-        conW = gw;
+        conW = panelX - pad - padW;
         conH = conBody;
-        hbLeft = pad;
+        hbLeft = padW;
         hbRight = panelX - pad;
         hbHalfH = hbH / 2f;
         hbY = conY + conH + 4 + hbHalfH;
         hbSlotHw = h >= 500 ? 48 : 34;
-        // pad (sama kulka) w lewym dolnym rogu widoku gry
-        float jr = Math.min(70, Math.min(gw, gh) * 0.2f);
-        joystick.layout(gx + 12 + jr * 1.3f, gy + 12 + jr * 1.3f, jr);
         // gorny pasek: HP i MP nad widokiem gry
         barX = gx + 4;
         barW = Math.min(170, gw * 0.28f);
@@ -1665,8 +1666,8 @@ public final class Hud {
         if (bagOpen && p.x >= bagX - 8 && p.x <= bagX + slotSize * 5 + 8 && p.y >= bagY - 50 && p.y <= bagY + slotSize * 4 + 30) {
             return true;
         }
-        if (!inGameView(p.x, p.y)) return true; // panele interfejsu nie przepuszczaja dotyku na mape
-        return joystick.touchDown(p.x, p.y, pointer);
+        if (joystick.touchDown(p.x, p.y, pointer)) return true; // pad w rogu ekranu, takze nad dolnym paskiem
+        return !inGameView(p.x, p.y); // panele interfejsu nie przepuszczaja dotyku na mape
     }
 
     public boolean touchDragged(int sx, int sy, int pointer) {

@@ -27,6 +27,13 @@ OBJECTS = {
     "sandstone_rock": 1627, "ice_crystal": 1650, "crystal": 1277, "obsidian_rock": 1633, "rubble": 1613,
     "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000,
 }
+# Mury jak w Tibii: cienka sciana na krawedzi pola z wysokoscia rysowana w gore i w lewo (obrazek 64x64,
+# prawy dolny kwadrat to pole muru). Kolejno: pionowy, poziomy, slupek, naroznik.
+WALLS = {
+    "stone_wall": (534, 535, 536, 537), "wood_wall": (680, 681, 682, 683), "sandstone_wall": (552, 553, 554, 555),
+    "mossy_wall": (518, 519, 520, 521), "log_wall": (878, 879, 880, 881),
+}
+WALL_SHAPES = ("v", "h", "pole", "corner")
 # Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
 ROOFS = {"roof_red": 183, "roof_slate": 187}
 ITEMS = {
@@ -91,10 +98,10 @@ PETS = {"pet_cat": (1, None), "pet_raven": (9, None)}
 MASK = {(255, 255, 0): 0, (255, 0, 0): 1, (0, 255, 0): 2, (0, 0, 255): 3}
 
 
-def outfit(spr, t, d, colors):
-    base = ot.compose(spr, t, x=d)
+def outfit(spr, t, d, colors, frame=0):
+    base = ot.compose(spr, t, x=d, frame=frame)
     if colors and t["layers"] > 1:
-        mask = ot.compose(spr, t, layer=1, x=d)
+        mask = ot.compose(spr, t, layer=1, x=d, frame=frame)
         b, m = base.load(), mask.load()
         for y in range(base.height):
             for x in range(base.width):
@@ -106,9 +113,9 @@ def outfit(spr, t, d, colors):
     return base
 
 
-def trim_square(img):
+def trim_square(img, box=None):
     """Przycina do zawartosci i dopelnia do kwadratu (stopy przy dolnej krawedzi, srodek w poziomie)."""
-    box = img.getbbox()
+    box = box or img.getbbox()
     if not box:
         return img
     img = img.crop(box)
@@ -116,6 +123,23 @@ def trim_square(img):
     out = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     out.alpha_composite(img, ((s - img.width) // 2, s - img.height))
     return out
+
+
+def walk_frames(t):
+    """Klatki stroju: 0 = postoj, dwie klatki kroku (w paczce 3 klatki: postoj i dwa kroki)."""
+    n = t["frames"]
+    return [0, 1, 2] if n == 3 else [0, max(1, n // 4), max(1, 3 * n // 4)] if n > 1 else [0]
+
+
+def save_outfit(spr, t, d, colors, path):
+    """Postoj jako path.png i kroki jako path_walk1.png / path_walk2.png, przyciete wspolnym prostokatem (bez drgan)."""
+    imgs = [outfit(spr, t, d, colors, f) for f in walk_frames(t)]
+    boxes = [i.getbbox() for i in imgs if i.getbbox()]
+    box = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+    save(trim_square(imgs[0], box), path + ".png")
+    for k, img in enumerate(imgs[1:], 1):
+        save(trim_square(img, box), f"{path}_walk{k}.png")
+    return len(imgs)
 
 
 def save(img, path):
@@ -131,6 +155,9 @@ def main(client, art):
         save(ot.compose(spr, things["item"][i]), f"{art}/tiles/{name}.png"); n += 1
     for name, i in OBJECTS.items():
         save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
+    for name, ids in WALLS.items():
+        for shape, i in zip(WALL_SHAPES, ids):
+            save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
     for name, i in ROOFS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ITEMS.items():
@@ -138,10 +165,10 @@ def main(client, art):
     south = ot.DIRS.index("down")
     for folder, table in (("monsters", MONSTERS), ("npcs", NPCS), ("pets", PETS)):
         for name, (i, colors) in table.items():
-            save(trim_square(outfit(spr, things["outfit"][i], south, colors)), f"{art}/{folder}/{name}.png"); n += 1
+            n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}")
     for voc, (i, colors) in CHARACTERS.items():
         for d, dname in enumerate(ot.DIRS):
-            save(trim_square(outfit(spr, things["outfit"][i], d, colors)), f"{art}/characters/{voc}_{dname}.png"); n += 1
+            n += save_outfit(spr, things["outfit"][i], d, colors, f"{art}/characters/{voc}_{dname}")
     print("Zapisano", n, "grafik do", art)
 
 

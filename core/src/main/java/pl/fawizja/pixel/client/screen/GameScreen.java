@@ -25,6 +25,7 @@ import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.client.PixelGame;
 import pl.fawizja.pixel.client.render.LightRenderer;
+import pl.fawizja.pixel.client.render.TileArt;
 import pl.fawizja.pixel.client.render.WorldRenderer;
 import pl.fawizja.pixel.client.ui.Hud;
 import pl.fawizja.pixel.combat.CombatEvent;
@@ -1226,11 +1227,13 @@ public final class GameScreen extends ScreenAdapter {
             for (int i = 0; i < visibleMonsters.size(); i++) {
                 Monster m = visibleMonsters.get(i);
                 if (m.position().y() != row || m.position().z() != z) continue;
-                TextureRegion tr = game.art().monster(m.type().key());
+                float mrx = m.renderX(t), mry = m.renderY(t);
+                TextureRegion tr = game.art().monster(m.type().key(),
+                        TileArt.walkFrame(mrx, mry, m.position().x(), m.position().y()));
                 if (tr == null) continue;
                 float[] lg = lunges.get(m.position());
-                float mx = m.renderX(t) + (lg == null ? 0f : lg[0]);
-                float my = worldRenderer.worldY(m.renderY(t) + (lg == null ? 0f : lg[1]));
+                float mx = mrx + (lg == null ? 0f : lg[0]);
+                float my = worldRenderer.worldY(mry + (lg == null ? 0f : lg[1]));
                 boolean flip = m.facing() != null && m.facing().dx < 0;
                 if (m.type().isElite()) {
                     // elita: wiekszy i zlocisty
@@ -1257,7 +1260,8 @@ public final class GameScreen extends ScreenAdapter {
                     b.draw(game.art().horse(rp.facing), remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)), 1f, 1f);
                     rise = 0.35f;
                 }
-                b.draw(game.art().character(rp.vocation, rp.facing, rp.outfit), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
+                int rf = rp.mounted ? 0 : TileArt.walkFrame(remoteX(rp, t), remoteY(rp, t), rp.to.x(), rp.to.y());
+                b.draw(game.art().character(rp.vocation, rp.facing, rp.outfit, rf), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
                         worldRenderer.worldY(remoteY(rp, t) - rise + (lg == null ? 0f : lg[1])), 1f, 1f);
             }
             if (row == playerRow) {
@@ -1266,7 +1270,8 @@ public final class GameScreen extends ScreenAdapter {
                     b.draw(game.art().horse(session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
                     rise = 0.35f;
                 }
-                b.draw(game.art().character(pc.vocation(), session.facing(), pc.outfit()), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
+                int pf = pc.isMounted() ? 0 : TileArt.walkFrame(px, py, pc.position().x(), pc.position().y());
+                b.draw(game.art().character(pc.vocation(), session.facing(), pc.outfit(), pf), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
             }
         });
         worldRenderer.renderAbove(batch, camera, pc.position(), roofs);
