@@ -163,12 +163,26 @@ Joystick ze strefa martwa, klawiatura na PC.
 - Przedmioty na ziemi (wyrzucone, plecak po smierci w PvP) znikaja po 30 min od ostatniego polozenia na kafelku.
 - Online: linia `CO x y z potwor 0|1` w klatce; przeszukanie to akcja `loot`.
 
-## Pasek czarow (Z logika, C UI)
+## Pasek akcji (Z logika, C UI)
 
-- 4 przyciski. Domyslnie automat: najlepsze leczenie, atak na cel, atak obszarowy (lub drugi atak), poswiata.
-- `settings/SpellBar`: w ksiedze wiersz "Ustaw pasek czarow" wybiera przycisk 1-4, dotkniecie czaru go przypisuje,
-  ten sam czar drugi raz przywraca automat. Czar nieznany postaci (poziom, profesja) = automat.
-- Zapis w Preferences `pixel-bar`, osobno dla kazdej postaci (klucz = imie).
+- 10 pol 5x2 na dole prawego panelu. Pole trzyma akcje: `cast:<czar>`, `item:<mikstura|runa>`, `potion_hp`/`potion_mp`
+  (najsilniejsza dozwolona mikstura) albo `none` (celowo puste). Akcja jest wysylana jak przycisk (`Actions.apply`,
+  online `ACT`); `item:` przyjmuje tylko mikstury i runy.
+- Automat (pole bez wpisu): leczenie, atak na cel, atak obszarowy (lub drugi atak), poswiata, mikstura HP, mikstura MP,
+  pierwsza runa z plecaka. Czar nieznany postaci wraca do automatu.
+- Krotkie dotkniecie uzywa pola (po puszczeniu), przytrzymanie 450 ms otwiera wybor: czar leczacy / atakujacy / inny,
+  mikstura, runa, automat, wyczysc. Odnowienie czarow, mikstur (grupa POTION) i run jako zaslona opadajaca z gory.
+- `settings/SpellBar`: zapis "cast:mend,-,item:...,none,..." w Preferences `pixel-bar` osobno dla kazdej postaci;
+  stary zapis 4 kluczy czarow jest czytany jako czary. Klawisze 1-9 i 0.
+
+## Uklad ekranu (C UI)
+
+- Jedna bryla jak klasyczny klient Tibii: `Hud.resize` liczy prostokat widoku gry (`Hud.gameView`, piksele),
+  `GameScreen.resize` dobiera skale (min. 15x11 pol w ramce) i przesuniecie kamery do srodka ramki; swiat rysuje sie
+  na calym ekranie, panele go zaslaniaja.
+- Prawy panel: minimapa z kolumna (i, BIEG, TARCZA, POCH), ekwipunek (3x4 albo 5x2), Umiejetnosci (wysoki ekran),
+  lista walki, pasek akcji. U gory paski HP/MP/doswiadczenie i ikony stanu, na dole rzad przyciskow i konsola.
+- Dotyk poza widokiem gry nie trafia na mape. Na szerokim ekranie okna (ksiega, NPC, mapa) stoja nad widokiem gry.
 
 ## Efekty graficzne czarow (Z zdarzenia, C rysowanie)
 
