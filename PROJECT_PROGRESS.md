@@ -25,7 +25,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 3. System mapy i warstw | ZAKONCZONY | 57d39e5 |
 | 4. Geografia swiata | ZAKONCZONY | e79368b |
 | 5. Cztery miasta | ZAKONCZONY | 19757e8 |
-| 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | (ten commit) |
+| 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | 435babc |
 | 7. Mosty, statki, podroze | nastepny | - |
 | 8-20 | do zrobienia | - |
 
