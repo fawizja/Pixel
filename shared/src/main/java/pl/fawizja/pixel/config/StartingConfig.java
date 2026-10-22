@@ -68,6 +68,11 @@ public final class StartingConfig {
             if (in == null) return defaults();
             Properties p = new Properties();
             p.load(in);
+            // -Dpixel.start.level / -Dpixel.start.gold.bank nadpisuja plik (np. testy sieciowe na poziomie 8)
+            for (String key : new String[] {"start.level", "start.gold.bank", "start.gold.backpack"}) {
+                String v = System.getProperty("pixel." + key);
+                if (v != null) p.setProperty(key, v);
+            }
             return fromProperties(p);
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read " + DEFAULT_RESOURCE, e);

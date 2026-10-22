@@ -34,6 +34,10 @@ configure(subprojects.findAll { it.name != 'android' }) {
 
     tasks.withType(Test).configureEach {
         useJUnitPlatform()
+        // Testy mechaniki licza od poziomu 8 bez zlota w banku; gra startuje od 300 z 10 mln gp
+        // (data/starting.properties, sprawdza StartingConfigFileTest).
+        systemProperty 'pixel.start.level', '8'
+        systemProperty 'pixel.start.gold.bank', '0'
         testLogging {
             events 'failed'
             exceptionFormat 'full'
