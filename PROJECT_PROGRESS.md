@@ -28,8 +28,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | 435babc |
 | 7. Mosty, statki, podroze | ZAKONCZONY | d9b2950 |
 | 8. Expowiska na powierzchni | ZAKONCZONY | 7312299 |
-| 9. Wielopoziomowe lochy | nastepny | - |
-| 10-20 | do zrobienia | - |
+| 9. Wielopoziomowe lochy | ZAKONCZONY | (ten commit) |
+| 10. Potwory, bossowie, loot | nastepny | - |
+| 11-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -173,10 +174,21 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   potwory, straznik doliny). Testy 436 OK, regresja GUI 42/42.
 - Do poprawy w etapie 10: grafika kraba (przebarwiony skorpion wyglada jak wij).
 
+## Etap 9 - wielopoziomowe lochy (2026-10-22)
+- `tools/mapgen/depths.py`: 5 nowych lochow 300+ (wlasne ziarna, reszta swiata bez zmian): Grota Przemytnikow
+  (Wyspa Piratow, -1..-3), Serce Wulkanu (Wyspa Wulkaniczna, -1..-4, magma), Lodowe Groty (Lodowa Wyspa, -1..-3),
+  Krypta Mgiel (Wyspa Mgiel, -1..-3), Gniazdo Wiwern (pod Dolina Wiwern, -1..-2, region 300-360).
+- Pietra lacza schody, a w lochach wysp miedzy glebszymi pietrami dziura i drabina. Wejscia na powierzchni maja
+  nowe symbole schodow (popiol, przeklete trawy, trawa).
+- Lacznie swiat ma teraz lochy pod kazdym miastem i wyspa endgame: Kopalnia Varden, Lodowe Jaskinie, Zatopione
+  Ruiny, Kanaly Selvaran, Grobowce Qasirah, Kopalnia Frostholm, Otchlan (wszystkie -1..-5) i 5 nowych.
+- Nowy test: kazdy nowy loch ma osiagalne pietra do najglebszego i potwory na najglebszym; co najmniej 4 dziury
+  w lochach 300+. Testy 437 OK, regresja GUI: zmieniony tylko wzorzec chest (inna pierwsza skrzynia skarbow).
+
 ## Nastepne kroki (dokladnie)
-1. Etap 9: wielopoziomowe lochy (wiecej pieter -1..-5 pod wyspami i Dolina Wiwern, schody/drabiny/dziury).
-2. Etap 10: potwory, bossowie, loot (bossowie wysp, grafika kraba).
-3. Etap 11: profesje i poziomy.
+1. Etap 10: potwory, bossowie, loot (bossowie na dnie nowych lochow, grafika kraba, loot dla 300+).
+2. Etap 11: profesje i poziomy.
+3. Etap 12: ruch i walka, utani hur / utani gran hur.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

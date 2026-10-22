@@ -226,4 +226,25 @@ class GameWorldTest {
         assertTrue(explore(world.spawn(), 249).stream().noneMatch(valley::contains), "level 249 kept out");
         assertTrue(explore(world.spawn(), 250).stream().anyMatch(valley::contains), "level 250 may enter");
     }
+
+    @Test
+    void islandDungeonsGoSeveralFloorsDownWithMonstersOnTheDeepestFloor() throws Exception {
+        List<SpawnPoint> spawns = SpawnTable.load(WorldLayout.WORLD_MAP, world, MONSTERS);
+        Object[][] dungeons = {{"Wyspa Piratow", -3}, {"Wyspa Wulkaniczna", -4}, {"Lodowa Wyspa", -3}, {"Wyspa Mgiel", -3},
+                {"Gniazdo Wiwern", -2}};
+        for (Object[] d : dungeons) {
+            Region r = world.regions().stream().filter(x -> x.name().equals(d[0])).findFirst().orElseThrow();
+            int deepest = (int) d[1];
+            for (int z = -1; z >= deepest; z--) {
+                int fz = z;
+                assertTrue(reachable.stream().anyMatch(p -> p.z() == fz && r.contains(p)), d[0] + " floor " + z);
+            }
+            assertTrue(spawns.stream().anyMatch(sp -> sp.center().z() == deepest && r.contains(sp.center())), d[0] + " deepest floor has monsters");
+        }
+        // miedzy glebszymi pietrami takze dziura i drabina (nie tylko schody)
+        long holes = world.floors().values().stream().flatMap(f -> f.transitions().values().stream())
+                .filter(t -> t.type() == TransitionType.HOLE && world.regionAt(t.from()) != null
+                        && world.regionAt(t.from()).levelMin() >= 300).count();
+        assertTrue(holes >= 4, "holes in island dungeons: " + holes);
+    }
 }

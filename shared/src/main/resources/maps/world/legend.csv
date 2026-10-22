@@ -164,3 +164,6 @@ $;frozen_floor;-;wall_torch;-
 Щ;stone_floor;-;depot_locker;-
 Ы;sandstone_floor;-;depot_locker;-
 Ь;wood_floor;-;depot_locker;-
+Ю;ash;-;stairs_down;-
+Я;blighted_grass;-;stairs_down;-
+Ш;grass;-;stairs_down;-

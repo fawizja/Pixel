@@ -17,6 +17,7 @@ from collections import deque
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import world_geo  # noqa: E402
 import ports  # noqa: E402
+import depths  # noqa: E402
 import cities  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -105,9 +106,9 @@ EXTRA_LEGEND = [
     # Selvaran (przebudowa 0.182): skaly i krzaki w dzungli Skalnego Wawozu
     ('\u03c3', 'jungle_grass', '-', 'rock', '-'),
     ('\u03c4', 'jungle_grass', '-', 'bush', '-'),
-] + world_geo.LEGEND + cities.LEGEND
+] + world_geo.LEGEND + cities.LEGEND + depths.LEGEND
 WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578'
-               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be' + '\u03c5') | cities.WALKABLE
+               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be' + '\u03c5') | cities.WALKABLE | depths.WALKABLE
 
 
 def grid(fill=' '):
@@ -813,6 +814,7 @@ def main():
     sea = ports.ports(floors)                                 # etap 7: przystanie, mola, mosty na wyspy
     cities.ship(g, 10, 239, random.Random(5401))              # etap 8: wrak u poludniowo-zachodniego brzegu
     wyvern_valley(g)
+    deep_spawns, deep_entrances = depths.depths(floors, transitions, dungeon)   # etap 9: lochy 300+
 
     # NPC: Varden (wspolrzedne mapy varden + przesuniecie), Frostholm i Qasirah (cities.py), Selvaran
     npcs = [
@@ -883,10 +885,14 @@ def main():
     if os.environ.get('MAPGEN_DUMP'):
         with open(os.environ['MAPGEN_DUMP'], 'w', encoding='utf-8') as f:
             f.write('\n'.join(''.join(r) for r in g))
+    # wyspy: pola osiagalne z pomostow kapitanow (rejs statkiem)
+    for key, (_place, pos) in sea['captains'].items():
+        if pos not in reach:
+            reach |= reachable(g, pos)
     for (x, y, z, *_r) in transitions:
         if z == 0:
             assert (x, y) in reach, f'entrance {x},{y} unreachable'
-    for name, pos in east_entrances + selv_entrances:
+    for name, pos in east_entrances + selv_entrances + deep_entrances:
         assert pos in reach, f'{name} unreachable from Varden'
     # przystanie: na ladzie kontynentu osiagalne pieszo, na wyspach - pomost polaczony z wnetrzem wyspy
     for key, (place, (x, y)) in sea['captains'].items():
@@ -943,6 +949,7 @@ def main():
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
     regions = [r for part in city_parts for r in part['regions']] + [
+        *depths.REGIONS,
         f'Dolina Wiwern;{WYVERN[0]};{WYVERN[1]};{WYVERN[2]};{WYVERN[3]};0;0;300;360',
     ] + [
         'Klify Selvaran;140;112;159;171;1;2;60;80',
@@ -1031,16 +1038,13 @@ def main():
         '# Wyspa Wulkaniczna',
         'magma_drake;310;184;0;5;2;360', 'magma_drake;322;196;0;5;2;360', 'magma_drake;306;200;0;4;2;360',
         'abyssal_demon;326;184;0;4;1;420',
-    ] + [
+        '# --- etap 9: lochy 300+ pod wyspami i Dolina Wiwern ---',
+    ] + deep_spawns + [
         '# --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---',
         'wolf;58;72;0;5;3;60;noc', 'bandit;106;96;0;3;2;120;noc', 'snow_wolf;50;12;0;6;3;90;noc',
         'hyena;40;190;0;6;3;90;noc', 'sand_wraith;20;226;0;5;2;180;noc', 'wraith_knight;186;103;0;5;3;240;noc',
     ]
     pz_rects = [tuple(int(v) for v in r.split(',')) for r in pz]
-    # wyspy: pola osiagalne z pomostow kapitanow (rejs statkiem)
-    for key, (_place, pos) in sea['captains'].items():
-        if pos not in reach:
-            reach |= reachable(g, pos)
 
     def in_pz(x, y, z):
         return any(a <= x <= c and b <= y <= d and z == zz for a, b, c, d, zz in pz_rects)

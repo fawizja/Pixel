@@ -104,6 +104,16 @@ poziomow wyzsze od poziomu postaci, pojawia sie ostrzezenie. To informacja, nie 
 | Wyspa Mgiel | 226..276 x 269..301 | 0 | 480-650 | upiory mgly, lowcy cieni |
 | Wyspa Wulkaniczna | 293..334 x 172..208 | 0 | 600-800 | smoki magmy, demon Otchlani |
 
+### Lochy 300+ (etap 9, `tools/mapgen/depths.py`)
+
+| Loch | Wejscie | Pietra | Przejscia | Potwory |
+|---|---|---|---|---|
+| Grota Przemytnikow | Wyspa Piratow (50,284) | -1..-3 | schody, dziura -2 -> drabina -3 | piraci, topielce |
+| Serce Wulkanu | Wyspa Wulkaniczna (316,192) | -1..-4 | schody, dziura -3 -> drabina -4 | smoki magmy, demony Otchlani |
+| Lodowe Groty | Lodowa Wyspa (312,40) | -1..-3 | schody, dziura -2 -> drabina -3 | mrozne olbrzymy, lodowe smoki |
+| Krypta Mgiel | Wyspa Mgiel (252,288) | -1..-3 | schody, dziura -2 -> drabina -3 | upiory mgly, lowcy cieni, piaskowy tytan |
+| Gniazdo Wiwern | Dolina Wiwern (28,106) | -1..-2 | schody | wiwerny |
+
 Potwory powyzej poziomu 15 nie stoja blizej niz 14 kafelkow od swiatyni, a poziom kazdego spawnu
 miesci sie w zalecanym zakresie regionu (test `spawnsAreValidAwayFromTownsAndMatchRegionLevels`).
 Nowa postac (poziom 8) idaca na polnoc lub poludnie trafia najpierw na ostrzezenie i potwory
