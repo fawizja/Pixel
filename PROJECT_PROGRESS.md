@@ -20,9 +20,13 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 
 | Etap | Stan | Commit |
 |------|------|--------|
-| 1. Audyt i zabezpieczenie | ZAKONCZONY | (ten commit) |
-| 2. Grafika, assety, renderowanie | nastepny | - |
-| 3-20 | do zrobienia | - |
+| 1. Audyt i zabezpieczenie | ZAKONCZONY | 15af7c2 |
+| 2. Grafika, assety, renderowanie | ZAKONCZONY | 55e7e49 |
+| 3. System mapy i warstw | w toku | - |
+| 4-20 | do zrobienia | - |
+
+Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
+APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
 
 ## Etap 1 - wyniki audytu (2026-10-22)
 
@@ -75,9 +79,23 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
   dalej licza od poziomu 8 (build.gradle), a `StartingConfigFileTest` pilnuje 300 i 10 mln w dostarczonej konfiguracji.
 - `tools/mapgen/render_overview.py` - podglad calego pietra mapy do PNG (wizualizacja do raportow).
 
+## Etap 2 - grafika (2026-10-22)
+- `core/.../render/GroundBorders.java`: obrzeza podloza jak w Tibii (priorytety: woda < lod/lawa < bagno < jaskinia
+  < popiol < ziemia < ciemny piasek < piasek < bruk < pole < trawa < trawa dzungli < snieg); 8 kawalkow na podloze
+  skladanych przy starcie z tekstury i maski; rysowane w WorldRenderer.drawBorders po podlozu, przed dekoracja.
+- `tools/art/otsp_import.py`: TINTED - 19 potworow z przebarwionych strojow OTSP; mnich = stroj 26; schody, drabina,
+  lada, oltarz, pochodnia; mury ice_wall i obsidian_wall; cave_wall = przyciemniony kamien (lita skala).
+  Paczka OTSP: `git clone https://github.com/peonso/opentibia_sprite_pack` i
+  `python3 -I tools/art/otsp_import.py <paczka>/client_files /tmp/art`, potem kopiowac tylko zmienione pliki.
+- Poprawka: CharacterFactory.BASE_LEVEL = 8 - umiejetnosci "pod poziom" od 9 w gore (wczesniej porownanie z
+  start.level, ktore po zmianie na 300 wylaczalo umiejetnosci postaci serwerowych).
+- Uwaga: ukosna sylwetka postaci to styl samej paczki OTSP (perspektywa Tibii), nie blad importu.
+- Testy 423 OK, regresja GUI zaktualizowana (east_camp, selvaran zmienione przez obrzeza).
+- Brakuje nadal: palma, kaktus, fontanna, latarnia uliczna, plot, dywan, magma/lawa z OTSP (zostaja z kodu).
+
 ## Nastepne kroki (dokladnie)
-1. Etap 2: naprawic import sprite postaci (pochylenie), sprawdzic stroje profesji, przejrzec kafelki i warstwy.
-2. Etap 3-4: nowy uklad swiata (kontynent z wybrzezem, morzem, wyspami, gorami) w generate_world.py,
+1. Etap 3: system mapy i warstw - sprawdzic limity (rozmiar mapy, pietra, chunki), przygotowac format pod duzy swiat.
+2. Etap 4: nowy uklad swiata (kontynent z wybrzezem, morzem, wyspami, gorami) w generate_world.py,
    zachowujac format plikow i istniejace systemy (MapLoader, transitions, spawns, npcs.csv).
 3. Etap 5: cztery rozne, duze miasta: Varden (krolewskie), nowe miasto portowe, Frostholm jako gorskie
    (kamienne tarasy, kopalnie), Qasirah/Selvaran jako egzotyczne (pustynia + dzungla).
