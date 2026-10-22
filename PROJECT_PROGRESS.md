@@ -31,7 +31,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 9. Wielopoziomowe lochy | ZAKONCZONY | 35ddade |
 | 10. Potwory, bossowie, loot | ZAKONCZONY | 0cd1b79 |
 | 11. Profesje i poziomy | ZAKONCZONY | 71a19a3 |
-| 12. Ruch i walka | ZAKONCZONY | (ten commit) |
+| 12. Ruch i walka | ZAKONCZONY | 96e652b |
 | 13. Czary, runy, mikstury | nastepny | - |
 | 14-20 | do zrobienia | - |
 
