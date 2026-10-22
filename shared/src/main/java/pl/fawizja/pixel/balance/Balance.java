@@ -20,7 +20,7 @@ public final class Balance {
 
     public static final int BASE_SPEED = 220;
     /** Gorny limit predkosci ruchu w kafelkach na sekunde (czytelnosc na telefonie). */
-    public static final double MAX_TILES_PER_SECOND = 8.0;
+    public static final double MAX_TILES_PER_SECOND = 10.0;
     /** Co ile sekund nastepuje tik regeneracji. */
     public static final int REGEN_TICK_SECONDS = 6;
 
@@ -118,8 +118,16 @@ public final class Balance {
         return BASE_SPEED + (int) Math.round(25.0 * Math.sqrt(Math.max(0, l - 7)));
     }
 
+    /** Do tej szybkosci 80 punktow = 1 pole/s; powyzej przyrost jest o polowe wolniejszy. */
+    public static final int FAST_SPEED = 400;
+
+    /**
+     * Pola na sekunde. Powyzej FAST_SPEED krzywa sie splaszcza, zeby postac 300+ (ok. 6.5 pola/s)
+     * miala jeszcze miejsce na przyspieszenie z czarow i wierzchowca przed limitem.
+     */
     public static double tilesPerSecond(int speed) {
-        return Math.min(MAX_TILES_PER_SECOND, Math.max(1.0, speed / 80.0));
+        double t = speed <= FAST_SPEED ? speed / 80.0 : FAST_SPEED / 80.0 + (speed - FAST_SPEED) / 160.0;
+        return Math.min(MAX_TILES_PER_SECOND, Math.max(1.0, t));
     }
 
     /** Czas jednego kroku w ms; ruch po skosie trwa dluzej. */

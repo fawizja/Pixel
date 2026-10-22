@@ -50,20 +50,23 @@ oplaca sie na bossach i potworach za mocnych dla jednej osoby. Wymagane poziomy 
 ## Statystyki wg poziomu
 
 HP i mana na poziomie 8 sa wspolne (185 / 90), potem rosna o przyrost profesji.
-Szybkosc: `220 + 25 * sqrt(L - 7)`, przeliczana na kafelki/s (`speed / 80`) z gornym limitem 8 kafelkow/s
-(czytelnosc na telefonie; powyzej ok. poziomu 300 dalszy wzrost szybkosci dadza czary i przedmioty).
+Szybkosc: `220 + 25 * sqrt(L - 7)`, przeliczana na kafelki/s: do szybkosci 400 `speed / 80`, powyzej
+`5 + (speed - 400) / 160`, limit 10 kafelkow/s (etap 12). Dzieki splaszczeniu postac 300 chodzi ok. 6.5 pola/s
+i ma jeszcze miejsce na przyspieszenie: utani hur (+30% na 33 s, kazda profesja od poz. 14, 60 many) daje
+ok. 7.7 pola/s, utani gran hur (+70% na 22 s, druid i sorcerer od poz. 20, 100 many) ok. 9.1 pola/s.
+Nowy czar przyspieszenia zastepuje poprzedni. Wierzchowiec dodaje 60 punktow przed premia procentowa.
 
 | Poziom | Exp calkowity | Exp do nast. | Paladin HP/MP | Druid HP/MP | Sorcerer HP/MP | Monk HP/MP | Szybkosc (kaf./s) |
 |---|---|---|---|---|---|---|---|
 | 8 | 4 200 | 2 200 | 185 / 90 | 185 / 90 | 185 / 90 | 185 / 90 | 245 (3.1) |
 | 20 | 98 800 | 17 200 | 305 / 270 | 245 / 450 | 245 / 450 | 341 / 162 | 310 (3.9) |
 | 60 | 3 256 800 | 171 200 | 705 / 870 | 445 / 1650 | 445 / 1650 | 861 / 402 | 402 (5.0) |
-| 100 | 15 694 800 | 485 200 | 1105 / 1470 | 645 / 2850 | 645 / 2850 | 1381 / 642 | 461 (5.8) |
-| 150 | 54 042 300 | 1 102 700 | 1605 / 2220 | 895 / 4350 | 895 / 4350 | 2031 / 942 | 519 (6.5) |
-| 300 | 441 084 800 | 4 455 200 | 3105 / 4470 | 1645 / 8850 | 1645 / 8850 | 3981 / 1842 | 648 (8.0) |
-| 500 | 2 058 474 800 | 12 425 200 | 5105 / 7470 | 2645 / 14850 | 2645 / 14850 | 6581 / 3042 | 775 (8.0) |
-| 750 | 6 975 212 300 | 28 012 700 | 7605 / 11220 | 3895 / 22350 | 3895 / 22350 | 9831 / 4542 | 901 (8.0) |
-| 1000 | 16 566 949 800 | - | 10105 / 14970 | 5145 / 29850 | 5145 / 29850 | 13081 / 6042 | 1008 (8.0) |
+| 100 | 15 694 800 | 485 200 | 1105 / 1470 | 645 / 2850 | 645 / 2850 | 1381 / 642 | 461 (5.4) |
+| 150 | 54 042 300 | 1 102 700 | 1605 / 2220 | 895 / 4350 | 895 / 4350 | 2031 / 942 | 519 (5.7) |
+| 300 | 441 084 800 | 4 455 200 | 3105 / 4470 | 1645 / 8850 | 1645 / 8850 | 3981 / 1842 | 648 (6.6) |
+| 500 | 2 058 474 800 | 12 425 200 | 5105 / 7470 | 2645 / 14850 | 2645 / 14850 | 6581 / 3042 | 775 (7.3) |
+| 750 | 6 975 212 300 | 28 012 700 | 7605 / 11220 | 3895 / 22350 | 3895 / 22350 | 9831 / 4542 | 901 (8.1) |
+| 1000 | 16 566 949 800 | - | 10105 / 14970 | 5145 / 29850 | 5145 / 29850 | 13081 / 6042 | 1008 (8.8) |
 
 ## Profesje
 

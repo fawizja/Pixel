@@ -52,6 +52,7 @@ public final class SoundCues {
             case "HOLY": return Sfx.SPELL_HOLY;
             case "DEATH": return Sfx.SPELL_DEATH;
             case "HEAL": return Sfx.HEAL;
+            case "HASTE": return Sfx.SPELL_ENERGY;
             default: return Sfx.SHOOT;
         }
     }

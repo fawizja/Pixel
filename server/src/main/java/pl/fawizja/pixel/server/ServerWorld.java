@@ -1452,6 +1452,12 @@ final class ServerWorld {
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
                 pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));
         if (p.pvp.fightUntil() > now) s.lockProtectionZonesUntil(p.pvp.fightUntil());
+        s.setOtherPlayers(pos -> {
+            for (ServerPlayer o : players.values()) {
+                if (o != p && !o.session.character().isDead() && pos.equals(o.session.character().position())) return true;
+            }
+            return false;
+        });
         s.spells().setPlayerTargeting(new pl.fawizja.pixel.magic.SpellSystem.PlayerTargeting() {
             @Override
             public Position position() {

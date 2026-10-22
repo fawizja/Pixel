@@ -1367,6 +1367,7 @@ public final class GameScreen extends ScreenAdapter {
             case "HOLY": return new Color(1f, 0.95f, 0.55f, 1f);
             case "DEATH": return new Color(0.6f, 0.25f, 0.7f, 1f);
             case "HEAL": return new Color(0.55f, 1f, 0.65f, 1f);
+            case "HASTE": return new Color(0.5f, 0.8f, 1f, 1f);
             default: return new Color(0.9f, 0.85f, 0.75f, 1f);
         }
     }

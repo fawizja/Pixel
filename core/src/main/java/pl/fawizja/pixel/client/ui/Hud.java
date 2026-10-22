@@ -735,7 +735,8 @@ public final class Hud {
                 case HEAL_SELF: heal = sp; break;
                 case ATTACK_TARGET: attack2 = attack; attack = sp; break;
                 case ATTACK_AREA: area = sp; break;
-                case LIGHT: extra = sp; break;
+                case LIGHT: if (extra == null || extra.kind() == SpellKind.LIGHT) extra = sp; break;
+                case HASTE: extra = sp; break; // na 300+ przyspieszenie przydaje sie bardziej niz swiatlo
                 default:
             }
         }
@@ -2106,6 +2107,7 @@ public final class Hud {
         HUNGRY("Głodny: zjedz coś, aby szybciej się regenerować", new Color(0.5f, 0.45f, 0.4f, 1f)),
         BLESSED("Błogosławieństwo: mniejsze straty po śmierci", new Color(0.75f, 0.62f, 0.2f, 1f)),
         RUNNING("Bieg: szybszy ruch", new Color(0.2f, 0.4f, 0.7f, 1f)),
+        HASTE("Przyspieszenie: szybkość zwiększona przez czar", new Color(0.15f, 0.55f, 0.6f, 1f)),
         LIGHT("Światło: pochodnia albo czar", new Color(0.7f, 0.6f, 0.15f, 1f)),
         ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f));
 
@@ -2130,6 +2132,7 @@ public final class Hud {
         statuses.add(pc.fedMs() > 0 ? Status.FED : Status.HUNGRY);
         if (pc.isBlessed()) statuses.add(Status.BLESSED);
         if (pc.isRunning()) statuses.add(Status.RUNNING);
+        if (pc.hasteMs() > 0) statuses.add(Status.HASTE);
         if (pc.isTorchLit() || pc.lightBuffMs() > 0) statuses.add(Status.LIGHT);
         for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
             if (pc.enchantments().active(k)) { statuses.add(Status.ENCHANT); break; }
@@ -2174,6 +2177,12 @@ public final class Hud {
                     s.triangle(cx - 5, cy + 4, cx - 5, cy - 4, cx, cy);
                     s.triangle(cx, cy + 4, cx, cy - 4, cx + 5, cy);
                     break;
+                case HASTE: // skrzydlaty but: stopa i dwa piora
+                    s.rect(cx - 4, cy - 5, 6, 3);
+                    s.rect(cx - 4, cy - 2, 3, 6);
+                    s.triangle(cx - 1, cy + 4, cx + 5, cy + 5, cx - 1, cy + 1);
+                    s.triangle(cx - 1, cy + 1, cx + 5, cy + 1, cx - 1, cy - 1);
+                    break;
                 case LIGHT: // plomien
                     s.triangle(cx - 3, cy - 3, cx + 3, cy - 3, cx, cy + 5);
                     s.circle(cx, cy - 3, 3, 10);
@@ -2197,6 +2206,7 @@ public final class Hud {
     private static Color spellColor(SpellType sp) {
         if (sp.kind().isHeal()) return new Color(0.2f, 0.55f, 0.35f, 0.85f);
         if (sp.kind() == SpellKind.LIGHT) return new Color(0.6f, 0.52f, 0.15f, 0.85f);
+        if (sp.kind() == SpellKind.HASTE) return new Color(0.15f, 0.5f, 0.55f, 0.85f);
         switch (sp.damageType()) {
             case FIRE: return new Color(0.7f, 0.25f, 0.1f, 0.85f);
             case ICE: return new Color(0.25f, 0.5f, 0.75f, 0.85f);
@@ -2231,6 +2241,10 @@ public final class Hud {
                     s.rectLine(cx + (float) Math.cos(a) * r * 0.6f, cy + (float) Math.sin(a) * r * 0.6f,
                             cx + (float) Math.cos(a) * r, cy + (float) Math.sin(a) * r, t * 0.7f);
                 }
+                break;
+            case HASTE: // dwie strzalki do przodu
+                s.triangle(cx - r, cy + r * 0.7f, cx - r, cy - r * 0.7f, cx, cy);
+                s.triangle(cx, cy + r * 0.7f, cx, cy - r * 0.7f, cx + r, cy);
                 break;
             case LIGHT:
                 s.circle(cx, cy, r * 0.55f, 16);

@@ -136,6 +136,10 @@ jeden dom na postac, obcy nie wchodza do srodka, wlasciciele w `save/houses.txt`
 ## Ruch (Z)
 
 Krok po kafelkach z czasem zaleznym od szybkosci (skos gracza x3 jak wyczerpanie w Tibii, potwory x1.41; bieganie -15%), plynna interpolacja.
+Kolizje (etap 12): poza strefa ochronna gracze blokuja sobie pola (na serwerze, `GameSession.setOtherPlayers`),
+w strefie ochronnej mozna przez siebie przejsc jak w Tibii; potwory nie wchodza na pole zadnego gracza (nie tylko celu).
+Przyspieszenie: czary utani hur / utani gran hur (`SpellKind.HASTE`, w spells.csv baza = procent, zasieg = sekundy),
+ikona stanu w HUD i pole na automatycznym pasku czarow (zamiast poswiaty, gdy postac zna przyspieszenie).
 Joystick ze strefa martwa, klawiatura na PC.
 
 ## Swiatlo, dzien i noc (C)

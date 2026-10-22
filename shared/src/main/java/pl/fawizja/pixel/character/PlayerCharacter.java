@@ -51,6 +51,8 @@ public final class PlayerCharacter {
     private long fedMs;
     private long restedMs;
     private long lightBuffMs;
+    private long hasteMs;
+    private int hastePercent;
     private int lightBuffRadius;
     /** Pozostaly czas palenia biezacej pochodni (0 = nowa, nieuzywana). */
     private long torchBurnMs;
@@ -136,6 +138,8 @@ public final class PlayerCharacter {
         fedMs = o.fedMs;
         restedMs = o.restedMs;
         lightBuffMs = o.lightBuffMs;
+        hasteMs = o.hasteMs;
+        hastePercent = o.hastePercent;
         lightBuffRadius = o.lightBuffRadius;
         torchBurnMs = o.torchBurnMs;
     }
@@ -162,7 +166,20 @@ public final class PlayerCharacter {
     /** Premia szybkosci na wierzchowcu. */
     public static final int MOUNT_SPEED = 60;
 
-    public int speed() { return Balance.speed(level) + (mounted ? MOUNT_SPEED : 0); }
+    /** Szybkosc z poziomu, wierzchowca i czaru przyspieszenia (premia procentowa liczona od calosci). */
+    public int speed() {
+        int base = Balance.speed(level) + (mounted ? MOUNT_SPEED : 0);
+        return hasteMs > 0 ? base + base * hastePercent / 100 : base;
+    }
+
+    /** Przyspieszenie (utani hur / utani gran hur): nowy czar zastepuje poprzedni, jak w Tibii. */
+    public void addHaste(int percent, long ms) {
+        hastePercent = Math.max(0, percent);
+        hasteMs = Math.max(0, ms);
+    }
+
+    public long hasteMs() { return hasteMs; }
+    public int hastePercent() { return hasteMs > 0 ? hastePercent : 0; }
 
     private boolean hasMount;
     private boolean mounted;
@@ -376,6 +393,7 @@ public final class PlayerCharacter {
     public void tickRegeneration(long deltaMs, boolean resting) {
         if (isDead() || deltaMs <= 0) return;
         lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
+        hasteMs = Math.max(0, hasteMs - deltaMs);
         if (resting) restedMs = Math.min(MAX_RESTED_MS, restedMs + deltaMs);
         regenAccumulatorMs += deltaMs;
         long tick = Balance.REGEN_TICK_SECONDS * 1000L;

@@ -187,9 +187,13 @@ public final class MonsterManager {
     }
 
     /** Czy potwor moze stanac na kafelku (bez graczy, innych potworow, stref ochronnych i przejsc). */
+    /** Gracze z ostatniej aktualizacji - potwory nie wchodza na ich pola. */
+    private List<? extends Target> bodies = Collections.emptyList();
+
     public boolean canOccupy(Position p, Position player) {
         if (!world.isWalkable(p) || world.isProtectionZone(p)) return false;
         if (player != null && player.equals(p)) return false;
+        for (Target b : bodies) if (p.equals(b.position())) return false; // inni gracze tez zajmuja pole
         Transition t = world.transitionAt(p);
         if (t != null) return false;
         return grid.at(p) == null;
@@ -284,6 +288,7 @@ public final class MonsterManager {
      * dopoki ten jest poprawny). Atak trafia do handlera; cel jest w {@link Monster#target()}.
      */
     public void update(long now, List<? extends Target> targets, AttackHandler handler) {
+        bodies = targets;
         updateNightSpawns(now, targets);
         for (Map.Entry<SpawnPoint, List<Long>> e : respawnQueue.entrySet()) {
             List<Long> times = e.getValue();

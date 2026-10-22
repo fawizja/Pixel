@@ -35,3 +35,5 @@ enchant_healing;Zaklęcie leczenia;DRUID;20;6;100;2000;SUPPORT;CONJURE;PHYSICAL;
 boulder_rune;Głaz (runa);*;8;2;0;2000;ATTACK;RUNE_TARGET;PHYSICAL;22;0.3;2.0;0;5;0;;;0;Efekt runy głazu.
 fireburst_rune;Wybuch ognia (runa);*;8;4;0;2000;ATTACK;RUNE_AREA;FIRE;20;0.35;2.4;0;5;1;;;0;Efekt runy wybuchu.
 healing_rune;Leczenie (runa);*;8;6;0;1000;HEALING;RUNE_HEAL;PHYSICAL;70;1.0;4.0;0;0;0;;;0;Efekt runy leczenia.
+haste;Przyspieszenie (utani hur);*;14;0;60;2000;SUPPORT;HASTE;PHYSICAL;30;0;0;0;33;0;;;0;Szybkość +30% na 33 sekundy.
+strong_haste;Silne przyspieszenie (utani gran hur);DRUID,SORCERER;20;0;100;2000;SUPPORT;HASTE;PHYSICAL;70;0;0;0;22;0;;;0;Szybkość +70% na 22 sekundy.

@@ -198,6 +198,13 @@ public final class SpellSystem {
                 pc.addLightBuff(s.radius(), LIGHT_SPELL_MS);
                 log.add(now, EventLog.Kind.INFO, "Światło otacza postać.");
                 return CastResult.OK;
+            case HASTE: {
+                int before = pc.speed();
+                pc.addHaste((int) Math.round(s.base()), s.range() * 1000L);
+                combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
+                log.add(now, EventLog.Kind.INFO, s.name() + ": szybkość " + before + " -> " + pc.speed() + " na " + s.range() + " s.");
+                return CastResult.OK;
+            }
             case CONJURE: {
                 Container copy = pc.backpack().copy();
                 if (s.consumesItem() != null && copy.remove(items.byKey(s.consumesItem()).id(), 1) != InventoryResult.OK) {

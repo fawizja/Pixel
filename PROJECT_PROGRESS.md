@@ -31,8 +31,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 9. Wielopoziomowe lochy | ZAKONCZONY | 35ddade |
 | 10. Potwory, bossowie, loot | ZAKONCZONY | 0cd1b79 |
 | 11. Profesje i poziomy | ZAKONCZONY | 71a19a3 |
-| 12. Ruch i walka | nastepny | - |
-| 13-20 | do zrobienia | - |
+| 12. Ruch i walka | ZAKONCZONY | (ten commit) |
+| 13. Czary, runy, mikstury | nastepny | - |
+| 14-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -210,10 +211,22 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   szybkosc 8 kafelkow/s na poziomie 300 do przegladu w etapie 12.
 - Testy 441 OK (nowy VeteranStarterKitTest), regresja GUI 42/42.
 
+## Etap 12 - ruch i walka (2026-10-22)
+- Nowe czary przyspieszenia: utani hur ("Przyspieszenie", kazda profesja od poz. 14, 60 many, +30% szybkosci
+  na 33 s) i utani gran hur ("Silne przyspieszenie", druid i sorcerer od poz. 20, 100 many, +70% na 22 s).
+  Czas trwania odlicza sie z czasem gry, po wygasnieciu szybkosc wraca; nowy czar zastepuje poprzedni.
+- Przeglad szybkosci 300+: wczesniej poziom 300 juz siedzial na limicie 8 pol/s, wiec przyspieszenie nic by nie
+  dalo. Krzywa powyzej szybkosci 400 jest teraz o polowe lagodniejsza, limit 10 pol/s: poziom 300 = 6.6 pola/s,
+  z utani hur 7.7, z utani gran hur 9.1. Niskie poziomy (do ok. 60) bez zmian; potwory (szybkosc <= 300) bez zmian.
+- Kolizje: na serwerze gracze blokuja sobie pola poza strefa ochronna (w PZ mozna przejsc), potwory nie wchodza
+  na pola zadnego gracza (wczesniej tylko celu). Klient online poprawia przewidziany krok wg serwera.
+- HUD: ikona stanu przyspieszenia, kolor i znak czaru na pasku, automatyczny pasek podstawia przyspieszenie.
+- Testy 447 OK (nowe HasteTest i PlayerCollisionTest), regresja GUI 42/42.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 12: ruch i walka (utani hur / utani gran hur z czasem trwania, przeglad szybkosci 300+, kolizje).
-2. Etap 13: czary, runy, mikstury (czary dla poziomow 100-300+).
-3. Etap 14: ekwipunek i plecaki (wiele plecakow, przeciaganie).
+1. Etap 13: czary, runy, mikstury (czary dla poziomow 100-300+, inkantacje w stylu Tibii).
+2. Etap 14: ekwipunek i plecaki (wiele plecakow, przeciaganie, monety).
+3. Etap 15: NPC, questy, ekonomia.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

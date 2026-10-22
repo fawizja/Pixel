@@ -133,7 +133,8 @@ public final class GameSession {
         this.fishing = new FishingSystem(world, items, rng);
         this.herbs = new pl.fawizja.pixel.gathering.HerbGathering(world);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
-        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p) || !mayEnter(p));
+        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p) || !mayEnter(p)
+                || (!world.isProtectionZone(p) && otherPlayers.test(p)));
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
             if (t.isElite()) pc.bestiary().recordElite();
@@ -630,6 +631,13 @@ public final class GameSession {
     public String houseOwner(pl.fawizja.pixel.house.House h) { return houseOwners.ownerOf(h.id()); }
 
     /** Czy postac moze wejsc na pole (wnetrza domow tylko dla wlasciciela). */
+    /** Pola zajete przez innych graczy (serwer). Poza strefa ochronna gracze sie blokuja, w PZ mozna przejsc, jak w Tibii. */
+    private java.util.function.Predicate<Position> otherPlayers = p -> false;
+
+    public void setOtherPlayers(java.util.function.Predicate<Position> occupied) {
+        otherPlayers = occupied == null ? p -> false : occupied;
+    }
+
     public boolean mayEnter(Position p) {
         pl.fawizja.pixel.house.House h = houses.at(p);
         return h == null || pc.name().equals(houseOwners.ownerOf(h.id()));
