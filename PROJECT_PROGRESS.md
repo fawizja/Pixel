@@ -35,7 +35,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 13. Czary, runy, mikstury | ZAKONCZONY | 6522097 |
 | 14. Ekwipunek, plecaki, monety | ZAKONCZONY | ea984e9 |
 | 15. NPC, questy, ekonomia | ZAKONCZONY | ddead90 |
-| 16. UI w stylu OTClient V8 | ZAKONCZONY | (ten commit) |
+| 16. UI w stylu OTClient V8 | ZAKONCZONY | c4f43a8 |
 | 17. Sterowanie mobilne | nastepny | - |
 | 18-20 | do zrobienia | - |
 
