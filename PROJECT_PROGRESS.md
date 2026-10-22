@@ -39,7 +39,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 17. Sterowanie mobilne | ZAKONCZONY | 11f56db |
 | 18. Optymalizacja | ZAKONCZONY | 9895785 |
 | 19. Testy koncowe | ZAKONCZONY | 22a8d8a |
-| 20. ZIP i debug APK | nastepny | - |
+| 20. ZIP i debug APK | ZAKONCZONY | (ten commit) |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -316,8 +316,16 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Przeglad nocy: w miastach latarnie i pochodnie oswietlaja ulice (zamierzone), poza miastem noc jest ciemna.
 - Testy 467 OK, CI zielone dla etapow 16-18.
 
+## Etap 20 - ZIP i debug APK (2026-10-22)
+- Opis wydania: docs/DEVELOPMENT_RELEASE.md (zawartosc etapow, pobranie, kompilacja, znane ograniczenia).
+- ZIP z kodem: `git archive` commita tego etapu (bez build/, bez sekretow; .gitignore wyklucza local.properties).
+- Debug APK: budowany przez CI na pushu i publikowany w wydaniu `development-apk`
+  (https://github.com/fawizja/Pixel/releases/tag/development-apk); lokalnie brak Android SDK.
+- main (0ba79e6) jest w pelni wciagniety do development.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 20: ZIP z kodem i debug APK (APK budowane przez CI - lokalnie brak Android SDK).
+Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
+- wymaga zgody Darka).
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central
