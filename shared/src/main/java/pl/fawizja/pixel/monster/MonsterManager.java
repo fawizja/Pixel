@@ -116,6 +116,7 @@ public final class MonsterManager {
 
     public List<Monster> monsters() { return Collections.unmodifiableList(monsters); }
     public SpatialGrid grid() { return grid; }
+    public MonsterRegistry registry() { return registry; }
     public List<SpawnPoint> spawns() { return Collections.unmodifiableList(spawns); }
 
     /** Rodzaje potworow ze stalych spawnow (np. do zadan dnia); pusta lista bez rejestru. */

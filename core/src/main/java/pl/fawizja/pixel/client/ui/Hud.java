@@ -381,7 +381,7 @@ public final class Hud {
         gw = panelX - pad - gx;
         gh = h - topH - gy;
         // pad w lewym dolnym rogu ekranu (na widoku gry i dolnym pasku), konsola i przyciski zaczynaja sie za nim
-        float jr = Math.min(60, Math.min(w, h) * 0.14f);
+        float jr = Math.min(60, Math.min(w, h) * 0.14f) * (settings != null ? settings.joystickScale() : 1f);
         joystick.layout(pad + 10 + jr * 1.3f, pad + 10 + jr * 1.3f, jr);
         float padW = pad + 10 + jr * 2.6f + 6;
         conX = padW;
@@ -502,6 +502,17 @@ public final class Hud {
     }
 
     public VirtualJoystick joystick() { return joystick; }
+
+    /**
+     * Joystick pod kciukiem (etap 17): przeciagniecie zaczete na lewej czesci widoku gry tworzy joystick w miejscu
+     * dotkniecia. Prawa czesc zostaje dla dotkniec pol (cel, marsz, rozmowa).
+     */
+    public boolean floatJoystick(int sx, int sy, int pointer) {
+        if (settings != null && !settings.floatingJoystick()) return false;
+        Vector2 p = toUi(sx, sy);
+        if (!inGameView(p.x, p.y) || p.x > gx + gw * 0.55f) return false;
+        return joystick.floatAt(p.x, p.y, pointer);
+    }
     public boolean bagOpen() { return bagOpen; }
     public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; dragSlot = -1; dragging = false; if (bagOpen) menuOpen = false; }
 
@@ -1911,6 +1922,10 @@ public final class Hud {
 
         // pad jak w Tibii mobile: sama kulka, w 90% przezroczysta (wyrazniejsza w trakcie ruchu)
         float jrad = joystick.radius();
+        if (joystick.floating()) {
+            shapes.setColor(1, 1, 1, 0.12f); // podstawa joysticka pod kciukiem
+            shapes.circle(joystick.baseX(), joystick.baseY(), jrad, 36);
+        }
         shapes.setColor(1, 1, 1, joystick.active() ? 0.22f : 0.1f);
         shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
 

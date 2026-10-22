@@ -1905,6 +1905,64 @@ public final class GameSession {
 
     public long gold() { return Money.totalValue(pc.backpack()); }
 
+    /** Opisy rol NPC do podgladu pola (dlugie dotkniecie, prawy przycisk myszy). */
+    private static String roleLabel(pl.fawizja.pixel.npc.NpcRole r) {
+        switch (r) {
+            case MERCHANT: return "kupiec";
+            case BANKER: return "bankier";
+            case PRIEST: return "kapłan";
+            case GUIDE: return "przewodnik";
+            case CARRIER: return "woźnica";
+            case CAPTAIN: return "kapitan statku";
+            default: return r.name().toLowerCase(java.util.Locale.ROOT);
+        }
+    }
+
+    /**
+     * Podglad pola jak "Look" w Tibii (etap 17: dlugie dotkniecie na telefonie, prawy przycisk myszy):
+     * potwor z poziomem i zdrowiem, NPC, cialo, przedmioty na ziemi, przejscia i strefa ochronna.
+     * Wynik trafia do konsoli i jest zwracany (testy, dymek).
+     */
+    public String lookAt(Position p, long nowMs) {
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        if (p.equals(pc.position())) parts.add("siebie (" + pc.name() + ", poziom " + pc.level() + ")");
+        Monster m = monsters == null ? null : monsters.monsterAt(p);
+        if (m != null && !m.isDead()) {
+            parts.add(m.type().name() + " (poziom " + m.type().level() + ", zdrowie " + Math.round(m.healthFraction() * 100) + "%)");
+        }
+        pl.fawizja.pixel.npc.Npc npc = npcs == null ? null : npcs.at(p);
+        if (npc != null) parts.add(npc.name() + " (" + roleLabel(npc.role()) + ")");
+        if (dummies != null && dummies.at(p)) parts.add("manekin treningowy");
+        GroundItems.Corpse c = ground.corpseAt(p);
+        if (c != null) {
+            String who = monsters != null && monsters.registry() != null && monsters.registry().contains(c.monsterKey())
+                    ? monsters.registry().get(c.monsterKey()).name() : c.monsterKey();
+            parts.add("ciało: " + who + (c.hasLoot() ? " (jest łup)" : " (puste)"));
+        }
+        java.util.List<ItemStack> lying = ground.at(p);
+        for (int i = lying.size() - 1, shown = 0; i >= 0 && shown < 3; i--, shown++) parts.add(describe(lying.get(i)));
+        pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
+        if (tr != null) {
+            switch (tr.type()) {
+                case STAIRS: parts.add("schody"); break;
+                case HOLE: parts.add("dziura w ziemi"); break;
+                case TUNNEL: parts.add("przejście"); break;
+                case LADDER: parts.add("drabina"); break;
+                case ROPE_SPOT: parts.add("miejsce na linę"); break;
+                default: break;
+            }
+        }
+        if (parts.isEmpty()) parts.add(world.isWalkable(p) ? "wolne pole" : "przeszkoda");
+        StringBuilder b = new StringBuilder("Widzisz: ").append(String.join(", ", parts)).append('.');
+        int dist = p.z() == pc.position().z() ? p.distanceTo(pc.position()) : -1;
+        if (dist > 1) b.append(" Odległość: ").append(dist).append(" pól.");
+        if (world.isProtectionZone(p)) b.append(" Strefa ochronna.");
+        int req = world.requiredLevelAt(p);
+        if (req > 0) b.append(" Wymagany poziom: ").append(req).append('.');
+        log.add(nowMs, EventLog.Kind.INFO, b.toString());
+        return b.toString();
+    }
+
     public String describe(ItemStack s) {
         String name = items.get(s.itemId()).name();
         return s.count() > 1 ? s.count() + "x " + name : name;

@@ -278,16 +278,33 @@ public final class GameScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int sx, int sy, int pointer, int button) {
                 if (hud.touchDown(sx, sy, pointer, session, GameScreen.this::onButton)) return true;
-                return tapWorld(sx, sy);
+                if (button == Input.Buttons.RIGHT) return lookWorld(sx, sy); // mysz: prawy przycisk = podglad pola
+                if (worldPointer >= 0) return tapWorld(sx, sy); // drugi palec na mapie: od razu dotkniecie
+                // dotkniecie mapy rozstrzyga sie pozniej: puszczenie = dotkniecie pola, przytrzymanie = podglad,
+                // przeciagniecie = joystick pod kciukiem
+                worldPointer = pointer;
+                worldDownX = sx;
+                worldDownY = sy;
+                worldDownMs = TimeUtils.millis();
+                worldGesture = 0;
+                return true;
             }
 
             @Override
             public boolean touchDragged(int sx, int sy, int pointer) {
+                if (pointer == worldPointer && worldGesture == 0
+                        && Math.abs(sx - worldDownX) + Math.abs(sy - worldDownY) > DRAG_SLOP_DP * Gdx.graphics.getDensity()) {
+                    worldGesture = hud.floatJoystick(worldDownX, worldDownY, pointer) ? 1 : 3;
+                }
                 return hud.touchDragged(sx, sy, pointer);
             }
 
             @Override
             public boolean touchUp(int sx, int sy, int pointer, int button) {
+                if (pointer == worldPointer) {
+                    worldPointer = -1;
+                    if (worldGesture == 0) return tapWorld(worldDownX, worldDownY);
+                }
                 return hud.touchUp(sx, sy, pointer);
             }
 
@@ -397,8 +414,12 @@ public final class GameScreen extends ScreenAdapter {
             case "settings:mana":
             case "settings:eat":
             case "settings:target":
+            case "settings:vibrate":
+            case "settings:joyfloat":
+            case "settings:joysize":
             case "settings:page":
                 settings.apply(id);
+                if (id.equals("settings:joysize")) hud.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 settingsPrefs.put(settings.toMap());
                 settingsPrefs.flush();
                 lastGuardSampleMs = 0; // nowy limit klatek od razu
@@ -765,10 +786,43 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Dotkniecie swiata: wybor potwora jako celu. */
     private boolean tapWorld(int sx, int sy) {
+        return tapTile(worldTile(sx, sy));
+    }
+
+    private Position worldTile(int sx, int sy) {
         Vector3 w = viewport.unproject(new Vector3(sx, sy, 0));
         int x = (int) Math.floor(w.x);
         int y = game.world().height() - 1 - (int) Math.floor(w.y);
-        return tapTile(new Position(x, y, session.character().position().z()));
+        return new Position(x, y, session.character().position().z());
+    }
+
+    /** Dotyk na mapie czekajacy na rozstrzygniecie (-1: brak) i jego gest: 0 jeszcze nie wiadomo, 1 joystick, 2 podglad, 3 nic. */
+    private int worldPointer = -1;
+    private int worldDownX, worldDownY, worldGesture;
+    private long worldDownMs;
+    /** Przytrzymanie palca na polu tak dlugo otwiera podglad pola (jak "Look" w Tibii). */
+    static final long LONG_PRESS_MS = 450;
+    /** Przesuniecie palca (w dp), od ktorego dotkniecie staje sie przeciaganiem. */
+    static final float DRAG_SLOP_DP = 10f;
+
+    private boolean lookWorld(int sx, int sy) {
+        lookTile(worldTile(sx, sy));
+        return true;
+    }
+
+    /** Podglad pola: opis w konsoli i krotki dymek nad postacia (desktop: -Dpixel.look=x,y). */
+    public void lookTile(Position p) {
+        String text = session.lookAt(p, now());
+        if (settings.vibrate()) Gdx.input.vibrate(25);
+        hud.showConsoleTab(0);
+        say(session.character().name(), text.length() > 90 ? text.substring(0, 87) + "..." : text);
+    }
+
+    /** Przytrzymanie palca bez ruchu: podglad pola (sprawdzane co klatke). */
+    private void checkLongPress() {
+        if (worldPointer < 0 || worldGesture != 0 || TimeUtils.millis() - worldDownMs < LONG_PRESS_MS) return;
+        worldGesture = 2;
+        lookWorld(worldDownX, worldDownY);
     }
 
     /** Dotkniecie pola swiata (desktop: -Dpixel.tap=x,y). */
@@ -1172,6 +1226,7 @@ public final class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         frameStartNs = TimeUtils.nanoTime();
         if (paused) return;
+        checkLongPress();
         frameTimeAvg = frameTimeAvg * 0.95f + Math.min(delta, 0.25f) * 0.05f;
         frameStats.add(delta);
         if (TimeUtils.millis() >= frameLogAtMs) {

@@ -160,6 +160,12 @@ w strefie ochronnej mozna przez siebie przejsc jak w Tibii; potwory nie wchodza 
 Przyspieszenie: czary utani hur / utani gran hur (`SpellKind.HASTE`, w spells.csv baza = procent, zasieg = sekundy),
 ikona stanu w HUD i pole na automatycznym pasku czarow (zamiast poswiaty, gdy postac zna przyspieszenie).
 Joystick ze strefa martwa, klawiatura na PC.
+Sterowanie dotykiem (etap 17, `GameScreen` + `Hud.floatJoystick`): dotkniecie mapy rozstrzyga sie przy puszczeniu
+palca. Krotkie dotkniecie = pole (cel, marsz, rozmowa, lup), przytrzymanie 450 ms = podglad pola
+(`GameSession.lookAt`: potwor z poziomem i zdrowiem, NPC z rola, cialo, przedmioty, przejscia, strefa ochronna,
+odleglosc; na PC prawy przycisk myszy), przeciagniecie po lewej czesci widoku gry = joystick pod kciukiem
+(podstawa tam, gdzie palec dotknal; po puszczeniu wraca w rog). Ustawienia: joystick pod kciukiem / tylko w rogu,
+rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
 
 ## Swiatlo, dzien i noc (C)
 

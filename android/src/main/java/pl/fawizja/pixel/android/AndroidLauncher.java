@@ -18,6 +18,7 @@ public class AndroidLauncher extends AndroidApplication {
         super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         config.useImmersiveMode = true;
+        config.useWakelock = true; // ekran nie gasnie w trakcie gry (jak w Tibii mobile)
         config.useAccelerometer = false;
         config.useCompass = false;
         config.useGyroscope = false;

@@ -28,6 +28,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.exportArt=dir zapisuje obecne grafiki jako PNG pod nazwami z docs/GRAPHICS.md (dla grafikow)
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
+ *   -Dpixel.look=x,y     podglad pola (jak dlugie dotkniecie na telefonie)
+ *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.conTab=N     zakladka konsoli (0 ogolne, 1 czat, 2 lup, 3 serwer)
@@ -286,6 +288,21 @@ public final class DesktopLauncher {
                     String[] w = tap.split(",");
                     GameScreen gs = (GameScreen) getScreen();
                     gs.tapTile(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()), gs.session().character().position().z()));
+                }
+                String look = System.getProperty("pixel.look");
+                if (look != null) {
+                    String[] w = look.split(",");
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.lookTile(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()), gs.session().character().position().z()));
+                }
+                String joy = System.getProperty("pixel.joy");
+                if (joy != null) {
+                    String[] f = joy.split(",");
+                    GameScreen gs = (GameScreen) getScreen();
+                    float[] v = gs.hud().gameView();
+                    int sx = (int) (v[0] + v[2] * Float.parseFloat(f[0].trim()));
+                    int sy = com.badlogic.gdx.Gdx.graphics.getHeight() - (int) (v[1] + v[3] * Float.parseFloat(f[1].trim()));
+                    if (gs.hud().floatJoystick(sx, sy, 7)) gs.hud().touchDragged(sx + 40, sy - 25, 7);
                 }
                 String walkTo = System.getProperty("pixel.walkto");
                 if (walkTo != null) {

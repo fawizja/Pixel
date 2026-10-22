@@ -8,16 +8,38 @@ public final class VirtualJoystick {
     private float baseX;
     private float baseY;
     private float radius;
+    /** Stale miejsce joysticka w rogu; joystick pod kciukiem wraca tu po puszczeniu. */
+    private float homeX;
+    private float homeY;
+    private boolean floating;
     private int pointer = -1;
     private final Vector2 knob = new Vector2();
     private final Vector2 value = new Vector2();
 
     public void layout(float x, float y, float radius) {
-        this.baseX = x;
-        this.baseY = y;
+        this.homeX = x;
+        this.homeY = y;
         this.radius = radius;
-        if (pointer < 0) knob.set(x, y);
+        if (pointer < 0) {
+            baseX = x;
+            baseY = y;
+            knob.set(x, y);
+        }
     }
+
+    /** Joystick pod kciukiem: podstawa tam, gdzie palec dotknal ekranu, potem zwykle przeciaganie. */
+    public boolean floatAt(float x, float y, int p) {
+        if (pointer >= 0) return false;
+        baseX = x;
+        baseY = y;
+        floating = true;
+        pointer = p;
+        knob.set(x, y);
+        value.setZero();
+        return true;
+    }
+
+    public boolean floating() { return floating && pointer >= 0; }
 
     /** Strefa aktywacji jest wieksza niz rysowana podstawa (wygodniej na telefonie). */
     public boolean touchDown(float x, float y, int p) {
@@ -40,6 +62,9 @@ public final class VirtualJoystick {
     public boolean touchUp(int p) {
         if (p != pointer) return false;
         pointer = -1;
+        floating = false;
+        baseX = homeX;
+        baseY = homeY;
         value.setZero();
         knob.set(baseX, baseY);
         return true;

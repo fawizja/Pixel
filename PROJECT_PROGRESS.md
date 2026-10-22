@@ -36,8 +36,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 14. Ekwipunek, plecaki, monety | ZAKONCZONY | ea984e9 |
 | 15. NPC, questy, ekonomia | ZAKONCZONY | ddead90 |
 | 16. UI w stylu OTClient V8 | ZAKONCZONY | c4f43a8 |
-| 17. Sterowanie mobilne | nastepny | - |
-| 18-20 | do zrobienia | - |
+| 17. Sterowanie mobilne | ZAKONCZONY | (ten commit) |
+| 18. Optymalizacja | nastepny | - |
+| 19-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -276,10 +277,23 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Wzorce regresji GUI odswiezone przez run.sh --update (pasek zakladek w kazdej scenie), 42/42.
 - Testy 460 OK.
 
+## Etap 17 - sterowanie mobilne (2026-10-22)
+- Przeglad: byl joystick w rogu (8 kierunkow), przyciski dolnego paska, pasek akcji z dlugim dotknieciem
+  (wybor czaru), dotkniecie pola (cel, marsz, NPC, lup), przeciaganie przedmiotow (etap 14), Wstecz zamyka okna.
+- Gesty na mapie rozstrzygane przy puszczeniu palca: krotkie dotkniecie = pole, przytrzymanie = podglad pola
+  ("Widzisz: Wilk (poziom 8, zdrowie 50%). Odleglosc: 4 pola."), przeciagniecie po lewej czesci mapy =
+  joystick pod kciukiem. Prawy przycisk myszy na PC = podglad.
+- Ustawienia: joystick pod kciukiem / tylko w rogu, rozmiar joysticka 80/100/125/150% (konsola przesuwa sie).
+- Naprawiony wiersz "Wibracje" w ustawieniach (nie przelaczal sie - brakowalo go w obsludze przyciskow).
+- Android: ekran nie gasnie w trakcie gry.
+- Testy 463 OK (nowy LookAtTest, test ustawien joysticka), regresja GUI 42/42 bez zmian wzorcow. Gesty
+  dotykowe nie maja testu automatycznego (brak emulacji dotyku w chmurze) - sprawdzone kompilacja, zrzut
+  z -Dpixel.joy i -Dpixel.look oraz logika w testach.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 17: sterowanie mobilne.
-2. Etap 18: optymalizacja.
-3. Etap 19: testy koncowe.
+1. Etap 18: optymalizacja.
+2. Etap 19: testy koncowe.
+3. Etap 20: ZIP i debug APK.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

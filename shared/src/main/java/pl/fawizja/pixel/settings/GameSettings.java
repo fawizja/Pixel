@@ -20,6 +20,8 @@ public final class GameSettings {
     public static final int[] VOLUME_CHOICES = {0, 30, 60, 100};
     /** Prog zdrowia (%) automatycznej mikstury; 0 = wylaczona. */
     public static final int[] AUTO_HEAL_CHOICES = {0, 30, 50, 70};
+    /** Rozmiar joysticka w procentach domyslnego (etap 17: sterowanie mobilne). */
+    public static final int[] JOY_SIZE_CHOICES = {80, 100, 125, 150};
 
     private int fpsCap = 60;
     private boolean batterySaver;
@@ -34,6 +36,9 @@ public final class GameSettings {
     /** Wibracja telefonu przy alarmie niskiego zdrowia (na komputerze bez skutku). */
     private boolean vibrate = true;
     private boolean autoTarget;
+    /** Joystick pod kciukiem: przeciagniecie po lewej czesci widoku gry tworzy joystick tam, gdzie jest palec. */
+    private boolean floatingJoystick = true;
+    private int joystickSize = 100;
     /** Strona panelu ustawien (nie zapisywana). */
     private int page;
     /** Wierszy ustawien na stronie panelu (ostatni wiersz strony przelacza strone). */
@@ -60,6 +65,17 @@ public final class GameSettings {
     /** Cel sam: najblizszy potwor obok postaci, gdy nie ma celu (poza strefa ochronna). */
     public boolean autoTarget() { return autoTarget; }
     public void toggleAutoTarget() { autoTarget = !autoTarget; }
+    public boolean floatingJoystick() { return floatingJoystick; }
+    public void toggleFloatingJoystick() { floatingJoystick = !floatingJoystick; }
+    public int joystickSize() { return joystickSize; }
+    public float joystickScale() { return joystickSize / 100f; }
+
+    public void cycleJoystickSize() {
+        int i = 0;
+        while (i < JOY_SIZE_CHOICES.length && JOY_SIZE_CHOICES[i] != joystickSize) i++;
+        joystickSize = JOY_SIZE_CHOICES[(i + 1) % JOY_SIZE_CHOICES.length];
+    }
+
     public int page() { return page; }
     /** Glosnosc 0..1 dla odtwarzacza. */
     public float volumeFactor() { return volume / 100f; }
@@ -120,6 +136,8 @@ public final class GameSettings {
             case "settings:eat": toggleAutoEat(); return true;
             case "settings:vibrate": toggleVibrate(); return true;
             case "settings:target": toggleAutoTarget(); return true;
+            case "settings:joyfloat": toggleFloatingJoystick(); return true;
+            case "settings:joysize": cycleJoystickSize(); return true;
             case "settings:page": page = (page + 1) % pages(); return true;
             default: return false;
         }
@@ -139,6 +157,8 @@ public final class GameSettings {
         m.put("eat", String.valueOf(autoEat));
         m.put("vibrate", String.valueOf(vibrate));
         m.put("target", String.valueOf(autoTarget));
+        m.put("joyfloat", String.valueOf(floatingJoystick));
+        m.put("joysize", String.valueOf(joystickSize));
         return m;
     }
 
@@ -157,6 +177,8 @@ public final class GameSettings {
         s.autoEat = bool(m.get("eat"), false);
         s.vibrate = bool(m.get("vibrate"), true);
         s.autoTarget = bool(m.get("target"), false);
+        s.floatingJoystick = bool(m.get("joyfloat"), true);
+        s.joystickSize = choice(m.get("joysize"), JOY_SIZE_CHOICES, 100);
         return s;
     }
 
@@ -207,6 +229,8 @@ public final class GameSettings {
             {"settings:eat", "Jedzenie samo: " + (autoEat ? "gdy kończy się sytość" : "wyłączone")},
             {"settings:target", "Cel sam: " + (autoTarget ? "najbliższy potwór obok" : "wyłączony")},
             {"settings:vibrate", "Wibracje: " + (vibrate ? "przy niskim zdrowiu" : "wyłączone")},
+            {"settings:joyfloat", "Joystick: " + (floatingJoystick ? "pod kciukiem (przeciągnij po mapie)" : "tylko w rogu ekranu")},
+            {"settings:joysize", "Rozmiar joysticka: " + joystickSize + "%"},
         };
     }
 }
