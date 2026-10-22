@@ -11,13 +11,18 @@ Generator jest deterministyczny (stale ziarno).
 """
 import os
 import random
+import sys
 from collections import deque
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import world_geo  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 VARDEN = os.path.join(ROOT, 'varden')
 OUT = os.path.join(ROOT, 'world')
 
-W, H = 256, 232
+W, H = 352, 320          # etap 4: morze i wyspy na wschodzie i poludniu (world_geo.py)
+OLD_EAST_W, OLD_H = 256, 232   # stary swiat (losowanie terenu jak przed rozszerzeniem mapy)
 OLD_W = 160              # zachodni kontynent (losowanie terenu jak przed rozszerzeniem mapy)
 STRAIT_X0, STRAIT_X1 = 160, 167   # ciesnina miedzy kontynentami
 EAST_X0 = 168
@@ -98,9 +103,9 @@ EXTRA_LEGEND = [
     # Selvaran (przebudowa 0.182): skaly i krzaki w dzungli Skalnego Wawozu
     ('\u03c3', 'jungle_grass', '-', 'rock', '-'),
     ('\u03c4', 'jungle_grass', '-', 'bush', '-'),
-]
+] + world_geo.LEGEND
 WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578'
-               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be')
+               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be' + '\u03c5')
 
 
 def grid(fill=' '):
@@ -186,15 +191,15 @@ def terrain(biome, edge):
 
 def surface():
     g = grid()
-    for y in range(H):
+    for y in range(OLD_H):
         for x in range(OLD_W):
-            edge = min(x, y, OLD_W - 1 - x, H - 1 - y) < 2
+            edge = min(x, y, OLD_W - 1 - x, OLD_H - 1 - y) < 2
             g[y][x] = terrain(biome_at(y), edge)
-        for x in range(OLD_W, W):
+        for x in range(OLD_W, OLD_EAST_W):
             if x <= STRAIT_X1:
                 g[y][x] = '~'
                 continue
-            edge = min(y, W - 1 - x, H - 1 - y) < 2
+            edge = min(y, OLD_EAST_W - 1 - x, OLD_H - 1 - y) < 2
             g[y][x] = east_terrain(biome_at(y, rnd_east), edge, rnd_east)
     # jeziora: zamarzniete na polnocy, bagna w dzungli, oaza na pustyni
     lake(g, 40, 50, 7, 4, 'i')
@@ -807,6 +812,11 @@ def main():
     high_spawns, high_entrances = highlands(g, floors, transitions)
     east_entrances = east_entrances + high_entrances
 
+    # ---------------------------------------------------------- etap 4: morze, wybrzeza, wyspy, gory
+    protect = [(VX - 2, VY - 2, VX + VW + 1, VY + VH + 1), (62, 18, 97, 45), (SELV[0] - 2, SELV[1] - 2, SELV[2] + 2, SELV[3] + 2),
+               (62, 185, 97, 212), (CAMP[0] - 2, CAMP[1] - 2, CAMP[2] + 2, CAMP[3] + 2)]
+    geo_regions = world_geo.geography(floors, W, H, protect)
+
     # NPC: Varden (wspolrzedne mapy varden + przesuniecie) i uklad town() dla 3 miast
     npcs = [
         ('varden_banker', 'Bankier Aldric', 'BANKER', 'Varden', 22 + VX, 13 + VY, '-', '#d8c070',
@@ -931,9 +941,9 @@ def main():
         'Lodowe Szczyty;168;0;255;63;0;5;400;560',
         'Pustkowia Cienia;168;172;255;231;0;5;550;750',
         'Otchlan;168;0;255;231;-5;-1;750;1000',
-    ]
+    ] + geo_regions
     with open(os.path.join(OUT, 'map.properties'), 'w', encoding='utf-8') as f:
-        f.write('# Swiat gry: 4 miasta w pasach biomow (generate_world.py)\n'
+        f.write('# Swiat gry: 4 miasta, wybrzeza, gory i wyspy (generate_world.py + world_geo.py)\n'
                 'name=Swiat Pixel\n'
                 f'width={W}\nheight={H}\n'
                 'floors=' + ','.join(str(z) for z in FLOORS) + '\n'
@@ -1011,6 +1021,10 @@ def main():
         fixed.append(f'{k};{nx};{ny};{z};{rr};{c};{s}' + ''.join(';' + n for n in night))
     with open(os.path.join(OUT, 'spawns.csv'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(fixed) + '\n')
+    # npcs.csv jest poprawiany recznie (polskie znaki, nowe postacie) - generator tworzy go tylko, gdy go brak
+    if os.path.exists(os.path.join(OUT, 'npcs.csv')):
+        print('world generated', W, 'x', H, 'towns', towns, '(npcs.csv bez zmian)')
+        return
     with open(os.path.join(OUT, 'npcs.csv'), 'w', encoding='utf-8') as f:
         f.write('# klucz;imie;rola;miasto;x;y;z;sklep;kolor;powitanie\n')
         for (k, n, r, t, x, y, shop, color, greet) in npcs:

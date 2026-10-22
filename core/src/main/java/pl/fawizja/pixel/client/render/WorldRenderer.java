@@ -35,6 +35,8 @@ public final class WorldRenderer {
     private final Color tmp = new Color();
     /** Drzewa i palmy rysowane wieksze niz kafelek (wystaja ponad sasiednie pola). */
     private final boolean[] tall;
+    /** Ozdoba na wierzchu skaly (glaz, zaspa) dla scian skalnych; 0 = brak. */
+    private final int[] rockDetail;
     /** Drzwi lacza mury (mur obok drzwi nie konczy sie slupkiem). */
     private final java.util.Set<Integer> doors;
 
@@ -49,6 +51,15 @@ public final class WorldRenderer {
         this.doors = doors;
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
             tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree").contains(t.key());
+        }
+        // skaly gor i jaskin: na czesci pol glaz albo zaspa, zeby lita skala nie byla plaska plyta
+        rockDetail = new int[max + 1];
+        java.util.Map<String, String> detail = java.util.Map.of("mountain", "rock", "snow_mountain", "snow_rock",
+                "sand_cliff", "sandstone_rock", "cave_wall", "rubble");
+        for (java.util.Map.Entry<String, String> e : detail.entrySet()) {
+            pl.fawizja.pixel.world.TileType wall = world.tiles().byKeyOrNull(e.getKey());
+            pl.fawizja.pixel.world.TileType rock = world.tiles().byKeyOrNull(e.getValue());
+            if (wall != null && rock != null) rockDetail[wall.id()] = rock.id();
         }
     }
 
@@ -175,6 +186,15 @@ public final class WorldRenderer {
             batch.setColor(tmp);
         }
         batch.draw(r, sx, wy + WALL_RAISE, 1f, 1f);
+        int d = id < rockDetail.length ? rockDetail[id] : 0;
+        if (d != 0) {
+            int h = (x * 73856093) ^ (y * 19349663);
+            if ((h & 7) < 2) {
+                TextureRegion rock = art.tile(d);
+                float off = ((h >>> 3) & 3) * 0.08f;
+                if (rock != null) batch.draw(rock, sx + off, wy + WALL_RAISE + 0.15f - off, 0.8f, 0.8f);
+            }
+        }
     }
 
     /**

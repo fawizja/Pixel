@@ -87,8 +87,13 @@ class GameWorldTest {
             }
         }
         assertTrue(explore(world.spawn(), 200).stream().anyMatch(p -> p.x() >= 168), "level 200 may cross");
+        java.util.Set<Position> walkable = explore(world.spawn(), 199);
         for (Region r : world.regions()) {
-            if (r.levelMin() >= 230) assertTrue(r.x0() >= 168, r.name() + " lies behind the bridge");
+            // endgame: za mostem albo na wyspach i morzu (tylko statkiem)
+            if (r.levelMin() >= 230) {
+                assertTrue(r.x0() >= 168 || walkable.stream().noneMatch(p -> r.contains(p)),
+                        r.name() + " lies behind the bridge or across the sea");
+            }
         }
     }
 

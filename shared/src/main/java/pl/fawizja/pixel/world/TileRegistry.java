@@ -76,6 +76,9 @@ public final class TileRegistry {
         return t;
     }
 
+    /** Kafelek o kluczu albo null (np. opcjonalne grafiki w kliencie). */
+    public TileType byKeyOrNull(String key) { return byKey.get(key); }
+
     public int maxId() { return byId.length - 1; }
 
     public List<TileType> all() {

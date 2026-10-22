@@ -60,9 +60,11 @@ def main():
             if not layers:
                 continue
             col = None
-            for key in (layers[3], layers[2], layers[1], layers[0]):  # sciana > obiekt > dekoracja > podloze
+            for i, key in enumerate((layers[3], layers[2], layers[1], layers[0])):  # sciana > obiekt > dekoracja > podloze
                 if key and key != '-' and key in colors:
                     col = colors[key]
+                    if i == 0:  # sciany i gory ciemniejsze - widac je na tle podloza
+                        col = tuple(c * 3 // 5 for c in col)
                     break
             if col is None:
                 continue

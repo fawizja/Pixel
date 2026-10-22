@@ -71,3 +71,8 @@
 77;dead_tree;OBJECT;0;0;temperate;#4a3a2c;tree
 78;obsidian_rock;OBJECT;0;0;equatorial;#2a2230;rock
 87;obsidian_wall;WALL;0;0;underground;#2a1e2a;rockwall
+# --- geografia swiata (etap 4): gory jak w Tibii (nieprzechodnie skaly) i plaze ---
+38;shells;DECORATION;1;0;desert;#f0e0d0;tuft
+88;mountain;WALL;0;0;temperate;#6e6a62;rockwall
+89;snow_mountain;WALL;0;0;north;#d8e0e8;rockwall
+90;sand_cliff;WALL;0;0;desert;#b08a58;rockwall

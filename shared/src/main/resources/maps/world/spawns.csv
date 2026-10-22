@@ -21,7 +21,7 @@ snow_wolf;110;12;0;5;3;90
 snow_wolf;30;56;0;4;3;90
 yeti;20;10;0;4;2;150
 yeti;140;20;0;4;2;150
-frost_witch;130;44;0;3;2;150
+frost_witch;129;43;0;3;2;150
 # Lodowe Jaskinie
 yeti;30;20;-1;4;2;150
 frost_witch;30;40;-1;4;2;150
@@ -86,13 +86,13 @@ cursed_treant;214;104;0;5;3;240
 cursed_treant;246;104;0;4;2;240
 wraith_knight;186;103;0;5;3;240
 wraith_knight;222;70;0;5;3;240
-wraith_knight;243;89;0;5;3;240
+wraith_knight;244;90;0;5;3;240
 wraith_knight;200;96;0;4;2;240
 # Spalone Wyzyny (300-400)
 fire_elemental;184;132;0;5;3;240
-fire_elemental;236;138;0;5;3;240
+fire_elemental;238;135;0;5;3;240
 fire_elemental;190;166;0;5;2;240
-fire_elemental;246;156;0;4;2;240
+fire_elemental;247;156;0;4;2;240
 lava_golem;196;120;0;5;2;300
 lava_golem;226;122;0;5;2;300
 lava_golem;222;166;0;5;2;300
@@ -102,7 +102,7 @@ frost_giant;180;20;0;5;3;300
 frost_giant;246;26;0;5;3;300
 frost_giant;196;54;0;5;2;300
 storm_harpy;229;53;0;6;3;300
-storm_harpy;188;8;0;6;3;300
+storm_harpy;188;6;0;6;3;300
 storm_harpy;244;8;0;5;2;300
 ice_dragon;204;40;1;4;2;360
 ice_dragon;232;38;1;4;2;360

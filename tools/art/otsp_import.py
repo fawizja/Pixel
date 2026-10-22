@@ -38,8 +38,14 @@ WALLS = {
 WALL_SHAPES = ("v", "h", "pole", "corner")
 # Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
 ROOFS = {"roof_red": 183, "roof_slate": 187}
-# Sciany jaskin (bryly): przyciemniony kamien laczacy sie w jednolita skale zamiast cegiel.
-CAVE_WALLS = {"cave_wall": 159}
+# Sciany skalne (bryly): kamien laczacy sie w jednolita skale zamiast cegiel - jaskinie i gory jak w Tibii.
+# nazwa: (podloze z paczki, mnoznik jasnosci, kolor domieszki, udzial domieszki)
+ROCK_WALLS = {
+    "cave_wall": (159, 0.7, None, 0),
+    "mountain": (159, 0.95, (120, 110, 90), 0.2),
+    "snow_mountain": (159, 1.0, (235, 242, 250), 0.55),
+    "sand_cliff": (159, 1.0, (200, 160, 100), 0.5),
+}
 # Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
 EXTRA_OBJECTS = {"backpack": 2099}
 ITEMS = {
@@ -190,9 +196,16 @@ def main(client, art):
         save(ot.compose(spr, things["item"][i]), f"{art}/tiles/{name}.png"); n += 1
     for name, i in OBJECTS.items():
         save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
-    for name, ground in CAVE_WALLS.items():
+    for name, (ground, mult, mix, part) in ROCK_WALLS.items():
         img = ot.compose(spr, things["item"][ground]).convert("RGBA")
-        img = Image.merge("RGBA", [b.point(lambda v: v * 7 // 10) for b in img.split()[:3]] + [img.split()[3]])
+        px = img.load()
+        for y in range(img.height):
+            for x in range(img.width):
+                r, g, b, a = px[x, y]
+                c = [min(255, int(v * mult)) for v in (r, g, b)]
+                if mix:
+                    c = [int(v * (1 - part) + m * part) for v, m in zip(c, mix)]
+                px[x, y] = (c[0], c[1], c[2], a)
         save(img, f"{art}/tiles/{name}.png"); n += 1
     for name, ids in WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
