@@ -142,6 +142,44 @@ scorpion;30;210;1;5;3;120
 hyena;44;198;1;5;3;90
 scorpion;38;222;1;4;2;120
 sand_wraith;50;218;2;4;2;180
+# --- etap 8: expowiska 300+ na powierzchni (wyspy - dojscie statkiem lub mostem) ---
+# Dolina Wiwern w Smoczym Grzbiecie (zachodni kontynent, straznik od poziomu 250)
+wyvern;16;106;0;2;2;240
+wyvern;22;106;0;2;2;240
+wyvern;27;107;0;2;2;240
+# Wyspa Koralowa, Skaly Mewie, Wyspa Latarni
+coral_crab;108;270;0;5;3;240
+coral_crab;132;272;0;5;3;240
+coral_crab;120;277;0;4;2;240
+drowned_sailor;104;264;0;4;2;240
+drowned_sailor;138;265;0;4;2;240
+drowned_sailor;120;270;0;6;3;240;noc
+coral_crab;190;250;0;3;2;240
+drowned_sailor;284;113;0;4;2;240
+drowned_sailor;292;110;0;3;2;240
+# Wyspa Piratow
+pirate_cutthroat;39;279;0;5;3;240
+pirate_cutthroat;56;286;0;5;3;240
+pirate_cutthroat;46;294;0;4;2;240
+pirate_gunner;36;288;0;4;2;300
+pirate_gunner;58;278;0;4;2;300
+# Wyspa Mgiel
+mist_wraith;240;284;0;5;3;300
+mist_wraith;258;290;0;5;3;300
+mist_wraith;250;297;0;4;2;300
+shadow_stalker;266;282;0;4;2;300
+shadow_stalker;236;292;0;4;2;300;noc
+# Lodowa Wyspa
+frost_giant;304;30;0;5;2;300
+frost_giant;322;34;0;5;2;300
+storm_harpy;314;26;0;5;3;300
+ice_dragon;318;46;0;4;2;360
+ice_dragon;302;44;0;4;1;360
+# Wyspa Wulkaniczna
+magma_drake;310;184;0;5;2;360
+magma_drake;322;196;0;5;2;360
+magma_drake;305;199;0;4;2;360
+abyssal_demon;326;184;0;4;1;420
 # --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---
 wolf;58;72;0;5;3;60;noc
 bandit;106;96;0;3;2;120;noc

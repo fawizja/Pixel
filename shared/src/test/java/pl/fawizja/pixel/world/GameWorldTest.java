@@ -9,6 +9,11 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.TestData;
+import pl.fawizja.pixel.npc.Npc;
+import pl.fawizja.pixel.npc.NpcRegistry;
+import pl.fawizja.pixel.npc.NpcRole;
+import pl.fawizja.pixel.npc.ShopRegistry;
+import pl.fawizja.pixel.npc.Travel;
 import pl.fawizja.pixel.balance.Balance;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.monster.MonsterRegistry;
@@ -29,7 +34,38 @@ class GameWorldTest {
     @BeforeAll
     static void load() {
         world = TestData.world();
-        reachable = explore(world.spawn(), 1000);
+        reachable = exploreWithShips(1000);
+    }
+
+    /** Jak {@link #explore}, ale takze rejsami statkow od kapitanow, do ktorych da sie dojsc (wyspy). */
+    static Set<Position> exploreWithShips(int level) {
+        NpcRegistry npcs;
+        try {
+            npcs = NpcRegistry.load("world", world, ShopRegistry.loadDefault(TestData.ITEMS));
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(e);
+        }
+        Set<Position> seen = explore(world.spawn(), level);
+        Set<Npc> sailed = new HashSet<>();
+        boolean more = true;
+        while (more) {
+            more = false;
+            for (Npc n : npcs.all()) {
+                if (n.role() != NpcRole.CAPTAIN || sailed.contains(n)
+                        || seen.stream().noneMatch(p -> p.z() == n.position().z() && p.distanceTo(n.position()) <= 1)) continue;
+                sailed.add(n);
+                for (Travel.Route r : Travel.routes(npcs, n)) {
+                    for (Direction d : Direction.values()) {
+                        Position p = r.to().position().translate(d.dx, d.dy);
+                        if (!d.diagonal() && world.isWalkable(p) && !seen.contains(p)) {
+                            seen.addAll(explore(p, level));
+                            more = true;
+                        }
+                    }
+                }
+            }
+        }
+        return seen;
     }
 
     /** BFS po logice ruchu (krok + uzycie, z lina w plecaku) od podanej pozycji. */
@@ -174,5 +210,20 @@ class GameWorldTest {
             assertTrue(expPerHp >= 0.3 && expPerHp <= 1.4, m.key() + " exp/hp " + expPerHp);
             assertTrue(m.maxHealth() >= m.level() * 5, m.key() + " has enough HP for its level");
         }
+    }
+
+    @Test
+    void islandsAndTheWyvernValleyAreHuntingGroundsForLevel300() throws Exception {
+        List<SpawnPoint> spawns = SpawnTable.load(WorldLayout.WORLD_MAP, world, MONSTERS);
+        for (String name : new String[] {"Wyspa Koralowa", "Wyspa Piratow", "Wyspa Mgiel", "Wyspa Latarni", "Lodowa Wyspa",
+                "Wyspa Wulkaniczna", "Skaly Mewie", "Dolina Wiwern"}) {
+            Region r = world.regions().stream().filter(x -> x.name().equals(name)).findFirst().orElseThrow();
+            assertTrue(r.levelMin() >= 300, name);
+            assertTrue(spawns.stream().filter(sp -> !sp.nightOnly()).anyMatch(sp -> world.regionAt(sp.center()) == r), name + " has monsters");
+        }
+        // Dolina Wiwern: straznik zawraca postacie ponizej poziomu 250
+        Region valley = world.regions().stream().filter(x -> x.name().equals("Dolina Wiwern")).findFirst().orElseThrow();
+        assertTrue(explore(world.spawn(), 249).stream().noneMatch(valley::contains), "level 249 kept out");
+        assertTrue(explore(world.spawn(), 250).stream().anyMatch(valley::contains), "level 250 may enter");
     }
 }

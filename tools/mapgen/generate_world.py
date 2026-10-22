@@ -338,6 +338,27 @@ def read_props():
 BRIDGE_Y = 86
 CAMP = (172, 80, 186, 93)                       # palisada obozu za mostem (strefa ochronna)
 GATES = [(STRAIT_X0, BRIDGE_Y, STRAIT_X1, BRIDGE_Y + 1, 0, 200)]   # straznik mostu: od poziomu 200
+# etap 8: Dolina Wiwern wykuta w Smoczym Grzbiecie (wnetrze), wejscie od polnocy ze straznikiem
+WYVERN = (14, 104, 30, 109)
+WYVERN_GATE = (21, 103, 22, 103)
+GATES.append(WYVERN_GATE + (0, 250))
+
+
+def wyvern_valley(g):
+    """Skalna dolina z kosci i glazow; jedno wejscie od polnocy (WYVERN_GATE)."""
+    x0, y0, x1, y1 = WYVERN
+    r = random.Random(5402)
+    for y in range(y0 - 1, y1 + 2):
+        for x in range(x0 - 1, x1 + 2):
+            g[y][x] = '\u03a9'
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            v = r.random()
+            g[y][x] = ',' if v < 0.15 else ('f' if v < 0.12 else '.')
+    gx0, gy, gx1, _ = WYVERN_GATE
+    for x in range(gx0, gx1 + 1):
+        g[gy][x] = '.'
+        g[gy - 1][x] = '.'
 VOLCANO = (212, 142)                            # krater Ignarotha
 RUINS = (222, 198, 238, 212)                    # ruiny Kha'zuula
 SUMMIT = (214, 30)                              # wejscie na Lodowe Szczyty (+1, +2)
@@ -790,6 +811,8 @@ def main():
         protect += part['protect']
     geo_regions = world_geo.geography(floors, W, H, protect)
     sea = ports.ports(floors)                                 # etap 7: przystanie, mola, mosty na wyspy
+    cities.ship(g, 10, 239, random.Random(5401))              # etap 8: wrak u poludniowo-zachodniego brzegu
+    wyvern_valley(g)
 
     # NPC: Varden (wspolrzedne mapy varden + przesuniecie), Frostholm i Qasirah (cities.py), Selvaran
     npcs = [
@@ -920,6 +943,8 @@ def main():
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
     regions = [r for part in city_parts for r in part['regions']] + [
+        f'Dolina Wiwern;{WYVERN[0]};{WYVERN[1]};{WYVERN[2]};{WYVERN[3]};0;0;300;360',
+    ] + [
         'Klify Selvaran;140;112;159;171;1;2;60;80',
         'Skalny Wawoz;144;112;159;171;0;0;55;80',
         'Kanaly Selvaran;100;112;159;171;-1;-1;45;75',
@@ -986,11 +1011,36 @@ def main():
         'mummy;130;196;-4;4;3;300', 'mummy;140;226;-4;3;2;300', 'mummy;120;214;-4;4;2;300',
         'pharaoh;126;198;-5;2;1;1800',
     ] + selv_spawns + east_spawns + high_spawns + [
+        '# --- etap 8: expowiska 300+ na powierzchni (wyspy - dojscie statkiem lub mostem) ---',
+        '# Dolina Wiwern w Smoczym Grzbiecie (zachodni kontynent, straznik od poziomu 250)',
+        'wyvern;16;106;0;2;2;240', 'wyvern;22;106;0;2;2;240', 'wyvern;27;107;0;2;2;240',
+        '# Wyspa Koralowa, Skaly Mewie, Wyspa Latarni',
+        'coral_crab;108;270;0;5;3;240', 'coral_crab;132;272;0;5;3;240', 'coral_crab;120;277;0;4;2;240',
+        'drowned_sailor;104;264;0;4;2;240', 'drowned_sailor;138;265;0;4;2;240', 'drowned_sailor;120;270;0;6;3;240;noc',
+        'coral_crab;190;250;0;3;2;240',
+        'drowned_sailor;284;113;0;4;2;240', 'drowned_sailor;292;110;0;3;2;240',
+        '# Wyspa Piratow',
+        'pirate_cutthroat;40;280;0;5;3;240', 'pirate_cutthroat;56;286;0;5;3;240', 'pirate_cutthroat;46;294;0;4;2;240',
+        'pirate_gunner;36;288;0;4;2;300', 'pirate_gunner;58;278;0;4;2;300',
+        '# Wyspa Mgiel',
+        'mist_wraith;240;284;0;5;3;300', 'mist_wraith;258;290;0;5;3;300', 'mist_wraith;250;297;0;4;2;300',
+        'shadow_stalker;266;282;0;4;2;300', 'shadow_stalker;236;292;0;4;2;300;noc',
+        '# Lodowa Wyspa',
+        'frost_giant;304;30;0;5;2;300', 'frost_giant;322;34;0;5;2;300', 'storm_harpy;314;26;0;5;3;300',
+        'ice_dragon;318;46;0;4;2;360', 'ice_dragon;302;44;0;4;1;360',
+        '# Wyspa Wulkaniczna',
+        'magma_drake;310;184;0;5;2;360', 'magma_drake;322;196;0;5;2;360', 'magma_drake;306;200;0;4;2;360',
+        'abyssal_demon;326;184;0;4;1;420',
+    ] + [
         '# --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---',
         'wolf;58;72;0;5;3;60;noc', 'bandit;106;96;0;3;2;120;noc', 'snow_wolf;50;12;0;6;3;90;noc',
         'hyena;40;190;0;6;3;90;noc', 'sand_wraith;20;226;0;5;2;180;noc', 'wraith_knight;186;103;0;5;3;240;noc',
     ]
     pz_rects = [tuple(int(v) for v in r.split(',')) for r in pz]
+    # wyspy: pola osiagalne z pomostow kapitanow (rejs statkiem)
+    for key, (_place, pos) in sea['captains'].items():
+        if pos not in reach:
+            reach |= reachable(g, pos)
 
     def in_pz(x, y, z):
         return any(a <= x <= c and b <= y <= d and z == zz for a, b, c, d, zz in pz_rects)

@@ -41,3 +41,10 @@ abyssal_demon;Demon Otchłani;800;18000;25000;230;480;1400;FIRE;1;2000;60;FIRE:9
 bone_dragon;Kościany smok;880;20000;28000;200;520;1520;DEATH;3;2200;50;DEATH:100,HOLY:-35,EARTH:30;MAGIC;7;0;0;0;#e8e0c8;beast;underground;-;Smok ze starych kości, zieje śmiercią.
 abyss_lord;Pan Otchłani;950;28100;33500;180;1080;2000;PHYSICAL;1;2300;90;PHYSICAL:15,FIRE:50,DEATH:50,HOLY:-25;TANK;6;0;0;0;#601010;humanoid;underground;-;Pan Otchłani w zbroi z czarnego żelaza.
 morgath;Mor'gath, Serce Otchłani;1000;160000;250000;210;1040;2990;DEATH;3;1700;90;DEATH:100,FIRE:50,HOLY:-25;MAGIC;9;0;12000;1;#ff3020;boss;underground;-;Serce Otchłani. Ostatni przeciwnik świata.
+wyvern;Wiwerna;300;5000;7000;260;130;380;EARTH;1;1900;25;EARTH:80,ICE:-20;SKIRMISHER;7;15;0;0;#6a8a4a;beast;temperate;-;Jadowita wiwerna ze Smoczego Grzbietu, ucieka ranna i wraca.
+coral_crab;Krab koralowy;310;6400;7600;180;140;400;PHYSICAL;1;2100;55;PHYSICAL:25,ICE:30,ENERGY:-25;TANK;5;0;0;0;#e07050;beast;equatorial;-;Ogromny krab z raf Wyspy Koralowej, pancerz jak kamień.
+drowned_sailor;Topielec;330;5400;7200;210;150;430;ICE;1;2000;20;ICE:70,DEATH:50,HOLY:-35,ENERGY:-20;MELEE;6;0;0;0;#5a8a9a;humanoid;equatorial;NOCTURNAL;Marynarz, którego morze nie chciało oddać. Wychodzi na brzeg nocą.
+pirate_cutthroat;Pirat rzezimieszek;350;6200;8200;240;160;460;PHYSICAL;1;1900;30;PHYSICAL:15,HOLY:-10;SKIRMISHER;7;15;0;0;#8a3a2a;humanoid;equatorial;-;Pirat z kordelasem, ucieka ranny po pomoc kompanów.
+pirate_gunner;Pirat kanonier;400;7000;9600;200;200;560;FIRE;4;2400;25;FIRE:40,ICE:-15;RANGED;8;0;0;0;#4a4a5a;humanoid;equatorial;-;Strzela z garłacza z daleka, z bliska jest słabszy.
+mist_wraith;Upiór mgły;540;9800;13200;260;300;880;DEATH;3;2100;20;DEATH:100,PHYSICAL:40,HOLY:-40,FIRE:-15;MAGIC;8;0;0;0;#b0c0c8;humanoid;equatorial;-;Zjawa z mgieł wyspy, rzuca klątwy z dystansu.
+magma_drake;Smok magmy;690;16000;21000;210;400;1150;FIRE;3;2300;50;FIRE:100,ICE:-30,EARTH:20;MAGIC;7;0;0;0;#e05010;beast;equatorial;-;Smok z wnętrza wulkanu, zieje magmą.

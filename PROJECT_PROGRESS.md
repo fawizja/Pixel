@@ -27,8 +27,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 5. Cztery miasta | ZAKONCZONY | 19757e8 |
 | 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | 435babc |
 | 7. Mosty, statki, podroze | ZAKONCZONY | d9b2950 |
-| 8. Expowiska na powierzchni | nastepny | - |
-| 9-20 | do zrobienia | - |
+| 8. Expowiska na powierzchni | ZAKONCZONY | (ten commit) |
+| 9. Wielopoziomowe lochy | nastepny | - |
+| 10-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -160,10 +161,22 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   regresja GUI bez zmian.
 - Wyspy nie maja jeszcze potworow - expowiska na wyspach w etapie 8.
 
+## Etap 8 - expowiska na powierzchni (2026-10-22)
+- 7 nowych potworow 300-690 (monsters.csv, loot.csv, grafika OTSP przebarwiona): wiwerna, krab koralowy,
+  topielec (nocny), pirat rzezimieszek, pirat kanonier (dystans), upior mgly, smok magmy.
+- Expowiska na wszystkich 7 wyspach (dojscie statkiem z etapu 7 lub mostem): Koralowa 300-380, Latarni i Skaly
+  Mewie 300-340, Piratow 320-420, Lodowa 420-560, Mgiel 480-650, Wulkaniczna 600-800; nocne spawny topielcow
+  i lowcow cieni.
+- Zachodni kontynent: Dolina Wiwern wykuta w Smoczym Grzbiecie (region 300-360) z jednym wejsciem i straznikiem
+  od poziomu 250 (gates), zeby postacie testowe poziomu 8 nie wchodzily w endgame; wrak statku u brzegu SW.
+- Testy: GameWorldTest liczy dostepnosc razem z rejsami; nowy test expowisk 300+ (kazda wyspa i dolina ma
+  potwory, straznik doliny). Testy 436 OK, regresja GUI 42/42.
+- Do poprawy w etapie 10: grafika kraba (przebarwiony skorpion wyglada jak wij).
+
 ## Nastepne kroki (dokladnie)
-1. Etap 8: expowiska na powierzchni dla postaci 300+ (wyspy z etapu 7 bez potworow, zachodni kontynent za slaby).
-2. Etap 9: wielopoziomowe lochy.
-3. Etap 10: potwory, bossowie, loot.
+1. Etap 9: wielopoziomowe lochy (wiecej pieter -1..-5 pod wyspami i Dolina Wiwern, schody/drabiny/dziury).
+2. Etap 10: potwory, bossowie, loot (bossowie wysp, grafika kraba).
+3. Etap 11: profesje i poziomy.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

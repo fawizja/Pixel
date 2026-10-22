@@ -97,6 +97,10 @@ TINTED = {
     "ice_dragon": (25, (150, 210, 255)), "bone_dragon": (25, (235, 225, 200)), "ignaroth": (25, (255, 110, 60)),
     "hrimgar": (39, (190, 230, 255)), "khazuul": (37, (210, 170, 90)), "abyss_lord": (46, (190, 120, 255)),
     "morgath": (38, (255, 80, 80)),
+    # etap 8: expowiska na wyspach i Smoczym Grzbiecie
+    "wyvern": (25, (130, 180, 90)), "coral_crab": (13, (255, 130, 100)), "drowned_sailor": (3, (130, 190, 200)),
+    "pirate_cutthroat": (19, (210, 100, 80)), "pirate_gunner": (19, (110, 110, 140)),
+    "mist_wraith": (40, (205, 220, 230)), "magma_drake": (25, (235, 80, 25)),
 }
 CHARACTERS = {
     "paladin": (19, None),

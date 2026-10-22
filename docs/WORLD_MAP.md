@@ -96,6 +96,13 @@ poziomow wyzsze od poziomu postaci, pojawia sie ostrzezenie. To informacja, nie 
 | Lodowe Szczyty | 168..255 x 0..63 | 0..+5 | 400-560 | lodowi olbrzymi, harpie burzy, lodowe smoki, Hrimgar |
 | Pustkowia Cienia | 168..255 x 172..231 | 0..+5 | 550-750 | cieniolowcy, tytani piasku, kaplani pustki, Kha'zuul |
 | Otchlan | 168..255 x 0..231 | -5..-1 | 750-1000 | demony, kosciane smoki, panowie Otchlani, Mor'gath |
+| Dolina Wiwern | 14..30 x 104..109 (w Smoczym Grzbiecie) | 0 | 300-360 | wiwerny; straznik wejscia (21..22,103) od poziomu 250 |
+| Wyspa Koralowa | 97..143 x 257..281 | 0 | 300-380 | kraby koralowe, topielce (wiecej noca) |
+| Wyspa Latarni, Skaly Mewie | mosty z kontynentu | 0 | 300-340 | topielce, kraby koralowe |
+| Wyspa Piratow | 28..67 x 268..297 | 0 | 320-420 | piraci rzezimieszki, piraci kanonierzy |
+| Lodowa Wyspa | 289..332 x 22..54 | 0 | 420-560 | mrozne olbrzymy, harpie burzy, lodowe smoki |
+| Wyspa Mgiel | 226..276 x 269..301 | 0 | 480-650 | upiory mgly, lowcy cieni |
+| Wyspa Wulkaniczna | 293..334 x 172..208 | 0 | 600-800 | smoki magmy, demon Otchlani |
 
 Potwory powyzej poziomu 15 nie stoja blizej niz 14 kafelkow od swiatyni, a poziom kazdego spawnu
 miesci sie w zalecanym zakresie regionu (test `spawnsAreValidAwayFromTownsAndMatchRegionLevels`).
