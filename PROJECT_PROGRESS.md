@@ -24,7 +24,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 2. Grafika, assety, renderowanie | ZAKONCZONY | 55e7e49 |
 | 3. System mapy i warstw | ZAKONCZONY | 57d39e5 |
 | 4. Geografia swiata | ZAKONCZONY | e79368b |
-| 5. Cztery miasta | ZAKONCZONY | (commit etapu 5, link w raporcie) |
+| 5. Cztery miasta | ZAKONCZONY | 19757e8 |
 | 6. Depozyty, banki, swiatynie, sklepy, domy | nastepny | - |
 | 7-20 | do zrobienia | - |
 
