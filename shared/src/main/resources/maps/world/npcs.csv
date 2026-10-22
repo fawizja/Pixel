@@ -39,3 +39,11 @@ qas_innkeeper;Handlarz Omar;MERCHANT;Qasirah;86;208;0;qas_supplies;#a07040;Dakty
 qas_housing;Zarządca Karim;HOUSING;Qasirah;97;185;0;-;#6a5a8a;Domy Qasirah przy palmowej uliczce. Płacisz z konta w banku.
 selv_fishmonger;Rybaczka Mara;MERCHANT;Selvaran;143;162;0;selv_supplies;#4a7a9a;Świeże ryby i zapasy na rejs.
 selv_housing;Zarządca Tomasz;HOUSING;Selvaran;132;162;0;-;#6a5a8a;Domy z piętrem w Selvaran. Płacisz z konta w banku.
+selv_captain;Kapitan Bartosz;CAPTAIN;Selvaran;127;168;0;-;#3a5a8a;Mój statek pływa do Qasirah, na wyspy południa i do Przystani Wschodniej. Płacisz monetami.
+qas_captain;Kapitan Rahim;CAPTAIN;Qasirah;78;229;0;-;#3a5a8a;Z zatoki Qasirah płynę do Selvaran i na wyspy południa. Płacisz monetami.
+east_captain;Kapitan Wiesław;CAPTAIN;Przystań Wschodnia;268;149;0;-;#3a5a8a;Stąd pływam na wyspy wschodu i z powrotem do Selvaran. Płacisz monetami.
+coral_captain;Sternik Lucjan;CAPTAIN;Wyspa Koralowa;119;257;0;-;#3a5a8a;Rafy wokół wyspy są zdradliwe, ale znam drogę do portów. Płacisz monetami.
+pirate_captain;Kapitan Czarna Mewa;CAPTAIN;Wyspa Piratów;47;269;0;-;#3a3a3a;Na tej wyspie nikt nie pyta skąd jesteś. Odpłyniesz, jeśli zapłacisz.
+mist_captain;Przewoźnik Gniewko;CAPTAIN;Wyspa Mgieł;249;269;0;-;#5a6a7a;We mgle łatwo zabłądzić. Odwiozę cię do portu.
+ice_captain;Kapitan Torvald;CAPTAIN;Lodowa Wyspa;289;37;0;-;#6a8aaa;Lód kruszy kadłuby, ale mój statek wytrzyma rejs do Przystani Wschodniej.
+volcano_captain;Kapitan Ognik;CAPTAIN;Wyspa Wulkaniczna;294;189;0;-;#8a4a3a;Popiół w żaglach, ale płyniemy. Wracam do Przystani Wschodniej.

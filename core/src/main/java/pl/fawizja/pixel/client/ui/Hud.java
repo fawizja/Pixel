@@ -1398,10 +1398,12 @@ public final class Hud {
                         home ? "już tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu będziesz się odradzać", !home));
                 break;
             }
-            case CARRIER: {
+            case CARRIER:
+            case CAPTAIN: {
                 long gold = session.gold();
+                String verb = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN ? "Płyń: " : "Jedź do ";
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
-                    left.add(new MenuRow("npc:travel:" + r.to().town(), "Jedź do " + r.to().town(),
+                    left.add(new MenuRow("npc:travel:" + r.to().town(), verb + r.to().town(),
                             String.format("%,d gp", r.price()) + (gold < r.price() ? " - za mało monet w plecaku" : ""), gold >= r.price()));
                 }
                 break;

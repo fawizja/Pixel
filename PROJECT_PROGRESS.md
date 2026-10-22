@@ -26,8 +26,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 4. Geografia swiata | ZAKONCZONY | e79368b |
 | 5. Cztery miasta | ZAKONCZONY | 19757e8 |
 | 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | 435babc |
-| 7. Mosty, statki, podroze | nastepny | - |
-| 8-20 | do zrobienia | - |
+| 7. Mosty, statki, podroze | ZAKONCZONY | (ten commit) |
+| 8. Expowiska na powierzchni | nastepny | - |
+| 9-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -146,10 +147,23 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Nowe testy: HouseSystemTest, DepotLockerTest. Testy 432 OK, regresja GUI bez zmian.
 - Czynsz za domy nie jest pobierany (decyzja: brak okresowych oplat, zeby nie zmieniac ekonomii bez zgody).
 
+## Etap 7 - mosty, statki i podroze (2026-10-22)
+- Nowa rola NPC `CAPTAIN` (kapitan): rejsy w obie strony z `maps/world/ships.csv` (10 tras), cena jak u woznicy,
+  monety z plecaka, bez rejsu w blokadzie po walce z graczem. Panel NPC: "Plyn: <cel>" z cena.
+- `tools/mapgen/ports.py`: przystan w zatoce Qasirah (nowa brama poludniowa i droga), Przystan Wschodnia na
+  Spalonych Wyzynach, przystanie na 6 wyspach (pomost, molo, lodz, strefa ochronna); kapitan w porcie Selvaran.
+- 8 kapitanow (npcs.csv, grafika OTSP). Wyspy sa osiagalne tylko statkiem albo mostem.
+- Mosty: Most Latarni (14 pol) na Wyspe Latarni i Most Mewi na Skaly Mewie.
+- Kontrola swiata: `Travel.links()` daje `Reachability.Link` dla rejsow (WorldConnectivityTest), test uslug miast
+  plywa statkami; generator sprawdza pomosty, mosty i polaczenie przystani z wnetrzem wysp.
+- Nowy test ShipTravelTest (trasy w obie strony, bledne ships.csv, rejs na wyspe i powrot). Testy 435 OK,
+  regresja GUI bez zmian.
+- Wyspy nie maja jeszcze potworow - expowiska na wyspach w etapie 8.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 7: mosty, statki i podroze (NPC kapitanowie w porcie Selvaran i na wyspach; Reachability.Link dla tras).
-2. Etap 8: expowiska na powierzchni dla postaci 300+ (zachodni kontynent za slaby).
-3. Etap 9: wielopoziomowe lochy.
+1. Etap 8: expowiska na powierzchni dla postaci 300+ (wyspy z etapu 7 bez potworow, zachodni kontynent za slaby).
+2. Etap 9: wielopoziomowe lochy.
+3. Etap 10: potwory, bossowie, loot.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

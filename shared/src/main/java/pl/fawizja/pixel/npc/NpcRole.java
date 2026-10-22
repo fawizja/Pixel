@@ -12,6 +12,8 @@ public enum NpcRole {
     GUIDE,
     /** Woznica: platny przejazd do innych miast (cena z odleglosci, {@link Travel}). */
     CARRIER,
+    /** Kapitan statku: rejsy do innych portow i na wyspy (trasy z maps/&lt;mapa&gt;/ships.csv, {@link Travel}). */
+    CAPTAIN,
     /** Zarzadca domow: lista domow miasta, kupno za zloto z banku i oddanie domu. */
     HOUSING
 }

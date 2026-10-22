@@ -16,6 +16,7 @@ from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import world_geo  # noqa: E402
+import ports  # noqa: E402
 import cities  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -788,6 +789,7 @@ def main():
     for part in city_parts:
         protect += part['protect']
     geo_regions = world_geo.geography(floors, W, H, protect)
+    sea = ports.ports(floors)                                 # etap 7: przystanie, mola, mosty na wyspy
 
     # NPC: Varden (wspolrzedne mapy varden + przesuniecie), Frostholm i Qasirah (cities.py), Selvaran
     npcs = [
@@ -863,6 +865,16 @@ def main():
             assert (x, y) in reach, f'entrance {x},{y} unreachable'
     for name, pos in east_entrances + selv_entrances:
         assert pos in reach, f'{name} unreachable from Varden'
+    # przystanie: na ladzie kontynentu osiagalne pieszo, na wyspach - pomost polaczony z wnetrzem wyspy
+    for key, (place, (x, y)) in sea['captains'].items():
+        assert g[y][x] in WALKABLE, f'captain {key} on {g[y][x]!r} at {x},{y}'
+        if key in ('selv_captain', 'qas_captain', 'east_captain'):
+            assert (x, y) in reach, f'{key} unreachable from Varden'
+        else:
+            assert len(reachable(g, (x, y))) > 100, f'{key}: island too small or dock cut off'
+    print('kapitanowie:', ', '.join(f'{k} {x},{y}' for k, (_p, (x, y)) in sea['captains'].items()))
+    for name, tiles in sea['bridges']:
+        assert tiles[0] in reach, f'{name} unreachable from Varden'
 
     # zapis pieter
     for z in FLOORS:
@@ -885,6 +897,11 @@ def main():
         for h in cities.HOUSES:
             f.write(';'.join(str(v) for v in h) + '\n')
 
+    with open(os.path.join(OUT, 'ships.csv'), 'w', encoding='utf-8') as f:
+        f.write('# rejsy statkiem w obie strony: kapitan;kapitan (ports.py; kapitanowie w npcs.csv)\n')
+        for a, b in sea['routes']:
+            f.write(f'{a};{b}\n')
+
     with open(os.path.join(OUT, 'transitions.csv'), 'w', encoding='utf-8') as f:
         f.write('# x;y;z;typ;docelowe x;y;z\n')
         for t in transitions:
@@ -899,6 +916,7 @@ def main():
     pz += [f'{SELV[0] + 1},{SELV[1] + 1},{SELV[2] - 1},{SELV[3] - 1},0']
     pz += [','.join(str(v) for v in r) for part in city_parts for r in part['pz']]
     pz += [f'{CAMP[0] + 1},{CAMP[1] + 1},{CAMP[2] - 1},{CAMP[3] - 1},0']   # oboz za mostem (bez swiatyni)
+    pz += [','.join(str(v) for v in r) for r in sea['pz']]                 # przystanie
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
     regions = [r for part in city_parts for r in part['regions']] + [

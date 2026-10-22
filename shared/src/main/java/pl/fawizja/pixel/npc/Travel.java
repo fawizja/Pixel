@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.fawizja.pixel.world.Position;
+import pl.fawizja.pixel.world.Reachability;
 
-/** Przejazdy woznicy miedzy miastami: cena 3 gp za pole odleglosci miedzy woznicami, co najmniej 100 gp. */
+/**
+ * Przejazdy woznicy miedzy miastami i rejsy kapitanow miedzy portami (trasy z ships.csv):
+ * cena 3 gp za pole odleglosci miedzy NPC, co najmniej 100 gp.
+ */
 public final class Travel {
 
     public static final long GP_PER_TILE = 3;
@@ -22,12 +26,26 @@ public final class Travel {
         return Math.max(MIN_PRICE, p);
     }
 
-    /** Woznice w innych miastach, w kolejnosci z npcs.csv. */
+    /** Woznice w innych miastach (kolejnosc z npcs.csv) albo porty, do ktorych plynie statek kapitana. */
     public static List<Route> routes(NpcRegistry npcs, Npc from) {
         List<Route> out = new ArrayList<>();
+        if (from.role() == NpcRole.CAPTAIN) {
+            for (Npc n : npcs.seaRoutes(from)) out.add(new Route(n, price(from.position(), n.position())));
+            return out;
+        }
         for (Npc n : npcs.all()) {
             if (n.role() != NpcRole.CARRIER || n.town().equalsIgnoreCase(from.town())) continue;
             out.add(new Route(n, price(from.position(), n.position())));
+        }
+        return out;
+    }
+
+    /** Wszystkie przejazdy jako polaczenia do kontroli swiata (z pola NPC do pola NPC docelowego). */
+    public static List<Reachability.Link> links(NpcRegistry npcs) {
+        List<Reachability.Link> out = new ArrayList<>();
+        for (Npc n : npcs.all()) {
+            if (n.role() != NpcRole.CARRIER && n.role() != NpcRole.CAPTAIN) continue;
+            for (Route r : routes(npcs, n)) out.add(new Reachability.Link(n.position(), r.to().position()));
         }
         return out;
     }

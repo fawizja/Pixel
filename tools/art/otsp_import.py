@@ -117,6 +117,8 @@ _ROLE = {
     "housing": (21, ((70, 60, 110), (110, 90, 150), (60, 50, 70), (40, 30, 30))),
     "archmage": (33, None),
     "fishmonger": (44, ((70, 110, 140), (60, 120, 150), (80, 80, 70), (50, 40, 30))),
+    # etap 7: kapitanowie statkow
+    "captain": (44, ((40, 50, 90), (40, 60, 120), (200, 190, 170), (40, 30, 30))),
 }
 _NPC_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
                         "shared/src/main/resources/maps/world/npcs.csv")

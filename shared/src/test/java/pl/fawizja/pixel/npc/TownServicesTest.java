@@ -71,12 +71,45 @@ class TownServicesTest {
         return null;
     }
 
-    /** Pola osiagalne z Varden pieszo (takze po schodach na inne pietra). */
+    /** Pola osiagalne z Varden pieszo (takze po schodach na inne pietra) i rejsami od osiagalnych kapitanow. */
     static Set<Position> surfaceFromVarden() {
         Set<Position> seen = new HashSet<>();
         ArrayDeque<Position> q = new ArrayDeque<>();
         seen.add(world.spawn());
         q.add(world.spawn());
+        Set<Npc> sailed = new HashSet<>();
+        boolean more = true;
+        while (more) {
+            walk(seen, q);
+            more = false;
+            for (Npc n : npcs.all()) {
+                if (n.role() != NpcRole.CAPTAIN || sailed.contains(n) || !talkable(n, seen)) continue;
+                sailed.add(n);
+                for (Travel.Route r : Travel.routes(npcs, n)) {
+                    for (Direction d : Direction.values()) {
+                        Position p = r.to().position().translate(d.dx, d.dy);
+                        if (!d.diagonal() && world.isWalkable(p) && npcs.at(p) == null && seen.add(p)) {
+                            q.add(p);
+                            more = true;
+                        }
+                    }
+                }
+            }
+        }
+        return seen;
+    }
+
+    private static boolean talkable(Npc n, Set<Position> seen) {
+        for (int dy = -Npc.TALK_RANGE; dy <= Npc.TALK_RANGE; dy++) {
+            for (int dx = -Npc.TALK_RANGE; dx <= Npc.TALK_RANGE; dx++) {
+                Position p = n.position().translate(dx, dy);
+                if (seen.contains(p) && npcs.nearest(p, world) == n) return true;
+            }
+        }
+        return false;
+    }
+
+    private static void walk(Set<Position> seen, ArrayDeque<Position> q) {
         while (!q.isEmpty()) {
             Position p = q.poll();
             for (Direction d : Direction.values()) {
@@ -92,7 +125,6 @@ class TownServicesTest {
                 }
             }
         }
-        return seen;
     }
 
     GameSession session(PlayerCharacter pc, List<SpawnPoint> spawns) {
@@ -107,6 +139,8 @@ class TownServicesTest {
     void everyTownHasAllServicesReachableFromVarden() {
         for (String town : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah"}) {
             for (NpcRole role : NpcRole.values()) {
+                // statki tylko w miastach nad morzem (Varden i Frostholm leza w glebi ladu)
+                if (role == NpcRole.CAPTAIN && (town.equals("Varden") || town.equals("Frostholm"))) continue;
                 assertTrue(npcs.all().stream().anyMatch(n -> n.town().equals(town) && n.role() == role), town + " " + role);
             }
         }

@@ -925,18 +925,22 @@ public final class GameSession {
     }
 
     /**
-     * Woznica: przejazd do woznicy w innym miescie za monety z plecaka. Nie w blokadzie po walce z graczem.
-     * Postac staje na wolnym polu obok woznicy docelowego.
+     * Woznica lub kapitan: przejazd do woznicy w innym miescie albo rejs do portu z trasy statku, za monety
+     * z plecaka. Nie w blokadzie po walce z graczem. Postac staje na wolnym polu obok NPC docelowego.
      */
     public boolean travel(String town, long nowMs) {
-        Npc n = talkTo(NpcRole.CARRIER, nowMs);
-        if (n == null) return false;
+        Npc n = npcNearby();
+        if (n == null || (n.role() != NpcRole.CARRIER && n.role() != NpcRole.CAPTAIN)) {
+            log.add(nowMs, EventLog.Kind.WARNING, TradeResult.TOO_FAR.message());
+            return false;
+        }
+        boolean ship = n.role() == NpcRole.CAPTAIN;
         pl.fawizja.pixel.npc.Travel.Route route = null;
         for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(npcs, n)) {
             if (r.to().town().equalsIgnoreCase(town)) route = r;
         }
         if (route == null) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": tam nie jeżdżę.");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? ": tam nie pływam." : ": tam nie jeżdżę."));
             return false;
         }
         if (nowMs < pzLockedUntil) {
@@ -960,13 +964,14 @@ public final class GameSession {
         }
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < route.price() || !Money.pay(tx, route.price()).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": przejazd do " + route.to().town() + " kosztuje "
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? ": rejs do " : ": przejazd do ") + route.to().town() + " kosztuje "
                     + route.price() + " gp (monety w plecaku).");
             return false;
         }
         pc.backpack().commitFrom(tx);
         teleport(dest, nowMs);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Po podróży (" + route.price() + " gp) jesteś w " + route.to().town() + ".");
+        log.add(nowMs, EventLog.Kind.SYSTEM, (ship ? "Po rejsie (" : "Po podróży (") + route.price() + " gp) jesteś: "
+                + route.to().town() + ".");
         return true;
     }
 

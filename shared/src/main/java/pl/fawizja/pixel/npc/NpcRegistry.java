@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import pl.fawizja.pixel.magic.SpellRegistry;
 import pl.fawizja.pixel.world.FloorMap;
@@ -18,13 +20,57 @@ import pl.fawizja.pixel.world.WorldMap;
  */
 public final class NpcRegistry {
     private final List<Npc> npcs;
+    /** Rejsy: klucz kapitana -> klucze kapitanow docelowych (trasy dwukierunkowe z ships.csv). */
+    private final Map<String, List<String>> sea;
 
-    private NpcRegistry(List<Npc> npcs) { this.npcs = Collections.unmodifiableList(npcs); }
+    private NpcRegistry(List<Npc> npcs, Map<String, List<String>> sea) {
+        this.npcs = Collections.unmodifiableList(npcs);
+        this.sea = sea;
+    }
+
+    private NpcRegistry(List<Npc> npcs) { this(npcs, Map.of()); }
 
     public static NpcRegistry empty() { return new NpcRegistry(new ArrayList<>()); }
 
     public static NpcRegistry load(String mapName, WorldMap world, ShopRegistry shops) throws IOException {
-        return parse(SpellRegistry.readLines("/maps/" + mapName + "/npcs.csv"), world, shops);
+        NpcRegistry r = parse(SpellRegistry.readLines("/maps/" + mapName + "/npcs.csv"), world, shops);
+        List<String> ships;
+        try {
+            ships = SpellRegistry.readLines("/maps/" + mapName + "/ships.csv");
+        } catch (IOException e) {
+            return r;                                           // mapy bez statkow (np. testowe)
+        }
+        return r.withShips(ships);
+    }
+
+    /** Ten sam rejestr z trasami statkow: linie "kapitan;kapitan" (rejs w obie strony). */
+    public NpcRegistry withShips(List<String> lines) throws IOException {
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        int n = 0;
+        for (String line : lines) {
+            n++;
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 2) throw new IOException("ships.csv line " + n + ": expected 2 fields");
+            Npc a = get(f[0].trim()), b = get(f[1].trim());
+            if (a == null || b == null || a.role() != NpcRole.CAPTAIN || b.role() != NpcRole.CAPTAIN || a == b) {
+                throw new IOException("ships.csv line " + n + ": both ends must be different captains");
+            }
+            if (map.getOrDefault(a.key(), List.of()).contains(b.key())) {
+                throw new IOException("ships.csv line " + n + ": duplicate route");
+            }
+            map.computeIfAbsent(a.key(), k -> new ArrayList<>()).add(b.key());
+            map.computeIfAbsent(b.key(), k -> new ArrayList<>()).add(a.key());
+        }
+        return new NpcRegistry(new ArrayList<>(npcs), map);
+    }
+
+    /** Kapitanowie, do ktorych plynie statek kapitana {@code from} (w kolejnosci z ships.csv). */
+    public List<Npc> seaRoutes(Npc from) {
+        List<Npc> out = new ArrayList<>();
+        for (String k : sea.getOrDefault(from.key(), List.of())) out.add(get(k));
+        return out;
     }
 
     public static NpcRegistry parse(List<String> lines, WorldMap world, ShopRegistry shops) throws IOException {

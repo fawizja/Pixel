@@ -4,7 +4,7 @@ Swiat ma **cztery glowne miasta** ulozone wzdluz osi klimatycznej polnoc-poludni
 w siebie stopniowo (tundra -> lasy umiarkowane -> dzungla -> pustynia), a regiony lacza drogi,
 mosty, przelecze, porty, tunele i jaskinie.
 
-Swiat jest jedna mapa `maps/world` (256 x 232 kafelkow, pietra -5..+5), generowana
+Swiat jest jedna mapa `maps/world` (352 x 320 kafelkow, pietra -5..+5; od etapu 4 morze i wyspy na wschodzie i poludniu), generowana
 deterministycznie przez `tools/mapgen/generate_world.py`. Region Varden jest wklejony bez zmian z
 `maps/varden` z przesunieciem (+48, +64) - test `GameWorldTest` pilnuje, ze jest identyczny.
 
@@ -47,6 +47,26 @@ Uklady miast rysuje `tools/mapgen/cities.py` (etap 5), wywolywany z `generate_wo
 Kazde miasto ma swiatynie w strefie ochronnej (miejsce odrodzenia po smierci - `homeTown`), plac z
 fontanna i latarniami oraz domy. NPC i uslugi przyjda w etapie 12.
 Kazde miasto ma woznice przy fontannie (przejazdy miedzy miastami, 0.50.0) i 2 manekiny treningowe w strefie ochronnej (0.48.0).
+
+## Statki, przystanie i mosty (etap 7)
+
+Rejsy u kapitanow (rola CAPTAIN): trasy w obie strony z `maps/world/ships.csv`, cena jak u woznicy
+(3 gp za pole odleglosci, min. 100 gp, monety z plecaka). Przystanie, mola, lodzie i mosty rysuje
+`tools/mapgen/ports.py`; kazda przystan ma strefe ochronna.
+
+| Kapitan | Miejsce | Pole | Rejsy |
+|---|---|---|---|
+| Kapitan Bartosz | Selvaran (nabrzeze) | 127,168 | Qasirah, Przystan Wschodnia, Wyspa Koralowa, Wyspa Piratow, Wyspa Mgiel |
+| Kapitan Rahim | Qasirah (zatoka, brama poludniowa) | 78,229 | Selvaran, Wyspa Piratow, Wyspa Koralowa |
+| Kapitan Wieslaw | Przystan Wschodnia (Spalone Wyzyny) | 268,149 | Selvaran, Wyspa Mgiel, Lodowa Wyspa, Wyspa Wulkaniczna |
+| Sternik Lucjan | Wyspa Koralowa | 119,257 | Selvaran, Qasirah |
+| Kapitan Czarna Mewa | Wyspa Piratow | 47,269 | Selvaran, Qasirah |
+| Przewoznik Gniewko | Wyspa Mgiel | 249,269 | Selvaran, Przystan Wschodnia |
+| Kapitan Torvald | Lodowa Wyspa | 289,37 | Przystan Wschodnia |
+| Kapitan Ognik | Wyspa Wulkaniczna | 294,189 | Przystan Wschodnia |
+
+Mosty na wyspy przy brzegu: Most Latarni (x 263..276, y 112..113) na Wyspe Latarni i Most Mewi
+(x 190..191, y 241..245) na Skaly Mewie. Woznice nadal jezdza miedzy czterema miastami ladem.
 
 ## Regiony (`regions=`) i zalecane poziomy
 
