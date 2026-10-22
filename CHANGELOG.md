@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.196.0] - 2026-10-22
+
+### Dodano
+- Plecak w ramce ekwipunku jak w Tibii (prawy górny róg lalki, w układzie 5x2 ostatnie pole). Dotknięcie
+  otwiera i zamyka plecak; otwarty plecak podświetla gniazdo. Grafika z OpenTibia Sprite Pack.
+
+### Zmieniono
+- Krok po skosie trwa jak trzy zwykłe kroki (wyczerpanie po skosie jak w Tibii); wcześniej √2. Potwory bez zmian.
+
 ## [0.195.0] - 2026-10-22
 
 ### Zmieniono

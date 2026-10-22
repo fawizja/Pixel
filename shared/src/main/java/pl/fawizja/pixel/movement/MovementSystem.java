@@ -71,9 +71,12 @@ public final class MovementSystem {
         return MoveResult.CHANGED_FLOOR;
     }
 
-    /** Czas trwania kroku w ms dla postaci (bieganie skraca krok o 15%). */
+    /** Krok gracza po skosie trwa jak trzy zwykle kroki (wyczerpanie po skosie jak w Tibii). */
+    public static final int DIAGONAL_STEP_FACTOR = 3;
+
+    /** Czas trwania kroku w ms dla postaci (bieganie skraca krok o 15%, skos x3). */
     public static long stepDurationMs(PlayerCharacter pc, Direction d) {
-        long ms = Balance.stepDurationMs(pc.speed(), d.diagonal());
+        long ms = Balance.stepDurationMs(pc.speed(), false) * (d.diagonal() ? DIAGONAL_STEP_FACTOR : 1);
         return pc.isRunning() ? Math.round(ms * 0.85) : ms;
     }
 }

@@ -52,6 +52,9 @@ public final class TileArt implements Disposable {
     /** Dachy budynkow (widok jak w Tibii): dachowka (drewno), lupek (kamien), piaskowa dachowka (piaskowiec). */
     private static final int ROOF_CELL = 1011;
     private TextureRegion[] roof;
+    /** Plecak w gniezdzie ekwipunku. */
+    private static final int BACKPACK_CELL = 1014;
+    private TextureRegion backpack;
     /** Stroje w kolorach (Outfit 1..): profesja * kolory * 4 kierunki od tej komorki. */
     private static final int OUTFIT_BASE = 1100;
     private final java.util.Map<String, TextureRegion> pets = new java.util.HashMap<>();
@@ -112,6 +115,7 @@ public final class TileArt implements Disposable {
         paintRoof(pm, cellX(ROOF_CELL + 1), cellY(ROOF_CELL + 1), Color.valueOf("#5a6270"));
         paintRoof(pm, cellX(ROOF_CELL + 2), cellY(ROOF_CELL + 2), Color.valueOf("#c89a5a"));
         for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(PET_CELL + i), cellY(PET_CELL + i), PETS[i]);
+        paintBackpack(pm, cellX(BACKPACK_CELL), cellY(BACKPACK_CELL));
         applyOverrides(pm, tileRegistry, itemRegistry, mtypes, npcList);
         int whiteCell = COLS * COLS - 1;
         pm.setColor(Color.WHITE);
@@ -155,6 +159,7 @@ public final class TileArt implements Disposable {
         chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
         dummy = region(DUMMY_CELL);
         trap = region(TRAP_CELL);
+        backpack = region(BACKPACK_CELL);
         roof = new TextureRegion[] {region(ROOF_CELL), region(ROOF_CELL + 1), region(ROOF_CELL + 2)};
         for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(PET_CELL + i));
         for (Map.Entry<String, Integer> e : walkCells.entrySet()) {
@@ -224,6 +229,7 @@ public final class TileArt implements Disposable {
         override(pm, ROOF_CELL, "objects/roof_red");
         override(pm, ROOF_CELL + 1, "objects/roof_slate");
         override(pm, ROOF_CELL + 2, "objects/roof_sand");
+        override(pm, BACKPACK_CELL, "objects/backpack");
         for (int i = 0; i < PETS.length; i++) override(pm, PET_CELL + i, "pets/" + PETS[i]);
         if (overrides > 0) Gdx.app.log("TileArt", "Grafiki z assets/art: " + overrides);
     }
@@ -353,7 +359,7 @@ public final class TileArt implements Disposable {
      * Kroki zmieniaja sie w polowie przejscia pola i na kolejnych polach (lewa, prawa noga).
      */
     public static int walkFrame(float renderX, float renderY, int tileX, int tileY) {
-        float progress = Math.abs(renderX - tileX) + Math.abs(renderY - tileY);
+        float progress = Math.max(Math.abs(renderX - tileX), Math.abs(renderY - tileY));
         if (progress < 0.02f) return 0;
         return 1 + ((tileX + tileY + (progress < 0.5f ? 0 : 1)) & 1);
     }
@@ -400,6 +406,7 @@ public final class TileArt implements Disposable {
 
     public TextureRegion dummy() { return dummy; }
     public TextureRegion trap() { return trap; }
+    public TextureRegion backpack() { return backpack; }
 
     /** Dach nad budynkiem wg Roofs: 1 dachowka (drewno), 2 lupek (kamien), 3 piaskowa dachowka (piaskowiec). */
     public TextureRegion roof(int kind) { return roof[Math.max(1, Math.min(kind, roof.length)) - 1]; }
@@ -949,6 +956,18 @@ public final class TileArt implements Disposable {
     }
 
     /** Metalowa plyta z kolcami na podlodze lochu. */
+    /** Zapasowy plecak (gdy brak objects/backpack.png): brazowy worek z klapa i paskiem. */
+    private void paintBackpack(Pixmap pm, int ox, int oy) {
+        pm.setColor(Color.valueOf("#3a2414"));
+        pm.fillRectangle(ox + 3, oy + 3, 10, 12);
+        pm.setColor(Color.valueOf("#7a5230"));
+        pm.fillRectangle(ox + 4, oy + 4, 8, 10);
+        pm.setColor(Color.valueOf("#5a3a20"));
+        pm.fillRectangle(ox + 4, oy + 4, 8, 4);
+        pm.setColor(Color.valueOf("#c8a050"));
+        pm.fillRectangle(ox + 7, oy + 7, 2, 2);
+    }
+
     private void paintTrap(Pixmap pm, int ox, int oy) {
         Color plate = Color.valueOf("#5a5a62");
         Color edge = shade(plate, 0.6f);

@@ -2495,6 +2495,12 @@ public final class Hud {
         return !charOpen && !windowOverPanel();
     }
 
+    /** Gniazdo plecaka w panelu: jak w Tibii prawy gorny rog lalki, w ukladzie 5x2 ostatnie pole. */
+    private float[] epBackpackPos() {
+        if (epTibia) return new float[] {epX + 6 + 2 * (epCell + 3), epY + epH - 23 - 4 - epCell};
+        return new float[] {epX + 4 + 4 * (epCell + 2), epY + epH - 4 - epCell - (epCell + 2)};
+    }
+
     private float[] epCellPos(int i) {
         if (epTibia) {
             return new float[] {epX + 6 + EQ_CELLS[i][0] * (epCell + 3), epY + epH - 23 - 4 - epCell - EQ_CELLS[i][1] * (epCell + 3)};
@@ -2529,6 +2535,11 @@ public final class Hud {
 
     private boolean equipPanelTouch(float px, float py, GameSession session, Actions actions) {
         if (!equipPanelVisible() || px < epX || px > epX + epW || py < epY || py > epY + epH) return false;
+        float[] bp = epBackpackPos();
+        if (px >= bp[0] && px <= bp[0] + epCell && py >= bp[1] && py <= bp[1] + epCell) {
+            toggleBag();
+            return true;
+        }
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = epCellPos(i);
             if (px >= c[0] && px <= c[0] + epCell && py >= c[1] && py <= c[1] + epCell) {
@@ -2545,6 +2556,20 @@ public final class Hud {
             float[] c = epCellPos(i);
             drawEquipSlot(batch, session.character().equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], epCell);
         }
+        float[] bp = epBackpackPos();
+        drawBackpackSlot(batch, bp[0], bp[1], epCell);
+    }
+
+    /** Plecak w gniezdzie ekwipunku (dotkniecie otwiera plecak), podswietlony gdy plecak jest otwarty. */
+    private void drawBackpackSlot(SpriteBatch batch, float x, float y, float cell) {
+        if (slotImg != null) batch.draw(slotImg, x, y, cell, cell);
+        if (bagOpen) {
+            batch.setColor(1f, 0.85f, 0.3f, 0.35f);
+            batch.draw(art.white(), x + 1, y + 1, cell - 2, cell - 2);
+            batch.setColor(Color.WHITE);
+        }
+        float pad = Math.max(2, cell * 0.08f);
+        batch.draw(art.backpack(), x + pad, y + pad, cell - pad * 2, cell - pad * 2);
     }
 
     /** Pole ekwipunku: tlo z OTClientV8, przedmiot albo szara nazwa gniazda. */
@@ -2592,6 +2617,10 @@ public final class Hud {
         skX = x0 + eqW + 8; skY = top - skH;
     }
 
+    private float[] eqBackpackPos() {
+        return new float[] {eqX + 8 + 2 * (eqCell + 6), eqY + eqH - 23 - 6 - eqCell};
+    }
+
     private float[] eqCellPos(int i) {
         return new float[] {eqX + 8 + EQ_CELLS[i][0] * (eqCell + 6), eqY + eqH - 23 - 6 - eqCell - EQ_CELLS[i][1] * (eqCell + 6)};
     }
@@ -2600,6 +2629,12 @@ public final class Hud {
     private boolean charWindowsTouch(float px, float py, GameSession session, Actions actions) {
         if (inside(px, py, eqX + eqW - 12, eqY + eqH - 12, 11) || inside(px, py, skX + skW - 12, skY + skH - 12, 11)) {
             charOpen = false;
+            return true;
+        }
+        float[] bp = eqBackpackPos();
+        if (px >= bp[0] && px <= bp[0] + eqCell && py >= bp[1] && py <= bp[1] + eqCell) {
+            charOpen = false;
+            if (!bagOpen) toggleBag();
             return true;
         }
         for (int i = 0; i < EQ_SLOTS.length; i++) {
@@ -2625,6 +2660,8 @@ public final class Hud {
             float[] c = eqCellPos(i);
             drawEquipSlot(batch, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], eqCell);
         }
+        float[] bp = eqBackpackPos();
+        drawBackpackSlot(batch, bp[0], bp[1], eqCell);
         font.getData().setScale(0.7f);
         font.setColor(0.8f, 0.8f, 0.75f, 1f);
         text(batch, "Dotknij, aby zdjąć", eqX + 8, eqY + 14);

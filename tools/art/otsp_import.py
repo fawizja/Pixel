@@ -36,6 +36,8 @@ WALLS = {
 WALL_SHAPES = ("v", "h", "pole", "corner")
 # Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
 ROOFS = {"roof_red": 183, "roof_slate": 187}
+# Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
+EXTRA_OBJECTS = {"backpack": 2099}
 ITEMS = {
     "iron_sword": 1683, "training_sword": 1702, "frost_blade": 1680, "shadowpiercer": 1734, "spear": 1893,
     "hunting_spear": 1880, "steel_spear": 1821, "dawnspear": 1909, "serpent_spear": 1830, "magma_spear": 1842,
@@ -158,6 +160,8 @@ def main(client, art):
     for name, ids in WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
             save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
+    for name, i in EXTRA_OBJECTS.items():
+        save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ROOFS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ITEMS.items():

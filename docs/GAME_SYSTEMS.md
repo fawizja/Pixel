@@ -132,7 +132,7 @@ Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 60 miejsc, wspolny dla
 
 ## Ruch (Z)
 
-Krok po kafelkach z czasem zaleznym od szybkosci (skos x1.41, bieganie -15%), plynna interpolacja.
+Krok po kafelkach z czasem zaleznym od szybkosci (skos gracza x3 jak wyczerpanie w Tibii, potwory x1.41; bieganie -15%), plynna interpolacja.
 Joystick ze strefa martwa, klawiatura na PC.
 
 ## Swiatlo, dzien i noc (C)
