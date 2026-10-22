@@ -1,0 +1,56 @@
+# Etap 13: inkantacje w stylu Tibii - wpisanie slow w czacie rzuca czar (wielkosc liter i odstepy bez znaczenia)
+# czar;slowa
+mend;exura
+greater_mend;exura gran
+vital_surge;exura vita
+ultimate_mend;exura max vito
+holy_mend;exura gran san
+inner_calm;exura med
+deep_meditation;exura gran med
+spirit_harmony;exura max med
+ember_bolt;exori flam
+spark_bolt;exori vis
+flame_ring;exevo mas flam
+inferno_bolt;exori gran flam
+storm_ring;exevo mas vis
+meteor_bolt;exori max flam
+energy_strike_max;exori max vis
+hells_core;exevo gran mas flam
+rage_of_skies;exevo gran mas vis
+frost_bolt;exori frigo
+thorn_burst;exori tera
+frost_nova;exevo mas frigo
+glacier_spike;exori gran frigo
+earth_quake;exevo mas tera
+blizzard_spike;exori max frigo
+earth_strike_max;exori max tera
+eternal_winter;exevo gran mas frigo
+wrath_of_nature;exevo gran mas tera
+holy_bolt;exori san
+sacred_nova;exevo san
+piercing_throw;exori con
+divine_spear;exori gran san
+divine_wrath;exevo gran san
+light_blade;exori max san
+divine_caldera;exevo mas san
+strong_ethereal_spear;exori gran con
+divine_judgement;exori ultima san
+tiger_strike;exori pug
+whirlwind_kick;exevo pug
+dragon_fist;exori gran pug
+storm_of_blows;exevo mas pug
+phoenix_fist;exori max pug
+storm_fist;exori ultima pug
+chi_wave;exevo gran mas pug
+thousand_palms;exevo ultima pug
+glow;utevo lux
+haste;utani hur
+strong_haste;utani gran hur
+conjure_spears;exevo con
+enchant_boulder;adori tera
+enchant_fireburst;adevo flam
+enchant_healing;adura gran
+enchant_great_fireball;adori mas flam
+enchant_avalanche;adori mas frigo
+enchant_sudden_death;adori gran mort
+enchant_ultimate_healing;adura vita

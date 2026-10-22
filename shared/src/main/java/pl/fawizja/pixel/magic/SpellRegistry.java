@@ -21,6 +21,9 @@ import pl.fawizja.pixel.vocation.Vocation;
 public final class SpellRegistry {
 
     private final Map<String, SpellType> byKey;
+    /** Inkantacje (data/incantations.csv): znormalizowane slowa -> klucz czaru. */
+    private final Map<String, String> byWords = new LinkedHashMap<>();
+    private final Map<String, String> wordsOf = new LinkedHashMap<>();
 
     private SpellRegistry(Map<String, SpellType> byKey) {
         this.byKey = Collections.unmodifiableMap(byKey);
@@ -28,7 +31,9 @@ public final class SpellRegistry {
 
     public static SpellRegistry loadDefault(ItemRegistry items) {
         try {
-            return parse(readLines("/data/spells.csv"), items);
+            SpellRegistry r = parse(readLines("/data/spells.csv"), items);
+            r.addIncantations(readLines("/data/incantations.csv"));
+            return r;
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read spell data", e);
         }
@@ -59,6 +64,36 @@ public final class SpellRegistry {
             }
         }
         return new SpellRegistry(map);
+    }
+
+    /** Wczytuje inkantacje "czar;slowa"; czar musi istniec i nie byc efektem runy, slowa nie moga sie powtarzac. */
+    public void addIncantations(List<String> lines) throws IOException {
+        int n = 0;
+        for (String line : lines) {
+            n++;
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 2) throw new IOException("incantations.csv line " + n + ": expected 2 fields");
+            SpellType s = byKey.get(f[0].trim());
+            if (s == null || s.kind().isRune()) throw new IOException("incantations.csv line " + n + ": no spell " + f[0]);
+            String w = normalizeWords(f[1]);
+            if (w.isEmpty() || byWords.put(w, s.key()) != null || wordsOf.put(s.key(), w) != null) {
+                throw new IOException("incantations.csv line " + n + ": duplicate " + t);
+            }
+        }
+    }
+
+    /** Klucz czaru dla wypowiedzianych slow (np. "Utani  Gran Hur") albo null, gdy to nie inkantacja. */
+    public String byWords(String said) {
+        return said == null ? null : byWords.get(normalizeWords(said));
+    }
+
+    /** Slowa czaru albo null, gdy czar nie ma inkantacji. */
+    public String words(String key) { return wordsOf.get(key); }
+
+    static String normalizeWords(String s) {
+        return s.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+", " ");
     }
 
     public SpellType get(String key) {

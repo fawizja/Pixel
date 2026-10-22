@@ -1373,8 +1373,11 @@ public final class GameSession {
     }
 
     /** Mikstury szybkich przyciskow od najsilniejszej; przycisk HP/MP uzywa najsilniejszej dozwolonej, ktora masz. */
-    static final String[] HP_TIERS = {"supreme_health_potion", "strong_health_potion", "great_health_potion", "health_potion"};
-    static final String[] MP_TIERS = {"supreme_mana_potion", "strong_mana_potion", "great_mana_potion", "mana_potion"};
+    /** Od najsilniejszej; mikstury ducha paladyna (zdrowie i mana naraz) sa na obu listach. */
+    static final String[] HP_TIERS = {"ultimate_health_potion", "supreme_health_potion", "ultimate_spirit_potion",
+            "strong_health_potion", "great_spirit_potion", "great_health_potion", "health_potion"};
+    static final String[] MP_TIERS = {"ultimate_mana_potion", "supreme_mana_potion", "ultimate_spirit_potion",
+            "great_spirit_potion", "strong_mana_potion", "great_mana_potion", "mana_potion"};
 
     /** Klucz mikstury dla przycisku HP (mana = false) albo MP; bez zadnej w plecaku - zwykla. */
     public String quickPotion(boolean mana) {

@@ -576,6 +576,14 @@ public final class GameScreen extends ScreenAdapter {
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        String spell = session.spells().registry().byWords(text);
+        if (spell != null) {
+            // inkantacja jak w Tibii: slowa nad postacia i czar (online inni gracze widza slowa w czacie)
+            act("cast:" + spell, now());
+            if (net != null) net.send("CHAT", text.trim());
+            else say(session.character().name(), text.trim());
+            return;
+        }
         if (cmd.equals("/smierc")) {
             if (net != null) net.send("DEATH");
             else showDeath(session.combat().lastDeath() == null ? List.of()

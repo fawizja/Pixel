@@ -37,3 +37,27 @@ fireburst_rune;Wybuch ognia (runa);*;8;4;0;2000;ATTACK;RUNE_AREA;FIRE;20;0.35;2.
 healing_rune;Leczenie (runa);*;8;6;0;1000;HEALING;RUNE_HEAL;PHYSICAL;70;1.0;4.0;0;0;0;;;0;Efekt runy leczenia.
 haste;Przyspieszenie (utani hur);*;14;0;60;2000;SUPPORT;HASTE;PHYSICAL;30;0;0;0;33;0;;;0;Szybkość +30% na 33 sekundy.
 strong_haste;Silne przyspieszenie (utani gran hur);DRUID,SORCERER;20;0;100;2000;SUPPORT;HASTE;PHYSICAL;70;0;0;0;22;0;;;0;Szybkość +70% na 22 sekundy.
+# Etap 13: czary 120-300 dla postaci startujacych na poziomie 300 (silne czary maja dlugie odnowienie)
+energy_strike_max;Ostateczny grom;SORCERER;150;0;300;8000;ATTACK;ATTACK_TARGET;ENERGY;200;1.0;7.0;0;4;0;;;0;Najsilniejszy pojedynczy cios energii w cel.
+hells_core;Piekielny rdzeń;SORCERER;200;0;1100;30000;ATTACK;ATTACK_AREA;FIRE;150;0.9;6.0;0;0;4;;;0;Morze ognia wokół czarodzieja (promień 4).
+rage_of_skies;Gniew niebios;SORCERER;300;0;1300;30000;ATTACK;ATTACK_AREA;ENERGY;200;1.0;7.0;0;0;4;;;0;Burza piorunów wokół czarodzieja (promień 4).
+earth_strike_max;Ostateczny cios ziemi;DRUID;150;0;300;8000;ATTACK;ATTACK_TARGET;EARTH;200;1.0;7.0;0;4;0;;;0;Najsilniejszy pojedynczy cios ziemi w cel.
+eternal_winter;Wieczna zima;DRUID;200;0;1050;30000;ATTACK;ATTACK_AREA;ICE;150;0.9;6.0;0;0;4;;;0;Zamieć wokół druida (promień 4).
+wrath_of_nature;Gniew natury;DRUID;300;0;1250;30000;ATTACK;ATTACK_AREA;EARTH;200;1.0;7.0;0;0;4;;;0;Ziemia wybucha wokół druida (promień 4).
+ultimate_mend;Wielkie uzdrowienie;DRUID,SORCERER;150;0;100;1000;HEALING;HEAL_SELF;PHYSICAL;250;0.4;4.0;0;0;0;;;0;Bardzo silne leczenie magów.
+divine_caldera;Boska kaldera;PALADIN;150;0;160;6000;ATTACK;ATTACK_AREA;HOLY;150;0.8;2.0;3.0;0;3;;;0;Święty wybuch wokół paladyna (promień 3).
+strong_ethereal_spear;Silna eteryczna włócznia;PALADIN;200;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;5;0;;;0;Eteryczna włócznia zależna od umiejętności dystansu.
+divine_judgement;Boski sąd;PALADIN;300;0;250;12000;ATTACK;ATTACK_TARGET;HOLY;250;1.0;2.0;6.0;5;0;;;0;Najsilniejszy święty cios w cel.
+holy_mend;Wielkie święte uzdrowienie;PALADIN;120;0;90;1000;HEALING;HEAL_SELF;PHYSICAL;150;0.7;3.0;0;0;0;;;0;Silne leczenie paladyna.
+storm_fist;Pięść burzy;MONK;150;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;1;0;;;0;Uderzenie wręcz z siłą burzy.
+chi_wave;Fala chi;MONK;200;0;200;8000;ATTACK;ATTACK_AREA;PHYSICAL;150;0.8;0;4.0;0;2;;;0;Fala energii chi wokół mnicha (promień 2).
+thousand_palms;Tysiąc dłoni;MONK;300;0;250;12000;ATTACK;ATTACK_AREA;PHYSICAL;250;1.0;0;6.0;0;1;;;0;Grad ciosów we wszystko obok mnicha.
+spirit_harmony;Harmonia ducha;MONK;150;0;50;1000;HEALING;HEAL_SELF;PHYSICAL;120;0.6;0;1.0;0;0;;;0;Silne leczenie mnicha.
+enchant_great_fireball;Zaklęcie wielkiej kuli ognia;DRUID,SORCERER;30;4;120;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;great_fireball_rune;blank_rune;4;Zamienia pustą runę w 4 runy wielkiej kuli ognia.
+enchant_avalanche;Zaklęcie lawiny;DRUID;30;4;120;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;avalanche_rune;blank_rune;4;Zamienia pustą runę w 4 runy lawiny.
+enchant_sudden_death;Zaklęcie nagłej śmierci;SORCERER;45;15;220;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;sudden_death_rune;blank_rune;3;Zamienia pustą runę w 3 runy nagłej śmierci.
+enchant_ultimate_healing;Zaklęcie ostatecznego leczenia;DRUID;24;8;160;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;ultimate_healing_rune;blank_rune;1;Zamienia pustą runę w runę ostatecznego leczenia.
+great_fireball_rune;Wielka kula ognia (runa);*;30;4;0;2000;ATTACK;RUNE_AREA;FIRE;40;0.45;3.0;0;5;2;;;0;Efekt runy wielkiej kuli ognia.
+avalanche_rune;Lawina (runa);*;30;4;0;2000;ATTACK;RUNE_AREA;ICE;40;0.45;3.0;0;5;2;;;0;Efekt runy lawiny.
+sudden_death_rune;Nagła śmierć (runa);*;45;15;0;2000;ATTACK;RUNE_TARGET;DEATH;80;0.6;5.0;0;5;0;;;0;Efekt runy nagłej śmierci.
+ultimate_healing_rune;Ostateczne leczenie (runa);*;24;8;0;1000;HEALING;RUNE_HEAL;PHYSICAL;250;1.2;6.0;0;0;0;;;0;Efekt runy ostatecznego leczenia.

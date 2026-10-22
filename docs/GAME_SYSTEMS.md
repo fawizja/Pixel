@@ -426,6 +426,19 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
 - Sytosc i swiatlo z czaru to stan ulotny (nie zapisywany) - po wczytaniu gry trzeba zjesc ponownie.
 - UI: pasek wybierany automatycznie (najlepsze leczenie, atak, obszar, swiatlo), ksiega z wszystkimi
   czarami profesji (szare = jeszcze niedostepne) i recepturami (szare = brak skladnikow).
+- Inkantacje (etap 13, `data/incantations.csv`): kazdy czar (bez efektow run) ma slowa w stylu Tibii, np.
+  `exura vita`, `exori max flam`, `exevo gran mas vis`, `utani gran hur`, `adori gran mort`. Wpisanie slow
+  w czacie rzuca czar (wielkosc liter i odstepy bez znaczenia); online inni gracze widza slowa w czacie.
+  Ksiega pokazuje slowa przy kazdym czarze. `SpellRegistry.byWords` / `words`.
+- Czary 120-300 (etap 13): po trzy ataki na profesje (cel 150, obszar lub cel 200 i 300) i silne leczenie.
+  Najsilniejsze maja dlugie odnowienie (8-30 s), bo i tak ograniczaja je wspolne odnowienie grupy ataku.
+  Leczenie 120-150 jest tylko troche silniejsze od poprzedniego - inaczej postac z progu nizej
+  przeskakiwala prog (EndgameSimulationTest).
+- Runy etapu 13: wielka kula ognia i lawina (obszar 2, poz. 30), nagla smierc (cel, smierc, poz. 45, magia 15),
+  ostateczne leczenie (poz. 24, magia 8); zaklinane z pustej runy i sprzedawane u magow kazdego miasta i w obozie.
+- Mikstury etapu 13: silna i ostateczna mikstura ducha (paladyn, zdrowie i mana naraz, poz. 80 / 130),
+  ostateczna mikstura many (magowie, poz. 250), ostateczna mikstura zdrowia (paladyn i mnich, poz. 250).
+  Przyciski HP/MP biora najsilniejsza dozwolona miksture z plecaka (`GameSession.HP_TIERS` / `MP_TIERS`).
 
 ## Lowienie i umiejetnosci (Z logika, C UI)
 

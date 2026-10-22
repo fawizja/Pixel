@@ -107,12 +107,12 @@ public final class CharacterFactory {
             List<Entry> common = Arrays.asList(new Entry("torch", 1), new Entry("rope", 1), new Entry("shovel", 1),
                     new Entry("fishing_rod", 1), new Entry("worm", 10), new Entry("bread", 5));
             switch (v) {
-                case PALADIN: return concat(common, new Entry("spear", 20), new Entry("strong_health_potion", 20),
-                        new Entry("strong_mana_potion", 20));
+                case PALADIN: return concat(common, new Entry("spear", 20), new Entry("great_spirit_potion", 30),
+                        new Entry("strong_mana_potion", 10));
                 case DRUID:
-                case SORCERER: return concat(common, new Entry("health_potion", 10), new Entry("strong_mana_potion", 30),
-                        new Entry("blank_rune", 10), new Entry("healing_rune", 5));
-                case MONK: return concat(common, new Entry("strong_health_potion", 30), new Entry("mana_potion", 10));
+                case SORCERER: return concat(common, new Entry("health_potion", 10), new Entry("ultimate_mana_potion", 30),
+                        new Entry("blank_rune", 10), new Entry("ultimate_healing_rune", 5), new Entry("great_fireball_rune", 20));
+                case MONK: return concat(common, new Entry("ultimate_health_potion", 30), new Entry("mana_potion", 10));
                 default: throw new IllegalArgumentException(v.name());
             }
         }

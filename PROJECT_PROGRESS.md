@@ -32,8 +32,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 10. Potwory, bossowie, loot | ZAKONCZONY | 0cd1b79 |
 | 11. Profesje i poziomy | ZAKONCZONY | 71a19a3 |
 | 12. Ruch i walka | ZAKONCZONY | 96e652b |
-| 13. Czary, runy, mikstury | nastepny | - |
-| 14-20 | do zrobienia | - |
+| 13. Czary, runy, mikstury | ZAKONCZONY | (ten commit) |
+| 14. Ekwipunek, plecaki, monety | nastepny | - |
+| 15-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -223,10 +224,27 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - HUD: ikona stanu przyspieszenia, kolor i znak czaru na pasku, automatyczny pasek podstawia przyspieszenie.
 - Testy 447 OK (nowe HasteTest i PlayerCollisionTest), regresja GUI 42/42.
 
+## Etap 13 - czary, runy, mikstury (2026-10-22)
+- 15 nowych czarow na poziomy 120-300: sorcerer (Ostateczny grom 150, Piekielny rdzen 200, Gniew niebios 300),
+  druid (Ostateczny cios ziemi 150, Wieczna zima 200, Gniew natury 300), paladyn (Boska kaldera 150, Silna
+  eteryczna wlocznia 200, Boski sad 300), mnich (Piesc burzy 150, Fala chi 200, Tysiac dloni 300) oraz leczenie
+  (Wielkie uzdrowienie magow 150, Wielkie swiete uzdrowienie paladyna 120, Harmonia ducha mnicha 150).
+- Inkantacje w stylu Tibii dla wszystkich 54 czarow (data/incantations.csv): wpisanie np. "utani gran hur" albo
+  "exevo gran mas flam" w czacie rzuca czar; ksiega pokazuje slowa.
+- 4 nowe runy (wielka kula ognia, lawina, nagla smierc, ostateczne leczenie) z czarami zaklinania i 4 nowe
+  mikstury (silna i ostateczna mikstura ducha, ostateczna mikstura many i zdrowia) w sklepach magow 4 miast i w obozie.
+  Grafiki run i mikstur rysowane proceduralnie wg koloru (jak dotychczasowe runy), bez nowych plikow graficznych.
+- Zestaw startowy postaci 300 zawiera nowe mikstury i runy; przyciski HP/MP biora najsilniejsza miksture.
+- Wywazenie: leczenie 120-150 oslabione wzgledem pierwszego projektu, bo EndgameSimulationTest wykazal, ze
+  postac z progu nizej przeskakiwala prog (paladyn, sorcerer, mnich vs void_priest).
+- Znane ograniczenie: ksiega miesci ok. 10 czarow - na poziomie 300 najslabsze (m.in. przyspieszenie) nie sa na
+  liscie, ale dzialaja ze slow i z automatycznego paska. Do poprawy w etapie 16 (UI).
+- Testy 453 OK (nowy HighLevelMagicTest), regresja GUI 42/42.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 13: czary, runy, mikstury (czary dla poziomow 100-300+, inkantacje w stylu Tibii).
-2. Etap 14: ekwipunek i plecaki (wiele plecakow, przeciaganie, monety).
-3. Etap 15: NPC, questy, ekonomia.
+1. Etap 14: ekwipunek i plecaki (20 pol, wiele plecakow, przeciaganie, monety 100 gp = 1 platinum, 100 platinum = 1 crystal).
+2. Etap 15: NPC, questy, ekonomia.
+3. Etap 16: UI w stylu OTClient V8 (w tym przewijana ksiega czarow).
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

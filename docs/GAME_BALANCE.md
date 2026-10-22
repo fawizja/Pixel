@@ -23,10 +23,10 @@ od poziomu 250 (czyli przy starcie na 300) zestaw obsydianowy:
 
 | Profesja | Bron | Tarcza | Plecak (poza latarka, lina, lopata, wedka, robakami, chlebem) |
 |---|---|---|---|
-| Paladin | Magmowa wlocznia | Obsydianowa tarcza | 20 wloczni, 20 poteznych mikstur zdrowia, 20 poteznych mikstur many |
-| Druid | Laska szronu | - | 10 mikstur zdrowia, 30 poteznych mikstur many, 10 czystych run, 5 run leczenia |
+| Paladin | Magmowa wlocznia | Obsydianowa tarcza | 20 wloczni, 30 silnych mikstur ducha, 10 poteznych mikstur many |
+| Druid | Laska szronu | - | 10 mikstur zdrowia, 30 ostatecznych mikstur many, 10 czystych run, 5 run ostatecznego leczenia, 20 run wielkiej kuli ognia |
 | Sorcerer | Obsydianowa rozdzka | - | jak druid |
-| Monk | Stopione kastety | - | 30 poteznych mikstur zdrowia, 10 mikstur many |
+| Monk | Stopione kastety | - | 30 ostatecznych mikstur zdrowia, 10 mikstur many |
 
 Wszystkie profesje: obsydianowy helm, zbroja i nagolenniki, skorzane buty.
 

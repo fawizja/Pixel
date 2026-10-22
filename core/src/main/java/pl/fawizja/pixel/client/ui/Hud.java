@@ -845,7 +845,9 @@ public final class Hud {
         while (spells.size() > bookRows) spells.remove(0);
         for (SpellType sp : spells) {
             boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
-            String detail = sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
+            String words = session.spells().registry().words(sp.key());
+            String detail = (words != null ? words + ", " : "") + sp.mana() + " many, poz. " + sp.minLevel()
+                    + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
         // ustawianie paska: wybierz przycisk, potem dotknij czaru (ten sam czar drugi raz = automat)
