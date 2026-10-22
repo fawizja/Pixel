@@ -249,6 +249,12 @@ rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
   Od 0.52.0 takze pogoda (pokazuj/ukryj) i automatyczna mikstura zdrowia (wylaczona / ponizej 30, 50, 70% HP;
   klient wysyla te sama akcje `potion_hp` co przycisk, najwyzej raz na sekunde).
   Ostateczny limit = min(ustawienie, ochrona zasobow); jakosc swiatla = min(ustawienie, ochrona zasobow).
+- Etap 18: panel diagnostyki pokazuje liczbe wywolan rysowania, wiazan tekstur i zmian shaderow na klatke
+  (libGDX `GLProfiler`, wlaczony tylko przy otwartym panelu). `-Dpixel.profile=true` na PC co 300 klatek wypisuje
+  srednie (rysowanie ogolem i swiat, tekstury, wierzcholki, czas CPU klatki).
+  Podloze, obrzeza i dekoracje rysowane trzema przebiegami (kazdy z jednego atlasu) - noc w Varden z deszczem:
+  251 -> 109 wywolan rysowania na klatke (swiat 201 -> 59). Pasek akcji przeliczany co 150 ms zamiast co klatke,
+  rodzaje potworow ze spawnow liczone raz (HUD pytal o nie co klatke).
 
 ## Zapis (Z)
 

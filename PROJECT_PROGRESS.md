@@ -37,8 +37,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 15. NPC, questy, ekonomia | ZAKONCZONY | ddead90 |
 | 16. UI w stylu OTClient V8 | ZAKONCZONY | c4f43a8 |
 | 17. Sterowanie mobilne | ZAKONCZONY | 11f56db |
-| 18. Optymalizacja | nastepny | - |
-| 19-20 | do zrobienia | - |
+| 18. Optymalizacja | ZAKONCZONY | (ten commit) |
+| 19. Testy koncowe | nastepny | - |
+| 20. ZIP i debug APK | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -290,10 +291,21 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   dotykowe nie maja testu automatycznego (brak emulacji dotyku w chmurze) - sprawdzone kompilacja, zrzut
   z -Dpixel.joy i -Dpixel.look oraz logika w testach.
 
+## Etap 18 - optymalizacja (2026-10-22)
+- Pomiar: JFR (profil CPU) i libGDX GLProfiler. Logika jest tania: 421 potworow ze 201 spawnow, GameSession.update
+  ok. 0,01 ms. Waskim gardlem byl GPU: 251 wywolan rysowania i 245 wiazan tekstur na klatke (noc w Varden, deszcz),
+  bo podloze, obrzeza i dekoracje przelaczaly atlasy na kazdym polu.
+- Podloze, obrzeza i dekoracje rysowane osobnymi przebiegami: 251 -> 109 wywolan na klatke (swiat 201 -> 59),
+  wiazania tekstur 245 -> 103. Obraz bez zmian (regresja GUI 42/42, roznice ponizej 0,7% to szum rasteryzacji).
+- HUD: pasek akcji przeliczany co 150 ms zamiast co klatke; nazwy potworow zadan bez kopiowania listy spawnow co klatke.
+- Narzedzia: liczniki rysowania w panelu diagnostyki, -Dpixel.profile=true wypisuje srednie co 300 klatek.
+- Czas klatki CPU w chmurze (renderowanie programowe Mesa) pozostaje ok. 14 ms - tam ogranicza wypelnianie pikseli,
+  nie liczba wywolan; na telefonie mniej wywolan rysowania przeklada sie bezposrednio na krotsza klatke.
+- Testy 463 OK.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 18: optymalizacja.
-2. Etap 19: testy koncowe.
-3. Etap 20: ZIP i debug APK.
+1. Etap 19: testy koncowe.
+2. Etap 20: ZIP i debug APK.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

@@ -268,8 +268,7 @@ public final class GameSession {
     }
 
     private pl.fawizja.pixel.monster.MonsterType monsterType(String key) {
-        for (pl.fawizja.pixel.monster.MonsterType t : monsters.spawnedTypes()) if (t.key().equals(key)) return t;
-        return null;
+        return monsters.spawnedType(key);
     }
 
     /** Nazwa potwora do napisow (klucz, gdy rejestr nieznany). */

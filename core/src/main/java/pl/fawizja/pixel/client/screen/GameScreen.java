@@ -96,6 +96,14 @@ public final class GameScreen extends ScreenAdapter {
     }
     private GuardMode lastMode = GuardMode.NORMAL;
     private long frameStartNs;
+    /**
+     * Licznik wywolan OpenGL (etap 18): wlaczony przy otwartej diagnostyce albo z -Dpixel.profile=true,
+     * ktore co 300 klatek wypisuje srednie (wywolania rysowania, wiazania tekstur, wierzcholki, czas CPU klatki).
+     */
+    private com.badlogic.gdx.graphics.profiling.GLProfiler profiler;
+    private final boolean profileLog = Boolean.getBoolean("pixel.profile");
+    private int lastDrawCalls, lastTextureBinds, lastShaderSwitches, worldDrawCalls;
+    private long profFrames, profCalls, profWorld, profBinds, profVerts, profCpuNs;
     private boolean paused;
     private final List<Monster> visibleMonsters = new ArrayList<>();
     private final Matrix4 screenMatrix = new Matrix4();
@@ -1226,6 +1234,7 @@ public final class GameScreen extends ScreenAdapter {
     public void render(float delta) {
         frameStartNs = TimeUtils.nanoTime();
         if (paused) return;
+        startProfiling();
         checkLongPress();
         frameTimeAvg = frameTimeAvg * 0.95f + Math.min(delta, 0.25f) * 0.05f;
         frameStats.add(delta);
@@ -1363,8 +1372,39 @@ public final class GameScreen extends ScreenAdapter {
         drawCombatOverlay(batch, game.shapes(), t, z);
         drawLowHealth(game.shapes(), t);
 
+        if (profiler != null && profiler.isEnabled()) worldDrawCalls = profiler.getDrawCalls();
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
+        endProfiling();
         limitFrameRate();
+    }
+
+    private void startProfiling() {
+        boolean on = profileLog || hud.diagnosticsOpen();
+        if (on && profiler == null) profiler = new com.badlogic.gdx.graphics.profiling.GLProfiler(Gdx.graphics);
+        if (profiler == null) return;
+        if (on && !profiler.isEnabled()) profiler.enable();
+        else if (!on && profiler.isEnabled()) profiler.disable();
+        profiler.reset();
+    }
+
+    private void endProfiling() {
+        if (profiler == null || !profiler.isEnabled()) return;
+        lastDrawCalls = profiler.getDrawCalls();
+        lastTextureBinds = profiler.getTextureBindings();
+        lastShaderSwitches = profiler.getShaderSwitches();
+        if (!profileLog) return;
+        profFrames++;
+        profCalls += lastDrawCalls;
+        profWorld += worldDrawCalls;
+        profBinds += lastTextureBinds;
+        profVerts += (long) profiler.getVertexCount().total;
+        profCpuNs += TimeUtils.nanoTime() - frameStartNs;
+        if (profFrames % 300 == 0) {
+            Gdx.app.log("Pixel", String.format(java.util.Locale.ROOT,
+                    "profil %d klatek: rysowanie %.1f (swiat %.1f), tekstury %.1f, wierzcholki %.0f, CPU klatki %.2f ms",
+                    profFrames, profCalls / 300.0, profWorld / 300.0, profBinds / 300.0, profVerts / 300.0, profCpuNs / 300.0 / 1e6));
+            profCalls = profWorld = profBinds = profVerts = profCpuNs = 0;
+        }
     }
 
     /**
@@ -1987,6 +2027,7 @@ public final class GameScreen extends ScreenAdapter {
     private List<String> diagnosticsLines() {
         List<String> l = new ArrayList<>();
         l.add("FPS: " + Gdx.graphics.getFramesPerSecond() + String.format("  (%.1f ms)", frameTimeAvg * 1000));
+        l.add("Rysowanie: " + lastDrawCalls + " wywołań, " + lastTextureBinds + " tekstur, " + lastShaderSwitches + " shaderów");
         Runtime rt = Runtime.getRuntime();
         long used = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
         l.add("Pamięć aplikacji: " + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");

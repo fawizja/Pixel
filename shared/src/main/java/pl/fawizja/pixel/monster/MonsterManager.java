@@ -121,10 +121,24 @@ public final class MonsterManager {
 
     /** Rodzaje potworow ze stalych spawnow (np. do zadan dnia); pusta lista bez rejestru. */
     public List<MonsterType> spawnedTypes() {
-        java.util.Map<String, MonsterType> out = new java.util.TreeMap<>();
         if (registry == null) return new ArrayList<>();
-        for (SpawnPoint sp : spawns) out.putIfAbsent(sp.monsterKey(), registry.get(sp.monsterKey()));
-        return new ArrayList<>(out.values());
+        if (spawnedTypes == null) {
+            // stale spawny sie nie zmieniaja: liczone raz (HUD pyta o nazwy potworow co klatke)
+            java.util.Map<String, MonsterType> out = new java.util.TreeMap<>();
+            for (SpawnPoint sp : spawns) out.putIfAbsent(sp.monsterKey(), registry.get(sp.monsterKey()));
+            spawnedTypes = Collections.unmodifiableList(new ArrayList<>(out.values()));
+        }
+        return new ArrayList<>(spawnedTypes);
+    }
+
+    private List<MonsterType> spawnedTypes;
+
+    /** Rodzaj potwora ze stalych spawnow po kluczu albo null (bez kopiowania listy). */
+    public MonsterType spawnedType(String key) {
+        if (registry == null) return null;
+        if (spawnedTypes == null) spawnedTypes();
+        for (MonsterType t : spawnedTypes) if (t.key().equals(key)) return t;
+        return null;
     }
 
     /** Stan bossa ze stalego spawnu: zyje albo czas (ms zegara gry) najblizszego odrodzenia; respawnAt <= now = zaraz. */

@@ -99,14 +99,19 @@ public final class WorldRenderer {
 
     private void drawFloor(SpriteBatch batch, FloorMap f, int x0, int x1, int y0, int y1,
                            GroundItems ground, RowDrawer rows, int z) {
+        // podloze, obrzeza i dekoracje nie wychodza poza swoje pole, wiec rysujemy je trzema przebiegami:
+        // kazdy z jednej tekstury, zamiast przelaczac atlasy na kazdym polu (etap 18: mniej wywolan rysowania)
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
-            for (int x = x0; x <= x1; x++) {
-                int g = f.get(Layer.GROUND, x, y);
-                draw(batch, g, x, wy);
-                drawBorders(batch, f, g, x, y, wy);
-                draw(batch, f.get(Layer.DECORATION, x, y), x, wy);
-            }
+            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.GROUND, x, y), x, wy);
+        }
+        for (int y = y0; y <= y1; y++) {
+            float wy = worldY(y);
+            for (int x = x0; x <= x1; x++) drawBorders(batch, f, f.get(Layer.GROUND, x, y), x, y, wy);
+        }
+        for (int y = y0; y <= y1; y++) {
+            float wy = worldY(y);
+            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.DECORATION, x, y), x, wy);
         }
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);

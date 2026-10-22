@@ -775,6 +775,9 @@ public final class Hud {
      * Automatyczny pasek: najlepsze leczenie, najlepszy atak na cel, atak obszarowy (lub drugi atak),
      * poswiata. Gracz nie musi niczego ustawiac na telefonie.
      */
+    private long barUpdatedMs = Long.MIN_VALUE / 2;
+    static final long BAR_REFRESH_MS = 150;
+
     public void updateBar(GameSession session) {
         List<SpellType> known = session.spells().knownSpells();
         SpellType heal = null, attack = null, attack2 = null, area = null, extra = null;
@@ -1871,7 +1874,12 @@ public final class Hud {
             menuOpen = false;
             npcMode = false;
         }
-        updateBar(session);
+        // pasek akcji (czary, mikstury, liczniki) co 150 ms, nie co klatke: przeglad czarow i plecaka kosztuje
+        long barNow = com.badlogic.gdx.utils.TimeUtils.millis();
+        if (barNow - barUpdatedMs >= BAR_REFRESH_MS || barNow < barUpdatedMs) {
+            barUpdatedMs = barNow;
+            updateBar(session);
+        }
         if (pressSlot >= 0 && com.badlogic.gdx.utils.TimeUtils.millis() - pressStart >= LONG_PRESS_MS) {
             openPicker(pressSlot);
             pressSlot = -1;
