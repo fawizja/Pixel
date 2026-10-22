@@ -72,6 +72,8 @@ public final class Actions {
             case "enchant": s.buyEnchantment(pl.fawizja.pixel.item.Enchantments.Kind.valueOf(p[2]), now); return true;
             case "travel": s.travel(p[2], now); return true;
             case "settle": s.settleHere(now); return true;
+            case "housebuy": s.buyHouse(p[2], now); return true;
+            case "houseleave": s.leaveHouse(now); return true;
             case "quest": s.questAction(p[2], now); return true;
             case "daily": s.dailyAction(now); return true;
             case "dailyreroll": s.dailyReroll(now); return true;

@@ -30,6 +30,7 @@ OBJECTS = {
     # etap 5: wyposazenie miast
     "bed": 1201, "bookcase": 1209, "barrel": 1110, "table": 1191, "statue": 1155, "sand_statue": 1161,
     "jungle_statue": 1157, "cannon": 1163, "chest": 1111, "lumber": 1140,
+    "depot_locker": 1113,   # etap 6: skrzynia depozytu jak w Tibii
 }
 # Mury jak w Tibii: cienka sciana na krawedzi pola z wysokoscia rysowana w gore i w lewo (obrazek 64x64,
 # prawy dolny kwadrat to pole muru). Kolejno: pionowy, poziomy, slupek, naroznik.
@@ -111,6 +112,11 @@ _ROLE = {
     "priest": (18, ((230, 230, 230), (240, 240, 250), (220, 220, 230), (150, 130, 100))),
     "mage": (33, None),
     "smith": (45, ((110, 80, 60), (150, 150, 160), (90, 90, 100), (60, 50, 40))),
+    # etap 6: karczmarze, zarzadcy domow, arcymag, rybaczka
+    "innkeeper": (16, ((120, 70, 40), (200, 190, 170), (110, 80, 50), (60, 40, 30))),
+    "housing": (21, ((70, 60, 110), (110, 90, 150), (60, 50, 70), (40, 30, 30))),
+    "archmage": (33, None),
+    "fishmonger": (44, ((70, 110, 140), (60, 120, 150), (80, 80, 70), (50, 40, 30))),
 }
 _NPC_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
                         "shared/src/main/resources/maps/world/npcs.csv")

@@ -71,6 +71,7 @@ class TownServicesTest {
         return null;
     }
 
+    /** Pola osiagalne z Varden pieszo (takze po schodach na inne pietra). */
     static Set<Position> surfaceFromVarden() {
         Set<Position> seen = new HashSet<>();
         ArrayDeque<Position> q = new ArrayDeque<>();
@@ -81,7 +82,14 @@ class TownServicesTest {
             for (Direction d : Direction.values()) {
                 if (d.diagonal()) continue;
                 Position n = p.translate(d.dx, d.dy);
-                if (world.isWalkable(n) && npcs.at(n) == null && world.transitionAt(n) == null && seen.add(n)) q.add(n);
+                if (!world.isWalkable(n) || npcs.at(n) != null) continue;
+                pl.fawizja.pixel.world.Transition t = world.transitionAt(n);
+                // schody prowadza na inne pietra (np. tarasy Frostholm na +1); samo pole schodow nie jest miejscem rozmowy
+                if (t != null) {
+                    if (t.type().triggeredByWalking() && seen.add(t.to())) q.add(t.to());
+                } else if (seen.add(n)) {
+                    q.add(n);
+                }
             }
         }
         return seen;

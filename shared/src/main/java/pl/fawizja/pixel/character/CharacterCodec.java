@@ -71,6 +71,7 @@ public final class CharacterCodec {
         if (!pc.enchantments().encode().isEmpty()) m.put("ench", pc.enchantments().encode());
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
+        if (pc.house() != null) m.put("house", pc.house());
         if (pc.outfit() != 0) m.put("outfit", String.valueOf(pc.outfit()));
         if (pc.tips() != 0) m.put("tips", String.valueOf(pc.tips()));
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
@@ -224,6 +225,7 @@ public final class CharacterCodec {
         pc.enchantments().restore(m.get("ench"));
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
+        pc.setHouse(m.get("house"));
         if (m.containsKey("outfit")) pc.setOutfit(Outfit.parse(m.get("outfit")));
         if (m.containsKey("tips")) pc.restoreTips(Long.parseLong(m.get("tips")));
         if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));

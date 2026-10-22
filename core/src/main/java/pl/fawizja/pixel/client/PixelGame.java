@@ -43,6 +43,7 @@ public class PixelGame extends Game {
     private List<SpawnPoint> spawns;
     private pl.fawizja.pixel.npc.ShopRegistry shops;
     private pl.fawizja.pixel.npc.NpcRegistry npcs;
+    private pl.fawizja.pixel.house.HouseRegistry houses;
     private pl.fawizja.pixel.quest.QuestRegistry quests;
     private pl.fawizja.pixel.treasure.TreasureChests chests;
     private TileArt art;
@@ -72,6 +73,7 @@ public class PixelGame extends Game {
             spawns = SpawnTable.load(WorldLayout.WORLD_MAP, world, monsters);
             shops = pl.fawizja.pixel.npc.ShopRegistry.loadDefault(items);
             npcs = pl.fawizja.pixel.npc.NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
+            houses = pl.fawizja.pixel.house.HouseRegistry.load(WorldLayout.WORLD_MAP, world);
             quests = pl.fawizja.pixel.quest.QuestRegistry.loadDefault(items, monsters);
             chests = pl.fawizja.pixel.treasure.TreasureChests.generate(world);
         } catch (IOException e) {
@@ -131,6 +133,7 @@ public class PixelGame extends Game {
 
     public pl.fawizja.pixel.npc.ShopRegistry shops() { return shops; }
     public pl.fawizja.pixel.npc.NpcRegistry npcs() { return npcs; }
+    public pl.fawizja.pixel.house.HouseRegistry houses() { return houses; }
     public pl.fawizja.pixel.quest.QuestRegistry quests() { return quests; }
     public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
 

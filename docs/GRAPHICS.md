@@ -120,6 +120,20 @@ Każda profesja w 4 kierunkach.
 | `npcs/varden_mage.png` | Czarodziejka Mirela | tak |
 | `npcs/varden_merchant.png` | Kupiec Tomas | tak |
 | `npcs/varden_priest.png` | Kapłan Benedykt | tak |
+| `npcs/varden_smith.png` | Kowal Bogdan (etap 6) | tak |
+| `npcs/varden_innkeeper.png` | Karczmarz Wit (etap 6) | tak |
+| `npcs/varden_archmage.png` | Arcymag Eldrin (etap 6) | tak |
+| `npcs/varden_housing.png` | Zarządca Leopold (etap 6) | tak |
+| `npcs/frost_smith.png` | Kowal Hrodgar (etap 6) | tak |
+| `npcs/frost_innkeeper.png` | Karczmarka Sigrun (etap 6) | tak |
+| `npcs/frost_mage.png` | Mag Runolf (etap 6) | tak |
+| `npcs/frost_housing.png` | Zarządca Bjorn (etap 6) | tak |
+| `npcs/qas_smith.png` | Płatnerz Hamid (etap 6) | tak |
+| `npcs/qas_mage.png` | Wróżbitka Leila (etap 6) | tak |
+| `npcs/qas_innkeeper.png` | Handlarz Omar (etap 6) | tak |
+| `npcs/qas_housing.png` | Zarządca Karim (etap 6) | tak |
+| `npcs/selv_fishmonger.png` | Rybaczka Mara (etap 6) | tak |
+| `npcs/selv_housing.png` | Zarządca Tomasz (etap 6) | tak |
 
 ## Przedmioty (`assets/art/items/`)
 
@@ -291,6 +305,7 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 | `tiles/chest.png` | object, town (OTSP, etap 5) | tak |
 | `tiles/lumber.png` | object, town (OTSP, etap 5) | tak |
 | `tiles/pyramid.png` | wall, desert (OTSP, etap 5: bloki piramidy) | tak |
+| `tiles/depot_locker.png` | object, town (OTSP, etap 6: skrzynia depozytu) | tak |
 | `tiles/counter.png` | object, town |  |
 | `tiles/fence.png` | object, temperate |  |
 | `tiles/crystal.png` | object, underground | tak |

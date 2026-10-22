@@ -1,0 +1,17 @@
+# id;nazwa;miasto;wnetrze x0;y0;x1;y1;z;drzwi x;drzwi y;cena (gp, z konta) - cities.py
+frostholm_1;Dolne Miasto 1;Frostholm;64;41;67;43;0;65;40;60000
+frostholm_2;Dolne Miasto 2;Frostholm;71;41;74;43;0;72;40;60000
+frostholm_3;Dolne Miasto 3;Frostholm;85;41;88;43;0;86;40;60000
+frostholm_4;Dolne Miasto 4;Frostholm;92;41;95;43;0;93;40;60000
+frostholm_5;Taras Zachodni;Frostholm;63;19;67;21;1;65;22;75000
+frostholm_6;Taras Wschodni 1;Frostholm;85;18;88;20;1;86;21;60000
+frostholm_7;Taras Wschodni 2;Frostholm;92;18;95;20;1;93;21;60000
+qasirah_1;Uliczka Palmowa 1;Qasirah;59;216;62;218;0;60;215;60000
+qasirah_2;Uliczka Palmowa 2;Qasirah;66;216;69;218;0;67;215;60000
+qasirah_3;Uliczka Palmowa 3;Qasirah;73;216;76;218;0;74;215;60000
+selvaran_1;Zaulek Palmowy 1;Selvaran;107;144;111;147;0;109;143;100000
+selvaran_2;Zaulek Palmowy 2;Selvaran;107;151;111;154;0;109;150;100000
+selvaran_3;Zaulek Palmowy 3;Selvaran;115;151;119;154;0;117;150;100000
+varden_1;Dzielnica Krolewska 1;Varden;138;91;142;94;0;139;90;200000
+varden_2;Dzielnica Krolewska 2;Varden;146;91;150;94;0;147;90;200000
+varden_3;Dzielnica Krolewska 3;Varden;146;98;150;101;0;147;97;200000

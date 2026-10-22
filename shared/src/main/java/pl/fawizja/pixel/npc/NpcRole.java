@@ -11,5 +11,7 @@ public enum NpcRole {
     /** Przewodnik: zadania z data/quests.csv. */
     GUIDE,
     /** Woznica: platny przejazd do innych miast (cena z odleglosci, {@link Travel}). */
-    CARRIER
+    CARRIER,
+    /** Zarzadca domow: lista domow miasta, kupno za zloto z banku i oddanie domu. */
+    HOUSING
 }

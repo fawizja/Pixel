@@ -209,6 +209,7 @@ public final class GameScreen extends ScreenAdapter {
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
                 game.startingConfig().startLevel());
         session.setTownServices(game.npcs(), game.shops(), game.quests());
+        session.setHouses(game.houses(), null);
         session.setChests(game.chests());
         // -Dpixel.day=N ustala dzien (potwor dnia, zadanie dnia); przy -Dpixel.hour staly dzien dla regresji GUI
         Long day = Long.getLong("pixel.day", System.getProperty("pixel.hour") != null ? 20_000L : null);

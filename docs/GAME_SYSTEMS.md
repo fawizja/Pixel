@@ -90,6 +90,9 @@ Gold / Platinum / Crystal (100:1). Wplata, wyplata, przelew, wymiana w gore i w 
 Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie (jedno konto).
 Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 60 miejsc, wspolny dla miast, tylko przy bankierze
 (`GameSession.depotStore/depotTake`, przenosi wszystkie sztuki ile sie zmiesci, monety odrzuca). Zapis: `dp.<slot>`.
+Szafki depozytu (`depot_locker`) w budynkach depozytu kazdego miasta otwieraja ten sam depozyt.
+Domy: `maps/world/houses.csv` + `house/HouseRegistry`; kupno u agenta domow (rola HOUSING) za zloto z banku,
+jeden dom na postac, obcy nie wchodza do srodka, wlasciciele w `save/houses.txt` (serwer).
 
 ## NPC, handel, zadania (Z logika, C UI)
 

@@ -25,8 +25,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 3. System mapy i warstw | ZAKONCZONY | 57d39e5 |
 | 4. Geografia swiata | ZAKONCZONY | e79368b |
 | 5. Cztery miasta | ZAKONCZONY | 19757e8 |
-| 6. Depozyty, banki, swiatynie, sklepy, domy | nastepny | - |
-| 7-20 | do zrobienia | - |
+| 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | (ten commit) |
+| 7. Mosty, statki, podroze | nastepny | - |
+| 8-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -129,11 +130,26 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Testy 426 OK, regresja GUI: zmieniony tylko wzorzec chest (skrzynia skarbow trafila do nowej kopalni).
 - Debug generatora: `MAPGEN_DUMP=plik python3 tools/mapgen/generate_world.py` zapisuje pietro 0 przed kontrola dostepnosci.
 
+## Etap 6 - depozyty, banki, swiatynie, sklepy, domy (2026-10-22)
+- Szafki depozytu (`depot_locker`, OTSP 1113) w kazdym miescie: Varden (dzielnica krolewska, 8 szafek),
+  Frostholm (6), Qasirah (6), Selvaran (4). Szafka otwiera ten sam wspolny depozyt (60 miejsc) co bankier;
+  `GameSession.npcNearby()` zwraca stalego syntetycznego NPC na pozycje szafki, nazwa miasta z najblizszego NPC.
+- Banki i swiatynie: bankier i kaplan w kazdym z 4 miast (sprawdza `TownServicesTest`: kazda rola NPC w kazdym
+  miescie + osiagalne miejsce rozmowy, rowniez na pietrach przez schody).
+- Sklepy: nowi NPC (14) - kowale/platnerze, karczmarze, magowie, handlarz ryb i agenci domow; nowe sklepy
+  `*_arms`, `*_magic`, `*_supplies` (te same ceny co istniejace sklepy, bez zmian w ekonomii).
+- Domy: `maps/world/houses.csv` (16 domow, generowane przez cities.house), `house/HouseRegistry` (walidacja:
+  miasto, drzwi, brak nakladania), wlasciciele `HouseOwnersMap` zapisywani przez serwer w `save/houses.txt`
+  (zapis atomowy). Kupno u agenta domow w tym samym miescie (`npc:housebuy:<id>`), cena 5000 gp za pole
+  (Varden x2), platne z banku; jeden dom na postac; `npc:houseleave` oddaje dom (bez zwrotu). Obcy nie wejda do
+  srodka; po utracie domu gracz przenoszony pod drzwi. Pole `house` w zapisie postaci.
+- Nowe testy: HouseSystemTest, DepotLockerTest. Testy 432 OK, regresja GUI bez zmian.
+- Czynsz za domy nie jest pobierany (decyzja: brak okresowych oplat, zeby nie zmieniac ekonomii bez zgody).
+
 ## Nastepne kroki (dokladnie)
-1. Etap 6: depozyty (skrzynie depozytu w budynkach), banki, swiatynie, sklepy w kazdym miescie (wiecej NPC
-   handlarzy: bron, zbroje, magia, zywnosc, narzedzia), system domow (wlasciciel, czynsz, drzwi, zapis).
-2. Etap 7: mosty, statki i podroze (NPC kapitanowie w porcie Selvaran i na wyspach; Reachability.Link dla tras).
-3. Etap 8: expowiska na powierzchni dla postaci 300+ (zachodni kontynent za slaby).
+1. Etap 7: mosty, statki i podroze (NPC kapitanowie w porcie Selvaran i na wyspach; Reachability.Link dla tras).
+2. Etap 8: expowiska na powierzchni dla postaci 300+ (zachodni kontynent za slaby).
+3. Etap 9: wielopoziomowe lochy.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

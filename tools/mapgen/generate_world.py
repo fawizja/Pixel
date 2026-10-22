@@ -567,7 +567,8 @@ def selvaran(floors, transitions):
     rect(g, X0 + 3, Y0 + 9, X0 + 7, Y0 + 9, 'B')
     for x in (X0 + 3, X0 + 7):
         g[Y0 + 8][x] = 'x'
-        g[Y0 + 16][x] = 'x'
+    for x in (X0 + 3, X0 + 4, X0 + 6, X0 + 7):
+        g[Y0 + 16][x] = '\u042c'                      # skrzynie depozytu (etap 6)
     g[Y0 + 17][X0 + 5] = 'd'
     g[Y0 + 15][X0 + 7] = '<'
     box(up, X0 + 2, Y0 + 7, X0 + 8, Y0 + 17, '%', '_')
@@ -588,9 +589,10 @@ def selvaran(floors, transitions):
     g[Y1 - 9][cx + 4] = 'D'
     # domy (poludniowy zachod) z pietrem
     houses = [(X0 + 6, gy + 3), (X0 + 6, gy + 10), (X0 + 14, gy + 10)]
-    for hx, hy in houses:
+    for i, (hx, hy) in enumerate(houses):
         box(g, hx, hy, hx + 6, hy + 5, '%', '_')
         g[hy][hx + 3] = 'D'
+        cities.house(f'Zaulek Palmowy {i + 1}', 'Selvaran', hx, hy, hx + 6, hy + 5, 0, (hx + 3, hy))
         g[hy + 4][hx + 5] = '<'
         box(up, hx, hy, hx + 6, hy + 5, '%', '_')
         up[hy + 4][hx + 5] = '>'
@@ -877,6 +879,11 @@ def main():
         legend.append(f'{sym};{ground};{dec};{obj};{wall}')
     with open(os.path.join(OUT, 'legend.csv'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(legend) + '\n')
+
+    with open(os.path.join(OUT, 'houses.csv'), 'w', encoding='utf-8') as f:
+        f.write('# id;nazwa;miasto;wnetrze x0;y0;x1;y1;z;drzwi x;drzwi y;cena (gp, z konta) - cities.py\n')
+        for h in cities.HOUSES:
+            f.write(';'.join(str(v) for v in h) + '\n')
 
     with open(os.path.join(OUT, 'transitions.csv'), 'w', encoding='utf-8') as f:
         f.write('# x;y;z;typ;docelowe x;y;z\n')

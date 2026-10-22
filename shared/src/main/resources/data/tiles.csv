@@ -88,3 +88,4 @@
 99;chest;OBJECT;0;0;town;#c08030;crate
 100;lumber;OBJECT;0;0;town;#b08048;crate
 101;pyramid;WALL;0;0;desert;#c8a060;rockwall
+102;depot_locker;OBJECT;0;0;town;#7a5230;crate

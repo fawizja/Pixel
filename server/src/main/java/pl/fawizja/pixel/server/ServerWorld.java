@@ -69,6 +69,27 @@ final class ServerWorld {
     private final StartingConfig config = StartingConfig.loadDefault();
     private final MonsterRegistry monsterTypes;
     private final NpcRegistry npcs;
+    private final pl.fawizja.pixel.house.HouseRegistry houses;
+    private final File housesFile;
+    private final pl.fawizja.pixel.house.HouseOwnersMap houseOwners;
+    /** Wlasciciele domow wspolni dla graczy; kazda zmiana od razu na dysk. */
+    private final pl.fawizja.pixel.house.HouseOwners savedHouseOwners = new pl.fawizja.pixel.house.HouseOwners() {
+        @Override
+        public String ownerOf(String id) { return houseOwners.ownerOf(id); }
+
+        @Override
+        public boolean claim(String id, String owner) {
+            boolean ok = houseOwners.claim(id, owner);
+            if (ok) saveHouses();
+            return ok;
+        }
+
+        @Override
+        public void release(String id) {
+            houseOwners.release(id);
+            saveHouses();
+        }
+    };
     private final ShopRegistry shops;
     private final QuestRegistry quests;
     private final pl.fawizja.pixel.treasure.TreasureChests chests;
@@ -131,6 +152,10 @@ final class ServerWorld {
         monsters.populate(null);
         shops = ShopRegistry.loadDefault(items);
         npcs = NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
+        houses = pl.fawizja.pixel.house.HouseRegistry.load(WorldLayout.WORLD_MAP, world);
+        housesFile = new File(saveDir, "houses.txt");
+        houseOwners = pl.fawizja.pixel.house.HouseOwnersMap.decode(housesFile.isFile()
+                ? new String(java.nio.file.Files.readAllBytes(housesFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : "");
         quests = QuestRegistry.loadDefault(items, monsterTypes);
         chests = pl.fawizja.pixel.treasure.TreasureChests.generate(world);
         spells = SpellRegistry.loadDefault(items);
@@ -576,6 +601,17 @@ final class ServerWorld {
                     java.nio.file.StandardCopyOption.ATOMIC_MOVE);
         } catch (IOException e) {
             LOG.warning("weekly ranking not saved: " + e.getMessage());
+        }
+    }
+
+    private void saveHouses() {
+        try {
+            File tmp = new File(housesFile.getParentFile(), "houses.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), houseOwners.encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), housesFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("houses save failed: " + e.getMessage());
         }
     }
 
@@ -1411,6 +1447,7 @@ final class ServerWorld {
         GameSession s = new GameSession(items, world, pc, monsters, ground, new Random(rng.nextLong()),
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
+        s.setHouses(houses, savedHouseOwners);
         s.setChests(chests);
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
                 pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));

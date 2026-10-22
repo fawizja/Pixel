@@ -128,6 +128,7 @@ public final class PlayerCharacter {
         weeklyBossWeek = o.weeklyBossWeek;
         pet = o.pet;
         title = o.title;
+        house = o.house;
         outfit = o.outfit;
         tips = o.tips;
         torchLit = o.torchLit;
@@ -210,6 +211,12 @@ public final class PlayerCharacter {
     public void setOutfit(int i) { outfit = Outfit.clamp(i); }
 
     public String title() { return title; }
+
+    /** Dom postaci (id z houses.csv) albo null. */
+    private String house;
+
+    public String house() { return house; }
+    public void setHouse(String id) { house = id == null || id.isEmpty() || id.equals("-") ? null : id; }
     public void setTitle(String key) { title = key == null || key.isEmpty() || key.equals("-") ? null : key; }
     public void setBlessed(boolean v) { blessed = v; }
 

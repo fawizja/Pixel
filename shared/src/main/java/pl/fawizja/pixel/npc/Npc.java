@@ -10,6 +10,9 @@ public record Npc(String key, String name, NpcRole role, String town, Position p
     /** Maksymalna odleglosc rozmowy (w kafelkach, przez lade). */
     public static final int TALK_RANGE = 2;
 
+    /** Klucz skrzyni depozytu (pole mapy dzialajace jak bankier w widoku depozytu). */
+    public static final String DEPOT_LOCKER = "depot_locker";
+
     public Npc {
         Objects.requireNonNull(key);
         Objects.requireNonNull(role);

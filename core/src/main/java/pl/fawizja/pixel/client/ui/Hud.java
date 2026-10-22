@@ -583,6 +583,7 @@ public final class Hud {
             smithView = false;
         }
         npc = n;
+        if (pl.fawizja.pixel.npc.Npc.DEPOT_LOCKER.equals(n.key())) depotView = true;   // skrzynia: od razu depozyt
         npcMode = true;
         menuOpen = true;
         bagOpen = false;
@@ -1402,6 +1403,25 @@ public final class Hud {
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
                     left.add(new MenuRow("npc:travel:" + r.to().town(), "Jedź do " + r.to().town(),
                             String.format("%,d gp", r.price()) + (gold < r.price() ? " - za mało monet w plecaku" : ""), gold >= r.price()));
+                }
+                break;
+            }
+            case HOUSING: {
+                pl.fawizja.pixel.house.House own = session.houses().get(pc.house());
+                long bal = pc.bank().balance();
+                left.add(new MenuRow("npc:none", own == null ? "Nie masz domu" : "Twój dom: " + own.name(),
+                        own == null ? String.format("konto: %,d gp - dom kupisz za złoto z banku", bal) : own.town() + ", wejdziesz do niego tylko ty", false));
+                if (own != null) {
+                    right.add(new MenuRow("npc:houseleave", "Oddaj dom", "bez zwrotu ceny; ktoś inny będzie mógł go kupić", true));
+                }
+                for (pl.fawizja.pixel.house.House h : session.houses().inTown(npc.town())) {
+                    if (left.size() >= perCol) break;
+                    String owner = session.houseOwner(h);
+                    String desc = owner != null ? "właściciel: " + owner
+                            : String.format("%,d gp, %d pól, drzwi %d,%d%s", h.price(), h.size(), h.door().x(), h.door().y(),
+                                    h.z() != 0 ? " (piętro " + h.z() + ")" : "");
+                    left.add(new MenuRow("npc:housebuy:" + h.id(), (owner == null ? "Kup: " : "Zajęty: ") + h.name(), desc,
+                            owner == null && own == null && bal >= h.price()));
                 }
                 break;
             }

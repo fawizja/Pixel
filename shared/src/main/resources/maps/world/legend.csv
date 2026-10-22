@@ -161,3 +161,6 @@ $;frozen_floor;-;wall_torch;-
 Ф;cobblestone;-;stairs_down;-
 Х;grass;-;fence;-
 Ъ;sand;-;-;pyramid
+Щ;stone_floor;-;depot_locker;-
+Ы;sandstone_floor;-;depot_locker;-
+Ь;wood_floor;-;depot_locker;-

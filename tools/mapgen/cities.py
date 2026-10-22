@@ -65,6 +65,10 @@ LEGEND = [
     ('\u0424', 'cobblestone', '-', 'stairs_down', '-'),   # Ф
     ('\u0425', 'grass', '-', 'fence', '-'),               # Х
     ('\u042a', 'sand', '-', '-', 'pyramid'),             # Ъ bloki piramidy
+    # etap 6: skrzynie depozytu (uzycie obok = depozyt jak w Tibii)
+    ('\u0429', 'stone_floor', '-', 'depot_locker', '-'),     # Щ
+    ('\u042b', 'sandstone_floor', '-', 'depot_locker', '-'), # Ы
+    ('\u042c', 'wood_floor', '-', 'depot_locker', '-'),      # Ь
 ]
 WALKABLE = set('\u0445\u0446\u0449\u044a\u044d\u0422\u0423\u0424')
 
@@ -72,6 +76,19 @@ FROST_TOWN = (60, 4, 100, 47)
 QAS_TOWN = (56, 178, 108, 220)
 HARBOR = (104, 160, 162, 182)
 ROYAL = (114, 66, 156, 104)
+
+
+# domy do kupienia (etap 6): wypelniane przez funkcje miast, zapisywane do maps/world/houses.csv
+HOUSES = []
+HOUSE_PRICE_PER_TILE = 5000
+
+
+def house(name, town, x0, y0, x1, y1, z, door, factor=1):
+    """Rejestruje dom o murach x0..x1, y0..y1 (wnetrze bez murow) i drzwiach door."""
+    ix0, iy0, ix1, iy1 = x0 + 1, y0 + 1, x1 - 1, y1 - 1
+    price = (ix1 - ix0 + 1) * (iy1 - iy0 + 1) * HOUSE_PRICE_PER_TILE * factor
+    hid = f'{town.lower()}_{sum(1 for h in HOUSES if h[2] == town) + 1}'
+    HOUSES.append((hid, name, town, ix0, iy0, ix1, iy1, z, door[0], door[1], price))
 
 
 def put(g, x, y, ch):
@@ -141,7 +158,7 @@ def frostholm(floors, transitions, dungeon):
                       'l      l'])
     put(g, 68, 32, 'd')
     box(g, 63, 34, 72, 38, '#', '-')
-    stamp(g, 64, 37, ['\u0442\u0442\u0442  \u0442\u0442\u0442'])
+    stamp(g, 64, 37, ['\u0429\u0429\u0429  \u0429\u0429\u0429'])
     put(g, 64, 35, 'l'); put(g, 71, 35, 'l')
     put(g, 68, 34, 'd')
     # sklep (drewno), tawerna, domy
@@ -159,10 +176,11 @@ def frostholm(floors, transitions, dungeon):
                       '\u0434 \u0434 \u0434  \u0433\u0433',
                       '        \u0433'])
     put(g, 87, 36, 'D')
-    for hx, door in ((63, 65), (70, 72), (84, 86), (91, 93)):
+    for i, (hx, door) in enumerate(((63, 65), (70, 72), (84, 86), (91, 93))):
         box(g, hx, 40, hx + 5, 44, '%', '_')
         stamp(g, hx + 1, 41, ['\u0433  \u0432', '    ', '\u0431 \u0434\u0439'])
         put(g, door, 40, 'D')
+        house(f'Dolne Miasto {i + 1}', 'Frostholm', hx, 40, hx + 5, 44, 0, (door, 40))
     # plac z fontanna, latarnie, posagi przy bramie
     rect(g, 79, 35, 80, 35, 'u')
     for lx, ly in ((76, 34), (83, 34), (76, 37), (83, 37), (77, 43), (82, 43)):
@@ -203,6 +221,7 @@ def frostholm(floors, transitions, dungeon):
     box(up, 62, 18, 68, 22, '%', '_')
     stamp(up, 63, 19, ['\u0433   \u0432', '     ', '\u0431  \u0434\u0439'])
     put(up, 65, 22, 'D')
+    house('Taras Zachodni', 'Frostholm', 62, 18, 68, 22, 1, (65, 22))
     # wschodni taras: biblioteka i dom kupca, punkt widokowy
     box(up, 84, 9, 97, 15, '#', '-')
     stamp(up, 85, 10, ['\u0440\u0440\u0440\u0440 \u0440\u0440\u0440\u0440 \u0440\u0440',
@@ -211,10 +230,11 @@ def frostholm(floors, transitions, dungeon):
                        '            ',
                        '\u0440\u0440\u0440\u0440    \u0440\u0440\u0440\u0440'])
     put(up, 90, 15, 'd')
-    for hx, door in ((84, 86), (91, 93)):
+    for i, (hx, door) in enumerate(((84, 86), (91, 93))):
         box(up, hx, 17, hx + 5, 21, '%', '_')
         stamp(up, hx + 1, 18, ['\u0433  \u0432', '    ', '\u0431 \u0434\u0439'])
         put(up, door, 21, 'D')
+        house(f'Taras Wschodni {i + 1}', 'Frostholm', hx, 17, hx + 5, 21, 1, (door, 21))
     for sx, sy in ((83, 10), (83, 13), (78, 9)):
         put(up, sx, sy, '\u0443')
     put(up, 67, 23, '\u0424')                               # zejscie z tarasu zachodniego
@@ -326,9 +346,10 @@ def qasirah(floors, transitions):
     stamp(g, 59, 209, ['        ', '\u043f\u043f\u043f\u043f\u043f\u043f\u043f\u043f', '        ', '\u0417\u044a    \u044a\u0417'])
     put(g, 62, 208, '\u0446')
     box(g, 69, 208, 77, 213, 'Z', 'X')
-    stamp(g, 70, 209, ['\u044a     \u044a', '       ', '       ', '\u0417\u0417\u0417 \u0417\u0417\u0417'])
+    stamp(g, 70, 209, ['\u044a     \u044a', '       ', '       ', '\u042b\u042b\u042b \u042b\u042b\u042b'])
     put(g, 73, 208, '\u0446')
-    for hx, door in ((58, 60), (65, 67), (72, 74)):
+    for i, (hx, door) in enumerate(((58, 60), (65, 67), (72, 74))):
+        house(f'Uliczka Palmowa {i + 1}', 'Qasirah', hx, 215, hx + 5, 219, 0, (door, 215))
         box(g, hx, 215, hx + 5, 219, 'Z', 'X')
         stamp(g, hx + 1, 216, ['\u041b  \u0416', '    ', '\u041d \u044f\u0417'.replace('\u041d', '\u0431')])
         put(g, door, 215, '\u0446')
@@ -506,10 +527,15 @@ def royal_district(floors, transitions):
     put(g, 130, 99, 'D')
 
     # bogata dzielnica: domy z kamienia z ogrodami
-    for hx, hy in ((137, 90), (145, 90), (137, 97), (145, 97)):
+    for i, (hx, hy) in enumerate(((137, 90), (145, 90), (137, 97), (145, 97))):
         box(g, hx, hy, hx + 6, hy + 5, '#', '-')
-        stamp(g, hx + 1, hy + 1, ['\u041dR \u0440\u0442', ' R   ', ' R \u0441 ', 'l   l'])
         put(g, hx + 2, hy, 'd')
+        if (hx, hy) == (137, 97):                           # depozyt krolewski ze skrzyniami
+            stamp(g, hx + 1, hy + 1, ['l   l', '     ', '\u0429\u0429 \u0429\u0429', '\u0429\u0429 \u0429\u0429'])
+            continue
+        stamp(g, hx + 1, hy + 1, ['\u041dR \u0440\u0442', ' R   ', ' R \u0441 ', 'l   l'])
+        house(f'Dzielnica Krolewska {len([h for h in HOUSES if h[2] == "Varden"]) + 1}', 'Varden', hx, hy, hx + 6, hy + 5, 0,
+              (hx + 2, hy), factor=2)
         put(g, hx - 1, hy + 6, 'f'); put(g, hx + 7, hy + 6, 'Y')
     for x in range(136, 152):
         if g[96][x] == '.':

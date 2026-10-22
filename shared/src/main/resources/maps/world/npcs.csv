@@ -25,3 +25,17 @@ qas_carrier;Woźnica Qasirah;CARRIER;Qasirah;104;197;0;-;#8a6a4a;Karawana do inn
 camp_merchant;Kwatermistrz Bren;MERCHANT;Oboz Zwiadowcow;183;84;0;camp_shop;#a07040;Mikstury dla twardych i skup wszystkiego, co przyniesiesz zza mostu.
 camp_banker;Skarbniczka Wena;BANKER;Oboz Zwiadowcow;175;88;0;-;#d8c070;Konto jest wspólne ze wszystkimi bankami miast.
 camp_guide;Zwiadowczyni Ilka;GUIDE;Oboz Zwiadowcow;179;82;0;-;#506040;Za obozem zaczyna się prawdziwe niebezpieczeństwo. Mam zadania dla najsilniejszych.
+varden_smith;Kowal Bogdan;MERCHANT;Varden;124;101;0;varden_arms;#909090;Kuźnia królewska. Broń i zbroje dla rycerzy i łowców.
+varden_innkeeper;Karczmarz Wit;MERCHANT;Varden;131;101;0;varden_supplies;#a07040;Gorąca strawa, pochodnie i liny. Siadaj, wędrowcze.
+varden_archmage;Arcymag Eldrin;MERCHANT;Varden;152;84;0;varden_magic;#5040c0;Gildia magów zaprasza. Runy, mikstury i różdżki.
+varden_housing;Zarządca Leopold;HOUSING;Varden;125;82;0;-;#6a5a8a;Domy w dzielnicy królewskiej. Płacisz z konta w banku.
+frost_smith;Kowal Hrodgar;MERCHANT;Frostholm;76;20;1;frost_arms;#909090;Stal z górskiej rudy. Kupisz tu broń i zbroje.
+frost_innkeeper;Karczmarka Sigrun;MERCHANT;Frostholm;94;36;0;frost_supplies;#a07040;Grzane piwo, prowiant i liny na mróz.
+frost_mage;Mag Runolf;MERCHANT;Frostholm;90;12;1;frost_magic;#5040c0;Runy i mikstury z biblioteki na tarasie.
+frost_housing;Zarządca Bjorn;HOUSING;Frostholm;68;12;1;-;#6a5a8a;Domy w dolnym mieście i na tarasach. Płacisz z konta w banku.
+qas_smith;Płatnerz Hamid;MERCHANT;Qasirah;93;203;0;qas_arms;#909090;Szable i zbroje z najlepszej stali bazaru.
+qas_mage;Wróżbitka Leila;MERCHANT;Qasirah;100;203;0;qas_magic;#8060c0;Runy, mikstury i różdżki z dalekich krain.
+qas_innkeeper;Handlarz Omar;MERCHANT;Qasirah;86;208;0;qas_supplies;#a07040;Daktyle, woda i liny na drogę przez pustynię.
+qas_housing;Zarządca Karim;HOUSING;Qasirah;97;185;0;-;#6a5a8a;Domy Qasirah przy palmowej uliczce. Płacisz z konta w banku.
+selv_fishmonger;Rybaczka Mara;MERCHANT;Selvaran;143;162;0;selv_supplies;#4a7a9a;Świeże ryby i zapasy na rejs.
+selv_housing;Zarządca Tomasz;HOUSING;Selvaran;132;162;0;-;#6a5a8a;Domy z piętrem w Selvaran. Płacisz z konta w banku.

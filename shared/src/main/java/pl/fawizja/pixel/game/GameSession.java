@@ -133,7 +133,7 @@ public final class GameSession {
         this.fishing = new FishingSystem(world, items, rng);
         this.herbs = new pl.fawizja.pixel.gathering.HerbGathering(world);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
-        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p));
+        this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p) || !mayEnter(p));
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
             if (t.isElite()) pc.bestiary().recordElite();
@@ -553,9 +553,130 @@ public final class GameSession {
     public ShopRegistry shops() { return shops; }
     public QuestSystem quests() { return quests; }
 
-    /** NPC, z ktorym mozna teraz rozmawiac (albo null). */
+    /** NPC, z ktorym mozna teraz rozmawiac (albo null); skrzynia depozytu obok postaci ma pierwszenstwo. */
     public Npc npcNearby() {
-        return pc.isDead() ? null : npcs.nearest(pc.position(), world);
+        if (pc.isDead()) return null;
+        Npc locker = depotLockerNearby();
+        return locker != null ? locker : npcs.nearest(pc.position(), world);
+    }
+
+    /** Skrzynia depozytu (jak w Tibii) na sasiednim polu: dziala jak bankier otwarty w widoku depozytu. */
+    public Npc depotLockerNearby() {
+        Position p = pc.position();
+        pl.fawizja.pixel.world.FloorMap f = world.floor(p.z());
+        if (lockerTile == null) lockerTile = tileId("depot_locker");
+        if (f == null || lockerTile < 0) return null;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                if (f.get(pl.fawizja.pixel.world.Layer.OBJECT, p.x() + dx, p.y() + dy) != lockerTile) continue;
+                // ta sama instancja dla tej samej skrzyni: okno rozmowy porownuje NPC przez ==
+                return lockers.computeIfAbsent(p.translate(dx, dy), q -> new Npc(Npc.DEPOT_LOCKER, "Skrzynia depozytu",
+                        NpcRole.BANKER, nearestTown(q), q, null, "Twój depozyt jest wspólny dla wszystkich miast.", "#7a5230"));
+            }
+        }
+        return null;
+    }
+
+    /** Miasto najblizszego NPC (dzielnice poza murami, np. krolewska Varden), a bez NPC - najblizszej swiatyni. */
+    private String nearestTown(Position p) {
+        String best = "";
+        int bd = Integer.MAX_VALUE;
+        for (Npc n : npcs.all()) {
+            int d = n.position().distanceTo(p);
+            if (n.position().z() == p.z() && d < bd) { bd = d; best = n.town(); }
+        }
+        if (!best.isEmpty()) return best;
+        for (pl.fawizja.pixel.world.Town t : world.towns()) {
+            int d = t.temple().distanceTo(p);
+            if (d < bd) { bd = d; best = t.name(); }
+        }
+        return best;
+    }
+
+    private Integer lockerTile;
+    private final java.util.Map<Position, Npc> lockers = new java.util.HashMap<>();
+
+    private int tileId(String key) {
+        pl.fawizja.pixel.world.TileType t = world.tiles().byKeyOrNull(key);
+        return t == null ? -1 : t.id();
+    }
+
+    // ------------------------------------------------------------------ domy
+
+    private pl.fawizja.pixel.house.HouseRegistry houses = pl.fawizja.pixel.house.HouseRegistry.empty();
+    private pl.fawizja.pixel.house.HouseOwners houseOwners = new pl.fawizja.pixel.house.HouseOwners() {
+        @Override
+        public String ownerOf(String id) { return id.equals(pc.house()) ? pc.name() : null; }
+
+        @Override
+        public boolean claim(String id, String owner) { return ownerOf(id) == null; }
+
+        @Override
+        public void release(String id) { }
+    };
+
+    /** Domy swiata i ich wlasciciele (serwer podaje wspolna liste; offline wlascicielem jest tylko ta postac). */
+    public void setHouses(pl.fawizja.pixel.house.HouseRegistry houses, pl.fawizja.pixel.house.HouseOwners owners) {
+        this.houses = java.util.Objects.requireNonNull(houses);
+        if (owners != null) this.houseOwners = owners;
+        if (pc.house() != null && (houses.get(pc.house()) == null || !pc.name().equals(houseOwners.ownerOf(pc.house())))) {
+            pc.setHouse(null);                                   // dom zniknal z mapy albo zostal odebrany
+        }
+        leaveForeignHouse();
+    }
+
+    public pl.fawizja.pixel.house.HouseRegistry houses() { return houses; }
+
+    public String houseOwner(pl.fawizja.pixel.house.House h) { return houseOwners.ownerOf(h.id()); }
+
+    /** Czy postac moze wejsc na pole (wnetrza domow tylko dla wlasciciela). */
+    public boolean mayEnter(Position p) {
+        pl.fawizja.pixel.house.House h = houses.at(p);
+        return h == null || pc.name().equals(houseOwners.ownerOf(h.id()));
+    }
+
+    private void leaveForeignHouse() {
+        pl.fawizja.pixel.house.House h = houses.at(pc.position());
+        if (h != null && !mayEnter(pc.position())) pc.setPosition(h.door());
+    }
+
+    /** U zarzadcy domow: kupno domu w jego miescie za zloto z banku (jeden dom na postac). */
+    public boolean buyHouse(String id, long nowMs) {
+        Npc n = talkTo(NpcRole.HOUSING, nowMs);
+        if (n == null) return false;
+        pl.fawizja.pixel.house.House h = houses.get(id);
+        String msg = null;
+        if (h == null || !h.town().equalsIgnoreCase(n.town())) msg = "Ten zarządca nie sprzedaje takiego domu.";
+        else if (pc.house() != null) msg = "Masz już dom. Najpierw go opuść.";
+        else if (houseOwners.ownerOf(id) != null) msg = "Ten dom ma już właściciela.";
+        else if (pc.bank().balance() < h.price()) msg = String.format("Dom kosztuje %,d gp, a na koncie masz %,d gp.", h.price(), pc.bank().balance());
+        if (msg != null) {
+            log.add(nowMs, EventLog.Kind.WARNING, msg);
+            return false;
+        }
+        if (!houseOwners.claim(id, pc.name())) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Ten dom ma już właściciela.");
+            return false;
+        }
+        pc.bank().debit(h.price());
+        pc.setHouse(id);
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp z konta. Wejdziesz do niego tylko ty.", h.name(), h.price()));
+        return true;
+    }
+
+    /** U zarzadcy domow: oddanie domu (bez zwrotu ceny); postac stojaca w srodku wychodzi przez drzwi. */
+    public boolean leaveHouse(long nowMs) {
+        if (talkTo(NpcRole.HOUSING, nowMs) == null) return false;
+        pl.fawizja.pixel.house.House h = houses.get(pc.house());
+        if (h == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz domu.");
+            return false;
+        }
+        houseOwners.release(h.id());
+        pc.setHouse(null);
+        leaveForeignHouse();
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Oddano dom " + h.name() + ".");
+        return true;
     }
 
     private Npc talkTo(NpcRole role, long nowMs) {

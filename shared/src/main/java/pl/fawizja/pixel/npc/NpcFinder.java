@@ -12,7 +12,7 @@ public final class NpcFinder {
             Map.entry("bank", NpcRole.BANKER), Map.entry("bankier", NpcRole.BANKER), Map.entry("depozyt", NpcRole.BANKER),
             Map.entry("rynek", NpcRole.BANKER), Map.entry("kaplan", NpcRole.PRIEST), Map.entry("swiatynia", NpcRole.PRIEST),
             Map.entry("przewodnik", NpcRole.GUIDE), Map.entry("zadania", NpcRole.GUIDE), Map.entry("woznica", NpcRole.CARRIER),
-            Map.entry("podroz", NpcRole.CARRIER));
+            Map.entry("podroz", NpcRole.CARRIER), Map.entry("dom", NpcRole.HOUSING), Map.entry("domy", NpcRole.HOUSING));
 
     private NpcFinder() {}
 
