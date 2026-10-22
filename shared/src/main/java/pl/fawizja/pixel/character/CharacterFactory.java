@@ -40,7 +40,7 @@ public final class CharacterFactory {
         PlayerCharacter pc = new PlayerCharacter(UUID.randomUUID().toString(), name, vocation,
                 level, startTemple, items, config.startBankBalance(), config.startTown());
         if (level > BASE_LEVEL) skillsForLevel(pc);
-        for (String key : StarterKits.equipped(vocation)) {
+        for (String key : StarterKits.equipped(vocation, level)) {
             ItemStack s = ItemStack.of(items.byKey(key).id());
             EquipSlot slot = items.get(s.itemId()).slot();
             if (pc.equipment().get(slot) != null) throw new IllegalStateException("kit slot used twice: " + slot);
@@ -48,7 +48,7 @@ public final class CharacterFactory {
         }
         InventoryResult r = Money.add(pc.backpack(), config.startGoldInBackpack());
         if (!r.ok()) throw new IllegalStateException("starting gold does not fit: " + r);
-        for (StarterKits.Entry e : StarterKits.backpack(vocation)) {
+        for (StarterKits.Entry e : StarterKits.backpack(vocation, level)) {
             r = pc.backpack().add(new ItemStack(items.byKey(e.key()).id(), e.count()));
             if (!r.ok()) throw new IllegalStateException("starter kit does not fit: " + e.key());
         }
@@ -77,11 +77,45 @@ public final class CharacterFactory {
         }
     }
 
-    /** Podstawowe wyposazenie zalezne od profesji. */
+    /**
+     * Wyposazenie startowe zalezne od profesji i poziomu: do poziomu 249 podstawowe (skora, prosta bron),
+     * od poziomu {@link #VETERAN_LEVEL} (start serwera na poziomie 300) obsydianowe z bronia profesji i mocniejszymi
+     * miksturami - tak jak postac, ktora doszla do tego poziomu sama.
+     */
     public static final class StarterKits {
         public record Entry(String key, int count) {}
 
+        /** Od tego poziomu startowy zestaw jest obsydianowy (minimalny poziom tych przedmiotow). */
+        public static final int VETERAN_LEVEL = 250;
+
         private StarterKits() {}
+
+        public static List<String> equipped(Vocation v, int level) {
+            if (level < VETERAN_LEVEL) return equipped(v);
+            List<String> armor = Arrays.asList("obsidian_helmet", "obsidian_armor", "obsidian_legs", "leather_boots");
+            switch (v) {
+                case PALADIN: return concat(armor, "magma_spear", "obsidian_shield");
+                case DRUID: return concat(armor, "rod_of_hoarfrost");
+                case SORCERER: return concat(armor, "obsidian_wand");
+                case MONK: return concat(armor, "molten_knuckles");
+                default: throw new IllegalArgumentException(v.name());
+            }
+        }
+
+        public static List<Entry> backpack(Vocation v, int level) {
+            if (level < VETERAN_LEVEL) return backpack(v);
+            List<Entry> common = Arrays.asList(new Entry("torch", 1), new Entry("rope", 1), new Entry("shovel", 1),
+                    new Entry("fishing_rod", 1), new Entry("worm", 10), new Entry("bread", 5));
+            switch (v) {
+                case PALADIN: return concat(common, new Entry("spear", 20), new Entry("strong_health_potion", 20),
+                        new Entry("strong_mana_potion", 20));
+                case DRUID:
+                case SORCERER: return concat(common, new Entry("health_potion", 10), new Entry("strong_mana_potion", 30),
+                        new Entry("blank_rune", 10), new Entry("healing_rune", 5));
+                case MONK: return concat(common, new Entry("strong_health_potion", 30), new Entry("mana_potion", 10));
+                default: throw new IllegalArgumentException(v.name());
+            }
+        }
 
         public static List<String> equipped(Vocation v) {
             List<String> armor = Arrays.asList("leather_helmet", "leather_armor", "leather_legs", "leather_boots");

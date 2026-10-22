@@ -11,12 +11,24 @@ wyswietlane sa polskie nazwy z `items.csv` / `monsters.csv`.
 
 | Ustawienie | Wartosc | Klucz w `starting.properties` |
 |---|---|---|
-| Poziom startowy (serwer) | 8 | `start.level` |
+| Poziom startowy (serwer) | 300 (brief Darka 2026-10-22; testy wymuszaja 8 przez -Dpixel.start.level) | `start.level` |
 | Poziom startowy gry offline | 300 (umiejetnosci: bron ~91, magia magow 70, obrona ~82; HP/mana z poziomu) | `start.level.offline`, `-Dpixel.startLevel` |
-| Zloto w plecaku | 10 000 gp (wydane jako 1 Crystal Coin) | `start.gold.backpack` |
-| Zloto w banku | 0 gp (10 000 gp **nie** trafia do banku) | `start.gold.bank` |
+| Zloto w plecaku | 10 000 gp (kieszonkowe, 1 Crystal Coin) | `start.gold.backpack` |
+| Zloto w banku | 10 000 000 gp | `start.gold.bank` |
 | Miasto startowe | Varden (swiatynia, strefa bezpieczna) | `start.town` |
 | Maksymalny poziom | 1000 | `level.max` |
+
+Wyposazenie startowe (etap 11, `CharacterFactory.StarterKits`): ponizej poziomu 250 skora i prosta bron profesji;
+od poziomu 250 (czyli przy starcie na 300) zestaw obsydianowy:
+
+| Profesja | Bron | Tarcza | Plecak (poza latarka, lina, lopata, wedka, robakami, chlebem) |
+|---|---|---|---|
+| Paladin | Magmowa wlocznia | Obsydianowa tarcza | 20 wloczni, 20 poteznych mikstur zdrowia, 20 poteznych mikstur many |
+| Druid | Laska szronu | - | 10 mikstur zdrowia, 30 poteznych mikstur many, 10 czystych run, 5 run leczenia |
+| Sorcerer | Obsydianowa rozdzka | - | jak druid |
+| Monk | Stopione kastety | - | 30 poteznych mikstur zdrowia, 10 mikstur many |
+
+Wszystkie profesje: obsydianowy helm, zbroja i nagolenniki, skorzane buty.
 
 Kwota startowa jest dodawana w najwyzszych nominalach (`Money.add`), wiec 10 000 gp zajmuje jeden slot.
 

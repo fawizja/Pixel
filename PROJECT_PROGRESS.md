@@ -30,8 +30,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 8. Expowiska na powierzchni | ZAKONCZONY | 7312299 |
 | 9. Wielopoziomowe lochy | ZAKONCZONY | 35ddade |
 | 10. Potwory, bossowie, loot | ZAKONCZONY | 0cd1b79 |
-| 11. Profesje i poziomy | nastepny | - |
-| 12-20 | do zrobienia | - |
+| 11. Profesje i poziomy | ZAKONCZONY | (ten commit) |
+| 12. Ruch i walka | nastepny | - |
+| 13-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -197,10 +198,22 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Regresja GUI: wzorzec chest z etapu 9 byl skopiowany w zlym formacie (pelny rozmiar) - odtworzony przez
   run.sh --update. Testy 439 OK (nowy DungeonBossTest), regresja GUI 42/42.
 
+## Etap 11 - profesje i poziomy (2026-10-22)
+- Przeglad: HP/mana/udzwig na poziom zgodne z Tibia dla paladyna (10/15/20) i magow (5/30/10); monk ma wlasny
+  profil (13/6/22, najszybsze ataki). Krzywa doswiadczenia jak w Tibii (szescienna), poziom maks. 1000.
+  Umiejetnosci startowe na poziomie 300 dobierane do profesji (bron ~91, magia magow 70, obrona ~82) - bez zmian.
+- Nowe: wyposazenie startowe zalezne od poziomu. Postac zaczynajaca na 300 dostaje zestaw obsydianowy (poziom 250)
+  z bronia swojej profesji i mocniejsze mikstury/runy zamiast skory z poziomu 8. Start 300 / 10 000 000 gp w banku
+  bez zmian.
+- docs/GAME_BALANCE.md: poprawiona nieaktualna tabela startu (pokazywala poziom 8 i 0 gp w banku) + tabela zestawow.
+- Braki przeniesione dalej: czary konczace sie na poziomie 100 i brak utani hur / utani gran hur (etapy 12-13),
+  szybkosc 8 kafelkow/s na poziomie 300 do przegladu w etapie 12.
+- Testy 441 OK (nowy VeteranStarterKitTest), regresja GUI 42/42.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 11: profesje i poziomy (przeglad 4 profesji, krzywa doswiadczenia i statystyki dla 300+).
-2. Etap 12: ruch i walka, utani hur / utani gran hur.
-3. Etap 13: czary, runy, mikstury.
+1. Etap 12: ruch i walka (utani hur / utani gran hur z czasem trwania, przeglad szybkosci 300+, kolizje).
+2. Etap 13: czary, runy, mikstury (czary dla poziomow 100-300+).
+3. Etap 14: ekwipunek i plecaki (wiele plecakow, przeciaganie).
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central
