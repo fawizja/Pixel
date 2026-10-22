@@ -27,7 +27,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 5. Cztery miasta | ZAKONCZONY | 19757e8 |
 | 6. Depozyty, banki, swiatynie, sklepy, domy | ZAKONCZONY | 435babc |
 | 7. Mosty, statki, podroze | ZAKONCZONY | d9b2950 |
-| 8. Expowiska na powierzchni | ZAKONCZONY | (ten commit) |
+| 8. Expowiska na powierzchni | ZAKONCZONY | 7312299 |
 | 9. Wielopoziomowe lochy | nastepny | - |
 | 10-20 | do zrobienia | - |
 
