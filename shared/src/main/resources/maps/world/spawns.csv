@@ -29,7 +29,7 @@ ice_golem;16;46;-2;4;2;240
 ice_golem;30;36;-2;4;2;240
 # Dzungla Selvaran
 crocodile;60;122;0;6;3;120
-crocodile;134;167;0;5;2;120
+crocodile;96;162;0;5;2;120
 jungle_serpent;29;129;0;5;3;120
 jungle_serpent;145;120;0;5;3;120
 jungle_hunter;40;160;0;4;2;120
@@ -40,7 +40,7 @@ temple_guardian;67;169;-2;4;2;300
 temple_guardian;44;172;-2;3;1;300
 # Pustynia Qasirah
 hyena;40;190;0;6;3;90
-hyena;120;180;0;6;3;90
+hyena;118;182;0;6;3;90
 scorpion;30;215;0;5;3;120
 scorpion;140;190;0;5;3;120
 sand_wraith;20;226;0;4;2;180
@@ -64,8 +64,8 @@ mummy;116;218;-4;4;2;300
 pharaoh;126;198;-5;2;1;1800
 # Skalny Wawoz i Klify Selvaran
 jungle_hunter;152;118;0;4;2;120
-jungle_serpent;154;160;0;4;2;120
-crocodile;137;165;0;4;2;120
+jungle_serpent;154;150;0;4;2;120
+crocodile;150;152;0;4;2;120
 jungle_hunter;155;117;1;4;2;120
 scorpion;150;164;1;4;2;120
 jungle_serpent;152;132;1;4;2;120

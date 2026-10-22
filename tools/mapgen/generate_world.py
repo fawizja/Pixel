@@ -16,6 +16,7 @@ from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import world_geo  # noqa: E402
+import cities  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 VARDEN = os.path.join(ROOT, 'varden')
@@ -103,9 +104,9 @@ EXTRA_LEGEND = [
     # Selvaran (przebudowa 0.182): skaly i krzaki w dzungli Skalnego Wawozu
     ('\u03c3', 'jungle_grass', '-', 'rock', '-'),
     ('\u03c4', 'jungle_grass', '-', 'bush', '-'),
-] + world_geo.LEGEND
+] + world_geo.LEGEND + cities.LEGEND
 WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578'
-               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be' + '\u03c5')
+               + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be' + '\u03c5') | cities.WALKABLE
 
 
 def grid(fill=' '):
@@ -230,44 +231,6 @@ def road(g, points, ch=':'):
                 x += 1 if bx > x else -1
             else:
                 y += 1 if by > y else -1
-
-
-# ------------------------------------------------------------------ miasta
-
-def town(g, x0, y0, x1, y1, wall, street, inner_wall, inner_floor, door_floor):
-    """Mury, bramy na 4 strony, swiatynia, bank, sklep, domy. Zwraca pozycje swiatyni."""
-    box(g, x0, y0, x1, y1, wall, street)
-    cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
-    for gx, gy in [(cx, y0), (cx + 1, y0), (cx, y1), (cx + 1, y1), (x0, cy), (x0, cy + 1), (x1, cy), (x1, cy + 1)]:
-        g[gy][gx] = street
-    # plac
-    rect(g, cx, cy, cx + 1, cy + 1, 'u')
-    for lx, ly in [(cx - 3, cy), (cx + 4, cy), (cx - 3, cy + 3), (cx + 4, cy + 3)]:
-        g[ly][lx] = 't'
-    # swiatynia (polnoc placu)
-    tx0, ty0 = cx - 4, y0 + 2
-    box(g, tx0, ty0, tx0 + 9, ty0 + 7, '#', '-')
-    rect(g, cx, ty0 + 2, cx + 1, ty0 + 6, 'R')
-    g[ty0 + 1][cx] = 'a'
-    g[ty0 + 1][cx + 1] = 'a'
-    g[ty0 + 1][tx0 + 1] = 'l'
-    g[ty0 + 1][tx0 + 8] = 'l'
-    g[ty0 + 7][cx] = 'd'
-    g[ty0 + 7][cx + 1] = 'd'
-    temple = (cx, ty0 + 4)
-    # bank (zachod) i sklep (wschod)
-    box(g, x0 + 2, y0 + 2, x0 + 7, y0 + 8, inner_wall, inner_floor)
-    rect(g, x0 + 3, y0 + 4, x0 + 5, y0 + 4, 'B')
-    g[y0 + 8][x0 + 5] = door_floor
-    box(g, x1 - 7, y0 + 2, x1 - 2, y0 + 8, inner_wall, inner_floor)
-    rect(g, x1 - 6, y0 + 4, x1 - 4, y0 + 4, 'B')
-    g[y0 + 8][x1 - 4] = door_floor
-    # domy (poludnie)
-    for hx in (x0 + 2, x0 + 8, x1 - 13, x1 - 7):
-        if hx + 5 < x1:
-            box(g, hx, y1 - 7, hx + 5, y1 - 2, inner_wall, inner_floor)
-            g[y1 - 7][hx + 2] = door_floor
-    return temple
 
 
 # ------------------------------------------------------------------ podziemia
@@ -696,7 +659,7 @@ def selvaran(floors, transitions):
                         (DEEP[0], DEEP[1], -2, 'LADDER', DEEP[0], DEEP[1] - 1, -1)])
     spawns = [
         '# Skalny Wawoz i Klify Selvaran',
-        'jungle_hunter;152;118;0;4;2;120', 'jungle_serpent;154;160;0;4;2;120', 'crocodile;137;165;0;4;2;120',
+        'jungle_hunter;152;118;0;4;2;120', 'jungle_serpent;154;150;0;4;2;120', 'crocodile;150;152;0;4;2;120',
         'jungle_hunter;156;118;1;4;2;120', 'scorpion;150;164;1;4;2;120', 'jungle_serpent;152;132;1;4;2;120',
         'jungle_hunter;150;162;2;3;2;120', 'jungle_serpent;156;146;2;3;2;120',
         '# Kanaly Selvaran (-1) i Krysztalowa Glebia (-2)',
@@ -724,11 +687,11 @@ def main():
     road(g, [(79, 150), (61, 150)])                                # sciezka do ruin w dzungli
     road(g, [(96, 198), (124, 198), (124, 205)])                   # szlak do grobowcow
 
-    # Frostholm (snieg)
-    frost = town(g, 64, 20, 95, 43, 'A', '=', '%', '_', 'D')
-    # Selvaran (rownik) - mury z omszalego kamienia
-    # Qasirah (pustynia) - piaskowiec
-    qas = town(g, 64, 187, 95, 210, 'Z', 'X', 'Z', 'X', 'd')
+    # etap 5: cztery rozne miasta (cities.py) - Frostholm gorski, Qasirah pustynno-dzunglowy
+    transitions_city = []
+    frost_city = cities.frostholm(floors, transitions_city, dungeon)
+    qas_city = cities.qasirah(floors, transitions_city)
+    frost, qas = frost_city['temple'], qas_city['temple']
 
     # Varden: kopia 1:1 (powierzchnia nadpisuje teren)
     v = read_varden()
@@ -744,6 +707,11 @@ def main():
 
     # Selvaran: miasto z murami, wiezami, swiatynia, depozytem, sklepami, kanalami i Skalnym Wawozem
     selv, selv_spawns, selv_entrances = selvaran(floors, transitions)
+    # port Selvaran i dzielnica krolewska Varden (poza kopia maps/varden)
+    port_city = cities.harbor(floors, transitions)
+    royal_city = cities.royal_district(floors, transitions)
+    transitions += transitions_city
+    city_parts = (frost_city, qas_city, port_city, royal_city)
 
     # jaskinie lodu pod Frostholm: wejscie (20,30) -> -1 -> -2
     g[30][20] = '{'
@@ -813,11 +781,13 @@ def main():
     east_entrances = east_entrances + high_entrances
 
     # ---------------------------------------------------------- etap 4: morze, wybrzeza, wyspy, gory
-    protect = [(VX - 2, VY - 2, VX + VW + 1, VY + VH + 1), (62, 18, 97, 45), (SELV[0] - 2, SELV[1] - 2, SELV[2] + 2, SELV[3] + 2),
-               (62, 185, 97, 212), (CAMP[0] - 2, CAMP[1] - 2, CAMP[2] + 2, CAMP[3] + 2)]
+    protect = [(VX - 2, VY - 2, VX + VW + 1, VY + VH + 1), (SELV[0] - 2, SELV[1] - 2, SELV[2] + 2, SELV[3] + 2),
+               (CAMP[0] - 2, CAMP[1] - 2, CAMP[2] + 2, CAMP[3] + 2)]
+    for part in city_parts:
+        protect += part['protect']
     geo_regions = world_geo.geography(floors, W, H, protect)
 
-    # NPC: Varden (wspolrzedne mapy varden + przesuniecie) i uklad town() dla 3 miast
+    # NPC: Varden (wspolrzedne mapy varden + przesuniecie), Frostholm i Qasirah (cities.py), Selvaran
     npcs = [
         ('varden_banker', 'Bankier Aldric', 'BANKER', 'Varden', 22 + VX, 13 + VY, '-', '#d8c070',
          'Witaj w banku Varden. Twoje zloto jest tu bezpieczne.'),
@@ -832,21 +802,22 @@ def main():
         ('varden_carrier', 'Woznica Jarek', 'CARRIER', 'Varden', 37 + VX, 22 + VY, '-', '#8a6a4a',
          'Woz do innych miast odjezdza, kiedy tylko zechcesz. Placisz monetami.'),
     ]
-    for key, name, (x0, y0, x1, y1), temple, shop, colors in [
-        ('frost', 'Frostholm', (64, 20, 95, 43), frost, 'frost_shop', ('#c0d8e8', '#6080a0')),
-        ('qas', 'Qasirah', (64, 187, 95, 210), qas, 'qas_shop', ('#e0c080', '#c09050')),
+    # Frostholm i Qasirah: miejsca w budynkach z cities.py (bank za lada, kupiec w sklepie/na bazarze)
+    for key, name, shop, colors, spots in [
+        ('frost', 'Frostholm', 'frost_shop', ('#c0d8e8', '#6080a0'), ((67, 27), (92, 27), (82, 27), (77, 36), (83, 42))),
+        ('qas', 'Qasirah', 'qas_shop', ('#e0c080', '#c09050'), ((62, 211), (86, 203), (63, 195), (77, 196), (104, 197))),
     ]:
-        cx, ty0 = (x0 + x1) // 2, y0 + 2
+        (bx, by), (mx, my), (px, py), (gx, gy), (cx, cy) = spots
         npcs += [
-            (key + '_banker', 'Bankier ' + name, 'BANKER', name, x0 + 4, y0 + 3, '-', '#d8c070',
+            (key + '_banker', 'Bankier ' + name, 'BANKER', name, bx, by, '-', '#d8c070',
              'Bank ' + name + ' prowadzi konta we wszystkich miastach.'),
-            (key + '_merchant', 'Kupiec ' + name, 'MERCHANT', name, x1 - 5, y0 + 3, shop, colors[0],
+            (key + '_merchant', 'Kupiec ' + name, 'MERCHANT', name, mx, my, shop, colors[0],
              'Towary z ' + name + ' i skup lupow z okolicy.'),
-            (key + '_priest', 'Kaplan ' + name, 'PRIEST', name, cx + 3, ty0 + 2, '-', '#f0f0f0',
+            (key + '_priest', 'Kaplan ' + name, 'PRIEST', name, px, py, '-', '#f0f0f0',
              'Swiatynia ' + name + ' wita wedrowca.'),
-            (key + '_guide', 'Przewodnik ' + name, 'GUIDE', name, cx - 2, ty0 + 4, '-', colors[1],
+            (key + '_guide', 'Przewodnik ' + name, 'GUIDE', name, gx, gy, '-', colors[1],
              'Okolice ' + name + ' sa niebezpieczne. Pomozesz?'),
-            (key + '_carrier', 'Woznica ' + name, 'CARRIER', name, cx + 6, ty0 + 10, '-', '#8a6a4a',
+            (key + '_carrier', 'Woznica ' + name, 'CARRIER', name, cx, cy, '-', '#8a6a4a',
              'Woz do innych miast czeka. Placisz monetami.'),
         ]
     npcs += [
@@ -882,6 +853,9 @@ def main():
     reach = reachable(g, vt)
     for name, t in (('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)):
         assert t in reach, f'{name} temple unreachable from Varden'
+    if os.environ.get('MAPGEN_DUMP'):
+        with open(os.environ['MAPGEN_DUMP'], 'w', encoding='utf-8') as f:
+            f.write('\n'.join(''.join(r) for r in g))
     for (x, y, z, *_r) in transitions:
         if z == 0:
             assert (x, y) in reach, f'entrance {x},{y} unreachable'
@@ -915,11 +889,12 @@ def main():
     for r in props['pz'].split(';'):
         x0, y0, x1, y1, z = (int(v) for v in r.split(','))
         pz.append(f'{x0 + VX},{y0 + VY},{x1 + VX},{y1 + VY},{z}')
-    pz += ['65,21,94,42,0', f'{SELV[0] + 1},{SELV[1] + 1},{SELV[2] - 1},{SELV[3] - 1},0', '65,188,94,209,0']
+    pz += [f'{SELV[0] + 1},{SELV[1] + 1},{SELV[2] - 1},{SELV[3] - 1},0']
+    pz += [','.join(str(v) for v in r) for part in city_parts for r in part['pz']]
     pz += [f'{CAMP[0] + 1},{CAMP[1] + 1},{CAMP[2] - 1},{CAMP[3] - 1},0']   # oboz za mostem (bez swiatyni)
 
     towns = [('Varden', vt), ('Frostholm', frost), ('Selvaran', selv), ('Qasirah', qas)]
-    regions = [
+    regions = [r for part in city_parts for r in part['regions']] + [
         'Klify Selvaran;140;112;159;171;1;2;60;80',
         'Skalny Wawoz;144;112;159;171;0;0;55;80',
         'Kanaly Selvaran;100;112;159;171;-1;-1;45;75',
@@ -968,7 +943,7 @@ def main():
         '# Lodowe Jaskinie',
         'yeti;30;20;-1;4;2;150', 'frost_witch;30;40;-1;4;2;150', 'ice_golem;20;50;-2;4;2;240', 'ice_golem;30;36;-2;4;2;240',
         '# Dzungla Selvaran',
-        'crocodile;60;122;0;6;3;120', 'crocodile;135;168;0;5;2;120', 'jungle_serpent;30;130;0;5;3;120',
+        'crocodile;60;122;0;6;3;120', 'crocodile;96;162;0;5;2;120', 'jungle_serpent;30;130;0;5;3;120',
         'jungle_serpent;145;120;0;5;3;120', 'jungle_hunter;40;160;0;4;2;120', 'jungle_hunter;150;145;0;4;2;120',
         '# Zatopione Ruiny',
         'jungle_serpent;70;158;-1;4;2;120', 'temple_guardian;68;170;-2;4;2;300', 'temple_guardian;44;172;-2;3;1;300',

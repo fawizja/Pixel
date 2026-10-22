@@ -27,6 +27,9 @@ OBJECTS = {
     "sandstone_rock": 1627, "ice_crystal": 1650, "crystal": 1277, "obsidian_rock": 1633, "rubble": 1613,
     "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000,
     "stairs_up": 1005, "stairs_down": 1008, "ladder": 1009, "counter": 1189, "altar": 1193, "wall_torch": 1254,
+    # etap 5: wyposazenie miast
+    "bed": 1201, "bookcase": 1209, "barrel": 1110, "table": 1191, "statue": 1155, "sand_statue": 1161,
+    "jungle_statue": 1157, "cannon": 1163, "chest": 1111, "lumber": 1140,
 }
 # Mury jak w Tibii: cienka sciana na krawedzi pola z wysokoscia rysowana w gore i w lewo (obrazek 64x64,
 # prawy dolny kwadrat to pole muru). Kolejno: pionowy, poziomy, slupek, naroznik.
@@ -45,6 +48,7 @@ ROCK_WALLS = {
     "mountain": (159, 0.95, (120, 110, 90), 0.2),
     "snow_mountain": (159, 1.0, (235, 242, 250), 0.55),
     "sand_cliff": (159, 1.0, (200, 160, 100), 0.5),
+    "pyramid": (166, 1.0, (225, 185, 115), 0.2),   # bloki piramidy Qasirah (etap 5)
 }
 # Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
 EXTRA_OBJECTS = {"backpack": 2099}

@@ -38,11 +38,12 @@ liczb), wiec stare zapisy i lochy sa nietkniete.
 
 | Miasto | Swiatynia | Biom | Charakter |
 |---|---|---|---|
-| **Varden** | 79,80,0 | umiarkowany | miasto startowe: swiatynia, bank, sklepy, wieza 0..+5 |
-| **Frostholm** | 79,26,0 | snieg i lod | mury z lodu, drewniane domy, zamarzniete posadzki |
-| **Selvaran** | 121,129,0 | rownik (dzungla, bagna) | najwieksze miasto (0.182.0): mury z 4 wiezami, swiatynia z dzwonnica, depozyt, 3 sklepy, kanaly |
-| **Qasirah** | 79,193,0 | pustynia | piaskowiec, oaza, kaktusy |
+| **Varden** | 79,80,0 | umiarkowany | miasto krolewskie: rdzen startowy (swiatynia, bank, sklepy, wieza 0..+5) + dzielnica krolewska x 114..156, y 66..104 (zamek z sala tronowa i skarbcem, rynek ze straganami, biblioteka, gildia magow, kuznia, tawerna, 4 bogate domy, 4 wieze straznicze, bramy z armatami) |
+| **Frostholm** | 79,29,0 | snieg, gory | kamienne miasto gorskie: dolne miasto u stop skaly (swiatynia, bank, depozyt, sklep, tawerna, domy), tarasy na +1 (ratusz jarla, kuznia, biblioteka, domy) po schodach (66,24) i (93,24), przepasc z potokiem i mostem (80,17,+1), kopalnia (70,18) -> -1 |
+| **Selvaran** | 121,129,0 | rownik (dzungla, bagna) | miasto portowe: mury z 4 wiezami, swiatynia z dzwonnica, depozyt, 3 sklepy, kanaly; port na poludniu (y 160..181): nabrzeze, 3 mola, 4 statki, magazyny, kapitanat, targ rybny, stocznia, kanal z mostem |
+| **Qasirah** | 67,197,0 | pustynia i dzungla | egzotyczne: ogrody z kanalem i kapliczka dzungli, palac, oaza z palmami, swiatynia Slonca, bazar (6 straganow), ruiny; piramida nad wejsciem do grobowcow (124,206) z pietrami +1..+3 |
 
+Uklady miast rysuje `tools/mapgen/cities.py` (etap 5), wywolywany z `generate_world.py`.
 Kazde miasto ma swiatynie w strefie ochronnej (miejsce odrodzenia po smierci - `homeTown`), plac z
 fontanna i latarniami oraz domy. NPC i uslugi przyjda w etapie 12.
 Kazde miasto ma woznice przy fontannie (przejazdy miedzy miastami, 0.50.0) i 2 manekiny treningowe w strefie ochronnej (0.48.0).

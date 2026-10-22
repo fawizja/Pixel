@@ -280,6 +280,17 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 | `tiles/fountain.png` | object, town |  |
 | `tiles/street_lamp.png` | object, town |  |
 | `tiles/wall_torch.png` | object, town |  |
+| `tiles/bed.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/bookcase.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/barrel.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/table.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/statue.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/sand_statue.png` | object, desert (OTSP, etap 5) | tak |
+| `tiles/jungle_statue.png` | object, equatorial (OTSP, etap 5) | tak |
+| `tiles/cannon.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/chest.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/lumber.png` | object, town (OTSP, etap 5) | tak |
+| `tiles/pyramid.png` | wall, desert (OTSP, etap 5: bloki piramidy) | tak |
 | `tiles/counter.png` | object, town |  |
 | `tiles/fence.png` | object, temperate |  |
 | `tiles/crystal.png` | object, underground | tak |

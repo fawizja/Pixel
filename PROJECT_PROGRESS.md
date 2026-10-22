@@ -22,8 +22,11 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 |------|------|--------|
 | 1. Audyt i zabezpieczenie | ZAKONCZONY | 15af7c2 |
 | 2. Grafika, assety, renderowanie | ZAKONCZONY | 55e7e49 |
-| 3. System mapy i warstw | w toku | - |
-| 4-20 | do zrobienia | - |
+| 3. System mapy i warstw | ZAKONCZONY | 57d39e5 |
+| 4. Geografia swiata | ZAKONCZONY | e79368b |
+| 5. Cztery miasta | ZAKONCZONY | (commit etapu 5, link w raporcie) |
+| 6. Depozyty, banki, swiatynie, sklepy, domy | nastepny | - |
+| 7-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -93,12 +96,44 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Testy 423 OK, regresja GUI zaktualizowana (east_camp, selvaran zmienione przez obrzeza).
 - Brakuje nadal: palma, kaktus, fontanna, latarnia uliczna, plot, dywan, magma/lawa z OTSP (zostaja z kodu).
 
+## Etap 3 - system mapy (2026-10-22)
+- `FloorMap` w kawalkach 32x32 tworzonych leniwie (puste morze i podziemia bez pamieci; 6,4 MB -> 2,4 MB),
+  `lightSources(x0,y0,x1,y1)` po kawalkach. Format plikow map bez zmian.
+- `Reachability` (BFS po polach, przejsciach i opcjonalnych polaczeniach statkow) + `WorldConnectivityTest`:
+  kazda swiatynia, NPC (w zasiegu rozmowy), spawn i przejscie osiagalne ze swiatyni startowej.
+
+## Etap 4 - geografia (2026-10-22)
+- Mapa 352x320; stare kontynenty zachowuja wspolrzedne. `tools/mapgen/world_geo.py`: poszarpane wybrzeza, plaze,
+  morze na poludniu i wschodzie, 7 wysp, faliste granice biomow, masywy gorskie z przeleczami, lasy, 3 rzeki z mostami.
+- Nowe kafelki: mountain, snow_mountain, sand_cliff (nieprzechodnie skaly), shells.
+- Generator nie nadpisuje recznie poprawianego `npcs.csv` (tworzy go tylko, gdy brak pliku).
+
+## Etap 5 - cztery miasta (2026-10-22)
+- `tools/mapgen/cities.py` (wywolywany z generate_world.py; wlasne ziarna, wiec reszta swiata bez zmian):
+  - Frostholm (gorskie): dolne miasto u stop skaly (swiatynia 79,29, bank z lada i skarbcem, depozyt, sklep,
+    tawerna, 4 domy), tarasy na +1 (ratusz jarla, kuznia, biblioteka, domy) po schodach (66,24) i (93,24),
+    przepasc z potokiem i mostem (80..81,17..18,+1), kopalnia (70,18) -> -1 z krysztalami (region Kopalnia Frostholm).
+  - Qasirah (pustynia + dzungla): ogrody z kanalem, mostami i kapliczka dzungli, palac z tronem, oaza z palmami,
+    swiatynia Slonca (67,197), bazar z 6 straganami, bank, depozyt, 3 domy, ruiny; piramida z blokow (+1..+3)
+    nad wejsciem do grobowcow (124,206) z korytarzem i posagami.
+  - Selvaran (portowe): port na poludnie od murow (y 160..181): nabrzeze z latarniami, 3 mola, 3 statki przy molach
+    (burty, poklad, armaty, ladunek, latarnia), statek na redzie, 2 magazyny, kapitanat, targ rybny, stocznia
+    z kadlubem w budowie, kanal z mostem; basen polaczony z ciesnina. Strefa ochronna obejmuje port i mola.
+  - Varden (krolewskie): rdzen z maps/varden bez zmian + dzielnica krolewska (x 114..156, y 66..104): zamek
+    (sala tronowa, skarbiec, dziedziniec z fontanna), rynek ze straganami, biblioteka, gildia magow, kuznia,
+    tawerna, 4 bogate domy z ogrodami, 4 wieze straznicze, bramy z armatami.
+- Nowe obiekty z OTSP: bed, bookcase, barrel, table, statue, sand_statue, jungle_statue, cannon, chest, lumber,
+  pyramid (sciana-bryla). Symbole legendy: cyrylica w cities.LEGEND.
+- NPC Frostholm i Qasirah przeniesione do nowych budynkow (npcs.csv, polskie znaki zachowane).
+- Krokodyle z dawnego bagna przeniesione (port jest strefa ochronna).
+- Testy 426 OK, regresja GUI: zmieniony tylko wzorzec chest (skrzynia skarbow trafila do nowej kopalni).
+- Debug generatora: `MAPGEN_DUMP=plik python3 tools/mapgen/generate_world.py` zapisuje pietro 0 przed kontrola dostepnosci.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 3: system mapy i warstw - sprawdzic limity (rozmiar mapy, pietra, chunki), przygotowac format pod duzy swiat.
-2. Etap 4: nowy uklad swiata (kontynent z wybrzezem, morzem, wyspami, gorami) w generate_world.py,
-   zachowujac format plikow i istniejace systemy (MapLoader, transitions, spawns, npcs.csv).
-3. Etap 5: cztery rozne, duze miasta: Varden (krolewskie), nowe miasto portowe, Frostholm jako gorskie
-   (kamienne tarasy, kopalnie), Qasirah/Selvaran jako egzotyczne (pustynia + dzungla).
+1. Etap 6: depozyty (skrzynie depozytu w budynkach), banki, swiatynie, sklepy w kazdym miescie (wiecej NPC
+   handlarzy: bron, zbroje, magia, zywnosc, narzedzia), system domow (wlasciciel, czynsz, drzwi, zapis).
+2. Etap 7: mosty, statki i podroze (NPC kapitanowie w porcie Selvaran i na wyspach; Reachability.Link dla tras).
+3. Etap 8: expowiska na powierzchni dla postaci 300+ (zachodni kontynent za slaby).
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

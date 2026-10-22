@@ -76,3 +76,15 @@
 88;mountain;WALL;0;0;temperate;#6e6a62;rockwall
 89;snow_mountain;WALL;0;0;north;#d8e0e8;rockwall
 90;sand_cliff;WALL;0;0;desert;#b08a58;rockwall
+# --- miasta (etap 5): meble i wyposazenie budynkow z OpenTibia Sprite Pack ---
+91;bed;OBJECT;0;0;town;#d8c060;counter
+92;bookcase;OBJECT;0;0;town;#7a5230;counter
+93;barrel;OBJECT;0;0;town;#8a5a2a;crate
+94;table;OBJECT;0;0;town;#7a4a26;counter
+95;statue;OBJECT;0;0;town;#9a9a9a;rock
+96;sand_statue;OBJECT;0;0;desert;#d8c8a0;rock
+97;jungle_statue;OBJECT;0;0;equatorial;#7a8a60;rock
+98;cannon;OBJECT;0;0;town;#3a3a3a;rock
+99;chest;OBJECT;0;0;town;#c08030;crate
+100;lumber;OBJECT;0;0;town;#b08048;crate
+101;pyramid;WALL;0;0;desert;#c8a060;rockwall
