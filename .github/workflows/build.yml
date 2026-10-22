@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
   pull_request:
 
 jobs:
@@ -38,6 +38,19 @@ jobs:
             --title "Pixel - najnowsza wersja (offline)" \
             --notes "APK (debug) z ostatniego commita na main. Nowa postac offline startuje na poziomie 300. Przed instalacja nowszej wersji odinstaluj poprzednia (kazda kompilacja ma inny klucz debug)."
           gh release upload najnowsza Pixel-offline.apk --clobber
+      # APK z brancha development (rozbudowa etapami): github.com/fawizja/Pixel/releases/tag/development-apk
+      - name: Publikacja APK (wydanie "development-apk")
+        if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/build/outputs/apk/debug/*.apk Pixel-development.apk
+          git tag -f development-apk
+          git push -f origin development-apk
+          gh release view development-apk >/dev/null 2>&1 || gh release create development-apk --prerelease \
+            --title "Pixel - development (rozbudowa w stylu Tibii)" \
+            --notes "APK (debug) z ostatniego commita na branchu development. Postac startuje na poziomie 300 z 10 000 000 gp w banku. Przed instalacja odinstaluj poprzednia wersje."
+          gh release upload development-apk Pixel-development.apk --clobber
       - uses: actions/upload-artifact@v4
         if: always()
         with:
