@@ -45,3 +45,19 @@ camp_elementals;Płonące pola;camp_guide;KILL;fire_elemental;20;450000;35000;30
 camp_harpies;Burza nad przełęczą;camp_guide;KILL;storm_harpy;20;700000;55000;460;Harpie burzy strącają zwiadowców z grani. Pokonaj 20.
 camp_titans;Piaskowe kolosy;camp_guide;KILL;sand_titan;15;1000000;80000;640;Piaskowe tytany zasypują drogę do ruin. Pokonaj 15.
 camp_bones;Kościane skrzydła;camp_guide;KILL;bone_dragon;10;2000000;150000;870;Kościane smoki krążą nad Otchłanią. Strąć 10.
+# Etap 15: zlecenia Admirala Wendy (Przystan Wschodnia) - wyspy i lochy dla postaci 300+
+isle_wyverns;Skrzydła nad doliną;isle_guide;KILL;wyvern;25;400000;30000;300;Wiwerny z Doliny Wiwern porywają owce z farm. Pokonaj 25.
+isle_scales;Łuski na tarcze;isle_guide;COLLECT;wyvern_scale;10;500000;20000;300;Kowale floty potrzebują łusek wiwern. Przynieś 10.
+isle_matriarch;Matka wiwern;isle_guide;KILL;wyvern_matriarch;1;2500000;100000;330;Na dnie Gniazda Wiwern czeka Matriarcha. Pokonaj ją.
+isle_crabs;Szczypce z rafy;isle_guide;KILL;coral_crab;25;450000;30000;310;Kraby koralowe niszczą sieci rybaków na Wyspie Koralowej.
+isle_pirates;Czarna bandera;isle_guide;KILL;pirate_cutthroat;30;600000;40000;350;Piraci z Wyspy Piratów napadają na statki. Rozpraw się z 30.
+isle_hooks;Dowody zwycięstwa;isle_guide;COLLECT;pirate_hook;10;600000;30000;350;Przynieś 10 haków pirackich - flota zapłaci nagrodę.
+isle_gunners;Ciche działa;isle_guide;KILL;pirate_gunner;20;700000;40000;380;Kanonierzy ostrzeliwują nasze łodzie z Groty Przemytników.
+isle_bloodbeard;Krwawobrody;isle_guide;KILL;bloodbeard;1;3000000;150000;400;Herszt piratów ukrywa się na dnie Groty Przemytników. Skończ z nim.
+isle_drowned;Topielcy;isle_guide;KILL;drowned_sailor;30;600000;35000;330;Utopieni marynarze wychodzą z morza nocą. Pokonaj 30.
+isle_mist;Mgła nad wyspą;isle_guide;KILL;mist_wraith;25;1100000;60000;520;Upiory mgły z Wyspy Mgieł porywają dusze rybaków.
+isle_morvena;Pani Mgieł;isle_guide;KILL;morvena;1;7000000;350000;620;W Krypcie Mgieł czeka Morvena. Rozprosz ją na zawsze.
+isle_skaldra;Lodowa wiedźma;isle_guide;KILL;skaldra;1;6000000;300000;520;Skaldra zamraża morze wokół Lodowej Wyspy. Pokonaj ją w Lodowych Grotach.
+isle_drakes;Ogień z głębin;isle_guide;KILL;magma_drake;20;1600000;80000;670;Magmowe smoki z Serca Wulkanu palą nasze statki.
+isle_horns;Rogi smoków;isle_guide;COLLECT;drake_horn;5;2000000;0;670;Przynieś 5 rogów magmowych smoków dla alchemików floty.
+isle_pyrrax;Władca wulkanu;isle_guide;KILL;pyrrax;1;12000000;600000;750;Pyrrax śpi w najgłębszym piętrze Serca Wulkanu. Obudź go i pokonaj.

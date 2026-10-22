@@ -206,3 +206,15 @@ coral_crab;coral_shield;4;1;1
 pirate_cutthroat;coral_helmet;4;1;1
 pirate_gunner;coral_armor;3;1;1
 drowned_sailor;coral_legs;4;1;1
+# Etap 15: produkty potworow wysp (skup u kwatermistrza Przystani Wschodniej)
+wyvern;wyvern_scale;250;1;2
+wyvern_matriarch;wyvern_scale;1000;5;10
+coral_crab;crab_pincer;250;1;2
+pirate_cutthroat;pirate_hook;220;1;1
+bloodbeard;pirate_hook;1000;3;5
+pirate_gunner;powder_horn;200;1;1
+drowned_sailor;drowned_ring;150;1;1
+mist_wraith;mist_essence;180;1;1
+morvena;mist_essence;1000;5;8
+magma_drake;drake_horn;150;1;1
+pyrrax;drake_horn;1000;4;6

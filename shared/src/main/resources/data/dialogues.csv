@@ -30,3 +30,11 @@ camp_merchant;kuźnia,obsydian;Z obsydianu, lodowych rdzeni i esencji cienia wyk
 qas_guide;karawana,hieny,upiory;Karawany giną na szlaku: najpierw hieny, potem piaskowe upiory, a ktoś jeszcze okrada krypty. Pomóż, a Qasirah się odwdzięczy.
 selv_guide;świątynia,strażnicy;Za gniazdami węży stoi stara świątynia. Jej kamienni strażnicy nie wpuszczają nikogo.
 frost_guide;golemy,serce;Lodowe golemy krążą wokół jaskiń. Ich zamarznięte serca podtrzymują zamieć.
+# Etap 15: kapitanowie i przystan wschodnia
+@CAPTAIN;rejs,statek,podróż,travel;Pływam tam, gdzie pokazuje lista rejsów. Wybierz cel i zapłać monetami - reszta to moja sprawa.
+@CAPTAIN;wyspy,wyspa,islands;Na wschodzie są Wyspa Mgieł, Lodowa Wyspa i Wyspa Wulkaniczna. Na południu Wyspa Koralowa i Wyspa Piratów. Wszystkie dla twardych, od poziomu 300.
+@CAPTAIN;piraci,pirat,pirates;Piraci siedzą w Grocie Przemytników na swojej wyspie. Ich herszt to Krwawobrody.
+isle_guide;zadanie,zlecenie,praca,quest,mission;Wybierz zlecenie z listy. Każde kolejne odblokowuje się, gdy skończysz poprzednie - a za ostatnie z łańcucha daję koralowy ekwipunek.
+isle_guide;bossowie,boss,potwory;Matriarcha w Gnieździe Wiwern, Krwawobrody w Grocie Przemytników, Skaldra w Lodowych Grotach, Morvena w Krypcie Mgieł i Pyrrax w Sercu Wulkanu. Idźcie drużyną.
+isle_guide;koral,koralowy,coral;Koralowy ekwipunek z poziomu 350 noszą najlepsi marynarze. Dostaniesz go ode mnie za największe zlecenia albo z bossów.
+isle_merchant;skup,sprzedam,ceny,handel,trade;Kupię łuski wiwern, szczypce krabów, haki piratów, rogi z prochem, pierścienie topielców, esencje mgły i rogi smoków. Płacę od razu.

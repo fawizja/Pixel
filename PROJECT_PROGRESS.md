@@ -34,8 +34,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 12. Ruch i walka | ZAKONCZONY | 96e652b |
 | 13. Czary, runy, mikstury | ZAKONCZONY | 6522097 |
 | 14. Ekwipunek, plecaki, monety | ZAKONCZONY | ea984e9 |
-| 15. NPC, questy, ekonomia | nastepny | - |
-| 16-20 | do zrobienia | - |
+| 15. NPC, questy, ekonomia | ZAKONCZONY | (ten commit) |
+| 16. UI w stylu OTClient V8 | nastepny | - |
+| 17-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -254,10 +255,20 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Testy 458 OK (nowy MultiBackpackTest), regresja GUI 42/42. Przeciagania nie sprawdza zaden test automatyczny
   (wymaga gestu na ekranie) - sprawdzone tylko kompilacja i logika ruchu miedzy stronami.
 
+## Etap 15 - NPC, questy, ekonomia (2026-10-22)
+- Przeglad: 4 miasta maja bankierow, kaplanow, agentow domow, przewoznikow, kupcow, przewodnikow z zadaniami
+  (lacznie 46 zadan do poziomu 900) i 8 kapitanow. Brakowalo tresci dla nowych wysp z etapow 7-10.
+- Nowi NPC w Przystani Wschodniej: Admiral Wenda (15 zlecen 300+ na wyspy i 5 bossow lochow, 4 lancuchy z koralowym
+  ekwipunkiem i krysztalowymi monetami) oraz Kwatermistrz Olaf (mikstury 250+, plecaki, skup lupow z wysp).
+- Ekonomia: 7 nowych produktow potworow (luska wiwerny 400 gp ... rog magmowego smoka 1500 gp) skupowanych po
+  wartosci; koralowy ekwipunek tez mozna sprzedac. Grafiki produktow z OTSP.
+- Rozmowy kapitanow o rejsach, wyspach i piratach; Admiral i kwatermistrz odpowiadaja o bossach, koralu i skupie.
+- Testy 460 OK (nowy IslandQuestsTest), regresja GUI 42/42.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 15: NPC, questy, ekonomia.
-2. Etap 16: UI w stylu OTClient V8 (w tym przewijana ksiega czarow).
-3. Etap 17: sterowanie mobilne.
+1. Etap 16: UI w stylu OTClient V8 (w tym przewijana ksiega czarow).
+2. Etap 17: sterowanie mobilne.
+3. Etap 18: optymalizacja.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

@@ -8,3 +8,12 @@ qas_caravan2;qas_caravan1;great_mana_potion:10
 qas_caravan3;qas_caravan2;sandstone_shield:1
 selv_temple;selv_exp2;great_health_potion:20
 frost_hearts;frost_storm;great_mana_potion:15
+# Etap 15: lancuchy Admirala Wendy z nagrodami w przedmiotach z wysp
+isle_scales;isle_wyverns;ultimate_health_potion:20
+isle_matriarch;isle_scales;coral_helmet:1
+isle_hooks;isle_pirates;ultimate_mana_potion:20
+isle_gunners;isle_hooks;great_spirit_potion:30
+isle_bloodbeard;isle_gunners;coral_armor:1
+isle_morvena;isle_mist;crystal_coin:20
+isle_horns;isle_drakes;ultimate_spirit_potion:20
+isle_pyrrax;isle_horns;coral_legs:1

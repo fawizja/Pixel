@@ -287,6 +287,7 @@ Każda profesja w 4 kierunkach.
 | `items/coral_legs.png` | Koralowe nagolenniki (armor), etap 10 | tak |
 | `items/coral_shield.png` | Tarcza z muszli (shield), etap 10 | tak |
 | `items/backpack.png` | Dodatkowy plecak (OTSP 2099), etap 14 | tak |
+| `items/wyvern_scale.png`, `crab_pincer`, `pirate_hook`, `powder_horn`, `drowned_ring`, `mist_essence`, `drake_horn` | Produkty potworow wysp (OTSP 2179, 2175, 2141, 2173, 2151, 2161, 2174), etap 15 | tak |
 
 ## Kafelki mapy (`assets/art/tiles/`)
 

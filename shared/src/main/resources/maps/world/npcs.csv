@@ -47,3 +47,5 @@ pirate_captain;Kapitan Czarna Mewa;CAPTAIN;Wyspa Piratów;47;269;0;-;#3a3a3a;Na 
 mist_captain;Przewoźnik Gniewko;CAPTAIN;Wyspa Mgieł;249;269;0;-;#5a6a7a;We mgle łatwo zabłądzić. Odwiozę cię do portu.
 ice_captain;Kapitan Torvald;CAPTAIN;Lodowa Wyspa;289;37;0;-;#6a8aaa;Lód kruszy kadłuby, ale mój statek wytrzyma rejs do Przystani Wschodniej.
 volcano_captain;Kapitan Ognik;CAPTAIN;Wyspa Wulkaniczna;294;189;0;-;#8a4a3a;Popiół w żaglach, ale płyniemy. Wracam do Przystani Wschodniej.
+isle_guide;Admirał Wenda;GUIDE;Przystań Wschodnia;267;151;0;-;#2a4a7a;Wyspy wschodu kipią od potworów i piratów. Szukam śmiałków od poziomu 300 - mam dla ciebie zlecenia.
+isle_merchant;Kwatermistrz Olaf;MERCHANT;Przystań Wschodnia;267;149;0;isle_shop;#6a5a3a;Skupuję łuski, rogi i wszystko, co przywieziesz z wysp. Mam też mikstury na drogę.

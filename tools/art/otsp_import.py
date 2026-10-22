@@ -81,6 +81,9 @@ ITEMS = {
     "coral_helmet": 1947, "coral_armor": 2055, "coral_legs": 2078, "coral_shield": 1919,
     # etap 14: dodatkowy plecak
     "backpack": 2099,
+    # etap 15: produkty potworow wysp
+    "wyvern_scale": 2179, "crab_pincer": 2175, "pirate_hook": 2141, "powder_horn": 2173, "drowned_ring": 2151,
+    "mist_essence": 2161, "drake_horn": 2174,
 }
 # Stroje: (numer, kolory glowa/tulow/nogi/stopy dla strojow z maska kolorow albo None).
 MONSTERS = {

@@ -123,6 +123,16 @@ jeden dom na postac, obcy nie wchodza do srodka, wlasciciele w `save/houses.txt`
   (praca / prace); linia NPC wygrywa z linia roli i wspolna. Odpowiedz idzie do dziennika jako "Imie: tekst";
   online liczy ja serwer (akcja `npc:ask:<tekst>`).
 
+## Przystan Wschodnia - wyspy 300+ (etap 15, dane)
+
+- Admiral Wenda (`isle_guide`, GUIDE): 15 zlecen od poziomu 300 na wyspach i w lochach (wiwerny, kraby, piraci,
+  topielcy, upiory mgly, magmowe smoki) oraz na pieciu bossow lochow. Cztery lancuchy (`quest_chains.csv`) koncza
+  sie koralowym ekwipunkiem (helm, zbroja, nagolenniki) albo 20 krysztalowymi monetami.
+- Kwatermistrz Olaf (`isle_merchant`, sklep `isle_shop`): mikstury 250+, plecaki, liny i skup produktow z wysp
+  (luska wiwerny, szczypce kraba, hak pirata, rog z prochem, pierscien topielca, esencja mgly, rog smoka) po
+  wartosci przedmiotu, a takze koralowego ekwipunku i materialow endgame.
+- Produkty wypadaja ze zwyklych potworow wysp (15-25%) i licznie z bossow. Rozmowy kapitanow (@CAPTAIN) o wyspach i piratach.
+
 ## Oboz i kuznia endgame (Z logika, C UI)
 
 - NPC moga stac poza miastami (pole "miasto" = nazwa obozu), ale kaplan tylko w miescie ze swiatynia.
