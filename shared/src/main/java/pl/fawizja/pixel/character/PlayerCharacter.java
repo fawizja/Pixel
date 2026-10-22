@@ -52,6 +52,8 @@ public final class PlayerCharacter {
     private long restedMs;
     private long lightBuffMs;
     private long hasteMs;
+    /** Dodatkowe plecaki (po 20 slotow kazdy) podpiete do plecaka glownego. */
+    private int extraBags;
     private int hastePercent;
     private int lightBuffRadius;
     /** Pozostaly czas palenia biezacej pochodni (0 = nowa, nieuzywana). */
@@ -96,6 +98,7 @@ public final class PlayerCharacter {
         health = o.health;
         mana = o.mana;
         backpack.clear();
+        backpack.resize(o.backpack.size());
         for (int i = 0; i < o.backpack.size(); i++) {
             if (o.backpack.get(i) != null) backpack.putInSlot(i, o.backpack.get(i));
         }
@@ -139,6 +142,7 @@ public final class PlayerCharacter {
         restedMs = o.restedMs;
         lightBuffMs = o.lightBuffMs;
         hasteMs = o.hasteMs;
+        extraBags = o.extraBags;
         hastePercent = o.hastePercent;
         lightBuffRadius = o.lightBuffRadius;
         torchBurnMs = o.torchBurnMs;
@@ -170,6 +174,35 @@ public final class PlayerCharacter {
     public int speed() {
         int base = Balance.speed(level) + (mounted ? MOUNT_SPEED : 0);
         return hasteMs > 0 ? base + base * hastePercent / 100 : base;
+    }
+
+    /** Najwiecej dodatkowych plecakow: plecak glowny + 3 = 80 slotow. */
+    public static final int MAX_EXTRA_BAGS = 3;
+
+    public int extraBags() { return extraBags; }
+
+    /** Liczba stron plecaka (glowny + dodatkowe). */
+    public int bagPages() { return 1 + extraBags; }
+
+    /** Podpina kolejny plecak (+20 slotow); false, gdy osiagnieto limit. */
+    public boolean attachBag() {
+        if (extraBags >= MAX_EXTRA_BAGS) return false;
+        extraBags++;
+        backpack.resize(bagPages() * pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS);
+        return true;
+    }
+
+    /** Odpina ostatni plecak; tylko gdy jego 20 slotow jest pustych. */
+    public boolean detachBag() {
+        if (extraBags == 0 || !backpack.resize((bagPages() - 1) * pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS)) return false;
+        extraBags--;
+        return true;
+    }
+
+    /** Odtwarzanie zapisu: liczba plecakow przed wczytaniem slotow. */
+    public void restoreBags(int n) {
+        while (extraBags > Math.max(0, n) && detachBag()) { }
+        while (extraBags < Math.min(MAX_EXTRA_BAGS, n) && attachBag()) { }
     }
 
     /** Przyspieszenie (utani hur / utani gran hur): nowy czar zastepuje poprzedni, jak w Tibii. */

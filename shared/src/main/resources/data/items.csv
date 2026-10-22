@@ -134,3 +134,4 @@
 150;ultimate_spirit_potion;Ostateczna mikstura ducha;POTION;100;880;NONE;0;0;0;130;PALADIN;0;0;PHYSICAL;#a020c0;Silniej przywraca zdrowie i manę paladyna od poziomu 130.
 151;ultimate_mana_potion;Ostateczna mikstura many;POTION;100;600;NONE;0;0;0;250;DRUID,SORCERER;0;0;PHYSICAL;#1a10f0;Najsilniejsza mikstura many dla magów od poziomu 250.
 152;ultimate_health_potion;Ostateczna mikstura zdrowia;POTION;100;700;NONE;0;0;0;250;PALADIN,MONK;0;0;PHYSICAL;#f00a30;Najsilniejsza mikstura zdrowia dla wojowników od poziomu 250.
+153;backpack;Plecak;TOOL;1;20;NONE;0;0;0;0;*;0;0;PHYSICAL;#7a5230;Dodatkowy plecak: użyj, aby dołączyć 20 miejsc (najwyżej 3 dodatkowe).

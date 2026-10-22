@@ -225,7 +225,7 @@ Każda profesja w 4 kierunkach.
 | `items/obsidian_shard.png` | Odłamek obsydianu (material) | tak |
 | `items/obsidian_shield.png` | Obsydianowa tarcza (shield) | tak |
 | `items/obsidian_wand.png` | Obsydianowa różdżka (weapon) | tak |
-| `items/pearl.png` | Perła (material) | tak |
+| `items/pearl.png` | Perła (material; etap 14: OTSP 2197, wcześniej ta sama grafika co platynowa moneta) | tak |
 | `items/pet_cat.png` | Kocię (tool) |  |
 | `items/pet_dog.png` | Szczenię (tool) |  |
 | `items/pet_fennec.png` | Fenek (tool) |  |
@@ -286,6 +286,7 @@ Każda profesja w 4 kierunkach.
 | `items/coral_armor.png` | Koralowa zbroja (armor), etap 10 | tak |
 | `items/coral_legs.png` | Koralowe nagolenniki (armor), etap 10 | tak |
 | `items/coral_shield.png` | Tarcza z muszli (shield), etap 10 | tak |
+| `items/backpack.png` | Dodatkowy plecak (OTSP 2099), etap 14 | tak |
 
 ## Kafelki mapy (`assets/art/tiles/`)
 

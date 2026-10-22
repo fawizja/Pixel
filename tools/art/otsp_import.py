@@ -73,12 +73,14 @@ ITEMS = {
     "shovel": 2109, "rope": 2137, "torch": 2103,
     "health_potion": 2130, "great_health_potion": 2129, "mana_potion": 2128, "great_mana_potion": 2131,
     "meat": 2181, "bread": 2183,
-    "crystal_shard": 2207, "pearl": 2191, "scarab_gem": 2219, "obsidian_shard": 2205, "iron_ore": 2201,
+    "crystal_shard": 2207, "pearl": 2197, "scarab_gem": 2219, "obsidian_shard": 2205, "iron_ore": 2201,
     "bone": 2166, "spider_silk": 2170, "wolf_pelt": 2162,
     "gold_coin": 2192, "platinum_coin": 2191, "crystal_coin": 2218,
     # etap 10: zestaw koralowy (poziom 350)
     "tidal_harpoon": 1828, "wand_of_the_deep": 1801, "rod_of_tides": 1798, "reef_gauntlets": 2153,
     "coral_helmet": 1947, "coral_armor": 2055, "coral_legs": 2078, "coral_shield": 1919,
+    # etap 14: dodatkowy plecak
+    "backpack": 2099,
 }
 # Stroje: (numer, kolory glowa/tulow/nogi/stopy dla strojow z maska kolorow albo None).
 MONSTERS = {

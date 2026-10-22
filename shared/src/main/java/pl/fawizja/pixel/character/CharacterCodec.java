@@ -49,6 +49,7 @@ public final class CharacterCodec {
         m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         if (pc.restedMs() > 0) m.put("rested", Long.toString(pc.restedMs()));
+        if (pc.extraBags() > 0) m.put("bags", Integer.toString(pc.extraBags()));
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack s = pc.backpack().get(i);
             if (s != null) m.put("bp." + i, stackText(s));
@@ -164,6 +165,7 @@ public final class CharacterCodec {
         PlayerCharacter pc = new PlayerCharacter(require(m, "id"), require(m, "name"), voc,
                 Balance.levelForExperience(exp), p, items, bank, m.getOrDefault("hometown", "varden"));
         pc.restoreState(exp, Integer.parseInt(require(m, "health")), Integer.parseInt(require(m, "mana")));
+        pc.restoreBags(Integer.parseInt(m.getOrDefault("bags", "0")));
         java.util.TreeMap<Integer, String> friends = new java.util.TreeMap<>();
         for (Map.Entry<String, String> e : m.entrySet()) {
             String k = e.getKey();

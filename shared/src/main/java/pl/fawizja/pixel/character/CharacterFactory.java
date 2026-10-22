@@ -46,6 +46,7 @@ public final class CharacterFactory {
             if (pc.equipment().get(slot) != null) throw new IllegalStateException("kit slot used twice: " + slot);
             pc.equipment().setDirect(slot, s);
         }
+        if (level >= StarterKits.VETERAN_LEVEL) pc.attachBag(); // weteran zaczyna z drugim plecakiem (40 miejsc)
         InventoryResult r = Money.add(pc.backpack(), config.startGoldInBackpack());
         if (!r.ok()) throw new IllegalStateException("starting gold does not fit: " + r);
         for (StarterKits.Entry e : StarterKits.backpack(vocation, level)) {

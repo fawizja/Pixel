@@ -29,7 +29,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -110,6 +110,20 @@ public final class DesktopLauncher {
                             break;
                         }
                     }
+                }
+                if ("bagpages".equals(open)) {
+                    // podglad wielu plecakow (etap 14): dwa dodatkowe plecaki, monety i lup na drugiej stronie
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter hero = gs.session().character();
+                    while (hero.extraBags() < 2) hero.attachBag();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    String[][] loot = {{"gold_coin", "100", "20"}, {"gold_coin", "100", "21"}, {"platinum_coin", "37", "22"},
+                            {"crystal_coin", "3", "23"}, {"coral_helmet", "1", "25"}, {"pearl", "12", "26"}, {"backpack", "1", "27"}};
+                    for (String[] m : loot) {
+                        if (reg.containsKey(m[0])) hero.backpack().putInSlot(Integer.parseInt(m[2]), new pl.fawizja.pixel.item.ItemStack(reg.byKey(m[0]).id(), Integer.parseInt(m[1])));
+                    }
+                    gs.hud().toggleBag();
+                    gs.hud().showBagPage(Integer.getInteger("pixel.bagPage", 1));
                 }
                 if ("bagmess".equals(open)) {
                     // podglad porzadkowania: rozrzucone stosy i dziury w plecaku (z -Dpixel.button=bag_sort po sortowaniu)

@@ -17,7 +17,7 @@ public final class Container {
     public static final int BACKPACK_SLOTS = 20;
 
     private final ItemRegistry registry;
-    private final ItemStack[] slots;
+    private ItemStack[] slots;
 
     public Container(ItemRegistry registry, int size) {
         if (size <= 0) throw new IllegalArgumentException("size must be > 0");
@@ -30,6 +30,17 @@ public final class Container {
     }
 
     public int size() { return slots.length; }
+
+    /**
+     * Zmienia liczbe slotow (dodatkowe plecaki). Powiekszenie zawsze sie udaje; pomniejszenie tylko wtedy,
+     * gdy usuwane sloty sa puste - przedmioty nigdy nie znikaja.
+     */
+    public boolean resize(int size) {
+        if (size <= 0) return false;
+        for (int i = size; i < slots.length; i++) if (slots[i] != null) return false;
+        slots = Arrays.copyOf(slots, size);
+        return true;
+    }
 
     public ItemStack get(int slot) {
         checkSlot(slot);

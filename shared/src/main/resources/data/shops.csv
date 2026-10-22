@@ -402,3 +402,10 @@ camp_shop;great_spirit_potion;500;0
 camp_shop;ultimate_spirit_potion;950;0
 camp_shop;ultimate_mana_potion;650;0
 camp_shop;ultimate_health_potion;760;0
+# Etap 14: dodatkowe plecaki (po 20 miejsc, najwyzej 3) u kazdego zaopatrzeniowca
+varden_general;backpack;20;0
+varden_supplies;backpack;20;0
+frost_supplies;backpack;20;0
+qas_supplies;backpack;20;0
+selv_supplies;backpack;20;0
+camp_shop;backpack;20;0

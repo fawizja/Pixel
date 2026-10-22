@@ -159,6 +159,16 @@ public final class Hud {
 
     private boolean bagOpen;
     private int selectedSlot = -1;
+    /** Strona plecaka (glowny = 0, dodatkowe plecaki dalej); sloty w akcjach sa globalne: strona * 20 + pole. */
+    private int bagPage;
+    private int bagPages = 1;
+    /** Przeciaganie przedmiotu w plecaku (etap 14): pole zrodlowe, palec i pozycja "ducha" przedmiotu. */
+    private int dragSlot = -1, dragPointer = -1;
+    private boolean dragging;
+    private float dragX, dragY, dragStartX, dragStartY;
+    private Actions dragActions;
+    private GameSession dragSession;
+    private final HudButton bagDetach = new HudButton("bag_detach", "ODEPNIJ");
     private float bagX, bagY, slotSize;
     private final HudButton bagEquip = new HudButton("bag_equip", "ZAŁÓŻ");
     private final HudButton bagDrop = new HudButton("bag_drop", "WYRZUĆ");
@@ -399,6 +409,7 @@ public final class Hud {
         bagDrop.x = bagX + slotSize * 4.0f; bagDrop.y = bagY - bbr * 1.4f; bagDrop.r = bbr;
         bagUse.x = bagX + slotSize * 2.5f; bagUse.y = bagY - bbr * 1.4f; bagUse.r = bbr;
         bagSort.x = bagUse.x; bagSort.y = bagUse.y; bagSort.r = bbr;
+        bagDetach.x = bagDrop.x; bagDetach.y = bagDrop.y; bagDetach.r = bbr;
         bagKeep.x = bagUse.x; bagKeep.y = bagY - bbr * 3.0f; bagKeep.r = bbr;
         bagClose.x = bagX + slotSize * 5f + 4; bagClose.y = bagY + slotSize * 4f + 18; bagClose.r = 14;
     }
@@ -490,7 +501,30 @@ public final class Hud {
 
     public VirtualJoystick joystick() { return joystick; }
     public boolean bagOpen() { return bagOpen; }
-    public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; if (bagOpen) menuOpen = false; }
+    public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; dragSlot = -1; dragging = false; if (bagOpen) menuOpen = false; }
+
+    /** Pokazuje strone plecaka (desktop: -Dpixel.bagPage). */
+    public void showBagPage(int page) { bagPage = Math.max(0, page); }
+
+    private static final int PAGE_SLOTS = pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS;
+
+    /** Zakladka strony plecaka pod punktem albo -1 (pionowe zakladki z prawej strony pol, gdy jest wiecej niz 1 plecak). */
+    private int bagTabAt(float x, float y) {
+        if (bagPages < 2 || x < bagTabX() - 4 || x > bagTabX() + TAB + 4) return -1;
+        for (int k = 0; k < bagPages; k++) {
+            float ty = bagTabY(k);
+            if (y >= ty - 4 && y <= ty + TAB + 4) return k;
+        }
+        return -1;
+    }
+
+    private static final float TAB = 26;
+    private float bagTabX() { return bagX + slotSize * 5 + 12; }
+    private float bagTabY(int k) { return bagY + slotSize * (3 - k) + (slotSize - TAB) / 2f; }
+
+    private boolean inEquipPanel(float x, float y) {
+        return epW > 0 && x >= epX && x <= epX + epW && y >= epY && y <= epY + epH;
+    }
     /** Klawisz Wstecz / Esc: zamyka okno na wierzchu; false, gdy nic nie bylo otwarte (handel zamyka sie przyciskiem). */
     public boolean closeTop(GameSession session) {
         if (trade != null) return true;
@@ -1657,10 +1691,34 @@ public final class Hud {
             if (selectedSlot >= 0 && bagUse.hit(p.x, p.y)) { actions.onButton("bag_use"); return true; }
             if (selectedSlot >= 0 && bagKeep.hit(p.x, p.y)) { actions.onButton("bag_keep"); return true; }
             if (selectedSlot < 0 && bagSort.hit(p.x, p.y)) { actions.onButton("bag_sort"); return true; }
-            int slot = slotAt(p.x, p.y);
+            bagPages = session.character().bagPages();
+            if (selectedSlot < 0 && bagPages > 1 && bagPage == bagPages - 1 && bagDetach.hit(p.x, p.y)) {
+                actions.onButton("bag_detach");
+                bagPage = Math.max(0, bagPage - 1);
+                return true;
+            }
+            int tab = bagTabAt(p.x, p.y);
+            if (tab >= 0) {
+                bagPage = tab;
+                selectedSlot = -1;
+                return true;
+            }
+            int local = slotAt(p.x, p.y);
+            int slot = local < 0 ? -1 : bagPage * PAGE_SLOTS + local;
+            if (slot >= session.character().backpack().size()) slot = -1;
             if (slot >= 0) {
                 if (selectedSlot < 0) {
-                    if (session.character().backpack().get(slot) != null) selectedSlot = slot;
+                    if (session.character().backpack().get(slot) != null) {
+                        selectedSlot = slot;
+                        // poczatek mozliwego przeciagania (staje sie nim po przesunieciu palca)
+                        dragSlot = slot;
+                        dragPointer = pointer;
+                        dragging = false;
+                        dragStartX = dragX = p.x;
+                        dragStartY = dragY = p.y;
+                        dragActions = actions;
+                        dragSession = session;
+                    }
                 } else if (selectedSlot == slot) {
                     selectedSlot = -1;
                 } else {
@@ -1688,7 +1746,7 @@ public final class Hud {
                 return true;
             }
         }
-        if (bagOpen && p.x >= bagX - 8 && p.x <= bagX + slotSize * 5 + 8 && p.y >= bagY - 50 && p.y <= bagY + slotSize * 4 + 30) {
+        if (bagOpen && p.x >= bagX - 8 && p.x <= bagX + slotSize * 5 + (bagPages > 1 ? 44 : 8) && p.y >= bagY - 50 && p.y <= bagY + slotSize * 4 + 30) {
             return true;
         }
         if (joystick.touchDown(p.x, p.y, pointer)) return true; // pad w rogu ekranu, takze nad dolnym paskiem
@@ -1697,10 +1755,48 @@ public final class Hud {
 
     public boolean touchDragged(int sx, int sy, int pointer) {
         Vector2 p = toUi(sx, sy);
+        if (dragSlot >= 0 && pointer == dragPointer) {
+            dragX = p.x;
+            dragY = p.y;
+            if (!dragging && Math.abs(p.x - dragStartX) + Math.abs(p.y - dragStartY) > slotSize * 0.3f) dragging = true;
+            return true;
+        }
         return joystick.drag(p.x, p.y, pointer);
     }
 
+    /** Upuszczenie przeciaganego przedmiotu: na pole (przeniesienie), zakladke (inny plecak) albo ekwipunek (zalozenie). */
+    private boolean dropDragged(float x, float y) {
+        int from = dragSlot;
+        dragSlot = -1;
+        dragPointer = -1;
+        if (!dragging) return true; // zwykle dotkniecie - zaznaczenie zostaje
+        dragging = false;
+        int local = slotAt(x, y);
+        int tab = bagTabAt(x, y);
+        int to = -1;
+        if (local >= 0) {
+            to = bagPage * PAGE_SLOTS + local;
+        } else if (tab >= 0 && dragSession != null) {
+            pl.fawizja.pixel.inventory.Container bp = dragSession.character().backpack();
+            for (int i = tab * PAGE_SLOTS; i < Math.min(bp.size(), (tab + 1) * PAGE_SLOTS) && to < 0; i++) if (bp.get(i) == null) to = i;
+            bagPage = tab;
+        } else if (inEquipPanel(x, y)) {
+            selectedSlot = from;
+            dragActions.onButton("bag_equip");
+            return true;
+        }
+        if (to >= 0 && to != from && dragSession != null && to < dragSession.character().backpack().size()) {
+            dragActions.onButton("slot_move:" + from + ":" + to);
+        }
+        selectedSlot = -1;
+        return true;
+    }
+
     public boolean touchUp(int sx, int sy, int pointer) {
+        if (dragSlot >= 0 && pointer == dragPointer) {
+            Vector2 p = toUi(sx, sy);
+            return dropDragged(p.x, p.y);
+        }
         if (pressSlot >= 0 && pointer == pressPointer) {
             // krotkie dotkniecie pola: uzyj akcji (dlugie juz otworzylo wybor i wyczyscilo pressSlot)
             pressActions.onButton("spell:" + pressSlot);
@@ -2749,20 +2845,31 @@ public final class Hud {
     private float bagTipX() { return bagX + slotSize * 2.5f - bagTipW() / 2f; }
 
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
+        if (selectedSlot >= session.character().backpack().size()) selectedSlot = -1; // odpiety plecak
         float extra = selectedSlot >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
         miniWindow(shapes, bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
         if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
             shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
             shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);
         }
+        bagPages = session.character().bagPages();
+        if (bagPage >= bagPages) bagPage = bagPages - 1;
+        for (int k = 0; k < bagPages && bagPages > 1; k++) {
+            float tx = bagTabX(), ty = bagTabY(k);
+            shapes.setColor(0.08f, 0.07f, 0.06f, 0.95f);
+            shapes.rect(tx - 2, ty - 2, TAB + 4, TAB + 4);
+            shapes.setColor(k == bagPage ? new Color(0.75f, 0.6f, 0.25f, 1f) : new Color(0.3f, 0.26f, 0.2f, 1f));
+            shapes.rect(tx, ty, TAB, TAB);
+        }
+        int base = bagPage * PAGE_SLOTS;
         for (int i = 0; i < 20 && slotImg == null; i++) {
             float sx = bagX + (i % 5) * slotSize;
             float sy = bagY + (3 - i / 5) * slotSize;
-            shapes.setColor(i == selectedSlot ? new Color(0.9f, 0.75f, 0.2f, 1f) : new Color(0.35f, 0.3f, 0.25f, 1f));
+            shapes.setColor(base + i == selectedSlot ? new Color(0.9f, 0.75f, 0.2f, 1f) : new Color(0.35f, 0.3f, 0.25f, 1f));
             shapes.rect(sx + 2, sy + 2, slotSize - 4, slotSize - 4);
             shapes.setColor(0.18f, 0.15f, 0.12f, 1f);
             shapes.rect(sx + 4, sy + 4, slotSize - 8, slotSize - 8);
-            ItemStack st = session.character().backpack().get(i);
+            ItemStack st = session.character().backpack().get(base + i);
             if (st != null && session.character().isKept(st.itemId())) {
                 // znaczek "zachowany": zloty rog slotu
                 shapes.setColor(0.95f, 0.8f, 0.25f, 1f);
@@ -2779,6 +2886,10 @@ public final class Hud {
         } else {
             shapes.setColor(0.3f, 0.35f, 0.5f, 0.95f);
             shapes.rect(bagSort.x - bagSort.r * 1.6f, bagSort.y - bagSort.r * 0.6f, bagSort.r * 3.2f, bagSort.r * 1.2f);
+            if (bagPages > 1 && bagPage == bagPages - 1) {
+                shapes.setColor(0.45f, 0.3f, 0.2f, 0.95f);
+                shapes.rect(bagDetach.x - bagDetach.r * 1.8f, bagDetach.y - bagDetach.r * 0.6f, bagDetach.r * 3.6f, bagDetach.r * 1.2f);
+            }
         }
         if (closeImg == null) {
             shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
@@ -2788,7 +2899,11 @@ public final class Hud {
 
     private void drawBagContents(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
-        text(batch, "Plecak (" + (20 - pc.backpack().freeSlots()) + "/20)", bagX, bagY + slotSize * 4 + 22);
+        int base = bagPage * PAGE_SLOTS;
+        int used = 0;
+        for (int i = 0; i < PAGE_SLOTS; i++) if (pc.backpack().get(base + i) != null) used++;
+        text(batch, (bagPages > 1 ? "Plecak " + (bagPage + 1) + "/" + bagPages : "Plecak") + " (" + used + "/20)", bagX, bagY + slotSize * 4 + 22);
+        for (int k = 0; k < bagPages && bagPages > 1; k++) centered(batch, String.valueOf(k + 1), bagTabX() + TAB / 2f, bagTabY(k) + TAB / 2f);
         closeButton(batch, bagClose.x, bagClose.y);
         if (slotImg != null) {
             // pola plecaka z OTClientV8: zaznaczone - zolta ramka, zachowane - zloty rog
@@ -2796,8 +2911,8 @@ public final class Hud {
                 float sx = bagX + (i % 5) * slotSize;
                 float sy = bagY + (3 - i / 5) * slotSize;
                 batch.draw(slotImg, sx + 1, sy + 1, slotSize - 2, slotSize - 2);
-                ItemStack st = pc.backpack().get(i);
-                if (i == selectedSlot) outline(batch, sx + 1, sy + 1, slotSize - 2, slotSize - 2, new Color(0.95f, 0.8f, 0.25f, 1f));
+                ItemStack st = pc.backpack().get(base + i);
+                if (base + i == selectedSlot) outline(batch, sx + 1, sy + 1, slotSize - 2, slotSize - 2, new Color(0.95f, 0.8f, 0.25f, 1f));
                 if (st != null && pc.isKept(st.itemId())) {
                     batch.setColor(0.95f, 0.8f, 0.25f, 1f);
                     batch.draw(art.white(), sx + slotSize - 10, sy + slotSize - 10, 7, 7);
@@ -2806,14 +2921,20 @@ public final class Hud {
             }
         }
         for (int i = 0; i < 20; i++) {
-            ItemStack s = pc.backpack().get(i);
+            ItemStack s = pc.backpack().get(base + i);
             if (s == null) continue;
             float sx = bagX + (i % 5) * slotSize;
             float sy = bagY + (3 - i / 5) * slotSize;
             TextureRegion r = art.item(s.itemId());
+            if (dragging && base + i == dragSlot) batch.setColor(1f, 1f, 1f, 0.35f); // przeciagany - blady w miejscu zrodla
             if (r != null) batch.draw(r, sx + 5, sy + 5, slotSize - 10, slotSize - 10);
+            batch.setColor(Color.WHITE);
             if (s.count() > 1) text(batch, String.valueOf(s.count()), sx + 5, sy + 15);
             if (s.upgrade() > 0) text(batch, "+" + s.upgrade(), sx + slotSize - 24, sy + slotSize - 6);
+        }
+        if (dragging && dragSlot >= 0 && dragSlot < pc.backpack().size() && pc.backpack().get(dragSlot) != null) {
+            TextureRegion r = art.item(pc.backpack().get(dragSlot).itemId());
+            if (r != null) batch.draw(r, dragX - slotSize * 0.45f, dragY - slotSize * 0.45f, slotSize * 0.9f, slotSize * 0.9f);
         }
         if (selectedSlot >= 0) {
             ItemStack s = pc.backpack().get(selectedSlot);
@@ -2833,6 +2954,7 @@ public final class Hud {
             }
         } else {
             centered(batch, bagSort.label, bagSort.x, bagSort.y);
+            if (bagPages > 1 && bagPage == bagPages - 1) centered(batch, bagDetach.label, bagDetach.x, bagDetach.y);
         }
     }
 

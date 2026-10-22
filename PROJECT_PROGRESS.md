@@ -33,8 +33,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 11. Profesje i poziomy | ZAKONCZONY | 71a19a3 |
 | 12. Ruch i walka | ZAKONCZONY | 96e652b |
 | 13. Czary, runy, mikstury | ZAKONCZONY | 6522097 |
-| 14. Ekwipunek, plecaki, monety | nastepny | - |
-| 15-20 | do zrobienia | - |
+| 14. Ekwipunek, plecaki, monety | ZAKONCZONY | (ten commit) |
+| 15. NPC, questy, ekonomia | nastepny | - |
+| 16-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -241,10 +242,22 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   liscie, ale dzialaja ze slow i z automatycznego paska. Do poprawy w etapie 16 (UI).
 - Testy 453 OK (nowy HighLevelMagicTest), regresja GUI 42/42.
 
+## Etap 14 - ekwipunek, plecaki, monety (2026-10-22)
+- Plecak glowny 20 pol bez zmian. Nowy przedmiot "Plecak" (20 gp u zaopatrzeniowcow 4 miast i w obozie): uzyty
+  dolacza kolejna strone 20 pol, najwyzej 3 dodatkowe (80 pol). Strony przelacza sie zakladkami 1-4 obok pol.
+  Ostatni plecak mozna odpiac (wraca jako przedmiot), gdy jest pusty. Postac startujaca na 300 ma 2 plecaki (40 pol).
+- Przeciaganie przedmiotow: na inne pole, na zakladke innego plecaka albo na panel ekwipunku (zalozenie).
+- Monety: uzycie 100 sztuk wymienia na wyzszy nominal (100 gp = 1 platinum, 100 platinum = 1 crystal), uzycie
+  pojedynczej wyzszej monety rozmienia; SORTUJ wymienia pelne setki sam.
+- Zapis i synchronizacja online: liczba plecakow w zapisie (`bags`), klient dostaje ja z serwera razem z postacia.
+- Grafika: plecak z OTSP (2099). Poprawiony blad: perla miala te sama grafike co platynowa moneta (teraz OTSP 2197).
+- Testy 458 OK (nowy MultiBackpackTest), regresja GUI 42/42. Przeciagania nie sprawdza zaden test automatyczny
+  (wymaga gestu na ekranie) - sprawdzone tylko kompilacja i logika ruchu miedzy stronami.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 14: ekwipunek i plecaki (20 pol, wiele plecakow, przeciaganie, monety 100 gp = 1 platinum, 100 platinum = 1 crystal).
-2. Etap 15: NPC, questy, ekonomia.
-3. Etap 16: UI w stylu OTClient V8 (w tym przewijana ksiega czarow).
+1. Etap 15: NPC, questy, ekonomia.
+2. Etap 16: UI w stylu OTClient V8 (w tym przewijana ksiega czarow).
+3. Etap 17: sterowanie mobilne.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

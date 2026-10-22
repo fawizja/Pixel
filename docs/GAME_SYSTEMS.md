@@ -83,10 +83,19 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
   kazdy strzal zuzywa sztuke, pusty stos uzupelnia sie tym samym rodzajem z plecaka. Bez amunicji bron dziala jak dotad.
 - Wyrzucanie na ziemie i podnoszenie (`GroundItems`), lista przedmiotow ignorowanych przez autoloot.
 - UI: okno plecaka z ikonami, statystykami zaznaczonego przedmiotu, ZALOZ / WYRZUC, przenoszenie dotykiem.
+- Wiele plecakow (etap 14): przedmiot `backpack` (20 gp u zaopatrzeniowcow) uzyty z plecaka staje sie kolejna
+  strona po 20 miejsc (najwyzej 3 dodatkowe = 80). Logika widzi jeden pojemnik (`Container.resize`), wiec lup,
+  sklepy, handel i mikstury dzialaja na wszystkich stronach. Ostatni plecak mozna odpiac (ODEPNIJ), gdy jest pusty.
+  Zapis: `bags=<liczba>` przed slotami `bp.<n>`. Postac startujaca na 250+ ma od razu drugi plecak.
+- Przeciaganie (etap 14): przytrzymanie i przesuniecie przedmiotu przenosi go na inne pole, na zakladke innego
+  plecaka (pierwsze wolne pole tej strony) albo na panel ekwipunku (zalozenie). Krotkie dotkniecie dziala jak dotad.
 
 ## Waluty i bank (Z, UI banku - C)
 
 Gold / Platinum / Crystal (100:1). Wplata, wyplata, przelew, wymiana w gore i w dol, placenie z reszta.
+Uzycie monet jak w Tibii (etap 14): stos 100 sztuk zamienia sie na monete wyzszego nominalu (100 gp = 1 platinum,
+100 platinum = 1 crystal), pojedyncza platynowa lub krysztalowa rozmienia sie na 100 nizszych. SORTUJ wymienia
+pelne setki automatycznie.
 Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie (jedno konto).
 Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 60 miejsc, wspolny dla miast, tylko przy bankierze
 (`GameSession.depotStore/depotTake`, przenosi wszystkie sztuki ile sie zmiesci, monety odrzuca). Zapis: `dp.<slot>`.

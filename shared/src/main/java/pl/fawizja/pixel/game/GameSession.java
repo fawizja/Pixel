@@ -1095,7 +1095,58 @@ public final class GameSession {
         if (st != null && items.get(st.itemId()).key().equals("exp_scroll")) return readExpScroll(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("challenge_scroll")) return startChallenge(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
+        if (st != null && items.get(st.itemId()).key().equals("backpack")) return attachBag(slot, nowMs);
+        if (st != null && pl.fawizja.pixel.economy.Currency.isCoin(st.itemId())) return exchangeCoins(slot, nowMs);
         return spells.useItem(slot, nowMs);
+    }
+
+    /** Uzycie plecaka z plecaka: staje sie kolejna strona (+20 slotow), jak plecak w plecaku w Tibii. */
+    private CastResult attachBag(int slot, long nowMs) {
+        if (pc.extraBags() >= PlayerCharacter.MAX_EXTRA_BAGS) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Masz już " + PlayerCharacter.MAX_EXTRA_BAGS + " dodatkowe plecaki.");
+            return CastResult.NOT_USABLE;
+        }
+        pc.backpack().takeFromSlot(slot, 1);
+        pc.attachBag();
+        log.add(nowMs, EventLog.Kind.INFO, "Plecak dołączony: " + pc.backpack().size() + " miejsc (strony " + pc.bagPages() + ").");
+        return CastResult.OK;
+    }
+
+    /** Odpina ostatni dodatkowy plecak (musi byc pusty) i kladzie go do plecaka glownego. */
+    public boolean detachBag(long nowMs) {
+        if (pc.extraBags() == 0) return false;
+        if (!pc.detachBag()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Najpierw opróżnij ostatni plecak.");
+            return false;
+        }
+        if (!pc.backpack().add(ItemStack.of(items.byKey("backpack").id())).ok()) {
+            pc.attachBag();
+            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca na odpięty plecak.");
+            return false;
+        }
+        log.add(nowMs, EventLog.Kind.INFO, "Plecak odpięty: " + pc.backpack().size() + " miejsc.");
+        return true;
+    }
+
+    /** Uzycie monet jak w Tibii: 100 sztuk zamienia na monete wyzszego nominalu, pojedyncza wyzsza - rozmienia na 100. */
+    private CastResult exchangeCoins(int slot, long nowMs) {
+        pl.fawizja.pixel.economy.Currency cur = pl.fawizja.pixel.economy.Currency.byItemId(pc.backpack().get(slot).itemId());
+        int count = pc.backpack().get(slot).count();
+        InventoryResult r;
+        if (count >= pl.fawizja.pixel.economy.Currency.EXCHANGE_RATE && cur != pl.fawizja.pixel.economy.Currency.CRYSTAL) {
+            r = Money.exchangeUp(pc.backpack(), cur);
+        } else if (cur != pl.fawizja.pixel.economy.Currency.GOLD) {
+            r = Money.exchangeDown(pc.backpack(), cur);
+        } else {
+            log.add(nowMs, EventLog.Kind.INFO, "100 złotych monet = 1 platynowa, 100 platynowych = 1 kryształowa.");
+            return CastResult.NOT_USABLE;
+        }
+        if (!r.ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na wymianę monet.");
+            return CastResult.BACKPACK_FULL;
+        }
+        log.add(nowMs, EventLog.Kind.INFO, "Monety wymienione.");
+        return CastResult.OK;
     }
 
     /** Zwoj powrotu: 3 s skupienia (ruch albo obrazenia przerywaja), potem swiatynia miasta postaci; zwoj znika na koncu. */
@@ -1840,7 +1891,14 @@ public final class GameSession {
 
     /** Porzadkuje plecak (przycisk SORTUJ, akcja "sort"). */
     public boolean sortBackpack(long nowMs) {
-        boolean moved = pc.backpack().sort();
+        // porzadkowanie wymienia tez pelne setki monet na wyzszy nominal (mniej zajetych pol)
+        boolean exchanged = false;
+        for (pl.fawizja.pixel.economy.Currency cur : new pl.fawizja.pixel.economy.Currency[] {
+                pl.fawizja.pixel.economy.Currency.GOLD, pl.fawizja.pixel.economy.Currency.PLATINUM}) {
+            while (pc.backpack().count(cur.itemId()) >= pl.fawizja.pixel.economy.Currency.EXCHANGE_RATE
+                    && Money.exchangeUp(pc.backpack(), cur).ok()) exchanged = true;
+        }
+        boolean moved = pc.backpack().sort() || exchanged;
         log.add(nowMs, EventLog.Kind.INFO, moved ? "Plecak uporządkowany." : "Plecak jest już uporządkowany.");
         return moved;
     }
