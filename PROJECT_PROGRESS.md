@@ -29,7 +29,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 7. Mosty, statki, podroze | ZAKONCZONY | d9b2950 |
 | 8. Expowiska na powierzchni | ZAKONCZONY | 7312299 |
 | 9. Wielopoziomowe lochy | ZAKONCZONY | 35ddade |
-| 10. Potwory, bossowie, loot | ZAKONCZONY | (ten commit) |
+| 10. Potwory, bossowie, loot | ZAKONCZONY | 0cd1b79 |
 | 11. Profesje i poziomy | nastepny | - |
 | 12-20 | do zrobienia | - |
 
