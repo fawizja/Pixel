@@ -33,7 +33,7 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 11. Profesje i poziomy | ZAKONCZONY | 71a19a3 |
 | 12. Ruch i walka | ZAKONCZONY | 96e652b |
 | 13. Czary, runy, mikstury | ZAKONCZONY | 6522097 |
-| 14. Ekwipunek, plecaki, monety | ZAKONCZONY | (ten commit) |
+| 14. Ekwipunek, plecaki, monety | ZAKONCZONY | ea984e9 |
 | 15. NPC, questy, ekonomia | nastepny | - |
 | 16-20 | do zrobienia | - |
 
