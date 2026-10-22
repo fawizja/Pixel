@@ -41,3 +41,5 @@ selvaran|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=119,142
 phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2
 battle|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=56,87,-1 -Dpixel.open=battle
 picker|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.open=pickerrune -Dpixel.uiScale=2
+diag|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.button=diag
+look|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=79,80,0 -Dpixel.look=82,79

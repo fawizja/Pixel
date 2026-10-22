@@ -102,7 +102,7 @@ public final class GameScreen extends ScreenAdapter {
      */
     private com.badlogic.gdx.graphics.profiling.GLProfiler profiler;
     private final boolean profileLog = Boolean.getBoolean("pixel.profile");
-    private int lastDrawCalls, lastTextureBinds, lastShaderSwitches, worldDrawCalls;
+    private int lastDrawCalls, lastTextureBinds, worldDrawCalls;
     private long profFrames, profCalls, profWorld, profBinds, profVerts, profCpuNs;
     private boolean paused;
     private final List<Monster> visibleMonsters = new ArrayList<>();
@@ -1391,7 +1391,6 @@ public final class GameScreen extends ScreenAdapter {
         if (profiler == null || !profiler.isEnabled()) return;
         lastDrawCalls = profiler.getDrawCalls();
         lastTextureBinds = profiler.getTextureBindings();
-        lastShaderSwitches = profiler.getShaderSwitches();
         if (!profileLog) return;
         profFrames++;
         profCalls += lastDrawCalls;
@@ -2027,7 +2026,7 @@ public final class GameScreen extends ScreenAdapter {
     private List<String> diagnosticsLines() {
         List<String> l = new ArrayList<>();
         l.add("FPS: " + Gdx.graphics.getFramesPerSecond() + String.format("  (%.1f ms)", frameTimeAvg * 1000));
-        l.add("Rysowanie: " + lastDrawCalls + " wywołań, " + lastTextureBinds + " tekstur, " + lastShaderSwitches + " shaderów");
+        l.add("Rysowanie: " + lastDrawCalls + ", tekstury: " + lastTextureBinds);
         Runtime rt = Runtime.getRuntime();
         long used = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
         l.add("Pamięć aplikacji: " + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");

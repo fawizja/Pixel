@@ -1954,7 +1954,10 @@ public final class GameSession {
         if (parts.isEmpty()) parts.add(world.isWalkable(p) ? "wolne pole" : "przeszkoda");
         StringBuilder b = new StringBuilder("Widzisz: ").append(String.join(", ", parts)).append('.');
         int dist = p.z() == pc.position().z() ? p.distanceTo(pc.position()) : -1;
-        if (dist > 1) b.append(" Odległość: ").append(dist).append(" pól.");
+        if (dist > 1) {
+            boolean few = dist % 10 >= 2 && dist % 10 <= 4 && (dist % 100 < 12 || dist % 100 > 14);
+            b.append(" Odległość: ").append(dist).append(few ? " pola." : " pól.");
+        }
         if (world.isProtectionZone(p)) b.append(" Strefa ochronna.");
         int req = world.requiredLevelAt(p);
         if (req > 0) b.append(" Wymagany poziom: ").append(req).append('.');

@@ -38,8 +38,8 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 16. UI w stylu OTClient V8 | ZAKONCZONY | c4f43a8 |
 | 17. Sterowanie mobilne | ZAKONCZONY | 11f56db |
 | 18. Optymalizacja | ZAKONCZONY | 9895785 |
-| 19. Testy koncowe | nastepny | - |
-| 20. ZIP i debug APK | do zrobienia | - |
+| 19. Testy koncowe | ZAKONCZONY | (ten commit) |
+| 20. ZIP i debug APK | nastepny | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -303,9 +303,21 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   nie liczba wywolan; na telefonie mniej wywolan rysowania przeklada sie bezposrednio na krotsza klatke.
 - Testy 463 OK.
 
+## Etap 19 - testy koncowe (2026-10-22)
+- Nowy test odbiorczy briefu `acceptance/BriefAcceptanceTest` na prawdziwych danych: kazda profesja startuje
+  na poziomie 300 z 10 000 000 gp w banku i dwoma plecakami (40 miejsc); "utani hur" rozpoznawane i rzucane przez
+  kazda profesje, "utani gran hur" to strong_haste; 4 miasta, kazde z kaplanem w strefie ochronnej, bankiem, sklepami
+  i transportem; co najmniej 4 kapitanow; co najmniej 3 pietra poza powierzchnia, ponad 100 spawnow na 3+ pietrach
+  i co najmniej 5 bossow w swiecie.
+- Regresja GUI: 2 nowe sceny (diag - panel diagnostyki z ustawieniami, look - podglad pola), lacznie 44/44.
+- Poprawki znalezione w testach: panel diagnostyki nie przeswituje juz przez minimape, ekwipunek i przyciski
+  kolumny (wczesniej nakladaly sie napisy), krotszy wiersz licznikow rysowania (nie wychodzi poza ekran),
+  poprawna odmiana "Odleglosc: 3 pola" / "5 pol".
+- Przeglad nocy: w miastach latarnie i pochodnie oswietlaja ulice (zamierzone), poza miastem noc jest ciemna.
+- Testy 467 OK, CI zielone dla etapow 16-18.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 19: testy koncowe.
-2. Etap 20: ZIP i debug APK.
+1. Etap 20: ZIP z kodem i debug APK (APK budowane przez CI - lokalnie brak Android SDK).
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

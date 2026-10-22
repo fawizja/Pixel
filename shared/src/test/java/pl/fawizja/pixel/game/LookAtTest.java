@@ -37,7 +37,7 @@ class LookAtTest {
         wolf.damage(wolf.type().maxHealth() / 2);
         String text = s.lookAt(wolf.position(), 0);
         assertTrue(text.startsWith("Widzisz: Wilk (poziom 8, zdrowie "), text);
-        assertTrue(text.contains("Odległość: " + wolf.position().distanceTo(me)), text);
+        assertTrue(text.contains("Odległość: 4 pola."), text);
         assertTrue(s.log().latest(1).get(0).text().contains("Wilk"), "the look goes to the console");
     }
 

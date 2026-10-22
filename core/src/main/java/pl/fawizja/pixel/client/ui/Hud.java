@@ -1598,7 +1598,8 @@ public final class Hud {
 
     /** Czy otwarte okno (ksiega, NPC, mapa...) zachodzi na prawy panel. */
     private boolean windowOverPanel() {
-        return (menuOpen || bigMapOpen) && menuX + menuW > panelX;
+        // diagnostyka z ustawieniami stoi na prawym panelu: minimapa i ekwipunek nie moga przez nia przeswitywac
+        return diagnosticsOpen || (menuOpen || bigMapOpen) && menuX + menuW > panelX;
     }
 
     private boolean minimapVisible() {
@@ -1856,6 +1857,7 @@ public final class Hud {
         bag.active = bagOpen;
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
+        run.visible = defensive.visible = torch.visible = !diagnosticsOpen; // pod panelem diagnostyki
         defensive.active = pc.isDefensive();
         book.active = menuOpen && !npcMode && pickSlot < 0 && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null && !achievementsView;
         if (playerMenu != null && !menuOpen) playerMenu = null;
@@ -2072,7 +2074,7 @@ public final class Hud {
             window(shapes, menuX, menuY, menuW, menuH, true);
         }
         if (diagnosticsOpen) {
-            shapes.setColor(0, 0, 0, 0.6f);
+            shapes.setColor(0, 0, 0, 0.75f);
             shapes.rect(w - 250, h - 256, 238, 216);
             if (settings != null) {
                 int n = settings.rows().length;
