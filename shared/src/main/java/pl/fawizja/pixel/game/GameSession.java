@@ -1029,7 +1029,7 @@ public final class GameSession {
             answer = "Nie rozumiem. Zapytaj o: " + String.join(", ", topics.subList(0, Math.min(4, topics.size()))) + ".";
         }
         String line = n.name() + ": " + answer;
-        log.add(nowMs, EventLog.Kind.INFO, line);
+        log.add(nowMs, EventLog.Kind.CHAT, line);
         return line;
     }
 

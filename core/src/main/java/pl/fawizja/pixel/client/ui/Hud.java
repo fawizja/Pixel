@@ -109,6 +109,8 @@ public final class Hud {
     /** Rozmowa z kupcem w widoku kowala (ulepszanie wyposazenia). */
     private boolean smithView;
     private int bookPage;
+    /** Strona czarow w ksiedze (etap 16); -1 = strona z najwyzszym poznanym czarem. */
+    private int spellPage = -1;
     /** Strona listy osiagniec (gdy nie mieszcza sie w dwoch kolumnach). */
     private int achPage;
     private int npcQty = 1;
@@ -560,6 +562,7 @@ public final class Hud {
 
     public void toggleBook() {
         if (trade != null) return; // okno handlu ma pierwszenstwo
+        spellPage = -1;
         playerMenu = null;
         if (rankingView != null || friendsView != null || marketView != null || achievementsView) {
             rankingView = null;
@@ -871,12 +874,20 @@ public final class Hud {
         PlayerCharacter pc = session.character();
         // tyle wierszy miesci kolumna okna; czary ponad to (najwyzsze poziomy) czekaja, az zwolni sie miejsce
         int bookRows = Math.max(5, (int) ((menuH - 40) / rowH));
-        List<SpellType> spells = new ArrayList<>(session.spells().registry().forVocation(pc.vocation()));
-        // za duzo: najpierw odpadaja najdalsze zapowiedzi, potem najslabsze (najnizsze) poznane czary
-        for (int i = spells.size() - 1; spells.size() > bookRows && i >= 0; i--) {
-            if (pc.level() < spells.get(i).minLevel()) spells.remove(i);
+        // czary profesji i zapowiedzi na nastepne 100 poziomow, stronami (wiersz "Kolejne czary" przewija)
+        List<SpellType> all = new ArrayList<>();
+        int lastKnown = 0;
+        for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
+            if (sp.minLevel() > pc.level() + 100) continue;
+            if (sp.minLevel() <= pc.level()) lastKnown = all.size();
+            all.add(sp);
         }
-        while (spells.size() > bookRows) spells.remove(0);
+        int spellsPerPage = all.size() > bookRows ? bookRows - 1 : bookRows;
+        // spellPage to tu indeks pierwszego czaru; domyslnie pelna strona konczaca sie najwyzszym poznanym czarem
+        if (spellPage < 0) spellPage = Math.max(0, Math.min(all.size(), lastKnown + 2) - spellsPerPage);
+        if (spellPage >= all.size()) spellPage = 0;
+        List<SpellType> spells = all.subList(spellPage, Math.min(all.size(), spellPage + spellsPerPage));
+        int spellPages = all.size() > bookRows ? 2 : 1;
         for (SpellType sp : spells) {
             boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
             String words = session.spells().registry().words(sp.key());
@@ -884,6 +895,8 @@ public final class Hud {
                     + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
+        if (spellPages > 1) menuRows.add(new MenuRow("book:spells", "Kolejne czary", "czary " + (spellPage + 1) + "-"
+                + (spellPage + spells.size()) + " z " + all.size(), true));
         // ustawianie paska: wybierz przycisk, potem dotknij czaru (ten sam czar drugi raz = automat)
         String assignLabel = assignSlot < 0 ? "Ustaw pasek czarów" : "Przycisk " + (assignSlot + 1) + ": dotknij czaru";
         String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? "własny układ; dotknij, aby zmienić" : "pasek automatyczny; dotknij, aby zmienić")
@@ -915,7 +928,7 @@ public final class Hud {
         for (MenuRow row : menuRows) if (row.action.startsWith("cast:")) spellsCount++;
         int li = 0, ri = 0;
         for (MenuRow row : menuRows) {
-            boolean left = row.action.startsWith("cast:");
+            boolean left = row.action.startsWith("cast:") || row.action.equals("book:spells");
             int idx = left ? li++ : ri++;
             row.x = menuX + 10 + (left ? 0 : colW + 10);
             row.y = menuY + menuH - 40 - (idx + 1) * rowH;
@@ -1666,6 +1679,8 @@ public final class Hud {
                         achPage++;
                     } else if (row.action.equals("book:page")) {
                         bookPage++;
+                    } else if (row.action.equals("book:spells")) {
+                        spellPage = spellPage + Math.max(1, (int) ((menuH - 40) / rowH) - 1); // nastepna strona, po koncu od poczatku
                     } else if (row.action.equals("book:journal")) {
                         openJournal();
                     } else if (row.action.startsWith("pick:")) {
@@ -2001,7 +2016,14 @@ public final class Hud {
                 yy -= SK_ROW;
             }
         }
-        if (consoleVisible()) frame(shapes, conX, conY, conW, conH);
+        if (consoleVisible()) {
+            frame(shapes, conX, conY, conW, conH);
+            // pasek zakladek konsoli; wybrana zakladka podswietlona
+            shapes.setColor(0.1f, 0.09f, 0.08f, 0.85f);
+            shapes.rect(conX + 3, conY + conH - CON_TAB_H - 1, conW - 6, CON_TAB_H - 1);
+            shapes.setColor(0.32f, 0.27f, 0.18f, 0.95f);
+            shapes.rect(conX + 6 + conTab * conTabW(), conY + conH - CON_TAB_H - 1, conTabW() - 4, CON_TAB_H - 1);
+        }
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
             rebuildMenu(session);
@@ -2472,6 +2494,24 @@ public final class Hud {
     /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
     private static final long CON_KEEP_MS = 30_000;
 
+    /** Zakladki konsoli jak w OTClient (etap 16): wszystko, czat (gracze i NPC), lup, dziennik serwera. */
+    private static final String[] CON_TABS = {"Ogólne", "Czat", "Łup", "Serwer"};
+    private static final float CON_TAB_H = 15;
+    private int conTab;
+
+    public void showConsoleTab(int tab) { conTab = Math.max(0, Math.min(CON_TABS.length - 1, tab)); }
+
+    private static boolean inTab(int tab, EventLog.Kind k) {
+        switch (tab) {
+            case 1: return k == EventLog.Kind.CHAT;
+            case 2: return k == EventLog.Kind.LOOT;
+            case 3: return k == EventLog.Kind.INFO || k == EventLog.Kind.WARNING || k == EventLog.Kind.SYSTEM;
+            default: return true;
+        }
+    }
+
+    private float conTabW() { return Math.min(64, (conW - 8) / CON_TABS.length); }
+
     private boolean consoleVisible() {
         return !((menuOpen || bigMapOpen) && menuY < conY + conH) && conH > 8;
     }
@@ -2479,7 +2519,7 @@ public final class Hud {
     /** Konsola pod panelem postaci: zadania i wyzwanie na gorze, potem ostatnie zdarzenia i czat (najnowsze na dole). */
     private void layoutConsole(GameSession session, long serverTimeMs) {
         PlayerCharacter pc = session.character();
-        float maxBody = conH - 8;
+        float maxBody = conH - 8 - CON_TAB_H;
         conLines.clear();
         battle.clear();
         for (Monster m : session.monsters().monsters()) {
@@ -2491,8 +2531,8 @@ public final class Hud {
         font.getData().setScale(CON_SCALE);
         List<ConLine> fixed = new ArrayList<>();
         String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
-        if (chLine != null) fixed.add(conLine(chLine, new Color(1f, 0.75f, 0.45f, 1f), tw));
-        for (String q : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
+        if (conTab == 0 && chLine != null) fixed.add(conLine(chLine, new Color(1f, 0.75f, 0.45f, 1f), tw));
+        for (String q : conTab != 0 ? java.util.List.<String>of() : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
                 session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()),
                 session.monsterName(pc.hunt().monster() == null ? "" : pc.hunt().monster()))) {
             fixed.add(conLine(q, new Color(0.85f, 0.9f, 1f, 1f), tw));
@@ -2500,14 +2540,17 @@ public final class Hud {
         float used = 0;
         for (ConLine l : fixed) used += l.height();
         List<ConLine> recent = new ArrayList<>();
-        List<EventLog.Entry> entries = session.log().latest(12);
+        List<EventLog.Entry> entries = session.log().latest(conTab == 0 ? 12 : 60);
         for (int i = entries.size() - 1; i >= 0; i--) {
             EventLog.Entry e = entries.get(i);
+            if (!inTab(conTab, e.kind())) continue;
             long age = serverTimeMs - e.timeMs();
-            if (age > CON_KEEP_MS) continue;
-            float a = age > CON_KEEP_MS - 5000 ? Math.max(0.3f, (CON_KEEP_MS - age) / 5000f) : 1f;
+            // zakladka "Ogolne" znika po 30 s jak dotad; pozostale zakladki to historia kanalu (bez wygaszania)
+            if (conTab == 0 && age > CON_KEEP_MS) continue;
+            float a = conTab != 0 ? 1f : age > CON_KEEP_MS - 5000 ? Math.max(0.3f, (CON_KEEP_MS - age) / 5000f) : 1f;
             Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.6f, 0.4f, a)
-                    : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a) : new Color(1f, 1f, 1f, a);
+                    : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a)
+                    : e.kind() == EventLog.Kind.CHAT ? new Color(1f, 0.92f, 0.55f, a) : new Color(1f, 1f, 1f, a);
             ConLine l = conLine(e.text(), c, tw);
             if (used + l.height() > maxBody) break;
             used += l.height();
@@ -2526,7 +2569,12 @@ public final class Hud {
     private void drawConsole(SpriteBatch batch) {
         if (!consoleVisible()) return;
         font.getData().setScale(CON_SCALE);
-        float yy = conY + conH - 4;
+        float tabW = conTabW();
+        for (int i = 0; i < CON_TABS.length; i++) {
+            font.setColor(i == conTab ? new Color(1f, 0.85f, 0.4f, 1f) : new Color(0.62f, 0.6f, 0.55f, 1f));
+            font.draw(batch, CON_TABS[i], conX + 6 + i * tabW, conY + conH - 3, tabW - 4, com.badlogic.gdx.utils.Align.center, false);
+        }
+        float yy = conY + conH - 4 - CON_TAB_H;
         for (ConLine l : conLines) {
             if (yy - l.height() < conY - 2) break;
             font.setColor(l.color());
@@ -2544,6 +2592,13 @@ public final class Hud {
     /** Dotkniecie konsoli otwiera czat. */
     private boolean consoleTouch(float px, float py, Actions actions) {
         if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
+        if (py >= conY + conH - CON_TAB_H - 2) {
+            int t = (int) ((px - conX - 6) / conTabW());
+            if (t >= 0 && t < CON_TABS.length) {
+                conTab = t;
+                return true;
+            }
+        }
         actions.onButton("chat");
         return true;
     }

@@ -7,7 +7,8 @@ import java.util.List;
 /** Dziennik zdarzen gry (ostatnie komunikaty dla UI). */
 public final class EventLog {
 
-    public enum Kind { INFO, WARNING, LOOT, SYSTEM }
+    /** CHAT (etap 16): rozmowy graczy, wiadomosci prywatne, gildia i odpowiedzi NPC - osobna zakladka konsoli. */
+    public enum Kind { INFO, WARNING, LOOT, SYSTEM, CHAT }
 
     public record Entry(long timeMs, Kind kind, String text) {}
 

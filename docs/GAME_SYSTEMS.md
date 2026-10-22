@@ -212,6 +212,12 @@ Joystick ze strefa martwa, klawiatura na PC.
   Prawy panel ma 20% szerokosci (170-260 jednostek UI).
 - Dotyk poza widokiem gry nie trafia na mape. Na szerokim ekranie okna (ksiega, NPC, mapa) stoja nad widokiem gry.
 
+- Etap 16: konsola ma zakladki jak w OTClient - Ogolne (wszystko, znika po 30 s, z zadaniami), Czat (gracze,
+  prywatne, gildia, druzyna, odpowiedzi NPC; `EventLog.Kind.CHAT`), Lup, Serwer (informacje, ostrzezenia,
+  komunikaty systemu). Zakladki inne niz Ogolne pokazuja historie kanalu bez wygaszania.
+- Ksiega czarow pokazuje wszystkie czary profesji (i zapowiedzi na +100 poziomow) stronami: domyslnie strona
+  konczy sie najwyzszym poznanym czarem, wiersz "Kolejne czary" przewija dalej.
+
 ## Efekty graficzne czarow (Z zdarzenia, C rysowanie)
 
 - `CombatEvent` ma rodzaje PROJECTILE (z `from` do `position`) i AREA (promien w `amount`), `effect` = rodzaj

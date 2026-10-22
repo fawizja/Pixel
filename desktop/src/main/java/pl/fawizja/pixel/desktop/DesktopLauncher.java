@@ -30,6 +30,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.conTab=N     zakladka konsoli (0 ogolne, 1 czat, 2 lup, 3 serwer)
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
  */
@@ -274,6 +275,8 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.say(gs.session().character().name(), "Witajcie w Varden! Ktoś idzie ze mną do kopalni goblinów?");
                 }
+                Integer conTab = Integer.getInteger("pixel.conTab");
+                if (conTab != null) ((GameScreen) getScreen()).hud().showConsoleTab(conTab);
                 String button = System.getProperty("pixel.button");
                 if (button != null) ((GameScreen) getScreen()).press(button);
                 String button2 = System.getProperty("pixel.button2");

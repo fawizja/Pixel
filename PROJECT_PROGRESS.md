@@ -35,8 +35,9 @@ Zalozenia serwera: kazda profesja startuje na poziomie 300 z 10 000 000 gp w ban
 | 13. Czary, runy, mikstury | ZAKONCZONY | 6522097 |
 | 14. Ekwipunek, plecaki, monety | ZAKONCZONY | ea984e9 |
 | 15. NPC, questy, ekonomia | ZAKONCZONY | ddead90 |
-| 16. UI w stylu OTClient V8 | nastepny | - |
-| 17-20 | do zrobienia | - |
+| 16. UI w stylu OTClient V8 | ZAKONCZONY | (ten commit) |
+| 17. Sterowanie mobilne | nastepny | - |
+| 18-20 | do zrobienia | - |
 
 Galeria zrzutow po etapach: https://claude.ai/artifact/NQhU2aj1gny6JeFq3Nzekz
 APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk (CI po kazdym pushu)
@@ -239,8 +240,7 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Zestaw startowy postaci 300 zawiera nowe mikstury i runy; przyciski HP/MP biora najsilniejsza miksture.
 - Wywazenie: leczenie 120-150 oslabione wzgledem pierwszego projektu, bo EndgameSimulationTest wykazal, ze
   postac z progu nizej przeskakiwala prog (paladyn, sorcerer, mnich vs void_priest).
-- Znane ograniczenie: ksiega miesci ok. 10 czarow - na poziomie 300 najslabsze (m.in. przyspieszenie) nie sa na
-  liscie, ale dzialaja ze slow i z automatycznego paska. Do poprawy w etapie 16 (UI).
+- Znane ograniczenie (naprawione w etapie 16): ksiega miescila ok. 10 czarow.
 - Testy 453 OK (nowy HighLevelMagicTest), regresja GUI 42/42.
 
 ## Etap 14 - ekwipunek, plecaki, monety (2026-10-22)
@@ -265,10 +265,21 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Rozmowy kapitanow o rejsach, wyspach i piratach; Admiral i kwatermistrz odpowiadaja o bossach, koralu i skupie.
 - Testy 460 OK (nowy IslandQuestsTest), regresja GUI 42/42.
 
+## Etap 16 - UI w stylu OTClient V8 (2026-10-22)
+- Przeglad: HUD od wczesniejszych wersji korzysta z grafik OTClientV8 (MIT: male okna, pola przedmiotow, ramki),
+  ma panel ekwipunku, umiejetnosci, liste walki, minimape i pasek akcji. Brakowalo zakladek konsoli
+  i okna wielu plecakow (zrobione w etapie 14) oraz ksiegi mieszczacej czary 300+.
+- Konsola: zakladki Ogolne / Czat / Lup / Serwer. Nowy rodzaj wpisu CHAT dla rozmow graczy, wiadomosci prywatnych,
+  gildii, druzyny, odpowiedzi NPC i inkantacji.
+- Ksiega czarow: stronicowana, domyslnie z najwyzszymi poznanymi czarami, "Kolejne czary" przewija - na poziomie
+  300 widac wszystkie 19-21 czarow profesji (usuniete ograniczenie z etapu 13).
+- Wzorce regresji GUI odswiezone przez run.sh --update (pasek zakladek w kazdej scenie), 42/42.
+- Testy 460 OK.
+
 ## Nastepne kroki (dokladnie)
-1. Etap 16: UI w stylu OTClient V8 (w tym przewijana ksiega czarow).
-2. Etap 17: sterowanie mobilne.
-3. Etap 18: optymalizacja.
+1. Etap 17: sterowanie mobilne.
+2. Etap 18: optymalizacja.
+3. Etap 19: testy koncowe.
 
 ## Narzedzia
 - JDK 21 (kompilacja --release 17), Gradle 8.14.3 wrapper; w chmurze lokalny init.d z lustrem Maven Central

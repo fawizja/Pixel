@@ -582,6 +582,7 @@ public final class GameScreen extends ScreenAdapter {
             act("cast:" + spell, now());
             if (net != null) net.send("CHAT", text.trim());
             else say(session.character().name(), text.trim());
+            session.log().add(now(), EventLog.Kind.CHAT, session.character().name() + ": " + text.trim());
             return;
         }
         if (cmd.equals("/smierc")) {
@@ -745,7 +746,7 @@ public final class GameScreen extends ScreenAdapter {
         if (net == null && emote != null) {
             // bez serwera emotka i tak pokazuje sie nad wlasna postacia
             String me = session.character().name();
-            session.log().add(now(), EventLog.Kind.INFO, me + ": " + emote);
+            session.log().add(now(), EventLog.Kind.CHAT, me + ": " + emote);
             say(me, emote);
             return;
         }
@@ -1802,7 +1803,7 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "CHAT":
                     if (m.length >= 3 && !ignored.hides(m[1])) {
-                        session.log().add(now, EventLog.Kind.INFO, m[1] + ": " + m[2]);
+                        session.log().add(now, EventLog.Kind.CHAT, m[1] + ": " + m[2]);
                         if (!m[1].startsWith("[")) say(m[1], m[2]); // czat ogolny: dymek nad mowiacym
                     }
                     break;
