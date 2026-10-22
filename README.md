@@ -6,6 +6,7 @@
 > (Frostholm, Varden, Selvaran, Qasirah) w pasach biomow snieg - umiarkowany - dzungla - pustynia,
 > lochami na pietrach -5..+5 i regionami z zalecanym poziomem, postac, profesje, plecak, monety, bank (logika), zapis oraz
 > potwory z AI, walka, smierc, doswiadczenie i lupy, czary, runy, mikstury, jedzenie i crafting.
+> W grze offline nowa postac startuje na poziomie 300 (HP, mana i umiejetnosci dobrane do poziomu; `start.level.offline`).
 > Stan: dziala serwer z synchronizacja sieciowa i tryb online klienta desktopowego (wielu graczy w jednym
 > swiecie). Dziala PvP z ochrona nowych postaci i czaszkami.
 > Logowanie z haslem dziala takze w APK, polaczenie jest szyfrowane (TLS z przypietym certyfikatem).

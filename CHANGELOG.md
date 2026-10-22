@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.194.0] - 2026-10-22
+
+### Zmieniono
+- Gra offline: nowa postać startuje od razu na poziomie 300 (`start.level.offline` w starting.properties).
+  HP i mana wynikają z poziomu i profesji (np. czarodziej 1645 HP / 8850 many) i są pełne; umiejętności dobrane do
+  poziomu (magowie magia 70, paladyn dystans i mnich pięści ~91, obrona ~82). Serwer nadal tworzy postacie od poziomu 8.
+  `-Dpixel.startLevel=N` nadpisuje poziom (regresja GUI używa 8).
+- Napisy panelu nie przebijają przez okna Ekwipunek i Umiejętności.
+
 ## [0.193.3] - 2026-10-21
 
 ### Zmieniono

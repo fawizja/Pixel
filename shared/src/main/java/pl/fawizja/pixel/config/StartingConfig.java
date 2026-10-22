@@ -8,6 +8,7 @@ import java.util.Properties;
 /**
  * Konfigurowalne ustawienia startowe nowych postaci.
  * Domyslne wartosci: poziom 8, 10 000 gp w plecaku, 0 gp w banku, start w miescie Varden.
+ * Gra offline (bez serwera) moze startowac z wyzszego poziomu ({@code start.level.offline}).
  */
 public final class StartingConfig {
 
@@ -18,9 +19,15 @@ public final class StartingConfig {
     private final long startBankBalance;
     private final String startTown;
     private final int maxLevel;
+    private final int offlineStartLevel;
 
     public StartingConfig(int startLevel, long startGoldInBackpack, long startBankBalance,
                           String startTown, int maxLevel) {
+        this(startLevel, startGoldInBackpack, startBankBalance, startTown, maxLevel, startLevel);
+    }
+
+    public StartingConfig(int startLevel, long startGoldInBackpack, long startBankBalance,
+                          String startTown, int maxLevel, int offlineStartLevel) {
         if (maxLevel < 1) throw new IllegalArgumentException("maxLevel must be >= 1");
         if (startLevel < 1 || startLevel > maxLevel) {
             throw new IllegalArgumentException("startLevel out of range: " + startLevel);
@@ -33,6 +40,10 @@ public final class StartingConfig {
         this.startBankBalance = startBankBalance;
         this.startTown = Objects.requireNonNull(startTown);
         this.maxLevel = maxLevel;
+        if (offlineStartLevel < startLevel || offlineStartLevel > maxLevel) {
+            throw new IllegalArgumentException("offline start level out of range: " + offlineStartLevel);
+        }
+        this.offlineStartLevel = offlineStartLevel;
     }
 
     public static StartingConfig defaults() {
@@ -42,12 +53,14 @@ public final class StartingConfig {
     /** Wczytuje konfiguracje z pliku properties; brakujace klucze przyjmuja wartosci domyslne. */
     public static StartingConfig fromProperties(Properties p) {
         StartingConfig d = defaults();
+        String level = p.getProperty("start.level", String.valueOf(d.startLevel)).trim();
         return new StartingConfig(
-                Integer.parseInt(p.getProperty("start.level", String.valueOf(d.startLevel)).trim()),
+                Integer.parseInt(level),
                 Long.parseLong(p.getProperty("start.gold.backpack", String.valueOf(d.startGoldInBackpack)).trim()),
                 Long.parseLong(p.getProperty("start.gold.bank", String.valueOf(d.startBankBalance)).trim()),
                 p.getProperty("start.town", d.startTown).trim(),
-                Integer.parseInt(p.getProperty("level.max", String.valueOf(d.maxLevel)).trim()));
+                Integer.parseInt(p.getProperty("level.max", String.valueOf(d.maxLevel)).trim()),
+                Integer.parseInt(p.getProperty("start.level.offline", level).trim()));
     }
 
     public static StartingConfig loadDefault() {
@@ -66,4 +79,6 @@ public final class StartingConfig {
     public long startBankBalance() { return startBankBalance; }
     public String startTown() { return startTown; }
     public int maxLevel() { return maxLevel; }
+    /** Poziom nowej postaci w grze offline (serwer zawsze uzywa {@link #startLevel()}). */
+    public int offlineStartLevel() { return offlineStartLevel; }
 }

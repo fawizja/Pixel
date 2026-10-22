@@ -135,7 +135,9 @@ public class PixelGame extends Game {
     public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
 
     public void createCharacter(String name, Vocation vocation) {
-        PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()));
+        // gra offline: postac od razu na poziomie start.level.offline (-Dpixel.startLevel nadpisuje, np. regresja GUI)
+        int level = Integer.getInteger("pixel.startLevel", startingConfig.offlineStartLevel());
+        PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()), level);
         saveCharacter(pc);
         startGame(pc);
     }

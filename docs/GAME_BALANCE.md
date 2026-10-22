@@ -11,7 +11,8 @@ wyswietlane sa polskie nazwy z `items.csv` / `monsters.csv`.
 
 | Ustawienie | Wartosc | Klucz w `starting.properties` |
 |---|---|---|
-| Poziom startowy | 8 | `start.level` |
+| Poziom startowy (serwer) | 8 | `start.level` |
+| Poziom startowy gry offline | 300 (umiejetnosci: bron ~91, magia magow 70, obrona ~82; HP/mana z poziomu) | `start.level.offline`, `-Dpixel.startLevel` |
 | Zloto w plecaku | 10 000 gp (wydane jako 1 Crystal Coin) | `start.gold.backpack` |
 | Zloto w banku | 0 gp (10 000 gp **nie** trafia do banku) | `start.gold.bank` |
 | Miasto startowe | Varden (swiatynia, strefa bezpieczna) | `start.town` |

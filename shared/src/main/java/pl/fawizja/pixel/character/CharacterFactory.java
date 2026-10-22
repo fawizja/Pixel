@@ -25,8 +25,18 @@ public final class CharacterFactory {
     }
 
     public PlayerCharacter create(String name, Vocation vocation, Position startTemple) {
+        return create(name, vocation, startTemple, config.startLevel());
+    }
+
+    /**
+     * Nowa postac na podanym poziomie (gra offline: {@link StartingConfig#offlineStartLevel()}). Powyzej zwyklego
+     * poziomu startowego umiejetnosci sa podniesione do typowych dla tego poziomu ({@link #skillsForLevel}),
+     * a HP i mana wynikaja z poziomu i sa pelne.
+     */
+    public PlayerCharacter create(String name, Vocation vocation, Position startTemple, int level) {
         PlayerCharacter pc = new PlayerCharacter(UUID.randomUUID().toString(), name, vocation,
-                config.startLevel(), startTemple, items, config.startBankBalance(), config.startTown());
+                level, startTemple, items, config.startBankBalance(), config.startTown());
+        if (level > config.startLevel()) skillsForLevel(pc);
         for (String key : StarterKits.equipped(vocation)) {
             ItemStack s = ItemStack.of(items.byKey(key).id());
             EquipSlot slot = items.get(s.itemId()).slot();
@@ -40,6 +50,28 @@ public final class CharacterFactory {
             if (!r.ok()) throw new IllegalStateException("starter kit does not fit: " + e.key());
         }
         return pc;
+    }
+
+    /**
+     * Umiejetnosci typowe dla poziomu postaci (wg progow z docs/GAME_BALANCE.md: poziom ~300 to bron ~90,
+     * magia magow ~70, obrona ~80). Magowie: slaba bron i obrona, mocna magia; paladyn i mnich odwrotnie.
+     */
+    static void skillsForLevel(PlayerCharacter pc) {
+        int lvl = pc.level();
+        boolean mage = pc.vocation() == Vocation.DRUID || pc.vocation() == Vocation.SORCERER;
+        int weapon = Math.min(Skills.MAX_SKILL, 10 + (int) (lvl * 0.27));
+        int magic = Math.min(Skills.MAX_SKILL, (int) (lvl * 0.235));
+        int shield = Math.min(Skills.MAX_SKILL, 10 + (int) (lvl * 0.24));
+        Skill main = pc.vocation() == Vocation.PALADIN ? Skill.DISTANCE : pc.vocation() == Vocation.MONK ? Skill.FIST : null;
+        for (Skill s : Skill.values()) {
+            int v;
+            if (s == Skill.MAGIC) v = mage ? magic : magic / 4;
+            else if (s == Skill.SHIELDING) v = mage ? Math.min(shield, 10 + lvl / 20) : shield;
+            else if (s == main) v = weapon;
+            else if (s == Skill.FISHING) v = Skills.START_SKILL;
+            else v = Math.min(weapon, mage ? 30 : 10 + lvl / 10);
+            pc.skills().set(s, Math.max(pc.skills().level(s), v), 0);
+        }
     }
 
     /** Podstawowe wyposazenie zalezne od profesji. */

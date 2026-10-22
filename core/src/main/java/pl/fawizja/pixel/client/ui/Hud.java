@@ -904,6 +904,8 @@ public final class Hud {
 
     /** Czy punkt lezy pod otwartym oknem (napisy pod nim nie przebijaja przez okno). */
     private boolean underMenu(float px, float py) {
+        if (charOpen && (px >= eqX && px <= eqX + eqW && py >= eqY && py <= eqY + eqH
+                || px >= skX && px <= skX + skW && py >= skY && py <= skY + skH)) return true;
         return (menuOpen || bigMapOpen) && px >= menuX && px <= menuX + menuW && py >= menuY && py <= menuY + menuH;
     }
 
@@ -2420,7 +2422,7 @@ public final class Hud {
     }
 
     private boolean battleVisible() {
-        return blH >= 23 + BATTLE_ROW && !windowOverPanel();
+        return blH >= 23 + BATTLE_ROW && !windowOverPanel() && !charOpen;
     }
 
     /** Lista walki w panelu (jak battle list w Tibii): imie potwora, pasek zycia, czerwona ramka przy celu. */
