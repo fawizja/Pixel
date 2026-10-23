@@ -230,9 +230,18 @@ public final class DesktopLauncher {
                     pc.setPet(pet);
                 }
                 if ("chest".equals(open)) {
-                    // podglad: obok pierwszej skrzyni na pietrze -1 (z pochodnia, zeby bylo widac)
+                    // podglad: obok skrzyni bez silnych potworow w poblizu, najblizej swiatyni Varden
+                    // (z pochodnia, zeby bylo widac); inaczej postac z poziomu 8 ginie przed zrzutem i obraz jest losowy
                     GameScreen gs = (GameScreen) getScreen();
-                    pl.fawizja.pixel.treasure.TreasureChests.Chest c = gs.session().chests().all().get(0);
+                    Position home = gs.session().world().spawn();
+                    pl.fawizja.pixel.treasure.TreasureChests.Chest c = gs.session().chests().all().stream()
+                            .min(java.util.Comparator.<pl.fawizja.pixel.treasure.TreasureChests.Chest>comparingInt(
+                                    ch -> gs.session().monsters().maxMonsterLevelNear(ch.position(), 20) > 15 ? 1 : 0)
+                                    .thenComparingInt(ch -> ch.position().distanceTo(home)))
+                            .orElse(gs.session().chests().all().get(0));
+                    Gdx.app.log("Pixel", "Podglad skrzyni: " + c.position());
+                    // bez kolejnych podpowiedzi: ich pora zalezy od klatek, a zrzut ma byc powtarzalny
+                    for (int bit = 0; bit < 64; bit++) gs.session().character().markTip(bit);
                     for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
                         Position n = c.position().translate(d.dx, d.dy);
                         if (gs.session().world().isWalkable(n)) {
