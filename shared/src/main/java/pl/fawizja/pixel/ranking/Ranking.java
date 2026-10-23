@@ -101,7 +101,7 @@ public final class Ranking {
         if (text == null) return null;
         String t = plain(text.trim());
         if (t.isEmpty()) return null;
-        String[][] aliases = {{"paladyn", "PALADIN"}, {"mag", "SORCERER"}, {"czarodziej", "SORCERER"}, {"mnich", "MONK"}};
+        String[][] aliases = {{"paladyn", "PALADIN"}, {"mag", "SORCERER"}, {"czarodziej", "SORCERER"}, {"mnich", "MONK"}, {"rycerz", "KNIGHT"}};
         for (String[] a : aliases) if (a[0].startsWith(t) || t.equals(a[0])) return Vocation.valueOf(a[1]);
         for (Vocation v : Vocation.values()) {
             if (plain(v.displayName()).startsWith(t) || plain(v.name()).startsWith(t)) return v;

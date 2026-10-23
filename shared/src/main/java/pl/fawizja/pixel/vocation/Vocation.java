@@ -1,7 +1,7 @@
 package pl.fawizja.pixel.vocation;
 
 /**
- * Cztery profesje. Kazda ma inny styl gry, a wszystkie liczby sa w jednym miejscu,
+ * Piec profesji. Kazda ma inny styl gry, a wszystkie liczby sa w jednym miejscu,
  * zeby balans korygowac w danych, a nie wyjatkami w kodzie.
  */
 public enum Vocation {
@@ -44,7 +44,17 @@ public enum Vocation {
             1400,
             "Mistrz walki wręcz: szybkie ciosy, kombinacje i samoleczenie skupieniem.",
             "Najwięcej HP, najszybsze ataki, dobra obrona.",
-            "Musi stać przy celu, mało many, prawie brak magii dystansowej.");
+            "Musi stać przy celu, mało many, prawie brak magii dystansowej."),
+
+    /** Miecze, topory i mloty z tarcza; najwyzsza obrona i najwiecej HP (jak rycerz w Tibii). */
+    KNIGHT("Knight",
+            15, 5, 25,
+            3, 1,
+            1.35, 0.40, 0.35, 0.80, 1.30,
+            1700,
+            "Rycerz w ciężkiej zbroi: miecze, topory i młoty, tarcza i ciosy wręcz.",
+            "Najwięcej HP i najlepsza obrona, mocne ciosy obszarowe wokół siebie.",
+            "Mało many, słabe leczenie, prawie brak magii i walki na dystans.");
 
     private final String displayName;
     private final int hpPerLevel;
@@ -93,6 +103,7 @@ public enum Vocation {
             case DRUID: return "Elder Druid";
             case SORCERER: return "Master Sorcerer";
             case MONK: return "Exalted Monk";
+            case KNIGHT: return "Elite Knight";
             default: return "Elite " + displayName;
         }
     }

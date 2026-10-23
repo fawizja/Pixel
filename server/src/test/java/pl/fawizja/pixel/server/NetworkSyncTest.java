@@ -864,7 +864,7 @@ class NetworkSyncTest {
             assertEquals(1, v.total(), "offline druid from the saves");
             assertEquals("Ula", v.rows().get(0).name());
             assertEquals(0, v.mine(), "a monk is not in the druid ranking");
-            kuba.send("RANK", "rycerz");
+            kuba.send("RANK", "krasnolud");
             awaitMessage(kuba, "unknown vocation", m -> m[0].equals("LOG") && m[2].contains("Nie znam profesji"));
             kuba.send("RANK", "pięści");
             String[][] skill = new String[1][];

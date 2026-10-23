@@ -61,7 +61,9 @@ class RankingTest {
         assertEquals(Vocation.SORCERER, Ranking.vocationFrom("sorc"));
         assertEquals(Vocation.MONK, Ranking.vocationFrom("mnich"));
         assertEquals(Vocation.PALADIN, Ranking.vocationFrom("paladyn"));
-        assertNull(Ranking.vocationFrom("rycerz"));
+        assertEquals(Vocation.KNIGHT, Ranking.vocationFrom("rycerz"));
+        assertEquals(Vocation.KNIGHT, Ranking.vocationFrom("knight"));
+        assertNull(Ranking.vocationFrom("krasnolud"));
         assertNull(Ranking.vocationFrom(" "));
     }
 

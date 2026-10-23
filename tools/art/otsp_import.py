@@ -118,6 +118,10 @@ TINTED_WALLS = {"ship_hull": ((680, 681, 682, 683), (120, 80, 50))}
 TINTED_ROOFS = {"roof_sand": (183, (215, 180, 115))}
 # Przedmioty bez wlasnego obrazka: najblizszy przedmiot z paczki, w razie potrzeby przebarwiony.
 MORE_ITEMS = {
+    # 2026-10-23 wieczor: bronie rycerza
+    "hand_axe": 1833, "battle_axe": 1826, "mace": 1807, "desert_scimitar": 1723, "barbarian_axe": 1852, "knight_sword": 1762,
+    "war_hammer": 1813, "crusader_axe": 1856, "magma_cleaver": 1736, "obsidian_axe": 1845, "coral_warhammer": 2604, "glacier_axe": 1861,
+    "frost_longsword": 1746, "umbral_blade": 1749, "skull_axe": 2613, "abyssal_greatsword": 2590, "abyss_hammer": 2608,
     "healing_herb": 2695, "fishing_rod": 1171, "saddle": 2673, "scorpion_tail": 2173, "worm": 2172,
     "boar_tusk": 2174, "hyena_fang": (2174, (235, 225, 200)), "jungle_idol": 2237, "cloth_wraps": 2685,
     "colossus_core": 2163, "croc_leather": (2162, (110, 140, 70)), "frost_pelt": (2162, (200, 225, 255)),
@@ -196,7 +200,7 @@ ITEMS = {
 # Stroje: (numer, kolory glowa/tulow/nogi/stopy dla strojow z maska kolorow albo None).
 MONSTERS = {
     "boar": (6, None), "goblin": (7, None), "forest_spider": (8, None), "scorpion": (13, None),
-    "skeleton": (3, None), "wraith_knight": (39, None), "sand_wraith": (40, None), "shadow_stalker": (37, None),
+    "wraith_knight": (39, None), "sand_wraith": (40, None), "shadow_stalker": (37, None),
     "frost_witch": (35, None), "void_priest": (34, None), "fire_elemental": (36, None),
     "abyssal_demon": (46, None), "cave_troll": (12, None), "jungle_serpent": (29, None),
     "crocodile": (25, None), "storm_harpy": (14, None), "temple_guardian": (22, None), "pharaoh": (23, None),
@@ -206,6 +210,7 @@ MONSTERS = {
 }
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
+    "skeleton": (3, (225, 215, 190)),
     "wolf": (1, (150, 140, 130)), "snow_wolf": (1, (235, 240, 255)), "hyena": (11, (200, 160, 110)),
     "yeti": (12, (240, 245, 255)), "crystal_golem": (12, (150, 220, 240)), "ice_golem": (12, (190, 220, 255)),
     "lava_golem": (12, (255, 120, 50)), "ruin_colossus": (12, (190, 180, 160)), "sand_titan": (12, (230, 200, 130)),
@@ -229,6 +234,7 @@ CHARACTERS = {
     "druid": (32, None),
     "sorcerer": (15, None),
     "monk": (26, None),  # brazowa szata z kapturem (wczesniej stroj 16 z czerwona czapka)
+    "knight": (3, None),  # rycerz w zbroi (2026-10-23 wieczor; szkielet dostal przebarwienie koloru kosci)
 }
 _ROLE = {
     "banker": (21, ((90, 70, 50), (60, 60, 110), (50, 50, 60), (40, 30, 30))),

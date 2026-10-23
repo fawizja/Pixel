@@ -39,7 +39,7 @@ class DungeonBossTest {
         for (Vocation v : Vocation.values()) {
             boolean weapon = false;
             for (ItemType it : TestData.ITEMS.all()) {
-                if (it.minLevel() == 350 && it.usableBy(v) && it.key().matches("tidal_harpoon|wand_of_the_deep|rod_of_tides|reef_gauntlets")) weapon = true;
+                if (it.minLevel() == 350 && it.usableBy(v) && it.key().matches("tidal_harpoon|wand_of_the_deep|rod_of_tides|reef_gauntlets|coral_warhammer")) weapon = true;
             }
             assertTrue(weapon, v + " has a level 350 weapon");
         }

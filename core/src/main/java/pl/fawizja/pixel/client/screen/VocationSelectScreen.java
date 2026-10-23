@@ -45,7 +45,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
 
             @Override
             public boolean keyDown(int keycode) {
-                if (keycode >= Input.Keys.NUM_1 && keycode <= Input.Keys.NUM_4) {
+                if (keycode >= Input.Keys.NUM_1 && keycode < Input.Keys.NUM_1 + Vocation.values().length) {
                     askName(Vocation.values()[keycode - Input.Keys.NUM_1]);
                     return true;
                 }
@@ -96,9 +96,10 @@ public final class VocationSelectScreen extends ScreenAdapter {
         viewport.setUnitsPerPixel(1f / scale);
         viewport.update(width, height, true);
         float w = viewport.getWorldWidth(), h = viewport.getWorldHeight();
-        cardW = Math.min(180, (w - 12 * 5) / 4f);
+        int n = Vocation.values().length;
+        cardW = Math.min(180, (w - 12 * (n + 1)) / n);
         cardH = Math.min(230, h * 0.62f);
-        startX = (w - (cardW * 4 + 12 * 3)) / 2f;
+        startX = (w - (cardW * n + 12 * (n - 1))) / 2f;
         startY = (h - cardH) / 2f - 10;
     }
 

@@ -173,7 +173,7 @@ public final class LoginScreen extends ScreenAdapter {
             fields[i].set(x, y - fh, fw, fh);
             y -= fh + 26;
         }
-        float vw = (fw - 3 * 8) / 4f;
+        float vw = (fw - (vocations.length - 1) * 8) / vocations.length;
         for (int i = 0; i < vocations.length; i++) vocations[i].set(x + i * (vw + 8), y - 38, vw, 38);
         y -= 38 + 18;
         connect.set(x + fw / 2f + 4, y - 40, fw / 2f - 4, 40);

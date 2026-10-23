@@ -25,13 +25,15 @@ class VocationTest {
         assertEquals(Vocation.PALADIN, best("distance"));
         assertEquals(Vocation.SORCERER, best("magic"));
         assertEquals(Vocation.DRUID, best("healing"));
-        assertEquals(Vocation.MONK, best("melee"));
-        assertEquals(Vocation.MONK, best("hp"));
+        assertEquals(Vocation.KNIGHT, best("melee"));
+        assertEquals(Vocation.KNIGHT, best("hp"));
+        assertEquals(Vocation.KNIGHT, best("defense"));
     }
 
     @Test
     void highLevelHealthOrderingReflectsRoles() {
         int lvl = 500;
+        assertTrue(Balance.maxHealth(Vocation.KNIGHT, lvl) > Balance.maxHealth(Vocation.MONK, lvl));
         assertTrue(Balance.maxHealth(Vocation.MONK, lvl) > Balance.maxHealth(Vocation.PALADIN, lvl));
         assertTrue(Balance.maxHealth(Vocation.PALADIN, lvl) > Balance.maxHealth(Vocation.SORCERER, lvl));
         assertTrue(Balance.maxMana(Vocation.SORCERER, lvl) > Balance.maxMana(Vocation.PALADIN, lvl));
@@ -48,6 +50,7 @@ class VocationTest {
                 case "magic": x = v.magicFactor(); break;
                 case "healing": x = v.healingFactor(); break;
                 case "melee": x = v.meleeFactor(); break;
+                case "defense": x = v.defenseFactor(); break;
                 default: x = v.hpPerLevel();
             }
             if (x > bestV) { bestV = x; best = v; }

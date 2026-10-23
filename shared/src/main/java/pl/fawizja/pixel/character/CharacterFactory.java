@@ -66,7 +66,8 @@ public final class CharacterFactory {
         int weapon = Math.min(Skills.MAX_SKILL, 10 + (int) (lvl * 0.27));
         int magic = Math.min(Skills.MAX_SKILL, (int) (lvl * 0.235));
         int shield = Math.min(Skills.MAX_SKILL, 10 + (int) (lvl * 0.24));
-        Skill main = pc.vocation() == Vocation.PALADIN ? Skill.DISTANCE : pc.vocation() == Vocation.MONK ? Skill.FIST : null;
+        Skill main = pc.vocation() == Vocation.PALADIN ? Skill.DISTANCE : pc.vocation() == Vocation.MONK ? Skill.FIST
+                : pc.vocation() == Vocation.KNIGHT ? Skill.SWORD : null;
         for (Skill s : Skill.values()) {
             int v;
             if (s == Skill.MAGIC) v = mage ? magic : magic / 4;
@@ -99,6 +100,7 @@ public final class CharacterFactory {
                 case DRUID: return concat(armor, "rod_of_hoarfrost");
                 case SORCERER: return concat(armor, "obsidian_wand");
                 case MONK: return concat(armor, "molten_knuckles");
+                case KNIGHT: return concat(armor, "magma_cleaver", "obsidian_shield");
                 default: throw new IllegalArgumentException(v.name());
             }
         }
@@ -114,6 +116,7 @@ public final class CharacterFactory {
                 case SORCERER: return concat(common, new Entry("health_potion", 10), new Entry("ultimate_mana_potion", 30),
                         new Entry("blank_rune", 10), new Entry("ultimate_healing_rune", 5), new Entry("great_fireball_rune", 20));
                 case MONK: return concat(common, new Entry("ultimate_health_potion", 30), new Entry("mana_potion", 10));
+                case KNIGHT: return concat(common, new Entry("ultimate_health_potion", 40), new Entry("mana_potion", 10));
                 default: throw new IllegalArgumentException(v.name());
             }
         }
@@ -125,6 +128,7 @@ public final class CharacterFactory {
                 case DRUID: return concat(armor, "thornroot_rod");
                 case SORCERER: return concat(armor, "wand_of_embers");
                 case MONK: return concat(armor, "cloth_wraps");
+                case KNIGHT: return concat(armor, "hand_axe", "wooden_shield");
                 default: throw new IllegalArgumentException(v.name());
             }
         }
@@ -137,6 +141,7 @@ public final class CharacterFactory {
                 case DRUID:
                 case SORCERER: return concat(common, new Entry("health_potion", 5), new Entry("mana_potion", 15), new Entry("blank_rune", 5));
                 case MONK: return concat(common, new Entry("health_potion", 15), new Entry("mana_potion", 3));
+                case KNIGHT: return concat(common, new Entry("health_potion", 20), new Entry("mana_potion", 2));
                 default: throw new IllegalArgumentException(v.name());
             }
         }

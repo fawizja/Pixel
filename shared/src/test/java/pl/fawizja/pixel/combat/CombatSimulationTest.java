@@ -87,6 +87,7 @@ class CombatSimulationTest {
         out.put(Vocation.DRUID, build(Vocation.DRUID, 30, 12, 40, 15, 54, 51, 56));
         out.put(Vocation.SORCERER, build(Vocation.SORCERER, 30, 12, 40, 15, 53, 51, 56));
         out.put(Vocation.MONK, build(Vocation.MONK, 30, 45, 8, 35, 55, 51, 52, 56));
+        out.put(Vocation.KNIGHT, build(Vocation.KNIGHT, 30, 45, 8, 35, 162, 51, 52, 56));
         return out;
     }
 

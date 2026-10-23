@@ -389,6 +389,19 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   energii, swietosci i smierci; czary obszarowe rozchodza sie fala od srodka.
 - Testy 476 OK; regresja GUI: wzorce odswiezone.
 
+## Klimat z paczki OTSP, rycerz, ulice (brief z 2026-10-23, 21:08)
+- Ulice: donice, kwiaty i lawki stojace na srodku ulicy przeniesione pod mur (tools/mapgen/sidewalk.py, takze
+  w generate_varden.py); straznicy przy bramach stoja na poboczu obok przejscia. Tam, gdzie nie bylo miejsca
+  pod murem, rzecz usunieto.
+- Kamera blizej: widok 11x8 pol, calkowita skala piksela (bez szwow).
+- Krew i plamy (OTSP) po trafieniach na 30 s, zwloki ludzi, goblinow i szkieletow.
+- Gory i jaskinie z grafik OTSP (szczyty, zbocza od poludnia i wschodu), skala laczy sie tylko z ta sama skala;
+  wiecej odmian drzew, skal i roslin, drzewa 64 px bez rozmycia (atlas bigTiles).
+- Nowa profesja Rycerz (Knight, awans Elite Knight): miecze, topory i mloty (17 nowych broni 161-177 z OTSP),
+  tarcze, 11 czarow (m.in. brutal strike, berserk, wound cleansing, annihilation, groundshaker), sklepy, loot,
+  receptury, ranking. Start jak inni: poziom 300, 10 mln w banku.
+- Testy 479 OK (KnightTest); regresja GUI: wzorce odswiezone.
+
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

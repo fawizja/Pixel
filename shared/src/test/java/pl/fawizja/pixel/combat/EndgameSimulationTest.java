@@ -26,18 +26,18 @@ class EndgameSimulationTest {
     static final SpellRegistry SPELLS = SpellRegistry.loadDefault(TestData.ITEMS);
     static final int FIGHTS = 200;
 
-    /** Prog: poziom, typowe umiejetnosci, sprzet (bron dla P, D, S, M), potwory, boss. */
+    /** Prog: poziom, typowe umiejetnosci, sprzet (bron dla P, D, S, M, K), potwory, boss. */
     record Tier(String name, int level, int skill, int magic, int shielding, int[] weapons, int[] armor, int shield,
                 String[] monsters, String boss) {}
 
     static final Tier[] TIERS = {
-        new Tier("Knieje i Wyzyny", 320, 95, 75, 85, new int[] {92, 94, 93, 95}, new int[] {104, 105, 106}, 107,
+        new Tier("Knieje i Wyzyny", 320, 95, 75, 85, new int[] {92, 94, 93, 95, 169}, new int[] {104, 105, 106}, 107,
                 new String[] {"cursed_treant", "wraith_knight", "fire_elemental", "lava_golem"}, "ignaroth"),
-        new Tier("Lodowe Szczyty", 500, 110, 90, 100, new int[] {96, 98, 97, 99}, new int[] {108, 109, 110}, 111,
+        new Tier("Lodowe Szczyty", 500, 110, 90, 100, new int[] {96, 98, 97, 99, 172}, new int[] {108, 109, 110}, 111,
                 new String[] {"frost_giant", "storm_harpy", "ice_dragon"}, "hrimgar"),
-        new Tier("Pustkowia Cienia", 680, 120, 100, 110, new int[] {100, 102, 101, 103}, new int[] {112, 113, 114}, 115,
+        new Tier("Pustkowia Cienia", 680, 120, 100, 110, new int[] {100, 102, 101, 103, 174}, new int[] {112, 113, 114}, 115,
                 new String[] {"shadow_stalker", "sand_titan", "void_priest"}, "khazuul"),
-        new Tier("Otchlan", 900, 128, 112, 118, new int[] {117, 119, 118, 120}, new int[] {112, 116, 114}, 115,
+        new Tier("Otchlan", 900, 128, 112, 118, new int[] {117, 119, 118, 120, 176}, new int[] {112, 116, 114}, 115,
                 new String[] {"abyssal_demon", "bone_dragon", "abyss_lord"}, "morgath"),
     };
 
@@ -45,7 +45,7 @@ class EndgameSimulationTest {
 
     static PlayerCharacter build(Vocation v, Tier t) {
         int w = t.weapons()[v.ordinal()];
-        int[] gear = (v == Vocation.PALADIN || v == Vocation.MONK)
+        int[] gear = (v == Vocation.PALADIN || v == Vocation.MONK || v == Vocation.KNIGHT)
                 ? new int[] {t.armor()[0], t.armor()[1], t.armor()[2], t.shield()} : t.armor();
         int weaponSkill = (v == Vocation.DRUID || v == Vocation.SORCERER) ? 30 : t.skill();
         int magic = (v == Vocation.DRUID || v == Vocation.SORCERER) ? t.magic() : t.magic() / 4;

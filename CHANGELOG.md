@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.197.0] - 2026-10-23
+
+### Dodano
+- Profesja Rycerz (Knight, po awansie Elite Knight): miecze, topory i młoty (17 nowych broni z OpenTibia Sprite Pack),
+  tarcze, 11 czarów (m.in. brutal strike, berserk, wound cleansing, annihilation, groundshaker).
+- Krew i plamy po trafieniach (30 s), zwłoki ludzi, goblinów i szkieletów.
+- Góry i jaskinie z grafik OTSP, więcej odmian drzew, skał i roślin; drzewa 64 px bez rozmycia.
+
+### Zmieniono
+- Kamera bliżej postaci: widok 11x8 pól.
+- Donice, kwiaty, ławki i strażnicy przy bramach stoją przy murze obok ulicy, nie blokują przejścia.
+
 ## [0.196.0] - 2026-10-22
 
 ### Dodano
