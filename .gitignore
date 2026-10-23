@@ -18,3 +18,4 @@ server-saves/
 *.p12
 keystore.pass
 *.acc
+tools/art/wst/

@@ -115,7 +115,7 @@ public final class WorldRenderer {
         // kazdy z jednej tekstury, zamiast przelaczac atlasy na kazdym polu (etap 18: mniej wywolan rysowania)
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
-            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.GROUND, x, y), x, y, x, wy);
+            for (int x = x0; x <= x1; x++) drawGround(batch, f, f.get(Layer.GROUND, x, y), x, y, wy);
         }
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
@@ -164,7 +164,7 @@ public final class WorldRenderer {
             int nx = x + SIDE_DX[k], ny = y + SIDE_DY[k];
             side[k] = f.inBounds(nx, ny) ? f.get(Layer.GROUND, nx, ny) : 0;
             int n = side[k];
-            if (n == 0 || n == g || b.priority(n) <= own) continue;
+            if (n == 0 || n == g || b.priority(n) <= own || art.autotile(n) != null) continue;
             boolean seen = false;
             for (int i = 0; i < count; i++) seen |= borderGrounds[i] == n;
             if (seen) continue;
@@ -195,6 +195,48 @@ public final class WorldRenderer {
             if (side[GroundBorders.SW] == n && !south && !west) draw(batch, b.piece(n, GroundBorders.SW), x, wy);
             if (side[GroundBorders.NW] == n && !north && !west) draw(batch, b.piece(n, GroundBorders.NW), x, wy);
         }
+    }
+
+    /**
+     * Podloze z autokafelkiem (paczka WsT): pole na granicy z nizszym podlozem jest skladane z czterech cwiartek
+     * z poszarpana krawedzia, a pod nie idzie pelne pole tego nizszego sasiada. Sasiad o rownym albo wyzszym
+     * priorytecie, bez obrzezy (posadzki, mosty) albo poza mapa laczy sie bez krawedzi.
+     */
+    private void drawGround(SpriteBatch batch, FloorMap f, int g, int x, int y, float wy) {
+        TextureRegion[] auto = art.autotile(g);
+        GroundBorders b = art.borders();
+        int own = b == null ? -1 : b.priority(g);
+        if (auto == null || own < 0) {
+            draw(batch, g, x, y, x, wy);
+            return;
+        }
+        int open = 0, under = 0;
+        for (int k = 0; k < 8; k++) {
+            int nx = x + SIDE_DX[k], ny = y + SIDE_DY[k];
+            int n = f.inBounds(nx, ny) ? f.get(Layer.GROUND, nx, ny) : 0;
+            int p = b.priority(n);
+            if (n == 0 || n == g || p < 0 || p >= own) continue;
+            open |= 1 << k;
+            // pod krawedz: nizsze podloze z boku (przed skosem), z nich to o najwyzszym priorytecie
+            if (under == 0 || (k < 4 && (open & 0xf) == 1 << k) || (k < 4 || (open & 0xf) == 0) && p > b.priority(under)) under = n;
+        }
+        if (open == 0) {
+            draw(batch, g, x, y, x, wy);
+            return;
+        }
+        draw(batch, under, x, y, x, wy);
+        boolean n = (open & 1) != 0, e = (open & 2) != 0, s = (open & 4) != 0, w = (open & 8) != 0;
+        quarter(batch, auto, 0, w, n, (open & (1 << GroundBorders.NW)) != 0, x, wy + 0.5f);
+        quarter(batch, auto, 1, e, n, (open & (1 << GroundBorders.NE)) != 0, x + 0.5f, wy + 0.5f);
+        quarter(batch, auto, 2, w, s, (open & (1 << GroundBorders.SW)) != 0, x, wy);
+        quarter(batch, auto, 3, e, s, (open & (1 << GroundBorders.SE)) != 0, x + 0.5f, wy);
+    }
+
+    /** Cwiartka autokafelka: side/vert = odslonieta krawedz z boku / od gory albo dolu, diag = odsloniety skos. */
+    private static void quarter(SpriteBatch batch, TextureRegion[] auto, int row, boolean side, boolean vert,
+                                boolean diag, float x, float y) {
+        int kind = side && vert ? 0 : vert ? 1 : side ? 2 : diag ? 3 : 4;
+        batch.draw(auto[row * 5 + kind], x, y, 0.5f, 0.5f);
     }
 
     private static boolean draw(SpriteBatch batch, TextureRegion r, int x, float wy) {

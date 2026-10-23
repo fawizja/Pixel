@@ -11,8 +11,9 @@ po kawałku.
 - Grafiki muszą być własne albo na wolnej licencji (bez kopii z Tibii i innych gier komercyjnych).
 - Kolumna „Jest”: plik już istnieje. Obecne pliki pochodzą z OpenTibia Sprite Pack (CC BY 4.0), autorzy w
   docs/CREDITS.md i w grze (/autorzy). Mapowanie nazw: `tools/art/otsp_import.py`.
-- Obrzeża podłoża (trawy, piasek, ziemia, glina, bagno) to 12 kawałków z paczki OTSP w `assets/art/borders/`
-  (krawędzie, małe i duże rogi). Własne rysunki zostały tylko tam, gdzie paczka nic nie ma: stragan, łódź,
+- Podłoża z krawędziami (trawy, ziemia, piasek, glina, śnieg, lód, bruk) to autokafelki z paczki WsT
+  (`assets/art/autotiles/`, `tools/art/wst_import.py`, warunki w docs/CREDITS.md). Pozostałe obrzeża: kawałki OTSP
+  w `assets/art/borders/` albo składane z maski. Własne rysunki zostały tylko tam, gdzie paczka nic nie ma: stragan, łódź,
   ster, namiot orków, wiatrak (`tools/art/draw_town_props.py`).
 
 Razem: 119 kafelków, 143 przedmiotów, 58 potworów, 63 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 396.

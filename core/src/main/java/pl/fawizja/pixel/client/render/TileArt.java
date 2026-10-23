@@ -155,6 +155,7 @@ public final class TileArt implements Disposable {
                 }
             }
         });
+        loadAutotiles(tileRegistry);
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         pm.dispose();
@@ -511,6 +512,53 @@ public final class TileArt implements Disposable {
     }
 
     /** Obrzeza podloza (trawa na ziemi, piasek na wodzie...). */
+    /**
+     * Autokafelki podloza (autotiles/klucz.png z tools/art/wst_import.py): 20 cwiartek 16x16, wiersz = cwiartka
+     * pola (TL, TR, BL, BR), kolumna = rodzaj (rog zewnetrzny, krawedz gora/dol, krawedz z boku, rog wewnetrzny,
+     * srodek). Wszystkie w jednej teksturze.
+     */
+    private void loadAutotiles(TileRegistry registry) {
+        java.util.List<TileType> found = new ArrayList<>();
+        java.util.List<Pixmap> sheets = new ArrayList<>();
+        for (TileType t : registry.all()) {
+            if (t.layer() != pl.fawizja.pixel.world.Layer.GROUND) continue;
+            com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/autotiles/" + t.key() + ".png");
+            if (!f.exists()) f = Gdx.files.internal("assets/art/autotiles/" + t.key() + ".png");
+            if (!f.exists()) continue;
+            try {
+                sheets.add(new Pixmap(f));
+                found.add(t);
+            } catch (RuntimeException e) {
+                Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+            }
+        }
+        autotiles = new TextureRegion[registry.maxId() + 1][];
+        if (found.isEmpty()) return;
+        Pixmap pm = new Pixmap(80, 64 * found.size(), Pixmap.Format.RGBA8888);
+        pm.setBlending(Pixmap.Blending.None);
+        for (int i = 0; i < found.size(); i++) {
+            Pixmap src = sheets.get(i);
+            pm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(), 0, i * 64, 80, 64);
+            src.dispose();
+        }
+        autoAtlas = new Texture(pm);
+        autoAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        pm.dispose();
+        for (int i = 0; i < found.size(); i++) {
+            TextureRegion[] q = new TextureRegion[20];
+            for (int k = 0; k < 20; k++) q[k] = new TextureRegion(autoAtlas, (k % 5) * 16, i * 64 + (k / 5) * 16, 16, 16);
+            autotiles[found.get(i).id()] = q;
+        }
+    }
+
+    /** Cwiartki autokafelka podloza (indeks = wiersz * 5 + rodzaj) albo null, gdy podloze go nie ma. */
+    public TextureRegion[] autotile(int tileId) {
+        return autotiles != null && tileId > 0 && tileId < autotiles.length ? autotiles[tileId] : null;
+    }
+
+    private Texture autoAtlas;
+    private TextureRegion[][] autotiles;
+
     /** Nazwy kawalkow obrzezy w kolejnosci GroundBorders.N..IN_NW (nazwy krawedzi jak w RME). */
     private static final String[] BORDER_EDGES = {"n", "e", "s", "w", "cne", "cse", "csw", "cnw", "dne", "dse", "dsw", "dnw"};
 
@@ -1344,6 +1392,7 @@ public final class TileArt implements Disposable {
     public void dispose() {
         atlas.dispose();
         if (borders != null) borders.dispose();
+        if (autoAtlas != null) autoAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();
         lightTexture.dispose();

@@ -1,5 +1,13 @@
 # Autorzy grafik
 
+## WsT - "Free 32X32 tiles and borders - Top down"
+
+Podłoża z krawędziami (trawy, ziemia, piasek, glina, śnieg, lód, bruk, posadzka otchłani: `assets/art/autotiles/`
+i odpowiadające im `assets/art/tiles/`) pochodzą z paczki **WsT**: https://westudesign.itch.io (kupiona przez
+Darka). Warunki autora: użycie w projektach komercyjnych i niekomercyjnych, bez odsprzedawania i rozpowszechniania
+samych grafik. Dlatego w repozytorium są tylko wycięte kawałki używane przez grę, bez oryginalnych arkuszy
+(narzędzie: `tools/art/wst_import.py`).
+
 ## OpenTibia Sprite Pack (CC BY 4.0)
 
 Część grafik w `assets/art/` (podłoże, drzewa i kamienie, potwory, NPC, postacie graczy, przedmioty) pochodzi z
