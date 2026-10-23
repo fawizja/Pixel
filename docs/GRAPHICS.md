@@ -390,7 +390,9 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 | `objects/training_dummy.png` | manekin treningowy |  |
 | `objects/spike_trap.png` | pułapka z kolcami |  |
 | `objects/roof_red.png` | dach z dachówki (drewniane domy) | tak |
-| `objects/roof_slate.png` | dach z łupku (kamienne budynki) | tak |
+| `objects/roof_slate.png` | dach z łupku (kamienne budynki; OTSP 187 odbarwiony na szary) | tak |
+| `objects/roof_wood.png` | gont (mur pruski, bale; OTSP 182) | tak |
+| `objects/roof_brown.png` | brązowa dachówka (domy tynkowane; OTSP 190) | tak |
 | `objects/roof_sand.png` | dach z piaskowej dachówki (budynki z piaskowca) |  |
 | `objects/horse_right.png` | koń, w prawo |  |
 | `objects/horse_left.png` | koń, w lewo |  |

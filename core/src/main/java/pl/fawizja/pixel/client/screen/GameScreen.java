@@ -1663,12 +1663,20 @@ public final class GameScreen extends ScreenAdapter {
         // imiona NPC w poblizu
         font.getData().setScale(scale * 0.8f);
         Position me = session.character().position();
+        // pod widocznym dachem postaci nie widac (jak w Tibii) - ich imion tez nie
+        boolean roofsShown = roofs != null && !roofs.covered(me);
+        float[] gv = hud.gameView();
+        float viewTop = gv[1] + gv[3] - 2, viewRight = gv[0] + gv[2];
         for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
             if (n.position().z() != z || n.position().distanceTo(me) > 7) continue;
+            if (roofsShown && roofs.at(n.position().x(), n.position().y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
             projected.set(n.position().x() + 0.5f, worldRenderer.worldY(n.position().y()) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            float nx = projected.x - n.name().length() * 2.8f * scale;
+            // imie nie wchodzi na gorny pasek ani na prawy panel (ramka widoku gry)
+            if (projected.y > viewTop || nx > viewRight - 20) continue;
             font.setColor(0.75f, 0.95f, 1f, 1f);
-            font.draw(batch, n.name(), projected.x - n.name().length() * 2.8f * scale, projected.y);
+            font.draw(batch, n.name(), Math.max(gv[0] + 2, Math.min(nx, viewRight - n.name().length() * 5.6f * scale - 2)), projected.y);
         }
         if (target != null && !target.isDead() && target.position().z() == z) {
             // imie celu w kolorze trudnosci wzgledem poziomu postaci
@@ -1681,6 +1689,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         for (RemotePlayer rp : remotePlayers.values()) {
             if (rp.to.z() != z) continue;
+            if (roofsShown && roofs.at(rp.to.x(), rp.to.y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
             projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));

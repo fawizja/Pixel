@@ -323,6 +323,29 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   (https://github.com/fawizja/Pixel/releases/tag/development-apk); lokalnie brak Android SDK.
 - main (0ba79e6) jest w pelni wciagniety do development.
 
+## Rozbudowa mapy, miast i interfejsu (brief z 2026-10-23)
+- Grafika (29fbba4): okna w scianach (kamien, piaskowiec, tynk, biel, mur pruski) rysowane co 3 pola na scianach
+  budynkow; nowe mury tynk / bielona sciana / mur pruski; plyty, cegla, marmur; 9 gatunkow drzew, krzaki, kwiaty
+  i kamienie losowane po pozycji, trawa i piasek odbijane; meble i rekwizyty OTSP (krzeslo, szafa, studnia, lawka...)
+  oraz wlasne (kowadlo, palenisko, stragan, drogowskaz, bela siana, lodka, sieci, skrzynka z kwiatami).
+- Varden od nowa (6012021, tools/mapgen/generate_varden.py + town.py): mury lamana linia z basztami i 3 bramami,
+  wschodni bok zamyka meandrujaca rzeka z drewnianym nabrzezem i pomostem, jezioro z plaza i wysepka, plac
+  swiatynny z plyt z jedna fontanna, rynek z cegly ze straganami i studnia, swiatynia z apsyda i marmurem, bank
+  z skarbcem, sklep z magazynem, dom rybaka, kuznia, karczma, dom mieszkalny, sklep magiczny z biblioteka; ogrody
+  zamiast pustego bruku; nieregularny las. Dachy wg muru: lupek (kamien), gont (mur pruski), braz (tynk).
+- Pozostale miasta (d4acbcb, tools/mapgen/dressing.py): wnetrza wyposazone wg roli NPC (bank, sklep, swiatynia,
+  przewodnik, woznica, kapitan) z kontrola, ze kazde pole wnetrza jest osiagalne od drzwi; drewniane budynki
+  dostaja rozne mury; place: latarnie, lawki, skrzynki z kwiatami, drzewa w ogrodach; fontanny 2x2 -> 1.
+- Teren (1e5df22): dlugie drogi wija sie (konce bez zmian), cieśnina ma poszarpane brzegi, region Varden
+  bez lesnej ramki.
+- Interfejs: imiona NPC i graczy nie sa pokazywane pod widocznym dachem i nie wchodza na gorny pasek; kolumna
+  przyciskow przy minimapie min. 30 dp, dolny pasek 32-34 dp. Sprawdzone 800x600, 1280x720, 1600x720,
+  720x1280 i uklad telefonu (-Dpixel.uiScale=1.8).
+- Testy 467 OK; regresja GUI: 38 z 44 wzorcow odswiezonych (nowa mapa), 6 bez zmian.
+- Znane ograniczenia: granice pasow biomow (snieg/trawa/piasek) i prostokatne ramy lasu wokol regionow
+  pozostaja proste; Frostholm, Selvaran i Qasirah maja dalej prostokatne obrysy (dopracowane wnetrzami
+  i wyposazeniem, nie przebudowane); brak animowanej wody i nowych animacji postaci.
+
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

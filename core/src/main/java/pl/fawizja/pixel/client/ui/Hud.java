@@ -345,7 +345,7 @@ public final class Hud {
         }
         abTop = pad + 8 + cell * 2 + gap;
         // u gory panelu minimapa, na lewo od niej kolumna: diagnostyka, bieg, postawa obronna, pochodnia
-        float sc = Math.max(22, Math.min(30, cell * 0.8f));
+        float sc = Math.max(30, Math.min(36, cell * 0.9f)); // dotykowe pola co najmniej ~30 dp
         mmSize = Math.min(180, Math.min(iw - sc - 10, h * 0.3f));
         mmX = w - pad - 3 - mmSize;
         mmY = h - pad - 3 - mmSize;
@@ -374,7 +374,7 @@ public final class Hud {
         }
         // dolny pasek pod widokiem gry: rzad przyciskow i konsola
         topH = 24;
-        float hbH = h >= 500 ? 30 : 26;
+        float hbH = h >= 500 ? 34 : 32;
         float conBody = (h >= 500 ? 6 : 3) * 13 + 8;
         gx = pad;
         gy = pad + conBody + 4 + hbH + 4;
