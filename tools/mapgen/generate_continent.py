@@ -29,6 +29,7 @@ sys.path.insert(0, HERE)
 import continent as C  # noqa: E402
 import town as tk  # noqa: E402
 import features as F  # noqa: E402
+import sidewalk  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -766,6 +767,7 @@ def build(ctx):
                 cost[start[1], start[0]] = saved
     towns_dressing(ctx)
     restore_varden_core(ctx)
+    street_sides(ctx)
     zones = zone_grid(T)
     ctx['zones'] = zones
     climate_spawns(ctx, zones, rng)
@@ -1392,6 +1394,20 @@ def open_spot(world, ctx, near, radius=12, avoid_pz=True):
     return None
 
 
+def street_sides(ctx):
+    """Donice, kwiaty i lawki ze srodka ulic pod mury (Varden ma je juz z generate_varden.py)."""
+    world = ctx['world']
+    core = ctx['varden_core']
+    npcs = {(int(n[4]), int(n[5])) for n in ctx['npcs'] if int(n[6]) == 0}
+
+    def get(x, y):
+        return None if (x, y) in npcs else world.get(x, y)
+
+    cells = [(x, y) for y in range(S) for x in range(S) if (x, y) not in core]
+    moved, removed = sidewalk.move_props(get, lambda x, y, c: world.put(x, y, 0, c), cells, avoid=core)
+    print('pobocza: przesuniete', moved, 'usuniete', removed)
+
+
 def towns_dressing(ctx):
     world = ctx['world']
     rng = random.Random(20261036)
@@ -1444,6 +1460,23 @@ def towns_dressing(ctx):
                 break
         if spot is None:
             continue
+        # straznik stoi przy murze z boku drogi, nie na srodku przejscia
+        taken = {(int(n[4]), int(n[5])) for n in ctx['npcs'] if int(n[6]) == 0}
+        outdoor = {k for k, (layer, ok) in tk.TILES.items() if layer == 'GROUND' and ok} - {'wood_floor', 'marble_floor'}
+        side = sidewalk.nearest_roadside(lambda x, y: None if (x, y) in taken else world.get(x, y), gx, gy,
+                                         outdoor, radius=7, avoid={(x, y) for y in range(gy - 8, gy + 9)
+                                                                   for x in range(gx - 8, gx + 9) if not in_pz(ctx, x, y)})
+        if side is None:
+            # bez muru obok: dowolne pole, ktore nie zamyka przejscia
+            get = lambda x, y: None if (x, y) in taken else world.get(x, y)  # noqa: E731
+            cand = [(x, y) for y in range(gy - 8, gy + 9) for x in range(gx - 8, gx + 9)
+                    if in_pz(ctx, x, y) and F.walk(get(x, y)) and get(x, y)[2] == NONE and get(x, y)[0] in outdoor
+                    and sidewalk.keeps_passage(get, x, y)
+                    and sum(1 for dx, dy in F.DIRS4 if F.walk(get(x + dx, y + dy))) >= 3]
+            if cand:
+                side = min(cand, key=lambda p: (p[0] - gx) ** 2 + (p[1] - gy) ** 2)
+        if side is not None:
+            spot = side
         if rng.random() < 0.3:
             title, first = rng.choice(['Strażniczka', 'Łuczniczka']), rng.choice([n for n in GUARD_FEMALE if n not in used])
         else:

@@ -56,11 +56,21 @@ ROOF_TONE = {"roof_slate": (0.18, 0.9)}
 # Sciany skalne (bryly): kamien laczacy sie w jednolita skale zamiast cegiel - jaskinie i gory jak w Tibii.
 # nazwa: (podloze z paczki, mnoznik jasnosci, kolor domieszki, udzial domieszki)
 ROCK_WALLS = {
-    "cave_wall": (159, 0.7, None, 0),
-    "mountain": (159, 0.95, (120, 110, 90), 0.2),
-    "snow_mountain": (159, 1.0, (235, 242, 250), 0.55),
-    "sand_cliff": (159, 1.0, (200, 160, 100), 0.5),
+    # wierzch gor: plaskie podloza "mountain" z paczki (990 piaskowy, 991 skalny), krawedzie to odcinki MOUNTAINS
+    "cave_wall": (991, 0.62, None, 0),
+    "mountain": (990, 0.95, (150, 140, 90), 0.15),
+    "snow_mountain": (991, 1.0, (235, 242, 250), 0.55),
+    "sand_cliff": (994, 1.0, None, 0),
     "pyramid": (166, 1.0, (225, 185, 115), 0.2),   # bloki piramidy Qasirah (etap 5)
+}
+# Gory i jaskinie jak w Tibii (2026-10-23 wieczor): odcinki gor z paczki rysowane jak mury (2x2 pola), kolejno
+# pionowy, poziomy, slupek, naroznik; kazdy ksztalt to lista przedmiotow, a przedmiot z wzorem (px x py) daje
+# kilka wariantow (walls/klucz_ksztalt.png i walls/klucz_ksztalt_N.png).
+MOUNTAINS = {
+    "mountain": ((923,), (922,), (921,), (930, 931)),
+    "snow_mountain": ((939,), (938,), (937,), (943, 944, 945)),
+    "sand_cliff": ((919,), (920,), (921,), (934, 926)),
+    "cave_wall": ((957,), (956,), (958,), (961,)),
 }
 # Dopracowanie miast (2026-10-23): wyposazenie wnetrz i ulic, nowe nawierzchnie, mury z oknami, warianty roslin.
 TOWN_OBJECTS = {
@@ -78,10 +88,19 @@ WINDOWS = {
 }
 # Warianty roslin i kamieni (tiles/klucz_vN.png): renderer wybiera wariant wg pozycji pola, las nie jest jednym drzewem.
 VARIANTS = {
-    "tree": (1503, 1504, 1506, 1507, 1509, 1531, 1534, 1537),
-    "bush": (1498, 1538, 1541, 1544, 1550),
-    "flowers": (1401, 1404, 1405, 1406),
-    "rock": (1622, 1624, 1626, 1628),
+    # 2026-10-23 wieczor (Darek: "dodaj wszystkie grafiki"): wiecej drzew, krzewow, kamieni i roslin z paczki
+    "tree": (1503, 1504, 1506, 1507, 1509, 1531, 1534, 1537, 1511, 1512, 1514, 1519, 1521, 1523, 1529, 1532),
+    "pine": (1508, 1565, 1566, 1579),
+    "dead_tree": (1500, 1502, 1576),
+    "bush": (1498, 1538, 1541, 1544, 1550, 1539, 1540, 1542, 1546, 1548, 1553, 1556, 1443, 1456, 1482),
+    "flowers": (1401, 1404, 1405, 1406, 1315, 1329, 1339, 1341, 1344, 1386, 1387, 1394, 1452, 1454),
+    "fern": (1408, 1409, 1411, 1415, 1416, 1417, 1490, 1499),
+    "tall_grass": (1362, 1365, 1366, 1368, 1370, 1375, 1378, 1382),
+    "rock": (1622, 1624, 1626, 1628, 1634, 1635, 1636, 1637, 1638, 1639, 1640, 1598, 1599),
+    "snow_rock": (1606, 1607, 1609),
+    "sandstone_rock": (1632, 1603, 1618),
+    "rubble": (1614, 1615, 1616, 1594, 1595, 1597),
+    "crystal": (1646, 1647, 2262, 2263),
 }
 # 2026-10-23 (Darek: "wszystkie grafiki maja byc z otclienta"): zamiast wlasnych rysunkow odpowiedniki z paczki.
 # nazwa -> numer albo (numer, barwa przebarwienia)
@@ -127,6 +146,15 @@ EFFECTS = {
 MISSILES = {
     "arrow": 2, "spear": 1, "fire": 4, "ice": 13, "earth": 5, "energy": (10, (120, 175, 255)), "stone": 12, "star": 6, "knife": 9,
     "holy": (10, (255, 225, 110)), "death": (10, (170, 80, 220)),
+}
+# Kaluze krwi i ciala (przedmioty paczki zapisane jako jednoklatkowe efekty effects/<nazwa>_0.png);
+# plyny w paczce sa niebieskie (kolor nadaje gra), wiec krew i sluz sa przebarwione.
+BLOOD, SLIME = (175, 25, 25), (90, 160, 40)
+DECALS = {
+    "blood_pool": (2221, BLOOD), "blood_small": (2222, BLOOD), "blood_splash": (2224, BLOOD),
+    "blood_drops": (2226, BLOOD), "slime_pool": (2221, SLIME), "slime_splash": (2224, SLIME),
+    "corpse_human": 2227, "corpse_human_old": 2246, "corpse_bones": 2248, "corpse_goblin": 2234,
+    "corpse_beast": 2228, "corpse_centipede": 2240, "corpse_wasp": 2243, "corpse_beetle": 2238,
 }
 # Pupile i potwory bez stroju w paczce: przebarwiony podobny stroj.
 MORE_TINTED = {"cursed_treant": (12, (100, 115, 55))}
@@ -318,6 +346,9 @@ def main(client, art):
         save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
     for name, (ground, mult, mix, part) in ROCK_WALLS.items():
         img = ot.compose(spr, things["item"][ground]).convert("RGBA")
+        if img.width > 32:   # podloza gor w paczce sa 2x2 z jednym wypelnionym polem
+            b = img.getbbox()
+            img = img.crop((b[0], b[1], b[0] + 32, b[1] + 32))
         px = img.load()
         for y in range(img.height):
             for x in range(img.width):
@@ -334,6 +365,16 @@ def main(client, art):
         save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
     for name, i in TOWN_GROUND.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/tiles/{name}.png"); n += 1
+    for name, shapes in MOUNTAINS.items():
+        for shape, ids in zip(WALL_SHAPES, shapes):
+            imgs = []
+            for i in ids:
+                t = things["item"][i]
+                imgs += [ot.compose(spr, t, x=px, y=py).convert("RGBA") for py in range(t["py"]) for px in range(t["px"])]
+            for k, img in enumerate(imgs):
+                sq = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+                sq.alpha_composite(img, (64 - img.width, 64 - img.height))
+                save(sq, f"{art}/walls/{name}_{shape}{'' if k == 0 else '_' + str(k)}.png"); n += 1
     for name, ids in TOWN_WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
             save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
@@ -386,6 +427,14 @@ def main(client, art):
         for f in range(t["frames"]):
             img = ot.compose(spr, t, frame=f).convert("RGBA")
             save(tint(img, rgb) if rgb else img, f"{art}/effects/{name}_{f}.png"); n += 1
+    for name, spec in DECALS.items():
+        i, rgb = spec if isinstance(spec, tuple) else (spec, None)
+        img = ot.compose(spr, things["item"][i]).convert("RGBA")
+        if img.width != img.height:   # 32x64: kwadrat 64x64, pole w prawym dolnym rogu jak efekty 2x2
+            sq = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+            sq.alpha_composite(img, (64 - img.width, 64 - img.height))
+            img = sq
+        save(tint(img, rgb) if rgb else img, f"{art}/effects/{name}_0.png"); n += 1
     for name, spec in MISSILES.items():
         i, rgb = spec if isinstance(spec, tuple) else (spec, None)
         t = things["missile"][i]

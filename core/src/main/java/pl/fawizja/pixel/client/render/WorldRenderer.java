@@ -260,9 +260,13 @@ public final class WorldRenderer {
     private void drawWall(SpriteBatch batch, FloorMap f, int x, int y, float sx, float wy) {
         int id = f.get(Layer.WALL, x, y);
         if (id == 0) return;
+        if (art.rockShape(id, 0) != null && art.wallPiece(id, TileArt.WALL_V) != null) {
+            drawMountain(batch, f, id, x, y, sx, wy);
+            return;
+        }
         int shape = wallShape(f, x, y);
         if (hasWindow(f, id, x, y, shape)) shape = shape == TileArt.WALL_V ? TileArt.WALL_V_WINDOW : TileArt.WALL_H_WINDOW;
-        TextureRegion piece = art.wallPiece(id, shape);
+        TextureRegion piece = art.wallPiece(id, shape, x, y);
         if (piece != null) {
             // mur jak w Tibii: sciana na prawej/dolnej krawedzi pola, wysokosc w gore i w lewo (2x2 pola)
             batch.draw(piece, sx - 1, wy, 2f, 2f);
@@ -292,19 +296,39 @@ public final class WorldRenderer {
         }
     }
 
+    /**
+     * Gora albo sciana jaskini jak w Tibii: plaski wierzch skaly (zaokraglony tam, gdzie konczy sie skala),
+     * a na krawedzi od poludnia i wschodu odcinek zbocza z paczki (2x2 pola, prawy dolny = pole skaly):
+     * poludnie - poziomy, wschod - pionowy, rog poludniowo-wschodni - naroznik, samotna skala - slupek.
+     */
+    private void drawMountain(SpriteBatch batch, FloorMap f, int id, int x, int y, float sx, float wy) {
+        int mask = rockMask(f, x, y);
+        batch.draw(art.rockShape(id, mask), sx, wy, 1f, 1f);
+        boolean south = (mask & TileArt.ROCK_S) != 0, east = (mask & TileArt.ROCK_E) != 0;
+        int shape;
+        if (south && east) shape = (mask & (TileArt.ROCK_N | TileArt.ROCK_W)) == (TileArt.ROCK_N | TileArt.ROCK_W)
+                ? TileArt.WALL_POLE : TileArt.WALL_CORNER;
+        else if (south) shape = TileArt.WALL_H;
+        else if (east) shape = TileArt.WALL_V;
+        else return;
+        TextureRegion piece = art.wallPiece(id, shape, x, y);
+        if (piece != null) batch.draw(piece, sx - 1, wy, 2f, 2f);
+    }
+
     /** Boki skaly, przy ktorych nie ma innej skaly (TileArt.ROCK_*): tam skala jest zaokraglona. */
     int rockMask(FloorMap f, int x, int y) {
-        int m = 0;
-        if (!rock(f, x, y - 1)) m |= TileArt.ROCK_N;
-        if (!rock(f, x + 1, y)) m |= TileArt.ROCK_E;
-        if (!rock(f, x, y + 1)) m |= TileArt.ROCK_S;
-        if (!rock(f, x - 1, y)) m |= TileArt.ROCK_W;
+        int m = 0, id = f.get(Layer.WALL, x, y);
+        if (!rock(f, id, x, y - 1)) m |= TileArt.ROCK_N;
+        if (!rock(f, id, x + 1, y)) m |= TileArt.ROCK_E;
+        if (!rock(f, id, x, y + 1)) m |= TileArt.ROCK_S;
+        if (!rock(f, id, x - 1, y)) m |= TileArt.ROCK_W;
         return m;
     }
 
-    private boolean rock(FloorMap f, int x, int y) {
+    /** Ta sama skala obok (gora przy osniezonej gorze ma wlasne zbocze). */
+    private boolean rock(FloorMap f, int id, int x, int y) {
         if (!f.inBounds(x, y)) return true;
-        return art.rockShape(f.get(Layer.WALL, x, y), 0) != null;
+        return f.get(Layer.WALL, x, y) == id;
     }
 
     /**

@@ -56,8 +56,8 @@ import pl.fawizja.pixel.vocation.Vocation;
 public final class GameScreen extends ScreenAdapter {
 
     /** Minimalny widoczny obszar w kafelkach (reszta zalezy od proporcji ekranu). */
-    private static final float VIEW_TILES_W = 15f;
-    private static final float VIEW_TILES_H = 11f;
+    private static final float VIEW_TILES_W = 11f;
+    private static final float VIEW_TILES_H = 8f;
     private static final long AUTOSAVE_MS = 60_000L;
     private static final long GUARD_SAMPLE_MS = 500L;
     private static final long WARMUP_MS = 5_000L;
@@ -1315,7 +1315,9 @@ public final class GameScreen extends ScreenAdapter {
         }
         float[] myLunge = lunges.get(pc.position());
         float lx = myLunge == null ? 0f : myLunge[0], ly = myLunge == null ? 0f : myLunge[1];
+        collectSplats(session.combat().recentEvents(t, 1200), t);
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
+            drawSplats(b, row, z, t);
             drawCorpses(b, row, z);
             drawChests(b, row, z);
             footprints.drawRow(b, game.art().white(), worldRenderer, row, z, t);
@@ -1467,19 +1469,96 @@ public final class GameScreen extends ScreenAdapter {
         }
     }
 
-    /** Ciala potworow w danym wierszu: lezacy, przyciemniony sprite (jasniejszy, gdy jest w nim lup). */
+    /**
+     * Ciala potworow w danym wierszu: kaluza krwi (albo sluzu) pod cialem, cialo z paczki dla ludzi, goblinow
+     * i szkieletow, dla reszty lezacy, przyciemniony sprite potwora (jasniejszy, gdy jest w nim lup).
+     */
     private void drawCorpses(SpriteBatch b, int row, int z) {
         Position me = session.character().position();
         session.ground().forEachCorpseNear(me, 16, (p, c) -> {
             if (p.y() != row || p.z() != z) return;
+            float wy = worldRenderer.worldY(p.y());
+            String fluid = fluidOf(c.monsterKey());
+            if (fluid != null) drawDecal(b, fluid + "_pool", p.x(), wy, 1f);
+            String body = corpseOf(c.monsterKey());
+            TextureRegion[] own = body == null ? null : game.art().effect(body);
+            if (own != null) {
+                float shade = c.hasLoot() ? 1f : 0.8f;
+                b.setColor(shade, shade, shade, 1f);
+                drawEffectFrame(b, body, 0, 1, p.x(), wy);
+                b.setColor(Color.WHITE);
+                return;
+            }
             TextureRegion tr = game.art().monster(c.monsterKey());
             if (tr == null) return;
             float shade = c.hasLoot() ? 0.62f : 0.42f;
             b.setColor(shade, shade * 0.9f, shade * 0.85f, 1f);
             // obrot o 90 stopni wokol srodka kafelka, splaszczony
-            b.draw(tr, p.x(), worldRenderer.worldY(p.y()) - 0.12f, 0.5f, 0.5f, 1f, 1f, 0.9f, 0.75f, 90f);
+            b.draw(tr, p.x(), wy - 0.12f, 0.5f, 0.5f, 1f, 1f, 0.9f, 0.75f, 90f);
             b.setColor(Color.WHITE);
         });
+    }
+
+    /** Krew potwora: "blood" (czerwona), "slime" (zielona: pajaki, weze, skorpiony) albo null (golemy, nieumarli). */
+    static String fluidOf(String key) {
+        if (key == null) return "blood";
+        if (key.matches(".*(golem|elemental|skeleton|wraith|mummy|treant|colossus|titan|stalker|bone|ignaroth|pyrrax).*")) return null;
+        if (key.matches(".*(spider|scorpion|serpent|crab|crocodile).*")) return "slime";
+        return "blood";
+    }
+
+    /** Cialo z paczki OTSP albo null (wtedy lezacy sprite potwora). */
+    static String corpseOf(String key) {
+        if (key == null) return null;
+        if (key.matches(".*(bandit|hunter|pirate|sailor|witch|priest|bloodbeard|morvena|cutthroat|gunner).*")) return "corpse_human";
+        if (key.matches(".*(goblin|orc|grimtooth).*")) return "corpse_goblin";
+        if (key.matches(".*(skeleton|bone_dragon).*")) return "corpse_bones";
+        return null;
+    }
+
+    /** Kaluze i rozbryzgi krwi po trafieniach: x, y, z, czas, wariant (rysowane pod postaciami, znikaja po 30 s). */
+    private final java.util.ArrayList<long[]> splats = new java.util.ArrayList<>();
+    private long lastSplatEventMs = Long.MIN_VALUE;
+    static final long SPLAT_MS = 30_000L;
+
+    private void collectSplats(List<CombatEvent> events, long t) {
+        long newest = lastSplatEventMs;
+        for (CombatEvent e : events) {
+            if (e.timeMs() <= lastSplatEventMs) continue;
+            newest = Math.max(newest, e.timeMs());
+            if ((e.kind() != CombatEvent.Kind.HIT_MONSTER && e.kind() != CombatEvent.Kind.HIT_PLAYER) || e.amount() <= 0) continue;
+            String who = null;
+            if (e.kind() == CombatEvent.Kind.HIT_MONSTER) {
+                for (Monster m : session.monsters().near(e.position(), 0)) if (m.position().equals(e.position())) who = m.type().key();
+                if (who == null) who = "";
+            }
+            String fluid = fluidOf(who);
+            if (fluid == null) continue;
+            Position p = e.position();
+            int variant = (int) Math.floorMod(p.x() * 31L + p.y() * 17L + e.timeMs() / 97, 3) + (fluid.equals("slime") ? 3 : 0);
+            splats.add(new long[] {p.x(), p.y(), p.z(), e.timeMs(), variant});
+        }
+        lastSplatEventMs = newest;
+        splats.removeIf(s -> t - s[3] > SPLAT_MS || t < s[3] - 1000);
+        while (splats.size() > 300) splats.remove(0);
+    }
+
+    private static final String[] SPLAT_NAMES = {"blood_splash", "blood_small", "blood_drops", "slime_splash", "slime_splash", "slime_splash"};
+
+    private void drawSplats(SpriteBatch b, int row, int z, long t) {
+        for (long[] s : splats) {
+            if (s[1] != row || s[2] != z) continue;
+            long age = t - s[3];
+            float alpha = age < SPLAT_MS - 6000 ? 1f : Math.max(0f, (SPLAT_MS - age) / 6000f);
+            drawDecal(b, SPLAT_NAMES[(int) s[4]], s[0], worldRenderer.worldY((int) s[1]), alpha);
+        }
+    }
+
+    private void drawDecal(SpriteBatch b, String name, float x, float wy, float alpha) {
+        if (game.art().effect(name) == null) return;
+        b.setColor(1f, 1f, 1f, alpha);
+        drawEffectFrame(b, name, 0, 1, x, wy);
+        b.setColor(Color.WHITE);
     }
 
     private static Color effectColor(String effect) {
@@ -2198,10 +2277,11 @@ public final class GameScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         hud.resize(width, height);
-        // swiat rysuje sie na calym ekranie, ale skala i kamera sa ustawione tak, by co najmniej 15x11 pol
+        // swiat rysuje sie na calym ekranie, ale skala i kamera sa ustawione tak, by co najmniej 11x8 pol
         // miescilo sie w ramce widoku gry z HUD-u (panele interfejsu zaslaniaja reszte jak w kliencie Tibii)
         float[] r = hud.gameView();
-        float ppu = Math.max(1f, Math.min(r[2] / VIEW_TILES_W, r[3] / VIEW_TILES_H));
+        // cala liczba pikseli na pole: bez cienkich szwow miedzy kafelkami
+        float ppu = Math.max(1f, (float) Math.floor(Math.min(r[2] / VIEW_TILES_W, r[3] / VIEW_TILES_H)));
         viewport.setMinWorldWidth(width / ppu);
         viewport.setMinWorldHeight(height / ppu);
         viewport.update(width, height, false);

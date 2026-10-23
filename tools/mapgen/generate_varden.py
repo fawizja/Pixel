@@ -14,7 +14,8 @@ import sys
 from collections import deque
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import town as tk  # noqa: E402
+import town as tk
+import sidewalk  # noqa: E402
 
 W, H = 64, 48
 OUT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps', 'varden')
@@ -559,6 +560,16 @@ def write_legend():
 def main():
     os.makedirs(OUT, exist_ok=True)
     canvas, inside = surface()
+    # donice ze srodka ulic pod mury (NPC z mapy swiata, Varden lezy tam od 139,340)
+    npcs = set()
+    with open(os.path.join(OUT, '..', 'world', 'npcs.csv'), encoding='utf-8') as f:
+        for line in f:
+            p = line.split(';')
+            if len(p) > 6 and p[6] == '0' and p[4].isdigit():
+                npcs.add((int(p[4]) - 139, int(p[5]) - 340))
+    get = lambda x, y: None if (x, y) in npcs or not canvas.inside(x, y) else canvas.at(x, y)  # noqa: E731
+    sidewalk.move_props(get, canvas.put, [(x, y) for y in range(canvas.h) for x in range(canvas.w)],
+                        kinds=('flower_box', 'potted_plant'))
     reach = tk.reachable(canvas, (31, 16))
     missing = [p for p in MUST_REACH if p not in reach]
     assert not missing, f'Varden: nieosiagalne {missing}'

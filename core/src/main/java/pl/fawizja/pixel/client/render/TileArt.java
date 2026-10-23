@@ -148,6 +148,7 @@ public final class TileArt implements Disposable {
         });
         loadAutotiles(tileRegistry);
         loadRockShapes(tileRegistry, base);
+        loadBigTiles(tileRegistry);
         loadEffects();
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -164,6 +165,17 @@ public final class TileArt implements Disposable {
                     pieces[k] = new TextureRegion(wallAtlas, (slot % WALL_COLS) * WALL_PX, (slot / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
                 }
                 wallPieces.put(e.getKey(), pieces);
+            }
+            for (Map.Entry<Integer, int[][]> e : wallVariantSlots.entrySet()) {
+                TextureRegion[][] v = new TextureRegion[e.getValue().length][];
+                for (int k = 0; k < v.length; k++) {
+                    int[] sl = e.getValue()[k];
+                    v[k] = new TextureRegion[sl.length];
+                    for (int n = 0; n < sl.length; n++) {
+                        v[k][n] = new TextureRegion(wallAtlas, (sl[n] % WALL_COLS) * WALL_PX, (sl[n] / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
+                    }
+                }
+                wallVariants.put(e.getKey(), v);
             }
         }
         if (hiPm != null) {
@@ -323,6 +335,8 @@ public final class TileArt implements Disposable {
     private Texture wallAtlas;
     private final Map<Integer, int[]> wallSlots = new HashMap<>();
     private final Map<Integer, TextureRegion[]> wallPieces = new HashMap<>();
+    private final Map<Integer, int[][]> wallVariantSlots = new HashMap<>();
+    private final Map<Integer, TextureRegion[][]> wallVariants = new HashMap<>();
     private int wallSlotCount;
 
     /** Wczytuje komplet ksztaltow muru (wszystkie cztery albo zaden - wtedy mur zostaje bryla). */
@@ -360,6 +374,24 @@ public final class TileArt implements Disposable {
             }
             wallSlotCount += files.length;
             wallSlots.put(t.id(), slots);
+            // warianty ksztaltow (gory z paczki maja po kilka odcinkow): walls/klucz_ksztalt_N.png
+            int[][] extra = new int[WALL_SHAPES.length][];
+            for (int k = 0; k < WALL_SHAPES.length; k++) {
+                List<Integer> more = new ArrayList<>();
+                for (int n = 1; n < 8; n++) {
+                    Pixmap src = loadArt("walls/" + t.key() + "_" + WALL_SHAPES[k] + "_" + n + ".png");
+                    if (src == null || wallSlotCount >= WALL_COLS * WALL_COLS) {
+                        if (src != null) src.dispose();
+                        break;
+                    }
+                    wallPm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
+                            (wallSlotCount % WALL_COLS) * WALL_PX, (wallSlotCount / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
+                    src.dispose();
+                    more.add(wallSlotCount++);
+                }
+                extra[k] = more.stream().mapToInt(Integer::intValue).toArray();
+            }
+            wallVariantSlots.put(t.id(), extra);
         } catch (RuntimeException e) {
             Gdx.app.error("TileArt", "Nie można wczytać murów " + t.key() + ": " + e.getMessage());
         }
@@ -377,10 +409,10 @@ public final class TileArt implements Disposable {
     private static final java.util.Set<String> FLIPPED_GROUNDS = java.util.Set.of("grass", "dirt", "sand", "snow",
             "jungle_grass", "swamp", "ash", "dark_sand", "blighted_grass", "cave_floor", "field", "abyss_floor");
 
-    /** Warianty grafiki tiles/klucz_v2.png ... _v9.png (np. rozne gatunki drzew), wybierane wg pozycji pola. */
+    /** Warianty grafiki tiles/klucz_v2.png ... _v17.png (np. rozne gatunki drzew), wybierane wg pozycji pola. */
     private void loadVariants(TileType t) {
         List<Integer> cells = new ArrayList<>();
-        for (int k = 2; k <= 9; k++) {
+        for (int k = 2; k <= 17; k++) {
             String name = "tiles/" + t.key() + "_v" + k + ".png";
             com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name);
             if (!f.exists()) f = Gdx.files.internal("assets/art/" + name);
@@ -420,6 +452,8 @@ public final class TileArt implements Disposable {
 
     /** Grafika pola z wariantem wg pozycji (stala dla danego pola, rozna dla sasiadow). */
     public TextureRegion tile(int id, int x, int y) {
+        TextureRegion[] b = id > 0 && id < bigTiles.length ? bigTiles[id] : null;
+        if (b != null) return b[spread(x, y) % b.length];
         TextureRegion[] v = variants.get(id);
         if (v == null) return tile(id);
         return v[spread(x, y) % v.length];
@@ -438,6 +472,15 @@ public final class TileArt implements Disposable {
     public TextureRegion wallPiece(int tileId, int shape) {
         TextureRegion[] p = wallPieces.get(tileId);
         return p == null ? null : p[shape];
+    }
+
+    /** Ksztalt muru w wariancie dla pola (x, y): odcinki gor zmieniaja sie wzdluz grzbietu jak w Tibii. */
+    public TextureRegion wallPiece(int tileId, int shape, int x, int y) {
+        TextureRegion base = wallPiece(tileId, shape);
+        TextureRegion[][] v = wallVariants.get(tileId);
+        if (base == null || v == null || shape >= v.length || v[shape].length == 0) return base;
+        int n = Math.floorMod(shape == WALL_V ? y : shape == WALL_H ? x : x * 7 + y * 13, v[shape].length + 1);
+        return n == 0 ? base : v[shape][n - 1];
     }
 
     /** Komorki klatek kroku (tylko w atlasie 32 px): numery poza atlasem 16 px. */
@@ -662,7 +705,11 @@ public final class TileArt implements Disposable {
 
     /** Efekty czarow (klatki effects/nazwa_N.png) i pociski (missiles/nazwa_XY.png) z paczki OTSP. */
     public static final String[] EFFECT_NAMES = {"blood", "energy", "poof", "sparks", "fire", "water", "earth", "dust",
-            "flame", "explosion", "ice", "holy", "death", "heal", "haste"};
+            "flame", "explosion", "ice", "holy", "death", "heal", "haste",
+            // kaluze krwi i ciala (jedna klatka)
+            "blood_pool", "blood_small", "blood_splash", "blood_drops", "slime_pool", "slime_splash",
+            "corpse_human", "corpse_human_old", "corpse_bones", "corpse_goblin", "corpse_beast", "corpse_centipede",
+            "corpse_wasp", "corpse_beetle"};
     public static final String[] MISSILE_NAMES = {"arrow", "spear", "fire", "ice", "earth", "energy", "stone", "star",
             "knife", "holy", "death"};
     private static final int FX = 64, FX_COLS = 16;
@@ -749,7 +796,60 @@ public final class TileArt implements Disposable {
     public GroundBorders borders() { return borders; }
     private GroundBorders borders;
 
-    public TextureRegion tile(int id) { return id > 0 && id < tiles.length ? tiles[id] : null; }
+    public TextureRegion tile(int id) {
+        if (id > 0 && id < bigTiles.length && bigTiles[id] != null) return bigTiles[id][0];
+        return id > 0 && id < tiles.length ? tiles[id] : null;
+    }
+
+    /** Duze obiekty (drzewa 64 px z paczki) w pelnej rozdzielczosci: klucz.png i warianty klucz_vN.png. */
+    private TextureRegion[][] bigTiles = new TextureRegion[0][];
+    private Texture bigAtlas;
+    private static final int BIG = 64, BIG_COLS = 16;
+
+    private void loadBigTiles(TileRegistry registry) {
+        bigTiles = new TextureRegion[registry.maxId() + 1][];
+        List<Pixmap> images = new ArrayList<>();
+        List<int[]> owners = new ArrayList<>();   // {tileId, liczba obrazkow}
+        for (TileType t : registry.all()) {
+            Pixmap base = loadArt("tiles/" + t.key() + ".png");
+            if (base == null) continue;
+            if (base.getWidth() <= 40) {
+                base.dispose();
+                continue;
+            }
+            int count = 1;
+            images.add(base);
+            for (int k = 2; k <= 17; k++) {
+                Pixmap p = loadArt("tiles/" + t.key() + "_v" + k + ".png");
+                if (p == null) break;
+                images.add(p);
+                count++;
+            }
+            owners.add(new int[] {t.id(), count});
+        }
+        if (images.isEmpty()) return;
+        int rows = (images.size() + BIG_COLS - 1) / BIG_COLS;
+        Pixmap pm = new Pixmap(BIG_COLS * BIG, rows * BIG, Pixmap.Format.RGBA8888);
+        pm.setBlending(Pixmap.Blending.None);
+        pm.setFilter(Pixmap.Filter.NearestNeighbour);
+        for (int i = 0; i < images.size(); i++) {
+            Pixmap src = images.get(i);
+            int w = Math.min(BIG, src.getWidth()), h = Math.min(BIG, src.getHeight());
+            // mniejsze drzewo stoi posrodku na dole komorki (bez rozciagania)
+            pm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
+                    (i % BIG_COLS) * BIG + (BIG - w) / 2, (i / BIG_COLS) * BIG + BIG - h, w, h);
+            src.dispose();
+        }
+        bigAtlas = new Texture(pm);
+        bigAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        pm.dispose();
+        int i = 0;
+        for (int[] o : owners) {
+            TextureRegion[] r = new TextureRegion[o[1]];
+            for (int k = 0; k < o[1]; k++, i++) r[k] = new TextureRegion(bigAtlas, (i % BIG_COLS) * BIG, (i / BIG_COLS) * BIG, BIG, BIG);
+            bigTiles[o[0]] = r;
+        }
+    }
     public TextureRegion item(int id) { return id > 0 && id < items.length ? items[id] : null; }
     public TextureRegion white() { return white; }
     public TextureRegion monster(String key) { return monsters.get(key); }
@@ -1578,6 +1678,7 @@ public final class TileArt implements Disposable {
         if (borders != null) borders.dispose();
         if (autoAtlas != null) autoAtlas.dispose();
         if (rockAtlas != null) rockAtlas.dispose();
+        if (bigAtlas != null) bigAtlas.dispose();
         if (fxAtlas != null) fxAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();

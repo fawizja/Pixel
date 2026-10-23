@@ -210,7 +210,7 @@ rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
 ## Uklad ekranu (C UI)
 
 - Jedna bryla jak klasyczny klient Tibii: `Hud.resize` liczy prostokat widoku gry (`Hud.gameView`, piksele),
-  `GameScreen.resize` dobiera skale (min. 15x11 pol w ramce) i przesuniecie kamery do srodka ramki; swiat rysuje sie
+  `GameScreen.resize` dobiera skale (min. 11x8 pol w ramce) i przesuniecie kamery do srodka ramki; swiat rysuje sie
   na calym ekranie, panele go zaslaniaja.
 - Prawy panel: minimapa z kolumna (i, BIEG, TARCZA, POCH), ekwipunek (3x4 albo 5x2), Umiejetnosci (wysoki ekran),
   lista walki, pasek akcji. U gory paski HP/MP/doswiadczenie i ikony stanu, na dole rzad przyciskow i konsola.
