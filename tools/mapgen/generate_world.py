@@ -20,6 +20,7 @@ import ports  # noqa: E402
 import depths  # noqa: E402
 import cities  # noqa: E402
 import town  # noqa: E402
+import dressing  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 VARDEN = os.path.join(ROOT, 'varden')
@@ -124,6 +125,21 @@ def varden_town_walkable():
 
 
 WALKABLE |= varden_town_walkable()
+WORLD_LEGEND = None
+
+
+def world_legend():
+    """Legenda swiata jako pelne kafle (Varden + biomy); nowe kombinacje z dressing.py dostaja litery U+0180..."""
+    global WORLD_LEGEND
+    base = []
+    with open(os.path.join(VARDEN, 'legend.csv'), encoding='utf-8') as f:
+        for line in f:
+            p = line.rstrip('\n').split(';')
+            if len(p) == 5 and not line.startswith('//'):
+                base.append(tuple(p))
+    base += [tuple(e) for e in EXTRA_LEGEND]
+    WORLD_LEGEND = town.Legend(base, pool=''.join(chr(c) for c in range(0x180, 0x250)))
+    return WORLD_LEGEND
 
 
 def grid(fill=' '):
@@ -892,6 +908,23 @@ def main():
     for (_k, _n, _r, _t, x, y, *_rest) in npcs:
         assert g[y][x] in WALKABLE, f'npc {_k} on {g[y][x]!r} at {x},{y}'
 
+    # dopracowanie miast poza Varden: wnetrza wg rol NPC, rozne mury, wyposazenie placow (dressing.py)
+    legend = world_legend()
+    pz0 = [(SELV[0] + 1, SELV[1] + 1, SELV[2] - 1, SELV[3] - 1), (CAMP[0] + 1, CAMP[1] + 1, CAMP[2] - 1, CAMP[3] - 1)]
+    pz0 += [r[:4] for part in city_parts for r in part['pz'] if r[4] == 0] + [r[:4] for r in sea['pz'] if r[4] == 0]
+    roles = []
+    with open(os.path.join(OUT, 'npcs.csv'), encoding='utf-8') as f:
+        for line in f:
+            p = line.rstrip('\n').split(';')
+            if line.startswith('#') or len(p) < 7 or p[6] != '0':
+                continue
+            roles.append((int(p[4]), int(p[5]), p[2]))
+    in_varden = lambda x, y: VX - 1 <= x <= VX + VW and VY - 1 <= y <= VY + VH  # noqa: E731
+    stats = dressing.dress(g, legend, pz0, roles, transitions, in_varden, dressing.house_cells(cities.HOUSES),
+                           keep=[frost, qas, selv])
+    WALKABLE.update(legend.walkable_symbols())
+    print('miasta:', stats)
+
     # kontrola: wszystkie miasta osiagalne z Varden po powierzchni
     vt = (31 + VX, 16 + VY)
     reach = reachable(g, vt)
@@ -933,6 +966,10 @@ def main():
     legend.append('// --- biomy swiata (generate_world.py) ---')
     for sym, ground, dec, obj, wall in EXTRA_LEGEND:
         legend.append(f'{sym};{ground};{dec};{obj};{wall}')
+    if WORLD_LEGEND is not None and WORLD_LEGEND.extra:
+        legend.append('// --- wyposazenie miast (dressing.py) ---')
+        for e in WORLD_LEGEND.extra:
+            legend.append(';'.join(e))
     with open(os.path.join(OUT, 'legend.csv'), 'w', encoding='utf-8') as f:
         f.write('\n'.join(legend) + '\n')
 

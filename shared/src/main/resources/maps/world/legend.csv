@@ -225,3 +225,19 @@ $;frozen_floor;-;wall_torch;-
 Ю;ash;-;stairs_down;-
 Я;blighted_grass;-;stairs_down;-
 Ш;grass;-;stairs_down;-
+// --- wyposazenie miast (dressing.py) ---
+ƀ;stone_floor;-;banner;-
+Ɓ;stone_floor;-;lectern;-
+Ƃ;sandstone_floor;-;bed;-
+ƃ;sandstone_floor;-;banner;-
+Ƅ;sandstone_floor;-;potted_plant;-
+ƅ;sandstone_floor;-;lectern;-
+Ɔ;cobblestone;-;potted_plant;-
+Ƈ;cobblestone;-;bench;-
+ƈ;dirt;-;street_lamp;-
+Ɖ;dirt;-;bench;-
+Ɗ;dirt;-;flower_box;-
+Ƌ;sand;-;street_lamp;-
+ƌ;sand;-;bench;-
+ƍ;sand;-;flower_box;-
+Ǝ;sand;-;potted_plant;-

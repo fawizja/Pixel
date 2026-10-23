@@ -36,7 +36,7 @@ class WorldMapTest {
         assertFalse(f.isWalkable(18, 15), "town wall");
         assertFalse(f.isWalkable(53, 5), "river");
         assertTrue(f.isWalkable(53, 22), "bridge");
-        assertFalse(f.isWalkable(31, 22), "fountain");
+        assertFalse(f.isWalkable(31, 23), "fountain");
         assertFalse(f.isWalkable(-1, 0));
         assertFalse(f.isWalkable(64, 0));
         assertTrue(f.isWalkable(31, 16));
