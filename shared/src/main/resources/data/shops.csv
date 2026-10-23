@@ -434,3 +434,12 @@ isle_shop;coral_helmet;0;9000
 isle_shop;coral_armor;0;18000
 isle_shop;coral_legs;0;11000
 isle_shop;coral_shield;0;15000
+# Kontynent (2026-10-23): kramy w zywych wioskach - prowiant, swiatlo, liny i podstawowe mikstury
+village_shop;torch;8;0
+village_shop;rope;60;0
+village_shop;bread;4;0
+village_shop;meat;6;0
+village_shop;fishing_rod;180;0
+village_shop;worm;2;0
+village_shop;health_potion;50;0
+village_shop;mana_potion;55;0

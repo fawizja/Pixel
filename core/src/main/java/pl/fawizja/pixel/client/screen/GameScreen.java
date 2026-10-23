@@ -67,6 +67,10 @@ public final class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final ExtendViewport viewport = new ExtendViewport(VIEW_TILES_W, VIEW_TILES_H, camera);
     private final WorldRenderer worldRenderer;
+    /** Slady na sniegu (gracz, inni gracze, potwory). */
+    private final pl.fawizja.pixel.client.render.Footprints footprints;
+    /** Towary kupcow na ladach obok nich. */
+    private final pl.fawizja.pixel.client.render.ShopDisplays shopDisplays;
     private final pl.fawizja.pixel.client.render.Roofs roofs;
     private final LightRenderer lightRenderer;
     private final Hud hud;
@@ -226,6 +230,8 @@ public final class GameScreen extends ScreenAdapter {
             session.setToday(() -> d);
         }
         this.worldRenderer = new WorldRenderer(game.world(), game.art());
+        this.footprints = new pl.fawizja.pixel.client.render.Footprints(game.world());
+        this.shopDisplays = new pl.fawizja.pixel.client.render.ShopDisplays(game.world(), session.npcs().all(), game.shops());
         this.roofs = new pl.fawizja.pixel.client.render.Roofs(game.world());
         this.lightRenderer = new LightRenderer(game.art().lightTexture());
         this.hud = new Hud(game.art(), game.font());
@@ -1293,11 +1299,19 @@ public final class GameScreen extends ScreenAdapter {
         lastPetMs = t;
         if (pc.pet() != null) myPet.update(pc.position(), petDt);
         for (RemotePlayer rp : remotePlayers.values()) if (rp.pet != null) rp.petFollower.update(rp.to, petDt);
+        footprints.track("@me", pc.position(), t);
+        for (RemotePlayer rp : remotePlayers.values()) footprints.track("p:" + rp.name, rp.to, t);
+        for (int i = 0; i < visibleMonsters.size(); i++) {
+            Monster m = visibleMonsters.get(i);
+            footprints.track("m:" + m.id(), m.position(), t);
+        }
         float[] myLunge = lunges.get(pc.position());
         float lx = myLunge == null ? 0f : myLunge[0], ly = myLunge == null ? 0f : myLunge[1];
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
             drawCorpses(b, row, z);
             drawChests(b, row, z);
+            footprints.drawRow(b, game.art().white(), worldRenderer, row, z, t);
+            shopDisplays.drawRow(b, game.art(), worldRenderer, row, z);
             for (int i = 0; i < visibleMonsters.size(); i++) {
                 Monster m = visibleMonsters.get(i);
                 if (m.position().y() != row || m.position().z() != z) continue;
@@ -1607,6 +1621,14 @@ public final class GameScreen extends ScreenAdapter {
         shapes.setProjectionMatrix(camera.combined);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         session.boostedCreature(); // online klient nie wola update - ustawia klucz premii w walce
+        if (session.character().isPromoted() && session.character().position().z() == z) {
+            // znak promocji od krola: zlota gwiazda nad glowa postaci
+            float cx = session.renderX(t) + 0.5f, cy = worldRenderer.worldY(session.renderY(t)) + 1.28f;
+            shapes.setColor(0.2f, 0.12f, 0f, 0.85f);
+            pl.fawizja.pixel.client.ui.Hud.star(shapes, cx, cy - 0.01f, 0.2f);
+            shapes.setColor(1f, 0.84f, 0.25f, 1f);
+            pl.fawizja.pixel.client.ui.Hud.star(shapes, cx, cy, 0.15f);
+        }
         for (Monster m : visibleMonsters) {
             if (m.isDead() || m.position().z() != z) continue;
             float mx = m.renderX(t);

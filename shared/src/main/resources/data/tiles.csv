@@ -114,3 +114,16 @@
 124;rowboat;OBJECT;0;0;town;#80542e;crate
 125;fishing_net;OBJECT;0;0;town;#c4ba96;fence
 126;flower_box;OBJECT;0;0;town;#c84a50;bush
+# --- kontynent (2026-10-23): statki, mosty wiszace, rozpadliny, swiatynie, mlyn, wioski ---
+127;ship_deck;GROUND;1;0;town;#8a6238;planks
+128;ship_hull;WALL;0;0;town;#5a3a1e;woodwall
+129;ship_mast;OBJECT;0;0;town;#6b4a2a;fence
+130;ship_wheel;OBJECT;0;0;town;#7a5230;crate
+131;rope_bridge;GROUND;1;0;town;#9a7448;planks
+132;chasm;GROUND;0;0;mountain;#141210;water
+133;candle;OBJECT;1;4;town;#f2e2a0;torch
+134;carpet;DECORATION;1;0;town;#8a1e2a;rug
+135;windmill;OBJECT;0;0;town;#d8cdb4;fence
+136;broken_wall;OBJECT;0;0;town;#77706a;rubble
+137;orc_tent;OBJECT;0;0;town;#7a6a40;crate
+138;throne;OBJECT;0;0;town;#c8a040;altar

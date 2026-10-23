@@ -69,6 +69,8 @@ public final class Actions {
             case "take": s.depotTake(Integer.parseInt(p[2]), now); return true;
             case "heal": s.priestHeal(now); return true;
             case "bless": s.priestBless(now); return true;
+            case "premium": s.buyPremium(now); return true;
+            case "promote": s.buyPromotion(now); return true;
             case "upgrade": s.upgradeEquipped(pl.fawizja.pixel.item.EquipSlot.valueOf(p[2]), now); return true;
             case "enchant": s.buyEnchantment(pl.fawizja.pixel.item.Enchantments.Kind.valueOf(p[2]), now); return true;
             case "travel": s.travel(p[2], now); return true;

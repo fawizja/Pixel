@@ -128,6 +128,8 @@ public final class PlayerCharacter {
         hasMount = o.hasMount;
         mounted = o.mounted;
         blessed = o.blessed;
+        premium = o.premium;
+        promoted = o.promoted;
         rewardedLevel = o.rewardedLevel;
         stats.copyFrom(o.stats);
         weeklyBossWeek = o.weeklyBossWeek;
@@ -220,6 +222,19 @@ public final class PlayerCharacter {
     private boolean blessed;
 
     public boolean isBlessed() { return blessed; }
+
+    /** Konto premium (kupione u krola w Varden): rejsy duzymi statkami miedzy portami. */
+    private boolean premium;
+    /** Promocja profesji (u krola, tylko z premium): znak przy postaci, nazwa jak w Tibii, szybsza regeneracja. */
+    private boolean promoted;
+
+    public boolean isPremium() { return premium; }
+    public void setPremium(boolean v) { premium = v; }
+    public boolean isPromoted() { return promoted; }
+    public void setPromoted(boolean v) { promoted = v; }
+
+    /** Nazwa profesji z uwzglednieniem promocji (np. Elite Knight). */
+    public String vocationTitle() { return promoted ? vocation.promotedName() : vocation.displayName(); }
 
     /** Najwyzszy poziom, za ktory sprawdzono juz nagrody progow ({@link LevelRewards}). */
     private int rewardedLevel;
@@ -433,8 +448,11 @@ public final class PlayerCharacter {
         while (regenAccumulatorMs >= tick) {
             regenAccumulatorMs -= tick;
             int mult = (fedMs > 0 ? 2 : 1) + (resting ? REST_BONUS : 0);
-            heal(Balance.healthRegenPerTick(vocation, level) * mult);
-            restoreMana(Balance.manaRegenPerTick(vocation, level) * mult);
+            int hp = Balance.healthRegenPerTick(vocation, level) * mult;
+            int mp = Balance.manaRegenPerTick(vocation, level) * mult;
+            // promocja: regeneracja o polowe szybsza (co najmniej 1 punkt wiecej)
+            heal(promoted ? hp + Math.max(1, hp / 2) : hp);
+            restoreMana(promoted ? mp + Math.max(1, mp / 2) : mp);
             fedMs = Math.max(0, fedMs - tick);
         }
     }

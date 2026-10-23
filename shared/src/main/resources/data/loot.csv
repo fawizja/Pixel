@@ -218,3 +218,17 @@ mist_wraith;mist_essence;180;1;1
 morvena;mist_essence;1000;5;8
 magma_drake;drake_horn;150;1;1
 pyrrax;drake_horn;1000;4;6
+orc_warrior;gold_coin;950;40;120
+orc_warrior;meat;400;1;2
+orc_warrior;health_potion;150;1;2
+orc_warrior;steel_spear;25;1;1
+orc_shaman;gold_coin;950;40;110
+orc_shaman;mana_potion;200;1;2
+orc_shaman;blank_rune;120;1;1
+orc_berserker;gold_coin;950;60;160
+orc_berserker;platinum_coin;300;1;2
+orc_berserker;iron_sword;40;1;1
+orc_berserker;health_potion;200;1;2
+orc_warlord;platinum_coin;900;3;8
+orc_warlord;great_health_potion;400;1;3
+orc_warlord;steel_spear;150;1;1

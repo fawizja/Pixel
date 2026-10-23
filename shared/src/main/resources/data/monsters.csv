@@ -53,3 +53,7 @@ bloodbeard;Kapitan Krwawa Broda;420;38000;52000;230;300;850;PHYSICAL;1;1800;40;P
 skaldra;Skaldra, Lodowa Matka;540;85000;110000;200;600;1700;ICE;3;1800;55;ICE:100,FIRE:-25;MAGIC;8;0;5000;1;#a0d8ff;boss;north;-;Matka lodowych smoków z dna Lodowych Grot. Wymaga drużyny.
 morvena;Morvena, Pani Mgieł;640;100000;140000;220;700;2000;DEATH;3;1800;45;DEATH:100,HOLY:-35,PHYSICAL:30;MAGIC;8;0;7000;1;#c0c8d8;boss;equatorial;-;Władczyni mgieł, której nikt nie widział dwa razy. Wymaga drużyny.
 pyrrax;Pyrrax, Serce Wulkanu;780;140000;200000;190;850;2400;FIRE;3;1800;70;FIRE:100,ICE:-25,PHYSICAL:25;MAGIC;8;0;10000;1;#ff6010;boss;equatorial;-;Żywe serce wulkanu. Wymaga silnej drużyny.
+orc_warrior;Ork wojownik;110;1500;1300;210;40;120;PHYSICAL;1;2000;18;PHYSICAL:10;MELEE;6;0;0;0;#4a6a2a;humanoid;temperate;-;Ork z najazdu na wioski. Bije toporem, nie ucieka.
+orc_shaman;Orczy szaman;125;1300;1500;200;35;110;FIRE;4;2400;8;FIRE:20,ICE:-15;HEALER;7;0;120;0;#6a5a2a;humanoid;temperate;-;Leczy inne orki i ciska ogniem z daleka.
+orc_berserker;Ork berserker;150;2200;2300;240;60;170;PHYSICAL;1;1800;14;PHYSICAL:5;MELEE;7;0;0;0;#7a3a2a;humanoid;temperate;-;Szybki i wściekły, rzuca się na każdego.
+orc_warlord;Gruzhak, Orczy Wódz;220;9000;11000;220;90;260;PHYSICAL;1;2000;28;PHYSICAL:20,FIRE:10;TANK;7;0;0;0;#3a4a1a;humanoid;temperate;-;Wódz orczych band. Pilnuje łupów w kopalni i na kurhanie.

@@ -1450,6 +1450,19 @@ public final class Hud {
                 }
                 break;
             }
+            case KING: {
+                long bal = pc.bank().balance();
+                long prem = pl.fawizja.pixel.game.GameSession.PREMIUM_PRICE, promo = pl.fawizja.pixel.game.GameSession.PROMOTION_PRICE;
+                left.add(new MenuRow("npc:premium", pc.isPremium() ? "Konto premium: masz" : "Kup konto premium",
+                        pc.isPremium() ? "kapitanowie zabiorą cię na rejs" : String.format("%,d gp z banku - rejsy statkami między portami", prem),
+                        !pc.isPremium() && bal >= prem));
+                boolean canPromo = pc.isPremium() && !pc.isPromoted() && pc.level() >= pl.fawizja.pixel.game.GameSession.PROMOTION_LEVEL && bal >= promo;
+                left.add(new MenuRow("npc:promote", pc.isPromoted() ? "Promocja: " + pc.vocationTitle() : "Promocja: " + pc.vocation().promotedName(),
+                        pc.isPromoted() ? "znak promocji i szybsza regeneracja"
+                                : String.format("%,d gp z banku, wymaga premium - znak przy postaci, regeneracja +50%%", promo), canPromo));
+                left.add(new MenuRow("npc:none", String.format("Saldo: %,d gp", bal), "opłaty pobiera król z konta w banku", false));
+                break;
+            }
             case PRIEST: {
                 left.add(new MenuRow("npc:heal", "Ulecz mnie", "pełne zdrowie i mana", pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
                 boolean home = npc.town().equalsIgnoreCase(pc.homeTown());
@@ -1467,8 +1480,10 @@ public final class Hud {
                 long gold = session.gold();
                 String verb = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN ? "Płyń: " : "Jedź do ";
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
+                    boolean locked = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN && !pc.isPremium();
                     left.add(new MenuRow("npc:travel:" + r.to().town(), verb + r.to().town(),
-                            String.format("%,d gp", r.price()) + (gold < r.price() ? " - za mało monet w plecaku" : ""), gold >= r.price()));
+                            String.format("%,d gp", r.price()) + (locked ? " - tylko z kontem premium (król w Varden)"
+                                    : gold < r.price() ? " - za mało monet w plecaku" : ""), !locked && gold >= r.price()));
                 }
                 break;
             }
@@ -2251,7 +2266,9 @@ public final class Hud {
         RUNNING("Bieg: szybszy ruch", new Color(0.2f, 0.4f, 0.7f, 1f)),
         HASTE("Przyspieszenie: szybkość zwiększona przez czar", new Color(0.15f, 0.55f, 0.6f, 1f)),
         LIGHT("Światło: pochodnia albo czar", new Color(0.7f, 0.6f, 0.15f, 1f)),
-        ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f));
+        ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f)),
+        PREMIUM("Konto premium: rejsy statkami między portami", new Color(0.55f, 0.2f, 0.45f, 1f)),
+        PROMOTED("Promocja od króla: szybsza regeneracja", new Color(0.62f, 0.48f, 0.08f, 1f));
 
         final String desc;
         final Color color;
@@ -2273,6 +2290,8 @@ public final class Hud {
         if (nowMs < session.protectionZoneLockedUntil()) statuses.add(Status.BATTLE);
         statuses.add(pc.fedMs() > 0 ? Status.FED : Status.HUNGRY);
         if (pc.isBlessed()) statuses.add(Status.BLESSED);
+        if (pc.isPremium()) statuses.add(Status.PREMIUM);
+        if (pc.isPromoted()) statuses.add(Status.PROMOTED);
         if (pc.isRunning()) statuses.add(Status.RUNNING);
         if (pc.hasteMs() > 0) statuses.add(Status.HASTE);
         if (pc.isTorchLit() || pc.lightBuffMs() > 0) statuses.add(Status.LIGHT);
@@ -2329,10 +2348,33 @@ public final class Hud {
                     s.triangle(cx - 3, cy - 3, cx + 3, cy - 3, cx, cy + 5);
                     s.circle(cx, cy - 3, 3, 10);
                     break;
+                case PREMIUM: // korona
+                    s.rect(cx - 5, cy - 4, 10, 3);
+                    s.triangle(cx - 5, cy - 1, cx - 2, cy - 1, cx - 5, cy + 4);
+                    s.triangle(cx - 2, cy - 1, cx + 2, cy - 1, cx, cy + 5);
+                    s.triangle(cx + 2, cy - 1, cx + 5, cy - 1, cx + 5, cy + 4);
+                    break;
+                case PROMOTED: // gwiazda promocji
+                    star(s, cx, cy, 6f);
+                    break;
                 default: // blysk zaklecia
                     s.rectLine(cx - 4, cy - 5, cx + 1, cy + 1, 1.6f);
                     s.rectLine(cx - 1, cy - 1, cx + 4, cy + 5, 1.6f);
             }
+        }
+    }
+
+    /** Piecioramienna gwiazda (znak promocji) z trojkatow: srodek i piec ramion. */
+    public static void star(ShapeRenderer s, float cx, float cy, float r) {
+        float inner = r * 0.42f;
+        for (int k = 0; k < 5; k++) {
+            double a = Math.PI / 2 + k * 2 * Math.PI / 5;
+            double l = a + Math.PI / 5, rr = a - Math.PI / 5;
+            float tx = cx + (float) Math.cos(a) * r, ty = cy + (float) Math.sin(a) * r;
+            float lx = cx + (float) Math.cos(l) * inner, ly = cy + (float) Math.sin(l) * inner;
+            float rx = cx + (float) Math.cos(rr) * inner, ry = cy + (float) Math.sin(rr) * inner;
+            s.triangle(tx, ty, lx, ly, rx, ry);
+            s.triangle(cx, cy, lx, ly, rx, ry);
         }
     }
 

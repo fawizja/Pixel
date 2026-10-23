@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Generator swiata gry: 4 miasta w pasach biomow (polnoc -> poludnie):
+"""Stary uklad swiata (do 2026-10-22): 4 miasta w pasach biomow (polnoc -> poludnie):
 
     Frostholm (snieg)  ->  Varden (umiarkowany)  ->  Selvaran (rownik)  ->  Qasirah (pustynia)
 
-Uruchom z katalogu repozytorium PO generate_varden.py:
-    python3 tools/mapgen/generate_world.py
-Region Varden jest kopiowany 1:1 z maps/varden (przesuniety o VARDEN_OFFSET), wiec mapa Varden
-uzywana w testach i ten fragment swiata sa identyczne. Wynik: shared/src/main/resources/maps/world/.
-Generator jest deterministyczny (stale ziarno).
+Od 2026-10-23 to etap posredni: generate_continent.py uruchamia ten generator do katalogu roboczego
+(tools/mapgen/build/legacy) i przenosi z niego miasta, wyspy, lochy i pietra na nowy kontynent.
+NPC starego ukladu (wspolrzedne sprzed przeniesienia) sa w tools/mapgen/legacy/npcs.csv.
+Region Varden jest kopiowany 1:1 z maps/varden (przesuniety o VARDEN_OFFSET). Generator jest deterministyczny.
 """
 import math
 import os
@@ -25,7 +24,8 @@ import dressing  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 VARDEN = os.path.join(ROOT, 'varden')
-OUT = os.path.join(ROOT, 'world')
+OUT = os.environ.get('MAPGEN_LEGACY_OUT', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build', 'legacy'))
+LEGACY_NPCS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'legacy', 'npcs.csv')
 
 W, H = 352, 320          # etap 4: morze i wyspy na wschodzie i poludniu (world_geo.py)
 OLD_EAST_W, OLD_H = 256, 232   # stary swiat (losowanie terenu jak przed rozszerzeniem mapy)
@@ -796,6 +796,8 @@ def selvaran(floors, transitions):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    import shutil
+    shutil.copyfile(LEGACY_NPCS, os.path.join(OUT, 'npcs.csv'))
     floors = {z: grid() for z in FLOORS}
     g = surface()
     floors[0] = g

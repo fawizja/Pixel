@@ -156,7 +156,7 @@ class NetworkSyncTest {
             b.hello("Finn", "MONK", "tajne-Finn");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
             // obaj teleportowani (na serwerze) do pola z wilkami: widza te same potwory o tych samych id
-            Position field = new Position(58, 75, 0);
+            Position field = new Position(149, 351, 0);
             server.enqueueTest(() -> {
                 for (ServerPlayer p : server.world().players()) p.session.teleport(field, server.now());
             });
@@ -191,7 +191,7 @@ class NetworkSyncTest {
                     .anyMatch(g -> g.itemId() == itemId));
 
             // walka obok zywego wilka: zdarzenia walki (EV) docieraja do klienta
-            Position field = new Position(58, 75, 0);
+            Position field = new Position(149, 351, 0);
             server.enqueueTest(() -> {
                 ServerWorld w = server.world();
                 Position spot = field;
@@ -250,7 +250,7 @@ class NetworkSyncTest {
                 while ((m = a.poll()) != null) if (m[0].equals("LOG") && m[2].contains("poziomu")) return true;
                 return false;
             });
-            Position field = new Position(58, 75, 0);
+            Position field = new Position(149, 351, 0);
             server.enqueueTest(() -> {
                 int i = 0;
                 for (ServerPlayer p : server.world().players()) {
@@ -302,7 +302,7 @@ class NetworkSyncTest {
             awaitMessage(a, "too small", m -> m[0].equals("LOG") && m[2].contains("Najmniejsza nagroda"));
             a.send("BOUNTY", "Ivo", "5000");
             awaitMessage(a, "own head", m -> m[0].equals("LOG") && m[2].contains("własną głowę"));
-            Position field = new Position(58, 75, 0);
+            Position field = new Position(149, 351, 0);
             java.util.concurrent.atomic.AtomicBoolean ready = new java.util.concurrent.atomic.AtomicBoolean();
             server.enqueueTest(() -> {
                 int i = 0;
@@ -397,7 +397,7 @@ class NetworkSyncTest {
             b.hello("Piotr", "MONK", "tajne-Piotr");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
             int piotrId = b.playerId();
-            Position field = new Position(58, 75, 0);
+            Position field = new Position(149, 351, 0);
             server.enqueueTest(() -> {
                 // po imieniu - kolejnosc graczy na serwerze nie jest stala
                 for (ServerPlayer p : server.world().players()) {
@@ -946,7 +946,7 @@ class NetworkSyncTest {
 
     @Test
     void buyOrdersLockGoldAndDeliverItemsToTheBuyersDepot() throws Exception {
-        Position banker = new Position(70, 78, 0);
+        Position banker = new Position(161, 354, 0);
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient ola = connect();
              NetClient ula = connect()) {
@@ -1014,7 +1014,7 @@ class NetworkSyncTest {
             }
             return pl.fawizja.pixel.market.MarketView.parse(got[0]);
         };
-        Position banker = new Position(70, 78, 0);
+        Position banker = new Position(161, 354, 0);
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient ula = connect()) {
             ula.hello("Ula", "DRUID", "tajne-Ula");
@@ -1199,7 +1199,7 @@ class NetworkSyncTest {
             await("ula sees the gold outfit", () -> seen(ula, "Ola") != null && seen(ula, "Ola").outfit() == 7);
             server.enqueueTest(() -> {
                 pl.fawizja.pixel.character.PlayerCharacter pc = server.world().find("Ola").session.character();
-                server.world().find("Ola").session.teleport(new pl.fawizja.pixel.world.Position(58, 72, 0), server.now());
+                server.world().find("Ola").session.teleport(new pl.fawizja.pixel.world.Position(149, 348, 0), server.now());
                 pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(ItemRegistry.loadDefault().byKey("challenge_scroll").id(), 1));
                 int slot = -1;
                 for (int i = 0; i < pc.backpack().size(); i++) {
@@ -1359,7 +1359,7 @@ class NetworkSyncTest {
             await("welcome", () -> kuba.selfSave() != null);
         }
         await("kuba left", () -> server.world().find("Kuba") == null);
-        Position banker = new Position(70, 78, 0);
+        Position banker = new Position(161, 354, 0);
         try (NetClient ola = connect();
              NetClient ula = connect()) {
             ola.hello("Ola", "PALADIN", "tajne-Ola");
@@ -1414,7 +1414,7 @@ class NetworkSyncTest {
             await("welcome", () -> kuba.selfSave() != null);
         }
         await("kuba left", () -> server.world().find("Kuba") == null);
-        Position banker = new Position(70, 78, 0);
+        Position banker = new Position(161, 354, 0);
         try (NetClient ola = connect();
              NetClient ula = connect()) {
             ola.hello("Ola", "PALADIN", "tajne-Ola");

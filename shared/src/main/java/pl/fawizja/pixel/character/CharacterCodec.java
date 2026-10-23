@@ -20,7 +20,7 @@ import pl.fawizja.pixel.world.WorldLayout;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 3;
+    public static final int CURRENT_VERSION = 4;
 
     private final ItemRegistry items;
 
@@ -66,6 +66,8 @@ public final class CharacterCodec {
         if (!pc.hunt().encode().isEmpty()) m.put("hunt", pc.hunt().encode());
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
         if (pc.isBlessed()) m.put("bless", "1");
+        if (pc.isPremium()) m.put("premium", "1");
+        if (pc.isPromoted()) m.put("promo", "1");
         m.put("lvlrew", String.valueOf(pc.rewardedLevel()));
         m.put("stats", pc.stats().encode());
         if (pc.weeklyBossWeek() >= 0) m.put("wboss", String.valueOf(pc.weeklyBossWeek()));
@@ -136,7 +138,8 @@ public final class CharacterCodec {
 
     /**
      * Migracje formatu: v1 zapisywal pozycje bez pietra i saldo pod kluczem "gold.bank";
-     * v1 i v2 zapisywaly pozycje na mapie Varden - w v3 to wspolrzedne swiata (przesuniecie regionu Varden).
+     * v1 i v2 zapisywaly pozycje na mapie Varden - w v3 to wspolrzedne swiata (przesuniecie regionu Varden);
+     * v3 to swiat 352x320 - w v4 pozycje na kontynencie 448x448 ({@link WorldLayout#fromV3}).
      */
     static void migrate(int version, Map<String, String> m) {
         if (version < 2) {
@@ -148,10 +151,20 @@ public final class CharacterCodec {
         if (version < 3) {
             String[] pos = m.getOrDefault("position", "").split(",");
             if (pos.length == 3) {
-                m.put("position", (Integer.parseInt(pos[0].trim()) + WorldLayout.VARDEN_OFFSET_X) + ","
-                        + (Integer.parseInt(pos[1].trim()) + WorldLayout.VARDEN_OFFSET_Y) + "," + pos[2].trim());
+                m.put("position", (Integer.parseInt(pos[0].trim()) + WorldLayout.V3_VARDEN_OFFSET_X) + ","
+                        + (Integer.parseInt(pos[1].trim()) + WorldLayout.V3_VARDEN_OFFSET_Y) + "," + pos[2].trim());
             }
             m.put("map", WorldLayout.WORLD_MAP);
+        }
+        if (version < 4) {
+            // v4: kontynent 448x448 - miasta i wyspy przeniesione w calosci, reszta swiata jest nowa
+            String[] pos = m.getOrDefault("position", "").split(",");
+            if (pos.length == 3) {
+                pl.fawizja.pixel.world.Position p = WorldLayout.fromV3(Integer.parseInt(pos[0].trim()),
+                        Integer.parseInt(pos[1].trim()), Integer.parseInt(pos[2].trim()));
+                // poza przeniesionymi miejscami: pole spoza mapy, sesja postawi postac w swiatyni Varden
+                m.put("position", p == null ? "-1,-1,0" : p.x() + "," + p.y() + "," + p.z());
+            }
         }
     }
 
@@ -221,6 +234,8 @@ public final class CharacterCodec {
         pc.hunt().restore(m.get("hunt"));
         pc.loginStreak().restore(m.get("login"));
         pc.setBlessed("1".equals(m.get("bless")));
+        pc.setPremium("1".equals(m.get("premium")));
+        pc.setPromoted("1".equals(m.get("promo")));
         if (m.containsKey("lvlrew")) pc.setRewardedLevel(Integer.parseInt(m.get("lvlrew")));
         pc.stats().restore(m.get("stats"));
         if (m.containsKey("wboss")) pc.setWeeklyBossWeek(Long.parseLong(m.get("wboss")));

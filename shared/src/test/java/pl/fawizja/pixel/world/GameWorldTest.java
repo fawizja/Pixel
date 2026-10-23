@@ -116,38 +116,32 @@ class GameWorldTest {
     }
 
     @Test
-    void theBridgeGuardKeepsNewCharactersOutOfTheEndgame() {
-        for (int level : new int[] {8, 120, 199}) {
-            for (Position p : explore(world.spawn(), level)) {
-                assertTrue(p.x() < 160, "level " + level + " reached the east continent at " + p);
-            }
-        }
-        assertTrue(explore(world.spawn(), 200).stream().anyMatch(p -> p.x() >= 168), "level 200 may cross");
-        java.util.Set<Position> walkable = explore(world.spawn(), 199);
-        for (Region r : world.regions()) {
-            // endgame: za mostem albo na wyspach i morzu (tylko statkiem)
-            if (r.levelMin() >= 230) {
-                assertTrue(r.x0() >= 168 || walkable.stream().noneMatch(p -> r.contains(p)),
-                        r.name() + " lies behind the bridge or across the sea");
-            }
-        }
+    void levelGatesKeepWeakerCharactersOut() {
+        // straznik Gniazda Wiwern: od poziomu 250 (pozostale krainy kontynentu sa otwarte - start od poziomu 300)
+        Position gate = new Position(167, 186, 0);
+        assertEquals(250, world.requiredLevelAt(gate));
+        assertFalse(explore(world.spawn(), 249).contains(gate), "level 249 passed the wyvern gate");
+        assertTrue(explore(world.spawn(), 250).contains(gate), "level 250 may enter");
     }
 
     @Test
-    void biomesRunFromSnowToDesert() {
-        String[] expected = {"north", "temperate", "equatorial", "desert"};
-        int[][] bands = {{4, 56}, {66, 110}, {116, 166}, {178, 228}};
+    void biomesFollowTheContinentSketch() {
+        // szkic Darka: snieg i lod na polnocnym zachodzie, dzungla na polnocnym wschodzie, pustynia w srodku,
+        // lasy i doliny na poludniu (woda nie liczy sie do zadnej krainy)
+        String[] expected = {"north", "equatorial", "desert", "temperate"};
+        int[][] boxes = {{20, 20, 120, 150}, {320, 60, 420, 200}, {200, 230, 250, 275}, {120, 300, 300, 420}};
         FloorMap surface = world.floor(0);
-        for (int b = 0; b < bands.length; b++) {
+        int water = world.tiles().byKey("water").id();
+        for (int b = 0; b < boxes.length; b++) {
             java.util.Map<String, Integer> counts = new java.util.HashMap<>();
-            for (int y = bands[b][0]; y <= bands[b][1]; y++) {
-                for (int x = 2; x < world.width() - 2; x++) {
+            for (int y = boxes[b][1]; y <= boxes[b][3]; y++) {
+                for (int x = boxes[b][0]; x <= boxes[b][2]; x++) {
                     int id = surface.get(Layer.GROUND, x, y);
-                    if (id != 0) counts.merge(world.tiles().get(id).biome(), 1, Integer::sum);
+                    if (id != 0 && id != water) counts.merge(world.tiles().get(id).biome(), 1, Integer::sum);
                 }
             }
             String top = counts.entrySet().stream().max(java.util.Map.Entry.comparingByValue()).orElseThrow().getKey();
-            assertEquals(expected[b], top, "band " + b + " " + counts);
+            assertEquals(expected[b], top, "box " + b + " " + counts);
         }
     }
 
@@ -233,13 +227,16 @@ class GameWorldTest {
         Object[][] dungeons = {{"Wyspa Piratow", -3}, {"Wyspa Wulkaniczna", -4}, {"Lodowa Wyspa", -3}, {"Wyspa Mgiel", -3},
                 {"Gniazdo Wiwern", -2}};
         for (Object[] d : dungeons) {
-            Region r = world.regions().stream().filter(x -> x.name().equals(d[0])).findFirst().orElseThrow();
+            // na kontynencie wyspa i jej podziemia leza w roznych miejscach - region o tej nazwie ma kilka czesci
+            List<Region> rs = world.regions().stream().filter(x -> x.name().equals(d[0])).toList();
+            assertFalse(rs.isEmpty(), "region " + d[0]);
+            java.util.function.Predicate<Position> in = p -> rs.stream().anyMatch(r -> r.contains(p));
             int deepest = (int) d[1];
             for (int z = -1; z >= deepest; z--) {
                 int fz = z;
-                assertTrue(reachable.stream().anyMatch(p -> p.z() == fz && r.contains(p)), d[0] + " floor " + z);
+                assertTrue(reachable.stream().anyMatch(p -> p.z() == fz && in.test(p)), d[0] + " floor " + z);
             }
-            assertTrue(spawns.stream().anyMatch(sp -> sp.center().z() == deepest && r.contains(sp.center())), d[0] + " deepest floor has monsters");
+            assertTrue(spawns.stream().anyMatch(sp -> sp.center().z() == deepest && in.test(sp.center())), d[0] + " deepest floor has monsters");
         }
         // miedzy glebszymi pietrami takze dziura i drabina (nie tylko schody)
         long holes = world.floors().values().stream().flatMap(f -> f.transitions().values().stream())

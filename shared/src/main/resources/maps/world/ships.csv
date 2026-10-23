@@ -1,4 +1,4 @@
-# rejsy statkiem w obie strony: kapitan;kapitan (ports.py; kapitanowie w npcs.csv)
+# rejsy statkiem w obie strony: kapitan;kapitan (kapitanowie w npcs.csv)
 selv_captain;qas_captain
 selv_captain;east_captain
 selv_captain;coral_captain
@@ -9,3 +9,12 @@ qas_captain;coral_captain
 east_captain;mist_captain
 east_captain;ice_captain
 east_captain;volcano_captain
+varden_captain;selv_captain
+varden_captain;qas_captain
+varden_captain;pirate_captain
+varden_captain;coral_captain
+varden_captain;east_captain
+gull_ferryman;qas_captain
+gull_ferryman;varden_captain
+lighthouse_ferryman;qas_captain
+lighthouse_ferryman;varden_captain

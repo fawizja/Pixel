@@ -304,8 +304,11 @@ def town(c, r):
         for y in range(11, 19):
             c.set(x, y, deco='rug')
         c.obj(x, 10, 'altar')
-    for (x, y) in ((28, 13), (35, 13), (28, 18), (35, 18), (30, 11), (33, 11)):
+    for (x, y) in ((28, 13), (35, 13), (28, 18), (35, 18)):
         c.obj(x, y, 'wall_torch')
+    # swiece przy oltarzu i pod scianami naw (2026-10-23)
+    for (x, y) in ((30, 11), (33, 11), (28, 15), (35, 15), (29, 18), (34, 18)):
+        c.obj(x, y, 'candle')
     c.obj(30, 10, 'banner')
     c.obj(33, 10, 'banner')
     c.obj(35, 16, 'potted_plant')

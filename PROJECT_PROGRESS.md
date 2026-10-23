@@ -346,6 +346,32 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   pozostaja proste; Frostholm, Selvaran i Qasirah maja dalej prostokatne obrysy (dopracowane wnetrzami
   i wyposazeniem, nie przebudowane); brak animowanej wody i nowych animacji postaci.
 
+## Kontynent ze szkicu Darka (brief z 2026-10-23, 06:53)
+- Mapa (tools/mapgen/generate_continent.py, continent.py, features.py): swiat 448x448 o ksztalcie ze szkicu.
+  Stary swiat 352x320 powstaje jako etap posredni (generate_world.py -> tools/mapgen/build/legacy) i jego
+  miasta, wyspy i wejscia do lochow sa przenoszone w calosci (klocki BLOCKS); Varden pole w pole z maps/varden.
+  Snieg i lod na polnocnym zachodzie (Frostholm), Qasirah na wzgorzach w srodku z pustynia, Selvaran w dzungli
+  na polnocnym wschodzie, lasy i doliny na poludniu (Varden). Pasma gorskie z przeleczami, rzeki z delta,
+  jeziora, 5 nowych wysp, drogi miedzy miastami, mosty i kladki nad rzekami, most wiszacy nad rozpadlina.
+- Wulkan: stozek z potokami lawy, polka i krater z lawa (pietra +1/+2, boss Ignaroth), Wnetrze Wulkanu
+  (3 pietra pod ziemia, zywiolaki ognia, golemy lawy, smoki magmy).
+- 12 wiosek: 2 zywe (kupcy), 2 opuszczone, 8 zajetych przez potwory (orki x3 z wodzem Gruzhakiem, gobliny,
+  bandyci, nieumarli, trolle, lowcy z krokodylami); 5 jaskin z potworami w gorach; 6 malych przystani.
+- Porty: duze statki z kapitanem na pokladzie (Varden, Qasirah, Przystan Wschodnia); przewoznicy na Mewiej
+  Skale i Latarni. Rejsy statkiem tylko z kontem premium.
+- Krol Aurelian w sali tronowej Varden: konto premium (500 000 gp z banku) i promocja (1 000 000 gp, premium,
+  od poziomu 20): nazwa profesji jak w Tibii, zlota gwiazda nad postacia i ikona stanu, regeneracja +50%.
+  Zapis v4 przechowuje premium i promocje; zapisy v3 przenosza postac razem z miastem albo do swiatyni.
+- Straznicy (7, losowe imiona) przy bramach miast; swiece i czerwony chodnik w swiatyniach, swieczniki przy
+  tronie, 3 wiatraki (grafika 2x2 pola), wiecej drzew, krzewow i kwiatow w miastach.
+- Klient: slady stop na sniegu (gracz, inni gracze, potwory; znikaja po 40 s), towary kupcow na ladach obok
+  nich (zlota moneta = skupuje). Wlasne grafiki: swiecznik, chodnik, tron, ster, maszt, poklad, most wiszacy,
+  rozpadlina, ruiny muru, namiot orkow, wiatrak; orki z przebarwionych strojow OTSP, krol i straznicy OTSP.
+- Testy 472 OK (testy z wspolrzednymi starego swiata przepisane); regresja GUI: 50 wzorcow (6 nowych scen).
+- Znane ograniczenia: Qasirah juz mial dywan w swiatyni (dodane tylko swiece); 3 zamiast 4 wiatrakow (czwarte
+  miejsce kolidowalo z rdzeniem Varden); znak promocji widac nad wlasna postacia i w ikonach stanu, inni gracze
+  online go nie widza (protokol nie przesyla flagi); orki to przebarwione stroje (paczka OTSP nie ma orkow).
+
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

@@ -15,5 +15,9 @@ public enum NpcRole {
     /** Kapitan statku: rejsy do innych portow i na wyspy (trasy z maps/&lt;mapa&gt;/ships.csv, {@link Travel}). */
     CAPTAIN,
     /** Zarzadca domow: lista domow miasta, kupno za zloto z banku i oddanie domu. */
-    HOUSING
+    HOUSING,
+    /** Krol w zamku Varden: konto premium (rejsy statkami) i promocja profesji. */
+    KING,
+    /** Straznik przy bramie miasta: tylko rozmowa (wskazowki), stoi w strefie ochronnej. */
+    GUARD
 }

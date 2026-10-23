@@ -85,6 +85,17 @@ public enum Vocation {
     }
 
     public String displayName() { return displayName; }
+
+    /** Nazwa po promocji u krola (jak w Tibii). */
+    public String promotedName() {
+        switch (this) {
+            case PALADIN: return "Royal Paladin";
+            case DRUID: return "Elder Druid";
+            case SORCERER: return "Master Sorcerer";
+            case MONK: return "Exalted Monk";
+            default: return "Elite " + displayName;
+        }
+    }
     public int hpPerLevel() { return hpPerLevel; }
     public int manaPerLevel() { return manaPerLevel; }
     public int capacityPerLevel() { return capacityPerLevel; }

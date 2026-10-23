@@ -38,3 +38,11 @@ isle_guide;zadanie,zlecenie,praca,quest,mission;Wybierz zlecenie z listy. Każde
 isle_guide;bossowie,boss,potwory;Matriarcha w Gnieździe Wiwern, Krwawobrody w Grocie Przemytników, Skaldra w Lodowych Grotach, Morvena w Krypcie Mgieł i Pyrrax w Sercu Wulkanu. Idźcie drużyną.
 isle_guide;koral,koralowy,coral;Koralowy ekwipunek z poziomu 350 noszą najlepsi marynarze. Dostaniesz go ode mnie za największe zlecenia albo z bossów.
 isle_merchant;skup,sprzedam,ceny,handel,trade;Kupię łuski wiwern, szczypce krabów, haki piratów, rogi z prochem, pierścienie topielców, esencje mgły i rogi smoków. Płacę od razu.
+# 2026-10-23: krol Aurelian (premium i promocja), straznicy bram, rejsy tylko z premium
+@KING;król,królestwo,king;Jestem Aurelian, władca Varden i całego kontynentu. Moi kapitanowie wożą tylko posiadaczy konta premium.
+@KING;zasady,cena,koszt;Konto premium kosztuje 500 000 gp, promocja 1 000 000 gp - oba z konta w banku. Promocję daję od poziomu 20 i tylko z premium. Napisz premium albo promocja.
+@KING;straż,strażnicy,guards;Moi strażnicy pilnują bram każdego miasta. W strefie ochronnej nic ci nie grozi.
+@GUARD;brama,miasto,droga,gate;Za bramą zaczynają się dzikie krainy. Trzymaj się drogi, póki nie poznasz okolicy.
+@GUARD;potwory,niebezpieczeństwo,orki,monsters;Orki spaliły kilka wiosek na zachodzie i południu. Na północnym wschodzie dymi wulkan - tam jest jeszcze gorzej.
+@GUARD;król,zamek,premium,promocja;Król Aurelian przyjmuje w sali tronowej zamku Varden. To u niego kupisz premium i promocję.
+@CAPTAIN;premium,konto;Wożę tylko posiadaczy konta premium. Kupisz je u króla Aureliana w zamku Varden.

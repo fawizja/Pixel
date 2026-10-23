@@ -48,6 +48,6 @@ class DayNightTest {
                 new java.util.Random(3));
         assertTrue(mm.maxMonsterLevelNear(world.spawn(), GameSession.DANGER_RADIUS) <= 15,
                 "Varden surface is calm although the north and the desert share floor 0");
-        assertTrue(mm.maxMonsterLevelNear(new pl.fawizja.pixel.world.Position(30, 44, -5), GameSession.DANGER_RADIUS) >= 150);
+        assertTrue(mm.maxMonsterLevelNear(new pl.fawizja.pixel.world.Position(134, 166, -5), GameSession.DANGER_RADIUS) >= 150);
     }
 }

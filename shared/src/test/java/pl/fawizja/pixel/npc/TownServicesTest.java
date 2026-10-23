@@ -139,8 +139,9 @@ class TownServicesTest {
     void everyTownHasAllServicesReachableFromVarden() {
         for (String town : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah"}) {
             for (NpcRole role : NpcRole.values()) {
-                // statki tylko w miastach nad morzem (Varden i Frostholm leza w glebi ladu)
-                if (role == NpcRole.CAPTAIN && (town.equals("Varden") || town.equals("Frostholm"))) continue;
+                // statki tylko w miastach nad morzem (Frostholm lezy w glebi ladu), krol tylko w stolicy
+                if (role == NpcRole.CAPTAIN && town.equals("Frostholm")) continue;
+                if (role == NpcRole.KING && !town.equals("Varden")) continue;
                 assertTrue(npcs.all().stream().anyMatch(n -> n.town().equals(town) && n.role() == role), town + " " + role);
             }
         }
@@ -313,8 +314,8 @@ class TownServicesTest {
     @Test
     void theDailyTaskCanBeChangedOnceADayForGold() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        GameSession s = session(pc, List.of(new SpawnPoint("wolf", new Position(58, 72, 0), 4, 5, 600),
-                new SpawnPoint("boar", new Position(60, 72, 0), 4, 5, 600)));
+        GameSession s = session(pc, List.of(new SpawnPoint("wolf", new Position(149, 348, 0), 4, 5, 600),
+                new SpawnPoint("boar", new Position(151, 348, 0), 4, 5, 600)));
         s.setToday(() -> 20_000L);
         long t = 1000;
         s.teleport(talkSpot(npcs.get("varden_guide")), t);
@@ -338,11 +339,12 @@ class TownServicesTest {
     @Test
     void theDailyTaskIsGivenOncePerDayCountsKillsAndPaysToTheBank() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        Position field = new Position(58, 72, 0);
+        Position field = new Position(149, 348, 0);
         GameSession s = session(pc, List.of(new SpawnPoint("wolf", field, 6, 40, 600)));
         long[] day = {20_000};
         s.setToday(() -> day[0]);
         long t = 1000;
+        s.teleport(field.translate(0, -8), 0); // daleko od NPC (swiatynia Varden ma przewodnika obok)
         s.dailyAction(t);
         assertFalse(pc.daily().activeOn(day[0]), "only at a guide");
         s.teleport(talkSpot(npcs.get("varden_guide")), t);
@@ -383,9 +385,10 @@ class TownServicesTest {
     @Test
     void huntingTasksRepeatCanBeDroppedAndPayOnReturn() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        Position field = new Position(58, 72, 0);
+        Position field = new Position(149, 348, 0);
         GameSession s = session(pc, List.of(new SpawnPoint("wolf", field, 8, 60, 600)));
         long t = 1000;
+        s.teleport(field.translate(0, -8), 0);
         assertTrue(Actions.apply(s, "npc:hunt", t));
         assertFalse(pc.hunt().active(), "only at a guide");
         s.teleport(talkSpot(npcs.get("varden_guide")), t);
@@ -453,7 +456,7 @@ class TownServicesTest {
     @Test
     void killQuestCountsKillsAndPaysOnce() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        Position field = new Position(58, 72, 0);
+        Position field = new Position(149, 348, 0);
         GameSession s = session(pc, List.of(new SpawnPoint("wolf", field, 3, 10, 600)));
         long t = 1000;
         Npc guide = npcs.get("varden_guide");

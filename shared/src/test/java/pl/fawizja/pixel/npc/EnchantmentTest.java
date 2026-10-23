@@ -52,7 +52,7 @@ class EnchantmentTest {
     void merchantSellsEnchantmentsThatLeechFromHits() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
         GameSession s = new TownServicesTest().session(pc,
-                List.of(new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(58, 72, 0), 0, 1, 600)));
+                List.of(new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(149, 348, 0), 0, 1, 600)));
         Npc merchant = TownServicesTest.npcs.get("varden_merchant");
         s.teleport(TownServicesTest.talkSpot(merchant), 1000);
         assertTrue(Money.add(pc.backpack(), 100_000).ok());

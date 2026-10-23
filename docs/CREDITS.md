@@ -11,7 +11,9 @@ Część grafik w `assets/art/` (podłoże, drzewa i kamienie, potwory, NPC, pos
   stroje ludzi pokolorowane maską kolorów, nazwane według listy `docs/GRAPHICS.md`. Mapowanie nazw jest w tym skrypcie.
 - To grafiki twórców społeczności, nie oryginalne grafiki Tibii (CipSoft).
 - Własne grafiki projektu (licencja projektu, nie OTSP): kowadło, palenisko kuźni, stragan, drogowskaz, bela siana,
-  łódka, sieci rybackie i skrzynka z kwiatami, rysowane skryptem `tools/art/draw_town_props.py`.
+  łódka, sieci rybackie, skrzynka z kwiatami, a od 2026-10-23 także świecznik, chodnik, tron, ster, maszt, pokład,
+  most wiszący, rozpadlina, ruiny muru, namiot orków i wiatrak - rysowane skryptem `tools/art/draw_town_props.py`.
+- Orki (2026-10-23) to przebarwione stroje OTSP (goblin, okultysta, jaszczuroczłek), król i strażnicy - stroje OTSP z maską kolorów.
 
 Autorzy paczki (plik AUTHORS.md paczki, bez zmian):
 

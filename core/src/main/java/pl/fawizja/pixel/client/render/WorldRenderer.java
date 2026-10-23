@@ -35,6 +35,9 @@ public final class WorldRenderer {
     private final Color tmp = new Color();
     /** Drzewa i palmy rysowane wieksze niz kafelek (wystaja ponad sasiednie pola). */
     private final boolean[] tall;
+    /** Wiatrak: grafika 64x64 rysowana na 2x2 pola nad swoim polem (jak duze obiekty w Tibii). */
+    private final int windmillId;
+    private static final float HUGE = 2.2f;
     /** Ozdoba na wierzchu skaly (glaz, zaspa) dla scian skalnych; 0 = brak. */
     private final int[] rockDetail;
     /** Drzwi lacza mury (mur obok drzwi nie konczy sie slupkiem). */
@@ -57,8 +60,10 @@ public final class WorldRenderer {
                     "marble_floor", "brick_paving").contains(t.key());
         }
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
-            tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree").contains(t.key());
+            tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree", "ship_mast").contains(t.key());
         }
+        pl.fawizja.pixel.world.TileType mill = world.tiles().byKeyOrNull("windmill");
+        windmillId = mill == null ? -1 : mill.id();
         // skaly gor i jaskin: na czesci pol glaz albo zaspa, zeby lita skala nie byla plaska plyta
         rockDetail = new int[max + 1];
         java.util.Map<String, String> detail = java.util.Map.of("mountain", "rock", "snow_mountain", "snow_rock",
@@ -176,7 +181,8 @@ public final class WorldRenderer {
         if (id == 0) return;
         TextureRegion r = art.tile(id, mx, my);
         if (r == null) return;
-        if (id < tall.length && tall[id]) batch.draw(r, x - (TALL - 1f) / 2f, wy, TALL, TALL);
+        if (id == windmillId) batch.draw(r, x - (HUGE - 1f) / 2f, wy, HUGE, HUGE);
+        else if (id < tall.length && tall[id]) batch.draw(r, x - (TALL - 1f) / 2f, wy, TALL, TALL);
         else batch.draw(r, x, wy, 1f, 1f);
     }
 

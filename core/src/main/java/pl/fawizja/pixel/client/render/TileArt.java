@@ -978,6 +978,19 @@ public final class TileArt implements Disposable {
                 rect(pm, ox, oy, 13, 3, 1, 10, Color.valueOf("#5a3a1a"));
                 px(pm, ox, oy, 14, 2, Color.valueOf("#5a3a1a"));
                 break;
+            case KING: // korona i gronostajowy kolnierz
+                rect(pm, ox, oy, 5, 0, 6, 1, Color.valueOf("#e8c040"));
+                px(pm, ox, oy, 5, 0, Color.valueOf("#f8e070"));
+                px(pm, ox, oy, 7, 0, Color.valueOf("#d83040"));
+                px(pm, ox, oy, 10, 0, Color.valueOf("#f8e070"));
+                rect(pm, ox, oy, 4, 6, 8, 1, Color.valueOf("#f0ece0"));
+                break;
+            case GUARD: // helm, napiersnik i halabarda
+                rect(pm, ox, oy, 5, 0, 6, 2, Color.valueOf("#9aa0a8"));
+                rect(pm, ox, oy, 5, 7, 6, 4, Color.valueOf("#8a9098"));
+                rect(pm, ox, oy, 13, 1, 1, 13, Color.valueOf("#6b4423"));
+                rect(pm, ox, oy, 12, 1, 3, 2, Color.valueOf("#c8ccd0"));
+                break;
             default: rect(pm, ox, oy, 4, 10, 8, 1, Color.valueOf("#e8d8b0")); break;
         }
     }

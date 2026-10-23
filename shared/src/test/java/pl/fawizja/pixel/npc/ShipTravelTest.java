@@ -18,7 +18,7 @@ import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
 import pl.fawizja.pixel.world.WorldMap;
 
-/** Statki: kapitanowie w portach i na wyspach, trasy z ships.csv w obie strony, rejs za monety z plecaka. */
+/** Statki: kapitanowie w portach i na wyspach, trasy z ships.csv w obie strony, rejs (z premium) za monety z plecaka. */
 class ShipTravelTest {
 
     static final WorldMap WORLD = TestData.world();
@@ -71,6 +71,12 @@ class ShipTravelTest {
         long price = Travel.price(selv.position(), coral.position());
         long before = Money.totalValue(pc.backpack());
         assertTrue(before >= price, "starter coins " + before);
+
+        // rejsy tylko z kontem premium (kupowanym u krola w Varden)
+        assertFalse(s.travel("Wyspa Koralowa", 500));
+        assertEquals(selv.position().translate(0, -1), pc.position());
+        assertTrue(s.log().latest(5).stream().anyMatch(e -> e.text().contains("premium")));
+        pc.setPremium(true);
 
         assertTrue(Actions.apply(s, "npc:travel:Wyspa Koralowa", 1000));
         assertTrue(pc.position().distanceTo(coral.position()) <= 1, "at the coral dock " + pc.position());

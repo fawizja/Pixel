@@ -218,6 +218,235 @@ PROPS = {
 }
 
 
+# ------------------------------------------------------------------ 2026-10-23: kontynent, swiatynie, statki, orki
+
+def candle():
+    """Swiecznik z trzema swiecami (swiatynie, sala tronowa)."""
+    img = canvas()
+    brass = (196, 156, 60)
+    ellipse(img, 16, 28, 6, 2, shade(brass, 0.8))
+    rect(img, 15, 18, 16, 27, brass)
+    rect(img, 9, 18, 22, 19, brass)
+    for x in (9, 15, 21):
+        rect(img, x, 10, x + 1, 17, (240, 232, 210))
+        px(img, x, 10, (255, 255, 255))
+        ellipse(img, x + 1, 7.5, 1.4, 2.4, (255, 190, 60))
+        px(img, x, 7, (255, 245, 180))
+    return outline(img)
+
+
+def carpet():
+    """Czerwony chodnik ze zlota lamowka - pelne pole, laczy sie z sasiednimi."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    red = (150, 30, 42)
+    rect(img, 3, 0, 28, 31, red)
+    rect(img, 3, 0, 4, 31, (210, 170, 70))
+    rect(img, 27, 0, 28, 31, (210, 170, 70))
+    for y in range(0, 32, 8):
+        for d in range(3):
+            px(img, 16 - d, y + 2 + d, (210, 170, 70))
+            px(img, 15 + d, y + 2 + d, (210, 170, 70))
+            px(img, 16 - d, y + 6 - d, (210, 170, 70))
+            px(img, 15 + d, y + 6 - d, (210, 170, 70))
+    for y in range(32):
+        for x in range(5, 27):
+            if (x * 7 + y * 3) % 11 == 0:
+                px(img, x, y, shade(red, 0.85))
+    return img
+
+
+def throne():
+    img = canvas()
+    gold = (214, 170, 60)
+    velvet = (140, 30, 50)
+    rect(img, 8, 3, 23, 22, gold)
+    rect(img, 10, 5, 21, 20, velvet)
+    for x in (8, 15, 23):
+        ellipse(img, x, 3, 1.6, 1.6, (250, 220, 110))
+    rect(img, 6, 18, 25, 23, gold)
+    rect(img, 8, 19, 23, 22, shade(velvet, 1.15))
+    rect(img, 6, 24, 8, 29, shade(gold, 0.8))
+    rect(img, 23, 24, 25, 29, shade(gold, 0.8))
+    rect(img, 9, 24, 22, 25, shade(gold, 0.7))
+    px(img, 15, 10, (90, 190, 230))
+    return outline(img)
+
+
+def ship_wheel():
+    img = canvas()
+    wood = (122, 80, 44)
+    for k in range(8):
+        import math
+        a = k * math.pi / 4
+        for r in range(2, 13):
+            px(img, int(16 + math.cos(a) * r), int(15 + math.sin(a) * r), wood)
+        ellipse(img, 16 + math.cos(a) * 13, 15 + math.sin(a) * 13, 1.3, 1.3, shade(wood, 1.2))
+    for k in range(64):
+        a = k * math.pi / 32
+        px(img, int(16.5 + math.cos(a) * 9), int(15.5 + math.sin(a) * 9), shade(wood, 1.15))
+    ellipse(img, 16, 15, 2.5, 2.5, (190, 150, 70))
+    rect(img, 14, 27, 18, 30, shade(wood, 0.8))
+    return outline(img)
+
+
+def ship_mast():
+    """Maszt ze zwinietym zaglem i reja (64x64, rysowany wyzej jak drzewo)."""
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    wood = (112, 74, 40)
+    for y in range(4, 62):
+        for x in range(30, 34):
+            img.putpixel((x, y), shade(wood, 1.25 if x == 30 else 1.0 if x < 33 else 0.75))
+    for y in (14, 30):
+        for x in range(10, 54):
+            img.putpixel((x, y), shade(wood, 1.1))
+            img.putpixel((x, y + 1), shade(wood, 0.8))
+        for x in range(12, 52):
+            for yy in range(y + 2, y + 5):
+                if (x + yy) % 5:
+                    img.putpixel((x, yy), (226, 214, 186, 255))
+                else:
+                    img.putpixel((x, yy), (196, 182, 150, 255))
+    for x in range(26, 38):
+        img.putpixel((x, 4), (60, 40, 24, 255))
+    for x in range(34, 44):
+        for y in range(5, 10):
+            img.putpixel((x, y), (170, 40, 40, 255) if y < 8 else (220, 200, 90, 255))
+    return img
+
+
+def ship_deck():
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 255))
+    base = (150, 104, 58)
+    for y in range(32):
+        board = y // 6
+        c = shade(base, 0.92 + 0.08 * (board % 3))
+        for x in range(32):
+            img.putpixel((x, y), c)
+        if y % 6 == 5:
+            for x in range(32):
+                img.putpixel((x, y), shade(base, 0.6))
+    for board in range(6):
+        x = (board * 11) % 32
+        for y in range(board * 6, board * 6 + 5):
+            if y < 32:
+                img.putpixel((x, y), shade(base, 0.65))
+    return img
+
+
+def rope_bridge():
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    plank = (140, 100, 56)
+    for x in range(0, 32, 5):
+        rect(img, x, 6, x + 3, 25, plank)
+        px(img, x, 6, shade(plank, 1.3))
+        rect(img, x + 3, 6, x + 3, 25, shade(plank, 0.7))
+    rect(img, 0, 4, 31, 5, (196, 170, 112))
+    rect(img, 0, 26, 31, 27, (196, 170, 112))
+    for x in range(1, 32, 5):
+        px(img, x, 3, (170, 140, 90))
+        px(img, x, 28, (170, 140, 90))
+    return img
+
+
+def chasm():
+    img = Image.new("RGBA", (32, 32), (16, 13, 12, 255))
+    for y in range(32):
+        for x in range(32):
+            v = 14 + ((x * 13 + y * 7) % 9) - y // 6
+            img.putpixel((x, y), (max(4, v), max(3, v - 2), max(3, v - 3), 255))
+    for x in range(32):
+        for y in range(0, 4 - (x % 3 == 0)):
+            img.putpixel((x, y), (70, 64, 58, 255))
+    return img
+
+
+def broken_wall():
+    img = canvas()
+    stone = (118, 112, 104)
+    heights = [14, 18, 9, 20, 12, 7, 16]
+    for k, h in enumerate(heights):
+        x0 = 2 + k * 4
+        rect(img, x0, 28 - h, x0 + 3, 28, shade(stone, 1.0 + 0.08 * (k % 2)))
+        px(img, x0, 28 - h, shade(stone, 1.3))
+    for y in range(12, 29, 4):
+        rect(img, 2, y, 29, y, shade(stone, 0.7))
+    for (x, y) in ((5, 29), (13, 30), (22, 29), (27, 30)):
+        ellipse(img, x, y, 2, 1.2, shade(stone, 0.9))
+    return outline(img)
+
+
+def orc_tent():
+    """Namiot orkow z wyprawionych skor, z kosciami na szczycie."""
+    img = canvas()
+    hide = (138, 112, 66)
+    for y in range(6, 29):
+        half = int((y - 6) * 0.62) + 1
+        rect(img, 16 - half, y, 15 + half, y, shade(hide, 0.9 + 0.2 * ((y // 4) % 2)))
+    for y in range(16, 29):
+        half = int((y - 16) * 0.35)
+        rect(img, 16 - half, y, 15 + half, y, (40, 28, 20))
+    for y in range(6, 29, 5):
+        px(img, 16 - int((y - 6) * 0.62) - 1, y, (90, 60, 40))
+        px(img, 16 + int((y - 6) * 0.62), y, (90, 60, 40))
+    rect(img, 15, 2, 16, 6, (110, 80, 50))
+    rect(img, 12, 3, 19, 3, (230, 222, 200))
+    px(img, 12, 2, (230, 222, 200))
+    px(img, 19, 2, (230, 222, 200))
+    return outline(img)
+
+
+def windmill():
+    """Wiatrak 64x64 (rysowany wiekszy niz pole): kamienna wieza, dach i cztery skrzydla."""
+    import math
+    img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    stone = (214, 204, 182)
+    for y in range(26, 64):
+        half = 9 + (y - 26) // 6
+        for x in range(32 - half, 32 + half):
+            f = 1.15 if x < 32 - half + 3 else 0.8 if x > 32 + half - 4 else 1.0
+            if (y % 6 == 0) or ((x + (y // 6) * 3) % 8 == 0):
+                f *= 0.85
+            img.putpixel((x, y), shade(stone, f))
+    for y in range(52, 64):
+        for x in range(29, 35):
+            img.putpixel((x, y), (70, 48, 30, 255))
+    for y in range(36, 41):
+        for x in range(36, 40):
+            img.putpixel((x, y), (60, 70, 90, 255))
+    roof = (150, 60, 40)
+    for y in range(14, 27):
+        half = (y - 14) + 2
+        for x in range(32 - half, 32 + half):
+            img.putpixel((x, y), shade(roof, 1.15 if x < 32 else 0.85))
+    hub = (32, 22)
+    for k in range(4):
+        a = math.pi / 4 + k * math.pi / 2
+        for r in range(2, 27):
+            cx, cy = hub[0] + math.cos(a) * r, hub[1] + math.sin(a) * r
+            for w in (-1, 0, 1):
+                x = int(cx - math.sin(a) * w)
+                y = int(cy + math.cos(a) * w)
+                if 0 <= x < 64 and 0 <= y < 64:
+                    img.putpixel((x, y), (92, 64, 38, 255))
+            if r > 6:
+                for w in range(2, 6):
+                    x = int(cx - math.sin(a) * w)
+                    y = int(cy + math.cos(a) * w)
+                    if 0 <= x < 64 and 0 <= y < 64:
+                        img.putpixel((x, y), (232, 226, 210, 255) if (r + w) % 3 else (180, 160, 120, 255))
+    for y in range(20, 25):
+        for x in range(30, 35):
+            img.putpixel((x, y), (60, 40, 24, 255))
+    return img
+
+
+PROPS.update({
+    "candle": candle, "carpet": carpet, "throne": throne, "ship_wheel": ship_wheel, "ship_mast": ship_mast,
+    "ship_deck": ship_deck, "rope_bridge": rope_bridge, "chasm": chasm, "broken_wall": broken_wall,
+    "orc_tent": orc_tent, "windmill": windmill,
+})
+
+
 def main(art):
     os.makedirs(os.path.join(art, "tiles"), exist_ok=True)
     for name, fn in PROPS.items():

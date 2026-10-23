@@ -944,6 +944,10 @@ public final class GameSession {
             return false;
         }
         boolean ship = n.role() == NpcRole.CAPTAIN;
+        if (ship && !pc.isPremium()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": rejsy tylko dla kont premium. Premium kupisz u króla w zamku Varden.");
+            return false;
+        }
         pl.fawizja.pixel.npc.Travel.Route route = null;
         for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(npcs, n)) {
             if (r.to().town().equalsIgnoreCase(town)) route = r;
@@ -981,6 +985,56 @@ public final class GameSession {
         teleport(dest, nowMs);
         log.add(nowMs, EventLog.Kind.SYSTEM, (ship ? "Po rejsie (" : "Po podróży (") + route.price() + " gp) jesteś: "
                 + route.to().town() + ".");
+        return true;
+    }
+
+    /** Cena konta premium i promocji u krola (z konta w banku). */
+    public static final long PREMIUM_PRICE = 500_000, PROMOTION_PRICE = 1_000_000;
+    /** Promocja od tego poziomu (jak w Tibii od 20). */
+    public static final int PROMOTION_LEVEL = 20;
+    private static final java.util.Set<String> PREMIUM_WORDS = java.util.Set.of("premium", "konto premium");
+    private static final java.util.Set<String> PROMOTION_WORDS = java.util.Set.of("promocja", "promocję", "promocje", "promotion", "promote");
+
+    /** Krol: konto premium za zloto z banku - rejsy duzymi statkami miedzy portami. */
+    public boolean buyPremium(long nowMs) {
+        Npc n = talkTo(NpcRole.KING, nowMs);
+        if (n == null) return false;
+        if (pc.isPremium()) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": masz już konto premium.");
+            return false;
+        }
+        if (!pc.bank().debit(PREMIUM_PRICE).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(": konto premium kosztuje %,d gp z banku.", PREMIUM_PRICE));
+            return false;
+        }
+        pc.setPremium(true);
+        log.add(nowMs, EventLog.Kind.SYSTEM, n.name() + String.format(": od dziś masz konto premium (%,d gp z banku). Kapitanowie zabiorą cię na rejs.", PREMIUM_PRICE));
+        return true;
+    }
+
+    /** Krol: promocja profesji (premium, poziom 20+) - znak przy postaci i szybsza regeneracja. */
+    public boolean buyPromotion(long nowMs) {
+        Npc n = talkTo(NpcRole.KING, nowMs);
+        if (n == null) return false;
+        if (pc.isPromoted()) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": już jesteś " + pc.vocationTitle() + ".");
+            return false;
+        }
+        if (!pc.isPremium()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": promocję daję tylko posiadaczom konta premium.");
+            return false;
+        }
+        if (pc.level() < PROMOTION_LEVEL) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": wróć od poziomu " + PROMOTION_LEVEL + ".");
+            return false;
+        }
+        if (!pc.bank().debit(PROMOTION_PRICE).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(": promocja kosztuje %,d gp z banku.", PROMOTION_PRICE));
+            return false;
+        }
+        pc.setPromoted(true);
+        log.add(nowMs, EventLog.Kind.SYSTEM, n.name() + ": mianuję cię " + pc.vocationTitle()
+                + String.format("! (%,d gp z banku) Regenerujesz się o połowę szybciej.", PROMOTION_PRICE));
         return true;
     }
 
@@ -1029,6 +1083,12 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.CHAT, line);
             priestHeal(nowMs);
             return line;
+        }
+        String said = text.trim().toLowerCase(java.util.Locale.ROOT);
+        if (n.role() == NpcRole.KING && (PREMIUM_WORDS.contains(said) || PROMOTION_WORDS.contains(said))) {
+            if (PREMIUM_WORDS.contains(said)) buyPremium(nowMs);
+            else buyPromotion(nowMs);
+            return n.name() + ": " + (PREMIUM_WORDS.contains(said) ? "premium" : "promocja");
         }
         pl.fawizja.pixel.npc.DialogueRegistry d = pl.fawizja.pixel.npc.DialogueRegistry.defaults();
         String answer = d.answer(n, text);
@@ -1925,6 +1985,8 @@ public final class GameSession {
             case GUIDE: return "przewodnik";
             case CARRIER: return "woźnica";
             case CAPTAIN: return "kapitan statku";
+            case KING: return "król";
+            case GUARD: return "strażnik";
             default: return r.name().toLowerCase(java.util.Locale.ROOT);
         }
     }

@@ -135,6 +135,9 @@ TINTED = {
     # etap 10: bossowie nowych lochow
     "wyvern_matriarch": (25, (80, 140, 50)), "bloodbeard": (19, (170, 50, 50)), "skaldra": (35, (160, 210, 255)),
     "morvena": (34, (190, 200, 220)), "pyrrax": (46, (255, 120, 30)),
+    # 2026-10-23: orki z zajetych wiosek (paczka nie ma orkow - przebarwiony goblin, okultysta i jaszczuroczlek)
+    "orc_warrior": (7, (120, 150, 70)), "orc_shaman": (10, (110, 160, 90)), "orc_berserker": (7, (180, 110, 70)),
+    "orc_warlord": (46, (100, 130, 60)),
 }
 CHARACTERS = {
     "paladin": (19, None),
@@ -157,6 +160,9 @@ _ROLE = {
     "fishmonger": (44, ((70, 110, 140), (60, 120, 150), (80, 80, 70), (50, 40, 30))),
     # etap 7: kapitanowie statkow
     "captain": (44, ((40, 50, 90), (40, 60, 120), (200, 190, 170), (40, 30, 30))),
+    # 2026-10-23: krol Aurelian i straznicy bram (klucze guard_N)
+    "king": (17, ((230, 190, 60), (120, 40, 140), (100, 30, 110), (210, 170, 60))),
+    "guard": (19, ((150, 155, 165), (70, 90, 140), (120, 125, 135), (60, 50, 40))),
 }
 _NPC_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
                         "shared/src/main/resources/maps/world/npcs.csv")
@@ -165,6 +171,8 @@ for _line in open(_NPC_CSV, encoding="utf-8"):
     _key = _line.split(";")[0]
     if _key and not _key.startswith("#") and _key.split("_")[-1] in _ROLE:
         NPCS[_key] = _ROLE[_key.split("_")[-1]]
+    elif _key.startswith("guard_"):
+        NPCS[_key] = _ROLE["guard"]
 PETS = {"pet_cat": (1, None), "pet_raven": (9, None)}
 
 MASK = {(255, 255, 0): 0, (255, 0, 0): 1, (0, 255, 0): 2, (0, 0, 255): 3}

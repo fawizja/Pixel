@@ -77,15 +77,38 @@ class DeepDungeonTest {
 
     @Test
     void deepFloorsHaveLightSourcesInEveryDungeon() {
-        int[][] areas = {{0, 0, 63, 63}, {30, 130, 90, 185}, {100, 185, 159, 231}};
+        // kazdy wiekszy loch na pietrach -3..-5 (spojny obszar pol do chodzenia) ma co najmniej 3 zrodla swiatla
         for (int z = -5; z <= -3; z++) {
             FloorMap f = world.floor(z);
-            for (int[] a : areas) {
-                int lights = 0;
-                for (int[] s : f.lightSources()) {
-                    if (s[0] >= a[0] && s[0] <= a[2] && s[1] >= a[1] && s[1] <= a[3]) lights++;
+            boolean[] seen = new boolean[f.width() * f.height()];
+            for (int y0 = 0; y0 < f.height(); y0++) {
+                for (int x0 = 0; x0 < f.width(); x0++) {
+                    if (seen[y0 * f.width() + x0] || !f.isWalkable(x0, y0)) continue;
+                    int[] box = {x0, y0, x0, y0};
+                    int size = 0;
+                    java.util.ArrayDeque<int[]> q = new java.util.ArrayDeque<>();
+                    q.add(new int[] {x0, y0});
+                    seen[y0 * f.width() + x0] = true;
+                    while (!q.isEmpty()) {
+                        int[] c = q.poll();
+                        size++;
+                        box[0] = Math.min(box[0], c[0]); box[1] = Math.min(box[1], c[1]);
+                        box[2] = Math.max(box[2], c[0]); box[3] = Math.max(box[3], c[1]);
+                        for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                            int nx = c[0] + d[0], ny = c[1] + d[1];
+                            if (f.inBounds(nx, ny) && !seen[ny * f.width() + nx] && f.isWalkable(nx, ny)) {
+                                seen[ny * f.width() + nx] = true;
+                                q.add(new int[] {nx, ny});
+                            }
+                        }
+                    }
+                    if (size < 300) continue;
+                    int lights = 0;
+                    for (int[] s : f.lightSources()) {
+                        if (s[0] >= box[0] - 1 && s[0] <= box[2] + 1 && s[1] >= box[1] - 1 && s[1] <= box[3] + 1) lights++;
+                    }
+                    assertTrue(lights >= 3, "floor " + z + " dungeon at " + x0 + "," + y0 + " (" + size + " fields) lights " + lights);
                 }
-                assertTrue(lights >= 3, "floor " + z + " area " + a[0] + "," + a[1] + " lights " + lights);
             }
         }
     }

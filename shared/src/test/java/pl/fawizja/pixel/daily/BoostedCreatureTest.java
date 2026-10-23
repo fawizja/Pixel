@@ -62,9 +62,9 @@ class BoostedCreatureTest {
 
     private static long killWolf(long day, boolean expectBoost) {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        pc.setPosition(new Position(58, 70, 0));
-        List<SpawnPoint> spawns = List.of(new SpawnPoint("wolf", new Position(58, 72, 0), 0, 1, 600),
-                new SpawnPoint("boar", new Position(58, 72, 0), 3, 1, 600));
+        pc.setPosition(new Position(149, 346, 0));
+        List<SpawnPoint> spawns = List.of(new SpawnPoint("wolf", new Position(149, 348, 0), 0, 1, 600),
+                new SpawnPoint("boar", new Position(149, 348, 0), 3, 1, 600));
         MonsterManager mm = new MonsterManager(TestData.world(), REG, spawns, new Random(2));
         mm.populate(null);
         GameSession s = new GameSession(TestData.ITEMS, TestData.world(), pc, mm, new Random(3), 8);

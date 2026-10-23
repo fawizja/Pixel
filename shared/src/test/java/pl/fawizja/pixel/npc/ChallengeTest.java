@@ -39,8 +39,8 @@ class ChallengeTest {
     void threeWavesAreSpawnedOneAfterAnotherAndPayAtTheEnd() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         // jedyny potwor w okolicy (daleko), zeby zwoj mial z czego wybierac
-        GameSession s = new TownServicesTest().session(pc, List.of(new SpawnPoint("wolf", new Position(40, 72, 0), 1, 1, 600)));
-        Position field = new Position(58, 72, 0);
+        GameSession s = new TownServicesTest().session(pc, List.of(new SpawnPoint("wolf", new Position(131, 348, 0), 1, 1, 600)));
+        Position field = new Position(149, 348, 0);
         s.teleport(field, 0);
         pc.backpack().add(new ItemStack(TestData.ITEMS.byKey("challenge_scroll").id(), 2));
         long t = 1000;
@@ -74,7 +74,7 @@ class ChallengeTest {
     @Test
     void cannotBeReadInTown() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        GameSession s = new TownServicesTest().session(pc, List.of(new SpawnPoint("wolf", new Position(40, 72, 0), 1, 1, 600)));
+        GameSession s = new TownServicesTest().session(pc, List.of(new SpawnPoint("wolf", new Position(131, 348, 0), 1, 1, 600)));
         s.teleport(TownServicesTest.talkSpot(TownServicesTest.npcs.get("varden_guide")), 0);
         pc.backpack().add(new ItemStack(TestData.ITEMS.byKey("challenge_scroll").id(), 1));
         s.useSlot(scrollSlot(pc), 1000);

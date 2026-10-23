@@ -1,51 +1,64 @@
 # klucz;imie;rola;miasto;x;y;z;sklep;kolor;powitanie
-varden_banker;Bankier Aldric;BANKER;Varden;70;77;0;-;#d8c070;Witaj w banku Varden. Twoje złoto jest tu bezpieczne.
-varden_merchant;Kupiec Tomas;MERCHANT;Varden;88;77;0;varden_general;#a07040;Pochodnie, liny, prowiant i sprzęt dla początkujących. Skupuje też łupy.
-varden_mage;Czarodziejka Mirela;MERCHANT;Varden;70;95;0;varden_magic;#8060c0;Mikstury, runy i różdżki. Skupuje kryształy i perły.
-varden_priest;Kapłan Benedykt;PRIEST;Varden;82;79;0;-;#f0f0f0;Niech światło cię prowadzi. Mogę cię uleczyć.
-varden_guide;Strażnik Oren;GUIDE;Varden;77;80;0;-;#607080;Okolica potrzebuje pomocy. Mam dla ciebie zadania.
-frost_banker;Bankier Frostholm;BANKER;Frostholm;67;27;0;-;#d8c070;Bank Frostholm prowadzi konta we wszystkich miastach.
-frost_merchant;Kupiec Frostholm;MERCHANT;Frostholm;92;27;0;frost_shop;#c0d8e8;Towary z Frostholm i skup łupów z okolicy.
-frost_priest;Kapłan Frostholm;PRIEST;Frostholm;82;27;0;-;#f0f0f0;Świątynia Frostholm wita wędrowca.
-frost_guide;Przewodnik Frostholm;GUIDE;Frostholm;77;36;0;-;#6080a0;Okolice Frostholm są niebezpieczne. Pomożesz?
-selv_banker;Bankier Selvaran;BANKER;Selvaran;105;132;0;-;#d8c070;Bank i depozyt Selvaran prowadzą konta we wszystkich miastach.
-selv_merchant;Kupiec Selvaran;MERCHANT;Selvaran;138;131;0;selv_shop;#60a060;Towary z Selvaran i skup łupów z okolicy.
-selv_smith;Płatnerz Selvaran;MERCHANT;Selvaran;138;147;0;selv_arms;#909090;Broń i zbroje z całego świata. Skupuję też używany sprzęt.
-selv_mage;Zielarka Selvaran;MERCHANT;Selvaran;125;154;0;selv_magic;#8060c0;Mikstury, runy i różdżki. Skupuję kryształy i perły.
-selv_priest;Kapłan Selvaran;PRIEST;Selvaran;124;126;0;-;#f0f0f0;Świątynia Selvaran wita wędrowca.
-selv_guide;Przewodnik Selvaran;GUIDE;Selvaran;118;137;0;-;#80a040;Okolice Selvaran są niebezpieczne. Pomożesz?
-qas_banker;Bankier Qasirah;BANKER;Qasirah;62;211;0;-;#d8c070;Bank Qasirah prowadzi konta we wszystkich miastach.
-qas_merchant;Kupiec Qasirah;MERCHANT;Qasirah;86;203;0;qas_shop;#e0c080;Towary z Qasirah i skup łupów z okolicy.
-qas_priest;Kapłan Qasirah;PRIEST;Qasirah;63;195;0;-;#f0f0f0;Świątynia Qasirah wita wędrowca.
-qas_guide;Przewodnik Qasirah;GUIDE;Qasirah;77;196;0;-;#c09050;Okolice Qasirah są niebezpieczne. Pomożesz?
-varden_carrier;Woźnica Jarek;CARRIER;Varden;85;86;0;-;#8a6a4a;Wóz do innych miast odjeżdża, kiedy tylko zechcesz. Płacisz monetami.
-frost_carrier;Woźnica Frostholm;CARRIER;Frostholm;83;42;0;-;#8a6a4a;Sanie do innych miast czekają. Płacisz monetami.
-selv_carrier;Woźnica Selvaran;CARRIER;Selvaran;104;143;0;-;#8a6a4a;Wóz do innych miast czeka. Płacisz monetami.
-qas_carrier;Woźnica Qasirah;CARRIER;Qasirah;104;197;0;-;#8a6a4a;Karawana do innych miast czeka. Płacisz monetami.
-camp_merchant;Kwatermistrz Bren;MERCHANT;Oboz Zwiadowcow;183;84;0;camp_shop;#a07040;Mikstury dla twardych i skup wszystkiego, co przyniesiesz zza mostu.
-camp_banker;Skarbniczka Wena;BANKER;Oboz Zwiadowcow;175;88;0;-;#d8c070;Konto jest wspólne ze wszystkimi bankami miast.
-camp_guide;Zwiadowczyni Ilka;GUIDE;Oboz Zwiadowcow;179;82;0;-;#506040;Za obozem zaczyna się prawdziwe niebezpieczeństwo. Mam zadania dla najsilniejszych.
-varden_smith;Kowal Bogdan;MERCHANT;Varden;124;101;0;varden_arms;#909090;Kuźnia królewska. Broń i zbroje dla rycerzy i łowców.
-varden_innkeeper;Karczmarz Wit;MERCHANT;Varden;131;101;0;varden_supplies;#a07040;Gorąca strawa, pochodnie i liny. Siadaj, wędrowcze.
-varden_archmage;Arcymag Eldrin;MERCHANT;Varden;152;84;0;varden_magic;#5040c0;Gildia magów zaprasza. Runy, mikstury i różdżki.
-varden_housing;Zarządca Leopold;HOUSING;Varden;125;82;0;-;#6a5a8a;Domy w dzielnicy królewskiej. Płacisz z konta w banku.
-frost_smith;Kowal Hrodgar;MERCHANT;Frostholm;76;20;1;frost_arms;#909090;Stal z górskiej rudy. Kupisz tu broń i zbroje.
-frost_innkeeper;Karczmarka Sigrun;MERCHANT;Frostholm;94;36;0;frost_supplies;#a07040;Grzane piwo, prowiant i liny na mróz.
-frost_mage;Mag Runolf;MERCHANT;Frostholm;90;12;1;frost_magic;#5040c0;Runy i mikstury z biblioteki na tarasie.
-frost_housing;Zarządca Bjorn;HOUSING;Frostholm;68;12;1;-;#6a5a8a;Domy w dolnym mieście i na tarasach. Płacisz z konta w banku.
-qas_smith;Płatnerz Hamid;MERCHANT;Qasirah;93;203;0;qas_arms;#909090;Szable i zbroje z najlepszej stali bazaru.
-qas_mage;Wróżbitka Leila;MERCHANT;Qasirah;100;203;0;qas_magic;#8060c0;Runy, mikstury i różdżki z dalekich krain.
-qas_innkeeper;Handlarz Omar;MERCHANT;Qasirah;86;208;0;qas_supplies;#a07040;Daktyle, woda i liny na drogę przez pustynię.
-qas_housing;Zarządca Karim;HOUSING;Qasirah;97;185;0;-;#6a5a8a;Domy Qasirah przy palmowej uliczce. Płacisz z konta w banku.
-selv_fishmonger;Rybaczka Mara;MERCHANT;Selvaran;143;162;0;selv_supplies;#4a7a9a;Świeże ryby i zapasy na rejs.
-selv_housing;Zarządca Tomasz;HOUSING;Selvaran;132;162;0;-;#6a5a8a;Domy z piętrem w Selvaran. Płacisz z konta w banku.
-selv_captain;Kapitan Bartosz;CAPTAIN;Selvaran;127;168;0;-;#3a5a8a;Mój statek pływa do Qasirah, na wyspy południa i do Przystani Wschodniej. Płacisz monetami.
-qas_captain;Kapitan Rahim;CAPTAIN;Qasirah;78;229;0;-;#3a5a8a;Z zatoki Qasirah płynę do Selvaran i na wyspy południa. Płacisz monetami.
-east_captain;Kapitan Wiesław;CAPTAIN;Przystań Wschodnia;268;149;0;-;#3a5a8a;Stąd pływam na wyspy wschodu i z powrotem do Selvaran. Płacisz monetami.
-coral_captain;Sternik Lucjan;CAPTAIN;Wyspa Koralowa;119;257;0;-;#3a5a8a;Rafy wokół wyspy są zdradliwe, ale znam drogę do portów. Płacisz monetami.
-pirate_captain;Kapitan Czarna Mewa;CAPTAIN;Wyspa Piratów;47;269;0;-;#3a3a3a;Na tej wyspie nikt nie pyta skąd jesteś. Odpłyniesz, jeśli zapłacisz.
-mist_captain;Przewoźnik Gniewko;CAPTAIN;Wyspa Mgieł;249;269;0;-;#5a6a7a;We mgle łatwo zabłądzić. Odwiozę cię do portu.
-ice_captain;Kapitan Torvald;CAPTAIN;Lodowa Wyspa;289;37;0;-;#6a8aaa;Lód kruszy kadłuby, ale mój statek wytrzyma rejs do Przystani Wschodniej.
-volcano_captain;Kapitan Ognik;CAPTAIN;Wyspa Wulkaniczna;294;189;0;-;#8a4a3a;Popiół w żaglach, ale płyniemy. Wracam do Przystani Wschodniej.
-isle_guide;Admirał Wenda;GUIDE;Przystań Wschodnia;267;151;0;-;#2a4a7a;Wyspy wschodu kipią od potworów i piratów. Szukam śmiałków od poziomu 300 - mam dla ciebie zlecenia.
-isle_merchant;Kwatermistrz Olaf;MERCHANT;Przystań Wschodnia;267;149;0;isle_shop;#6a5a3a;Skupuję łuski, rogi i wszystko, co przywieziesz z wysp. Mam też mikstury na drogę.
+varden_banker;Bankier Aldric;BANKER;Varden;161;353;0;-;#d8c070;Witaj w banku Varden. Twoje złoto jest tu bezpieczne.
+varden_merchant;Kupiec Tomas;MERCHANT;Varden;179;353;0;varden_general;#a07040;Pochodnie, liny, prowiant i sprzęt dla początkujących. Skupuje też łupy.
+varden_mage;Czarodziejka Mirela;MERCHANT;Varden;161;371;0;varden_magic;#8060c0;Mikstury, runy i różdżki. Skupuje kryształy i perły.
+varden_priest;Kapłan Benedykt;PRIEST;Varden;173;355;0;-;#f0f0f0;Niech światło cię prowadzi. Mogę cię uleczyć.
+varden_guide;Strażnik Oren;GUIDE;Varden;168;356;0;-;#607080;Okolica potrzebuje pomocy. Mam dla ciebie zadania.
+frost_banker;Bankier Frostholm;BANKER;Frostholm;107;119;0;-;#d8c070;Bank Frostholm prowadzi konta we wszystkich miastach.
+frost_merchant;Kupiec Frostholm;MERCHANT;Frostholm;132;119;0;frost_shop;#c0d8e8;Towary z Frostholm i skup łupów z okolicy.
+frost_priest;Kapłan Frostholm;PRIEST;Frostholm;122;119;0;-;#f0f0f0;Świątynia Frostholm wita wędrowca.
+frost_guide;Przewodnik Frostholm;GUIDE;Frostholm;117;128;0;-;#6080a0;Okolice Frostholm są niebezpieczne. Pomożesz?
+selv_banker;Bankier Selvaran;BANKER;Selvaran;325;114;0;-;#d8c070;Bank i depozyt Selvaran prowadzą konta we wszystkich miastach.
+selv_merchant;Kupiec Selvaran;MERCHANT;Selvaran;358;113;0;selv_shop;#60a060;Towary z Selvaran i skup łupów z okolicy.
+selv_smith;Płatnerz Selvaran;MERCHANT;Selvaran;358;129;0;selv_arms;#909090;Broń i zbroje z całego świata. Skupuję też używany sprzęt.
+selv_mage;Zielarka Selvaran;MERCHANT;Selvaran;345;136;0;selv_magic;#8060c0;Mikstury, runy i różdżki. Skupuję kryształy i perły.
+selv_priest;Kapłan Selvaran;PRIEST;Selvaran;344;108;0;-;#f0f0f0;Świątynia Selvaran wita wędrowca.
+selv_guide;Przewodnik Selvaran;GUIDE;Selvaran;338;119;0;-;#80a040;Okolice Selvaran są niebezpieczne. Pomożesz?
+qas_banker;Bankier Qasirah;BANKER;Qasirah;197;262;0;-;#d8c070;Bank Qasirah prowadzi konta we wszystkich miastach.
+qas_merchant;Kupiec Qasirah;MERCHANT;Qasirah;221;254;0;qas_shop;#e0c080;Towary z Qasirah i skup łupów z okolicy.
+qas_priest;Kapłan Qasirah;PRIEST;Qasirah;198;246;0;-;#f0f0f0;Świątynia Qasirah wita wędrowca.
+qas_guide;Przewodnik Qasirah;GUIDE;Qasirah;212;247;0;-;#c09050;Okolice Qasirah są niebezpieczne. Pomożesz?
+varden_carrier;Woźnica Jarek;CARRIER;Varden;176;362;0;-;#8a6a4a;Wóz do innych miast odjeżdża, kiedy tylko zechcesz. Płacisz monetami.
+frost_carrier;Woźnica Frostholm;CARRIER;Frostholm;123;134;0;-;#8a6a4a;Sanie do innych miast czekają. Płacisz monetami.
+selv_carrier;Woźnica Selvaran;CARRIER;Selvaran;324;125;0;-;#8a6a4a;Wóz do innych miast czeka. Płacisz monetami.
+qas_carrier;Woźnica Qasirah;CARRIER;Qasirah;239;248;0;-;#8a6a4a;Karawana do innych miast czeka. Płacisz monetami.
+camp_merchant;Kwatermistrz Bren;MERCHANT;Oboz Zwiadowcow;295;244;0;camp_shop;#a07040;Mikstury dla twardych i skup wszystkiego, co przyniesiesz zza mostu.
+camp_banker;Skarbniczka Wena;BANKER;Oboz Zwiadowcow;287;248;0;-;#d8c070;Konto jest wspólne ze wszystkimi bankami miast.
+camp_guide;Zwiadowczyni Ilka;GUIDE;Oboz Zwiadowcow;291;242;0;-;#506040;Za obozem zaczyna się prawdziwe niebezpieczeństwo. Mam zadania dla najsilniejszych.
+varden_smith;Kowal Bogdan;MERCHANT;Varden;215;377;0;varden_arms;#909090;Kuźnia królewska. Broń i zbroje dla rycerzy i łowców.
+varden_innkeeper;Karczmarz Wit;MERCHANT;Varden;222;377;0;varden_supplies;#a07040;Gorąca strawa, pochodnie i liny. Siadaj, wędrowcze.
+varden_archmage;Arcymag Eldrin;MERCHANT;Varden;243;360;0;varden_magic;#5040c0;Gildia magów zaprasza. Runy, mikstury i różdżki.
+varden_housing;Zarządca Leopold;HOUSING;Varden;216;358;0;-;#6a5a8a;Domy w dzielnicy królewskiej. Płacisz z konta w banku.
+frost_smith;Kowal Hrodgar;MERCHANT;Frostholm;116;112;1;frost_arms;#909090;Stal z górskiej rudy. Kupisz tu broń i zbroje.
+frost_innkeeper;Karczmarka Sigrun;MERCHANT;Frostholm;134;128;0;frost_supplies;#a07040;Grzane piwo, prowiant i liny na mróz.
+frost_mage;Mag Runolf;MERCHANT;Frostholm;130;104;1;frost_magic;#5040c0;Runy i mikstury z biblioteki na tarasie.
+frost_housing;Zarządca Bjorn;HOUSING;Frostholm;108;104;1;-;#6a5a8a;Domy w dolnym mieście i na tarasach. Płacisz z konta w banku.
+qas_smith;Płatnerz Hamid;MERCHANT;Qasirah;228;254;0;qas_arms;#909090;Szable i zbroje z najlepszej stali bazaru.
+qas_mage;Wróżbitka Leila;MERCHANT;Qasirah;235;254;0;qas_magic;#8060c0;Runy, mikstury i różdżki z dalekich krain.
+qas_innkeeper;Handlarz Omar;MERCHANT;Qasirah;221;259;0;qas_supplies;#a07040;Daktyle, woda i liny na drogę przez pustynię.
+qas_housing;Zarządca Karim;HOUSING;Qasirah;232;236;0;-;#6a5a8a;Domy Qasirah przy palmowej uliczce. Płacisz z konta w banku.
+selv_fishmonger;Rybaczka Mara;MERCHANT;Selvaran;363;144;0;selv_supplies;#4a7a9a;Świeże ryby i zapasy na rejs.
+selv_housing;Zarządca Tomasz;HOUSING;Selvaran;352;144;0;-;#6a5a8a;Domy z piętrem w Selvaran. Płacisz z konta w banku.
+selv_captain;Kapitan Bartosz;CAPTAIN;Selvaran;347;150;0;-;#3a5a8a;Mój statek pływa do Qasirah, na wyspy południa i do Przystani Wschodniej. Płacisz monetami.
+coral_captain;Sternik Lucjan;CAPTAIN;Wyspa Koralowa;256;417;0;-;#3a5a8a;Rafy wokół wyspy są zdradliwe, ale znam drogę do portów. Płacisz monetami.
+pirate_captain;Kapitan Czarna Mewa;CAPTAIN;Wyspa Piratów;29;410;0;-;#3a3a3a;Na tej wyspie nikt nie pyta skąd jesteś. Odpłyniesz, jeśli zapłacisz.
+mist_captain;Przewoźnik Gniewko;CAPTAIN;Wyspa Mgieł;361;344;0;-;#5a6a7a;We mgle łatwo zabłądzić. Odwiozę cię do portu.
+ice_captain;Kapitan Torvald;CAPTAIN;Lodowa Wyspa;331;25;0;-;#6a8aaa;Lód kruszy kadłuby, ale mój statek wytrzyma rejs do Przystani Wschodniej.
+volcano_captain;Kapitan Ognik;CAPTAIN;Wyspa Wulkaniczna;403;229;0;-;#8a4a3a;Popiół w żaglach, ale płyniemy. Wracam do Przystani Wschodniej.
+varden_captain;Kapitan Edmund;CAPTAIN;Varden;169;404;0;-;#4a6a8a;Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium.
+qas_captain;Kapitan Rahim;CAPTAIN;Qasirah;127;213;0;-;#3a5a8a;Z zatoki Qasirah płynę do Selvaran i na wyspy południa. Płacisz monetami.
+east_captain;Kapitan Wiesław;CAPTAIN;Przystań Wschodnia;386;251;0;-;#3a5a8a;Stąd pływam na wyspy wschodu i z powrotem do Selvaran. Płacisz monetami.
+isle_guide;Admirał Wenda;GUIDE;Przystań Wschodnia;380;251;0;-;#2a4a7a;Wyspy wschodu kipią od potworów i piratów. Szukam śmiałków od poziomu 300 - mam dla ciebie zlecenia.
+isle_merchant;Kwatermistrz Olaf;MERCHANT;Przystań Wschodnia;379;250;0;isle_shop;#6a5a3a;Skupuję łuski, rogi i wszystko, co przywieziesz z wysp. Mam też mikstury na drogę.
+gull_ferryman;Przewoźnik Bolko;CAPTAIN;Mewia Skała;59;53;0;-;#4a6a8a;Przewożę łodzią na stały ląd. Tylko posiadacze konta premium.
+lighthouse_ferryman;Latarniczka Wanda;CAPTAIN;Latarnia;81;222;0;-;#4a6a8a;Przewożę łodzią na stały ląd. Tylko posiadacze konta premium.
+wierzbowo_merchant;Sołtys Bogumił;MERCHANT;Wierzbowo;150;301;0;village_shop;#7a6a3a;Witaj w Wierzbowie. Chleb, mięso i pochodnie dla wędrowców.
+osada_merchant;Handlarka Jagna;MERCHANT;Mroźna Osada;168;113;0;village_shop;#7a6a3a;Ciepła strawa i liny na drogę w góry.
+varden_king;Król Aurelian;KING;Varden;220;349;0;-;#c8a040;Witaj w moim królestwie. Konta premium i promocje załatwisz tutaj: napisz premium albo promocja.
+guard_1;Strażniczka Dobrosława;GUARD;Varden;237;343;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+guard_2;Kusznik Wszebor;GUARD;Varden;168;396;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+guard_3;Strażniczka Wiesława;GUARD;Qasirah;214;230;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+guard_4;Strażnik Przemysław;GUARD;Qasirah;242;249;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+guard_5;Halabardnik Siemowit;GUARD;Frostholm;103;125;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+guard_6;Łuczniczka Zdzisława;GUARD;Frostholm;116;136;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+guard_7;Strażniczka Jaromira;GUARD;Selvaran;321;122;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
