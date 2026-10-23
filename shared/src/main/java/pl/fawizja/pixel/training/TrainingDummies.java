@@ -75,11 +75,13 @@ public final class TrainingDummies {
         return found;
     }
 
-    /** Kamienna posadzka to wnetrze swiatyni: manekin ma stac na placu albo ulicy, nie przed oltarzem. */
+    /** Posadzki wnetrz (swiatynia, domy): manekin ma stac na placu albo ulicy, nie przed oltarzem. */
+    static final Set<String> INDOOR = Set.of("stone_floor", "marble_floor", "wood_floor", "sandstone_floor", "frozen_floor");
+
     private static boolean indoors(WorldMap world, FloorMap f, Position p) {
         if (world.tiles() == null) return false;
         pl.fawizja.pixel.world.TileType t = world.tiles().get(f.get(Layer.GROUND, p.x(), p.y()));
-        return t != null && t.key().equals("stone_floor");
+        return t != null && INDOOR.contains(t.key());
     }
 
     private static boolean suitable(WorldMap world, FloorMap f, Position p, Position temple, List<Position> found,

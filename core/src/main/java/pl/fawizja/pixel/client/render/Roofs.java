@@ -19,8 +19,12 @@ import pl.fawizja.pixel.world.WorldMap;
  */
 public final class Roofs {
 
-    public static final byte NONE = 0, RED = 1, SLATE = 2, SAND = 3;
-    static final Set<String> INTERIOR = Set.of("wood_floor", "stone_floor", "sandstone_floor", "frozen_floor", "tomb_floor");
+    public static final byte NONE = 0, RED = 1, SLATE = 2, SAND = 3, WOOD = 4, BROWN = 5;
+    /** Mury, ktore decyduja o dachu niezaleznie od posadzki: mur pruski i bale - gont, tynk - brazowa dachowka. */
+    static final java.util.Map<String, Byte> WALL_ROOF = java.util.Map.of("timber_wall", WOOD, "log_wall", WOOD,
+            "plaster_wall", BROWN, "whitewash_wall", BROWN);
+    static final Set<String> INTERIOR = Set.of("wood_floor", "stone_floor", "sandstone_floor", "frozen_floor", "tomb_floor",
+            "marble_floor");
     static final int MAX_BUILDING = 900;
 
     private final WorldMap world;
@@ -82,6 +86,8 @@ public final class Roofs {
                 }
                 if (!enclosed || cells.size() > MAX_BUILDING) continue;
                 byte kind = sand * 2 > cells.size() ? SAND : stone * 2 > cells.size() ? SLATE : RED;
+                Byte byWall = wallRoof(f, cells);
+                if (byWall != null) kind = byWall;
                 for (int[] c : cells) {
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dx = -1; dx <= 1; dx++) {
@@ -94,6 +100,24 @@ public final class Roofs {
             }
         }
         return out;
+    }
+
+    /** Dach wg przewazajacego materialu murow wokol budynku (null = wg posadzki). */
+    private Byte wallRoof(FloorMap f, List<int[]> cells) {
+        Map<String, Integer> count = new HashMap<>();
+        for (int[] c : cells) {
+            for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                int nx = c[0] + d[0], ny = c[1] + d[1];
+                if (!f.inBounds(nx, ny) || !wall(f, nx, ny)) continue;
+                TileType t = world.tiles().get(f.get(Layer.WALL, nx, ny));
+                if (t != null) count.merge(t.key(), 1, Integer::sum);
+            }
+        }
+        String top = null;
+        for (Map.Entry<String, Integer> e : count.entrySet()) {
+            if (top == null || e.getValue() > count.get(top) || (e.getValue().equals(count.get(top)) && e.getKey().compareTo(top) < 0)) top = e.getKey();
+        }
+        return top == null ? null : WALL_ROOF.get(top);
     }
 
     private String key(FloorMap f, int x, int y) {

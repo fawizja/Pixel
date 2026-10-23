@@ -41,7 +41,9 @@ WALLS = {
 }
 WALL_SHAPES = ("v", "h", "pole", "corner")
 # Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
-ROOFS = {"roof_red": 183, "roof_slate": 187}
+ROOFS = {"roof_red": 183, "roof_slate": 187, "roof_wood": 182, "roof_brown": 190}
+# dachy przebarwione: nazwa -> (nasycenie, jasnosc) - niebieska dachowka z paczki jako szary lupek
+ROOF_TONE = {"roof_slate": (0.18, 0.9)}
 # Sciany skalne (bryly): kamien laczacy sie w jednolita skale zamiast cegiel - jaskinie i gory jak w Tibii.
 # nazwa: (podloze z paczki, mnoznik jasnosci, kolor domieszki, udzial domieszki)
 ROCK_WALLS = {
@@ -274,7 +276,17 @@ def main(client, art):
     for name, i in EXTRA_OBJECTS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ROOFS.items():
-        save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
+        img = ot.compose(spr, things["item"][i]).convert("RGBA")
+        if name in ROOF_TONE:
+            sat, light = ROOF_TONE[name]
+            px = img.load()
+            for y in range(img.height):
+                for x in range(img.width):
+                    r, g, b, a = px[x, y]
+                    grey = 0.3 * r + 0.59 * g + 0.11 * b
+                    c = [min(255, int((grey + (v - grey) * sat) * light)) for v in (r, g, b)]
+                    px[x, y] = (c[0], c[1], c[2], a)
+        save(img, f"{art}/objects/{name}.png"); n += 1
     for name, i in ITEMS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/items/{name}.png"); n += 1
     south = ot.DIRS.index("down")

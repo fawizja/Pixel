@@ -19,6 +19,7 @@ import world_geo  # noqa: E402
 import ports  # noqa: E402
 import depths  # noqa: E402
 import cities  # noqa: E402
+import town  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 VARDEN = os.path.join(ROOT, 'varden')
@@ -109,6 +110,20 @@ EXTRA_LEGEND = [
 ] + world_geo.LEGEND + cities.LEGEND + depths.LEGEND
 WALKABLE = set('.,f=:b_-RDdlLwcjk<>()}HO' + 'sviehJyoXz[]{|^!?&*@$' + '0124578'
                + '\u03b1\u03c0\u03b3\u03b6\u03b7\u03bd\u03b8\u03bb\u03bc\u03be' + '\u03c5') | cities.WALKABLE | depths.WALKABLE
+
+
+def varden_town_walkable():
+    """Symbole miasta Varden spoza ASCII (town.py) - przechodnie wg data/tiles.csv."""
+    out = set()
+    with open(os.path.join(VARDEN, 'legend.csv'), encoding='utf-8') as f:
+        for line in f:
+            p = line.rstrip('\n').split(';')
+            if len(p) == 5 and len(p[0]) == 1 and ord(p[0]) > 0x7f and town.walkable(tuple(p[1:])):
+                out.add(p[0])
+    return out
+
+
+WALKABLE |= varden_town_walkable()
 
 
 def grid(fill=' '):
@@ -305,7 +320,7 @@ def read_varden():
     floors = {}
     for z in FLOORS:
         name = f'floor_{"+" + str(z) if z > 0 else z}.txt'
-        with open(os.path.join(VARDEN, name)) as f:
+        with open(os.path.join(VARDEN, name), encoding='utf-8') as f:
             rows = [line.rstrip('\n') for line in f]
         floors[z] = [r.ljust(VW)[:VW] for r in rows[:VH]] + [' ' * VW] * max(0, VH - len(rows))
     return floors
@@ -320,13 +335,13 @@ def paste(g, rows, ox, oy, transparent_space):
 
 
 def read_lines(name):
-    with open(os.path.join(VARDEN, name)) as f:
+    with open(os.path.join(VARDEN, name), encoding='utf-8') as f:
         return [l.rstrip('\n') for l in f if l.strip() and not l.startswith('#')]
 
 
 def read_props():
     props = {}
-    with open(os.path.join(VARDEN, 'map.properties')) as f:
+    with open(os.path.join(VARDEN, 'map.properties'), encoding='utf-8') as f:
         for l in f:
             if '=' in l and not l.startswith('#'):
                 k, v = l.strip().split('=', 1)
@@ -913,7 +928,7 @@ def main():
                 f.write(''.join(row).rstrip() + '\n')
 
     # legenda = Varden + biomy
-    with open(os.path.join(VARDEN, 'legend.csv')) as f:
+    with open(os.path.join(VARDEN, 'legend.csv'), encoding='utf-8') as f:
         legend = f.read().rstrip('\n').split('\n')
     legend.append('// --- biomy swiata (generate_world.py) ---')
     for sym, ground, dec, obj, wall in EXTRA_LEGEND:

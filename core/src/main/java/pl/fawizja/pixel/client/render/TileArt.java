@@ -49,8 +49,10 @@ public final class TileArt implements Disposable {
     /** Pulapka z kolcami (lochy). */
     private static final int TRAP_CELL = 1010;
     private TextureRegion trap;
-    /** Dachy budynkow (widok jak w Tibii): dachowka (drewno), lupek (kamien), piaskowa dachowka (piaskowiec). */
+    /** Dachy budynkow (widok jak w Tibii): dachowka (drewno), lupek (kamien), piaskowa dachowka (piaskowiec);
+     *  gont i brazowa dachowka w komorkach ROOF_EXTRA_CELL.. (domy z muru pruskiego i tynkowane). */
     private static final int ROOF_CELL = 1011;
+    private static final int ROOF_EXTRA_CELL = 1015;
     private TextureRegion[] roof;
     /** Plecak w gniezdzie ekwipunku. */
     private static final int BACKPACK_CELL = 1014;
@@ -114,6 +116,8 @@ public final class TileArt implements Disposable {
         paintRoof(pm, cellX(ROOF_CELL), cellY(ROOF_CELL), Color.valueOf("#a8402c"));
         paintRoof(pm, cellX(ROOF_CELL + 1), cellY(ROOF_CELL + 1), Color.valueOf("#5a6270"));
         paintRoof(pm, cellX(ROOF_CELL + 2), cellY(ROOF_CELL + 2), Color.valueOf("#c89a5a"));
+        paintRoof(pm, cellX(ROOF_EXTRA_CELL), cellY(ROOF_EXTRA_CELL), Color.valueOf("#6a4a30"));
+        paintRoof(pm, cellX(ROOF_EXTRA_CELL + 1), cellY(ROOF_EXTRA_CELL + 1), Color.valueOf("#7a5a58"));
         for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(PET_CELL + i), cellY(PET_CELL + i), PETS[i]);
         paintBackpack(pm, cellX(BACKPACK_CELL), cellY(BACKPACK_CELL));
         applyOverrides(pm, tileRegistry, itemRegistry, mtypes, npcList);
@@ -174,7 +178,8 @@ public final class TileArt implements Disposable {
         dummy = region(DUMMY_CELL);
         trap = region(TRAP_CELL);
         backpack = region(BACKPACK_CELL);
-        roof = new TextureRegion[] {region(ROOF_CELL), region(ROOF_CELL + 1), region(ROOF_CELL + 2)};
+        roof = new TextureRegion[] {region(ROOF_CELL), region(ROOF_CELL + 1), region(ROOF_CELL + 2),
+                region(ROOF_EXTRA_CELL), region(ROOF_EXTRA_CELL + 1)};
         for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(PET_CELL + i));
         for (Map.Entry<String, Integer> e : walkCells.entrySet()) {
             if (hiAtlas == null || !hiCells.containsKey(e.getValue()) || !hiCells.containsKey(e.getValue() + 1)) continue;
@@ -244,6 +249,8 @@ public final class TileArt implements Disposable {
         override(pm, ROOF_CELL, "objects/roof_red");
         override(pm, ROOF_CELL + 1, "objects/roof_slate");
         override(pm, ROOF_CELL + 2, "objects/roof_sand");
+        override(pm, ROOF_EXTRA_CELL, "objects/roof_wood");
+        override(pm, ROOF_EXTRA_CELL + 1, "objects/roof_brown");
         override(pm, BACKPACK_CELL, "objects/backpack");
         for (int i = 0; i < PETS.length; i++) override(pm, PET_CELL + i, "pets/" + PETS[i]);
         if (overrides > 0) Gdx.app.log("TileArt", "Grafiki z assets/art: " + overrides);
@@ -508,7 +515,8 @@ public final class TileArt implements Disposable {
     public TextureRegion trap() { return trap; }
     public TextureRegion backpack() { return backpack; }
 
-    /** Dach nad budynkiem wg Roofs: 1 dachowka (drewno), 2 lupek (kamien), 3 piaskowa dachowka (piaskowiec). */
+    /** Dach nad budynkiem wg Roofs: 1 dachowka (drewno), 2 lupek (kamien), 3 piaskowa dachowka (piaskowiec),
+     *  4 gont (mur pruski, bale), 5 brazowa dachowka (tynk). */
     public TextureRegion roof(int kind) { return roof[Math.max(1, Math.min(kind, roof.length)) - 1]; }
 
     /** Pupil po kluczu przedmiotu (null = nieznany). */
