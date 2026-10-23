@@ -53,4 +53,23 @@ class PathfinderPathTest {
         assertEquals(plain, forced);
         assertEquals(List.of(goal).get(0), Pathfinder.pathAvoiding(world, from, goal, 100_000, goal::equals).get(plain.size() - 1));
     }
+
+    @Test
+    void monstersStepWithoutDiagonalsUnlessTheyMust() {
+        // otwarte pole: cel po skosie, a pierwszy krok jest prosty
+        Position from = world.spawn();
+        Position goal = from.translate(4, 4);
+        pl.fawizja.pixel.world.Direction d = Pathfinder.nextStepOrthogonalFirst(world, from, goal, 1, 400, p -> false);
+        assertNotNull(d);
+        assertFalse(d.diagonal(), "first step " + d);
+        // gdy prosta droga jest zablokowana (wszystkie pola N/S/E/W zajete), wolno pojsc po skosie
+        java.util.Set<Position> blocked = new java.util.HashSet<>();
+        for (pl.fawizja.pixel.world.Direction o : new pl.fawizja.pixel.world.Direction[] {
+                pl.fawizja.pixel.world.Direction.NORTH, pl.fawizja.pixel.world.Direction.EAST,
+                pl.fawizja.pixel.world.Direction.SOUTH, pl.fawizja.pixel.world.Direction.WEST}) {
+            blocked.add(from.translate(o.dx, o.dy));
+        }
+        assertTrue(Pathfinder.nextStepOrthogonalFirst(world, from, goal, 1, 400, blocked::contains).diagonal());
+        assertNull(Pathfinder.nextStepOrthogonalFirst(world, from, goal, 1, 400, p -> true));
+    }
 }

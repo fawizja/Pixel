@@ -20,8 +20,26 @@ public final class Pathfinder {
 
     private Pathfinder() {}
 
+    /** Kierunki bez skosow (N, E, S, W - pierwsze cztery w {@link Direction}). */
+    private static final Direction[] ORTHOGONAL = Arrays.copyOf(Direction.values(), 4);
+
     public static Direction nextStep(WorldMap world, Position from, Position goal, int stopDistance,
                                      int maxNodes, Predicate<Position> blocked) {
+        return nextStep(world, from, goal, stopDistance, maxNodes, blocked, Direction.values());
+    }
+
+    /**
+     * Krok potwora jak w Tibii: najpierw droga wylacznie N/S/E/W, a skos tylko wtedy, gdy bez niego nie da sie
+     * dojsc do celu (waskie przejscie po skosie, zablokowane pola) w limicie wezlow.
+     */
+    public static Direction nextStepOrthogonalFirst(WorldMap world, Position from, Position goal, int stopDistance,
+                                                    int maxNodes, Predicate<Position> blocked) {
+        Direction d = nextStep(world, from, goal, stopDistance, maxNodes, blocked, ORTHOGONAL);
+        return d != null ? d : nextStep(world, from, goal, stopDistance, maxNodes, blocked, Direction.values());
+    }
+
+    private static Direction nextStep(WorldMap world, Position from, Position goal, int stopDistance,
+                                      int maxNodes, Predicate<Position> blocked, Direction[] dirs) {
         if (from.z() != goal.z()) return null;
         if (from.distanceTo(goal) <= stopDistance) return null;
         Map<Position, Direction> firstStep = new HashMap<>();
@@ -31,7 +49,7 @@ public final class Pathfinder {
         int visited = 0;
         while (!queue.isEmpty() && visited++ < maxNodes) {
             Position p = queue.poll();
-            for (Direction d : Direction.values()) {
+            for (Direction d : dirs) {
                 Position n = p.translate(d.dx, d.dy);
                 if (firstStep.containsKey(n)) continue;
                 if (!world.isWalkable(n)) continue;

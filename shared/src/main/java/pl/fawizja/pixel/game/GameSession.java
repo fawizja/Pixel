@@ -923,6 +923,8 @@ public final class GameSession {
         return n;
     }
 
+    private static final java.util.Set<String> HEAL_WORDS = java.util.Set.of("help", "heal", "ulecz", "pomocy", "pomoc", "lecz");
+
     /** Kaplan: pelne leczenie i mana (tylko w swiatyni, wiec poza walka). */
     public void priestHeal(long nowMs) {
         if (talkTo(NpcRole.PRIEST, nowMs) == null) return;
@@ -1020,6 +1022,13 @@ public final class GameSession {
         if (n == null) {
             log.add(nowMs, EventLog.Kind.WARNING, TradeResult.TOO_FAR.message());
             return null;
+        }
+        if (n.role() == NpcRole.PRIEST && HEAL_WORDS.contains(text.trim().toLowerCase(java.util.Locale.ROOT))) {
+            // jak w Tibii: "help" (albo "heal", "ulecz", "pomocy") do kaplana leczy i odnawia mane
+            String line = n.name() + ": Niech światło cię uleczy.";
+            log.add(nowMs, EventLog.Kind.CHAT, line);
+            priestHeal(nowMs);
+            return line;
         }
         pl.fawizja.pixel.npc.DialogueRegistry d = pl.fawizja.pixel.npc.DialogueRegistry.defaults();
         String answer = d.answer(n, text);
@@ -1669,7 +1678,10 @@ public final class GameSession {
 
     private float progress(long nowMs) {
         if (!moving || stepFrom.z() != pc.position().z()) return 1f;
-        return Math.min(1f, (nowMs - stepStartMs) / (float) Math.max(1, stepDurationMs));
+        // skos jak w Tibii: postac przesuwa sie w zwyklym tempie (x1.4 dlugosci), a reszta kroku to postoj
+        boolean diagonal = stepFrom.x() != pc.position().x() && stepFrom.y() != pc.position().y();
+        float anim = diagonal ? stepDurationMs * 1.4f / MovementSystem.DIAGONAL_STEP_FACTOR : stepDurationMs;
+        return Math.min(1f, (nowMs - stepStartMs) / Math.max(1f, anim));
     }
 
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }

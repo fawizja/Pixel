@@ -493,12 +493,12 @@ public final class MonsterManager {
                     step = chaseStep(m, tp, dist, canSee);
                 }
                 break;
-            case RETURN: step = Pathfinder.nextStep(world, mp, m.spawn().center(), Math.max(0, m.spawn().radius() - 1), 600,
+            case RETURN: step = Pathfinder.nextStepOrthogonalFirst(world, mp, m.spawn().center(), Math.max(0, m.spawn().radius() - 1), 600,
                     blockedFor(tp)); break;
             case IDLE:
                 // regeneracja poza walka: 5% zdrowia na kazdy "oddech" bezczynnosci
                 if (m.health() < t.maxHealth()) m.heal(Math.max(1, t.maxHealth() / 20));
-                if (rng.nextInt(3) == 0) step = Direction.values()[rng.nextInt(Direction.values().length)];
+                if (rng.nextInt(3) == 0) step = Direction.values()[rng.nextInt(4)]; // spacer bez skosow
                 m.setNextActionMs(now + 1500 + rng.nextInt(2500));
                 break;
             default:
@@ -517,16 +517,18 @@ public final class MonsterManager {
         if (keepsDistance && t.range() > 1) {
             if (dist < 2) return fleeStep(m, tp);
             if (dist <= t.range() && canSee) return null;
-            return Pathfinder.nextStep(world, m.position(), tp, Math.max(1, t.range() - 1), 400, blockedFor(tp));
+            return Pathfinder.nextStepOrthogonalFirst(world, m.position(), tp, Math.max(1, t.range() - 1), 400, blockedFor(tp));
         }
         if (dist <= 1) return null;
-        return Pathfinder.nextStep(world, m.position(), tp, 1, 400, blockedFor(tp));
+        return Pathfinder.nextStepOrthogonalFirst(world, m.position(), tp, 1, 400, blockedFor(tp));
     }
 
     private Direction fleeStep(Monster m, Position tp) {
         Direction best = null;
         int bestDist = m.position().distanceTo(tp);
+        // ucieczka tez najpierw prosto (N/S/E/W), skos dopiero gdy prosto nie oddala od gracza
         for (Direction d : Direction.values()) {
+            if (d.diagonal() && best != null) break;
             Position n = m.position().translate(d.dx, d.dy);
             if (!canOccupy(n, tp) || !cornerFree(m.position(), d)) continue;
             int nd = n.distanceTo(tp);

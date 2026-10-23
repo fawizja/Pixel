@@ -1855,6 +1855,8 @@ public final class Hud {
         run.active = pc.isRunning();
         torch.active = pc.isTorchLit();
         bag.active = bagOpen;
+        // plecak otwiera sie z gniazda w ramce ekwipunku (2026-10-23); przycisk tylko gdy ramka jest zakryta
+        bag.visible = !equipPanelVisible();
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
         run.visible = defensive.visible = torch.visible = !diagnosticsOpen; // pod panelem diagnostyki
@@ -2043,11 +2045,6 @@ public final class Hud {
         }
         if (consoleVisible()) {
             frame(shapes, conX, conY, conW, conH);
-            // pasek zakladek konsoli; wybrana zakladka podswietlona
-            shapes.setColor(0.1f, 0.09f, 0.08f, 0.85f);
-            shapes.rect(conX + 3, conY + conH - CON_TAB_H - 1, conW - 6, CON_TAB_H - 1);
-            shapes.setColor(0.32f, 0.27f, 0.18f, 0.95f);
-            shapes.rect(conX + 6 + conTab * conTabW(), conY + conH - CON_TAB_H - 1, conTabW() - 4, CON_TAB_H - 1);
         }
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
@@ -2519,9 +2516,10 @@ public final class Hud {
     /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
     private static final long CON_KEEP_MS = 30_000;
 
-    /** Zakladki konsoli jak w OTClient (etap 16): wszystko, czat (gracze i NPC), lup, dziennik serwera. */
+    /** Filtry konsoli (etap 16): wszystko, czat, lup, dziennik serwera. Bez zakladek na ekranie (2026-10-23:
+     *  zbedne nad czatem) - konsola zawsze pokazuje wszystko, filtr zostaje dla -Dpixel.conTab. */
     private static final String[] CON_TABS = {"Ogólne", "Czat", "Łup", "Serwer"};
-    private static final float CON_TAB_H = 15;
+    private static final float CON_TAB_H = 0;
     private int conTab;
 
     public void showConsoleTab(int tab) { conTab = Math.max(0, Math.min(CON_TABS.length - 1, tab)); }
@@ -2534,8 +2532,6 @@ public final class Hud {
             default: return true;
         }
     }
-
-    private float conTabW() { return Math.min(64, (conW - 8) / CON_TABS.length); }
 
     private boolean consoleVisible() {
         return !((menuOpen || bigMapOpen) && menuY < conY + conH) && conH > 8;
@@ -2594,11 +2590,6 @@ public final class Hud {
     private void drawConsole(SpriteBatch batch) {
         if (!consoleVisible()) return;
         font.getData().setScale(CON_SCALE);
-        float tabW = conTabW();
-        for (int i = 0; i < CON_TABS.length; i++) {
-            font.setColor(i == conTab ? new Color(1f, 0.85f, 0.4f, 1f) : new Color(0.62f, 0.6f, 0.55f, 1f));
-            font.draw(batch, CON_TABS[i], conX + 6 + i * tabW, conY + conH - 3, tabW - 4, com.badlogic.gdx.utils.Align.center, false);
-        }
         float yy = conY + conH - 4 - CON_TAB_H;
         for (ConLine l : conLines) {
             if (yy - l.height() < conY - 2) break;
@@ -2617,13 +2608,6 @@ public final class Hud {
     /** Dotkniecie konsoli otwiera czat. */
     private boolean consoleTouch(float px, float py, Actions actions) {
         if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
-        if (py >= conY + conH - CON_TAB_H - 2) {
-            int t = (int) ((px - conX - 6) / conTabW());
-            if (t >= 0 && t < CON_TABS.length) {
-                conTab = t;
-                return true;
-            }
-        }
         actions.onButton("chat");
         return true;
     }

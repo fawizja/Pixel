@@ -270,6 +270,10 @@ class TownServicesTest {
         pc.damage(50);
         s.priestHeal(t);
         assertEquals(pc.maxHealth(), pc.health());
+        // jak w Tibii: "help" napisane do kaplana leczy
+        pc.damage(50);
+        assertTrue(s.askNpc("help", t).contains("uleczy"));
+        assertEquals(pc.maxHealth(), pc.health());
         s.settleHere(t);
         assertEquals("frostholm", pc.homeTown());
         assertEquals(world.town("Frostholm").temple(), world.templeOf(pc.homeTown()));
