@@ -57,6 +57,9 @@ lines = [
     "- Grafiki muszą być własne albo na wolnej licencji (bez kopii z Tibii i innych gier komercyjnych).",
     "- Kolumna „Jest”: plik już istnieje. Obecne pliki pochodzą z OpenTibia Sprite Pack (CC BY 4.0), autorzy w",
     "  docs/CREDITS.md i w grze (/autorzy). Mapowanie nazw: `tools/art/otsp_import.py`.",
+    "- Obrzeża podłoża (trawy, piasek, ziemia, glina, bagno) to 12 kawałków z paczki OTSP w `assets/art/borders/`",
+    "  (krawędzie, małe i duże rogi). Własne rysunki zostały tylko tam, gdzie paczka nic nie ma: stragan, łódź,",
+    "  ster, namiot orków, wiatrak (`tools/art/draw_town_props.py`).",
     "",
     f"Razem: {len(tiles)} kafelków, {len(items)} przedmiotów, {len(monsters)} potworów, {len(npcs)} NPC, "
     f"{len(chars)} obrazków postaci, {len(objects)} obiektów, {len(pets)} pupili. Podmienione: {done}.",

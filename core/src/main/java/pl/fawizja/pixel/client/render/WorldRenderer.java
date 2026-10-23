@@ -149,6 +149,8 @@ public final class WorldRenderer {
 
     /**
      * Obrzeza jak w Tibii: podloze sasiada o wyzszym priorytecie nachodzi na to pole poszarpana krawedzia.
+     * Kazde podloze sasiadow osobno, od najnizszego priorytetu. Dwie stykajace sie krawedzie tego samego podloza
+     * (np. polnoc i zachod) daja duzy rog, jesli podloze ma kawalki z paczki; inaczej dwie krawedzie.
      * Rog po skosie tylko wtedy, gdy obie sasiednie krawedzie maja inne podloze (inaczej juz go przykrywaja).
      */
     private void drawBorders(SpriteBatch batch, FloorMap f, int g, int x, int y, float wy) {
@@ -157,24 +159,51 @@ public final class WorldRenderer {
         int own = b.priority(g);
         if (own < 0) return;
         int[] side = sideTiles;
+        int count = 0;
         for (int k = 0; k < 8; k++) {
             int nx = x + SIDE_DX[k], ny = y + SIDE_DY[k];
             side[k] = f.inBounds(nx, ny) ? f.get(Layer.GROUND, nx, ny) : 0;
-        }
-        for (int k = 0; k < 8; k++) {
             int n = side[k];
             if (n == 0 || n == g || b.priority(n) <= own) continue;
-            if (k >= 4) {
-                int a = k == GroundBorders.NE ? GroundBorders.N : k == GroundBorders.SE ? GroundBorders.S
-                        : k == GroundBorders.SW ? GroundBorders.S : GroundBorders.N;
-                int c = k == GroundBorders.NE || k == GroundBorders.SE ? GroundBorders.E : GroundBorders.W;
-                if (side[a] == n || side[c] == n) continue;
+            boolean seen = false;
+            for (int i = 0; i < count; i++) seen |= borderGrounds[i] == n;
+            if (seen) continue;
+            int at = count++;
+            while (at > 0 && b.priority(borderGrounds[at - 1]) > b.priority(n)) {
+                borderGrounds[at] = borderGrounds[at - 1];
+                at--;
             }
-            TextureRegion r = b.piece(n, k);
-            if (r != null) batch.draw(r, x, wy, 1f, 1f);
+            borderGrounds[at] = n;
+        }
+        for (int i = 0; i < count; i++) {
+            int n = borderGrounds[i];
+            boolean north = side[GroundBorders.N] == n, east = side[GroundBorders.E] == n;
+            boolean south = side[GroundBorders.S] == n, west = side[GroundBorders.W] == n;
+            boolean edgeN = north, edgeE = east, edgeS = south, edgeW = west;
+            if (b.piece(n, GroundBorders.IN_NW) != null) {
+                if (north && west) edgeN = edgeW = !draw(batch, b.piece(n, GroundBorders.IN_NW), x, wy);
+                if (north && east) edgeN = edgeE = !draw(batch, b.piece(n, GroundBorders.IN_NE), x, wy);
+                if (south && west) edgeS = edgeW = !draw(batch, b.piece(n, GroundBorders.IN_SW), x, wy);
+                if (south && east) edgeS = edgeE = !draw(batch, b.piece(n, GroundBorders.IN_SE), x, wy);
+            }
+            if (edgeN) draw(batch, b.piece(n, GroundBorders.N), x, wy);
+            if (edgeE) draw(batch, b.piece(n, GroundBorders.E), x, wy);
+            if (edgeS) draw(batch, b.piece(n, GroundBorders.S), x, wy);
+            if (edgeW) draw(batch, b.piece(n, GroundBorders.W), x, wy);
+            if (side[GroundBorders.NE] == n && !north && !east) draw(batch, b.piece(n, GroundBorders.NE), x, wy);
+            if (side[GroundBorders.SE] == n && !south && !east) draw(batch, b.piece(n, GroundBorders.SE), x, wy);
+            if (side[GroundBorders.SW] == n && !south && !west) draw(batch, b.piece(n, GroundBorders.SW), x, wy);
+            if (side[GroundBorders.NW] == n && !north && !west) draw(batch, b.piece(n, GroundBorders.NW), x, wy);
         }
     }
 
+    private static boolean draw(SpriteBatch batch, TextureRegion r, int x, float wy) {
+        if (r == null) return false;
+        batch.draw(r, x, wy, 1f, 1f);
+        return true;
+    }
+
+    private final int[] borderGrounds = new int[8];
     private final int[] sideTiles = new int[8];
 
     private void drawObject(SpriteBatch batch, int id, int mx, int my, float x, float wy) {

@@ -12,13 +12,17 @@ import pl.fawizja.pixel.world.TileType;
 
 /**
  * Obrzeza podloza jak w Tibii: trawa nachodzi poszarpana krawedzia na ziemie, piasek na wode itd.
- * Podloze o wyzszym priorytecie "wylewa sie" na sasiednie pole o nizszym. Kawalki obrzezy sa skladane przy
- * starcie z tekstury podloza i maski (4 krawedzie + 4 rogi), wiec dzialaja dla kazdej grafiki podloza.
+ * Podloze o wyzszym priorytecie "wylewa sie" na sasiednie pole o nizszym. Gdy w assets/art/borders/ sa gotowe
+ * kawalki z paczki OTSP (12: krawedzie, male rogi i duze rogi przy dwoch krawedziach), uzywane sa one; inaczej
+ * kawalki sa skladane przy starcie z tekstury podloza i maski (4 krawedzie + 4 rogi, bez duzych rogow).
  * Posadzki budynkow, mosty i podobne nie maja obrzezy (priorytet -1).
  */
 public final class GroundBorders implements Disposable {
 
     public static final int N = 0, E = 1, S = 2, W = 3, NE = 4, SE = 5, SW = 6, NW = 7;
+    /** Duze rogi: sasiad zajmuje obie krawedzie (np. IN_NW = polnoc i zachod). */
+    public static final int IN_NE = 8, IN_SE = 9, IN_SW = 10, IN_NW = 11;
+    public static final int PIECES = 12;
     private static final int PX = 32;
     private static final int COLS = 8;
 
@@ -36,6 +40,11 @@ public final class GroundBorders implements Disposable {
     /** Zrodlo grafiki podloza 32x32 dla danego kafelka (null = brak). */
     public interface Source {
         Pixmap ground32(TileType t);
+
+        /** Gotowy kawalek obrzeza 32x32 (piece = N..IN_NW) albo null - wtedy kawalki sa skladane z maski. */
+        default Pixmap borderPiece(TileType t, int piece) {
+            return null;
+        }
     }
 
     public GroundBorders(TileRegistry registry, Source source) {
@@ -54,22 +63,36 @@ public final class GroundBorders implements Disposable {
         }
         if (count == 0) return;
         int rows = (count + COLS - 1) / COLS;
-        Pixmap pm = new Pixmap(COLS * PX, rows * 8 * PX, Pixmap.Format.RGBA8888); // kolumna = 8 kawalkow jednego podloza
+        Pixmap pm = new Pixmap(COLS * PX, rows * PIECES * PX, Pixmap.Format.RGBA8888); // kolumna = kawalki jednego podloza
         pm.setBlending(Pixmap.Blending.None);
         float[][] masks = buildMasks();
         int slot = 0;
         int[][] slots = new int[max + 1][];
+        boolean[] full = new boolean[max + 1];
         for (TileType t : registry.all()) {
             if (priority[t.id()] < 0) continue;
-            Pixmap src = source.ground32(t);
-            if (src == null) {
-                priority[t.id()] = -1;
-                continue;
-            }
             int col = slot % COLS, row = slot / COLS;
+            Pixmap[] ready = new Pixmap[PIECES];
+            int found = 0;
+            for (int k = 0; k < PIECES; k++) if ((ready[k] = source.borderPiece(t, k)) != null) found++;
+            if (found == PIECES) {
+                for (int k = 0; k < PIECES; k++) {
+                    pm.drawPixmap(ready[k], 0, 0, ready[k].getWidth(), ready[k].getHeight(),
+                            col * PX, row * PIECES * PX + k * PX, PX, PX);
+                }
+                full[t.id()] = true;
+            } else {
+                Pixmap src = source.ground32(t);
+                if (src == null) {
+                    priority[t.id()] = -1;
+                    for (Pixmap r : ready) if (r != null) r.dispose();
+                    continue;
+                }
+                for (int k = 0; k < 8; k++) paint(pm, src, masks[k], col * PX, row * PIECES * PX + k * PX);
+                src.dispose();
+            }
+            for (Pixmap r : ready) if (r != null) r.dispose();
             slots[t.id()] = new int[] {col, row};
-            for (int k = 0; k < 8; k++) paint(pm, src, masks[k], col * PX, row * 8 * PX + k * PX);
-            src.dispose();
             slot++;
         }
         texture = new Texture(pm);
@@ -77,9 +100,9 @@ public final class GroundBorders implements Disposable {
         pm.dispose();
         for (int id = 0; id <= max; id++) {
             if (slots[id] == null) continue;
-            pieces[id] = new TextureRegion[8];
-            for (int k = 0; k < 8; k++) {
-                pieces[id][k] = new TextureRegion(texture, slots[id][0] * PX, slots[id][1] * 8 * PX + k * PX, PX, PX);
+            pieces[id] = new TextureRegion[PIECES];
+            for (int k = 0; k < (full[id] ? PIECES : 8); k++) {
+                pieces[id][k] = new TextureRegion(texture, slots[id][0] * PX, slots[id][1] * PIECES * PX + k * PX, PX, PX);
             }
         }
     }
@@ -89,7 +112,7 @@ public final class GroundBorders implements Disposable {
         return tileId > 0 && tileId < priority.length ? priority[tileId] : -1;
     }
 
-    /** Kawalek obrzeza podloza tileId wchodzacy na pole od strony side (N..NW) albo null. */
+    /** Kawalek obrzeza podloza tileId wchodzacy na pole od strony side (N..IN_NW) albo null (duze rogi tylko z OTSP). */
     public TextureRegion piece(int tileId, int side) {
         TextureRegion[] p = tileId > 0 && tileId < pieces.length ? pieces[tileId] : null;
         return p == null ? null : p[side];

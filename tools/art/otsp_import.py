@@ -15,11 +15,20 @@ import otsp_extract as ot  # noqa: E402
 
 # Kafelki podloza: caly kwadrat 32x32, bez przycinania.
 GROUND = {
-    "grass": 106, "field": 116, "jungle_grass": 124, "blighted_grass": 101, "dirt": 136, "sand": 128,
+    "grass": 106, "field": 116, "jungle_grass": 124, "blighted_grass": 101, "dirt": 136, "sand": 126,
     "dark_sand": 130, "cobblestone": 154, "stone_floor": 153, "wood_floor": 173, "bridge": 182,
     "cave_floor": 138, "abyss_floor": 144, "ash": 143, "water": 163, "swamp": 141, "snow": 145, "ice": 155,
     "frozen_floor": 175, "sandstone_floor": 166, "tomb_floor": 165,
     "stone_wall": 170, "wood_wall": 172, "sandstone_wall": 192,
+    "lava": 2298,   # 2026-10-23: piasek 126 (pasuje do obrzezy 315), lawa z paczki
+    "ship_deck": 173, "rope_bridge": 182, "chasm": 992,
+}
+# Obrzeza podloza jak w Tibii (borders/klucz_krawedz.png): 12 kawalkow z paczki w kolejnosci RME
+# n, e, s, w, cnw, cne, csw, cse (male rogi po skosie), dnw, dne, dsw, dse (duze rogi przy dwoch krawedziach).
+BORDER_EDGES = ("n", "e", "s", "w", "cnw", "cne", "csw", "cse", "dnw", "dne", "dsw", "dse")
+BORDERS = {
+    "grass": 227, "field": 251, "jungle_grass": 291, "blighted_grass": 215, "dirt": 387, "sand": 315,
+    "dark_sand": 339, "swamp": 375,
 }
 # Obiekty na kafelku: przycinane do zawartosci (drzewa 64x64 tez mieszcza sie w jednym polu).
 OBJECTS = {
@@ -69,11 +78,47 @@ WINDOWS = {
 }
 # Warianty roslin i kamieni (tiles/klucz_vN.png): renderer wybiera wariant wg pozycji pola, las nie jest jednym drzewem.
 VARIANTS = {
-    "tree": (1503, 1504, 1506, 1507, 1509, 1531, 1534, 1537, 1564),
+    "tree": (1503, 1504, 1506, 1507, 1509, 1531, 1534, 1537),
     "bush": (1498, 1538, 1541, 1544, 1550),
     "flowers": (1401, 1404, 1405, 1406),
     "rock": (1622, 1624, 1626, 1628),
 }
+# 2026-10-23 (Darek: "wszystkie grafiki maja byc z otclienta"): zamiast wlasnych rysunkow odpowiedniki z paczki.
+# nazwa -> numer albo (numer, barwa przebarwienia)
+OTSP_PROPS = {
+    "throne": 1102, "candle": 1242, "carpet": 176, "rug": 176, "broken_wall": 840, "flower_box": 1245,
+    "hay_bale": 1118, "ship_mast": 1131, "signpost": 1175, "anvil": 2694, "forge": 1121,
+    "fishing_net": (1271, (150, 120, 80)), "fountain": 1122, "street_lamp": 1239, "fence": 964, "door_open": 1022,
+    "tall_grass": 1420, "wheat": 1001, "snow_tuft": (1426, (240, 245, 250)), "dry_grass": (1426, (200, 175, 95)),
+    "glow_moss": (1446, (120, 240, 200)), "magma": 2298, "bones": 1183, "shells": (1593, (240, 225, 210)),
+    "palm": 2584, "cactus": 2583,
+}
+OTSP_OBJECTS = {"chest_closed": 1111, "training_dummy": 1275}
+# Mury bez odpowiednika: przebarwiona drewniana sciana (burta statku).
+TINTED_WALLS = {"ship_hull": ((680, 681, 682, 683), (120, 80, 50))}
+TINTED_ROOFS = {"roof_sand": (183, (215, 180, 115))}
+# Przedmioty bez wlasnego obrazka: najblizszy przedmiot z paczki, w razie potrzeby przebarwiony.
+MORE_ITEMS = {
+    "healing_herb": 2695, "fishing_rod": 1171, "saddle": 2673, "scorpion_tail": 2173, "worm": 2172,
+    "boar_tusk": 2174, "hyena_fang": (2174, (235, 225, 200)), "jungle_idol": 2237, "cloth_wraps": 2685,
+    "colossus_core": 2163, "croc_leather": (2162, (110, 140, 70)), "frost_pelt": (2162, (200, 225, 255)),
+    "yeti_fur": (2162, (245, 245, 250)), "troll_hide": (2162, (120, 110, 70)), "snake_skin": (2162, (150, 170, 80)),
+    "mummy_wrap": (2162, (225, 215, 185)), "frozen_heart": (2187, (140, 190, 255)), "glacial_core": 2209,
+    "goblin_ear": (2178, (120, 160, 70)), "shadow_essence": (2161, (150, 90, 220)),
+    "abyssal_ember": (2164, (170, 90, 255)),
+    "blank_rune": (2698, (190, 190, 190)), "healing_rune": 2696, "ultimate_healing_rune": (2696, (120, 255, 160)),
+    "fireburst_rune": 2697, "great_fireball_rune": (2697, (255, 150, 40)), "avalanche_rune": 2698,
+    "boulder_rune": (2696, (190, 140, 90)), "sudden_death_rune": 2699,
+    "challenge_scroll": 1219, "return_scroll": 1220, "exp_scroll": (1219, (255, 215, 90)),
+    "strong_health_potion": 2133, "supreme_health_potion": 2134, "ultimate_health_potion": (2129, (200, 40, 90)),
+    "strong_mana_potion": (2131, (110, 150, 255)), "supreme_mana_potion": (2131, (90, 90, 230)),
+    "ultimate_mana_potion": (2131, (150, 90, 255)), "great_spirit_potion": 2128,
+    "ultimate_spirit_potion": (2128, (230, 120, 255)),
+    "fists_of_the_abyss": 2709, "frostbound_fists": 2710, "umbral_grips": 2711, "molten_knuckles": (2159, (255, 120, 50)),
+}
+# Pupile i potwory bez stroju w paczce: przebarwiony podobny stroj.
+MORE_TINTED = {"cursed_treant": (12, (100, 115, 55))}
+PET_TINTED = {"pet_dog": (1, (160, 115, 70)), "pet_fennec": (11, (235, 175, 95))}
 # Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
 EXTRA_OBJECTS = {"backpack": 2099}
 ITEMS = {
@@ -169,10 +214,15 @@ _NPC_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
 NPCS = {}
 for _line in open(_NPC_CSV, encoding="utf-8"):
     _key = _line.split(";")[0]
-    if _key and not _key.startswith("#") and _key.split("_")[-1] in _ROLE:
+    _cols = _line.split(";")
+    if not _key or _key.startswith("#"):
+        continue
+    if _key.split("_")[-1] in _ROLE:
         NPCS[_key] = _ROLE[_key.split("_")[-1]]
     elif _key.startswith("guard_"):
         NPCS[_key] = _ROLE["guard"]
+    elif len(_cols) > 2 and _cols[2].lower() in _ROLE:   # np. gull_ferryman (CAPTAIN), isle_guide
+        NPCS[_key] = _ROLE[_cols[2].lower()]
 PETS = {"pet_cat": (1, None), "pet_raven": (9, None)}
 
 MASK = {(255, 255, 0): 0, (255, 0, 0): 1, (0, 255, 0): 2, (0, 0, 255): 3}
@@ -297,7 +347,32 @@ def main(client, art):
         save(img, f"{art}/objects/{name}.png"); n += 1
     for name, i in ITEMS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/items/{name}.png"); n += 1
+    for name, first in BORDERS.items():
+        for k, edge in enumerate(BORDER_EDGES):
+            save(ot.compose(spr, things["item"][first + k]), f"{art}/borders/{name}_{edge}.png"); n += 1
+    for name, spec in OTSP_PROPS.items():
+        i, rgb = spec if isinstance(spec, tuple) else (spec, None)
+        img = trim_square(ot.compose(spr, things["item"][i]).convert("RGBA"))
+        save(tint(img, rgb) if rgb else img, f"{art}/tiles/{name}.png"); n += 1
+    for name, i in OTSP_OBJECTS.items():
+        save(trim_square(ot.compose(spr, things["item"][i]).convert("RGBA")), f"{art}/objects/{name}.png"); n += 1
+    for name, (ids, rgb) in TINTED_WALLS.items():
+        for shape, i in zip(WALL_SHAPES, ids):
+            save(tint(ot.compose(spr, things["item"][i]).convert("RGBA"), rgb), f"{art}/walls/{name}_{shape}.png"); n += 1
+    for name, (i, rgb) in TINTED_ROOFS.items():
+        save(tint(ot.compose(spr, things["item"][i]).convert("RGBA"), rgb), f"{art}/objects/{name}.png"); n += 1
+    for name, spec in MORE_ITEMS.items():
+        i, rgb = spec if isinstance(spec, tuple) else (spec, None)
+        img = ot.compose(spr, things["item"][i]).convert("RGBA")
+        if img.width > 32:   # przedmiot 64x64 (np. figurka): przyciety i zmniejszony do pola plecaka
+            img = trim_square(img)
+            img = img.resize((32, 32), Image.NEAREST) if img.width > 32 else img
+        save(tint(img, rgb) if rgb else img, f"{art}/items/{name}.png"); n += 1
     south = ot.DIRS.index("down")
+    for name, (i, rgb) in MORE_TINTED.items():
+        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)
+    for name, (i, rgb) in PET_TINTED.items():
+        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/pets/{name}", rgb)
     for folder, table in (("monsters", MONSTERS), ("npcs", NPCS), ("pets", PETS)):
         for name, (i, colors) in table.items():
             n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}")
@@ -306,6 +381,9 @@ def main(client, art):
     for voc, (i, colors) in CHARACTERS.items():
         for d, dname in enumerate(ot.DIRS):
             n += save_outfit(spr, things["outfit"][i], d, colors, f"{art}/characters/{voc}_{dname}")
+    for name in ("pet_cat", "pet_raven", "pet_dog", "pet_fennec"):   # ikona pupila w plecaku = jego postac
+        src = Image.open(f"{art}/pets/{name}.png").convert("RGBA")
+        save(src.resize((32, 32), Image.NEAREST) if src.width != 32 else src, f"{art}/items/{name}.png"); n += 1
     print("Zapisano", n, "grafik do", art)
 
 

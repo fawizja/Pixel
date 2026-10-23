@@ -126,17 +126,34 @@ public final class TileArt implements Disposable {
         pm.fillRectangle(cellX(whiteCell), cellY(whiteCell), SIZE, SIZE);
 
         final Pixmap base = pm;
-        borders = new GroundBorders(tileRegistry, t -> {
-            Pixmap out = new Pixmap(HI_SIZE, HI_SIZE, Pixmap.Format.RGBA8888);
-            out.setBlending(Pixmap.Blending.None);
-            out.setFilter(Pixmap.Filter.NearestNeighbour);
-            Integer slot = hiCells.get(t.id());
-            if (slot != null && hiPm != null) {
-                out.drawPixmap(hiPm, (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE, 0, 0, HI_SIZE, HI_SIZE);
-            } else {
-                out.drawPixmap(base, cellX(t.id()), cellY(t.id()), SIZE, SIZE, 0, 0, HI_SIZE, HI_SIZE);
+        borders = new GroundBorders(tileRegistry, new GroundBorders.Source() {
+            @Override
+            public Pixmap ground32(TileType t) {
+                Pixmap out = new Pixmap(HI_SIZE, HI_SIZE, Pixmap.Format.RGBA8888);
+                out.setBlending(Pixmap.Blending.None);
+                out.setFilter(Pixmap.Filter.NearestNeighbour);
+                Integer slot = hiCells.get(t.id());
+                if (slot != null && hiPm != null) {
+                    out.drawPixmap(hiPm, (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE, 0, 0, HI_SIZE, HI_SIZE);
+                } else {
+                    out.drawPixmap(base, cellX(t.id()), cellY(t.id()), SIZE, SIZE, 0, 0, HI_SIZE, HI_SIZE);
+                }
+                return out;
             }
-            return out;
+
+            @Override
+            public Pixmap borderPiece(TileType t, int piece) {
+                // kawalki obrzezy z paczki OTSP: borders/klucz_krawedz.png (tools/art/otsp_import.py)
+                com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/borders/" + t.key() + "_" + BORDER_EDGES[piece] + ".png");
+                if (!f.exists()) f = Gdx.files.internal("assets/art/borders/" + t.key() + "_" + BORDER_EDGES[piece] + ".png");
+                if (!f.exists()) return null;
+                try {
+                    return new Pixmap(f);
+                } catch (RuntimeException e) {
+                    Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+                    return null;
+                }
+            }
         });
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -494,6 +511,9 @@ public final class TileArt implements Disposable {
     }
 
     /** Obrzeza podloza (trawa na ziemi, piasek na wodzie...). */
+    /** Nazwy kawalkow obrzezy w kolejnosci GroundBorders.N..IN_NW (nazwy krawedzi jak w RME). */
+    private static final String[] BORDER_EDGES = {"n", "e", "s", "w", "cne", "cse", "csw", "cnw", "dne", "dse", "dsw", "dnw"};
+
     public GroundBorders borders() { return borders; }
     private GroundBorders borders;
 
