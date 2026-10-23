@@ -9,6 +9,7 @@ Region Varden jest kopiowany 1:1 z maps/varden (przesuniety o VARDEN_OFFSET), wi
 uzywana w testach i ten fragment swiata sa identyczne. Wynik: shared/src/main/resources/maps/world/.
 Generator jest deterministyczny (stale ziarno).
 """
+import math
 import os
 import random
 import sys
@@ -142,6 +143,54 @@ def world_legend():
     return WORLD_LEGEND
 
 
+NATURAL = {'grass', 'snow', 'sand', 'jungle_grass', 'ash', 'blighted_grass', 'dark_sand', 'swamp'}
+
+
+def ragged_strait(g):
+    """Cieśnina miedzy kontynentami z poszarpanymi brzegami (zatoczki i cyple do 3 pol) zamiast prostych linii.
+    Przeprawy (wiersze, gdzie ciesnina nie jest sama woda) i 3 wiersze wokol nich zostaja bez zmian."""
+    legend = world_legend()
+    r = random.Random(20261024)
+    waves = [[(r.uniform(0.08, 0.35), r.uniform(0, 6.3), r.uniform(0.5, 1)) for _ in range(4)] for _ in range(2)]
+
+    def wave(i, y):
+        w = waves[i]
+        return sum(a * math.sin(k * y + p) for k, p, a in w) / sum(a for _, _, a in w)
+
+    def natural(ch):
+        c = legend.by_sym.get(ch)
+        return c is not None and c[0] in NATURAL and c[2] == '-' and c[3] == '-'
+
+    crossing = {y for y in range(H) if any(g[y][x] != '~' for x in range(STRAIT_X0, STRAIT_X1 + 1))}
+    for y in range(H):
+        if any(abs(y - c) <= 3 for c in crossing):
+            continue
+        x0 = STRAIT_X0
+        while x0 > 0 and g[y][x0 - 1] == '~':
+            x0 -= 1
+        x1 = STRAIT_X1
+        while x1 < W - 1 and g[y][x1 + 1] == '~':
+            x1 += 1
+        if x0 < STRAIT_X0 - 3 or x1 > STRAIT_X1 + 3:
+            continue                                   # otwarte morze - brzegi juz nieregularne
+        dw = int(round(3 * wave(0, y)))
+        de = int(round(3 * wave(1, y)))
+        if dw > 0 and natural(g[y][x0 - 1]):
+            for x in range(x0, min(x0 + dw, STRAIT_X0)):     # zachodni kontynent konczy sie przed x=160
+                g[y][x] = g[y][x0 - 1]
+        elif dw < 0:
+            for x in range(x0 + dw, x0):
+                if natural(g[y][x]):
+                    g[y][x] = '~'
+        if de < 0 and natural(g[y][x1 + 1]):
+            for x in range(x1 + de + 1, x1 + 1):
+                g[y][x] = g[y][x1 + 1]
+        elif de > 0:
+            for x in range(x1 + 1, x1 + de + 1):
+                if natural(g[y][x]):
+                    g[y][x] = '~'
+
+
 def grid(fill=' '):
     return [[fill] * W for _ in range(H)]
 
@@ -255,11 +304,28 @@ def road(g, points, ch=':'):
     """Droga szerokosci 2 przez kolejne punkty (odcinki poziome/pionowe); mosty nad woda."""
     for (ax, ay), (bx, by) in zip(points, points[1:]):
         x, y = ax, ay
+        n = abs(bx - ax) + abs(by - ay)
+        # dlugie odcinki wija sie (przesuniecie w poprzek drogi, zerowe na koncach - polaczenia bez zmian)
+        crosses_strait = min(ax, bx) <= STRAIT_X1 + 6 and max(ax, bx) >= STRAIT_X0 - 6
+        amp = min(2.4, n / 14.0) if n >= 14 and not crosses_strait else 0
+        phase = (ax * 7 + ay * 13) % 6
+        k = 0
+        prev = 0
         while (x, y) != (bx, by):
-            for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-                px, py = x + dx, y + dy
+            t = k / n
+            off = int(round(amp * math.sin(math.pi * t) * math.sin(2 * math.pi * t * max(1, n // 22) + phase)))
+            cells = [(0, 0), (1, 0), (0, 1), (1, 1)]
+            if off != prev:      # przy zmianie przesuniecia poszerzenie, zeby droga byla ciagla
+                cells += [(0, -1), (1, -1), (0, 2), (1, 2)] if bx == ax else [(-1, 0), (-1, 1), (2, 0), (2, 1)]
+            for dx, dy in cells:
+                if bx != ax:
+                    px, py = x + dx, y + dy + off
+                else:
+                    px, py = x + dx + off, y + dy
                 if 0 <= px < W and 0 <= py < H:
                     g[py][px] = 'b' if g[py][px] in '~V' else ch
+            prev = off
+            k += 1
             if x != bx:
                 x += 1 if bx > x else -1
             else:
@@ -842,6 +908,7 @@ def main():
     for part in city_parts:
         protect += part['protect']
     geo_regions = world_geo.geography(floors, W, H, protect)
+    ragged_strait(g)
     sea = ports.ports(floors)                                 # etap 7: przystanie, mola, mosty na wyspy
     cities.ship(g, 10, 239, random.Random(5401))              # etap 8: wrak u poludniowo-zachodniego brzegu
     wyvern_valley(g)

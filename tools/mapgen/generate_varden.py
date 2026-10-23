@@ -120,12 +120,15 @@ def forest(c, r):
     for y in range(H):
         for x in range(W):
             d = min(x, y, W - 1 - x, H - 1 - y)
-            if d < 2 or d >= 9 or (x, y) in KEEP_CLEAR:
+            if d >= 9 or (x, y) in KEEP_CLEAR:
                 continue
-            depth = 1.6 + 2.2 * (n(x, y) + 1)
+            # las przy krawedzi tylko tam, gdzie wypada w szumie - w swiecie region Varden nie ma lesnej ramki
+            depth = -1.2 + 3.6 * (n(x, y) + 1)
             cell = c.at(x, y)
             if cell[2] in ('tree', 'bush'):
                 c.put(x, y, ('grass', '-', '-', '-'))
+            if cell[0] != 'grass':
+                continue
             if d < depth:
                 v = r.random()
                 c.put(x, y, ('grass', '-', 'tree' if v < 0.62 else 'bush' if v < 0.74 else '-', '-'))
