@@ -20,6 +20,9 @@ public final class Monster {
     private boolean cornered;
     private Direction facing = Direction.SOUTH;
     private MonsterManager.Target target;
+    /** Ostatnie miejsce, gdzie potwor widzial gracza, i kiedy (poscig za znikajacym z oczu). */
+    private Position lastSeen;
+    private long lastSeenMs;
 
     public Monster(int id, MonsterType type, SpawnPoint spawn, Position position) {
         this.id = id;
@@ -50,6 +53,14 @@ public final class Monster {
     void setCornered(boolean c) { cornered = c; }
 
     void setState(MonsterState s) { state = s; }
+    Position lastSeen() { return lastSeen; }
+    long lastSeenMs() { return lastSeenMs; }
+    void saw(Position p, long now) {
+        lastSeen = p;
+        lastSeenMs = now;
+    }
+    /** Rozglada sie: zwrot bez kroku (bezczynny potwor patrzy w rozne strony). */
+    void face(Direction d) { facing = d; }
     long nextAttackMs() { return nextAttackMs; }
     void setNextAttackMs(long t) { nextAttackMs = t; }
     long nextActionMs() { return nextActionMs; }

@@ -164,12 +164,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (target == null || now < nextPlayerAttackMs) return;
         if (world.isProtectionZone(pc.position())) return;
         AttackProfile ap = CombatFormulas.attackProfile(pc, items);
-        if (!inReach(target, ap.range())) {
-            // cel uciekl poza zasieg, a inny potwor nas atakuje - przelacz (wygoda na ekranie dotykowym)
-            Monster attacker = nearestAttackerInReach(ap.range());
-            if (attacker == null) return;
-            target = attacker;
-        }
+        // cel wybiera tylko gracz (Darek, 23.10): poza zasiegiem po prostu nie atakujemy, bez przelaczania na innego
+        if (!inReach(target, ap.range())) return;
         nextPlayerAttackMs = now + ap.intervalMs();
         int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng));
         if (pc.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
@@ -202,7 +198,6 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         leech(dealt);
         push(new CombatEvent(now, m.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
         monsters.provoke(m);
-        if (target == null) target = m;
         if (m.isDead()) onMonsterDeath(m, now);
         return dealt;
     }
@@ -259,15 +254,6 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private boolean inReach(Monster m, int range) {
         return m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= range
                 && world.hasLineOfSight(pc.position(), m.position());
-    }
-
-    private Monster nearestAttackerInReach(int range) {
-        Monster best = null;
-        for (Monster m : monsters.near(pc.position(), range)) {
-            if (m.isDead() || m == target || m.state() != MonsterState.CHASE || !inReach(m, range)) continue;
-            if (best == null || m.position().distanceTo(pc.position()) < best.position().distanceTo(pc.position())) best = m;
-        }
-        return best;
     }
 
     private final LootLog lootLog = new LootLog();
@@ -351,7 +337,6 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t)) pc.skills().addTries(Skill.SHIELDING, 1);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 t.range() > 1 ? null : m.position(), null));
-        if (target == null) target = m; // automatyczna odpowiedz na atak
         if (pc.isDead()) onPlayerDeath(m, now);
     }
 

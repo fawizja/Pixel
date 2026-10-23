@@ -129,16 +129,7 @@ public final class TileArt implements Disposable {
         borders = new GroundBorders(tileRegistry, new GroundBorders.Source() {
             @Override
             public Pixmap ground32(TileType t) {
-                Pixmap out = new Pixmap(HI_SIZE, HI_SIZE, Pixmap.Format.RGBA8888);
-                out.setBlending(Pixmap.Blending.None);
-                out.setFilter(Pixmap.Filter.NearestNeighbour);
-                Integer slot = hiCells.get(t.id());
-                if (slot != null && hiPm != null) {
-                    out.drawPixmap(hiPm, (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE, 0, 0, HI_SIZE, HI_SIZE);
-                } else {
-                    out.drawPixmap(base, cellX(t.id()), cellY(t.id()), SIZE, SIZE, 0, 0, HI_SIZE, HI_SIZE);
-                }
-                return out;
+                return pixmap32(base, t.id());
             }
 
             @Override
@@ -156,6 +147,8 @@ public final class TileArt implements Disposable {
             }
         });
         loadAutotiles(tileRegistry);
+        loadRockShapes(tileRegistry, base);
+        loadEffects();
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         pm.dispose();
@@ -551,6 +544,114 @@ public final class TileArt implements Disposable {
         }
     }
 
+    /** Kafelek 32x32 z atlasu wysokiej rozdzielczosci albo powiekszony z atlasu 16 px. */
+    private Pixmap pixmap32(Pixmap base, int cell) {
+        Pixmap out = new Pixmap(HI_SIZE, HI_SIZE, Pixmap.Format.RGBA8888);
+        out.setBlending(Pixmap.Blending.None);
+        out.setFilter(Pixmap.Filter.NearestNeighbour);
+        Integer slot = hiCells.get(cell);
+        if (slot != null && hiPm != null) {
+            out.drawPixmap(hiPm, (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE, 0, 0, HI_SIZE, HI_SIZE);
+        } else {
+            out.drawPixmap(base, cellX(cell), cellY(cell), SIZE, SIZE, 0, 0, HI_SIZE, HI_SIZE);
+        }
+        return out;
+    }
+
+    /** Odsloniete boki skaly w masce {@link #rockShape}. */
+    public static final int ROCK_N = 1, ROCK_E = 2, ROCK_S = 4, ROCK_W = 8;
+    private static final int ROCK_R = 14;
+    private TextureRegion[][] rockShapes;
+    private Texture rockAtlas;
+
+    /**
+     * Zaokraglone skaly (gory, jaskinie, klify): dla kazdej skaly 16 wersji wg odslonietych bokow. Odsloniety bok
+     * dostaje nierowna krawedz, rog miedzy dwoma odslonietymi bokami - luk, a brzeg jest przyciemniony, zeby
+     * lita skala nie wygladala jak kwadratowe pola.
+     */
+    private void loadRockShapes(TileRegistry registry, Pixmap base) {
+        java.util.List<TileType> rocks = new ArrayList<>();
+        for (TileType t : registry.all()) {
+            if (t.layer() == pl.fawizja.pixel.world.Layer.WALL && "rockwall".equals(t.pattern())) rocks.add(t);
+        }
+        rockShapes = new TextureRegion[registry.maxId() + 1][];
+        if (rocks.isEmpty()) return;
+        Pixmap pm = new Pixmap(16 * HI_SIZE, rocks.size() * HI_SIZE, Pixmap.Format.RGBA8888);
+        pm.setBlending(Pixmap.Blending.None);
+        for (int i = 0; i < rocks.size(); i++) {
+            Pixmap src = pixmap32(base, rocks.get(i).id());
+            for (int mask = 0; mask < 16; mask++) {
+                for (int y = 0; y < HI_SIZE; y++) {
+                    for (int x = 0; x < HI_SIZE; x++) {
+                        float d = rockInside(mask, x + 0.5f, y + 0.5f);
+                        int c = src.getPixel(x, y);
+                        if (d < 0) c = 0;
+                        else if (d < 2.2f) c = shadeRgba(c, d < 1.1f ? 0.55f : 0.75f);
+                        else if (d < 4f && rockLit(mask, x + 0.5f, y + 0.5f)) c = shadeRgba(c, 1.18f);
+                        pm.drawPixel(mask * HI_SIZE + x, i * HI_SIZE + y, c);
+                    }
+                }
+            }
+            src.dispose();
+        }
+        rockAtlas = new Texture(pm);
+        rockAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        pm.dispose();
+        for (int i = 0; i < rocks.size(); i++) {
+            TextureRegion[] v = new TextureRegion[16];
+            for (int mask = 0; mask < 16; mask++) v[mask] = new TextureRegion(rockAtlas, mask * HI_SIZE, i * HI_SIZE, HI_SIZE, HI_SIZE);
+            rockShapes[rocks.get(i).id()] = v;
+        }
+    }
+
+    /** Odleglosc piksela od brzegu skaly w masce (ujemna = poza skala). */
+    static float rockInside(int mask, float x, float y) {
+        float n = HI_SIZE, d = Float.MAX_VALUE;
+        boolean north = (mask & ROCK_N) != 0, east = (mask & ROCK_E) != 0, south = (mask & ROCK_S) != 0, west = (mask & ROCK_W) != 0;
+        if (north) d = Math.min(d, y - wobble(x, 0));
+        if (south) d = Math.min(d, n - y - wobble(x, 1));
+        if (west) d = Math.min(d, x - wobble(y, 2));
+        if (east) d = Math.min(d, n - x - wobble(y, 3));
+        float r = ROCK_R;
+        if (north && west) d = Math.min(d, corner(x, y, r, r, r));
+        if (north && east) d = Math.min(d, corner(x, y, n - r, r, r));
+        if (south && west) d = Math.min(d, corner(x, y, r, n - r, r));
+        if (south && east) d = Math.min(d, corner(x, y, n - r, n - r, r));
+        return d;
+    }
+
+    /** Wglebienie nierownej krawedzi: zero na koncach boku (sasiednie pola sie stykaja), do ~3 px w srodku. */
+    private static float wobble(float t, int side) {
+        double u = t / HI_SIZE;
+        double bump = Math.sin(Math.PI * u);
+        return (float) (bump * (1.8 + 1.4 * Math.sin(u * Math.PI * 2 + side * 1.7)));
+    }
+
+    private static float corner(float x, float y, float cx, float cy, float r) {
+        boolean inX = (cx < HI_SIZE / 2f) ? x < cx : x > cx;
+        boolean inY = (cy < HI_SIZE / 2f) ? y < cy : y > cy;
+        if (!inX || !inY) return Float.MAX_VALUE;
+        return r - (float) Math.hypot(x - cx, y - cy);
+    }
+
+    /** Brzeg od polnocy i zachodu jest oswietlony, reszta w cieniu. */
+    private static boolean rockLit(int mask, float x, float y) {
+        return ((mask & ROCK_N) != 0 && y < HI_SIZE / 2f) || ((mask & ROCK_W) != 0 && x < HI_SIZE / 2f);
+    }
+
+    private static int shadeRgba(int c, float f) {
+        int r = Math.min(255, (int) (((c >>> 24) & 0xff) * f));
+        int g = Math.min(255, (int) (((c >>> 16) & 0xff) * f));
+        int b = Math.min(255, (int) (((c >>> 8) & 0xff) * f));
+        return (r << 24) | (g << 16) | (b << 8) | (c & 0xff);
+    }
+
+    /** Skala o zaokraglonych odslonietych bokach (maska ROCK_*) albo null, gdy kafelek nie jest skala. */
+    public TextureRegion rockShape(int tileId, int mask) {
+        if (rockShapes == null || tileId <= 0 || tileId >= rockShapes.length || rockShapes[tileId] == null) return null;
+        return rockShapes[tileId][mask & 15];
+    }
+
     /** Cwiartki autokafelka podloza (indeks = wiersz * 5 + rodzaj) albo null, gdy podloze go nie ma. */
     public TextureRegion[] autotile(int tileId) {
         return autotiles != null && tileId > 0 && tileId < autotiles.length ? autotiles[tileId] : null;
@@ -558,6 +659,89 @@ public final class TileArt implements Disposable {
 
     private Texture autoAtlas;
     private TextureRegion[][] autotiles;
+
+    /** Efekty czarow (klatki effects/nazwa_N.png) i pociski (missiles/nazwa_XY.png) z paczki OTSP. */
+    public static final String[] EFFECT_NAMES = {"blood", "energy", "poof", "sparks", "fire", "water", "earth", "dust",
+            "flame", "explosion", "ice", "holy", "death", "heal", "haste"};
+    public static final String[] MISSILE_NAMES = {"arrow", "spear", "fire", "ice", "earth", "energy", "stone", "star",
+            "knife", "holy", "death"};
+    private static final int FX = 64, FX_COLS = 16;
+    private Texture fxAtlas;
+    private final Map<String, TextureRegion[]> effects = new java.util.HashMap<>();
+    private final Map<String, TextureRegion[]> missiles = new java.util.HashMap<>();
+
+    private void loadEffects() {
+        List<String> keys = new ArrayList<>();
+        List<Pixmap> images = new ArrayList<>();
+        for (String name : EFFECT_NAMES) {
+            for (int f = 0; f < 32; f++) {
+                Pixmap p = loadArt("effects/" + name + "_" + f + ".png");
+                if (p == null) break;
+                keys.add("e:" + name + ":" + f);
+                images.add(p);
+            }
+        }
+        for (String name : MISSILE_NAMES) {
+            for (int k = 0; k < 9; k++) {
+                if (k == 4) continue;
+                Pixmap p = loadArt("missiles/" + name + "_" + (k % 3) + (k / 3) + ".png");
+                if (p == null) continue;
+                keys.add("m:" + name + ":" + k);
+                images.add(p);
+            }
+        }
+        if (images.isEmpty()) return;
+        int rows = (images.size() + FX_COLS - 1) / FX_COLS;
+        Pixmap pm = new Pixmap(FX_COLS * FX, rows * FX, Pixmap.Format.RGBA8888);
+        pm.setBlending(Pixmap.Blending.None);
+        int[] sizes = new int[images.size()];
+        for (int i = 0; i < images.size(); i++) {
+            Pixmap src = images.get(i);
+            sizes[i] = Math.min(FX, src.getWidth());
+            pm.drawPixmap(src, 0, 0, sizes[i], sizes[i], (i % FX_COLS) * FX, (i / FX_COLS) * FX, sizes[i], sizes[i]);
+            src.dispose();
+        }
+        fxAtlas = new Texture(pm);
+        fxAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        pm.dispose();
+        for (int i = 0; i < keys.size(); i++) {
+            String[] k = keys.get(i).split(":");
+            TextureRegion r = new TextureRegion(fxAtlas, (i % FX_COLS) * FX, (i / FX_COLS) * FX, sizes[i], sizes[i]);
+            Map<String, TextureRegion[]> into = k[0].equals("e") ? effects : missiles;
+            int idx = Integer.parseInt(k[2]);
+            TextureRegion[] arr = into.get(k[1]);
+            if (arr == null || arr.length <= idx) {
+                TextureRegion[] grown = new TextureRegion[k[0].equals("m") ? 9 : idx + 1];
+                if (arr != null) System.arraycopy(arr, 0, grown, 0, arr.length);
+                arr = grown;
+                into.put(k[1], arr);
+            }
+            arr[idx] = r;
+        }
+    }
+
+    private Pixmap loadArt(String name) {
+        com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name);
+        if (!f.exists()) f = Gdx.files.internal("assets/art/" + name);
+        if (!f.exists()) return null;
+        try {
+            return new Pixmap(f);
+        } catch (RuntimeException e) {
+            Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+            return null;
+        }
+    }
+
+    /** Klatki efektu (32 albo 64 px; 64 = efekt na 2x2 pola, prawy dolny kwadrat na polu) albo null. */
+    public TextureRegion[] effect(String name) { return effects.get(name); }
+
+    /** Pocisk lecacy w kierunku (dx, dy w ukladzie mapy, -1..1) albo null. */
+    public TextureRegion missile(String name, int dx, int dy) {
+        TextureRegion[] m = missiles.get(name);
+        if (m == null) return null;
+        int k = (Integer.signum(dx) + 1) + (Integer.signum(dy) + 1) * 3;
+        return k == 4 ? m[5] : m[k];
+    }
 
     /** Nazwy kawalkow obrzezy w kolejnosci GroundBorders.N..IN_NW (nazwy krawedzi jak w RME). */
     private static final String[] BORDER_EDGES = {"n", "e", "s", "w", "cne", "cse", "csw", "cnw", "dne", "dse", "dsw", "dnw"};
@@ -1393,6 +1577,8 @@ public final class TileArt implements Disposable {
         atlas.dispose();
         if (borders != null) borders.dispose();
         if (autoAtlas != null) autoAtlas.dispose();
+        if (rockAtlas != null) rockAtlas.dispose();
+        if (fxAtlas != null) fxAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();
         lightTexture.dispose();

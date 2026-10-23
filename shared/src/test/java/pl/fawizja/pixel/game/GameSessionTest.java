@@ -88,12 +88,30 @@ class GameSessionTest {
             GameSession s = sessionWithMonsters(pc, 3);
             s.teleport(new Position(13, 11, 0), 0);
             long exp = pc.experience();
-            // stoi w miejscu przez 3 minuty: wilki atakuja, postac odpowiada automatycznie
-            for (long t = 0; t < 180_000; t += 50) s.update(t, null);
+            // stoi w miejscu przez 3 minuty: wilki atakuja, gracz zaznacza najblizszego i postac go bije
+            for (long t = 0; t < 180_000; t += 50) {
+                if (t % 250 == 0 && s.combat().target() == null) s.combat().cycleTarget();
+                s.update(t, null);
+            }
             assertEquals(new Position(13, 11, 0), pc.position(), v + " did not die");
             assertTrue(pc.experience() > exp, v + " killed something");
             assertTrue(s.combat().kills() >= 2, v + " kills " + s.combat().kills());
         }
+    }
+
+    @Test
+    void attackedPlayerDoesNotPickATargetByItself() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        GameSession s = sessionWithMonsters(pc, 3);
+        s.teleport(new Position(13, 11, 0), 0);
+        int hp = pc.health();
+        boolean hit = false;
+        for (long t = 0; t < 60_000 && !hit; t += 50) {
+            s.update(t, null);
+            hit = pc.health() < hp;
+        }
+        assertTrue(hit, "wolves attacked");
+        assertNull(s.combat().target(), "only the player selects a monster to attack");
     }
 
     @Test

@@ -116,6 +116,18 @@ MORE_ITEMS = {
     "ultimate_spirit_potion": (2128, (230, 120, 255)),
     "fists_of_the_abyss": 2709, "frostbound_fists": 2710, "umbral_grips": 2711, "molten_knuckles": (2159, (255, 120, 50)),
 }
+# Efekty czarow i pociskow (Darek, 23.10: "skile i spele nie maja grafik, paladyn rzuca kulka").
+# Efekt: klatki animacji effects/nazwa_N.png; pocisk: 8 kierunkow missiles/nazwa_XY.png (X, Y = 0..2 jak w Tibii:
+# 0 = lewo/gora, 1 = srodek, 2 = prawo/dol). nazwa -> numer albo (numer, barwa przebarwienia)
+EFFECTS = {
+    "blood": 1, "energy": 2, "poof": 3, "sparks": 4, "fire": 6, "water": 7, "earth": 9, "dust": 10,
+    "flame": 11, "explosion": 13, "ice": 15, "holy": (2, (255, 230, 120)), "death": (12, (170, 80, 220)),
+    "heal": (2, (120, 255, 150)), "haste": (7, (150, 210, 255)),
+}
+MISSILES = {
+    "arrow": 2, "spear": 1, "fire": 4, "ice": 13, "earth": 5, "energy": (10, (120, 175, 255)), "stone": 12, "star": 6, "knife": 9,
+    "holy": (10, (255, 225, 110)), "death": (10, (170, 80, 220)),
+}
 # Pupile i potwory bez stroju w paczce: przebarwiony podobny stroj.
 MORE_TINTED = {"cursed_treant": (12, (100, 115, 55))}
 PET_TINTED = {"pet_dog": (1, (160, 115, 70)), "pet_fennec": (11, (235, 175, 95))}
@@ -368,6 +380,21 @@ def main(client, art):
             img = trim_square(img)
             img = img.resize((32, 32), Image.NEAREST) if img.width > 32 else img
         save(tint(img, rgb) if rgb else img, f"{art}/items/{name}.png"); n += 1
+    for name, spec in EFFECTS.items():
+        i, rgb = spec if isinstance(spec, tuple) else (spec, None)
+        t = things["effect"][i]
+        for f in range(t["frames"]):
+            img = ot.compose(spr, t, frame=f).convert("RGBA")
+            save(tint(img, rgb) if rgb else img, f"{art}/effects/{name}_{f}.png"); n += 1
+    for name, spec in MISSILES.items():
+        i, rgb = spec if isinstance(spec, tuple) else (spec, None)
+        t = things["missile"][i]
+        for py in range(3):
+            for px in range(3):
+                if px == 1 and py == 1:
+                    continue
+                img = ot.compose(spr, t, x=px, y=py).convert("RGBA")
+                save(tint(img, rgb) if rgb else img, f"{art}/missiles/{name}_{px}{py}.png"); n += 1
     south = ot.DIRS.index("down")
     for name, (i, rgb) in MORE_TINTED.items():
         n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)

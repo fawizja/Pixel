@@ -27,7 +27,7 @@ public final class GameSettings {
     private boolean batterySaver;
     private boolean highLighting = true;
     private boolean damageNumbers = true;
-    private int volume = 60;
+    private int volume = 0;   // dzwiek domyslnie wylaczony (Darek, 23.10); wlacza sie w ustawieniach
     private boolean autoLoot = true;
     private boolean weather = true;
     private int autoHeal;
@@ -149,7 +149,7 @@ public final class GameSettings {
         m.put("battery", String.valueOf(batterySaver));
         m.put("light", String.valueOf(highLighting));
         m.put("numbers", String.valueOf(damageNumbers));
-        m.put("volume", String.valueOf(volume));
+        m.put("sound", String.valueOf(volume));
         m.put("loot", String.valueOf(autoLoot));
         m.put("weather", String.valueOf(weather));
         m.put("heal", String.valueOf(autoHeal));
@@ -166,7 +166,8 @@ public final class GameSettings {
         GameSettings s = new GameSettings();
         if (m == null) return s;
         s.fpsCap = choice(m.get("fps"), FPS_CHOICES, s.fpsCap);
-        s.volume = choice(m.get("volume"), VOLUME_CHOICES, s.volume);
+        // nowy klucz "sound": zapisany wczesniej "volume" (domyslnie 60%) nie wlacza dzwieku z powrotem
+        s.volume = choice(m.get("sound"), VOLUME_CHOICES, s.volume);
         s.batterySaver = bool(m.get("battery"), false);
         s.highLighting = bool(m.get("light"), true);
         s.damageNumbers = bool(m.get("numbers"), true);

@@ -25,6 +25,10 @@ public final class MonsterManager {
     public static final int ACTIVE_RADIUS = 20;
     /** Dodatkowy dystans od spawnu, po ktorym potwor rezygnuje z poscigu. */
     public static final int LEASH = 10;
+    /** Najkrotszy zasieg wzroku: potwor widzi mniej wiecej caly ekran przed soba (jak w Tibii). */
+    public static final int MIN_SIGHT = 7;
+    /** Jak dlugo potwor goni gracza, ktory zniknal mu z oczu (idzie tam, gdzie go ostatnio widzial). */
+    public static final long MEMORY_MS = 5_000;
 
     /** Callback do walki - wywolywany, gdy potwor atakuje gracza. */
     public interface AttackHandler {
@@ -422,20 +426,24 @@ public final class MonsterManager {
         Position mp = m.position();
         int dist = mp.distanceTo(tp);
         boolean nightBonus = nightBonus(m);
-        int aggro = t.aggroRange() + (nightBonus ? NIGHT_AGGRO_BONUS : 0);
-        boolean canSee = dist <= aggro + 6 && world.hasLineOfSight(mp, tp);
+        int sight = sightRange(t, nightBonus);
+        boolean canSee = dist <= sight + 4 && world.hasLineOfSight(mp, tp);
         boolean targetValid = target.attackable() && tp.z() == mp.z() && !world.isProtectionZone(tp);
+        if (targetValid && canSee) m.saw(tp, now);
+        // poscig z pamieci: gracz schowal sie za rogiem - potwor idzie tam, gdzie go ostatnio widzial
+        boolean remembers = !canSee && m.lastSeen() != null && now - m.lastSeenMs() < MEMORY_MS
+                && !mp.equals(m.lastSeen());
         boolean tooFarFromHome = mp.distanceTo(m.spawn().center()) > m.spawn().radius() + LEASH
                 || mp.z() != m.spawn().center().z();
 
         // wybor stanu
         switch (m.state()) {
             case IDLE:
-                if (targetValid && dist <= aggro && canSee) m.setState(MonsterState.CHASE);
+                if (targetValid && canSee && notices(m, tp, sight)) m.setState(MonsterState.CHASE);
                 break;
             case CHASE:
             case FLEE:
-                if (!targetValid || !canSee || tooFarFromHome) m.setState(MonsterState.RETURN);
+                if (!targetValid || (!canSee && !remembers) || tooFarFromHome) m.setState(MonsterState.RETURN);
                 else if (!m.cornered() && t.fleeHealthPercent() > 0 && m.healthFraction() * 100 < t.fleeHealthPercent()) {
                     m.setState(MonsterState.FLEE);
                 }
@@ -483,7 +491,8 @@ public final class MonsterManager {
         if (m.isMoving(now) || now < m.nextActionMs()) return;
         Direction step = null;
         switch (m.state()) {
-            case CHASE: step = chaseStep(m, tp, dist, canSee); break;
+            case CHASE: step = canSee ? chaseStep(m, tp, dist, true)
+                    : Pathfinder.nextStepOrthogonalFirst(world, mp, m.lastSeen(), 0, 400, blockedFor(tp)); break;
             case FLEE:
                 step = fleeStep(m, tp);
                 if (step == null) {
@@ -499,11 +508,30 @@ public final class MonsterManager {
                 // regeneracja poza walka: 5% zdrowia na kazdy "oddech" bezczynnosci
                 if (m.health() < t.maxHealth()) m.heal(Math.max(1, t.maxHealth() / 20));
                 if (rng.nextInt(3) == 0) step = Direction.values()[rng.nextInt(4)]; // spacer bez skosow
+                else if (rng.nextInt(2) == 0) m.face(Direction.values()[rng.nextInt(4)]); // rozglada sie
                 m.setNextActionMs(now + 1500 + rng.nextInt(2500));
                 break;
             default:
         }
         if (step != null) tryStep(m, step, now, tp);
+    }
+
+    /** Zasieg wzroku przed soba: zasieg aggro z danych + 2, co najmniej MIN_SIGHT; noca drapiezniki dalej. */
+    static int sightRange(MonsterType t, boolean nightBonus) {
+        return Math.max(MIN_SIGHT, t.aggroRange() + 2) + (nightBonus ? NIGHT_AGGRO_BONUS : 0);
+    }
+
+    /**
+     * Pole widzenia: przed soba (polplaszczyzna w strone, w ktora patrzy) pelny zasieg wzroku, za plecami polowa,
+     * a gracza tuz obok (2 pola) zawsze zauwazy.
+     */
+    static boolean notices(Monster m, Position tp, int sight) {
+        Position mp = m.position();
+        int dist = mp.distanceTo(tp);
+        if (dist <= 2) return true;
+        int dx = tp.x() - mp.x(), dy = tp.y() - mp.y();
+        boolean ahead = dx * m.facing().dx + dy * m.facing().dy >= 0;
+        return dist <= (ahead ? sight : (sight + 1) / 2);
     }
 
     private Predicate<Position> blockedFor(Position player) {

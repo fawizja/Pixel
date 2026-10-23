@@ -146,7 +146,7 @@ class MonsterAiTest {
     @Test
     void nocturnalPredatorsSpotPlayersFromFartherAtNight() {
         Position wolfAt = new Position(42, 6, 0);
-        int distance = REG.get("wolf").aggroRange() + 2;
+        int distance = MonsterManager.sightRange(REG.get("wolf"), false) + 1;
         for (boolean night : new boolean[] {false, true}) {
             MonsterManager mm = single("wolf", wolfAt, 0);
             mm.setNight(night);
@@ -155,6 +155,19 @@ class MonsterAiTest {
             run(mm, d, 0, 1_000);
             assertEquals(night ? MonsterState.CHASE : MonsterState.IDLE, w.state(), "night=" + night);
         }
+    }
+
+    @Test
+    void monstersSeeFartherAheadThanBehindAndNoticeClosePlayers() {
+        MonsterType boar = REG.get("boar");
+        int sight = MonsterManager.sightRange(boar, false);
+        assertTrue(sight >= MonsterManager.MIN_SIGHT, "sees about one screen");
+        Monster m = new Monster(1, boar, new SpawnPoint("boar", new Position(42, 6, 0), 0, 1, 60), new Position(42, 6, 0));
+        // patrzy na poludnie (y rosnie)
+        assertTrue(MonsterManager.notices(m, new Position(42, 6 + sight, 0), sight), "in front at full range");
+        assertFalse(MonsterManager.notices(m, new Position(42, 6 - sight, 0), sight), "behind: only half range");
+        assertTrue(MonsterManager.notices(m, new Position(42, 6 - (sight + 1) / 2, 0), sight));
+        assertTrue(MonsterManager.notices(m, new Position(42, 4, 0), sight), "right behind its back it still hears");
     }
 
     @Test

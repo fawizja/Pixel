@@ -269,11 +269,15 @@ public final class WorldRenderer {
             return;
         }
         TextureRegion r = art.tile(id);
+        TextureRegion shaped = art.rockShape(id, rockMask(f, x, y));
+        if (shaped != null) r = shaped;
         if (r == null) return;
         if (f.get(Layer.WALL, x, y + 1) == 0) {
             tmp.set(batch.getColor());
             batch.setColor(tmp.r * 0.62f, tmp.g * 0.62f, tmp.b * 0.62f, tmp.a);
-            batch.draw(r, sx, wy, 1f, WALL_RAISE);
+            // zaokraglona skala: zbocze to przyciemniona kopia ksztaltu przesunieta w dol, wiec ma te same luki
+            if (shaped != null) batch.draw(r, sx, wy, 1f, 1f);
+            else batch.draw(r, sx, wy, 1f, WALL_RAISE);
             batch.setColor(tmp);
         }
         batch.draw(r, sx, wy + WALL_RAISE, 1f, 1f);
@@ -286,6 +290,21 @@ public final class WorldRenderer {
                 if (rock != null) batch.draw(rock, sx + off, wy + WALL_RAISE + 0.15f - off, 0.8f, 0.8f);
             }
         }
+    }
+
+    /** Boki skaly, przy ktorych nie ma innej skaly (TileArt.ROCK_*): tam skala jest zaokraglona. */
+    int rockMask(FloorMap f, int x, int y) {
+        int m = 0;
+        if (!rock(f, x, y - 1)) m |= TileArt.ROCK_N;
+        if (!rock(f, x + 1, y)) m |= TileArt.ROCK_E;
+        if (!rock(f, x, y + 1)) m |= TileArt.ROCK_S;
+        if (!rock(f, x - 1, y)) m |= TileArt.ROCK_W;
+        return m;
+    }
+
+    private boolean rock(FloorMap f, int x, int y) {
+        if (!f.inBounds(x, y)) return true;
+        return art.rockShape(f.get(Layer.WALL, x, y), 0) != null;
     }
 
     /**

@@ -9,9 +9,10 @@ class WorldClockTest {
     @Test
     void phasesCoverTheWholeDay() {
         assertEquals(DayPhase.NIGHT, WorldClock.phase(0));
-        assertEquals(DayPhase.DAWN, WorldClock.phase(6 * 60));
+        assertEquals(DayPhase.DAWN, WorldClock.phase(5 * 60 + 30));
         assertEquals(DayPhase.DAY, WorldClock.phase(12 * 60));
-        assertEquals(DayPhase.DUSK, WorldClock.phase(20 * 60));
+        assertEquals(DayPhase.DUSK, WorldClock.phase(17 * 60 + 30));
+        assertEquals(DayPhase.NIGHT, WorldClock.phase(18 * 60));
         assertEquals(DayPhase.NIGHT, WorldClock.phase(23 * 60));
     }
 
@@ -32,9 +33,19 @@ class WorldClockTest {
     }
 
     @Test
+    void anHourOfLightAndAnHourOfDarkness() {
+        WorldClock c = WorldClock.standard();
+        long light = 0;
+        for (int m = 0; m < WorldClock.MINUTES_PER_DAY; m++) if (c.ambientLight(m) > (1f + c.nightAmbient()) / 2f) light++;
+        long lightMs = light * WorldClock.REAL_DAY_MS / WorldClock.MINUTES_PER_DAY;
+        assertEquals(60L * 60_000L, lightMs, 60_000L, "about one real hour of daylight");
+        assertEquals(2L * 60L * 60_000L, WorldClock.REAL_DAY_MS);
+    }
+
+    @Test
     void timeComesFromServerClockAndWraps() {
         WorldClock c = WorldClock.standard();
-        long hour = 60L * 60L * 1000L;
+        long hour = WorldClock.REAL_DAY_MS;
         assertEquals(0, c.minuteOfDay(0));
         assertEquals(720, c.minuteOfDay(hour / 2));
         assertEquals(0, c.minuteOfDay(hour));

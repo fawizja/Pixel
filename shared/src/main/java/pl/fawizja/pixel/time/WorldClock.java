@@ -2,12 +2,16 @@ package pl.fawizja.pixel.time;
 
 /**
  * Zegar swiata gry liczony z czasu serwera (nie z zegara telefonu).
- * Domyslnie pelna doba gry trwa 60 minut czasu rzeczywistego.
+ * Doba gry trwa 2 godziny czasu rzeczywistego: godzina jasno (05:30-17:30 gry) i godzina ciemno (Darek, 23.10).
  * Oswietlenie zmienia sie plynnie, a noc ma minimalna jasnosc dla czytelnosci.
  */
 public final class WorldClock {
 
     public static final int MINUTES_PER_DAY = 24 * 60;
+    /** Doba gry w ms czasu rzeczywistego: 1 h dnia + 1 h nocy. */
+    public static final long REAL_DAY_MS = 2L * 60L * 60L * 1000L;
+    /** Godzina gry w ms czasu rzeczywistego (5 min). */
+    public static final long GAME_HOUR_MS = REAL_DAY_MS / 24;
 
     private final long epochMs;
     private final long realMsPerGameDay;
@@ -22,7 +26,7 @@ public final class WorldClock {
     }
 
     public static WorldClock standard() {
-        return new WorldClock(0L, 60L * 60L * 1000L, 0.38f);
+        return new WorldClock(0L, REAL_DAY_MS, 0.38f);
     }
 
     /** Minuta doby gry (0..1439) dla czasu serwera w ms. */
@@ -33,9 +37,9 @@ public final class WorldClock {
 
     public static DayPhase phase(int minuteOfDay) {
         int h = minuteOfDay / 60;
-        if (h >= 5 && h < 7) return DayPhase.DAWN;
-        if (h >= 7 && h < 19) return DayPhase.DAY;
-        if (h >= 19 && h < 21) return DayPhase.DUSK;
+        if (h == 5) return DayPhase.DAWN;
+        if (h >= 6 && h < 17) return DayPhase.DAY;
+        if (h == 17) return DayPhase.DUSK;
         return DayPhase.NIGHT;
     }
 
@@ -44,9 +48,9 @@ public final class WorldClock {
         int m = Math.floorMod(minuteOfDay, MINUTES_PER_DAY);
         float day = 1f;
         float night = nightAmbient;
-        if (m >= 5 * 60 && m < 7 * 60) return lerp(night, day, smooth((m - 300) / 120f));
-        if (m >= 7 * 60 && m < 19 * 60) return day;
-        if (m >= 19 * 60 && m < 21 * 60) return lerp(day, night, smooth((m - 1140) / 120f));
+        if (m >= 5 * 60 && m < 6 * 60) return lerp(night, day, smooth((m - 300) / 60f));
+        if (m >= 6 * 60 && m < 17 * 60) return day;
+        if (m >= 17 * 60 && m < 18 * 60) return lerp(day, night, smooth((m - 1020) / 60f));
         return night;
     }
 

@@ -10,31 +10,33 @@ import pl.fawizja.pixel.vocation.Vocation;
 /** Etap 11: zegar swiata w sesji, noc i jej wplyw na potwory. */
 class DayNightTest {
 
-    /** Minuta gry trwa 2,5 s czasu rzeczywistego (doba = 60 min). */
-    static final long GAME_HOUR_MS = 150_000L;
+    /** Godzina gry = 5 min czasu rzeczywistego (doba = 2 h: godzina dnia i godzina nocy). */
+    static final long GAME_HOUR_MS = pl.fawizja.pixel.time.WorldClock.GAME_HOUR_MS;
 
     @Test
-    void sessionStartsAtNineAndNightFallsAtNine() {
+    void sessionStartsAtNineAndNightFallsAtSix() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc);
         assertEquals(9 * 60, s.clock().minuteOfDay(0));
         assertFalse(s.isNight(0));
-        long nightAt = 12 * GAME_HOUR_MS; // 21:00
+        long nightAt = 9 * GAME_HOUR_MS; // 18:00
+        assertFalse(s.isNight(nightAt - 60_000));
         assertTrue(s.isNight(nightAt));
-        assertFalse(s.isNight(nightAt + 9 * GAME_HOUR_MS), "06:00 is dawn");
+        assertTrue(s.isNight(nightAt + 10 * GAME_HOUR_MS + GAME_HOUR_MS / 2), "04:30 is still night");
+        assertFalse(s.isNight(nightAt + 11 * GAME_HOUR_MS), "05:00 is dawn");
     }
 
     @Test
     void nightfallIsAnnouncedAndMonstersAreTold() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc);
-        long t = 12 * GAME_HOUR_MS - 2_000;
+        long t = 9 * GAME_HOUR_MS - 2_000;
         s.update(t, null);
         assertFalse(s.monsters().isNight());
         s.update(t + 3_000, null);
         assertTrue(s.monsters().isNight());
         assertTrue(s.log().latest(3).stream().anyMatch(e -> e.text().startsWith("Zapada noc")));
-        s.update(t + 9 * GAME_HOUR_MS + 3_000, null);
+        s.update(t + 11 * GAME_HOUR_MS + 3_000, null);
         assertFalse(s.monsters().isNight());
         assertTrue(s.log().latest(3).stream().anyMatch(e -> e.text().equals("Wstaje dzień.")));
     }

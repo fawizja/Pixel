@@ -43,17 +43,16 @@ class GameSettingsTest {
     }
 
     @Test
-    void volumeCyclesThroughLevelsAndIsSaved() {
+    void soundIsOffByDefaultCyclesThroughLevelsAndIsSaved() {
         GameSettings s = new GameSettings();
-        assertEquals(60, s.volume());
-        assertTrue(s.apply("settings:sound"));
-        assertEquals(100, s.volume());
-        s.cycleVolume();
         assertEquals(0, s.volume());
         assertEquals(0f, s.volumeFactor());
         assertTrue(s.allRows()[4][1].contains("wyłączony"));
-        assertEquals(0, GameSettings.fromMap(s.toMap()).volume());
-        assertEquals(60, GameSettings.fromMap(Map.of("volume", "55")).volume(), "unsupported level falls back");
+        assertEquals(0, GameSettings.fromMap(Map.of("volume", "60")).volume(), "old saved volume does not turn sound on");
+        assertTrue(s.apply("settings:sound"));
+        assertEquals(30, s.volume());
+        assertEquals(30, GameSettings.fromMap(s.toMap()).volume());
+        assertEquals(0, GameSettings.fromMap(Map.of("sound", "55")).volume(), "unsupported level falls back");
     }
 
     @Test

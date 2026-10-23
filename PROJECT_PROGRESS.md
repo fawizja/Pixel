@@ -372,6 +372,23 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   miejsce kolidowalo z rdzeniem Varden); znak promocji widac nad wlasna postacia i w ikonach stanu, inni gracze
   online go nie widza (protokol nie przesyla flagi); orki to przebarwione stroje (paczka OTSP nie ma orkow).
 
+## Mniej sztucznie: skaly, walka, pory dnia, efekty (brief z 2026-10-23, 17:04)
+- Grafika: 97 grafik OTSP zamiast wlasnych (647122d), podloza z autokafelkow WsT (d35c92a). Skaly (gory,
+  jaskinie, klify, piramidy) maja zaokraglone rogi i nierowne brzegi tam, gdzie nie stykaja sie z inna skala;
+  zbocze ma ten sam ksztalt (TileArt.loadRockShapes, WorldRenderer.rockMask).
+- Dzwiek domyslnie wylaczony (ustawienie zapisywane pod nowym kluczem "sound").
+- Walka: postac atakuje tylko potwora zaznaczonego przez gracza; usunieto samo przelaczanie celu i samo
+  odpowiadanie na atak (takze po trafieniu czarem obszarowym).
+- Potwory: pole widzenia co najmniej 7 pol (wiecej w nocy), pelny zasieg przed soba i polowa za soba, zawsze
+  zauwazaja gracza w promieniu 2 pol; same biegna do gracza, a gdy zniknie z oczu, ida przez 5 s tam, gdzie go
+  widzialy; stojac rozgladaja sie.
+- Czas: doba gry trwa 2 godziny: 1 godzina dnia i 1 godzina nocy (switt i zmierzch po 5 min). Klimat zmienia
+  sie z kazdym dniem gry i regionem (slonecznie / zmiennie / deszczowo), komunikat "Pogoda na dzis".
+- Efekty czarow i pociskow z paczki OTSP (assets/art/effects, assets/art/missiles): paladyn strzela strzalami
+  (wlocznia przy wloczni), potwory rzucaja kamieniami albo nozami, czary maja animacje ognia, lodu, ziemi,
+  energii, swietosci i smierci; czary obszarowe rozchodza sie fala od srodka.
+- Testy 476 OK; regresja GUI: wzorce odswiezone.
+
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

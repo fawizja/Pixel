@@ -61,11 +61,15 @@ def load_dat(path):
     r = Reader(open(path, "rb").read())
     r.u32()
     items, outfits, effects, missiles = r.u16(), r.u16(), r.u16(), r.u16()
-    things = {"item": {}, "outfit": {}}
+    things = {"item": {}, "outfit": {}, "effect": {}, "missile": {}}
     for i in range(100, items + 1):
         things["item"][i] = read_thing(r)
     for i in range(1, outfits + 1):
         things["outfit"][i] = read_thing(r)
+    for i in range(1, effects + 1):
+        things["effect"][i] = read_thing(r)
+    for i in range(1, missiles + 1):
+        things["missile"][i] = read_thing(r)
     return things
 
 

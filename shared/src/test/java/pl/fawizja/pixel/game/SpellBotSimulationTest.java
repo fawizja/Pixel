@@ -29,6 +29,8 @@ class SpellBotSimulationTest {
     /** Jeden krok decyzji bota. */
     static void bot(GameSession s, long now) {
         PlayerCharacter pc = s.character();
+        // gracz sam zaznacza potwora (gra nie wybiera celu za niego)
+        if (s.combat().target() == null) s.combat().cycleTarget();
         List<SpellType> known = s.spells().knownSpells();
         if (pc.health() < pc.maxHealth() / 2) {
             for (int i = known.size() - 1; i >= 0; i--) {

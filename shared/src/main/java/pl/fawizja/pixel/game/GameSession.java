@@ -68,7 +68,7 @@ public final class GameSession {
     private final FishingSystem fishing;
     private final pl.fawizja.pixel.gathering.HerbGathering herbs;
     /** Zegar swiata; czas sesji 0 = 09:00 czasu gry. W trybie online czas poda serwer. */
-    private WorldClock clock = new WorldClock(-9L * 150_000L, 60L * 60L * 1000L, 0.38f);
+    private WorldClock clock = new WorldClock(-9L * WorldClock.GAME_HOUR_MS, WorldClock.REAL_DAY_MS, 0.38f);
     private Boolean wasNight;
     private NpcRegistry npcs = NpcRegistry.empty();
     private ShopRegistry shops;

@@ -900,6 +900,7 @@ public final class GameScreen extends ScreenAdapter {
     private final boolean frozenWeather = System.getProperty("pixel.hour") != null;
     private Weather.Kind lastWeather;
     private int lastWeatherZ;
+    private long lastClimateDay = Long.MIN_VALUE;
 
     /** Pogoda nad graczem; zmiana rodzaju trafia do dziennika. */
     private Weather.Kind weatherAt(Position p, long wallMs) {
@@ -909,6 +910,13 @@ public final class GameScreen extends ScreenAdapter {
         // komunikat tylko przy zmianie pogody na miejscu (nie przy zejsciu pod ziemie i powrocie)
         if (lastWeather != null && k != lastWeather && p.z() >= 0 && lastWeatherZ >= 0) {
             session.log().add(now(), EventLog.Kind.INFO, Weather.describe(k));
+        }
+        // nowy dzien gry: klimat dnia w krainie (slonecznie / zmiennie / deszczowo)
+        long day = Math.floorDiv(wallMs, Weather.DAY_MS);
+        if (settings.weather() && forcedWeather == null && p.z() >= 0 && day != lastClimateDay) {
+            pl.fawizja.pixel.world.Region region = game.world().regionAt(p);
+            session.log().add(now(), EventLog.Kind.INFO, Weather.describe(Weather.climate(wallMs, region), region));
+            lastClimateDay = day;
         }
         lastWeatherZ = p.z();
         lastWeather = k;
@@ -1494,12 +1502,119 @@ public final class GameScreen extends ScreenAdapter {
      * rozbiega sie pierscieniem po kafelkach, leczenie - iskry unoszace sie nad postacia.
      * Przy niskiej jakosci (bateria, ochrona zasobow) bez warkocza i iskier.
      */
+    /** Czas trwania efektu z paczki (klatki rowno rozlozone). */
+    static final long SPRITE_EFFECT_MS = 420L;
+
+    /** Pocisk dla rodzaju obrazen; fizyczny: strzala gracza (wlocznia przy wloczni w reku), kamien olbrzymow. */
+    private String missileFor(CombatEvent e) {
+        String fx = e.effect() == null ? "PHYSICAL" : e.effect();
+        switch (fx) {
+            case "FIRE": return "fire";
+            case "ICE": return "ice";
+            case "EARTH": return "earth";
+            case "ENERGY": return "energy";
+            case "HOLY": return "holy";
+            case "DEATH": return "death";
+            default:
+        }
+        if (e.from().equals(session.character().position())) {
+            pl.fawizja.pixel.item.ItemStack w = session.character().equipment().get(pl.fawizja.pixel.item.EquipSlot.WEAPON);
+            pl.fawizja.pixel.item.ItemType wt = w == null || !session.items().contains(w.itemId()) ? null : session.items().get(w.itemId());
+            return wt != null && wt.key().contains("spear") ? "spear" : "arrow";
+        }
+        String key = "";
+        for (Monster m : session.monsters().near(e.from(), 0)) if (m.position().equals(e.from())) key = m.type().key();
+        return key.matches(".*(golem|troll|titan|giant|colossus|yeti).*") ? "stone"
+                : key.matches(".*(goblin|bandit|pirate|cutthroat).*") ? "knife" : "arrow";
+    }
+
+    /** Efekt trafienia czarem / na koniec lotu pocisku. */
+    private static String impactFor(String effect, boolean area) {
+        if (effect == null) return area ? "explosion" : null;
+        switch (effect) {
+            case "FIRE": return area ? "fire" : "flame";
+            case "ICE": return "ice";
+            case "EARTH": return "earth";
+            case "ENERGY": return "energy";
+            case "HOLY": return "holy";
+            case "DEATH": return "death";
+            case "HEAL": return "heal";
+            case "HASTE": return "haste";
+            case "PHYSICAL": return area ? "explosion" : null;
+            default: return null;
+        }
+    }
+
+    private void drawEffectFrame(SpriteBatch b, String name, long age, long duration, float x, float wy) {
+        TextureRegion[] frames = name == null ? null : game.art().effect(name);
+        if (frames == null || age < 0 || age >= duration) return;
+        TextureRegion r = frames[(int) Math.min(frames.length - 1, age * frames.length / duration)];
+        if (r == null) return;
+        // efekt 64 px jak w Tibii: 2x2 pola, prawy dolny kwadrat na polu celu
+        if (r.getRegionWidth() > 32) b.draw(r, x - 1f, wy, 2f, 2f);
+        else b.draw(r, x, wy, 1f, 1f);
+    }
+
+    /**
+     * Grafiki czarow i pociskow z paczki OTSP: strzaly, wlocznie, kule ognia i lodu lecace w strone celu, wybuch
+     * na koniec lotu, fala efektu na polach czaru obszarowego, iskry leczenia; krew przy trafieniu, oblok przy bloku.
+     */
+    private void drawSpriteEffects(SpriteBatch b, List<CombatEvent> events, long t, int z) {
+        for (CombatEvent e : events) {
+            if (e.position().z() != z) continue;
+            long age = t - e.timeMs();
+            float x = e.position().x(), wy = worldRenderer.worldY(e.position().y());
+            switch (e.kind()) {
+                case PROJECTILE: {
+                    if (e.from() == null) break;
+                    if (age < CombatEvent.PROJECTILE_MS) {
+                        int dx = e.position().x() - e.from().x(), dy = e.position().y() - e.from().y();
+                        TextureRegion r = game.art().missile(missileFor(e), dx, dy);
+                        if (r == null) break;
+                        float p = age / (float) CombatEvent.PROJECTILE_MS;
+                        float mx = e.from().x() + dx * p;
+                        float my = worldRenderer.worldY(e.from().y() + dy * p);
+                        b.draw(r, mx, my, 1f, 1f);
+                    } else {
+                        drawEffectFrame(b, impactFor(e.effect(), false), age - CombatEvent.PROJECTILE_MS, SPRITE_EFFECT_MS, x, wy);
+                    }
+                    break;
+                }
+                case AREA: {
+                    int r = e.amount();
+                    String name = impactFor(e.effect(), true);
+                    if (r <= 0) {
+                        drawEffectFrame(b, name, age, SPRITE_EFFECT_MS, x, wy);
+                        break;
+                    }
+                    // fala: pola dalej od srodka zaczynaja pozniej
+                    for (int ddy = -r; ddy <= r; ddy++) {
+                        for (int ddx = -r; ddx <= r; ddx++) {
+                            int d = Math.max(Math.abs(ddx), Math.abs(ddy));
+                            drawEffectFrame(b, name, age - d * 70L, SPRITE_EFFECT_MS, x + ddx, worldRenderer.worldY(e.position().y() + ddy));
+                        }
+                    }
+                    break;
+                }
+                case HIT_MONSTER:
+                case HIT_PLAYER:
+                    if (e.amount() > 0) drawEffectFrame(b, "blood", age, 300L, x, wy);
+                    break;
+                case BLOCKED:
+                    drawEffectFrame(b, "poof", age, 300L, x, wy);
+                    break;
+                default:
+            }
+        }
+    }
+
     private void drawSpellEffects(ShapeRenderer shapes, List<CombatEvent> events, long t, int z) {
         boolean rich = Math.min(settings.qualityCap(), guard.effectsQuality()) > 0.6f;
         boolean begun = false;
         for (CombatEvent e : events) {
             boolean slash = e.isMeleeStrike() && t - e.timeMs() <= CombatEvent.LUNGE_MS;
             if ((!e.isVisualEffect() && !slash) || e.position().z() != z) continue;
+            if (e.isVisualEffect() && game.art().effect("explosion") != null) continue; // grafiki z paczki (drawSpriteEffects)
             if (!begun) {
                 Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE); // swiecace, addytywne
                 shapes.begin(ShapeRenderer.ShapeType.Filled);
@@ -1673,6 +1788,10 @@ public final class GameScreen extends ScreenAdapter {
         }
 
         List<CombatEvent> events = session.combat().recentEvents(t, 1200);
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        drawSpriteEffects(batch, events, t, z);
+        batch.end();
         drawSpellEffects(shapes, events, t, z);
         game.sound().play(soundCues.poll(events, session.character().position(), t), settings.volumeFactor());
 

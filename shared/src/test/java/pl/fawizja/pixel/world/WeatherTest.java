@@ -31,6 +31,29 @@ class WeatherTest {
     }
 
     @Test
+    void climateChangesFromDayToDayAndSunnyDaysStayDry() {
+        java.util.Set<Weather.Climate> seen = java.util.EnumSet.noneOf(Weather.Climate.class);
+        int changes = 0;
+        Weather.Climate prev = null;
+        for (int d = 0; d < 60; d++) {
+            long dayStart = d * Weather.DAY_MS;
+            Weather.Climate c = Weather.climate(dayStart, VARDEN);
+            assertEquals(c, Weather.climate(dayStart + Weather.DAY_MS - 1, VARDEN), "one climate per game day");
+            if (prev != null && c != prev) changes++;
+            prev = c;
+            seen.add(c);
+            if (c == Weather.Climate.SUNNY) {
+                for (long t = dayStart; t < dayStart + Weather.DAY_MS; t += Weather.WINDOW_MS) {
+                    assertEquals(Weather.Kind.CLEAR, Weather.at(t, VARDEN, 0));
+                }
+            }
+        }
+        assertEquals(java.util.EnumSet.allOf(Weather.Climate.class), seen);
+        assertTrue(changes > 20, "weather really changes between days: " + changes);
+        assertTrue(Weather.describe(Weather.Climate.WET, FROST).contains("śnieżyce"));
+    }
+
+    @Test
     void theSameInsideAWindowAndClearUnderground() {
         for (int w = 0; w < 200; w++) {
             long start = w * Weather.WINDOW_MS;

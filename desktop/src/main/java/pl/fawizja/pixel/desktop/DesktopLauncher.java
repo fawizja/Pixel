@@ -88,7 +88,8 @@ public final class DesktopLauncher {
             if (!clockSet && hour != null && getScreen() instanceof GameScreen) {
                 clockSet = true;
                 ((GameScreen) getScreen()).session().setClock(
-                        new pl.fawizja.pixel.time.WorldClock(-hour * 150_000L, 60L * 60L * 1000L, 0.38f));
+                        new pl.fawizja.pixel.time.WorldClock(-hour * pl.fawizja.pixel.time.WorldClock.GAME_HOUR_MS,
+                                pl.fawizja.pixel.time.WorldClock.REAL_DAY_MS, 0.38f));
             }
             if (!teleported && teleport != null && getScreen() instanceof GameScreen) {
                 String[] p = teleport.split(",");
@@ -364,7 +365,8 @@ public final class DesktopLauncher {
                 long now = gs.worldTime();
                 Position me = gs.session().character().position();
                 pl.fawizja.pixel.combat.CombatSystem cs = gs.session().combat();
-                cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.projectile(now - 120, me, me.translate(5, -3), "ENERGY"));
+                cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.projectile(now - 20, me, me.translate(5, -3), "ENERGY"));
+                cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.projectile(now, me, me.translate(-5, -3), "PHYSICAL"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 100, me.translate(-4, 2), 2, "FIRE"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 220, me.translate(4, 3), 1, "ICE"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 150, me, 0, "HEAL"));
