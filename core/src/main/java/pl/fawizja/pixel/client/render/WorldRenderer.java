@@ -39,6 +39,8 @@ public final class WorldRenderer {
     private final int[] rockDetail;
     /** Drzwi lacza mury (mur obok drzwi nie konczy sie slupkiem). */
     private final java.util.Set<Integer> doors;
+    /** Podlogi wnetrz: mur budynku obok nich dostaje okna. */
+    private final boolean[] indoorGround;
 
     public WorldRenderer(WorldMap world, TileArt art) {
         this.world = world;
@@ -49,6 +51,11 @@ public final class WorldRenderer {
         java.util.Set<Integer> doors = new java.util.HashSet<>();
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) if (t.key().startsWith("door")) doors.add(t.id());
         this.doors = doors;
+        indoorGround = new boolean[max + 1];
+        for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
+            indoorGround[t.id()] = java.util.Set.of("wood_floor", "stone_floor", "sandstone_floor", "frozen_floor",
+                    "marble_floor", "brick_paving").contains(t.key());
+        }
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
             tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree").contains(t.key());
         }
@@ -103,7 +110,7 @@ public final class WorldRenderer {
         // kazdy z jednej tekstury, zamiast przelaczac atlasy na kazdym polu (etap 18: mniej wywolan rysowania)
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
-            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.GROUND, x, y), x, wy);
+            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.GROUND, x, y), x, y, x, wy);
         }
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
@@ -111,7 +118,7 @@ public final class WorldRenderer {
         }
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
-            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.DECORATION, x, y), x, wy);
+            for (int x = x0; x <= x1; x++) draw(batch, f.get(Layer.DECORATION, x, y), x, y, x, wy);
         }
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
@@ -125,7 +132,7 @@ public final class WorldRenderer {
                 }
             }
             for (int x = x0; x <= x1; x++) {
-                drawObject(batch, f.get(Layer.OBJECT, x, y), x, wy);
+                drawObject(batch, f.get(Layer.OBJECT, x, y), x, y, x, wy);
                 drawWall(batch, f, x, y, x, wy);
             }
             if (rows != null) rows.drawRow(batch, y);
@@ -165,9 +172,9 @@ public final class WorldRenderer {
 
     private final int[] sideTiles = new int[8];
 
-    private void drawObject(SpriteBatch batch, int id, float x, float wy) {
+    private void drawObject(SpriteBatch batch, int id, int mx, int my, float x, float wy) {
         if (id == 0) return;
-        TextureRegion r = art.tile(id);
+        TextureRegion r = art.tile(id, mx, my);
         if (r == null) return;
         if (id < tall.length && tall[id]) batch.draw(r, x - (TALL - 1f) / 2f, wy, TALL, TALL);
         else batch.draw(r, x, wy, 1f, 1f);
@@ -176,7 +183,9 @@ public final class WorldRenderer {
     private void drawWall(SpriteBatch batch, FloorMap f, int x, int y, float sx, float wy) {
         int id = f.get(Layer.WALL, x, y);
         if (id == 0) return;
-        TextureRegion piece = art.wallPiece(id, wallShape(f, x, y));
+        int shape = wallShape(f, x, y);
+        if (hasWindow(f, id, x, y, shape)) shape = shape == TileArt.WALL_V ? TileArt.WALL_V_WINDOW : TileArt.WALL_H_WINDOW;
+        TextureRegion piece = art.wallPiece(id, shape);
         if (piece != null) {
             // mur jak w Tibii: sciana na prawej/dolnej krawedzi pola, wysokosc w gore i w lewo (2x2 pola)
             batch.draw(piece, sx - 1, wy, 2f, 2f);
@@ -214,6 +223,36 @@ public final class WorldRenderer {
         return TileArt.WALL_POLE;
     }
 
+    /**
+     * Okno w murze budynku: prosty odcinek (mur tego samego rodzaju po obu stronach wzdluz, bez drzwi obok),
+     * co trzecie pole, tylko na powierzchni i wyzej i tylko gdy po jednej stronie jest podloga wnetrza.
+     * Mury miejskie i jaskinie (bruk, trawa, skala po obu stronach) zostaja pelne.
+     */
+    boolean hasWindow(FloorMap f, int id, int x, int y, int shape) {
+        if (f.z() < 0) return false;
+        if (shape == TileArt.WALL_V) {
+            if (Math.floorMod(y + x, 3) != 1) return false;
+            if (!sameWall(f, id, x, y - 1) || !sameWall(f, id, x, y + 1)) return false;
+            return indoor(f, x, y) || indoor(f, x + 1, y);
+        }
+        if (shape == TileArt.WALL_H) {
+            if (Math.floorMod(x + y, 3) != 1) return false;
+            if (!sameWall(f, id, x - 1, y) || !sameWall(f, id, x + 1, y)) return false;
+            return indoor(f, x, y) || indoor(f, x, y + 1);
+        }
+        return false;
+    }
+
+    private boolean sameWall(FloorMap f, int id, int x, int y) {
+        return f.inBounds(x, y) && f.get(Layer.WALL, x, y) == id;
+    }
+
+    private boolean indoor(FloorMap f, int x, int y) {
+        if (!f.inBounds(x, y)) return false;
+        int g = f.get(Layer.GROUND, x, y);
+        return g > 0 && g < indoorGround.length && indoorGround[g];
+    }
+
     private boolean joins(FloorMap f, int x, int y) {
         if (!f.inBounds(x, y)) return false;
         return f.get(Layer.WALL, x, y) != 0 || doors.contains(f.get(Layer.OBJECT, x, y));
@@ -240,14 +279,14 @@ public final class WorldRenderer {
                 for (int y = y0; y <= y1; y++) {
                     float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
-                        draw(batch, f.get(Layer.GROUND, x, y), x - UP, wy);
-                        draw(batch, f.get(Layer.DECORATION, x, y), x - UP, wy);
+                        draw(batch, f.get(Layer.GROUND, x, y), x, y, x - UP, wy);
+                        draw(batch, f.get(Layer.DECORATION, x, y), x, y, x - UP, wy);
                     }
                 }
                 for (int y = y0; y <= y1; y++) {
                     float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
-                        drawObject(batch, f.get(Layer.OBJECT, x, y), x - UP, wy);
+                        drawObject(batch, f.get(Layer.OBJECT, x, y), x, y, x - UP, wy);
                         drawWall(batch, f, x, y, x - UP, wy);
                     }
                 }
@@ -265,9 +304,10 @@ public final class WorldRenderer {
         }
     }
 
-    private void draw(SpriteBatch batch, int id, float x, float y) {
+    /** Pole mapy (mx, my) rysowane w (x, y) swiata, z wariantem grafiki wg pozycji. */
+    private void draw(SpriteBatch batch, int id, int mx, int my, float x, float y) {
         if (id == 0) return;
-        TextureRegion r = art.tile(id);
+        TextureRegion r = art.tile(id, mx, my);
         if (r != null) batch.draw(r, x, y, 1f, 1f);
     }
 }

@@ -374,6 +374,12 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 | `tiles/dead_tree.png` | object, temperate | tak |
 | `tiles/obsidian_rock.png` | object, equatorial | tak |
 | `tiles/obsidian_wall.png` | wall, underground |  |
+| `tiles/paving.png`, `brick_paving.png`, `marble_floor.png` | płyty, cegła, marmur (OTSP 155, 147, 156) | tak |
+| `walls/plaster_wall_*`, `whitewash_wall_*`, `timber_wall_*` | tynk, bielona ściana, mur pruski (OTSP 603-606, 617-620, 627-630) | tak |
+| `walls/*_vwin.png`, `*_hwin.png` | ściany z oknem do kamienia, piaskowca, tynku, bieli i muru pruskiego (OTSP 539/541, 556/557, 611/613, 621/622, 631/632) | tak |
+| `tiles/chair`, `wardrobe`, `potted_plant`, `well`, `firewood`, `banner`, `lectern`, `showcase`, `bucket`, `bench` | wyposażenie miast (OTSP 1094, 1104, 1088, 1154, 1141, 1179, 1181, 1211, 1185, 1197) | tak |
+| `tiles/tree_v2..v9`, `bush_v2..v6`, `flowers_v2..v5`, `rock_v2..v5` | warianty gatunków losowane po pozycji kafla (OTSP) | tak |
+| `tiles/anvil`, `forge`, `market_stall`, `signpost`, `hay_bale`, `rowboat`, `fishing_net`, `flower_box` | własne rekwizyty projektu rysowane skryptem `tools/art/draw_town_props.py` | tak |
 
 ## Obiekty (`assets/art/objects/`)
 

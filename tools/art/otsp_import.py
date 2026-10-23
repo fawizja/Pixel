@@ -51,6 +51,27 @@ ROCK_WALLS = {
     "sand_cliff": (159, 1.0, (200, 160, 100), 0.5),
     "pyramid": (166, 1.0, (225, 185, 115), 0.2),   # bloki piramidy Qasirah (etap 5)
 }
+# Dopracowanie miast (2026-10-23): wyposazenie wnetrz i ulic, nowe nawierzchnie, mury z oknami, warianty roslin.
+TOWN_OBJECTS = {
+    "chair": 1094, "wardrobe": 1104, "potted_plant": 1088, "well": 1154, "firewood": 1141, "banner": 1179,
+    "lectern": 1181, "showcase": 1211, "bucket": 1185, "bench": 1197,
+}
+TOWN_GROUND = {"paving": 155, "brick_paving": 147, "marble_floor": 156}
+TOWN_WALLS = {
+    "plaster_wall": (603, 604, 605, 606), "whitewash_wall": (617, 618, 619, 620), "timber_wall": (627, 628, 629, 630),
+}
+# Okna w prostych odcinkach murow budynkow: pionowy i poziomy odcinek z oknem (walls/klucz_vwin.png, _hwin.png).
+WINDOWS = {
+    "stone_wall": (539, 541), "sandstone_wall": (556, 557), "plaster_wall": (611, 613),
+    "whitewash_wall": (621, 622), "timber_wall": (631, 632),
+}
+# Warianty roslin i kamieni (tiles/klucz_vN.png): renderer wybiera wariant wg pozycji pola, las nie jest jednym drzewem.
+VARIANTS = {
+    "tree": (1503, 1504, 1506, 1507, 1509, 1531, 1534, 1537, 1564),
+    "bush": (1498, 1538, 1541, 1544, 1550),
+    "flowers": (1401, 1404, 1405, 1406),
+    "rock": (1622, 1624, 1626, 1628),
+}
 # Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
 EXTRA_OBJECTS = {"backpack": 2099}
 ITEMS = {
@@ -237,6 +258,19 @@ def main(client, art):
     for name, ids in WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
             save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
+    for name, i in TOWN_OBJECTS.items():
+        save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}.png"); n += 1
+    for name, i in TOWN_GROUND.items():
+        save(ot.compose(spr, things["item"][i]), f"{art}/tiles/{name}.png"); n += 1
+    for name, ids in TOWN_WALLS.items():
+        for shape, i in zip(WALL_SHAPES, ids):
+            save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
+    for name, (v, h) in WINDOWS.items():
+        save(ot.compose(spr, things["item"][v]), f"{art}/walls/{name}_vwin.png")
+        save(ot.compose(spr, things["item"][h]), f"{art}/walls/{name}_hwin.png"); n += 2
+    for name, ids in VARIANTS.items():
+        for k, i in enumerate(ids, 2):
+            save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}_v{k}.png"); n += 1
     for name, i in EXTRA_OBJECTS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ROOFS.items():

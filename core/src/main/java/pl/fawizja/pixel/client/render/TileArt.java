@@ -143,7 +143,7 @@ public final class TileArt implements Disposable {
             wallPm.dispose();
             wallPm = null;
             for (Map.Entry<Integer, int[]> e : wallSlots.entrySet()) {
-                TextureRegion[] pieces = new TextureRegion[WALL_SHAPES.length];
+                TextureRegion[] pieces = new TextureRegion[e.getValue().length];
                 for (int k = 0; k < pieces.length; k++) {
                     int slot = e.getValue()[k];
                     pieces[k] = new TextureRegion(wallAtlas, (slot % WALL_COLS) * WALL_PX, (slot / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
@@ -159,6 +159,7 @@ public final class TileArt implements Disposable {
         }
 
         for (TileType t : tileRegistry.all()) tiles[t.id()] = region(t.id());
+        buildVariants(tileRegistry);
         for (ItemType it : itemRegistry.all()) items[it.id()] = region(ITEM_BASE + it.id());
         for (Vocation v : Vocation.values()) {
             for (int d = 0; d < 4; d++) characters[v.ordinal()][d] = region(SPRITE_BASE + v.ordinal() * 4 + d);
@@ -233,6 +234,7 @@ public final class TileArt implements Disposable {
         }
         for (MonsterType m : mtypes) loadWalk("monsters/" + m.key());
         for (TileType t : tileRegistry.all()) loadWallPieces(t);
+        for (TileType t : tileRegistry.all()) loadVariants(t);
         override(pm, HORSE_CELL, "objects/horse_right");
         override(pm, HORSE_CELL + 1, "objects/horse_left");
         override(pm, CHEST_CELL, "objects/chest_closed");
@@ -295,7 +297,10 @@ public final class TileArt implements Disposable {
     /** Ksztalty murow jak w Tibii (pliki walls/klucz_ksztalt.png, 64x64): pionowy, poziomy, slupek, naroznik. */
     public static final String[] WALL_SHAPES = {"v", "h", "pole", "corner"};
     public static final int WALL_V = 0, WALL_H = 1, WALL_POLE = 2, WALL_CORNER = 3;
-    private static final int WALL_PX = 64, WALL_COLS = 8;
+    /** Odcinki z oknem (pliki walls/klucz_vwin.png i _hwin.png, opcjonalne): pionowy i poziomy. */
+    public static final int WALL_V_WINDOW = 4, WALL_H_WINDOW = 5;
+    private static final String[] WINDOW_SHAPES = {"vwin", "hwin"};
+    private static final int WALL_PX = 64, WALL_COLS = 16;
     private Pixmap wallPm;
     private Texture wallAtlas;
     private final Map<Integer, int[]> wallSlots = new HashMap<>();
@@ -311,6 +316,15 @@ public final class TileArt implements Disposable {
             if (!files[k].exists()) files[k] = Gdx.files.internal("assets/art/" + name);
             if (!files[k].exists()) return;
         }
+        com.badlogic.gdx.files.FileHandle[] windows = new com.badlogic.gdx.files.FileHandle[WINDOW_SHAPES.length];
+        for (int k = 0; k < windows.length; k++) {
+            String name = "walls/" + t.key() + "_" + WINDOW_SHAPES[k] + ".png";
+            windows[k] = Gdx.files.internal("art/" + name);
+            if (!windows[k].exists()) windows[k] = Gdx.files.internal("assets/art/" + name);
+            if (!windows[k].exists()) windows[k] = files[k]; // bez okien: zwykly odcinek
+        }
+        files = java.util.Arrays.copyOf(files, files.length + windows.length);
+        System.arraycopy(windows, 0, files, WALL_SHAPES.length, windows.length);
         if (wallSlotCount + files.length > WALL_COLS * WALL_COLS) return;
         try {
             if (wallPm == null) {
@@ -331,6 +345,75 @@ public final class TileArt implements Disposable {
         } catch (RuntimeException e) {
             Gdx.app.error("TileArt", "Nie można wczytać murów " + t.key() + ": " + e.getMessage());
         }
+    }
+
+    /** Komorki wariantow (tylko w atlasie 32 px). */
+    private static final int VARIANT_BASE = 1 << 21;
+    private final Map<Integer, int[]> variantCells = new HashMap<>();
+    private int variantCount;
+    private final Map<Integer, TextureRegion[]> variants = new HashMap<>();
+    /**
+     * Podloza bez wyraznego wzoru: odbicia w poziomie i pionie wg pola, zeby trawa czy piasek nie ukladaly sie
+     * w powtarzalna kratke (wzory z cegiel, desek i plyt zostaja bez zmian).
+     */
+    private static final java.util.Set<String> FLIPPED_GROUNDS = java.util.Set.of("grass", "dirt", "sand", "snow",
+            "jungle_grass", "swamp", "ash", "dark_sand", "blighted_grass", "cave_floor", "field", "abyss_floor");
+
+    /** Warianty grafiki tiles/klucz_v2.png ... _v9.png (np. rozne gatunki drzew), wybierane wg pozycji pola. */
+    private void loadVariants(TileType t) {
+        List<Integer> cells = new ArrayList<>();
+        for (int k = 2; k <= 9; k++) {
+            String name = "tiles/" + t.key() + "_v" + k + ".png";
+            com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name);
+            if (!f.exists()) f = Gdx.files.internal("assets/art/" + name);
+            if (!f.exists()) break;
+            try {
+                Pixmap src = new Pixmap(f);
+                int cell = VARIANT_BASE + variantCount++;
+                putHi(cell, src);
+                src.dispose();
+                cells.add(cell);
+            } catch (RuntimeException e) {
+                Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+            }
+        }
+        if (!cells.isEmpty()) variantCells.put(t.id(), cells.stream().mapToInt(Integer::intValue).toArray());
+    }
+
+    private void buildVariants(TileRegistry tileRegistry) {
+        for (TileType t : tileRegistry.all()) {
+            TextureRegion base = tiles[t.id()];
+            int[] cells = variantCells.get(t.id());
+            if (cells != null && hiAtlas != null) {
+                TextureRegion[] v = new TextureRegion[cells.length + 1];
+                v[0] = base;
+                for (int k = 0; k < cells.length; k++) v[k + 1] = hiCells.containsKey(cells[k]) ? region(cells[k]) : base;
+                variants.put(t.id(), v);
+            } else if (t.layer() == pl.fawizja.pixel.world.Layer.GROUND && FLIPPED_GROUNDS.contains(t.key())) {
+                TextureRegion[] v = new TextureRegion[4];
+                for (int k = 0; k < 4; k++) {
+                    v[k] = new TextureRegion(base);
+                    v[k].flip((k & 1) != 0, (k & 2) != 0);
+                }
+                variants.put(t.id(), v);
+            }
+        }
+    }
+
+    /** Grafika pola z wariantem wg pozycji (stala dla danego pola, rozna dla sasiadow). */
+    public TextureRegion tile(int id, int x, int y) {
+        TextureRegion[] v = variants.get(id);
+        if (v == null) return tile(id);
+        return v[spread(x, y) % v.length];
+    }
+
+    /** Rozrzut pozycji pola na liczbe nieujemna (bez widocznych powtorzen w rzedach i kolumnach). */
+    public static int spread(int x, int y) {
+        int h = x * 73856093 ^ y * 19349663;
+        h ^= h >>> 13;
+        h *= 0x5bd1e995;
+        h ^= h >>> 15;
+        return h & 0x7fffffff;
     }
 
     /** Ksztalt muru jak w Tibii (2x2 pola, prawy dolny = pole muru) albo null, gdy mur jest rysowany bryla. */
