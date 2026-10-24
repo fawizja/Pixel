@@ -1583,6 +1583,19 @@ public final class GameSession {
             facing = requested;
             Position before = pc.position();
             MoveResult r = pzLocked(before, requested, nowMs) ? MoveResult.BLOCKED : movement.step(pc, requested);
+            if (r == MoveResult.BLOCKED && requested.diagonal()) {
+                // slizg po murze: skos w sciane idzie wzdluz niej (najpierw poziomo, potem pionowo)
+                for (Direction slide : new Direction[] {Direction.fromDelta(requested.dx, 0), Direction.fromDelta(0, requested.dy)}) {
+                    if (pzLocked(before, slide, nowMs)) continue;
+                    MoveResult s2 = movement.step(pc, slide);
+                    if (s2 != MoveResult.BLOCKED) {
+                        r = s2;
+                        requested = slide;
+                        facing = slide;
+                        break;
+                    }
+                }
+            }
             if (r == MoveResult.MOVED || r == MoveResult.CHANGED_FLOOR) checkRegion(nowMs);
             if (r == MoveResult.MOVED) {
                 stepOnTrap(nowMs);

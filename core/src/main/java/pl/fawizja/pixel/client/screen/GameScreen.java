@@ -348,6 +348,14 @@ public final class GameScreen extends ScreenAdapter {
                     }
                     return true; // klawisze ida do czatu, nie do gry
                 }
+                Direction tapped = keyDirection(keycode);
+                if (tapped != null) {
+                    queuedDir = tapped;
+                    queuedAtMs = TimeUtils.millis();
+                    queuedFrom = session.character().position();
+                    queuedPending = false;
+                    return true;
+                }
                 switch (keycode) {
                     case Input.Keys.ENTER: onButton("chat"); return true;
                     case Input.Keys.E: onButton("use"); return true;
@@ -1234,6 +1242,24 @@ public final class GameScreen extends ScreenAdapter {
 
     private static final int WALK_MAX_NODES = 120_000;
 
+    /** Kierunek stuknietego klawisza (strzalki i WASD) do kolejki ruchu; null dla innych klawiszy. */
+    private static Direction keyDirection(int keycode) {
+        switch (keycode) {
+            case Input.Keys.UP: case Input.Keys.W: return Direction.NORTH;
+            case Input.Keys.DOWN: case Input.Keys.S: return Direction.SOUTH;
+            case Input.Keys.LEFT: case Input.Keys.A: return Direction.WEST;
+            case Input.Keys.RIGHT: case Input.Keys.D: return Direction.EAST;
+            default: return null;
+        }
+    }
+
+    /** Kolejka jednego kroku z krotkiego stukniecia klawisza (wazna przez QUEUE_MS). */
+    private Direction queuedDir;
+    private long queuedAtMs;
+    private Position queuedFrom;
+    private boolean queuedPending;
+    private static final long QUEUE_MS = 450;
+
     private Direction keyboardDirection() {
         int dx = 0, dy = 0;
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) dx -= 1;
@@ -1261,13 +1287,23 @@ public final class GameScreen extends ScreenAdapter {
 
         Direction dir = chatDraft == null ? keyboardDirection() : null;
         if (dir == null && hud.joystick().active()) {
-            dir = Direction.fromVector(hud.joystick().value().x, hud.joystick().value().y, 0.25f);
+            dir = Direction.fromStick(hud.joystick().value().x, hud.joystick().value().y, 0.25f);
         }
+        // krotkie stukniecie klawisza w trakcie kroku nie ginie: krok wykona sie zaraz po biezacym
+        if (dir == null && queuedDir != null) {
+            if (TimeUtils.millis() - queuedAtMs > QUEUE_MS || chatDraft != null) queuedDir = null;
+            else dir = queuedDir;
+        }
+        if (dir != null && queuedDir != null && !session.isMoving() && dir == queuedDir) queuedPending = true;
         if (dir != null) stopWalk(); // reczne sterowanie przerywa marsz do celu
         else if (walkPath != null) dir = walkStep();
         if (net != null) syncWithServer(dir);
         final long t = now();
         if (net == null) session.update(t, dir);
+        if (queuedPending && (session.isMoving() || !session.character().position().equals(queuedFrom))) {
+            queuedDir = null;
+            queuedPending = false;
+        }
         autoLoot(t);
         autoHeal(t);
         autoMana(t);

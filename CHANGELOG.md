@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.200.0] - 2026-10-24
+
+### Zmieniono
+- Sterowanie: joystick woli kierunki proste (skos tylko w wąskim klinie), więc przypadkowy, trzy razy wolniejszy
+  krok po skosie zdarza się rzadziej. Skos w mur zamienia się w krok wzdłuż muru. Krótkie stuknięcie strzałki
+  lub WASD w trakcie kroku nie ginie: krok wykona się zaraz po bieżącym.
+
 ## [0.199.0] - 2026-10-24
 
 ### Dodano

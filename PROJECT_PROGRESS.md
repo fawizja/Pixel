@@ -417,6 +417,8 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Pociski arrow_red, bolt, star_small, fire_arrow, poison, shadow_star i efekty sparkle, magic, stones
   (GameScreen.missileFor/impactFor). Paczka ma tylko ok. 15 roznych efektow i 20 pociskow - teraz uzyte prawie wszystkie.
 
+- Sterowanie (05:56 "popraw mechanike sterowania"): Direction.fromStick (klin skosu +-12 st.), slizg po murze w
+  GameSession.update (dziala tez na serwerze), kolejka jednego kroku z keyDown w GameScreen (450 ms); ControlFeelTest.
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

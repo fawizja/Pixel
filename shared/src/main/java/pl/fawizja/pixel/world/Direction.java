@@ -21,6 +21,24 @@ public enum Direction {
         return null;
     }
 
+    /**
+     * Kierunek z joysticka z przewaga kierunkow prostych: skos tylko w waskim klinie (+-12 stopni wokol 45),
+     * bo krok po skosie trwa trzy razy dluzej i przypadkowy skos spowalnia marsz.
+     */
+    public static Direction fromStick(float vx, float vy, float deadZone) {
+        double len = Math.sqrt(vx * vx + vy * vy);
+        if (len < deadZone) return null;
+        double angle = Math.toDegrees(Math.atan2(vy, vx));
+        if (angle < 0) angle += 360;
+        double off = angle % 90;                 // odleglosc od najblizszego kierunku prostego w cwiartce
+        if (Math.abs(off - 45) <= DIAGONAL_WEDGE) return fromVector(vx, vy, deadZone);
+        int sector = (int) Math.round(angle / 90.0) % 4;
+        return sector == 0 ? EAST : sector == 1 ? NORTH : sector == 2 ? WEST : SOUTH;
+    }
+
+    /** Polowa klina skosu joysticka w stopniach. */
+    public static final double DIAGONAL_WEDGE = 12.0;
+
     /** Kierunek z wektora joysticka (os y w gore dodatnia) lub null w martwej strefie. */
     public static Direction fromVector(float vx, float vy, float deadZone) {
         double len = Math.sqrt(vx * vx + vy * vy);
