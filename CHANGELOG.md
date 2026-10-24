@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.198.0] - 2026-10-24
+
+### Dodano
+- Kolejne grafiki z OpenTibia Sprite Pack: pajęczyny w zakamarkach jaskiń, bałwany na placach miasta śniegu,
+  gliniane dzbany i worki we wnętrzach (część skrzyń i beczek).
+- Odmiany krzeseł, skrzyń, posągów, donic z kwiatami, świec, sztandarów i drewna (każde pole może mieć inną).
+
+### Zmieniono
+- Upiór mgły, krab koralowy, Morvena i Mor'gath mają własne stroje z paczki zamiast przebarwionych.
+
 ## [0.197.0] - 2026-10-23
 
 ### Dodano

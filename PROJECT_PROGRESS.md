@@ -402,6 +402,13 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   receptury, ranking. Start jak inni: poziom 300, 10 mln w banku.
 - Testy 479 OK (KnightTest); regresja GUI: wzorce odswiezone.
 
+## Kolejne grafiki z paczki OTSP (pytanie Darka z 2026-10-24, 05:16)
+- Nowe kafle 139-142: cobweb (dekoracja w rogach jaskin), snowman, clay_pot, sack; generate_continent.atmosphere()
+  wybiera pola wg pozycji (bez losowania), rdzen i podziemia Varden bez zmian.
+- Warianty z paczki: krzesla, skrzynie, posagi, donice, swiece, sztandary, drewno, pajeczyny, balwany.
+- Wlasne stroje z paczki: mist_wraith (5), coral_crab (31), morvena (41), morgath (2).
+- Testy 481 OK; regresja GUI: wzorce odswiezone.
+
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

@@ -76,6 +76,8 @@ MOUNTAINS = {
 TOWN_OBJECTS = {
     "chair": 1094, "wardrobe": 1104, "potted_plant": 1088, "well": 1154, "firewood": 1141, "banner": 1179,
     "lectern": 1181, "showcase": 1211, "bucket": 1185, "bench": 1197,
+    # 2026-10-24: balwany w miastach sniegu, dzbany i worki we wnetrzach
+    "snowman": 1217, "clay_pot": 2700, "sack": 2673,
 }
 TOWN_GROUND = {"paving": 155, "brick_paving": 147, "marble_floor": 156}
 TOWN_WALLS = {
@@ -101,6 +103,16 @@ VARIANTS = {
     "sandstone_rock": (1632, 1603, 1618),
     "rubble": (1614, 1615, 1616, 1594, 1595, 1597),
     "crystal": (1646, 1647, 2262, 2263),
+    # 2026-10-24 (Darek: "inne grafiki z paczki tez"): odmiany mebli i ozdob, pajeczyny, balwany
+    "chair": (1093, 1095, 1096, 1097),
+    "crate": (1115, 1117),
+    "statue": (1156, 1159, 1160),
+    "flower_box": (1246, 1247, 1248),
+    "candle": (1243, 1244),
+    "banner": (1180,),
+    "lumber": (1142, 1145),
+    "cobweb": (1273, 1274),
+    "snowman": (1218,),
 }
 # 2026-10-23 (Darek: "wszystkie grafiki maja byc z otclienta"): zamiast wlasnych rysunkow odpowiedniki z paczki.
 # nazwa -> numer albo (numer, barwa przebarwienia)
@@ -110,7 +122,7 @@ OTSP_PROPS = {
     "fishing_net": (1271, (150, 120, 80)), "fountain": 1122, "street_lamp": 1239, "fence": 964, "door_open": 1022,
     "tall_grass": 1420, "wheat": 1001, "snow_tuft": (1426, (240, 245, 250)), "dry_grass": (1426, (200, 175, 95)),
     "glow_moss": (1446, (120, 240, 200)), "magma": 2298, "bones": 1183, "shells": (1593, (240, 225, 210)),
-    "palm": 2584, "cactus": 2583,
+    "palm": 2584, "cactus": 2583, "cobweb": 1272,
 }
 OTSP_OBJECTS = {"chest_closed": 1111, "training_dummy": 1275}
 # Mury bez odpowiednika: przebarwiona drewniana sciana (burta statku).
@@ -207,6 +219,8 @@ MONSTERS = {
     "goblin_shaman": (10, None),
     "bandit": (19, None), "jungle_hunter": (16, ((150, 90, 50), (70, 120, 50), (90, 70, 40), (60, 40, 30))),
     "mummy": (17, ((230, 220, 190), (220, 210, 180), (210, 200, 170), (200, 190, 160))),
+    # 2026-10-24: wlasne stroje z paczki zamiast przebarwien (duch, krab, blady upior, skrzydlaty demon)
+    "mist_wraith": (5, None), "coral_crab": (31, None), "morvena": (41, None), "morgath": (2, None),
 }
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
@@ -217,14 +231,13 @@ TINTED = {
     "grimtooth": (7, (200, 90, 70)), "frost_queen": (35, (200, 235, 255)), "frost_giant": (46, (150, 190, 255)),
     "ice_dragon": (25, (150, 210, 255)), "bone_dragon": (25, (235, 225, 200)), "ignaroth": (25, (255, 110, 60)),
     "hrimgar": (39, (190, 230, 255)), "khazuul": (37, (210, 170, 90)), "abyss_lord": (46, (190, 120, 255)),
-    "morgath": (38, (255, 80, 80)),
     # etap 8: expowiska na wyspach i Smoczym Grzbiecie
-    "wyvern": (25, (130, 180, 90)), "coral_crab": (24, (255, 120, 90)), "drowned_sailor": (3, (130, 190, 200)),
+    "wyvern": (25, (130, 180, 90)), "drowned_sailor": (3, (130, 190, 200)),
     "pirate_cutthroat": (19, (210, 100, 80)), "pirate_gunner": (19, (110, 110, 140)),
-    "mist_wraith": (40, (205, 220, 230)), "magma_drake": (25, (235, 80, 25)),
+    "magma_drake": (25, (235, 80, 25)),
     # etap 10: bossowie nowych lochow
     "wyvern_matriarch": (25, (80, 140, 50)), "bloodbeard": (19, (170, 50, 50)), "skaldra": (35, (160, 210, 255)),
-    "morvena": (34, (190, 200, 220)), "pyrrax": (46, (255, 120, 30)),
+    "pyrrax": (46, (255, 120, 30)),
     # 2026-10-23: orki z zajetych wiosek (paczka nie ma orkow - przebarwiony goblin, okultysta i jaszczuroczlek)
     "orc_warrior": (7, (120, 150, 70)), "orc_shaman": (10, (110, 160, 90)), "orc_berserker": (7, (180, 110, 70)),
     "orc_warlord": (46, (100, 130, 60)),

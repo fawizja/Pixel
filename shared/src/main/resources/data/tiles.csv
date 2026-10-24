@@ -127,3 +127,8 @@
 136;broken_wall;OBJECT;0;0;town;#77706a;rubble
 137;orc_tent;OBJECT;0;0;town;#7a6a40;crate
 138;throne;OBJECT;0;0;town;#c8a040;altar
+# --- 2026-10-24: kolejne grafiki z paczki OTSP (pajeczyny w jaskiniach, balwany, dzbany, worki) ---
+139;cobweb;DECORATION;1;0;mountain;#d8d8d0;rug
+140;snowman;OBJECT;0;0;town;#f0f4f8;rock
+141;clay_pot;OBJECT;0;0;town;#8a5a3a;crate
+142;sack;OBJECT;0;0;town;#a08860;crate

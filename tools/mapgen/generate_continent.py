@@ -768,6 +768,7 @@ def build(ctx):
     towns_dressing(ctx)
     restore_varden_core(ctx)
     street_sides(ctx)
+    atmosphere(ctx)
     zones = zone_grid(T)
     ctx['zones'] = zones
     climate_spawns(ctx, zones, rng)
@@ -1406,6 +1407,57 @@ def street_sides(ctx):
     cells = [(x, y) for y in range(S) for x in range(S) if (x, y) not in core]
     moved, removed = sidewalk.move_props(get, lambda x, y, c: world.put(x, y, 0, c), cells, avoid=core)
     print('pobocza: przesuniete', moved, 'usuniete', removed)
+
+
+INDOOR_FLOORS = {'wood_floor', 'stone_floor', 'sandstone_floor', 'frozen_floor', 'marble_floor', 'ship_deck'}
+CAVE_FLOORS = {'cave_floor', 'dirt', 'frozen_floor', 'ash', 'stone_floor'}
+
+
+def atmosphere(ctx):
+    """Pajeczyny w zakamarkach jaskin (rogi miedzy dwoma murami), balwany na snieznych placach, a we wnetrzach
+    czesc skrzyn i beczek zamieniona na worki i gliniane dzbany. Wybor wg pozycji pola (bez losowania), wiec reszta mapy sie nie przesuwa; rdzen Varden bez zmian."""
+    world = ctx['world']
+    vb = next(bb for bb in ctx['blocks'] if bb.name == 'varden')
+    vx0, vy0, vx1, vy1 = vb.rect[0] + vb.dx, vb.rect[1] + vb.dy, vb.rect[2] + vb.dx, vb.rect[3] + vb.dy
+    webs = snowmen = pots = 0
+    for z, rows in world.floors.items():
+        for y in range(1, S - 1):
+            for x in range(1, S - 1):
+                if vx0 - 1 <= x <= vx1 + 1 and vy0 - 1 <= y <= vy1 + 1:
+                    continue
+                c = rows[y][x]
+                if c is None:
+                    continue
+                h = (x * 7349 + y * 1913 + z * 409) % 7
+                if c[0] in INDOOR_FLOORS and c[3] == NONE and c[2] in ('crate', 'barrel') and h % 3 == 0:
+                    rows[y][x] = (c[0], c[1], 'sack' if c[2] == 'crate' else 'clay_pot', NONE)
+                    pots += 1
+                elif z < 0 and c[0] in CAVE_FLOORS and c[1] == NONE and c[2] == NONE and c[3] == NONE and h == 0:
+                    walls = [rows[y + dy][x + dx] is not None and rows[y + dy][x + dx][3] != NONE
+                             for dx, dy in ((1, 0), (0, 1), (-1, 0), (0, -1))]
+                    if any(walls[k] and walls[(k + 1) % 4] for k in range(4)):
+                        rows[y][x] = (c[0], 'cobweb', NONE, NONE)
+                        webs += 1
+    # balwany na snieznych placach miast (strefy ochronne), tylko na polu z 8 wolnymi sasiadami
+    placed = []
+    for (x0, y0, x1, y1, z) in ctx['pz']:
+        if z != 0:
+            continue
+        for y in range(max(1, y0), min(S - 1, y1 + 1)):
+            for x in range(max(1, x0), min(S - 1, x1 + 1)):
+                c = world.get(x, y)
+                if c is None or c[0] != 'snow' or c[2] != NONE or c[3] != NONE or (x * 31 + y * 17) % 11:
+                    continue
+                if vx0 - 1 <= x <= vx1 + 1 and vy0 - 1 <= y <= vy1 + 1:
+                    continue
+                if any(abs(x - px) < 6 and abs(y - py) < 6 for (px, py) in placed):
+                    continue
+                around = [world.get(x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy]
+                if all(n is not None and F.walk(n) and n[2] == NONE for n in around):
+                    world.put(x, y, 0, (c[0], c[1], 'snowman', NONE))
+                    placed.append((x, y))
+                    snowmen += 1
+    print('klimat: pajeczyny', webs, 'balwany', snowmen, 'worki i dzbany', pots)
 
 
 def towns_dressing(ctx):

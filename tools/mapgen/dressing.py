@@ -17,12 +17,12 @@ OUTDOOR = {'cobblestone', 'paving', 'brick_paving', 'sand', 'snow', 'grass',
            'jungle_grass', 'dirt'}
 FURNITURE = {
     'BANKER': ['bookcase', 'chest', 'potted_plant', 'banner', 'chest', 'bookcase'],
-    'MERCHANT': ['crate', 'barrel', 'showcase', 'crate', 'barrel', 'potted_plant', 'crate'],
+    'MERCHANT': ['crate', 'sack', 'clay_pot', 'barrel', 'showcase', 'barrel', 'crate'],
     'PRIEST': ['banner', 'potted_plant', 'lectern', 'banner', 'potted_plant'],
     'GUIDE': ['bookcase', 'table', 'chair', 'potted_plant', 'bookcase'],
-    'CARRIER': ['hay_bale', 'barrel', 'crate', 'bucket'],
-    'CAPTAIN': ['barrel', 'crate', 'fishing_net', 'barrel'],
-    None: ['bed', 'wardrobe', 'table', 'chair', 'potted_plant', 'bookcase', 'chest'],
+    'CARRIER': ['hay_bale', 'sack', 'barrel', 'bucket'],
+    'CAPTAIN': ['barrel', 'sack', 'fishing_net', 'crate'],
+    None: ['bed', 'clay_pot', 'table', 'chair', 'wardrobe', 'potted_plant', 'bookcase', 'chest'],
 }
 # drewniane budynki: mur wg miasta (x, y srodka budynku -> material); piaskowiec i kamien bez zmian
 WOOD_WALLS = ['wood_wall', 'timber_wall', 'plaster_wall', 'whitewash_wall']
