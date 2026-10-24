@@ -82,6 +82,15 @@ public final class Equipment {
         return sum;
     }
 
+    /** Obrona samej tarczy (0, gdy postac nie nosi tarczy). */
+    public int shieldDefense() {
+        ItemStack s = worn.get(EquipSlot.SHIELD);
+        if (s == null) return 0;
+        ItemType def = registry.get(s.itemId());
+        if (def == null || def.category() != pl.fawizja.pixel.item.ItemCategory.SHIELD) return 0;
+        return pl.fawizja.pixel.item.Upgrade.defense(def, s.upgrade());
+    }
+
     public int weaponAttack() {
         ItemStack w = worn.get(EquipSlot.WEAPON);
         return w == null ? 0 : pl.fawizja.pixel.item.Upgrade.attack(registry.get(w.itemId()), w.upgrade());

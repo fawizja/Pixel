@@ -1855,7 +1855,7 @@ public final class GameSession {
 
     public void toggleRun(long nowMs) {
         pc.setRunning(!pc.isRunning());
-        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Bieganie włączone." : "Bieganie wyłączone.");
+        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Bieg włączony: postać sama idzie do zaznaczonego potwora." : "Bieg wyłączony.");
     }
 
     public void toggleTorch(long nowMs) {

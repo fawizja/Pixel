@@ -419,6 +419,13 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 
 - Sterowanie (05:56 "popraw mechanike sterowania"): Direction.fromStick (klin skosu +-12 st.), slizg po murze w
   GameSession.update (dziala tez na serwerze), kolejka jednego kroku z keyDown w GameScreen (450 ms); ControlFeelTest.
+
+## Przyciski przy ekwipunku, Bieg i Tarcza (Darek, 2026-10-24, 06:26)
+- Hud.resize: panel max(150, min(210, 17% szerokosci)), minimapa na cala szerokosc, kolumna diag/run/defensive/torch
+  obok ekwipunku (niski ekran: rzad pod minimapa i zwarty ekwipunek). layoutEquipPanel(top, bottom, maxW).
+- Bieg: ChaseMode.wants + GameScreen.chase (trasa na pole obok celu, odswiezana co >=200 ms przy ruchu celu,
+  joystick zawiesza pogon do zmiany celu). Szybszy krok biegu zostaje.
+- Tarcza: Equipment.shieldDefense, CombatFormulas.DEFENSIVE_INCOMING_SHIELD = 0.6 + dodatkowy blok tarcza; RunShieldTest.
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

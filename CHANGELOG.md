@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.201.0] - 2026-10-24
+
+### Zmieniono
+- Przyciski I, Bieg, Tarcza i Pochodnia stoją teraz obok ekwipunku, a prawy panel jest wąski jak minimapa,
+  więc widok gry jest szerszy.
+- Bieg: gdy jest włączony, postać sama idzie do zaznaczonego potwora i podąża za nim, aż stanie obok.
+  Joystick przerywa pogoń za tym celem.
+- Tarcza: postawa obronna z założoną tarczą blokuje dodatkowo część ciosów tarczą i mocniej zmniejsza
+  obrażenia (60% zamiast 75%).
+
 ## [0.200.0] - 2026-10-24
 
 ### Zmieniono

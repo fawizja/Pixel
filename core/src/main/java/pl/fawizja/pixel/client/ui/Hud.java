@@ -328,7 +328,8 @@ public final class Hud {
         // jedna bryla jak klasyczny klient Tibii: widok gry w ramce, po prawej panel (minimapa, ekwipunek,
         // lista walki, pasek akcji), u gory paski HP/MP, na dole przyciski i konsola
         float pad = 4, gap = 3;
-        float pw = Math.max(170, Math.min(260, w * 0.2f)); // waski panel: wiecej miejsca na widok gry
+        // panel tylko tak szeroki jak minimapa: wiecej miejsca na widok gry
+        float pw = Math.max(150, Math.min(210, w * 0.17f));
         panelX = w - pw;
         float iw = pw - pad * 2;
         // pasek akcji 5x2 na dole panelu
@@ -344,21 +345,40 @@ public final class Hud {
             b.hw = cell / 2f;
         }
         abTop = pad + 8 + cell * 2 + gap;
-        // u gory panelu minimapa, na lewo od niej kolumna: diagnostyka, bieg, postawa obronna, pochodnia
-        float sc = Math.max(30, Math.min(36, cell * 0.9f)); // dotykowe pola co najmniej ~30 dp
-        mmSize = Math.min(180, Math.min(iw - sc - 10, h * 0.3f));
+        // u gory minimapa na cala szerokosc panelu
+        mmSize = Math.min(iw - 6, h * 0.3f);
         mmX = w - pad - 3 - mmSize;
         mmY = h - pad - 3 - mmSize;
+        // pod minimapa ekwipunek, obok niego kolumna: diagnostyka, bieg, postawa obronna, pochodnia
+        float sc = Math.max(28, Math.min(34, cell * 0.9f)); // dotykowe pola co najmniej ~28 dp
         HudButton[] col = {diag, run, defensive, torch};
-        for (int i = 0; i < col.length; i++) {
-            col[i].x = mmX - 3 - 4 - sc / 2f;
-            col[i].y = h - pad - sc / 2f - i * (sc + gap);
-            col[i].r = sc / 2f;
-            col[i].hw = sc / 2f;
+        float eqTop = mmY - 3 - pad;
+        float eqBottom = abTop + pad + 23 + BATTLE_ROW * 2 + 6;
+        layoutEquipPanel(eqTop, eqBottom, iw - sc - gap);
+        if (epTibia) {
+            // ekwipunek i kolumna razem wysrodkowane w panelu
+            float groupW = epW + gap + sc;
+            epX = panelX + pad + (iw - groupW) / 2f;
+            float cx = epX + epW + gap + sc / 2f;
+            float step = Math.min(sc + gap, (epH - sc) / (col.length - 1));
+            for (int i = 0; i < col.length; i++) {
+                col[i].x = cx;
+                col[i].y = epY + epH - sc / 2f - i * step;
+            }
+        } else {
+            // niski ekran: przyciski w rzedzie pod minimapa, pod nimi zwarty ekwipunek
+            float rowW = col.length * sc + (col.length - 1) * gap;
+            float rx = panelX + pad + (iw - rowW) / 2f;
+            for (int i = 0; i < col.length; i++) {
+                col[i].x = rx + sc / 2f + i * (sc + gap);
+                col[i].y = eqTop - sc / 2f;
+            }
+            layoutEquipPanel(eqTop - sc - gap, eqBottom, iw);
         }
-        float colBottom = h - pad - col.length * (sc + gap);
-        // pod minimapa ekwipunek, miedzy nim a paskiem akcji lista walki
-        layoutEquipPanel(Math.min(mmY - 3, colBottom) - pad, abTop + pad + 23 + BATTLE_ROW * 2 + 6);
+        for (HudButton b : col) {
+            b.r = sc / 2f;
+            b.hw = sc / 2f;
+        }
         blX = panelX + pad;
         blW = iw;
         blY = abTop + pad;
@@ -2263,7 +2283,7 @@ public final class Hud {
         FED("Najedzony: szybsza regeneracja", new Color(0.55f, 0.4f, 0.2f, 1f)),
         HUNGRY("Głodny: zjedz coś, aby szybciej się regenerować", new Color(0.5f, 0.45f, 0.4f, 1f)),
         BLESSED("Błogosławieństwo: mniejsze straty po śmierci", new Color(0.75f, 0.62f, 0.2f, 1f)),
-        RUNNING("Bieg: szybszy ruch", new Color(0.2f, 0.4f, 0.7f, 1f)),
+        RUNNING("Bieg: idę do celu", new Color(0.2f, 0.4f, 0.7f, 1f)),
         HASTE("Przyspieszenie: szybkość zwiększona przez czar", new Color(0.15f, 0.55f, 0.6f, 1f)),
         LIGHT("Światło: pochodnia albo czar", new Color(0.7f, 0.6f, 0.15f, 1f)),
         ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f)),
@@ -2715,15 +2735,15 @@ public final class Hud {
     private boolean epTibia;
 
     /** Ekwipunek w panelu pod minimapa: od top w dol, zostawiajac miejsce do bottom (lista walki). */
-    private void layoutEquipPanel(float top, float bottom) {
+    private void layoutEquipPanel(float top, float bottom, float maxW) {
         float room = top - bottom;
-        epTibia = room >= 23 + 4 * 28 + 3 * 3 + 8;
+        epTibia = room >= 23 + 4 * 24 + 3 * 3 + 8 && (maxW - 18) / 3f >= 24;
         if (epTibia) {
-            epCell = Math.min(36, (room - 23 - 9 - 8) / 4f);
+            epCell = Math.min(36, Math.min((room - 23 - 9 - 8) / 4f, (maxW - 18) / 3f));
             epW = epCell * 3 + 3 * 2 + 12;
             epH = 23 + epCell * 4 + 3 * 3 + 8;
         } else {
-            epCell = Math.max(16, Math.min(Math.min(32, (w - panelX - 16 - 8) / 5f), (room - 2 - 8) / 2f));
+            epCell = Math.max(16, Math.min(Math.min(32, (maxW - 8 - 8) / 5f), (room - 2 - 8) / 2f));
             epW = epCell * 5 + 2 * 4 + 8;
             epH = epCell * 2 + 2 + 8;
         }

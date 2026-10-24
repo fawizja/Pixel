@@ -1242,6 +1242,30 @@ public final class GameScreen extends ScreenAdapter {
 
     private static final int WALK_MAX_NODES = 120_000;
 
+    /** Pogon za celem (bieg wlaczony): ostatnie pole celu, do ktorego liczono trase. */
+    private Position chaseGoal;
+    /** Cel, za ktorym gracz przestal gonic joystickiem - pogon wraca po wyborze innego celu. */
+    private Monster chaseSkip;
+    private long chaseAtMs;
+
+    /** Bieg wlaczony i zaznaczony potwor: trasa na pole obok niego, odswiezana, gdy potwor sie ruszy. */
+    private void chase(long nowMs) {
+        Monster m = session.combat().target();
+        if (m != chaseSkip) chaseSkip = null;
+        if (m == null || m == chaseSkip || !pl.fawizja.pixel.movement.ChaseMode.wants(session.character(), m)) {
+            if (chaseGoal != null && walkNpc == null) stopWalk();
+            chaseGoal = null;
+            return;
+        }
+        if (walkPath != null && chaseGoal == null) return; // marsz do wskazanego miejsca ma pierwszenstwo
+        Position goal = m.position();
+        if (walkPath != null && goal.equals(chaseGoal)) return;
+        if (nowMs - chaseAtMs < 200) return;
+        chaseAtMs = nowMs;
+        chaseGoal = goal;
+        walkTo(goal, now(), true, true);
+    }
+
     /** Kierunek stuknietego klawisza (strzalki i WASD) do kolejki ruchu; null dla innych klawiszy. */
     private static Direction keyDirection(int keycode) {
         switch (keycode) {
@@ -1295,8 +1319,14 @@ public final class GameScreen extends ScreenAdapter {
             else dir = queuedDir;
         }
         if (dir != null && queuedDir != null && !session.isMoving() && dir == queuedDir) queuedPending = true;
-        if (dir != null) stopWalk(); // reczne sterowanie przerywa marsz do celu
-        else if (walkPath != null) dir = walkStep();
+        if (dir != null) {
+            stopWalk(); // reczne sterowanie przerywa marsz do celu
+            if (chaseGoal != null) chaseSkip = session.combat().target(); // i pogon, az do wyboru innego celu
+            chaseGoal = null;
+        } else {
+            chase(TimeUtils.millis());
+            if (walkPath != null) dir = walkStep();
+        }
         if (net != null) syncWithServer(dir);
         final long t = now();
         if (net == null) session.update(t, dir);

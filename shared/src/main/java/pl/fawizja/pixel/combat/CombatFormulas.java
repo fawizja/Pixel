@@ -23,6 +23,8 @@ public final class CombatFormulas {
     /** Postawa obronna: mniej zadawanych i otrzymywanych obrazen. */
     public static final double DEFENSIVE_OUTGOING = 0.8;
     public static final double DEFENSIVE_INCOMING = 0.75;
+    /** Postawa obronna z tarcza: mocniejsze zmniejszenie obrazen niz bez tarczy. */
+    public static final double DEFENSIVE_INCOMING_SHIELD = 0.6;
 
     private CombatFormulas() {}
 
@@ -104,7 +106,19 @@ public final class CombatFormulas {
                     * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0;
             d -= rollBetween(0, (int) (defense / 3), rng);
         }
-        if (defensive) d *= DEFENSIVE_INCOMING;
+        if (defensive) {
+            int shield = pc.equipment().shieldDefense();
+            if (shield > 0) {
+                // postawa obronna z tarcza: dodatkowe blokowanie ciosow tarcza i mniejsze obrazenia
+                if (type == DamageType.PHYSICAL) {
+                    double block = shield * pc.vocation().defenseFactor() * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0;
+                    d -= rollBetween((int) (block / 6), (int) (block / 2), rng);
+                }
+                d = Math.max(0, d) * DEFENSIVE_INCOMING_SHIELD;
+            } else {
+                d *= DEFENSIVE_INCOMING;
+            }
+        }
         return (int) Math.max(0, Math.round(d));
     }
 }
