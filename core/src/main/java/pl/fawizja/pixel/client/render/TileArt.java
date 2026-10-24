@@ -71,8 +71,14 @@ public final class TileArt implements Disposable {
     private final Map<String, TextureRegion> monsters = new HashMap<>();
     private final Map<String, TextureRegion> npcs = new HashMap<>();
 
+    private final ItemRegistry itemRegistry;
+
+    /** Rejestr przedmiotow, z ktorego zbudowano grafiki (rzadkosc ramek w interfejsie). */
+    public ItemRegistry itemRegistry() { return itemRegistry; }
+
     public TileArt(TileRegistry tileRegistry, ItemRegistry itemRegistry, MonsterRegistry monsterRegistry,
                    List<pl.fawizja.pixel.npc.Npc> npcList) {
+        this.itemRegistry = itemRegistry;
         Pixmap pm = new Pixmap(ATLAS, ATLAS, Pixmap.Format.RGBA8888);
         pm.setBlending(Pixmap.Blending.None);
         pm.setColor(0, 0, 0, 0);

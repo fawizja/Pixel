@@ -426,6 +426,12 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Bieg: ChaseMode.wants + GameScreen.chase (trasa na pole obok celu, odswiezana co >=200 ms przy ruchu celu,
   joystick zawiesza pogon do zmiany celu). Szybszy krok biegu zostaje.
 - Tarcza: Equipment.shieldDefense, CombatFormulas.DEFENSIVE_INCOMING_SHIELD = 0.6 + dodatkowy blok tarcza; RunShieldTest.
+
+## Kupione paczki WsT: ikony mikstur i ramki pol (Darek, 2026-10-24, 06:45)
+- tools/art/wst_icons_import.py (po otsp_import.py i wst_import.py): 23 ikony 16->32 px do art/items, 9 ramek 22 px do
+  assets/ui/wst/. Surowe paczki w tools/art/wst/alchemy, tools/art/wst/ui_slots (gitignore) i pixel-wst-zrodla/*.zip.
+- Mikstury 191-194 (Enchantments.Kind STRENGTH/STONESKIN/SWIFTNESS/LUCK, POTION_MS 10 min), GameSession.drinkBuff;
+  Rarity.tier wg ceny -> Hud.slotFrame; PotionBuffTest.
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

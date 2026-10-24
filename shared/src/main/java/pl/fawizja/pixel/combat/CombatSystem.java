@@ -225,6 +225,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Zaklecie ciosu krytycznego: 10% szans na +50% obrazen. */
     private int critical(int raw) {
         pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
+        raw = e.outgoing(raw); // mikstura sily
         if (raw <= 0 || !e.active(pl.fawizja.pixel.item.Enchantments.Kind.CRIT)) return raw;
         if (rng.nextInt(100) >= pl.fawizja.pixel.item.Enchantments.CRIT_CHANCE) return raw;
         return raw + raw * pl.fawizja.pixel.item.Enchantments.CRIT_BONUS_PERCENT / 100;
@@ -311,6 +312,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         rareRolled.clear();
         for (LootEntry e : t.loot()) {
             int chance = isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostChance(e.chancePermille()) : e.chancePermille();
+            chance = pc.enchantments().lootChance(chance);
             if (rng.nextInt(1000) < chance) {
                 int count = CombatFormulas.rollBetween(e.min(), e.max(), rng);
                 if (isRare(t, e.chancePermille())) rareRolled.add(new ItemStack(e.itemId(), count));
@@ -330,7 +332,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
         MonsterType t = m.type();
         int raw = CombatFormulas.rollBetween(t.attackMin(), t.attackMax(), rng);
-        int dmg = CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), pc.isDefensive(), rng);
+        int dmg = pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), pc.isDefensive(), rng));
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
         recap.record(t.name(), dealt, now);

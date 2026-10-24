@@ -13,16 +13,39 @@ public final class Enchantments {
         MANA("Kradzież many", "3% zadanych obrażeń wraca jako mana", true),
         CRIT("Cios krytyczny", "10% szans na +50% obrażeń", true),
         /** Zwoj nauki z plecaka (nie u kowala): +30% doswiadczenia za potwory. */
-        EXP("Zwój nauki", "+30% doświadczenia za potwory", false);
+        EXP("Zwój nauki", "+30% doświadczenia za potwory", false),
+        /** Mikstury wzmacniajace (paczka ikon WsT): 10 minut polowania na lyk, do 30 minut zapasu. */
+        STRENGTH("Mikstura siły", "+15% zadawanych obrażeń", false, "strength_potion"),
+        STONESKIN("Kamienna skóra", "-15% otrzymywanych obrażeń", false, "stoneskin_potion"),
+        SWIFTNESS("Mikstura szybkości", "krok o 15% krótszy", false, "swiftness_potion"),
+        LUCK("Mikstura szczęścia", "+30% szans na łup", false, "luck_potion");
 
         private final String label;
         private final String effect;
         private final boolean smith;
+        private final String potion;
 
         Kind(String label, String effect, boolean smith) {
+            this(label, effect, smith, null);
+        }
+
+        Kind(String label, String effect, boolean smith, String potion) {
             this.label = label;
             this.effect = effect;
             this.smith = smith;
+            this.potion = potion;
+        }
+
+        /** Klucz mikstury, ktora daje to zaklecie (null dla kowala i zwoju). */
+        public String potion() { return potion; }
+        /** Czas jednego zakupu, zwoju albo lyku. */
+        public long durationMs() { return potion != null ? POTION_MS : DURATION_MS; }
+        public long maxMs() { return 3 * durationMs(); }
+
+        /** Zaklecie z mikstury o tym kluczu albo null. */
+        public static Kind ofPotion(String itemKey) {
+            for (Kind k : values()) if (itemKey != null && itemKey.equals(k.potion)) return k;
+            return null;
         }
 
         public String label() { return label; }
@@ -38,6 +61,26 @@ public final class Enchantments {
     public static final int CRIT_CHANCE = 10;
     public static final int CRIT_BONUS_PERCENT = 50;
     public static final int EXP_BONUS_PERCENT = 30;
+    public static final long POTION_MS = 600_000L;
+    public static final int STRENGTH_PERCENT = 15;
+    public static final int STONESKIN_PERCENT = 15;
+    public static final double SWIFT_STEP = 0.85;
+    public static final int LUCK_PERCENT = 30;
+
+    /** Obrazenia zadawane z mikstura sily. */
+    public int outgoing(int raw) {
+        return raw > 0 && active(Kind.STRENGTH) ? raw + Math.max(1, raw * STRENGTH_PERCENT / 100) : raw;
+    }
+
+    /** Obrazenia otrzymywane z kamienna skora. */
+    public int incoming(int dmg) {
+        return dmg > 0 && active(Kind.STONESKIN) ? dmg - dmg * STONESKIN_PERCENT / 100 : dmg;
+    }
+
+    /** Szansa na lup (promile) z mikstura szczescia. */
+    public int lootChance(int permille) {
+        return active(Kind.LUCK) ? permille + permille * LUCK_PERCENT / 100 : permille;
+    }
 
     /** Doswiadczenie ze zwojem nauki. */
     public long experience(long exp) {
@@ -58,10 +101,10 @@ public final class Enchantments {
     }
 
     /** Czy kolejny zakup sie zmiesci (do 3 godzin). */
-    public boolean canExtend(Kind k) { return remainingMs(k) + DURATION_MS <= MAX_MS; }
+    public boolean canExtend(Kind k) { return remainingMs(k) + k.durationMs() <= k.maxMs(); }
 
     public void extend(Kind k) {
-        remaining.put(k, Math.min(MAX_MS, remainingMs(k) + DURATION_MS));
+        remaining.put(k, Math.min(k.maxMs(), remainingMs(k) + k.durationMs()));
     }
 
     /** Uplyw czasu poza strefa ochronna; zwraca zaklecie, ktore wlasnie wygaslo, albo null. */
@@ -108,8 +151,9 @@ public final class Enchantments {
             String[] f = part.split(":");
             if (f.length != 2) continue;
             try {
-                long v = Math.min(MAX_MS, Long.parseLong(f[1]));
-                if (v > 0) remaining.put(Kind.valueOf(f[0]), v);
+                Kind k = Kind.valueOf(f[0]);
+                long v = Math.min(k.maxMs(), Long.parseLong(f[1]));
+                if (v > 0) remaining.put(k, v);
             } catch (IllegalArgumentException ignored) {
                 // nieznane zaklecie ze starszego lub nowszego zapisu
             }

@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.202.0] - 2026-10-24
+
+### Dodano
+- Ikony z kupionej paczki WsT "Alchemy & Potion Icons": wszystkie mikstury zdrowia, many i ducha, esencje,
+  róg z prochem, ziele lecznicze i zwój nauki.
+- Cztery mikstury wzmacniające w sklepach magicznych (10 minut polowania na łyk, do 30 minut zapasu):
+  siły (+15% obrażeń), kamiennej skóry (-15% otrzymywanych obrażeń), szybkości (krótszy krok) i szczęścia
+  (+30% szans na łup).
+- Ramki pól z kupionej paczki WsT "Icon Frames & UI Slots" w plecaku, ekwipunku, pasku akcji i przy
+  przyciskach. Kolor ramki przedmiotu pokazuje jego rzadkość (od szarej po pomarańczową legendarną).
+
 ## [0.201.0] - 2026-10-24
 
 ### Zmieniono

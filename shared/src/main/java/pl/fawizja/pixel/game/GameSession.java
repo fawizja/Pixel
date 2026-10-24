@@ -1162,6 +1162,7 @@ public final class GameSession {
         if (st != null && items.get(st.itemId()).key().equals("saddle")) return useSaddle(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("return_scroll")) return startRecall(nowMs);
         if (st != null && items.get(st.itemId()).key().equals("exp_scroll")) return readExpScroll(slot, nowMs);
+        if (st != null && pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(items.get(st.itemId()).key()) != null) return drinkBuff(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("challenge_scroll")) return startChallenge(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
         if (st != null && items.get(st.itemId()).key().equals("backpack")) return attachBag(slot, nowMs);
@@ -1336,6 +1337,26 @@ public final class GameSession {
         e.extend(k);
         log.add(nowMs, EventLog.Kind.SYSTEM, "Zwój nauki: +" + pl.fawizja.pixel.item.Enchantments.EXP_BONUS_PERCENT
                 + "% doświadczenia za potwory przez " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
+        return CastResult.OK;
+    }
+
+    /** Mikstura wzmacniajaca: 10 minut polowania (czas plynie poza strefa ochronna), do 30 minut zapasu. */
+    private CastResult drinkBuff(int slot, long nowMs) {
+        pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
+        pl.fawizja.pixel.item.ItemType potion = items.get(pc.backpack().get(slot).itemId());
+        pl.fawizja.pixel.item.Enchantments.Kind k = pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(potion.key());
+        if (pc.level() < potion.minLevel()) {
+            log.add(nowMs, EventLog.Kind.WARNING, potion.name() + ": od poziomu " + potion.minLevel() + ".");
+            return CastResult.LEVEL_TOO_LOW;
+        }
+        if (!e.canExtend(k)) {
+            log.add(nowMs, EventLog.Kind.INFO, k.label() + " działa jeszcze " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + ".");
+            return CastResult.OK;
+        }
+        if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
+        e.extend(k);
+        log.add(nowMs, EventLog.Kind.SYSTEM, k.label() + ": " + k.effect() + " przez "
+                + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
         return CastResult.OK;
     }
 
@@ -1515,6 +1536,13 @@ public final class GameSession {
     public CastResult usePotion(String itemKey, long nowMs) {
         if (itemKey.equals("health_potion")) itemKey = quickPotion(false);
         else if (itemKey.equals("mana_potion")) itemKey = quickPotion(true);
+        if (pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(itemKey) != null && items.containsKey(itemKey)) {
+            int id = items.byKey(itemKey).id();
+            for (int i = 0; i < pc.backpack().size(); i++) {
+                pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(i);
+                if (st != null && st.itemId() == id) return useSlot(i, nowMs);
+            }
+        }
         return spells.useFirst(itemKey, nowMs);
     }
 

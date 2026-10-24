@@ -8,6 +8,13 @@ Darka). Warunki autora: użycie w projektach komercyjnych i niekomercyjnych, bez
 samych grafik. Dlatego w repozytorium są tylko wycięte kawałki używane przez grę, bez oryginalnych arkuszy
 (narzędzie: `tools/art/wst_import.py`).
 
+## WsT - "Alchemy & Potion Icons" i "Icon Frames & UI Slots"
+
+Ikony mikstur, esencji i zwojów (`assets/art/items/`, lista w `tools/art/wst_icons_import.py`) oraz ramki pól
+interfejsu (`assets/ui/wst/`) pochodzą z dwóch płatnych paczek **WsT** (https://westudesign.itch.io, kupione przez
+Darka). Licencja pozwala używać ich w grach, także komercyjnych, ale zabrania udostępniania samych plików. W repozytorium są tylko
+elementy używane przez grę, bez oryginalnych paczek.
+
 ## OpenTibia Sprite Pack (CC BY 4.0)
 
 Część grafik w `assets/art/` (podłoże, drzewa i kamienie, potwory, NPC, postacie graczy, przedmioty) pochodzi z

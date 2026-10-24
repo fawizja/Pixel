@@ -255,12 +255,40 @@ public final class Hud {
 
     private static com.badlogic.gdx.graphics.Texture uiTexture(String name) {
         if (Gdx.files == null) return null;
-        com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("ui/otc/" + name);
-        if (!f.exists()) f = Gdx.files.internal("assets/ui/otc/" + name); // desktop z katalogu repozytorium
+        String dir = name.startsWith("wst/") ? "ui/" : "ui/otc/";
+        com.badlogic.gdx.files.FileHandle f = Gdx.files.internal(dir + name);
+        if (!f.exists()) f = Gdx.files.internal("assets/" + dir + name); // desktop z katalogu repozytorium
         if (!f.exists()) return null;
         com.badlogic.gdx.graphics.Texture t = new com.badlogic.gdx.graphics.Texture(f);
-        t.setFilter(com.badlogic.gdx.graphics.Texture.TextureFilter.Linear, com.badlogic.gdx.graphics.Texture.TextureFilter.Linear);
+        // ramki WsT to pixel art: ostre piksele; skorka OTClient wygladzana
+        com.badlogic.gdx.graphics.Texture.TextureFilter filter = name.startsWith("wst/")
+                ? com.badlogic.gdx.graphics.Texture.TextureFilter.Nearest : com.badlogic.gdx.graphics.Texture.TextureFilter.Linear;
+        t.setFilter(filter, filter);
         return t;
+    }
+
+    /** Ramki pol z paczki WsT (22x22, ikona 16x16 w (3,3)); null = stare pole OTClient. */
+    private TextureRegion wstSlot, wstEmpty, wstSelected, wstPressed;
+    /** Ramki rzadkosci przedmiotu w plecaku i ekwipunku: zwykly, niepospolity, rzadki, epicki, legendarny. */
+    private final TextureRegion[] wstRarity = new TextureRegion[5];
+
+    private static TextureRegion wst(String name) {
+        com.badlogic.gdx.graphics.Texture t = uiTexture("wst/" + name + ".png");
+        return t == null ? null : new TextureRegion(t);
+    }
+
+    /** Odstep ikony od krawedzi pola: w ramce WsT ikona wypelnia wnetrze ramki. */
+    private float slotPad(float cell) {
+        return wstSlot != null ? cell * 3f / 22f : Math.max(2, cell * 0.08f);
+    }
+
+    /** Ramka pola dla przedmiotu: kolor rzadkosci wg ceny (puste pole - wglebione). */
+    private TextureRegion slotFrame(ItemStack st, pl.fawizja.pixel.item.ItemRegistry items) {
+        if (wstSlot == null) return slotImg;
+        if (st == null) return wstEmpty != null ? wstEmpty : wstSlot;
+        int tier = pl.fawizja.pixel.item.Rarity.tier(items.get(st.itemId()));
+        TextureRegion r = tier > 0 ? wstRarity[tier - 1] : null;
+        return r != null ? r : wstSlot;
     }
 
     private void loadUiImages() {
@@ -280,6 +308,15 @@ public final class Hud {
             if (pm != null) panelPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(pm, 2, 2, 2, 2);
             com.badlogic.gdx.graphics.Texture slot = uiTexture("item.png");
             if (slot != null) slotImg = new TextureRegion(slot);
+            wstSlot = wst("slot");
+            if (wstSlot != null) {
+                slotImg = wstSlot;
+                wstEmpty = wst("slot_empty");
+                wstSelected = wst("slot_selected");
+                wstPressed = wst("slot_pressed");
+                String[] tiers = {"common", "uncommon", "rare", "epic", "legendary"};
+                for (int i = 0; i < tiers.length; i++) wstRarity[i] = wst("slot_" + tiers[i]);
+            }
             com.badlogic.gdx.graphics.Texture mb = uiTexture("miniwindow_buttons.png");
             if (mb != null) {
                 closeImg = new TextureRegion(mb, 28, 0, 14, 14);
@@ -2005,7 +2042,7 @@ public final class Hud {
             }
             if (slotImg != null) for (HudButton b : slotButtons()) {
                 if (!b.visible) continue;
-                batch.draw(slotImg, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
+                batch.draw(b.active && wstPressed != null ? wstPressed : slotImg, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
                 if (b.active) outline(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2,
                         b == target ? new Color(0.95f, 0.25f, 0.2f, 1f) : new Color(0.3f, 0.9f, 0.35f, 1f));
             }
@@ -2151,7 +2188,7 @@ public final class Hud {
                 centered(batch, b.label, b.x, b.y - b.r * 0.6f);
             } else if (b.icon != null && b.id.startsWith("spell:")) {
                 // pole paska z mikstura albo runa: duza ikona, liczba sztuk w prawym dolnym rogu
-                float is = b.r * 1.7f;
+                float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.7f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
                 float cd = itemCd[Integer.parseInt(b.id.substring(6))];
                 if (cd > 0) {
@@ -2822,22 +2859,23 @@ public final class Hud {
 
     /** Plecak w gniezdzie ekwipunku (dotkniecie otwiera plecak), podswietlony gdy plecak jest otwarty. */
     private void drawBackpackSlot(SpriteBatch batch, float x, float y, float cell) {
-        if (slotImg != null) batch.draw(slotImg, x, y, cell, cell);
+        if (slotImg != null) batch.draw(bagOpen && wstSelected != null ? wstSelected : slotImg, x, y, cell, cell);
         if (bagOpen) {
             batch.setColor(1f, 0.85f, 0.3f, 0.35f);
             batch.draw(art.white(), x + 1, y + 1, cell - 2, cell - 2);
             batch.setColor(Color.WHITE);
         }
-        float pad = Math.max(2, cell * 0.08f);
+        float pad = slotPad(cell);
         batch.draw(art.backpack(), x + pad, y + pad, cell - pad * 2, cell - pad * 2);
     }
 
     /** Pole ekwipunku: tlo z OTClientV8, przedmiot albo szara nazwa gniazda. */
     private void drawEquipSlot(SpriteBatch batch, ItemStack st, String name, float x, float y, float cell) {
-        if (slotImg != null) batch.draw(slotImg, x, y, cell, cell);
+        TextureRegion frame = slotFrame(st, art.itemRegistry());
+        if (frame != null) batch.draw(frame, x, y, cell, cell);
         TextureRegion r = st == null ? null : art.item(st.itemId());
         if (r != null) {
-            float pad = Math.max(2, cell * 0.08f);
+            float pad = slotPad(cell);
             batch.draw(r, x + pad, y + pad, cell - pad * 2, cell - pad * 2);
             font.getData().setScale(Math.min(0.7f, cell / 50f));
             if (st.count() > 1) text(batch, String.valueOf(st.count()), x + 2, y + cell * 0.32f);
@@ -3036,8 +3074,8 @@ public final class Hud {
             for (int i = 0; i < 20; i++) {
                 float sx = bagX + (i % 5) * slotSize;
                 float sy = bagY + (3 - i / 5) * slotSize;
-                batch.draw(slotImg, sx + 1, sy + 1, slotSize - 2, slotSize - 2);
                 ItemStack st = pc.backpack().get(base + i);
+                batch.draw(base + i == selectedSlot && wstSelected != null ? wstSelected : slotFrame(st, art.itemRegistry()), sx + 1, sy + 1, slotSize - 2, slotSize - 2);
                 if (base + i == selectedSlot) outline(batch, sx + 1, sy + 1, slotSize - 2, slotSize - 2, new Color(0.95f, 0.8f, 0.25f, 1f));
                 if (st != null && pc.isKept(st.itemId())) {
                     batch.setColor(0.95f, 0.8f, 0.25f, 1f);
@@ -3053,7 +3091,8 @@ public final class Hud {
             float sy = bagY + (3 - i / 5) * slotSize;
             TextureRegion r = art.item(s.itemId());
             if (dragging && base + i == dragSlot) batch.setColor(1f, 1f, 1f, 0.35f); // przeciagany - blady w miejscu zrodla
-            if (r != null) batch.draw(r, sx + 5, sy + 5, slotSize - 10, slotSize - 10);
+            float ip = 1 + slotPad(slotSize - 2);
+            if (r != null) batch.draw(r, sx + ip, sy + ip, slotSize - ip * 2, slotSize - ip * 2);
             batch.setColor(Color.WHITE);
             if (s.count() > 1) text(batch, String.valueOf(s.count()), sx + 5, sy + 15);
             if (s.upgrade() > 0) text(batch, "+" + s.upgrade(), sx + slotSize - 24, sy + slotSize - 6);

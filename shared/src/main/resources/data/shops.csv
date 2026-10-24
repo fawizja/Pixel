@@ -370,6 +370,10 @@ varden_magic;great_spirit_potion;500;0
 varden_magic;ultimate_spirit_potion;950;0
 varden_magic;ultimate_mana_potion;650;0
 varden_magic;ultimate_health_potion;760;0
+varden_magic;strength_potion;700;0
+varden_magic;stoneskin_potion;700;0
+varden_magic;swiftness_potion;500;0
+varden_magic;luck_potion;1000;0
 selv_magic;great_fireball_rune;130;0
 selv_magic;avalanche_rune;130;0
 selv_magic;sudden_death_rune;300;0
@@ -378,6 +382,10 @@ selv_magic;great_spirit_potion;500;0
 selv_magic;ultimate_spirit_potion;950;0
 selv_magic;ultimate_mana_potion;650;0
 selv_magic;ultimate_health_potion;760;0
+selv_magic;strength_potion;700;0
+selv_magic;stoneskin_potion;700;0
+selv_magic;swiftness_potion;500;0
+selv_magic;luck_potion;1000;0
 qas_magic;great_fireball_rune;130;0
 qas_magic;avalanche_rune;130;0
 qas_magic;sudden_death_rune;300;0
@@ -386,6 +394,10 @@ qas_magic;great_spirit_potion;500;0
 qas_magic;ultimate_spirit_potion;950;0
 qas_magic;ultimate_mana_potion;650;0
 qas_magic;ultimate_health_potion;760;0
+qas_magic;strength_potion;700;0
+qas_magic;stoneskin_potion;700;0
+qas_magic;swiftness_potion;500;0
+qas_magic;luck_potion;1000;0
 frost_magic;great_fireball_rune;130;0
 frost_magic;avalanche_rune;130;0
 frost_magic;sudden_death_rune;300;0
@@ -394,6 +406,10 @@ frost_magic;great_spirit_potion;500;0
 frost_magic;ultimate_spirit_potion;950;0
 frost_magic;ultimate_mana_potion;650;0
 frost_magic;ultimate_health_potion;760;0
+frost_magic;strength_potion;700;0
+frost_magic;stoneskin_potion;700;0
+frost_magic;swiftness_potion;500;0
+frost_magic;luck_potion;1000;0
 camp_shop;great_fireball_rune;130;0
 camp_shop;avalanche_rune;130;0
 camp_shop;sudden_death_rune;300;0

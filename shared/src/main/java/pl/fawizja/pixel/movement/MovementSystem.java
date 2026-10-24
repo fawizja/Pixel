@@ -77,6 +77,7 @@ public final class MovementSystem {
     /** Czas trwania kroku w ms dla postaci (bieganie skraca krok o 15%, skos x3). */
     public static long stepDurationMs(PlayerCharacter pc, Direction d) {
         long ms = Balance.stepDurationMs(pc.speed(), false) * (d.diagonal() ? DIAGONAL_STEP_FACTOR : 1);
+        if (pc.enchantments().active(pl.fawizja.pixel.item.Enchantments.Kind.SWIFTNESS)) ms = Math.round(ms * pl.fawizja.pixel.item.Enchantments.SWIFT_STEP);
         return pc.isRunning() ? Math.round(ms * 0.85) : ms;
     }
 }

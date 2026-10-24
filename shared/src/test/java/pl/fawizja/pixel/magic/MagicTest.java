@@ -53,7 +53,8 @@ class MagicTest {
             if (it.category() == ItemCategory.RUNE && !it.key().equals("blank_rune")) {
                 assertTrue(SPELLS.find(it.key()) != null && SPELLS.get(it.key()).kind().isRune(), "rune effect for " + it.key());
             }
-            if (it.category() == ItemCategory.POTION || it.category() == ItemCategory.FOOD) {
+            if ((it.category() == ItemCategory.POTION || it.category() == ItemCategory.FOOD)
+                    && pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(it.key()) == null) { // wzmacniajace: PotionBuffTest
                 assertNotNull(CONSUMABLES.get(it.id()), "consumable data for " + it.key());
             }
         }

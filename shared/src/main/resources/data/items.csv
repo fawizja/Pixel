@@ -172,3 +172,7 @@
 188;glacier_crossbow;Kusza lodowca;WEAPON;1;200000;WEAPON;92;0;0;550;PALADIN;0;5;PHYSICAL;#a0d8f0;Kusza Skaldry, bełty zamarzają w locie.
 189;shadow_bow;Łuk cienia;WEAPON;1;380000;WEAPON;102;0;0;700;PALADIN;0;5;PHYSICAL;#5a4a7a;Łuk, którego strzał nie rzuca cienia.
 190;dawn_bow;Łuk świtu;WEAPON;1;650000;WEAPON;120;0;0;850;PALADIN;1;5;PHYSICAL;#fff0a0;Łuk świtu - strzały świecą jak słońce nad Otchłanią.
+191;strength_potion;Mikstura siły;POTION;100;600;NONE;0;0;0;30;*;0;0;PHYSICAL;#c83020;Gęsty czerwony wywar: +15% zadawanych obrażeń przez 10 minut polowania.
+192;stoneskin_potion;Mikstura kamiennej skóry;POTION;100;600;NONE;0;0;0;30;*;0;0;PHYSICAL;#8a8478;Skóra twardnieje jak kamień: -15% otrzymywanych obrażeń przez 10 minut polowania.
+193;swiftness_potion;Mikstura szybkości;POTION;100;450;NONE;0;0;0;20;*;0;0;PHYSICAL;#70c0f0;Musujący błękitny napój: krok o 15% krótszy przez 10 minut polowania.
+194;luck_potion;Mikstura szczęścia;POTION;100;900;NONE;0;0;0;50;*;0;0;PHYSICAL;#e8c040;Fortuna sprzyja: +30% szans na łup przez 10 minut polowania.
