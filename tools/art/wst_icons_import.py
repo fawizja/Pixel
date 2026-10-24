@@ -30,6 +30,7 @@ ICONS = {
     "shadow_essence": "quintessence", "powder_horn": "black_powder", "exp_scroll": "recipe_scroll",
     "healing_herb": "essential_oil",
 }
+UI_ICONS = {"icon_info": "grimoire"}
 # ramki pol: (wyjscie, stan, wzor)
 FRAMES = [
     ("slot", "normal", "classic_plate_neutral"), ("slot_empty", "empty", "classic_plate_neutral"),
@@ -55,6 +56,9 @@ def main():
     os.makedirs(out, exist_ok=True)
     for name, state, design in FRAMES:
         Image.open(os.path.join(frames, state, design + ".png")).convert("RGBA").save(os.path.join(out, name + ".png"))
+    # piktogramy przyciskow interfejsu (16x16, rysowane w ramce pola)
+    for name, src in UI_ICONS.items():
+        Image.open(os.path.join(icons, src + ".png")).convert("RGBA").save(os.path.join(out, name + ".png"))
     print(f"WsT: {n} ikon przedmiotow, {len(FRAMES)} ramek pol")
 
 

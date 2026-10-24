@@ -47,13 +47,13 @@ public final class Hud {
     private final VirtualJoystick joystick = new VirtualJoystick();
     private final List<HudButton> buttons = new ArrayList<>();
     private final HudButton use = new HudButton("use", "UŻYJ");
-    private final HudButton run = new HudButton("run", "BIEG");
-    private final HudButton torch = new HudButton("torch", "POCH");
+    private final HudButton run = new HudButton("run", "");
+    private final HudButton torch = new HudButton("torch", "");
     private final HudButton bag = new HudButton("bag", "PLECAK");
     private final HudButton pick = new HudButton("pick", "PODNIEŚ");
-    private final HudButton diag = new HudButton("diag", "i");
+    private final HudButton diag = new HudButton("diag", "");
     private final HudButton target = new HudButton("target", "ATAK");
-    private final HudButton defensive = new HudButton("defensive", "TARCZA");
+    private final HudButton defensive = new HudButton("defensive", "");
     private final HudButton book = new HudButton("book", "KSIĘGA");
     private final HudButton fish = new HudButton("fish", "ŁÓW");
     private final HudButton talk = new HudButton("talk", "ROZMOWA");
@@ -271,6 +271,8 @@ public final class Hud {
     private TextureRegion wstSlot, wstEmpty, wstSelected, wstPressed;
     /** Ramki rzadkosci przedmiotu w plecaku i ekwipunku: zwykly, niepospolity, rzadki, epicki, legendarny. */
     private final TextureRegion[] wstRarity = new TextureRegion[5];
+    /** Piktogram przycisku diagnostyki (ksiega z paczki WsT). */
+    private TextureRegion infoIcon;
 
     private static TextureRegion wst(String name) {
         com.badlogic.gdx.graphics.Texture t = uiTexture("wst/" + name + ".png");
@@ -316,6 +318,7 @@ public final class Hud {
                 wstPressed = wst("slot_pressed");
                 String[] tiers = {"common", "uncommon", "rare", "epic", "legendary"};
                 for (int i = 0; i < tiers.length; i++) wstRarity[i] = wst("slot_" + tiers[i]);
+                infoIcon = wst("icon_info");
             }
             com.badlogic.gdx.graphics.Texture mb = uiTexture("miniwindow_buttons.png");
             if (mb != null) {
@@ -393,14 +396,14 @@ public final class Hud {
         float eqBottom = abTop + pad + 23 + BATTLE_ROW * 2 + 6;
         layoutEquipPanel(eqTop, eqBottom, iw - sc - gap);
         if (epTibia) {
-            // ekwipunek i kolumna razem wysrodkowane w panelu
-            float groupW = epW + gap + sc;
-            epX = panelX + pad + (iw - groupW) / 2f;
-            float cx = epX + epW + gap + sc / 2f;
-            float step = Math.min(sc + gap, (epH - sc) / (col.length - 1));
+            // ekwipunek rowno z lewa krawedzia minimapy, kolumna przyciskow przy prawej krawedzi, od wysokosci pol
+            epX = mmX - 3;
+            float cx = mmX + mmSize + 3 - sc / 2f;
+            float colTop = epY + epH - 23 - 2;
+            float step = Math.min(sc + gap, (colTop - epY - sc) / (col.length - 1));
             for (int i = 0; i < col.length; i++) {
                 col[i].x = cx;
-                col[i].y = epY + epH - sc / 2f - i * step;
+                col[i].y = colTop - sc / 2f - i * step;
             }
         } else {
             // niski ekran: przyciski w rzedzie pod minimapa, pod nimi zwarty ekwipunek
@@ -1972,6 +1975,9 @@ public final class Hud {
         target.icon = itemIcon(session, "iron_sword");
         defensive.icon = itemIcon(session, "wooden_shield");
         torch.icon = itemIcon(session, "torch");
+        run.icon = itemIcon(session, "leather_boots");
+        if (infoIcon != null) diag.icon = infoIcon;
+        else diag.label = "i";
         fish.icon = itemIcon(session, "fishing_rod");
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -2200,6 +2206,10 @@ public final class Hud {
                 font.getData().setScale(Math.min(0.7f, b.r / 28f));
                 layout.setText(font, b.label);
                 text(batch, b.label, b.x + b.hw - 3 - layout.width, b.y - b.r + 3 + layout.height);
+            } else if (b.icon != null && b.label.isEmpty()) {
+                // piktogram bez napisu (diagnostyka, bieg, tarcza, pochodnia): ikona we wnetrzu ramki
+                float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.5f;
+                batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
             } else if (b.icon != null) {
                 float is = b.r * 1.15f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.3f, is, is);

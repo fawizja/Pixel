@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.203.0] - 2026-10-24
+
+### Zmieniono
+- Ekwipunek stoi równo z lewą krawędzią minimapy, a przyciski są niżej, przy prawej krawędzi panelu.
+- Przyciski mają piktogramy zamiast napisów: księga (diagnostyka), buty (bieg), tarcza (postawa obronna)
+  i pochodnia.
+
 ## [0.202.0] - 2026-10-24
 
 ### Dodano
