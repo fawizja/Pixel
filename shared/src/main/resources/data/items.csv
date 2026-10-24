@@ -159,3 +159,16 @@
 175;skull_axe;Topór czaszek;WEAPON;1;350000;WEAPON;110;26;0;700;KNIGHT;0;1;PHYSICAL;#d8d0c0;Topór ozdobiony czaszkami pokonanych.
 176;abyssal_greatsword;Wielki miecz Otchłani;WEAPON;1;600000;WEAPON;128;34;0;850;KNIGHT;0;1;PHYSICAL;#802020;Ostrze wykute z serca Otchłani.
 177;abyss_hammer;Młot Otchłani;WEAPON;1;600000;WEAPON;130;30;0;850;KNIGHT;0;1;PHYSICAL;#6a3a8a;Młot, którego uderzenie trzęsie ziemią.
+178;short_bow;Krótki łuk;WEAPON;1;60;WEAPON;26;0;0;0;PALADIN;0;5;PHYSICAL;#a07a48;Prosty łuk z cisu. Strzela bez amunicji.
+179;hunting_bow;Łuk myśliwski;WEAPON;1;350;WEAPON;30;0;0;15;PALADIN;0;5;PHYSICAL;#8a6a3a;Mocniejszy łuk myśliwych z Varden.
+180;crossbow;Kusza;WEAPON;1;1100;WEAPON;36;0;0;25;PALADIN;0;5;PHYSICAL;#7a3a2a;Kusza z bełtami. Wolno się naciąga, mocno trafia.
+181;elven_bow;Elfi łuk;WEAPON;1;3200;WEAPON;41;0;0;40;PALADIN;0;5;PHYSICAL;#9ac070;Lekki łuk z Selvaran.
+182;serpent_bow;Wężowy łuk;WEAPON;1;8000;WEAPON;46;0;0;60;PALADIN;0;5;PHYSICAL;#50a050;Łuk oplatany wężową skórą.
+183;composite_bow;Łuk kompozytowy;WEAPON;1;12000;WEAPON;54;0;0;100;PALADIN;0;5;PHYSICAL;#c0b090;Łuk z rogu i drewna, sięga daleko.
+184;heavy_crossbow;Ciężka kusza;WEAPON;1;25000;WEAPON;60;0;0;150;PALADIN;0;5;PHYSICAL;#d09030;Ciężka kusza piratów z okuciami ze złota.
+185;magma_bow;Magmowy łuk;WEAPON;1;45000;WEAPON;67;0;0;250;PALADIN;0;5;PHYSICAL;#d04020;Łuk ze ścięgien smoka magmy.
+186;tidal_bow;Łuk przypływu;WEAPON;1;80000;WEAPON;75;0;0;350;PALADIN;0;5;PHYSICAL;#3a8ab0;Łuk kapitana piratów, cięciwa z wodorostów.
+187;frost_bow;Łuk mroźnego kła;WEAPON;1;130000;WEAPON;84;0;0;450;PALADIN;0;5;PHYSICAL;#c8ecff;Łuk z lodowego kryształu Hrimgara.
+188;glacier_crossbow;Kusza lodowca;WEAPON;1;200000;WEAPON;92;0;0;550;PALADIN;0;5;PHYSICAL;#a0d8f0;Kusza Skaldry, bełty zamarzają w locie.
+189;shadow_bow;Łuk cienia;WEAPON;1;380000;WEAPON;102;0;0;700;PALADIN;0;5;PHYSICAL;#5a4a7a;Łuk, którego strzał nie rzuca cienia.
+190;dawn_bow;Łuk świtu;WEAPON;1;650000;WEAPON;120;0;0;850;PALADIN;1;5;PHYSICAL;#fff0a0;Łuk świtu - strzały świecą jak słońce nad Otchłanią.

@@ -386,6 +386,7 @@ public final class GameSession {
         pl.fawizja.pixel.item.ItemStack w = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.WEAPON);
         pl.fawizja.pixel.item.ItemType weapon = w == null ? null : items.get(w.itemId());
         if (weapon == null || weapon.range() <= 1 || weapon.damageType() != pl.fawizja.pixel.combat.DamageType.PHYSICAL) return false;
+        if (pl.fawizja.pixel.combat.CombatFormulas.usesNoAmmo(weapon)) return false;
         if (pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO) != null) return false;
         for (pl.fawizja.pixel.item.ItemType t : items.all()) {
             if (t.category() == pl.fawizja.pixel.item.ItemCategory.AMMUNITION && pc.backpack().count(t.id()) > 0

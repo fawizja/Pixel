@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.199.0] - 2026-10-24
+
+### Dodano
+- Łuki i kusze paladyna z OpenTibia Sprite Pack (13, od krótkiego łuku po łuk świtu na poziomie 850): w sklepach
+  z bronią i u bossów. Strzelają bez amunicji, włócznie z gniazda amunicji do nich nie pasują.
+- Kalenice i okapy dachów z paczki, dachy śnieżne w mieście śniegu, okrągła pomarańczowa dachówka i niebieski dach pałacu.
+- Pozostałe pociski i efekty paczki: bełt z kuszy, ognista strzała z magmowego łuku, czerwone strzały łowców,
+  trucizna węży i pająków, ciemna gwiazdka czarów śmierci, kamienie z ziemi przy fizycznych czarach obszarowych,
+  złote iskry przyspieszenia i niebieski wybuch magii energii.
+
+### Zmieniono
+- Granice trawy, śniegu, piasku i popiołu są wygładzone: bez prostokątów, schodków i pojedynczych wypustek.
+
 ## [0.198.0] - 2026-10-24
 
 ### Dodano

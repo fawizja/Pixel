@@ -19,7 +19,9 @@ import pl.fawizja.pixel.world.WorldMap;
  */
 public final class Roofs {
 
-    public static final byte NONE = 0, RED = 1, SLATE = 2, SAND = 3, WOOD = 4, BROWN = 5;
+    public static final byte NONE = 0, RED = 1, SLATE = 2, SAND = 3, WOOD = 4, BROWN = 5, SNOW = 6, ORANGE = 7, ROYAL = 8;
+    /** Liczba rodzajow dachu (bez NONE). */
+    public static final int KINDS = 8;
     /** Mury, ktore decyduja o dachu niezaleznie od posadzki: mur pruski i bale - gont, tynk - brazowa dachowka. */
     static final java.util.Map<String, Byte> WALL_ROOF = java.util.Map.of("timber_wall", WOOD, "log_wall", WOOD,
             "plaster_wall", BROWN, "whitewash_wall", BROWN);
@@ -67,13 +69,15 @@ public final class Roofs {
                 q.add(new int[] {x, y});
                 seen[y * w + x] = true;
                 boolean enclosed = true;
-                int stone = 0, sand = 0;
+                int stone = 0, sand = 0, frozen = 0, marble = 0;
                 while (!q.isEmpty()) {
                     int[] c = q.poll();
                     cells.add(c);
                     String k = key(f, c[0], c[1]);
                     if (!k.equals("wood_floor")) stone++;
                     if (k.equals("sandstone_floor")) sand++;
+                    if (k.equals("frozen_floor")) frozen++;
+                    if (k.equals("marble_floor")) marble++;
                     if (door(f, c[0], c[1])) continue;            // drzwi naleza do budynku, ale nie prowadza dalej
                     for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
                         int nx = c[0] + d[0], ny = c[1] + d[1];
@@ -88,6 +92,10 @@ public final class Roofs {
                 byte kind = sand * 2 > cells.size() ? SAND : stone * 2 > cells.size() ? SLATE : RED;
                 Byte byWall = wallRoof(f, cells);
                 if (byWall != null) kind = byWall;
+                // miasto sniegu: osniezone dachy; palac (marmur): niebieska dachowka; czesc dachowek okragla pomaranczowa
+                if (frozen * 2 > cells.size() || snowAround(f, cells)) kind = SNOW;
+                else if (marble * 2 > cells.size()) kind = ROYAL;
+                else if (kind == RED && ((x * 7 + y * 13) & 1) == 0) kind = ORANGE;
                 for (int[] c : cells) {
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dx = -1; dx <= 1; dx++) {
@@ -100,6 +108,20 @@ public final class Roofs {
             }
         }
         return out;
+    }
+
+    /** Budynek stoi na sniegu: wiekszosc pol tuz za murami to snieg. */
+    private boolean snowAround(FloorMap f, List<int[]> cells) {
+        int snow = 0, outside = 0;
+        for (int[] c : cells) {
+            for (int[] d : new int[][] {{2, 0}, {-2, 0}, {0, 2}, {0, -2}}) {
+                int nx = c[0] + d[0], ny = c[1] + d[1];
+                if (!f.inBounds(nx, ny) || interior(f, nx, ny) || wall(f, nx, ny)) continue;
+                outside++;
+                if (key(f, nx, ny).equals("snow")) snow++;
+            }
+        }
+        return outside > 0 && snow * 2 > outside;
     }
 
     /** Dach wg przewazajacego materialu murow wokol budynku (null = wg posadzki). */

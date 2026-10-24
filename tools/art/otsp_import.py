@@ -50,9 +50,13 @@ WALLS = {
 }
 WALL_SHAPES = ("v", "h", "pole", "corner")
 # Dachy budynkow (widok jak w Tibii): obiekty rysowane nad budynkami.
-ROOFS = {"roof_red": 183, "roof_slate": 187, "roof_wood": 182, "roof_brown": 190}
+ROOFS = {"roof_red": 184, "roof_slate": 188, "roof_wood": 182, "roof_brown": 190,
+         # 2026-10-24: kalenice (_top) i okapy (_bottom) z paczki, pomaranczowa okragla dachowka, niebieska palacu
+         "roof_red_top": 183, "roof_slate_top": 187, "roof_brown_top": 189,
+         "roof_orange": 180, "roof_orange_top": 178, "roof_orange_bottom": 181,
+         "roof_royal": 188, "roof_royal_top": 187}
 # dachy przebarwione: nazwa -> (nasycenie, jasnosc) - niebieska dachowka z paczki jako szary lupek
-ROOF_TONE = {"roof_slate": (0.18, 0.9)}
+ROOF_TONE = {"roof_slate": (0.18, 0.9), "roof_slate_top": (0.18, 0.9)}
 # Sciany skalne (bryly): kamien laczacy sie w jednolita skale zamiast cegiel - jaskinie i gory jak w Tibii.
 # nazwa: (podloze z paczki, mnoznik jasnosci, kolor domieszki, udzial domieszki)
 ROCK_WALLS = {
@@ -127,9 +131,15 @@ OTSP_PROPS = {
 OTSP_OBJECTS = {"chest_closed": 1111, "training_dummy": 1275}
 # Mury bez odpowiednika: przebarwiona drewniana sciana (burta statku).
 TINTED_WALLS = {"ship_hull": ((680, 681, 682, 683), (120, 80, 50))}
-TINTED_ROOFS = {"roof_sand": (183, (215, 180, 115))}
+TINTED_ROOFS = {"roof_sand": (184, (215, 180, 115)), "roof_sand_top": (183, (215, 180, 115)),
+                # osniezona dachowka miasta sniegu
+                "roof_snow": (184, (240, 246, 252)), "roof_snow_top": (183, (240, 246, 252))}
 # Przedmioty bez wlasnego obrazka: najblizszy przedmiot z paczki, w razie potrzeby przebarwiony.
 MORE_ITEMS = {
+    # 2026-10-24: luki i kusze paladyna
+    "short_bow": 1873, "hunting_bow": 1882, "crossbow": 1884, "elven_bow": 1883, "serpent_bow": 1871,
+    "composite_bow": 1877, "heavy_crossbow": 1885, "magma_bow": 1887, "tidal_bow": (1878, (90, 170, 210)),
+    "frost_bow": 1889, "glacier_crossbow": 1888, "shadow_bow": (1886, (120, 95, 170)), "dawn_bow": (1879, (255, 225, 120)),
     # 2026-10-23 wieczor: bronie rycerza
     "hand_axe": 1833, "battle_axe": 1826, "mace": 1807, "desert_scimitar": 1723, "barbarian_axe": 1852, "knight_sword": 1762,
     "war_hammer": 1813, "crusader_axe": 1856, "magma_cleaver": 1736, "obsidian_axe": 1845, "coral_warhammer": 2604, "glacier_axe": 1861,
@@ -158,10 +168,14 @@ EFFECTS = {
     "blood": 1, "energy": 2, "poof": 3, "sparks": 4, "fire": 6, "water": 7, "earth": 9, "dust": 10,
     "flame": 11, "explosion": 13, "ice": 15, "holy": (2, (255, 230, 120)), "death": (12, (170, 80, 220)),
     "heal": (2, (120, 255, 150)), "haste": (7, (150, 210, 255)),
+    # 2026-10-24: reszta efektow paczki - zlote iskry, niebieski wybuch magii, kamienie wyrastajace z ziemi
+    "sparkle": 5, "magic": 8, "stones": 14,
 }
 MISSILES = {
     "arrow": 2, "spear": 1, "fire": 4, "ice": 13, "earth": 5, "energy": (10, (120, 175, 255)), "stone": 12, "star": 6, "knife": 9,
     "holy": (10, (255, 225, 110)), "death": (10, (170, 80, 220)),
+    # 2026-10-24: reszta pociskow paczki - czerwona i ognista strzala, belt, mala gwiazdka, trucizna, ciemna gwiazdka
+    "arrow_red": 3, "bolt": 7, "star_small": 8, "fire_arrow": 11, "poison": 15, "shadow_star": 19,
 }
 # Kaluze krwi i ciala (przedmioty paczki zapisane jako jednoklatkowe efekty effects/<nazwa>_0.png);
 # plyny w paczce sa niebieskie (kolor nadaje gra), wiec krew i sluz sa przebarwione.

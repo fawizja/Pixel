@@ -34,7 +34,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.conTab=N     zakladka konsoli (0 ogolne, 1 czat, 2 lup, 3 serwer)
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
- *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pocisk, wybuch ognia, mrozna fala, leczenie) i dwa ciala
+ *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
  */
 public final class DesktopLauncher {
 
@@ -370,6 +370,9 @@ public final class DesktopLauncher {
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 100, me.translate(-4, 2), 2, "FIRE"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 220, me.translate(4, 3), 1, "ICE"));
                 cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 150, me, 0, "HEAL"));
+                cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.projectile(now - 40, me, me.translate(2, -4), "DEATH"));
+                cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.projectile(now - 60, me, me.translate(-2, -4), "EARTH"));
+                cs.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now - 120, me.translate(0, 3), 1, "PHYSICAL"));
                 gs.session().ground().addCorpse(me.translate(1, 1), "wolf",
                         java.util.List.of(new pl.fawizja.pixel.item.ItemStack(1, 12)), now);
                 gs.session().ground().addCorpse(me.translate(-1, 1), "goblin", java.util.List.of(), now);

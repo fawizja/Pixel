@@ -418,7 +418,9 @@ public final class WorldRenderer {
                     byte kind = roofs.at(x, y, z);
                     if (kind == Roofs.NONE) continue;
                     if (upper != null && upper.get(Layer.GROUND, x, y) != 0) continue;
-                    batch.draw(art.roof(kind), x - UP, wy, 1f, 1f);
+                    // kalenica (gorny brzeg) i okap (dolny brzeg) z paczki tam, gdzie dach sie konczy
+                    boolean top = roofs.at(x, y - 1, z) != kind, bottom = roofs.at(x, y + 1, z) != kind;
+                    batch.draw(art.roof(kind, top, bottom), x - UP, wy, 1f, 1f);
                 }
             }
         }

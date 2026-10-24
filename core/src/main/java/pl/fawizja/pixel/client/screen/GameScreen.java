@@ -1584,42 +1584,54 @@ public final class GameScreen extends ScreenAdapter {
     /** Czas trwania efektu z paczki (klatki rowno rozlozone). */
     static final long SPRITE_EFFECT_MS = 420L;
 
-    /** Pocisk dla rodzaju obrazen; fizyczny: strzala gracza (wlocznia przy wloczni w reku), kamien olbrzymow. */
+    /**
+     * Pocisk dla rodzaju obrazen; fizyczny: strzala gracza (belt z kuszy, ognista strzala z magmowego luku, wlocznia
+     * przy wloczni w reku), kamien olbrzymow, noz goblinow, czerwona strzala lowcow, wlocznia orkow. Trucizna wezy
+     * i pajakow, ciemna gwiazdka czarow smierci.
+     */
     private String missileFor(CombatEvent e) {
         String fx = e.effect() == null ? "PHYSICAL" : e.effect();
+        String key = "";
+        boolean player = e.from().equals(session.character().position());
+        if (!player) for (Monster m : session.monsters().near(e.from(), 0)) if (m.position().equals(e.from())) key = m.type().key();
         switch (fx) {
             case "FIRE": return "fire";
             case "ICE": return "ice";
-            case "EARTH": return "earth";
+            case "EARTH": return key.matches(".*(serpent|spider|scorpion|wasp|centipede|crocodile|witch).*") ? "poison" : "earth";
             case "ENERGY": return "energy";
             case "HOLY": return "holy";
-            case "DEATH": return "death";
+            case "DEATH": return "shadow_star";
             default:
         }
-        if (e.from().equals(session.character().position())) {
+        if (player) {
             pl.fawizja.pixel.item.ItemStack w = session.character().equipment().get(pl.fawizja.pixel.item.EquipSlot.WEAPON);
             pl.fawizja.pixel.item.ItemType wt = w == null || !session.items().contains(w.itemId()) ? null : session.items().get(w.itemId());
-            return wt != null && wt.key().contains("spear") ? "spear" : "arrow";
+            String k = wt == null ? "" : wt.key();
+            if (k.endsWith("crossbow")) return "bolt";
+            if (k.startsWith("magma") && k.endsWith("bow")) return "fire_arrow";
+            if (k.startsWith("dawn") || k.startsWith("shadow") && k.endsWith("bow")) return "arrow_red";
+            return k.contains("spear") || k.contains("harpoon") ? "spear" : "arrow";
         }
-        String key = "";
-        for (Monster m : session.monsters().near(e.from(), 0)) if (m.position().equals(e.from())) key = m.type().key();
-        return key.matches(".*(golem|troll|titan|giant|colossus|yeti).*") ? "stone"
-                : key.matches(".*(goblin|bandit|pirate|cutthroat).*") ? "knife" : "arrow";
+        if (key.matches(".*(golem|troll|titan|giant|colossus|yeti|gunner).*")) return "stone";
+        if (key.matches(".*(goblin|bandit|cutthroat).*")) return "knife";
+        if (key.matches(".*(orc).*")) return "spear";
+        if (key.matches(".*(hunter|harpy).*")) return "arrow_red";
+        return "arrow";
     }
 
     /** Efekt trafienia czarem / na koniec lotu pocisku. */
     private static String impactFor(String effect, boolean area) {
-        if (effect == null) return area ? "explosion" : null;
+        if (effect == null) return area ? "stones" : null;
         switch (effect) {
             case "FIRE": return area ? "fire" : "flame";
             case "ICE": return "ice";
             case "EARTH": return "earth";
-            case "ENERGY": return "energy";
+            case "ENERGY": return area ? "magic" : "energy";
             case "HOLY": return "holy";
             case "DEATH": return "death";
             case "HEAL": return "heal";
-            case "HASTE": return "haste";
-            case "PHYSICAL": return area ? "explosion" : null;
+            case "HASTE": return "sparkle";
+            case "PHYSICAL": return area ? "stones" : null;
             default: return null;
         }
     }

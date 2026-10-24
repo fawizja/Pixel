@@ -150,6 +150,7 @@ public final class TileArt implements Disposable {
         loadRockShapes(tileRegistry, base);
         loadBigTiles(tileRegistry);
         loadEffects();
+        loadRoofPieces();
         atlas = new Texture(pm);
         atlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         pm.dispose();
@@ -183,9 +184,11 @@ public final class TileArt implements Disposable {
             hiAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             hiPm.dispose();
             hiPm = null;
+            Gdx.app.log("TileArt", "Grafiki 32 px: " + hiCells.size() + " / " + HI_COLS * HI_COLS);
         }
 
         for (TileType t : tileRegistry.all()) tiles[t.id()] = region(t.id());
+        buildRoofPieces();
         buildVariants(tileRegistry);
         for (ItemType it : itemRegistry.all()) items[it.id()] = region(ITEM_BASE + it.id());
         for (Vocation v : Vocation.values()) {
@@ -705,13 +708,13 @@ public final class TileArt implements Disposable {
 
     /** Efekty czarow (klatki effects/nazwa_N.png) i pociski (missiles/nazwa_XY.png) z paczki OTSP. */
     public static final String[] EFFECT_NAMES = {"blood", "energy", "poof", "sparks", "fire", "water", "earth", "dust",
-            "flame", "explosion", "ice", "holy", "death", "heal", "haste",
+            "flame", "explosion", "ice", "holy", "death", "heal", "haste", "sparkle", "magic", "stones",
             // kaluze krwi i ciala (jedna klatka)
             "blood_pool", "blood_small", "blood_splash", "blood_drops", "slime_pool", "slime_splash",
             "corpse_human", "corpse_human_old", "corpse_bones", "corpse_goblin", "corpse_beast", "corpse_centipede",
             "corpse_wasp", "corpse_beetle"};
     public static final String[] MISSILE_NAMES = {"arrow", "spear", "fire", "ice", "earth", "energy", "stone", "star",
-            "knife", "holy", "death"};
+            "knife", "holy", "death", "arrow_red", "bolt", "star_small", "fire_arrow", "poison", "shadow_star"};
     private static final int FX = 64, FX_COLS = 16;
     private Texture fxAtlas;
     private final Map<String, TextureRegion[]> effects = new java.util.HashMap<>();
@@ -870,6 +873,57 @@ public final class TileArt implements Disposable {
     /** Dach nad budynkiem wg Roofs: 1 dachowka (drewno), 2 lupek (kamien), 3 piaskowa dachowka (piaskowiec),
      *  4 gont (mur pruski, bale), 5 brazowa dachowka (tynk). */
     public TextureRegion roof(int kind) { return roof[Math.max(1, Math.min(kind, roof.length)) - 1]; }
+
+    /** Dach z brzegiem: top = kalenica (nad polem nie ma dachu), bottom = okap; bez osobnej grafiki zwykly dach. */
+    public TextureRegion roof(int kind, boolean top, boolean bottom) {
+        int k = Math.max(1, Math.min(kind, Roofs.KINDS)) - 1;
+        TextureRegion[] p = roofPieces[k];
+        if (p != null) {
+            if (top && p[1] != null) return p[1];
+            if (bottom && p[2] != null) return p[2];
+            if (p[0] != null) return p[0];
+        }
+        return roof(kind);
+    }
+
+    /** Rodzaje dachu (kolejnosc jak Roofs.RED..ROYAL) i pliki objects/roof_klucz[_top|_bottom].png. */
+    private static final String[] ROOF_KEYS = {"red", "slate", "sand", "wood", "brown", "snow", "orange", "royal"};
+    private static final int ROOF_BASE = 1 << 22;
+    private final TextureRegion[][] roofPieces = new TextureRegion[ROOF_KEYS.length][];
+
+    private void loadRoofPieces() {
+        String[] suffix = {"", "_top", "_bottom"};
+        for (int k = 0; k < ROOF_KEYS.length; k++) {
+            for (int p = 0; p < 3; p++) {
+                String name = "objects/roof_" + ROOF_KEYS[k] + suffix[p] + ".png";
+                com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + name);
+                if (!f.exists()) f = Gdx.files.internal("assets/art/" + name);
+                if (!f.exists()) continue;
+                try {
+                    Pixmap src = new Pixmap(f);
+                    putHi(ROOF_BASE + k * 3 + p, src);
+                    src.dispose();
+                } catch (RuntimeException e) {
+                    Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void buildRoofPieces() {
+        if (hiAtlas == null) return;
+        for (int k = 0; k < ROOF_KEYS.length; k++) {
+            TextureRegion[] p = new TextureRegion[3];
+            boolean any = false;
+            for (int i = 0; i < 3; i++) {
+                if (hiCells.containsKey(ROOF_BASE + k * 3 + i)) {
+                    p[i] = region(ROOF_BASE + k * 3 + i);
+                    any = true;
+                }
+            }
+            if (any) roofPieces[k] = p;
+        }
+    }
 
     /** Pupil po kluczu przedmiotu (null = nieznany). */
     public TextureRegion pet(String key) { return key == null ? null : pets.get(key); }

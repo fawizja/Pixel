@@ -33,11 +33,16 @@ public final class CombatFormulas {
     public static ItemType ammunition(PlayerCharacter pc, ItemRegistry items) {
         ItemStack w = pc.equipment().get(EquipSlot.WEAPON);
         ItemType weapon = w == null ? null : items.get(w.itemId());
-        if (weapon == null || weapon.range() <= 1 || weapon.damageType() != DamageType.PHYSICAL) return null;
+        if (weapon == null || weapon.range() <= 1 || weapon.damageType() != DamageType.PHYSICAL || usesNoAmmo(weapon)) return null;
         ItemStack a = pc.equipment().get(EquipSlot.AMMO);
         if (a == null || a.count() <= 0) return null;
         ItemType t = items.get(a.itemId());
         return t != null && t.category() == pl.fawizja.pixel.item.ItemCategory.AMMUNITION ? t : null;
+    }
+
+    /** Luki i kusze strzelaja bez amunicji z gniazda (wlocznie do rzucania do nich nie pasuja). */
+    public static boolean usesNoAmmo(ItemType weapon) {
+        return weapon.key().endsWith("bow");
     }
 
     /** Profil ataku postaci na podstawie broni, umiejetnosci i profesji. */

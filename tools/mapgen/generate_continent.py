@@ -769,6 +769,7 @@ def build(ctx):
     restore_varden_core(ctx)
     street_sides(ctx)
     atmosphere(ctx)
+    soften_edges(ctx)
     zones = zone_grid(T)
     ctx['zones'] = zones
     climate_spawns(ctx, zones, rng)
@@ -1458,6 +1459,87 @@ def atmosphere(ctx):
                     placed.append((x, y))
                     snowmen += 1
     print('klimat: pajeczyny', webs, 'balwany', snowmen, 'worki i dzbany', pots)
+
+
+SOFT_GROUNDS = {'grass', 'snow', 'sand', 'dark_sand', 'ash', 'jungle_grass', 'blighted_grass'}
+# rosliny pasujace do podloza: po zmianie podloza nie zostaje sosna na piasku ani palma na sniegu
+COLD_ONLY = {'pine', 'snow_rock', 'snow_tuft'}
+WARM_ONLY = {'palm', 'cactus', 'sandstone_rock', 'dry_grass', 'shells'}
+COLD, WARM = {'snow'}, {'sand', 'dark_sand', 'ash'}
+
+
+def smooth_noise(seed, base):
+    """Gladki szum -1..1 na calej mapie: losowa siatka co base pol, interpolacja dwuliniowa."""
+    rs = np.random.RandomState(seed)
+    n = S // base + 2
+    grid = rs.uniform(-1, 1, (n, n))
+    ys, xs = np.mgrid[0:S, 0:S] / base
+    x0, y0 = xs.astype(int), ys.astype(int)
+    fx, fy = xs - x0, ys - y0
+    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+    a = grid[y0, x0] * (1 - fx) + grid[y0, x0 + 1] * fx
+    b = grid[y0 + 1, x0] * (1 - fx) + grid[y0 + 1, x0 + 1] * fx
+    return a * (1 - fy) + b * fy
+
+
+def soften_edges(ctx):
+    """Granice naturalnych podlozy (trawa, snieg, piasek, popiol...) bez schodkow i prostokatow: kazde pole bierze
+    podloze z pola przesunietego o gladki szum (do 2-3 pol). Zmienia sie tylko podloze miedzy przechodnimi
+    podlozami naturalnymi, wiec przejscia, drogi, woda, miasta i Varden zostaja bez zmian."""
+    world = ctx['world']
+    rows = world.floors[0]
+    vb = next(bb for bb in ctx['blocks'] if bb.name == 'varden')
+    vx0, vy0, vx1, vy1 = vb.rect[0] + vb.dx - 2, vb.rect[1] + vb.dy - 2, vb.rect[2] + vb.dx + 2, vb.rect[3] + vb.dy + 2
+    pz = [r for r in ctx['pz'] if r[4] == 0]
+    wx = smooth_noise(41, 6) * 2.2 + smooth_noise(42, 3) * 0.8
+    wy = smooth_noise(43, 6) * 2.2 + smooth_noise(44, 3) * 0.8
+    old = [[c[0] if c is not None else None for c in row] for row in rows]
+    changed = 0
+    for y in range(2, S - 2):
+        for x in range(2, S - 2):
+            c = rows[y][x]
+            if c is None or c[0] not in SOFT_GROUNDS or c[3] != NONE:
+                continue
+            if vx0 <= x <= vx1 and vy0 <= y <= vy1 or any(r[0] - 1 <= x <= r[2] + 1 and r[1] - 1 <= y <= r[3] + 1 for r in pz):
+                continue
+            sx, sy = x + int(round(wx[y, x])), y + int(round(wy[y, x]))
+            src = old[sy][sx] if 0 <= sx < S and 0 <= sy < S else None
+            if src is None or src == c[0] or src not in SOFT_GROUNDS:
+                continue
+            deco, obj = c[1], c[2]
+            if src in WARM and deco in COLD_ONLY or src in COLD and deco in WARM_ONLY:
+                deco = NONE
+            if src in WARM and obj in COLD_ONLY or src in COLD and obj in WARM_ONLY:
+                obj = NONE
+            rows[y][x] = (src, deco, obj, NONE)
+            changed += 1
+    # dwa przejscia wygladzania: pojedyncze wypustki i wciecia znikaja (pole bierze podloze, ktore ma co najmniej
+    # 6 z 8 sasiadow), wiec brzegi sa rowne jak w Tibii zamiast poszarpanych kresek szerokosci jednego pola
+    for _ in range(2):
+        snap = [[c[0] if c is not None else None for c in row] for row in rows]
+        for y in range(2, S - 2):
+            for x in range(2, S - 2):
+                c = rows[y][x]
+                if c is None or c[0] not in SOFT_GROUNDS or c[3] != NONE:
+                    continue
+                if vx0 <= x <= vx1 and vy0 <= y <= vy1 or any(r[0] - 1 <= x <= r[2] + 1 and r[1] - 1 <= y <= r[3] + 1 for r in pz):
+                    continue
+                count = {}
+                for dy in (-1, 0, 1):
+                    for dx in (-1, 0, 1):
+                        if dx or dy:
+                            g = snap[y + dy][x + dx]
+                            count[g] = count.get(g, 0) + 1
+                g, k = max(count.items(), key=lambda kv: kv[1])
+                if k >= 6 and g != c[0] and g in SOFT_GROUNDS:
+                    deco, obj = c[1], c[2]
+                    if g in WARM and deco in COLD_ONLY or g in COLD and deco in WARM_ONLY:
+                        deco = NONE
+                    if g in WARM and obj in COLD_ONLY or g in COLD and obj in WARM_ONLY:
+                        obj = NONE
+                    rows[y][x] = (g, deco, obj, NONE)
+                    changed += 1
+    print('krawedzie terenow: zmienione pola', changed)
 
 
 def towns_dressing(ctx):

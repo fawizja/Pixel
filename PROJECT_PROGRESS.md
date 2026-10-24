@@ -409,6 +409,14 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Wlasne stroje z paczki: mist_wraith (5), coral_crab (31), morvena (41), morgath (2).
 - Testy 481 OK; regresja GUI: wzorce odswiezone.
 
+## Wszystko z paczki, co ma sens (brief Darka z 2026-10-24, 05:35)
+- Krawedzie terenow: generate_continent.soften_edges() (przesuniecie o gladki szum + 2 przejscia wygladzania,
+  tylko miedzy przechodnimi podlozami naturalnymi, bez miast i Varden).
+- Dachy: Roofs.SNOW/ORANGE/ROYAL, kalenica i okap (objects/roof_*_top/_bottom.png) w WorldRenderer.renderAbove.
+- Luki i kusze 178-190 (PALADIN, zasieg 5, bez amunicji: CombatFormulas.usesNoAmmo), sklepy i loot bossow; BowTest.
+- Pociski arrow_red, bolt, star_small, fire_arrow, poison, shadow_star i efekty sparkle, magic, stones
+  (GameScreen.missileFor/impactFor). Paczka ma tylko ok. 15 roznych efektow i 20 pociskow - teraz uzyte prawie wszystkie.
+
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).
