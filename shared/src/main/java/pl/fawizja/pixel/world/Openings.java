@@ -61,8 +61,12 @@ public final class Openings {
 
     /** Drzwi pionowe (mur na polnoc albo poludnie), inaczej poziome. */
     public boolean doorVertical(FloorMap f, int x, int y) {
-        return f.inBounds(x, y - 1) && f.get(Layer.WALL, x, y - 1) != 0
-                || f.inBounds(x, y + 1) && f.get(Layer.WALL, x, y + 1) != 0;
+        if (wallAt(f, x - 1, y) && wallAt(f, x + 1, y)) return false; // drzwi w murze poziomym przy murze wewnetrznym
+        return wallAt(f, x, y - 1) || wallAt(f, x, y + 1);
+    }
+
+    private static boolean wallAt(FloorMap f, int x, int y) {
+        return f.inBounds(x, y) && f.get(Layer.WALL, x, y) != 0;
     }
 
     /** Mur, w ktorym stoja drzwi (sasiad wzdluz drzwi); 0 gdy brak. */
@@ -76,14 +80,17 @@ public final class Openings {
     }
 
     /**
-     * Ksztalt muru z sasiadow (drzwi lacza mury): mur na polnoc i zachod - naroznik, na polnoc albo poludnie - pionowy,
-     * na zachod - poziomy, inaczej slupek.
+     * Ksztalt muru z sasiadow (drzwi lacza mury): mur na polnoc i zachod - naroznik, na polnoc - pionowy, na zachod -
+     * poziomy, sam mur na poludnie (koniec muru) - pionowy, inaczej slupek (rog polnocno-zachodni).
      */
     public int shape(FloorMap f, int x, int y) {
         boolean n = joins(f, x, y - 1), s = joins(f, x, y + 1), w = joins(f, x - 1, y);
         if (n && w) return CORNER;
-        if (n || (s && !joins(f, x + 1, y))) return V;
+        // mur do gory: pionowy (rog poludniowo-zachodni budynku tez); mur na zachod: poziomy - takze w rogu
+        // polnocno-wschodnim, gdzie pionowy odcinek wystawalby pole nad linie muru
+        if (n) return V;
         if (w) return H;
+        if (s && !joins(f, x + 1, y)) return V;
         return POLE;
     }
 

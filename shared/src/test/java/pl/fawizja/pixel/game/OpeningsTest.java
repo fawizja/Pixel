@@ -102,4 +102,19 @@ class OpeningsTest {
         assertTrue(s.useAt(box, 1000));
         assertTrue(s.character().openedChests().contains("t1"));
     }
+
+    @Test
+    void buildingCornersCloseWithoutStubs() {
+        // dom 184..189 x 364..368 w Varden: rogi NW slupek, NE poziomy (bez pionowego kikuta nad linia muru),
+        // SW pionowy, SE naroznik
+        WorldMap world = TestData.world();
+        Openings o = world.openings();
+        pl.fawizja.pixel.world.FloorMap f = world.floor(0);
+        assertEquals(Openings.POLE, o.shape(f, 184, 364));
+        assertEquals(Openings.H, o.shape(f, 187, 364));
+        assertEquals(Openings.H, o.shape(f, 189, 364), "north-east corner");
+        assertEquals(Openings.V, o.shape(f, 189, 366));
+        assertEquals(Openings.V, o.shape(f, 184, 368), "south-west corner");
+        assertEquals(Openings.CORNER, o.shape(f, 189, 368));
+    }
 }

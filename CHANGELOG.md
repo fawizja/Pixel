@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.205.0] - 2026-10-27
+
+### Poprawiono
+- Mury budynków tworzą zamknięte bryły: w rogu północno-wschodnim nie wystaje już kawałek muru ponad linię
+  ściany i nie brakuje ostatniego odcinka górnej ściany. Drzwi w ścianie poziomej przy murze wewnętrznym
+  stoją w dobrą stronę.
+
 ## [0.204.0] - 2026-10-24
 
 ### Dodano
