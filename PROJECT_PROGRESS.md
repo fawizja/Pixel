@@ -432,6 +432,20 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   assets/ui/wst/. Surowe paczki w tools/art/wst/alchemy, tools/art/wst/ui_slots (gitignore) i pixel-wst-zrodla/*.zip.
 - Mikstury 191-194 (Enchantments.Kind STRENGTH/STONESKIN/SWIFTNESS/LUCK, POTION_MS 10 min), GameSession.drinkBuff;
   Rarity.tier wg ceny -> Hud.slotFrame; PotionBuffTest.
+
+## Drzwi, okna, skrzynie, meble, mury, panele WsT, czat (Darek, 2026-10-24, 07:32)
+- world/Openings (wspolne klient/serwer): drzwi i okna zamkniete na starcie, GameSession.useAt (Actions "open:x:y:z"),
+  MovementSystem otwiera drzwi przy wejsciu, MonsterManager.canOccupy omija zamkniete. Grafiki drzwi i okien
+  otwartych z paczki (otsp_import DOORS, WINDOW_STATES), WorldRenderer.openness = animacja 220 ms. OpeningsTest.
+- Skrzynie skarbow blokuja krok (GameSession.chestAt), tap = useOpening (z daleka walkTo + walkUse),
+  native/chest_closed/open + przejscie 350 ms w GameScreen.drawChests.
+- Grafiki w naturalnym rozmiarze: assets/art/native (plotno 64x64, prawy dolny = pole), TileArt.nativeTile.
+  COMPOSITES (lozko z dwoch polowek), STITCHED (stol i oltarz 2x2 zszyte w jedno pole), obrazy na murach
+  WALL_DECO_H/V (Openings.wallDecor, co czwarty prosty mur wnetrza).
+- ALT_WALLS: odmiany murow walls/klucz_altN_ksztalt.png, WorldRenderer.buildingStyle wg spojnego fragmentu muru.
+- Konsola: tylko czat (Hud conTab=1), reszta zdarzen 5 s na widoku gry (drawStatus).
+- Panele WsT: wst_icons_import PANELS -> assets/ui/wst/panel_*.png, Hud.Tiled9 (kafelkowany 9-slice x2),
+  Hud.menuStyle wybiera styl wg okna.
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

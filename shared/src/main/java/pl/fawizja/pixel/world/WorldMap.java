@@ -32,6 +32,14 @@ public final class WorldMap {
     public int height() { return height; }
     public TileRegistry tiles() { return tiles; }
 
+    private Openings openings;
+
+    /** Drzwi i okna (otwarte / zamkniete), tworzone przy pierwszym uzyciu. */
+    public synchronized Openings openings() {
+        if (openings == null) openings = new Openings(this);
+        return openings;
+    }
+
     public List<Town> towns() { return Collections.unmodifiableList(towns); }
     public List<Region> regions() { return Collections.unmodifiableList(regions); }
 

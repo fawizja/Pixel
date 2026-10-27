@@ -31,6 +31,15 @@ ICONS = {
     "healing_herb": "essential_oil",
 }
 UI_ICONS = {"icon_info": "grimoire"}
+# Panele okien (2026-10-24, Darek: "ramki roznorodne wedlug uznania"): kazde miejsce ma pasujacy wzor -
+# ekwipunek i plecak drewniany, lista walki zelazna ("grim"), umiejetnosci i czat klasyczne brazowe, ksiega czarow
+# magiczna, handel i targ zlote, rozmowa z NPC drewniana, pozostale okna kamienne. wyjscie -> (cialo, pasek tytulu)
+PANELS = {
+    "wood": ("panel_wood_panel", "panel_wood_title"), "grim": ("panel_grim_panel", "panel_grim_title"),
+    "stone": ("panel_stone_panel", "panel_stone_title"), "arcane": ("panel_arcane_panel", "panel_arcane_title"),
+    "classic": ("panel_classic_panel_neutral", "panel_classic_title_neutral"),
+    "gold": ("panel_classic_panel_gold", "panel_classic_title_gold"), "royal": ("panel_royal_panel", None),
+}
 # ramki pol: (wyjscie, stan, wzor)
 FRAMES = [
     ("slot", "normal", "classic_plate_neutral"), ("slot_empty", "empty", "classic_plate_neutral"),
@@ -59,7 +68,13 @@ def main():
     # piktogramy przyciskow interfejsu (16x16, rysowane w ramce pola)
     for name, src in UI_ICONS.items():
         Image.open(os.path.join(icons, src + ".png")).convert("RGBA").save(os.path.join(out, name + ".png"))
-    print(f"WsT: {n} ikon przedmiotow, {len(FRAMES)} ramek pol")
+    extras = os.path.join(SRC, "ui_slots", "extras")
+    found = {os.path.basename(f)[:-4]: os.path.join(d, f) for d, _, fs in os.walk(extras) for f in fs if f.endswith(".png")}
+    for name, (body, title) in PANELS.items():
+        Image.open(found[body]).convert("RGBA").save(os.path.join(out, "panel_" + name + ".png"))
+        if title:
+            Image.open(found[title]).convert("RGBA").save(os.path.join(out, "panel_" + name + "_title.png"))
+    print(f"WsT: {n} ikon przedmiotow, {len(FRAMES)} ramek pol, {len(PANELS)} paneli okien")
 
 
 if __name__ == "__main__":

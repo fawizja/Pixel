@@ -11,7 +11,7 @@ samych grafik. Dlatego w repozytorium są tylko wycięte kawałki używane przez
 ## WsT - "Alchemy & Potion Icons" i "Icon Frames & UI Slots"
 
 Ikony mikstur, esencji i zwojów (`assets/art/items/`, lista w `tools/art/wst_icons_import.py`) oraz ramki pól
-interfejsu (`assets/ui/wst/`) pochodzą z dwóch płatnych paczek **WsT** (https://westudesign.itch.io, kupione przez
+i panele okien interfejsu (`assets/ui/wst/`) pochodzą z dwóch płatnych paczek **WsT** (https://westudesign.itch.io, kupione przez
 Darka). Licencja pozwala używać ich w grach, także komercyjnych, ale zabrania udostępniania samych plików. W repozytorium są tylko
 elementy używane przez grę, bez oryginalnych paczek.
 

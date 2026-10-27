@@ -293,7 +293,95 @@ public final class Hud {
         return r != null ? r : wstSlot;
     }
 
+    /** Panele okien z paczki WsT: styl -> {cialo, pasek tytulu albo null} (piksele x2). */
+    private final java.util.Map<String, Tiled9[]> wstPanels = new java.util.HashMap<>();
+    private static final float WST_PANEL_SCALE = 2f;
+
+    private void loadWstPanels() {
+        for (String name : new String[] {"wood", "grim", "stone", "arcane", "classic", "gold", "royal"}) {
+            com.badlogic.gdx.graphics.Texture body = uiTexture("wst/panel_" + name + ".png");
+            if (body == null) continue;
+            com.badlogic.gdx.graphics.Texture title = uiTexture("wst/panel_" + name + "_title.png");
+            wstPanels.put(name, new Tiled9[] {new Tiled9(body, body.getWidth() >= 32 ? 10 : 5, body.getWidth() >= 32 ? 10 : 5),
+                    title == null ? null : new Tiled9(title, 4, 3)});
+        }
+    }
+
+    /**
+     * Panel 9-slice z pixel artu: rogi bez zmian, krawedzie i srodek powtarzane (kafelkowane), nie rozciagane -
+     * faktura drewna czy kamienia zostaje ostra (piksele x WST_PANEL_SCALE).
+     */
+    private static final class Tiled9 {
+        final com.badlogic.gdx.graphics.Texture t;
+        final int cx, cy;
+
+        Tiled9(com.badlogic.gdx.graphics.Texture t, int cx, int cy) {
+            this.t = t;
+            this.cx = cx;
+            this.cy = cy;
+        }
+
+        void draw(SpriteBatch b, float x, float y, float w, float h) {
+            float s = WST_PANEL_SCALE;
+            int tw = t.getWidth(), th = t.getHeight();
+            float bx = Math.min(cx * s, w / 2f), by = Math.min(cy * s, h / 2f);
+            int mw = tw - 2 * cx, mh = th - 2 * cy;
+            // kolumny: lewa krawedz, srodek (kafelki), prawa; wiersze tak samo (y w teksturze od gory)
+            for (int row = 0; row < 3; row++) {
+                float ry = row == 0 ? y + h - by : row == 1 ? y + by : y;
+                float rh = row == 1 ? h - 2 * by : by;
+                int sy = row == 0 ? 0 : row == 1 ? cy : th - cy, sh = row == 1 ? mh : cy;
+                for (int col = 0; col < 3; col++) {
+                    float rx = col == 0 ? x : col == 1 ? x + bx : x + w - bx;
+                    float rw = col == 1 ? w - 2 * bx : bx;
+                    int sx = col == 0 ? 0 : col == 1 ? cx : tw - cx, sw = col == 1 ? mw : cx;
+                    if (rw <= 0 || rh <= 0) continue;
+                    float stepX = col == 1 ? sw * s : rw, stepY = row == 1 ? sh * s : rh;
+                    for (float yy = 0; yy < rh - 0.01f; yy += stepY) {
+                        float dh = Math.min(stepY, rh - yy);
+                        int srcH = row == 1 ? Math.max(1, Math.round(dh / s)) : sh;
+                        for (float xx = 0; xx < rw - 0.01f; xx += stepX) {
+                            float dw = Math.min(stepX, rw - xx);
+                            int srcW = col == 1 ? Math.max(1, Math.round(dw / s)) : sw;
+                            // kafelek przyciety od gory: zachowuje gorny brzeg wzoru
+                            b.draw(t, rx + xx, ry + rh - yy - dh, dw, dh, sx, sy, srcW, srcH, false, false);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Okno z panelem WsT w danym stylu (pasek tytulu wysokosci titleH u gory, 0 = bez paska); false, gdy brak
+     * grafik - wtedy wolajacy rysuje stara skorke OTClient.
+     */
+    private boolean wstPanel(ShapeRenderer shapes, String style, float fx, float fy, float fw, float fh, float titleH) {
+        Tiled9[] p = wstPanels.get(style);
+        if (p == null || uiBatch == null) return false;
+        shapes.end();
+        uiBatch.begin();
+        drawBarOverlays(uiBatch);
+        uiBatch.setColor(1, 1, 1, 0.97f);
+        p[0].draw(uiBatch, fx, fy, fw, fh);
+        if (titleH > 0 && p[1] != null) p[1].draw(uiBatch, fx + 3, fy + fh - titleH - 2, fw - 6, titleH);
+        uiBatch.setColor(Color.WHITE);
+        uiBatch.end();
+        resumeShapes(shapes);
+        return true;
+    }
+
+    /** Styl okna menu wg zawartosci: handel zloty, rozmowa drewniana, osiagniecia krolewskie, ksiega magiczna. */
+    private String menuStyle() {
+        if (trade != null || marketView != null) return "gold";
+        if (npcMode) return "wood";
+        if (achievementsView) return "royal";
+        if (pickSlot >= 0 || playerMenu != null || rankingView != null || friendsView != null) return "stone";
+        return "arcane";
+    }
+
     private void loadUiImages() {
+        loadWstPanels();
         try {
             com.badlogic.gdx.graphics.Texture win = uiTexture("window.png");
             if (win != null) windowPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(win, 6, 6, 27, 6);
@@ -507,7 +595,7 @@ public final class Hud {
     /** Paski postepu skilli pod ich wierszami (w przebiegu ksztaltow). */
     private void drawPanelSkillBars(ShapeRenderer shapes, PlayerCharacter pc) {
         if (!panelSkillsVisible()) return;
-        miniWindow(shapes, pskX, pskY, pskW, pskH);
+        miniWindow(shapes, "classic", pskX, pskY, pskW, pskH);
         float yy = pskY + pskH - 23 - 3 - PSK_ROW * 2;
         for (Skill sk : Skill.values()) {
             double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
@@ -2006,7 +2094,7 @@ public final class Hud {
         bar(shapes, x + barW + 6, y, barW, 13, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
         bar(shapes, x, y - 5, barW * 2 + 6, 3, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
         drawStatusIcons(shapes, statusX(), h - 4 - STATUS_SIZE);
-        miniWindow(shapes, blX, blY, blW, blH);
+        miniWindow(shapes, "grim", blX, blY, blW, blH);
         drawPanelSkillBars(shapes, pc);
         frame(shapes, panelX + 4, 4, w - panelX - 8, abTop - 4);
 
@@ -2112,8 +2200,8 @@ public final class Hud {
         }
         if (charOpen) {
             layoutCharWindows();
-            miniWindow(shapes, eqX, eqY, eqW, eqH);
-            miniWindow(shapes, skX, skY, skW, skH);
+            miniWindow(shapes, "wood", eqX, eqY, eqW, eqH);
+            miniWindow(shapes, "classic", skX, skY, skW, skH);
             float yy = skY + skH - 23 - SK_ROW * (SK_INFO_ROWS + 1);
             for (Skill sk : Skill.values()) {
                 double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
@@ -2122,12 +2210,12 @@ public final class Hud {
             }
         }
         if (consoleVisible()) {
-            frame(shapes, conX, conY, conW, conH);
+            if (!wstPanel(shapes, "classic", conX, conY, conW, conH, 0)) frame(shapes, conX, conY, conW, conH);
         }
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
             rebuildMenu(session);
-            window(shapes, menuX, menuY, menuW, menuH, true);
+            if (!wstPanel(shapes, menuStyle(), menuX, menuY, menuW, menuH, 24)) window(shapes, menuX, menuY, menuW, menuH, true);
             for (MenuRow row : menuRows) {
                 shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
@@ -2136,7 +2224,7 @@ public final class Hud {
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
         if (equipPanelVisible()) {
-            if (epTibia) miniWindow(shapes, epX, epY, epW, epH);
+            if (epTibia) miniWindow(shapes, "wood", epX, epY, epW, epH);
             else frame(shapes, epX, epY, epW, epH);
         }
         if (minimapVisible()) {
@@ -2146,7 +2234,7 @@ public final class Hud {
             shapes.rect(mmX - 1, mmY - 1, mmSize + 2, mmSize + 2);
         }
         if (bigMapOpen) {
-            window(shapes, menuX, menuY, menuW, menuH, true);
+            if (!wstPanel(shapes, "stone", menuX, menuY, menuW, menuH, 24)) window(shapes, menuX, menuY, menuW, menuH, true);
         }
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.75f);
@@ -2183,6 +2271,7 @@ public final class Hud {
         drawPanelSkills(batch, pc);
 
         drawConsole(batch);
+        drawStatus(batch);
 
         for (HudButton b : buttons) {
             if (!b.visible || underMenu(b.x, b.y)) continue;
@@ -2532,7 +2621,8 @@ public final class Hud {
     }
 
     /** Male okno z naglowkiem 23 px (plecak, ekwipunek, umiejetnosci, konsola). */
-    private void miniWindow(ShapeRenderer shapes, float fx, float fy, float fw, float fh) {
+    private void miniWindow(ShapeRenderer shapes, String style, float fx, float fy, float fw, float fh) {
+        if (wstPanel(shapes, style, fx, fy, fw, fh, 21)) return;
         if (miniPatch != null && uiBatch != null) patch(shapes, miniPatch, fx, fy, fw, fh, 0.96f);
         else window(shapes, fx, fy, fw, fh, true);
     }
@@ -2625,11 +2715,16 @@ public final class Hud {
     /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
     private static final long CON_KEEP_MS = 30_000;
 
-    /** Filtry konsoli (etap 16): wszystko, czat, lup, dziennik serwera. Bez zakladek na ekranie (2026-10-23:
-     *  zbedne nad czatem) - konsola zawsze pokazuje wszystko, filtr zostaje dla -Dpixel.conTab. */
+    /** Filtry konsoli (etap 16): wszystko, czat, lup, dziennik serwera. 2026-10-24 (Darek: "w czacie na dole ma byc
+     *  tylko zakladka czatu"): konsola pokazuje sam czat, a reszta zdarzen to krotkie napisy na widoku gry jak w Tibii
+     *  (biale, lup na zielono); filtr zostaje dla -Dpixel.conTab. */
     private static final String[] CON_TABS = {"Ogólne", "Czat", "Łup", "Serwer"};
     private static final float CON_TAB_H = 0;
-    private int conTab;
+    private int conTab = 1;
+    /** Napisy zdarzen na widoku gry: jak dlugo widoczne (ms) i ile naraz. */
+    private static final long STATUS_KEEP_MS = 5_000;
+    private static final int STATUS_LINES = 4;
+    private final List<ConLine> statusLines = new ArrayList<>();
 
     public void showConsoleTab(int tab) { conTab = Math.max(0, Math.min(CON_TABS.length - 1, tab)); }
 
@@ -2686,9 +2781,42 @@ public final class Hud {
             used += l.height();
             recent.add(0, l);
         }
+        statusLines.clear();
+        if (conTab == 1) {
+            List<EventLog.Entry> last = session.log().latest(STATUS_LINES * 2);
+            for (int i = last.size() - 1; i >= 0 && statusLines.size() < STATUS_LINES; i--) {
+                EventLog.Entry e = last.get(i);
+                long age = serverTimeMs - e.timeMs();
+                if (e.kind() == EventLog.Kind.CHAT || age > STATUS_KEEP_MS) continue;
+                float a = age > STATUS_KEEP_MS - 1000 ? Math.max(0f, (STATUS_KEEP_MS - age) / 1000f) : 1f;
+                Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.55f, 0.35f, a)
+                        : e.kind() == EventLog.Kind.LOOT ? new Color(0.55f, 1f, 0.55f, a) : new Color(1f, 1f, 1f, a);
+                statusLines.add(0, conLine(e.text(), c, Math.min(gw - 20, 520)));
+            }
+        }
         font.getData().setScale(1f);
         conLines.addAll(fixed);
         conLines.addAll(recent);
+    }
+
+    /** Zdarzenia (lup, poziom, osiagniecia, ostrzezenia) na dole widoku gry, wysrodkowane, z cieniem. */
+    private void drawStatus(SpriteBatch batch) {
+        if (statusLines.isEmpty() || menuOpen || bigMapOpen) return;
+        font.getData().setScale(CON_SCALE);
+        float width = Math.min(gw - 20, 520);
+        float x = gx + (gw - width) / 2f;
+        float yy = gy + 10;
+        for (int i = statusLines.size() - 1; i >= 0; i--) yy += statusLines.get(i).height();
+        for (ConLine l : statusLines) {
+            Color c = l.color();
+            font.setColor(0f, 0f, 0f, c.a * 0.85f);
+            font.draw(batch, l.text(), x + 1, yy - 1, width, com.badlogic.gdx.utils.Align.center, true);
+            font.setColor(c);
+            font.draw(batch, l.text(), x, yy, width, com.badlogic.gdx.utils.Align.center, true);
+            yy -= l.height();
+        }
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
     }
 
     private ConLine conLine(String text, Color c, float width) {
@@ -2708,7 +2836,7 @@ public final class Hud {
         }
         if (conLines.isEmpty()) {
             font.setColor(0.6f, 0.6f, 0.55f, 1f);
-            text(batch, "Konsola: dotknij, aby pisać", conX + 7, yy);
+            text(batch, "Czat: dotknij, aby pisać", conX + 7, yy);
         }
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
@@ -3021,7 +3149,7 @@ public final class Hud {
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
         if (selectedSlot >= session.character().backpack().size()) selectedSlot = -1; // odpiety plecak
         float extra = selectedSlot >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
-        miniWindow(shapes, bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
+        miniWindow(shapes, "wood", bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
         if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
             shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
             shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);

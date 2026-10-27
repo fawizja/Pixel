@@ -1610,7 +1610,8 @@ public final class GameSession {
         if (!moving && requested != null) {
             facing = requested;
             Position before = pc.position();
-            MoveResult r = pzLocked(before, requested, nowMs) ? MoveResult.BLOCKED : movement.step(pc, requested);
+            MoveResult r = pzLocked(before, requested, nowMs) || chestAt(before.translate(requested.dx, requested.dy))
+                    ? MoveResult.BLOCKED : movement.step(pc, requested);
             if (r == MoveResult.BLOCKED && requested.diagonal()) {
                 // slizg po murze: skos w sciane idzie wzdluz niej (najpierw poziomo, potem pionowo)
                 for (Direction slide : new Direction[] {Direction.fromDelta(requested.dx, 0), Direction.fromDelta(0, requested.dy)}) {
@@ -1858,10 +1859,43 @@ public final class GameSession {
 
     public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
 
+    /** Na skrzynie skarbow nie mozna wejsc - otwiera sie ja dotknieciem z sasiedniego pola. */
+    public boolean chestAt(Position p) {
+        return chests != null && chests.at(p) != null;
+    }
+
+    /**
+     * Dotkniecie pola obok postaci: skrzynia (otwiera), drzwi albo okno (otwiera, drugie dotkniecie zamyka).
+     * Zwraca false, gdy pole jest za daleko albo nie ma tam nic do otwarcia.
+     */
+    public boolean useAt(Position p, long nowMs) {
+        Position me = pc.position();
+        if (p.z() != me.z() || me.distanceTo(p) > 1) return false;
+        if (chests != null && chests.at(p) != null) {
+            pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests.at(p);
+            return openChestAt(c, nowMs);
+        }
+        pl.fawizja.pixel.world.Openings o = world.openings();
+        boolean door = o.isDoor(p);
+        if (!door && !o.isWindow(p)) return false;
+        if (door && o.isOpen(p) && (p.equals(me) || monsters != null && monsters.monsterAt(p) != null)) {
+            log.add(nowMs, EventLog.Kind.INFO, "Ktoś stoi w drzwiach.");
+            return true;
+        }
+        boolean opened = o.toggle(p);
+        log.add(nowMs, EventLog.Kind.INFO, door ? (opened ? "Otwierasz drzwi." : "Zamykasz drzwi.")
+                : (opened ? "Otwierasz okno." : "Zamykasz okno."));
+        return true;
+    }
+
     /** Skrzynia obok gracza: zloto i przedmioty do plecaka, raz na postac. false = nie ma skrzyni obok. */
     public boolean openChest(long nowMs) {
         pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests == null ? null : chests.near(pc.position());
         if (c == null) return false;
+        return openChestAt(c, nowMs);
+    }
+
+    private boolean openChestAt(pl.fawizja.pixel.treasure.TreasureChests.Chest c, long nowMs) {
         if (pc.openedChests().contains(c.id())) {
             log.add(nowMs, EventLog.Kind.INFO, "Ta skrzynia jest już pusta.");
             return true;

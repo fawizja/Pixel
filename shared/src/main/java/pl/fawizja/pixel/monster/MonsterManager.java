@@ -210,7 +210,7 @@ public final class MonsterManager {
     private List<? extends Target> bodies = Collections.emptyList();
 
     public boolean canOccupy(Position p, Position player) {
-        if (!world.isWalkable(p) || world.isProtectionZone(p)) return false;
+        if (!world.isWalkable(p) || world.isProtectionZone(p) || world.openings().isClosedDoor(p)) return false;
         if (player != null && player.equals(p)) return false;
         for (Target b : bodies) if (p.equals(b.position())) return false; // inni gracze tez zajmuja pole
         Transition t = world.transitionAt(p);

@@ -155,6 +155,7 @@ public final class TileArt implements Disposable {
         loadAutotiles(tileRegistry);
         loadRockShapes(tileRegistry, base);
         loadBigTiles(tileRegistry);
+        loadNative(tileRegistry);
         loadEffects();
         loadRoofPieces();
         atlas = new Texture(pm);
@@ -183,6 +184,17 @@ public final class TileArt implements Disposable {
                     }
                 }
                 wallVariants.put(e.getKey(), v);
+            }
+            for (Map.Entry<Integer, List<int[]>> e : wallAltSlots.entrySet()) {
+                TextureRegion[][] v = new TextureRegion[e.getValue().size()][];
+                for (int k = 0; k < v.length; k++) {
+                    int[] sl = e.getValue().get(k);
+                    v[k] = new TextureRegion[sl.length];
+                    for (int n = 0; n < sl.length; n++) {
+                        v[k][n] = new TextureRegion(wallAtlas, (sl[n] % WALL_COLS) * WALL_PX, (sl[n] / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
+                    }
+                }
+                wallAlts.put(e.getKey(), v);
             }
         }
         if (hiPm != null) {
@@ -339,7 +351,11 @@ public final class TileArt implements Disposable {
     /** Odcinki z oknem (pliki walls/klucz_vwin.png i _hwin.png, opcjonalne): pionowy i poziomy. */
     public static final int WALL_V_WINDOW = 4, WALL_H_WINDOW = 5;
     private static final String[] WINDOW_SHAPES = {"vwin", "hwin"};
-    private static final int WALL_PX = 64, WALL_COLS = 16;
+    /** Okna otwarte i drzwi w murze (zamkniete / otwarte, pionowe / poziome), pliki walls/klucz_ksztalt.png. */
+    public static final int WALL_V_WINDOW_OPEN = 6, WALL_H_WINDOW_OPEN = 7, DOOR_V = 8, DOOR_V_OPEN = 9, DOOR_H = 10, DOOR_H_OPEN = 11;
+    private static final String[] OPENING_SHAPES = {"vwin_open", "hwin_open", "door_v", "door_vopen", "door_h", "door_hopen"};
+    private final java.util.Set<Integer> wallDoors = new java.util.HashSet<>();
+    private static final int WALL_PX = 64, WALL_COLS = 24;
     private Pixmap wallPm;
     private Texture wallAtlas;
     private final Map<Integer, int[]> wallSlots = new HashMap<>();
@@ -347,6 +363,10 @@ public final class TileArt implements Disposable {
     private final Map<Integer, int[][]> wallVariantSlots = new HashMap<>();
     private final Map<Integer, TextureRegion[][]> wallVariants = new HashMap<>();
     private int wallSlotCount;
+    /** Odmiany murow budynkow: ksztalty v, h, slupek, naroznik, okna zamkniete i otwarte. */
+    private static final String[] ALT_SHAPES = {"v", "h", "pole", "corner", "vwin", "hwin", "vwin_open", "hwin_open"};
+    private final Map<Integer, List<int[]>> wallAltSlots = new HashMap<>();
+    private final Map<Integer, TextureRegion[][]> wallAlts = new HashMap<>();
 
     /** Wczytuje komplet ksztaltow muru (wszystkie cztery albo zaden - wtedy mur zostaje bryla). */
     private void loadWallPieces(TileType t) {
@@ -366,6 +386,22 @@ public final class TileArt implements Disposable {
         }
         files = java.util.Arrays.copyOf(files, files.length + windows.length);
         System.arraycopy(windows, 0, files, WALL_SHAPES.length, windows.length);
+        // okna otwarte (bez nich: zamkniete) i drzwi (bez nich: stare drzwi jako obiekt)
+        com.badlogic.gdx.files.FileHandle[] openings = new com.badlogic.gdx.files.FileHandle[OPENING_SHAPES.length];
+        boolean doorsFound = true;
+        for (int k = 0; k < openings.length; k++) {
+            String name = "walls/" + t.key() + "_" + OPENING_SHAPES[k] + ".png";
+            openings[k] = Gdx.files.internal("art/" + name);
+            if (!openings[k].exists()) openings[k] = Gdx.files.internal("assets/art/" + name);
+            if (!openings[k].exists()) {
+                if (k >= 2) doorsFound = false;
+                openings[k] = k < 2 ? files[WALL_SHAPES.length + k] : files[k % 2 == 0 ? WALL_V : WALL_H];
+            }
+        }
+        if (doorsFound) wallDoors.add(t.id());
+        int before = files.length;
+        files = java.util.Arrays.copyOf(files, before + openings.length);
+        System.arraycopy(openings, 0, files, before, openings.length);
         if (wallSlotCount + files.length > WALL_COLS * WALL_COLS) return;
         try {
             if (wallPm == null) {
@@ -401,6 +437,30 @@ public final class TileArt implements Disposable {
                 extra[k] = more.stream().mapToInt(Integer::intValue).toArray();
             }
             wallVariantSlots.put(t.id(), extra);
+            // odmiany muru dla calych budynkow: walls/klucz_altN_ksztalt.png (8 ksztaltow, ALT_SHAPES)
+            List<int[]> alts = new ArrayList<>();
+            for (int n = 1; n <= 4; n++) {
+                if (wallSlotCount + ALT_SHAPES.length > WALL_COLS * WALL_COLS) break;
+                Pixmap[] src = new Pixmap[ALT_SHAPES.length];
+                boolean all = true;
+                for (int k = 0; k < src.length; k++) {
+                    src[k] = loadArt("walls/" + t.key() + "_alt" + n + "_" + ALT_SHAPES[k] + ".png");
+                    if (src[k] == null) all = false;
+                }
+                if (!all) {
+                    for (Pixmap p : src) if (p != null) p.dispose();
+                    break;
+                }
+                int[] sl = new int[src.length];
+                for (int k = 0; k < src.length; k++) {
+                    sl[k] = wallSlotCount++;
+                    wallPm.drawPixmap(src[k], 0, 0, src[k].getWidth(), src[k].getHeight(),
+                            (sl[k] % WALL_COLS) * WALL_PX, (sl[k] / WALL_COLS) * WALL_PX, WALL_PX, WALL_PX);
+                    src[k].dispose();
+                }
+                alts.add(sl);
+            }
+            if (!alts.isEmpty()) wallAltSlots.put(t.id(), alts);
         } catch (RuntimeException e) {
             Gdx.app.error("TileArt", "Nie można wczytać murów " + t.key() + ": " + e.getMessage());
         }
@@ -476,6 +536,25 @@ public final class TileArt implements Disposable {
         h ^= h >>> 15;
         return h & 0x7fffffff;
     }
+
+    /** Liczba odmian muru dla budynkow (0 = tylko podstawowy). */
+    public int wallAltCount(int tileId) {
+        TextureRegion[][] a = wallAlts.get(tileId);
+        return a == null ? 0 : a.length;
+    }
+
+    /**
+     * Ksztalt odmiany muru (alt od 1): WALL_V, WALL_H, WALL_POLE, WALL_CORNER, WALL_V_WINDOW, WALL_H_WINDOW,
+     * WALL_V_WINDOW_OPEN, WALL_H_WINDOW_OPEN; null dla alt 0 albo braku odmiany.
+     */
+    public TextureRegion wallAltPiece(int tileId, int alt, int shape) {
+        TextureRegion[][] a = wallAlts.get(tileId);
+        if (alt <= 0 || a == null || alt > a.length || shape < 0 || shape >= a[alt - 1].length) return null;
+        return a[alt - 1][shape];
+    }
+
+    /** Czy mur ma wlasne drzwi z paczki (DOOR_V ... DOOR_H_OPEN). */
+    public boolean hasWallDoors(int tileId) { return wallDoors.contains(tileId); }
 
     /** Ksztalt muru jak w Tibii (2x2 pola, prawy dolny = pole muru) albo null, gdy mur jest rysowany bryla. */
     public TextureRegion wallPiece(int tileId, int shape) {
@@ -809,6 +888,95 @@ public final class TileArt implements Disposable {
         if (id > 0 && id < bigTiles.length && bigTiles[id] != null) return bigTiles[id][0];
         return id > 0 && id < tiles.length ? tiles[id] : null;
     }
+
+    /**
+     * Obiekty w naturalnym rozmiarze jak w Tibii (native/klucz.png i native/klucz_vN.png, plotno 64x64 z obiektem
+     * przy prawym dolnym rogu): rysowane 2x2 pola od prawego dolnego rogu pola, bez sciskania do 32 px.
+     * Indeks wariantu jak w {@link #tile(int, int, int)}; brak pliku dla wariantu = zwykla grafika.
+     */
+    private TextureRegion[][] nativeTiles = new TextureRegion[0][];
+    private TextureRegion[] nativeChest;
+    private Texture nativeAtlas;
+    /** Obrazy, gobeliny i tkaniny na murach wnetrz: poziome (mur polnocny) i pionowe (mur zachodni). */
+    private final List<TextureRegion> decoH = new ArrayList<>(), decoV = new ArrayList<>();
+
+    private void loadNative(TileRegistry registry) {
+        nativeTiles = new TextureRegion[registry.maxId() + 1][];
+        List<Pixmap> images = new ArrayList<>();
+        List<int[]> slots = new ArrayList<>();   // {tileId (-1 = skrzynia), indeks wariantu}
+        for (TileType t : registry.all()) {
+            for (int k = 0; k <= 17; k++) {
+                if (k == 1) continue;
+                Pixmap p = loadArt("native/" + t.key() + (k == 0 ? "" : "_v" + k) + ".png");
+                if (p == null) continue;
+                images.add(p);
+                slots.add(new int[] {t.id(), k == 0 ? 0 : k - 1});
+            }
+        }
+        for (int k = 0; k < 2; k++) {
+            Pixmap p = loadArt(k == 0 ? "native/chest_closed.png" : "native/chest_open.png");
+            if (p == null) continue;
+            images.add(p);
+            slots.add(new int[] {-1, k});
+        }
+        for (int v = 0; v < 2; v++) {
+            for (int k = 0; k < 16; k++) {
+                Pixmap p = loadArt("native/wall_deco_" + (v == 0 ? "h_" : "v_") + k + ".png");
+                if (p == null) break;
+                images.add(p);
+                slots.add(new int[] {-2 - v, k});
+            }
+        }
+        if (images.isEmpty()) return;
+        int rows = (images.size() + BIG_COLS - 1) / BIG_COLS;
+        Pixmap pm = new Pixmap(BIG_COLS * BIG, rows * BIG, Pixmap.Format.RGBA8888);
+        pm.setBlending(Pixmap.Blending.None);
+        for (int i = 0; i < images.size(); i++) {
+            Pixmap src = images.get(i);
+            pm.drawPixmap(src, 0, 0, Math.min(BIG, src.getWidth()), Math.min(BIG, src.getHeight()),
+                    (i % BIG_COLS) * BIG, (i / BIG_COLS) * BIG, Math.min(BIG, src.getWidth()), Math.min(BIG, src.getHeight()));
+            src.dispose();
+        }
+        nativeAtlas = new Texture(pm);
+        nativeAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        pm.dispose();
+        for (int i = 0; i < slots.size(); i++) {
+            int[] o = slots.get(i);
+            TextureRegion r = new TextureRegion(nativeAtlas, (i % BIG_COLS) * BIG, (i / BIG_COLS) * BIG, BIG, BIG);
+            if (o[0] < -1) {
+                List<TextureRegion> deco = o[0] == -2 ? decoH : decoV;
+                deco.add(r);
+                continue;
+            }
+            if (o[0] < 0) {
+                if (nativeChest == null) nativeChest = new TextureRegion[2];
+                nativeChest[o[1]] = r;
+                continue;
+            }
+            if (nativeTiles[o[0]] == null) nativeTiles[o[0]] = new TextureRegion[17];
+            nativeTiles[o[0]][o[1]] = r;
+        }
+    }
+
+    /** Obiekt w naturalnym rozmiarze dla pola (plotno 2x2 pola) albo null - wtedy zwykla grafika z tile(). */
+    public TextureRegion nativeTile(int id, int x, int y) {
+        TextureRegion[] n = id > 0 && id < nativeTiles.length ? nativeTiles[id] : null;
+        if (n == null) return null;
+        int count = 1;
+        if (id < bigTiles.length && bigTiles[id] != null) count = bigTiles[id].length;
+        else if (variants.get(id) != null) count = variants.get(id).length;
+        int k = count == 1 ? 0 : spread(x, y) % count;
+        return k < n.length ? n[k] : null;
+    }
+
+    /** Ozdoba muru wnetrza (plotno 2x2 pola) wybrana wg liczby albo null, gdy brak grafik. */
+    public TextureRegion wallDeco(boolean vertical, int pick) {
+        List<TextureRegion> d = vertical ? decoV : decoH;
+        return d.isEmpty() ? null : d.get(Math.floorMod(pick, d.size()));
+    }
+
+    /** Skrzynia skarbow w naturalnym rozmiarze (plotno 2x2 pola) albo null. */
+    public TextureRegion nativeChest(boolean open) { return nativeChest == null ? null : nativeChest[open ? 1 : 0]; }
 
     /** Duze obiekty (drzewa 64 px z paczki) w pelnej rozdzielczosci: klucz.png i warianty klucz_vN.png. */
     private TextureRegion[][] bigTiles = new TextureRegion[0][];
@@ -1739,6 +1907,7 @@ public final class TileArt implements Disposable {
         if (autoAtlas != null) autoAtlas.dispose();
         if (rockAtlas != null) rockAtlas.dispose();
         if (bigAtlas != null) bigAtlas.dispose();
+        if (nativeAtlas != null) nativeAtlas.dispose();
         if (fxAtlas != null) fxAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();

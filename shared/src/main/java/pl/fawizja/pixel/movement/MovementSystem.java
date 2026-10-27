@@ -45,6 +45,7 @@ public final class MovementSystem {
         if (!canStep(from, d)) return MoveResult.BLOCKED;
         Position to = from.translate(d.dx, d.dy);
         if (world.requiredLevelAt(to) > pc.level()) return MoveResult.LEVEL_TOO_LOW;
+        if (world.openings().isClosedDoor(to)) world.openings().set(to, true); // wejscie w zamkniete drzwi je otwiera
         Transition t = world.transitionAt(to);
         if (t != null && t.type().triggeredByWalking()) {
             pc.setPosition(t.to());

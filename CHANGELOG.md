@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.204.0] - 2026-10-24
+
+### Dodano
+- Drzwi i okna w domach otwiera się dotknięciem pola obok, a drugie dotknięcie je zamyka, z krótką animacją.
+  Wszystkie drzwi są na początku zamknięte, postać otwiera je sama, gdy w nie wchodzi, a potwory nie
+  przechodzą przez zamknięte drzwi. Nie da się zamknąć drzwi, w których ktoś stoi.
+- Skrzynie skarbów: nie można na nie wejść. Otwiera się je dotknięciem z sąsiedniego pola (z daleka postać
+  najpierw podchodzi), z animacją otwarcia wieka i złotem w środku.
+- Więcej mebli z paczki OTSP: nowe krzesła i taborety, komody, beczki i baryłki na boku, a na ścianach wnętrz
+  obrazy, gobeliny i tkaniny.
+- Sześć nowych odmian murów z paczki (zamkowy z blankami, gładki i łupkowy kamień, ciemny i biały mur
+  szachulcowy, beżowe panele). Odmiana jest wybierana dla całego budynku, więc sąsiednie domy się różnią.
+- Panele okien z kupionej paczki WsT dobrane do miejsca: plecak, ekwipunek i rozmowa z NPC drewniane, lista
+  walki żelazna, umiejętności i czat klasyczne, księga czarów magiczna, handel i targ złote, osiągnięcia
+  królewskie, a mapa i pozostałe okna kamienne.
+
+### Zmieniono
+- Konsola na dole pokazuje tylko czat. Pozostałe zdarzenia (łup, osiągnięcia, ostrzeżenia) pojawiają się
+  na kilka sekund jako napis na dole widoku gry, jak w Tibii.
+- Meble i ozdoby większe niż jedno pole są rysowane w naturalnym rozmiarze zamiast ściśniętych do 32 px.
+  Łóżko jest całe (wcześniej było widać tylko połowę), a stół i ołtarz to pełne meble zamiast rogu
+  większego stołu.
+
 ## [0.203.0] - 2026-10-24
 
 ### Zmieniono

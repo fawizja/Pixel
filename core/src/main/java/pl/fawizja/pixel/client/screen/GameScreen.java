@@ -836,7 +836,6 @@ public final class GameScreen extends ScreenAdapter {
     public void lookTile(Position p) {
         String text = session.lookAt(p, now());
         if (settings.vibrate()) Gdx.input.vibrate(25);
-        hud.showConsoleTab(0);
         say(session.character().name(), text.length() > 90 ? text.substring(0, 87) + "..." : text);
     }
 
@@ -865,6 +864,13 @@ public final class GameScreen extends ScreenAdapter {
             if (session.npcNearby() == npc) hud.openNpc(session);
             else if (walkTo(p, now(), true, true)) walkNpc = npc; // rozmowa otworzy sie po dojsciu
             else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
+            return true;
+        }
+        if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)) {
+            // skrzynia, drzwi, okno: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
+            if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
+            else if (walkTo(p, now(), true, true)) walkUse = p;
+            else session.log().add(now(), EventLog.Kind.INFO, "Nie ma tam drogi.");
             return true;
         }
         if (session.dummies().at(p)) {
@@ -896,6 +902,19 @@ public final class GameScreen extends ScreenAdapter {
     private List<Position> walkPath;
     private int walkIndex;
     private pl.fawizja.pixel.npc.Npc walkNpc;
+    /** Drzwi, okno albo skrzynia do otwarcia po dojsciu (null = brak). */
+    private Position walkUse;
+
+    /** Otwiera albo zamyka drzwi i okna, otwiera skrzynie (online: serwer decyduje, drzwi i okna od razu na ekranie). */
+    private void useOpening(Position p) {
+        long t = now();
+        if (net == null) {
+            session.useAt(p, t);
+            return;
+        }
+        net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
+        if (!session.chestAt(p)) game.world().openings().toggle(p);
+    }
 
     /**
      * Pogoda: -Dpixel.weather=rain|snow|sandstorm|clear wymusza rodzaj (narzedzia, zrzuty); przy -Dpixel.hour
@@ -1199,6 +1218,7 @@ public final class GameScreen extends ScreenAdapter {
 
     private void stopWalk() {
         walkNpc = null;
+        walkUse = null;
         if (walkPath == null) return;
         walkPath = null;
         hud.setWalkTarget(null);
@@ -1209,8 +1229,10 @@ public final class GameScreen extends ScreenAdapter {
         Position goal = walkPath.get(walkPath.size() - 1);
         if (pos.equals(goal) || pos.z() != goal.z()) {
             pl.fawizja.pixel.npc.Npc npc = walkNpc;
+            Position use = walkUse;
             stopWalk();
             if (npc != null && session.npcNearby() == npc && !hud.npcOpen()) hud.openNpc(session);
+            if (use != null && use.distanceTo(pos) <= 1) useOpening(use);
             return null;
         }
         // postep: najdalsze pole trasy, na ktorym stoimy (od ostatniego miejsca, z zapasem jednego pola)
@@ -1515,7 +1537,22 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Pole z pulapka z kolcami - marsz po mapie je omija, jesli sie da. */
     private boolean isTrap(Position p) {
-        return game.chests() != null && game.chests().trapAt(p);
+        return game.chests() != null && (game.chests().trapAt(p) || game.chests().at(p) != null); // na skrzynie sie nie wchodzi
+    }
+
+    /** Chwila, w ktorej skrzynia zostala zobaczona jako otwarta (animacja wieka). */
+    private final Map<String, Long> chestOpenedAt = new java.util.HashMap<>();
+    private final java.util.Set<String> chestSeenClosed = new java.util.HashSet<>();
+
+    /** 0..1: skrzynia otwarta na oczach gracza przechodzi plynnie, otwarta wczesniej jest od razu otwarta. */
+    private float chestOpenness(String id) {
+        long now = TimeUtils.millis();
+        Long at = chestOpenedAt.get(id);
+        if (at == null) {
+            at = chestSeenClosed.contains(id) ? now : now - 1000;
+            chestOpenedAt.put(id, at);
+        }
+        return Math.min(1f, (now - at) / 350f);
     }
 
     /** Skrzynie skarbow w danym wierszu: zamknieta albo otwarta (gdy ta postac juz ja oproznila). */
@@ -1531,7 +1568,22 @@ public final class GameScreen extends ScreenAdapter {
             Position p = c.position();
             if (p.y() != row || p.z() != z) continue;
             boolean open = session.character().openedChests().contains(c.id());
-            b.draw(game.art().chest(open), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
+            TextureRegion closedImg = game.art().nativeChest(false), openImg = game.art().nativeChest(true);
+            float wy = worldRenderer.worldY(p.y());
+            if (closedImg == null || openImg == null) {
+                b.draw(game.art().chest(open), p.x(), wy, 1f, 1f);
+                continue;
+            }
+            // naturalny rozmiar jak w Tibii; po otwarciu wieko odchyla sie przez chwile (przejscie klatek)
+            if (!open) chestSeenClosed.add(c.id());
+            float k = open ? chestOpenness(c.id()) : 0f;
+            b.draw(closedImg, p.x() - 1, wy, 2f, 2f);
+            if (k > 0f) {
+                Color old = b.getColor().cpy();
+                b.setColor(old.r, old.g, old.b, old.a * k);
+                b.draw(openImg, p.x() - 1, wy, 2f, 2f);
+                b.setColor(old);
+            }
         }
     }
 

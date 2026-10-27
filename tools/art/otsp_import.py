@@ -37,7 +37,7 @@ OBJECTS = {
     "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000,
     "stairs_up": 1005, "stairs_down": 1008, "ladder": 1009, "counter": 1189, "altar": 1193, "wall_torch": 1254,
     # etap 5: wyposazenie miast
-    "bed": 1201, "bookcase": 1209, "barrel": 1110, "table": 1191, "statue": 1155, "sand_statue": 1161,
+    "bookcase": 1209, "barrel": 1110, "table": 1191, "statue": 1155, "sand_statue": 1161,
     "jungle_statue": 1157, "cannon": 1163, "chest": 1111, "lumber": 1140,
     "depot_locker": 1113,   # etap 6: skrzynia depozytu jak w Tibii
 }
@@ -87,11 +87,33 @@ TOWN_GROUND = {"paving": 155, "brick_paving": 147, "marble_floor": 156}
 TOWN_WALLS = {
     "plaster_wall": (603, 604, 605, 606), "whitewash_wall": (617, 618, 619, 620), "timber_wall": (627, 628, 629, 630),
 }
-# Okna w prostych odcinkach murow budynkow: pionowy i poziomy odcinek z oknem (walls/klucz_vwin.png, _hwin.png).
-WINDOWS = {
-    "stone_wall": (539, 541), "sandstone_wall": (556, 557), "plaster_wall": (611, 613),
-    "whitewash_wall": (621, 622), "timber_wall": (631, 632),
+# Okna zamkniete i otwarte (2026-10-24, Darek: "okna otwierane po nacisnieciu"): (pionowe zamkniete, pionowe otwarte,
+# poziome zamkniete, poziome otwarte); para (mur, okno) naklada okno z paczki (1078/1079) na otwor w murze.
+WINDOW_STATES = {
+    "stone_wall": (539, 538, 541, 540), "plaster_wall": (612, 611, 614, 613),
+    "whitewash_wall": ((621, 1078), 621, (622, 1079), 622), "timber_wall": ((631, 1078), 631, (632, 1079), 632),
+    "sandstone_wall": ((556, 1078), 556, (557, 1079), 557),
 }
+# Drzwi w murach jak w Tibii (pionowe zamkniete, pionowe otwarte, poziome zamkniete, poziome otwarte);
+# mury bez wlasnych drzwi w paczce dostaja drzwi kamienne (walls/klucz_door_v.png, _door_vopen, _door_h, _door_hopen).
+DOORS = {
+    "stone_wall": (1013, 1014, 1016, 1017), "timber_wall": (1027, 1028, 1030, 1031),
+    "whitewash_wall": (1041, 1042, 1044, 1045), "plaster_wall": (1053, 1054, 1056, 1057),
+    "wood_wall": (1065, 1066, 1068, 1069), "sandstone_wall": (1071, 1072, 1074, 1075),
+}
+DOOR_SHAPES = ("door_v", "door_vopen", "door_h", "door_hopen")
+# Odmiany murow budynkow (2026-10-24, Darek: "urozmaic mury z grafiki ktorych nie wykorzystales"): renderer wybiera
+# odmiane dla calego budynku (spojny fragment muru), wiec sasiednie domy roznia sie murem, a jeden dom ma jeden.
+# mur -> lista odmian (pionowy, poziomy, slupek, naroznik, okno pionowe, okno poziome; None = bez okna),
+# pliki walls/klucz_altN_ksztalt.png; okno otwarte powstaje z zamknietego (szyba zastapiona ciemnym wnetrzem).
+ALT_WALLS = {
+    "stone_wall": [(542, 543, 544, 545, 550, 551), (558, 559, 560, 561, None, None), (569, 570, 571, 572, None, None)],
+    "timber_wall": [(600, 601, 592, 602, 598, 599)],
+    "whitewash_wall": [(654, 655, 656, 657, 663, 664)],
+    "plaster_wall": [(713, 714, 715, 716, 717, 718)],
+    "sandstone_wall": [(713, 714, 715, 716, 717, 718)],
+}
+ALT_SHAPES = ("v", "h", "pole", "corner", "vwin", "hwin", "vwin_open", "hwin_open")
 # Warianty roslin i kamieni (tiles/klucz_vN.png): renderer wybiera wariant wg pozycji pola, las nie jest jednym drzewem.
 VARIANTS = {
     # 2026-10-23 wieczor (Darek: "dodaj wszystkie grafiki"): wiecej drzew, krzewow, kamieni i roslin z paczki
@@ -108,7 +130,7 @@ VARIANTS = {
     "rubble": (1614, 1615, 1616, 1594, 1595, 1597),
     "crystal": (1646, 1647, 2262, 2263),
     # 2026-10-24 (Darek: "inne grafiki z paczki tez"): odmiany mebli i ozdob, pajeczyny, balwany
-    "chair": (1093, 1095, 1096, 1097),
+    "chair": (1093, 1095, 1096, 1097, 1090, 1091, 1098, 1099),
     "crate": (1115, 1117),
     "statue": (1156, 1159, 1160),
     "flower_box": (1246, 1247, 1248),
@@ -117,7 +139,20 @@ VARIANTS = {
     "lumber": (1142, 1145),
     "cobweb": (1273, 1274),
     "snowman": (1218,),
+    # 2026-10-24 (Darek: "wiecej mebli, precyzyjne"): komody, beczki i baryłki na boku
+    "wardrobe": (1105, 1107, 1108),
+    "barrel": (1185, 1187),
 }
+# Meble skladane z kilku pol paczki (2026-10-24, audyt precyzji): lozko z paczki to dwie polowki (wezglowie i nogi),
+# a stol i oltarz to rogi stolu 2x2 - pojedynczy wycinek wygladal na ucieta grafike.
+# COMPOSITES: wiersze numerow, kazdy na swoim polu (grafika w naturalnym rozmiarze, native/klucz.png).
+COMPOSITES = {"bed": [[1199], [1200]], "bed_v2": [[1201, 1202]]}
+# STITCHED: stol 2x2 zszyty w jedno pole bez skalowania (lewa i gorna polowa blatu + prawy dolny rog z nogami).
+STITCHED = {"table": [[1189, 1190], [1191, 1192]], "altar": [[1193, 1194], [1195, 1196]]}
+# Obrazy, gobeliny i tkaniny na murach wnetrz (renderer wiesza je na scianach wg pozycji, bez zmian mapy):
+# poziome na murach polnocnych, pionowe na zachodnich (native/wall_deco_h_N.png, wall_deco_v_N.png).
+WALL_DECO_H = (1225, 1229, 1230, 1221, 1233, 1235, 1237, 1256, 1260, 1264, 1268)
+WALL_DECO_V = (1227, 1231, 1232, 1223, 1234, 1236, 1238, 1255, 1259, 1263, 1267)
 # 2026-10-23 (Darek: "wszystkie grafiki maja byc z otclienta"): zamiast wlasnych rysunkow odpowiedniki z paczki.
 # nazwa -> numer albo (numer, barwa przebarwienia)
 OTSP_PROPS = {
@@ -369,6 +404,90 @@ def save(img, path):
     img.save(path, optimize=True)
 
 
+# Grafiki w naturalnym rozmiarze jak w Tibii (2026-10-24, Darek: "meble precyzyjne"): obiekty wieksze niz pole
+# (64x32, 32x64, 64x64) nie sa sciskane do 32 px, tylko rysowane w calosci od prawego dolnego rogu pola
+# (native/klucz.png i native/klucz_vN.png, plotno 64x64). Drzewa, wiatrak i manekin zostaja po staremu.
+NATIVE_SKIP = {"tree", "pine", "palm", "dead_tree", "ship_mast", "windmill", "training_dummy", "door_open",
+               "carpet", "rug", "magma", "hole", "rope_spot", "stairs_up", "stairs_down", "ladder", "campfire"}
+
+
+def grid(spr, things, rows):
+    """Kilka przedmiotow paczki na sasiednich polach (kazdy od prawego dolnego rogu swojego pola)."""
+    h, w = len(rows), max(len(r) for r in rows)
+    out = Image.new("RGBA", (32 * w, 32 * h), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, i in enumerate(row):
+            img = ot.compose(spr, things["item"][i]).convert("RGBA")
+            # pole przedmiotu to prawy dolny kwadrat jego grafiki
+            out.alpha_composite(img.crop((max(0, img.width - 32), max(0, img.height - 32), img.width, img.height)),
+                                (32 * x, 32 * y))
+    return out
+
+
+def stitch(img):
+    """Mebel 2x2 zszyty w jedno pole: lewa/gorna polowa i prawa/dolna polowa, piksele bez skalowania."""
+    out = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    for dx, sx in ((0, 0), (16, img.width - 16)):
+        for dy, sy in ((0, 0), (16, img.height - 16)):
+            out.alpha_composite(img.crop((sx, sy, sx + 16, sy + 16)), (dx, dy))
+    return out
+
+
+def native_canvas(img):
+    """Plotno 64x64 z obrazkiem przy prawym dolnym rogu (None, gdy obiekt miesci sie w polu albo jest za duzy)."""
+    if img.width <= 32 and img.height <= 32:
+        return None
+    if img.width > 64 or img.height > 64:
+        return None
+    out = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    out.alpha_composite(img.convert("RGBA"), (64 - img.width, 64 - img.height))
+    return out
+
+
+def open_window(img):
+    """Okno otwarte z zamknietego: szyba (jasnoniebieskie piksele) zamieniona na ciemne wnetrze."""
+    out = img.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a and b > 120 and b > r + 40 and g > r:
+                d = 30 + (y % 3) * 4
+                px[x, y] = (d + 10, d, d - 8, 255)
+    return out
+
+
+def open_chest(closed):
+    """Otwarta skrzynia z zamknietej (1111): wieko odchylone do tylu, w srodku zloto (plotno 64x64)."""
+    out = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+    lid = closed.crop((16, 1, 53, 22))
+    body = closed.copy()
+    px = body.load()
+    for y in range(4, 21):
+        for x in range(20, 48):
+            if px[x, y][3] == 0:
+                continue
+            d = (y - 4) / 16
+            px[x, y] = (int(40 + 30 * d), int(20 + 14 * d), int(10 + 6 * d), 255)
+    # monety w rzedach: jasny gorny lewy piksel, ciemny prawy dolny
+    for row, y in enumerate(range(13, 21, 2)):
+        for x in range(21 + (row % 2) * 2, 46, 4):
+            for dx, dy, c in ((0, 0, (255, 240, 150)), (1, 0, (246, 206, 80)), (2, 0, (232, 180, 48)),
+                              (0, 1, (232, 180, 48)), (1, 1, (214, 156, 36)), (2, 1, (170, 110, 20))):
+                if px[x + dx, y + dy][3]:
+                    px[x + dx, y + dy] = c + (255,)
+    out.alpha_composite(body, (0, 32))
+    flat = lid.resize((lid.width, 9), Image.NEAREST)
+    lp = flat.load()
+    for y in range(flat.height):
+        for x in range(flat.width):
+            r, g, b, a = lp[x, y]
+            if a:
+                lp[x, y] = (int(r * 0.8), int(g * 0.75), int(b * 0.75), a)
+    out.alpha_composite(flat, (16, 25))
+    return out
+
+
 def main(client, art):
     things = ot.load_dat(os.path.join(client, "otsp.dat"))
     spr = ot.Spr(os.path.join(client, "otsp.spr"))
@@ -411,9 +530,26 @@ def main(client, art):
     for name, ids in TOWN_WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
             save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
-    for name, (v, h) in WINDOWS.items():
-        save(ot.compose(spr, things["item"][v]), f"{art}/walls/{name}_vwin.png")
-        save(ot.compose(spr, things["item"][h]), f"{art}/walls/{name}_hwin.png"); n += 2
+    def wall_with(spec):
+        base, over = spec if isinstance(spec, tuple) else (spec, None)
+        img = ot.compose(spr, things["item"][base]).convert("RGBA")
+        if over is not None:
+            o = ot.compose(spr, things["item"][over]).convert("RGBA")
+            img.alpha_composite(o, (img.width - o.width, img.height - o.height))
+        return img
+    for name, specs in WINDOW_STATES.items():
+        for shape, spec in zip(("vwin", "vwin_open", "hwin", "hwin_open"), specs):
+            save(wall_with(spec), f"{art}/walls/{name}_{shape}.png"); n += 1
+    for name, sets in ALT_WALLS.items():
+        for k, ids in enumerate(sets, 1):
+            imgs = [ot.compose(spr, things["item"][i]).convert("RGBA") for i in ids[:4]]
+            imgs += [ot.compose(spr, things["item"][i]).convert("RGBA") if i else imgs[j] for j, i in zip((0, 1), ids[4:])]
+            imgs += [open_window(imgs[4]) if ids[4] else imgs[0], open_window(imgs[5]) if ids[5] else imgs[1]]
+            for shape, img in zip(ALT_SHAPES, imgs):
+                save(img, f"{art}/walls/{name}_alt{k}_{shape}.png"); n += 1
+    for name in set(WALLS) | set(TOWN_WALLS):
+        for shape, i in zip(DOOR_SHAPES, DOORS.get(name, DOORS["stone_wall"])):
+            save(ot.compose(spr, things["item"][i]), f"{art}/walls/{name}_{shape}.png"); n += 1
     for name, ids in VARIANTS.items():
         for k, i in enumerate(ids, 2):
             save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}_v{k}.png"); n += 1
@@ -493,6 +629,39 @@ def main(client, art):
     for name in ("pet_cat", "pet_raven", "pet_dog", "pet_fennec"):   # ikona pupila w plecaku = jego postac
         src = Image.open(f"{art}/pets/{name}.png").convert("RGBA")
         save(src.resize((32, 32), Image.NEAREST) if src.width != 32 else src, f"{art}/items/{name}.png"); n += 1
+    # obiekty w naturalnym rozmiarze
+    def native(name, i, rgb=None, suffix=""):
+        if name in NATIVE_SKIP:
+            return 0
+        img = ot.compose(spr, things["item"][i]).convert("RGBA")
+        c = native_canvas(tint(img, rgb) if rgb else img)
+        if c is None:
+            return 0
+        save(c, f"{art}/native/{name}{suffix}.png")
+        return 1
+    os.makedirs(f"{art}/native", exist_ok=True)
+    for name, i in OBJECTS.items():
+        n += native(name, i)
+    for name, rows in COMPOSITES.items():
+        img = grid(spr, things, rows)
+        save(trim_square(img), f"{art}/tiles/{name}.png")
+        save(native_canvas(img), f"{art}/native/{name}.png"); n += 2
+    for name, rows in STITCHED.items():
+        save(stitch(grid(spr, things, rows)), f"{art}/tiles/{name}.png"); n += 1
+    for prefix, ids in (("wall_deco_h", WALL_DECO_H), ("wall_deco_v", WALL_DECO_V)):
+        for k, i in enumerate(ids):
+            save(native_canvas(ot.compose(spr, things["item"][i]).convert("RGBA")), f"{art}/native/{prefix}_{k}.png"); n += 1
+    for name, i in TOWN_OBJECTS.items():
+        n += native(name, i)
+    for name, spec in OTSP_PROPS.items():
+        i, rgb = spec if isinstance(spec, tuple) else (spec, None)
+        n += native(name, i, rgb)
+    for name, ids in VARIANTS.items():
+        for k, i in enumerate(ids, 2):
+            n += native(name, i, None, f"_v{k}")
+    closed = ot.compose(spr, things["item"][OTSP_OBJECTS["chest_closed"]]).convert("RGBA")
+    save(native_canvas(closed), f"{art}/native/chest_closed.png")
+    save(open_chest(closed), f"{art}/native/chest_open.png"); n += 2
     print("Zapisano", n, "grafik do", art)
 
 
