@@ -14,6 +14,13 @@ varden_captain;qas_captain
 varden_captain;pirate_captain
 varden_captain;coral_captain
 varden_captain;east_captain
+varden_captain;frost_captain
+varden_captain;valmir_captain
+qas_captain;valmir_captain
+frost_captain;valmir_captain
+frost_captain;nerys_captain
+valmir_captain;nerys_captain
+east_captain;nerys_captain
 gull_ferryman;qas_captain
 gull_ferryman;varden_captain
 lighthouse_ferryman;qas_captain

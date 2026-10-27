@@ -29,6 +29,7 @@ Część grafik w `assets/art/` (podłoże, drzewa i kamienie, potwory, NPC, pos
   łódka, sieci rybackie, skrzynka z kwiatami, a od 2026-10-23 także świecznik, chodnik, tron, ster, maszt, pokład,
   most wiszący, rozpadlina, ruiny muru, namiot orków i wiatrak - rysowane skryptem `tools/art/draw_town_props.py`.
 - Orki (2026-10-23) to przebarwione stroje OTSP (goblin, okultysta, jaszczuroczłek), król i strażnicy - stroje OTSP z maską kolorów.
+- Kratka ściekowa (2026-10-27) to grafika OTSP; szczur kanałowy i wielki szczur to przebarwiony szczur OTSP, a NPC Valmir, Nerys i nowi strażnicy - stroje OTSP z maską kolorów.
 
 Autorzy paczki (plik AUTHORS.md paczki, bez zmian):
 

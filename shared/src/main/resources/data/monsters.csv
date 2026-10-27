@@ -1,4 +1,6 @@
 # key;name;level;hp;exp;speed;attackMin;attackMax;damageType;range;attackIntervalMs;armor;resistances(TYP:%);behavior;aggroRange;fleeHpPct;healAmount;boss;color;shape;biome;activity(NOCTURNAL/-);description
+sewer_rat;Szczur kanałowy;3;25;9;220;1;5;PHYSICAL;1;1800;1;;MELEE;4;0;0;0;#6a5a4a;beast;underground;-;Szczur z miejskich kanałów. Pierwsza zdobycz każdego wędrowca.
+giant_rat;Wielki szczur;6;45;16;230;2;8;PHYSICAL;1;1900;2;EARTH:10;SKIRMISHER;5;15;0;0;#5a4a3a;beast;underground;-;Tłusty szczur wielkości psa, ucieka gdy jest ranny.
 wolf;Wilk;8;55;20;260;2;10;PHYSICAL;1;2000;2;;SKIRMISHER;6;20;0;0;#8a8a8a;beast;temperate;NOCTURNAL;Szybki drapieżnik, ucieka gdy jest ranny.
 boar;Dzik;10;90;32;200;3;14;PHYSICAL;1;2000;6;EARTH:10;TANK;4;0;0;0;#6b4a2e;beast;temperate;-;Wytrzymały dzik o grubej skórze.
 forest_spider;Pająk leśny;12;70;35;230;2;12;EARTH;1;1800;3;EARTH:50,FIRE:-20;MELEE;5;0;0;0;#3a3028;spider;temperate;-;Jadowity pająk leśny.

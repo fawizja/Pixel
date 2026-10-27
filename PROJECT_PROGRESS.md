@@ -446,6 +446,14 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - Konsola: tylko czat (Hud conTab=1), reszta zdarzen 5 s na widoku gry (drawStatus).
 - Panele WsT: wst_icons_import PANELS -> assets/ui/wst/panel_*.png, Hud.Tiled9 (kafelkowany 9-slice x2),
   Hud.menuStyle wybiera styl wg okna.
+## Swiat 1000x1000 wg mapy Darka (2026-10-27, 20:13, wersja 0.206.0)
+- Teren z obrazka: tools/mapgen/picture_terrain.py -> tools/mapgen/data/world1k.txt.gz, czytany w continent.py.
+- Nowe miasta tools/mapgen/newtowns.py (Valmir, Nerys), kanaly i kratki tools/mapgen/underground.py
+  (sewer_grate = STAIRS w dol, LADDER w gore), kopalnie = lochy stylu 'mine'. Town.MAX_TOWNS=6.
+- WorldLayout.VARDEN_OFFSET=(467,483); stare wspolrzedne Varden 448 + (328,143). CharacterCodec v5: stare
+  zapisy -> pozycja (-1,-1,0) -> GameSession stawia w swiatyni miasta.
+- Otchlan Wulkanu: 5 pieter pod wulkanem (Otchlan -2..-1, Dno -5..-3). Openings.wallDecor wylaczony pod ziemia.
+- Testy maja heap 1536m (kazdy serwer testowy laduje swiat ~15 MB).
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

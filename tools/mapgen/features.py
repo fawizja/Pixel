@@ -506,6 +506,7 @@ CAVE_STYLES = {
     'fire': ('ash', 'obsidian_wall', [], ['magma', 'obsidian_rock'], 'magma'),
     'core': ('abyss_floor', 'obsidian_wall', [], ['magma', 'obsidian_rock'], 'magma'),
     'orc': ('dirt', 'cave_wall', [], ['barrel', 'crate', 'orc_tent', 'rubble'], 'wall_torch'),
+    'mine': ('dirt', 'cave_wall', [], ['lumber', 'crate', 'rubble', 'barrel', 'rock'], 'wall_torch'),
 }
 
 

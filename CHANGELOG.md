@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.206.0] - 2026-10-27
+
+### Dodano
+- Nowy świat 1000x1000 pól według mapy Darka: kontynent z pustynią na zachodzie, dżunglą na południowym
+  wschodzie, lodowymi szczytami na północy, wulkanem w północno-zachodnich Czarnych Szczytach i wyspami.
+- Dwa nowe miasta: port Valmir na południu i wyspiarskie Nerys na Wyspach Szmaragdowych, każde ze świątynią,
+  bankiem, kupcami, kowalem, magiem, karczmą, domami do wynajęcia, strażą i kapitanem statku.
+- Kanały pod wszystkimi sześcioma miastami: kratki ściekowe na ulicach prowadzą w dół, drabina pod kratką
+  wyprowadza z powrotem. W kanałach żyją szczury kanałowe i wielkie szczury (poziomy 3-20).
+- Kopalnie pod lub obok każdego miasta (Stara Kopalnia, Kopalnia Lodu, Soli, Szmaragdów, Miedzi, Pereł).
+- Otchłań Wulkanu: pięć pięter pod wulkanem z demonami i najsilniejszymi potworami (poziomy 320-960).
+- Więcej expowisk i jaskiń (15 jaskiń, 19 wiosek), nowe trasy statków według tabeli z mapy i przystanie.
+
+### Zmieniono
+- Zapisane postacie ze starego świata pojawiają się w świątyni swojego miasta. Zadania, przedmioty i domy
+  zostają.
+- Na murach w podziemiach nie wiszą już obrazy ani gobeliny.
+
 ## [0.205.0] - 2026-10-27
 
 ### Poprawiono

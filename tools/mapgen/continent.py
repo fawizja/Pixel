@@ -1,128 +1,41 @@
-"""Kontynent swiata (2026-10-23, wg szkicu Darka): ksztalt ladu, wysokosci, biomy, gory z przeleczami, rzeki
-z delta, jeziora i wyspy. Wynik to pola terenu (krotki kafli town.py) i mapy pomocnicze dla miast i podziemi.
+"""Kontynent swiata: ksztalt ladu, gory, biomy, rzeki, jeziora i wyspy. Wynik to pola terenu (krotki kafli town.py)
+i mapy pomocnicze dla miast i podziemi.
 
-Ksztalt ladu: zgrubna maska 64x64 (COARSE, kazde pole = 6x6 kafli) rozmyta i poszarpana szumem - podobny
-zarys do szkicu, wlasna linia brzegowa. Wszystko deterministyczne (stale ziarna).
+2026-10-27 (Darek: "zaprojektuj mape jak na zdjeciu, 1000/1000"): teren pochodzi z obrazka mapy Darka, ktory
+picture_terrain.py zamienil na klasy pol (data/world1k.txt.gz): woda, pustynia, snieg, lawa, czarne szczyty,
+skaly, trawa i gesty las. Morze to woda polaczona z brzegiem mapy, reszta wody to rzeki i jeziora. Gory powstaja
+tam, gdzie obrazek ma skupiska skal. Wszystko deterministyczne (stale ziarna).
 """
+import gzip
 import math
+import os
 import random
 from collections import deque
 
 import numpy as np
 
-S = 448                     # rozmiar swiata (kwadrat)
+S = 1000                    # rozmiar swiata (kwadrat)
 CELL = S // 64
+HERE = os.path.dirname(os.path.abspath(__file__))
+# Teren z obrazka mapy Darka (2026-10-27): klasy pol 1000x1000 z picture_terrain.py
+PICTURE = os.path.join(HERE, 'data', 'world1k.txt.gz')
 
-COARSE = """\
-................................................................
-................................................................
-................................................................
-................................................................
-................................................................
-................................................................
-............................###.................................
-..........................#######...............................
-........................##########.###..........................
-...........#############################........................
-.........###############################........................
-........################################.##.....................
-.......####################################.....................
-.......######################################...................
-.......###############################################..........
-.......################################################.........
-.......#################################################........
-.......#################################################........
-........################################################........
-........################################################........
-........################################################........
-........################################################........
-.........###############################################........
-..........##############################################........
-............####..######################################........
-.................#######################################........
-.................#######################################........
-..................######################################........
-...............##.#####################################.........
-................#######################################.........
-..............##########################################........
-..............##########################################........
-..............##########################################........
-.............###########################################........
-.............###########################################........
-.......################################################.........
-.........#############################################..........
-............##..###################################.............
-.................##############################.................
-.................##############################.................
-.................##############################.................
-.................##############################.................
-.................#############################..................
-.................#############################..................
-..................############################..................
-...................###########################..................
-...................#########################....................
-...................##################.##........................
-...................##################...........................
-.................####################...........................
-...............#.####################...........................
-.......#...#.##..####################...........................
-........#..#.#######################............................
-........############################............................
-.........##.########################............................
-..........###########################...........................
-.............#############.##..#####............................
-................................................................
-................................................................
-................................................................
-................................................................
-................................................................
-................................................................
-................................................................
-"""
+# --- miejsca (wspolrzedne swiata 1000 x 1000) ---
+VOLCANO = (367, 70)                 # krater wulkanu (Czarne Szczyty, polnocny zachod)
+VOLCANO_BOX = (215, 15, 470, 300)   # Czarne Szczyty: lad tu jest wulkaniczny
+SNOW_TOP = 175                      # Lodowe Szczyty: snieg na polnoc od tej linii (i ich skaly)
+ROCKY_LANDS = (60, 560, 430, 800)   # Skaliste Ziemie (poludniowy zachod)
+JUNGLE = (555, 400, 840, 780)       # Dzungla Zielony Mrok
+LAKES = []
+RIVERS = []
+ISLANDS = []
 
-# --- miejsca (wspolrzedne swiata 448 x 448) ---
-VOLCANO = (222, 72)                 # krater wulkanu (polnoc)
-QAS_HILLS = (217, 250)              # wzgorza stolicy (srodek)
 
-# lancuchy gor: lamane (x, y) i szerokosc; przelecze to miejsca, gdzie gora sie urywa
-RANGES = [
-    ([(175, 82), (198, 70), (222, 72), (247, 75), (275, 89)], 8.2, 'north'),
-    ([(275, 93), (268, 121), (278, 152), (292, 187), (306, 212)], 6.4, 'spine'),
-    ([(170, 149), (182, 175), (175, 203), (165, 222)], 5.8, 'west'),
-    ([(60, 80), (86, 76), (112, 80), (138, 72)], 6.0, 'snow'),
-    ([(196, 318), (226, 312), (250, 324)], 4.0, 'south'),
-]
-PASSES = [(271, 107), (285, 170), (175, 163), (172, 212), (100, 78), (226, 312), (205, 71)]
-
-# biomy: punkty wzorcowe (Voronoi w zakrzywionych wspolrzednych - granice nieregularne)
-BIOME_SEEDS = [
-    ('snow', 82, 93), ('snow', 128, 76), ('snow', 70, 130), ('snow', 140, 110), ('taiga', 163, 82),
-    ('taiga', 170, 131), ('taiga', 120, 160), ('temperate', 140, 190), ('temperate', 210, 187),
-    ('temperate', 236, 226), ('hills', 217, 250), ('hills', 196, 262), ('temperate', 128, 240),
-    ('forest', 163, 292), ('forest', 222, 315), ('forest', 150, 330), ('cursed', 90, 372), ('cursed', 120, 395),
-    ('temperate', 196, 360), ('forest', 240, 380), ('desert', 287, 287), ('desert', 270, 270),
-    ('savanna', 262, 240), ('jungle', 315, 128), ('jungle', 350, 120), ('jungle', 360, 190), ('jungle', 300, 196),
-    ('jungle', 372, 232), ('swamp', 336, 228), ('shadow', 312, 262), ('shadow', 300, 300),
-    ('temperate', 245, 140), ('volcanic', 222, 72), ('volcanic', 200, 92), ('volcanic', 248, 88),
-    ('taiga', 198, 112),
-]
-
-# rzeki: punkty kontrolne od zrodla do ujscia (meandry i delta dodawane przy rysowaniu)
-RIVERS = [
-    ('Wielka Rzeka', [(206, 104), (196, 131), (201, 163), (186, 201), (172, 240), (176, 280), (190, 312),
-                      (192, 338)], 'join'),
-    ('Rzeka Dzungli', [(282, 104), (294, 136), (306, 160), (318, 170)], 'join'),
-    ('Lodowy Potok', [(52, 142), (70, 152), (88, 160), (102, 176)], 'mouth'),
-    ('Rzeka Wzgorz', [(252, 236), (262, 268), (266, 300), (276, 318), (296, 334)], 'delta'),
-    ('Strumien Zachodni', [(131, 212), (152, 236), (172, 240)], 'join'),
-    ('Rzeka Bagien', [(334, 214), (350, 240), (366, 262), (384, 278)], 'delta'),
-    ('Ujscie Varden', [(193, 388), (194, 394), (196, 400)], 'mouth'),
-]
-LAKES = [(198, 208, 6, 5), (140, 275, 6, 4), (360, 70, 5, 4), (150, 142, 5, 3)]
-ISLANDS = [  # srodek, promienie, rodzaj (male wyspy z przystaniami; duze wyspy to kopie ze starego swiata)
-    ((26, 300), (8, 12), 'temperate'), ((150, 30), (12, 6), 'snow'), ((428, 120), (8, 15), 'jungle'),
-    ((420, 360), (7, 7), 'beach'), ((120, 432), (9, 6), 'beach'),
-]
+def picture_classes():
+    with gzip.open(PICTURE, 'rt', encoding='ascii') as f:
+        rows = f.read().split()
+    assert len(rows) == S and all(len(r) == S for r in rows), 'world1k.txt.gz: zly rozmiar'
+    return np.array([list(r) for r in rows])
 
 
 def fbm(seed, octaves=4, base=24.0):
@@ -146,21 +59,6 @@ def fbm(seed, octaves=4, base=24.0):
     return out / total
 
 
-def coarse_field():
-    rows = COARSE.strip('\n').split('\n')
-    g = np.array([[1.0 if ch == '#' else 0.0 for ch in r] for r in rows])
-    # dwuliniowe powiekszenie do S x S + rozmycie (gladkie brzegi zamiast schodkow 6x6)
-    ys, xs = np.mgrid[0:S, 0:S]
-    gx, gy = (xs + 0.5) / CELL - 0.5, (ys + 0.5) / CELL - 0.5
-    x0, y0 = np.clip(gx.astype(int), 0, 62), np.clip(gy.astype(int), 0, 62)
-    fx, fy = np.clip(gx - x0, 0, 1), np.clip(gy - y0, 0, 1)
-    f = (g[y0, x0] * (1 - fx) * (1 - fy) + g[y0, x0 + 1] * fx * (1 - fy) + g[y0 + 1, x0] * (1 - fx) * fy
-         + g[y0 + 1, x0 + 1] * fx * fy)
-    for _ in range(3):
-        f = (f + np.roll(f, 1, 0) + np.roll(f, -1, 0) + np.roll(f, 1, 1) + np.roll(f, -1, 1)) / 5
-    return f
-
-
 def seg_dist(px, py, ax, ay, bx, by):
     dx, dy = bx - ax, by - ay
     t = np.clip(((px - ax) * dx + (py - ay) * dy) / max(1e-9, dx * dx + dy * dy), 0, 1)
@@ -179,33 +77,76 @@ class Terrain:
         """force_land / force_water: maski S x S (miasta i wyspy kopiowane ze starego swiata)."""
         ys, xs = np.mgrid[0:S, 0:S].astype(float)
         self.xs, self.ys = xs, ys
-        n1, n2 = fbm(101, 5, 32), fbm(102, 4, 20)
-        self.land = (coarse_field() + 0.22 * n1 + 0.08 * n2) > 0.5
-        self.land[:2, :] = self.land[-2:, :] = False
-        self.land[:, :2] = self.land[:, -2:] = False
+        cls = picture_classes()
+        self.cls = cls
+        # rog z legenda obrazka (prostokat byl woda): ukosny brzeg pustyni od (200,150) do (40,300)
+        warp = 14 * fbm(122, 3, 16)
+        corner = (xs < 210) & (ys < 310)
+        inside = xs + warp >= 200 - (ys - 150) * 1.07
+        cls[corner & (xs < 134) & (ys < 292) & inside] = 'S'
+        cls[corner & ~inside] = 'W'
+        # napisy obrazka: "Lodowe Szczyty" (kopia terenu dala prostokatne jezioro) - snieg; "Wyspy Szmaragdowe"
+        # (prosta krawedz wysp) - morze
+        lab = (xs >= 600) & (xs < 708) & (ys >= 56) & (ys < 100)
+        cls[lab & (cls == 'W')] = 'N'
+        cls[(xs >= 826) & (xs < 962) & (ys >= 512) & (ys < 552)] = 'W'
+        water = cls == 'W'
+        water[:3, :] = water[-3:, :] = True
+        water[:, :3] = water[:, -3:] = True
+        # morze: woda polaczona z brzegiem mapy po odcieciu waskich rzek (otwarcie promieniem 4); reszta wody
+        # na ladzie to rzeki i jeziora (mosty, brzegi bez plazy)
+        open_ = self._erode(water, 4)
+        sea_core = self._flood(open_, (0, 0))
+        sea = self._dilate(sea_core, 5) & water
+        self.land = ~sea
         self._drop_specks()
         if force_land is not None:
             self.land |= force_land
         if force_water is not None:
             self.land &= ~force_water
         self.coast_dist = self._distance(~self.land)
-        # wysokosc: odleglosc od morza + pasma gor + wzgorza stolicy + wulkan + szum
-        e = np.minimum(self.coast_dist / 30.0, 1.0) * 0.35 + 0.18 * fbm(103, 4, 28)
-        self.ridge = np.zeros((S, S))
-        wob = fbm(104, 3, 14)
-        for pts, width, _name in RANGES:
-            d = polyline_dist(pts, xs + 6 * wob, ys - 6 * wob)
-            self.ridge = np.maximum(self.ridge, np.exp(-(d / width) ** 2) * (0.75 + 0.35 * fbm(105, 3, 10)))
-        for (px, py) in PASSES:
-            self.ridge *= 1 - np.exp(-((xs - px) ** 2 + (ys - py) ** 2) / 30.0)
-        hills = np.exp(-((xs - QAS_HILLS[0]) ** 2 / 900 + (ys - QAS_HILLS[1]) ** 2 / 700))
-        cone = np.exp(-((xs - VOLCANO[0]) ** 2 + (ys - VOLCANO[1]) ** 2) / 120.0)
-        self.elev = e + self.ridge * 0.9 + hills * 0.25 + cone * 0.6
+        # gory: gestosc skal (R) i czarnych szczytow (V) z obrazka, poszarpana szumem - przejscia zostaja
+        rocky = ((cls == 'R') | (cls == 'V')).astype(float)
+        dens = rocky.copy()
+        for _ in range(3):
+            dens = (dens + np.roll(dens, 1, 0) + np.roll(dens, -1, 0) + np.roll(dens, 1, 1) + np.roll(dens, -1, 1)) / 5
+        self.ridge = dens * (0.62 + 0.3 * fbm(105, 3, 10)) + 0.08 * fbm(104, 3, 14)
+        self.elev = self.ridge + np.minimum(self.coast_dist / 30.0, 1.0) * 0.35
+        self.lava = (cls == 'L') & self.land
         self.biome = self._biomes()
-        self.water = ~self.land
-        self.river = np.zeros((S, S), bool)
-        self.lake = np.zeros((S, S), bool)
+        inland = water & self.land
+        self.lake = inland & (self.biome == 'snow')
+        self.river = inland & ~self.lake
+        self.water = ~self.land | self.river | self.lake
         self.rivers = []
+
+    @staticmethod
+    def _erode(m, r):
+        out = m.copy()
+        for _ in range(r):
+            out = out & np.roll(out, 1, 0) & np.roll(out, -1, 0) & np.roll(out, 1, 1) & np.roll(out, -1, 1)
+        return out
+
+    @staticmethod
+    def _dilate(m, r):
+        out = m.copy()
+        for _ in range(r):
+            out = out | np.roll(out, 1, 0) | np.roll(out, -1, 0) | np.roll(out, 1, 1) | np.roll(out, -1, 1)
+        return out
+
+    @staticmethod
+    def _flood(mask, start):
+        seen = np.zeros(mask.shape, bool)
+        stack = [start]
+        seen[start[1], start[0]] = True
+        while stack:
+            x, y = stack.pop()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < S and 0 <= ny < S and mask[ny, nx] and not seen[ny, nx]:
+                    seen[ny, nx] = True
+                    stack.append((nx, ny))
+        return seen
 
     # ---------------------------------------------------------------- pomocnicze
     def _drop_specks(self):
@@ -250,18 +191,37 @@ class Terrain:
         return d
 
     def _biomes(self):
-        wx = self.xs + 14 * fbm(106, 3, 26)
-        wy = self.ys + 14 * fbm(107, 3, 26)
-        best = np.full((S, S), 1e9)
+        """Biomy z klas obrazka: pustynia, snieg, wulkan, dzungla, skaly (wg krainy), trawa i lasy."""
+        cls = self.cls
+        # krainy bez prostych krawedzi: wspolrzedne przesuniete szumem (granica faluje o kilkadziesiat pol)
+        xs = self.xs + 120 * fbm(120, 3, 60)
+        ys = self.ys + 120 * fbm(121, 3, 60)
+
+        def box(b):
+            return (xs >= b[0]) & (xs < b[2]) & (ys >= b[1]) & (ys < b[3])
+        dense = (cls == 'J').astype(float)
+        for _ in range(4):
+            dense = (dense + np.roll(dense, 2, 0) + np.roll(dense, -2, 0) + np.roll(dense, 2, 1) + np.roll(dense, -2, 1)) / 5
+        sand = (cls == 'S').astype(float)
+        for _ in range(6):
+            sand = (sand + np.roll(sand, 3, 0) + np.roll(sand, -3, 0) + np.roll(sand, 3, 1) + np.roll(sand, -3, 1)) / 5
         out = np.empty((S, S), dtype=object)
         out[:] = 'temperate'
-        for name, bx, by in BIOME_SEEDS:
-            d = np.hypot(wx - bx, wy - by)
-            if name == 'desert':
-                d = d * 1.15
-            mask = d < best
-            out[mask] = name
-            best = np.minimum(best, d)
+        out[dense > 0.3] = 'forest'
+        jungle = box(JUNGLE)
+        out[jungle & (dense > 0.2)] = 'jungle'
+        out[jungle & (dense > 0.2) & (fbm(110, 3, 30) > 0.35)] = 'swamp'
+        rock = (cls == 'R') | (cls == 'V')
+        out[rock] = 'hills'
+        out[sand > 0.35] = 'savanna'
+        out[(cls == 'S') & (sand > 0.25)] = 'desert'
+        rocky = box(ROCKY_LANDS)
+        out[rocky & rock] = 'shadow'
+        out[rocky & ~rock & (fbm(111, 3, 26) > 0.1) & (sand < 0.3)] = 'cursed'
+        snow = (cls == 'N') | ((ys < SNOW_TOP) & (xs > 470) & rock)
+        out[snow] = 'snow'
+        out[(ys < SNOW_TOP + 25) & (xs > 470) & ~snow & (out != 'jungle')] = 'taiga'
+        out[box(VOLCANO_BOX) & ((cls == 'V') | (cls == 'L') | (cls == 'G') | (cls == 'R'))] = 'volcanic'
         return out
 
     # ---------------------------------------------------------------- woda
@@ -464,6 +424,9 @@ def paint(T, canvas, skip):
             if T.water[y, x]:
                 frozen = T.lake[y, x] and biome == 'snow'
                 canvas.put(x, y, ('ice' if frozen else 'water', '-', '-', '-'))
+                continue
+            if T.lava[y, x]:
+                canvas.put(x, y, ('lava', '-', '-', '-'))
                 continue
             if T.ridge[y, x] + 0.12 * n2[y, x] > MOUNTAIN_LEVEL:
                 g, wall = WALL_OF.get(biome, ('grass', 'mountain'))

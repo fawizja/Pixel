@@ -34,7 +34,7 @@ BORDERS = {
 OBJECTS = {
     "tree": 1505, "pine": 1580, "dead_tree": 1501, "bush": 1483, "rock": 1625, "snow_rock": 1651,
     "sandstone_rock": 1627, "ice_crystal": 1650, "crystal": 1277, "obsidian_rock": 1633, "rubble": 1613,
-    "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000,
+    "flowers": 1400, "fern": 1414, "crate": 1139, "campfire": 1121, "hole": 996, "rope_spot": 1000, "sewer_grate": 999,
     "stairs_up": 1005, "stairs_down": 1008, "ladder": 1009, "counter": 1189, "altar": 1193, "wall_torch": 1254,
     # etap 5: wyposazenie miast
     "bookcase": 1209, "barrel": 1110, "table": 1191, "statue": 1155, "sand_statue": 1161,
@@ -274,6 +274,8 @@ MONSTERS = {
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
     "skeleton": (3, (225, 215, 190)),
+    # 2026-10-27: szczury z kanalow pod miastami (paczka nie ma szczura - przebarwiony kot)
+    "sewer_rat": (1, (125, 105, 85)), "giant_rat": (1, (95, 80, 65)),
     "wolf": (1, (150, 140, 130)), "snow_wolf": (1, (235, 240, 255)), "hyena": (11, (200, 160, 110)),
     "yeti": (12, (240, 245, 255)), "crystal_golem": (12, (150, 220, 240)), "ice_golem": (12, (190, 220, 255)),
     "lava_golem": (12, (255, 120, 50)), "ruin_colossus": (12, (190, 180, 160)), "sand_titan": (12, (230, 200, 130)),
@@ -408,7 +410,7 @@ def save(img, path):
 # (64x32, 32x64, 64x64) nie sa sciskane do 32 px, tylko rysowane w calosci od prawego dolnego rogu pola
 # (native/klucz.png i native/klucz_vN.png, plotno 64x64). Drzewa, wiatrak i manekin zostaja po staremu.
 NATIVE_SKIP = {"tree", "pine", "palm", "dead_tree", "ship_mast", "windmill", "training_dummy", "door_open",
-               "carpet", "rug", "magma", "hole", "rope_spot", "stairs_up", "stairs_down", "ladder", "campfire"}
+               "carpet", "rug", "magma", "hole", "rope_spot", "sewer_grate", "stairs_up", "stairs_down", "ladder", "campfire"}
 
 
 def grid(spr, things, rows):

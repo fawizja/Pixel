@@ -124,7 +124,9 @@ public final class GameSession {
         this.movement = new MovementSystem(world, items.byKey("rope").id());
         this.torchId = items.byKey("torch").id();
         if (!world.isWalkable(pc.position())) {
-            pc.setPosition(world.spawn());
+            // poza mapa (stary zapis) albo w murze: swiatynia miasta postaci
+            Position home = world.templeOf(pc.homeTown());
+            pc.setPosition(home != null ? home : world.spawn());
         }
         this.stepFrom = pc.position();
         this.monsters = monsters != null ? monsters

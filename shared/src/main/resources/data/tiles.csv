@@ -132,3 +132,4 @@
 140;snowman;OBJECT;0;0;town;#f0f4f8;rock
 141;clay_pot;OBJECT;0;0;town;#8a5a3a;crate
 142;sack;OBJECT;0;0;town;#a08860;crate
+143;sewer_grate;OBJECT;1;0;town;#3a3a3e;hole

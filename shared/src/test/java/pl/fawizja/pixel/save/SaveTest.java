@@ -77,8 +77,8 @@ class SaveTest {
         crc.update(body.toString().getBytes(StandardCharsets.UTF_8));
         String v1 = "PIXELSAVE 1\n" + body + "crc=" + Long.toHexString(crc.getValue()) + "\n";
         PlayerCharacter pc = codec.decode(v1);
-        // v1/v2 zapisywaly wspolrzedne mapy Varden - teraz to wspolrzedne swiata
-        assertEquals(new Position(31 + WorldLayout.VARDEN_OFFSET_X, 16 + WorldLayout.VARDEN_OFFSET_Y, 0), pc.position());
+        // zapisy sprzed swiata 1000x1000 (v1-v4): pole spoza mapy, sesja stawia postac w swiatyni jej miasta
+        assertEquals(new Position(-1, -1, 0), pc.position());
         assertEquals(777, pc.bank().balance());
         assertEquals("varden", pc.homeTown());
     }

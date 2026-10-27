@@ -90,10 +90,10 @@ class GameWorldTest {
     }
 
     @Test
-    void fourTownsWithProtectedTemples() {
-        assertEquals(4, world.towns().size());
+    void sixTownsWithProtectedTemples() {
+        assertEquals(6, world.towns().size());
         assertTrue(world.towns().size() <= Town.MAX_TOWNS);
-        for (String name : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah"}) {
+        for (String name : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah", "Valmir", "Nerys"}) {
             Town t = world.town(name);
             assertNotNull(t, name);
             assertTrue(world.isWalkable(t.temple()) && world.isProtectionZone(t.temple()), name);
@@ -118,7 +118,7 @@ class GameWorldTest {
     @Test
     void levelGatesKeepWeakerCharactersOut() {
         // straznik Gniazda Wiwern: od poziomu 250 (pozostale krainy kontynentu sa otwarte - start od poziomu 300)
-        Position gate = new Position(167, 186, 0);
+        Position gate = new Position(309, 217, 0);
         assertEquals(250, world.requiredLevelAt(gate));
         assertFalse(explore(world.spawn(), 249).contains(gate), "level 249 passed the wyvern gate");
         assertTrue(explore(world.spawn(), 250).contains(gate), "level 250 may enter");
@@ -126,10 +126,10 @@ class GameWorldTest {
 
     @Test
     void biomesFollowTheContinentSketch() {
-        // szkic Darka: snieg i lod na polnocnym zachodzie, dzungla na polnocnym wschodzie, pustynia w srodku,
-        // lasy i doliny na poludniu (woda nie liczy sie do zadnej krainy)
+        // mapa Darka (2026-10-27): Lodowe Szczyty na polnocy, dzungla Zielony Mrok na wschodzie, Pustynia Zlotych
+        // Wydm na zachodzie, lasy i doliny na poludniu (woda nie liczy sie do zadnej krainy)
         String[] expected = {"north", "equatorial", "desert", "temperate"};
-        int[][] boxes = {{20, 20, 120, 150}, {320, 60, 420, 200}, {200, 230, 250, 275}, {120, 300, 300, 420}};
+        int[][] boxes = {{560, 30, 800, 150}, {600, 450, 760, 700}, {80, 350, 300, 450}, {380, 600, 480, 720}};
         FloorMap surface = world.floor(0);
         int water = world.tiles().byKey("water").id();
         for (int b = 0; b < boxes.length; b++) {

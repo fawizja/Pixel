@@ -1,4 +1,9 @@
 # monsterKey;itemKey;szansa (promile);min;max
+sewer_rat;gold_coin;700;1;4
+sewer_rat;bread;150;1;1
+giant_rat;gold_coin;750;1;7
+giant_rat;bread;200;1;1
+giant_rat;meat;250;1;1
 wolf;gold_coin;800;1;8
 wolf;meat;500;1;2
 wolf;wolf_pelt;120;1;1

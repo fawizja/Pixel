@@ -1,53 +1,58 @@
 # nazwa|wlasciwosci uruchomienia (oprocz pixel.screenshot, pixel.saveDir, pixel.seed)
 menu|
 login|-Dpixel.open=login
-varden_day|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0
-varden_night|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=22 -Dpixel.teleport=170,356,0
-bag|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=bag
-spellbook|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=book
-character|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=character
-shop|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,354,0 -Dpixel.open=npc
-shopgear|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,354,0 -Dpixel.open=npc -Dpixel.npcPage=2
-mine|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=147,363,-1
-knight_mine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=147,363,-1
-east_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=291,244,0
-trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=trade
-player|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=player
-party|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=party
-ranking|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=ranking
-weekly|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=weekly
-depot|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=161,354,0 -Dpixel.open=depot
-friends|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=friends
-market|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=161,354,0 -Dpixel.open=market
-achievements|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=achievements
-bestiary|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=bestiary
-guide|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=169,356,0 -Dpixel.open=npc
-mount|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.open=mount
-chest|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=chest
-map|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.open=map
-chat|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.open=chat
-journal|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.open=journal
-bosses|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.button=npc:bosses
-hunting|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.button=npc:hunting
-bagitem|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.open=bagitem -Dpixel.teleport=170,360,0
-rain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.weather=rain -Dpixel.teleport=170,366,0
-pet|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,366,0 -Dpixel.open=pet
-smith|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=179,354,0 -Dpixel.open=smith
-help|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.button=cmd:/pomoc
-markers|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.open=map -Dpixel.markers=Kopalnia|60,70,0;Wieza|100,60,0;Obok|84,80,0
-events|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.button=cmd:/wydarzenia
-stats|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.button=cmd:/statystyki
-outfit|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,360,0 -Dpixel.button=outfit:7
-selvaran|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=339,124,0
+varden_day|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0
+varden_night|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=22 -Dpixel.teleport=498,499,0
+bag|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bag
+spellbook|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=book
+character|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character
+shop|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
+shopgear|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc -Dpixel.npcPage=2
+mine|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=475,506,-1
+knight_mine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1
+east_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=456,271,0
+trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=trade
+player|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=player
+party|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=party
+ranking|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=ranking
+weekly|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=weekly
+depot|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=489,497,0 -Dpixel.open=depot
+friends|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=friends
+market|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=489,497,0 -Dpixel.open=market
+achievements|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=achievements
+bestiary|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bestiary
+guide|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=497,499,0 -Dpixel.open=npc
+mount|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=mount
+chest|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=chest
+map|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=map
+chat|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=chat
+journal|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=journal
+bosses|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=npc:bosses
+hunting|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=npc:hunting
+bagitem|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.open=bagitem -Dpixel.teleport=498,503,0
+rain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.weather=rain -Dpixel.teleport=498,509,0
+pet|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,509,0 -Dpixel.open=pet
+smith|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=smith
+help|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/pomoc
+markers|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=map -Dpixel.markers=Kopalnia|60,70,0;Wieza|100,60,0;Obok|84,80,0
+events|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/wydarzenia
+stats|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/statystyki
+outfit|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=outfit:7
+selvaran|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=678,702,0
 phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2
-battle|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=147,363,-1 -Dpixel.open=battle
-picker|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.open=pickerrune -Dpixel.uiScale=2
-diag|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.button=diag
-look|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=170,356,0 -Dpixel.look=82,79
+battle|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.open=battle
+picker|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=pickerrune -Dpixel.uiScale=2
+diag|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.button=diag
+look|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.look=82,79
 # 2026-10-23: kontynent - krol, swiatynia z swiecami, wiatrak, wioska orkow, most wiszacy
-king|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=220,350,0 -Dpixel.open=npc
-qasirah_temple|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=21 -Dpixel.teleport=202,250,0
-windmill|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=181,277,0
-orc_village|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=217,292,0
-rope_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=269,139,1
-volcano|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=222,86,0
+king|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=548,493,0 -Dpixel.open=npc
+qasirah_temple|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=21 -Dpixel.teleport=200,487,0
+windmill|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=206,453,0
+orc_village|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=317,633,0
+rope_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=410,168,1
+volcano|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=367,93,0
+# 2026-10-27: swiat 1000x1000 - nowe miasta, kanaly pod kratkami, kopalnia pod miastem
+valmir|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=479,756,0
+nerys|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=855,730,0
+sewer|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=547,511,-1
+copper_mine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=436,772,-1

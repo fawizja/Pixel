@@ -48,10 +48,10 @@ class BestiaryCardTest {
     void habitatsNameTheRegionsWhereTheMonsterSpawns() {
         pl.fawizja.pixel.world.WorldMap world = pl.fawizja.pixel.TestData.world();
         java.util.List<pl.fawizja.pixel.monster.SpawnPoint> spawns = java.util.List.of(
-                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(149, 348, 0), 4, 2, 60),
-                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(153, 370, 0), 3, 2, 60),
-                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(130, 160, 0), 3, 2, 60, true),
-                new pl.fawizja.pixel.monster.SpawnPoint("bat", new pl.fawizja.pixel.world.Position(120, 150, -1), 3, 2, 60));
+                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(477, 491, 0), 4, 2, 60),
+                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(481, 513, 0), 3, 2, 60),
+                new pl.fawizja.pixel.monster.SpawnPoint("wolf", new pl.fawizja.pixel.world.Position(600, 165, 0), 3, 2, 60, true),
+                new pl.fawizja.pixel.monster.SpawnPoint("bat", new pl.fawizja.pixel.world.Position(760, 100, -1), 3, 2, 60));
         assertEquals("Krainy Varden, Mrozne Pustkowia nocą", BestiaryCard.habitats("wolf", spawns, world));
         assertEquals("Lodowe Jaskinie", BestiaryCard.habitats("bat", spawns, world));
         assertEquals("", BestiaryCard.habitats("dragon", spawns, world));

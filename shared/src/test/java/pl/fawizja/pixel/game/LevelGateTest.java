@@ -15,7 +15,7 @@ import pl.fawizja.pixel.world.WorldMap;
 class LevelGateTest {
 
     /** Pole tuz przed brama od polnocy (brama: przerwa w murze doliny wiwern). */
-    static final Position BEFORE_GATE = new Position(167, 185, 0);
+    static final Position BEFORE_GATE = new Position(309, 216, 0);
 
     static GameSession walkSouth(int level) {
         WorldMap w = TestData.world();

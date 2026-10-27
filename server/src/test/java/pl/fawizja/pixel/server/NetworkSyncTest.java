@@ -946,7 +946,7 @@ class NetworkSyncTest {
 
     @Test
     void buyOrdersLockGoldAndDeliverItemsToTheBuyersDepot() throws Exception {
-        Position banker = new Position(161, 354, 0);
+        Position banker = new Position(489, 497, 0);
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient ola = connect();
              NetClient ula = connect()) {
@@ -1014,7 +1014,7 @@ class NetworkSyncTest {
             }
             return pl.fawizja.pixel.market.MarketView.parse(got[0]);
         };
-        Position banker = new Position(161, 354, 0);
+        Position banker = new Position(489, 497, 0);
         int pelt = ItemRegistry.loadDefault().byKey("wolf_pelt").id();
         try (NetClient ula = connect()) {
             ula.hello("Ula", "DRUID", "tajne-Ula");
@@ -1359,7 +1359,7 @@ class NetworkSyncTest {
             await("welcome", () -> kuba.selfSave() != null);
         }
         await("kuba left", () -> server.world().find("Kuba") == null);
-        Position banker = new Position(161, 354, 0);
+        Position banker = new Position(489, 497, 0);
         try (NetClient ola = connect();
              NetClient ula = connect()) {
             ola.hello("Ola", "PALADIN", "tajne-Ola");
@@ -1414,7 +1414,7 @@ class NetworkSyncTest {
             await("welcome", () -> kuba.selfSave() != null);
         }
         await("kuba left", () -> server.world().find("Kuba") == null);
-        Position banker = new Position(161, 354, 0);
+        Position banker = new Position(489, 497, 0);
         try (NetClient ola = connect();
              NetClient ula = connect()) {
             ola.hello("Ola", "PALADIN", "tajne-Ola");

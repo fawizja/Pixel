@@ -268,7 +268,7 @@ public final class DesktopLauncher {
                 if ("map".equals(open)) {
                     // podglad duzej mapy z zaznaczonym celem marszu (bez ruchu - zrzut jest powtarzalny)
                     GameScreen gs = (GameScreen) getScreen();
-                    gs.hud().setWalkTarget(new Position(120, 150, 0));
+                    gs.hud().setWalkTarget(new Position(560, 560, 0));
                     gs.hud().toggleMap();
                 }
                 if ("journal".equals(open)) {

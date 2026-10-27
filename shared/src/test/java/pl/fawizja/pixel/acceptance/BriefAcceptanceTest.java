@@ -80,9 +80,9 @@ class BriefAcceptanceTest {
     }
 
     @Test
-    void fourCitiesWithTempleBankShopsAndTransport() {
+    void sixCitiesWithTempleBankShopsAndTransport() {
         List<Town> towns = world.towns();
-        assertEquals(4, towns.size(), "four cities");
+        assertEquals(6, towns.size(), "six cities (Valmir and Nerys from the 2026-10-27 map)");
         for (Town t : towns) {
             Set<NpcRole> roles = npcs.all().stream().filter(n -> n.town().equals(t.name())).map(Npc::role)
                     .collect(Collectors.toCollection(() -> EnumSet.noneOf(NpcRole.class)));

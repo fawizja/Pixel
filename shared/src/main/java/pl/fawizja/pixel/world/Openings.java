@@ -119,6 +119,7 @@ public final class Openings {
      * drzwi i naroznika) z wnetrzem od poludnia (mur poziomy) albo od wschodu (pionowy), co czwarty wg pozycji.
      */
     public int wallDecor(FloorMap f, int x, int y, int shape) {
+        if (f.z() < 0) return -1; // bez obrazow i gobelinow w kanalach, kopalniach i jaskiniach
         int id = f.get(Layer.WALL, x, y);
         if (id == 0 || hasWindow(f, id, x, y, shape)) return -1;
         int h = (x * 73856093) ^ (y * 19349663);

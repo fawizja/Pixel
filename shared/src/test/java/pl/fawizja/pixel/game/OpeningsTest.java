@@ -16,7 +16,7 @@ import pl.fawizja.pixel.world.WorldMap;
 /** Drzwi i okna otwierane dotknieciem, skrzynie skarbow, na ktore nie mozna wejsc. */
 class OpeningsTest {
 
-    private static final Position DOOR = new Position(182, 355, 0);
+    private static final Position DOOR = new Position(510, 498, 0);
 
     private static GameSession at(WorldMap world, Position p) {
         PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
@@ -31,13 +31,13 @@ class OpeningsTest {
         o.set(DOOR, false);
         assertTrue(o.isDoor(DOOR));
         assertTrue(o.isClosedDoor(DOOR), "doors start closed");
-        GameSession s = at(world, new Position(183, 355, 0));
+        GameSession s = at(world, new Position(511, 498, 0));
         assertTrue(s.useAt(DOOR, 0));
         assertTrue(o.isOpen(DOOR));
         assertTrue(s.useAt(DOOR, 10));
         assertFalse(o.isOpen(DOOR));
         // za daleko: nic sie nie dzieje
-        GameSession far = at(world, new Position(184, 355, 0));
+        GameSession far = at(world, new Position(512, 498, 0));
         assertFalse(far.useAt(DOOR, 20));
         assertFalse(o.isOpen(DOOR));
     }
@@ -58,7 +58,7 @@ class OpeningsTest {
         WorldMap world = TestData.world();
         Openings o = world.openings();
         o.set(DOOR, false);
-        GameSession s = at(world, new Position(183, 355, 0));
+        GameSession s = at(world, new Position(511, 498, 0));
         for (long t = 0; t < 3000 && !s.character().position().equals(DOOR); t += 50) s.update(t, Direction.WEST);
         assertEquals(DOOR, s.character().position());
         assertTrue(o.isOpen(DOOR));
@@ -70,8 +70,8 @@ class OpeningsTest {
         WorldMap world = TestData.world();
         Openings o = world.openings();
         Position win = null;
-        for (int y = 340; y < 380 && win == null; y++)
-            for (int x = 150; x < 240 && win == null; x++)
+        for (int y = 483; y < 523 && win == null; y++)
+            for (int x = 478; x < 568 && win == null; x++)
                 if (o.isWindow(new Position(x, y, 0))) win = new Position(x, y, 0);
         assertNotNull(win, "Varden has windows");
         o.set(win, false);
@@ -92,8 +92,8 @@ class OpeningsTest {
     @Test
     void treasureChestBlocksTheStepAndOpensOnTap() {
         WorldMap world = TestData.world();
-        Position me = new Position(185, 360, 0);
-        Position box = new Position(186, 360, 0);
+        Position me = new Position(513, 503, 0);
+        Position box = new Position(514, 503, 0);
         GameSession s = at(world, me);
         s.setChests(new TreasureChests(List.of(new TreasureChests.Chest("t1", box, 100, "health_potion", 1)), List.of()));
         assertTrue(s.chestAt(box));
@@ -105,16 +105,16 @@ class OpeningsTest {
 
     @Test
     void buildingCornersCloseWithoutStubs() {
-        // dom 184..189 x 364..368 w Varden: rogi NW slupek, NE poziomy (bez pionowego kikuta nad linia muru),
+        // dom 512..517 x 507..511 w Varden: rogi NW slupek, NE poziomy (bez pionowego kikuta nad linia muru),
         // SW pionowy, SE naroznik
         WorldMap world = TestData.world();
         Openings o = world.openings();
         pl.fawizja.pixel.world.FloorMap f = world.floor(0);
-        assertEquals(Openings.POLE, o.shape(f, 184, 364));
-        assertEquals(Openings.H, o.shape(f, 187, 364));
-        assertEquals(Openings.H, o.shape(f, 189, 364), "north-east corner");
-        assertEquals(Openings.V, o.shape(f, 189, 366));
-        assertEquals(Openings.V, o.shape(f, 184, 368), "south-west corner");
-        assertEquals(Openings.CORNER, o.shape(f, 189, 368));
+        assertEquals(Openings.POLE, o.shape(f, 512, 507));
+        assertEquals(Openings.H, o.shape(f, 515, 507));
+        assertEquals(Openings.H, o.shape(f, 517, 507), "north-east corner");
+        assertEquals(Openings.V, o.shape(f, 517, 509));
+        assertEquals(Openings.V, o.shape(f, 512, 511), "south-west corner");
+        assertEquals(Openings.CORNER, o.shape(f, 517, 511));
     }
 }

@@ -30,6 +30,8 @@ import continent as C  # noqa: E402
 import town as tk  # noqa: E402
 import features as F  # noqa: E402
 import sidewalk  # noqa: E402
+import newtowns  # noqa: E402
+import underground as U  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -45,27 +47,27 @@ WATER = ('water', NONE, NONE, NONE)
 #   island   - lad wyspy (bez morza dookola), przystan i lodz; pietra nad nia
 #   entrance - tylko otoczenie wejsc na powierzchni (promien 2) i pietra nad nimi (plaskowyze)
 BLOCKS = [
-    ('varden', 'full', (46, 64, 157, 111), (137, 340)),
-    ('frostholm', 'full', (60, 4, 100, 47), (100, 96)),
-    ('selvaran', 'full', [(98, 112, 159, 176), (111, 177, 159, 181)], (318, 94)),
-    ('qasirah', 'full', (54, 177, 110, 222), (189, 228)),
-    ('pyramid', 'full', (113, 198, 136, 216), (276, 280)),
-    ('ruins', 'full', (219, 195, 241, 215), (300, 270)),
-    ('camp', 'full', (170, 78, 188, 95), (282, 238)),
-    ('wyvern', 'full', (12, 101, 32, 111), (158, 184)),
-    ('coral', 'island', (95, 244, 146, 283), (232, 404)),
-    ('gull', 'island', (184, 242, 197, 256), (48, 44)),
-    ('lighthouse', 'island', (276, 103, 298, 119), (62, 212)),
-    ('pirate', 'island', (26, 255, 70, 300), (8, 396)),
-    ('mist', 'island', (222, 255, 280, 304), (334, 330)),
-    ('ice', 'island', (274, 18, 336, 58), (316, 6)),
-    ('volcano_isle', 'island', (279, 168, 337, 212), (388, 208)),
-    ('ice_caves', 'entrance', (20, 30, 20, 30), (124, 152)),
-    ('jungle_ruins', 'entrance', (60, 150, 60, 150), (300, 214)),
-    ('abyss', 'entrance', (196, 216, 196, 216), (318, 300)),
-    ('turnie', 'entrance', (36, 10, 36, 10), (86, 74)),
-    ('szczyty', 'entrance', (214, 30, 214, 30), (64, 120)),
-    ('mesa', 'entrance', (30, 200, 30, 200), (250, 206)),
+    ('varden', 'full', (46, 64, 157, 111), (465, 483)),
+    ('frostholm', 'full', (60, 4, 100, 47), (722, 186)),
+    ('selvaran', 'full', [(98, 112, 159, 176), (111, 177, 159, 181)], (657, 672)),
+    ('qasirah', 'full', (54, 177, 110, 222), (187, 465)),
+    ('pyramid', 'full', (113, 198, 136, 216), (110, 556)),
+    ('ruins', 'full', (219, 195, 241, 215), (204, 674)),
+    ('camp', 'full', (170, 78, 188, 95), (447, 265)),
+    ('wyvern', 'full', (12, 101, 32, 111), (300, 215)),
+    ('coral', 'island', (95, 244, 146, 283), (250, 790)),
+    ('gull', 'island', (184, 242, 197, 256), (120, 40)),
+    ('lighthouse', 'island', (276, 103, 298, 119), (60, 200)),
+    ('pirate', 'island', (26, 255, 70, 300), (670, 910)),
+    ('mist', 'island', (222, 255, 280, 304), (930, 515)),
+    ('ice', 'island', (274, 18, 336, 58), (880, 20)),
+    ('volcano_isle', 'island', (279, 168, 337, 212), (40, 80)),
+    ('ice_caves', 'entrance', (20, 30, 20, 30), (760, 95)),
+    ('jungle_ruins', 'entrance', (60, 150, 60, 150), (703, 586)),
+    ('abyss', 'entrance', (196, 216, 196, 216), (160, 640)),
+    ('turnie', 'entrance', (36, 10, 36, 10), (520, 240)),
+    ('szczyty', 'entrance', (214, 30, 214, 30), (600, 60)),
+    ('mesa', 'entrance', (30, 200, 30, 200), (250, 330)),
 ]
 
 
@@ -638,35 +640,57 @@ def main():
         towns.append((name, remap.point(x, y, z)))
     regions = legacy_regions(legacy, remap)
     routes = [tuple(line.split(';')) for line in legacy.lines('ships.csv')]
+    # nowe miasta z mapy Darka (2026-10-27): port Valmir i wyspiarskie Nerys
+    new_towns = []
+    trng = random.Random(20261027)
+    for name in newtowns.TOWNS:
+        t = newtowns.build(world, name, trng)
+        x0, y0, x1, y1 = t['rect']
+        footprint[y0:y1 + 1, x0:x1 + 1] = True
+        npcs += t['npcs']
+        houses += t['houses']
+        pz.append((*t['pz'], 0))
+        towns.append((name, (*t['temple'], 0)))
+        lo, hi = newtowns.TOWNS[name]['levels']
+        regions.insert(0, (name, x0, y0, x1, y1, 0, 2, lo, hi))
+        new_towns.append(t)
     ctx = dict(legacy=legacy, blocks=blocks, T=T, world=world, remap=remap, transitions=transitions, npcs=npcs,
                unplaced=unplaced, spawns=spawns, dropped=dropped, houses=houses, pz=pz, gates=gates, towns=towns,
-               regions=regions, routes=routes, footprint=footprint)
+               regions=regions, routes=routes, footprint=footprint, new_towns=new_towns)
     return ctx
 
 
 # nowe przystanie z duzymi statkami: klucz kapitana, imie, miasto, punkt na ladzie, kierunek do wody
 HARBOURS = [
-    ('varden_captain', 'Kapitan Edmund', 'Varden', (170, 389), F.S_),
-    ('qas_captain', None, 'Qasirah', (150, 214), F.W),
-    ('east_captain', None, 'Przystań Wschodnia', (380, 252), F.E),
+    ('varden_captain', 'Kapitan Edmund', 'Varden', (498, 533), F.S_),
+    ('qas_captain', None, 'Qasirah', (70, 470), F.W),
+    ('east_captain', None, 'Przystań Wschodnia', (785, 560), F.E),
+    ('frost_captain', 'Kapitan Ulf', 'Frostholm', (800, 215), F.E),
 ]
+# rejsy wg tabeli z mapy Darka (Sareth = Qasirah, Thalion = Varden, Arden = Frostholm) i stare trasy wysp
 NEW_ROUTES = [('varden_captain', 'selv_captain'), ('varden_captain', 'qas_captain'),
               ('varden_captain', 'pirate_captain'), ('varden_captain', 'coral_captain'),
-              ('varden_captain', 'east_captain')]
+              ('varden_captain', 'east_captain'), ('varden_captain', 'frost_captain'),
+              ('varden_captain', 'valmir_captain'), ('qas_captain', 'valmir_captain'),
+              ('frost_captain', 'valmir_captain'), ('frost_captain', 'nerys_captain'),
+              ('valmir_captain', 'nerys_captain'), ('east_captain', 'nerys_captain')]
 # drogi: (skad, dokad) - pola tuz za bramami miast i przy celach; kolejne drogi korzystaja z poprzednich
 ROADS = [
-    ((170, 339), (214, 274)),        # Varden (polnoc) -> Qasirah (poludnie)
-    ((215, 227), (119, 140)),        # Qasirah (polnoc) -> Frostholm (poludnie)
-    ((246, 249), (317, 122)),        # Qasirah (wschod) -> Selvaran (zachod), przelecz w grzbiecie
-    ((237, 339), (282, 279)),        # Varden (dzielnica krolewska) -> piramida
-    ((282, 279), (290, 256)),        # piramida -> oboz
-    ((99, 123), (66, 122)),          # Frostholm (zachod) -> Lodowe Szczyty
-    ((119, 140), (124, 154)),        # Frostholm -> Lodowe Jaskinie
-    ((99, 123), (86, 77)),           # Frostholm -> Mrozne Turnie
-    ((215, 227), (250, 208)),        # Qasirah -> Plaskowyz
-    ((170, 388), (170, 392)),        # Varden (poludnie) -> przystan
-    ((215, 227), (151, 214)),        # Qasirah -> przystan Qasirah
-    ((379, 252), (317, 122)),        # Przystan Wschodnia -> Selvaran
+    ((498, 482), (741, 230)),        # Varden (polnoc) -> Frostholm (poludnie)
+    ((498, 531), (491, 745)),        # Varden (poludnie) -> Valmir (polnoc)
+    ((498, 482), (244, 486)),        # Varden (polnoc) -> Qasirah (wschod)
+    ((565, 482), (455, 283)),        # Varden (dzielnica krolewska) -> oboz w Szarych Turniach
+    ((213, 464), (250, 332)),        # Qasirah (polnoc) -> Plaskowyz
+    ((212, 511), (116, 555)),        # Qasirah (poludnie) -> piramida
+    ((212, 511), (70, 470)),         # Qasirah -> przystan Qasirah
+    ((721, 213), (520, 243)),        # Frostholm (zachod) -> Szare Turnie
+    ((721, 213), (602, 62)),         # Frostholm (zachod) -> Lodowe Szczyty
+    ((721, 213), (760, 97)),         # Frostholm -> Lodowe Jaskinie
+    ((741, 230), (800, 215)),        # Frostholm -> przystan Frostholm
+    ((515, 765), (656, 700)),        # Valmir (wschod) -> Selvaran (zachod)
+    ((785, 560), (703, 589)),        # Przystan Wschodnia -> ruiny w dzungli
+    ((703, 589), (656, 700)),        # ruiny w dzungli -> Selvaran
+    ((466, 765), (160, 643)),        # Valmir (zachod) -> Skaliste Ziemie (Otchlan)
 ]
 
 
@@ -715,8 +739,26 @@ def build(ctx):
         n = ctx['unplaced'].pop(key)
         spot = free_spot(world, (ex - 6, ey), ctx['npcs'])
         ctx['npcs'].append([n[0], n[1], n[2], n[3], spot[0], spot[1], 0, *n[7:10]])
+    for t in ctx['new_towns']:
+        key, cname = newtowns.CAPTAINS[t['name']]
+        start = t['gates']['S']
+        quay = F.to_water(world, start, F.S_)
+        assert quay is not None, f'no sea south of {t["name"]}'
+        captain, rect = F.harbour_with_ship(world, quay, F.S_)
+        ctx['pz'].append((*rect, 0))
+        ctx['npcs'].append([key, cname, 'CAPTAIN', t['name'], captain[0], captain[1], 0, '-', '#4a6a8a',
+                            'Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium.'])
+        for y in range(rect[1], rect[3] + 1):
+            for x in range(rect[0], rect[2] + 1):
+                if world.floors[0][y][x][0] in ('bridge', 'ship_deck'):
+                    cost[y, x] = min(cost[y, x], 0.35)
+        if quay != start:
+            F.connect(world, T, cost, start, quay)
     ctx['routes'] += NEW_ROUTES
     ferries(ctx)
+    for t in ctx['new_towns']:
+        for (gx, gy) in t['gates'].values():
+            cost[gy, gx] = 1.0
     bridges = []
     for a, b in ROADS:
         br, _path = F.connect(world, T, cost, a, b)
@@ -725,11 +767,15 @@ def build(ctx):
     ctx['regions_new'] = []
     rng = random.Random(20261035)
     foot = volcano(ctx, cost, rng)
-    F.connect(world, T, cost, foot, nearest_road(world, cost, foot, (foot[0], foot[1], foot[0], foot[1]), limit=120))
+    # droga spod wulkanu do Plaskowyzu (droga z Qasirah) i do gniazda wiwern
+    F.connect(world, T, cost, foot, (250, 332))
+    F.connect(world, T, cost, foot, (310, 228))
     villages(ctx, cost)
     caves(ctx, rng)
-    for (yr, xr, kind) in (((130, 160), (258, 300), 'rock'), ((228, 256), (330, 372), 'river'),
-                           ((290, 320), (160, 200), 'river')):
+    town_undergrounds(ctx, rng)
+    for (yr, xr, kind) in (((230, 280), (470, 560), 'rock'), ((150, 200), (380, 460), 'rock'),
+                           ((300, 330), (560, 640), 'river'), ((600, 640), (540, 620), 'river'),
+                           ((380, 420), (380, 470), 'river')):
         cr = find_crossing(world, T, yr[0], yr[1], xr[0], xr[1], kind)
         if cr is not None:
             sky_bridge(ctx, cr[1], cr[2], chasm=(kind == 'rock'), deck='rope_bridge' if kind == 'rock' else 'bridge')
@@ -737,9 +783,10 @@ def build(ctx):
     small_docks(ctx)
     # kazde wejscie na powierzchni osiagalne pieszo z Varden (inaczej sciezka do najblizszej drogi)
     temple = dict(ctx['towns'])['Varden']
+    others = [p[:2] for _n, p in ctx['towns']]
     island_blocks = [b for b in ctx['blocks'] if b.kind == 'island']
     for _ in range(3):
-        reach = reach_surface(world, temple[:2])
+        reach = reach_surface(world, temple[:2], others)
         missing = []
         for (x, y, z, _t, tx, ty, tz) in ctx['transitions']:
             if z == 0 and not reach[y, x] and not any(b.rect[0] + b.dx - 2 <= x <= b.rect[2] + b.dx + 2
@@ -789,22 +836,31 @@ def monster_levels():
 MONSTER_LEVEL = monster_levels()
 # wioski: nazwa, rodzaj, okolica, potwory (klucz, promien, liczba) dla zajetych
 VILLAGES = [
-    ('Wierzbowo', 'living', (150, 300), []),
-    ('Mroźna Osada', 'living', (168, 112), []),
-    ('Popielisko', 'deserted', (138, 178), []),
-    ('Suche Studnie', 'deserted', (262, 304), []),
-    ('Kamienny Bród', 'occupied', (120, 250), [('orc_warrior', 4, 3), ('orc_shaman', 3, 2)]),
-    ('Wilczy Jar', 'occupied', (238, 168), [('orc_berserker', 4, 3), ('orc_warrior', 4, 2)]),
-    ('Czerwony Kurhan', 'occupied', (226, 300), [('orc_warrior', 4, 3), ('orc_warlord', 2, 1)]),
-    ('Zielony Gaj', 'occupied', (150, 262), [('goblin', 4, 4), ('goblin_shaman', 3, 2)]),
-    ('Rozstaje', 'occupied', (140, 206), [('bandit', 4, 4)]),
-    ('Martwa Wieś', 'occupied', (92, 366), [('skeleton', 4, 4), ('wraith_knight', 3, 1)]),
-    ('Trollowe Leże', 'occupied', (196, 142), [('cave_troll', 4, 3)]),
-    ('Bagienna Osada', 'occupied', (346, 216), [('jungle_hunter', 4, 3), ('crocodile', 4, 2)]),
+    ('Wierzbowo', 'living', (420, 440), []),
+    ('Mroźna Osada', 'living', (680, 260), []),
+    ('Rybacka Wola', 'living', (600, 815), []),
+    ('Oaza Daktylowa', 'living', (140, 360), []),
+    ('Popielisko', 'deserted', (300, 300), []),
+    ('Suche Studnie', 'deserted', (120, 430), []),
+    ('Stary Młyn', 'deserted', (560, 640), []),
+    ('Kamienny Bród', 'occupied', (610, 330), [('orc_warrior', 4, 3), ('orc_shaman', 3, 2)]),
+    ('Wilczy Jar', 'occupied', (580, 290), [('orc_berserker', 4, 3), ('orc_warrior', 4, 2)]),
+    ('Czerwony Kurhan', 'occupied', (330, 640), [('orc_warrior', 4, 3), ('orc_warlord', 2, 1)]),
+    ('Zielony Gaj', 'occupied', (410, 610), [('goblin', 4, 4), ('goblin_shaman', 3, 2)]),
+    ('Rozstaje', 'occupied', (360, 470), [('bandit', 4, 4)]),
+    ('Martwa Wieś', 'occupied', (250, 610), [('skeleton', 4, 4), ('wraith_knight', 3, 1)]),
+    ('Trollowe Leże', 'occupied', (440, 340), [('cave_troll', 4, 3)]),
+    ('Bagienna Osada', 'occupied', (630, 560), [('jungle_hunter', 4, 3), ('crocodile', 4, 2)]),
+    ('Kozi Przysiółek', 'occupied', (380, 700), [('goblin', 4, 3), ('wolf', 4, 2)]),
+    ('Lodowy Kurhan', 'occupied', (650, 150), [('yeti', 4, 3), ('frost_witch', 3, 1)]),
+    ('Gniazdo Rabusiów', 'occupied', (740, 420), [('bandit', 4, 4), ('skeleton', 3, 2)]),
+    ('Piaskowy Obóz', 'occupied', (90, 520), [('hyena', 4, 3), ('scorpion', 3, 2)]),
 ]
 VILLAGE_NPCS = {
     'Wierzbowo': ('wierzbowo_merchant', 'Sołtys Bogumił', 'Witaj w Wierzbowie. Chleb, mięso i pochodnie dla wędrowców.'),
     'Mroźna Osada': ('osada_merchant', 'Handlarka Jagna', 'Ciepła strawa i liny na drogę w góry.'),
+    'Rybacka Wola': ('wola_merchant', 'Rybaczka Halina', 'Świeże ryby, chleb i pochodnie dla wędrowców.'),
+    'Oaza Daktylowa': ('oaza_merchant', 'Handlarz Karim', 'Woda, daktyle i liny na drogę przez pustynię.'),
 }
 
 
@@ -919,82 +975,94 @@ def dungeon(ctx, name, entrance, levels, rng, surface_ground=None):
 
 
 def volcano(ctx, cost, rng):
-    """Wulkan: stozek z lawowymi strugami, polka (+1) na zboczu i krater z jeziorem lawy na szczycie (+2),
-    wnetrze wulkanu (-1..-3) z ogniowymi potworami. Zwraca punkt u stop (do drogi)."""
+    """Wulkan (Czarne Szczyty): szeroki stozek z lawowymi strugami, polka (+1) na zboczu i krater z jeziorem lawy
+    na szczycie (+2). Pod nim Otchlan Wulkanu (-1..-5): od zywiolakow ognia przez smoki magmy do demonow i wladcow
+    otchlani na samym dnie (2026-10-27, Darek: "pod wulkanem jaskinia z demonami i silnymi potworami").
+    Zwraca punkt u stop (do drogi)."""
     world = ctx['world']
     vx, vy = C.VOLCANO
+    R = 36                                   # promien stozka
     n = C.fbm(401, 2, 5)
-    streams = [math.radians(a) for a in (35, 150, 260)]
-    for y in range(vy - 22, vy + 23):
-        for x in range(vx - 22, vx + 23):
-            d = math.hypot(x - vx, y - vy) + 1.2 * n[y, x]
-            if d > 21:
+    streams = [math.radians(a) for a in (35, 100, 150, 215, 260, 320)]
+    for y in range(vy - R - 1, vy + R + 2):
+        for x in range(vx - R - 1, vx + R + 2):
+            if not (0 <= x < S and 0 <= y < S):
+                continue
+            d = math.hypot(x - vx, y - vy) + 1.6 * n[y, x]
+            if d > R:
                 continue
             ang = math.atan2(y - vy, x - vx)
-            if d < 7:
+            if d < 11:
                 cell = ('lava', NONE, NONE, NONE)
-            elif d <= 11:
+            elif d <= 18.5:
                 cell = ('ash', NONE, NONE, 'mountain')
             else:
-                in_stream = any(abs((ang - a + math.pi) % (2 * math.pi) - math.pi) * d < 0.9 for a in streams) and d < 18
+                in_stream = any(abs((ang - a + math.pi) % (2 * math.pi) - math.pi) * d < 1.1 for a in streams) and d < 31
                 if in_stream:
                     cell = ('lava', NONE, NONE, NONE)
                 else:
                     v = rng.random()
-                    cell = ('ash', NONE, 'obsidian_rock' if v < 0.05 else ('dead_tree' if v < 0.07 else NONE), NONE)
+                    cell = ('ash', NONE, 'obsidian_rock' if v < 0.04 else ('dead_tree' if v < 0.055 else NONE), NONE)
             world.put(x, y, 0, cell)
-            cost[y, x] = 30.0 if cell[3] != NONE or cell[0] == 'lava' else 1.0
+            cost[y, x] = 30.0 if cell[3] != NONE else 1.0
             if cell[0] == 'lava':
                 cost[y, x] = np.inf
     # polka (+1) i krawedz krateru (+2)
-    for y in range(vy - 14, vy + 15):
-        for x in range(vx - 14, vx + 15):
+    for y in range(vy - 22, vy + 23):
+        for x in range(vx - 22, vx + 23):
             d = math.hypot(x - vx, y - vy)
-            if 9 <= d <= 12.4:
-                world.put(x, y, 1, ('ash', NONE, 'obsidian_rock' if rng.random() < 0.04 and d > 10 else NONE, NONE))
-            if 6 <= d <= 9.4:
-                world.put(x, y, 2, ('ash', NONE, 'magma' if rng.random() < 0.05 and d > 8.6 else NONE, NONE))
-            elif d < 6:
+            if 15.3 <= d <= 21:
+                world.put(x, y, 1, ('ash', NONE, 'obsidian_rock' if rng.random() < 0.04 and d > 17 else NONE, NONE))
+            if 10.2 <= d <= 16:
+                world.put(x, y, 2, ('ash', NONE, 'magma' if rng.random() < 0.05 and d > 15 else NONE, NONE))
+            elif d < 10.2:
                 world.put(x, y, 2, ('lava', NONE, NONE, NONE))
     # schody: zbocze (poludnie) -> polka -> krawedz krateru (polnoc)
     t = ctx['transitions']
-    world.put(vx, vy + 12, 0, ('ash', NONE, 'stairs_up', NONE))
-    world.put(vx, vy + 13, 0, ('ash', NONE, NONE, NONE))
-    world.put(vx, vy + 12, 1, ('ash', NONE, 'stairs_down', NONE))
-    world.put(vx, vy + 11, 1, ('ash', NONE, NONE, NONE))
-    t += [(vx, vy + 12, 0, 'STAIRS', vx, vy + 11, 1), (vx, vy + 12, 1, 'STAIRS', vx, vy + 13, 0)]
-    world.put(vx, vy - 10, 1, ('ash', NONE, 'stairs_up', NONE))
-    world.put(vx, vy - 11, 1, ('ash', NONE, NONE, NONE))
-    world.put(vx, vy - 9, 2, ('ash', NONE, 'stairs_down', NONE))
-    world.put(vx, vy - 8, 2, ('ash', NONE, NONE, NONE))
-    t += [(vx, vy - 10, 1, 'STAIRS', vx, vy - 8, 2), (vx, vy - 9, 2, 'STAIRS', vx, vy - 11, 1)]
-    for yy in range(vy + 13, vy + 22):
+    world.put(vx, vy + 20, 0, ('ash', NONE, 'stairs_up', NONE))
+    world.put(vx, vy + 21, 0, ('ash', NONE, NONE, NONE))
+    world.put(vx, vy + 20, 1, ('ash', NONE, 'stairs_down', NONE))
+    world.put(vx, vy + 19, 1, ('ash', NONE, NONE, NONE))
+    t += [(vx, vy + 20, 0, 'STAIRS', vx, vy + 19, 1), (vx, vy + 20, 1, 'STAIRS', vx, vy + 21, 0)]
+    world.put(vx, vy - 17, 1, ('ash', NONE, 'stairs_up', NONE))
+    world.put(vx, vy - 18, 1, ('ash', NONE, NONE, NONE))
+    world.put(vx, vy - 15, 2, ('ash', NONE, 'stairs_down', NONE))
+    world.put(vx, vy - 14, 2, ('ash', NONE, NONE, NONE))
+    t += [(vx, vy - 17, 1, 'STAIRS', vx, vy - 14, 2), (vx, vy - 15, 2, 'STAIRS', vx, vy - 18, 1)]
+    for yy in range(vy + 21, vy + R + 2):
         for xx in (vx - 1, vx, vx + 1):
             c = world.get(xx, yy)
-            if c[0] == 'lava' or c[3] != NONE or c[2] != NONE:
+            if c[0] in ('lava', 'water') or c[3] != NONE or c[2] != NONE:
                 world.put(xx, yy, 0, ('ash', NONE, NONE, NONE))
             cost[yy, xx] = 1.0
     sp = ctx['spawns']
     sp += ['# Wulkan: zbocza, polka i krater (Ignaroth na szczycie)',
-           f'fire_elemental;{vx - 15};{vy + 4};0;3;2;240', f'lava_golem;{vx + 15};{vy - 3};0;3;2;300',
-           f'fire_elemental;{vx + 11};{vy + 3};1;2;2;240', f'fire_elemental;{vx - 11};{vy - 3};1;2;2;240',
-           f'ignaroth;{vx + 7};{vy};2;1;1;3600']
-    # wnetrze wulkanu: wejscie u wschodniej stopy
-    entry = (vx + 16, vy + 8)
+           f'fire_elemental;{vx - 26};{vy + 6};0;4;3;240', f'lava_golem;{vx + 26};{vy - 5};0;4;2;300',
+           f'fire_elemental;{vx - 8};{vy + 28};0;4;3;240', f'lava_golem;{vx + 22};{vy + 20};0;4;2;300',
+           f'fire_elemental;{vx + 18};{vy + 5};1;2;2;240', f'fire_elemental;{vx - 18};{vy - 5};1;2;2;240',
+           f'magma_drake;{vx};{vy + 18};1;2;1;600', f'ignaroth;{vx + 12};{vy};2;1;1;3600']
+    # Otchlan Wulkanu: wejscie u wschodniej stopy, piec pieter w dol
+    entry = (vx + 27, vy + 14)
     world.put(entry[0], entry[1], 0, ('ash', NONE, NONE, NONE))
-    dungeon(ctx, 'Wnetrze Wulkanu', entry, [
-        (44, 34, [(4, 4), (16, 10), (30, 6), (38, 20), (24, 26)], 'fire', 0.06,
-         [('fire_elemental', 4, 3), ('fire_elemental', 4, 2), ('lava_golem', 3, 2)]),
-        (44, 34, [(24, 26), (10, 22), (8, 8), (26, 14), (40, 6)], 'fire', 0.08,
-         [('lava_golem', 4, 3), ('fire_elemental', 4, 3), ('magma_drake', 3, 1)]),
-        (44, 34, [(40, 6), (36, 22), (20, 28), (8, 16)], 'core', 0.1,
-         [('magma_drake', 4, 2), ('lava_golem', 4, 2), ('magma_drake', 3, 2)]),
+    for yy in range(entry[1] + 1, entry[1] + 3):
+        world.put(entry[0], yy, 0, ('ash', NONE, NONE, NONE))
+    dungeon(ctx, 'Otchłań Wulkanu', entry, [
+        (72, 56, [(6, 6), (24, 16), (50, 8), (64, 30), (40, 44), (18, 40)], 'fire', 0.06,
+         [('fire_elemental', 4, 3), ('lava_golem', 4, 2), ('fire_elemental', 4, 3), ('lava_golem', 3, 2)]),
+        (72, 56, [(18, 40), (8, 24), (26, 8), (48, 20), (64, 44), (40, 50)], 'fire', 0.08,
+         [('lava_golem', 4, 3), ('magma_drake', 3, 2), ('fire_elemental', 4, 3), ('magma_drake', 3, 1)]),
+        (72, 56, [(40, 50), (60, 36), (64, 10), (36, 14), (12, 22), (10, 46)], 'core', 0.1,
+         [('magma_drake', 4, 3), ('abyssal_demon', 3, 2), ('magma_drake', 4, 2), ('abyssal_demon', 3, 1)]),
+        (72, 56, [(10, 46), (28, 34), (22, 10), (50, 6), (66, 26), (52, 48)], 'core', 0.1,
+         [('abyssal_demon', 4, 3), ('bone_dragon', 3, 2), ('abyssal_demon', 4, 2), ('bone_dragon', 3, 1)]),
+        (72, 56, [(52, 48), (30, 46), (10, 30), (30, 14), (56, 18)], 'core', 0.12,
+         [('abyss_lord', 4, 2), ('abyssal_demon', 4, 3), ('bone_dragon', 3, 2), ('abyss_lord', 3, 1)]),
     ], rng, surface_ground='ash')
-    ctx['regions_new'] = [('Szczyt Wulkanu', vx - 14, vy - 14, vx + 14, vy + 14, 1, 2, 340, 420)] + ctx['regions_new']
+    ctx['regions_new'] = [('Szczyt Wulkanu', vx - 22, vy - 22, vx + 22, vy + 22, 1, 2, 340, 700)] + ctx['regions_new']
     _n, x0, y0, x1, y1, zl, zh = ctx['dungeons'][-1]
-    lv = [MONSTER_LEVEL[m] for m in ('fire_elemental', 'lava_golem', 'magma_drake')]
-    ctx['regions_new'].insert(0, ('Wnetrze Wulkanu', x0, y0, x1, y1, zl, zh, min(lv), max(lv) + 10))
-    return (vx, vy + 21)
+    ctx['regions_new'].insert(0, ('Otchłań Wulkanu', x0, y0, x1, y1, -2, -1, 320, 700))
+    ctx['regions_new'].insert(0, ('Dno Otchłani', x0, y0, x1, y1, -5, -3, 690, 960))
+    return (vx, vy + R + 1)
 
 
 # ------------------------------------------------------------------ krainy (regiony) i spawny wg klimatu
@@ -1002,7 +1070,7 @@ def volcano(ctx, cost, rng):
 ZONES = {
     'Krainy Varden': (8, 60, [('wolf', 3), ('boar', 3), ('forest_spider', 2), ('bandit', 2), ('goblin', 2),
                               ('goblin_shaman', 1), ('skeleton', 1)], ['wolf']),
-    'Wzgorza Qasirah': (20, 70, [('bandit', 2), ('goblin_shaman', 2), ('skeleton', 2), ('cave_troll', 2)], ['wolf']),
+    'Wzgorza Qasirah': (20, 70, [('crystal_golem', 2), ('goblin_shaman', 2), ('skeleton', 2), ('cave_troll', 2)], ['hyena']),
     'Mrozne Pustkowia': (40, 90, [('snow_wolf', 3), ('yeti', 2), ('frost_witch', 1)], ['snow_wolf']),
     'Lodowe Szczyty': (400, 560, [('frost_giant', 3), ('storm_harpy', 2), ('ice_dragon', 1)], []),
     'Spalone Wyzyny': (300, 400, [('fire_elemental', 3), ('lava_golem', 2)], []),
@@ -1019,7 +1087,7 @@ ZONE_CELL = 16
 
 
 def zone_grid(T):
-    """Kraina kazdego pola 16 x 16 wg przewazajacego biomu ladu (zachodni snieg to Lodowe Szczyty)."""
+    """Kraina kazdego pola 16 x 16 wg przewazajacego biomu ladu (polnocny snieg to Lodowe Szczyty)."""
     n = S // ZONE_CELL
     out = {}
     for cy in range(n):
@@ -1029,7 +1097,7 @@ def zone_grid(T):
                 for x in range(cx * ZONE_CELL, (cx + 1) * ZONE_CELL, 2):
                     if T.land[y, x]:
                         z = BIOME_ZONE.get(T.biome[y, x], 'Krainy Varden')
-                        if z == 'Mrozne Pustkowia' and x < 100 and y < 168:
+                        if z == 'Mrozne Pustkowia' and y < 120:
                             z = 'Lodowe Szczyty'
                         votes[z] = votes.get(z, 0) + 1
             if votes:
@@ -1068,7 +1136,7 @@ def reach_surface(world, start, extra_starts=()):
 def climate_spawns(ctx, zones, rng):
     world = ctx['world']
     temples = [p for _n, p in ctx['towns']]
-    reach = reach_surface(world, temples[0][:2])
+    reach = reach_surface(world, temples[0][:2], [t[:2] for t in temples])
     pz = ctx['pz']
     avoid = [v['rect'] for v in ctx.get('villages', [])]
     taken = []
@@ -1120,29 +1188,50 @@ def climate_spawns(ctx, zones, rng):
 
 # ------------------------------------------------------------------ jaskinie w gorach, mosty wiszace, przystanie
 
+# uklady pieter jaskin (szer, wys, punkty komor); ostatni punkt pietra = pierwszy punkt nastepnego
+CAVE_LAYOUTS = [(36, 28, [(4, 4), (16, 14), (30, 6), (30, 22)]),
+                (36, 28, [(30, 22), (12, 22), (6, 8), (22, 10)]),
+                (36, 28, [(22, 10), (8, 18), (20, 24), (32, 14)])]
+
+
+def cave_levels(style, *spawns, lava=0):
+    """Pietra jaskini w stylu style; spawns: lista spawnow [(potwor, promien, liczba)] na kazde pietro."""
+    return [(w, h, pts, style, lava, sp) for (w, h, pts), sp in zip(CAVE_LAYOUTS, spawns)]
+
+
 CAVES = [
-    # nazwa, okolica wejscia, poziomy (szer, wys, punkty, styl, lawa, spawny), poziomy regionu
-    ('Grota Pajakow', (226, 318), [
-        (34, 26, [(4, 4), (14, 12), (28, 6), (26, 20)], 'moss', 0, [('forest_spider', 4, 3), ('forest_spider', 3, 2)]),
-        (34, 26, [(26, 20), (10, 18), (6, 6), (24, 8)], 'moss', 0, [('forest_spider', 4, 3), ('skeleton', 3, 2)]),
-    ], (10, 40)),
-    ('Jaskinia Trolli', (176, 156), [
-        (36, 28, [(4, 4), (16, 14), (30, 6), (30, 22)], 'rock', 0, [('cave_troll', 4, 3), ('cave_troll', 4, 2)]),
-        (36, 28, [(30, 22), (12, 22), (6, 8), (22, 10)], 'rock', 0, [('cave_troll', 4, 3), ('crystal_golem', 3, 2)]),
-    ], (28, 60)),
-    ('Orcza Kopalnia', (270, 126), [
-        (40, 30, [(4, 4), (18, 8), (34, 6), (30, 20), (14, 24)], 'orc', 0,
-         [('orc_warrior', 4, 3), ('orc_shaman', 4, 2), ('orc_warrior', 3, 2)]),
-        (40, 30, [(14, 24), (6, 12), (20, 6), (34, 14), (30, 26)], 'orc', 0,
-         [('orc_berserker', 4, 3), ('orc_shaman', 4, 2), ('orc_warlord', 2, 1)]),
-    ], (100, 230)),
-    ('Lodowa Grota', (128, 80), [
-        (34, 26, [(4, 4), (16, 12), (28, 6), (26, 20)], 'ice', 0, [('yeti', 4, 3), ('frost_witch', 3, 2)]),
-        (34, 26, [(26, 20), (10, 20), (6, 6), (22, 10)], 'ice', 0, [('ice_golem', 4, 2), ('frost_witch', 3, 2)]),
-    ], (60, 130)),
-    ('Grota Przemytnikow', (252, 322), [
-        (30, 22, [(4, 4), (14, 10), (24, 16), (8, 16)], 'rock', 0, [('bandit', 4, 3), ('skeleton', 3, 2)]),
-    ], (12, 40)),
+    # nazwa, okolica wejscia, pietra, poziomy regionu
+    ('Grota Pająków', (430, 560), cave_levels('moss', [('forest_spider', 4, 3), ('forest_spider', 3, 2)],
+                                             [('forest_spider', 4, 3), ('skeleton', 3, 2)]), (10, 40)),
+    ('Wilcza Nora', (330, 430), cave_levels('moss', [('wolf', 4, 3), ('boar', 3, 2)], [('forest_spider', 4, 3)]), (8, 25)),
+    ('Grota Rozbójników', (420, 720), cave_levels('rock', [('bandit', 4, 3), ('skeleton', 3, 2)],
+                                                 [('bandit', 4, 3), ('goblin_shaman', 3, 2)]), (12, 40)),
+    ('Jaskinia Trolli', (470, 330), cave_levels('rock', [('cave_troll', 4, 3), ('cave_troll', 4, 2)],
+                                               [('cave_troll', 4, 3), ('crystal_golem', 3, 2)]), (28, 60)),
+    ('Kryształowa Grota', (560, 240), cave_levels('moss', [('crystal_golem', 4, 3), ('cave_troll', 3, 2)],
+                                                 [('crystal_golem', 4, 3), ('crystal_golem', 3, 2)],
+                                                 [('cave_troll', 4, 3), ('crystal_golem', 4, 2)]), (40, 80)),
+    ('Orcza Kopalnia', (590, 280), cave_levels('orc', [('orc_warrior', 4, 3), ('orc_shaman', 4, 2)],
+                                              [('orc_berserker', 4, 3), ('orc_shaman', 4, 2), ('orc_warlord', 2, 1)]), (100, 230)),
+    ('Lodowa Grota', (680, 180), cave_levels('ice', [('yeti', 4, 3), ('frost_witch', 3, 2)],
+                                            [('ice_golem', 4, 2), ('frost_witch', 3, 2)]), (60, 130)),
+    ('Mroźna Otchłań', (560, 120), cave_levels('ice', [('frost_giant', 4, 3), ('storm_harpy', 3, 2)],
+                                              [('frost_giant', 4, 3), ('ice_dragon', 3, 1)],
+                                              [('ice_dragon', 4, 2), ('storm_harpy', 3, 2)]), (430, 560)),
+    ('Leże Krokodyli', (720, 500), cave_levels('moss', [('crocodile', 4, 3), ('jungle_serpent', 3, 2)],
+                                              [('jungle_serpent', 4, 3), ('crocodile', 3, 2)]), (55, 90)),
+    ('Zatopiona Świątynia', (640, 620), cave_levels('moss', [('jungle_hunter', 4, 3), ('temple_guardian', 3, 1)],
+                                                   [('temple_guardian', 4, 2), ('jungle_serpent', 3, 2)]), (60, 200)),
+    ('Grobowiec Wydm', (170, 400), cave_levels('rock', [('scorpion', 4, 3), ('sand_wraith', 3, 2)],
+                                              [('mummy', 4, 3), ('sand_wraith', 3, 2)]), (60, 220)),
+    ('Grota Upiorów', (300, 560), cave_levels('rock', [('wraith_knight', 4, 2), ('cursed_treant', 4, 2)],
+                                             [('wraith_knight', 4, 3), ('cursed_treant', 3, 1)]), (240, 300)),
+    ('Jaskinia Cienia', (200, 620), cave_levels('rock', [('shadow_stalker', 4, 3), ('void_priest', 3, 1)],
+                                               [('sand_titan', 4, 2), ('void_priest', 3, 2)],
+                                               [('shadow_stalker', 4, 3), ('sand_titan', 3, 2)]), (550, 750)),
+    ('Grota Przemytników', (330, 700), cave_levels('rock', [('bandit', 4, 3), ('skeleton', 3, 2)]), (12, 40)),
+    ('Wyspiarska Grota', (900, 690), cave_levels('moss', [('drowned_sailor', 4, 3), ('pirate_cutthroat', 3, 2)],
+                                                [('pirate_gunner', 4, 2), ('drowned_sailor', 3, 2)]), (330, 400)),
 ]
 MOUNTAIN_WALLS = {'mountain', 'snow_mountain', 'sand_cliff'}
 
@@ -1172,12 +1261,108 @@ def mountain_entrance(world, footprint, near, radius=30):
 def caves(ctx, rng):
     world = ctx['world']
     for name, near, levels, (lo, hi) in CAVES:
-        ex, ey = mountain_entrance(world, ctx['footprint'], near)
+        ex, ey = mountain_entrance(world, ctx['footprint'], near, radius=60)
         ground = world.get(ex, ey + 1)[0]
         tx, ty = dungeon(ctx, name, (ex, ey), levels, rng, surface_ground=ground)
         nm, x0, y0, x1, y1, zl, zh = ctx['dungeons'][-1]
         ctx['regions_new'].insert(0, (name, x0, y0, x1, y1, zl, zh, lo, hi))
         ctx.setdefault('entrances', []).append((name, (ex, ey + 1)))
+
+
+# ------------------------------------------------------------------ kanaly i kopalnie pod miastami (2026-10-27)
+SEWER_STREETS = {'cobblestone', 'paving', 'brick_paving', 'dirt', 'sandstone_floor'}
+SEWER_MONSTERS = [('sewer_rat', 4, 3), ('giant_rat', 4, 2), ('sewer_rat', 3, 3), ('forest_spider', 3, 2),
+                  ('giant_rat', 4, 3), ('goblin', 3, 2)]
+MINES = [
+    # miasto, nazwa, okolica wejscia, pietra (spawny), poziomy regionu
+    ('Varden', 'Stara Kopalnia', (445, 505), [[('goblin', 4, 3), ('goblin_shaman', 3, 2)],
+                                             [('skeleton', 4, 3), ('cave_troll', 3, 1)]], (12, 40)),
+    ('Qasirah', 'Kopalnia Soli', (258, 478), [[('scorpion', 4, 3), ('hyena', 3, 2)],
+                                             [('scorpion', 4, 3), ('sand_wraith', 3, 1)]], (45, 140)),
+    ('Frostholm', 'Kopalnia Lodu', (705, 220), [[('snow_wolf', 4, 3), ('yeti', 3, 1)],
+                                               [('yeti', 4, 3), ('ice_golem', 3, 1)]], (40, 130)),
+    ('Selvaran', 'Kopalnia Szmaragdów', (640, 690), [[('jungle_serpent', 4, 2), ('crocodile', 3, 2)],
+                                                    [('jungle_hunter', 4, 3), ('jungle_serpent', 3, 2)]], (55, 90)),
+    ('Valmir', 'Kopalnia Miedzi', (452, 770), [[('goblin', 4, 3), ('bandit', 3, 2)],
+                                              [('cave_troll', 4, 2), ('skeleton', 3, 2)]], (12, 45)),
+    ('Nerys', 'Kopalnia Pereł', (835, 745), [[('cave_troll', 4, 3), ('crystal_golem', 3, 1)],
+                                            [('crystal_golem', 4, 3), ('cave_troll', 3, 2)]], (32, 60)),
+]
+
+
+def town_rects(ctx):
+    out = {}
+    for town, bname in TOWN_BLOCKS.items():
+        b = next(bb for bb in ctx['blocks'] if bb.name == bname)
+        out[town] = (b.rect[0] + b.dx, b.rect[1] + b.dy, b.rect[2] + b.dx, b.rect[3] + b.dy)
+    for t in ctx['new_towns']:
+        out[t['name']] = t['rect']
+    return out
+
+
+def clearing(world, ctx, near, radius=30):
+    """Polana 5x5 na naturalnym ladzie najblizej near (drzewa i krzaki znikaja) - gdy w gestym lesie nie ma
+    wolnego miejsca. Zwraca srodek."""
+    x0, y0 = near
+    best = None
+    for y in range(y0 - radius, y0 + radius + 1):
+        for x in range(x0 - radius, x0 + radius + 1):
+            area = [world.get(x + a, y + b) for a in range(-2, 3) for b in range(-2, 3)]
+            if any(c is None or c[0] not in NATURAL_GROUND or c[3] != NONE or c[2] in F.STAIRS for c in area):
+                continue
+            if in_pz(ctx, x, y) or ctx['footprint'][y, x]:
+                continue
+            d = abs(x - x0) + abs(y - y0)
+            if best is None or d < best[0]:
+                best = (d, x, y)
+    assert best is not None, f'no clearing near {near}'
+    _d, x, y = best
+    for a in range(-2, 3):
+        for b in range(-2, 3):
+            c = world.get(x + a, y + b)
+            world.put(x + a, y + b, 0, (c[0], NONE, NONE, NONE))
+    return (x, y)
+
+
+def town_undergrounds(ctx, rng):
+    """Kanaly z kratkami pod ulicami kazdego miasta i kopalnia u bram (dwa pietra w dol)."""
+    world = ctx['world']
+    core = set(varden_core_cells(ctx))
+    taken = {(int(n[4]), int(n[5])) for n in ctx['npcs'] if int(n[6]) == 0}
+    ctx['sewers'] = {}
+    for town, rect in town_rects(ctx).items():
+        # pietro -1, a gdy pod miastem sa juz stare lochy - nizej (kratka prowadzi wtedy glebiej)
+        for z in (-1, -2, -3):
+            cells = U.sewers(world, rect, SEWER_STREETS, lambda x, y: (x, y) in core, rng, F.walk, z=z)
+            if cells:
+                break
+        if not cells:
+            print('kanaly: brak miejsca pod', town)
+            continue
+        count = max(2, min(6, len(cells) // 120))
+        gr = U.grates(world, cells, SEWER_STREETS, taken | core, rng, count, F.walk, z=z)
+        t = ctx['transitions']
+        for (g, ladder, up, down) in gr:
+            t.append((g[0], g[1], 0, 'STAIRS', down[0], down[1], z))
+            t.append((ladder[0], ladder[1], z, 'LADDER', up[0], up[1], 0))
+        far = [c for c in cells if all(abs(c[0] - g[0][0]) + abs(c[1] - g[0][1]) > 6 for g in gr)]
+        n_sp = max(3, len(far) // 70)
+        for i in range(n_sp):
+            sx, sy = far[(i * 97 + 13) % len(far)]
+            m, r, k = SEWER_MONSTERS[i % len(SEWER_MONSTERS)]
+            ctx['spawns'].append(f'{m};{sx};{sy};{z};{r};{k};60')
+        xs = [c[0] for c in cells]
+        ys = [c[1] for c in cells]
+        ctx['regions_new'].insert(0, (f'Kanały {town}', min(xs), min(ys), max(xs), max(ys), z, z, 3, 20))
+        ctx['sewers'][town] = (len(cells), [g[0] for g in gr], n_sp)
+        print('kanaly', town, 'pola', len(cells), 'kratki', len(gr), 'spawny', n_sp)
+    for town, name, near, spawns, (lo, hi) in MINES:
+        spot = open_spot(world, ctx, near, radius=24) or clearing(world, ctx, near)
+        levels = cave_levels('mine', *spawns)
+        dungeon(ctx, name, spot, levels, rng)
+        _n, x0, y0, x1, y1, zl, zh = ctx['dungeons'][-1]
+        ctx['regions_new'].insert(0, (name, x0, y0, x1, y1, zl, zh, lo, hi))
+        ctx.setdefault('mines', []).append((town, name, spot))
 
 
 def sky_bridge(ctx, a, b, chasm=True, deck='rope_bridge'):
@@ -1232,8 +1417,9 @@ def find_crossing(world, T, y_from, y_to, x_from, x_to, kind):
 
 def small_docks(ctx):
     world = ctx['world']
-    spots = [((96, 236), F.W), ((70, 344), F.S_), ((330, 300), F.E), ((150, 30), F.S_), ((428, 120), F.W),
-             ((420, 360), F.W), ((120, 432), F.N), ((26, 300), F.E), ((300, 336), F.S_)]
+    spots = [((60, 560), F.W), ((150, 690), F.S_), ((300, 735), F.S_), ((400, 760), F.W), ((600, 850), F.S_),
+             ((790, 640), F.E), ((820, 250), F.E), ((330, 210), F.W), ((40, 420), F.W), ((560, 470), F.E),
+             ((760, 330), F.E), ((900, 640), F.N)]
     for start, d in spots:
         c = world.get(*start)
         if c is None or c[0] == 'water':
@@ -1280,8 +1466,8 @@ GUARD_NAMES = ['Bolesław', 'Radosław', 'Mścisław', 'Gniewomir', 'Sobiesław'
 GUARD_RANKS = ['Strażnik', 'Strażniczka', 'Halabardnik', 'Kusznik']
 GUARD_FEMALE = ['Dobrosława', 'Wiesława', 'Jaromira', 'Bogna', 'Świętosława', 'Zdzisława']
 # bramy miast: punkt tuz za brama (z ROADS) i miasto
-GATES = [((170, 339), 'Varden'), ((237, 339), 'Varden'), ((170, 388), 'Varden'), ((215, 227), 'Qasirah'),
-         ((246, 249), 'Qasirah'), ((99, 123), 'Frostholm'), ((119, 140), 'Frostholm'), ((317, 122), 'Selvaran')]
+GATES = [((498, 482), 'Varden'), ((565, 482), 'Varden'), ((498, 531), 'Varden'), ((213, 464), 'Qasirah'),
+         ((244, 486), 'Qasirah'), ((721, 213), 'Frostholm'), ((741, 230), 'Frostholm'), ((656, 700), 'Selvaran')]
 TOWN_BLOCKS = {'Varden': 'varden', 'Frostholm': 'frostholm', 'Qasirah': 'qasirah', 'Selvaran': 'selvaran'}
 TOWN_GREEN = {'Varden': (['tree', 'bush'], ['flowers', 'tall_grass']),
               'Frostholm': (['pine', 'snow_rock'], ['snow_tuft']),
@@ -1579,7 +1765,8 @@ def towns_dressing(ctx):
     # straznicy przy bramach (w strefie ochronnej, tuz za brama)
     used = set()
     guards = 0
-    for (gx, gy), town in GATES:
+    gates = list(GATES) + [(p, t['name']) for t in ctx['new_towns'] for p in t['gates'].values()]
+    for (gx, gy), town in gates:
         spot = None
         for r in range(1, 9):
             for dy in range(-r, r + 1):
@@ -1623,7 +1810,7 @@ def towns_dressing(ctx):
     # wiatraki: wioski zywe i pola za Qasirah i Varden
     mills = []
     for near in [v['centre'] for v in ctx.get('villages', []) if v['name'] in ('Wierzbowo', 'Mroźna Osada')] + \
-            [(200, 222), (118, 318)]:
+            [(198, 459), (446, 461), (480, 720)]:
         p = open_spot(world, ctx, (near[0] + 8, near[1] - 4), radius=24)
         if p is not None:
             c = world.get(*p)
@@ -1706,14 +1893,69 @@ def all_regions(ctx):
     return out
 
 
+def snap_spawns(ctx):
+    """Srodek spawnu na polu przechodnim: przesuniety na najblizsze wolne pole (do 6 pol), inaczej usuniety."""
+    world = ctx['world']
+    out, moved, dropped = [], 0, 0
+    for line in ctx['spawns']:
+        if line.startswith('#'):
+            out.append(line)
+            continue
+        f = line.split(';')
+        x, y, z = int(f[1]), int(f[2]), int(f[3])
+        best = None
+        for r in range(7):
+            for dy in range(-r, r + 1):
+                for dx in range(-r, r + 1):
+                    if best is None and max(abs(dx), abs(dy)) == r:
+                        c = world.get(x + dx, y + dy, z)
+                        if F.walk(c) and c[2] not in F.STAIRS and not in_pz(ctx, x + dx, y + dy, z):
+                            best = (x + dx, y + dy)
+            if best:
+                break
+        if best is None:
+            dropped += 1
+            continue
+        if best != (x, y):
+            moved += 1
+        f[1], f[2] = str(best[0]), str(best[1])
+        out.append(';'.join(f))
+    ctx['spawns'] = out
+    print('spawny: przesuniete', moved, 'usuniete', dropped)
+
+
+def fix_transition_targets(ctx):
+    """Cel przejscia zastawiony pozniej (lawka z pobocza, drzewo, straznik) - przejscie prowadzi na sasiednie wolne
+    pole celu."""
+    world = ctx['world']
+    npcs = {(int(n[4]), int(n[5]), int(n[6])) for n in ctx['npcs']}
+    out, fixed = [], 0
+    for (x, y, z, typ, tx, ty, tz) in ctx['transitions']:
+        c = world.get(tx, ty, tz)
+        if not (F.walk(c) and c[2] not in F.STAIRS and c[2] != 'sewer_grate') or (tx, ty, tz) in npcs:
+            for r in (1, 2):
+                cand = [(tx + a, ty + b) for a in range(-r, r + 1) for b in range(-r, r + 1) if (a or b)]
+                cand = [p for p in cand if F.walk(world.get(p[0], p[1], tz)) and world.get(p[0], p[1], tz)[2] not in F.STAIRS
+                        and world.get(p[0], p[1], tz)[2] != 'sewer_grate' and (p[0], p[1], tz) not in npcs]
+                if cand:
+                    tx, ty = min(cand, key=lambda p: abs(p[0] - tx) + abs(p[1] - ty))
+                    fixed += 1
+                    break
+        out.append((x, y, z, typ, tx, ty, tz))
+    ctx['transitions'] = out
+    print('przejscia: poprawione cele', fixed)
+
+
 def finish(ctx):
+    snap_spawns(ctx)
+    fix_transition_targets(ctx)
     temple = dict(ctx['towns'])['Varden']
     props = [
         ('spawn', f'{temple[0]},{temple[1]},0'),
         ('pz', ';'.join(','.join(str(v) for v in r) for r in ctx['pz'])),
         ('# przejscia strzezone: x0,y0,x1,y1,z,minimalny poziom', None),
         ('gates', ';'.join(','.join(str(v) for v in g) for g in ctx['gates'])),
-        ('# miasta: nazwa:x,y,z swiatyni (maks. 4)', None),
+        ('# miasta: nazwa:x,y,z swiatyni (maks. 6)', None),
         ('towns', ';'.join(f'{n}:{p[0]},{p[1]},{p[2]}' for n, p in ctx['towns'])),
         ('# regiony: nazwa;x0;y0;x1;y1;z od;z do;zalecany poziom od;do (oddzielone |)', None),
         ('regions', '|'.join(';'.join(str(v) for v in r) for r in all_regions(ctx))),

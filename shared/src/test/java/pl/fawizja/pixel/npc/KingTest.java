@@ -96,12 +96,11 @@ class KingTest {
     }
 
     @Test
-    void oldSavesMoveWithTheirTownOrBackToTheTemple() {
-        // Varden przeniesiony w calosci z podziemiami, wyspy tylko powierzchnia, dzicz nie istnieje
-        assertEquals(new Position(170, 356, 0), WorldLayout.fromV3(79, 80, 0));
-        assertEquals(new Position(170, 356, -2), WorldLayout.fromV3(79, 80, -2));
-        assertNull(WorldLayout.fromV3(20, 300, 0));
-        assertNull(WorldLayout.fromV3(80, 20, -1));
-        assertTrue(WORLD.isWalkable(WorldLayout.fromV3(79, 29, 0)), "Frostholm temple");
+    void everyTownHasAWalkableTemple() {
+        // stare zapisy (v1-v4) wracaja do swiatyni swojego miasta - kazde miasto musi ja miec
+        for (String town : new String[] {"varden", "frostholm", "qasirah", "selvaran", "valmir", "nerys"}) {
+            assertNotNull(WORLD.templeOf(town), town);
+            assertTrue(WORLD.isWalkable(WORLD.templeOf(town)), town);
+        }
     }
 }

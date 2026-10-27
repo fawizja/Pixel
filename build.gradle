@@ -38,6 +38,8 @@ configure(subprojects.findAll { it.name != 'android' }) {
         // (data/starting.properties, sprawdza StartingConfigFileTest).
         systemProperty 'pixel.start.level', '8'
         systemProperty 'pixel.start.gold.bank', '0'
+        // swiat 1000x1000: kazdy test serwera laduje caly swiat (ok. 15 MB), domyslne 512 MB nie wystarcza
+        maxHeapSize = '1536m'
         testLogging {
             events 'failed'
             exceptionFormat 'full'
