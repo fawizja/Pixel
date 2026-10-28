@@ -72,7 +72,7 @@ final class ServerWorld {
     private final pl.fawizja.pixel.house.HouseRegistry houses;
     private final File housesFile;
     private final pl.fawizja.pixel.house.HouseOwnersMap houseOwners;
-    /** Wlasciciele domow wspolni dla graczy; kazda zmiana od razu na dysk. */
+    /** Wlasciciele domow wspolni dla graczy; kazda zmiana od razu na dysk, a na koniec kroku do klientow (HACC). */
     private final pl.fawizja.pixel.house.HouseOwners savedHouseOwners = new pl.fawizja.pixel.house.HouseOwners() {
         @Override
         public String ownerOf(String id) { return houseOwners.ownerOf(id); }
@@ -80,40 +80,69 @@ final class ServerWorld {
         @Override
         public boolean claim(String id, String owner) {
             boolean ok = houseOwners.claim(id, owner);
-            if (ok) saveHouses();
+            if (ok) housesChanged();
             return ok;
         }
 
         @Override
         public void release(String id) {
             houseOwners.release(id);
-            saveHouses();
+            housesChanged();
         }
 
         @Override
         public List<String> guests(String id) { return houseOwners.guests(id); }
 
         @Override
-        public boolean addGuest(String id, String name) {
-            boolean ok = houseOwners.addGuest(id, name);
-            if (ok) saveHouses();
+        public java.util.Map<String, pl.fawizja.pixel.house.HouseAccess> guestLevels(String id) { return houseOwners.guestLevels(id); }
+
+        @Override
+        public pl.fawizja.pixel.house.HouseAccess guestAccess(String id, String name) { return houseOwners.guestAccess(id, name); }
+
+        @Override
+        public boolean addGuest(String id, String name) { return addGuest(id, name, pl.fawizja.pixel.house.HouseAccess.FULL); }
+
+        @Override
+        public boolean addGuest(String id, String name, pl.fawizja.pixel.house.HouseAccess level) {
+            boolean ok = houseOwners.addGuest(id, name, level);
+            if (ok) housesChanged();
             return ok;
         }
 
         @Override
         public boolean removeGuest(String id, String name) {
             boolean ok = houseOwners.removeGuest(id, name);
-            if (ok) saveHouses();
+            if (ok) housesChanged();
             return ok;
         }
 
         @Override
         public boolean transfer(String id, String owner) {
             boolean ok = houseOwners.transfer(id, owner);
-            if (ok) saveHouses();
+            if (ok) housesChanged();
             return ok;
         }
+
+        @Override
+        public long rentPaidUntil(String id) { return houseOwners.rentPaidUntil(id); }
+
+        @Override
+        public int rentMissed(String id) { return houseOwners.rentMissed(id); }
+
+        @Override
+        public void setRent(String id, long paidUntil, int missed) {
+            houseOwners.setRent(id, paidUntil, missed);
+            saveHouses();
+        }
     };
+    /** Zmienili sie wlasciciele albo goscie: wstep do domow trzeba sprawdzic i rozeslac na koncu kroku. */
+    private boolean housesDirty;
+
+    private void housesChanged() {
+        saveHouses();
+        housesDirty = true;
+    }
+
     /** Oferty sprzedazy domow innym graczom: kupujacy (male litery) -> oferta. */
     private final Map<String, HouseOffer> houseOffers = new java.util.HashMap<>();
     static final long HOUSE_OFFER_MS = 5 * 60_000L;
@@ -791,6 +820,69 @@ final class ServerWorld {
         info(p, "Przelano " + label + " do " + to + (r == null ? " (wpłynie po wejściu do gry)." : "."), now);
     }
 
+    static final long RENT_SWEEP_MS = 60_000;
+    private long rentSweptMs = Long.MIN_VALUE / 2;
+
+    /** Cudze domy, do ktorych gracz ma wstep: {"HACC", "id:poziom,id:poziom"} (klient od razu wie, gdzie wejdzie). */
+    private void sendHouseAccess(ServerPlayer p) {
+        List<String> out = new ArrayList<>();
+        for (pl.fawizja.pixel.house.House h : houses.all()) {
+            pl.fawizja.pixel.house.HouseAccess a = houseOwners.guestAccess(h.id(), p.name());
+            if (a != pl.fawizja.pixel.house.HouseAccess.NONE) out.add(h.id() + ":" + a.code());
+        }
+        p.client.send("HACC", String.join(",", out));
+    }
+
+    /**
+     * Czynsz domow, ktorych wlasciciele sa offline (wlasciciel w grze placi w swojej sesji): pobranie z konta
+     * w zapisie postaci, po {@link pl.fawizja.pixel.house.HouseRent#MAX_MISSED} zaleglosciach dom wraca do miasta,
+     * a rzeczy z niego trafiaja do depozytu postaci.
+     */
+    void sweepHouseRent(long now) {
+        long wall = wallClock.getAsLong();
+        long period = pl.fawizja.pixel.house.HouseRent.period();
+        for (Map.Entry<String, String> e : houseOwners.owned().entrySet()) {
+            pl.fawizja.pixel.house.House h = houses.get(e.getKey());
+            if (h == null || find(e.getValue()) != null) continue;
+            long until = houseOwners.rentPaidUntil(h.id());
+            int missed = houseOwners.rentMissed(h.id());
+            if (until <= 0) {                                  // dom kupiony przed czynszem: okres rusza teraz
+                savedHouseOwners.setRent(h.id(), wall + period, 0);
+                continue;
+            }
+            if (wall < until && missed == 0) continue;
+            PlayerCharacter pc;
+            try {
+                pc = load(e.getValue());
+            } catch (IllegalArgumentException ex) {
+                continue;                                      // uszkodzony zapis: nie ruszamy domu
+            }
+            if (pc == null) {                                  // postac usunieta: dom wraca do miasta
+                savedHouseOwners.release(h.id());
+                continue;
+            }
+            pl.fawizja.pixel.house.HouseRent.Result r = pl.fawizja.pixel.house.HouseRent.settle(until, missed, wall, period,
+                    pl.fawizja.pixel.house.HouseRent.rent(h), pc.bank());
+            boolean write = r.charged() > 0;
+            if (r.evicted()) {
+                pl.fawizja.pixel.house.HouseRent.moveBelongings(h, world.crates(), ground, pc.depot(), pc.bank(), items);
+                savedHouseOwners.release(h.id());
+                if (h.id().equals(pc.house())) pc.setHouse(null);
+                write = true;
+                LOG.info("house " + h.id() + " returned to town: rent unpaid by " + e.getValue());
+            } else if (r.changed(until, missed)) {
+                savedHouseOwners.setRent(h.id(), r.paidUntil(), r.missed());
+            }
+            if (write) {
+                try {
+                    saves.write("player_" + e.getValue().toLowerCase(java.util.Locale.ROOT), codec.encode(pc));
+                } catch (IOException ex) {
+                    LOG.warning("rent: save of " + e.getValue() + " failed: " + ex.getMessage());
+                }
+            }
+        }
+    }
+
     /**
      * HOUSE INFO | GUEST imie | UNGUEST imie | SELL imie cena | ACCEPT | CANCEL: goscie domu i sprzedaz domu
      * innemu graczowi (kupujacy placi z banku, sprzedajacy dostaje zloto na konto, takze gdy jest offline).
@@ -800,6 +892,30 @@ final class ServerWorld {
         GameSession s = p.session;
         String own = s.character().house();
         switch (f[1]) {
+            case "DOOR": {                                   // okno domu przy drzwiach: stan z serwera
+                pl.fawizja.pixel.house.House h = f.length < 3 ? null : houses.get(f[2]);
+                if (h != null) p.client.send(s.houseView(h).toMessage());
+                break;
+            }
+            case "BUY": {
+                pl.fawizja.pixel.house.House h = f.length < 3 ? null : houses.get(f[2]);
+                if (h == null) return;
+                if (s.buyHouseAtDoor(h.id(), now)) {
+                    save(p);
+                    LOG.info("house " + h.id() + " bought by " + p.name());
+                }
+                p.client.send(s.houseView(h).toMessage());
+                break;
+            }
+            case "LEAVE": {
+                pl.fawizja.pixel.house.House h = houses.get(own);
+                if (h != null && s.leaveHouseAtDoor(now)) {
+                    save(p);
+                    LOG.info("house " + h.id() + " left by " + p.name());
+                }
+                if (h != null) p.client.send(s.houseView(h).toMessage());
+                break;
+            }
             case "INFO": {
                 info(p, s.houseInfo(), now);
                 HouseOffer o = houseOffers.get(p.name().toLowerCase(java.util.Locale.ROOT));
@@ -816,11 +932,14 @@ final class ServerWorld {
                     warn(p, "Nie ma takiej postaci.", now);
                     return;
                 }
-                if (s.addHouseGuest(name, now)) {
+                pl.fawizja.pixel.house.HouseAccess level = f.length > 3 && f[3].equalsIgnoreCase("entry")
+                        ? pl.fawizja.pixel.house.HouseAccess.ENTRY : pl.fawizja.pixel.house.HouseAccess.FULL;
+                if (s.addHouseGuest(name, level, now)) {
                     ServerPlayer g = find(name);
                     if (g != null) g.session.log().add(now, EventLog.Kind.SYSTEM,
-                            p.name() + " wpuszcza cię do domu " + houses.get(own).name() + ".");
+                            p.name() + " wpuszcza cię do domu " + houses.get(own).name() + " (" + level.label() + ").");
                 }
+                if (houses.get(own) != null) p.client.send(s.houseView(houses.get(own)).toMessage());
                 break;
             }
             case "UNGUEST": {
@@ -829,6 +948,7 @@ final class ServerWorld {
                     ServerPlayer g = find(f[2].trim());
                     if (g != null) g.session.checkHouseAccess();
                 }
+                if (houses.get(own) != null) p.client.send(s.houseView(houses.get(own)).toMessage());
                 break;
             }
             case "SELL": {
@@ -1632,6 +1752,7 @@ final class ServerWorld {
         GameSession s = new GameSession(items, world, pc, monsters, ground, new Random(rng.nextLong()),
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
+        s.setWallClock(() -> wallClock.getAsLong());
         s.setHouses(houses, savedHouseOwners);
         s.setChests(chests);
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
@@ -1674,6 +1795,7 @@ final class ServerWorld {
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         sendCrates(client);
+        sendHouseAccess(p);
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
         tellFriends(p, "jest teraz w grze.", lastNow);
         List<String> on = new ArrayList<>();
@@ -2605,6 +2727,18 @@ final class ServerWorld {
             weeklyRollover(now);
         }
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
+        long wall = wallClock.getAsLong();
+        if (wall - rentSweptMs >= RENT_SWEEP_MS || wall < rentSweptMs) {
+            rentSweptMs = wall;
+            sweepHouseRent(now);
+        }
+        if (housesDirty) {
+            housesDirty = false;
+            for (ServerPlayer p : players.values()) {
+                p.session.checkHouseAccess();          // wyrzuceni goscie i dawni wlasciciele wychodza przez drzwi
+                sendHouseAccess(p);
+            }
+        }
         updateInvasion(now);
         updateDuels(now);
         updateShutdown(now);

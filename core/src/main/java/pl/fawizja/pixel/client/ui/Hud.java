@@ -78,6 +78,211 @@ public final class Hud {
     private String infoTitle;
     private List<String[]> infoRows = new ArrayList<>();
 
+    // ------------------------------------------------------------------ okno domu przy drzwiach
+
+    /** Okno domu (informacja, okno wlasciciela) albo null. Lezy nad wszystkimi oknami, jak okienko w Tibii. */
+    private HouseWindow houseWin;
+    private float hwX, hwY, hwW, hwH, hwFieldY;
+    private static final float HW_TITLE = 28, HW_LINE = 18, HW_GUEST = 24, HW_BTN = 26, HW_GAP = 6;
+
+    /** Otwiera okno domu: informacja (wolny/zajety, cena, czynsz, Kup) albo okno wlasciciela. */
+    public void openHouse(pl.fawizja.pixel.house.House house, pl.fawizja.pixel.house.HouseView view, boolean ownerWindow) {
+        if (house == null || view == null || trade != null) return;
+        houseWin = new HouseWindow(house, view, ownerWindow && view.access() == pl.fawizja.pixel.house.HouseAccess.OWNER);
+        bagOpen = false;
+    }
+
+    /** Nowy stan domu (po kupnie, zaproszeniu, odpowiedzi serwera) dla otwartego okna tego domu. */
+    public void updateHouse(pl.fawizja.pixel.house.HouseView view) {
+        if (houseWin == null || view == null || !houseWin.house.id().equals(view.houseId())) return;
+        houseWin.view = view;
+        if (view.access() != pl.fawizja.pixel.house.HouseAccess.OWNER && houseWin.mode != HouseWindow.Mode.INFO) {
+            houseWin.mode = HouseWindow.Mode.INFO;             // dom sprzedany albo odebrany: zwykla informacja
+        }
+    }
+
+    public boolean houseOpen() { return houseWin != null; }
+
+    /** Id domu w otwartym oknie albo null. */
+    public String houseOpenId() { return houseWin == null ? null : houseWin.house.id(); }
+
+    /** Okno czeka na imie goscia (klawiatura idzie do pola). */
+    public boolean houseTyping() { return houseWin != null && houseWin.mode == HouseWindow.Mode.INVITE; }
+
+    public void houseType(char c) { if (houseWin != null) houseWin.type(c); }
+
+    /** Podglad (zrzuty): przycisk okna bez akcji gry i wpisane imie. */
+    public void previewHouse(String button, String typed) {
+        if (houseWin == null) return;
+        if (button != null) houseWin.press(button);
+        if (typed != null) for (char c : typed.toCharArray()) houseWin.type(c);
+    }
+
+    /** Enter w polu imienia: zaproszenie. */
+    public void houseSubmit(Actions actions) { houseButton("house:invitesend", actions); }
+
+    public void closeHouse() { houseWin = null; }
+
+    private void houseButton(String id, Actions actions) {
+        if (houseWin == null) return;
+        String out = houseWin.press(id);
+        if (out == null) {
+            if (houseTyping() && Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android) askHouseName();
+            return;
+        }
+        if (out.equals("house:close")) {
+            houseWin = null;
+            return;
+        }
+        actions.onButton(out);
+    }
+
+    /** Telefon: imie goscia z systemowej klawiatury. */
+    private void askHouseName() {
+        final HouseWindow win = houseWin;
+        Gdx.input.getTextInput(new com.badlogic.gdx.Input.TextInputListener() {
+            @Override
+            public void input(String text) {
+                win.name.setLength(0);
+                for (char c : (text == null ? "" : text).toCharArray()) win.type(c);
+            }
+
+            @Override
+            public void canceled() { }
+        }, win.inviteLevel == pl.fawizja.pixel.house.HouseAccess.FULL ? "Zaproś (pełny dostęp)" : "Zaproś (wejście)",
+                win.name.toString(), "Imię postaci");
+    }
+
+    /** Wymiary okna z liczby wierszy (przyciski po dwa w rzedzie, "Usuń" przy gosciach). */
+    private void layoutHouse() {
+        HouseWindow win = houseWin;
+        int big = 0;
+        for (HouseWindow.Button b : win.buttons()) if (!b.inline) big++;
+        int btnRows = (big + 1) / 2;
+        boolean field = win.mode == HouseWindow.Mode.INVITE;
+        hwW = Math.min(w - 32, 400);
+        hwH = HW_TITLE + 10 + win.lines().size() * HW_LINE + win.guestRows().size() * HW_GUEST + (field ? HW_BTN + 8 : 0)
+                + btnRows * (HW_BTN + HW_GAP) + 12;
+        hwX = (w - hwW) / 2f;
+        hwY = Math.max(8, (h - hwH) / 2f);
+        hwFieldY = hwY + hwH - HW_TITLE - 10 - win.lines().size() * HW_LINE - HW_BTN - 4;
+    }
+
+    /** Polozenie przyciskow (po layoutHouse). */
+    private List<HouseWindow.Button> houseButtons() {
+        HouseWindow win = houseWin;
+        List<HouseWindow.Button> btns = win.buttons();
+        int big = 0;
+        for (HouseWindow.Button b : btns) if (!b.inline) big++;
+        boolean field = win.mode == HouseWindow.Mode.INVITE;
+        float y = hwY + hwH - HW_TITLE - 10 - win.lines().size() * HW_LINE;
+        float bw = (hwW - 30 - HW_GAP) / 2f;
+        float top = y - win.guestRows().size() * HW_GUEST - (field ? HW_BTN + 8 : 0) - 6;
+        int gi = 0, bi = 0;
+        for (HouseWindow.Button b : btns) {
+            if (b.inline) {
+                b.w = 64;
+                b.h = HW_GUEST - 4;
+                b.x = hwX + hwW - 15 - b.w;
+                b.y = y - (gi + 1) * HW_GUEST + 2;
+                gi++;
+            } else {
+                boolean lastAlone = bi == big - 1 && big % 2 == 1;
+                b.w = lastAlone ? hwW - 30 : bw;
+                b.h = HW_BTN;
+                b.x = hwX + 15 + (lastAlone ? 0 : (bi % 2) * (bw + HW_GAP));
+                b.y = top - (bi / 2 + 1) * (HW_BTN + HW_GAP) + HW_GAP;
+                bi++;
+            }
+        }
+        return btns;
+    }
+
+    private void refreshHouse(GameSession session) {
+        PlayerCharacter pc = session.character();
+        houseWin.bank = pc.bank().balance();
+        houseWin.hasHouse = pc.house() != null;
+        houseWin.doorOpen = session.world().openings().isOpen(houseWin.house.door());
+    }
+
+    private void drawHouseShapes(ShapeRenderer shapes, GameSession session) {
+        refreshHouse(session);
+        layoutHouse();
+        if (!wstPanel(shapes, "wood", hwX, hwY, hwW, hwH, 24)) window(shapes, hwX, hwY, hwW, hwH, true);
+        if (houseWin.mode == HouseWindow.Mode.INVITE) {
+            shapes.setColor(0.05f, 0.05f, 0.04f, 0.95f);
+            shapes.rect(hwX + 15, hwFieldY, hwW - 30, HW_BTN);
+            shapes.setColor(BORDER);
+            shapes.rect(hwX + 15, hwFieldY, hwW - 30, 1);
+            shapes.rect(hwX + 15, hwFieldY + HW_BTN - 1, hwW - 30, 1);
+        }
+        for (HouseWindow.Button b : houseButtons()) {
+            boolean buy = b.id.startsWith("house:buy:") || b.id.equals("house:invitesend");
+            boolean danger = b.id.equals("house:leave") || b.id.equals("house:leaveask") || b.inline;
+            if (!b.enabled) shapes.setColor(0.2f, 0.18f, 0.18f, 1f);
+            else if (buy) shapes.setColor(0.2f, 0.42f, 0.22f, 1f);
+            else if (danger) shapes.setColor(0.45f, 0.18f, 0.14f, 1f);
+            else shapes.setColor(0.22f, 0.3f, 0.25f, 1f);
+            shapes.rect(b.x, b.y, b.w, b.h);
+            shapes.setColor(BORDER);
+            shapes.rect(b.x, b.y, b.w, 1);
+            shapes.rect(b.x, b.y + b.h - 1, b.w, 1);
+        }
+    }
+
+    private void drawHouseText(SpriteBatch batch) {
+        HouseWindow win = houseWin;
+        layoutHouse();
+        font.setColor(new Color(1f, 0.92f, 0.7f, 1f));
+        text(batch, win.title(), hwX + 12, hwY + hwH - 9);
+        font.getData().setScale(0.85f);
+        float y = hwY + hwH - HW_TITLE - 12;
+        for (String line : win.lines()) {
+            boolean warn = line.startsWith("Zaległe") || line.contains("za mało") || line.startsWith("Masz już");
+            font.setColor(warn ? new Color(1f, 0.55f, 0.45f, 1f) : line.startsWith("Stan: wolny") ? new Color(0.6f, 1f, 0.6f, 1f) : Color.WHITE);
+            text(batch, line, hwX + 15, y);
+            y -= HW_LINE;
+        }
+        float gy0 = hwY + hwH - HW_TITLE - 10 - win.lines().size() * HW_LINE;
+        int gi = 0;
+        for (String[] g : win.guestRows()) {
+            font.setColor(Color.WHITE);
+            text(batch, g[0], hwX + 22, gy0 - gi * HW_GUEST - 6);
+            font.setColor(new Color(0.8f, 0.85f, 0.7f, 1f));
+            text(batch, g[1], hwX + 22 + Math.min(150, hwW * 0.4f), gy0 - gi * HW_GUEST - 6);
+            gi++;
+        }
+        font.setColor(Color.WHITE);
+        if (win.mode == HouseWindow.Mode.INVITE) {
+            boolean caret = (com.badlogic.gdx.utils.TimeUtils.millis() / 500) % 2 == 0;
+            text(batch, win.name + (caret ? "_" : ""), hwX + 22, hwFieldY + HW_BTN - 7);
+        }
+        for (HouseWindow.Button b : houseButtons()) {
+            font.setColor(b.enabled ? Color.WHITE : Color.GRAY);
+            centered(batch, b.label, b.x + b.w / 2f, b.y + b.h / 2f);
+        }
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+    }
+
+    /** Dotkniecie przy otwartym oknie domu: przyciski, pole imienia; poza oknem zamyka je. */
+    private boolean houseTouch(float px, float py, Actions actions) {
+        layoutHouse();
+        for (HouseWindow.Button b : houseButtons()) {
+            if (px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) {
+                if (b.enabled) houseButton(b.id, actions);
+                return true;
+            }
+        }
+        if (houseWin.mode == HouseWindow.Mode.INVITE && py >= hwFieldY && py <= hwFieldY + HW_BTN
+                && Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android) {
+            askHouseName();
+            return true;
+        }
+        if (px < hwX || px > hwX + hwW || py < hwY || py > hwY + hwH) houseWin = null;
+        return true;
+    }
+
     public void openInfo(String title, List<String[]> rows) {
         if (trade != null) return;
         achievementsView = false; // openAchievements nie zamknie wtedy okna
@@ -718,6 +923,11 @@ public final class Hud {
     }
     /** Klawisz Wstecz / Esc: zamyka okno na wierzchu; false, gdy nic nie bylo otwarte (handel zamyka sie przyciskiem). */
     public boolean closeTop(GameSession session) {
+        if (houseWin != null) {
+            if (houseWin.mode == HouseWindow.Mode.INVITE || houseWin.mode == HouseWindow.Mode.CONFIRM_LEAVE) houseWin.press("house:back");
+            else houseWin = null;
+            return true;
+        }
         if (trade != null) return true;
         if (bigMapOpen) {
             toggleMap();
@@ -1849,6 +2059,7 @@ public final class Hud {
     /** Zwraca true, jesli dotyk zostal obsluzony przez interfejs. */
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
+        if (houseWin != null) return houseTouch(p.x, p.y, actions);
         if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
         if (statusTouch(p.x, p.y, session)) return true;
         if (equipPanelTouch(p.x, p.y, session, actions)) return true;
@@ -2303,6 +2514,7 @@ public final class Hud {
                 }
             }
         }
+        if (houseWin != null) drawHouseShapes(shapes, session);
         shapes.end();
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
@@ -2438,6 +2650,7 @@ public final class Hud {
                 font.getData().setScale(1f);
             }
         }
+        if (houseWin != null) drawHouseText(batch);
         batch.end();
     }
 

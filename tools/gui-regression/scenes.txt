@@ -67,3 +67,7 @@ island_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=94
 chattabs|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=chattabs
 chattabs_trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=chattabs -Dpixel.conTab=2
 chattabs_phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2 -Dpixel.teleport=498,503,0 -Dpixel.open=chattabs -Dpixel.conTab=4
+# 2026-10-28: okno domu przy drzwiach (wolny z Kup, zajety, okno wlasciciela z goscmi)
+house_free|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_free
+house_owned|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_owned
+house_owner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_owner

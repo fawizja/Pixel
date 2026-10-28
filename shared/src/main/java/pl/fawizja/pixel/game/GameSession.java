@@ -614,41 +614,29 @@ public final class GameSession {
     // ------------------------------------------------------------------ domy
 
     private pl.fawizja.pixel.house.HouseRegistry houses = pl.fawizja.pixel.house.HouseRegistry.empty();
-    private pl.fawizja.pixel.house.HouseOwners houseOwners = new pl.fawizja.pixel.house.HouseOwners() {
-        @Override
-        public String ownerOf(String id) { return id.equals(pc.house()) ? pc.name() : null; }
+    /** Offline i klient online: wlasciciel to ta postac; serwer podaje wspolna liste (setHouses). */
+    private pl.fawizja.pixel.house.HouseOwners houseOwners;
+    /** Czas rzeczywisty (ms od 1970) do czynszu; testy i serwer podaja wlasny zegar. */
+    private java.util.function.LongSupplier wallClock = System::currentTimeMillis;
+    private long rentCheckedMs = Long.MIN_VALUE / 2;
+    private boolean rentLowWarned;
+    /** Co ile ms czasu gry sprawdzac czynsz. */
+    static final long RENT_CHECK_MS = 60_000;
 
-        @Override
-        public boolean claim(String id, String owner) { return ownerOf(id) == null; }
+    public void setWallClock(java.util.function.LongSupplier clock) {
+        wallClock = clock == null ? System::currentTimeMillis : clock;
+    }
 
-        @Override
-        public void release(String id) { guestList.clear(); }
-
-        /** Offline nie ma innych graczy, ale lista dziala tak samo (do testow i podgladu). */
-        private final java.util.List<String> guestList = new java.util.ArrayList<>();
-
-        @Override
-        public java.util.List<String> guests(String id) { return id.equals(pc.house()) ? java.util.List.copyOf(guestList) : java.util.List.of(); }
-
-        @Override
-        public boolean addGuest(String id, String name) {
-            if (!id.equals(pc.house()) || name == null || name.isBlank() || name.equals(pc.name())) return false;
-            for (String g : guestList) if (g.equalsIgnoreCase(name)) return false;
-            if (guestList.size() >= MAX_GUESTS) return false;
-            return guestList.add(name.trim());
-        }
-
-        @Override
-        public boolean removeGuest(String id, String name) {
-            return id.equals(pc.house()) && guestList.removeIf(g -> g.equalsIgnoreCase(name == null ? "" : name.trim()));
-        }
-    };
+    private pl.fawizja.pixel.house.HouseOwners owners() {
+        if (houseOwners == null) houseOwners = new pl.fawizja.pixel.house.CharacterHouseOwners(pc);
+        return houseOwners;
+    }
 
     /** Domy swiata i ich wlasciciele (serwer podaje wspolna liste; offline wlascicielem jest tylko ta postac). */
     public void setHouses(pl.fawizja.pixel.house.HouseRegistry houses, pl.fawizja.pixel.house.HouseOwners owners) {
         this.houses = java.util.Objects.requireNonNull(houses);
         if (owners != null) this.houseOwners = owners;
-        if (pc.house() != null && (houses.get(pc.house()) == null || !pc.name().equals(houseOwners.ownerOf(pc.house())))) {
+        if (pc.house() != null && (houses.get(pc.house()) == null || !pc.name().equals(owners().ownerOf(pc.house())))) {
             pc.setHouse(null);                                   // dom zniknal z mapy albo zostal odebrany
         }
         leaveForeignHouse();
@@ -656,35 +644,95 @@ public final class GameSession {
 
     public pl.fawizja.pixel.house.HouseRegistry houses() { return houses; }
 
-    public String houseOwner(pl.fawizja.pixel.house.House h) { return houseOwners.ownerOf(h.id()); }
+    public String houseOwner(pl.fawizja.pixel.house.House h) { return owners().ownerOf(h.id()); }
 
-    public java.util.List<String> houseGuests(pl.fawizja.pixel.house.House h) { return houseOwners.guests(h.id()); }
+    public java.util.List<String> houseGuests(pl.fawizja.pixel.house.House h) { return owners().guests(h.id()); }
 
-    /** Wlasciciel wpuszcza goscia do domu (wejdzie do srodka i otworzy skrzynie). */
+    /** Klient online: cudze domy, do ktorych serwer wpuszcza te postac (id -> poziom dostepu). */
+    public void setRemoteHouseAccess(java.util.Map<String, pl.fawizja.pixel.house.HouseAccess> access) {
+        if (owners() instanceof pl.fawizja.pixel.house.CharacterHouseOwners c) c.setRemoteAccess(access);
+    }
+
+    /** Dostep tej postaci do domu. */
+    public pl.fawizja.pixel.house.HouseAccess houseAccess(pl.fawizja.pixel.house.House h) {
+        return h == null ? pl.fawizja.pixel.house.HouseAccess.NONE : owners().access(h.id(), pc.name());
+    }
+
+    /** Czy postac moze ruszac rzeczy na polu (wyrzucac, podnosic, pchac, otwierac skrzynie). Poza domami zawsze. */
+    public boolean mayHandle(Position p) {
+        pl.fawizja.pixel.house.House h = houses.at(p);
+        return h == null || houseAccess(h).mayHandle();
+    }
+
+    /** Czy postac moze otworzyc albo zamknac drzwi lub okno (drzwi i okna domow: wlasciciel i pelny dostep). */
+    public boolean mayUseOpening(Position p) {
+        pl.fawizja.pixel.house.House h = houses.ofOpening(p);
+        return h == null || houseAccess(h).mayHandle();
+    }
+
+    /** Co robi dotkniecie drzwi wejsciowych domu. */
+    public enum DoorTap {
+        /** Otwiera albo zamyka (wlasciciel na zewnatrz, gosc z pelnym dostepem). */
+        TOGGLE,
+        /** Okno z informacja o domu: wolny czy zajety, cena, czynsz, przycisk Kup (wszyscy inni). */
+        INFO,
+        /** Okno wlasciciela stojacego w domu: zapros, goscie, opusc dom. */
+        OWNER_WINDOW
+    }
+
+    /** Dotkniecie pola p, gdy to drzwi wejsciowe domu; null, gdy to nie drzwi domu. */
+    public DoorTap houseDoorTap(Position p) {
+        pl.fawizja.pixel.house.House h = houses.byDoor(p);
+        if (h == null) return null;
+        pl.fawizja.pixel.house.HouseAccess a = houseAccess(h);
+        if (a == pl.fawizja.pixel.house.HouseAccess.OWNER) return h.contains(pc.position()) ? DoorTap.OWNER_WINDOW : DoorTap.TOGGLE;
+        return a == pl.fawizja.pixel.house.HouseAccess.FULL ? DoorTap.TOGGLE : DoorTap.INFO;
+    }
+
+    /** Stan domu do okna przy drzwiach (czynsz i goscie tylko dla wlasciciela). */
+    public pl.fawizja.pixel.house.HouseView houseView(pl.fawizja.pixel.house.House h) {
+        String owner = owners().ownerOf(h.id());
+        pl.fawizja.pixel.house.HouseAccess a = houseAccess(h);
+        boolean mine = a == pl.fawizja.pixel.house.HouseAccess.OWNER;
+        long until = mine ? owners().rentPaidUntil(h.id()) : 0;
+        return new pl.fawizja.pixel.house.HouseView(h.id(), owner, a, until > 0 ? Math.max(0, until - wallClock.getAsLong()) : -1,
+                mine ? owners().rentMissed(h.id()) : 0, mine ? owners().guestLevels(h.id()) : java.util.Map.of());
+    }
+
+    /** Wlasciciel wpuszcza goscia z pelnym dostepem. */
     public boolean addHouseGuest(String name, long nowMs) {
+        return addHouseGuest(name, pl.fawizja.pixel.house.HouseAccess.FULL, nowMs);
+    }
+
+    /** Wlasciciel wpuszcza goscia (pelny dostep albo samo wejscie) albo zmienia jego poziom. */
+    public boolean addHouseGuest(String name, pl.fawizja.pixel.house.HouseAccess level, long nowMs) {
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
         String who = name == null ? "" : name.trim();
         String msg = null;
+        pl.fawizja.pixel.house.HouseAccess now = h == null ? null : owners().guestAccess(h.id(), who);
         if (h == null) msg = "Nie masz domu.";
         else if (who.isEmpty()) msg = "Podaj imię: /dom wpuść Imię.";
         else if (who.equalsIgnoreCase(pc.name())) msg = "To twój dom.";
-        else if (houseOwners.mayEnter(h.id(), who)) msg = who + " już może wchodzić do domu.";
-        else if (houseOwners.guests(h.id()).size() >= pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS) {
+        else if (now == level) msg = who + " już ma " + level.label() + " do domu.";
+        else if (now == pl.fawizja.pixel.house.HouseAccess.NONE
+                && owners().guests(h.id()).size() >= pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS) {
             msg = "Dom może mieć najwyżej " + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + " gości.";
         }
-        if (msg == null && !houseOwners.addGuest(h.id(), who)) msg = "Nie udało się dodać gościa.";
+        if (msg == null && !owners().addGuest(h.id(), who, level)) msg = "Nie udało się dodać gościa.";
         if (msg != null) {
             log.add(nowMs, EventLog.Kind.WARNING, msg);
             return false;
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, who + " może teraz wchodzić do domu " + h.name() + " i korzystać ze skrzyń.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, level == pl.fawizja.pixel.house.HouseAccess.FULL
+                ? who + " może teraz wchodzić do domu " + h.name() + " i korzystać ze skrzyń, drzwi i przedmiotów (pełny dostęp)."
+                : who + " może teraz wchodzić do domu " + h.name() + " (tylko wejście: bez skrzyń, drzwi i przedmiotów).");
         return true;
     }
 
     /** Wlasciciel odbiera gosciowi wstep. */
     public boolean removeHouseGuest(String name, long nowMs) {
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
-        if (h == null || !houseOwners.removeGuest(h.id(), name)) {
+        if (h == null || !owners().removeGuest(h.id(), name)) {
             log.add(nowMs, EventLog.Kind.WARNING, h == null ? "Nie masz domu." : name + " nie jest gościem twojego domu.");
             return false;
         }
@@ -692,12 +740,18 @@ public final class GameSession {
         return true;
     }
 
-    /** Opis domu postaci: nazwa, miasto, goscie. */
+    /** Opis domu postaci: nazwa, miasto, czynsz, goscie. */
     public String houseInfo() {
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
-        if (h == null) return "Nie masz domu. Kupisz go u zarządcy domów w mieście (za złoto z banku).";
-        java.util.List<String> g = houseOwners.guests(h.id());
-        return String.format("Twój dom: %s (%s, %d pól, cena %,d gp). Goście: %s.", h.name(), h.town(), h.size(), h.price(),
+        if (h == null) return "Nie masz domu. Kupisz go przy drzwiach wolnego domu albo u zarządcy domów (za złoto z banku).";
+        java.util.List<String> g = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, pl.fawizja.pixel.house.HouseAccess> e : owners().guestLevels(h.id()).entrySet()) {
+            g.add(e.getKey() + (e.getValue() == pl.fawizja.pixel.house.HouseAccess.ENTRY ? " (wejście)" : " (pełny)"));
+        }
+        long until = owners().rentPaidUntil(h.id());
+        String due = until > 0 ? ", następna płatność za " + pl.fawizja.pixel.house.HouseRent.describeIn(until - wallClock.getAsLong()) : "";
+        return String.format("Twój dom: %s (%s, %d pól, cena %,d gp, czynsz %,d gp tygodniowo%s). Goście: %s.", h.name(), h.town(),
+                h.size(), h.price(), pl.fawizja.pixel.house.HouseRent.rent(h), due,
                 g.isEmpty() ? "nikt (/dom wpuść Imię)" : String.join(", ", g));
     }
 
@@ -720,7 +774,7 @@ public final class GameSession {
 
     public boolean mayEnter(Position p) {
         pl.fawizja.pixel.house.House h = houses.at(p);
-        return h == null || houseOwners.mayEnter(h.id(), pc.name());
+        return h == null || owners().mayEnter(h.id(), pc.name());
     }
 
     private void leaveForeignHouse() {
@@ -733,22 +787,43 @@ public final class GameSession {
         Npc n = talkTo(NpcRole.HOUSING, nowMs);
         if (n == null) return false;
         pl.fawizja.pixel.house.House h = houses.get(id);
+        if (h == null || !h.town().equalsIgnoreCase(n.town())) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Ten zarządca nie sprzedaje takiego domu.");
+            return false;
+        }
+        return claimHouse(h, nowMs);
+    }
+
+    /** Przy drzwiach wolnego domu (okno domu, przycisk Kup): kupno za zloto z banku. */
+    public boolean buyHouseAtDoor(String id, long nowMs) {
+        pl.fawizja.pixel.house.House h = houses.get(id);
+        if (h == null) return false;
+        if (pc.position().z() != h.z() || pc.position().distanceTo(h.door()) > 1) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do drzwi domu " + h.name() + ".");
+            return false;
+        }
+        return claimHouse(h, nowMs);
+    }
+
+    private boolean claimHouse(pl.fawizja.pixel.house.House h, long nowMs) {
         String msg = null;
-        if (h == null || !h.town().equalsIgnoreCase(n.town())) msg = "Ten zarządca nie sprzedaje takiego domu.";
-        else if (pc.house() != null) msg = "Masz już dom. Najpierw go opuść.";
-        else if (houseOwners.ownerOf(id) != null) msg = "Ten dom ma już właściciela.";
+        if (pc.house() != null) msg = "Masz już dom. Najpierw go opuść.";
+        else if (owners().ownerOf(h.id()) != null) msg = "Ten dom ma już właściciela.";
         else if (pc.bank().balance() < h.price()) msg = String.format("Dom kosztuje %,d gp, a na koncie masz %,d gp.", h.price(), pc.bank().balance());
         if (msg != null) {
             log.add(nowMs, EventLog.Kind.WARNING, msg);
             return false;
         }
-        if (!houseOwners.claim(id, pc.name())) {
+        if (!owners().claim(h.id(), pc.name())) {
             log.add(nowMs, EventLog.Kind.WARNING, "Ten dom ma już właściciela.");
             return false;
         }
         pc.bank().debit(h.price());
-        pc.setHouse(id);
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp z konta. Wejdziesz do niego ty i goście (/dom wpuść Imię).", h.name(), h.price()));
+        pc.setHouse(h.id());
+        owners().setRent(h.id(), wallClock.getAsLong() + pl.fawizja.pixel.house.HouseRent.period(), 0);   // pierwszy tydzien w cenie
+        rentLowWarned = false;
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp z konta. Czynsz %,d gp tygodniowo pobierany "
+                + "automatycznie z banku. Gości zaprosisz przy drzwiach od środka.", h.name(), h.price(), pl.fawizja.pixel.house.HouseRent.rent(h)));
         return true;
     }
 
@@ -763,13 +838,86 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, "Nie masz domu.");
             return false;
         }
-        houseOwners.release(h.id());
+        return abandonHouse(h, nowMs);
+    }
+
+    /** Okno wlasciciela przy drzwiach: "Opusc dom" - jak sprzedaz miastu u zarzadcy. */
+    public boolean leaveHouseAtDoor(long nowMs) {
+        pl.fawizja.pixel.house.House h = houses.get(pc.house());
+        if (h == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz domu.");
+            return false;
+        }
+        if (!h.contains(pc.position()) && (pc.position().z() != h.z() || pc.position().distanceTo(h.door()) > 1)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do drzwi swojego domu.");
+            return false;
+        }
+        return abandonHouse(h, nowMs);
+    }
+
+    private boolean abandonHouse(pl.fawizja.pixel.house.House h, long nowMs) {
+        int moved = vacate(h, pc);
+        owners().release(h.id());
         pc.setHouse(null);
         leaveForeignHouse();
         long refund = h.price() * HOUSE_SELLBACK_PERCENT / 100;
         pc.bank().credit(refund);
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Sprzedano dom %s miastu za %,d gp (na konto).", h.name(), refund));
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Sprzedano dom %s miastu za %,d gp (na konto).", h.name(), refund)
+                + (moved > 0 ? " Rzeczy z domu (" + moved + ") są w depozycie u bankiera." : ""));
         return true;
+    }
+
+    /** Rzeczy ze skrzyn i podlogi domu do depozytu wlasciciela. */
+    private int vacate(pl.fawizja.pixel.house.House h, PlayerCharacter owner) {
+        if (openCrate != null && h.contains(openCrate)) openCrate = null;
+        int moved = pl.fawizja.pixel.house.HouseRent.moveBelongings(h, world.crates(), ground, owner.depot(), owner.bank(), items);
+        crateWindows.clear();
+        if (moved > 0 && !sharedWorld) pc.setCrates(world.crates().encode());
+        return moved;
+    }
+
+    /**
+     * Czynsz za dom (co tydzien czasu rzeczywistego, z konta): pobranie, ostrzezenie przy braku zlota, po dwoch
+     * nieoplaconych platnosciach dom wraca do miasta, a rzeczy z niego ida do depozytu. Wolane co minute w update().
+     */
+    public void checkHouseRent(long nowMs) {
+        pl.fawizja.pixel.house.House h = houses.get(pc.house());
+        if (h == null || !pc.name().equals(owners().ownerOf(h.id()))) return;
+        long now = wallClock.getAsLong();
+        long until = owners().rentPaidUntil(h.id());
+        int missed = owners().rentMissed(h.id());
+        long rent = pl.fawizja.pixel.house.HouseRent.rent(h);
+        pl.fawizja.pixel.house.HouseRent.Result r = until > 0 && now < until && missed == 0 ? null
+                : pl.fawizja.pixel.house.HouseRent.settle(until, missed, now, pl.fawizja.pixel.house.HouseRent.period(), rent, pc.bank());
+        if (r != null && r.evicted()) {
+            int moved = vacate(h, pc);
+            owners().release(h.id());
+            pc.setHouse(null);
+            leaveForeignHouse();
+            log.add(nowMs, EventLog.Kind.WARNING, "Czynsz za dom " + h.name() + " nie był płacony " + pl.fawizja.pixel.house.HouseRent.MAX_MISSED
+                    + " razy - dom wrócił do miasta." + (moved > 0 ? " Rzeczy z domu (" + moved + ") są w depozycie u bankiera." : ""));
+            return;
+        }
+        if (r != null) {
+            if (r.changed(until, missed)) owners().setRent(h.id(), r.paidUntil(), r.missed());
+            if (r.charged() > 0) {
+                log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Pobrano czynsz za dom %s: %,d gp z konta. Saldo: %,d gp.",
+                        h.name(), r.charged(), pc.bank().balance()));
+            }
+            if (r.newlyMissed() > 0) {
+                log.add(nowMs, EventLog.Kind.WARNING, String.format("Brak złota na czynsz za dom %s (%,d gp, na koncie %,d gp)! Wpłać złoto do "
+                        + "banku - kolejna nieopłacona płatność i dom wróci do miasta, a rzeczy trafią do depozytu.", h.name(),
+                        rent * (r.missed() + 1), pc.bank().balance()));
+                rentLowWarned = true;
+            }
+        }
+        if (pc.bank().balance() >= rent * (owners().rentMissed(h.id()) + 1)) {
+            rentLowWarned = false;
+        } else if (!rentLowWarned) {
+            rentLowWarned = true;
+            log.add(nowMs, EventLog.Kind.WARNING, String.format("Na koncie masz %,d gp, a czynsz za dom %s to %,d gp (termin za %s). Wpłać złoto do banku.",
+                    pc.bank().balance(), h.name(), rent, pl.fawizja.pixel.house.HouseRent.describeIn(owners().rentPaidUntil(h.id()) - now)));
+        }
     }
 
     private Npc talkTo(NpcRole role, long nowMs) {
@@ -1667,6 +1815,10 @@ public final class GameSession {
         if (nowMs - tipsCheckedMs >= 1000 || nowMs < tipsCheckedMs) checkTips(nowMs);
         if (nowMs - suppliesCheckedMs >= 500 || nowMs < suppliesCheckedMs) checkSupplies(nowMs);
         if (nowMs - bossesCheckedMs >= BossWatch.CHECK_MS || nowMs < bossesCheckedMs) checkBosses(nowMs);
+        if (nowMs - rentCheckedMs >= RENT_CHECK_MS || nowMs < rentCheckedMs) {
+            rentCheckedMs = nowMs;
+            checkHouseRent(nowMs);
+        }
         updateRecall(nowMs);
         updateTraining(nowMs);
         updateChallenge(nowMs);
@@ -1914,8 +2066,9 @@ public final class GameSession {
      */
     public boolean useCrate(Position p, long nowMs) {
         if (p.z() != pc.position().z() || pc.position().distanceTo(p) > 1 || !world.crates().isStorage(p)) return false;
-        if (!mayEnter(p)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "To schowek w cudzym domu.");
+        if (!mayHandle(p)) {
+            log.add(nowMs, EventLog.Kind.WARNING, mayEnter(p) ? "Masz w tym domu tylko wstęp - schowków nie otworzysz."
+                    : "To schowek w cudzym domu.");
             return true;
         }
         String key = objectKey(p);
@@ -1935,7 +2088,7 @@ public final class GameSession {
     /** Klient online: okno skrzyni otwiera sie od razu, serwer otwiera ja u siebie i odsyla zawartosc. */
     public void toggleCrateView(Position p) {
         if (p.equals(openCrate)) openCrate = null;
-        else if (world.crates().isStorage(p) && mayEnter(p)) openCrate = p;
+        else if (world.crates().isStorage(p) && mayHandle(p)) openCrate = p;
     }
 
     /** UZYJ obok skrzyni (najpierw ta, w ktora postac patrzy). */
@@ -1999,7 +2152,7 @@ public final class GameSession {
     }
 
     private pl.fawizja.pixel.inventory.Container openCrateContainer(long nowMs) {
-        if (crateNearby() == null || !mayEnter(openCrate)) {
+        if (crateNearby() == null || !mayHandle(openCrate)) {
             log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do skrzyni i otwórz ją.");
             return null;
         }
@@ -2016,6 +2169,13 @@ public final class GameSession {
         Position at = before.translate(d.dx, d.dy);
         pl.fawizja.pixel.world.Crates c = world.crates();
         if (d.diagonal() || chestAt(at) || !c.isMovable(at) || !mayEnter(at)) return false;
+        if (!mayHandle(at)) {
+            if (nowMs - lastPushNoteMs > 4000) {
+                lastPushNoteMs = nowMs;
+                log.add(nowMs, EventLog.Kind.INFO, "Masz w tym domu tylko wstęp - nie przesuniesz mebli.");
+            }
+            return false;
+        }
         java.util.function.Predicate<Position> blocked = q -> monsters.monsterAt(q) != null || npcs.at(q) != null
                 || dummies.at(q) || !mayEnter(q) || otherPlayers.test(q) || q.equals(pc.position())
                 || !java.util.Objects.equals(houses.at(q), houses.at(at));   // meble z domu nie wyjezdzaja na ulice
@@ -2119,6 +2279,13 @@ public final class GameSession {
         pl.fawizja.pixel.world.Openings o = world.openings();
         boolean door = o.isDoor(p);
         if (!door && !o.isWindow(p)) return false;
+        if (!mayUseOpening(p)) {
+            pl.fawizja.pixel.house.House h = houses.ofOpening(p);
+            log.add(nowMs, EventLog.Kind.WARNING, houseAccess(h) == pl.fawizja.pixel.house.HouseAccess.ENTRY
+                    ? "Masz w domu " + h.name() + " tylko wstęp - " + (door ? "drzwi" : "okna") + " otwiera właściciel albo gość z pełnym dostępem."
+                    : (door ? "To drzwi" : "To okno") + " domu " + h.name() + ". Otwiera je właściciel albo gość z pełnym dostępem.");
+            return true;
+        }
         if (door && o.isOpen(p) && (p.equals(me) || monsters != null && monsters.monsterAt(p) != null)) {
             log.add(nowMs, EventLog.Kind.INFO, "Ktoś stoi w drzwiach.");
             return true;
@@ -2214,6 +2381,10 @@ public final class GameSession {
             searchCorpse(nowMs);
             return;
         }
+        if (!mayHandle(p)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Masz w tym domu tylko wstęp - nie możesz tu podnosić przedmiotów.");
+            return;
+        }
         ItemStack top = ground.at(p).get(ground.at(p).size() - 1);
         InventoryResult r = ground.pickUp(p, ground.at(p).size() - 1, pc.backpack());
         if (r.ok()) {
@@ -2228,6 +2399,10 @@ public final class GameSession {
         if (s == null) return;
         if (pc.isKept(s.itemId())) {
             log.add(nowMs, EventLog.Kind.WARNING, items.get(s.itemId()).name() + " jest oznaczony jako zachowany. Najpierw go odblokuj.");
+            return;
+        }
+        if (!mayHandle(pc.position())) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Masz w tym domu tylko wstęp - nie możesz tu wyrzucać przedmiotów.");
             return;
         }
         if (s.itemId() == torchId && pc.isTorchLit() && pc.backpack().count(torchId) == 1) {

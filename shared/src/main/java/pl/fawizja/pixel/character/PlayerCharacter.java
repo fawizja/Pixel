@@ -137,6 +137,9 @@ public final class PlayerCharacter {
         pet = o.pet;
         title = o.title;
         house = o.house;
+        houseGuests = o.houseGuests;
+        rentPaidUntil = o.rentPaidUntil;
+        rentMissed = o.rentMissed;
         outfit = o.outfit;
         tips = o.tips;
         torchLit = o.torchLit;
@@ -283,6 +286,20 @@ public final class PlayerCharacter {
 
     public String house() { return house; }
     public void setHouse(String id) { house = id == null || id.isEmpty() || id.equals("-") ? null : id; }
+
+    /** Gra offline: goscie domu ("Imie:full,Imie:entry") i czynsz (oplacony do, ms od 1970; zalegle platnosci). */
+    private String houseGuests = "";
+    private long rentPaidUntil;
+    private int rentMissed;
+
+    public String houseGuests() { return houseGuests; }
+    public void setHouseGuests(String g) { houseGuests = g == null ? "" : g; }
+    public long rentPaidUntil() { return rentPaidUntil; }
+    public int rentMissed() { return rentMissed; }
+    public void setRent(long paidUntil, int missed) {
+        rentPaidUntil = Math.max(0, paidUntil);
+        rentMissed = Math.max(0, missed);
+    }
     public void setTitle(String key) { title = key == null || key.isEmpty() || key.equals("-") ? null : key; }
     public void setBlessed(boolean v) { blessed = v; }
 

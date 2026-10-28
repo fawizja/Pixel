@@ -84,6 +84,28 @@ public final class HouseRegistry {
         return out;
     }
 
+    /** Dom z drzwiami wejsciowymi na tym polu (albo null). */
+    public House byDoor(Position p) {
+        for (House h : byId.values()) if (h.door().equals(p)) return h;
+        return null;
+    }
+
+    /**
+     * Dom, do ktorego nalezy pole drzwi albo okna: drzwi wejsciowe, wnetrze albo mur przy wnetrzu (okna, drzwi
+     * wewnetrzne). Null, gdy pole nie nalezy do zadnego domu.
+     */
+    public House ofOpening(Position p) {
+        House h = byDoor(p);
+        if (h == null) h = at(p);
+        if (h != null) return h;
+        int[][] around = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        for (int[] d : around) {
+            House n = at(p.translate(d[0], d[1]));
+            if (n != null) return n;
+        }
+        return null;
+    }
+
     /** Dom, ktorego wnetrze obejmuje pole (albo null). */
     public House at(Position p) {
         for (House h : byId.values()) if (h.contains(p)) return h;
