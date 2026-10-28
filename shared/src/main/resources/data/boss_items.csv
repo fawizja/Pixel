@@ -4,7 +4,7 @@
 # przedmiot;bossowie (klucze z monsters.csv), ktorzy go upuszczaja (test sprawdza zgodnosc z loot.csv)
 grimtooth_crown;grimtooth
 frost_tiara;frost_queen
-pharaoh_scepter;pharaoh
+pharaoh_scepter;pharaoh,velmira
 magma_spear;ignaroth
 magma_bow;ignaroth
 rod_of_hoarfrost;ignaroth
@@ -26,8 +26,8 @@ stormcaller_wand;morvena
 rod_of_twilight;khazuul,morvena
 shadowpiercer;khazuul,pyrrax
 umbral_grips;khazuul,pyrrax
-umbral_blade;khazuul,pyrrax
-skull_axe;khazuul,pyrrax
+umbral_blade;khazuul,pyrrax,suweren
+skull_axe;khazuul,pyrrax,suweren
 shadow_bow;khazuul
 rod_of_eternal_winter;morgath
 starfall_wand;morgath
@@ -37,3 +37,5 @@ abyssal_greatsword;morgath
 abyss_hammer;morgath
 dawn_bow;morgath
 crown_of_the_abyss;morgath
+crow_feather_hood;wroniec
+mirewood_rod;szlamiara

@@ -217,6 +217,9 @@ TINTED_ROOFS = {"roof_sand": (184, (215, 180, 115)), "roof_sand_top": (183, (215
                 "roof_snow": (184, (240, 246, 252)), "roof_snow_top": (183, (240, 246, 252))}
 # Przedmioty bez wlasnego obrazka: najblizszy przedmiot z paczki, w razie potrzeby przebarwiony.
 MORE_ITEMS = {
+    # 2026-10-28: produkty nowych potworow i przedmioty tylko z nowych bossow
+    "black_feather": (2167, (70, 62, 85)), "worm_slime": 2169, "chitin_plate": 2171, "ectoplasm": (2223, (170, 235, 200)),
+    "gargoyle_shard": 2200, "crow_feather_hood": (1941, (80, 65, 110)), "mirewood_rod": 1901,
     # 2026-10-24: luki i kusze paladyna
     "short_bow": 1873, "hunting_bow": 1882, "crossbow": 1884, "elven_bow": 1883, "serpent_bow": 1871,
     "composite_bow": 1877, "heavy_crossbow": 1885, "magma_bow": 1887, "tidal_bow": (1878, (90, 170, 210)),
@@ -316,6 +319,16 @@ MONSTERS = {
     "mummy": (17, ((230, 220, 190), (220, 210, 180), (210, 200, 170), (200, 190, 160))),
     # 2026-10-24: wlasne stroje z paczki zamiast przebarwien (duch, krab, blady upior, skrzydlaty demon)
     "mist_wraith": (5, None), "coral_crab": (31, None), "morvena": (41, None), "morgath": (2, None),
+    # 2026-10-28: nowe potwory na stroje paczki, ktorych gra jeszcze nie uzywala (latarnik, akolita, czerwie,
+    # wirujace ostrze, iskra, granatowy gargulec, zielona i czerwona zjawa) oraz ludzie ze strojow z maska kolorow
+    "barrow_lantern": (4, None), "sand_devourer": (24, None), "blade_warden": (27, None), "spark_wisp": (28, None),
+    "rime_crawler": (30, None), "dusk_gargoyle": (38, None), "bog_wraith": (42, None), "crimson_shade": (43, None),
+    "striped_prowler": (11, None),
+    "candle_acolyte": (20, ((110, 70, 150), (70, 45, 100), (110, 40, 50), (40, 35, 40))),
+    "tunnel_fence": (21, ((190, 50, 45), (60, 85, 150), (80, 80, 85), (60, 45, 35))),
+    "snare_setter": (44, ((150, 110, 60), (85, 135, 60), (115, 90, 55), (75, 55, 35))),
+    "quarry_brute": (45, ((175, 175, 170), (200, 125, 60), (125, 105, 85), (85, 65, 45))),
+    "dune_zealot": (18, ((245, 235, 205), (250, 245, 225), (230, 195, 100), (160, 125, 70))),
 }
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
@@ -338,6 +351,16 @@ TINTED = {
     # 2026-10-23: orki z zajetych wiosek (paczka nie ma orkow - przebarwiony goblin, okultysta i jaszczuroczlek)
     "orc_warrior": (7, (120, 150, 70)), "orc_shaman": (10, (110, 160, 90)), "orc_berserker": (7, (180, 110, 70)),
     "orc_warlord": (46, (100, 130, 60)),
+    # 2026-10-28: odmiany strojow paczki dla nowych potworow (barwa wyraznie inna niz u potworow na tym samym stroju)
+    "burrow_larva": (29, (150, 120, 80)), "carrion_crow": (9, (95, 85, 105)), "cave_centipede": (13, (125, 110, 150)),
+    "frost_boar": (6, (230, 238, 250)), "swamp_hornet": (14, (170, 205, 70)), "gilded_beetle": (8, (235, 195, 80)),
+    "frost_centipede": (13, (170, 225, 255)), "stone_sentinel": (22, (165, 165, 155)), "sand_gargoyle": (39, (215, 185, 125)),
+    "ember_beetle": (8, (240, 105, 40)), "ash_magus": (15, (150, 145, 150)), "dune_drake": (25, (215, 175, 110)),
+    "storm_wisp": (28, (190, 215, 255)), "rime_gargoyle": (39, (195, 230, 255)), "shadow_centipede": (13, (95, 75, 125)),
+    "abyss_crawler": (31, (120, 55, 150)), "winged_spawn": (2, (135, 105, 185)), "obsidian_sentinel": (22, (70, 60, 90)),
+    # bossowie
+    "wroniec": (9, (60, 45, 85)), "szlamiara": (42, (70, 120, 55)), "velmira": (43, (165, 25, 45)),
+    "suweren": (27, (230, 190, 90)),
 }
 CHARACTERS = {
     "paladin": (19, None),

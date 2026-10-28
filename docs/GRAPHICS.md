@@ -47,23 +47,40 @@ Każda profesja w 4 kierunkach.
 
 | Plik | Co to jest | Jest |
 |---|---|---|
+| `monsters/abyss_crawler.png` | Czerw Otchłani, poziom 760 | tak |
 | `monsters/abyss_lord.png` | Pan Otchłani, poziom 950 | tak |
 | `monsters/abyssal_demon.png` | Demon Otchłani, poziom 800 | tak |
+| `monsters/ash_magus.png` | Mag Popiołu, poziom 360 | tak |
 | `monsters/bandit.png` | Bandyta, poziom 15 | tak |
+| `monsters/barrow_lantern.png` | Latarnik z kurhanu, poziom 38 | tak |
+| `monsters/blade_warden.png` | Wirujący strażnik, poziom 215 | tak |
 | `monsters/bloodbeard.png` | Kapitan Krwawa Broda, poziom 420, boss | tak |
 | `monsters/boar.png` | Dzik, poziom 10 | tak |
+| `monsters/bog_wraith.png` | Bagienna zjawa, poziom 80 | tak |
 | `monsters/bone_dragon.png` | Kościany smok, poziom 880 | tak |
+| `monsters/burrow_larva.png` | Ryjąca larwa, poziom 9 | tak |
+| `monsters/candle_acolyte.png` | Akolita Czarnej Świecy, poziom 30 | tak |
+| `monsters/carrion_crow.png` | Padlinożerna wrona, poziom 11 | tak |
+| `monsters/cave_centipede.png` | Jaskiniowa wij, poziom 16 | tak |
 | `monsters/cave_troll.png` | Troll jaskiniowy, poziom 32 | tak |
 | `monsters/coral_crab.png` | Krab koralowy, poziom 310 | tak |
+| `monsters/crimson_shade.png` | Krwawa zmora, poziom 265 | tak |
 | `monsters/crocodile.png` | Krokodyl, poziom 55 | tak |
 | `monsters/crystal_golem.png` | Kryształowy golem, poziom 45 | tak |
 | `monsters/cursed_treant.png` | Przeklęty drzewiec, poziom 240 | tak |
 | `monsters/drowned_sailor.png` | Topielec, poziom 330 | tak |
+| `monsters/dune_drake.png` | Wydmowy smok, poziom 410 | tak |
+| `monsters/dune_zealot.png` | Fanatyk Białego Słońca, poziom 125 | tak |
+| `monsters/dusk_gargoyle.png` | Zmierzchnik, poziom 620 | tak |
+| `monsters/ember_beetle.png` | Żarowy chrząszcz, poziom 335 | tak |
 | `monsters/fire_elemental.png` | Żywiołak ognia, poziom 320 | tak |
 | `monsters/forest_spider.png` | Pająk leśny, poziom 12 | tak |
+| `monsters/frost_boar.png` | Szroniasty odyniec, poziom 48 | tak |
+| `monsters/frost_centipede.png` | Lodowa wij, poziom 115 | tak |
 | `monsters/frost_giant.png` | Mroźny olbrzym, poziom 430 | tak |
 | `monsters/frost_queen.png` | Ysolde, Królowa Lodu, poziom 150, boss | tak |
 | `monsters/frost_witch.png` | Mroźna wiedźma, poziom 85 | tak |
+| `monsters/gilded_beetle.png` | Złotopancerz, poziom 105 | tak |
 | `monsters/goblin.png` | Goblin, poziom 12 | tak |
 | `monsters/goblin_shaman.png` | Goblin szaman, poziom 18 | tak |
 | `monsters/grimtooth.png` | Grimtooth, Król Kopalni, poziom 60, boss | tak |
@@ -81,6 +98,7 @@ Każda profesja w 4 kierunkach.
 | `monsters/morgath.png` | Mor'gath, Serce Otchłani, poziom 1000, boss | tak |
 | `monsters/morvena.png` | Morvena, Pani Mgieł, poziom 640, boss | tak |
 | `monsters/mummy.png` | Mumia, poziom 200 | tak |
+| `monsters/obsidian_sentinel.png` | Obsydianowy wartownik, poziom 930 | tak |
 | `monsters/orc_berserker.png` | Ork berserker, poziom 150 | tak |
 | `monsters/orc_shaman.png` | Orczy szaman, poziom 125 | tak |
 | `monsters/orc_warlord.png` | Gruzhak, Orczy Wódz, poziom 220 | tak |
@@ -89,19 +107,37 @@ Każda profesja w 4 kierunkach.
 | `monsters/pirate_cutthroat.png` | Pirat rzezimieszek, poziom 350 | tak |
 | `monsters/pirate_gunner.png` | Pirat kanonier, poziom 400 | tak |
 | `monsters/pyrrax.png` | Pyrrax, Serce Wulkanu, poziom 780, boss | tak |
+| `monsters/quarry_brute.png` | Łamacz kamieni, poziom 24 | tak |
+| `monsters/rime_crawler.png` | Szronowy czerw, poziom 98 | tak |
+| `monsters/rime_gargoyle.png` | Szronowy gargulec, poziom 500 | tak |
 | `monsters/ruin_colossus.png` | Kolos z ruin, poziom 200, boss | tak |
+| `monsters/sand_devourer.png` | Piaskowy pożeracz, poziom 64 | tak |
+| `monsters/sand_gargoyle.png` | Piaskowy gargulec, poziom 165 | tak |
 | `monsters/sand_titan.png` | Piaskowy tytan, poziom 650 | tak |
 | `monsters/sand_wraith.png` | Piaskowy upiór, poziom 130 | tak |
 | `monsters/scorpion.png` | Skorpion, poziom 60 | tak |
+| `monsters/shadow_centipede.png` | Cienista wij, poziom 680 | tak |
 | `monsters/shadow_stalker.png` | Łowca cieni, poziom 590 | tak |
 | `monsters/skaldra.png` | Skaldra, Lodowa Matka, poziom 540, boss | tak |
 | `monsters/skeleton.png` | Szkielet, poziom 22 | tak |
+| `monsters/snare_setter.png` | Sidlarz, poziom 14 | tak |
 | `monsters/snow_wolf.png` | Śnieżny wilk, poziom 40 | tak |
+| `monsters/spark_wisp.png` | Iskrzyk, poziom 26 | tak |
+| `monsters/stone_sentinel.png` | Kamienny wartownik, poziom 140 | tak |
 | `monsters/storm_harpy.png` | Harpia burzy, poziom 470 | tak |
+| `monsters/storm_wisp.png` | Burzowy ognik, poziom 445 | tak |
+| `monsters/striped_prowler.png` | Pręgowany skradacz, poziom 72 | tak |
+| `monsters/suweren.png` | Suweren Ostrzy, poziom 640, boss | tak |
+| `monsters/swamp_hornet.png` | Bagienny szerszeń, poziom 58 | tak |
+| `monsters/szlamiara.png` | Szlamiara, Matka Topieli, poziom 95, boss | tak |
 | `monsters/temple_guardian.png` | Strażnik świątyni, poziom 180 | tak |
+| `monsters/tunnel_fence.png` | Paser z tuneli, poziom 34 | tak |
+| `monsters/velmira.png` | Velmira, Szkarłatna Pani, poziom 290, boss | tak |
 | `monsters/void_priest.png` | Kapłan pustki, poziom 700 | tak |
+| `monsters/winged_spawn.png` | Skrzydlaty pomiot, poziom 860 | tak |
 | `monsters/wolf.png` | Wilk, poziom 8 | tak |
 | `monsters/wraith_knight.png` | Upiorny rycerz, poziom 280 | tak |
+| `monsters/wroniec.png` | Wroniec, Kruczy Kniaź, poziom 32, boss | tak |
 | `monsters/wyvern.png` | Wiwerna, poziom 300 | tak |
 | `monsters/wyvern_matriarch.png` | Matka Wiwern, poziom 360, boss | tak |
 | `monsters/yeti.png` | Yeti, poziom 70 | tak |
@@ -181,6 +217,7 @@ Każda profesja w 4 kierunkach.
 | `items/abyssal_ember.png` | Żar Otchłani (material) | tak |
 | `items/avalanche_rune.png` | Runa lawiny (rune) | tak |
 | `items/backpack.png` | Plecak (tool) | tak |
+| `items/black_feather.png` | Czarne pióro (material) | tak |
 | `items/blank_rune.png` | Pusta runa (rune) | tak |
 | `items/boar_tusk.png` | Kieł dzika (material) | tak |
 | `items/bone.png` | Kość (material) | tak |
@@ -188,6 +225,7 @@ Każda profesja w 4 kierunkach.
 | `items/boulder_rune.png` | Runa głazu (rune) | tak |
 | `items/bread.png` | Chleb (food) | tak |
 | `items/challenge_scroll.png` | Zwój wyzwania (tool) | tak |
+| `items/chitin_plate.png` | Płytka pancerza (material) | tak |
 | `items/cloth_wraps.png` | Płócienne owijki (weapon) | tak |
 | `items/colossus_core.png` | Rdzeń kolosa (material) | tak |
 | `items/coral_armor.png` | Koralowa zbroja (armor) | tak |
@@ -197,6 +235,7 @@ Każda profesja w 4 kierunkach.
 | `items/crab_pincer.png` | Szczypce kraba koralowego (material) | tak |
 | `items/croc_leather.png` | Skóra krokodyla (material) | tak |
 | `items/croc_legs.png` | Krokodyle spodnie (armor) | tak |
+| `items/crow_feather_hood.png` | Kaptur z kruczych piór (armor) | tak |
 | `items/crown_of_the_abyss.png` | Korona Otchłani (armor) | tak |
 | `items/crystal_coin.png` | Kryształowa moneta (currency) | tak |
 | `items/crystal_shard.png` | Odłamek kryształu (material) | tak |
@@ -204,6 +243,7 @@ Każda profesja w 4 kierunkach.
 | `items/desert_knuckles.png` | Pustynne kastety (weapon) | tak |
 | `items/drake_horn.png` | Róg magmowego smoka (material) | tak |
 | `items/drowned_ring.png` | Pierścień topielca (material) | tak |
+| `items/ectoplasm.png` | Ektoplazma (material) | tak |
 | `items/exp_scroll.png` | Zwój nauki (tool) | tak |
 | `items/fireburst_rune.png` | Runa wybuchu ognia (rune) | tak |
 | `items/fish.png` | Ryba (food) |  |
@@ -216,6 +256,7 @@ Każda profesja w 4 kierunkach.
 | `items/frostfang_spear.png` | Włócznia mroźnego kła (weapon) | tak |
 | `items/frozen_heart.png` | Zamarznięte serce (material) | tak |
 | `items/fur_armor.png` | Futrzana zbroja (armor) | tak |
+| `items/gargoyle_shard.png` | Odłamek gargulca (material) | tak |
 | `items/glacial_core.png` | Lodowy rdzeń (material) | tak |
 | `items/glacial_helm.png` | Lodowy hełm (armor) | tak |
 | `items/glacial_legs.png` | Lodowe nagolenniki (armor) | tak |
@@ -246,6 +287,7 @@ Każda profesja w 4 kierunkach.
 | `items/mana_potion.png` | Mikstura many (potion) | tak |
 | `items/meat.png` | Mięso (food) | tak |
 | `items/miner_helmet.png` | Hełm górnika (armor) | tak |
+| `items/mirewood_rod.png` | Laska z Topieli (weapon) | tak |
 | `items/mist_essence.png` | Esencja mgły (material) | tak |
 | `items/molten_knuckles.png` | Stopione kastety (weapon) | tak |
 | `items/mummy_wrap.png` | Bandaż mumii (material) | tak |
@@ -319,6 +361,7 @@ Każda profesja w 4 kierunkach.
 | `items/wolf_pelt.png` | Wilcze futro (material) | tak |
 | `items/wooden_shield.png` | Drewniana tarcza (shield) | tak |
 | `items/worm.png` | Robak (bait) | tak |
+| `items/worm_slime.png` | Śluz czerwia (material) | tak |
 | `items/wyvern_scale.png` | Łuska wiwerny (material) | tak |
 | `items/yeti_fur.png` | Sierść yeti (material) | tak |
 

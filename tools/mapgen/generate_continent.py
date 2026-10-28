@@ -1118,11 +1118,13 @@ def dungeon(ctx, name, entrance, levels, rng, surface_ground=None):
                  if g[y][x] is not None and F.walk(g[y][x]) and g[y][x][2] == NONE
                  and all(abs(x - px) + abs(y - py) > 5 for (px, py) in (pts[0], pts[-1]))]
         cells.sort()
-        for j, (monster, radius, count) in enumerate(spawns):
+        for j, spawn in enumerate(spawns):
+            monster, radius, count = spawn[:3]
+            respawn = spawn[3] if len(spawn) > 3 else 180   # bossowie jaskin: 3600 s
             pts_world = [(tx + px, ty + py) for (px, py) in pts[1:-1]] or [(tx + pts[-1][0], ty + pts[-1][1])]
             want = pts_world[j % len(pts_world)]
             sx, sy = min(cells, key=lambda c: abs(c[0] - want[0]) + abs(c[1] - want[1]) + (j * 13 % 5))
-            ctx['spawns'].append(f'{monster};{sx};{sy};{z};{radius};{count};180')
+            ctx['spawns'].append(f'{monster};{sx};{sy};{z};{radius};{count};{respawn}')
     ctx.setdefault('dungeons', []).append((name, tx, ty, tx + W - 1, ty + H - 1, -len(levels), -1))
     return tx, ty
 
@@ -1201,15 +1203,20 @@ def volcano(ctx, cost, rng):
         world.put(entry[0], yy, 0, ('ash', NONE, NONE, NONE))
     dungeon(ctx, 'Otchłań Wulkanu', entry, [
         (72, 56, [(6, 6), (24, 16), (50, 8), (64, 30), (40, 44), (18, 40)], 'fire', 0.06,
-         [('fire_elemental', 4, 3), ('lava_golem', 4, 2), ('fire_elemental', 4, 3), ('lava_golem', 3, 2)]),
+         [('fire_elemental', 4, 3), ('lava_golem', 4, 2), ('fire_elemental', 4, 3), ('lava_golem', 3, 2),
+          ('ember_beetle', 3, 2)]),
         (72, 56, [(18, 40), (8, 24), (26, 8), (48, 20), (64, 44), (40, 50)], 'fire', 0.08,
-         [('lava_golem', 4, 3), ('magma_drake', 3, 2), ('fire_elemental', 4, 3), ('magma_drake', 3, 1)]),
+         [('lava_golem', 4, 3), ('magma_drake', 3, 2), ('fire_elemental', 4, 3), ('magma_drake', 3, 1),
+          ('ash_magus', 3, 2)]),
         (72, 56, [(40, 50), (60, 36), (64, 10), (36, 14), (12, 22), (10, 46)], 'core', 0.1,
-         [('magma_drake', 4, 3), ('abyssal_demon', 3, 2), ('magma_drake', 4, 2), ('abyssal_demon', 3, 1)]),
+         [('magma_drake', 4, 3), ('abyssal_demon', 3, 2), ('magma_drake', 4, 2), ('abyssal_demon', 3, 1),
+          ('abyss_crawler', 3, 2)]),
         (72, 56, [(10, 46), (28, 34), (22, 10), (50, 6), (66, 26), (52, 48)], 'core', 0.1,
-         [('abyssal_demon', 4, 3), ('bone_dragon', 3, 2), ('abyssal_demon', 4, 2), ('bone_dragon', 3, 1)]),
+         [('abyssal_demon', 4, 3), ('bone_dragon', 3, 2), ('abyssal_demon', 4, 2), ('bone_dragon', 3, 1),
+          ('winged_spawn', 3, 2)]),
         (72, 56, [(52, 48), (30, 46), (10, 30), (30, 14), (56, 18)], 'core', 0.12,
-         [('abyss_lord', 4, 2), ('abyssal_demon', 4, 3), ('bone_dragon', 3, 2), ('abyss_lord', 3, 1)]),
+         [('abyss_lord', 4, 2), ('abyssal_demon', 4, 3), ('bone_dragon', 3, 2), ('abyss_lord', 3, 1),
+          ('obsidian_sentinel', 3, 1)]),
     ], rng, surface_ground='ash')
     ctx['regions_new'] = [('Szczyt Wulkanu', vx - 22, vy - 22, vx + 22, vy + 22, 1, 2, 340, 700)] + ctx['regions_new']
     _n, x0, y0, x1, y1, zl, zh = ctx['dungeons'][-1]
@@ -1221,16 +1228,26 @@ def volcano(ctx, cost, rng):
 # ------------------------------------------------------------------ krainy (regiony) i spawny wg klimatu
 # kraina: (poziom od, do, potwory dzienne [(klucz, waga)], potwory nocne)
 ZONES = {
+    # 2026-10-28: nowe potwory (wrona, klusownik, lamacz kamieni, iskrzyk, latarnik, odyniec, czerwie, szerszen,
+    # skradacz, zjawy, chrzaszcze, mag popiolu, ognik, gargulce, wije) w kazdej krainie
     'Krainy Varden': (8, 60, [('wolf', 3), ('boar', 3), ('forest_spider', 2), ('bandit', 2), ('goblin', 2),
-                              ('goblin_shaman', 1), ('skeleton', 1)], ['wolf']),
-    'Wzgorza Qasirah': (20, 70, [('crystal_golem', 2), ('goblin_shaman', 2), ('skeleton', 2), ('cave_troll', 2)], ['hyena']),
-    'Mrozne Pustkowia': (40, 90, [('snow_wolf', 3), ('yeti', 2), ('frost_witch', 1)], ['snow_wolf']),
-    'Lodowe Szczyty': (400, 560, [('frost_giant', 3), ('storm_harpy', 2), ('ice_dragon', 1)], []),
-    'Spalone Wyzyny': (300, 400, [('fire_elemental', 3), ('lava_golem', 2)], []),
-    'Dzungla Selvaran': (55, 80, [('crocodile', 2), ('jungle_hunter', 3), ('jungle_serpent', 2)], []),
-    'Pustynia Qasirah': (45, 130, [('hyena', 3), ('scorpion', 3), ('sand_wraith', 1)], ['hyena', 'sand_wraith']),
-    'Pustkowia Cienia': (550, 750, [('shadow_stalker', 3), ('sand_titan', 2), ('void_priest', 2)], ['shadow_stalker']),
-    'Przeklete Knieje': (230, 300, [('cursed_treant', 3), ('wraith_knight', 2)], ['wraith_knight']),
+                              ('goblin_shaman', 1), ('skeleton', 1), ('carrion_crow', 2), ('snare_setter', 2),
+                              ('quarry_brute', 1)], ['wolf']),
+    'Wzgorza Qasirah': (20, 70, [('crystal_golem', 2), ('goblin_shaman', 2), ('skeleton', 2), ('cave_troll', 2),
+                                 ('spark_wisp', 2), ('quarry_brute', 1), ('barrow_lantern', 1)], ['hyena', 'barrow_lantern']),
+    'Mrozne Pustkowia': (40, 100, [('snow_wolf', 3), ('yeti', 2), ('frost_witch', 1), ('frost_boar', 2), ('rime_crawler', 1)],
+                         ['snow_wolf']),
+    'Lodowe Szczyty': (400, 560, [('frost_giant', 3), ('storm_harpy', 2), ('ice_dragon', 1), ('storm_wisp', 2),
+                                  ('rime_gargoyle', 2)], []),
+    'Spalone Wyzyny': (300, 400, [('fire_elemental', 3), ('lava_golem', 2), ('ember_beetle', 2), ('ash_magus', 2)], []),
+    'Dzungla Selvaran': (55, 80, [('crocodile', 2), ('jungle_hunter', 3), ('jungle_serpent', 2), ('swamp_hornet', 2),
+                                  ('striped_prowler', 2), ('bog_wraith', 1)], ['bog_wraith']),
+    'Pustynia Qasirah': (45, 130, [('hyena', 3), ('scorpion', 3), ('sand_wraith', 1), ('sand_devourer', 2),
+                                   ('gilded_beetle', 1), ('dune_zealot', 1)], ['hyena', 'sand_wraith']),
+    'Pustkowia Cienia': (550, 750, [('shadow_stalker', 3), ('sand_titan', 2), ('void_priest', 2), ('dusk_gargoyle', 2),
+                                    ('shadow_centipede', 2)], ['shadow_stalker', 'dusk_gargoyle']),
+    'Przeklete Knieje': (230, 300, [('cursed_treant', 3), ('wraith_knight', 2), ('crimson_shade', 2)],
+                         ['wraith_knight', 'crimson_shade']),
 }
 BIOME_ZONE = {'snow': 'Mrozne Pustkowia', 'taiga': 'Mrozne Pustkowia', 'temperate': 'Krainy Varden',
               'forest': 'Krainy Varden', 'hills': 'Wzgorza Qasirah', 'cursed': 'Przeklete Knieje',
@@ -1338,7 +1355,10 @@ def climate_spawns(ctx, zones, rng):
             taken.append((x, y))
             if night and night_left.get(zone, 0) < 3 and rng.random() < 0.35:
                 night_left[zone] = night_left.get(zone, 0) + 1
-                out.append(f'{rng.choice(night)};{x};{y};0;5;2;120;noc')
+                nk = rng.choice(night)
+                if MONSTER_LEVEL[nk] > 15 and max(abs(x - temples[0][0]), abs(y - temples[0][1])) < 40:
+                    nk = min(night, key=lambda k: MONSTER_LEVEL[k])   # noca pod Varden tez tylko slabe
+                out.append(f'{nk};{x};{y};0;5;2;120;noc')
     ctx['spawns'] += out
 
 
@@ -1356,38 +1376,42 @@ def cave_levels(style, *spawns, lava=0):
 
 
 CAVES = [
-    # nazwa, okolica wejscia, pietra, poziomy regionu
+    # nazwa, okolica wejscia, pietra, poziomy regionu; spawn (potwor, promien, liczba[, odrodzenie s])
+    # 2026-10-28: nowe potwory i trzej bossowie jaskin (Wroniec, Szlamiara, Velmira, Suweren Ostrzy)
     ('Grota Pająków', (430, 560), cave_levels('moss', [('forest_spider', 4, 3), ('forest_spider', 3, 2)],
-                                             [('forest_spider', 4, 3), ('skeleton', 3, 2)]), (10, 40)),
+                                             [('forest_spider', 4, 3), ('skeleton', 3, 2), ('cave_centipede', 3, 2)]), (10, 40)),
     ('Wilcza Nora', (330, 430), cave_levels('moss', [('wolf', 4, 3), ('boar', 3, 2)], [('forest_spider', 4, 3)]), (8, 25)),
-    ('Grota Rozbójników', (420, 720), cave_levels('rock', [('bandit', 4, 3), ('skeleton', 3, 2)],
-                                                 [('bandit', 4, 3), ('goblin_shaman', 3, 2)]), (12, 40)),
-    ('Jaskinia Trolli', (470, 330), cave_levels('rock', [('cave_troll', 4, 3), ('cave_troll', 4, 2)],
-                                               [('cave_troll', 4, 3), ('crystal_golem', 3, 2)]), (28, 60)),
-    ('Kryształowa Grota', (560, 240), cave_levels('moss', [('crystal_golem', 4, 3), ('cave_troll', 3, 2)],
-                                                 [('crystal_golem', 4, 3), ('crystal_golem', 3, 2)],
+    ('Grota Rozbójników', (420, 720), cave_levels('rock', [('bandit', 4, 3), ('skeleton', 3, 2), ('tunnel_fence', 3, 2)],
+                                                 [('bandit', 4, 3), ('goblin_shaman', 3, 2), ('candle_acolyte', 3, 2),
+                                                  ('wroniec', 2, 1, 3600)]), (12, 40)),
+    ('Jaskinia Trolli', (470, 330), cave_levels('rock', [('cave_troll', 4, 3), ('cave_troll', 4, 2), ('spark_wisp', 3, 2)],
+                                               [('cave_troll', 4, 3), ('crystal_golem', 3, 2), ('candle_acolyte', 3, 2)]), (28, 60)),
+    ('Kryształowa Grota', (560, 240), cave_levels('moss', [('crystal_golem', 4, 3), ('cave_troll', 3, 2), ('barrow_lantern', 3, 2)],
+                                                 [('crystal_golem', 4, 3), ('barrow_lantern', 3, 2)],
                                                  [('cave_troll', 4, 3), ('crystal_golem', 4, 2)]), (40, 80)),
     ('Orcza Kopalnia', (590, 280), cave_levels('orc', [('orc_warrior', 4, 3), ('orc_shaman', 4, 2)],
                                               [('orc_berserker', 4, 3), ('orc_shaman', 4, 2), ('orc_warlord', 2, 1)]), (100, 230)),
-    ('Lodowa Grota', (680, 180), cave_levels('ice', [('yeti', 4, 3), ('frost_witch', 3, 2)],
-                                            [('ice_golem', 4, 2), ('frost_witch', 3, 2)]), (60, 130)),
+    ('Lodowa Grota', (680, 180), cave_levels('ice', [('yeti', 4, 3), ('frost_witch', 3, 2), ('rime_crawler', 3, 2)],
+                                            [('ice_golem', 4, 2), ('frost_witch', 3, 2), ('frost_centipede', 3, 2)]), (60, 130)),
     ('Mroźna Otchłań', (560, 120), cave_levels('ice', [('frost_giant', 4, 3), ('storm_harpy', 3, 2)],
-                                              [('frost_giant', 4, 3), ('ice_dragon', 3, 1)],
-                                              [('ice_dragon', 4, 2), ('storm_harpy', 3, 2)]), (430, 560)),
-    ('Leże Krokodyli', (720, 500), cave_levels('moss', [('crocodile', 4, 3), ('jungle_serpent', 3, 2)],
-                                              [('jungle_serpent', 4, 3), ('crocodile', 3, 2)]), (55, 90)),
-    ('Zatopiona Świątynia', (640, 620), cave_levels('moss', [('jungle_hunter', 4, 3), ('temple_guardian', 3, 1)],
-                                                   [('temple_guardian', 4, 2), ('jungle_serpent', 3, 2)]), (60, 200)),
-    ('Grobowiec Wydm', (170, 400), cave_levels('rock', [('scorpion', 4, 3), ('sand_wraith', 3, 2)],
-                                              [('mummy', 4, 3), ('sand_wraith', 3, 2)]), (60, 220)),
-    ('Grota Upiorów', (300, 560), cave_levels('rock', [('wraith_knight', 4, 2), ('cursed_treant', 4, 2)],
-                                             [('wraith_knight', 4, 3), ('cursed_treant', 3, 1)]), (240, 300)),
-    ('Jaskinia Cienia', (200, 620), cave_levels('rock', [('shadow_stalker', 4, 3), ('void_priest', 3, 1)],
-                                               [('sand_titan', 4, 2), ('void_priest', 3, 2)],
-                                               [('shadow_stalker', 4, 3), ('sand_titan', 3, 2)]), (550, 750)),
-    ('Grota Przemytników', (330, 700), cave_levels('rock', [('bandit', 4, 3), ('skeleton', 3, 2)]), (12, 40)),
+                                              [('frost_giant', 4, 3), ('ice_dragon', 3, 1), ('storm_wisp', 3, 2)],
+                                              [('ice_dragon', 4, 2), ('storm_harpy', 3, 2), ('rime_gargoyle', 3, 2)]), (430, 560)),
+    ('Leże Krokodyli', (720, 500), cave_levels('moss', [('crocodile', 4, 3), ('jungle_serpent', 3, 2), ('swamp_hornet', 3, 2)],
+                                              [('jungle_serpent', 4, 3), ('crocodile', 3, 2), ('bog_wraith', 3, 2),
+                                               ('szlamiara', 2, 1, 3600)]), (55, 100)),
+    ('Zatopiona Świątynia', (640, 620), cave_levels('moss', [('jungle_hunter', 4, 3), ('temple_guardian', 3, 1), ('stone_sentinel', 3, 2)],
+                                                   [('temple_guardian', 4, 2), ('jungle_serpent', 3, 2), ('blade_warden', 3, 2)]), (60, 220)),
+    ('Grobowiec Wydm', (170, 400), cave_levels('rock', [('scorpion', 4, 3), ('sand_wraith', 3, 2), ('dune_zealot', 3, 2)],
+                                              [('mummy', 4, 3), ('sand_wraith', 3, 2), ('sand_gargoyle', 3, 2)]), (60, 220)),
+    ('Grota Upiorów', (300, 560), cave_levels('rock', [('wraith_knight', 4, 2), ('cursed_treant', 4, 2), ('crimson_shade', 3, 2)],
+                                             [('wraith_knight', 4, 3), ('cursed_treant', 3, 1), ('crimson_shade', 3, 2),
+                                              ('velmira', 2, 1, 3600)]), (240, 300)),
+    ('Jaskinia Cienia', (200, 620), cave_levels('rock', [('shadow_stalker', 4, 3), ('void_priest', 3, 1), ('dusk_gargoyle', 3, 2)],
+                                               [('sand_titan', 4, 2), ('void_priest', 3, 2), ('shadow_centipede', 3, 2)],
+                                               [('shadow_stalker', 4, 3), ('sand_titan', 3, 2), ('suweren', 2, 1, 3600)]), (550, 750)),
+    ('Grota Przemytników', (330, 700), cave_levels('rock', [('bandit', 4, 3), ('skeleton', 3, 2), ('tunnel_fence', 3, 2)]), (12, 40)),
     ('Wyspiarska Grota', (900, 690), cave_levels('moss', [('drowned_sailor', 4, 3), ('pirate_cutthroat', 3, 2)],
-                                                [('pirate_gunner', 4, 2), ('drowned_sailor', 3, 2)]), (330, 400)),
+                                                [('pirate_gunner', 4, 2), ('drowned_sailor', 3, 2), ('dune_drake', 3, 1)]), (330, 420)),
 ]
 MOUNTAIN_WALLS = {'mountain', 'snow_mountain', 'sand_cliff'}
 
@@ -1427,19 +1451,19 @@ def caves(ctx, rng):
 
 # ------------------------------------------------------------------ kanaly i kopalnie pod miastami (2026-10-27)
 SEWER_STREETS = {'cobblestone', 'paving', 'brick_paving', 'dirt', 'sandstone_floor'}
-SEWER_MONSTERS = [('sewer_rat', 4, 3), ('giant_rat', 4, 2), ('sewer_rat', 3, 3), ('forest_spider', 3, 2),
-                  ('giant_rat', 4, 3), ('goblin', 3, 2)]
+SEWER_MONSTERS = [('sewer_rat', 4, 3), ('giant_rat', 4, 2), ('burrow_larva', 3, 2), ('sewer_rat', 3, 3),
+                  ('forest_spider', 3, 2), ('giant_rat', 4, 3), ('goblin', 3, 2)]
 MINES = [
     # miasto, nazwa, okolica wejscia, pietra (spawny), poziomy regionu
-    ('Varden', 'Stara Kopalnia', (445, 505), [[('goblin', 4, 3), ('goblin_shaman', 3, 2)],
-                                             [('skeleton', 4, 3), ('cave_troll', 3, 1)]], (12, 40)),
+    ('Varden', 'Stara Kopalnia', (445, 505), [[('goblin', 4, 3), ('goblin_shaman', 3, 2), ('cave_centipede', 3, 2)],
+                                             [('skeleton', 4, 3), ('cave_troll', 3, 1), ('candle_acolyte', 3, 2)]], (12, 40)),
     ('Qasirah', 'Kopalnia Soli', (268, 470), [[('scorpion', 4, 3), ('hyena', 3, 2)],
-                                             [('scorpion', 4, 3), ('sand_wraith', 3, 1)]], (45, 140)),
-    ('Frostholm', 'Kopalnia Lodu', (698, 222), [[('snow_wolf', 4, 3), ('yeti', 3, 1)],
+                                             [('scorpion', 4, 3), ('sand_wraith', 3, 1), ('sand_devourer', 3, 2)]], (45, 140)),
+    ('Frostholm', 'Kopalnia Lodu', (698, 222), [[('snow_wolf', 4, 3), ('yeti', 3, 1), ('frost_boar', 3, 2)],
                                                [('yeti', 4, 3), ('ice_golem', 3, 1)]], (40, 130)),
     ('Selvaran', 'Kopalnia Szmaragdów', (636, 692), [[('jungle_serpent', 4, 2), ('crocodile', 3, 2)],
-                                                    [('jungle_hunter', 4, 3), ('jungle_serpent', 3, 2)]], (55, 90)),
-    ('Valmir', 'Kopalnia Miedzi', (436, 772), [[('goblin', 4, 3), ('bandit', 3, 2)],
+                                                    [('jungle_hunter', 4, 3), ('jungle_serpent', 3, 2), ('swamp_hornet', 3, 2)]], (55, 90)),
+    ('Valmir', 'Kopalnia Miedzi', (436, 772), [[('goblin', 4, 3), ('bandit', 3, 2), ('cave_centipede', 3, 2)],
                                               [('cave_troll', 4, 2), ('skeleton', 3, 2)]], (12, 45)),
     ('Nerys', 'Kopalnia Pereł', (815, 748), [[('cave_troll', 4, 3), ('crystal_golem', 3, 1)],
                                             [('crystal_golem', 4, 3), ('cave_troll', 3, 2)]], (32, 60)),
@@ -2094,10 +2118,14 @@ NOT_LAND = SEA | {'lava', 'chasm'}
 ISLAND_MIN = 60
 ISLAND_TIERS = [
     # najdalej od Varden (pola), poziomy regionu, potwory [(klucz, waga)]
-    (300, (10, 40), [('boar', 2), ('forest_spider', 2), ('bandit', 2), ('goblin', 2), ('skeleton', 1)]),
-    (380, (45, 130), [('crocodile', 2), ('jungle_serpent', 2), ('orc_warrior', 2), ('orc_shaman', 1), ('scorpion', 1)]),
-    (450, (150, 260), [('orc_berserker', 2), ('mummy', 2), ('temple_guardian', 2), ('cursed_treant', 1)]),
-    (10 ** 6, (280, 420), [('drowned_sailor', 2), ('pirate_cutthroat', 2), ('coral_crab', 2), ('wraith_knight', 1)]),
+    (300, (10, 40), [('boar', 2), ('forest_spider', 2), ('bandit', 2), ('goblin', 2), ('skeleton', 1),
+                      ('carrion_crow', 1), ('snare_setter', 1), ('tunnel_fence', 1)]),
+    (380, (45, 130), [('crocodile', 2), ('jungle_serpent', 2), ('orc_warrior', 2), ('orc_shaman', 1), ('scorpion', 1),
+                       ('swamp_hornet', 1), ('sand_devourer', 1), ('striped_prowler', 1)]),
+    (450, (150, 260), [('orc_berserker', 2), ('mummy', 2), ('temple_guardian', 2), ('cursed_treant', 1),
+                        ('stone_sentinel', 1), ('sand_gargoyle', 1), ('blade_warden', 2)]),
+    (10 ** 6, (280, 420), [('drowned_sailor', 2), ('pirate_cutthroat', 2), ('coral_crab', 2), ('wraith_knight', 1),
+                            ('dune_drake', 1), ('crimson_shade', 1), ('ember_beetle', 1)]),
 ]
 ISLAND_NAMES = ['Wyspa Mewia', 'Wyspa Bursztynowa', 'Wyspa Szeptów', 'Wyspa Kormoranów', 'Wyspa Wraków', 'Wyspa Fok',
                 'Wyspa Zachodu', 'Wyspa Mgieł Porannych', 'Wyspa Kamiennego Kręgu', 'Wyspa Rybaków', 'Wyspa Czapli',
@@ -2116,17 +2144,19 @@ FERRYMEN = ['Przewoźnik Gniewko', 'Przewoźniczka Jagna', 'Przewoźnik Wojsław
             'Przewoźnik Krzesimir', 'Przewoźniczka Jarosława', 'Przewoźnik Domasław', 'Przewoźniczka Unisława',
             'Przewoźnik Żelisław', 'Przewoźniczka Tomira', 'Przewoźnik Wszebor', 'Przewoźniczka Czesława',
             'Przewoźnik Bogdan', 'Przewoźniczka Radosława', 'Przewoźnik Sulisław', 'Przewoźniczka Milena']
-TUNNEL_SPAWNS = [[('giant_rat', 3, 3), ('forest_spider', 3, 2)], [('jungle_serpent', 3, 2), ('crocodile', 3, 2)],
-                 [('orc_berserker', 3, 2), ('mummy', 3, 2)], [('drowned_sailor', 3, 3), ('pirate_cutthroat', 3, 2)]]
+TUNNEL_SPAWNS = [[('giant_rat', 3, 3), ('burrow_larva', 3, 2), ('forest_spider', 3, 2)],
+                 [('jungle_serpent', 3, 2), ('swamp_hornet', 3, 2), ('crocodile', 3, 2)],
+                 [('orc_berserker', 3, 2), ('blade_warden', 3, 2), ('mummy', 3, 2)],
+                 [('drowned_sailor', 3, 3), ('dune_drake', 3, 1), ('pirate_cutthroat', 3, 2)]]
 LOCHY = ('Lochy Zapomnianych', [
     (64, 48, [(6, 6), (26, 10), (52, 8), (54, 30), (32, 40), (8, 36)], 'crypt', 0,
-     [('wraith_knight', 4, 3), ('shadow_stalker', 4, 2), ('wraith_knight', 4, 3), ('shadow_stalker', 3, 2)]),
+     [('wraith_knight', 4, 3), ('shadow_stalker', 4, 2), ('dusk_gargoyle', 4, 2), ('shadow_stalker', 3, 2)]),
     (64, 48, [(8, 36), (10, 14), (34, 6), (56, 18), (50, 42), (28, 26)], 'crypt', 0,
-     [('shadow_stalker', 4, 3), ('void_priest', 3, 2), ('shadow_stalker', 4, 3), ('void_priest', 3, 2)]),
+     [('shadow_stalker', 4, 3), ('void_priest', 3, 2), ('shadow_centipede', 4, 3), ('void_priest', 3, 2)]),
     (64, 48, [(28, 26), (52, 40), (58, 12), (32, 6), (8, 18), (12, 42)], 'crypt', 0,
-     [('void_priest', 4, 3), ('bone_dragon', 3, 1), ('void_priest', 4, 2), ('bone_dragon', 3, 2)]),
+     [('void_priest', 4, 3), ('bone_dragon', 3, 1), ('abyss_crawler', 4, 2), ('bone_dragon', 3, 2)]),
     (64, 48, [(12, 42), (34, 40), (56, 30), (50, 8), (22, 8)], 'crypt', 0,
-     [('bone_dragon', 4, 3), ('abyss_lord', 3, 1), ('bone_dragon', 4, 2), ('abyss_lord', 3, 2)]),
+     [('bone_dragon', 4, 3), ('abyss_lord', 3, 1), ('winged_spawn', 4, 2), ('obsidian_sentinel', 3, 2)]),
 ], [(-1, -2, 350, 750), (-3, -4, 700, 960)])
 
 

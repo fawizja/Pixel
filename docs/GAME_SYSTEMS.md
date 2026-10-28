@@ -520,6 +520,17 @@ Przemytnikow -3), Skaldra (540, Lodowe Groty -3), Morvena (640, Krypta Mgiel -3)
 respawn 1 h, czesty loot z zestawu koralowego (poziom 350: harpun, rozdzka, laska, rekawice, helm, zbroja,
 nagolenniki, tarcza) albo wyzszych zestawow. Zestaw koralowy wypada tez rzadko z potworow wysp.
 
+Nowe potwory (2026-10-28, 32 gatunki i 4 bossow jaskin, poziomy 9-930): wlasne projekty i nazwy, grafiki tylko
+z OpenTibia Sprite Pack (stroje 4, 20, 24, 27, 28, 30, 38, 42, 43 dotad nieuzywane; reszta to stroje z maska kolorow
+albo przebarwienia w `tools/art/otsp_import.py`). Dane Canary (GPL) sluzyly tylko jako punkt odniesienia dla proporcji
+statystyk (doswiadczenie/HP, zywioly, szybkosc), statystyki liczone z krzywej naszych potworow. Spawny w krainach
+(`ZONES`), wyspach (`ISLAND_TIERS`), tunelach, kanalach, kopalniach, jaskiniach, Otchlani Wulkanu, Lochach Zapomnianych
+i na drogach wypraw na bossa. Bossowie: Wroniec (32, Grota Rozbojnikow -2), Szlamiara (95, Leze Krokodyli -2),
+Velmira (290, Grota Upiorow -2), Suweren Ostrzy (640, Jaskinia Cienia -3), respawn 1 h; nowe przedmioty tylko z bossow:
+kaptur z kruczych pior, laska z Topieli. Nowe materialy (skupuja sklepy z towarami): czarne pioro, sluz czerwia,
+plytka pancerza, ektoplazma, odlamek gargulca. Test `MonsterArtAndNamesTest`: kazdy potwor ma grafike z klatkami
+kroku, zaden nie nosi nazwy znanego potwora z Tibii.
+
 ## Zadanie dnia (Z logika, C UI)
 
 `daily/DailyTask`: raz na dzien kalendarzowy (`GameSession.today()`, w testach `setToday`) potwor ze stalych spawnow

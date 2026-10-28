@@ -176,3 +176,10 @@
 192;stoneskin_potion;Mikstura kamiennej skóry;POTION;100;600;NONE;0;0;0;30;*;0;0;PHYSICAL;#8a8478;Skóra twardnieje jak kamień: -15% otrzymywanych obrażeń przez 10 minut polowania.
 193;swiftness_potion;Mikstura szybkości;POTION;100;450;NONE;0;0;0;20;*;0;0;PHYSICAL;#70c0f0;Musujący błękitny napój: krok o 15% krótszy przez 10 minut polowania.
 194;luck_potion;Mikstura szczęścia;POTION;100;900;NONE;0;0;0;50;*;0;0;PHYSICAL;#e8c040;Fortuna sprzyja: +30% szans na łup przez 10 minut polowania.
+195;black_feather;Czarne pióro;MATERIAL;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a3448;Lotka z padlinożernej wrony. Skupują ją sklepy z towarami.
+196;worm_slime;Śluz czerwia;MATERIAL;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;#80a040;Gęsty śluz z czerwi i larw. Alchemicy dodają go do klejów.
+197;chitin_plate;Płytka pancerza;MATERIAL;100;180;NONE;0;0;0;0;*;0;0;PHYSICAL;#a08050;Twarda płytka z pancerza chrząszcza albo wija.
+198;ectoplasm;Ektoplazma;MATERIAL;100;350;NONE;0;0;0;0;*;0;0;PHYSICAL;#a0e0c0;Zimna, świecąca mgła zamknięta w kropli. Zostaje po zjawach.
+199;gargoyle_shard;Odłamek gargulca;MATERIAL;100;700;NONE;0;0;0;0;*;0;0;PHYSICAL;#8a8a90;Kamień, który jeszcze drży. Zostaje po ożywionych posągach i gargulcach.
+200;crow_feather_hood;Kaptur z kruczych piór;ARMOR;1;3500;HEAD;0;0;4;25;*;0;0;PHYSICAL;#3a2a5a;Kaptur Wrońca, Kruczego Kniazia. Pióra szeleszczą przy każdym kroku.
+201;mirewood_rod;Laska z Topieli;WEAPON;1;9000;WEAPON;42;0;0;80;DRUID;0;7;EARTH;#4a7a3a;Laska z czarnego drewna z dna bagien. Zostawia ją tylko Szlamiara.

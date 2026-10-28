@@ -87,3 +87,6 @@ bossq_door|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=607,39
 bossq_lobby|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=631,418,-1 -Dpixel.button=tips_off
 bossq_arena|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=632,421,-1 -Dpixel.bossGhosts=4 -Dpixel.button=tips_off -Dpixel.tap=632,420
 bossq_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=632,421,-1 -Dpixel.bossGhosts=4 -Dpixel.button=tips_off -Dpixel.tap=632,420 -Dpixel.bossWin=true
+monsters_desert|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=150 -Dpixel.teleport=127,383,0
+monsters_peaks|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.startLevel=500 -Dpixel.teleport=652,53,0
+monsters_abyss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=700 -Dpixel.teleport=226,636,-3

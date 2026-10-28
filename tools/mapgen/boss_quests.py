@@ -28,19 +28,19 @@ QUESTS = [
     dict(id='grimtooth', name='Leże Grimtootha', level=30, boss='grimtooth', style='orc', z=-1,
          grounds={'grass'}, wall='wood_wall', floor='wood_floor', near=(610, 395), lava=0.0,
          levels=(25, 60),
-         spawns=[('skeleton', 3, 3), ('cave_troll', 3, 2), ('skeleton', 3, 3), ('crystal_golem', 3, 2), ('cave_troll', 3, 3)]),
+         spawns=[('skeleton', 3, 3), ('cave_troll', 3, 2), ('candle_acolyte', 3, 3), ('crystal_golem', 3, 2), ('cave_troll', 3, 3)]),
     dict(id='frost', name='Lodowy Tron Ysolde', level=100, boss='frost_queen', style='ice', z=-1,
          grounds={'snow'}, wall='log_wall', floor='wood_floor', near=(625, 95), lava=0.0,
          levels=(85, 160),
-         spawns=[('yeti', 3, 3), ('frost_witch', 3, 3), ('yeti', 3, 3), ('ice_golem', 3, 3), ('frost_witch', 3, 2)]),
+         spawns=[('yeti', 3, 3), ('frost_witch', 3, 3), ('rime_crawler', 3, 3), ('ice_golem', 3, 3), ('frost_centipede', 3, 2)]),
     dict(id='pharaoh', name='Krypta Neferakha', level=200, boss='pharaoh', style='crypt', z=-1,
          grounds={'sand', 'dark_sand'}, wall='sandstone_wall', floor='sandstone_floor', near=(105, 395), lava=0.0,
          levels=(160, 240),
-         spawns=[('sand_wraith', 3, 3), ('mummy', 3, 3), ('mummy', 3, 3), ('sand_wraith', 3, 3), ('mummy', 3, 2)]),
+         spawns=[('sand_wraith', 3, 3), ('mummy', 3, 3), ('sand_gargoyle', 3, 3), ('sand_wraith', 3, 3), ('mummy', 3, 2)]),
     dict(id='ignaroth', name='Kuźnia Ignarotha', level=400, boss='ignaroth', style='fire', z=-1,
          grounds={'ash'}, wall='stone_wall', floor='stone_floor', near=(230, 150), lava=0.02,
          levels=(380, 480),
-         spawns=[('fire_elemental', 3, 3), ('lava_golem', 3, 3), ('fire_elemental', 3, 3), ('lava_golem', 3, 3), ('lava_golem', 3, 2)]),
+         spawns=[('fire_elemental', 3, 3), ('lava_golem', 3, 3), ('ash_magus', 3, 3), ('ember_beetle', 3, 3), ('lava_golem', 3, 2)]),
 ]
 
 # podloga i mur przedsionka i areny wg stylu lochu
