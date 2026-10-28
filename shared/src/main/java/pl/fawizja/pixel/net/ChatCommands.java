@@ -85,6 +85,14 @@ public final class ChatCommands {
                 return new String[] {"BOSS"};
             case "/obejrzyj":
                 return w.length >= 2 ? new String[] {"INSPECT", rest(t)} : null;
+            case "/pvp": {
+                // "/pvp" przelacza tryb PvP, "/pvp wl|wyl" (tez on/off) ustawia
+                if (w.length < 2) return new String[] {"PVP", "TOGGLE"};
+                String a = key(w[1]);
+                if (a.equals("wl") || a.equals("on") || a.equals("tak")) return new String[] {"PVP", "ON"};
+                if (a.equals("wyl") || a.equals("off") || a.equals("nie")) return new String[] {"PVP", "OFF"};
+                return null;
+            }
             case "/pojedynek":
                 if (w.length < 2) return new String[] {"DUEL", "HELP"};
                 if (key(w[1]).equals("poddaj")) return new String[] {"DUEL", "SURRENDER"};
@@ -300,7 +308,7 @@ public final class ChatCommands {
         String[][] typed = {
             {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
             {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d; /szukam; /handel Imię"},
-            {"/pojedynek Imię", "pojedynek; /nagroda Imię, 5000 za głowę"},
+            {"/pojedynek Imię", "pojedynek; /pvp tryb PvP (czaszka); /nagroda Imię, 5000"},
             {"/gildia załóż Nazwa", "zaproś, przyjmij, wyrzuć, wpłać; czat /g"},
             {"/wyślij Imię, 5 futro", "poczta; /przelew Imię, 5000; /kupię u bankiera"},
             {"/dom wpuść Imię", "gość z pełnym dostępem; /dom wstęp Imię (tylko wejście), /dom wyrzuć, /dom sprzedaj Imię, cena"},
@@ -310,5 +318,5 @@ public final class ChatCommands {
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /łowiska, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /dom [wpuść|wstęp|wyrzuć Imię | sprzedaj Imię, cena | kup | anuluj], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło. Emotki: " + Emotes.LIST;
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /pvp [wł|wył] (tryb PvP), /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /łowiska, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /dom [wpuść|wstęp|wyrzuć Imię | sprzedaj Imię, cena | kup | anuluj], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło. Emotki: " + Emotes.LIST;
 }

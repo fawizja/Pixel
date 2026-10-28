@@ -136,6 +136,7 @@ public final class GameScreen extends ScreenAdapter {
         long stepStart;
         int healthPercent;
         String skull = "NONE";
+        boolean pvp;
         String guild;
         boolean mounted;
         String pet;
@@ -868,6 +869,11 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         String[] house = net == null ? pl.fawizja.pixel.net.ChatCommands.toMessage(text) : null;
+        if (house != null && house[0].equals("PVP")) {
+            // bez serwera tryb PvP i tak dziala (zasady w PvpRules; inni gracze sa tylko online)
+            if (house[1].equals("TOGGLE") || house[1].equals("ON") != session.pvpMode()) session.togglePvpMode(now());
+            return;
+        }
         if (house != null && house[0].equals("HOUSE")) {
             // bez serwera: opis domu i lista gosci (inni gracze wchodza tylko online)
             if (house[1].equals("GUEST")) session.addHouseGuest(house[2], house.length > 3 && house[3].equals("entry")
@@ -2203,9 +2209,20 @@ public final class GameScreen extends ScreenAdapter {
             else if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
             else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
             else font.setColor(0.55f, 1f, 0.55f, 1f);
-            String label = rp.name + (ally ? " [drużyna]" : "") + ("NONE".equals(rp.skull) ? "" : " [czaszka]")
+            String label = rp.name + (ally ? " [drużyna]" : "")
                     + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "") + (rp.guild == null ? "" : " <" + rp.guild + ">");
-            font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
+            float lx = projected.x - label.length() * 2.8f * scale;
+            font.draw(batch, label, lx, projected.y);
+            // czaszka PvP (biala/czerwona) przed imieniem; maly czerwony znacznik = gracz z wlaczonym trybem PvP
+            com.badlogic.gdx.graphics.g2d.TextureRegion sk = hud.skullIcon(rp.skull);
+            float is = Math.max(12f, 16f * scale);
+            if (sk != null) batch.draw(sk, lx - is - 2 * scale, projected.y - is + 1 * scale, is, is);
+            else if (!"NONE".equals(rp.skull)) font.draw(batch, "[czaszka]", lx - 50 * scale, projected.y);
+            if (rp.pvp && "NONE".equals(rp.skull)) {
+                batch.setColor(0.9f, 0.15f, 0.15f, 1f);
+                batch.draw(hud.whiteRegion(), lx - 6 * scale, projected.y - 7 * scale, 4 * scale, 4 * scale);
+                batch.setColor(Color.WHITE);
+            }
             if (rp.title != null) {
                 // tytul z osiagniecia nad imieniem
                 String tl = "\"" + rp.title + "\""; // cudzyslowy ASCII - pewne w kazdej czcionce
@@ -2371,6 +2388,7 @@ public final class GameScreen extends ScreenAdapter {
                 }
                 rp.healthPercent = e.healthPercent();
                 rp.skull = e.mark();
+                rp.pvp = e.pvpMode();
                 rp.guild = e.guild();
                 rp.mounted = e.mounted();
                 rp.pet = e.pet();
@@ -2399,6 +2417,19 @@ public final class GameScreen extends ScreenAdapter {
                         pendingHouse = null;
                     } else {
                         hud.updateHouse(v);
+                    }
+                    break;
+                }
+                case "PVP": {
+                    // PVP 1|0 czaszka czaszkaDo blokadaPzDo (czasy serwera = now() po synchronizacji zegara)
+                    if (m.length < 5) break;
+                    try {
+                        pl.fawizja.pixel.character.PlayerCharacter me = session.character();
+                        me.setPvpMode("1".equals(m[1]));
+                        me.setSkull(pl.fawizja.pixel.pvp.PvpRules.Skull.valueOf(m[2]), Long.parseLong(m[3]));
+                        me.setPzBlockedUntil(Long.parseLong(m[4]));
+                    } catch (IllegalArgumentException e) {
+                        // zly komunikat: pomijamy
                     }
                     break;
                 }
@@ -2686,5 +2717,63 @@ public final class GameScreen extends ScreenAdapter {
             partyNames.add(n);
         }
         if (partyNames.size() >= 2) hud.chatTabs().ensure(pl.fawizja.pixel.chat.ChatTabs.Channel.PARTY);
+    }
+
+    /**
+     * Podglad PvP bez serwera (-Dpixel.open=pvp): inni gracze obok postaci - z biala czaszka, z czerwona
+     * i z wlaczonym trybem PvP - oraz wlasny tryb PvP i biala czaszka z blokada PZ.
+     */
+    public void previewPvp() {
+        Position me = session.character().position();
+        Object[][] who = {{"Ula", Vocation.DRUID, 2, 0, "WHITE", false}, {"Kuba", Vocation.KNIGHT, -2, 1, "RED", true},
+                {"Mira", Vocation.SORCERER, 1, 2, "NONE", true}};
+        int id = 900;
+        for (Object[] w : who) {
+            RemotePlayer rp = new RemotePlayer();
+            rp.name = (String) w[0];
+            rp.vocation = (Vocation) w[1];
+            rp.from = rp.to = me.translate((Integer) w[2], (Integer) w[3]);
+            rp.healthPercent = 100;
+            rp.skull = (String) w[4];
+            rp.pvp = (Boolean) w[5];
+            rp.seen = true;
+            remotePlayers.put(id++, rp);
+        }
+        session.setPvpMode(true);
+        long t = now();
+        pl.fawizja.pixel.pvp.PvpRules.markForPreview(session.pvpStatus(), pl.fawizja.pixel.pvp.PvpRules.Skull.WHITE, t);
+        session.lockProtectionZonesUntil(session.pvpStatus().fightUntil());
+    }
+
+    /**
+     * Podglad blokady PZ (-Dpixel.open=pzblock): czerwona czaszka po zabiciu gracza, postac staje tuz przed
+     * strefa ochronna i probuje do niej wejsc (komunikat w dzienniku).
+     */
+    public void previewPzBlock() {
+        long t = now();
+        pl.fawizja.pixel.pvp.PvpRules.Status st = session.pvpStatus();
+        session.setPvpMode(true);
+        // jak po zabiciu gracza bez czaszki (stan w PvpRules.Status - sesja offline przepisze go do postaci)
+        pl.fawizja.pixel.pvp.PvpRules.markForPreview(st, pl.fawizja.pixel.pvp.PvpRules.Skull.RED, t);
+        session.lockProtectionZonesUntil(st.fightUntil());
+        pl.fawizja.pixel.world.WorldMap w = session.world();
+        Position c = session.character().position();
+        for (int r = 1; r < 25; r++) {
+            for (int dx = -r; dx <= r; dx++) {
+                for (int dy = -r; dy <= r; dy++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) != r) continue;
+                    Position p = c.translate(dx, dy);
+                    if (!w.isWalkable(p) || w.isProtectionZone(p) || w.transitionAt(p) != null) continue;
+                    for (Direction d : new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
+                        Position q = p.translate(d.dx, d.dy);
+                        if (w.isWalkable(q) && w.isProtectionZone(q) && w.transitionAt(q) == null) {
+                            session.teleport(p, t);
+                            session.update(t + 10, d);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

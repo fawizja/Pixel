@@ -16,17 +16,67 @@ Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
 - Postacie ponizej poziomu 30 nie atakuja graczy i nie moga byc atakowane (start na poziomie 8 = okres ochronny).
 - W strefie ochronnej (PZ) nie ma walki - ani atakujacy, ani cel nie moga w niej stac.
 - Nie mozna atakowac postaci o poziomie mniejszym niz polowa wlasnego, chyba ze ma czaszke.
-- Atak na gracza bez czaszki = biala czaszka na 15 min. Atak na gracza z czaszka jest usprawiedliwiony.
-- 3 nieusprawiedliwione zabojstwa w 24 h = czerwona czaszka na 6 h; smierc z nia = caly plecak zostaje na ziemi.
+- Tryb PvP (przelacznik czaszki, ponizej): bez niego nie atakujesz graczy bez czaszki.
+- Trafienie gracza bez czaszki = biala czaszka na 60 s; zabicie gracza bez czaszki = czerwona czaszka na 10 min.
+  Atak na gracza z czaszka jest usprawiedliwiony (bez czaszki i blokady PZ).
+- 3 nieusprawiedliwione zabojstwa w 24 h = czerwona czaszka na 6 h; smierc z czerwona = caly plecak zostaje na ziemi.
 - Smierc z reki gracza: ta sama kara exp co od potwora, odrodzenie w swiatyni miasta. Zabojca nie dostaje exp.
 - Obrazenia zadawane graczom x0,5 (walki trwaja dluzej niz z potworami - czas na ucieczke lub leczenie).
 - Stan czaszek trzyma serwer po imieniu postaci i zapisuje na dysku (`pvp_<imie>`, czasy jako zegar scienny),
   wiec czaszki i licznik zabojstw przetrwaja wylogowanie i restart serwera.
-- Blokada strefy ochronnej: kazdy atak PvP zamyka PZ dla atakujacego i ofiary na 60 s (wyjsc mozna, wejsc nie -
-  takze schodami prowadzacymi do PZ). Blokada przetrwa ponowne zalogowanie.
+- Blokada strefy ochronnej: nieusprawiedliwione trafienie zamyka PZ atakujacemu na 60 s, zabicie na 10 min (wyjsc
+  mozna, wejsc nie - takze schodami prowadzacymi do PZ). Ofiara moze uciec do PZ. Blokada przetrwa ponowne zalogowanie
+  (do restartu serwera).
 - Czary i runy ofensywne trafiaja gracza, gdy jest celem PvP, a postac nie ma celu-potwora
   (`SpellSystem.PlayerTargeting`, na serwerze `PvpRules.spellHit`): te same zasady, czaszki, blokada PZ i x0,5.
-  Czary obszarowe trafiaja tylko wybranego gracza (nie przypadkowych przechodniow). Odmowa zasad = bez kosztu many/runy.
+  Czary i runy obszarowe (`ATTACK_AREA`, `RUNE_AREA`) trafiaja wszystkich graczy w obszarze, ktorych zasady pozwalaja
+  zaatakowac (`pvp/PvpTargeting`): w trybie PvP kazdego (poza druzyna), bez trybu PvP tylko graczy z czaszka.
+  Odmowa zasad dla czaru celowanego = bez kosztu many/runy.
+
+### Tryb PvP i czaszki (przelacznik czaszki)
+
+Model (najprostszy zgodny z opisem wlasciciela, jak w Tibii): `PvpRules.Skull { NONE, WHITE, RED }`, bez zoltej
+czaszki - "agresor" to po prostu gracz z czaszka (WHITE lub RED).
+- Tryb PvP: `PlayerCharacter.pvpMode()` - tylko w pamieci (bez zapisu w CharacterCodec), po zalogowaniu wylaczony.
+  Wylaczony: nie mozna wybrac ani zranic gracza bez czaszki (`Verdict.PVP_OFF`), obszar omija takich graczy.
+  Wlaczony: mozna atakowac graczy, obszar trafia graczy. Gracza z czaszka moze bic kazdy, takze bez trybu PvP.
+  W PZ nikt nikogo nie atakuje. Ochrona do poziomu 30, roznica poziomow i druzyna dzialaja jak wczesniej.
+- Trafienie (atak, czar, runa, obszar) gracza bez czaszki: biala czaszka + blokada wejscia do PZ na 60 s
+  (`WHITE_SKULL_MS`). Zabicie gracza bez czaszki: czerwona czaszka + blokada PZ na 10 min (`KILL_SKULL_MS`).
+  Kazda nowa agresja odnawia licznik. Czaszka znika po uplywie czasu. Postac z blokada nie wejdzie do PZ (komunikat
+  "Masz czaszkę po ataku na gracza - nie wejdziesz do strefy ochronnej jeszcze przez ..."); jesli juz w niej stoi,
+  zostaje (w PZ i tak nie ma walki).
+- Protokol: klient -> serwer `PVP ON|OFF|TOGGLE` albo `ACT pvp` (przycisk). Serwer -> klient po kazdej zmianie
+  `PVP 1|0 CZASZKA czaszkaDo blokadaPzDo` (czasy serwera, 0 = brak). Inni gracze: pole `czaszka` (jak dotad) i nowe
+  pole `P|-` (tryb PvP) na koncu wiersza `PL` (`RemoteEntity.mark()`, `RemoteEntity.pvpMode()`).
+- Offline logika dziala tak samo (sesja ma wlasny `PvpRules.Status`), testy uzywaja "udawanego" drugiego gracza:
+  druga `GameSession` i `PvpTargeting` (`PvpModeTest`). Serwer: `NetworkSyncTest.areaSpellsSkullsAndAggressorsWithThreePlayers`.
+- Ikony: `assets/ui/pvp/skull_white.png`, `skull_red.png` (16x16) i `pvp_off.png` / `pvp_on.png` (32x32,
+  przelacznik) rysowane kodem w `tools/art/skull_icons.py` (OTSP nie ma ikon czaszek).
+- Interfejs (tymczasowy): `/pvp [wł|wył]`, przelacznik czaszki w kolumnie obok ekwipunku (pod BIEG/TARCZA/pochodnia),
+  czaszka przed imieniem innych graczy (maly czerwony kwadrat = gracz bez czaszki z wlaczonym trybem PvP), wlasna
+  czaszka z pozostalym czasem na gornym pasku na lewo od ikon stanu. Podglad: `-Dpixel.open=pvp|pzblock`.
+
+API dla HUD (wszystko we wspolnym module):
+
+| Wywolanie | Znaczenie |
+|---|---|
+| `session.pvpMode()` / `session.isPvpMode()` | czy tryb PvP jest wlaczony |
+| `session.setPvpMode(boolean)` | ustawia tryb (bez komunikatu) |
+| `session.togglePvpMode()` | przelacza, zwraca nowy stan (bez komunikatu) |
+| `session.togglePvpMode(long now)` | przelacza z komunikatem w dzienniku (tak dziala przycisk i `/pvp` offline) |
+| `Actions.apply(session, "pvp", now)` / online `net.send("ACT", "pvp")` | akcja przycisku (online wykonuje serwer) |
+| `character.pvpMode()` | to samo co `session.pvpMode()` |
+| `character.skull()` | `PvpRules.Skull` z ostatniej synchronizacji (sesja co krok / komunikat `PVP` online) |
+| `character.skull(now)` | jw., ale `NONE` po uplywie czasu czaszki |
+| `character.skullMs(now)` | pozostaly czas czaszki w ms (0 = brak) |
+| `character.pzBlockedMs(now)` | pozostaly czas blokady wejscia do PZ w ms (0 = mozna) |
+| `session.pzBlockedMessage(now)` | polski komunikat blokady PZ |
+| `session.pvpStatus()` | pelny stan `PvpRules.Status` (skull(now), skullUntil(now), pzBlockedMs(now), aggressor(now)) |
+| `hud.skullIcon("WHITE"/"RED")` | `TextureRegion` ikony 16x16 albo null |
+
+`now` to czas swiata klienta (`GameScreen.now()`, online zgrany z serwerem) - ten sam, ktory dostaje `Hud.render`
+jako `serverTimeMs`.
 - Nagrody za glowy (0.121.0, `pvp/Bounties`): `/nagroda imie, kwota` (min. 1 000 gp, z konta) dokłada do nagrody,
   `/nagrody` pokazuje 10 najwyzszych. Kto pokona postac w PvP (nie pojedynek, nie ta sama druzyna ani gildia),
   dostaje calosc na konto; serwer oglasza wplaty i odbior. Zapis `<dane>/bounties.txt`.

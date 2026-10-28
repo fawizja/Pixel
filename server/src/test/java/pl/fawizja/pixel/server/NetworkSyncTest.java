@@ -279,6 +279,12 @@ class NetworkSyncTest {
                     return false;
                 }
             });
+            // tryb PvP wylaczony (domyslnie): atak odrzucony; po PVP ON inni widza znacznik trybu
+            a.send("ATTACK", String.valueOf(janId));
+            awaitMessage(a, "pvp mode needed", m -> m[0].equals("LOG") && m[2].contains("Włącz tryb PvP"));
+            a.send("PVP", "ON");
+            awaitMessage(a, "pvp mode echoed", m -> m[0].equals("PVP") && m[1].equals("1") && m[2].equals("NONE"));
+            await("jan sees ivo in pvp mode", () -> seen(b, "Ivo") != null && seen(b, "Ivo").pvpMode());
             int full = self(b).health();
             a.send("ATTACK", String.valueOf(janId));
             await("jan hurt and ivo marked", () -> {
@@ -299,6 +305,83 @@ class NetworkSyncTest {
         try (NetClient a = connect()) {
             a.hello("Ivo", "PALADIN", "tajne-Ivo");
             await("skull after restart", () -> a.frame() != null && "WHITE".equals(a.frame().skull()));
+        }
+    }
+
+    /**
+     * Trzech graczy: krag ognia bez trybu PvP omija graczy; w trybie PvP rani obu sasiadow i daje biala
+     * czaszke (widoczna dla innych), a wtedy gracz bez trybu PvP moze bic agresora bez wlasnej czaszki.
+     */
+    @Test
+    void areaSpellsSkullsAndAggressorsWithThreePlayers() throws Exception {
+        try (NetClient a = connect();
+             NetClient b = connect();
+             NetClient c = connect()) {
+            a.hello("Ivo", "SORCERER", "tajne-Ivo");
+            b.hello("Jan", "MONK", "tajne-Jan");
+            c.hello("Ola", "DRUID", "tajne-Ola");
+            await("welcome", () -> a.playerId() > 0 && b.playerId() > 0 && c.playerId() > 0);
+            int ivoId = a.playerId();
+            Position field = new Position(149, 351, 0);
+            java.util.concurrent.atomic.AtomicBoolean ready = new java.util.concurrent.atomic.AtomicBoolean();
+            server.enqueueTest(() -> {
+                String[] order = {"Jan", "Ivo", "Ola"}; // Ivo w srodku: obaj sasiedzi w kregu ognia
+                for (int i = 0; i < order.length; i++) {
+                    ServerPlayer p = server.world().find(order[i]);
+                    PlayerCharacter pc = p.session.character();
+                    pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(40) - pc.experience());
+                    pc.heal(pc.maxHealth());
+                    pc.restoreMana(pc.maxMana());
+                    p.session.teleport(field.translate(i, 0), server.now());
+                }
+                ready.set(true);
+            });
+            await("ready", ready::get);
+            await("all level 40", () -> {
+                try {
+                    return self(a).level() >= 40 && self(b).level() >= 40 && self(c).level() >= 40
+                            && seen(b, "Ivo") != null && seen(c, "Ivo") != null;
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            int janFull = self(b).health(), olaFull = self(c).health();
+
+            // bez trybu PvP: obszar omija graczy (nie ma w co trafic)
+            a.send("ACT", "cast:flame_ring");
+            awaitMessage(a, "no target", m -> m[0].equals("LOG") && m[2].contains(pl.fawizja.pixel.magic.CastResult.NO_TARGET.message));
+            assertEquals(janFull, self(b).health());
+            assertEquals(olaFull, self(c).health());
+            assertEquals("NONE", seen(b, "Ivo").mark());
+
+            // w trybie PvP: krag ognia rani Jana i Ole, Ivo dostaje biala czaszke i blokade PZ
+            a.send("ACT", "pvp");
+            awaitMessage(a, "pvp on", m -> m[0].equals("PVP") && m[1].equals("1"));
+            a.send("ACT", "cast:flame_ring");
+            awaitMessage(a, "white skull and pz block", m -> m[0].equals("PVP") && m[2].equals("WHITE")
+                    && Long.parseLong(m[4]) > 0);
+            await("both hurt, everyone sees the skull", () -> {
+                try {
+                    return self(b).health() < janFull && self(c).health() < olaFull
+                            && "WHITE".equals(seen(b, "Ivo").mark()) && "WHITE".equals(seen(c, "Ivo").mark());
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            assertFalse(seen(c, "Jan").pvpMode());
+
+            // Jan bez trybu PvP bije agresora: wolno, bez czaszki dla Jana
+            int ivoHp = self(a).health();
+            b.send("ATTACK", String.valueOf(ivoId));
+            await("jan fights ivo", () -> {
+                try {
+                    return b.frame().playerTargetId() == ivoId && self(a).health() < ivoHp;
+                } catch (Exception e) {
+                    return false;
+                }
+            }, 20_000);
+            assertEquals("NONE", b.frame().skull(), "attacking an aggressor is free");
+            assertEquals("NONE", seen(c, "Jan").mark());
         }
     }
 
@@ -342,6 +425,7 @@ class NetworkSyncTest {
                 weak.set(true);
             });
             await("weak", weak::get);
+            a.send("PVP", "ON");
             a.send("ATTACK", String.valueOf(janId));
             // Jan regeneruje sie miedzy ciosami (paladyn moze chybic) - oslabiamy go ponownie, az padnie
             long[] lastWeaken = {System.currentTimeMillis()};

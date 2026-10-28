@@ -90,3 +90,5 @@ bossq_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=632,42
 monsters_desert|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=150 -Dpixel.teleport=127,383,0
 monsters_peaks|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.startLevel=500 -Dpixel.teleport=652,53,0
 monsters_abyss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=700 -Dpixel.teleport=226,636,-3
+pvp|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pvp
+pzblock|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pzblock

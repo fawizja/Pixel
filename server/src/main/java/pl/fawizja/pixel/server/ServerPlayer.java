@@ -26,6 +26,8 @@ final class ServerPlayer {
     long lastReportMs = -1_000_000;
     /** Ostatnio wyslany wiersz wyzwania ("-" = brak). */
     String lastChallenge = "-";
+    /** Ostatnio wyslany wiersz PVP (tryb, czaszka, blokada PZ). */
+    String lastPvp;
     /** Gracz oglosil, ze szuka druzyny (/szukam; tylko w pamieci). */
     boolean lookingForParty;
 

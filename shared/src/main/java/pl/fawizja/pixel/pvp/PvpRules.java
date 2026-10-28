@@ -17,23 +17,32 @@ import pl.fawizja.pixel.world.WorldMap;
  * <ul>
  *   <li>postacie ponizej poziomu {@link #PROTECTION_LEVEL} nie atakuja i nie sa atakowane przez graczy,</li>
  *   <li>w strefie ochronnej (PZ) nie ma walki - ani atakujacy, ani cel nie moga w niej stac,</li>
+ *   <li>tryb PvP (przelacznik czaszki, {@link PlayerCharacter#pvpMode()}): wylaczony = nie atakujesz graczy
+ *       i obszarowe czary/runy omijaja graczy; wyjatek - gracz z czaszka (agresor) jest celem dla kazdego,</li>
  *   <li>nie mozna atakowac postaci o ponad polowe slabszej (chyba ze ma czaszke),</li>
- *   <li>atak na gracza bez czaszki daje biala czaszke na {@link #WHITE_SKULL_MS},</li>
- *   <li>{@link #RED_SKULL_KILLS} nieusprawiedliwione zabojstwa w {@link #KILL_WINDOW_MS} daja czerwona
- *       czaszke na {@link #RED_SKULL_MS}; smierc z czerwona czaszka = caly plecak zostaje na ziemi,</li>
+ *   <li>trafienie gracza bez czaszki (atak, czar, runa, obszar) daje biala czaszke i blokade wejscia do PZ
+ *       na {@link #WHITE_SKULL_MS} (60 s), odnawiane kazdym kolejnym takim trafieniem,</li>
+ *   <li>zabicie gracza bez czaszki daje czerwona czaszke i blokade PZ na {@link #KILL_SKULL_MS} (10 min);
+ *       {@link #RED_SKULL_KILLS} takie zabojstwa w {@link #KILL_WINDOW_MS} wydluzaja czerwona czaszke do
+ *       {@link #RED_SKULL_MS}; smierc z czerwona czaszka = caly plecak zostaje na ziemi,</li>
+ *   <li>atak na gracza z czaszka jest "darmowy": bez czaszki i bez blokady PZ dla atakujacego,</li>
  *   <li>PvP nie daje doswiadczenia (brak "farmienia" znajomych), obrazenia graczom sa o polowe mniejsze.</li>
  * </ul>
  */
 public final class PvpRules {
 
     public static final int PROTECTION_LEVEL = 30;
-    public static final long WHITE_SKULL_MS = 15 * 60_000L;
+    /** Biala czaszka (i blokada PZ) po trafieniu gracza bez czaszki. */
+    public static final long WHITE_SKULL_MS = 60_000L;
+    /** Czerwona czaszka (i blokada PZ) po zabiciu gracza bez czaszki. */
+    public static final long KILL_SKULL_MS = 10 * 60_000L;
+    /** Czerwona czaszka po {@link #RED_SKULL_KILLS} nieusprawiedliwionych zabojstwach w {@link #KILL_WINDOW_MS}. */
     public static final long RED_SKULL_MS = 6 * 3_600_000L;
     public static final long KILL_WINDOW_MS = 24 * 3_600_000L;
     public static final int RED_SKULL_KILLS = 3;
     public static final double PVP_DAMAGE = 0.5;
-    /** Po walce z graczem (atak lub trafienie) nie mozna wejsc do strefy ochronnej przez ten czas. */
-    public static final long FIGHT_LOCK_MS = 60_000L;
+    /** Po nieusprawiedliwionym trafieniu gracza nie mozna wejsc do strefy ochronnej przez ten czas. */
+    public static final long FIGHT_LOCK_MS = WHITE_SKULL_MS;
 
     public enum Skull { NONE, WHITE, RED }
 
@@ -45,6 +54,7 @@ public final class PvpRules {
         TARGET_PROTECTED("Ten gracz jest chroniony (poniżej poziomu " + PROTECTION_LEVEL + ")."),
         PROTECTION_ZONE("W strefie ochronnej nie ma walki."),
         LEVEL_GAP("Ten gracz jest o wiele słabszy - nie możesz go zaatakować."),
+        PVP_OFF("Włącz tryb PvP (czaszka obok ekwipunku albo /pvp), aby atakować graczy."),
         OTHER_FLOOR("Cel jest na innym piętrze.");
 
         public final String message;
@@ -71,6 +81,18 @@ public final class PvpRules {
 
         /** Do kiedy trwa blokada strefy ochronnej po walce z graczem (czas serwera). */
         public long fightUntil() { return fightUntil; }
+
+        /** Czy postac ma czaszke (jest agresorem) - wtedy kazdy moze ja atakowac, takze bez trybu PvP. */
+        public boolean aggressor(long now) { return skull(now) != Skull.NONE; }
+
+        /** Kiedy znika obecna czaszka (0 = brak). */
+        public long skullUntil(long now) {
+            if (now < redUntil) return redUntil;
+            return now < whiteUntil ? whiteUntil : 0;
+        }
+
+        /** Pozostaly czas blokady wejscia do strefy ochronnej (0 = brak). */
+        public long pzBlockedMs(long now) { return Math.max(0, fightUntil - now); }
 
         /**
          * Zapis na dysk: czasy jako zegar scienny (czas serwera liczy sie od startu procesu), wiec czaszki
@@ -164,6 +186,7 @@ public final class PvpRules {
         if (world.isProtectionZone(a.position()) || world.isProtectionZone(b.position())) return Verdict.PROTECTION_ZONE;
         if (duel) return Verdict.OK; // pojedynek: poziomy bez znaczenia
         boolean marked = bStatus != null && bStatus.skull(now) != Skull.NONE;
+        if (!marked && !a.pvpMode()) return Verdict.PVP_OFF; // agresora (z czaszka) wolno bic bez trybu PvP
         if (!marked && b.level() * 2 < a.level()) return Verdict.LEVEL_GAP;
         return Verdict.OK;
     }
@@ -204,15 +227,16 @@ public final class PvpRules {
         PlayerCharacter a = attacker.character();
         PlayerCharacter b = victim.character();
         if (vs.duelling(a.name())) return duelHit(attacker, as, victim, vs, raw, type, now, rng);
-        as.fightUntil = Math.max(as.fightUntil, now + FIGHT_LOCK_MS);
-        vs.fightUntil = Math.max(vs.fightUntil, now + FIGHT_LOCK_MS);
-        attacker.lockProtectionZonesUntil(as.fightUntil);
-        victim.lockProtectionZonesUntil(vs.fightUntil);
         boolean justified = vs.skull(now) != Skull.NONE;
-        if (!justified && as.skull(now) == Skull.NONE) {
-            attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowałeś gracza " + b.name() + " - biała czaszka na 15 min.");
+        if (!justified) {
+            // agresja: biala czaszka i blokada PZ (odnawiane kazdym trafieniem); bicie agresora jest darmowe
+            if (as.skull(now) == Skull.NONE) {
+                attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowałeś gracza " + b.name()
+                        + " - biała czaszka, strefa ochronna zamknięta na " + WHITE_SKULL_MS / 1000 + " s.");
+            }
+            as.whiteUntil = Math.max(as.whiteUntil, now + WHITE_SKULL_MS);
+            block(attacker, as, now + WHITE_SKULL_MS);
         }
-        if (!justified) as.whiteUntil = Math.max(as.whiteUntil, now + WHITE_SKULL_MS);
         raw = (int) Math.round(raw * PVP_DAMAGE);
         int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, b.isDefensive(), rng);
         int dealt = b.damage(dmg);
@@ -228,13 +252,32 @@ public final class PvpRules {
         attacker.log().add(now, EventLog.Kind.WARNING, "Zabiłeś gracza " + b.name() + ".");
         if (!justified) {
             as.unjustKills.addLast(now);
-            if (as.unjustKills(now) >= RED_SKULL_KILLS) {
-                as.redUntil = now + RED_SKULL_MS;
-                attacker.log().add(now, EventLog.Kind.WARNING,
-                        "Czerwona czaszka: przy smierci stracisz caly plecak (6 h).");
-            }
+            long red = as.unjustKills(now) >= RED_SKULL_KILLS ? RED_SKULL_MS : KILL_SKULL_MS;
+            as.redUntil = Math.max(as.redUntil, now + red);
+            block(attacker, as, now + KILL_SKULL_MS);
+            attacker.log().add(now, EventLog.Kind.WARNING, "Czerwona czaszka na "
+                    + (red == RED_SKULL_MS ? "6 h" : KILL_SKULL_MS / 60_000 + " min")
+                    + ": strefa ochronna zamknięta na " + KILL_SKULL_MS / 60_000 + " min, przy śmierci stracisz cały plecak.");
         }
         return Outcome.KILLED;
+    }
+
+    /**
+     * Stan jak po trafieniu (WHITE) albo zabiciu (RED) gracza bez czaszki - podglad na zrzutach ekranu
+     * (-Dpixel.open=pvp|pzblock), bez drugiego gracza.
+     */
+    public static void markForPreview(Status st, Skull skull, long now) {
+        long ms = skull == Skull.RED ? KILL_SKULL_MS : WHITE_SKULL_MS;
+        if (skull == Skull.RED) st.redUntil = Math.max(st.redUntil, now + ms);
+        else if (skull == Skull.WHITE) st.whiteUntil = Math.max(st.whiteUntil, now + ms);
+        else return;
+        st.fightUntil = Math.max(st.fightUntil, now + ms);
+    }
+
+    /** Blokada wejscia do PZ do czasu until (tylko wydluza) - w stanie PvP i w sesji gracza. */
+    private static void block(GameSession s, Status st, long until) {
+        st.fightUntil = Math.max(st.fightUntil, until);
+        s.lockProtectionZonesUntil(st.fightUntil);
     }
 
     /** Trafienie w pojedynku: bez czaszek i blokady PZ; cios, ktory by zabil, konczy pojedynek przy 1 HP. */

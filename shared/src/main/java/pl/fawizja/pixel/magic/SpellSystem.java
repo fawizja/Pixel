@@ -54,6 +54,24 @@ public final class SpellSystem {
 
         /** Zadaje obrazenia czaru; false, gdy zasady PvP na to nie pozwalaja. */
         boolean strike(int amount, DamageType type, long now);
+
+        /**
+         * Czar/runa obszarowa: trafia graczy w promieniu radius od center, ktorych zasady PvP pozwalaja zaatakowac
+         * (tryb PvP wlaczony albo gracz z czaszka); reach = zasieg wzroku od srodka. Zwraca liczbe trafionych.
+         * Domyslnie (bez listy graczy) tylko wybrany cel-gracz.
+         */
+        default int strikeArea(Position center, int radius, java.util.function.Predicate<Position> reach,
+                               java.util.function.IntSupplier amount, DamageType type, long now) {
+            Position p = position();
+            if (p == null || p.z() != center.z() || p.distanceTo(center) > radius || !reach.test(p)) return 0;
+            return strike(amount.getAsInt(), type, now) ? 1 : 0;
+        }
+
+        /** Czy w obszarze stoi gracz, ktorego wolno trafic (czar obszarowy bez potworow w zasiegu). */
+        default boolean anyInArea(Position center, int radius, java.util.function.Predicate<Position> reach) {
+            Position p = position();
+            return p != null && p.z() == center.z() && p.distanceTo(center) <= radius && reach.test(p);
+        }
     }
 
     public void setPlayerTargeting(PlayerTargeting t) { playerTarget = t; }
@@ -183,7 +201,7 @@ public final class SpellSystem {
             case ATTACK_AREA:
                 combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), s.damageType().name()));
                 for (Monster m : targetsAround(pc.position(), s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
-                if (playerInArea(pc.position(), s.radius())) playerTarget.strike(roll(s), s.damageType(), now);
+                strikePlayers(pc.position(), s, now);
                 return CastResult.OK;
             case RUNE_AREA: {
                 Position pvp = playerTargetPosition();
@@ -191,7 +209,7 @@ public final class SpellSystem {
                 combat.addEvent(CombatEvent.projectile(now, pc.position(), center, s.damageType().name()));
                 combat.addEvent(CombatEvent.area(now, center, s.radius(), s.damageType().name()));
                 for (Monster m : targetsAround(center, s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
-                if (playerInArea(center, s.radius())) playerTarget.strike(roll(s), s.damageType(), now);
+                strikePlayers(center, s, now);
                 return CastResult.OK;
             }
             case LIGHT:
@@ -221,10 +239,15 @@ public final class SpellSystem {
         }
     }
 
-    /** Czy cel-gracz stoi w obszarze czaru (obszar trafia tylko w wybrany cel, nie w przypadkowych graczy). */
+    /** Czy w obszarze czaru stoi gracz, ktorego zasady PvP pozwalaja trafic. */
     private boolean playerInArea(Position center, int radius) {
-        Position p = playerTarget == null ? null : playerTarget.position();
-        return p != null && p.z() == center.z() && p.distanceTo(center) <= radius && world.hasLineOfSight(center, p);
+        return playerTarget != null && playerTarget.anyInArea(center, radius, p -> world.hasLineOfSight(center, p));
+    }
+
+    /** Obszar trafia graczy (tryb PvP albo agresorzy) - zasady w implementacji PlayerTargeting (PvpTargeting). */
+    private void strikePlayers(Position center, SpellType s, long now) {
+        if (playerTarget == null) return;
+        playerTarget.strikeArea(center, s.radius(), p -> world.hasLineOfSight(center, p), () -> roll(s), s.damageType(), now);
     }
 
     private List<Monster> targetsAround(Position center, int radius) {

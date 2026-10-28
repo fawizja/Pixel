@@ -1803,26 +1803,32 @@ final class ServerWorld {
             s.teleport(freeSpotNear(evict), now);
             s.log().add(now, EventLog.Kind.INFO, "Arena jest zamknięta - wracasz do przedsionka.");
         }
-        s.spells().setPlayerTargeting(new pl.fawizja.pixel.magic.SpellSystem.PlayerTargeting() {
-            @Override
-            public Position position() {
-                ServerPlayer t = p.pvpTarget < 0 ? null : players.get(p.pvpTarget);
-                return t == null ? null : t.session.character().position();
-            }
-
-            @Override
-            public boolean strike(int amount, pl.fawizja.pixel.combat.DamageType type, long t) {
-                ServerPlayer v = p.pvpTarget < 0 ? null : players.get(p.pvpTarget);
-                if (v == null) return false;
-                PvpRules.Outcome o = PvpRules.spellHit(p.session, p.pvp, v.session, v.pvp, amount, type, world, t, pvpRng);
-                if (o == PvpRules.Outcome.KILLED) {
-                    p.pvpTarget = -1;
-                    claimBounty(p, v, t);
-                }
-                if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
-                return o != PvpRules.Outcome.NOT_ALLOWED;
-            }
-        });
+        s.setPvpStatus(p.pvp);
+        // czary i runy na graczy: cel-gracz i (obszar) wszyscy gracze w zasiegu - zasady w PvpRules.check
+        s.spells().setPlayerTargeting(new pl.fawizja.pixel.pvp.PvpTargeting(s,
+                () -> {
+                    ServerPlayer t = p.pvpTarget < 0 ? null : players.get(p.pvpTarget);
+                    return t == null ? null : t.session;
+                },
+                () -> {
+                    List<GameSession> near = new ArrayList<>();
+                    for (ServerPlayer o : players.values()) if (o != p) near.add(o.session);
+                    return near;
+                },
+                (me, other) -> {
+                    ServerPlayer o = bySession(other);
+                    return o != null && sameParty(p, o);
+                },
+                world, pvpRng,
+                (victim, o, t) -> {
+                    ServerPlayer v = bySession(victim);
+                    if (v == null) return;
+                    if (o == PvpRules.Outcome.KILLED) {
+                        if (p.pvpTarget == v.id) p.pvpTarget = -1;
+                        claimBounty(p, v, t);
+                    }
+                    if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
+                }));
         s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
         s.combat().setDeathListener(m -> {
             invasionKill(p, m);
@@ -2366,6 +2372,10 @@ final class ServerWorld {
             case "HOUSE": houseCommand(p, f, now); break;
             case "BOUNTY": bountyCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
+            case "PVP": // PVP ON|OFF|TOGGLE - przelacznik trybu PvP (tez ACT pvp)
+                if (f.length < 2 || f[1].equals("TOGGLE")) p.session.togglePvpMode(now);
+                else if (f[1].equals("ON") != p.session.pvpMode()) p.session.togglePvpMode(now);
+                break;
             case "TITLE": p.session.chooseTitle(f.length > 1 ? f[1] : null, now); break;
             case "OUTFIT": p.session.chooseOutfit(f.length > 1 ? f[1] : null, now); break;
             case "DEATH": {
@@ -2703,6 +2713,11 @@ final class ServerWorld {
         return true;
     }
 
+    private ServerPlayer bySession(GameSession s) {
+        for (ServerPlayer o : players.values()) if (o.session == s) return o;
+        return null;
+    }
+
     /** Wybor gracza do ataku: zasady sprawdzane od razu, by gracz dostal czytelna odpowiedz. */
     void attackPlayer(ServerPlayer p, int id, long now) {
         ServerPlayer t = players.get(id);
@@ -3030,6 +3045,13 @@ final class ServerWorld {
                 p.client.send("CHAL", chLine); // stan wyzwania ze zwoju (zmienia sie co sekunde)
                 p.lastChallenge = chLine;
             }
+            // tryb PvP, czaszka i blokada PZ (czas serwera) - tylko po zmianie
+            String pvpLine = Protocol.line("PVP", p.session.pvpMode() ? "1" : "0", p.pvp.skull(now).name(),
+                    String.valueOf(p.pvp.skullUntil(now)), String.valueOf(p.pvp.fightUntil() > now ? p.pvp.fightUntil() : 0));
+            if (!pvpLine.equals(p.lastPvp)) {
+                p.client.send(Protocol.parse(pvpLine));
+                p.lastPvp = pvpLine;
+            }
             Position me = p.session.character().position();
             StringBuilder frame = new StringBuilder();
             frame.append(Protocol.line("ME", String.valueOf(me.x()), String.valueOf(me.y()), String.valueOf(me.z()),
@@ -3045,7 +3067,8 @@ final class ServerWorld {
                         String.valueOf(op.x()), String.valueOf(op.y()), String.valueOf(op.z()),
                         String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())), o.pvp.skull(now).name(),
                         guildTag(oc.name()), oc.isMounted() ? "M" : "-", oc.pet() == null ? "-" : oc.pet(),
-                        oc.title() == null ? "-" : oc.title(), String.valueOf(oc.outfit()))).append('\n');
+                        oc.title() == null ? "-" : oc.title(), String.valueOf(oc.outfit()),
+                        o.session.pvpMode() ? "P" : "-")).append('\n');
             }
             for (Monster m : monsters.near(me, Protocol.VIEW_RADIUS)) {
                 if (m.isDead() || m.position().z() != me.z()) continue;

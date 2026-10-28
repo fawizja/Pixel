@@ -367,6 +367,39 @@ public final class PlayerCharacter {
     public boolean isDefensive() { return defensive; }
     public void setDefensive(boolean defensive) { this.defensive = defensive; }
 
+    // ------------------------------------------------------------------ PvP (tylko w pamieci, bez zapisu)
+    // Tryb PvP, czaszka i blokada PZ nie sa kodowane w CharacterCodec ani kopiowane w copyFrom: po zalogowaniu
+    // tryb jest wylaczony, a czaszke i blokade ustawia serwer (PvpRules.Status) albo komunikat PVP u klienta.
+    private boolean pvpMode;
+    private pl.fawizja.pixel.pvp.PvpRules.Skull skull = pl.fawizja.pixel.pvp.PvpRules.Skull.NONE;
+    private long skullUntilMs;
+    private long pzBlockedUntilMs;
+
+    /** Tryb PvP (przelacznik czaszki): wlaczony = mozna atakowac graczy, obszar trafia graczy. */
+    public boolean pvpMode() { return pvpMode; }
+    public void setPvpMode(boolean on) { pvpMode = on; }
+
+    /** Czaszka postaci (NONE, WHITE, RED) wg ostatniej synchronizacji ze stanem PvP. */
+    public pl.fawizja.pixel.pvp.PvpRules.Skull skull() { return skull; }
+    /** Czaszka w chwili now (po uplywie czasu - NONE, nawet bez synchronizacji). */
+    public pl.fawizja.pixel.pvp.PvpRules.Skull skull(long now) {
+        return now < skullUntilMs ? skull : pl.fawizja.pixel.pvp.PvpRules.Skull.NONE;
+    }
+    /** Pozostaly czas czaszki w ms (0 = brak). */
+    public long skullMs(long now) { return skull == pl.fawizja.pixel.pvp.PvpRules.Skull.NONE ? 0 : Math.max(0, skullUntilMs - now); }
+    public void setSkull(pl.fawizja.pixel.pvp.PvpRules.Skull s, long untilMs) {
+        skull = s == null ? pl.fawizja.pixel.pvp.PvpRules.Skull.NONE : s;
+        skullUntilMs = skull == pl.fawizja.pixel.pvp.PvpRules.Skull.NONE ? 0 : untilMs;
+    }
+
+    /** Pozostaly czas blokady wejscia do strefy ochronnej w ms (0 = mozna wejsc). */
+    public long pzBlockedMs(long now) { return Math.max(0, pzBlockedUntilMs - now); }
+    public long pzBlockedUntil() { return pzBlockedUntilMs; }
+    /** Blokada PZ do czasu until; tylko wydluza (kazda nowa agresja odnawia licznik). */
+    public void blockPzUntil(long untilMs) { pzBlockedUntilMs = Math.max(pzBlockedUntilMs, untilMs); }
+    /** Ustawia blokade dokladnie (klient - stan z serwera). */
+    public void setPzBlockedUntil(long untilMs) { pzBlockedUntilMs = untilMs; }
+
     /** Zapala lub gasi pochodnie; zapalic mozna tylko majac pochodnie w plecaku. */
     public boolean setTorchLit(boolean lit, int torchItemId) {
         if (lit && backpack.count(torchItemId) == 0) return false;

@@ -58,6 +58,10 @@ public final class Hud {
     private final HudButton fish = new HudButton("fish", "ŁÓW");
     private final HudButton talk = new HudButton("talk", "ROZMOWA");
     private final HudButton mount = new HudButton("mount", "KOŃ");
+    /** Przelacznik trybu PvP: biala czaszka = wylaczony, czerwona = wlaczony. */
+    private final HudButton pvp = new HudButton("pvp", "");
+    /** Ikony czaszek (tools/art/skull_icons.py, assets/ui/pvp); null bez plikow - wtedy napis. */
+    private TextureRegion skullWhite, skullRed, pvpOffIcon, pvpOnIcon;
     private boolean chatEnabled;
     /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
     private boolean npcMode;
@@ -584,7 +588,32 @@ public final class Hud {
         return "arcane";
     }
 
+    private static TextureRegion pvpIcon(String name) {
+        if (Gdx.files == null) return null;
+        com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("ui/pvp/" + name + ".png");
+        if (!f.exists()) f = Gdx.files.internal("assets/ui/pvp/" + name + ".png");
+        if (!f.exists()) return null;
+        return new TextureRegion(new com.badlogic.gdx.graphics.Texture(f)); // pixel art: domyslnie Nearest
+    }
+
+    /** Ikona czaszki dla "WHITE"/"RED" (jak w protokole) albo null (brak czaszki lub grafiki). */
+    public TextureRegion skullIcon(String skull) {
+        if ("RED".equals(skull)) return skullRed;
+        if ("WHITE".equals(skull)) return skullWhite;
+        return null;
+    }
+
+    public TextureRegion whiteRegion() { return art.white(); }
+
     private void loadUiImages() {
+        try {
+            skullWhite = pvpIcon("skull_white");
+            skullRed = pvpIcon("skull_red");
+            pvpOffIcon = pvpIcon("pvp_off");
+            pvpOnIcon = pvpIcon("pvp_on");
+        } catch (RuntimeException e) {
+            Gdx.app.error("Hud", "Brak ikon czaszek: " + e.getMessage());
+        }
         loadWstPanels();
         try {
             com.badlogic.gdx.graphics.Texture win = uiTexture("window.png");
@@ -638,6 +667,7 @@ public final class Hud {
         buttons.add(fish);
         buttons.add(talk);
         buttons.add(mount);
+        buttons.add(pvp);
         for (int i = 0; i < spellButtons.length; i++) {
             spellButtons[i] = new HudButton("spell:" + i, "");
             buttons.add(spellButtons[i]);
@@ -690,8 +720,8 @@ public final class Hud {
 
     /** Przyciski akcji obok ekwipunku (2026-10-28: dawny pasek nad konsola) - widoczne w kolejnosci. */
     private final HudButton[] actionButtons = {target, use, book, bag, talk, pick, fish, mount};
-    /** Przelaczniki obok ekwipunku: diagnostyka, bieg, postawa obronna, pochodnia. */
-    private final HudButton[] toggleButtons = {diag, run, defensive, torch};
+    /** Przelaczniki obok ekwipunku: diagnostyka, bieg, postawa obronna, pochodnia, tryb PvP (czaszka). */
+    private final HudButton[] toggleButtons = {diag, run, defensive, torch, pvp};
 
     private List<HudButton> visibleActions() {
         List<HudButton> out = new ArrayList<>();
@@ -2293,8 +2323,11 @@ public final class Hud {
         bag.visible = !equipPanelVisible();
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
-        run.visible = defensive.visible = torch.visible = !diagnosticsOpen; // pod panelem diagnostyki
+        run.visible = defensive.visible = torch.visible = pvp.visible = !diagnosticsOpen; // pod panelem diagnostyki
         defensive.active = pc.isDefensive();
+        pvp.active = pc.pvpMode();
+        pvp.icon = pc.pvpMode() ? pvpOnIcon : pvpOffIcon;
+        if (pvp.icon == null) pvp.label = pc.pvpMode() ? "PvP!" : "PvP";
         book.active = menuOpen && !npcMode && pickSlot < 0 && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null && !achievementsView;
         if (playerMenu != null && !menuOpen) playerMenu = null;
         if (rankingView != null && !menuOpen) rankingView = null;
@@ -2540,6 +2573,7 @@ public final class Hud {
 
         drawConsole(batch);
         drawStatus(batch);
+        drawOwnSkull(batch, pc, serverTimeMs);
 
         for (HudButton b : buttons) {
             if (!b.visible || underMenu(b.x, b.y)) continue;
@@ -2724,6 +2758,30 @@ public final class Hud {
         for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
             if (pc.enchantments().active(k)) { statuses.add(Status.ENCHANT); break; }
         }
+    }
+
+    /**
+     * Wlasna czaszka i pozostaly czas blokady PZ (na razie na gornym pasku, na lewo od ikon stanu; docelowo
+     * w polu ekwipunku na lewo od butow). Dane: {@link PlayerCharacter#skull(long)}, {@link PlayerCharacter#pzBlockedMs(long)}.
+     */
+    private void drawOwnSkull(SpriteBatch batch, PlayerCharacter pc, long nowMs) {
+        pl.fawizja.pixel.pvp.PvpRules.Skull sk = pc.skull(nowMs);
+        long left = Math.max(pc.skullMs(nowMs), pc.pzBlockedMs(nowMs));
+        if (sk == pl.fawizja.pixel.pvp.PvpRules.Skull.NONE && left <= 0) return;
+        long sec = (left + 999) / 1000;
+        String time = sec >= 3600 ? (sec / 3600) + " h" : (sec / 60) + ":" + String.format("%02d", sec % 60);
+        font.getData().setScale(0.8f);
+        layout.setText(font, time);
+        float is = STATUS_SIZE + 2;
+        float right = statusX() - 6;
+        float tx = right - layout.width;
+        float y0 = h - 4 - STATUS_SIZE - 1;
+        TextureRegion icon = skullIcon(sk.name());
+        if (icon != null) batch.draw(icon, tx - is - 2, y0, is, is);
+        font.setColor(sk == pl.fawizja.pixel.pvp.PvpRules.Skull.RED ? new Color(1f, 0.45f, 0.4f, 1f) : Color.WHITE);
+        font.draw(batch, time, tx, y0 + is - 3);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
     }
 
     /** Ikony stanu wyrownane do prawej krawedzi gornego paska. */

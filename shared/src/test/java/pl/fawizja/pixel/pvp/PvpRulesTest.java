@@ -25,6 +25,7 @@ class PvpRulesTest {
         pc.addExperience(Balance.experienceForLevel(level) - pc.experience());
         pc.setPosition(p);
         pc.heal(pc.maxHealth());
+        pc.setPvpMode(true); // te testy dotycza zasad walki; tryb PvP wylaczony: PvpModeTest
         return new GameSession(TestData.ITEMS, W, pc);
     }
 
@@ -144,6 +145,7 @@ class PvpRulesTest {
                 pl.fawizja.pixel.config.StartingConfig.loadDefault(), TestData.ITEMS).create(name, v, p);
         pc.addExperience(Balance.experienceForLevel(50) - pc.experience());
         pc.heal(pc.maxHealth());
+        pc.setPvpMode(true);
         return new GameSession(TestData.ITEMS, W, pc);
     }
 
@@ -154,7 +156,8 @@ class PvpRulesTest {
         Status as = new Status(), bs = new Status();
         assertEquals(Outcome.HIT, PvpRules.attack(a, as, b, bs, W, 10_000, new Random(1)));
         assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, as.fightUntil());
-        assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, b.protectionZoneLockedUntil(), "the victim is locked too");
+        assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, a.protectionZoneLockedUntil());
+        assertEquals(0, b.protectionZoneLockedUntil(), "the victim may flee into the protection zone");
 
         // pole tuz przed strefa ochronna
         Position edge = null;
@@ -180,7 +183,7 @@ class PvpRulesTest {
         a.character().setPosition(edge);
         a.update(20_000, into);
         assertEquals(edge, a.character().position(), "locked out of the protection zone");
-        assertTrue(a.log().latest(5).stream().anyMatch(e -> e.text().contains("strefa ochronna zamknięta")));
+        assertTrue(a.log().latest(5).stream().anyMatch(e -> e.text().contains("nie wejdziesz do strefy ochronnej")));
         a.update(20_000 + PvpRules.FIGHT_LOCK_MS, into);
         assertTrue(W.isProtectionZone(a.character().position()), "open again after the lock");
     }
@@ -231,7 +234,7 @@ class PvpRulesTest {
         assertTrue(knight.character().health() < hp, "the spell hurts the player");
         assertTrue(sorc.character().mana() < mana);
         assertEquals(Skull.WHITE, ss.skull(10_000), "an unjustified spell gives a white skull");
-        assertTrue(knight.protectionZoneLockedUntil() > 10_000);
+        assertTrue(sorc.protectionZoneLockedUntil() > 10_000);
 
         // runa na obszar trafia wybranego gracza; runa celowana tez
         sorc.character().skills().set(pl.fawizja.pixel.character.Skill.MAGIC, 10, 0);

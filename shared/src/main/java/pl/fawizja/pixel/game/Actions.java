@@ -19,6 +19,7 @@ public final class Actions {
             case "loot": s.searchCorpse(now); return true;
             case "target": s.cycleTarget(now); return true;
             case "defensive": s.toggleDefensive(now); return true;
+            case "pvp": s.togglePvpMode(now); return true;
             case "fish": s.fish(now); return true;
             case "sort": s.sortBackpack(now); return true;
             case "bag_detach": s.detachBag(now); return true;

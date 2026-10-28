@@ -87,7 +87,6 @@ public final class GameSession {
     /** Czas ostatniego kroku symulacji (ms). */
     public long lastUpdateMs() { return lastUpdateMs; }
     private long lastGateWarningMs = -10_000;
-    private long pzLockedUntil;
     private long lastPzWarningMs = -10_000;
 
     /** Sesja bez potworow (testy, edytor). */
@@ -433,7 +432,7 @@ public final class GameSession {
 
     /** Odpoczynek: postac w strefie ochronnej, bez blokady po walce - szybsza regeneracja. */
     public boolean isResting(long nowMs) {
-        return !pc.isDead() && nowMs >= pzLockedUntil && world.isProtectionZone(pc.position());
+        return !pc.isDead() && nowMs >= pc.pzBlockedUntil() && world.isProtectionZone(pc.position());
     }
 
     /** " (Krainy Varden)" - gdzie szukac potwora z zadania; pusty tekst, gdy nie ma go na mapie. */
@@ -1202,9 +1201,9 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? ": tam nie pływam." : ": tam nie jeżdżę."));
             return false;
         }
-        if (nowMs < pzLockedUntil) {
+        if (nowMs < pc.pzBlockedUntil()) {
             log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": po walce z graczem nie zabiorę cię jeszcze przez "
-                    + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
+                    + ((pc.pzBlockedUntil() - nowMs + 999) / 1000) + " s.");
             return false;
         }
         Position dest = null;
@@ -1480,9 +1479,9 @@ public final class GameSession {
     public boolean recalling() { return recallAtMs >= 0; }
 
     private CastResult startRecall(long nowMs) {
-        if (nowMs < pzLockedUntil) {
+        if (nowMs < pc.pzBlockedUntil()) {
             log.add(nowMs, EventLog.Kind.WARNING, "Po walce z graczem zwój nie działa jeszcze przez "
-                    + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
+                    + ((pc.pzBlockedUntil() - nowMs + 999) / 1000) + " s.");
             return CastResult.OK;
         }
         if (world.templeOf(pc.homeTown()) == null) return CastResult.OK;
@@ -1495,7 +1494,7 @@ public final class GameSession {
 
     private void updateRecall(long nowMs) {
         if (recallAtMs < 0) return;
-        if (!pc.position().equals(recallFrom) || pc.health() < recallHealth || pc.isDead() || nowMs < pzLockedUntil) {
+        if (!pc.position().equals(recallFrom) || pc.health() < recallHealth || pc.isDead() || nowMs < pc.pzBlockedUntil()) {
             recallAtMs = -1;
             log.add(nowMs, EventLog.Kind.WARNING, "Skupienie przerwane - zwój nie zadziałał.");
             return;
@@ -1825,6 +1824,7 @@ public final class GameSession {
 
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
     public void update(long nowMs, Direction requested) {
+        syncPvp(nowMs);
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         checkBoost(nowMs);
@@ -1983,19 +1983,63 @@ public final class GameSession {
      * schody, dziury i inne przejscia czekaja na serwer. Zwraca true, gdy krok sie zaczal.
      */
     /** Po walce z graczem: do tego czasu nie mozna wejsc do strefy ochronnej (mozna z niej wyjsc). */
-    public void lockProtectionZonesUntil(long untilMs) { pzLockedUntil = Math.max(pzLockedUntil, untilMs); }
+    public void lockProtectionZonesUntil(long untilMs) { pc.blockPzUntil(untilMs); }
 
-    public long protectionZoneLockedUntil() { return pzLockedUntil; }
+    public long protectionZoneLockedUntil() { return pc.pzBlockedUntil(); }
+
+    // ------------------------------------------------------------------ PvP: tryb i czaszka
+    /** Stan PvP (czaszki, blokada PZ). Serwer podmienia go na stan trzymany po imieniu (przetrwa wylogowanie). */
+    private pl.fawizja.pixel.pvp.PvpRules.Status pvpStatus = new pl.fawizja.pixel.pvp.PvpRules.Status();
+
+    public pl.fawizja.pixel.pvp.PvpRules.Status pvpStatus() { return pvpStatus; }
+
+    public void setPvpStatus(pl.fawizja.pixel.pvp.PvpRules.Status status) {
+        pvpStatus = java.util.Objects.requireNonNull(status);
+        syncPvp(lastUpdateMs < 0 ? 0 : lastUpdateMs);
+    }
+
+    /** Tryb PvP (przelacznik czaszki); po zalogowaniu zawsze wylaczony. */
+    public boolean pvpMode() { return pc.pvpMode(); }
+    public boolean isPvpMode() { return pc.pvpMode(); }
+    public void setPvpMode(boolean on) { pc.setPvpMode(on); }
+
+    /** Przelacza tryb PvP; zwraca nowy stan. */
+    public boolean togglePvpMode() {
+        pc.setPvpMode(!pc.pvpMode());
+        return pc.pvpMode();
+    }
+
+    /** Przelacza tryb PvP z komunikatem w dzienniku (przycisk czaszki, /pvp). */
+    public boolean togglePvpMode(long nowMs) {
+        boolean on = togglePvpMode();
+        log.add(nowMs, on ? EventLog.Kind.WARNING : EventLog.Kind.INFO, on
+                ? "Tryb PvP włączony: możesz atakować graczy, czary obszarowe ranią graczy (atak na gracza bez czaszki = biała czaszka)."
+                : "Tryb PvP wyłączony: atakujesz tylko graczy z czaszką.");
+        return on;
+    }
+
+    /** Przepisuje czaszke i blokade PZ ze stanu PvP do postaci (HUD, inne systemy). */
+    private void syncPvp(long nowMs) {
+        pl.fawizja.pixel.pvp.PvpRules.Skull sk = pvpStatus.skull(nowMs);
+        pc.setSkull(sk, pvpStatus.skullUntil(nowMs));
+        pc.blockPzUntil(pvpStatus.fightUntil());
+    }
+
+    /** Komunikat przy probie wejscia do PZ z blokada (czaszka po ataku na gracza). */
+    public String pzBlockedMessage(long nowMs) {
+        long left = (pc.pzBlockedUntil() - nowMs + 999) / 1000;
+        String time = left >= 60 ? (left / 60) + " min " + (left % 60) + " s" : left + " s";
+        return "Masz czaszkę po ataku na gracza - nie wejdziesz do strefy ochronnej jeszcze przez " + time + ".";
+    }
 
     private boolean pzLocked(Position from, Direction d, long nowMs) {
-        if (nowMs >= pzLockedUntil || world.isProtectionZone(from)) return false;
+        if (nowMs >= pc.pzBlockedUntil() || world.isProtectionZone(from)) return false;
         Position to = from.translate(d.dx, d.dy);
         pl.fawizja.pixel.world.Transition t = world.transitionAt(to);
         if (!world.isProtectionZone(to) && (t == null || !world.isProtectionZone(t.to()))) return false;
         if (nowMs - lastPzWarningMs > 3000) {
             lastPzWarningMs = nowMs;
-            log.add(nowMs, EventLog.Kind.WARNING, "Walczysz z graczem - strefa ochronna zamknięta jeszcze "
-                    + ((pzLockedUntil - nowMs + 999) / 1000) + " s.");
+            log.add(nowMs, EventLog.Kind.WARNING, pzBlockedMessage(nowMs));
         }
         return true;
     }
