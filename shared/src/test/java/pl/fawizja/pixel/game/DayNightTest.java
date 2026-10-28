@@ -10,7 +10,7 @@ import pl.fawizja.pixel.vocation.Vocation;
 /** Etap 11: zegar swiata w sesji, noc i jej wplyw na potwory. */
 class DayNightTest {
 
-    /** Godzina gry = 5 min czasu rzeczywistego (doba = 2 h: godzina dnia i godzina nocy). */
+    /** Godzina gry = 15 min czasu rzeczywistego (doba = 6 h: 3 h dnia i 3 h nocy). */
     static final long GAME_HOUR_MS = pl.fawizja.pixel.time.WorldClock.GAME_HOUR_MS;
 
     @Test

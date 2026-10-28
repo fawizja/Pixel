@@ -210,11 +210,17 @@ public final class MonsterManager {
     /** Czy potwor moze stanac na kafelku (bez graczy, innych potworow, stref ochronnych i przejsc). */
     /** Gracze z ostatniej aktualizacji - potwory nie wchodza na ich pola. */
     private List<? extends Target> bodies = Collections.emptyList();
+    /** Pola graczy na czas jednego update (wielu graczy: zamiast petli po liscie przy kazdym polu sciezki). */
+    private java.util.Set<Position> bodyCells;
 
     public boolean canOccupy(Position p, Position player) {
         if (!world.isWalkable(p) || world.isProtectionZone(p) || world.openings().isClosedDoor(p)) return false;
         if (player != null && player.equals(p)) return false;
-        for (Target b : bodies) if (p.equals(b.position())) return false; // inni gracze tez zajmuja pole
+        if (bodyCells != null) {
+            if (bodyCells.contains(p)) return false;
+        } else {
+            for (Target b : bodies) if (p.equals(b.position())) return false; // inni gracze tez zajmuja pole
+        }
         Transition t = world.transitionAt(p);
         if (t != null) return false;
         return grid.at(p) == null;
@@ -310,6 +316,18 @@ public final class MonsterManager {
      */
     public void update(long now, List<? extends Target> targets, AttackHandler handler) {
         bodies = targets;
+        if (targets.size() > 4) {
+            bodyCells = new java.util.HashSet<>();
+            for (Target tg : targets) bodyCells.add(tg.position());
+        }
+        try {
+            updateMonsters(now, targets, handler);
+        } finally {
+            bodyCells = null;
+        }
+    }
+
+    private void updateMonsters(long now, List<? extends Target> targets, AttackHandler handler) {
         updateNightSpawns(now, targets);
         for (Map.Entry<SpawnPoint, List<Long>> e : respawnQueue.entrySet()) {
             List<Long> times = e.getValue();
@@ -372,8 +390,9 @@ public final class MonsterManager {
 
     private boolean validTarget(Monster m, Target t) {
         Position tp = t.position();
-        return t.attackable() && tp.z() == m.position().z() && !world.isProtectionZone(tp)
-                && tp.distanceTo(m.position()) <= ACTIVE_RADIUS;
+        // najpierw tanie warunki (pietro, odleglosc): serwer sprawdza kazdego gracza dla kazdego aktywnego potwora
+        return tp.z() == m.position().z() && tp.distanceTo(m.position()) <= ACTIVE_RADIUS
+                && t.attackable() && !world.isProtectionZone(tp);
     }
 
     private Target chooseTarget(Monster m, List<? extends Target> targets) {

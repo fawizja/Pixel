@@ -242,7 +242,9 @@ rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
 
 ## Swiatlo, dzien i noc (C)
 
-- `WorldClock`: doba gry = 60 min, fazy swit/dzien/zmierzch/noc, plynne przejscia, noc min. 38% jasnosci.
+- `WorldClock`: doba gry = 6 h czasu rzeczywistego (`REAL_DAY_MS`): ok. 3 h jasno i 3 h ciemno, godzina gry = 15 min
+  (`GAME_HOUR_MS`; do 0.212 doba trwala 2 h). Fazy swit/dzien/zmierzch/noc, plynne przejscia, noc min. 38% jasnosci.
+  Czynsz, zaproszenia, odliczania i inne timery licza czas rzeczywisty i nie zaleza od dlugosci doby.
 - Podziemia: jasnosc maleje z glebokoscia, min. 16%; postac zawsze ma poswiate 2,5 kafelka.
 - Pochodnia z plecaka (POCH) - promien 5; pali sie 30 min czasu gry, potem znika i zapala sie nastepna
   (komunikat, gdy brak kolejnej). Zgaszona nie traci paliwa. Czas widac na karcie postaci.
@@ -393,14 +395,57 @@ przy pauzie, utracie fokusu i zamknieciu.
 
 ## Druzyny (Z logika, S serwer)
 
-- `party/PartyManager`: zaproszenie przez lidera (wazne 60 s), przyjecie, wyjscie; maks. 8 osob; po wyjsciu lidera
-  przywodztwo przechodzi na nastepnego, przy jednej osobie druzyna sie rozpada. Wylogowanie = wyjscie z druzyny.
-- `party/PartyRules`: doswiadczenie dzielone, gdy >= 2 zywych czlonkow jest na pietrze zabojcy w promieniu 30
-  i najnizszy poziom >= 2/3 najwyzszego. Udzial = solo(wlasny poziom) * (1 + 0,2 * (n - 1)) / n.
-  Bez spelnienia warunkow zabojca dostaje doswiadczenie sam. Zabicie liczy sie do zadan tylko zabojcy.
-- Klient: panel druzyny (imiona, HP% gdy widoczni, "daleko" poza zasiegiem), imiona niebieskie z [druzyna].
-- `CombatSystem.setExperienceSharer` - punkt podpiecia serwera. PvP miedzy czlonkami jest zablokowane.
-- Protokol: `PARTY INVITE|ACCEPT imie`, `PARTY LEAVE`, `PCHAT tekst`; serwer odsyla `PARTY imie1,imie2` albo `PARTY -`.
+- `party/PartyManager`: zaproszenie przez lidera (wazne 60 s), przyjecie, wyjscie, wyrzucenie przez lidera (`kick`);
+  maks. 8 osob; po wyjsciu lidera przywodztwo przechodzi na nastepnego, przy jednej osobie druzyna sie rozpada.
+  Wylogowanie = wyjscie z druzyny. Druzyna dziala tylko online (offline nie ma innych graczy).
+- `party/PartyRules` (etap 9, jak w Tibii): doswiadczenie dzielone, gdy >= 2 zywych czlonkow jest na pietrze zabojcy
+  w promieniu 30 pol od zabojcy i najnizszy poziom >= 2/3 najwyzszego (`minSharingLevel`) - inaczej nikt nie dzieli
+  (kazdy dostaje swoje zabicia sam). Premia = premia za liczbe osob + premia za rozne profesje, maks. +200%;
+  licza sie tylko czlonkowie dzielacy to zabicie:
+
+  | osoby | premia | | rozne profesje | premia |
+  |---|---|---|---|---|
+  | 2 | +20% | | 1 | +0% |
+  | 3 | +30% | | 2 | +20% |
+  | 4 | +35% | | 3 | +50% |
+  | 5+ | +40% | | 4 | +100% |
+  | | | | 5 | +160% |
+
+  Udzial = solo(wlasny poziom) * (100 + premia)% / n (pula dzielona po rowno, jak w Tibii). Przyklady:
+  2 osoby/1 profesja +20% -> 60% solo za zabicie; 2/2 +40% -> 70%; 3/3 +80% -> 60%; 4/4 +135% -> 59%;
+  5/1 +40% -> 28%; 5/5 (Knight, Paladin, Sorcerer, Druid, Monk) +200% -> pula x3,0, kazdy 60%.
+  Dlaczego podzial, a nie x3 dla kazdego: piec osob bijacych jednego potwora dostawaloby razem 15x tyle co solo i druzyna
+  bylaby obowiazkowa nawet na szczurach. Pelna, rozna piatka zabija kilka razy szybciej niz jedna postac (i daje rade
+  stadom w lepszych lowiskach), wiec na godzine kazdy zarabia ok. 2-3x tyle co solo; druzyna jednej profesji - malo
+  wiecej niz solo. Zabicie liczy sie do zadan dnia, zlecen i zadan calej druzyny obok.
+- Klient: panel druzyny (imiona, poziom i profesja, HP% gdy widoczni, "daleko" poza zasiegiem; w naglowku premia
+  "+200% exp" albo "bez wspolnego exp"), zakladka Druzyna pokazuje `PartyView.bonusLine()`; imiona niebieskie.
+- `CombatSystem.setExperienceSharer(type, expPercent, now)` - punkt podpiecia serwera. PvP miedzy czlonkami zablokowane.
+- Protokol: `PARTY INVITE|ACCEPT|KICK imie`, `PARTY LEAVE|INFO`, `PCHAT tekst`; serwer odsyla `PARTY imie1,imie2`
+  albo `PARTY -`, `PARTYINFO premia dzieli imie;poziom;PROFESJA;online ...` (`party/PartyView`, po kazdej zmianie
+  i co 3 s, gdy cos sie zmienilo), `PARTYINV lider` do zaproszonego. `PINFO imie` -> `PINFO imie;poziom;PROFESJA;gildia;online`
+  (`social/PlayerInfo`, z gry albo rankingu).
+- Czat: `/zaproś Imię`, `/przyjmij [Imię]` (bez imienia - najnowsze zaproszenie), `/opuść`, `/drużyna` (sklad i premia),
+  `/drużyna zaproś|przyjmij|wyrzuć|opuść Imię`, to samo po angielsku `/party invite|accept|kick|leave|info`.
+- API klienta (`social/SocialClient`, przez `GameSession`; dla okna po dotknieciu gracza): `invitePlayerToParty(name)`,
+  `acceptPartyInvite([leader])`, `leaveParty()`, `kickFromParty(name)`, `party()` (`PartyView`: czlonkowie z poziomem,
+  profesja i stanem, premia, `bonusLine()`), `playerInfo(name)` (`PlayerInfo`, online odpowiedz serwera przychodzi
+  asynchronicznie - `social().version()` rosnie), `addFriend(name)`, `removeFriend(name)`, `friends()` (`FriendsView`
+  ze stanem w grze). Online kazda akcja idzie do serwera (`setSocialLink`), offline druzyna odpowiada "dziala online",
+  a znajomi zapisuja sie w postaci.
+
+## Stada dla druzyn (etap 9, generator)
+
+- `generate_continent.party_packs` (wlasne ziarno - reszta mapy bez zmian): spawny potworow powyzej poziomu 15, dalej
+  niz 60 pol od swiatyn, bez bossow, nocnych i kanalow, dostaja znacznik `stado` w spawns.csv: pietro -2 albo potwor
+  od poz. 60 -> 3-4 sztuki (promien >= 4); pietro -3 i nizej albo potwor od poz. 150 -> 4-6 sztuk (promien >= 5) i w 40%
+  drugie stado 3-4 sztuk obok (tylko na polu osiagalnym pieszo, w tym samym regionie). Okolice miast i Varden bez zmian.
+- Za potwora ze stada `CombatSystem.PACK_EXP_PERCENT` = 85% doswiadczenia (postacie z czarami obszarowymi zabijaja stada
+  szybciej; dzieki temu doswiadczenie solo na godzine zostaje mniej wiecej jak przed zageszczeniem - szacunek, bez symulacji).
+- Liczby (0.212 -> etap 9): punkty spawnu 960 -> 1071, potwory 2283 -> 3803 (pietro 0: 1527 -> 2322, -1: 367 -> 622,
+  -2: 206 -> 416, -3: 85 -> 213, -4: 46 -> 131, -5: 18 -> 40). `ServerLoadBudgetTest` (200 graczy): 4,7 ms -> 6,7 ms na tik
+  (bez optymalizacji ok. 10 ms); pomogly zbior pol graczy w `MonsterManager.canOccupy` (zamiast petli po 200 graczach
+  przy kazdym polu sciezki) i tablica pieter w `WorldMap` zamiast TreeMap.
 
 ## Handel miedzy graczami (Z logika, S serwer)
 

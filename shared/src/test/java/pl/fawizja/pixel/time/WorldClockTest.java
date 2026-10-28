@@ -33,13 +33,15 @@ class WorldClockTest {
     }
 
     @Test
-    void anHourOfLightAndAnHourOfDarkness() {
+    void threeHoursOfLightAndThreeHoursOfDarkness() {
         WorldClock c = WorldClock.standard();
         long light = 0;
         for (int m = 0; m < WorldClock.MINUTES_PER_DAY; m++) if (c.ambientLight(m) > (1f + c.nightAmbient()) / 2f) light++;
         long lightMs = light * WorldClock.REAL_DAY_MS / WorldClock.MINUTES_PER_DAY;
-        assertEquals(60L * 60_000L, lightMs, 60_000L, "about one real hour of daylight");
-        assertEquals(2L * 60L * 60_000L, WorldClock.REAL_DAY_MS);
+        assertEquals(3L * 60L * 60_000L, lightMs, 3L * 60_000L, "about three real hours of daylight");
+        assertEquals(3L * 60L * 60_000L, WorldClock.REAL_DAY_MS - lightMs, 3L * 60_000L, "and about three hours of darkness");
+        assertEquals(6L * 60L * 60_000L, WorldClock.REAL_DAY_MS);
+        assertEquals(15L * 60_000L, WorldClock.GAME_HOUR_MS, "a game hour lasts 15 real minutes");
     }
 
     @Test

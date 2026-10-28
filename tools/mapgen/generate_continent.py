@@ -481,7 +481,7 @@ def write_world(world, legacy, extra_props, transitions, npcs, spawns, houses, r
         for n in npcs:
             f.write(';'.join(str(v) for v in n) + '\n')
     with open(os.path.join(OUT, 'spawns.csv'), 'w', encoding='utf-8') as f:
-        f.write('# potwor;x;y;z;promien;liczba;respawn (s)[;noc - tylko w nocy, na powierzchni]\n')
+        f.write('# potwor;x;y;z;promien;liczba;respawn (s)[;noc - tylko w nocy, na powierzchni][;stado - lowisko dla druzyn]\n')
         f.write('\n'.join(spawns) + '\n')
     with open(os.path.join(OUT, 'houses.csv'), 'w', encoding='utf-8') as f:
         f.write('# id;nazwa;miasto;wnetrze x0;y0;x1;y1;z;drzwi x;drzwi y;cena (gp, z konta)\n')
@@ -2601,6 +2601,110 @@ def snap_spawns(ctx):
     print('spawny: przesuniete', moved, 'usuniete', dropped)
 
 
+# ------------------------------------------------------------------ stada dla druzyn (etap 9, 28.10)
+# Lepsze i glebsze lowiska maja wieksze grupy potworow (3-6 na punkt) i dodatkowe stada obok, aby druzyna
+# piecioosobowa miala co bic. Okolice miast i slabe potwory (poziom <= PACK_MIN_LEVEL) bez zmian; bossowie,
+# nocne spawny i kanaly tez. Punkty-stada dostaja znacznik "stado" (mniej doswiadczenia na potwora w grze,
+# CombatSystem.PACK_EXP_PERCENT). Wlasne ziarno: reszta mapy (i kolejnosc losowan generatora) bez zmian.
+PACK_MIN_LEVEL = 15
+PACK_TOWN_RADIUS = 60
+PACK_SEED = 9_2810
+
+
+def monster_bosses():
+    out = set()
+    with open(os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'monsters.csv'), encoding='utf-8') as f:
+        for line in f:
+            if line.startswith('#') or not line.strip():
+                continue
+            p = line.split(';')
+            if p[17].strip() == '1':
+                out.add(p[0])
+    return out
+
+
+def pack_tier(key, z, level):
+    """0 = bez zmian, 1 = stado 3-4, 2 = stado 4-6 i (czasem) stado obok."""
+    t = 0
+    if z <= -2 or level >= 60:
+        t = 1
+    if z <= -3 or level >= 150:
+        t = 2
+    return t
+
+
+def walk_near(world, x, y, z, steps):
+    """Pola przechodnie (bez schodow) osiagalne z (x, y) w najwyzej steps krokach na tym samym pietrze."""
+    seen = {(x, y)}
+    q = deque([(x, y, 0)])
+    while q:
+        cx, cy, d = q.popleft()
+        if d >= steps:
+            continue
+        for dx, dy in F.DIRS4:
+            nx, ny = cx + dx, cy + dy
+            if (nx, ny) in seen or not (0 <= nx < S and 0 <= ny < S):
+                continue
+            c = world.get(nx, ny, z)
+            if F.walk(c) and c[2] not in F.STAIRS:
+                seen.add((nx, ny))
+                q.append((nx, ny, d + 1))
+    return seen
+
+
+def party_packs(ctx):
+    rng = random.Random(PACK_SEED)
+    bosses = monster_bosses()
+    regions = all_regions(ctx)
+
+    def region_of(px, py, pz):
+        for r in regions:
+            if r[1] <= px <= r[3] and r[2] <= py <= r[4] and r[5] <= pz <= r[6]:
+                return r
+        return None
+    temples = [p for _n, p in ctx['towns']]
+    out = []
+    before = after = points = packs = extra = 0
+    for line in ctx['spawns']:
+        if line.startswith('#'):
+            out.append(line)
+            continue
+        f = line.split(';')
+        key, x, y, z, r, count, respawn = f[0], int(f[1]), int(f[2]), int(f[3]), int(f[4]), int(f[5]), int(f[6])
+        night = len(f) > 7
+        before += count
+        points += 1
+        level = MONSTER_LEVEL.get(key, 0)
+        near_town = any(max(abs(x - t[0]), abs(y - t[1])) < PACK_TOWN_RADIUS for t in temples)
+        tier = 0 if (key in bosses or night or respawn >= 600 or level <= PACK_MIN_LEVEL or near_town) else pack_tier(key, z, level)
+        if tier == 0:
+            out.append(line)
+            after += count
+            continue
+        packs += 1
+        if tier == 1:
+            count = min(4, max(3, count + 1))
+            r = max(r, 4)
+        else:
+            count = min(6, max(4, count + 3))
+            r = max(r, 5)
+        out.append(f'{key};{x};{y};{z};{r};{count};{respawn};stado')
+        after += count
+        if tier == 2 and rng.random() < 0.4:
+            # drugie stado obok: tylko na polu osiagalnym pieszo z pierwszego (bez schodow, do 12 krokow)
+            reach = walk_near(ctx['world'], x, y, z, 12)
+            cand = [(x + dx, y + dy) for dx, dy in ((7, 0), (-7, 0), (0, 7), (0, -7), (5, 5), (-5, -5), (5, -5), (-5, 5))
+                    if (x + dx, y + dy) in reach and region_of(x + dx, y + dy, z) == region_of(x, y, z)]
+            if cand:
+                sx, sy = rng.choice(cand)
+                k2 = rng.choice((3, 4))
+                out.append(f'{key};{sx};{sy};{z};4;{k2};{respawn};stado')
+                after += k2
+                extra += 1
+    ctx['spawns'] = out
+    print(f'stada: punkty {points}, stada {packs}, dodatkowe {extra}, potwory {before} -> {after}')
+
+
 def fix_transition_targets(ctx):
     """Cel przejscia zastawiony pozniej (lawka z pobocza, drzewo, straznik) - przejscie prowadzi na sasiednie wolne
     pole celu."""
@@ -2638,6 +2742,7 @@ def finish(ctx):
     ctx['displays'] = nature.shop_displays(ctx, shops, protect=lambda x, y: (x, y) in core or (
         vr[0] <= x <= vr[2] and vr[1] <= y <= vr[3]))
     print('towary na ladach:', len(ctx['displays']))
+    party_packs(ctx)
     snap_spawns(ctx)
     fix_transition_targets(ctx)
     temple = dict(ctx['towns'])['Varden']

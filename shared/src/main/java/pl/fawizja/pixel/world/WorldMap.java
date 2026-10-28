@@ -14,6 +14,12 @@ public final class WorldMap {
     private final int height;
     private final TileRegistry tiles;
     private final Map<Integer, FloorMap> floors = new TreeMap<>();
+    /** Te same pietra w tablicy (indeks z - MIN_FLOOR): szybki odczyt w petli AI potworow bez TreeMap. */
+    private final FloorMap[] byZ = new FloorMap[Position.MAX_FLOOR - Position.MIN_FLOOR + 1];
+
+    private FloorMap fl(int z) {
+        return z < Position.MIN_FLOOR || z > Position.MAX_FLOOR ? null : byZ[z - Position.MIN_FLOOR];
+    }
     private Position spawn;
     private final List<int[]> protectionZones = new ArrayList<>();
     private volatile java.util.Map<Integer, java.util.BitSet> pzCells;
@@ -94,22 +100,24 @@ public final class WorldMap {
         return null;
     }
 
-    public FloorMap floor(int z) { return floors.get(z); }
+    public FloorMap floor(int z) { return fl(z); }
 
     public FloorMap getOrCreateFloor(int z) {
         if (z < Position.MIN_FLOOR || z > Position.MAX_FLOOR) throw new IllegalArgumentException("floor " + z);
-        return floors.computeIfAbsent(z, k -> new FloorMap(k, width, height, tiles));
+        FloorMap f = floors.computeIfAbsent(z, k -> new FloorMap(k, width, height, tiles));
+        byZ[z - Position.MIN_FLOOR] = f;
+        return f;
     }
 
     public Map<Integer, FloorMap> floors() { return Collections.unmodifiableMap(floors); }
 
     public boolean isWalkable(Position p) {
-        FloorMap f = floors.get(p.z());
+        FloorMap f = fl(p.z());
         return f != null && f.isWalkable(p.x(), p.y());
     }
 
     public Transition transitionAt(Position p) {
-        FloorMap f = floors.get(p.z());
+        FloorMap f = fl(p.z());
         return f == null ? null : f.transitionAt(p.x(), p.y());
     }
 
@@ -262,7 +270,7 @@ public final class WorldMap {
     /** Linia wzroku na tym samym pietrze (Bresenham, pomija punkt startowy i docelowy). */
     public boolean hasLineOfSight(Position a, Position b) {
         if (a.z() != b.z()) return false;
-        FloorMap f = floors.get(a.z());
+        FloorMap f = fl(a.z());
         if (f == null) return false;
         int x0 = a.x(), y0 = a.y(), x1 = b.x(), y1 = b.y();
         int dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0);

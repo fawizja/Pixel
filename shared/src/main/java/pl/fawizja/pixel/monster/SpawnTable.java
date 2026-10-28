@@ -6,7 +6,9 @@ import java.util.List;
 import pl.fawizja.pixel.world.Position;
 import pl.fawizja.pixel.world.WorldMap;
 
-/** Wczytuje /maps/&lt;mapa&gt;/spawns.csv i sprawdza, czy spawny leza na przechodnich kafelkach poza strefa ochronna. */
+/**
+ * Wczytuje /maps/&lt;mapa&gt;/spawns.csv (potwor;x;y;z;promien;liczba;respawn[;noc][;stado]) i sprawdza, czy spawny leza na przechodnich kafelkach poza strefa ochronna.
+ */
 public final class SpawnTable {
 
     private SpawnTable() {}
@@ -19,11 +21,14 @@ public final class SpawnTable {
             String t = line.trim();
             if (t.isEmpty() || t.startsWith("#")) continue;
             String[] f = t.split(";");
-            if (f.length != 7 && f.length != 8) throw new IOException("spawns.csv line " + n + ": expected 7 or 8 fields");
+            if (f.length < 7 || f.length > 9) throw new IOException("spawns.csv line " + n + ": expected 7 to 9 fields");
             boolean nightOnly = false;
-            if (f.length == 8) {
-                if (!f[7].trim().equals("noc")) throw new IOException("spawns.csv line " + n + ": 8th field must be 'noc'");
-                nightOnly = true;
+            boolean pack = false;
+            for (int i = 7; i < f.length; i++) {
+                String flag = f[i].trim();
+                if (flag.equals("noc") && !nightOnly) nightOnly = true;
+                else if (flag.equals("stado") && !pack) pack = true;
+                else throw new IOException("spawns.csv line " + n + ": extra field must be 'noc' or 'stado'");
             }
             try {
                 monsters.get(f[0].trim());
@@ -31,7 +36,7 @@ public final class SpawnTable {
                 if (!world.isWalkable(c)) throw new IOException("spawns.csv line " + n + ": center not walkable " + c);
                 if (world.isProtectionZone(c)) throw new IOException("spawns.csv line " + n + ": spawn inside protection zone");
                 list.add(new SpawnPoint(f[0].trim(), c, Integer.parseInt(f[4].trim()), Integer.parseInt(f[5].trim()),
-                        Integer.parseInt(f[6].trim()), nightOnly));
+                        Integer.parseInt(f[6].trim()), nightOnly, pack));
             } catch (IllegalArgumentException e) {
                 throw new IOException("spawns.csv line " + n + ": " + e.getMessage(), e);
             }

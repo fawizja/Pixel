@@ -2,15 +2,15 @@ package pl.fawizja.pixel.time;
 
 /**
  * Zegar swiata gry liczony z czasu serwera (nie z zegara telefonu).
- * Doba gry trwa 2 godziny czasu rzeczywistego: godzina jasno (05:30-17:30 gry) i godzina ciemno (Darek, 23.10).
+ * Doba gry trwa 6 godzin czasu rzeczywistego: 3 h jasno (05:30-17:30 gry) i 3 h ciemno (wczesniej 1 h + 1 h).
  * Oswietlenie zmienia sie plynnie, a noc ma minimalna jasnosc dla czytelnosci.
  */
 public final class WorldClock {
 
     public static final int MINUTES_PER_DAY = 24 * 60;
-    /** Doba gry w ms czasu rzeczywistego: 1 h dnia + 1 h nocy. */
-    public static final long REAL_DAY_MS = 2L * 60L * 60L * 1000L;
-    /** Godzina gry w ms czasu rzeczywistego (5 min). */
+    /** Doba gry w ms czasu rzeczywistego: 3 h dnia + 3 h nocy (wlasciciel gry, 28.10). */
+    public static final long REAL_DAY_MS = 6L * 60L * 60L * 1000L;
+    /** Godzina gry w ms czasu rzeczywistego (15 min). */
     public static final long GAME_HOUR_MS = REAL_DAY_MS / 24;
 
     private final long epochMs;

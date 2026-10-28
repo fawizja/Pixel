@@ -1829,7 +1829,7 @@ final class ServerWorld {
                     }
                     if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
                 }));
-        s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
+        s.combat().setExperienceSharer((type, pct, t) -> shareKill(p, type, pct, t));
         s.combat().setDeathListener(m -> {
             invasionKill(p, m);
             bossQuestKill(m);
@@ -1881,6 +1881,11 @@ final class ServerWorld {
      * false = brak warunkow (zabojca dostaje doswiadczenie sam).
      */
     boolean shareKill(ServerPlayer killer, pl.fawizja.pixel.monster.MonsterType type, long now) {
+        return shareKill(killer, type, 100, now);
+    }
+
+    /** Jak wyzej; expPercent = czesc doswiadczenia za potwora (stado: CombatSystem.PACK_EXP_PERCENT). */
+    boolean shareKill(ServerPlayer killer, pl.fawizja.pixel.monster.MonsterType type, int expPercent, long now) {
         List<String> names = parties.members(killer.name());
         if (names.size() < 2) return false;
         Position at = killer.session.character().position();
@@ -1894,19 +1899,59 @@ final class ServerWorld {
             levels.add(m.session.character().level());
         }
         if (eligible.size() < 2 || !pl.fawizja.pixel.party.PartyRules.levelsCompatible(levels)) return false;
+        List<pl.fawizja.pixel.vocation.Vocation> vocations = new ArrayList<>();
+        for (ServerPlayer m : eligible) vocations.add(m.session.character().vocation());
+        int bonus = pl.fawizja.pixel.party.PartyRules.bonusPercent(vocations);
         for (ServerPlayer m : eligible) {
-            long solo = m.session.combat().killExperience(type, m.session.character().level());
-            long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size());
+            long solo = m.session.combat().killExperience(type, m.session.character().level()) * expPercent / 100;
+            long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size(), bonus);
             m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name(), now);
             if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
         }
         return true;
     }
 
-    /** Obsluga polecen druzyny: PARTY INVITE|ACCEPT imie, PARTY LEAVE. */
+    /** Obsluga polecen druzyny: PARTY INVITE|ACCEPT|KICK imie, PARTY LEAVE|INFO. */
     private void partyCommand(ServerPlayer p, String[] f, long now) {
         if (f.length < 2) return;
         String sub = f[1];
+        if (sub.equals("INFO")) {
+            pl.fawizja.pixel.party.PartyView v = partyView(p.name());
+            if (!v.inParty()) {
+                info(p, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message, now);
+                return;
+            }
+            p.lastPartyInfo = "";
+            sendPartyInfo(p);
+            info(p, "Drużyna: " + String.join(", ", v.names()) + ". " + v.bonusLine(), now);
+            return;
+        }
+        if (sub.equals("KICK")) {
+            if (f.length < 3) return;
+            String target = f[2].trim();
+            String leader = parties.leaderOf(p.name());
+            String exact = target;
+            for (String n : parties.members(p.name())) if (n.equalsIgnoreCase(target)) exact = n;
+            pl.fawizja.pixel.party.PartyManager.Result r = parties.kick(p.name(), target);
+            if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
+                warn(p, r == pl.fawizja.pixel.party.PartyManager.Result.NOT_LEADER ? "Tylko lider drużyny może wyrzucać." : r.message, now);
+                return;
+            }
+            ServerPlayer gone = find(exact);
+            if (gone != null) {
+                gone.session.log().add(now, EventLog.Kind.WARNING, leader + " usuwa cię z drużyny.");
+                gone.lastPartyInfo = "";
+                gone.client.send("PARTY", "-");
+            }
+            List<String> rest = parties.members(p.name());
+            if (rest.isEmpty()) rest = List.of(p.name());
+            for (String n : rest) {
+                ServerPlayer m = find(n);
+                if (m != null) m.session.log().add(now, EventLog.Kind.INFO, exact + " usunięty z drużyny.");
+            }
+            sendParty(rest);
+            return;
+        }
         if (sub.equals("LEAVE")) {
             if (parties.members(p.name()).isEmpty()) {
                 p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message);
@@ -1930,6 +1975,7 @@ final class ServerWorld {
             }
             p.session.log().add(now, EventLog.Kind.INFO, "Zaproszono " + other.name() + " do drużyny.");
             other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cię do drużyny: /przyjmij " + p.name());
+            other.client.send("PARTYINV", p.name());
         } else if (sub.equals("ACCEPT")) {
             pl.fawizja.pixel.party.PartyManager.Result r = parties.accept(p.name(), other.name(), now);
             if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
@@ -2212,6 +2258,7 @@ final class ServerWorld {
         List<String> rest = parties.leave(p.name());
         if (rest.isEmpty()) return;
         p.client.send("PARTY", "-");
+        p.lastPartyInfo = "";
         for (String n : rest) {
             ServerPlayer m = find(n);
             if (m != null) m.session.log().add(now, EventLog.Kind.INFO, p.name() + " opuszcza drużynę.");
@@ -2226,7 +2273,61 @@ final class ServerWorld {
             if (m == null) continue;
             List<String> now = parties.members(n);
             m.client.send("PARTY", now.isEmpty() ? "-" : String.join(",", now));
+            if (now.isEmpty()) m.lastPartyInfo = "";
+            else sendPartyInfo(m);
         }
+    }
+
+    /** Druzyna gracza z poziomami, profesjami i premia (czlonkowie poza gra: poziom z rankingu). */
+    pl.fawizja.pixel.party.PartyView partyView(String name) {
+        List<String> names = parties.members(name);
+        if (names.size() < 2) return pl.fawizja.pixel.party.PartyView.NONE;
+        List<pl.fawizja.pixel.party.PartyView.Member> rows = new ArrayList<>();
+        for (String n : names) {
+            ServerPlayer m = find(n);
+            if (m != null) {
+                PlayerCharacter c = m.session.character();
+                rows.add(new pl.fawizja.pixel.party.PartyView.Member(c.name(), c.level(), c.vocation(), true));
+            } else {
+                pl.fawizja.pixel.ranking.Ranking.Entry e = ranking.get(n);
+                rows.add(new pl.fawizja.pixel.party.PartyView.Member(n, e == null ? 0 : e.level(), e == null ? null : e.vocation(), false));
+            }
+        }
+        return pl.fawizja.pixel.party.PartyView.of(rows);
+    }
+
+    /** PARTYINFO do gracza, gdy cos sie zmienilo od ostatniego wyslania. */
+    private void sendPartyInfo(ServerPlayer m) {
+        String[] msg = partyView(m.name()).encode();
+        String body = String.join("\t", msg);
+        if (body.equals(m.lastPartyInfo)) return;
+        m.lastPartyInfo = body;
+        m.client.send(msg);
+    }
+
+    private long partyInfoSentMs = Long.MIN_VALUE / 2;
+
+    /** Co kilka sekund: poziomy w oknie druzyny (awans, wejscie i wyjscie czlonka). */
+    private void refreshPartyInfo(long now) {
+        if (now - partyInfoSentMs < 3_000 && now >= partyInfoSentMs) return;
+        partyInfoSentMs = now;
+        for (ServerPlayer p : players.values()) {
+            if (parties.members(p.name()).size() >= 2) sendPartyInfo(p);
+        }
+    }
+
+    /** Odpowiedz PINFO: poziom, profesja i gildia postaci (w grze albo z rankingu). */
+    pl.fawizja.pixel.social.PlayerInfo playerInfo(String name) {
+        ServerPlayer o = find(name);
+        if (o != null) {
+            PlayerCharacter c = o.session.character();
+            String g = guildTag(c.name());
+            return new pl.fawizja.pixel.social.PlayerInfo(c.name(), c.level(), c.vocation(), g.equals("-") ? null : g, true);
+        }
+        pl.fawizja.pixel.ranking.Ranking.Entry e = ranking.get(name);
+        if (e == null) return pl.fawizja.pixel.social.PlayerInfo.unknown(name);
+        String g = guildTag(e.name());
+        return new pl.fawizja.pixel.social.PlayerInfo(e.name(), e.level(), e.vocation(), g.equals("-") ? null : g, false);
     }
 
     boolean sameParty(ServerPlayer a, ServerPlayer b) { return parties.sameParty(a.name(), b.name()); }
@@ -2360,6 +2461,9 @@ final class ServerWorld {
                 deleteCharacter(p);
                 break;
             case "PARTY": partyCommand(p, f, now); break;
+            case "PINFO":
+                if (f.length >= 2 && !f[1].isBlank()) p.client.send(playerInfo(f[1].trim()).encode());
+                break;
             case "LFG": lookingForParty(p, now); break;
             case "TRADE": tradeCommand(p, f, now); break;
             case "GUILD": guildCommand(p, f, now); break;
@@ -2800,6 +2904,7 @@ final class ServerWorld {
         updateAltarTorches();
         updateInvasion(now);
         updateDuels(now);
+        refreshPartyInfo(now);
         updateShutdown(now);
         if (players.isEmpty()) return;
         List<MonsterManager.Target> targets = new ArrayList<>();

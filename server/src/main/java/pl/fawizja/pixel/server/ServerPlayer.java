@@ -30,6 +30,8 @@ final class ServerPlayer {
     String lastPvp;
     /** Gracz oglosil, ze szuka druzyny (/szukam; tylko w pamieci). */
     boolean lookingForParty;
+    /** Ostatnio wyslany komunikat PARTYINFO (bez powtorzen przy odswiezaniu). */
+    String lastPartyInfo = "";
 
     ServerPlayer(int id, GameSession session, ClientHandler client, long now, pl.fawizja.pixel.pvp.PvpRules.Status pvp) {
         this.pvp = pvp;

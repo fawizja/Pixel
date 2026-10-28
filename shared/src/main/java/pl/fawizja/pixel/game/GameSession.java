@@ -1808,6 +1808,44 @@ public final class GameSession {
         return res;
     }
 
+    private pl.fawizja.pixel.social.SocialClient social;
+
+    /** Druzyna, znajomi i informacje o graczach (API dla okna gracza i polecen czatu). */
+    public pl.fawizja.pixel.social.SocialClient social() {
+        if (social == null) social = new pl.fawizja.pixel.social.SocialClient(pc, log, () -> Math.max(0L, lastUpdateMs));
+        return social;
+    }
+
+    /** Klient online: akcje druzyny i znajomych ida do serwera (null = gra offline). */
+    public void setSocialLink(pl.fawizja.pixel.social.SocialClient.Link link) { social().setLink(link); }
+
+    /** Zaproszenie do druzyny (okno gracza: "Zaproś do drużyny"). Online wysyla prosbe do serwera. */
+    public boolean invitePlayerToParty(String name) { return social().invitePlayerToParty(name); }
+
+    /** Przyjecie zaproszenia od lidera. */
+    public boolean acceptPartyInvite(String leader) { return social().acceptPartyInvite(leader); }
+
+    /** Przyjecie najnowszego zaproszenia. */
+    public boolean acceptPartyInvite() { return social().acceptPartyInvite(); }
+
+    public boolean leaveParty() { return social().leaveParty(); }
+
+    /** Lider usuwa czlonka z druzyny. */
+    public boolean kickFromParty(String name) { return social().kickFromParty(name); }
+
+    /** Moja druzyna: czlonkowie (lider pierwszy) z poziomem i profesja, premia doswiadczenia. */
+    public pl.fawizja.pixel.party.PartyView party() { return social().party(); }
+
+    /** Poziom, profesja i gildia gracza, jesli wiadomo (online: serwer odpowiada asynchronicznie). */
+    public pl.fawizja.pixel.social.PlayerInfo playerInfo(String name) { return social().playerInfo(name); }
+
+    public boolean addFriend(String name) { return social().addFriend(name); }
+
+    public boolean removeFriend(String name) { return social().removeFriend(name); }
+
+    /** Znajomi ze stanem w grze (offline: bez stanu). */
+    public pl.fawizja.pixel.friends.FriendsView friends() { return social().friends(); }
+
     public PlayerCharacter character() { return pc; }
     public WorldMap world() { return world; }
     public GroundItems ground() { return ground; }

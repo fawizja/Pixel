@@ -25,7 +25,9 @@ public final class PartyManager {
         FULL("Drużyna jest pełna (maks. " + MAX_MEMBERS + ")."),
         NO_INVITE("Nie masz zaproszenia od tego gracza (albo wygasło)."),
         ALREADY_IN_PARTY("Najpierw opuść obecną drużynę (/opuść)."),
-        NOT_IN_PARTY("Nie jesteś w drużynie.");
+        NOT_IN_PARTY("Nie jesteś w drużynie."),
+        NOT_MEMBER("Tego gracza nie ma w twojej drużynie."),
+        ONLINE_ONLY("Drużyna działa w grze online (z innymi graczami).");
 
         public final String message;
 
@@ -83,6 +85,29 @@ public final class PartyManager {
             p.members.clear();
         }
         return rest;
+    }
+
+    /**
+     * Lider usuwa czlonka z druzyny. Zwraca OK i wtedy {@link #leave} juz sie wykonalo; pozostalych czlonkow
+     * (do powiadomienia) poda {@link #members} lidera.
+     */
+    public Result kick(String leader, String target) {
+        Party p = byMember.get(key(leader));
+        if (p == null) return Result.NOT_IN_PARTY;
+        if (!key(p.members.get(0)).equals(key(leader))) return Result.NOT_LEADER;
+        if (key(leader).equals(key(target))) return Result.SELF;
+        if (byMember.get(key(target)) != p) return Result.NOT_MEMBER;
+        leave(target);
+        return Result.OK;
+    }
+
+    /** Liderzy, ktorzy zaprosili gracza i zaproszenie jeszcze nie wygaslo (male litery). */
+    public List<String> invitesFor(String target, long now) {
+        Map<String, Long> mine = invites.get(key(target));
+        if (mine == null) return Collections.emptyList();
+        List<String> out = new ArrayList<>();
+        for (Map.Entry<String, Long> e : mine.entrySet()) if (now <= e.getValue()) out.add(e.getKey());
+        return out;
     }
 
     /** Czlonkowie druzyny gracza (lider pierwszy) albo pusta lista. */

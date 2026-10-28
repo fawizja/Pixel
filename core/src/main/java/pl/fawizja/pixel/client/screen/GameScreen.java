@@ -231,6 +231,16 @@ public final class GameScreen extends ScreenAdapter {
         if (net == null) monsters.populate(pc.position()); // online: potwory przychodza z serwera
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
                 game.startingConfig().startLevel());
+        if (net != null) {
+            // druzyna, znajomi i informacje o graczach: API sesji wysyla prosby do serwera
+            session.setSocialLink(new pl.fawizja.pixel.social.SocialClient.Link() {
+                @Override
+                public void send(String... fields) { net.send(fields); }
+
+                @Override
+                public long now() { return GameScreen.this.now(); }
+            });
+        }
         session.setTownServices(game.npcs(), game.shops(), game.quests());
         session.setHouses(game.houses(), null);
         session.setChests(game.chests());
@@ -528,13 +538,15 @@ public final class GameScreen extends ScreenAdapter {
             default:
                 if (id.startsWith("player:")) {
                     hud.closePlayerMenu();
-                    if (net == null) break;
                     String[] f = id.split(":", 3);
+                    if (f.length == 3 && f[1].equals("party")) session.invitePlayerToParty(f[2]);
+                    if (f.length == 3 && f[1].equals("friend")) session.addFriend(f[2]);
+                    if (net == null) break;
                     switch (f[1]) {
                         case "trade": net.send("TRADE", "REQUEST", f[2]); break;
-                        case "party": net.send("PARTY", "INVITE", f[2]); break;
+                        case "party":
+                        case "friend": break; // wyslane przez API sesji powyzej
                         case "guild": net.send("GUILD", "INVITE", f[2]); break;
-                        case "friend": net.send("FRIEND", "ADD", f[2]); break;
                         case "duel": net.send("DUEL", "REQUEST", f[2]); break;
                         case "inspect": net.send("INSPECT", f[2]); break;
                         case "attack": {
@@ -883,11 +895,17 @@ public final class GameScreen extends ScreenAdapter {
             else session.log().add(now(), EventLog.Kind.INFO, "Sprzedaż domu innemu graczowi działa online. Miastu sprzedasz go u zarządcy domów.");
             return;
         }
+        String[] social = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
+        if (session.social().command(social)) return; // /zaproś, /przyjmij, /drużyna, /znajomi dodaj ... (API sesji)
+        if (net == null && social != null && social[0].equals("FRIEND")) {
+            hud.openFriends(session.friends()); // offline: lista z zapisu postaci
+            return;
+        }
         if (net == null) {
             session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami działa online. Podejdź do NPC, aby z nim porozmawiać.");
             return;
         }
-        String[] msg = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
+        String[] msg = social;
         if (msg == null) {
             session.log().add(now(), EventLog.Kind.INFO, "Nieznane polecenie. Lista: /pomoc");
             hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
@@ -2251,6 +2269,7 @@ public final class GameScreen extends ScreenAdapter {
             }
             font.draw(batch, text, projected.x - text.length() * 3.5f * scale, projected.y);
         }
+        hud.setPartyLine(session.party().inParty() ? session.party().bonusLine() : null);
         drawPartyPanel(batch, font, scale);
         if (chatDraft != null) {
             font.setColor(1f, 1f, 0.6f, 1f);
@@ -2269,31 +2288,41 @@ public final class GameScreen extends ScreenAdapter {
     private void drawPartyPanel(SpriteBatch batch, BitmapFont font, float scale) {
         if (partyNames.size() < 2) return;
         String me = session.character().name();
-        float x = 12 * scale;
-        float y = Gdx.graphics.getHeight() * 0.62f;
+        // w lewym gornym rogu okna gry 15x11 (poza nim jest czarna ramka i wycinanie)
+        float x = clip[2] > 0 ? clip[0] + 12 * scale : 12 * scale;
+        float y = clip[3] > 0 ? clip[1] + clip[3] - 14 * scale : Gdx.graphics.getHeight() * 0.62f;
         // tlo dla czytelnosci na jasnej podlodze
         float rows = partyNames.size(); // naglowek + pozostali czlonkowie
         batch.setColor(0f, 0f, 0f, 0.55f);
-        batch.draw(game.art().white(), x - 6 * scale, y - rows * 15 * scale - 6 * scale, 170 * scale, rows * 15 * scale + 20 * scale);
+        batch.draw(game.art().white(), x - 6 * scale, y - rows * 15 * scale - 6 * scale, 190 * scale, rows * 15 * scale + 20 * scale);
         batch.setColor(Color.WHITE);
         font.getData().setScale(scale * 0.85f);
         font.setColor(0.45f, 0.75f, 1f, 1f);
-        font.draw(batch, "Drużyna", x, y);
+        pl.fawizja.pixel.party.PartyView pv = session.party();
+        String head = "Drużyna";
+        if (pv.inParty()) head += pv.sharing() ? "  +" + pv.bonusPercent() + "% exp" : "  (bez wspólnego exp)";
+        font.draw(batch, head, x, y);
         y -= 16 * scale;
         for (String n : partyNames) {
             if (n.equalsIgnoreCase(me)) continue;
+            String label = n;
+            for (pl.fawizja.pixel.party.PartyView.Member pm : pv.members()) {
+                if (pm.name().equalsIgnoreCase(n) && pm.level() > 0) {
+                    label = n + " " + pm.level() + (pm.vocation() == null ? "" : " " + pm.vocation().displayName().substring(0, 2).toUpperCase(java.util.Locale.ROOT));
+                }
+            }
             RemotePlayer rp = null;
             for (RemotePlayer r : remotePlayers.values()) if (r.name != null && r.name.equalsIgnoreCase(n)) rp = r;
             String line;
             if (rp == null) {
                 font.setColor(0.6f, 0.6f, 0.65f, 1f);
-                line = n + "  (daleko)";
+                line = label + "  (daleko)";
             } else {
                 int hp = rp.healthPercent;
                 if (hp < 35) font.setColor(1f, 0.35f, 0.3f, 1f);
                 else if (hp < 70) font.setColor(1f, 0.85f, 0.35f, 1f);
                 else font.setColor(0.55f, 1f, 0.55f, 1f);
-                line = n + "  " + hp + "% HP";
+                line = label + "  " + hp + "% HP";
             }
             font.draw(batch, line, x, y);
             y -= 15 * scale;
@@ -2407,6 +2436,7 @@ public final class GameScreen extends ScreenAdapter {
         String[] m;
         while ((m = net.poll()) != null) {
             long now = now();
+            boolean quiet = session.social().handle(m); // druzyna, znajomi, PINFO dla API sesji
             switch (m[0]) {
                 case "HOUSEINFO": {
                     pl.fawizja.pixel.house.HouseView v = pl.fawizja.pixel.house.HouseView.parse(m);
@@ -2539,7 +2569,7 @@ public final class GameScreen extends ScreenAdapter {
                     hud.openMarket(pl.fawizja.pixel.market.MarketView.parse(m));
                     break;
                 case "FRIENDS":
-                    hud.openFriends(pl.fawizja.pixel.friends.FriendsView.parse(m));
+                    if (!quiet) hud.openFriends(pl.fawizja.pixel.friends.FriendsView.parse(m));
                     break;
                 case "PARTY":
                     party.clear();
@@ -2775,5 +2805,11 @@ public final class GameScreen extends ScreenAdapter {
                 }
             }
         }
+    }
+
+    /** Podglad druzyny z poziomami, profesjami i premia (bez serwera; opcje deweloperskie desktop). */
+    public void previewParty(pl.fawizja.pixel.party.PartyView view) {
+        session.social().handle(view.encode());
+        previewParty(view.names());
     }
 }

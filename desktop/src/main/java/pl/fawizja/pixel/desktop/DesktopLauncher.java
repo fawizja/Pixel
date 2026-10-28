@@ -26,6 +26,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.frameMs=N                 krok czasu sesji na klatke (0 = zegar rzeczywisty)
  *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
+ *   -Dpixel.partySize=N  przy -Dpixel.open=party: wielkosc podgladanej druzyny (2..5, rozne profesje, premia exp)
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.exportArt=dir zapisuje obecne grafiki jako PNG pod nazwami z docs/GRAPHICS.md (dla grafikow)
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
@@ -246,7 +247,18 @@ public final class DesktopLauncher {
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
                 if ("party".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();
-                    gs.previewParty(java.util.List.of(gs.session().character().name(), "Ula", "Kuba"));
+                    // -Dpixel.partySize=N (2..5): ja + czlonkowie innych profesji; premia jak w PartyRules
+                    int size = Math.max(2, Math.min(5, Integer.getInteger("pixel.partySize", 3)));
+                    pl.fawizja.pixel.character.PlayerCharacter lead = gs.session().character();
+                    java.util.List<pl.fawizja.pixel.party.PartyView.Member> rows = new java.util.ArrayList<>();
+                    rows.add(new pl.fawizja.pixel.party.PartyView.Member(lead.name(), lead.level(), lead.vocation(), true));
+                    String[] names = {"Ula", "Kuba", "Ela", "Ada"};
+                    int i = 0;
+                    for (pl.fawizja.pixel.vocation.Vocation v : pl.fawizja.pixel.vocation.Vocation.values()) {
+                        if (v == lead.vocation() || rows.size() >= size) continue;
+                        rows.add(new pl.fawizja.pixel.party.PartyView.Member(names[i++], Math.max(1, lead.level() - i), v, true));
+                    }
+                    gs.previewParty(pl.fawizja.pixel.party.PartyView.of(rows));
                 }
                 if ("player".equals(open)) ((GameScreen) getScreen()).hud().openPlayerMenu(2, "Ula", false, false);
                 if ("pvp".equals(open)) ((GameScreen) getScreen()).previewPvp();

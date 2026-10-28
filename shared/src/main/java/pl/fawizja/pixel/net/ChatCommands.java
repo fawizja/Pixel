@@ -4,7 +4,8 @@ package pl.fawizja.pixel.net;
  * Polecenia wpisywane w okno czatu, zamieniane na komunikaty protokolu (zamiast wysylania tekstu innym):
  * "/haslo stare nowe" -> PASSWD, "/usun-konto haslo" -> DELETE. Zwykly tekst -> CHAT.
  * Druzyna: "/zapros Imie" i "/przyjmij Imie" -> PARTY INVITE|ACCEPT imie, "/opusc" -> PARTY LEAVE,
- * "/d tekst" -> PCHAT (czat druzyny). Handel: "/handel Imie" -> TRADE REQUEST, "/oferuj 5 mikstura zdrowia"
+ * "/d tekst" -> PCHAT (czat druzyny), "/druzyna [zapros|przyjmij|wyrzuc|opusc Imie]" (albo "/party invite|accept|kick|leave")
+ * -> PARTY INFO|INVITE|ACCEPT|KICK|LEAVE. Handel: "/handel Imie" -> TRADE REQUEST, "/oferuj 5 mikstura zdrowia"
  * albo "/oferuj 1000 gp" -> TRADE OFFER, "/akceptuj" -> TRADE ACCEPT, "/anuluj" -> TRADE CANCEL.
  * Gildie: "/gildia" -> GUILD INFO, "/gildia zaloz|zapros|przyjmij|wyrzuc X" -> GUILD CREATE|INVITE|ACCEPT|KICK X,
  * "/gildia opusc" -> GUILD LEAVE, "/gildia wplac|wyplac 5k" -> GUILD DEPOSIT|WITHDRAW kwota, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
@@ -40,7 +41,10 @@ public final class ChatCommands {
             case "/zapros":
                 return w.length >= 2 ? new String[] {"PARTY", "INVITE", rest(t)} : null;
             case "/przyjmij":
-                return w.length >= 2 ? new String[] {"PARTY", "ACCEPT", rest(t)} : null;
+                return w.length >= 2 ? new String[] {"PARTY", "ACCEPT", rest(t)} : new String[] {"PARTY", "ACCEPT"};
+            case "/druzyna":
+            case "/party":
+                return party(t, w);
             case "/szukam":
                 return w.length == 1 ? new String[] {"LFG"} : null;
             case "/opusc":
@@ -181,6 +185,36 @@ public final class ChatCommands {
         return new String[] {"WANT", "ADD", rest(t)};
     }
 
+    /**
+     * "/drużyna" (albo "/party") -> PARTY INFO; "/drużyna zaproś|przyjmij|wyrzuć Imię" i "/party invite|accept|kick Name"
+     * -> PARTY INVITE|ACCEPT|KICK imie; "/drużyna opuść" / "/party leave" -> PARTY LEAVE; "przyjmij" bez imienia
+     * przyjmuje najnowsze zaproszenie.
+     */
+    private static String[] party(String t, String[] w) {
+        if (w.length == 1) return new String[] {"PARTY", "INFO"};
+        String arg = rest(rest(t));
+        switch (key(w[1])) {
+            case "info":
+            case "stan":
+                return new String[] {"PARTY", "INFO"};
+            case "zapros":
+            case "invite":
+                return arg.isEmpty() ? null : new String[] {"PARTY", "INVITE", arg};
+            case "przyjmij":
+            case "accept":
+            case "join":
+                return arg.isEmpty() ? new String[] {"PARTY", "ACCEPT"} : new String[] {"PARTY", "ACCEPT", arg};
+            case "wyrzuc":
+            case "kick":
+                return arg.isEmpty() ? null : new String[] {"PARTY", "KICK", arg};
+            case "opusc":
+            case "leave":
+                return arg.isEmpty() ? new String[] {"PARTY", "LEAVE"} : null;
+            default:
+                return null;
+        }
+    }
+
     private static String[] friends(String t, String[] w) {
         if (w.length == 1) return new String[] {"FRIEND", "LIST"};
         String arg = rest(rest(t));
@@ -307,7 +341,7 @@ public final class ChatCommands {
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {
             {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
-            {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d; /szukam; /handel Imię"},
+            {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d; /drużyna (premia), /drużyna wyrzuć Imię; /szukam"},
             {"/pojedynek Imię", "pojedynek; /pvp tryb PvP (czaszka); /nagroda Imię, 5000"},
             {"/gildia załóż Nazwa", "zaproś, przyjmij, wyrzuć, wpłać; czat /g"},
             {"/wyślij Imię, 5 futro", "poczta; /przelew Imię, 5000; /kupię u bankiera"},
@@ -318,5 +352,5 @@ public final class ChatCommands {
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /pvp [wł|wył] (tryb PvP), /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /łowiska, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /dom [wpuść|wstęp|wyrzuć Imię | sprzedaj Imię, cena | kup | anuluj], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło. Emotki: " + Emotes.LIST;
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /pvp [wł|wył] (tryb PvP), /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /łowiska, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /dom [wpuść|wstęp|wyrzuć Imię | sprzedaj Imię, cena | kup | anuluj], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst, /drużyna [wyrzuć Imię] (drużyna i premia exp), /hasło stare nowe, /usuń-konto hasło. Emotki: " + Emotes.LIST;
 }

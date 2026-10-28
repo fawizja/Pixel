@@ -840,7 +840,8 @@ class NetworkSyncTest {
             await("kill shared", () -> soloExp[0] >= 0 && ulaHunt[0] >= 0);
             assertEquals(4, ulaHunt[0], "the party kill counts for Ula's hunting task");
             long solo = soloExp[0];
-            long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2);
+            // paladyn + druid: +20% za dwie osoby, +20% za dwie profesje
+            long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2, 40);
             await("both got a share", () -> {
                 try {
                     return self(ola).experience() == olaExp + each && self(ula).experience() == ulaExp + each;
@@ -856,6 +857,97 @@ class NetworkSyncTest {
 
             ula.send("BYE");
             awaitMessage(ola, "party dissolved", m -> m[0].equals("PARTY") && m[1].equals("-"));
+        }
+    }
+
+    @Test
+    void fullDiversePartyGetsTwoHundredPercentAndTheLeaderCanKick() throws Exception {
+        String[] names = {"Lider", "Pala", "Sora", "Drui", "Monka"};
+        pl.fawizja.pixel.vocation.Vocation[] vocs = {pl.fawizja.pixel.vocation.Vocation.KNIGHT,
+                pl.fawizja.pixel.vocation.Vocation.PALADIN, pl.fawizja.pixel.vocation.Vocation.SORCERER,
+                pl.fawizja.pixel.vocation.Vocation.DRUID, pl.fawizja.pixel.vocation.Vocation.MONK};
+        java.util.List<NetClient> cs = new java.util.ArrayList<>();
+        try {
+            for (int i = 0; i < 5; i++) {
+                NetClient c = connect();
+                cs.add(c);
+                c.hello(names[i], vocs[i].name(), "tajne-" + names[i]);
+            }
+            await("welcome", () -> cs.stream().allMatch(c -> c.playerId() > 0 && c.selfSave() != null));
+            NetClient lead = cs.get(0);
+            for (int i = 1; i < 5; i++) {
+                lead.send("PARTY", "INVITE", names[i]);
+                final int k = i;
+                awaitMessage(cs.get(i), "invite card " + names[i], m -> m[0].equals("PARTYINV") && m[1].equals("Lider"));
+                cs.get(k).send("PARTY", "ACCEPT", "Lider");
+            }
+            // kazdy dostaje PARTYINFO z poziomami, profesjami i premia +200%
+            for (int i = 0; i < 5; i++) {
+                awaitMessage(cs.get(i), "party info " + names[i], m -> {
+                    pl.fawizja.pixel.party.PartyView v = pl.fawizja.pixel.party.PartyView.parse(m);
+                    return v != null && v.members().size() == 5 && v.bonusPercent() == 200 && v.sharing()
+                            && v.leader().equals("Lider") && v.distinctVocations() == 5;
+                });
+            }
+            // wspolne zabicie: pula x3.0 dzielona na piec (kazdy 60% tego, co dostalby sam)
+            pl.fawizja.pixel.monster.MonsterType wolf = pl.fawizja.pixel.monster.MonsterRegistry
+                    .loadDefault(ItemRegistry.loadDefault()).get("wolf");
+            long[] before = new long[5];
+            long[] solo = new long[5];
+            long[] after = {-1, -1, -1, -1, -1};
+            boolean[] shared = new boolean[1];
+            server.enqueueTest(() -> {
+                for (int i = 0; i < 5; i++) {
+                    ServerPlayer p = server.world().find(names[i]);
+                    before[i] = p.session.character().experience();
+                    solo[i] = p.session.combat().killExperience(wolf, p.session.character().level());
+                }
+                shared[0] = server.world().shareKill(server.world().find("Lider"), wolf, server.now());
+                for (int i = 0; i < 5; i++) after[i] = server.world().find(names[i]).session.character().experience();
+            });
+            await("shared kill", () -> after[4] >= 0);
+            assertTrue(shared[0]);
+            for (int i = 0; i < 5; i++) {
+                assertEquals(pl.fawizja.pixel.party.PartyRules.share(solo[i], 5, 200), after[i] - before[i], names[i]);
+                assertEquals(Math.round(solo[i] * 0.6), after[i] - before[i], names[i]);
+            }
+            // za daleko: Monka nie dzieli, czterech dzieli z premia 4 osob / 4 profesji
+            long[] far = {-1, -1};
+            server.enqueueTest(() -> {
+                ServerPlayer monk = server.world().find("Monka");
+                monk.session.character().setPosition(server.world().find("Lider").session.character().position()
+                        .translate(pl.fawizja.pixel.party.PartyRules.SHARE_RANGE + 1, 0));
+                long m0 = monk.session.character().experience();
+                ServerPlayer pala = server.world().find("Pala");
+                long p0 = pala.session.character().experience();
+                long ps = pala.session.combat().killExperience(wolf, pala.session.character().level());
+                server.world().shareKill(server.world().find("Lider"), wolf, server.now());
+                far[0] = monk.session.character().experience() - m0;
+                far[1] = pala.session.character().experience() - p0 - pl.fawizja.pixel.party.PartyRules.share(ps, 4, 135);
+            });
+            await("far kill", () -> far[0] >= 0);
+            assertEquals(0, far[0], "out of range: no share");
+            assertEquals(0, far[1], "four in range share with 4 people / 4 vocations");
+
+            // informacja o graczu do okna po dotknieciu
+            cs.get(1).send("PINFO", "monka");
+            awaitMessage(cs.get(1), "player info", m -> {
+                pl.fawizja.pixel.social.PlayerInfo pi = pl.fawizja.pixel.social.PlayerInfo.parse(m);
+                return pi != null && pi.name().equals("Monka") && pi.vocation() == pl.fawizja.pixel.vocation.Vocation.MONK
+                        && pi.online() && pi.level() > 0;
+            });
+            // tylko lider wyrzuca; wyrzucony dostaje PARTY -, reszta nowa liste
+            cs.get(1).send("PARTY", "KICK", "Sora");
+            awaitMessage(cs.get(1), "not leader", m -> m[0].equals("LOG") && m[2].contains("Tylko lider"));
+            lead.send("PARTY", "KICK", "Sora");
+            awaitMessage(cs.get(2), "kicked", m -> m[0].equals("PARTY") && m[1].equals("-"));
+            awaitMessage(cs.get(3), "new list", m -> m[0].equals("PARTY") && m[1].equals("Lider,Pala,Drui,Monka"));
+            awaitMessage(cs.get(3), "new bonus", m -> {
+                pl.fawizja.pixel.party.PartyView v = pl.fawizja.pixel.party.PartyView.parse(m);
+                return v != null && v.members().size() == 4 && v.bonusPercent() == 135;
+            });
+        } finally {
+            for (NetClient c : cs) c.close();
         }
     }
 

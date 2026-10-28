@@ -71,8 +71,24 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public void setLootOwner(java.util.function.Predicate<Monster> owner) { this.lootOwner = owner; }
 
-    /** Podzial doswiadczenia w druzynie (serwer); true = doswiadczenie juz rozdane, zabojca nie dostaje go sam. */
-    public interface ExperienceSharer { boolean share(MonsterType killed, long now); }
+    /**
+     * Podzial doswiadczenia w druzynie (serwer); true = doswiadczenie juz rozdane, zabojca nie dostaje go sam.
+     * expPercent - czesc doswiadczenia za tego potwora (100, w stadzie {@link #PACK_EXP_PERCENT}).
+     */
+    public interface ExperienceSharer { boolean share(MonsterType killed, int expPercent, long now); }
+
+    /**
+     * Doswiadczenie za potwora ze stada (spawn "stado" w lepszych lowiskach, {@link pl.fawizja.pixel.monster.SpawnPoint#pack()}).
+     * Stada maja 3-6 potworow na punkt i dodatkowe stada obok, wiec postac z czarami obszarowymi zabija tam wiecej
+     * na godzine niz w zwyklym lowisku; 85% za sztuke trzyma doswiadczenie solo na godzine mniej wiecej jak przed
+     * zageszczeniem, a druzyna (premia do +200%) i tak zarabia tam najwiecej.
+     */
+    public static final int PACK_EXP_PERCENT = 85;
+
+    /** Procent doswiadczenia za tego potwora (stado: {@link #PACK_EXP_PERCENT}). */
+    public static int expPercent(Monster m) {
+        return m != null && m.spawn() != null && m.spawn().pack() ? PACK_EXP_PERCENT : 100;
+    }
 
     private ExperienceSharer experienceSharer;
 
@@ -273,8 +289,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         boolean lootElsewhere = lootOwner != null && lootOwner.test(m);   // przed sluchaczem: on konczy wyprawe
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
-        if (experienceSharer == null || !experienceSharer.share(t, now)) {
-            long exp = killExperience(t, pc.level());
+        int expPercent = expPercent(m);
+        if (experienceSharer == null || !experienceSharer.share(t, expPercent, now)) {
+            long exp = killExperience(t, pc.level()) * expPercent / 100;
             boolean rested = pc.useRested();
             if (rested) {
                 exp = exp * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;

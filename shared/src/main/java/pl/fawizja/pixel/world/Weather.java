@@ -3,7 +3,7 @@ package pl.fawizja.pixel.world;
 import java.util.Locale;
 
 /**
- * Pogoda na powierzchni: okna po 20 min czasu rzeczywistego. Kazda doba gry (2 h) ma w kazdej krainie swoj
+ * Pogoda na powierzchni: okna po 20 min czasu rzeczywistego. Kazda doba gry (6 h) ma w kazdej krainie swoj
  * klimat dnia (Darek, 23.10: "zmiana klimatu codziennie"): slonecznie (bez opadow), zmiennie (opady w ok. 30%
  * okien) albo deszczowo (ok. 75% okien). Rodzaj opadow zalezy od krainy (mroz -> snieg, pustynia -> burza
  * piaskowa, reszta -> deszcz). Liczona z zegara i nazwy krainy, wiec wszyscy gracze w tej samej krainie widza to

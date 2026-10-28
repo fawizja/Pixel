@@ -74,6 +74,10 @@ public final class Hud {
     private pl.fawizja.pixel.ranking.RankingView rankingView;
     /** Okno znajomych z serwera (null = zamkniete). */
     private pl.fawizja.pixel.friends.FriendsView friendsView;
+    /** Wiersz premii druzyny w pustej zakladce Druzyna (null = brak druzyny). */
+    private String partyLine;
+
+    public void setPartyLine(String line) { partyLine = line; }
     /** Okno osiagniec (albo bestiariusza) - dane lokalnej postaci. */
     private boolean achievementsView;
     /** Trzeci widok okna osiagniec: dziennik zadan (aktywne, do oddania, dostepne). */
@@ -3229,7 +3233,7 @@ public final class Hud {
                 case SERVER: hint = "Serwer: wiadomości gry i serwera."; break;
                 case TRADE: hint = "Handel: kupno i sprzedaż. Dotknij, aby pisać."; break;
                 case GUILD: hint = "Gildia: dotknij, aby pisać do gildii."; break;
-                case PARTY: hint = "Drużyna: dotknij, aby pisać do drużyny."; break;
+                case PARTY: hint = partyLine != null ? partyLine + " Dotknij, aby pisać." : "Drużyna: dotknij, aby pisać do drużyny."; break;
                 case PRIVATE: hint = "Rozmowa z " + t.peer() + ": dotknij, aby pisać."; break;
                 default: hint = "Czat: dotknij, aby pisać";
             }

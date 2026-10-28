@@ -92,3 +92,5 @@ monsters_peaks|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.startLevel
 monsters_abyss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=700 -Dpixel.teleport=226,636,-3
 pvp|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pvp
 pzblock|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pzblock
+party_bonus|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=party -Dpixel.partySize=5 -Dpixel.conTab=3
+pack_fire|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=400 -Dpixel.teleport=338,78,0
