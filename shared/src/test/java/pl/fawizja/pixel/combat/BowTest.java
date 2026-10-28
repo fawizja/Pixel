@@ -22,7 +22,7 @@ class BowTest {
         pc.equipment().setDirect(EquipSlot.AMMO, new ItemStack(TestData.ITEMS.byKey("spear").id(), 50));
         AttackProfile p = CombatFormulas.attackProfile(pc, TestData.ITEMS);
         assertEquals(Skill.DISTANCE, p.skill());
-        assertEquals(5, p.range());
+        assertEquals(7, p.range());
         assertNull(CombatFormulas.ammunition(pc, TestData.ITEMS), "a bow does not throw spears");
     }
 
@@ -30,7 +30,7 @@ class BowTest {
     void paladinHasABowForEveryTier() {
         for (int tier : new int[] {0, 15, 25, 40, 60, 100, 150, 250, 350, 450, 550, 700, 850}) {
             assertTrue(TestData.ITEMS.all().stream().anyMatch(i -> i.minLevel() == tier && i.usableBy(Vocation.PALADIN)
-                    && i.key().endsWith("bow") && i.range() == 5), "paladin bow at level " + tier);
+                    && i.key().endsWith("bow") && i.range() == 7), "paladin bow at level " + tier);
         }
     }
 }

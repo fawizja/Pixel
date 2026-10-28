@@ -31,7 +31,7 @@ class CombatTest {
         AttackProfile sor = CombatFormulas.attackProfile(TestData.newCharacter(Vocation.SORCERER), TestData.ITEMS);
         AttackProfile monk = CombatFormulas.attackProfile(TestData.newCharacter(Vocation.MONK), TestData.ITEMS);
         assertEquals(Skill.DISTANCE, pal.skill());
-        assertEquals(4, pal.range());
+        assertEquals(7, pal.range(), "distance attacks reach the screen edge (7)");
         assertEquals(DamageType.EARTH, dru.type());
         assertEquals(DamageType.FIRE, sor.type());
         assertEquals(Skill.MAGIC, sor.skill());

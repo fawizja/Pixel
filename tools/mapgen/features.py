@@ -597,7 +597,78 @@ CAVE_STYLES = {
     'core': ('abyss_floor', 'obsidian_wall', [], ['magma', 'obsidian_rock'], 'magma'),
     'orc': ('dirt', 'cave_wall', [], ['barrel', 'crate', 'orc_tent', 'rubble'], 'wall_torch'),
     'mine': ('dirt', 'cave_wall', [], ['lumber', 'crate', 'rubble', 'barrel', 'rock'], 'wall_torch'),
+    # lochy (2026-10-28): prostokatne sale z kamienia, proste korytarze, kosci i pajeczyny
+    'crypt': ('tomb_floor', 'stone_wall', ['bones', 'cobweb', 'blood'], ['rubble', 'broken_wall'], 'wall_torch'),
 }
+
+
+def carve_crypt(w, h, points, style, rng, lava=0.0):
+    """Lochy w lokalnym prostokacie w x h: prostokatne sale w punktach i proste korytarze (2 pola szerokosci,
+    zalamane pod katem prostym) miedzy kolejnymi salami, mury dookola. Ten sam format co carve_cave."""
+    floor, wall, deco_free, deco_block, light = CAVE_STYLES[style]
+    carved = set()
+    rooms = []
+    for (px, py) in points:
+        rw, rh = rng.randint(3, 5), rng.randint(2, 4)
+        x0, x1 = max(1, px - rw), min(w - 2, px + rw)
+        y0, y1 = max(1, py - rh), min(h - 2, py + rh)
+        rooms.append((x0, y0, x1, y1))
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                carved.add((x, y))
+
+    def line(ax, ay, bx, by):
+        for x in range(min(ax, bx), max(ax, bx) + 1):
+            for d in (0, 1):
+                if 1 <= ay + d < h - 1:
+                    carved.add((x, ay + d))
+        for y in range(min(ay, by), max(ay, by) + 1):
+            for d in (0, 1):
+                if 1 <= bx + d < w - 1:
+                    carved.add((bx + d, y))
+    for (ax, ay), (bx, by) in zip(points, points[1:]):
+        if rng.random() < 0.5:
+            line(ax, ay, bx, by)
+        else:
+            line(bx, by, ax, ay)
+    # boczne cele (male komnaty) przy korytarzach - zakamarki jak w lochach
+    for (x0, y0, x1, y1) in rooms:
+        if rng.random() < 0.6:
+            cx = rng.randint(x0, x1)
+            cy = y1 + 3 if y1 + 5 < h - 1 else y0 - 3
+            if 2 <= cy < h - 2:
+                for y in range(min(cy, y1), max(cy, y1) + 1):
+                    carved.add((cx, y))
+                for y in range(cy - 1, cy + 2):
+                    for x in range(cx - 1, cx + 2):
+                        if 1 <= x < w - 1 and 1 <= y < h - 1:
+                            carved.add((x, y))
+    grid = [[None] * w for _ in range(h)]
+    for (x, y) in carved:
+        grid[y][x] = (floor, NONE, NONE, NONE)
+    for (x, y) in carved:
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < w and 0 <= ny < h and grid[ny][nx] is None:
+                    grid[ny][nx] = (floor, NONE, NONE, wall)
+    cells = sorted(carved)
+    rng.shuffle(cells)
+    for (x, y) in cells[:len(cells) // 6]:
+        if any(abs(x - px) + abs(y - py) < 3 for (px, py) in points):
+            continue
+        near_wall = any(grid[y + dy][x + dx] is not None and grid[y + dy][x + dx][3] != NONE
+                        for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+        open8 = all(grid[y + dy][x + dx] is not None and grid[y + dy][x + dx][3] == NONE and grid[y + dy][x + dx][2] == NONE
+                    for dx in (-1, 0, 1) for dy in (-1, 0, 1) if (dx, dy) != (0, 0))
+        r = rng.random()
+        if near_wall and r < 0.2 and (tk.TILES[light][1] or open8):
+            grid[y][x] = (floor, NONE, light, NONE)
+        elif r < 0.75:
+            grid[y][x] = (floor, rng.choice(deco_free), NONE, NONE)
+        elif open8:
+            grid[y][x] = (floor, NONE, rng.choice(deco_block), NONE)
+    return grid
 
 
 def carve_cave(w, h, points, style, rng, room=(3, 5), tunnel=1, lava=0.0):

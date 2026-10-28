@@ -102,3 +102,20 @@ guard_21;Strażnik Wielisław;GUARD;Varden;560;489;0;-;#5a6a8a;Spokojnie, wędro
 guard_22;Strażnik Bolesław;GUARD;Varden;555;528;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
 guard_23;Strażnik Bronisław;GUARD;Varden;576;502;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
 guard_24;Halabardnik Jaromir;GUARD;Varden;535;510;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
+isle0_ferryman;Przewoźnik Gniewko;CAPTAIN;Wyspa Mewia;885;501;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle1_ferryman;Przewoźniczka Jagna;CAPTAIN;Wyspa Bursztynowa;808;842;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle2_ferryman;Przewoźnik Wojsław;CAPTAIN;Wyspa Szeptów;903;327;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle3_ferryman;Przewoźniczka Dobrawa;CAPTAIN;Wyspa Kormoranów;921;213;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle4_ferryman;Przewoźnik Sambor;CAPTAIN;Wyspa Wraków;263;54;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle5_ferryman;Przewoźniczka Mila;CAPTAIN;Wyspa Fok;850;381;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle6_ferryman;Przewoźnik Bratumił;CAPTAIN;Wyspa Zachodu;864;45;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle7_ferryman;Przewoźniczka Ludmiła;CAPTAIN;Wyspa Mgieł Porannych;920;859;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle8_ferryman;Przewoźnik Zbysław;CAPTAIN;Wyspa Kamiennego Kręgu;579;878;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle9_ferryman;Przewoźniczka Wiesna;CAPTAIN;Wyspa Rybaków;229;39;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle10_ferryman;Przewoźnik Racibor;CAPTAIN;Wyspa Czapli;953;657;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle11_ferryman;Przewoźniczka Bogumiła;CAPTAIN;Wyspa Sosnowa;304;33;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle12_ferryman;Przewoźnik Dobromir;CAPTAIN;Wyspa Ukwiałów;703;762;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle13_ferryman;Przewoźniczka Sława;CAPTAIN;Wyspa Burz;856;901;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle14_ferryman;Przewoźnik Ciechosław;CAPTAIN;Wyspa Lisów;872;427;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle15_ferryman;Przewoźniczka Grzymisława;CAPTAIN;Wyspa Starej Latarni;762;866;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+isle16_ferryman;Przewoźnik Mirogniew;CAPTAIN;Wyspa Wilcza;729;883;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.

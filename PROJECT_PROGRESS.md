@@ -468,6 +468,13 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   (spacing 9, 7-9 na miasto, nie przy NPC, 8 wolnych sasiadow).
 - world/Crates + GameSession (pushCrate, useCrate, cratePut/Take), serwer crates.txt + CRATEMV/CRATE. CratesTest.
 - Domy: HouseOwners goscie/transfer, ServerWorld.houseCommand, ChatCommands /dom, zwrot 50% u zarzadcy.
+## Ekran 15x11, zasiegi 7, wyspy (2026-10-28, 08:56, wersja 0.209.0)
+- GameScreen VIEW_TILES 15x11, nozyce (glScissor) do prostokata 15x11 na srodku ramki widoku.
+- spells.csv / items.csv: zasieg 4-5 -> 7. MonsterManager.sightRange 7..MAX_SIGHT 9, za plecami sight-2.
+- generate_continent.island_access (po soften_edges): kawalki ladu (F.walk) oddzielone woda od kontynentu,
+  kladka <= 8 pol wody, most <= 14, tunel pod morzem <= 60 (A* na -1..-3, zejscie z 8 wolnymi sasiadami),
+  reszta przewoznik (small_dock, trasy do 2 najblizszych portow miast). Spawny ISLAND_TIERS wg odleglosci od
+  Varden, regiony island_regions po regionach starych wysp. LOCHY (styl 'crypt', features.carve_crypt).
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

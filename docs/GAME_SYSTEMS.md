@@ -503,6 +503,10 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
 
 ## Swiat, miasta i regiony (Z)
 
+- Okno gry (0.209.0): 15 x 11 pol (`GameScreen.VIEW_TILES_W/H`), postac w srodku; zasieg dystansowy i czarow 7,
+  wzrok potworow 7-9 (`MonsterManager.MIN_SIGHT/MAX_SIGHT`). Kazda wyspa ma dojscie (kladka, most, tunel pod
+  morzem albo przewoznik); Lochy Zapomnianych pod najwieksza wyspa bez miasta (-1..-4, poziomy 350-960).
+
 - Jedna mapa `maps/world` 256 x 232 x 11 pieter (wschodni kontynent x 168..255 = endgame) (`WorldLayout.WORLD_MAP`), generator `tools/mapgen/generate_world.py`.
 - `Town` (maks. 4, swiatynia musi byc w strefie ochronnej i przechodnia) i `Region` (prostokat, zakres pieter,
   zalecany poziom) wczytywane z `towns=` i `regions=` w map.properties.

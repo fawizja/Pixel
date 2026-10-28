@@ -4,24 +4,24 @@ greater_mend;Uzdrowienie;DRUID,SORCERER,PALADIN;20;0;60;1000;HEALING;HEAL_SELF;P
 vital_surge;Przypływ życia;DRUID;35;0;120;1000;HEALING;HEAL_SELF;PHYSICAL;130;1.4;7.0;0;0;0;;;0;Najsilniejsze leczenie - specjalność druida.
 inner_calm;Wewnętrzny spokój;MONK;12;0;25;1000;HEALING;HEAL_SELF;PHYSICAL;30;0.6;0;0.8;0;0;;;0;Leczenie mnicha zależne od walki wręcz.
 deep_meditation;Głęboka medytacja;MONK;40;0;45;1000;HEALING;HEAL_SELF;PHYSICAL;50;0.7;0;1.0;0;0;;;0;Silne leczenie mnicha.
-ember_bolt;Żar;SORCERER;8;0;20;2000;ATTACK;ATTACK_TARGET;FIRE;15;0.3;2.5;0;4;0;;;0;Pocisk ognia w cel.
-spark_bolt;Iskra;SORCERER;14;0;30;2000;ATTACK;ATTACK_TARGET;ENERGY;20;0.35;2.8;0;4;0;;;0;Pocisk energii w cel.
+ember_bolt;Żar;SORCERER;8;0;20;2000;ATTACK;ATTACK_TARGET;FIRE;15;0.3;2.5;0;7;0;;;0;Pocisk ognia w cel.
+spark_bolt;Iskra;SORCERER;14;0;30;2000;ATTACK;ATTACK_TARGET;ENERGY;20;0.35;2.8;0;7;0;;;0;Pocisk energii w cel.
 flame_ring;Krąg ognia;SORCERER;25;0;80;4000;ATTACK;ATTACK_AREA;FIRE;30;0.4;3.0;0;0;2;;;0;Ogień wokół czarodzieja (promień 2).
-inferno_bolt;Płomienny grot;SORCERER;45;0;120;2000;ATTACK;ATTACK_TARGET;FIRE;60;0.5;3.5;0;4;0;;;0;Potężny pocisk ognia w cel.
+inferno_bolt;Płomienny grot;SORCERER;45;0;120;2000;ATTACK;ATTACK_TARGET;FIRE;60;0.5;3.5;0;7;0;;;0;Potężny pocisk ognia w cel.
 storm_ring;Burza energii;SORCERER;60;0;220;4000;ATTACK;ATTACK_AREA;ENERGY;70;0.55;3.6;0;0;3;;;0;Wyładowania wokół czarodzieja (promień 3).
-meteor_bolt;Meteor;SORCERER;100;0;300;4000;ATTACK;ATTACK_TARGET;FIRE;95;0.55;3.9;0;4;0;;;0;Rozżarzony meteor spada na cel.
-frost_bolt;Lodowy pocisk;DRUID;8;0;20;2000;ATTACK;ATTACK_TARGET;ICE;14;0.3;2.3;0;4;0;;;0;Pocisk lodu w cel.
-thorn_burst;Wybuch cierni;DRUID;14;0;30;2000;ATTACK;ATTACK_TARGET;EARTH;18;0.32;2.5;0;4;0;;;0;Kolce ziemi w cel.
+meteor_bolt;Meteor;SORCERER;100;0;300;4000;ATTACK;ATTACK_TARGET;FIRE;95;0.55;3.9;0;7;0;;;0;Rozżarzony meteor spada na cel.
+frost_bolt;Lodowy pocisk;DRUID;8;0;20;2000;ATTACK;ATTACK_TARGET;ICE;14;0.3;2.3;0;7;0;;;0;Pocisk lodu w cel.
+thorn_burst;Wybuch cierni;DRUID;14;0;30;2000;ATTACK;ATTACK_TARGET;EARTH;18;0.32;2.5;0;7;0;;;0;Kolce ziemi w cel.
 frost_nova;Mroźna fala;DRUID;30;0;90;4000;ATTACK;ATTACK_AREA;ICE;26;0.35;2.6;0;0;2;;;0;Mróz wokół druida (promień 2).
-glacier_spike;Lodowy kolec;DRUID;45;0;110;2000;ATTACK;ATTACK_TARGET;ICE;55;0.48;3.2;0;4;0;;;0;Ostry sopel lodu w cel.
+glacier_spike;Lodowy kolec;DRUID;45;0;110;2000;ATTACK;ATTACK_TARGET;ICE;55;0.48;3.2;0;7;0;;;0;Ostry sopel lodu w cel.
 earth_quake;Gniew ziemi;DRUID;60;0;210;4000;ATTACK;ATTACK_AREA;EARTH;65;0.5;3.3;0;0;3;;;0;Wstrząs ziemi wokół druida (promień 3).
-blizzard_spike;Śnieżyca;DRUID;100;0;280;4000;ATTACK;ATTACK_TARGET;ICE;90;0.55;3.8;0;4;0;;;0;Lodowa zamieć uderza w cel.
-holy_bolt;Święty pocisk;PALADIN;8;0;20;2000;ATTACK;ATTACK_TARGET;HOLY;12;0.3;1.5;0.5;4;0;;;0;Swiete swiatlo w cel; mocne na nieumarłych.
+blizzard_spike;Śnieżyca;DRUID;100;0;280;4000;ATTACK;ATTACK_TARGET;ICE;90;0.55;3.8;0;7;0;;;0;Lodowa zamieć uderza w cel.
+holy_bolt;Święty pocisk;PALADIN;8;0;20;2000;ATTACK;ATTACK_TARGET;HOLY;12;0.3;1.5;0.5;7;0;;;0;Swiete swiatlo w cel; mocne na nieumarłych.
 sacred_nova;Święta fala;PALADIN;30;0;80;4000;ATTACK;ATTACK_AREA;HOLY;25;0.35;1.5;0.6;0;2;;;0;Święte światło wokół paladyna (promień 2).
-piercing_throw;Przeszywający rzut;PALADIN;20;0;40;3000;ATTACK;ATTACK_TARGET;PHYSICAL;20;0.4;0;1.5;4;0;;;0;Silny rzut zależny od umiejętności dystansu.
-divine_spear;Boska włócznia;PALADIN;45;0;90;3000;ATTACK;ATTACK_TARGET;HOLY;50;0.5;1.8;1.2;4;0;;;0;Włócznia świętego światła w cel.
+piercing_throw;Przeszywający rzut;PALADIN;20;0;40;3000;ATTACK;ATTACK_TARGET;PHYSICAL;20;0.4;0;1.5;7;0;;;0;Silny rzut zależny od umiejętności dystansu.
+divine_spear;Boska włócznia;PALADIN;45;0;90;3000;ATTACK;ATTACK_TARGET;HOLY;50;0.5;1.8;1.2;7;0;;;0;Włócznia świętego światła w cel.
 divine_wrath;Boski gniew;PALADIN;60;0;180;4000;ATTACK;ATTACK_AREA;HOLY;60;0.5;1.8;1.0;0;3;;;0;Święty gniew wokół paladyna (promień 3).
-light_blade;Ostrze światła;PALADIN;100;0;130;4000;ATTACK;ATTACK_TARGET;HOLY;90;0.55;2.0;1.4;4;0;;;0;Ostrze świętego światła w cel.
+light_blade;Ostrze światła;PALADIN;100;0;130;4000;ATTACK;ATTACK_TARGET;HOLY;90;0.55;2.0;1.4;7;0;;;0;Ostrze świętego światła w cel.
 tiger_strike;Cios tygrysa;MONK;8;0;15;2000;ATTACK;ATTACK_TARGET;PHYSICAL;15;0.3;0;1.2;1;0;;;0;Silny cios wręcz.
 whirlwind_kick;Wirujące kopnięcie;MONK;20;0;40;4000;ATTACK;ATTACK_AREA;PHYSICAL;25;0.4;0;1.4;0;1;;;0;Kopnięcie trafia wszystko obok mnicha.
 dragon_fist;Pięść smoka;MONK;45;0;60;2000;ATTACK;ATTACK_TARGET;PHYSICAL;35;0.4;0;1.4;1;0;;;0;Potężny cios wręcz.
@@ -32,22 +32,22 @@ conjure_spears;Przywołanie włóczni;PALADIN;10;0;40;2000;SUPPORT;CONJURE;PHYSI
 enchant_boulder;Zaklęcie głazu;PALADIN,DRUID,SORCERER;12;2;50;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;boulder_rune;blank_rune;2;Zamienia pustą runę w 2 runy głazu.
 enchant_fireburst;Zaklęcie wybuchu;DRUID,SORCERER;15;4;80;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;fireburst_rune;blank_rune;3;Zamienia pustą runę w 3 runy wybuchu ognia.
 enchant_healing;Zaklęcie leczenia;DRUID;20;6;100;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;healing_rune;blank_rune;1;Zamienia pustą runę w runę leczenia.
-boulder_rune;Głaz (runa);*;8;2;0;2000;ATTACK;RUNE_TARGET;PHYSICAL;22;0.3;2.0;0;5;0;;;0;Efekt runy głazu.
-fireburst_rune;Wybuch ognia (runa);*;8;4;0;2000;ATTACK;RUNE_AREA;FIRE;20;0.35;2.4;0;5;1;;;0;Efekt runy wybuchu.
+boulder_rune;Głaz (runa);*;8;2;0;2000;ATTACK;RUNE_TARGET;PHYSICAL;22;0.3;2.0;0;7;0;;;0;Efekt runy głazu.
+fireburst_rune;Wybuch ognia (runa);*;8;4;0;2000;ATTACK;RUNE_AREA;FIRE;20;0.35;2.4;0;7;1;;;0;Efekt runy wybuchu.
 healing_rune;Leczenie (runa);*;8;6;0;1000;HEALING;RUNE_HEAL;PHYSICAL;70;1.0;4.0;0;0;0;;;0;Efekt runy leczenia.
 haste;Przyspieszenie (utani hur);*;14;0;60;2000;SUPPORT;HASTE;PHYSICAL;30;0;0;0;33;0;;;0;Szybkość +30% na 33 sekundy.
 strong_haste;Silne przyspieszenie (utani gran hur);DRUID,SORCERER;20;0;100;2000;SUPPORT;HASTE;PHYSICAL;70;0;0;0;22;0;;;0;Szybkość +70% na 22 sekundy.
 # Etap 13: czary 120-300 dla postaci startujacych na poziomie 300 (silne czary maja dlugie odnowienie)
-energy_strike_max;Ostateczny grom;SORCERER;150;0;300;8000;ATTACK;ATTACK_TARGET;ENERGY;200;1.0;7.0;0;4;0;;;0;Najsilniejszy pojedynczy cios energii w cel.
+energy_strike_max;Ostateczny grom;SORCERER;150;0;300;8000;ATTACK;ATTACK_TARGET;ENERGY;200;1.0;7.0;0;7;0;;;0;Najsilniejszy pojedynczy cios energii w cel.
 hells_core;Piekielny rdzeń;SORCERER;200;0;1100;30000;ATTACK;ATTACK_AREA;FIRE;150;0.9;6.0;0;0;4;;;0;Morze ognia wokół czarodzieja (promień 4).
 rage_of_skies;Gniew niebios;SORCERER;300;0;1300;30000;ATTACK;ATTACK_AREA;ENERGY;200;1.0;7.0;0;0;4;;;0;Burza piorunów wokół czarodzieja (promień 4).
-earth_strike_max;Ostateczny cios ziemi;DRUID;150;0;300;8000;ATTACK;ATTACK_TARGET;EARTH;200;1.0;7.0;0;4;0;;;0;Najsilniejszy pojedynczy cios ziemi w cel.
+earth_strike_max;Ostateczny cios ziemi;DRUID;150;0;300;8000;ATTACK;ATTACK_TARGET;EARTH;200;1.0;7.0;0;7;0;;;0;Najsilniejszy pojedynczy cios ziemi w cel.
 eternal_winter;Wieczna zima;DRUID;200;0;1050;30000;ATTACK;ATTACK_AREA;ICE;150;0.9;6.0;0;0;4;;;0;Zamieć wokół druida (promień 4).
 wrath_of_nature;Gniew natury;DRUID;300;0;1250;30000;ATTACK;ATTACK_AREA;EARTH;200;1.0;7.0;0;0;4;;;0;Ziemia wybucha wokół druida (promień 4).
 ultimate_mend;Wielkie uzdrowienie;DRUID,SORCERER;150;0;100;1000;HEALING;HEAL_SELF;PHYSICAL;250;0.4;4.0;0;0;0;;;0;Bardzo silne leczenie magów.
 divine_caldera;Boska kaldera;PALADIN;150;0;160;6000;ATTACK;ATTACK_AREA;HOLY;150;0.8;2.0;3.0;0;3;;;0;Święty wybuch wokół paladyna (promień 3).
-strong_ethereal_spear;Silna eteryczna włócznia;PALADIN;200;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;5;0;;;0;Eteryczna włócznia zależna od umiejętności dystansu.
-divine_judgement;Boski sąd;PALADIN;300;0;250;12000;ATTACK;ATTACK_TARGET;HOLY;250;1.0;2.0;6.0;5;0;;;0;Najsilniejszy święty cios w cel.
+strong_ethereal_spear;Silna eteryczna włócznia;PALADIN;200;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;7;0;;;0;Eteryczna włócznia zależna od umiejętności dystansu.
+divine_judgement;Boski sąd;PALADIN;300;0;250;12000;ATTACK;ATTACK_TARGET;HOLY;250;1.0;2.0;6.0;7;0;;;0;Najsilniejszy święty cios w cel.
 holy_mend;Wielkie święte uzdrowienie;PALADIN;120;0;90;1000;HEALING;HEAL_SELF;PHYSICAL;150;0.7;3.0;0;0;0;;;0;Silne leczenie paladyna.
 storm_fist;Pięść burzy;MONK;150;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;1;0;;;0;Uderzenie wręcz z siłą burzy.
 chi_wave;Fala chi;MONK;200;0;200;8000;ATTACK;ATTACK_AREA;PHYSICAL;150;0.8;0;4.0;0;2;;;0;Fala energii chi wokół mnicha (promień 2).
@@ -57,18 +57,18 @@ enchant_great_fireball;Zaklęcie wielkiej kuli ognia;DRUID,SORCERER;30;4;120;200
 enchant_avalanche;Zaklęcie lawiny;DRUID;30;4;120;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;avalanche_rune;blank_rune;4;Zamienia pustą runę w 4 runy lawiny.
 enchant_sudden_death;Zaklęcie nagłej śmierci;SORCERER;45;15;220;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;sudden_death_rune;blank_rune;3;Zamienia pustą runę w 3 runy nagłej śmierci.
 enchant_ultimate_healing;Zaklęcie ostatecznego leczenia;DRUID;24;8;160;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;ultimate_healing_rune;blank_rune;1;Zamienia pustą runę w runę ostatecznego leczenia.
-great_fireball_rune;Wielka kula ognia (runa);*;30;4;0;2000;ATTACK;RUNE_AREA;FIRE;40;0.45;3.0;0;5;2;;;0;Efekt runy wielkiej kuli ognia.
-avalanche_rune;Lawina (runa);*;30;4;0;2000;ATTACK;RUNE_AREA;ICE;40;0.45;3.0;0;5;2;;;0;Efekt runy lawiny.
-sudden_death_rune;Nagła śmierć (runa);*;45;15;0;2000;ATTACK;RUNE_TARGET;DEATH;80;0.6;5.0;0;5;0;;;0;Efekt runy nagłej śmierci.
+great_fireball_rune;Wielka kula ognia (runa);*;30;4;0;2000;ATTACK;RUNE_AREA;FIRE;40;0.45;3.0;0;7;2;;;0;Efekt runy wielkiej kuli ognia.
+avalanche_rune;Lawina (runa);*;30;4;0;2000;ATTACK;RUNE_AREA;ICE;40;0.45;3.0;0;7;2;;;0;Efekt runy lawiny.
+sudden_death_rune;Nagła śmierć (runa);*;45;15;0;2000;ATTACK;RUNE_TARGET;DEATH;80;0.6;5.0;0;7;0;;;0;Efekt runy nagłej śmierci.
 ultimate_healing_rune;Ostateczne leczenie (runa);*;24;8;0;1000;HEALING;RUNE_HEAL;PHYSICAL;250;1.2;6.0;0;0;0;;;0;Efekt runy ostatecznego leczenia.
 wound_cleansing;Oczyszczenie ran (exura ico);KNIGHT;8;0;40;1000;HEALING;HEAL_SELF;PHYSICAL;40;0.6;0;1.0;0;0;;;0;Leczenie rycerza zależne od walki bronią.
 brutal_strike;Brutalne uderzenie;KNIGHT;8;0;30;2000;ATTACK;ATTACK_TARGET;PHYSICAL;20;0.35;0;1.3;1;0;;;0;Potężny cios bronią w cel obok rycerza.
-whirlwind_throw;Wirujący rzut;KNIGHT;28;0;40;6000;ATTACK;ATTACK_TARGET;PHYSICAL;25;0.4;0;1.3;5;0;;;0;Rzut bronią, która wraca do ręki rycerza.
+whirlwind_throw;Wirujący rzut;KNIGHT;28;0;40;6000;ATTACK;ATTACK_TARGET;PHYSICAL;25;0.4;0;1.3;7;0;;;0;Rzut bronią, która wraca do ręki rycerza.
 berserk;Szał;KNIGHT;35;0;115;4000;ATTACK;ATTACK_AREA;PHYSICAL;30;0.45;0;1.5;0;1;;;0;Cięcie we wszystko wokół rycerza.
 intense_wound_cleansing;Silne oczyszczenie ran (exura gran ico);KNIGHT;80;0;45;1000;HEALING;HEAL_SELF;PHYSICAL;55;0.7;0;1.0;0;0;;;0;Silne leczenie rycerza.
 fierce_berserk;Dziki szał;KNIGHT;90;0;340;6000;ATTACK;ATTACK_AREA;PHYSICAL;55;0.55;0;2.0;0;1;;;0;Mocniejsze cięcie we wszystko wokół rycerza.
 annihilation;Unicestwienie;KNIGHT;110;0;300;20000;ATTACK;ATTACK_TARGET;PHYSICAL;150;0.8;0;4.0;1;0;;;0;Niszczycielski cios w jeden cel.
-executioners_throw;Rzut kata;KNIGHT;150;0;150;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;5;0;;;0;Rzut ciężką bronią z ogromną siłą.
+executioners_throw;Rzut kata;KNIGHT;150;0;150;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;7;0;;;0;Rzut ciężką bronią z ogromną siłą.
 groundshaker;Wstrząs ziemi;KNIGHT;200;0;250;8000;ATTACK;ATTACK_AREA;PHYSICAL;150;0.8;0;4.0;0;2;;;0;Uderzenie w ziemię rani wszystko w promieniu 2.
 blade_storm;Burza ostrzy;KNIGHT;300;0;300;12000;ATTACK;ATTACK_AREA;PHYSICAL;250;1.0;0;6.0;0;1;;;0;Grad ciosów we wszystko obok rycerza.
 iron_will;Żelazna wola;KNIGHT;150;0;55;1000;HEALING;HEAL_SELF;PHYSICAL;130;0.65;0;1.1;0;0;;;0;Najsilniejsze leczenie rycerza na wysokich poziomach.

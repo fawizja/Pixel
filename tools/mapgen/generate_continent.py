@@ -16,6 +16,7 @@ Jak to dziala:
 Wszystkie wspolrzedne (przejscia, NPC, spawny, domy, strefy, regiony) sa przeliczane przez te same przesuniecia.
 Generator jest deterministyczny.
 """
+import heapq
 import math
 import os
 import random
@@ -952,6 +953,7 @@ def build(ctx):
     street_sides(ctx)
     atmosphere(ctx)
     soften_edges(ctx)
+    print('wyspy:', island_access(ctx, rng))
     zones = zone_grid(T)
     ctx['zones'] = zones
     climate_spawns(ctx, zones, rng)
@@ -1048,7 +1050,8 @@ def dungeon(ctx, name, entrance, levels, rng, surface_ground=None):
     H = max(lv[1] for lv in levels)
     for i, (w, h, pts, style, lava, _sp) in enumerate(levels):
         z = -1 - i
-        g = F.carve_cave(W, H, pts, style, rng, lava=lava)
+        carve = F.carve_crypt if style == 'crypt' else F.carve_cave
+        g = carve(W, H, pts, style, rng, lava=lava)
         F.fix_lava(g, pts)
         grids[z] = (g, pts)
     masks = {}
@@ -1274,7 +1277,8 @@ def reach_surface(world, start, extra_starts=()):
 def climate_spawns(ctx, zones, rng):
     world = ctx['world']
     temples = [p for _n, p in ctx['towns']]
-    reach = reach_surface(world, temples[0][:2], [t[:2] for t in temples])
+    reach = reach_surface(world, temples[0][:2], [t[:2] for t in temples] + ctx.get('island_starts', []))
+    island_cells = ctx.get('island_cells', set())
     pz = ctx['pz']
     avoid = [v['rect'] for v in ctx.get('villages', [])]
     taken = []
@@ -1289,7 +1293,7 @@ def climate_spawns(ctx, zones, rng):
     for gy in range(8, S - 8, step):
         for gx in range(8, S - 8, step):
             x, y = gx + rng.randint(-6, 6), gy + rng.randint(-6, 6)
-            if not (0 <= x < S and 0 <= y < S) or not reach[y, x] or ctx['footprint'][y, x]:
+            if not (0 <= x < S and 0 <= y < S) or not reach[y, x] or ctx['footprint'][y, x] or (x, y) in island_cells:
                 continue
             c = world.get(x, y)
             if not F.walk(c) or c[0] in F.ROAD_GROUND or c[2] != NONE:
@@ -1315,6 +1319,8 @@ def climate_spawns(ctx, zones, rng):
                 r -= w
                 if r <= 0:
                     break
+            if MONSTER_LEVEL[key] > 15 and max(abs(x - temples[0][0]), abs(y - temples[0][1])) < 40:
+                key = min(pool, key=lambda kw: MONSTER_LEVEL[kw[0]])[0]   # pod Varden tylko slabe potwory
             count = 3 if rng.random() < 0.5 else 2
             out.append(f'{key};{x};{y};0;{rng.choice((4, 5))};{count};{rng.choice((90, 120, 150))}')
             taken.append((x, y))
@@ -2068,6 +2074,433 @@ def ferries(ctx):
         for partner in partners:
             ctx['routes'].append((key, partner))
 
+# ------------------------------------------------------------------ dojscie na wszystkie wyspy (2026-10-28)
+# Darek: "dostep na wszystkie wyspy przez podziemia, statki, kladki, mosty; roznorodne potworki o roznym poziomie;
+# pod jedna wyspa podziemia w stylu lochow, trudny poziom dla wysokopoziomowych graczy".
+SEA = {'water', 'deep_water'}
+NOT_LAND = SEA | {'lava', 'chasm'}
+ISLAND_MIN = 60
+ISLAND_TIERS = [
+    # najdalej od Varden (pola), poziomy regionu, potwory [(klucz, waga)]
+    (300, (10, 40), [('boar', 2), ('forest_spider', 2), ('bandit', 2), ('goblin', 2), ('skeleton', 1)]),
+    (380, (45, 130), [('crocodile', 2), ('jungle_serpent', 2), ('orc_warrior', 2), ('orc_shaman', 1), ('scorpion', 1)]),
+    (450, (150, 260), [('orc_berserker', 2), ('mummy', 2), ('temple_guardian', 2), ('cursed_treant', 1)]),
+    (10 ** 6, (280, 420), [('drowned_sailor', 2), ('pirate_cutthroat', 2), ('coral_crab', 2), ('wraith_knight', 1)]),
+]
+ISLAND_NAMES = ['Wyspa Mewia', 'Wyspa Bursztynowa', 'Wyspa Szeptów', 'Wyspa Kormoranów', 'Wyspa Wraków', 'Wyspa Fok',
+                'Wyspa Zachodu', 'Wyspa Mgieł Porannych', 'Wyspa Kamiennego Kręgu', 'Wyspa Rybaków', 'Wyspa Czapli',
+                'Wyspa Sosnowa', 'Wyspa Ukwiałów', 'Wyspa Burz', 'Wyspa Lisów', 'Wyspa Starej Latarni',
+                'Wyspa Wilcza', 'Wyspa Słonego Wiatru', 'Wyspa Bocianów', 'Wyspa Piaskowa', 'Wyspa Złotego Brzegu',
+                'Wyspa Ciszy', 'Wyspa Krabów', 'Wyspa Przemytników', 'Wyspa Rafy', 'Wyspa Pustelnika',
+                'Wyspa Białych Skał', 'Wyspa Kruków', 'Wyspa Delfinów', 'Wyspa Paproci', 'Wyspa Dzwonów',
+                'Wyspa Sztormu', 'Wyspa Muszli', 'Wyspa Orlicy', 'Wyspa Zatoki', 'Wyspa Bezimienna',
+                'Wyspa Topielców', 'Wyspa Wrzosów', 'Wyspa Kutra', 'Wyspa Zielona', 'Wyspa Szkwału', 'Wyspa Łabędzia',
+                'Wyspa Zakotwiczona', 'Wyspa Dalekiego Brzegu', 'Wyspa Ostatnia']
+FERRYMEN = ['Przewoźnik Gniewko', 'Przewoźniczka Jagna', 'Przewoźnik Wojsław', 'Przewoźniczka Dobrawa',
+            'Przewoźnik Sambor', 'Przewoźniczka Mila', 'Przewoźnik Bratumił', 'Przewoźniczka Ludmiła',
+            'Przewoźnik Zbysław', 'Przewoźniczka Wiesna', 'Przewoźnik Racibor', 'Przewoźniczka Bogumiła',
+            'Przewoźnik Dobromir', 'Przewoźniczka Sława', 'Przewoźnik Ciechosław', 'Przewoźniczka Grzymisława',
+            'Przewoźnik Mirogniew', 'Przewoźniczka Wanda', 'Przewoźnik Lubomir', 'Przewoźniczka Zbysława',
+            'Przewoźnik Krzesimir', 'Przewoźniczka Jarosława', 'Przewoźnik Domasław', 'Przewoźniczka Unisława',
+            'Przewoźnik Żelisław', 'Przewoźniczka Tomira', 'Przewoźnik Wszebor', 'Przewoźniczka Czesława',
+            'Przewoźnik Bogdan', 'Przewoźniczka Radosława', 'Przewoźnik Sulisław', 'Przewoźniczka Milena']
+TUNNEL_SPAWNS = [[('giant_rat', 3, 3), ('forest_spider', 3, 2)], [('jungle_serpent', 3, 2), ('crocodile', 3, 2)],
+                 [('orc_berserker', 3, 2), ('mummy', 3, 2)], [('drowned_sailor', 3, 3), ('pirate_cutthroat', 3, 2)]]
+LOCHY = ('Lochy Zapomnianych', [
+    (64, 48, [(6, 6), (26, 10), (52, 8), (54, 30), (32, 40), (8, 36)], 'crypt', 0,
+     [('wraith_knight', 4, 3), ('shadow_stalker', 4, 2), ('wraith_knight', 4, 3), ('shadow_stalker', 3, 2)]),
+    (64, 48, [(8, 36), (10, 14), (34, 6), (56, 18), (50, 42), (28, 26)], 'crypt', 0,
+     [('shadow_stalker', 4, 3), ('void_priest', 3, 2), ('shadow_stalker', 4, 3), ('void_priest', 3, 2)]),
+    (64, 48, [(28, 26), (52, 40), (58, 12), (32, 6), (8, 18), (12, 42)], 'crypt', 0,
+     [('void_priest', 4, 3), ('bone_dragon', 3, 1), ('void_priest', 4, 2), ('bone_dragon', 3, 2)]),
+    (64, 48, [(12, 42), (34, 40), (56, 30), (50, 8), (22, 8)], 'crypt', 0,
+     [('bone_dragon', 4, 3), ('abyss_lord', 3, 1), ('bone_dragon', 4, 2), ('abyss_lord', 3, 2)]),
+], [(-1, -2, 350, 750), (-3, -4, 700, 960)])
+
+
+def land_parts(world, by_ground=False):
+    """Spojne kawalki ladu, po ktorym da sie chodzic (z mostami, bez gor i drzew): tablica numerow i lista [pola]."""
+    lab = np.zeros((S, S), np.int32)
+    parts = [None]
+    g = world.floors[0]
+    for y0 in range(S):
+        for x0 in range(S):
+            c = g[y0][x0]
+            if lab[y0, x0] or c is None or c[0] in NOT_LAND or not (by_ground or F.walk(c)):
+                continue
+            k = len(parts)
+            cells = [(x0, y0)]
+            lab[y0, x0] = k
+            i = 0
+            while i < len(cells):
+                x, y = cells[i]
+                i += 1
+                for dx, dy in F.DIRS4:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < S and 0 <= ny < S and not lab[ny, nx]:
+                        cc = g[ny][nx]
+                        if cc is not None and cc[0] not in NOT_LAND and (by_ground or F.walk(cc)):
+                            lab[ny, nx] = k
+                            cells.append((nx, ny))
+            parts.append(cells)
+    return lab, parts
+
+
+def standable(world, x, y):
+    c = world.get(x, y)
+    return c is not None and F.walk(c) and c[2] == NONE and c[0] not in NOT_LAND
+
+
+def sea_paths(world, lab, linked, limit):
+    """BFS po wodzie od brzegow polaczonego ladu (linked: numery kawalkow) do limit pol. Zwraca (odleglosc, rodzic)."""
+    g = world.floors[0]
+    dist = np.full((S, S), -1, np.int32)
+    parent = {}
+    q = deque()
+    for y in range(1, S - 1):
+        for x in range(1, S - 1):
+            if lab[y, x] in linked and standable(world, x, y):
+                for dx, dy in F.DIRS4:
+                    nx, ny = x + dx, y + dy
+                    c = g[ny][nx]
+                    if c is not None and c[0] in SEA and c[2] == NONE and c[3] == NONE and dist[ny, nx] < 0:
+                        dist[ny, nx] = 1
+                        parent[(nx, ny)] = (x, y)
+                        q.append((nx, ny))
+    while q:
+        x, y = q.popleft()
+        if dist[y, x] >= limit:
+            continue
+        for dx, dy in F.DIRS4:
+            nx, ny = x + dx, y + dy
+            if not (0 < nx < S - 1 and 0 < ny < S - 1) or dist[ny, nx] >= 0:
+                continue
+            c = g[ny][nx]
+            if c is not None and c[0] in SEA and c[2] == NONE and c[3] == NONE:
+                dist[ny, nx] = dist[y, x] + 1
+                parent[(nx, ny)] = (x, y)
+                q.append((nx, ny))
+    return dist, parent
+
+
+def best_landing(world, lab, part_id, cells, dist):
+    """Najblizszy wodzie polaczonego ladu brzeg wyspy: (odleglosc, pole ladu, pole wody)."""
+    best = None
+    for (x, y) in cells:
+        if not standable(world, x, y):
+            continue
+        for dx, dy in F.DIRS4:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < S and 0 <= ny < S and dist[ny, nx] > 0:
+                if best is None or dist[ny, nx] < best[0]:
+                    best = (int(dist[ny, nx]), (x, y), (nx, ny))
+    return best
+
+
+def trace(parent, water):
+    path = [water]
+    while path[-1] in parent:
+        path.append(parent[path[-1]])
+    return path            # woda ... woda, pole ladu po drugiej stronie
+
+
+def lay_bridge(world, path, wide):
+    """Kladka (1 pole) albo most (2 pola) po wodnych polach sciezki."""
+    water = path[:-1]
+    for i, (x, y) in enumerate(water):
+        world.put(x, y, 0, ('bridge', NONE, NONE, NONE))
+        if wide:
+            a = water[i - 1] if i else path[-1]
+            b = water[i + 1] if i + 1 < len(water) else path[-1]
+            vx, vy = (1, 0) if a[1] != b[1] or a[1] != y else (0, 1)
+            for (px, py) in ((x + vx, y + vy),):
+                c = world.get(px, py)
+                if c is not None and c[0] in SEA and c[2] == NONE:
+                    world.put(px, py, 0, ('bridge', NONE, NONE, NONE))
+
+
+def tunnel(ctx, a, b, rng, tier):
+    """Tunel pod morzem miedzy polami ladu a i b (na pietrze -1, -2 albo -3) ze schodami na obu brzegach."""
+    world = ctx['world']
+    x0, x1 = min(a[0], b[0]) - 8, max(a[0], b[0]) + 8
+    y0, y1 = min(a[1], b[1]) - 8, max(a[1], b[1]) + 8
+    for z in (-1, -2, -3):
+        occ = world.occ[z]
+
+        def free(x, y):
+            if not (x0 <= x <= x1 and y0 <= y <= y1 and 2 <= x < S - 3 and 2 <= y < S - 3):
+                return False
+            return all(world.get(x + dx, y + dy, z) is None and not occ[y + dy, x + dx]
+                       for dx in (-1, 0, 1, 2) for dy in (-1, 0, 1, 2))
+        if not free(*a) or not free(*b):
+            continue
+        # A* (4 kierunki) z lekkim szumem: tunel kreci sie, ale nie meandruje
+        start, goal = a, b
+        openh = [(0, start)]
+        came = {start: None}
+        g_ = {start: 0}
+        while openh:
+            _f, cur = heapq.heappop(openh)
+            if cur == goal:
+                break
+            for dx, dy in F.DIRS4:
+                n = (cur[0] + dx, cur[1] + dy)
+                if n in g_ or not free(*n):
+                    continue
+                g_[n] = g_[cur] + 1 + rng.random() * 0.6
+                came[n] = cur
+                heapq.heappush(openh, (g_[n] + abs(n[0] - goal[0]) + abs(n[1] - goal[1]), n))
+        if goal not in came:
+            continue
+        path = [goal]
+        while came[path[-1]] is not None:
+            path.append(came[path[-1]])
+        path.reverse()
+        carved = set()
+        for (x, y) in path:
+            for dx in (0, 1):
+                for dy in (0, 1):
+                    carved.add((x + dx, y + dy))
+        for (x, y) in carved:
+            r = rng.random()
+            obj = 'glow_moss' if r < 0.03 else NONE
+            deco = 'cobweb' if r > 0.985 else NONE
+            world.put(x, y, z, ('cave_floor', deco, obj, NONE))
+        for (x, y) in carved:
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    if world.get(x + dx, y + dy, z) is None:
+                        world.put(x + dx, y + dy, z, ('cave_floor', NONE, NONE, 'mossy_wall'))
+        for (x, y) in carved:
+            for dx in range(-3, 4):
+                for dy in range(-3, 4):
+                    if 0 <= x + dx < S and 0 <= y + dy < S:
+                        occ[y + dy, x + dx] = True
+        t = ctx['transitions']
+        for end, nxt in ((path[0], path[2]), (path[-1], path[-3])):
+            ex, ey = end
+            out = next(((ex + dx, ey + dy) for dx, dy in F.DIRS4 if standable(world, ex + dx, ey + dy)), None)
+            assert out is not None, f'no land next to tunnel stairs {end}'
+            c = world.get(ex, ey)
+            world.put(ex, ey, 0, (c[0] if c[0] not in ('bridge',) else 'dirt', NONE, 'stairs_down', NONE))
+            world.put(ex, ey, z, ('cave_floor', NONE, 'stairs_up', NONE))
+            t.append((ex, ey, 0, 'STAIRS', nxt[0], nxt[1], z))
+            t.append((ex, ey, z, 'STAIRS', out[0], out[1], 0))
+        pool = TUNNEL_SPAWNS[tier]
+        n = max(1, min(4, len(path) // 18))
+        for i in range(n):
+            sx, sy = path[(i + 1) * len(path) // (n + 1)]
+            m, r, k = pool[i % len(pool)]
+            ctx['spawns'].append(f'{m};{sx};{sy};{z};{r};{k};120')
+        xs = [p[0] for p in carved]
+        ys = [p[1] for p in carved]
+        lo, hi = ISLAND_TIERS[tier][1]
+        ctx['regions_new'].insert(0, ('Tunel pod Morzem', min(xs), min(ys), max(xs), max(ys), z, z, lo, hi))
+        return z, len(path)
+    return None
+
+
+def inland(world, lab, p):
+    """Pole przy brzegu p (do 6 pol w glab ladu), na ktorym zmiesci sie zejscie: wolne, z wolnymi 8 sasiadami."""
+    k = lab[p[1], p[0]]
+    best = None
+    for dx in range(-6, 7):
+        for dy in range(-6, 7):
+            x, y = p[0] + dx, p[1] + dy
+            if not (0 < x < S - 1 and 0 < y < S - 1) or lab[y, x] != k or not standable(world, x, y):
+                continue
+            # zejscie nie moze zamykac przejscia: wszystkie 8 pol dookola wolne
+            n = sum(1 for a in (-1, 0, 1) for b in (-1, 0, 1) if (a or b) and standable(world, x + a, y + b))
+            if n == 8 and (best is None or abs(dx) + abs(dy) < best[0]):
+                best = (abs(dx) + abs(dy), (x, y))
+    return best[1] if best else None
+
+
+def island_tier(cells):
+    tx, ty = dict(ctx_towns_cache)['Varden'][:2]
+    cx = sum(c[0] for c in cells) / len(cells)
+    cy = sum(c[1] for c in cells) / len(cells)
+    d = math.hypot(cx - tx, cy - ty)
+    return next(i for i, (lim, _lv, _p) in enumerate(ISLAND_TIERS) if d < lim)
+
+
+ctx_towns_cache = []
+
+
+def island_access(ctx, rng):
+    """Kazda wyspa (ponad ISLAND_MIN pol) dostaje dojscie: kladka (do 8 pol wody), most (do 14), tunel pod morzem
+    (do 60) albo przewoznika z lodzia; potwory wg odleglosci od Varden; pod najwieksza wyspa Lochy Zapomnianych."""
+    world = ctx['world']
+    ctx_towns_cache[:] = ctx['towns']
+    lab, parts = land_parts(world)
+    glab, _gparts = land_parts(world, by_ground=True)
+    temple = dict(ctx['towns'])['Varden']
+    mainland = int(glab[temple[1], temple[0]])
+    # wyspy to kawalki ladu oddzielone od kontynentu woda (zamkniete gorami kotliny na ladzie zostaja jak sa)
+    sea_island = [False] + [glab[p[0][1], p[0][0]] != mainland for p in parts[1:]]
+    main = int(lab[temple[1], temple[0]])
+    linked = {main} | {int(lab[p[1], p[0]]) for _n, p in ctx['towns']}
+    for n in ctx['npcs']:
+        if n[2] == 'CAPTAIN' and int(n[6]) == 0:
+            linked.add(int(lab[int(n[5]), int(n[4])]))
+    stats = {'kladki': 0, 'mosty': 0, 'tunele': 0, 'przewoznicy': 0}
+    islands = []           # (numer, sposob)
+    for rnd in range(2):
+        dist, parent = sea_paths(world, lab, linked, 60)
+        todo = []
+        for k in range(1, len(parts)):
+            if k in linked or len(parts[k]) < ISLAND_MIN or not sea_island[k]:
+                continue
+            bl = best_landing(world, lab, k, parts[k], dist)
+            if bl is not None:
+                todo.append((bl[0], k, bl))
+        todo.sort()
+        for d, k, (_d, land, water) in todo:
+            path = trace(parent, water)
+            other = path[-1]
+            if d <= 14:
+                lay_bridge(world, path, wide=d > 8)
+                stats['kladki' if d <= 8 else 'mosty'] += 1
+                islands.append((k, 'kładka' if d <= 8 else 'most'))
+                linked.add(k)
+            elif rnd == 1:
+                tier = island_tier(parts[k])
+                a, b = inland(world, lab, land), inland(world, lab, other)
+                if a and b and tunnel(ctx, a, b, rng, tier):
+                    stats['tunele'] += 1
+                    islands.append((k, 'tunel'))
+                    linked.add(k)
+    # reszta: przewoznik z lodzia na brzegu zwroconym do ladu, rejs do dwoch najblizszych kapitanow
+    # przewoznicy plywaja do portow miast (kapitanowie dawnych wysp maja wlasne, stale trasy)
+    ports = {n for n, _p in ctx['towns']} | {'Przystań Wschodnia'}
+    captains = [n for n in ctx['npcs'] if n[2] == 'CAPTAIN' and int(n[6]) == 0 and n[3] in ports]
+    fi = 0
+    ferry_names = {}
+    # nazwy wysp nie moga powtarzac miejsc, do ktorych juz plywaja statki, ani starych regionow
+    used = {n[3] for n in ctx['npcs']} | {r[0] for r in ctx['regions'] + ctx['regions_new']}
+    ISLAND_NAMES[:] = [n for n in ISLAND_NAMES if n not in used]
+    for k in sorted(range(1, len(parts)), key=lambda i: -len(parts[i])):
+        if k in linked or len(parts[k]) < ISLAND_MIN or not sea_island[k]:
+            continue
+        cells = parts[k]
+        best = None
+        for need_land, reach_out in ((6, 8), (3, 5)):          # male wysepki: luzniejsze wymagania
+            for (x, y) in cells:
+                if not standable(world, x, y):
+                    continue
+                for d in (F.N, F.S_, F.E, F.W):
+                    c = world.get(x + d[0], y + d[1])
+                    if c is None or c[0] not in SEA:
+                        continue
+                    if sum(1 for dx in (-1, 0, 1) for dy in (-1, 0, 1) if standable(world, x + dx, y + dy)) < need_land:
+                        continue
+                    far = [(x + d[0] * j + abs(d[1]) * side, y + d[1] * j + abs(d[0]) * side)
+                           for j in range(1, reach_out) for side in (0, 1)]
+                    if not all((world.get(*p) or WATER)[0] in SEA and (world.get(*p) or WATER)[2] == NONE for p in far):
+                        continue
+                    score = min(abs(x - int(c_[4])) + abs(y - int(c_[5])) for c_ in captains)
+                    if best is None or score < best[0]:
+                        best = (score, (x, y), d)
+            if best is not None:
+                break
+        if best is None:
+            print('wyspa bez brzegu na przystan:', len(cells), cells[0])
+            continue
+        _s, spot, d = best
+        r = F.small_dock(world, spot, d, pier=3)
+        if r is None:
+            print('wyspa bez przystani:', len(cells), cells[0])
+            continue
+        stand, rect = r
+        if not standable(world, *stand):
+            stand = spot
+        key = f'isle{fi}_ferryman'
+        name = FERRYMEN[fi % len(FERRYMEN)]
+        island = ISLAND_NAMES[fi % len(ISLAND_NAMES)]
+        fi += 1
+        ctx['pz'].append((*rect, 0))
+        ctx['npcs'].append([key, name, 'CAPTAIN', island, stand[0], stand[1], 0, '-', '#4a6a8a',
+                            'Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.'])
+        near = sorted(captains, key=lambda c_: abs(stand[0] - int(c_[4])) + abs(stand[1] - int(c_[5])))[:2]
+        for c_ in near:
+            ctx['routes'].append((key, c_[0]))
+        stats['przewoznicy'] += 1
+        ferry_names[k] = island
+        islands.append((k, 'statek'))
+        linked.add(k)
+    # potwory i regiony wysp (wczesniej puste); klimatyczne spawny omijaja te pola
+    island_cells = set()
+    ni = 0
+    starts = []
+    for k, how in islands:
+        cells = parts[k]
+        island_cells.update(cells)
+        tier = island_tier(cells)
+        lim, (lo, hi), pool = ISLAND_TIERS[tier]
+        xs = [p[0] for p in cells]
+        ys = [p[1] for p in cells]
+        box = (min(xs), min(ys), max(xs), max(ys))
+        sub = lab[box[1]:box[3] + 1, box[0]:box[2] + 1]
+        other = int(((sub != 0) & (sub != k)).sum())
+        name = ferry_names.get(k) or ISLAND_NAMES[(ni + 13) % len(ISLAND_NAMES)]
+        ni += 1
+        # prostokat wyspy; gdy obejmuje cudzy lad - kilka prostokatow dokladnie po wyspie
+        rects = [box] if other < 40 else [r for r in organic.rect_cover(set(cells))
+                                          if (r[2] - r[0] + 1) * (r[3] - r[1] + 1) >= 6]
+        for r in rects:
+            ctx.setdefault('island_regions', []).append((name, *r, 0, 0, lo, hi))
+        z0_rects = [r[1:5] for r in ctx['regions'] + ctx['regions_new'] if len(r) > 5 and r[5] <= 0 <= r[6]]
+        free = [p for p in cells if standable(world, *p) and world.get(*p)[0] not in F.ROAD_GROUND
+                and any(a <= p[0] <= c_ and b <= p[1] <= d_ for (a, b, c_, d_) in rects)
+                and not any(a <= p[0] <= c_ and b <= p[1] <= d_ for (a, b, c_, d_) in z0_rects)]
+        if not free:
+            continue
+        starts.append(free[0])
+        rng.shuffle(free)
+        want = max(1, min(8, len(cells) // 450))
+        placed = []
+        for (x, y) in free:
+            if len(placed) >= want:
+                break
+            if any(abs(x - a) + abs(y - b) < 14 for (a, b) in placed):
+                continue
+            if any(a - 3 <= x <= c_ + 3 and b - 3 <= y <= d_ + 3 for (a, b, c_, d_, z) in ctx['pz'] if z == 0):
+                continue
+            total = sum(w for _m, w in pool)
+            v = rng.random() * total
+            for m, w in pool:
+                v -= w
+                if v <= 0:
+                    break
+            ctx['spawns'].append(f'{m};{x};{y};0;4;{rng.choice((2, 3))};120')
+            placed.append((x, y))
+    ctx['island_cells'] = island_cells
+    ctx['island_starts'] = starts
+    # Lochy Zapomnianych pod najwieksza wyspa bez miasta
+    town_parts = {int(lab[p[1], p[0]]) for _n, p in ctx['towns']}
+    big = max((k for k, _h in islands if k not in town_parts), key=lambda k: len(parts[k]))
+    cells = parts[big]
+    cx = sum(c[0] for c in cells) / len(cells)
+    cy = sum(c[1] for c in cells) / len(cells)
+    entry = min((p for p in cells if standable(world, *p) and standable(world, p[0], p[1] + 1)
+                 and all(standable(world, p[0] + dx, p[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1))),
+                key=lambda p: abs(p[0] - cx) + abs(p[1] - cy))
+    name, levels, regs = LOCHY
+    dungeon(ctx, name, entry, levels, rng)
+    _n, x0, y0, x1, y1, _zl, _zh = ctx['dungeons'][-1]
+    for (za, zb, lo, hi) in regs:
+        ctx['regions_new'].insert(0, (name if za == -1 else 'Dno Lochów', x0, y0, x1, y1, zb, za, lo, hi))
+    # ruiny nad wejsciem: kawalki murow, kosci i pochodnie
+    ex, ey = entry
+    for (dx, dy, cell) in ((-2, -1, 'broken_wall'), (2, -1, 'broken_wall'), (-2, 1, 'wall_torch'), (2, 1, 'wall_torch')):
+        c = world.get(ex + dx, ey + dy)
+        if standable(world, ex + dx, ey + dy):
+            world.put(ex + dx, ey + dy, 0, (c[0], NONE, cell, NONE))
+    ctx['lochy'] = entry
+    stats['lochy'] = entry
+    return stats
+
+
 
 def all_regions(ctx):
     """Kolejnosc ma znaczenie (pierwszy pasujacy region wygrywa): wioski i nowe lochy, regiony klockow
@@ -2078,6 +2511,7 @@ def all_regions(ctx):
             continue
         out.append(r)
     out += ctx['regions']
+    out += ctx.get('island_regions', [])
     out += zone_regions(ctx['zones']) if 'zones' in ctx else []
     return out
 

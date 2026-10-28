@@ -55,9 +55,12 @@ import pl.fawizja.pixel.vocation.Vocation;
  */
 public final class GameScreen extends ScreenAdapter {
 
-    /** Minimalny widoczny obszar w kafelkach (reszta zalezy od proporcji ekranu). */
-    private static final float VIEW_TILES_W = 11f;
-    private static final float VIEW_TILES_H = 8f;
+    /**
+     * Widoczny obszar w kafelkach, jak okno gry Tibii: 15 x 11, postac w srodku (7 pol w bok, 5 w pionie).
+     * Reszta ramki widoku gry jest czarna.
+     */
+    static final float VIEW_TILES_W = 15f;
+    static final float VIEW_TILES_H = 11f;
     private static final long AUTOSAVE_MS = 60_000L;
     private static final long GUARD_SAMPLE_MS = 500L;
     private static final long WARMUP_MS = 5_000L;
@@ -1395,6 +1398,7 @@ public final class GameScreen extends ScreenAdapter {
 
         ScreenUtils.clear(0, 0, 0, 1);
         viewport.apply();
+        clipToView(true);
         SpriteBatch batch = game.batch();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -1496,6 +1500,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         drawCombatOverlay(batch, game.shapes(), t, z);
         drawLowHealth(game.shapes(), t);
+        clipToView(false);
 
         if (profiler != null && profiler.isEnabled()) worldDrawCalls = profiler.getDrawCalls();
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
@@ -2440,8 +2445,8 @@ public final class GameScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         hud.resize(width, height);
-        // swiat rysuje sie na calym ekranie, ale skala i kamera sa ustawione tak, by co najmniej 11x8 pol
-        // miescilo sie w ramce widoku gry z HUD-u (panele interfejsu zaslaniaja reszte jak w kliencie Tibii)
+        // skala i kamera tak, by 15x11 pol miescilo sie w ramce widoku gry z HUD-u; swiat rysuje sie tylko
+        // w prostokacie 15x11 na srodku ramki (reszta czarna, jak w kliencie Tibii)
         float[] r = hud.gameView();
         // cala liczba pikseli na pole: bez cienkich szwow miedzy kafelkami
         float ppu = Math.max(1f, (float) Math.floor(Math.min(r[2] / VIEW_TILES_W, r[3] / VIEW_TILES_H)));
@@ -2450,6 +2455,24 @@ public final class GameScreen extends ScreenAdapter {
         viewport.update(width, height, false);
         viewOffX = (r[0] + r[2] / 2f - width / 2f) / ppu;
         viewOffY = (r[1] + r[3] / 2f - height / 2f) / ppu;
+        // gracz stoi na srodku pola, wiec okno konczy sie rowno 7 pol w bok i 5 w pionie od niego
+        float vw = VIEW_TILES_W * ppu, vh = VIEW_TILES_H * ppu;
+        clip[0] = Math.round(r[0] + (r[2] - vw) / 2f);
+        clip[1] = Math.round(r[1] + (r[3] - vh) / 2f);
+        clip[2] = Math.round(vw);
+        clip[3] = Math.round(vh);
+    }
+
+    /** Prostokat okna gry 15x11 na ekranie (x, y, szerokosc, wysokosc w pikselach logicznych). */
+    private final int[] clip = new int[4];
+
+    private void clipToView(boolean on) {
+        if (!on || clip[2] <= 0) {
+            Gdx.gl.glDisable(com.badlogic.gdx.graphics.GL20.GL_SCISSOR_TEST);
+            return;
+        }
+        Gdx.gl.glEnable(com.badlogic.gdx.graphics.GL20.GL_SCISSOR_TEST);
+        com.badlogic.gdx.graphics.glutils.HdpiUtils.glScissor(clip[0], clip[1], clip[2], clip[3]);
     }
 
     /** Przesuniecie srodka ramki widoku gry wzgledem srodka ekranu (w polach). */

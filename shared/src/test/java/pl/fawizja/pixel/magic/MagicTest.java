@@ -128,6 +128,7 @@ class MagicTest {
         assertEquals("FIRE", bolt.effect());
         PlayerCharacter far = TestData.newCharacter(Vocation.SORCERER);
         GameSession s2 = session(far, "bandit", new Position(17, 12, 0));
+        s2.teleport(new Position(9, 12, 0), 0);   // 8 pol: poza zasiegiem 7
         s2.combat().setTarget(s2.monsters().monsters().get(0));
         int mana = far.mana();
         assertEquals(CastResult.OUT_OF_RANGE, s2.castSpell("ember_bolt", 0));

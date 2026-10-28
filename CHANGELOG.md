@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.209.0] - 2026-10-28
+
+### Zmieniono
+- Okno gry jak w Tibii: 15 x 11 kratek, postać zawsze w środku (7 kratek w bok, 5 w górę i w dół).
+  Reszta ramki widoku jest czarna.
+- Zasięg czarów na cel, run, łuków, kusz, różdżek i broni rzucanej: 7 kratek, czyli do krawędzi ekranu.
+- Potwory zauważają gracza z 7-9 kratek (za plecami o 2 mniej), więc w pionie także spoza ekranu.
+
+### Dodano
+- Dojście na każdą wyspę: kładki i mosty nad wąskimi cieśninami, tunele pod morzem ze schodami na obu
+  brzegach i przewoźnicy z łodziami (rejs do najbliższych portów, konto premium).
+- Potwory na wyspach według odległości od Varden: od dzików i bandytów (10-40) przez krokodyle i orki,
+  mumie i strażników świątyń, aż po topielców, piratów i kraby koralowe (280-420). W tunelach też żyją potwory.
+- Lochy Zapomnianych pod wielką wyspą na wschodzie: cztery piętra kamiennych sal i korytarzy z kośćmi
+  i pajęczynami, upiorni rycerze i łowcy cieni, kapłani pustki, kościane smoki i władcy otchłani (poziomy 350-960).
+
 ## [0.208.0] - 2026-10-28
 
 ### Dodano

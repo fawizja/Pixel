@@ -27,6 +27,8 @@ public final class MonsterManager {
     public static final int LEASH = 10;
     /** Najkrotszy zasieg wzroku: potwor widzi mniej wiecej caly ekran przed soba (jak w Tibii). */
     public static final int MIN_SIGHT = 7;
+    /** Najdalej, skad potwor zauwazy gracza (zasieg ekranu w poziomie + 2). */
+    public static final int MAX_SIGHT = 9;
     /** Jak dlugo potwor goni gracza, ktory zniknal mu z oczu (idzie tam, gdzie go ostatnio widzial). */
     public static final long MEMORY_MS = 5_000;
 
@@ -516,14 +518,18 @@ public final class MonsterManager {
         if (step != null) tryStep(m, step, now, tp);
     }
 
-    /** Zasieg wzroku przed soba: zasieg aggro z danych + 2, co najmniej MIN_SIGHT; noca drapiezniki dalej. */
+    /**
+     * Zasieg wzroku przed soba: zasieg aggro z danych + 2, od MIN_SIGHT do MAX_SIGHT (jak w Tibii: potwory widza
+     * gracza z 7-9 pol, w pionie takze spoza ekranu 15x11); noca drapiezniki dalej, ale nie ponad MAX_SIGHT.
+     */
     static int sightRange(MonsterType t, boolean nightBonus) {
-        return Math.max(MIN_SIGHT, t.aggroRange() + 2) + (nightBonus ? NIGHT_AGGRO_BONUS : 0);
+        int base = Math.min(MAX_SIGHT, Math.max(MIN_SIGHT, t.aggroRange() + 2));
+        return Math.min(MAX_SIGHT, base + (nightBonus ? NIGHT_AGGRO_BONUS : 0));
     }
 
     /**
-     * Pole widzenia: przed soba (polplaszczyzna w strone, w ktora patrzy) pelny zasieg wzroku, za plecami polowa,
-     * a gracza tuz obok (2 pola) zawsze zauwazy.
+     * Pole widzenia: przed soba (polplaszczyzna w strone, w ktora patrzy) pelny zasieg wzroku, za plecami o 2 pola
+     * mniej (co najmniej 5), a gracza tuz obok (2 pola) zawsze zauwazy.
      */
     static boolean notices(Monster m, Position tp, int sight) {
         Position mp = m.position();
@@ -531,7 +537,7 @@ public final class MonsterManager {
         if (dist <= 2) return true;
         int dx = tp.x() - mp.x(), dy = tp.y() - mp.y();
         boolean ahead = dx * m.facing().dx + dy * m.facing().dy >= 0;
-        return dist <= (ahead ? sight : (sight + 1) / 2);
+        return dist <= (ahead ? sight : Math.max(5, sight - 2));
     }
 
     private Predicate<Position> blockedFor(Position player) {
