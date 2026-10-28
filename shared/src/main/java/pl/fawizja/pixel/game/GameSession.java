@@ -1214,7 +1214,7 @@ public final class GameSession {
 
     public FishingSystem fishing() { return fishing; }
 
-    /** Czy pokazac przycisk lowienia (wedka w plecaku i woda w zasiegu). */
+    /** Czy pokazac przycisk lowienia (wedka w plecaku albo w rece i woda w zasiegu; brak robakow wyjasnia komunikat). */
     public boolean canFish() {
         return fishing.hasRod(pc) && fishing.waterNearby(pc.position());
     }
@@ -1232,6 +1232,13 @@ public final class GameSession {
                 break;
             default:
                 log.add(nowMs, EventLog.Kind.WARNING, r.message);
+        }
+        if (r == FishingResult.CAUGHT || r == FishingResult.NOTHING) {
+            if (fishing.lastRefill() > 0) {
+                log.add(nowMs, EventLog.Kind.INFO, "Robaki uzupełnione z plecaka (" + fishing.lastRefill() + ").");
+            } else if (fishing.baitInSlot(pc) == 0) {
+                log.add(nowMs, EventLog.Kind.SYSTEM, "Skończyły się robaki na przynętę.");
+            }
         }
         return r;
     }

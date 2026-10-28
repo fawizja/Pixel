@@ -50,7 +50,14 @@ public final class CharacterFactory {
         InventoryResult r = Money.add(pc.backpack(), config.startGoldInBackpack());
         if (!r.ok()) throw new IllegalStateException("starting gold does not fit: " + r);
         for (StarterKits.Entry e : StarterKits.backpack(vocation, level)) {
-            r = pc.backpack().add(new ItemStack(items.byKey(e.key()).id(), e.count()));
+            ItemStack stack = new ItemStack(items.byKey(e.key()).id(), e.count());
+            // robaki od razu w gniezdzie amunicji (tam ich szuka wedka); paladyn trzyma je w plecaku, bo gniazdo
+            // zajmuja mu wlocznie do rzucania
+            if (e.key().equals("worm") && vocation != Vocation.PALADIN && pc.equipment().get(EquipSlot.AMMO) == null) {
+                pc.equipment().setDirect(EquipSlot.AMMO, stack);
+                continue;
+            }
+            r = pc.backpack().add(stack);
             if (!r.ok()) throw new IllegalStateException("starter kit does not fit: " + e.key());
         }
         return pc;

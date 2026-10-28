@@ -30,7 +30,7 @@ class BestiaryCardTest {
 
         List<String[]> many = BestiaryCard.rows(wolf, 25, TestData.ITEMS);
         assertNull(find(many, "Łupy"), "the loot list replaces the hint");
-        assertEquals("80% 1-8 szt.", find(many, TestData.ITEMS.byKey("gold_coin").name()));
+        assertEquals("80% 3-23 szt.", find(many, TestData.ITEMS.byKey("gold_coin").name()));
         assertEquals("12%", find(many, TestData.ITEMS.byKey("wolf_pelt").name()));
     }
 

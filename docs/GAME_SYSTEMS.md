@@ -294,6 +294,12 @@ przy pauzie, utracie fokusu i zamknieciu.
   odpowiedz na atak; gdy cel ucieknie poza zasieg, cel przechodzi na atakujacego potwora w zasiegu.
 - Smierc potwora: exp (z redukcja), trening umiejetnosci, lup do plecaka (autoloot w promieniu 8,
   lista ignorowanych) lub na ziemie, odrodzenie po czasie ze spawns.csv.
+- Zasady lupow (`monster/LootRules`, test `LootRulesTest`): oczekiwane zloto zwyklego potwora = poziom^1,12
+  (pas 0,5-2x), boss >= 8x; szansa przedmiotu <= 1000*sqrt(250/wartosc) promili (boss 10x); zwykly potwor nie
+  upuszcza nic drozszego niz 400*poziom+1000. Przedmioty tylko z bossow: `data/boss_items.csv` (wszystkie
+  legendarne >= 400 000 gp tez), u bossa 1-5% zaleznie od wartosci, bez premii potwora dnia i zaklec; zwykly potwor
+  z takim przedmiotem nie wczyta sie. `LootRules.rollBossLootPerPlayer` - osobny rzut na kazdego uczestnika
+  (pod wyprawy na bossa w 5 graczy).
 - Smierc gracza: -5% exp (nie ponizej poziomu startowego), pelne HP/MP, swiatynia Varden.
 - Zdarzenia walki (`CombatEvent`) -> liczby obrazen, leczenia, awansu w kliencie.
 - Cios wrecz niesie pozycje atakujacego (`from`, `isMeleeStrike`): klient rysuje wypad atakujacego w strone celu
@@ -492,8 +498,12 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
 ## Lowienie i umiejetnosci (Z logika, C UI)
 
 - `gathering/FishingSystem`: najblizszy kafelek wody w zasiegu 3 z linia wzroku; proba co 1,5 s;
-  szansa `min(70%, 10% + 0,6% * umiejetnosc)`; robak zuzywany przy zlowieniu; pelny plecak = nic nie
-  znika; kafelek po zlowieniu odpoczywa 2 min (stan ulotny); perla 3% od umiejetnosci 30.
+  szansa `min(70%, 10% + 0,6% * umiejetnosc)`. Potrzebna wedka (w plecaku albo w rece) i robaki w gniezdzie
+  amunicji (`EquipSlot.AMMO`, obok spodni - robak ma slot AMMO w items.csv); kazde zarzucenie zuzywa 1 robaka,
+  pusty stos uzupelnia sie robakami z plecaka. Bez wedki / bez robakow / robaki tylko w plecaku - osobne komunikaty
+  (`FishingResult.NO_ROD`, `NO_BAIT`, `BAIT_NOT_IN_SLOT`). Robak 1 gp u kazdego kupca z plecakami (tam tez wedka),
+  postac startowa (bez paladyna) ma 10 robakow w gniezdzie. Zlowiona ryba, ktora nie zmiesci sie w plecaku = robak
+  zostaje; kafelek po zlowieniu odpoczywa 2 min (stan ulotny); perla 3% od umiejetnosci 30.
 - Ryby biomow (`data/fishing.csv`): Mrozne Pustkowia - lodowy dorsz (35%, od umiejetnosci 15),
   Dzungla Selvaran - wegorz bagienny (35%, od 20; lowiskiem sa tam bagna), Pustynia Qasirah - karp z oazy
   (30%, od 25). Pozostale zlowienia to zwykla ryba. Ryby biomow dluzej syca i maja wyzszy skup w lokalnym sklepie.

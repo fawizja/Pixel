@@ -311,8 +311,12 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         List<ItemStack> out = new ArrayList<>();
         rareRolled.clear();
         for (LootEntry e : t.loot()) {
-            int chance = isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostChance(e.chancePermille()) : e.chancePermille();
-            chance = pc.enchantments().lootChance(chance);
+            int chance = e.chancePermille();
+            // przedmioty tylko z bossow zawsze z gola szansa z tabeli (rzadkie), bez premii potwora dnia i zaklec
+            if (!pl.fawizja.pixel.monster.LootRules.isBossOnly(items.get(e.itemId()))) {
+                chance = isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostChance(chance) : chance;
+                chance = pc.enchantments().lootChance(chance);
+            }
             if (rng.nextInt(1000) < chance) {
                 int count = CombatFormulas.rollBetween(e.min(), e.max(), rng);
                 if (isRare(t, e.chancePermille())) rareRolled.add(new ItemStack(e.itemId(), count));

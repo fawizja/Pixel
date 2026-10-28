@@ -63,3 +63,7 @@ lochy|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=933,441,-1
 sea_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=845,429,-1
 ferry|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=885,502,0 -Dpixel.open=npc
 island_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=947,566,0
+# 2026-10-28: robaki w gniezdzie amunicji (1 gp u kupca z plecakami), lup bossa rzucany osobno na gracza
+shop_worms|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
+equipment_worms|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bag
+boss_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bossloot

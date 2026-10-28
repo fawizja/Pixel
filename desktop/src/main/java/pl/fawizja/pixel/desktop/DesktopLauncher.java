@@ -168,6 +168,37 @@ public final class DesktopLauncher {
                     for (int i = 0; i < 2; i++) cs.recordDamage("Goblin szaman", 44, t);
                     cs.diedFromPlayer("Kuba", false, t);
                 }
+                if ("bossloot".equals(open)) {
+                    // podglad lupu bossa (-Dpixel.boss=morgath): osobny rzut dla kazdego z 5 uczestnikow wyprawy;
+                    // ziarno szukane tak, by ktos trafil przedmiot tylko z bossow (inaczej przy 1-5% zwykle nic)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    pl.fawizja.pixel.monster.MonsterType boss = pl.fawizja.pixel.monster.MonsterRegistry.loadDefault(reg)
+                            .get(System.getProperty("pixel.boss", "morgath"));
+                    java.util.List<String> party = java.util.List.of(gs.session().character().name(), "Ula", "Kuba", "Mira", "Olaf");
+                    java.util.Map<String, java.util.List<pl.fawizja.pixel.item.ItemStack>> rolls = null;
+                    for (long seed = 1; seed < 10_000; seed++) {
+                        rolls = pl.fawizja.pixel.monster.LootRules.rollBossLootPerPlayer(boss, reg, party, new java.util.Random(seed));
+                        boolean rare = rolls.values().stream().flatMap(java.util.List::stream)
+                                .anyMatch(s -> pl.fawizja.pixel.monster.LootRules.isBossOnly(reg.get(s.itemId())));
+                        if (rare) break;
+                    }
+                    java.util.List<String[]> rows = new java.util.ArrayList<>();
+                    for (java.util.Map.Entry<String, java.util.List<pl.fawizja.pixel.item.ItemStack>> e : rolls.entrySet()) {
+                        java.util.Map<Integer, Integer> sum = new java.util.LinkedHashMap<>();
+                        for (pl.fawizja.pixel.item.ItemStack s : e.getValue()) sum.merge(s.itemId(), s.count(), Integer::sum);
+                        java.util.List<String> parts = new java.util.ArrayList<>();
+                        boolean rare = false;
+                        for (java.util.Map.Entry<Integer, Integer> s : sum.entrySet()) {
+                            pl.fawizja.pixel.item.ItemType it = reg.get(s.getKey());
+                            boolean bossOnly = pl.fawizja.pixel.monster.LootRules.isBossOnly(it);
+                            rare |= bossOnly;
+                            parts.add((s.getValue() > 1 ? s.getValue() + "x " : "") + it.name() + (bossOnly ? " (tylko z bossa!)" : ""));
+                        }
+                        rows.add(new String[] {e.getKey() + (rare ? " - rzadki łup!" : ""), parts.isEmpty() ? "nic" : String.join(", ", parts)});
+                    }
+                    gs.hud().openInfo("Łup: " + boss.name() + " (osobny rzut na gracza)", rows);
+                }
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
                 if ("party".equals(open)) {
