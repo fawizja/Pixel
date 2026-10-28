@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.212.0] - 2026-10-28
+
+### Dodano
+- 36 nowych potworów (32 zwykłe i 4 bossy) od poziomu 9 do 930, z własnymi nazwami i opisami. Statystyki
+  wzorowane na proporcjach z serwera Canary, grafiki wyłącznie z OpenTibia Sprite Pack (CC BY 4.0).
+  Nowi bossowie: Wroniec, Kruczy Kniaź (32), Szlamiara, Matka Topieli (95), Velmira, Szkarłatna Pani (290)
+  i Suweren Ostrzy (640). Rozstawione w strefach klimatu, na wyspach, w tunelach, kopalniach, jaskiniach i lochach.
+- Nowe materiały z potworów (czarne pióro, śluz czerwia, płytka chitynu, ektoplazma, odłamek gargulca)
+  i dwa przedmioty tylko z bossów (kaptur z kruczych piór, różdżka z bagiennego drewna).
+
 ## [0.211.0] - 2026-10-28
 
 ### Dodano
