@@ -36,6 +36,7 @@ import newtowns  # noqa: E402
 import organic  # noqa: E402
 import underground as U  # noqa: E402
 import wall_lights  # noqa: E402
+import quests  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -958,6 +959,12 @@ def build(ctx):
     zones = zone_grid(T)
     ctx['zones'] = zones
     climate_spawns(ctx, zones, rng)
+    # Grobowiec Pieciu Profesji pod pustynia (drzwi poziomu 20, oltarze profesji, skarbiec)
+    temple = dict(ctx['towns'])['Varden']
+    helpers = dict(standable=standable, in_pz=lambda x, y: in_pz(ctx, x, y), footprint=ctx['footprint'],
+                   reach=reach_surface(world, temple[:2], [p[:2] for _n, p in ctx['towns']]),
+                   find_free=find_free, mark=mark)
+    print('grobowiec pieciu profesji:', quests.tomb_of_five(ctx, random.Random(20261040), helpers))
 
 
 def monster_levels():
@@ -2615,8 +2622,18 @@ def finish(ctx):
                 ctx['routes'])
     with open(os.path.join(OUT, 'displays.csv'), 'w', encoding='utf-8') as f:
         f.write('# towary wylozone na ladach sklepow (tylko do ogladania): x;y;z;przedmiot\n')
-        for d in ctx['displays']:
+        for d in ctx['displays'] + ctx.get('quest_displays', []):
             f.write(';'.join(str(v) for v in d) + '\n')
+    with open(os.path.join(OUT, 'level_doors.csv'), 'w', encoding='utf-8') as f:
+        f.write('# drzwi poziomu: x;y;z;minimalny poziom (pole z drzwiami; dotkniecie pokazuje napis)\n')
+        for d in ctx.get('level_doors', []):
+            f.write(';'.join(str(v) for v in d) + '\n')
+    with open(os.path.join(OUT, 'altar_quests.csv'), 'w', encoding='utf-8') as f:
+        f.write('# zadania z oltarzami profesji (world/AltarQuest):\n'
+                '# quest;id;nazwa;zloto;dzwignia x,y,z;sala x0,y0,x1,y1,z;skarbiec x0,y0,x1,y1,z\n'
+                '# altar;id;PROFESJA;oltarz x,y,z;pole x,y,z;pochodnia x,y,z;przedmiot;cel x,y,z;skrzynia x,y,z\n')
+        for line in ctx.get('altar_quests', []):
+            f.write(line + '\n')
 
 
 if __name__ == '__main__':

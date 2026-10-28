@@ -1726,11 +1726,17 @@ public final class GameSession {
                 onFloorChanged(nowMs);
             } else if (r == MoveResult.LEVEL_TOO_LOW && nowMs - lastGateWarningMs > 3000) {
                 lastGateWarningMs = nowMs;
-                log.add(nowMs, EventLog.Kind.WARNING, "Strażnik: dalej wpuszczamy tylko od poziomu "
-                        + world.requiredLevelAt(pc.position().translate(requested.dx, requested.dy)) + ".");
+                Position gate = pc.position().translate(requested.dx, requested.dy);
+                if (world.levelDoorAt(gate) > 0) {
+                    log.add(nowMs, EventLog.Kind.WARNING, levelDoorRefusal(world.levelDoorAt(gate)));
+                } else {
+                    log.add(nowMs, EventLog.Kind.WARNING, "Strażnik: dalej wpuszczamy tylko od poziomu "
+                            + world.requiredLevelAt(gate) + ".");
+                }
             }
         }
         ground.decay(nowMs);
+        if (!sharedWorld && altarsLocal) updateAltarTorches();
         boolean night = isNight(nowMs);
         if (wasNight != null && night != wasNight) {
             log.add(nowMs, EventLog.Kind.INFO, night ? "Zapada noc. Nocne drapieżniki są groźniejsze."
@@ -2106,6 +2112,84 @@ public final class GameSession {
         return chests != null && chests.at(p) != null;
     }
 
+    // ------------------------------------------------------------------ zadania z oltarzami profesji
+    /**
+     * Kto stoi przed oltarzami i jak przeniesc druzyne do skarbca. Gra offline: sama postac (i "duchy" z
+     * {@link #setAltarGhosts} do testow i zrzutow); serwer podstawia wszystkich graczy swiata.
+     */
+    public interface AltarParty extends pl.fawizja.pixel.world.AltarQuest.Occupants {
+        /** Przenosi postac danej profesji stojaca na polu from na pole to. */
+        void teleport(Position from, pl.fawizja.pixel.vocation.Vocation v, Position to, long nowMs);
+    }
+
+    private java.util.Set<pl.fawizja.pixel.vocation.Vocation> altarGhosts =
+            java.util.EnumSet.noneOf(pl.fawizja.pixel.vocation.Vocation.class);
+    private final AltarParty soloParty = new AltarParty() {
+        @Override
+        public boolean standing(Position p, pl.fawizja.pixel.vocation.Vocation v) {
+            if (!pc.isDead() && pc.position().equals(p) && pc.vocation() == v) return true;
+            if (!altarGhosts.contains(v) || pc.position().equals(p)) return false;
+            // duch (tryb testowy offline) stoi na swoim polu, jesli nikt go nie zajal
+            for (pl.fawizja.pixel.world.AltarQuest q : world.altarQuests()) {
+                pl.fawizja.pixel.world.AltarQuest.Slot s = q.slotByStand(p);
+                if (s != null && s.vocation() == v) return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void teleport(Position from, pl.fawizja.pixel.vocation.Vocation v, Position to, long nowMs) {
+            if (pc.position().equals(from) && pc.vocation() == v) GameSession.this.teleport(to, nowMs);
+        }
+    };
+    private AltarParty altarParty = soloParty;
+    /** false: pochodnie oltarzy ustawia serwer (klient online), true: sesja sama (gra offline). */
+    private boolean altarsLocal = true;
+
+    /** Serwer: wszyscy gracze swiata (null = sama postac). */
+    public void setAltarParty(AltarParty party) { altarParty = party == null ? soloParty : party; }
+
+    /** Klient online: pochodnie oltarzy przychodza z serwera, sesja ich nie zmienia. */
+    public void setAltarsLocal(boolean local) { altarsLocal = local; }
+
+    /** Tryb testowy offline (-Dpixel.altarGhosts): te profesje "stoja" na swoich polach przed oltarzami. */
+    public void setAltarGhosts(java.util.Collection<pl.fawizja.pixel.vocation.Vocation> ghosts) {
+        altarGhosts = ghosts == null || ghosts.isEmpty() ? java.util.EnumSet.noneOf(pl.fawizja.pixel.vocation.Vocation.class)
+                : java.util.EnumSet.copyOf(ghosts);
+    }
+
+    /** Pochodnie nad oltarzami wg tego, kto stoi na polach (offline: co klatke, gdy postac jest blisko sali). */
+    public void updateAltarTorches() {
+        for (pl.fawizja.pixel.world.AltarQuest q : world.altarQuests()) {
+            if (q.lever().z() != pc.position().z() || q.lever().distanceTo(pc.position()) > 40) continue;
+            q.updateTorches(world.wallLights(), altarParty);
+        }
+    }
+
+    private String itemName(String key) {
+        pl.fawizja.pixel.item.ItemType t = items.byKeyOrNull(key);
+        return t == null ? key : t.name();
+    }
+
+    static String levelDoorRefusal(int level) {
+        return "Na drzwiach napis: " + WorldMap.levelDoorSign(level) + ". Drzwi nie ustępują - wejdziesz od poziomu " + level + ".";
+    }
+
+    /** Dzwignia sali oltarzy: z piecioma profesjami na miejscach przenosi je do skarbca, inaczej mowi, kogo brakuje. */
+    private boolean pullLever(pl.fawizja.pixel.world.AltarQuest q, long nowMs) {
+        java.util.List<pl.fawizja.pixel.world.AltarQuest.Slot> missing = q.missing(altarParty);
+        if (!missing.isEmpty()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Dźwignia ani drgnie. Przed ołtarzami brakuje: "
+                    + pl.fawizja.pixel.world.AltarQuest.names(missing) + " (pali się " + (q.slots().size() - missing.size())
+                    + " z " + q.slots().size() + " pochodni).");
+            return true;
+        }
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Przeciągasz dźwignię. Ołtarze rozbłyskują - " + q.name() + " otwiera skarbiec!");
+        for (pl.fawizja.pixel.world.AltarQuest.Slot s : q.slots()) altarParty.teleport(s.stand(), s.vocation(), s.target(), nowMs);
+        if (!sharedWorld && altarsLocal) updateAltarTorches();
+        return true;
+    }
+
     /**
      * Dotkniecie pola obok postaci: skrzynia (otwiera), drzwi albo okno (otwiera, drugie dotkniecie zamyka).
      * Zwraca false, gdy pole jest za daleko albo nie ma tam nic do otwarcia.
@@ -2118,7 +2202,32 @@ public final class GameSession {
             return openChestAt(c, nowMs);
         }
         if (world.crates().isStorage(p)) return useCrate(p, nowMs);
+        pl.fawizja.pixel.world.AltarQuest leverOf = world.altarQuestByLever(p);
+        if (leverOf != null) return pullLever(leverOf, nowMs);
+        pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
+        if (altar != null) {
+            // przedmiot na oltarzu jest tylko do ogladania: nie trafia do plecaka i nie da sie go przesunac
+            log.add(nowMs, EventLog.Kind.INFO, "Na ołtarzu leży " + itemName(altar.itemKey()) + " - jest przytwierdzony"
+                    + " i nie da się go podnieść. Przed ołtarzem ma stanąć " + altar.vocation().displayName() + ".");
+            return true;
+        }
         pl.fawizja.pixel.world.WallLights wl = world.wallLights();
+        if (wl.isWallLight(p) && world.isQuestTorch(p)) {
+            log.add(nowMs, EventLog.Kind.INFO, wl.isLit(p) ? "Pochodnia płonie, bo przed ołtarzem stoi właściwa profesja."
+                    : "Pochodnia zapali się sama, gdy przed ołtarzem stanie właściwa profesja.");
+            return true;
+        }
+        int doorLevel = world.levelDoorAt(p);
+        if (doorLevel > 0 && pc.level() < doorLevel) {
+            log.add(nowMs, EventLog.Kind.WARNING, levelDoorRefusal(doorLevel));
+            return true;
+        }
+        if (doorLevel > 0 && !world.openings().isOpen(p)) {
+            log.add(nowMs, EventLog.Kind.INFO, "Na drzwiach napis: " + WorldMap.levelDoorSign(doorLevel)
+                    + ". Masz poziom " + pc.level() + " - drzwi się otwierają.");
+            world.openings().set(p, true);
+            return true;
+        }
         if (wl.isWallLight(p)) {
             // pochodnia albo latarnia na murze: zapala sie i gasi na miejscu, nie trafia do plecaka
             boolean lit = wl.toggle(p);
@@ -2149,8 +2258,26 @@ public final class GameSession {
     }
 
     private boolean openChestAt(pl.fawizja.pixel.treasure.TreasureChests.Chest c, long nowMs) {
+        if (c.vocation() != null && c.vocation() != pc.vocation()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Ta skrzynia należy do profesji " + c.vocation().displayName()
+                    + ". Nie możesz z niej nic wziąć.");
+            return true;
+        }
         if (pc.openedChests().contains(c.id())) {
-            log.add(nowMs, EventLog.Kind.INFO, "Ta skrzynia jest już pusta.");
+            log.add(nowMs, EventLog.Kind.INFO, c.vocation() != null
+                    ? "Ta skrzynia jest pusta. Ta postać już odebrała nagrodę za to zadanie." : "Ta skrzynia jest już pusta.");
+            return true;
+        }
+        if (c.itemKey() == null) {
+            // nagroda zadania: samo zloto
+            pl.fawizja.pixel.inventory.Container gold = pc.backpack().copy();
+            if (!pl.fawizja.pixel.economy.Money.add(gold, c.gold()).ok()) {
+                log.add(nowMs, EventLog.Kind.WARNING, "Plecak nie ma miejsca na nagrodę. Zrób miejsce i spróbuj znowu.");
+                return true;
+            }
+            pc.backpack().commitFrom(gold);
+            pc.openedChests().add(c.id());
+            log.add(nowMs, EventLog.Kind.LOOT, "Nagroda za zadanie: " + String.format("%,d gp", c.gold()) + "!");
             return true;
         }
         int itemId = items.byKey(c.itemKey()).id();
@@ -2343,6 +2470,10 @@ public final class GameSession {
         }
         java.util.List<ItemStack> lying = ground.at(p);
         for (int i = lying.size() - 1, shown = 0; i >= 0 && shown < 3; i--, shown++) parts.add(describe(lying.get(i)));
+        pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
+        if (altar != null) parts.add("ołtarz profesji " + altar.vocation().displayName() + " (" + itemName(altar.itemKey()) + ")");
+        if (world.altarQuestByLever(p) != null) parts.add("dźwignia");
+        if (world.levelDoorAt(p) > 0) parts.add("drzwi z napisem " + WorldMap.levelDoorSign(world.levelDoorAt(p)));
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null) {
             switch (tr.type()) {

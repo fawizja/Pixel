@@ -583,6 +583,52 @@ class NetworkSyncTest {
     }
 
     /** Czeka na komunikat spelniajacy warunek (pozostale komunikaty sa pomijane). */
+    @Test
+    void altarQuestTorchesAndLeverWorkForFivePlayersOnline() throws Exception {
+        pl.fawizja.pixel.world.AltarQuest q = server.world().world.altarQuests().get(0);
+        String[] names = {"Pala", "Sora", "Kniga", "Drui", "Monka"};
+        pl.fawizja.pixel.vocation.Vocation[] vocs = {pl.fawizja.pixel.vocation.Vocation.PALADIN,
+                pl.fawizja.pixel.vocation.Vocation.SORCERER, pl.fawizja.pixel.vocation.Vocation.KNIGHT,
+                pl.fawizja.pixel.vocation.Vocation.DRUID, pl.fawizja.pixel.vocation.Vocation.MONK};
+        java.util.List<NetClient> cs = new java.util.ArrayList<>();
+        try {
+            for (int i = 0; i < 5; i++) {
+                NetClient c = connect();
+                cs.add(c);
+                c.hello(names[i], vocs[i].name(), "tajne-" + names[i]);
+            }
+            await("welcome", () -> cs.stream().allMatch(c -> c.playerId() > 0));
+            // czterech na swoich polach: cztery pochodnie (WLIGHT do klientow), dzwignia nie dziala
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    if (p.session.character().vocation() != pl.fawizja.pixel.vocation.Vocation.MONK) {
+                        p.session.teleport(q.slot(p.session.character().vocation()).stand(), server.now());
+                    }
+                }
+            });
+            Position knightTorch = q.slot(pl.fawizja.pixel.vocation.Vocation.KNIGHT).torch();
+            awaitMessage(cs.get(4), "torch lit for everybody", m -> m[0].equals("WLIGHT") && m[1].equals("" + knightTorch.x())
+                    && m[2].equals("" + knightTorch.y()) && m[4].equals("1"));
+            await("4 torches on the server", () -> q.slots().stream()
+                    .filter(sl -> server.world().world.wallLights().isLit(sl.torch())).count() == 4);
+            Position lever = q.lever();
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            Thread.sleep(300);
+            await("nobody moved", () -> server.world().players().stream()
+                    .allMatch(p -> !q.inVault(p.session.character().position())));
+            // piaty na miejscu: dzwignia przenosi wszystkich do skarbca
+            server.enqueueTest(() -> server.world().find("Monka").session.teleport(
+                    q.slot(pl.fawizja.pixel.vocation.Vocation.MONK).stand(), server.now()));
+            await("5 torches", () -> q.slots().stream().allMatch(sl -> server.world().world.wallLights().isLit(sl.torch())));
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            await("all five in the vault", () -> server.world().players().stream().allMatch(p ->
+                    p.session.character().position().equals(q.slot(p.session.character().vocation()).target())));
+            await("torches out again", () -> q.slots().stream().noneMatch(sl -> server.world().world.wallLights().isLit(sl.torch())));
+        } finally {
+            for (NetClient c : cs) c.close();
+        }
+    }
+
     static void awaitMessage(NetClient c, String what, java.util.function.Predicate<String[]> cond) throws InterruptedException {
         await(what, () -> {
             String[] m;

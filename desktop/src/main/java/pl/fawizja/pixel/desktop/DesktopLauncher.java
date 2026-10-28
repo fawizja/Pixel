@@ -29,6 +29,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.look=x,y     podglad pola (jak dlugie dotkniecie na telefonie)
+ *   -Dpixel.altarGhosts=PALADIN,DRUID|ALL  offline: "duchy" profesji stoja przed oltarzami zadan (test bez 5 graczy)
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu

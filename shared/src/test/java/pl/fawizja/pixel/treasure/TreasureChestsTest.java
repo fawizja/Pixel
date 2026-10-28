@@ -26,12 +26,13 @@ class TreasureChestsTest {
         assertTrue(ms < 5_000, "generation took " + ms + " ms");
         Map<Integer, BitSet> reach = TreasureChests.reachable(world);
         for (int z : new int[] {-1, -2, -3, -4, -5}) {
-            assertEquals(4, c.all().stream().filter(x -> x.position().z() == z).count(), "floor " + z);
+            assertEquals(4, c.all().stream().filter(x -> x.position().z() == z && x.vocation() == null).count(), "floor " + z);
         }
         for (int z : new int[] {1, 2, 3}) {
             assertEquals(2, c.all().stream().filter(x -> x.position().z() == z).count(), "floor +" + z);
         }
         for (TreasureChests.Chest x : c.all()) {
+            if (x.vocation() != null) continue; // nagrody zadan z oltarzami (AltarQuestTest): skarbiec tylko dzwignia
             assertTrue(world.isWalkable(x.position()), x.id());
             assertFalse(world.isProtectionZone(x.position()), x.id());
             assertTrue(reach.get(x.position().z()).get(x.position().y() * world.width() + x.position().x()), x.id());

@@ -18,7 +18,7 @@ class WorldLookTest {
     void shopCountersShowGoodsTheShopSells() {
         Map<Position, String> displays = world.displays();
         assertTrue(displays.size() >= 40, "towary na ladach: " + displays.size());
-        Set<String> counters = Set.of("counter", "showcase");
+        Set<String> counters = Set.of("counter", "showcase", "altar"); // altar: przedmiot profesji (AltarQuest)
         for (Map.Entry<Position, String> e : displays.entrySet()) {
             Position p = e.getKey();
             assertNotNull(TestData.ITEMS.byKeyOrNull(e.getValue()), "nieznany przedmiot " + e.getValue());

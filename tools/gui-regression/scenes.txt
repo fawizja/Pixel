@@ -66,3 +66,7 @@ island_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=94
 wall_torches_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1
 wall_torch_out|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1 -Dpixel.tap=434,698
 wall_lanterns_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.teleport=741,206,0
+# 2026-10-28: Grobowiec Pieciu Profesji - drzwi poziomu 20, sala oltarzy (duchy paladyna i druida), skarbiec
+tomb_level_door|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=191,431,0 -Dpixel.button=tips_off -Dpixel.tap=191,430
+tomb_altars|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=242,418,-3 -Dpixel.altarGhosts=PALADIN,DRUID -Dpixel.button=tips_off
+tomb_vault|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=248,437,-3 -Dpixel.button=tips_off -Dpixel.tap=248,436

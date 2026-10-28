@@ -1670,6 +1670,7 @@ final class ServerWorld {
             }
             return false;
         });
+        s.setAltarParty(altarParty(p));
         s.spells().setPlayerTargeting(new pl.fawizja.pixel.magic.SpellSystem.PlayerTargeting() {
             @Override
             public Position position() {
@@ -2624,6 +2625,7 @@ final class ServerWorld {
             weeklyRollover(now);
         }
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
+        updateAltarTorches();
         updateInvasion(now);
         updateDuels(now);
         updateShutdown(now);
@@ -2676,6 +2678,41 @@ final class ServerWorld {
                 p.lastSaveMs = now;
             }
         }
+    }
+
+    /** Kto stoi przed oltarzami: wszyscy zywi gracze swiata (serwer jest jedynym zrodlem prawdy). */
+    private final pl.fawizja.pixel.world.AltarQuest.Occupants altarOccupants = (pos, v) -> {
+        for (ServerPlayer o : players.values()) {
+            PlayerCharacter c = o.session.character();
+            if (!c.isDead() && c.vocation() == v && pos.equals(c.position())) return true;
+        }
+        return false;
+    };
+
+    /** Dzwignia sali oltarzy przenosi wszystkich graczy stojacych na swoich polach (kazdy dostaje komunikat). */
+    private pl.fawizja.pixel.game.GameSession.AltarParty altarParty(ServerPlayer puller) {
+        return new pl.fawizja.pixel.game.GameSession.AltarParty() {
+            @Override
+            public boolean standing(Position pos, Vocation v) { return altarOccupants.standing(pos, v); }
+
+            @Override
+            public void teleport(Position from, Vocation v, Position to, long t) {
+                for (ServerPlayer o : players.values()) {
+                    PlayerCharacter c = o.session.character();
+                    if (c.isDead() || c.vocation() != v || !from.equals(c.position())) continue;
+                    o.session.teleport(to, t);
+                    if (o != puller) {
+                        o.session.log().add(t, EventLog.Kind.SYSTEM, puller.name() + " przeciąga dźwignię - jesteście w skarbcu!");
+                    }
+                    return;
+                }
+            }
+        };
+    }
+
+    /** Pochodnie nad oltarzami zadan (zmiany ida do klientow komunikatem WLIGHT). */
+    private void updateAltarTorches() {
+        for (pl.fawizja.pixel.world.AltarQuest q : world.altarQuests()) q.updateTorches(world.wallLights(), altarOccupants);
     }
 
     /** Ogloszenie wydarzenia dla wszystkich graczy w grze. */

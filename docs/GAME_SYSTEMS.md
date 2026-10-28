@@ -355,6 +355,31 @@ i bramami poziomu, >= 8 pol od przejsc, losowanie z ziarnem 20261015 + pietro, o
 pietrach). Lup rosnie x3 na pietro w dol. Otwieranie: `GameSession.openChest` (UZYJ obok), raz na postac
 (`openedChests`, zapis `chests`).
 
+## Drzwi poziomu i zadania z oltarzami profesji (Z logika, S serwer, C rysowanie)
+
+- Drzwi poziomu (wielokrotnego uzytku): plik mapy `level_doors.csv` (`x;y;z;minimalny poziom`, pole z obiektem
+  `door_level`, ktory jest zwyklymi drzwiami w murze ze zlota tabliczka). `MapLoader` wywoluje
+  `WorldMap.addLevelDoor(p, lvl)`: drzwi + straznik poziomu na tym jednym polu (`requiredLevelAt`). API:
+  `world.levelDoorAt(p)` (0 = nie drzwi poziomu), `world.levelDoors()`, `WorldMap.levelDoorSign(lvl)`
+  ("„Tylko dla poziomu 20+”"). Dotkniecie (`GameSession.useAt`) pokazuje napis; nizszy poziom - drzwi sie nie
+  otwieraja, krok w drzwi konczy sie tym samym komunikatem; od poziomu - drzwi sie otwieraja i mozna przejsc.
+  Generator: `ctx['level_doors'].append((x, y, z, poziom))` i obiekt `door_level` w przerwie muru.
+- Zadania z oltarzami: `world/AltarQuest` z pliku `altar_quests.csv` (wiersz `quest` + wiersze `altar` na kazda
+  profesje: oltarz, pole przed nim, pochodnia na murze, przedmiot, cel teleportu, skrzynia). Przedmiot na oltarzu to
+  `displays.csv` (tylko grafika, nie do podniesienia ani przesuniecia). Pochodnie zadania sa domyslnie zgaszone
+  (`WallLights.setDefaultLit(false)`) i nie zapalaja sie dotknieciem; `AltarQuest.updateTorches` zapala pochodnie
+  oltarza, gdy na polu stoi zywa postac wlasciwej profesji. Dzwignia (`lever`, na prawo od pola rycerza) przy
+  wszystkich pieciu przenosi kazda postac na jej pole w skarbcu, inaczej mowi, kogo brakuje.
+  Skarbiec: skrzynie `TreasureChests.Chest` z `vocation` (identyfikator `q_<id>_<profesja>`), samo zloto, raz na
+  postac (`openedChests`), cudzej profesji nie da sie otworzyc. Ze skarbca schody na -2.
+- Offline: `GameSession` liczy pochodnie sama (sama postac); `-Dpixel.altarGhosts=PALADIN,DRUID` (albo `ALL`)
+  stawia "duchy" profesji na ich polach (test i zrzuty). Online: klient nie zmienia pochodni zadan
+  (`setAltarsLocal(false)`), serwer co takt liczy je z pozycji wszystkich graczy (`ServerWorld.updateAltarTorches`,
+  komunikaty `WLIGHT`) i podstawia `GameSession.AltarParty` (dzwignia przenosi wszystkich graczy z pol).
+- Grobowiec Pieciu Profesji (generator `tools/mapgen/quests.py`): kapliczka na Pustyni Qasirah z drzwiami poziomu 20,
+  grobowiec -1..-3 (szkielety, hieny, trolle, golemy, skorpiony; region 20-60), sala oltarzy i skarbiec na -3
+  (strefy ochronne), nagroda 20 000 gp dla kazdej profesji.
+
 ## Minimapa (Z kolory, C rysowanie)
 
 `world/MinimapPalette.color/paint`: piksel RGBA8888 na kafelek - przejscie zolte, sciana ciemna, podloze w kolorze
