@@ -1,0 +1,9 @@
+# zadania z oltarzami profesji (world/AltarQuest):
+# quest;id;nazwa;zloto;dzwignia x,y,z;sala x0,y0,x1,y1,z;skarbiec x0,y0,x1,y1,z
+# altar;id;PROFESJA;oltarz x,y,z;pole x,y,z;pochodnia x,y,z;przedmiot;cel x,y,z;skrzynia x,y,z
+quest;desert;Grobowiec Pięciu Profesji;20000;243,418,-3;235,417,249,422,-3;235,436,249,440,-3
+altar;desert;PALADIN;236,417,-3;236,418,-3;237,416,-3;hunting_bow;236,437,-3;236,436,-3
+altar;desert;SORCERER;239,417,-3;239,418,-3;240,416,-3;wand_of_embers;239,437,-3;239,436,-3
+altar;desert;KNIGHT;242,417,-3;242,418,-3;243,416,-3;knight_sword;242,437,-3;242,436,-3
+altar;desert;DRUID;245,417,-3;245,418,-3;246,416,-3;thornroot_rod;245,437,-3;245,436,-3
+altar;desert;MONK;248,417,-3;248,418,-3;249,416,-3;iron_knuckles;248,437,-3;248,436,-3

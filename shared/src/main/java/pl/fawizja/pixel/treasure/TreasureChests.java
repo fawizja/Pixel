@@ -20,8 +20,16 @@ import pl.fawizja.pixel.world.WorldMap;
  */
 public final class TreasureChests {
 
-    /** Zawartosc skrzyni: zloto i przedmiot (klucz z items.csv) w ilosci. */
-    public record Chest(String id, Position position, long gold, String itemKey, int count) {}
+    /**
+     * Zawartosc skrzyni: zloto i przedmiot (klucz z items.csv, null = samo zloto) w ilosci. Skrzynia nagrody zadania
+     * moze nalezec do jednej profesji (vocation != null): inne profesje jej nie otworza.
+     */
+    public record Chest(String id, Position position, long gold, String itemKey, int count,
+                        pl.fawizja.pixel.vocation.Vocation vocation) {
+        public Chest(String id, Position position, long gold, String itemKey, int count) {
+            this(id, position, gold, itemKey, count, null);
+        }
+    }
 
     public static final long SEED = 20261015L;
 
@@ -101,7 +109,7 @@ public final class TreasureChests {
             List<Position> cand = new ArrayList<>();
             for (int i = r.nextSetBit(0); i >= 0; i = r.nextSetBit(i + 1)) {
                 Position p = new Position(i % w, i / w, z);
-                if (world.isProtectionZone(p) || world.requiredLevelAt(p) > 0) continue;
+                if (world.isProtectionZone(p) || world.requiredLevelAt(p) > 0 || world.inAltarQuestRooms(p)) continue;
                 boolean far = true;
                 for (Position e : exits) {
                     if (Math.max(Math.abs(e.x() - p.x()), Math.abs(e.y() - p.y())) < 8) {
@@ -137,6 +145,12 @@ public final class TreasureChests {
                     if (ok) placed.add(p);
                 }
                 traps.addAll(placed);
+            }
+        }
+        // skrzynie nagrod zadan z oltarzami profesji: po jednej na profesje, samo zloto
+        for (pl.fawizja.pixel.world.AltarQuest aq : world.altarQuests()) {
+            for (pl.fawizja.pixel.world.AltarQuest.Slot s : aq.slots()) {
+                out.add(new Chest(aq.chestId(s.vocation()), s.chest(), aq.gold(), null, 0, s.vocation()));
             }
         }
         return new TreasureChests(out, traps);

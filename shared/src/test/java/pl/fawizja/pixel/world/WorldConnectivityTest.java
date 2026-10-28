@@ -22,7 +22,12 @@ class WorldConnectivityTest {
         WorldMap w = TestData.world();
         NpcRegistry npcs = NpcRegistry.load("world", w, ShopRegistry.loadDefault(TestData.ITEMS));
         // rejsy i przejazdy: z pola NPC do pola NPC docelowego (wyspy sa osiagalne tylko statkiem)
-        Reachability r = Reachability.from(w, w.spawn(), Travel.links(npcs));
+        List<Reachability.Link> links = new ArrayList<>(Travel.links(npcs));
+        // dzwignie zadan z oltarzami przenosza z pol przed oltarzami do skarbca
+        for (AltarQuest q : w.altarQuests()) {
+            for (AltarQuest.Slot s : q.slots()) links.add(new Reachability.Link(s.stand(), s.target()));
+        }
+        Reachability r = Reachability.from(w, w.spawn(), links);
         List<String> missing = new ArrayList<>();
         for (Town t : w.towns()) if (!r.reached(t.temple())) missing.add("swiatynia " + t.name());
         for (Npc n : npcs.all()) if (!r.reachedWithin(n.position(), Npc.TALK_RANGE)) missing.add("NPC " + n.key() + " " + n.position());
