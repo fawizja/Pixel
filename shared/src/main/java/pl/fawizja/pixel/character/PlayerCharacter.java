@@ -116,6 +116,7 @@ public final class PlayerCharacter {
         openedChests.clear();
         openedChests.addAll(o.openedChests);
         crates = o.crates;
+        wallLights = o.wallLights;
         depot.clear();
         for (int i = 0; i < o.depot.size(); i++) {
             if (o.depot.get(i) != null) depot.putInSlot(i, o.depot.get(i));
@@ -331,6 +332,13 @@ public final class PlayerCharacter {
     public String crates() { return crates; }
 
     public void setCrates(String state) { crates = state == null ? "" : state; }
+
+    /** Gra offline: zapalone i zgaszone pochodnie na murach ({@link pl.fawizja.pixel.world.WallLights#encode()}). */
+    private String wallLights = "";
+
+    public String wallLights() { return wallLights; }
+
+    public void setWallLights(String state) { wallLights = state == null ? "" : state; }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public java.util.Set<Integer> keptItems() { return keptItems; }

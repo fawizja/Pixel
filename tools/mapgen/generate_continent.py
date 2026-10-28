@@ -35,6 +35,7 @@ import nature  # noqa: E402
 import newtowns  # noqa: E402
 import organic  # noqa: E402
 import underground as U  # noqa: E402
+import wall_lights  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -2609,6 +2610,7 @@ def finish(ctx):
         ('# regiony: nazwa;x0;y0;x1;y1;z od;z do;zalecany poziom od;do (oddzielone |)', None),
         ('regions', '|'.join(';'.join(str(v) for v in r) for r in all_regions(ctx))),
     ]
+    print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
     write_world(ctx['world'], ctx['legacy'], props, ctx['transitions'], ctx['npcs'], ctx['spawns'], ctx['houses'],
                 ctx['routes'])
     with open(os.path.join(OUT, 'displays.csv'), 'w', encoding='utf-8') as f:

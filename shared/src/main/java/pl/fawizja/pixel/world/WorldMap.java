@@ -51,6 +51,14 @@ public final class WorldMap {
         return crates;
     }
 
+    private WallLights wallLights;
+
+    /** Pochodnie i latarnie na murach (zapalone / zgaszone), tworzone przy pierwszym uzyciu. */
+    public synchronized WallLights wallLights() {
+        if (wallLights == null) wallLights = new WallLights(this);
+        return wallLights;
+    }
+
     public List<Town> towns() { return Collections.unmodifiableList(towns); }
     public List<Region> regions() { return Collections.unmodifiableList(regions); }
 

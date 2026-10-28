@@ -71,3 +71,6 @@ chattabs_phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2 
 house_free|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_free
 house_owned|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_owned
 house_owner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_owner
+wall_torches_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1
+wall_torch_out|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1 -Dpixel.tap=434,698
+wall_lanterns_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.teleport=741,206,0

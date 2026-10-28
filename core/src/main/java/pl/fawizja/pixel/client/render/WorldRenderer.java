@@ -44,12 +44,14 @@ public final class WorldRenderer {
     private final java.util.Set<Integer> doors;
 
     private final pl.fawizja.pixel.world.Openings openings;
+    private final pl.fawizja.pixel.world.WallLights wallLights;
     /** Pietro rysowane w tej chwili (drzwi w murze sa pomijane w przebiegu obiektow). */
     private FloorMap drawingFloor;
 
     public WorldRenderer(WorldMap world, TileArt art) {
         this.world = world;
         this.openings = world.openings();
+        this.wallLights = world.wallLights();
         this.art = art;
         int max = 0;
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) max = Math.max(max, t.id());
@@ -268,6 +270,7 @@ public final class WorldRenderer {
     private void drawObject(SpriteBatch batch, int id, int mx, int my, float x, float wy) {
         if (id == 0) return;
         if (doors.contains(id) && drawingFloor != null && doorArt(drawingFloor, mx, my) != 0) return; // drzwi w murze - drawWall
+        if (wallLights.isLightTile(id) && drawingFloor != null && drawingFloor.get(Layer.WALL, mx, my) != 0) return; // na murze - drawWall
         TextureRegion nat = art.nativeTile(id, mx, my);
         if (nat != null) {
             batch.draw(nat, x - 1, wy, 2f, 2f); // naturalny rozmiar jak w Tibii: od prawego dolnego rogu pola
@@ -331,6 +334,28 @@ public final class WorldRenderer {
                     art.wallPiece(wall, vert ? TileArt.DOOR_V_OPEN : TileArt.DOOR_H_OPEN), k, sx, wy);
             return;
         }
+        drawWallBody(batch, f, id, x, y, sx, wy);
+        if (wallLights.isLightTile(f.get(Layer.OBJECT, x, y))) drawWallLight(batch, f, x, y, sx, wy);
+    }
+
+    /**
+     * Pochodnia albo latarnia na murze: na scianie poludniowej (mur poziomy) albo wschodniej (pionowy), zapalona albo
+     * zgaszona wg {@link pl.fawizja.pixel.world.WallLights}. Latarnia z paczki wisi na polu przed murem, wiec
+     * przesuwamy ja o pole w strone podlogi (rysowana razem z murem, przed postaciami nastepnego rzedu).
+     */
+    private void drawWallLight(SpriteBatch batch, FloorMap f, int x, int y, float sx, float wy) {
+        int face = pl.fawizja.pixel.world.WallLights.face(f, x, y);
+        if (face == pl.fawizja.pixel.world.WallLights.FACE_NONE) return;
+        Position p = new Position(x, y, f.z());
+        boolean lantern = wallLights.isLantern(p);
+        boolean vertical = face == pl.fawizja.pixel.world.WallLights.FACE_EAST;
+        TextureRegion r = art.wallLight(lantern, vertical, wallLights.isLit(p));
+        if (r == null) return;
+        float dx = lantern && vertical ? 1f : 0f, dy = lantern && !vertical ? -1f : 0f;
+        batch.draw(r, sx - 1 + dx, wy + dy, 2f, 2f);
+    }
+
+    private void drawWallBody(SpriteBatch batch, FloorMap f, int id, int x, int y, float sx, float wy) {
         if (art.rockShape(id, 0) != null && art.wallPiece(id, TileArt.WALL_V) != null) {
             drawMountain(batch, f, id, x, y, sx, wy);
             return;
@@ -357,7 +382,7 @@ public final class WorldRenderer {
         if (piece != null) {
             // mur jak w Tibii: sciana na prawej/dolnej krawedzi pola, wysokosc w gore i w lewo (2x2 pola)
             batch.draw(piece, sx - 1, wy, 2f, 2f);
-            int deco = openings.wallDecor(f, x, y, shape);
+            int deco = wallLights.isLightTile(f.get(Layer.OBJECT, x, y)) ? -1 : openings.wallDecor(f, x, y, shape);
             TextureRegion d = deco < 0 ? null : art.wallDeco(shape == TileArt.WALL_V, deco);
             if (d != null) batch.draw(d, sx - 1, wy, 2f, 2f);
             return;

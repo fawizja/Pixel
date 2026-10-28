@@ -199,7 +199,18 @@ rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
 - Czar Poswiata (LIGHT) daje wiekszy promien na czas; sytosc, swiatlo z czaru i pochodnia sa zapisywane.
 - Zrodla swiatla na mapie: latarnie, pochodnie scienne, ogniska, krysztaly (takze lodowe), swiecacy mech,
   magma, swiatlo z otworu nad miejscem na line.
+- Pochodnie i latarnie na murach: `world/WallLights` (WorldMap.wallLights()). Na mapie obiekt `wall_torch` /
+  `wall_lantern` na polu muru, wiszacy na scianie poludniowej (mur poziomy) albo wschodniej (pionowy):
+  `WallLights.face`. Generator (`tools/mapgen/wall_lights.py`, ostatni przebieg generate_continent.py)
+  przenosi pochodnie i latarnie z podlogi na najblizszy taki mur w tym samym pomieszczeniu/ulicy (bez okien,
+  drzwi i zaslaniajacych obiektow), reszte usuwa. Dotkniecie z pola obok (jak drzwi, akcja `open:x:y:z`)
+  zapala albo gasi; nie da sie ich wziac. Zgaszona nie swieci (LightRenderer pomija ja, wersja `version()`).
+  Stan: domyslnie wszystko sie pali; odstepstwa offline w postaci (`walllights`), na serwerze w
+  `walllights.txt` i komunikat `WLIGHT x y z 1|0` do klientow (takze po zalogowaniu). API dla zadan:
+  `isLit(x,y,z)`, `setLit(p, lit)`, `toggle(p)`, `setDefaultLit(p, lit)` (np. zgaszone do czasu oltarza,
+  bez zapisu), `lightsIn(z, x0, y0, x1, y1)`, `front(p)`. Grafiki: `tools/art/wall_lights_import.py` (OTSP).
 - Renderowanie: FBO o obnizonej rozdzielczosci, mnozenie przez scene; lista zrodel buforowana per pietro.
+  Na czas rysowania do FBO wylaczane jest przyciecie (scissor) okna gry - inaczej scena wychodzila biala.
 - Zegar swiata jest w `GameSession` (czas sesji 0 = 09:00); klient bierze z niego jasnosc i godzine.
   `setClock` pozwoli podac czas serwera. Noc = 21:00-05:00.
 - Nocne drapiezniki (`activity=NOCTURNAL`: wilki, hieny, bandyci, szkielety, upiory, mumie, faraon) maja

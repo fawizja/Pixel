@@ -148,12 +148,17 @@ class GameWorldTest {
     @Test
     void vardenRegionIsIdenticalToTheVardenMap() {
         WorldMap v = TestData.varden();
+        // pochodnie i latarnie przeniesione z podlogi na mury (tools/mapgen/wall_lights.py) - poza porownaniem
+        java.util.Set<Integer> lights = new java.util.HashSet<>();
+        for (String k : new String[] {"wall_torch", "street_lamp", "wall_lantern"}) lights.add(world.tiles().byKey(k).id());
         for (int z = -5; z <= 5; z++) {
             FloorMap a = v.floor(z), b = world.floor(z);
             for (int y = 0; y < v.height(); y++) {
                 for (int x = 0; x < v.width(); x++) {
                     for (Layer l : Layer.values()) {
                         int va = a.get(l, x, y);
+                        if (l == Layer.OBJECT && (lights.contains(va) || lights.contains(
+                                b.get(l, x + WorldLayout.VARDEN_OFFSET_X, y + WorldLayout.VARDEN_OFFSET_Y)))) continue;
                         if (va == 0 && z != 0) continue;
                         assertEquals(va, b.get(l, x + WorldLayout.VARDEN_OFFSET_X, y + WorldLayout.VARDEN_OFFSET_Y),
                                 "tile " + x + "," + y + "," + z + " " + l);
