@@ -66,6 +66,11 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public void setDeathListener(java.util.function.Consumer<Monster> listener) { this.deathListener = listener; }
 
+    /** Potwory, ktorych lup rozdaje kto inny (boss wyprawy w piec postaci): cialo zostaje puste. */
+    private java.util.function.Predicate<Monster> lootOwner;
+
+    public void setLootOwner(java.util.function.Predicate<Monster> owner) { this.lootOwner = owner; }
+
     /** Podzial doswiadczenia w druzynie (serwer); true = doswiadczenie juz rozdane, zabojca nie dostaje go sam. */
     public interface ExperienceSharer { boolean share(MonsterType killed, long now); }
 
@@ -265,6 +270,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onMonsterDeath(Monster m, long now) {
         MonsterType t = m.type();
         kills++;
+        boolean lootElsewhere = lootOwner != null && lootOwner.test(m);   // przed sluchaczem: on konczy wyprawe
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
         if (experienceSharer == null || !experienceSharer.share(t, now)) {
@@ -277,7 +283,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             awardExperience(exp, "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : ""), now);
         }
         Position corpse = m.position();
-        List<ItemStack> drop = rollLoot(t);
+        List<ItemStack> drop;
+        if (lootElsewhere) {
+            rareRolled.clear();
+            drop = new ArrayList<>();
+        } else {
+            drop = rollLoot(t);
+        }
         List<String> dropped = new ArrayList<>();
         for (ItemStack s : drop) dropped.add(describe(s));
         lootLog.record(now, t.name(), dropped, !rareRolled.isEmpty());

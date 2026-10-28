@@ -35,6 +35,8 @@ public final class PlayerCharacter {
     private final pl.fawizja.pixel.item.Enchantments enchantments = new pl.fawizja.pixel.item.Enchantments();
     /** Otwarte skrzynie skarbow (identyfikatory). */
     private final java.util.Set<String> openedChests = new java.util.LinkedHashSet<>();
+    /** Ukonczone wyprawy na bossa w piec postaci (identyfikatory z boss_quests.csv) - kazda raz na postac. */
+    private final java.util.Set<String> completedBossQuests = new java.util.LinkedHashSet<>();
 
     public static final int DEPOT_SLOTS = 60;
     private final Skills skills = new Skills();
@@ -115,6 +117,8 @@ public final class PlayerCharacter {
         enchantments.copyFrom(o.enchantments);
         openedChests.clear();
         openedChests.addAll(o.openedChests);
+        completedBossQuests.clear();
+        completedBossQuests.addAll(o.completedBossQuests);
         crates = o.crates;
         wallLights = o.wallLights;
         depot.clear();
@@ -325,6 +329,7 @@ public final class PlayerCharacter {
     public pl.fawizja.pixel.daily.LoginStreak loginStreak() { return loginStreak; }
     public pl.fawizja.pixel.item.Enchantments enchantments() { return enchantments; }
     public java.util.Set<String> openedChests() { return openedChests; }
+    public java.util.Set<String> completedBossQuests() { return completedBossQuests; }
 
     /** Gra offline: przesuniete skrzynie i ich zawartosc ({@link pl.fawizja.pixel.world.Crates#encode()}). */
     private String crates = "";

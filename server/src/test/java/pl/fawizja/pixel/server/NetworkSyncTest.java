@@ -594,7 +594,127 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void bossQuestForFivePlayersOnline() throws Exception {
+        pl.fawizja.pixel.world.BossQuest q = server.world().world.bossQuest("frost");
+        pl.fawizja.pixel.game.BossQuestRuntime rt = server.world().bossQuests;
+        String[] names = {"Lodka", "Szron", "Mroz", "Sopel", "Zima"};
+        pl.fawizja.pixel.vocation.Vocation[] vocs = pl.fawizja.pixel.vocation.Vocation.values();
+        java.util.List<NetClient> cs = new java.util.ArrayList<>();
+        try {
+            for (int i = 0; i < 5; i++) {
+                NetClient c = connect();
+                cs.add(c);
+                c.hello(names[i], vocs[i % vocs.length].name(), "tajne-" + names[i]);
+            }
+            await("welcome", () -> cs.stream().allMatch(c -> c.playerId() > 0));
+            // czterech na polach, Mroz (srodkowe pole) ciagnie: serwer odmawia i mowi, ilu brakuje
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    // wytrzymali bohaterowie (poziom 120), zeby Ysolde nie zabila ich przed testowym ciosem
+                    pl.fawizja.pixel.character.PlayerCharacter pc = p.session.character();
+                    pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(120) - pc.experience());
+                    pc.heal(pc.maxHealth());
+                }
+                for (int i = 0; i < 4; i++) {
+                    int sq = new int[] {2, 0, 1, 3}[i];
+                    server.world().find(new String[] {"Mroz", "Lodka", "Szron", "Sopel"}[i]).session
+                            .teleport(q.squares().get(sq).stand(), server.now());
+                }
+            });
+            await("four on squares", () -> pl.fawizja.pixel.game.BossQuestRuntime.onSquares(q, server.world().players().stream()
+                    .map(p -> p.session.bossHero()).toList()).size() == 4);
+            Position lever = q.lever();
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            awaitMessage(cs.get(2), "missing one", m -> m[0].equals("LOG") && m.length > 2 && m[2].contains("brakuje jeszcze 1"));
+            assertEquals(pl.fawizja.pixel.game.BossQuestRuntime.Phase.IDLE, rt.phase(q.id()));
+            // piaty staje na polu: dzwignia przenosi wszystkich na arene i budzi Ysolde
+            server.enqueueTest(() -> server.world().find("Zima").session.teleport(q.squares().get(4).stand(), server.now()));
+            await("five on squares", () -> pl.fawizja.pixel.game.BossQuestRuntime.onSquares(q, server.world().players().stream()
+                    .map(p -> p.session.bossHero()).toList()).size() == 5);
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            await("all five in the arena", () -> server.world().players().stream()
+                    .allMatch(p -> q.inArena(p.session.character().position())));
+            await("boss spawned", () -> rt.bossId(q.id()) >= 0);
+            for (NetClient c : cs) awaitMessage(c, "arena message", m -> m[0].equals("LOG") && m.length > 2 && m[2].contains("Ysolde, Królowa Lodu się budzi"));
+            // boss ginie (cios gracza Mroz): kazdy dostaje swoj lup, zapis ukonczenia i komunikat
+            server.enqueueTest(() -> {
+                for (pl.fawizja.pixel.monster.Monster m : new java.util.ArrayList<>(server.world().monsters.monsters())) {
+                    if (m.id() == rt.bossId(q.id())) {
+                        server.world().find("Mroz").session.combat().damageMonster(m, m.type().maxHealth() * 20,
+                                pl.fawizja.pixel.combat.DamageType.FIRE, server.now());
+                    }
+                }
+            });
+            await("cleared", () -> rt.phase(q.id()) == pl.fawizja.pixel.game.BossQuestRuntime.Phase.CLEARED);
+            for (int i = 0; i < 5; i++) {
+                awaitMessage(cs.get(i), "own loot " + names[i], m -> m[0].equals("LOG") && m.length > 2 && m[2].startsWith("Twój łup z bossa"));
+                assertTrue(server.world().find(names[i]).session.character().completedBossQuests().contains(q.id()), names[i]);
+            }
+            awaitMessage(cs.get(0), "broadcast", m -> m[0].equals("LOG") && m.length > 2 && m[2].contains("pokonuje Ysolde"));
+            // portal: wszyscy wracaja do przedsionka, arena wolna; ponowna dzwignia - odmowa (raz na postac)
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) p.session.teleport(q.exitPortal(), server.now());
+            });
+            await("back in the lobby", () -> server.world().players().stream()
+                    .allMatch(p -> q.inLobby(p.session.character().position())));
+            await("arena free", () -> rt.phase(q.id()) == pl.fawizja.pixel.game.BossQuestRuntime.Phase.IDLE);
+            server.enqueueTest(() -> server.world().find("Mroz").session.teleport(q.squares().get(2).stand(), server.now()));
+            await("on the square", () -> server.world().find("Mroz").session.character().position().equals(q.squares().get(2).stand()));
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            awaitMessage(cs.get(2), "only once", m -> m[0].equals("LOG") && m.length > 2 && m[2].contains("już ukończyła"));
+        } finally {
+            for (NetClient c : cs) c.close();
+        }
+    }
+
     /** Czeka na komunikat spelniajacy warunek (pozostale komunikaty sa pomijane). */
+    @Test
+    void altarQuestTorchesAndLeverWorkForFivePlayersOnline() throws Exception {
+        pl.fawizja.pixel.world.AltarQuest q = server.world().world.altarQuests().get(0);
+        String[] names = {"Pala", "Sora", "Kniga", "Drui", "Monka"};
+        pl.fawizja.pixel.vocation.Vocation[] vocs = {pl.fawizja.pixel.vocation.Vocation.PALADIN,
+                pl.fawizja.pixel.vocation.Vocation.SORCERER, pl.fawizja.pixel.vocation.Vocation.KNIGHT,
+                pl.fawizja.pixel.vocation.Vocation.DRUID, pl.fawizja.pixel.vocation.Vocation.MONK};
+        java.util.List<NetClient> cs = new java.util.ArrayList<>();
+        try {
+            for (int i = 0; i < 5; i++) {
+                NetClient c = connect();
+                cs.add(c);
+                c.hello(names[i], vocs[i].name(), "tajne-" + names[i]);
+            }
+            await("welcome", () -> cs.stream().allMatch(c -> c.playerId() > 0));
+            // czterech na swoich polach: cztery pochodnie (WLIGHT do klientow), dzwignia nie dziala
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    if (p.session.character().vocation() != pl.fawizja.pixel.vocation.Vocation.MONK) {
+                        p.session.teleport(q.slot(p.session.character().vocation()).stand(), server.now());
+                    }
+                }
+            });
+            Position knightTorch = q.slot(pl.fawizja.pixel.vocation.Vocation.KNIGHT).torch();
+            awaitMessage(cs.get(4), "torch lit for everybody", m -> m[0].equals("WLIGHT") && m[1].equals("" + knightTorch.x())
+                    && m[2].equals("" + knightTorch.y()) && m[4].equals("1"));
+            await("4 torches on the server", () -> q.slots().stream()
+                    .filter(sl -> server.world().world.wallLights().isLit(sl.torch())).count() == 4);
+            Position lever = q.lever();
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            Thread.sleep(300);
+            await("nobody moved", () -> server.world().players().stream()
+                    .allMatch(p -> !q.inVault(p.session.character().position())));
+            // piaty na miejscu: dzwignia przenosi wszystkich do skarbca
+            server.enqueueTest(() -> server.world().find("Monka").session.teleport(
+                    q.slot(pl.fawizja.pixel.vocation.Vocation.MONK).stand(), server.now()));
+            await("5 torches", () -> q.slots().stream().allMatch(sl -> server.world().world.wallLights().isLit(sl.torch())));
+            cs.get(2).send("ACT", "open:" + lever.x() + ":" + lever.y() + ":" + lever.z());
+            await("all five in the vault", () -> server.world().players().stream().allMatch(p ->
+                    p.session.character().position().equals(q.slot(p.session.character().vocation()).target())));
+            await("torches out again", () -> q.slots().stream().noneMatch(sl -> server.world().world.wallLights().isLit(sl.torch())));
+        } finally {
+            for (NetClient c : cs) c.close();
+        }
+    }
+
     static void awaitMessage(NetClient c, String what, java.util.function.Predicate<String[]> cond) throws InterruptedException {
         await(what, () -> {
             String[] m;

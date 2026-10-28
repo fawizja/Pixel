@@ -233,6 +233,21 @@ public final class GameScreen extends ScreenAdapter {
         session.setTownServices(game.npcs(), game.shops(), game.quests());
         session.setHouses(game.houses(), null);
         session.setChests(game.chests());
+        // online pochodnie nad oltarzami zadan zapala serwer; offline -Dpixel.altarGhosts=KNIGHT,DRUID (albo ALL)
+        // stawia "duchy" tych profesji na ich polach przed oltarzami (test i zrzuty bez pieciu graczy)
+        session.setAltarsLocal(net == null);
+        String ghosts = System.getProperty("pixel.altarGhosts");
+        if (net == null && ghosts != null) {
+            java.util.List<pl.fawizja.pixel.vocation.Vocation> list = new java.util.ArrayList<>();
+            for (String g : ghosts.split(",")) {
+                if (g.trim().equalsIgnoreCase("ALL")) list.addAll(java.util.Arrays.asList(pl.fawizja.pixel.vocation.Vocation.values()));
+                else if (!g.isBlank()) list.add(pl.fawizja.pixel.vocation.Vocation.valueOf(g.trim().toUpperCase(java.util.Locale.ROOT)));
+            }
+            session.setAltarGhosts(list);
+        }
+        // offline -Dpixel.bossGhosts=N (1..4): duchy uzupelniaja druzyne na polach przy dzwigni wyprawy na bossa
+        Integer bossGhosts = Integer.getInteger("pixel.bossGhosts");
+        if (net == null && bossGhosts != null) session.setBossGhosts(bossGhosts);
         // -Dpixel.day=N ustala dzien (potwor dnia, zadanie dnia); przy -Dpixel.hour staly dzien dla regresji GUI
         Long day = Long.getLong("pixel.day", System.getProperty("pixel.hour") != null ? 20_000L : null);
         if (day != null) {
@@ -936,7 +951,9 @@ public final class GameScreen extends ScreenAdapter {
             return true;
         }
         if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)
-                || game.world().crates().isStorage(p) || game.world().wallLights().isWallLight(p)) {
+                || game.world().crates().isStorage(p) || game.world().wallLights().isWallLight(p)
+                || game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null
+                || game.world().bossQuestByLever(p) != null) {
             // skrzynia, drzwi, okno, pochodnia na murze: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
             if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
             else if (walkTo(p, now(), true, true)) walkUse = p;
@@ -1037,6 +1054,11 @@ public final class GameScreen extends ScreenAdapter {
             session.useAt(p, t);
         } else {
             net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
+            // dzwignia, oltarz, pochodnia zadania i drzwi poziomu: rozstrzyga tylko serwer (komunikat przyjdzie w logu)
+            boolean serverOnly = game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null
+                    || game.world().bossQuestByLever(p) != null
+                    || game.world().isQuestTorch(p) || game.world().levelDoorAt(p) > session.character().level();
+            if (serverOnly) return;
             if (crate) session.toggleCrateView(p);
             else if (game.world().wallLights().isWallLight(p)) game.world().wallLights().toggle(p);
             else if (!session.chestAt(p)) game.world().openings().toggle(p);

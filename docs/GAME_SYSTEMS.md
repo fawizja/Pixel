@@ -386,6 +386,61 @@ i bramami poziomu, >= 8 pol od przejsc, losowanie z ziarnem 20261015 + pietro, o
 pietrach). Lup rosnie x3 na pietro w dol. Otwieranie: `GameSession.openChest` (UZYJ obok), raz na postac
 (`openedChests`, zapis `chests`).
 
+## Drzwi poziomu i zadania z oltarzami profesji (Z logika, S serwer, C rysowanie)
+
+- Drzwi poziomu (wielokrotnego uzytku): plik mapy `level_doors.csv` (`x;y;z;minimalny poziom`, pole z obiektem
+  `door_level`, ktory jest zwyklymi drzwiami w murze ze zlota tabliczka). `MapLoader` wywoluje
+  `WorldMap.addLevelDoor(p, lvl)`: drzwi + straznik poziomu na tym jednym polu (`requiredLevelAt`). API:
+  `world.levelDoorAt(p)` (0 = nie drzwi poziomu), `world.levelDoors()`, `WorldMap.levelDoorSign(lvl)`
+  ("\"Tylko dla poziomu 20+\"" - proste cudzyslowy, czcionka gry nie ma „ ”). Dotkniecie (`GameSession.useAt`) pokazuje napis; nizszy poziom - drzwi sie nie
+  otwieraja, krok w drzwi konczy sie tym samym komunikatem; od poziomu - drzwi sie otwieraja i mozna przejsc.
+  Generator: `ctx['level_doors'].append((x, y, z, poziom))` i obiekt `door_level` w przerwie muru.
+- Zadania z oltarzami: `world/AltarQuest` z pliku `altar_quests.csv` (wiersz `quest` + wiersze `altar` na kazda
+  profesje: oltarz, pole przed nim, pochodnia na murze, przedmiot, cel teleportu, skrzynia). Przedmiot na oltarzu to
+  `displays.csv` (tylko grafika, nie do podniesienia ani przesuniecia). Pochodnie zadania sa domyslnie zgaszone
+  (`WallLights.setDefaultLit(false)`) i nie zapalaja sie dotknieciem; `AltarQuest.updateTorches` zapala pochodnie
+  oltarza, gdy na polu stoi zywa postac wlasciwej profesji. Dzwignia (`lever`, na prawo od pola rycerza) przy
+  wszystkich pieciu przenosi kazda postac na jej pole w skarbcu, inaczej mowi, kogo brakuje.
+  Skarbiec: skrzynie `TreasureChests.Chest` z `vocation` (identyfikator `q_<id>_<profesja>`), samo zloto, raz na
+  postac (`openedChests`), cudzej profesji nie da sie otworzyc. Ze skarbca schody na -2.
+- Offline: `GameSession` liczy pochodnie sama (sama postac); `-Dpixel.altarGhosts=PALADIN,DRUID` (albo `ALL`)
+  stawia "duchy" profesji na ich polach (test i zrzuty). Online: klient nie zmienia pochodni zadan
+  (`setAltarsLocal(false)`), serwer co takt liczy je z pozycji wszystkich graczy (`ServerWorld.updateAltarTorches`,
+  komunikaty `WLIGHT`) i podstawia `GameSession.AltarParty` (dzwignia przenosi wszystkich graczy z pol).
+- Grobowiec Pieciu Profesji (generator `tools/mapgen/quests.py`): kapliczka na Pustyni Qasirah z drzwiami poziomu 20,
+  grobowiec -1..-3 (szkielety, hieny, trolle, golemy, skorpiony; region 20-60), sala oltarzy i skarbiec na -3
+  (strefy ochronne), nagroda 20 000 gp dla kazdej profesji.
+
+## Wyprawy na bossa w piec postaci (Z logika, S serwer, C rysowanie)
+
+- Dane: plik mapy `boss_quests.csv` (generator `tools/mapgen/boss_quests.py`), wiersz `quest;id;nazwa;poziom;boss;
+  dzwignia;przedsionek x0,y0,x1,y1,z;arena x0,y0,x1,y1,z;boss;portal;cel wyjscia;drzwi poziomu` i piec wierszy
+  `square;id;pole;cel na arenie`. `MapLoader` -> `world/BossQuest` (`world.bossQuests()`, `bossQuest(id)`,
+  `bossQuestByLever/ByPortal/ByArena/BySquare`, `inBossQuestRooms` - bez losowych skrzyn i pulapek). Nowa wyprawa =
+  nowy wpis w `QUESTS` generatora (kraina, styl lochu, boss z monsters.csv, potwory w komorach); kod sie nie zmienia.
+- Uklad: na powierzchni kapliczka z drzwiami poziomu (`level_doors.csv`) i schodami, loch na -1 z potworami progu,
+  przedsionek (strefa ochronna) z piecioma polami `boss_plate` w rzedzie i dzwignia `lever` nad srodkowym polem,
+  obok zamknieta arena (bez wejscia, nie jest strefa ochronna) z polami docelowymi, miejscem bossa i portalem
+  `boss_portal` w rogu. Grafiki pol i portalu rysuje `tools/art/boss_quest_art.py`.
+- Przebieg: `game/BossQuestRuntime` (wspolny dla gry offline i serwera; gracze przez `BossQuestRuntime.Hero`).
+  Dzwignia: arena wolna (`Phase.IDLE`), ciagnacy nie ukonczyl wyprawy, na pieciu polach stoi piec zywych postaci
+  (dowolne profesje), zadna nie ukonczyla - wtedy teleport na arene i boss (`MonsterManager.spawnEvent`, bez
+  odradzania), inaczej komunikat (ilu brakuje / kto juz ukonczyl / arena zajeta). Smierc bossa: kazdy uczestnik zywy
+  i na arenie dostaje wlasny lup `LootRules.rollBossLootPerPlayer` do plecaka (pelny - depozyt, w ostatecznosci
+  ziemia), komunikat z lista (przedmioty tylko z bossa w gwiazdkach + osobny wiersz "Rzadki lup tylko z bossa"),
+  zapis `PlayerCharacter.completedBossQuests` (klucz `bossq` w zapisie postaci); cialo bossa jest puste
+  (`CombatSystem.setLootOwner`). Portal przenosi do przedsionka (`Phase.CLEARED`, po 10 min sam wynosi maruderow);
+  arena wolna, gdy nikt z druzyny na niej nie zostal. Reset: w trakcie walki brak zywego uczestnika na arenie
+  (smierc, ucieczka, wylogowanie) - boss znika, dzwignia znow dziala. Postac wczytana na arenie (bez trwajacej walki)
+  wraca do przedsionka.
+- Serwer: jeden `BossQuestRuntime` w `ServerWorld` (pozycje, teleporty, boss, lup, ogloszenie zabicia), sesje dostaja
+  go przez `GameSession.setBossQuests`; klient online wysyla tylko `ACT open:` dzwigni. Offline:
+  `-Dpixel.bossGhosts=4` stawia duchy na wolnych polach (licza sie tylko przy dzwigni), `-Dpixel.bossWin=true`
+  zabija bossa jednym ciosem (podglad lupu).
+- Wyprawy (2026-10-28): Leze Grimtootha (las na wschod od Varden, poziom 30, Grimtooth), Lodowy Tron Ysolde
+  (lodowa polnoc, 100, Ysolde), Krypta Neferakha (zachodnia pustynia, 200, Faraon Neferakh), Kuznia Ignarotha
+  (zbocze wulkanu, 400, Ignaroth).
+
 ## Minimapa (Z kolory, C rysowanie)
 
 `world/MinimapPalette.color/paint`: piksel RGBA8888 na kafelek - przejscie zolte, sciana ciemna, podloze w kolorze

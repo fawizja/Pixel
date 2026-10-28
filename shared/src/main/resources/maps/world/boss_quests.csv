@@ -1,0 +1,27 @@
+# wyprawy na bossa w piec postaci (world/BossQuest, game/BossQuestRuntime):
+# quest;id;nazwa;poziom;boss;dzwignia x,y,z;przedsionek x0,y0,x1,y1,z;arena x0,y0,x1,y1,z;boss x,y,z;portal wyjscia x,y,z;cel wyjscia x,y,z;drzwi poziomu x,y,z
+# square;id;pole x,y,z;cel teleportu na arenie x,y,z (piec pol na wyprawe)
+quest;grimtooth;Leże Grimtootha;30;grimtooth;632,420,-1;626,416,638,424,-1;648,412,666,426,-1;657,420,-1;649,425,-1;631,417,-1;607,391,0
+square;grimtooth;628,421,-1;653,424,-1
+square;grimtooth;630,421,-1;655,424,-1
+square;grimtooth;632,421,-1;657,424,-1
+square;grimtooth;634,421,-1;659,424,-1
+square;grimtooth;636,421,-1;661,424,-1
+quest;frost;Lodowy Tron Ysolde;100;frost_queen;649,125,-1;643,121,655,129,-1;665,117,683,131,-1;674,125,-1;666,130,-1;648,122,-1;624,96,0
+square;frost;645,126,-1;670,129,-1
+square;frost;647,126,-1;672,129,-1
+square;frost;649,126,-1;674,129,-1
+square;frost;651,126,-1;676,129,-1
+square;frost;653,126,-1;678,129,-1
+quest;pharaoh;Krypta Neferakha;200;pharaoh;131,418,-1;125,414,137,422,-1;147,410,165,424,-1;156,418,-1;148,423,-1;130,415,-1;112,389,0
+square;pharaoh;127,419,-1;152,422,-1
+square;pharaoh;129,419,-1;154,422,-1
+square;pharaoh;131,419,-1;156,422,-1
+square;pharaoh;133,419,-1;158,422,-1
+square;pharaoh;135,419,-1;160,422,-1
+quest;ignaroth;Kuźnia Ignarotha;400;ignaroth;260,185,-1;254,181,266,189,-1;276,177,294,191,-1;285,185,-1;277,190,-1;259,182,-1;235,156,0
+square;ignaroth;256,186,-1;281,189,-1
+square;ignaroth;258,186,-1;283,189,-1
+square;ignaroth;260,186,-1;285,189,-1
+square;ignaroth;262,186,-1;287,189,-1
+square;ignaroth;264,186,-1;289,189,-1

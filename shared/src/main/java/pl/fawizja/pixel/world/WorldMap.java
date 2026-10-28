@@ -133,6 +133,105 @@ public final class WorldMap {
         return need;
     }
 
+    // ------------------------------------------------------------------ drzwi poziomu i zadania z oltarzami
+    /** Drzwi poziomu: pole drzwi -> minimalny poziom (dane z level_doors.csv). */
+    private final Map<Position, Integer> levelDoors = new java.util.LinkedHashMap<>();
+    private final List<AltarQuest> altarQuests = new ArrayList<>();
+
+    /**
+     * Drzwi poziomu (jak w Tibii): zwykle drzwi w murze, przez ktore przejdzie tylko postac od danego poziomu.
+     * Pole drzwi dostaje straznika poziomu ({@link #requiredLevelAt}); dotkniecie pokazuje napis z poziomem.
+     */
+    public void addLevelDoor(Position p, int minLevel) {
+        if (minLevel <= 0) throw new IllegalArgumentException("level door needs a level: " + p);
+        levelDoors.put(p, minLevel);
+        addLevelGate(p.x(), p.y(), p.x(), p.y(), p.z(), minLevel);
+    }
+
+    /** Minimalny poziom drzwi poziomu w tym polu albo 0, gdy to nie sa drzwi poziomu. */
+    public int levelDoorAt(Position p) {
+        Integer v = levelDoors.get(p);
+        return v == null ? 0 : v;
+    }
+
+    public Map<Position, Integer> levelDoors() { return Collections.unmodifiableMap(levelDoors); }
+
+    /** Napis na drzwiach poziomu (proste cudzyslowy: czcionka gry nie ma znakow „ i ”). */
+    public static String levelDoorSign(int minLevel) { return "\"Tylko dla poziomu " + minLevel + "+\""; }
+
+    void addAltarQuest(AltarQuest q) { altarQuests.add(q); }
+
+    public List<AltarQuest> altarQuests() { return Collections.unmodifiableList(altarQuests); }
+
+    /** Zadanie, ktorego dzwignia stoi w tym polu, albo null. */
+    public AltarQuest altarQuestByLever(Position p) {
+        for (AltarQuest q : altarQuests) if (q.lever().equals(p)) return q;
+        return null;
+    }
+
+    /** Oltarz zadania w tym polu albo null. */
+    public AltarQuest.Slot altarAt(Position p) {
+        for (AltarQuest q : altarQuests) {
+            AltarQuest.Slot s = q.slotByAltar(p);
+            if (s != null) return s;
+        }
+        return null;
+    }
+
+    /** Pochodnia sterowana przez zadanie (nie zapala sie dotknieciem). */
+    public boolean isQuestTorch(Position p) {
+        for (AltarQuest q : altarQuests) if (q.slotByTorch(p) != null) return true;
+        return false;
+    }
+
+    /** Sala oltarzy albo skarbiec ktoregos zadania. */
+    public boolean inAltarQuestRooms(Position p) {
+        for (AltarQuest q : altarQuests) if (q.inQuestRooms(p)) return true;
+        return false;
+    }
+
+    // ------------------------------------------------------------------ wyprawy na bossa w piec postaci
+    private final List<BossQuest> bossQuests = new ArrayList<>();
+
+    void addBossQuest(BossQuest q) { bossQuests.add(q); }
+
+    public List<BossQuest> bossQuests() { return Collections.unmodifiableList(bossQuests); }
+
+    public BossQuest bossQuest(String id) {
+        for (BossQuest q : bossQuests) if (q.id().equals(id)) return q;
+        return null;
+    }
+
+    /** Wyprawa, ktorej dzwignia stoi w tym polu, albo null. */
+    public BossQuest bossQuestByLever(Position p) {
+        for (BossQuest q : bossQuests) if (q.lever().equals(p)) return q;
+        return null;
+    }
+
+    /** Wyprawa, ktorej portal wyjscia z areny jest w tym polu, albo null. */
+    public BossQuest bossQuestByPortal(Position p) {
+        for (BossQuest q : bossQuests) if (q.exitPortal().equals(p)) return q;
+        return null;
+    }
+
+    /** Wyprawa, na ktorej arenie lezy to pole, albo null. */
+    public BossQuest bossQuestByArena(Position p) {
+        for (BossQuest q : bossQuests) if (q.inArena(p)) return q;
+        return null;
+    }
+
+    /** Wyprawa, do ktorej nalezy oznaczone pole przedsionka, albo null. */
+    public BossQuest bossQuestBySquare(Position p) {
+        for (BossQuest q : bossQuests) if (q.squareAt(p) != null) return q;
+        return null;
+    }
+
+    /** Przedsionek albo arena ktorejs wyprawy (bez losowych skrzyn i pulapek). */
+    public boolean inBossQuestRooms(Position p) {
+        for (BossQuest q : bossQuests) if (q.inArena(p) || q.inLobby(p)) return true;
+        return false;
+    }
+
     public boolean isProtectionZone(Position p) {
         if (p.x() < 0 || p.y() < 0 || p.x() >= width() || p.y() >= height()) {
             for (int[] r : protectionZones) {

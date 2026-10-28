@@ -78,3 +78,12 @@ wall_lanterns_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.telepo
 shop_worms|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
 equipment_worms|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bag
 boss_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bossloot
+# 2026-10-28: Grobowiec Pieciu Profesji - drzwi poziomu 20, sala oltarzy (duchy paladyna i druida), skarbiec
+tomb_level_door|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=191,431,0 -Dpixel.button=tips_off -Dpixel.tap=191,430
+tomb_altars|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=242,418,-3 -Dpixel.altarGhosts=PALADIN,DRUID -Dpixel.button=tips_off
+tomb_vault|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=248,437,-3 -Dpixel.button=tips_off -Dpixel.tap=248,436
+# 2026-10-28: wyprawa na bossa w 5 postaci (Leze Grimtootha) - drzwi poziomu 30, przedsionek z 5 polami i dzwignia, arena z bossem, lup
+bossq_door|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=607,392,0 -Dpixel.button=tips_off -Dpixel.tap=607,391
+bossq_lobby|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=631,418,-1 -Dpixel.button=tips_off
+bossq_arena|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=632,421,-1 -Dpixel.bossGhosts=4 -Dpixel.button=tips_off -Dpixel.tap=632,420
+bossq_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=632,421,-1 -Dpixel.bossGhosts=4 -Dpixel.button=tips_off -Dpixel.tap=632,420 -Dpixel.bossWin=true

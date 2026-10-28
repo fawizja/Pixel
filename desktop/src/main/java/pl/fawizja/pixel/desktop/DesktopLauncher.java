@@ -31,6 +31,9 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.button2=id   druga akcja po pierwszej (np. use, potem cmd:/statystyki)
  *   -Dpixel.tap=x,y      dotkniecie pola swiata (marsz, NPC, cel)
  *   -Dpixel.look=x,y     podglad pola (jak dlugie dotkniecie na telefonie)
+ *   -Dpixel.altarGhosts=PALADIN,DRUID|ALL  offline: "duchy" profesji stoja przed oltarzami zadan (test bez 5 graczy)
+ *   -Dpixel.bossGhosts=4  offline: "duchy" uzupelniaja druzyne na polach przy dzwigni wyprawy na bossa (test w 1 osobe)
+ *   -Dpixel.bossWin=true  offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od razu - podglad lupu i portalu
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
@@ -442,6 +445,11 @@ public final class DesktopLauncher {
                     gs.hud().openNpc(gs.session());
                     gs.hud().previewNpcPage(Integer.getInteger("pixel.npcPage", 0));
                 }
+            }
+            if (Boolean.getBoolean("pixel.bossWin") && frame == frames - 15 && getScreen() instanceof GameScreen) {
+                // offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od jednego ciosu - podglad lupu i portalu
+                GameScreen gs = (GameScreen) getScreen();
+                gs.session().debugDefeatQuestBoss(gs.worldTime());
             }
             if (Boolean.getBoolean("pixel.fx") && frame == frames - 8 && getScreen() instanceof GameScreen) {
                 GameScreen gs = (GameScreen) getScreen();

@@ -57,6 +57,8 @@ final class ServerWorld {
     final ItemRegistry items = ItemRegistry.loadDefault();
     final WorldMap world;
     final MonsterManager monsters;
+    /** Areny wypraw na bossa w piec postaci (wspolne dla wszystkich graczy; serwer rozstrzyga dzwignie i lup). */
+    final pl.fawizja.pixel.game.BossQuestRuntime bossQuests;
     final GroundItems ground = new GroundItems();
     /** Stan PvP po imieniu - przetrwa wylogowanie (czaszki nie znikaja po ponownym wejsciu). */
     private final Map<String, PvpRules.Status> pvp = new java.util.HashMap<>();
@@ -208,6 +210,7 @@ final class ServerWorld {
         monsterTypes = MonsterRegistry.loadDefault(items);
         monsters = new MonsterManager(world, monsterTypes, SpawnTable.load(WorldLayout.WORLD_MAP, world, monsterTypes), rng);
         monsters.populate(null);
+        bossQuests = new pl.fawizja.pixel.game.BossQuestRuntime(world, items, monsters, new Random(rng.nextLong()));
         shops = ShopRegistry.loadDefault(items);
         npcs = NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
         houses = pl.fawizja.pixel.house.HouseRegistry.load(WorldLayout.WORLD_MAP, world);
@@ -1791,6 +1794,15 @@ final class ServerWorld {
             }
             return false;
         });
+        s.setAltarParty(altarParty(p));
+        s.setBossQuests(bossQuests, this::bossHeroes);
+        s.combat().setLootOwner(bossQuests::ownsLoot);
+        Position evict = bossQuests.evictTarget(s.bossHero());
+        if (evict != null) {
+            // wylogowanie na arenie: walka sie skonczyla albo to inna druzyna - powrot do przedsionka
+            s.teleport(freeSpotNear(evict), now);
+            s.log().add(now, EventLog.Kind.INFO, "Arena jest zamknięta - wracasz do przedsionka.");
+        }
         s.spells().setPlayerTargeting(new pl.fawizja.pixel.magic.SpellSystem.PlayerTargeting() {
             @Override
             public Position position() {
@@ -1812,7 +1824,10 @@ final class ServerWorld {
             }
         });
         s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
-        s.combat().setDeathListener(m -> invasionKill(p, m));
+        s.combat().setDeathListener(m -> {
+            invasionKill(p, m);
+            bossQuestKill(m);
+        });
         s.combat().setRareDropListener((type, item, t) -> {
             String what = items.get(item.itemId()).name() + " (" + type.name() + ")";
             for (ServerPlayer o : players.values()) {
@@ -2754,6 +2769,7 @@ final class ServerWorld {
             weeklyRollover(now);
         }
         for (ServerPlayer p : players.values()) p.session.update(now, p.move);
+        bossQuests.update(bossHeroes(), now);
         long wall = wallClock.getAsLong();
         if (wall - rentSweptMs >= RENT_SWEEP_MS || wall < rentSweptMs) {
             rentSweptMs = wall;
@@ -2766,6 +2782,7 @@ final class ServerWorld {
                 sendHouseAccess(p);
             }
         }
+        updateAltarTorches();
         updateInvasion(now);
         updateDuels(now);
         updateShutdown(now);
@@ -2818,6 +2835,62 @@ final class ServerWorld {
                 p.lastSaveMs = now;
             }
         }
+    }
+
+    /** Kto stoi przed oltarzami: wszyscy zywi gracze swiata (serwer jest jedynym zrodlem prawdy). */
+    private final pl.fawizja.pixel.world.AltarQuest.Occupants altarOccupants = (pos, v) -> {
+        for (ServerPlayer o : players.values()) {
+            PlayerCharacter c = o.session.character();
+            if (!c.isDead() && c.vocation() == v && pos.equals(c.position())) return true;
+        }
+        return false;
+    };
+
+    /** Dzwignia sali oltarzy przenosi wszystkich graczy stojacych na swoich polach (kazdy dostaje komunikat). */
+    private pl.fawizja.pixel.game.GameSession.AltarParty altarParty(ServerPlayer puller) {
+        return new pl.fawizja.pixel.game.GameSession.AltarParty() {
+            @Override
+            public boolean standing(Position pos, Vocation v) { return altarOccupants.standing(pos, v); }
+
+            @Override
+            public void teleport(Position from, Vocation v, Position to, long t) {
+                for (ServerPlayer o : players.values()) {
+                    PlayerCharacter c = o.session.character();
+                    if (c.isDead() || c.vocation() != v || !from.equals(c.position())) continue;
+                    o.session.teleport(to, t);
+                    if (o != puller) {
+                        o.session.log().add(t, EventLog.Kind.SYSTEM, puller.name() + " przeciąga dźwignię - jesteście w skarbcu!");
+                    }
+                    return;
+                }
+            }
+        };
+    }
+
+    /** Pochodnie nad oltarzami zadan (zmiany ida do klientow komunikatem WLIGHT). */
+    private void updateAltarTorches() {
+        for (pl.fawizja.pixel.world.AltarQuest q : world.altarQuests()) q.updateTorches(world.wallLights(), altarOccupants);
+    }
+
+    /** Wszyscy gracze w grze widziani przez wyprawy na bossa. */
+    private List<pl.fawizja.pixel.game.BossQuestRuntime.Hero> bossHeroes() {
+        List<pl.fawizja.pixel.game.BossQuestRuntime.Hero> out = new ArrayList<>();
+        for (ServerPlayer o : players.values()) out.add(o.session.bossHero());
+        return out;
+    }
+
+    /** Smierc potwora: boss wyprawy rozdaje lup uczestnikom (osobno kazdemu), zapis postaci i ogloszenie. */
+    private void bossQuestKill(Monster m) {
+        long now = lastNow;
+        pl.fawizja.pixel.world.BossQuest q = bossQuests.onMonsterDeath(m, bossHeroes(), now);
+        if (q == null) return;
+        List<String> party = bossQuests.party(q.id());
+        for (String n : party) {
+            ServerPlayer o = find(n);
+            if (o != null) save(o);
+        }
+        announce("Drużyna " + String.join(", ", party) + " pokonuje " + m.type().name() + " (" + q.name() + ")!", now);
+        LOG.info("boss quest " + q.id() + " cleared by " + party);
     }
 
     /** Ogloszenie wydarzenia dla wszystkich graczy w grze. */

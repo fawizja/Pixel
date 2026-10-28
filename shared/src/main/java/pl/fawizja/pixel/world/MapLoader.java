@@ -118,6 +118,9 @@ public final class MapLoader {
         readTransitions(base + "transitions.csv", world);
         validateTransitions(world);
         readDisplays(base + "displays.csv", world);
+        readLevelDoors(base + "level_doors.csv", world);
+        readAltarQuests(base + "altar_quests.csv", world);
+        readBossQuests(base + "boss_quests.csv", world);
         return world;
     }
 
@@ -170,6 +173,121 @@ public final class MapLoader {
             }
             world.addDisplay(p, f[3].trim());
         }
+    }
+
+    /** Drzwi poziomu (plik opcjonalny): x;y;z;minimalny poziom - tylko na polu z drzwiami. */
+    private void readLevelDoors(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 4) throw new IOException(path + ": expected 4 fields in '" + line + "'");
+            Position p = new Position(i(f[0]), i(f[1]), i(f[2]));
+            if (!world.openings().isDoor(p)) throw new IOException(path + ": level door needs a door at " + p);
+            world.addLevelDoor(p, i(f[3]));
+        }
+    }
+
+    /**
+     * Zadania z oltarzami profesji (plik opcjonalny). Wiersze:
+     * quest;id;nazwa;zloto;dzwignia x,y,z;sala x0,y0,x1,y1,z;skarbiec x0,y0,x1,y1,z
+     * altar;id;PROFESJA;oltarz x,y,z;pole x,y,z;pochodnia x,y,z;przedmiot;cel x,y,z;skrzynia x,y,z
+     * Pochodnie zadan sa domyslnie zgaszone.
+     */
+    private void readAltarQuests(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        Map<String, AltarQuest> byId = new HashMap<>();
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            try {
+                if (f[0].equals("quest") && f.length == 7) {
+                    AltarQuest q = new AltarQuest(f[1].trim(), f[2].trim(), Long.parseLong(f[3].trim()), pos(f[4]),
+                            ints(f[5], 5), ints(f[6], 5));
+                    if (world.floor(q.lever().z()) == null || world.floor(q.lever().z()).get(Layer.OBJECT, q.lever().x(), q.lever().y()) == 0) {
+                        throw new IOException(path + ": lever needs an object at " + q.lever());
+                    }
+                    byId.put(q.id(), q);
+                    world.addAltarQuest(q);
+                } else if (f[0].equals("altar") && f.length == 9) {
+                    AltarQuest q = byId.get(f[1].trim());
+                    if (q == null) throw new IOException(path + ": altar before its quest: " + line);
+                    AltarQuest.Slot s = new AltarQuest.Slot(pl.fawizja.pixel.vocation.Vocation.valueOf(f[2].trim()),
+                            pos(f[3]), pos(f[4]), pos(f[5]), f[6].trim(), pos(f[7]), pos(f[8]));
+                    if (!world.wallLights().isWallLight(s.torch())) throw new IOException(path + ": no wall torch at " + s.torch());
+                    if (!world.isWalkable(s.stand()) || !world.isWalkable(s.target())) {
+                        throw new IOException(path + ": altar square or target not walkable: " + line);
+                    }
+                    q.addSlot(s);
+                    world.wallLights().setDefaultLit(s.torch(), false);
+                } else {
+                    throw new IOException(path + ": bad line '" + line + "'");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IOException(path + ": " + e.getMessage() + " in '" + line + "'", e);
+            }
+        }
+    }
+
+    /**
+     * Wyprawy na bossa w piec postaci (plik opcjonalny). Wiersze:
+     * quest;id;nazwa;poziom;boss;dzwignia x,y,z;przedsionek x0,y0,x1,y1,z;arena x0,y0,x1,y1,z;boss x,y,z;
+     * portal x,y,z;cel wyjscia x,y,z;drzwi poziomu x,y,z
+     * square;id;pole x,y,z;cel na arenie x,y,z
+     */
+    private void readBossQuests(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        Map<String, BossQuest> byId = new HashMap<>();
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            try {
+                if (f[0].equals("quest") && f.length == 12) {
+                    BossQuest q = new BossQuest(f[1].trim(), f[2].trim(), i(f[3]), f[4].trim(), pos(f[5]), ints(f[6], 5),
+                            ints(f[7], 5), pos(f[8]), pos(f[9]), pos(f[10]), pos(f[11]));
+                    FloorMap fl = world.floor(q.lever().z());
+                    if (fl == null || fl.get(Layer.OBJECT, q.lever().x(), q.lever().y()) == 0) {
+                        throw new IOException(path + ": lever needs an object at " + q.lever());
+                    }
+                    if (!world.isWalkable(q.bossSpawn()) || !world.isWalkable(q.exitPortal()) || !world.isWalkable(q.exitTarget())) {
+                        throw new IOException(path + ": boss, portal or exit not walkable: " + line);
+                    }
+                    if (byId.put(q.id(), q) != null) throw new IOException(path + ": duplicate quest " + q.id());
+                    world.addBossQuest(q);
+                } else if (f[0].equals("square") && f.length == 4) {
+                    BossQuest q = byId.get(f[1].trim());
+                    if (q == null) throw new IOException(path + ": square before its quest: " + line);
+                    BossQuest.Square s = new BossQuest.Square(pos(f[2]), pos(f[3]));
+                    if (!world.isWalkable(s.stand()) || !world.isWalkable(s.target())) {
+                        throw new IOException(path + ": square or target not walkable: " + line);
+                    }
+                    q.addSquare(s);
+                } else {
+                    throw new IOException(path + ": bad line '" + line + "'");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IOException(path + ": " + e.getMessage() + " in '" + line + "'", e);
+            }
+        }
+        for (BossQuest q : byId.values()) {
+            if (q.squares().size() != BossQuest.PARTY) throw new IOException(path + ": " + q.id() + " needs " + BossQuest.PARTY + " squares");
+        }
+    }
+
+    private static Position pos(String s) {
+        int[] v = ints(s, 3);
+        return new Position(v[0], v[1], v[2]);
+    }
+
+    private static int[] ints(String s, int n) {
+        String[] f = s.trim().split(",");
+        if (f.length != n) throw new IllegalArgumentException("expected " + n + " numbers: " + s);
+        int[] out = new int[n];
+        for (int k = 0; k < n; k++) out[k] = i(f[k]);
+        return out;
     }
 
     private void validateTransitions(WorldMap world) throws IOException {
