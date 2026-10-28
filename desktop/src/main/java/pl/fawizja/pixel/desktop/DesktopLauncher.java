@@ -37,7 +37,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.bossWin=true  offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od razu - podglad lupu i portalu
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
@@ -262,6 +262,25 @@ public final class DesktopLauncher {
                 }
                 if ("player".equals(open)) ((GameScreen) getScreen()).hud().openPlayerMenu(2, "Ula", false, false);
                 if ("pvp".equals(open)) ((GameScreen) getScreen()).previewPvp();
+                if ("playerpopup".equals(open)) ((GameScreen) getScreen()).previewPlayerPopup();
+                if ("vip".equals(open)) {
+                    // podglad listy VIP (bez serwera): znajomi w grze (zieloni) i poza gra (czerwoni)
+                    ((GameScreen) getScreen()).previewVip(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Druid", 212),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175, 3 * 60 + 20),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", true, "Paladin", 98),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160, 5 * 24 * 60),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Olaf", true, "Knight", 142))));
+                }
+                if ("buffs".equals(open)) {
+                    // podglad pola wzmocnien obok butow: przyspieszenie, mikstura sily, jedzenie i biala czaszka
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pc.enchantments().extend(pl.fawizja.pixel.item.Enchantments.Kind.STRENGTH);
+                    pc.addHaste(30, 90_000);
+                    pc.feed(20 * 60_000);
+                    gs.previewPvp();
+                }
                 if ("pzblock".equals(open)) ((GameScreen) getScreen()).previewPzBlock();
                 if ("trade".equals(open)) {
                     // podglad okna handlu (bez serwera): przykladowe oferty

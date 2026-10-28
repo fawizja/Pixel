@@ -94,3 +94,12 @@ pvp|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dp
 pzblock|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pzblock
 party_bonus|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=party -Dpixel.partySize=5 -Dpixel.conTab=3
 pack_fire|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=400 -Dpixel.teleport=338,78,0
+# 2026-10-28: HUD jak w Tibii - lewa kolumna (minimapa, VIP, umiejetnosci), prawa (ekwipunek z przyciskami, walka, akcje, pasek), paski nad postaciami
+hud_tibia|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1
+hud_tibia_wide|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.width=1920 -Dpixel.height=1080
+hud_tibia_phone|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.width=2400 -Dpixel.height=1080 -Dpixel.uiScale=2
+player_popup|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=playerpopup
+vip_list|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=vip
+skills_phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2 -Dpixel.teleport=498,499,0 -Dpixel.open=vip -Dpixel.button=hud:skills
+buffs_skull|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=buffs
+logout_confirm|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.button=logout

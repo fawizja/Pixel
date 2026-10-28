@@ -506,6 +506,34 @@ public final class GameScreen extends ScreenAdapter {
                 lastGuardSampleMs = 0; // nowy limit klatek od razu
                 break;
             case "book": hud.toggleBook(); break;
+            case "quest": hud.openJournal(); break;
+            case "hud:skills": hud.toggleSkills(); break;
+            case "hud:vip": hud.toggleVip(); break;
+            case "vip:add": openChat("/znajomi dodaj "); break;
+            case "logout": {
+                // jak w Tibii: nie w trakcie walki z graczem (blokada strefy ochronnej)
+                long block = session.character().pzBlockedMs(t);
+                if (block > 0) {
+                    session.log().add(t, EventLog.Kind.WARNING, "Nie możesz się wylogować w trakcie walki. Poczekaj "
+                            + (block + 999) / 1000 + " s.");
+                } else if (hud.logoutConfirmOpen()) {
+                    hud.closeTop(session);
+                } else {
+                    hud.confirmLogout();
+                }
+                break;
+            }
+            case "logout:yes": {
+                long block = session.character().pzBlockedMs(t);
+                hud.closeTop(session);
+                if (block > 0) {
+                    session.log().add(t, EventLog.Kind.WARNING, "Nie możesz się wylogować w trakcie walki.");
+                    break;
+                }
+                if (net == null) game.saveCharacter(session.character());
+                Gdx.app.postRunnable(() -> game.backToMenu("Wylogowano. Postać zapisana."));
+                break;
+            }
             case "talk": hud.toggleNpc(session); break;
             case "chat": openChat(); break;
             case "target":
@@ -536,16 +564,29 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             default:
-                if (id.startsWith("player:")) {
+                if (id.startsWith("bplayer:")) {
+                    // lista walki: okienko gracza
+                    int pid = Integer.parseInt(id.substring(8));
+                    RemotePlayer rp = remotePlayers.get(pid);
+                    if (rp != null) hud.openPlayerMenu(pid, rp.name, pvpTargetId == pid, party.contains(rp.name.toLowerCase(java.util.Locale.ROOT)));
+                } else if (id.startsWith("player:")) {
                     hud.closePlayerMenu();
                     String[] f = id.split(":", 3);
                     if (f.length == 3 && f[1].equals("party")) session.invitePlayerToParty(f[2]);
                     if (f.length == 3 && f[1].equals("friend")) session.addFriend(f[2]);
+                    if (f.length == 3 && f[1].equals("unfriend")) session.removeFriend(f[2]);
+                    if (f.length == 3 && f[1].equals("pm")) {
+                        // rozmowa prywatna: zakladka czatu z graczem i od razu pisanie
+                        hud.chatTabs().openPrivate(f[2]);
+                        openChat();
+                    }
                     if (net == null) break;
                     switch (f[1]) {
                         case "trade": net.send("TRADE", "REQUEST", f[2]); break;
                         case "party":
-                        case "friend": break; // wyslane przez API sesji powyzej
+                        case "friend":
+                        case "unfriend":
+                        case "pm": break; // wyslane przez API sesji powyzej
                         case "guild": net.send("GUILD", "INVITE", f[2]); break;
                         case "duel": net.send("DUEL", "REQUEST", f[2]); break;
                         case "inspect": net.send("INSPECT", f[2]); break;
@@ -1665,6 +1706,7 @@ public final class GameScreen extends ScreenAdapter {
         clipToView(false);
 
         if (profiler != null && profiler.isEnabled()) worldDrawCalls = profiler.getDrawCalls();
+        feedHud(t);
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
         endProfiling();
         limitFrameRate();
@@ -2118,6 +2160,25 @@ public final class GameScreen extends ScreenAdapter {
         shapes.end();
     }
 
+    /**
+     * Maly pasek nad postacia (jednostki swiata, x = lewa krawedz pola): zycie w kolorze wg procentu, opcjonalnie
+     * pod nim mana (gracze).
+     */
+    private static void overheadBar(ShapeRenderer shapes, float x, float y, float hp, Float mana) {
+        float bw = 0.72f, bh = 0.075f, bx = x + (1f - bw) / 2f;
+        float total = mana != null ? bh * 2 + 0.02f : bh;
+        shapes.setColor(0f, 0f, 0f, 0.75f);
+        shapes.rect(bx - 0.02f, y - (total - bh) - 0.02f, bw + 0.04f, total + 0.04f);
+        float[] c = pl.fawizja.pixel.client.ui.BarColors.health(hp);
+        shapes.setColor(c[0], c[1], c[2], 1f);
+        shapes.rect(bx, y, bw * Math.max(0f, Math.min(1f, hp)), bh);
+        if (mana != null) {
+            float[] mc = pl.fawizja.pixel.client.ui.BarColors.mana();
+            shapes.setColor(mc[0], mc[1], mc[2], 1f);
+            shapes.rect(bx, y - bh - 0.02f, bw * Math.max(0f, Math.min(1f, mana)), bh);
+        }
+    }
+
     private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
         Monster target = session.combat().target();
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -2147,14 +2208,19 @@ public final class GameScreen extends ScreenAdapter {
                 shapes.triangle(cx - 0.12f, cy, cx + 0.12f, cy, cx, cy + 0.12f);
                 shapes.triangle(cx - 0.12f, cy, cx + 0.12f, cy, cx, cy - 0.12f);
             }
-            boolean hurt = m.healthFraction() < 1f;
-            if (!hurt && m != target) continue;
-            float f = m.healthFraction();
-            shapes.setColor(0f, 0f, 0f, 0.7f);
-            shapes.rect(mx + 0.1f, my + 1.02f, 0.8f, 0.12f);
-            shapes.setColor(f > 0.6f ? new Color(0.2f, 0.85f, 0.2f, 1f)
-                    : f > 0.3f ? new Color(0.95f, 0.8f, 0.15f, 1f) : new Color(0.9f, 0.15f, 0.15f, 1f));
-            shapes.rect(mx + 0.12f, my + 1.04f, 0.76f * f, 0.08f);
+            // pasek zycia nad kazdym potworem jak w Tibii (kolor wg procentu)
+            overheadBar(shapes, mx, my + 1.02f, m.healthFraction(), null);
+        }
+        // nad graczami: HP, pod nim mana (wlasna postac; u innych serwer podaje tylko procent zycia)
+        PlayerCharacter me0 = session.character();
+        if (me0.position().z() == z && !me0.isDead()) {
+            float ox = session.renderX(t), oy = worldRenderer.worldY(session.renderY(t));
+            overheadBar(shapes, ox, oy + 1.06f, me0.health() / (float) Math.max(1, me0.maxHealth()),
+                    me0.mana() / (float) Math.max(1, me0.maxMana()));
+        }
+        for (RemotePlayer rp : remotePlayers.values()) {
+            if (rp.to.z() != z) continue;
+            overheadBar(shapes, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)) + 1.02f, rp.healthPercent / 100f, null);
         }
         shapes.end();
         if (target != null && target.position().z() == z) {
@@ -2213,6 +2279,7 @@ public final class GameScreen extends ScreenAdapter {
             pl.fawizja.pixel.monster.Difficulty d = pl.fawizja.pixel.monster.Difficulty.of(target.type().level(), session.character().level());
             projected.set(target.renderX(t) + 0.5f, worldRenderer.worldY(target.renderY(t)) + 1.3f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            projected.y += 6 * scale; // nad paskiem zycia
             String label = target.type().name() + " (" + d.label + ")";
             font.setColor(d.r, d.g, d.b, 1f);
             font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
@@ -2222,14 +2289,19 @@ public final class GameScreen extends ScreenAdapter {
             if (roofsShown && roofs.at(rp.to.x(), rp.to.y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
             projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            projected.y += 9 * scale; // imie nad paskiem zycia (jak w Tibii)
             boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));
             if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
             else if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
             else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
             else font.setColor(0.55f, 1f, 0.55f, 1f);
             String label = rp.name + (ally ? " [drużyna]" : "")
-                    + (rp.healthPercent < 100 ? " " + rp.healthPercent + "%" : "") + (rp.guild == null ? "" : " <" + rp.guild + ">");
+                    + (rp.guild == null ? "" : " <" + rp.guild + ">");
             float lx = projected.x - label.length() * 2.8f * scale;
+            Color nameColor = font.getColor().cpy();
+            font.setColor(0f, 0f, 0f, 0.85f); // cien: imie czytelne tez na jasnej podlodze
+            font.draw(batch, label, lx + scale, projected.y - scale);
+            font.setColor(nameColor);
             font.draw(batch, label, lx, projected.y);
             // czaszka PvP (biala/czerwona) przed imieniem; maly czerwony znacznik = gracz z wlaczonym trybem PvP
             com.badlogic.gdx.graphics.g2d.TextureRegion sk = hud.skullIcon(rp.skull);
@@ -2682,7 +2754,8 @@ public final class GameScreen extends ScreenAdapter {
         // w prostokacie 15x11 na srodku ramki (reszta czarna, jak w kliencie Tibii)
         float[] r = hud.gameView();
         // cala liczba pikseli na pole: bez cienkich szwow miedzy kafelkami
-        float ppu = Math.max(1f, (float) Math.floor(Math.min(r[2] / VIEW_TILES_W, r[3] / VIEW_TILES_H)));
+        float ppu = hud.tilePixels() > 0 ? hud.tilePixels()
+                : Math.max(1f, (float) Math.floor(Math.min(r[2] / VIEW_TILES_W, r[3] / VIEW_TILES_H)));
         viewport.setMinWorldWidth(width / ppu);
         viewport.setMinWorldHeight(height / ppu);
         viewport.update(width, height, false);
@@ -2694,6 +2767,34 @@ public final class GameScreen extends ScreenAdapter {
         clip[1] = Math.round(r[1] + (r[3] - vh) / 2f);
         clip[2] = Math.round(vw);
         clip[3] = Math.round(vh);
+    }
+
+    /** Lista VIP z podgladu (-Dpixel.open=vip) zamiast session.friends(). */
+    private pl.fawizja.pixel.friends.FriendsView vipPreview;
+    private long vipFedMs = Long.MIN_VALUE / 2, vipRefreshMs = Long.MIN_VALUE / 2;
+    private final List<pl.fawizja.pixel.client.ui.Hud.BattlePlayer> battlePlayers = new ArrayList<>();
+
+    /** Dane panelu HUD z ekranu gry: znajomi (VIP, co 0,5 s; online odswiezani co minute) i gracze w poblizu. */
+    private void feedHud(long t) {
+        long ui = uiMs();
+        if (ui - vipFedMs >= 500 || ui < vipFedMs) {
+            vipFedMs = ui;
+            hud.setVip(vipPreview != null ? vipPreview : session.friends());
+        }
+        if (net != null && (ui - vipRefreshMs >= 60_000 || ui < vipRefreshMs)) {
+            if (vipRefreshMs != Long.MIN_VALUE / 2) session.social().refreshFriends();
+            vipRefreshMs = ui;
+        }
+        battlePlayers.clear();
+        Position me = session.character().position();
+        for (Map.Entry<Integer, RemotePlayer> e : remotePlayers.entrySet()) {
+            RemotePlayer rp = e.getValue();
+            if (rp.to == null || rp.to.z() != me.z() || rp.to.distanceTo(me) > 7) continue;
+            battlePlayers.add(new pl.fawizja.pixel.client.ui.Hud.BattlePlayer(e.getKey(), rp.name, rp.healthPercent, rp.skull,
+                    party.contains(rp.name.toLowerCase(java.util.Locale.ROOT))));
+        }
+        battlePlayers.sort(java.util.Comparator.comparingInt(b -> remotePlayers.get(b.id()).to.distanceTo(me)));
+        hud.setBattlePlayers(battlePlayers);
     }
 
     /** Prostokat okna gry 15x11 na ekranie (x, y, szerokosc, wysokosc w pikselach logicznych). */
@@ -2805,6 +2906,26 @@ public final class GameScreen extends ScreenAdapter {
                 }
             }
         }
+    }
+
+    /** Podglad listy VIP (-Dpixel.open=vip): znajomi w grze i poza nia, jak z serwera. */
+    public void previewVip(pl.fawizja.pixel.friends.FriendsView view) {
+        vipPreview = view;
+        hud.setVip(view);
+    }
+
+    /**
+     * Podglad okienka gracza (-Dpixel.open=playerpopup): inni gracze obok (paski HP nad glowami), dane gracza jak
+     * z serwera (PINFO) i okienko po dotknieciu.
+     */
+    public void previewPlayerPopup() {
+        previewPvp();
+        session.social().handle(new pl.fawizja.pixel.social.PlayerInfo("Ula", 212, Vocation.DRUID, "Wilki", true).encode());
+        RemotePlayer ula = remotePlayers.get(900);
+        if (ula != null) ula.healthPercent = 64;
+        RemotePlayer kuba = remotePlayers.get(901);
+        if (kuba != null) kuba.healthPercent = 22;
+        hud.openPlayerMenu(900, "Ula", false, false);
     }
 
     /** Podglad druzyny z poziomami, profesjami i premia (bez serwera; opcje deweloperskie desktop). */
