@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.211.0] - 2026-10-28
+
+### Dodano
+- Grobowiec Pięciu Profesji pod pustynią Qasirah (od poziomu 20): trzy piętra w dół, na -3 sala z 5 ołtarzami.
+  Właściwa profesja na kwadracie przed ołtarzem zapala pochodnię na ścianie; przy 5 pochodniach dźwignia na prawo
+  od kwadratu knighta przenosi drużynę do skarbca, gdzie każdy otwiera skrzynię swojej profesji (20 000 gp, raz na postać).
+- Drzwi poziomu ze złotą tabliczką: po stuknięciu mówią, od którego poziomu można wejść, i nie puszczają niższych.
+- Cztery wyprawy na bossa w 5 postaci: Leże Grimtootha (30+), Lodowy Tron Ysolde (100+), Krypta Neferakha (200+),
+  Kuźnia Ignarotha (400+). Dźwignia działa przy 5 postaciach na kwadratach, arena z bossem, osobny losowy łup dla
+  każdego uczestnika, każda wyprawa raz na postać.
+
+### Naprawiono
+- Niestabilny test wspólnych potworów na serwerze i różnice w zrzutach GUI zależne od szybkości komputera.
+
 ## [0.210.0] - 2026-10-28
 
 ### Dodano
