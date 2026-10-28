@@ -879,8 +879,8 @@ public final class GameScreen extends ScreenAdapter {
             return true;
         }
         if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)
-                || game.world().crates().isStorage(p)) {
-            // skrzynia, drzwi, okno: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
+                || game.world().crates().isStorage(p) || game.world().wallLights().isWallLight(p)) {
+            // skrzynia, drzwi, okno, pochodnia na murze: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
             if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
             else if (walkTo(p, now(), true, true)) walkUse = p;
             else session.log().add(now(), EventLog.Kind.INFO, "Nie ma tam drogi.");
@@ -927,6 +927,7 @@ public final class GameScreen extends ScreenAdapter {
         } else {
             net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
             if (crate) session.toggleCrateView(p);
+            else if (game.world().wallLights().isWallLight(p)) game.world().wallLights().toggle(p);
             else if (!session.chestAt(p)) game.world().openings().toggle(p);
         }
         if (crate && session.openCrate() != null && !hud.npcOpen()) hud.openNpc(session);
@@ -1486,7 +1487,7 @@ public final class GameScreen extends ScreenAdapter {
         float rain = forcedWeather != null ? 1f : Weather.intensity(wallMs);
         float quality = Math.min(settings.qualityCap(), guard.effectsQuality());
         float ambient = Lighting.ambientForFloor(z, session.clock().ambientLight(minute)) * Weather.ambientFactor(weather, rain);
-        lightRenderer.render(batch, camera, game.world().floor(z), game.world().height(), ambient,
+        lightRenderer.render(batch, camera, game.world().floor(z), game.world().wallLights(), game.world().height(), ambient,
                 quality, camX, camY, Lighting.playerLightRadius(pc, game.items()));
         batch.setColor(Color.WHITE);
         if (weather != Weather.Kind.CLEAR) {
@@ -2258,6 +2259,15 @@ public final class GameScreen extends ScreenAdapter {
                         session.world().crates().applyMove(
                                 new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])),
                                 new Position(Integer.parseInt(m[4]), Integer.parseInt(m[5]), Integer.parseInt(m[6])));
+                    } catch (NumberFormatException e) {
+                        // zly komunikat: pomijamy
+                    }
+                    break;
+                case "WLIGHT":
+                    if (m.length < 5) break;
+                    try {
+                        session.world().wallLights().apply(
+                                new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])), "1".equals(m[4]));
                     } catch (NumberFormatException e) {
                         // zly komunikat: pomijamy
                     }

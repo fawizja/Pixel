@@ -230,6 +230,29 @@ final class ServerWorld {
             broadcast(null, msg);
             saveCrates();
         });
+        wallLightsFile = new File(saveDir, "walllights.txt");
+        if (wallLightsFile.isFile()) {
+            world.wallLights().restore(new String(java.nio.file.Files.readAllBytes(wallLightsFile.toPath()),
+                    java.nio.charset.StandardCharsets.UTF_8));
+        }
+        world.wallLights().setListener(msg -> {
+            broadcast(null, msg);
+            saveWallLights();
+        });
+    }
+
+    private final File wallLightsFile;
+
+    /** Pochodnie i latarnie na murach (zapalone / zgaszone) wspolne dla wszystkich graczy; zapis po kazdej zmianie. */
+    private void saveWallLights() {
+        try {
+            File tmp = new File(wallLightsFile.getParentFile(), "walllights.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), world.wallLights().encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), wallLightsFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("wall lights save failed: " + e.getMessage());
+        }
     }
 
     private final File cratesFile;
@@ -248,6 +271,10 @@ final class ServerWorld {
 
     /** Nowy klient dostaje obecny stan skrzyn (jego mapa jest swieza z pliku). */
     private void sendCrates(ClientHandler client) {
+        for (java.util.Map.Entry<Position, Boolean> e : world.wallLights().changes().entrySet()) {
+            Position c = e.getKey();
+            client.send("WLIGHT", String.valueOf(c.x()), String.valueOf(c.y()), String.valueOf(c.z()), e.getValue() ? "1" : "0");
+        }
         for (java.util.Map.Entry<Position, Position> e : world.crates().moves().entrySet()) {
             Position o = e.getValue(), c = e.getKey();
             client.send("CRATEMV", String.valueOf(o.x()), String.valueOf(o.y()), String.valueOf(o.z()),

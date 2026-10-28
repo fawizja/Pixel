@@ -149,3 +149,4 @@
 156;debris;DECORATION;1;0;town;#5a4a3a;tuft
 157;corpse;DECORATION;1;0;town;#8a7060;tuft
 158;blood;DECORATION;1;0;town;#8a1a1a;tuft
+159;wall_lantern;OBJECT;0;6;town;#ffd27a;lamp

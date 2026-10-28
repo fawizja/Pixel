@@ -119,6 +119,8 @@ public final class GameSession {
             // gra offline: skrzynie przesuniete przez te postac i ich zawartosc
             world.crates().reset();
             world.crates().restore(pc.crates(), items);
+            world.wallLights().reset();
+            world.wallLights().restore(pc.wallLights());
         }
         this.rng = rng;
         this.ground = sharedGround != null ? sharedGround : new GroundItems();
@@ -2116,6 +2118,16 @@ public final class GameSession {
             return openChestAt(c, nowMs);
         }
         if (world.crates().isStorage(p)) return useCrate(p, nowMs);
+        pl.fawizja.pixel.world.WallLights wl = world.wallLights();
+        if (wl.isWallLight(p)) {
+            // pochodnia albo latarnia na murze: zapala sie i gasi na miejscu, nie trafia do plecaka
+            boolean lit = wl.toggle(p);
+            boolean torch = wl.isTorch(p);
+            log.add(nowMs, EventLog.Kind.INFO, torch ? (lit ? "Zapalasz pochodnię." : "Gasisz pochodnię.")
+                    : (lit ? "Zapalasz latarnię." : "Gasisz latarnię."));
+            if (!sharedWorld) pc.setWallLights(wl.encode());
+            return true;
+        }
         pl.fawizja.pixel.world.Openings o = world.openings();
         boolean door = o.isDoor(p);
         if (!door && !o.isWindow(p)) return false;

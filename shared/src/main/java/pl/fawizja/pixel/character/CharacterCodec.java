@@ -79,6 +79,7 @@ public final class CharacterCodec {
         if (pc.tips() != 0) m.put("tips", String.valueOf(pc.tips()));
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
         if (!pc.crates().isEmpty()) m.put("crates", pc.crates());
+        if (!pc.wallLights().isEmpty()) m.put("walllights", pc.wallLights());
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), stackText(e.getValue()));
         }
@@ -243,6 +244,7 @@ public final class CharacterCodec {
         if (m.containsKey("tips")) pc.restoreTips(Long.parseLong(m.get("tips")));
         if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));
         pc.setCrates(m.getOrDefault("crates", ""));
+        pc.setWallLights(m.getOrDefault("walllights", ""));
         String chests = m.get("chests");
         if (chests != null && !chests.isBlank()) for (String c : chests.split(",")) pc.openedChests().add(c.trim());
         String ignore = m.getOrDefault("autoloot.ignore", "");

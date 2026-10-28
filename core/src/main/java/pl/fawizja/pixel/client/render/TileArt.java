@@ -927,6 +927,13 @@ public final class TileArt implements Disposable {
                 slots.add(new int[] {-2 - v, k});
             }
         }
+        for (int k = 0; k < 8; k++) {
+            Pixmap p = loadArt("native/wall_light_" + ((k & 4) != 0 ? "lantern_" : "torch_") + ((k & 2) != 0 ? "v_" : "h_")
+                    + ((k & 1) != 0 ? "off" : "lit") + ".png");
+            if (p == null) continue;
+            images.add(p);
+            slots.add(new int[] {-4, k});
+        }
         if (images.isEmpty()) return;
         int rows = (images.size() + BIG_COLS - 1) / BIG_COLS;
         Pixmap pm = new Pixmap(BIG_COLS * BIG, rows * BIG, Pixmap.Format.RGBA8888);
@@ -943,6 +950,10 @@ public final class TileArt implements Disposable {
         for (int i = 0; i < slots.size(); i++) {
             int[] o = slots.get(i);
             TextureRegion r = new TextureRegion(nativeAtlas, (i % BIG_COLS) * BIG, (i / BIG_COLS) * BIG, BIG, BIG);
+            if (o[0] == -4) {
+                wallLights[o[1]] = r;
+                continue;
+            }
             if (o[0] < -1) {
                 List<TextureRegion> deco = o[0] == -2 ? decoH : decoV;
                 deco.add(r);
@@ -973,6 +984,14 @@ public final class TileArt implements Disposable {
     public TextureRegion wallDeco(boolean vertical, int pick) {
         List<TextureRegion> d = vertical ? decoV : decoH;
         return d.isEmpty() ? null : d.get(Math.floorMod(pick, d.size()));
+    }
+
+    /** Pochodnie i latarnie na murach (plotno 2x2 pola): indeks lantern*4 + vertical*2 + zgaszona. */
+    private final TextureRegion[] wallLights = new TextureRegion[8];
+
+    /** Pochodnia albo latarnia na murze (plotno 2x2 pola jak mur) albo null, gdy brak grafiki. */
+    public TextureRegion wallLight(boolean lantern, boolean vertical, boolean lit) {
+        return wallLights[(lantern ? 4 : 0) + (vertical ? 2 : 0) + (lit ? 0 : 1)];
     }
 
     /** Skrzynia skarbow w naturalnym rozmiarze (plotno 2x2 pola) albo null. */

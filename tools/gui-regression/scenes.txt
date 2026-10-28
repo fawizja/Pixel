@@ -63,3 +63,6 @@ lochy|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=933,441,-1
 sea_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=845,429,-1
 ferry|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=885,502,0 -Dpixel.open=npc
 island_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=947,566,0
+wall_torches_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1
+wall_torch_out|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1 -Dpixel.tap=434,698
+wall_lanterns_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.teleport=741,206,0
