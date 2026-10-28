@@ -152,3 +152,5 @@
 159;wall_lantern;OBJECT;0;6;town;#ffd27a;lamp
 160;door_level;OBJECT;1;0;town;#c8a040;door
 161;lever;OBJECT;0;0;town;#8a8a90;fence
+162;boss_plate;DECORATION;1;2;town;#d8b040;rug
+163;boss_portal;OBJECT;1;5;town;#9a60ff;crystal

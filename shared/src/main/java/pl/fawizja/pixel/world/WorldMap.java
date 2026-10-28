@@ -156,8 +156,8 @@ public final class WorldMap {
 
     public Map<Position, Integer> levelDoors() { return Collections.unmodifiableMap(levelDoors); }
 
-    /** Napis na drzwiach poziomu. */
-    public static String levelDoorSign(int minLevel) { return "„Tylko dla poziomu " + minLevel + "+”"; }
+    /** Napis na drzwiach poziomu (proste cudzyslowy: czcionka gry nie ma znakow „ i ”). */
+    public static String levelDoorSign(int minLevel) { return "\"Tylko dla poziomu " + minLevel + "+\""; }
 
     void addAltarQuest(AltarQuest q) { altarQuests.add(q); }
 
@@ -187,6 +187,48 @@ public final class WorldMap {
     /** Sala oltarzy albo skarbiec ktoregos zadania. */
     public boolean inAltarQuestRooms(Position p) {
         for (AltarQuest q : altarQuests) if (q.inQuestRooms(p)) return true;
+        return false;
+    }
+
+    // ------------------------------------------------------------------ wyprawy na bossa w piec postaci
+    private final List<BossQuest> bossQuests = new ArrayList<>();
+
+    void addBossQuest(BossQuest q) { bossQuests.add(q); }
+
+    public List<BossQuest> bossQuests() { return Collections.unmodifiableList(bossQuests); }
+
+    public BossQuest bossQuest(String id) {
+        for (BossQuest q : bossQuests) if (q.id().equals(id)) return q;
+        return null;
+    }
+
+    /** Wyprawa, ktorej dzwignia stoi w tym polu, albo null. */
+    public BossQuest bossQuestByLever(Position p) {
+        for (BossQuest q : bossQuests) if (q.lever().equals(p)) return q;
+        return null;
+    }
+
+    /** Wyprawa, ktorej portal wyjscia z areny jest w tym polu, albo null. */
+    public BossQuest bossQuestByPortal(Position p) {
+        for (BossQuest q : bossQuests) if (q.exitPortal().equals(p)) return q;
+        return null;
+    }
+
+    /** Wyprawa, na ktorej arenie lezy to pole, albo null. */
+    public BossQuest bossQuestByArena(Position p) {
+        for (BossQuest q : bossQuests) if (q.inArena(p)) return q;
+        return null;
+    }
+
+    /** Wyprawa, do ktorej nalezy oznaczone pole przedsionka, albo null. */
+    public BossQuest bossQuestBySquare(Position p) {
+        for (BossQuest q : bossQuests) if (q.squareAt(p) != null) return q;
+        return null;
+    }
+
+    /** Przedsionek albo arena ktorejs wyprawy (bez losowych skrzyn i pulapek). */
+    public boolean inBossQuestRooms(Position p) {
+        for (BossQuest q : bossQuests) if (q.inArena(p) || q.inLobby(p)) return true;
         return false;
     }
 

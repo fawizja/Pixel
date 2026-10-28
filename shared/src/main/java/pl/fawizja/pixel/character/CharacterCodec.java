@@ -80,6 +80,7 @@ public final class CharacterCodec {
         if (pc.outfit() != 0) m.put("outfit", String.valueOf(pc.outfit()));
         if (pc.tips() != 0) m.put("tips", String.valueOf(pc.tips()));
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
+        if (!pc.completedBossQuests().isEmpty()) m.put("bossq", String.join(",", pc.completedBossQuests()));
         if (!pc.crates().isEmpty()) m.put("crates", pc.crates());
         if (!pc.wallLights().isEmpty()) m.put("walllights", pc.wallLights());
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
@@ -254,6 +255,8 @@ public final class CharacterCodec {
         pc.setWallLights(m.getOrDefault("walllights", ""));
         String chests = m.get("chests");
         if (chests != null && !chests.isBlank()) for (String c : chests.split(",")) pc.openedChests().add(c.trim());
+        String bossq = m.get("bossq");
+        if (bossq != null && !bossq.isBlank()) for (String c : bossq.split(",")) pc.completedBossQuests().add(c.trim());
         String ignore = m.getOrDefault("autoloot.ignore", "");
         if (!ignore.isEmpty()) {
             for (String id : ignore.split(",")) pc.autoLootFilter().ignore(Integer.parseInt(id.trim()));

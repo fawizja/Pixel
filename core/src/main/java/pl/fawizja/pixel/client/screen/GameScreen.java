@@ -238,6 +238,9 @@ public final class GameScreen extends ScreenAdapter {
             }
             session.setAltarGhosts(list);
         }
+        // offline -Dpixel.bossGhosts=N (1..4): duchy uzupelniaja druzyne na polach przy dzwigni wyprawy na bossa
+        Integer bossGhosts = Integer.getInteger("pixel.bossGhosts");
+        if (net == null && bossGhosts != null) session.setBossGhosts(bossGhosts);
         // -Dpixel.day=N ustala dzien (potwor dnia, zadanie dnia); przy -Dpixel.hour staly dzien dla regresji GUI
         Long day = Long.getLong("pixel.day", System.getProperty("pixel.hour") != null ? 20_000L : null);
         if (day != null) {
@@ -936,7 +939,8 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)
                 || game.world().crates().isStorage(p) || game.world().wallLights().isWallLight(p)
-                || game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null) {
+                || game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null
+                || game.world().bossQuestByLever(p) != null) {
             // skrzynia, drzwi, okno, pochodnia na murze: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
             if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
             else if (walkTo(p, now(), true, true)) walkUse = p;
@@ -1039,6 +1043,7 @@ public final class GameScreen extends ScreenAdapter {
             net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
             // dzwignia, oltarz, pochodnia zadania i drzwi poziomu: rozstrzyga tylko serwer (komunikat przyjdzie w logu)
             boolean serverOnly = game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null
+                    || game.world().bossQuestByLever(p) != null
                     || game.world().isQuestTorch(p) || game.world().levelDoorAt(p) > session.character().level();
             if (serverOnly) return;
             if (crate) session.toggleCrateView(p);

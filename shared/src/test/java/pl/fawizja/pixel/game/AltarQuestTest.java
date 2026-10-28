@@ -341,7 +341,7 @@ class AltarQuestTest {
     void questDataApi() {
         Map<Position, Integer> doors = world.levelDoors();
         assertFalse(doors.isEmpty());
-        assertEquals("„Tylko dla poziomu 20+”", WorldMap.levelDoorSign(20));
+        assertEquals("\"Tylko dla poziomu 20+\"", WorldMap.levelDoorSign(20));
         assertEquals("Knight, Monk", AltarQuest.names(List.of(quest.slot(Vocation.KNIGHT), quest.slot(Vocation.MONK))));
         assertEquals("q_desert_knight", quest.chestId(Vocation.KNIGHT));
     }

@@ -109,7 +109,7 @@ public final class TreasureChests {
             List<Position> cand = new ArrayList<>();
             for (int i = r.nextSetBit(0); i >= 0; i = r.nextSetBit(i + 1)) {
                 Position p = new Position(i % w, i / w, z);
-                if (world.isProtectionZone(p) || world.requiredLevelAt(p) > 0 || world.inAltarQuestRooms(p)) continue;
+                if (world.isProtectionZone(p) || world.requiredLevelAt(p) > 0 || world.inAltarQuestRooms(p) || world.inBossQuestRooms(p)) continue;
                 boolean far = true;
                 for (Position e : exits) {
                     if (Math.max(Math.abs(e.x() - p.x()), Math.abs(e.y() - p.y())) < 8) {

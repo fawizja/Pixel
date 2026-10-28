@@ -135,6 +135,8 @@ public final class GameSession {
             Position home = world.templeOf(pc.homeTown());
             pc.setPosition(home != null ? home : world.spawn());
         }
+        pl.fawizja.pixel.world.BossQuest arenaOf = world.bossQuestByArena(pc.position());
+        if (!sharedWorld && arenaOf != null) pc.setPosition(arenaOf.exitTarget()); // arena po wczytaniu jest pusta
         this.stepFrom = pc.position();
         this.monsters = monsters != null ? monsters
                 : new MonsterManager(world, null, Collections.emptyList(), rng);
@@ -151,6 +153,14 @@ public final class GameSession {
             checkWeeklyBoss(t, lastUpdateMs);
             checkAchievements(lastUpdateMs);
         });
+        if (!sharedWorld) {
+            // gra offline: wlasne areny wypraw na bossa (serwer podaje wspolne przez setBossQuests)
+            bossRuntime = new BossQuestRuntime(world, items, this.monsters, rng);
+            combat.setLootOwner(m -> bossRuntime != null && bossRuntime.ownsLoot(m));
+            combat.setDeathListener(m -> {
+                if (bossRuntime != null) bossRuntime.onMonsterDeath(m, bossHeroes.get(), lastUpdateMs);
+            });
+        }
         this.playerTarget = new MonsterManager.Target() {
             @Override
             public Position position() { return pc.position(); }
@@ -1906,6 +1916,7 @@ public final class GameSession {
         Position before = pc.position();
         if (!sharedWorld) monsters.update(nowMs, playerTarget, combat);
         combat.update(nowMs);
+        if (!sharedWorld && bossRuntime != null) bossRuntime.update(bossHeroes.get(), nowMs);
         if (!pc.position().equals(before)) {
             // smierc i odrodzenie w swiatyni
             stepFrom = pc.position();
@@ -2279,6 +2290,89 @@ public final class GameSession {
         return chests != null && chests.at(p) != null;
     }
 
+    // ------------------------------------------------------------------ wyprawy na bossa w piec postaci
+    /** Areny wypraw: offline wlasne, na serwerze wspolne (setBossQuests). */
+    private BossQuestRuntime bossRuntime;
+    private final BossQuestRuntime.Hero bossHero = new BossQuestRuntime.Hero() {
+        @Override
+        public String id() { return pc.name(); }
+
+        @Override
+        public Position position() { return pc.position(); }
+
+        @Override
+        public boolean dead() { return pc.isDead(); }
+
+        @Override
+        public boolean completed(String questId) { return pc.completedBossQuests().contains(questId); }
+
+        @Override
+        public void markCompleted(String questId) { pc.completedBossQuests().add(questId); }
+
+        @Override
+        public void teleport(Position to, long nowMs) { GameSession.this.teleport(to, nowMs); }
+
+        @Override
+        public void message(EventLog.Kind kind, String text, long nowMs) { log.add(nowMs, kind, text); }
+
+        @Override
+        public boolean toBackpack(ItemStack st) { return pc.backpack().add(st).ok(); }
+
+        @Override
+        public boolean toDepot(ItemStack st) { return pc.depot().add(st).ok(); }
+
+        @Override
+        public void drop(ItemStack st, long nowMs) { ground.place(pc.position(), st); }
+    };
+    /** Kto bierze udzial w wyprawach: offline sama postac, na serwerze wszyscy gracze. */
+    private java.util.function.Supplier<java.util.List<BossQuestRuntime.Hero>> bossHeroes = () -> java.util.List.of(bossHero);
+    /** Tryb testowy offline (-Dpixel.bossGhosts=N): tylu "duchow" stoi na wolnych polach przedsionka przy dzwigni. */
+    private int bossGhosts;
+
+    /** Ta postac widziana przez wyprawy (serwer zbiera je od wszystkich graczy). */
+    public BossQuestRuntime.Hero bossHero() { return bossHero; }
+
+    public BossQuestRuntime bossQuests() { return bossRuntime; }
+
+    /** Serwer: wspolne areny i wszyscy gracze swiata. */
+    public void setBossQuests(BossQuestRuntime runtime, java.util.function.Supplier<java.util.List<BossQuestRuntime.Hero>> everyone) {
+        bossRuntime = runtime;
+        bossHeroes = everyone == null ? () -> java.util.List.of(bossHero) : everyone;
+    }
+
+    /** Tryb testowy offline: n (0..4) duchow uzupelnia druzyne na polach przedsionka (nie walcza i nie dostaja lupu). */
+    public void setBossGhosts(int n) { bossGhosts = Math.max(0, Math.min(BossQuestRuntime.PARTY_GHOSTS_MAX, n)); }
+
+    /**
+     * Tryb testowy offline (-Dpixel.bossWin): boss toczacej sie walki ginie od jednego ciosu tej postaci - lup
+     * i komunikaty jak po prawdziwej walce. Zwraca false, gdy zadna walka nie trwa.
+     */
+    public boolean debugDefeatQuestBoss(long nowMs) {
+        if (sharedWorld || bossRuntime == null) return false;
+        for (pl.fawizja.pixel.world.BossQuest q : world.bossQuests()) {
+            int id = bossRuntime.bossId(q.id());
+            if (id < 0) continue;
+            for (Monster m : new java.util.ArrayList<>(monsters.monsters())) {
+                if (m.id() == id) {
+                    combat.damageMonster(m, m.type().maxHealth() * 20, pl.fawizja.pixel.combat.DamageType.HOLY, nowMs);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean pullBossLever(pl.fawizja.pixel.world.BossQuest q, long nowMs) {
+        if (bossRuntime == null) {
+            log.add(nowMs, EventLog.Kind.INFO, "Dźwignia wyprawy " + q.name() + " - o wszystkim rozstrzyga serwer.");
+            return true;
+        }
+        java.util.List<BossQuestRuntime.Hero> everyone = new java.util.ArrayList<>(bossHeroes.get());
+        if (!sharedWorld) everyone.addAll(BossQuestRuntime.ghosts(q, bossGhosts, everyone));
+        bossRuntime.pull(q, bossHero, everyone, nowMs);
+        return true;
+    }
+
     // ------------------------------------------------------------------ zadania z oltarzami profesji
     /**
      * Kto stoi przed oltarzami i jak przeniesc druzyne do skarbca. Gra offline: sama postac (i "duchy" z
@@ -2369,6 +2463,8 @@ public final class GameSession {
             return openChestAt(c, nowMs);
         }
         if (world.crates().isStorage(p)) return useCrate(p, nowMs);
+        pl.fawizja.pixel.world.BossQuest bossLever = world.bossQuestByLever(p);
+        if (bossLever != null) return pullBossLever(bossLever, nowMs);
         pl.fawizja.pixel.world.AltarQuest leverOf = world.altarQuestByLever(p);
         if (leverOf != null) return pullLever(leverOf, nowMs);
         pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
@@ -2655,6 +2751,12 @@ public final class GameSession {
         pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
         if (altar != null) parts.add("ołtarz profesji " + altar.vocation().displayName() + " (" + itemName(altar.itemKey()) + ")");
         if (world.altarQuestByLever(p) != null) parts.add("dźwignia");
+        pl.fawizja.pixel.world.BossQuest bq = world.bossQuestByLever(p);
+        if (bq != null) parts.add("dźwignia wyprawy " + bq.name() + " (5 postaci na polach, od poziomu " + bq.minLevel() + ")");
+        bq = world.bossQuestBySquare(p);
+        if (bq != null) parts.add("oznaczone pole wyprawy " + bq.name() + " - tu staje jedna z pięciu postaci");
+        bq = world.bossQuestByPortal(p);
+        if (bq != null) parts.add("portal wyjścia z areny (otwiera się po pokonaniu bossa)");
         if (world.levelDoorAt(p) > 0) parts.add("drzwi z napisem " + WorldMap.levelDoorSign(world.levelDoorAt(p)));
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null) {
