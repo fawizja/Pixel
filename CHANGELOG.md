@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.210.0] - 2026-10-28
+
+### Dodano
+- Pochodnie i latarenki wiszą na ścianach (724 światła przeniesione z podłogi). Stuknięcie z sąsiedniej kratki
+  zapala lub gasi światło, nic nie trafia do plecaka; stan zapisuje się w postaci i na serwerze.
+- Zakładki czatu jak w Tibii: Lokalny, Serwer, Handel, Gildia, Drużyna i prywatne rozmowy; nieprzeczytane na czerwono,
+  wpisany tekst idzie na kanał zakładki. Przyciski ATAK, UŻYJ, KSIĘGA i reszta stoją obok ekwipunku.
+- Okno domu przy drzwiach: stan, cena, czynsz tygodniowy, przycisk Kup. Okno właściciela od środka: zaproś z pełnym
+  dostępem albo tylko wejściem, lista gości, opuść dom. Czynsz (2% ceny tygodniowo) schodzi z banku, po 2 zaległościach
+  dom wraca do miasta, a rzeczy idą do depo.
+- Łowienie wymaga wędki i robaków w gnieździe amunicji; każde zarzucenie zużywa robaka (1 gp u kupców z plecakami).
+- Reguły łupu: złoto i wartość przedmiotów według poziomu potwora, rzadsze drogie rzeczy, 35 przedmiotów tylko z bossów
+  (1-5%), osobny rzut łupu bossa dla każdego gracza.
+
+### Naprawiono
+- Od 0.209.0 obraz w nocy i pod ziemią był prawie biały (przycinanie widoku przy rysowaniu świateł).
+
 ## [0.209.0] - 2026-10-28
 
 ### Zmieniono
