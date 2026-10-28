@@ -27,7 +27,16 @@ public final class MonsterRegistry {
 
     public static MonsterRegistry loadDefault(ItemRegistry items) {
         try {
-            return parse(readLines("/data/monsters.csv"), readLines("/data/loot.csv"), items);
+            MonsterRegistry reg = parse(readLines("/data/monsters.csv"), readLines("/data/loot.csv"), items);
+            for (MonsterType t : reg.all()) {
+                if (t.boss()) continue;
+                for (LootEntry e : t.loot()) {
+                    if (LootRules.isBossOnly(items.get(e.itemId()))) {
+                        throw new IllegalStateException("loot.csv: boss-only item " + items.get(e.itemId()).key() + " on " + t.key());
+                    }
+                }
+            }
+            return reg;
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read monster data", e);
         }

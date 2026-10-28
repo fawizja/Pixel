@@ -1,0 +1,39 @@
+# Przedmioty tylko z bossow: zaden zwykly potwor (ani jego odmiana elitarna) nie moze ich upuszczac.
+# U bossa spadaja rzadko: 5% (wartosc < 50 000), 3,5% (< 150 000), 2,5% (< 400 000), 1,5% (< 800 000), 1% (wyzej)
+# - patrz LootRules.bossOnlyMaxPermille. Kazdy przedmiot legendarny (wartosc >= 400 000) z tabel lupow musi tu byc.
+# przedmiot;bossowie (klucze z monsters.csv), ktorzy go upuszczaja (test sprawdza zgodnosc z loot.csv)
+grimtooth_crown;grimtooth
+frost_tiara;frost_queen
+pharaoh_scepter;pharaoh
+magma_spear;ignaroth
+magma_bow;ignaroth
+rod_of_hoarfrost;ignaroth
+rod_of_tides;wyvern_matriarch
+reef_gauntlets;wyvern_matriarch
+coral_warhammer;wyvern_matriarch
+tidal_harpoon;bloodbeard
+wand_of_the_deep;bloodbeard
+tidal_bow;bloodbeard
+frostfang_spear;hrimgar,skaldra
+frostbound_fists;hrimgar
+glacier_axe;hrimgar
+frost_longsword;hrimgar
+frost_bow;hrimgar
+glacier_crossbow;skaldra
+glacial_plate;hrimgar,skaldra
+glacial_shield;hrimgar
+stormcaller_wand;morvena
+rod_of_twilight;khazuul,morvena
+shadowpiercer;khazuul,pyrrax
+umbral_grips;khazuul,pyrrax
+umbral_blade;khazuul,pyrrax
+skull_axe;khazuul,pyrrax
+shadow_bow;khazuul
+rod_of_eternal_winter;morgath
+starfall_wand;morgath
+fists_of_the_abyss;morgath
+dawnspear;morgath
+abyssal_greatsword;morgath
+abyss_hammer;morgath
+dawn_bow;morgath
+crown_of_the_abyss;morgath

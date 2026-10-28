@@ -18,7 +18,7 @@
 33;rope;Lina;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#c8a165;Lina do wspinania się z dziur.
 34;shovel;Łopata;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#8f8f8f;Łopata do odkopywania przejść.
 35;fishing_rod;Wędka;TOOL;1;150;NONE;0;0;0;0;*;0;0;PHYSICAL;#a07040;Wędka do łowienia ryb.
-36;worm;Robak;BAIT;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;#d48a8a;Przynęta na ryby.
+36;worm;Robak;BAIT;100;1;AMMO;0;0;0;0;*;0;0;PHYSICAL;#d48a8a;Przynęta na ryby: włóż do gniazda amunicji (obok spodni). Każde zarzucenie wędki zużywa jednego robaka.
 37;blank_rune;Pusta runa;RUNE;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;#d0d0c0;Pusta runa do zaklinania.
 38;bread;Chleb;FOOD;100;3;NONE;0;0;0;0;*;0;0;PHYSICAL;#d9a85b;Chleb z piekarni w Varden.
 39;spear;Włócznia;AMMUNITION;100;3;AMMO;20;0;0;0;PALADIN;0;7;PHYSICAL;#c9b37e;Zwykła włócznia do rzucania.

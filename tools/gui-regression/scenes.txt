@@ -74,3 +74,7 @@ house_owner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,5
 wall_torches_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1
 wall_torch_out|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=434,699,-1 -Dpixel.tap=434,698
 wall_lanterns_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.teleport=741,206,0
+# 2026-10-28: robaki w gniezdzie amunicji (1 gp u kupca z plecakami), lup bossa rzucany osobno na gracza
+shop_worms|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
+equipment_worms|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bag
+boss_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bossloot

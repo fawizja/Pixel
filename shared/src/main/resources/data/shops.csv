@@ -4,7 +4,7 @@ varden_general;torch;8;0
 varden_general;rope;60;0
 varden_general;shovel;60;0
 varden_general;fishing_rod;180;0
-varden_general;worm;2;0
+varden_general;worm;1;0
 varden_general;bread;4;0
 varden_general;meat;6;0
 varden_general;health_potion;50;0
@@ -51,7 +51,7 @@ frost_shop;torch;8;0
 frost_shop;rope;60;0
 frost_shop;shovel;60;0
 frost_shop;fishing_rod;180;0
-frost_shop;worm;2;0
+frost_shop;worm;1;0
 frost_shop;bread;4;0
 frost_shop;meat;6;0
 frost_shop;health_potion;50;0
@@ -82,7 +82,7 @@ selv_shop;torch;8;0
 selv_shop;rope;60;0
 selv_shop;shovel;60;0
 selv_shop;fishing_rod;180;0
-selv_shop;worm;2;0
+selv_shop;worm;1;0
 selv_shop;bread;4;0
 selv_shop;meat;6;0
 selv_shop;health_potion;50;0
@@ -147,7 +147,7 @@ qas_shop;torch;8;0
 qas_shop;rope;60;0
 qas_shop;shovel;60;0
 qas_shop;fishing_rod;180;0
-qas_shop;worm;2;0
+qas_shop;worm;1;0
 qas_shop;bread;4;0
 qas_shop;meat;6;0
 qas_shop;health_potion;50;0
@@ -325,7 +325,7 @@ varden_supplies;torch;8;0
 varden_supplies;rope;60;0
 varden_supplies;shovel;60;0
 varden_supplies;fishing_rod;180;0
-varden_supplies;worm;2;0
+varden_supplies;worm;1;0
 varden_supplies;bread;4;0
 varden_supplies;meat;6;0
 varden_supplies;health_potion;50;0
@@ -335,7 +335,7 @@ frost_supplies;torch;8;0
 frost_supplies;rope;60;0
 frost_supplies;shovel;60;0
 frost_supplies;fishing_rod;180;0
-frost_supplies;worm;2;0
+frost_supplies;worm;1;0
 frost_supplies;bread;4;0
 frost_supplies;meat;6;0
 frost_supplies;health_potion;50;0
@@ -345,7 +345,7 @@ qas_supplies;torch;8;0
 qas_supplies;rope;60;0
 qas_supplies;shovel;60;0
 qas_supplies;fishing_rod;180;0
-qas_supplies;worm;2;0
+qas_supplies;worm;1;0
 qas_supplies;bread;4;0
 qas_supplies;meat;6;0
 qas_supplies;health_potion;50;0
@@ -355,7 +355,7 @@ selv_supplies;torch;8;0
 selv_supplies;rope;60;0
 selv_supplies;shovel;60;0
 selv_supplies;fishing_rod;180;0
-selv_supplies;worm;2;0
+selv_supplies;worm;1;0
 selv_supplies;bread;4;0
 selv_supplies;meat;6;0
 selv_supplies;health_potion;50;0
@@ -425,6 +425,8 @@ frost_supplies;backpack;20;0
 qas_supplies;backpack;20;0
 selv_supplies;backpack;20;0
 camp_shop;backpack;20;0
+camp_shop;fishing_rod;180;0
+camp_shop;worm;1;0
 # Etap 15: kwatermistrz Przystani Wschodniej - zaopatrzenie i skup produktow z wysp
 isle_shop;ultimate_health_potion;760;0
 isle_shop;ultimate_mana_potion;650;0
@@ -433,6 +435,8 @@ isle_shop;supreme_health_potion;560;0
 isle_shop;supreme_mana_potion;400;0
 isle_shop;blank_rune;15;0
 isle_shop;backpack;20;0
+isle_shop;fishing_rod;180;0
+isle_shop;worm;1;0
 isle_shop;rope;60;0
 isle_shop;wyvern_scale;0;400
 isle_shop;crab_pincer;0;350
@@ -456,7 +460,7 @@ village_shop;rope;60;0
 village_shop;bread;4;0
 village_shop;meat;6;0
 village_shop;fishing_rod;180;0
-village_shop;worm;2;0
+village_shop;worm;1;0
 village_shop;health_potion;50;0
 village_shop;mana_potion;55;0
 varden_general;battle_axe;0;300
@@ -505,7 +509,7 @@ valmir_shop;torch;8;0
 valmir_shop;rope;60;0
 valmir_shop;shovel;60;0
 valmir_shop;fishing_rod;180;0
-valmir_shop;worm;2;0
+valmir_shop;worm;1;0
 valmir_shop;bread;4;0
 valmir_shop;meat;6;0
 valmir_shop;health_potion;50;0
@@ -573,7 +577,7 @@ valmir_supplies;torch;8;0
 valmir_supplies;rope;60;0
 valmir_supplies;shovel;60;0
 valmir_supplies;fishing_rod;180;0
-valmir_supplies;worm;2;0
+valmir_supplies;worm;1;0
 valmir_supplies;bread;4;0
 valmir_supplies;meat;6;0
 valmir_supplies;health_potion;50;0
@@ -604,7 +608,7 @@ nerys_shop;torch;8;0
 nerys_shop;rope;60;0
 nerys_shop;shovel;60;0
 nerys_shop;fishing_rod;180;0
-nerys_shop;worm;2;0
+nerys_shop;worm;1;0
 nerys_shop;bread;4;0
 nerys_shop;meat;6;0
 nerys_shop;health_potion;50;0
@@ -672,7 +676,7 @@ nerys_supplies;torch;8;0
 nerys_supplies;rope;60;0
 nerys_supplies;shovel;60;0
 nerys_supplies;fishing_rod;180;0
-nerys_supplies;worm;2;0
+nerys_supplies;worm;1;0
 nerys_supplies;bread;4;0
 nerys_supplies;meat;6;0
 nerys_supplies;health_potion;50;0

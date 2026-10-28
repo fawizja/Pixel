@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.TestData;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.character.Skill;
+import pl.fawizja.pixel.item.EquipSlot;
 import pl.fawizja.pixel.item.ItemCategory;
 import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.vocation.Vocation;
@@ -32,6 +33,12 @@ class FishingTest {
         throw new AssertionError("no lake on the map");
     }
 
+    /** Robaki w gniezdzie amunicji i w plecaku razem. */
+    static int worms(PlayerCharacter pc) {
+        ItemStack a = pc.equipment().get(EquipSlot.AMMO);
+        return pc.backpack().count(id("worm")) + (a != null && a.itemId() == id("worm") ? a.count() : 0);
+    }
+
     static PlayerCharacter fisher(Position at) {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         pc.setPosition(at);
@@ -51,17 +58,58 @@ class FishingTest {
         PlayerCharacter pc = fisher(TestData.varden().spawn());
         assertEquals(FishingResult.NO_WATER, fs.fish(pc, 0), "temple is far from water");
         pc.setPosition(shore(fs));
+        assertEquals(10, fs.baitInSlot(pc), "starter worms sit in the ammo slot");
+        pc.equipment().setDirect(EquipSlot.AMMO, null);
         pc.backpack().remove(id("worm"), pc.backpack().count(id("worm")));
         assertEquals(FishingResult.NO_BAIT, fs.fish(pc, 0));
+        assertTrue(FishingResult.NO_BAIT.message.contains("robak"));
+        pc.backpack().add(new ItemStack(id("worm"), 5));
+        assertEquals(FishingResult.BAIT_NOT_IN_SLOT, fs.fish(pc, 0), "worms only in the backpack are not enough");
+        pc.equipment().setDirect(EquipSlot.AMMO, new ItemStack(id("worm"), 5));
         pc.backpack().remove(id("fishing_rod"), 1);
         assertEquals(FishingResult.NO_ROD, fs.fish(pc, 0));
+        assertTrue(FishingResult.NO_ROD.message.contains("wędk"));
+        assertEquals(10, worms(pc), "failed attempts use no worms");
+    }
+
+    @Test
+    void wormsCanBeWornInTheAmmoSlotAndRodInHandCounts() {
+        FishingSystem fs = new FishingSystem(TestData.varden(), TestData.ITEMS, new Random(9));
+        PlayerCharacter pc = fisher(shore(fs));
+        assertEquals(EquipSlot.AMMO, TestData.ITEMS.byKey("worm").slot());
+        pc.backpack().remove(id("fishing_rod"), 1);
+        pc.equipment().setDirect(EquipSlot.WEAPON, new ItemStack(id("fishing_rod"), 1));
+        assertTrue(fs.hasRod(pc));
+        assertNotEquals(FishingResult.NO_ROD, fs.fish(pc, 0));
+    }
+
+    @Test
+    void everyCastUsesOneWormAndTheSlotRefillsFromTheBackpack() {
+        FishingSystem fs = new FishingSystem(TestData.varden(), TestData.ITEMS, new Random(8));
+        PlayerCharacter pc = fisher(shore(fs));
+        pc.equipment().setDirect(EquipSlot.AMMO, new ItemStack(id("worm"), 2));
+        pc.backpack().add(new ItemStack(id("worm"), 3));
+        long t = 0;
+        int casts = 0;
+        for (int i = 0; i < 5; i++) {
+            FishingResult r = fs.fish(pc, t + i * (FishingSystem.TILE_REST_MS + 1));
+            assertTrue(r == FishingResult.CAUGHT || r == FishingResult.NOTHING, r.toString());
+            casts++;
+            assertEquals(5 - casts, worms(pc));
+            pc.backpack().remove(id("fish"), pc.backpack().count(id("fish")));
+            pc.backpack().remove(id("pearl"), pc.backpack().count(id("pearl")));
+        }
+        assertNull(pc.equipment().get(EquipSlot.AMMO), "all worms used");
+        assertEquals(FishingResult.NO_BAIT, fs.fish(pc, 10 * (FishingSystem.TILE_REST_MS + 1)));
     }
 
     @Test
     void catchingUsesAWormTrainsAndRestsTheSpot() {
         FishingSystem fs = new FishingSystem(TestData.varden(), TestData.ITEMS, new Random(2));
         PlayerCharacter pc = fisher(shore(fs));
-        int worms = pc.backpack().count(id("worm"));
+        pc.backpack().add(new ItemStack(id("worm"), 100));
+        pc.backpack().add(new ItemStack(id("worm"), 100));
+        int worms = worms(pc);
         long t = 0;
         FishingResult r;
         int attempts = 0;
@@ -71,7 +119,7 @@ class FishingTest {
             attempts++;
         } while (r != FishingResult.CAUGHT && attempts < 200);
         assertEquals(FishingResult.CAUGHT, r);
-        assertEquals(worms - 1, pc.backpack().count(id("worm")), "only a catch uses bait");
+        assertEquals(worms - attempts, worms(pc), "every cast uses one worm");
         assertEquals(1, pc.backpack().count(id("fish")));
         assertTrue(pc.skills().tries(Skill.FISHING) > 0 || pc.skills().level(Skill.FISHING) > 10);
         assertEquals(FishingResult.COOLDOWN, fs.fish(pc, t - FishingSystem.ATTEMPT_COOLDOWN_MS + 10));
@@ -82,7 +130,8 @@ class FishingTest {
         FishingSystem fs = new FishingSystem(TestData.varden(), TestData.ITEMS, new Random(3));
         PlayerCharacter pc = fisher(shore(fs));
         pc.skills().set(Skill.FISHING, 200, 0);
-        pc.backpack().add(new ItemStack(id("worm"), 80));
+        pc.backpack().add(new ItemStack(id("worm"), 100));
+        pc.backpack().add(new ItemStack(id("worm"), 100));
         long t = 0;
         int caught = 0;
         FishingResult last = null;
@@ -111,7 +160,7 @@ class FishingTest {
             if (r == FishingResult.CAUGHT) caught++;
             attempts++;
             pc.backpack().remove(id("fish"), pc.backpack().count(id("fish")));
-            if (pc.backpack().count(id("worm")) < 5) pc.backpack().add(new ItemStack(id("worm"), 50));
+            if (worms(pc) < 5) pc.backpack().add(new ItemStack(id("worm"), 50));
         }
         double rate = caught / (double) attempts;
         assertTrue(rate > 0.11 && rate < 0.21, "rate " + rate);
@@ -124,15 +173,16 @@ class FishingTest {
         PlayerCharacter pc = fisher(shore(fs));
         pc.skills().set(Skill.FISHING, 200, 0);
         while (pc.backpack().freeSlots() > 0) pc.backpack().add(new ItemStack(id("leather_helmet"), 1));
-        int worms = pc.backpack().count(id("worm"));
         FishingResult r;
         long t = 0;
+        int before;
         do {
+            before = worms(pc);
             r = fs.fish(pc, t);
             t += FishingSystem.ATTEMPT_COOLDOWN_MS;
         } while (r == FishingResult.NOTHING);
         assertEquals(FishingResult.BACKPACK_FULL, r);
-        assertEquals(worms, pc.backpack().count(id("worm")));
+        assertEquals(before, worms(pc), "a catch that does not fit keeps the worm");
     }
 
     /** Brzeg wody w glebi regionu (cala okolica w zasiegu wedki nalezy do regionu). */
@@ -162,7 +212,7 @@ class FishingTest {
         Map<Integer, Integer> got = new HashMap<>();
         for (int i = 0; i < attempts; i++) {
             pc.skills().set(Skill.FISHING, skill, 0);
-            if (pc.backpack().count(id("worm")) < 5) pc.backpack().add(new ItemStack(id("worm"), 50));
+            if (worms(pc) < 5) pc.backpack().add(new ItemStack(id("worm"), 50));
             if (fs.fish(pc, clock) == FishingResult.CAUGHT) got.merge(fs.lastCatchId(), 1, Integer::sum);
             for (int k = 0; k < 20; k++) {
                 ItemStack st = pc.backpack().get(k);
