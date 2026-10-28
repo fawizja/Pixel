@@ -75,6 +75,8 @@ public final class CharacterCodec {
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
         if (pc.house() != null) m.put("house", pc.house());
+        if (!pc.houseGuests().isEmpty()) m.put("hguests", pc.houseGuests());
+        if (pc.rentPaidUntil() > 0 || pc.rentMissed() > 0) m.put("rent", pc.rentPaidUntil() + "," + pc.rentMissed());
         if (pc.outfit() != 0) m.put("outfit", String.valueOf(pc.outfit()));
         if (pc.tips() != 0) m.put("tips", String.valueOf(pc.tips()));
         if (!pc.openedChests().isEmpty()) m.put("chests", String.join(",", pc.openedChests()));
@@ -239,6 +241,11 @@ public final class CharacterCodec {
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
         pc.setHouse(m.get("house"));
+        pc.setHouseGuests(m.get("hguests"));
+        if (m.containsKey("rent")) {
+            String[] r = m.get("rent").split(",");
+            pc.setRent(Long.parseLong(r[0].trim()), r.length > 1 ? Integer.parseInt(r[1].trim()) : 0);
+        }
         if (m.containsKey("outfit")) pc.setOutfit(Outfit.parse(m.get("outfit")));
         if (m.containsKey("tips")) pc.restoreTips(Long.parseLong(m.get("tips")));
         if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));

@@ -327,6 +327,10 @@ public final class GameScreen extends ScreenAdapter {
 
             @Override
             public boolean keyTyped(char c) {
+                if (chatDraft == null && hud.houseTyping()) {
+                    if (c != '\r' && c != '\n') hud.houseType(c);
+                    return true;
+                }
                 if (chatDraft == null) return false;
                 if (c == '\b') {
                     if (chatDraft.length() > 0) chatDraft.setLength(chatDraft.length() - 1);
@@ -338,6 +342,12 @@ public final class GameScreen extends ScreenAdapter {
 
             @Override
             public boolean keyDown(int keycode) {
+                if (chatDraft == null && hud.houseTyping()) {
+                    // imie goscia w oknie domu: Enter zaprasza, Esc wraca do okna wlasciciela
+                    if (keycode == Input.Keys.ENTER) hud.houseSubmit(GameScreen.this::onButton);
+                    else if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK) hud.closeTop(session);
+                    return true;
+                }
                 if (chatDraft != null) {
                     if (keycode == Input.Keys.ENTER) {
                         chatHistory.add(chatDraft.toString());
@@ -421,6 +431,10 @@ public final class GameScreen extends ScreenAdapter {
 
     private void onButton(String id) {
         long t = now();
+        if (id.startsWith("house:")) {
+            houseAction(id, t);
+            return;
+        }
         switch (id) {
             case "bag": hud.toggleBag(); break;
             case "diag": hud.toggleDiagnostics(); break;
@@ -799,7 +813,8 @@ public final class GameScreen extends ScreenAdapter {
         String[] house = net == null ? pl.fawizja.pixel.net.ChatCommands.toMessage(text) : null;
         if (house != null && house[0].equals("HOUSE")) {
             // bez serwera: opis domu i lista gosci (inni gracze wchodza tylko online)
-            if (house[1].equals("GUEST")) session.addHouseGuest(house[2], now());
+            if (house[1].equals("GUEST")) session.addHouseGuest(house[2], house.length > 3 && house[3].equals("entry")
+                    ? pl.fawizja.pixel.house.HouseAccess.ENTRY : pl.fawizja.pixel.house.HouseAccess.FULL, now());
             else if (house[1].equals("UNGUEST")) session.removeHouseGuest(house[2], now());
             else if (house[1].equals("INFO")) session.log().add(now(), EventLog.Kind.SYSTEM, session.houseInfo());
             else session.log().add(now(), EventLog.Kind.INFO, "Sprzedaż domu innemu graczowi działa online. Miastu sprzedasz go u zarządcy domów.");
@@ -915,12 +930,66 @@ public final class GameScreen extends ScreenAdapter {
     private List<Position> walkPath;
     private int walkIndex;
     private pl.fawizja.pixel.npc.Npc walkNpc;
+    /** Online: dom, ktorego okno otworzy sie po odpowiedzi serwera (HOUSEINFO), i czy to okno wlasciciela. */
+    private String pendingHouse;
+    private boolean pendingHouseOwner;
+
+    /** Przycisk okna domu (house:buy:id, house:invite:poziom:Imie, house:unguest:Imie, house:door, house:leave). */
+    private void houseAction(String id, long t) {
+        String[] f = id.split(":", 4);
+        pl.fawizja.pixel.house.House h = session.houses().get(hud.houseOpenId());
+        if (h == null) return;
+        switch (f[1]) {
+            case "buy":
+                if (net == null) session.buyHouseAtDoor(f[2], t);
+                else net.send("HOUSE", "BUY", f[2]);
+                break;
+            case "invite":
+                if (f.length < 4) return;
+                if (net == null) session.addHouseGuest(f[3], pl.fawizja.pixel.house.HouseAccess.guestLevel(f[2]), t);
+                else net.send("HOUSE", "GUEST", f[3], f[2]);
+                break;
+            case "unguest":
+                if (net == null) session.removeHouseGuest(f[2], t);
+                else net.send("HOUSE", "UNGUEST", f[2]);
+                break;
+            case "leave":
+                if (net == null) session.leaveHouseAtDoor(t);
+                else net.send("HOUSE", "LEAVE");
+                break;
+            case "door":
+                // wlasciciel w srodku: drzwi otwiera i zamyka przycisk okna
+                if (net == null) session.useAt(h.door(), t);
+                else {
+                    net.send("ACT", "open:" + h.door().x() + ":" + h.door().y() + ":" + h.door().z());
+                    game.world().openings().toggle(h.door());
+                }
+                break;
+            default:
+                return;
+        }
+        if (net == null) hud.updateHouse(session.houseView(h));  // online: odswiezy odpowiedz serwera
+    }
+
     /** Drzwi, okno albo skrzynia do otwarcia po dojsciu (null = brak). */
     private Position walkUse;
 
     /** Otwiera albo zamyka drzwi i okna, otwiera skrzynie (online: serwer decyduje, drzwi i okna od razu na ekranie). */
     private void useOpening(Position p) {
         long t = now();
+        GameSession.DoorTap tap = session.houseDoorTap(p);
+        if (tap != null && tap != GameSession.DoorTap.TOGGLE) {
+            // drzwi domu: okno jak w Tibii (wolny/zajety, cena, czynsz, Kup) albo okno wlasciciela w srodku
+            pl.fawizja.pixel.house.House h = session.houses().byDoor(p);
+            if (net == null) {
+                hud.openHouse(h, session.houseView(h), tap == GameSession.DoorTap.OWNER_WINDOW);
+            } else {
+                pendingHouse = h.id();
+                pendingHouseOwner = tap == GameSession.DoorTap.OWNER_WINDOW;
+                net.send("HOUSE", "DOOR", h.id());              // wlasciciel i goscie: odpowiedz HOUSEINFO z serwera
+            }
+            return;
+        }
         boolean crate = !session.chestAt(p) && game.world().crates().isStorage(p);
         if (net == null) {
             session.useAt(p, t);
@@ -2252,6 +2321,27 @@ public final class GameScreen extends ScreenAdapter {
         while ((m = net.poll()) != null) {
             long now = now();
             switch (m[0]) {
+                case "HOUSEINFO": {
+                    pl.fawizja.pixel.house.HouseView v = pl.fawizja.pixel.house.HouseView.parse(m);
+                    if (v == null) break;
+                    if (v.houseId().equals(pendingHouse)) {
+                        pl.fawizja.pixel.house.House h = session.houses().get(v.houseId());
+                        if (h != null) hud.openHouse(h, v, pendingHouseOwner);
+                        pendingHouse = null;
+                    } else {
+                        hud.updateHouse(v);
+                    }
+                    break;
+                }
+                case "HACC": {
+                    Map<String, pl.fawizja.pixel.house.HouseAccess> acc = new java.util.HashMap<>();
+                    for (String e : (m.length > 1 ? m[1] : "").split(",")) {
+                        int c = e.lastIndexOf(':');
+                        if (c > 0) acc.put(e.substring(0, c), pl.fawizja.pixel.house.HouseAccess.guestLevel(e.substring(c + 1)));
+                    }
+                    session.setRemoteHouseAccess(acc);
+                    break;
+                }
                 case "CRATEMV":
                     if (m.length < 7) break;
                     try {

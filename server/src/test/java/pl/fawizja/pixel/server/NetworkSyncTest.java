@@ -1513,6 +1513,61 @@ class NetworkSyncTest {
     }
 
     @Test
+    void houseDoorWindowBuyGuestLevelsAndRentOfAnOfflineOwner() throws Exception {
+        pl.fawizja.pixel.house.House h = server.world().houses().inTown("Selvaran").get(2);
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            boolean[] ready = new boolean[1];
+            server.enqueueTest(() -> {
+                PlayerCharacter pc = server.world().find("Ola").session.character();
+                pc.bank().debit(pc.bank().balance());
+                pc.bank().credit(h.price());                     // dokladnie na dom, nic na czynsz
+                for (int[] d : new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+                    Position q = h.door().translate(d[0], d[1]);
+                    if (server.world().world.isWalkable(q) && !h.contains(q)) {
+                        server.world().find("Ola").session.teleport(q, 0);
+                        break;
+                    }
+                }
+                ready[0] = true;
+            });
+            await("ready", () -> ready[0]);
+            ola.send("HOUSE", "DOOR", h.id());
+            awaitMessage(ola, "free house", m -> m[0].equals("HOUSEINFO") && m[1].equals(h.id()) && m[2].equals("-"));
+            ola.send("HOUSE", "BUY", h.id());
+            awaitMessage(ola, "bought", m -> m[0].equals("HOUSEINFO") && m[2].equals("Ola") && m[3].equals("OWNER"));
+            assertEquals("Ola", server.world().houseOwners().ownerOf(h.id()));
+            assertTrue(server.world().houseOwners().rentPaidUntil(h.id()) > System.currentTimeMillis());
+            ola.send("HOUSE", "GUEST", "Ula", "entry");
+            awaitMessage(ula, "access", m -> m[0].equals("HACC") && m.length > 1 && m[1].equals(h.id() + ":entry"));
+            assertEquals(pl.fawizja.pixel.house.HouseAccess.ENTRY, server.world().houseOwners().guestAccess(h.id(), "Ula"));
+            ula.send("HOUSE", "DOOR", h.id());
+            awaitMessage(ula, "guest view", m -> m[0].equals("HOUSEINFO") && m[2].equals("Ola") && m[3].equals("ENTRY"));
+        }
+        await("logged out", () -> server.world().find("Ola") == null);
+        String saved = new String(Files.readAllBytes(new File(saves, "houses.txt").toPath()), java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(saved.contains("guests:" + h.id() + "=Ula:entry"), saved);
+
+        // dwa tygodnie bez zlota na koncie: dom wraca do miasta, choc wlascicielka jest offline
+        boolean[] swept = new boolean[1];
+        server.enqueueTest(() -> {
+            server.world().wallClock = () -> System.currentTimeMillis() + 2 * pl.fawizja.pixel.house.HouseRent.WEEK_MS + 60_000;
+            server.world().sweepHouseRent(0);
+            swept[0] = true;
+        });
+        await("swept", () -> swept[0]);
+        assertNull(server.world().houseOwners().ownerOf(h.id()));
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome back", () -> ola.selfSave() != null);
+            assertNull(self(ola).house());
+        }
+    }
+
+    @Test
     void pushedCratesAndTheirContentsReachEveryClientAndSurviveARestart() throws Exception {
         pl.fawizja.pixel.world.WorldMap w = server.world().world;
         pl.fawizja.pixel.world.Crates c = w.crates();

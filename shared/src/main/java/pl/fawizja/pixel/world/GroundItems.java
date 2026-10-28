@@ -52,6 +52,18 @@ public final class GroundItems {
         return l == null ? Collections.emptyList() : Collections.unmodifiableList(l);
     }
 
+    /** Zdejmuje stos z kafelka (np. monety z opuszczanego domu ida na konto); null, gdy nie ma takiego. */
+    public ItemStack take(Position p, int index) {
+        List<ItemStack> l = items.get(p);
+        if (l == null || index < 0 || index >= l.size()) return null;
+        ItemStack s = l.remove(index);
+        if (l.isEmpty()) {
+            items.remove(p);
+            placedAt.remove(p);
+        }
+        return s;
+    }
+
     public void place(Position p, ItemStack stack) {
         items.computeIfAbsent(p, k -> new ArrayList<>()).add(stack);
         placedAt.put(p, lastNow);

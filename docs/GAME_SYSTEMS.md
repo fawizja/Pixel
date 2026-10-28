@@ -108,6 +108,17 @@ Czat: `/dom` (HOUSE INFO), `/dom wpusc|wyrzuc Imie` (GUEST/UNGUEST), `/dom sprze
 5 minut), `/dom kup` (ACCEPT: kupujacy placi z banku, sprzedajacy dostaje zloto na konto albo w zaleglych
 wplywach rynku, goscie traca wstep), `/dom anuluj`. Sprzedaz miastu u zarzadcy: zwrot
 `HOUSE_SELLBACK_PERCENT` = 50% ceny. Domy maja kształt L: 12. pole houses.csv to skrzydla `x0,y0,x1,y1/...`.
+Okno domu przy drzwiach (`GameSession.houseDoorTap`, `HouseView`, `client/ui/HouseWindow`): obcy i gosc "tylko
+wejscie" dostaja okno (wolny/zajety, wlasciciel, cena, czynsz, przycisk Kup -> `buyHouseAtDoor`), wlasciciel na
+zewnatrz i gosc z pelnym dostepem otwieraja drzwi, wlasciciel w srodku dostaje okno: Zapros (pelny dostep / wejscie),
+lista gosci z Usun, Otworz/Zamknij drzwi, Opusc dom (potwierdzenie, jak sprzedaz miastu). Online: HOUSE DOOR|BUY|LEAVE|
+GUEST imie [entry] -> odpowiedz HOUSEINFO; HACC = cudze domy z dostepem gracza. `/dom wstep Imie` = samo wejscie.
+Dostep (`HouseAccess`): ENTRY - wejscie i chodzenie; FULL/OWNER - takze wyrzucanie, podnoszenie, pchanie skrzyn,
+schowki, drzwi i okna domu. Zapis gosci: `guests:id=Imie:full,Imie:entry` (stare linie bez poziomu = full).
+Czynsz (`HouseRent`): 2% ceny tygodniowo (czas rzeczywisty, `-Dpixel.rentPeriodMs`), kupno oplaca pierwszy tydzien,
+pobierany z banku (offline w sesji, stan w zapisie postaci `rent`/`hguests`; serwer: wlasciciel w grze w swojej sesji,
+offline `ServerWorld.sweepHouseRent` na zapisie postaci; linie `rent:id=oplacony_do,zalegle`). Brak zlota = zaleglosc
+i ostrzezenie; po 2 zaleglosciach dom wraca do miasta, rzeczy ze schowkow i podlogi ida do depozytu (monety na konto).
 Skrzynie (0.208.0): `world/Crates` (WorldMap.crates()). Skrzynie, beczki, worki i kufry (`MOVABLE`) pcha sie,
 wchodzac w nie (tylko prosto, pole za nimi wolne, bez schodow i kratek, najdalej `MAX_DRIFT` = 6 pol od miejsca
 z mapy, meble domu nie wyjezdzaja z domu). `STORAGE` (+ szafy) otwiera sie dotknieciem albo UZYJ: 8 miejsc,

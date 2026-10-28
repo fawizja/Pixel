@@ -63,3 +63,7 @@ lochy|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=933,441,-1
 sea_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=845,429,-1
 ferry|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=885,502,0 -Dpixel.open=npc
 island_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=947,566,0
+# 2026-10-28: okno domu przy drzwiach (wolny z Kup, zajety, okno wlasciciela z goscmi)
+house_free|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_free
+house_owned|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_owned
+house_owner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=549,515,0 -Dpixel.open=house_owner

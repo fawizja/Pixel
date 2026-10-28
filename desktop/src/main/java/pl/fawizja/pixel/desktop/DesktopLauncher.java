@@ -168,6 +168,40 @@ public final class DesktopLauncher {
                     for (int i = 0; i < 2; i++) cs.recordDamage("Goblin szaman", 44, t);
                     cs.diedFromPlayer("Kuba", false, t);
                 }
+                if (open != null && open.startsWith("house_")) {
+                    // podglad okna domu przy drzwiach: house_free (wolny, Kup), house_owned (zajety przez Halvara),
+                    // house_owner (wlasciciel w srodku, goscie), house_invite (wpisywanie imienia); -Dpixel.houseId=id
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.game.GameSession s = gs.session();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
+                    String hid = System.getProperty("pixel.houseId");
+                    pl.fawizja.pixel.house.House h = hid != null ? s.houses().get(hid) : s.houses().inTown("Varden").get(0);
+                    for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
+                    boolean owner = open.equals("house_owner") || open.equals("house_invite");
+                    pl.fawizja.pixel.house.HouseOwnersMap owners = new pl.fawizja.pixel.house.HouseOwnersMap();
+                    if (open.equals("house_owned")) owners.claim(h.id(), "Halvar");
+                    if (owner) {
+                        owners.claim(h.id(), pc.name());
+                        pc.setHouse(h.id());
+                        owners.setRent(h.id(), System.currentTimeMillis() + 5 * 86_400_000L + 3 * 3_600_000L, 0);
+                        owners.addGuest(h.id(), "Ula", pl.fawizja.pixel.house.HouseAccess.FULL);
+                        owners.addGuest(h.id(), "Stary Wilk", pl.fawizja.pixel.house.HouseAccess.ENTRY);
+                    } else {
+                        pc.bank().credit(h.price() + 12_500);
+                    }
+                    s.setHouses(s.houses(), owners);
+                    Position stand = null;
+                    for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+                        Position n = h.door().translate(d.dx, d.dy);
+                        if (!d.diagonal() && s.world().isWalkable(n) && h.contains(n) == owner && s.npcs().at(n) == null) {
+                            stand = n;
+                            break;
+                        }
+                    }
+                    if (stand != null) s.teleport(stand, 0L);
+                    gs.tapTile(h.door());
+                    if (open.equals("house_invite")) gs.hud().previewHouse("house:invitefull", "Stary Wilk");
+                }
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
                 if ("party".equals(open)) {
