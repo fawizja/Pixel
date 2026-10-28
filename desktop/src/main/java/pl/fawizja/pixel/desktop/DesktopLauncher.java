@@ -21,7 +21,9 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.teleport=x,y,z            ustawia postac na pozycji (np. 8,23,-1)
  *   -Dpixel.screenshot=plik.png       zapisuje zrzut ekranu po pixel.frames klatkach i konczy
  *   -Dpixel.frames=120
- *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu)
+ *   -Dpixel.hour=22                   godzina gry na starcie sesji (np. noc do zrzutow ekranu); wlacza tez staly
+ *                                     czas: 50 ms na klatke, staly dzien i czas rzeczywisty - zrzut nie zalezy od maszyny
+ *   -Dpixel.frameMs=N                 krok czasu sesji na klatke (0 = zegar rzeczywisty)
  *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
@@ -55,6 +57,8 @@ public final class DesktopLauncher {
         private final String screenshot = System.getProperty("pixel.screenshot");
         private final int frames = Integer.getInteger("pixel.frames", 120);
         private final Integer hour = Integer.getInteger("pixel.hour");
+        /** Czas rzeczywisty przy -Dpixel.hour (regresja GUI): 2026-01-01 12:00 UTC. */
+        private static final long FIXED_WALL_MS = 1_767_268_800_000L;
         private boolean clockSet;
         private int frame;
         private boolean teleported;
@@ -87,6 +91,8 @@ public final class DesktopLauncher {
         public void render() {
             if (!clockSet && hour != null && getScreen() instanceof GameScreen) {
                 clockSet = true;
+                // staly czas rzeczywisty (czynsz domu: "nastepna platnosc za ...") - zrzut nie zalezy od chwili uruchomienia
+                ((GameScreen) getScreen()).session().setWallClock(() -> FIXED_WALL_MS);
                 ((GameScreen) getScreen()).session().setClock(
                         new pl.fawizja.pixel.time.WorldClock(-hour * pl.fawizja.pixel.time.WorldClock.GAME_HOUR_MS,
                                 pl.fawizja.pixel.time.WorldClock.REAL_DAY_MS, 0.38f));
@@ -183,7 +189,7 @@ public final class DesktopLauncher {
                     if (owner) {
                         owners.claim(h.id(), pc.name());
                         pc.setHouse(h.id());
-                        owners.setRent(h.id(), System.currentTimeMillis() + 5 * 86_400_000L + 3 * 3_600_000L, 0);
+                        owners.setRent(h.id(), (hour != null ? FIXED_WALL_MS : System.currentTimeMillis()) + 5 * 86_400_000L + 3 * 3_600_000L, 0);
                         owners.addGuest(h.id(), "Ula", pl.fawizja.pixel.house.HouseAccess.FULL);
                         owners.addGuest(h.id(), "Stary Wilk", pl.fawizja.pixel.house.HouseAccess.ENTRY);
                     } else {

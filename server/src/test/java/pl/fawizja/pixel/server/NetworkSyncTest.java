@@ -66,6 +66,26 @@ class NetworkSyncTest {
         return null;
     }
 
+    /**
+     * Wolny kafelek obok zywego wilka najblizszego punktowi near (watek petli swiata). Stale wspolrzedne pola nie
+     * wystarcza: na mapie 1000x1000 przy (149,351) nie ma wilkow w zasiegu widoku, a potwory z wezszym wzrokiem
+     * (0.209.0) rzadko same podchodza - test zalezal od przypadkowego zblakania sie wilka.
+     */
+    static Position besideLiveWolf(ServerWorld w, Position near) {
+        pl.fawizja.pixel.monster.Monster best = null;
+        for (pl.fawizja.pixel.monster.Monster m : w.monsters.monsters()) {
+            if (m.isDead() || m.position().z() != near.z() || !m.type().key().equals("wolf")) continue;
+            if (best == null || m.position().distanceTo(near) < best.position().distanceTo(near)) best = m;
+        }
+        assertNotNull(best, "no live wolf on the map");
+        for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+            Position n = best.position().translate(d.dx, d.dy);
+            if (w.world.isWalkable(n) && !w.world.isProtectionZone(n) && w.monsters.monsterAt(n) == null) return n;
+        }
+        fail("no free tile next to the wolf at " + best.position());
+        return null;
+    }
+
     @Test
     void twoPlayersSeeEachOtherMoveAndChat() throws Exception {
         try (NetClient alice = connect();
@@ -155,11 +175,18 @@ class NetworkSyncTest {
             a.hello("Erin", "PALADIN", "tajne-Erin");
             b.hello("Finn", "MONK", "tajne-Finn");
             await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
-            // obaj teleportowani (na serwerze) do pola z wilkami: widza te same potwory o tych samych id
-            Position field = new Position(149, 351, 0);
+            // obaj teleportowani (na serwerze) obok zywego wilka: widza te same potwory o tych samych id
+            java.util.concurrent.CompletableFuture<Position> spot = new java.util.concurrent.CompletableFuture<>();
             server.enqueueTest(() -> {
-                for (ServerPlayer p : server.world().players()) p.session.teleport(field, server.now());
+                try {
+                    Position field = besideLiveWolf(server.world(), new Position(149, 351, 0));
+                    for (ServerPlayer p : server.world().players()) p.session.teleport(field, server.now());
+                    spot.complete(field);
+                } catch (Throwable t) {
+                    spot.completeExceptionally(t);
+                }
             });
+            spot.get(10, java.util.concurrent.TimeUnit.SECONDS); // blad wyboru miejsca widoczny w tescie, nie w logu serwera
             await("both see monsters", () -> a.frame() != null && b.frame() != null
                     && !a.frame().monsters().isEmpty() && !b.frame().monsters().isEmpty()
                     && seen(a, "Finn") != null);
@@ -191,24 +218,9 @@ class NetworkSyncTest {
                     .anyMatch(g -> g.itemId() == itemId));
 
             // walka obok zywego wilka: zdarzenia walki (EV) docieraja do klienta
-            Position field = new Position(149, 351, 0);
             server.enqueueTest(() -> {
                 ServerWorld w = server.world();
-                Position spot = field;
-                pl.fawizja.pixel.monster.Monster best = null;
-                for (pl.fawizja.pixel.monster.Monster m : w.monsters.monsters()) {
-                    if (m.isDead() || m.position().z() != 0 || !m.type().key().equals("wolf")) continue;
-                    if (best == null || m.position().distanceTo(field) < best.position().distanceTo(field)) best = m;
-                }
-                if (best != null) {
-                    for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
-                        Position n = best.position().translate(d.dx, d.dy);
-                        if (w.world.isWalkable(n) && !w.world.isProtectionZone(n) && w.monsters.monsterAt(n) == null) {
-                            spot = n;
-                            break;
-                        }
-                    }
-                }
+                Position spot = besideLiveWolf(w, new Position(149, 351, 0));
                 for (ServerPlayer p : w.players()) {
                     if (p.name().equals("Gina")) p.session.teleport(spot, server.now());
                 }

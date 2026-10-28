@@ -80,6 +80,13 @@ public final class GameScreen extends ScreenAdapter {
     private final ResourceGuard guard = new ResourceGuard();
     private final Map<Resource, Float> sample = new EnumMap<>(Resource.class);
     private final long startMs = TimeUtils.millis();
+    /**
+     * -Dpixel.frameMs=N: staly krok czasu sesji na klatke zamiast zegara (domyslnie 50 ms przy -Dpixel.hour, tryb lokalny).
+     * Zrzut regresji GUI powstaje po stalej liczbie klatek; z zegarem rzeczywistym liczba podpowiedzi i komunikatow
+     * na ekranie zalezala od szybkosci maszyny (CI vs lokalnie).
+     */
+    static final long FIXED_FRAME_MS = Long.getLong("pixel.frameMs", System.getProperty("pixel.hour") != null ? 50L : 0L);
+    private long fixedFrames;
     private long lastSaveMs;
     private long lastGuardSampleMs;
     private float frameTimeAvg = 1f / 60f;
@@ -151,20 +158,20 @@ public final class GameScreen extends ScreenAdapter {
     /** Dymek nad postacia na kilka sekund (dluzszy tekst - dluzej, najwyzej 9 s). */
     public void say(String name, String text) {
         String t = text.length() > 90 ? text.substring(0, 87) + "..." : text;
-        bubbles.put(name.toLowerCase(java.util.Locale.ROOT), new Object[] {t, TimeUtils.millis() + Math.min(9_000, 4_000 + 60L * t.length())});
+        bubbles.put(name.toLowerCase(java.util.Locale.ROOT), new Object[] {t, uiMs() + Math.min(9_000, 4_000 + 60L * t.length())});
     }
 
     /** Podskok albo przykucniecie postaci w trakcie emotki z jej dymka (kafelki, dodatni = w gore). */
     private float emoteRise(String name) {
         Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
-        if (b == null || (Long) b[1] <= TimeUtils.millis()) return 0f;
-        return pl.fawizja.pixel.net.Emotes.rise((String) b[0], TimeUtils.millis());
+        if (b == null || (Long) b[1] <= uiMs()) return 0f;
+        return pl.fawizja.pixel.net.Emotes.rise((String) b[0], uiMs());
     }
 
     private void drawBubble(SpriteBatch batch, BitmapFont font, float scale, String name, float wx, float wy) {
         Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
         if (b == null) return;
-        long left = (Long) b[1] - TimeUtils.millis();
+        long left = (Long) b[1] - uiMs();
         if (left <= 0) {
             bubbles.remove(name.toLowerCase(java.util.Locale.ROOT));
             return;
@@ -273,8 +280,14 @@ public final class GameScreen extends ScreenAdapter {
         lastSaveMs = now();
     }
 
+    /** Czas animacji interfejsu (dymki, kursor): zegar, a przy stalym kroku klatki ({@link #FIXED_FRAME_MS}) - klatki. */
+    private long uiMs() {
+        return FIXED_FRAME_MS > 0 && net == null ? fixedFrames * FIXED_FRAME_MS : TimeUtils.millis();
+    }
+
     /** Czas swiata: w trybie lokalnym liczony od startu klienta, w trybie online - zgrany z serwerem. */
     private long now() {
+        if (FIXED_FRAME_MS > 0 && net == null) return fixedFrames * FIXED_FRAME_MS + clockOffset;
         return TimeUtils.millis() - startMs + clockOffset; // czas sesji 0 = 09:00 czasu gry (zegar w GameSession)
     }
 
@@ -1434,6 +1447,10 @@ public final class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         frameStartNs = TimeUtils.nanoTime();
+        if (FIXED_FRAME_MS > 0 && net == null) {
+            fixedFrames++;
+            delta = FIXED_FRAME_MS / 1000f;
+        }
         if (paused) return;
         startProfiling();
         checkLongPress();
@@ -2198,7 +2215,7 @@ public final class GameScreen extends ScreenAdapter {
         drawPartyPanel(batch, font, scale);
         if (chatDraft != null) {
             font.setColor(1f, 1f, 0.6f, 1f);
-            boolean caret = (TimeUtils.millis() / 500) % 2 == 0;
+            boolean caret = (uiMs() / 500) % 2 == 0;
             font.draw(batch, hud.chatTabs().active().title() + ": " + chatDraft + (caret ? "_" : ""), 12 * scale, Gdx.graphics.getHeight() * 0.42f);
         }
         font.getData().setScale(1f);
@@ -2511,6 +2528,9 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private void updateGuard(long t) {
+        // staly krok klatki (zrzuty regresji GUI): ochrona mierzy prawdziwe zasoby maszyny, wiec jej komunikaty
+        // i obnizona jakosc efektow zalezalyby od obciazenia (CI) - zostaje tryb normalny
+        if (FIXED_FRAME_MS > 0 && net == null) return;
         if (t - lastGuardSampleMs < GUARD_SAMPLE_MS) return;
         lastGuardSampleMs = t;
         sample.clear();

@@ -181,12 +181,15 @@ public final class LoginScreen extends ScreenAdapter {
         forget.set(x, y - 40 - 70, fw, 34);
     }
 
+    /** Zrzut ekranu (-Dpixel.screenshot, regresja GUI): kursor nie miga, wiec obraz nie zalezy od chwili zrzutu. */
+    private static final boolean STEADY_CARET = System.getProperty("pixel.screenshot") != null;
+
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0.07f, 0.08f, 0.1f, 1f);
         viewport.apply();
         float w = viewport.getWorldWidth(), h = viewport.getWorldHeight();
-        boolean caret = (TimeUtils.millis() / 500) % 2 == 0;
+        boolean caret = STEADY_CARET || (TimeUtils.millis() / 500) % 2 == 0;
         ShapeRenderer shapes = game.shapes();
         shapes.setProjectionMatrix(viewport.getCamera().combined);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
