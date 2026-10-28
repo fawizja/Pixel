@@ -348,6 +348,8 @@ public final class GameScreen extends ScreenAdapter {
                         if (h != null) chatDraft = new StringBuilder(h);
                     } else if (keycode == Input.Keys.ESCAPE || keycode == Input.Keys.BACK) {
                         chatDraft = null;
+                    } else if (keycode == Input.Keys.TAB) {
+                        cycleChatTab();
                     }
                     return true; // klawisze ida do czatu, nie do gry
                 }
@@ -361,6 +363,7 @@ public final class GameScreen extends ScreenAdapter {
                 }
                 switch (keycode) {
                     case Input.Keys.ENTER: onButton("chat"); return true;
+                    case Input.Keys.TAB: cycleChatTab(); return true;
                     case Input.Keys.E: onButton("use"); return true;
                     case Input.Keys.R: onButton("run"); return true;
                     case Input.Keys.T: onButton("torch"); return true;
@@ -597,6 +600,22 @@ public final class GameScreen extends ScreenAdapter {
 
     private void openChat() { openChat(""); }
 
+    /** Tab (Shift+Tab wstecz): nastepna zakladka czatu. */
+    private void cycleChatTab() {
+        boolean back = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT);
+        hud.chatTabs().cycle(back ? -1 : 1);
+    }
+
+    /**
+     * Wiadomosc CHAT z serwera (nadawca, tekst, kanal albo null) do zakladki czatu; ogloszenia trafiaja do dziennika
+     * (zakladka Serwer i napis na widoku gry). Publiczne dla podgladu zakladek (-Dpixel.open=chattabs).
+     */
+    public void receiveChat(String from, String text, String channel, long now) {
+        pl.fawizja.pixel.chat.ChatTabs.Route r = pl.fawizja.pixel.chat.ChatTabs.route(from, text, channel, session.character().name());
+        if (r.style() == pl.fawizja.pixel.chat.ChatTabs.Style.BROADCAST) session.log().add(now, EventLog.Kind.SYSTEM, r.text());
+        else hud.chatTabs().add(r, now);
+    }
+
     /** Okno czatu z gotowym poczatkiem tekstu (np. "/w Ula, "). */
     private void openChat(String start) {
         if (Gdx.app.getType() == Application.ApplicationType.Android) {
@@ -609,7 +628,7 @@ public final class GameScreen extends ScreenAdapter {
 
                 @Override
                 public void canceled() { }
-            }, "Czat", start, chatHistory.last() != null ? "Ostatnio: " + chatHistory.last()
+            }, "Czat: " + hud.chatTabs().active().title(), start, chatHistory.last() != null ? "Ostatnio: " + chatHistory.last()
                     : net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
         } else {
             chatHistory.resetCursor();
@@ -619,6 +638,13 @@ public final class GameScreen extends ScreenAdapter {
 
     private void sendChat(String text) {
         if (text == null || text.isBlank()) return;
+        // zakladka kanalu (Handel, Gildia, Druzyna, rozmowa prywatna): zwykly tekst idzie na jej kanal
+        String[] channelMsg = hud.chatTabs().outgoing(text);
+        if (channelMsg != null) {
+            if (net != null) net.send(channelMsg);
+            else session.log().add(now(), EventLog.Kind.INFO, "Kanał " + hud.chatTabs().active().title() + " działa online. Lokalny czat: zakładka Lokalny.");
+            return;
+        }
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
@@ -626,9 +652,12 @@ public final class GameScreen extends ScreenAdapter {
         if (spell != null) {
             // inkantacja jak w Tibii: slowa nad postacia i czar (online inni gracze widza slowa w czacie)
             act("cast:" + spell, now());
-            if (net != null) net.send("CHAT", text.trim());
-            else say(session.character().name(), text.trim());
-            session.log().add(now(), EventLog.Kind.CHAT, session.character().name() + ": " + text.trim());
+            if (net != null) {
+                net.send("CHAT", text.trim()); // serwer odsyla slowa wszystkim, takze nam (zakladka Lokalny)
+            } else {
+                say(session.character().name(), text.trim());
+                session.log().add(now(), EventLog.Kind.CHAT, session.character().name() + ": " + text.trim());
+            }
             return;
         }
         if (cmd.equals("/smierc")) {
@@ -2100,7 +2129,7 @@ public final class GameScreen extends ScreenAdapter {
         if (chatDraft != null) {
             font.setColor(1f, 1f, 0.6f, 1f);
             boolean caret = (TimeUtils.millis() / 500) % 2 == 0;
-            font.draw(batch, "Czat: " + chatDraft + (caret ? "_" : ""), 12 * scale, Gdx.graphics.getHeight() * 0.42f);
+            font.draw(batch, hud.chatTabs().active().title() + ": " + chatDraft + (caret ? "_" : ""), 12 * scale, Gdx.graphics.getHeight() * 0.42f);
         }
         font.getData().setScale(1f);
         font.setColor(Color.WHITE);
@@ -2294,7 +2323,7 @@ public final class GameScreen extends ScreenAdapter {
                     break;
                 case "CHAT":
                     if (m.length >= 3 && !ignored.hides(m[1])) {
-                        session.log().add(now, EventLog.Kind.CHAT, m[1] + ": " + m[2]);
+                        receiveChat(m[1], m[2], m.length > 3 ? m[3] : null, now);
                         if (!m[1].startsWith("[")) say(m[1], m[2]); // czat ogolny: dymek nad mowiacym
                     }
                     break;
@@ -2351,6 +2380,7 @@ public final class GameScreen extends ScreenAdapter {
                             partyNames.add(n);
                         }
                     }
+                    if (partyNames.size() >= 2) hud.chatTabs().ensure(pl.fawizja.pixel.chat.ChatTabs.Channel.PARTY);
                     break;
                 case "EV":
                     if (m.length < 6) break;
@@ -2513,5 +2543,6 @@ public final class GameScreen extends ScreenAdapter {
             party.add(n.toLowerCase(java.util.Locale.ROOT));
             partyNames.add(n);
         }
+        if (partyNames.size() >= 2) hud.chatTabs().ensure(pl.fawizja.pixel.chat.ChatTabs.Channel.PARTY);
     }
 }

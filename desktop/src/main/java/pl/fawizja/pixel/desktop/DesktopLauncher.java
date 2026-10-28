@@ -32,7 +32,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
- *   -Dpixel.conTab=N     zakladka konsoli (0 ogolne, 1 czat, 2 lup, 3 serwer)
+ *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
  */
@@ -286,6 +286,18 @@ public final class DesktopLauncher {
                     // podglad dymka czatu nad wlasna postacia
                     GameScreen gs = (GameScreen) getScreen();
                     gs.say(gs.session().character().name(), "Witajcie w Varden! Ktoś idzie ze mną do kopalni goblinów?");
+                }
+                if ("chattabs".equals(open)) {
+                    // podglad zakladek czatu: wiadomosci z kilku kanalow (jak z serwera), czesc nieprzeczytana
+                    GameScreen gs = (GameScreen) getScreen();
+                    long t = gs.session().lastUpdateMs();
+                    String self = gs.session().character().name();
+                    gs.receiveChat("Ula", "Ktoś idzie ze mną na wilki pod Varden?", "local", t);
+                    gs.receiveChat(self, "Ja idę, poczekaj przy świątyni.", "local", t);
+                    gs.receiveChat("[Handel] Kuba", "Sprzedam 20 wilczych futer, 300 gp za sztukę.", "trade", t);
+                    gs.receiveChat("[Handel] Mira", "Kupię łopatę i linę, płacę od ręki.", "trade", t);
+                    gs.receiveChat("[Drużyna] Ola", "Zbieramy się przy wejściu do kopalni.", "party", t);
+                    gs.receiveChat("[od Mira]", "Hej, masz jeszcze tę łopatę?", "pm", t);
                 }
                 Integer conTab = Integer.getInteger("pixel.conTab");
                 if (conTab != null) ((GameScreen) getScreen()).hud().showConsoleTab(conTab);

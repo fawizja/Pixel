@@ -658,7 +658,7 @@ final class ServerWorld {
         saveWeekly();
         LOG.info("weekly podium: " + names);
         for (ServerPlayer o : players.values()) {
-            o.client.send("CHAT", "[Ogłoszenie]", "Koniec tygodnia! Najwięcej doświadczenia: " + String.join(", ", names) + ". Nagrody trafiły na konta.");
+            o.client.send("CHAT", "[Ogłoszenie]", "Koniec tygodnia! Najwięcej doświadczenia: " + String.join(", ", names) + ". Nagrody trafiły na konta.", "broadcast");
         }
     }
 
@@ -699,7 +699,7 @@ final class ServerWorld {
     private void deliverLetters(ServerPlayer p) {
         List<pl.fawizja.pixel.mail.Letters.Letter> got = letters.take(p.name());
         if (got.isEmpty()) return;
-        for (pl.fawizja.pixel.mail.Letters.Letter l : got) p.client.send("CHAT", "[list] " + l.from(), l.text());
+        for (pl.fawizja.pixel.mail.Letters.Letter l : got) p.client.send("CHAT", "[list] " + l.from(), l.text(), "letter");
         saveLetters();
     }
 
@@ -2286,8 +2286,8 @@ final class ServerWorld {
                 }
                 if (!chatAllowed(p, now)) break;
                 String text = f[2].length() > 200 ? f[2].substring(0, 200) : f[2];
-                to.client.send("CHAT", "[od " + p.name() + "]", text);
-                p.client.send("CHAT", "[do " + to.name() + "]", text);
+                to.client.send("CHAT", "[od " + p.name() + "]", text, "pm");
+                p.client.send("CHAT", "[do " + to.name() + "]", text, "pm");
                 break;
             }
             case "REPORT":
@@ -2315,7 +2315,7 @@ final class ServerWorld {
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
                     for (String n : g.members()) {
                         ServerPlayer m = find(n);
-                        if (m != null) m.client.send("CHAT", "[" + g.name() + "] " + p.name(), text);
+                        if (m != null) m.client.send("CHAT", "[" + g.name() + "] " + p.name(), text, "guild");
                     }
                 }
                 break;
@@ -2330,7 +2330,7 @@ final class ServerWorld {
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
                     for (String n : team) {
                         ServerPlayer m = find(n);
-                        if (m != null) m.client.send("CHAT", "[Drużyna] " + p.name(), text);
+                        if (m != null) m.client.send("CHAT", "[Drużyna] " + p.name(), text, "party");
                     }
                 }
                 break;
@@ -2344,14 +2344,22 @@ final class ServerWorld {
                     // zostaje k6
                 }
                 String text = pl.fawizja.pixel.net.Emotes.diceText(sides, 1 + rng.nextInt(sides));
-                for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text);
+                for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text, "local");
                 break;
             }
             case "CHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
                     if (!chatAllowed(p, now)) break;
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
-                    for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text);
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", p.name(), text, "local");
+                }
+                break;
+            case "TCHAT":
+                // kanal Handel (zakladka czatu jak w Tibii): do wszystkich graczy, z ta sama moderacja co czat
+                if (f.length > 1 && !f[1].isBlank()) {
+                    if (!chatAllowed(p, now)) break;
+                    String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Handel] " + p.name(), text, "trade");
                 }
                 break;
             default:
@@ -2420,7 +2428,7 @@ final class ServerWorld {
     }
 
     private void announce(String text) {
-        for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", text);
+        for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", text, "broadcast");
     }
     /** Czas pierwszego taktu swiata (do czasu dzialania w STATUS); -1 przed pierwszym taktem. */
     private long firstTick = -1;
@@ -2443,7 +2451,7 @@ final class ServerWorld {
             switch (c[0].toUpperCase(java.util.Locale.ROOT)) {
                 case "SAY": {
                     if (c.length < 2 || c[1].isBlank()) return "Podaj tekst ogłoszenia.";
-                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", c[1]);
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", c[1], "broadcast");
                     return "Wysłano ogłoszenie do " + players.size() + " graczy.";
                 }
                 case "KICK": {

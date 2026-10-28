@@ -793,7 +793,11 @@ class NetworkSyncTest {
             await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
             ula.send("PM", "ola", "psst");
             awaitMessage(ola, "private message", m -> m[0].equals("CHAT") && m[1].equals("[od Ula]") && m[2].equals("psst"));
-            awaitMessage(ula, "echo", m -> m[0].equals("CHAT") && m[1].equals("[do Ola]"));
+            awaitMessage(ula, "echo", m -> m[0].equals("CHAT") && m[1].equals("[do Ola]") && m.length > 3 && m[3].equals("pm"));
+            // kanal Handel (zakladka czatu): wszyscy dostaja wiadomosc z etykieta i polem kanalu
+            ula.send("TCHAT", "sprzedam futro");
+            awaitMessage(ola, "trade channel", m -> m[0].equals("CHAT") && m[1].equals("[Handel] Ula") && m[2].equals("sprzedam futro")
+                    && m.length > 3 && m[3].equals("trade"));
 
             ula.send("ADMIN", "KICK", "Ola");
             awaitMessage(ula, "not an admin", m -> m[0].equals("LOG") && m[2].contains("Brak uprawnień"));

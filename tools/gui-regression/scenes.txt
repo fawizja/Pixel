@@ -63,3 +63,7 @@ lochy|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=933,441,-1
 sea_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=845,429,-1
 ferry|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=885,502,0 -Dpixel.open=npc
 island_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=947,566,0
+# 2026-10-28: przyciski akcji obok ekwipunku, zakladki czatu jak w Tibii (nieprzeczytane na czerwono)
+chattabs|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=chattabs
+chattabs_trade|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=chattabs -Dpixel.conTab=2
+chattabs_phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2 -Dpixel.teleport=498,503,0 -Dpixel.open=chattabs -Dpixel.conTab=4

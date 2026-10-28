@@ -57,7 +57,6 @@ public final class Hud {
     private final HudButton book = new HudButton("book", "KSIĘGA");
     private final HudButton fish = new HudButton("fish", "ŁÓW");
     private final HudButton talk = new HudButton("talk", "ROZMOWA");
-    private final HudButton chat = new HudButton("chat", "CZAT");
     private final HudButton mount = new HudButton("mount", "KOŃ");
     private boolean chatEnabled;
     /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
@@ -433,7 +432,6 @@ public final class Hud {
         buttons.add(book);
         buttons.add(fish);
         buttons.add(talk);
-        buttons.add(chat);
         buttons.add(mount);
         for (int i = 0; i < spellButtons.length; i++) {
             spellButtons[i] = new HudButton("spell:" + i, "");
@@ -453,8 +451,55 @@ public final class Hud {
         viewport.update(width, height, true);
         w = viewport.getWorldWidth();
         h = viewport.getWorldHeight();
-        // jedna bryla jak klasyczny klient Tibii: widok gry w ramce, po prawej panel (minimapa, ekwipunek,
-        // lista walki, pasek akcji), u gory paski HP/MP, na dole przyciski i konsola
+        // jedna bryla jak klasyczny klient Tibii: widok gry w ramce, po prawej panel (minimapa, ekwipunek z przyciskami
+        // obok, lista walki, pasek akcji), u gory paski HP/MP, na dole konsola z zakladkami czatu
+        layoutSide();
+        float pad = 4;
+        // dolny pasek pod widokiem gry: konsola z zakladkami (przyciski akcji sa obok ekwipunku)
+        topH = 24;
+        conTabH = h >= 500 ? 18 : 16;
+        float conBody = (h >= 500 ? 6 : 3) * 13 + 8 + conTabH;
+        gx = pad;
+        gy = pad + conBody + 4;
+        gw = panelX - pad - gx;
+        gh = h - topH - gy;
+        // pad w lewym dolnym rogu ekranu (na widoku gry i dolnym pasku), konsola zaczyna sie za nim
+        float jr = Math.min(60, Math.min(w, h) * 0.14f) * (settings != null ? settings.joystickScale() : 1f);
+        joystick.layout(pad + 10 + jr * 1.3f, pad + 10 + jr * 1.3f, jr);
+        float padW = pad + 10 + jr * 2.6f + 6;
+        conX = padW;
+        conY = pad;
+        conW = panelX - pad - padW;
+        conH = conBody;
+        layoutRest();
+    }
+
+    /** Ktore przyciski akcji byly widoczne przy ostatnim ukladzie (bity; zmiana = nowy uklad panelu). */
+    private int sideButtonsLaidOut = -1;
+
+    private int visibleActionMask() {
+        int m = 0;
+        for (int i = 0; i < actionButtons.length; i++) if (actionButtons[i].visible) m |= 1 << i;
+        return m;
+    }
+
+    /** Przyciski akcji obok ekwipunku (2026-10-28: dawny pasek nad konsola) - widoczne w kolejnosci. */
+    private final HudButton[] actionButtons = {target, use, book, bag, talk, pick, fish, mount};
+    /** Przelaczniki obok ekwipunku: diagnostyka, bieg, postawa obronna, pochodnia. */
+    private final HudButton[] toggleButtons = {diag, run, defensive, torch};
+
+    private List<HudButton> visibleActions() {
+        List<HudButton> out = new ArrayList<>();
+        for (HudButton b : actionButtons) if (b.visible) out.add(b);
+        return out;
+    }
+
+    /**
+     * Prawy panel: pasek akcji na dole, minimapa u gory, pod nia ekwipunek. Jak w Tibii obok ekwipunku stoja
+     * przyciski: kolumna akcji (atak, uzyj, ksiega, rozmowa...) i kolumna przelacznikow. Na niskim ekranie
+     * (telefon) przelaczniki sa w kolumnie obok minimapy (gdy jest miejsce), a akcje w rzedzie nad zwartym ekwipunkiem.
+     */
+    private void layoutSide() {
         float pad = 4, gap = 3;
         // panel tylko tak szeroki jak minimapa: wiecej miejsca na widok gry
         float pw = Math.max(150, Math.min(210, w * 0.17f));
@@ -477,35 +522,47 @@ public final class Hud {
         mmSize = Math.min(iw - 6, h * 0.3f);
         mmX = w - pad - 3 - mmSize;
         mmY = h - pad - 3 - mmSize;
-        // pod minimapa ekwipunek, obok niego kolumna: diagnostyka, bieg, postawa obronna, pochodnia
+        // pod minimapa ekwipunek, na prawo od niego dwie kolumny przyciskow: akcje i przelaczniki
         float sc = Math.max(28, Math.min(34, cell * 0.9f)); // dotykowe pola co najmniej ~28 dp
-        HudButton[] col = {diag, run, defensive, torch};
+        HudButton[] col = toggleButtons;
+        List<HudButton> acts = visibleActions();
+        sideButtonsLaidOut = visibleActionMask();
         float eqTop = mmY - 3 - pad;
         float eqBottom = abTop + pad + 23 + BATTLE_ROW * 2 + 6;
-        layoutEquipPanel(eqTop, eqBottom, iw - sc - gap);
+        layoutEquipPanel(eqTop, eqBottom, iw - 2 * sc - 2 * gap);
         if (epTibia) {
-            // ekwipunek rowno z lewa krawedzia minimapy, kolumna przyciskow przy prawej krawedzi, od wysokosci pol
+            // ekwipunek rowno z lewa krawedzia minimapy; przelaczniki przy prawej krawedzi panelu, akcje miedzy nimi
             epX = mmX - 3;
-            float cx = mmX + mmSize + 3 - sc / 2f;
-            float colTop = epY + epH - 23 - 2;
-            float step = Math.min(sc + gap, (colTop - epY - sc) / (col.length - 1));
-            for (int i = 0; i < col.length; i++) {
-                col[i].x = cx;
-                col[i].y = colTop - sc / 2f - i * step;
-            }
+            float right = mmX + mmSize + 3;
+            float top = epY + epH;
+            int rows = Math.max(col.length, acts.size());
+            float s = Math.min(sc, (epH + gap) / rows - gap);
+            s = Math.min(s, (right - (epX + epW) - 2 * gap) / 2f);
+            for (int i = 0; i < col.length; i++) place(col[i], right - s / 2f, top - s / 2f - i * (s + gap), s);
+            float ax = right - s - gap - s / 2f;
+            for (int i = 0; i < acts.size(); i++) place(acts.get(i), ax, top - s / 2f - i * (s + gap), s);
         } else {
-            // niski ekran: przyciski w rzedzie pod minimapa, pod nimi zwarty ekwipunek
-            float rowW = col.length * sc + (col.length - 1) * gap;
-            float rx = panelX + pad + (iw - rowW) / 2f;
-            for (int i = 0; i < col.length; i++) {
-                col[i].x = rx + sc / 2f + i * (sc + gap);
-                col[i].y = eqTop - sc / 2f;
+            // niski ekran: przelaczniki w kolumnie obok minimapy (gdy sie mieszcza), akcje w rzedach pod minimapa
+            float leftW = mmX - 3 - gap - (panelX + pad);
+            List<HudButton> row = new ArrayList<>(acts);
+            if (leftW >= 22) {
+                float s = Math.min(Math.min(sc, leftW), (mmSize + 6 + gap) / col.length - gap);
+                for (int i = 0; i < col.length; i++) {
+                    place(col[i], panelX + pad + leftW - s / 2f, h - pad - s / 2f - i * (s + gap), s);
+                }
+            } else {
+                row.addAll(java.util.Arrays.asList(col));
             }
-            layoutEquipPanel(eqTop - sc - gap, eqBottom, iw);
-        }
-        for (HudButton b : col) {
-            b.r = sc / 2f;
-            b.hw = sc / 2f;
+            int perRow = Math.max(1, Math.min(row.size(), (int) ((iw + gap) / (24 + gap))));
+            float s = Math.min(30, (iw + gap) / perRow - gap);
+            int rows = (row.size() + perRow - 1) / perRow;
+            for (int i = 0; i < row.size(); i++) {
+                int r = i / perRow, c = i % perRow;
+                int inRow = Math.min(perRow, row.size() - r * perRow);
+                float rx = panelX + pad + (iw - (inRow * s + (inRow - 1) * gap)) / 2f;
+                place(row.get(i), rx + s / 2f + c * (s + gap), eqTop - s / 2f - r * (s + gap), s);
+            }
+            layoutEquipPanel(eqTop - rows * (s + gap), eqBottom, iw);
         }
         blX = panelX + pad;
         blW = iw;
@@ -520,27 +577,18 @@ public final class Hud {
         } else {
             pskH = 0;
         }
-        // dolny pasek pod widokiem gry: rzad przyciskow i konsola
-        topH = 24;
-        float hbH = h >= 500 ? 34 : 32;
-        float conBody = (h >= 500 ? 6 : 3) * 13 + 8;
-        gx = pad;
-        gy = pad + conBody + 4 + hbH + 4;
-        gw = panelX - pad - gx;
-        gh = h - topH - gy;
-        // pad w lewym dolnym rogu ekranu (na widoku gry i dolnym pasku), konsola i przyciski zaczynaja sie za nim
-        float jr = Math.min(60, Math.min(w, h) * 0.14f) * (settings != null ? settings.joystickScale() : 1f);
-        joystick.layout(pad + 10 + jr * 1.3f, pad + 10 + jr * 1.3f, jr);
-        float padW = pad + 10 + jr * 2.6f + 6;
-        conX = padW;
-        conY = pad;
-        conW = panelX - pad - padW;
-        conH = conBody;
-        hbLeft = padW;
-        hbRight = panelX - pad;
-        hbHalfH = hbH / 2f;
-        hbY = conY + conH + 4 + hbHalfH;
-        hbSlotHw = h >= 500 ? 48 : 34;
+    }
+
+    /** Pole przycisku panelu: kwadrat o boku s ze srodkiem w (cx, cy). */
+    private static void place(HudButton b, float cx, float cy, float s) {
+        b.x = cx;
+        b.y = cy;
+        b.r = s / 2f;
+        b.hw = s / 2f;
+    }
+
+    /** Okna, plecak i paski - reszta ukladu po panelu i konsoli. */
+    private void layoutRest() {
         // gorny pasek: HP i MP nad widokiem gry
         barX = gx + 4;
         barW = Math.min(170, gw * 0.28f);
@@ -614,16 +662,13 @@ public final class Hud {
         return px >= gx && px <= gx + gw && py >= gy && py <= gy + gh;
     }
 
-    /** Dolny pasek przyciskow (granice) i polowa wysokosci / szerokosci jego pola. */
-    private float hbLeft, hbRight, hbY, hbHalfH, hbSlotHw;
     /** Paski HP/MP obok minimapy. */
     private float barX, barW;
-    private final HudButton[] hotbar = {target, use, bag, book, chat, talk, pick, fish, mount};
     /** Kwadratowe pola jak w Tibii (pasek akcji i przyciski obok ekwipunku). */
     private HudButton[] slotButtons() {
-        HudButton[] out = java.util.Arrays.copyOf(spellButtons, spellButtons.length + 4);
-        HudButton[] rest = {diag, run, defensive, torch};
-        System.arraycopy(rest, 0, out, spellButtons.length, rest.length);
+        HudButton[] out = java.util.Arrays.copyOf(spellButtons, spellButtons.length + toggleButtons.length + actionButtons.length);
+        System.arraycopy(toggleButtons, 0, out, spellButtons.length, toggleButtons.length);
+        System.arraycopy(actionButtons, 0, out, spellButtons.length + toggleButtons.length, actionButtons.length);
         return out;
     }
 
@@ -632,21 +677,6 @@ public final class Hud {
         b.x = cx + (float) Math.cos(a) * dist;
         b.y = cy + (float) Math.sin(a) * dist;
         b.r = r;
-    }
-
-    /** Rozklada widoczne przyciski dolnego paska od srodka wolnego miejsca. */
-    private void layoutHotbar() {
-        int n = 0;
-        for (HudButton b : hotbar) if (b.visible) n++;
-        if (n == 0) return;
-        float gap = 6;
-        float hw = Math.min(hbSlotHw, ((hbRight - hbLeft) - gap * (n - 1)) / (2f * n));
-        float x = hbLeft + hw;
-        for (HudButton b : hotbar) {
-            if (!b.visible) continue;
-            b.x = x; b.y = hbY; b.r = hbHalfH; b.hw = hw;
-            x += hw * 2 + gap;
-        }
     }
 
     public VirtualJoystick joystick() { return joystick; }
@@ -2066,7 +2096,6 @@ public final class Hud {
         pl.fawizja.pixel.npc.Npc near = session.npcNearby();
         talk.visible = near != null;
         talk.active = npcOpen();
-        chat.visible = chatEnabled || near != null;
         if (npcMode && trade == null && near != npc) {
             menuOpen = false;
             npcMode = false;
@@ -2088,7 +2117,7 @@ public final class Hud {
         Monster tgt = session.combat().target();
         currentTarget = tgt;
         target.active = tgt != null;
-        layoutHotbar();
+        if (visibleActionMask() != sideButtonsLaidOut) layoutSide(); // np. ROZMOWA obok NPC
         layoutConsole(session, serverTimeMs);
         target.icon = itemIcon(session, "iron_sword");
         defensive.icon = itemIcon(session, "wooden_shield");
@@ -2097,6 +2126,8 @@ public final class Hud {
         if (infoIcon != null) diag.icon = infoIcon;
         else diag.label = "i";
         fish.icon = itemIcon(session, "fishing_rod");
+        book.icon = itemIcon(session, "return_scroll");
+        mount.icon = itemIcon(session, "saddle");
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -2158,12 +2189,6 @@ public final class Hud {
         if (buttonPatch != null) {
             shapes.end();
             batch.begin();
-            for (HudButton b : hotbar) {
-                if (!b.visible) continue;
-                if (b.active) batch.setColor(0.6f, 1f, 0.6f, 1f);
-                (b.active ? buttonDownPatch : buttonPatch).draw(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
-                batch.setColor(Color.WHITE);
-            }
             if (slotImg != null) for (HudButton b : slotButtons()) {
                 if (!b.visible) continue;
                 batch.draw(b.active && wstPressed != null ? wstPressed : slotImg, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
@@ -2241,6 +2266,7 @@ public final class Hud {
         }
         if (consoleVisible()) {
             if (!wstPanel(shapes, "classic", conX, conY, conW, conH, 0)) frame(shapes, conX, conY, conW, conH);
+            drawTabShapes(shapes);
         }
         if (bagOpen) drawBagBackground(shapes, session);
         if (menuOpen) {
@@ -2335,7 +2361,8 @@ public final class Hud {
                 font.getData().setScale(Math.min(fit, Math.min(0.7f, b.r / 30f)));
                 centered(batch, b.label, b.x, b.y - b.r * 0.6f);
             } else {
-                font.getData().setScale(fit);
+                // kwadratowe pole obok ekwipunku (UŻYJ, ROZMOWA...): napis tej samej wielkosci co pod ikonami
+                font.getData().setScale(b.hw > 0 && b.hw == b.r ? Math.min(fit, Math.min(0.62f, b.r / 26f)) : fit);
                 centered(batch, b.label, b.x, b.y);
             }
             font.getData().setScale(1f);
@@ -2742,28 +2769,36 @@ public final class Hud {
     private final List<Monster> battle = new ArrayList<>();
     private static final float BATTLE_ROW = 18;
     private static final float CON_SCALE = 0.8f;
-    /** Jak dlugo zdarzenie zostaje w konsoli (ms). */
-    private static final long CON_KEEP_MS = 30_000;
 
-    /** Filtry konsoli (etap 16): wszystko, czat, lup, dziennik serwera. 2026-10-24 (Darek: "w czacie na dole ma byc
-     *  tylko zakladka czatu"): konsola pokazuje sam czat, a reszta zdarzen to krotkie napisy na widoku gry jak w Tibii
-     *  (biale, lup na zielono); filtr zostaje dla -Dpixel.conTab. */
-    private static final String[] CON_TABS = {"Ogólne", "Czat", "Łup", "Serwer"};
-    private static final float CON_TAB_H = 0;
-    private int conTab = 1;
+    /** Zakladki czatu jak w Tibii (Lokalny, Serwer, Handel, Gildia, Druzyna, rozmowy prywatne). 2026-10-24 (Darek:
+     *  "w czacie na dole ma byc tylko zakladka czatu"): pozostale zdarzenia to tez krotkie napisy na widoku gry. */
+    private final pl.fawizja.pixel.chat.ChatTabs chatTabs = new pl.fawizja.pixel.chat.ChatTabs();
+    /** Wysokosc paska zakladek i ich prostokaty z ostatniej klatki {x, szerokosc, x krzyzyka albo -1}. */
+    private float conTabH;
+    private final List<float[]> tabRects = new ArrayList<>();
+    private static final float TAB_SCALE = 0.8f;
     /** Napisy zdarzen na widoku gry: jak dlugo widoczne (ms) i ile naraz. */
     private static final long STATUS_KEEP_MS = 5_000;
     private static final int STATUS_LINES = 4;
     private final List<ConLine> statusLines = new ArrayList<>();
 
-    public void showConsoleTab(int tab) { conTab = Math.max(0, Math.min(CON_TABS.length - 1, tab)); }
+    public pl.fawizja.pixel.chat.ChatTabs chatTabs() { return chatTabs; }
 
-    private static boolean inTab(int tab, EventLog.Kind k) {
-        switch (tab) {
-            case 1: return k == EventLog.Kind.CHAT;
-            case 2: return k == EventLog.Kind.LOOT;
-            case 3: return k == EventLog.Kind.INFO || k == EventLog.Kind.WARNING || k == EventLog.Kind.SYSTEM;
-            default: return true;
+    /** Wybiera zakladke czatu (opcja -Dpixel.conTab=N). */
+    public void showConsoleTab(int tab) { chatTabs.select(Math.max(0, Math.min(chatTabs.tabs().size() - 1, tab))); }
+
+    private static Color styleColor(pl.fawizja.pixel.chat.ChatTabs.Style st) {
+        switch (st) {
+            case SAY:
+            case OWN:
+            case CHANNEL: return new Color(1f, 0.92f, 0.55f, 1f); // mowa jak w Tibii: zolta
+            case NPC: return new Color(0.55f, 0.8f, 1f, 1f);
+            case PRIVATE_IN: return new Color(0.6f, 0.85f, 1f, 1f);
+            case PRIVATE_OUT: return new Color(0.75f, 0.85f, 0.95f, 1f);
+            case BROADCAST: return new Color(1f, 0.4f, 0.35f, 1f);
+            case WARNING: return new Color(1f, 0.6f, 0.4f, 1f);
+            case LOOT: return new Color(0.6f, 1f, 0.6f, 1f);
+            default: return new Color(1f, 1f, 1f, 1f);
         }
     }
 
@@ -2771,10 +2806,12 @@ public final class Hud {
         return !((menuOpen || bigMapOpen) && menuY < conY + conH) && conH > 8;
     }
 
-    /** Konsola pod panelem postaci: zadania i wyzwanie na gorze, potem ostatnie zdarzenia i czat (najnowsze na dole). */
+    /** Konsola: zakladki u gory, pod nimi wiersze wybranej zakladki (najnowsze na dole); zdarzenia jako napisy. */
     private void layoutConsole(GameSession session, long serverTimeMs) {
         PlayerCharacter pc = session.character();
-        float maxBody = conH - 8 - CON_TAB_H;
+        chatTabs.setSelf(pc.name());
+        chatTabs.sync(session.log(), serverTimeMs);
+        float maxBody = conH - 8 - conTabH;
         conLines.clear();
         battle.clear();
         for (Monster m : session.monsters().monsters()) {
@@ -2784,49 +2821,97 @@ public final class Hud {
         battle.sort(java.util.Comparator.comparingInt(m -> m.position().distanceTo(pc.position())));
         float tw = conW - 14;
         font.getData().setScale(CON_SCALE);
-        List<ConLine> fixed = new ArrayList<>();
-        String chLine = session.challenge() != null ? session.challenge().line(session.lastUpdateMs()) : onlineChallenge;
-        if (conTab == 0 && chLine != null) fixed.add(conLine(chLine, new Color(1f, 0.75f, 0.45f, 1f), tw));
-        for (String q : conTab != 0 ? java.util.List.<String>of() : pl.fawizja.pixel.quest.QuestTracker.lines(pc, session.quests(), session.today(),
-                session.monsterName(pc.daily().monster() == null ? "" : pc.daily().monster()),
-                session.monsterName(pc.hunt().monster() == null ? "" : pc.hunt().monster()))) {
-            fixed.add(conLine(q, new Color(0.85f, 0.9f, 1f, 1f), tw));
-        }
         float used = 0;
-        for (ConLine l : fixed) used += l.height();
-        List<ConLine> recent = new ArrayList<>();
-        List<EventLog.Entry> entries = session.log().latest(conTab == 0 ? 12 : 60);
-        for (int i = entries.size() - 1; i >= 0; i--) {
-            EventLog.Entry e = entries.get(i);
-            if (!inTab(conTab, e.kind())) continue;
-            long age = serverTimeMs - e.timeMs();
-            // zakladka "Ogolne" znika po 30 s jak dotad; pozostale zakladki to historia kanalu (bez wygaszania)
-            if (conTab == 0 && age > CON_KEEP_MS) continue;
-            float a = conTab != 0 ? 1f : age > CON_KEEP_MS - 5000 ? Math.max(0.3f, (CON_KEEP_MS - age) / 5000f) : 1f;
-            Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.6f, 0.4f, a)
-                    : e.kind() == EventLog.Kind.LOOT ? new Color(0.6f, 1f, 0.6f, a)
-                    : e.kind() == EventLog.Kind.CHAT ? new Color(1f, 0.92f, 0.55f, a) : new Color(1f, 1f, 1f, a);
-            ConLine l = conLine(e.text(), c, tw);
+        List<pl.fawizja.pixel.chat.ChatTabs.Line> lines = chatTabs.active().lines();
+        for (int i = lines.size() - 1; i >= 0; i--) {
+            pl.fawizja.pixel.chat.ChatTabs.Line e = lines.get(i);
+            ConLine l = conLine(e.text(), styleColor(e.style()), tw);
             if (used + l.height() > maxBody) break;
             used += l.height();
-            recent.add(0, l);
+            conLines.add(0, l);
         }
         statusLines.clear();
-        if (conTab == 1) {
-            List<EventLog.Entry> last = session.log().latest(STATUS_LINES * 2);
-            for (int i = last.size() - 1; i >= 0 && statusLines.size() < STATUS_LINES; i--) {
-                EventLog.Entry e = last.get(i);
-                long age = serverTimeMs - e.timeMs();
-                if (e.kind() == EventLog.Kind.CHAT || age > STATUS_KEEP_MS) continue;
-                float a = age > STATUS_KEEP_MS - 1000 ? Math.max(0f, (STATUS_KEEP_MS - age) / 1000f) : 1f;
-                Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.55f, 0.35f, a)
-                        : e.kind() == EventLog.Kind.LOOT ? new Color(0.55f, 1f, 0.55f, a) : new Color(1f, 1f, 1f, a);
-                statusLines.add(0, conLine(e.text(), c, Math.min(gw - 20, 520)));
-            }
+        List<EventLog.Entry> last = session.log().latest(STATUS_LINES * 2);
+        for (int i = last.size() - 1; i >= 0 && statusLines.size() < STATUS_LINES; i--) {
+            EventLog.Entry e = last.get(i);
+            long age = serverTimeMs - e.timeMs();
+            if (e.kind() == EventLog.Kind.CHAT || age > STATUS_KEEP_MS) continue;
+            float a = age > STATUS_KEEP_MS - 1000 ? Math.max(0f, (STATUS_KEEP_MS - age) / 1000f) : 1f;
+            Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.55f, 0.35f, a)
+                    : e.kind() == EventLog.Kind.LOOT ? new Color(0.55f, 1f, 0.55f, a) : new Color(1f, 1f, 1f, a);
+            statusLines.add(0, conLine(e.text(), c, Math.min(gw - 20, 520)));
+        }
+        layoutTabs();
+        font.getData().setScale(1f);
+    }
+
+    /** Szerokosci zakladek: wedlug nazwy, a gdy sie nie mieszcza - rowno sciesnione. */
+    private void layoutTabs() {
+        tabRects.clear();
+        List<pl.fawizja.pixel.chat.ChatTabs.Tab> tabs = chatTabs.tabs();
+        font.getData().setScale(TAB_SCALE);
+        float[] want = new float[tabs.size()];
+        float total = 0;
+        float closeW = conTabH * 0.8f;
+        for (int i = 0; i < tabs.size(); i++) {
+            layout.setText(font, tabs.get(i).title());
+            want[i] = layout.width + 14 + (tabs.get(i).closable() && i == chatTabs.activeIndex() ? closeW : 0);
+            total += want[i];
+        }
+        float room = conW - 8 - 2 * (tabs.size() - 1);
+        float k = total > room ? room / total : 1f;
+        float x = conX + 4;
+        for (int i = 0; i < tabs.size(); i++) {
+            float tw = want[i] * k;
+            boolean close = tabs.get(i).closable() && i == chatTabs.activeIndex();
+            tabRects.add(new float[] {x, tw, close ? x + tw - closeW : -1});
+            x += tw + 2;
         }
         font.getData().setScale(1f);
-        conLines.addAll(fixed);
-        conLines.addAll(recent);
+    }
+
+    /** Tlo zakladek (w przebiegu ksztaltow): wybrana jasniejsza i polaczona z konsola. */
+    private void drawTabShapes(ShapeRenderer shapes) {
+        float ty = conY + conH - conTabH - 2;
+        for (int i = 0; i < tabRects.size(); i++) {
+            float[] r = tabRects.get(i);
+            boolean act = i == chatTabs.activeIndex();
+            shapes.setColor(0.05f, 0.04f, 0.03f, 0.9f);
+            shapes.rect(r[0], ty, r[1], conTabH);
+            shapes.setColor(act ? new Color(0.36f, 0.3f, 0.22f, 1f) : new Color(0.18f, 0.15f, 0.12f, 1f));
+            shapes.rect(r[0] + 1, ty + (act ? 0 : 1), r[1] - 2, conTabH - (act ? 1 : 2));
+        }
+        // linia pod zakladkami oddziela je od wierszy czatu
+        shapes.setColor(0.05f, 0.04f, 0.03f, 0.9f);
+        shapes.rect(conX + 4, ty - 1, conW - 8, 1);
+    }
+
+    /** Nazwy zakladek: wybrana biala, z nieprzeczytanymi czerwona (jak w Tibii), pozostale szare. */
+    private void drawTabTitles(SpriteBatch batch) {
+        List<pl.fawizja.pixel.chat.ChatTabs.Tab> tabs = chatTabs.tabs();
+        float ty = conY + conH - conTabH - 2;
+        for (int i = 0; i < tabRects.size() && i < tabs.size(); i++) {
+            float[] r = tabRects.get(i);
+            pl.fawizja.pixel.chat.ChatTabs.Tab t = tabs.get(i);
+            boolean act = i == chatTabs.activeIndex();
+            float textW = r[2] >= 0 ? r[2] - r[0] : r[1];
+            font.getData().setScale(TAB_SCALE);
+            layout.setText(font, t.title());
+            float sc = layout.width > textW - 6 ? TAB_SCALE * (textW - 6) / layout.width : TAB_SCALE;
+            font.getData().setScale(sc);
+            if (act) font.setColor(1f, 1f, 1f, 1f);
+            else if (t.unread()) font.setColor(1f, 0.32f, 0.25f, 1f);
+            else font.setColor(0.7f, 0.68f, 0.62f, 1f);
+            layout.setText(font, t.title());
+            font.draw(batch, t.title(), r[0] + (textW - layout.width) / 2f, ty + conTabH / 2f + layout.height / 2f);
+            if (r[2] >= 0) {
+                font.setColor(0.85f, 0.5f, 0.45f, 1f);
+                layout.setText(font, "x");
+                font.draw(batch, "x", r[2] + (r[0] + r[1] - r[2] - layout.width) / 2f - 1, ty + conTabH / 2f + layout.height / 2f);
+            }
+        }
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
     }
 
     /** Zdarzenia (lup, poziom, osiagniecia, ostrzezenia) na dole widoku gry, wysrodkowane, z cieniem. */
@@ -2856,8 +2941,9 @@ public final class Hud {
 
     private void drawConsole(SpriteBatch batch) {
         if (!consoleVisible()) return;
+        drawTabTitles(batch);
         font.getData().setScale(CON_SCALE);
-        float yy = conY + conH - 4 - CON_TAB_H;
+        float yy = conY + conH - 4 - conTabH;
         for (ConLine l : conLines) {
             if (yy - l.height() < conY - 2) break;
             font.setColor(l.color());
@@ -2866,15 +2952,36 @@ public final class Hud {
         }
         if (conLines.isEmpty()) {
             font.setColor(0.6f, 0.6f, 0.55f, 1f);
-            text(batch, "Czat: dotknij, aby pisać", conX + 7, yy);
+            pl.fawizja.pixel.chat.ChatTabs.Tab t = chatTabs.active();
+            String hint;
+            switch (t.channel()) {
+                case SERVER: hint = "Serwer: wiadomości gry i serwera."; break;
+                case TRADE: hint = "Handel: kupno i sprzedaż. Dotknij, aby pisać."; break;
+                case GUILD: hint = "Gildia: dotknij, aby pisać do gildii."; break;
+                case PARTY: hint = "Drużyna: dotknij, aby pisać do drużyny."; break;
+                case PRIVATE: hint = "Rozmowa z " + t.peer() + ": dotknij, aby pisać."; break;
+                default: hint = "Czat: dotknij, aby pisać";
+            }
+            text(batch, hint, conX + 7, yy);
         }
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
     }
 
-    /** Dotkniecie konsoli otwiera czat. */
+    /** Dotkniecie zakladki ja wybiera (krzyzyk zamyka rozmowe), dotkniecie wierszy otwiera pisanie w tej zakladce. */
     private boolean consoleTouch(float px, float py, Actions actions) {
         if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
+        if (py >= conY + conH - conTabH - 2) {
+            for (int i = 0; i < tabRects.size(); i++) {
+                float[] r = tabRects.get(i);
+                if (px < r[0] || px > r[0] + r[1]) continue;
+                if (r[2] >= 0 && px >= r[2]) chatTabs.close(i);
+                else chatTabs.select(i);
+                layoutTabs();
+                return true;
+            }
+            return true;
+        }
         actions.onButton("chat");
         return true;
     }

@@ -224,15 +224,29 @@ rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
 - Jedna bryla jak klasyczny klient Tibii: `Hud.resize` liczy prostokat widoku gry (`Hud.gameView`, piksele),
   `GameScreen.resize` dobiera skale (min. 11x8 pol w ramce) i przesuniecie kamery do srodka ramki; swiat rysuje sie
   na calym ekranie, panele go zaslaniaja.
-- Prawy panel: minimapa z kolumna (i, BIEG, TARCZA, POCH), ekwipunek (3x4 albo 5x2), Umiejetnosci (wysoki ekran),
-  lista walki, pasek akcji. U gory paski HP/MP/doswiadczenie i ikony stanu, na dole rzad przyciskow i konsola.
-- Pad w lewym dolnym rogu ekranu (nachodzi na widok gry i dolny pasek); konsola i przyciski zaczynaja sie za nim.
+- Prawy panel: minimapa, ekwipunek (3x4 albo 5x2), Umiejetnosci (wysoki ekran), lista walki, pasek akcji. U gory
+  paski HP/MP/doswiadczenie i ikony stanu, na dole konsola z zakladkami czatu.
+- 2026-10-28 (Darek): dawny rzad przyciskow nad konsola (ATAK, UZYJ, KSIEGA, ROZMOWA, PODNIES, LOW, KON, PLECAK
+  gdy ekwipunek jest zasloniety) stoi jak w Tibii na prawo od ekwipunku: kolumna akcji i kolumna przelacznikow
+  (i, BIEG, TARCZA, POCH). Na niskim ekranie (telefon, zwarty ekwipunek 5x2) przelaczniki sa w kolumnie obok
+  minimapy, a akcje w rzedzie pod nia, nad ekwipunkiem. Pojawienie sie przycisku (np. ROZMOWA obok NPC) przelicza
+  uklad panelu (`Hud.layoutSide`). Przycisku CZAT nie ma: dotkniecie konsoli (albo Enter) otwiera pisanie.
+- Pad w lewym dolnym rogu ekranu (nachodzi na widok gry i dolny pasek); konsola zaczyna sie za nim.
   Prawy panel ma 20% szerokosci (170-260 jednostek UI).
 - Dotyk poza widokiem gry nie trafia na mape. Na szerokim ekranie okna (ksiega, NPC, mapa) stoja nad widokiem gry.
 
-- Etap 16: konsola ma zakladki jak w OTClient - Ogolne (wszystko, znika po 30 s, z zadaniami), Czat (gracze,
-  prywatne, gildia, druzyna, odpowiedzi NPC; `EventLog.Kind.CHAT`), Lup, Serwer (informacje, ostrzezenia,
-  komunikaty systemu). Zakladki inne niz Ogolne pokazuja historie kanalu bez wygaszania.
+- Zakladki czatu jak w Tibii (`chat.ChatTabs`, 2026-10-28): Lokalny, Serwer, Handel, na zadanie Gildia i Druzyna
+  (po pierwszej wiadomosci albo dolaczeniu do druzyny) oraz zakladka kazdej rozmowy prywatnej (otwiera ja wiadomosc
+  od gracza albo echo wlasnej; krzyzyk na wybranej zakladce ja zamyka, najwyzej 8). Wybrana zakladka jest jasna,
+  zakladka z nowa cudza wiadomoscia ma czerwona nazwe do czasu wybrania. Tab / Shift+Tab przelacza zakladki.
+- Trasowanie: serwer wysyla `CHAT nadawca tekst kanal` (kanal: local, pm, letter, guild, party, trade, broadcast;
+  starszy serwer bez kanalu - decyduje etykieta "[od X]", "[Handel] X"...). Wpisy dziennika `EventLog.Kind.CHAT`
+  (NPC, wlasne slowa offline, wiesci gildii) ida do Lokalnego / Gildii, cala reszta dziennika do zakladki Serwer;
+  ogloszenia administratora sa wpisem SYSTEM (Serwer i napis na widoku gry). Zdarzenia (lup, poziom, ostrzezenia)
+  dalej pokazuja sie tez jako napisy na widoku gry przez 5 s.
+- Pisanie: tekst bez "/" w zakladce Handel idzie jako `TCHAT tekst` (serwer: `CHAT "[Handel] imie" tekst trade` do
+  wszystkich), w Gildii `GCHAT`, w Druzynie `PCHAT`, w rozmowie `PM imie tekst`; w Lokalnym i Serwerze jak dotad
+  (slowa do NPC obok, inkantacje, `CHAT`). Polecenia "/..." dzialaja tak samo w kazdej zakladce.
 - Ksiega czarow pokazuje wszystkie czary profesji (i zapowiedzi na +100 poziomow) stronami: domyslnie strona
   konczy sie najwyzszym poznanym czarem, wiersz "Kolejne czary" przewija dalej.
 
