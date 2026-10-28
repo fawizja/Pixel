@@ -10,6 +10,7 @@ package pl.fawizja.pixel.net;
  * "/gildia opusc" -> GUILD LEAVE, "/gildia wplac|wyplac 5k" -> GUILD DEPOSIT|WITHDRAW kwota, "/g tekst" -> GCHAT. Prywatnie: "/w Imie, tekst" -> PM imie tekst.
  * Administrator: "/ogloszenie tekst", "/kick Imie", "/ban Imie [godziny]", "/unban Imie", "/wycisz Imie [minuty]",
  * "/kto", "/inwazja [miasto]", "/serwer", "/zapisz" -> ADMIN SAY|KICK|BAN|UNBAN|MUTE|WHO|INVASION|STATUS|SAVE. Ranking: "/ranking [profesja|gildie]" -> RANK [profesja].
+ * Domy: "/dom", "/dom wpusc|wyrzuc Imie", "/dom sprzedaj Imie, 100000", "/dom kup", "/dom anuluj" -> HOUSE ...
  * Znajomi: "/znajomi" -> FRIEND LIST, "/znajomi dodaj|usun Imie" -> FRIEND ADD|REMOVE imie.
  * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
  * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Zamowienia: "/kupię 20 wilcze futro 2000" -> WANT ADD,
@@ -54,6 +55,8 @@ public final class ChatCommands {
                 return w.length == 1 ? new String[] {"TRADE", "CANCEL"} : null;
             case "/gildia":
                 return guild(t, w);
+            case "/dom":
+                return house(t, w);
             case "/g":
                 return w.length >= 2 ? new String[] {"GCHAT", rest(t)} : null;
             case "/w": {
@@ -205,6 +208,29 @@ public final class ChatCommands {
         }
     }
 
+    /**
+     * Domy: "/dom" -> HOUSE INFO, "/dom wpuść|wyrzuć Imię" -> HOUSE GUEST|UNGUEST imie,
+     * "/dom sprzedaj Imię, 100000" -> HOUSE SELL imie kwota, "/dom kup" -> HOUSE ACCEPT, "/dom anuluj" -> HOUSE CANCEL.
+     */
+    private static String[] house(String t, String[] w) {
+        if (w.length == 1) return new String[] {"HOUSE", "INFO"};
+        String arg = rest(rest(t));
+        switch (key(w[1])) {
+            case "wpusc": case "gosc": return arg.isEmpty() ? null : new String[] {"HOUSE", "GUEST", arg};
+            case "wyrzuc": return arg.isEmpty() ? null : new String[] {"HOUSE", "UNGUEST", arg};
+            case "kup": return w.length == 2 ? new String[] {"HOUSE", "ACCEPT"} : null;
+            case "anuluj": return w.length == 2 ? new String[] {"HOUSE", "CANCEL"} : null;
+            case "sprzedaj": {
+                int comma = arg.lastIndexOf(',');
+                if (comma <= 0) return null;
+                long a = amount(arg.substring(comma + 1));
+                String name = arg.substring(0, comma).trim();
+                return a > 0 && !name.isEmpty() ? new String[] {"HOUSE", "SELL", name, String.valueOf(a)} : null;
+            }
+            default: return null;
+        }
+    }
+
     /** Nazwa polecenia bez wielkosci liter i polskich znakow: "/Zaproś" i "/zapros" to to samo. */
     static String key(String word) {
         String t = word.toLowerCase(java.util.Locale.ROOT).replace('ł', 'l');
@@ -271,16 +297,16 @@ public final class ChatCommands {
         for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
         String[][] typed = {
             {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
-            {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d tekst; /szukam"},
-            {"/handel Imię", "handel (/oferuj, /akceptuj, /anuluj)"},
+            {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d; /szukam; /handel Imię"},
             {"/pojedynek Imię", "pojedynek; /nagroda Imię, 5000 za głowę"},
             {"/gildia załóż Nazwa", "zaproś, przyjmij, wyrzuć, wpłać; czat /g"},
             {"/wyślij Imię, 5 futro", "poczta; /przelew Imię, 5000; /kupię u bankiera"},
+            {"/dom wpuść Imię", "gość w domu; /dom wyrzuć, /dom sprzedaj Imię, cena"},
             {"/hasło stare nowe", "zmiana hasła konta"},
         };
         for (String[] r : typed) rows.add(new String[] {r[0], r[1]});
         return rows;
     }
 
-    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /łowiska, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło. Emotki: " + Emotes.LIST;
+    public static final String HELP = "Polecenia: /w Imię, tekst (prywatnie), /znajomi [dodaj|usuń Imię], /pojedynek Imię | poddaj, /obejrzyj Imię, /zgłoś Imię, powód, /gracze, /wydarzenia, /znacznik nazwa, /znaczniki, /bossowie, /łowiska, /analiza, /potwór, /śmierć, /rynek [nazwa | wystaw 5 wilcze futro 300 | kup nr | wycofaj nr], /wyślij Imię, 5 wilcze futro (u bankiera), /przelew Imię, 5000 (u bankiera), /osiągnięcia, /bestiariusz, /ranking [profesja], /gildia [załóż|zaproś|przyjmij|wyrzuć|opuść|członkowie|wiadomość tekst], /dom [wpuść|wyrzuć Imię | sprzedaj Imię, cena | kup | anuluj], /g tekst, /handel Imię, /oferuj 5 mikstura zdrowia | 1000 gp, /akceptuj, /anuluj, /zaproś Imię, /przyjmij Imię, /opuść, /d tekst (drużyna), /hasło stare nowe, /usuń-konto hasło. Emotki: " + Emotes.LIST;
 }

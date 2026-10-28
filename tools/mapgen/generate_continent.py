@@ -1465,28 +1465,66 @@ def clearing(world, ctx, near, radius=30):
     return (x, y)
 
 
+def cell_parts(cells):
+    """Spojne (4 kierunki) kawalki zbioru pol, od najwiekszego."""
+    left, out = set(cells), []
+    while left:
+        start = left.pop()
+        comp, q = {start}, [start]
+        while q:
+            x, y = q.pop()
+            for a, b in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                n = (x + a, y + b)
+                if n in left:
+                    left.discard(n)
+                    comp.add(n)
+                    q.append(n)
+        out.append(comp)
+    return sorted(out, key=len, reverse=True)
+
+
 def town_undergrounds(ctx, rng):
     """Kanaly z kratkami pod ulicami kazdego miasta i kopalnia u bram (dwa pietra w dol)."""
     world = ctx['world']
     core = set(varden_core_cells(ctx))
-    taken = {(int(n[4]), int(n[5])) for n in ctx['npcs'] if int(n[6]) == 0}
+    # kratka nie moze stanac tuz przy NPC (zejscie zabraloby miejsce do rozmowy)
+    taken = {(int(n[4]) + a, int(n[5]) + b) for n in ctx['npcs'] if int(n[6]) == 0
+             for a in range(-2, 3) for b in range(-2, 3)}
     ctx['sewers'] = {}
     for town, rect in town_rects(ctx).items():
         # pietro -1, a gdy pod miastem sa juz stare lochy - nizej (kratka prowadzi wtedy glebiej)
-        for z in (-1, -2, -3):
-            cells = U.sewers(world, rect, SEWER_STREETS, lambda x, y: (x, y) in core, rng, F.walk, z=z)
+        # najpierw szukamy pietra, pod ktorym miesci sie wiekszosc ulic; male kanaly tylko w ostatecznosci
+        cells = None
+        for min_mask in (200, 40):
+            for z in (-1, -2, -3):
+                cells = U.sewers(world, rect, SEWER_STREETS, lambda x, y: (x, y) in core, rng, F.walk, z=z,
+                                 min_mask=min_mask)
+                if cells:
+                    break
             if cells:
                 break
         if not cells:
             print('kanaly: brak miejsca pod', town)
             continue
-        count = max(2, min(6, len(cells) // 120))
-        gr = U.grates(world, cells, SEWER_STREETS, taken | core, rng, count, F.walk, z=z)
+        # kratki w roznych czesciach miasta: kazdy odcinek kanalu dostaje swoje, mniej wiecej co 10 pol ulicy
+        gr = []
+        parts = cell_parts(cells)
+        for part in parts:
+            if len(gr) >= 9 and len(part) < 60:
+                break
+            count = max(1, min(4, len(part) // 70))
+            gr += U.grates(world, part, SEWER_STREETS, taken | core | {g[0] for g in gr}, rng, count, F.walk,
+                           spacing=9, z=z)
+        reach = set()
+        for part in parts:
+            if any(g[3] in part or g[0] in part for g in gr):
+                reach |= part
+        cells = [c for c in cells if c in reach]
         t = ctx['transitions']
         for (g, ladder, up, down) in gr:
             t.append((g[0], g[1], 0, 'STAIRS', down[0], down[1], z))
             t.append((ladder[0], ladder[1], z, 'LADDER', up[0], up[1], 0))
-        far = [c for c in cells if all(abs(c[0] - g[0][0]) + abs(c[1] - g[0][1]) > 6 for g in gr)]
+        far = [c for c in cells if all(abs(c[0] - g[0][0]) + abs(c[1] - g[0][1]) > 5 for g in gr)] or cells
         n_sp = max(3, len(far) // 70)
         for i in range(n_sp):
             sx, sy = far[(i * 97 + 13) % len(far)]

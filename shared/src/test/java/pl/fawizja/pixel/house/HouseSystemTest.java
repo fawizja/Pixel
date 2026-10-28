@@ -160,4 +160,65 @@ class HouseSystemTest {
         assertNull(pc.house());
         assertEquals(h.door(), pc.position());
     }
+
+    @Test
+    void guestsMayEnterAndAreSavedWhileATransferResetsThem() {
+        House h = houses.inTown("Selvaran").get(0);
+        HouseOwnersMap owners = new HouseOwnersMap();
+        assertFalse(owners.addGuest(h.id(), "Ola"), "no guests without an owner");
+        assertTrue(owners.claim(h.id(), "Kasia"));
+        assertTrue(owners.addGuest(h.id(), "Ola"));
+        assertFalse(owners.addGuest(h.id(), "ola"), "already a guest");
+        assertFalse(owners.addGuest(h.id(), "Kasia"), "owner is not a guest");
+        HouseOwnersMap back = HouseOwnersMap.decode(owners.encode());
+        assertEquals("Kasia", back.ownerOf(h.id()));
+        assertEquals(List.of("Ola"), back.guests(h.id()));
+        assertTrue(back.mayEnter(h.id(), "OLA"));
+        assertFalse(back.mayEnter(h.id(), "Basia"));
+
+        Position inside = null;
+        for (int[] d : new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+            Position q = h.door().translate(d[0], d[1]);
+            if (h.contains(q)) inside = q;
+        }
+        GameSession guest = session(TestData.newCharacterNamed("Ola"), back);
+        GameSession stranger = session(TestData.newCharacterNamed("Basia"), back);
+        assertTrue(guest.mayEnter(inside));
+        assertFalse(stranger.mayEnter(inside));
+
+        assertTrue(back.transfer(h.id(), "Basia"));
+        assertEquals("Basia", back.ownerOf(h.id()));
+        assertTrue(back.guests(h.id()).isEmpty(), "new owner starts without guests");
+        assertFalse(guest.mayEnter(inside));
+        assertTrue(stranger.mayEnter(inside));
+        back.release(h.id());
+        assertNull(back.ownerOf(h.id()));
+    }
+
+    @Test
+    void sellingAHouseToTheTownRefundsHalfThePrice() {
+        Npc agent = housing("Frostholm");
+        House h = houses.inTown("Frostholm").get(2);
+        PlayerCharacter pc = TestData.newCharacterNamed("Halvar");
+        pc.bank().credit(h.price());
+        pc.setPosition(nextTo(agent));
+        GameSession s = session(pc, new HouseOwnersMap());
+        assertTrue(s.buyHouse(h.id(), 0));
+        assertEquals(0, pc.bank().balance());
+        assertTrue(s.addHouseGuest("Sven", 0));
+        assertTrue(s.houseInfo().contains("Sven"));
+        assertTrue(s.leaveHouse(0));
+        assertEquals(h.price() * GameSession.HOUSE_SELLBACK_PERCENT / 100, pc.bank().balance());
+    }
+
+    @Test
+    void houseChatCommands() {
+        assertArrayEquals(new String[] {"HOUSE", "INFO"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/dom"));
+        assertArrayEquals(new String[] {"HOUSE", "GUEST", "Stary Wilk"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/dom wpuść Stary Wilk"));
+        assertArrayEquals(new String[] {"HOUSE", "UNGUEST", "Ola"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/dom wyrzuc Ola"));
+        assertArrayEquals(new String[] {"HOUSE", "SELL", "Ola", "150000"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/dom sprzedaj Ola, 150k"));
+        assertArrayEquals(new String[] {"HOUSE", "ACCEPT"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/dom kup"));
+        assertArrayEquals(new String[] {"HOUSE", "CANCEL"}, pl.fawizja.pixel.net.ChatCommands.toMessage("/dom anuluj"));
+        assertNull(pl.fawizja.pixel.net.ChatCommands.toMessage("/dom sprzedaj Ola"));
+    }
 }

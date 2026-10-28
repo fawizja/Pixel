@@ -115,6 +115,11 @@ public final class GameSession {
                        GroundItems sharedGround, Random rng, int minLevel, SpellRegistry spellRegistry,
                        ConsumableRegistry consumables, RecipeRegistry recipes) {
         this.sharedWorld = sharedGround != null;
+        if (!sharedWorld) {
+            // gra offline: skrzynie przesuniete przez te postac i ich zawartosc
+            world.crates().reset();
+            world.crates().restore(pc.crates(), items);
+        }
         this.rng = rng;
         this.ground = sharedGround != null ? sharedGround : new GroundItems();
         this.items = items;
@@ -559,6 +564,8 @@ public final class GameSession {
     /** NPC, z ktorym mozna teraz rozmawiac (albo null); skrzynia depozytu obok postaci ma pierwszenstwo. */
     public Npc npcNearby() {
         if (pc.isDead()) return null;
+        Npc crate = crateNearby();
+        if (crate != null) return crate;
         Npc locker = depotLockerNearby();
         return locker != null ? locker : npcs.nearest(pc.position(), world);
     }
@@ -615,7 +622,26 @@ public final class GameSession {
         public boolean claim(String id, String owner) { return ownerOf(id) == null; }
 
         @Override
-        public void release(String id) { }
+        public void release(String id) { guestList.clear(); }
+
+        /** Offline nie ma innych graczy, ale lista dziala tak samo (do testow i podgladu). */
+        private final java.util.List<String> guestList = new java.util.ArrayList<>();
+
+        @Override
+        public java.util.List<String> guests(String id) { return id.equals(pc.house()) ? java.util.List.copyOf(guestList) : java.util.List.of(); }
+
+        @Override
+        public boolean addGuest(String id, String name) {
+            if (!id.equals(pc.house()) || name == null || name.isBlank() || name.equals(pc.name())) return false;
+            for (String g : guestList) if (g.equalsIgnoreCase(name)) return false;
+            if (guestList.size() >= MAX_GUESTS) return false;
+            return guestList.add(name.trim());
+        }
+
+        @Override
+        public boolean removeGuest(String id, String name) {
+            return id.equals(pc.house()) && guestList.removeIf(g -> g.equalsIgnoreCase(name == null ? "" : name.trim()));
+        }
     };
 
     /** Domy swiata i ich wlasciciele (serwer podaje wspolna liste; offline wlascicielem jest tylko ta postac). */
@@ -632,6 +658,58 @@ public final class GameSession {
 
     public String houseOwner(pl.fawizja.pixel.house.House h) { return houseOwners.ownerOf(h.id()); }
 
+    public java.util.List<String> houseGuests(pl.fawizja.pixel.house.House h) { return houseOwners.guests(h.id()); }
+
+    /** Wlasciciel wpuszcza goscia do domu (wejdzie do srodka i otworzy skrzynie). */
+    public boolean addHouseGuest(String name, long nowMs) {
+        pl.fawizja.pixel.house.House h = houses.get(pc.house());
+        String who = name == null ? "" : name.trim();
+        String msg = null;
+        if (h == null) msg = "Nie masz domu.";
+        else if (who.isEmpty()) msg = "Podaj imię: /dom wpuść Imię.";
+        else if (who.equalsIgnoreCase(pc.name())) msg = "To twój dom.";
+        else if (houseOwners.mayEnter(h.id(), who)) msg = who + " już może wchodzić do domu.";
+        else if (houseOwners.guests(h.id()).size() >= pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS) {
+            msg = "Dom może mieć najwyżej " + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + " gości.";
+        }
+        if (msg == null && !houseOwners.addGuest(h.id(), who)) msg = "Nie udało się dodać gościa.";
+        if (msg != null) {
+            log.add(nowMs, EventLog.Kind.WARNING, msg);
+            return false;
+        }
+        log.add(nowMs, EventLog.Kind.SYSTEM, who + " może teraz wchodzić do domu " + h.name() + " i korzystać ze skrzyń.");
+        return true;
+    }
+
+    /** Wlasciciel odbiera gosciowi wstep. */
+    public boolean removeHouseGuest(String name, long nowMs) {
+        pl.fawizja.pixel.house.House h = houses.get(pc.house());
+        if (h == null || !houseOwners.removeGuest(h.id(), name)) {
+            log.add(nowMs, EventLog.Kind.WARNING, h == null ? "Nie masz domu." : name + " nie jest gościem twojego domu.");
+            return false;
+        }
+        log.add(nowMs, EventLog.Kind.SYSTEM, name.trim() + " nie może już wchodzić do domu " + h.name() + ".");
+        return true;
+    }
+
+    /** Opis domu postaci: nazwa, miasto, goscie. */
+    public String houseInfo() {
+        pl.fawizja.pixel.house.House h = houses.get(pc.house());
+        if (h == null) return "Nie masz domu. Kupisz go u zarządcy domów w mieście (za złoto z banku).";
+        java.util.List<String> g = houseOwners.guests(h.id());
+        return String.format("Twój dom: %s (%s, %d pól, cena %,d gp). Goście: %s.", h.name(), h.town(), h.size(), h.price(),
+                g.isEmpty() ? "nikt (/dom wpuść Imię)" : String.join(", ", g));
+    }
+
+    /** Ponowne sprawdzenie wstepu (po wyrzuceniu goscia albo zmianie wlasciciela): kto nie moze, wychodzi przez drzwi. */
+    public void checkHouseAccess() { leaveForeignHouse(); }
+
+    /** Dom po sprzedazy innemu graczowi (serwer). */
+    public void setOwnHouse(String id) {
+        pc.setHouse(id);
+        leaveForeignHouse();
+    }
+
     /** Czy postac moze wejsc na pole (wnetrza domow tylko dla wlasciciela). */
     /** Pola zajete przez innych graczy (serwer). Poza strefa ochronna gracze sie blokuja, w PZ mozna przejsc, jak w Tibii. */
     private java.util.function.Predicate<Position> otherPlayers = p -> false;
@@ -642,7 +720,7 @@ public final class GameSession {
 
     public boolean mayEnter(Position p) {
         pl.fawizja.pixel.house.House h = houses.at(p);
-        return h == null || pc.name().equals(houseOwners.ownerOf(h.id()));
+        return h == null || houseOwners.mayEnter(h.id(), pc.name());
     }
 
     private void leaveForeignHouse() {
@@ -670,11 +748,14 @@ public final class GameSession {
         }
         pc.bank().debit(h.price());
         pc.setHouse(id);
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp z konta. Wejdziesz do niego tylko ty.", h.name(), h.price()));
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp z konta. Wejdziesz do niego ty i goście (/dom wpuść Imię).", h.name(), h.price()));
         return true;
     }
 
-    /** U zarzadcy domow: oddanie domu (bez zwrotu ceny); postac stojaca w srodku wychodzi przez drzwi. */
+    /** Miasto odkupuje dom za tyle procent ceny. */
+    public static final int HOUSE_SELLBACK_PERCENT = 50;
+
+    /** U zarzadcy domow: sprzedaz domu miastu (polowa ceny na konto); postac stojaca w srodku wychodzi przez drzwi. */
     public boolean leaveHouse(long nowMs) {
         if (talkTo(NpcRole.HOUSING, nowMs) == null) return false;
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
@@ -685,7 +766,9 @@ public final class GameSession {
         houseOwners.release(h.id());
         pc.setHouse(null);
         leaveForeignHouse();
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Oddano dom " + h.name() + ".");
+        long refund = h.price() * HOUSE_SELLBACK_PERCENT / 100;
+        pc.bank().credit(refund);
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Sprzedano dom %s miastu za %,d gp (na konto).", h.name(), refund));
         return true;
     }
 
@@ -1614,6 +1697,9 @@ public final class GameSession {
             Position before = pc.position();
             MoveResult r = pzLocked(before, requested, nowMs) || chestAt(before.translate(requested.dx, requested.dy))
                     ? MoveResult.BLOCKED : movement.step(pc, requested);
+            if (r == MoveResult.BLOCKED && !pzLocked(before, requested, nowMs) && pushCrate(before, requested, nowMs)) {
+                r = movement.step(pc, requested);                  // skrzynia odjechala - postac idzie za nia
+            }
             if (r == MoveResult.BLOCKED && requested.diagonal()) {
                 // slizg po murze: skos w sciane idzie wzdluz niej (najpierw poziomo, potem pionowo)
                 for (Direction slide : new Direction[] {Direction.fromDelta(requested.dx, 0), Direction.fromDelta(0, requested.dy)}) {
@@ -1796,6 +1882,157 @@ public final class GameSession {
         return z > 0 ? "Piętro +" + z + "." : "Podziemia, poziom " + z + ".";
     }
 
+    // ------------------------------------------------------------------ zwykle skrzynie (2026-10-28)
+
+    /** Otwarta skrzynia (schowek) obok postaci albo null. */
+    private Position openCrate;
+    private final java.util.Map<Position, Npc> crateWindows = new java.util.HashMap<>();
+    private long lastPushNoteMs = Long.MIN_VALUE / 2;
+
+    public Position openCrate() { return openCrate; }
+
+    private static String crateName(String key, boolean accusative) {
+        switch (key) {
+            case "barrel": return accusative ? "beczkę" : "Beczka";
+            case "sack": return accusative ? "worek" : "Worek";
+            case "chest": return accusative ? "kufer" : "Kufer";
+            case "wardrobe": return accusative ? "szafę" : "Szafa";
+            default: return accusative ? "skrzynię" : "Skrzynia";
+        }
+    }
+
+    private String objectKey(Position p) {
+        pl.fawizja.pixel.world.FloorMap f = world.floor(p.z());
+        int id = f == null ? 0 : f.get(pl.fawizja.pixel.world.Layer.OBJECT, p.x(), p.y());
+        pl.fawizja.pixel.world.TileType t = id == 0 ? null : world.tiles().get(id);
+        return t == null ? "" : t.key();
+    }
+
+    /**
+     * Skrzynia, beczka albo worek obok: otwiera schowek, drugie dotkniecie zamyka. W domu tylko dla wlasciciela
+     * i gosci (jak wejscie), na ulicy dla kazdego.
+     */
+    public boolean useCrate(Position p, long nowMs) {
+        if (p.z() != pc.position().z() || pc.position().distanceTo(p) > 1 || !world.crates().isStorage(p)) return false;
+        if (!mayEnter(p)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "To schowek w cudzym domu.");
+            return true;
+        }
+        String key = objectKey(p);
+        if (p.equals(openCrate)) {
+            openCrate = null;
+            log.add(nowMs, EventLog.Kind.INFO, "Zamykasz " + crateName(key, true) + ".");
+            return true;
+        }
+        openCrate = p;
+        world.crates().open(p, items);
+        int n = world.crates().peek(p).size();
+        log.add(nowMs, EventLog.Kind.INFO, "Otwierasz " + crateName(key, true) + (n == 0 ? ". Pusto - możesz tu coś schować."
+                : ". W środku: " + n + " " + (n == 1 ? "rzecz" : n < 5 ? "rzeczy" : "rzeczy") + "."));
+        return true;
+    }
+
+    /** Klient online: okno skrzyni otwiera sie od razu, serwer otwiera ja u siebie i odsyla zawartosc. */
+    public void toggleCrateView(Position p) {
+        if (p.equals(openCrate)) openCrate = null;
+        else if (world.crates().isStorage(p) && mayEnter(p)) openCrate = p;
+    }
+
+    /** UZYJ obok skrzyni (najpierw ta, w ktora postac patrzy). */
+    private boolean useCrateNearby(long nowMs) {
+        Position me = pc.position();
+        if (facing != null && world.crates().isStorage(me.translate(facing.dx, facing.dy))) {
+            return useCrate(me.translate(facing.dx, facing.dy), nowMs);
+        }
+        for (Direction d : Direction.values()) {
+            Position q = me.translate(d.dx, d.dy);
+            if (world.crates().isStorage(q) && !chestAt(q)) return useCrate(q, nowMs);
+        }
+        return false;
+    }
+
+    /** Okno otwartej skrzyni (jak depozyt u bankiera); null, gdy zadnej nie ma obok. */
+    private Npc crateNearby() {
+        Position p = openCrate;
+        if (p == null) return null;
+        if (p.z() != pc.position().z() || pc.position().distanceTo(p) > 1 || !world.crates().isStorage(p)) {
+            openCrate = null;
+            return null;
+        }
+        String key = objectKey(p);
+        return crateWindows.computeIfAbsent(p, q -> new Npc(Npc.CRATE, crateName(key, false), NpcRole.BANKER,
+                nearestTown(q), q, null, "Schowek na " + pl.fawizja.pixel.world.Crates.SLOTS + " rzeczy.", "#8a6a3a"));
+    }
+
+    /** Zawartosc otwartej skrzyni (do okna); pusta lista, gdy nic nie jest otwarte. */
+    public java.util.List<ItemStack> crateContents() {
+        return openCrate == null ? java.util.List.of() : world.crates().peek(openCrate);
+    }
+
+    /** Wolne miejsca w otwartej skrzyni. */
+    public long crateSpaceFor(int itemId) {
+        if (openCrate == null) return 0;
+        pl.fawizja.pixel.inventory.Container c = world.crates().open(openCrate, items);
+        return c == null ? 0 : c.spaceFor(itemId);
+    }
+
+    /** Wszystkie sztuki przedmiotu z plecaka do otwartej skrzyni. */
+    public int cratePut(int itemId, long nowMs) {
+        pl.fawizja.pixel.inventory.Container c = openCrateContainer(nowMs);
+        if (c == null) return 0;
+        if (pl.fawizja.pixel.economy.Currency.isCoin(itemId)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Monety trzymaj w banku, nie w skrzyni.");
+            return 0;
+        }
+        int n = moveAll(pc.backpack(), c, itemId, nowMs, "Schowano", "Skrzynia jest pełna.");
+        if (n > 0) cratesChanged(openCrate);
+        return n;
+    }
+
+    /** Wszystkie sztuki przedmiotu z otwartej skrzyni do plecaka (ile sie zmiesci). */
+    public int crateTake(int itemId, long nowMs) {
+        pl.fawizja.pixel.inventory.Container c = openCrateContainer(nowMs);
+        if (c == null) return 0;
+        int n = moveAll(c, pc.backpack(), itemId, nowMs, "Wyjęto", "Brak miejsca w plecaku.");
+        if (n > 0) cratesChanged(openCrate);
+        return n;
+    }
+
+    private pl.fawizja.pixel.inventory.Container openCrateContainer(long nowMs) {
+        if (crateNearby() == null || !mayEnter(openCrate)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do skrzyni i otwórz ją.");
+            return null;
+        }
+        return world.crates().open(openCrate, items);
+    }
+
+    private void cratesChanged(Position p) {
+        if (p != null) world.crates().changed(p);
+        if (!sharedWorld) pc.setCrates(world.crates().encode());
+    }
+
+    /** Wejscie w skrzynie, beczke albo worek pcha je o pole dalej (gdy tam wolno). */
+    private boolean pushCrate(Position before, Direction d, long nowMs) {
+        Position at = before.translate(d.dx, d.dy);
+        pl.fawizja.pixel.world.Crates c = world.crates();
+        if (d.diagonal() || chestAt(at) || !c.isMovable(at) || !mayEnter(at)) return false;
+        java.util.function.Predicate<Position> blocked = q -> monsters.monsterAt(q) != null || npcs.at(q) != null
+                || dummies.at(q) || !mayEnter(q) || otherPlayers.test(q) || q.equals(pc.position())
+                || !java.util.Objects.equals(houses.at(q), houses.at(at));   // meble z domu nie wyjezdzaja na ulice
+        if (!c.canPush(at, d, blocked)) {
+            if (nowMs - lastPushNoteMs > 4000) {
+                lastPushNoteMs = nowMs;
+                log.add(nowMs, EventLog.Kind.INFO, crateName(objectKey(at), false) + " nie przesunie się dalej.");
+            }
+            return false;
+        }
+        c.push(at, d);
+        crateWindows.clear();
+        if (at.equals(openCrate)) openCrate = null;
+        if (!sharedWorld) pc.setCrates(c.encode());
+        return true;
+    }
+
     public void useNearby(long nowMs) {
         MoveResult r = movement.use(pc);
         switch (r) {
@@ -1809,6 +2046,7 @@ public final class GameSession {
                 if (toggleTraining(nowMs)) break;
                 if (openChest(nowMs)) break;
                 if (searchCorpse(nowMs)) break;
+                if (useCrateNearby(nowMs)) break;
                 if (!gatherHerbs(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
         }
     }
@@ -1877,6 +2115,7 @@ public final class GameSession {
             pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests.at(p);
             return openChestAt(c, nowMs);
         }
+        if (world.crates().isStorage(p)) return useCrate(p, nowMs);
         pl.fawizja.pixel.world.Openings o = world.openings();
         boolean door = o.isDoor(p);
         if (!door && !o.isWindow(p)) return false;

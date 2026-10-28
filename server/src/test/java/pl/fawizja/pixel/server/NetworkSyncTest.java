@@ -1470,6 +1470,85 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void housesHaveGuestsAndCanBeSoldToAnotherPlayer() throws Exception {
+        pl.fawizja.pixel.house.House h = server.world().houses().inTown("Frostholm").get(0);
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            boolean[] ready = new boolean[1];
+            long[] ulaBank = new long[1], olaBank = new long[1];
+            server.enqueueTest(() -> {
+                assertTrue(server.world().houseOwners().claim(h.id(), "Ola"));
+                server.world().find("Ola").session.setOwnHouse(h.id());
+                server.world().find("Ula").session.character().bank().credit(50_000);
+                ulaBank[0] = server.world().find("Ula").session.character().bank().balance();
+                olaBank[0] = server.world().find("Ola").session.character().bank().balance();
+                ready[0] = true;
+            });
+            await("house owned", () -> ready[0]);
+            ola.send("HOUSE", "GUEST", "ula");
+            awaitMessage(ula, "let in", m -> m[0].equals("LOG") && m[2].contains("wpuszcza cię do domu"));
+            assertEquals(java.util.List.of("Ula"), server.world().houseOwners().guests(h.id()));
+            ola.send("HOUSE", "UNGUEST", "Ula");
+            awaitMessage(ola, "kicked", m -> m[0].equals("LOG") && m[2].contains("nie może już wchodzić"));
+            ola.send("HOUSE", "SELL", "Ula", "20000");
+            awaitMessage(ula, "offer", m -> m[0].equals("LOG") && m[2].contains("oferuje ci dom"));
+            ula.send("HOUSE", "ACCEPT");
+            awaitMessage(ula, "bought", m -> m[0].equals("LOG") && m[2].startsWith("Kupiono dom"));
+            assertEquals("Ula", server.world().houseOwners().ownerOf(h.id()));
+            PlayerCharacter ulaPc = server.world().find("Ula").session.character();
+            PlayerCharacter olaPc = server.world().find("Ola").session.character();
+            assertEquals(h.id(), ulaPc.house());
+            assertNull(olaPc.house());
+            assertEquals(ulaBank[0] - 20_000, ulaPc.bank().balance());
+            assertEquals(olaBank[0] + 20_000, olaPc.bank().balance());
+            ula.send("HOUSE", "ACCEPT");
+            awaitMessage(ula, "no second sale", m -> m[0].equals("LOG") && m[2].contains("Nikt nie oferuje"));
+        }
+        String saved = new String(Files.readAllBytes(new File(saves, "houses.txt").toPath()), java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(saved.contains(h.id() + "=Ula"), saved);
+    }
+
+    @Test
+    void pushedCratesAndTheirContentsReachEveryClientAndSurviveARestart() throws Exception {
+        pl.fawizja.pixel.world.WorldMap w = server.world().world;
+        pl.fawizja.pixel.world.Crates c = w.crates();
+        Position crate = null;
+        for (int y = 1; y < w.floor(0).height() - 1 && crate == null; y++) {
+            for (int x = 1; x < w.floor(0).width() - 2 && crate == null; x++) {
+                Position p = new Position(x, y, 0);
+                if (c.isMovable(p) && server.world().houses().at(p) == null && c.canPush(p, pl.fawizja.pixel.world.Direction.EAST, null)) crate = p;
+            }
+        }
+        assertNotNull(crate);
+        Position from = crate, to = crate.translate(1, 0);
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome", () -> ola.selfSave() != null);
+            server.enqueueTest(() -> {
+                c.push(from, pl.fawizja.pixel.world.Direction.EAST);
+                c.open(to, ItemRegistry.loadDefault()).add(new pl.fawizja.pixel.item.ItemStack(ItemRegistry.loadDefault().byKey("health_potion").id(), 1));
+                c.changed(to);
+            });
+            awaitMessage(ola, "crate moved", m -> m[0].equals("CRATEMV") && m[4].equals(String.valueOf(to.x())));
+            awaitMessage(ola, "crate contents", m -> m[0].equals("CRATE") && m[1].equals(String.valueOf(to.x())));
+        }
+        try (NetClient kuba = connect()) {
+            kuba.hello("Kuba", "MONK", "tajne-Kuba");
+            awaitMessage(kuba, "state on login", m -> m[0].equals("CRATEMV") && m[1].equals(String.valueOf(from.x()))
+                    && m[4].equals(String.valueOf(to.x())));
+        }
+        assertTrue(new File(saves, "crates.txt").isFile());
+        server.close();
+        server = new PixelServer(0, saves);
+        server.start();
+        assertTrue(server.world().world.crates().isStorage(to), "crate stays where it was pushed");
+        assertFalse(server.world().world.crates().peek(to).isEmpty());
+    }
+
     static boolean logSays(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

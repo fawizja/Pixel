@@ -70,6 +70,8 @@ public final class Actions {
             case "withdraw": s.withdraw(Long.parseLong(p[2]), now); return true;
             case "store": s.depotStore(Integer.parseInt(p[2]), now); return true;
             case "take": s.depotTake(Integer.parseInt(p[2]), now); return true;
+            case "crateput": s.cratePut(Integer.parseInt(p[2]), now); return true;
+            case "cratetake": s.crateTake(Integer.parseInt(p[2]), now); return true;
             case "heal": s.priestHeal(now); return true;
             case "bless": s.priestBless(now); return true;
             case "premium": s.buyPremium(now); return true;

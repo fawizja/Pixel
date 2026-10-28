@@ -460,6 +460,14 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
 - features.winding_path: drogi przez odsuniete punkty posrednie, A* 8-kierunkowy po szumie kosztu, skosy dopelnione.
 - WorldMap.displays / MapLoader.readDisplays; WorldRenderer.drawDisplay rysuje przedmiot na ladzie. WorldLookTest.
 - Grafiki: otsp_import CLIMATE (jungle_tree, frost_pine, burnt_tree, blood, corpse...), wst_import FLOORS (posadzki).
+## Miasta, skrzynie, domy, kratki (2026-10-28, 07:10, wersja 0.208.0)
+- tools/mapgen/organic.py: Town (falisty obrys, cienki mur thin_ring, bramy, plac, ulice A* przez punkty posrednie,
+  dzialki wzdluz ulic, domy L -> houses.csv pole 12 "wings"), sklepy z lada; newtowns (Valmir, Nerys) i
+  generate_continent.REBUILD/rebuild_towns (Qasirah, Frostholm, Selvaran, Varden-East). Stare Varden 1:1.
+- Kratki: underground.sewers trzyma wszystkie odcinki >= 24 pol, town_undergrounds daje kratki kazdemu odcinkowi
+  (spacing 9, 7-9 na miasto, nie przy NPC, 8 wolnych sasiadow).
+- world/Crates + GameSession (pushCrate, useCrate, cratePut/Take), serwer crates.txt + CRATEMV/CRATE. CratesTest.
+- Domy: HouseOwners goscie/transfer, ServerWorld.houseCommand, ChatCommands /dom, zwrot 50% u zarzadcy.
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

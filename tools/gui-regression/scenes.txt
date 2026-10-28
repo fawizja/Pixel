@@ -38,21 +38,23 @@ markers|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,
 events|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/wydarzenia
 stats|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/statystyki
 outfit|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=outfit:7
-selvaran|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=678,702,0
+selvaran|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=675,689,0
 phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2
 battle|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.open=battle
 picker|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=pickerrune -Dpixel.uiScale=2
 diag|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.button=diag
 look|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.look=82,79
 # 2026-10-23: kontynent - krol, swiatynia z swiecami, wiatrak, wioska orkow, most wiszacy
-king|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=548,493,0 -Dpixel.open=npc
-qasirah_temple|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=21 -Dpixel.teleport=200,487,0
+king|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=568,512,0 -Dpixel.open=npc
+qasirah_temple|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=21 -Dpixel.teleport=226,491,0
 windmill|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=206,453,0
 orc_village|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=307,618,0
 rope_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=410,168,1
 volcano|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=367,93,0
 # 2026-10-27: swiat 1000x1000 - nowe miasta, kanaly pod kratkami, kopalnia pod miastem
-valmir|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=479,756,0
-nerys|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=855,730,0
-sewer|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=547,511,-1
-copper_mine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=436,772,-1
+valmir|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=493,750,0
+nerys|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=878,731,0
+sewer|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=540,512,-1
+copper_mine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=444,785,-1
+# 2026-10-28: miasta o nieregularnym ksztalcie
+frostholm|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=743,197,0

@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.208.0] - 2026-10-28
+
+### Dodano
+- Skrzynie, beczki, worki i kufry można przesuwać: wejdź w nie, a przesuną się o pole dalej (do 6 pól od
+  swojego miejsca). Dotknięcie albo UŻYJ otwiera je, drugie dotknięcie zamyka. W środku jest 8 miejsc na
+  rzeczy z plecaka. Online skrzynie są wspólne dla wszystkich graczy i zostają po restarcie serwera.
+  Skrzynie w cudzym domu są zamknięte.
+- Goście w domach: `/dom wpuść Imię` wpuszcza gracza do domu (wchodzi do środka i korzysta ze skrzyń),
+  `/dom wyrzuć Imię` odbiera wstęp, `/dom` pokazuje dom i gości.
+- Sprzedaż domu innemu graczowi: `/dom sprzedaj Imię, 100000`, kupujący wpisuje `/dom kup` i płaci z banku.
+  Zarządca domów odkupuje dom za połowę ceny.
+
+### Zmieniono
+- Miasta mają nieregularny kształt: falisty mur, kręte ulice, budynki różnej wielkości ustawione wzdłuż ulic
+  (także domy w kształcie litery L), sklepy rozrzucone po mieście. Przebudowane: Valmir, Nerys, Qasirah,
+  Frostholm, Selvaran i dzielnica królewska Varden (pałac z tronem). Stare Varden zostało bez zmian.
+- Sklepy mają ladę przez całą szerokość: kupiec stoi za nią, towary leżą na ladzie i na półkach.
+- Kratki ściekowe w 7-9 miejscach w każdym mieście, rozrzucone po ulicach; kanały ciągną się pod większą
+  częścią miasta.
+
 ## [0.207.0] - 2026-10-28
 
 ### Dodano

@@ -793,6 +793,15 @@ public final class GameScreen extends ScreenAdapter {
             say(me, emote);
             return;
         }
+        String[] house = net == null ? pl.fawizja.pixel.net.ChatCommands.toMessage(text) : null;
+        if (house != null && house[0].equals("HOUSE")) {
+            // bez serwera: opis domu i lista gosci (inni gracze wchodza tylko online)
+            if (house[1].equals("GUEST")) session.addHouseGuest(house[2], now());
+            else if (house[1].equals("UNGUEST")) session.removeHouseGuest(house[2], now());
+            else if (house[1].equals("INFO")) session.log().add(now(), EventLog.Kind.SYSTEM, session.houseInfo());
+            else session.log().add(now(), EventLog.Kind.INFO, "Sprzedaż domu innemu graczowi działa online. Miastu sprzedasz go u zarządcy domów.");
+            return;
+        }
         if (net == null) {
             session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami działa online. Podejdź do NPC, aby z nim porozmawiać.");
             return;
@@ -866,7 +875,8 @@ public final class GameScreen extends ScreenAdapter {
             else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
             return true;
         }
-        if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)) {
+        if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)
+                || game.world().crates().isStorage(p)) {
             // skrzynia, drzwi, okno: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
             if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
             else if (walkTo(p, now(), true, true)) walkUse = p;
@@ -908,12 +918,15 @@ public final class GameScreen extends ScreenAdapter {
     /** Otwiera albo zamyka drzwi i okna, otwiera skrzynie (online: serwer decyduje, drzwi i okna od razu na ekranie). */
     private void useOpening(Position p) {
         long t = now();
+        boolean crate = !session.chestAt(p) && game.world().crates().isStorage(p);
         if (net == null) {
             session.useAt(p, t);
-            return;
+        } else {
+            net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
+            if (crate) session.toggleCrateView(p);
+            else if (!session.chestAt(p)) game.world().openings().toggle(p);
         }
-        net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
-        if (!session.chestAt(p)) game.world().openings().toggle(p);
+        if (crate && session.openCrate() != null && !hud.npcOpen()) hud.openNpc(session);
     }
 
     /**
@@ -2234,6 +2247,26 @@ public final class GameScreen extends ScreenAdapter {
         while ((m = net.poll()) != null) {
             long now = now();
             switch (m[0]) {
+                case "CRATEMV":
+                    if (m.length < 7) break;
+                    try {
+                        session.world().crates().applyMove(
+                                new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])),
+                                new Position(Integer.parseInt(m[4]), Integer.parseInt(m[5]), Integer.parseInt(m[6])));
+                    } catch (NumberFormatException e) {
+                        // zly komunikat: pomijamy
+                    }
+                    break;
+                case "CRATE":
+                    if (m.length < 4) break;
+                    try {
+                        session.world().crates().applyContents(
+                                new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])),
+                                m.length > 4 ? m[4] : "", session.items());
+                    } catch (NumberFormatException e) {
+                        // zly komunikat: pomijamy
+                    }
+                    break;
                 case "LOG":
                     if (m.length < 3) break;
                     EventLog.Kind kind;

@@ -89,7 +89,36 @@ final class ServerWorld {
             houseOwners.release(id);
             saveHouses();
         }
+
+        @Override
+        public List<String> guests(String id) { return houseOwners.guests(id); }
+
+        @Override
+        public boolean addGuest(String id, String name) {
+            boolean ok = houseOwners.addGuest(id, name);
+            if (ok) saveHouses();
+            return ok;
+        }
+
+        @Override
+        public boolean removeGuest(String id, String name) {
+            boolean ok = houseOwners.removeGuest(id, name);
+            if (ok) saveHouses();
+            return ok;
+        }
+
+        @Override
+        public boolean transfer(String id, String owner) {
+            boolean ok = houseOwners.transfer(id, owner);
+            if (ok) saveHouses();
+            return ok;
+        }
     };
+    /** Oferty sprzedazy domow innym graczom: kupujacy (male litery) -> oferta. */
+    private final Map<String, HouseOffer> houseOffers = new java.util.HashMap<>();
+    static final long HOUSE_OFFER_MS = 5 * 60_000L;
+
+    record HouseOffer(String houseId, String seller, String buyer, long price, long until) {}
     private final ShopRegistry shops;
     private final QuestRegistry quests;
     private final pl.fawizja.pixel.treasure.TreasureChests chests;
@@ -192,6 +221,42 @@ final class ServerWorld {
             motd = cleanMotd(new String(java.nio.file.Files.readAllBytes(motdFile.toPath()), java.nio.charset.StandardCharsets.UTF_8));
         }
         loadRanking(saveDir);
+        cratesFile = new File(saveDir, "crates.txt");
+        if (cratesFile.isFile()) {
+            world.crates().restore(new String(java.nio.file.Files.readAllBytes(cratesFile.toPath()),
+                    java.nio.charset.StandardCharsets.UTF_8), items);
+        }
+        world.crates().setListener(msg -> {
+            broadcast(null, msg);
+            saveCrates();
+        });
+    }
+
+    private final File cratesFile;
+
+    /** Skrzynie (przesuniecia i zawartosc) wspolne dla wszystkich graczy; zapis po kazdej zmianie. */
+    private void saveCrates() {
+        try {
+            File tmp = new File(cratesFile.getParentFile(), "crates.txt.tmp");
+            java.nio.file.Files.write(tmp.toPath(), world.crates().encode().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            java.nio.file.Files.move(tmp.toPath(), cratesFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            LOG.warning("crates save failed: " + e.getMessage());
+        }
+    }
+
+    /** Nowy klient dostaje obecny stan skrzyn (jego mapa jest swieza z pliku). */
+    private void sendCrates(ClientHandler client) {
+        for (java.util.Map.Entry<Position, Position> e : world.crates().moves().entrySet()) {
+            Position o = e.getValue(), c = e.getKey();
+            client.send("CRATEMV", String.valueOf(o.x()), String.valueOf(o.y()), String.valueOf(o.z()),
+                    String.valueOf(c.x()), String.valueOf(c.y()), String.valueOf(c.z()));
+        }
+        for (java.util.Map.Entry<Position, String> e : world.crates().allContents().entrySet()) {
+            Position c = e.getKey();
+            client.send("CRATE", String.valueOf(c.x()), String.valueOf(c.y()), String.valueOf(c.z()), e.getValue());
+        }
     }
 
     static String cleanMotd(String s) {
@@ -200,6 +265,10 @@ final class ServerWorld {
     }
 
     String motd() { return motd; }
+
+    pl.fawizja.pixel.house.HouseRegistry houses() { return houses; }
+
+    pl.fawizja.pixel.house.HouseOwners houseOwners() { return savedHouseOwners; }
 
     /** Wydarzenie premii doswiadczenia (EXPEVENT procent [minuty]); 0 = brak. Tylko w pamieci. */
     private int expEventPercent;
@@ -720,6 +789,122 @@ final class ServerWorld {
         save(p);
         LOG.info("transfer " + p.name() + " -> " + to + " " + amount);
         info(p, "Przelano " + label + " do " + to + (r == null ? " (wpłynie po wejściu do gry)." : "."), now);
+    }
+
+    /**
+     * HOUSE INFO | GUEST imie | UNGUEST imie | SELL imie cena | ACCEPT | CANCEL: goscie domu i sprzedaz domu
+     * innemu graczowi (kupujacy placi z banku, sprzedajacy dostaje zloto na konto, takze gdy jest offline).
+     */
+    private void houseCommand(ServerPlayer p, String[] f, long now) {
+        if (f.length < 2) return;
+        GameSession s = p.session;
+        String own = s.character().house();
+        switch (f[1]) {
+            case "INFO": {
+                info(p, s.houseInfo(), now);
+                HouseOffer o = houseOffers.get(p.name().toLowerCase(java.util.Locale.ROOT));
+                if (o != null && o.until() > now && houses.get(o.houseId()) != null) {
+                    info(p, String.format("%s oferuje ci dom %s za %,d gp: /dom kup albo /dom anuluj.", o.seller(),
+                            houses.get(o.houseId()).name(), o.price()), now);
+                }
+                break;
+            }
+            case "GUEST": {
+                if (f.length < 3) return;
+                String name = knownName(f[2].trim());
+                if (name == null) {
+                    warn(p, "Nie ma takiej postaci.", now);
+                    return;
+                }
+                if (s.addHouseGuest(name, now)) {
+                    ServerPlayer g = find(name);
+                    if (g != null) g.session.log().add(now, EventLog.Kind.SYSTEM,
+                            p.name() + " wpuszcza cię do domu " + houses.get(own).name() + ".");
+                }
+                break;
+            }
+            case "UNGUEST": {
+                if (f.length < 3) return;
+                if (s.removeHouseGuest(f[2], now)) {
+                    ServerPlayer g = find(f[2].trim());
+                    if (g != null) g.session.checkHouseAccess();
+                }
+                break;
+            }
+            case "SELL": {
+                if (f.length < 4) return;
+                long price;
+                try {
+                    price = Long.parseLong(f[3]);
+                } catch (NumberFormatException e) {
+                    return;
+                }
+                pl.fawizja.pixel.house.House h = houses.get(own);
+                ServerPlayer b = find(f[2].trim());
+                String msg = null;
+                if (h == null || !p.name().equals(houseOwners.ownerOf(h.id()))) msg = "Nie masz domu.";
+                else if (price <= 0 || price > 10_000_000_000L) msg = "Podaj cenę, np. /dom sprzedaj Imię, 100000.";
+                else if (b == null) msg = "Kupujący musi być w grze.";
+                else if (b == p) msg = "Nie sprzedasz domu samemu sobie.";
+                else if (b.session.character().house() != null) msg = b.name() + " ma już dom.";
+                if (msg != null) {
+                    warn(p, msg, now);
+                    return;
+                }
+                houseOffers.put(b.name().toLowerCase(java.util.Locale.ROOT),
+                        new HouseOffer(h.id(), p.name(), b.name(), price, now + HOUSE_OFFER_MS));
+                String label = String.format("%,d gp", price);
+                info(p, "Oferta wysłana: " + h.name() + " dla " + b.name() + " za " + label + " (ważna 5 minut).", now);
+                b.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " oferuje ci dom " + h.name() + " (" + h.town()
+                        + ", " + h.size() + " pól) za " + label + " z banku. Wpisz /dom kup albo /dom anuluj.");
+                break;
+            }
+            case "ACCEPT": {
+                HouseOffer o = houseOffers.remove(p.name().toLowerCase(java.util.Locale.ROOT));
+                pl.fawizja.pixel.house.House h = o == null ? null : houses.get(o.houseId());
+                PlayerCharacter pc = s.character();
+                String msg = null;
+                if (o == null || o.until() < now || h == null) msg = "Nikt nie oferuje ci teraz domu.";
+                else if (!o.seller().equals(houseOwners.ownerOf(h.id()))) msg = "Ten dom nie należy już do " + o.seller() + ".";
+                else if (pc.house() != null) msg = "Masz już dom. Najpierw go sprzedaj.";
+                else if (pc.bank().balance() < o.price()) {
+                    msg = String.format("Dom kosztuje %,d gp, a na koncie masz %,d gp.", o.price(), pc.bank().balance());
+                }
+                if (msg != null) {
+                    warn(p, msg, now);
+                    return;
+                }
+                if (!pc.bank().debit(o.price()).ok() || !savedHouseOwners.transfer(h.id(), p.name())) {
+                    warn(p, "Nie udało się kupić domu.", now);
+                    return;
+                }
+                String label = String.format("%,d gp", o.price());
+                ServerPlayer seller = find(o.seller());
+                if (seller != null && seller.session.character().bank().credit(o.price()).ok()) {
+                    seller.session.setOwnHouse(null);
+                    seller.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " kupuje twój dom " + h.name() + ". "
+                            + label + " wpływa na twoje konto.");
+                    save(seller);
+                } else {
+                    market.addEarnings(o.seller(), o.price());
+                    saveMarket();
+                }
+                s.setOwnHouse(h.id());
+                for (ServerPlayer o2 : players.values()) o2.session.checkHouseAccess();   // dawni goscie wychodza
+                save(p);
+                LOG.info("house " + h.id() + " sold " + o.seller() + " -> " + p.name() + " " + o.price());
+                info(p, "Kupiono dom " + h.name() + " od " + o.seller() + " za " + label + ".", now);
+                break;
+            }
+            case "CANCEL": {
+                String me = p.name().toLowerCase(java.util.Locale.ROOT);
+                boolean any = houseOffers.remove(me) != null;
+                any |= houseOffers.values().removeIf(o -> o.seller().equals(p.name()));
+                info(p, any ? "Oferta domu anulowana." : "Nie masz ofert domu.", now);
+                break;
+            }
+            default: return;
+        }
     }
 
     /** BOUNTY: lista nagrod; BOUNTY imie kwota: doplata z konta do nagrody za glowe postaci. */
@@ -1488,6 +1673,7 @@ final class ServerWorld {
         });
         players.put(p.id, p);
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
+        sendCrates(client);
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
         tellFriends(p, "jest teraz w grze.", lastNow);
         List<String> on = new ArrayList<>();
@@ -2013,6 +2199,7 @@ final class ServerWorld {
             case "PRICE": marketPrice(p, f.length > 1 ? f[1] : "", now); break;
             case "MAIL": mailCommand(p, f, now); break;
             case "TRANSFER": transferCommand(p, f, now); break;
+            case "HOUSE": houseCommand(p, f, now); break;
             case "BOUNTY": bountyCommand(p, f, now); break;
             case "DUEL": duelCommand(p, f, now); break;
             case "TITLE": p.session.chooseTitle(f.length > 1 ? f[1] : null, now); break;

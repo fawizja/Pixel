@@ -11,7 +11,7 @@ FLOOR, WALL = 'stone_floor', 'stone_wall'
 DIRS4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
 
 
-def sewers(world, rect, streets, avoid, rng, walk, z=-1):
+def sewers(world, rect, streets, avoid, rng, walk, z=-1, min_part=24, min_mask=40):
     """Kanaly pod ulicami w prostokacie rect. streets: podloza ulic; avoid(x, y): pola, pod ktorymi kanalu byc
     nie moze (stare podziemia, rdzen Varden). Zwraca (pola chodnikow, kratki [(x, y)] ) albo None."""
     x0, y0, x1, y1 = rect
@@ -31,7 +31,7 @@ def sewers(world, rect, streets, avoid, rng, walk, z=-1):
             c = world.get(x, y, 0)
             if c is not None and c[0] in streets and c[3] == NONE and free_below(x, y):
                 mask.add((x, y))
-    if len(mask) < 40:
+    if len(mask) < min_mask:
         return None
     # rynsztok: pola z pelnym sasiedztwem (srodek szerszych ulic); co kilka pol kladka
     channel = {p for p in mask if all((p[0] + a, p[1] + b) in mask for a in (-1, 0, 1) for b in (-1, 0, 1))}
@@ -57,6 +57,7 @@ def sewers(world, rect, streets, avoid, rng, walk, z=-1):
     # najwieksza spojna czesc chodnikow
     walkable = {p for p, c in cells.items() if walk(c)}
     best = set()
+    comps = []
     seen = set()
     for p in sorted(walkable):
         if p in seen:
@@ -74,6 +75,12 @@ def sewers(world, rect, streets, avoid, rng, walk, z=-1):
                     q.append(n)
         if len(comp) > len(best):
             best = comp
+        comps.append(comp)
+    # kazdy wiekszy kawalek chodnikow to osobny odcinek kanalu z wlasna kratka (kratki w roznych czesciach miasta)
+    best = set(best)
+    for comp in comps:
+        if len(comp) >= min_part:
+            best |= comp
     keep = {p for p in cells if p in best or (cells[p][0] == 'water' and any((p[0] + a, p[1] + b) in best for a, b in DIRS4))}
     for (x, y) in keep:
         world.put(x, y, z, cells[(x, y)])
@@ -154,7 +161,9 @@ def grates(world, walk_cells, streets, taken, rng, count, walk, spacing=14, z=-1
               and world.get(x + a, y + b, 0)[2] == NONE and (x + a, y + b) not in taken]
         down = [(x + a, y + b) for a, b in DIRS4 if walk(world.get(x + a, y + b, z))
                 and world.get(x + a, y + b, z)[2] == NONE]
-        if len(up) < 3 or not down:
+        # kratka nie moze zamykac przejscia: wszystkie 8 sasiednich pol wolne (obejscie dookola bez scinania rogow)
+        around = [world.get(x + a, y + b, 0) for a in (-1, 0, 1) for b in (-1, 0, 1) if a or b]
+        if len(up) < 4 or not down or not all(walk(c) and c[2] == NONE for c in around):
             continue
         out.append(((x, y), (x, y), up[0], down[0]))
     for (g, ladder, up, down) in out:

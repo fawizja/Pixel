@@ -115,6 +115,7 @@ public final class PlayerCharacter {
         enchantments.copyFrom(o.enchantments);
         openedChests.clear();
         openedChests.addAll(o.openedChests);
+        crates = o.crates;
         depot.clear();
         for (int i = 0; i < o.depot.size(); i++) {
             if (o.depot.get(i) != null) depot.putInSlot(i, o.depot.get(i));
@@ -306,6 +307,13 @@ public final class PlayerCharacter {
     public pl.fawizja.pixel.daily.LoginStreak loginStreak() { return loginStreak; }
     public pl.fawizja.pixel.item.Enchantments enchantments() { return enchantments; }
     public java.util.Set<String> openedChests() { return openedChests; }
+
+    /** Gra offline: przesuniete skrzynie i ich zawartosc ({@link pl.fawizja.pixel.world.Crates#encode()}). */
+    private String crates = "";
+
+    public String crates() { return crates; }
+
+    public void setCrates(String state) { crates = state == null ? "" : state; }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public java.util.Set<Integer> keptItems() { return keptItems; }

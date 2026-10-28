@@ -1569,6 +1569,29 @@ public final class Hud {
                 break;
             }
             case BANKER: {
+                if (pl.fawizja.pixel.npc.Npc.CRATE.equals(npc.key())) {
+                    // zwykla skrzynia: lewa kolumna - zawartosc, prawa - plecak
+                    java.util.List<ItemStack> inside = session.crateContents();
+                    int used = inside.size();
+                    left.add(new MenuRow("npc:none", npc.name() + ": " + used + " / " + pl.fawizja.pixel.world.Crates.SLOTS
+                            + " miejsc", "dotknij, aby wyjąć do plecaka", false));
+                    java.util.Map<Integer, Integer> counts = new java.util.LinkedHashMap<>();
+                    for (ItemStack st : inside) counts.merge(st.itemId(), st.count(), Integer::sum);
+                    for (java.util.Map.Entry<Integer, Integer> e : counts.entrySet()) {
+                        if (left.size() >= perCol) break;
+                        left.add(new MenuRow("npc:cratetake:" + e.getKey(), "Wyjmij " + e.getValue() + "x "
+                                + session.items().get(e.getKey()).name(), "do plecaka", pc.backpack().spaceFor(e.getKey()) > 0));
+                    }
+                    if (left.size() == 1) left.add(new MenuRow("npc:none", "Pusto", "schowaj coś z plecaka", false));
+                    right.add(new MenuRow("npc:none", "Plecak", "dotknij, aby schować", false));
+                    for (int id : distinctIds(pc.backpack())) {
+                        if (pl.fawizja.pixel.economy.Currency.isCoin(id) || right.size() >= perCol) continue;
+                        right.add(new MenuRow("npc:crateput:" + id, "Schowaj " + pc.backpack().count(id) + "x "
+                                + session.items().get(id).name(), "do schowka", session.crateSpaceFor(id) > 0));
+                    }
+                    if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do schowania", "monety trzymaj w banku", false));
+                    break;
+                }
                 pl.fawizja.pixel.inventory.Container depot = pc.depot();
                 if (depotView) {
                     left.add(new MenuRow("npc:depot", "Wróć do konta", "depozyt: " + (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc", true));
@@ -1639,9 +1662,15 @@ public final class Hud {
                 pl.fawizja.pixel.house.House own = session.houses().get(pc.house());
                 long bal = pc.bank().balance();
                 left.add(new MenuRow("npc:none", own == null ? "Nie masz domu" : "Twój dom: " + own.name(),
-                        own == null ? String.format("konto: %,d gp - dom kupisz za złoto z banku", bal) : own.town() + ", wejdziesz do niego tylko ty", false));
+                        own == null ? String.format("konto: %,d gp - dom kupisz za złoto z banku", bal) : own.town() + ", wchodzisz ty i goście", false));
                 if (own != null) {
-                    right.add(new MenuRow("npc:houseleave", "Oddaj dom", "bez zwrotu ceny; ktoś inny będzie mógł go kupić", true));
+                    java.util.List<String> guests = session.houseGuests(own);
+                    right.add(new MenuRow("npc:none", "Goście: " + (guests.isEmpty() ? "nikt" : String.join(", ", guests)),
+                            "/dom wpuść Imię, /dom wyrzuć Imię (czat)", false));
+                    right.add(new MenuRow("npc:none", "Sprzedaż graczowi", "/dom sprzedaj Imię, cena - kupujący wpisuje /dom kup", false));
+                    right.add(new MenuRow("npc:houseleave", "Sprzedaj miastu", String.format("%,d gp na konto (%d%% ceny)",
+                            own.price() * pl.fawizja.pixel.game.GameSession.HOUSE_SELLBACK_PERCENT / 100,
+                            pl.fawizja.pixel.game.GameSession.HOUSE_SELLBACK_PERCENT), true));
                 }
                 for (pl.fawizja.pixel.house.House h : session.houses().inTown(npc.town())) {
                     if (left.size() >= perCol) break;
@@ -1728,6 +1757,7 @@ public final class Hud {
         }
         // tematy rozmowy (to samo mozna wpisac w czacie obok NPC)
         boolean depotRows = depotView && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER
+                || pl.fawizja.pixel.npc.Npc.CRATE.equals(npc.key())
                 || smithView && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT;
         for (String topic : depotRows ? java.util.List.<String>of() : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
             MenuRow row = new MenuRow("npc:ask:" + topic, "Zapytaj: " + topic, "rozmowa", true);

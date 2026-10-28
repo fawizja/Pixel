@@ -43,6 +43,14 @@ public final class WorldMap {
         return openings;
     }
 
+    private Crates crates;
+
+    /** Skrzynie, beczki i worki: przesuwanie i schowki, tworzone przy pierwszym uzyciu. */
+    public synchronized Crates crates() {
+        if (crates == null) crates = new Crates(this);
+        return crates;
+    }
+
     public List<Town> towns() { return Collections.unmodifiableList(towns); }
     public List<Region> regions() { return Collections.unmodifiableList(regions); }
 

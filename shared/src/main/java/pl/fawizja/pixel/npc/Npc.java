@@ -12,6 +12,8 @@ public record Npc(String key, String name, NpcRole role, String town, Position p
 
     /** Klucz skrzyni depozytu (pole mapy dzialajace jak bankier w widoku depozytu). */
     public static final String DEPOT_LOCKER = "depot_locker";
+    /** Otwarta zwykla skrzynia (schowek na mapie) - okno jak u bankiera w widoku depozytu. */
+    public static final String CRATE = "crate";
 
     public Npc {
         Objects.requireNonNull(key);
