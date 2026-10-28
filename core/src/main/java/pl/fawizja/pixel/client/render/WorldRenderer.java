@@ -58,7 +58,13 @@ public final class WorldRenderer {
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) if (t.key().startsWith("door")) doors.add(t.id());
         this.doors = doors;
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
-            tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree", "ship_mast").contains(t.key());
+            tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree", "ship_mast", "jungle_tree", "frost_pine", "autumn_tree", "burnt_tree").contains(t.key());
+        }
+        if (art.itemRegistry() != null) {
+            for (java.util.Map.Entry<Position, String> e : world.displays().entrySet()) {
+                pl.fawizja.pixel.item.ItemType it = art.itemRegistry().byKeyOrNull(e.getValue());
+                if (it != null) displays.put(e.getKey(), it.id());
+            }
         }
         pl.fawizja.pixel.world.TileType mill = world.tiles().byKeyOrNull("windmill");
         windmillId = mill == null ? -1 : mill.id();
@@ -137,10 +143,22 @@ public final class WorldRenderer {
             }
             for (int x = x0; x <= x1; x++) {
                 drawObject(batch, f.get(Layer.OBJECT, x, y), x, y, x, wy);
+                if (!displays.isEmpty()) drawDisplay(batch, x, y, z, wy);
                 drawWall(batch, f, x, y, x, wy);
             }
             if (rows != null) rows.drawRow(batch, y);
         }
+    }
+
+    /** Towary na ladach sklepow (z mapy): pole -> numer przedmiotu; tylko grafika, gracz ich nie podnosi. */
+    private final java.util.Map<Position, Integer> displays = new java.util.HashMap<>();
+
+    /** Przedmiot lezacy na ladzie: pomniejszony, na blacie (lada ma wysokosc, wiec troche wyzej niz srodek pola). */
+    private void drawDisplay(SpriteBatch batch, int x, int y, int z, float wy) {
+        Integer id = displays.get(new Position(x, y, z));
+        if (id == null) return;
+        TextureRegion r = art.item(id);
+        if (r != null) batch.draw(r, x + 0.18f, wy + 0.3f, 0.62f, 0.62f);
     }
 
     private static final int[] SIDE_DX = {0, 1, 0, -1, 1, 1, -1, -1};

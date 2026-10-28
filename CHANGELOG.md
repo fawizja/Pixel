@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.207.0] - 2026-10-28
+
+### Dodano
+- Towary na ladach sklepów: przed kupcami, kowalami, magami i karczmarzami leżą na ladach i w gablotach
+  przedmioty, które sprzedają. Są tylko do oglądania, nie da się ich podnieść ani wejść na ladę.
+- Stawy i jeziorka w losowych miejscach (170): z trzciną przy brzegu, zamarznięte na lodach, oazy z palmami
+  na pustyni.
+- Roślinność dopasowana do klimatu z paczki OTSP: drzewa, krzewy i paprocie dżungli, oszronione świerki
+  i krzaki na lodach, suche krzewy na pustyni, jesienne drzewa i grzyby w lasach, zwęglone drzewa na
+  ziemiach wulkanu.
+- Ozdoby w miastach: donice, skrzynki z kwiatami, beczki, ławki i dzbany pod domami, kwiaty na trawnikach.
+
+### Zmieniono
+- Drogi kręcą się po terenie zamiast biec prostymi odcinkami.
+- Opuszczone i zajęte wioski wyglądają na napadnięte: spalona ziemia, zwęglone belki i drzewa, gruz,
+  krew i ciała, domy z dziurami w murach.
+- Podłogi w całym świecie z paczki WsT: kamień, marmur, cegła, piaskowiec, lód, posadzka domów, grobowce,
+  jaskinie i popiół.
+
 ## [0.206.0] - 2026-10-27
 
 ### Dodano

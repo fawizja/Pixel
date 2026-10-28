@@ -454,6 +454,12 @@ APK z development: https://github.com/fawizja/Pixel/releases/tag/development-apk
   zapisy -> pozycja (-1,-1,0) -> GameSession stawia w swiatyni miasta.
 - Otchlan Wulkanu: 5 pieter pod wulkanem (Otchlan -2..-1, Dno -5..-3). Openings.wallDecor wylaczony pod ziemia.
 - Testy maja heap 1536m (kazdy serwer testowy laduje swiat ~15 MB).
+## Wyglad swiata (2026-10-28, 06:27, wersja 0.207.0)
+- tools/mapgen/nature.py: ponds (stawy przed drogami, zajmuja footprint), ravage (napadniete wioski), town_ornaments
+  (ozdoby pod murami, bez zamykania przejsc i przy NPC), shop_displays -> maps/world/displays.csv (x;y;z;przedmiot).
+- features.winding_path: drogi przez odsuniete punkty posrednie, A* 8-kierunkowy po szumie kosztu, skosy dopelnione.
+- WorldMap.displays / MapLoader.readDisplays; WorldRenderer.drawDisplay rysuje przedmiot na ladzie. WorldLookTest.
+- Grafiki: otsp_import CLIMATE (jungle_tree, frost_pine, burnt_tree, blood, corpse...), wst_import FLOORS (posadzki).
 ## Nastepne kroki (dokladnie)
 Wszystkie 20 etapow zakonczone. Dalsze prace tylko na nowe polecenie (np. scalenie development do main
 - wymaga zgody Darka).

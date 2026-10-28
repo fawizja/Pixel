@@ -133,3 +133,19 @@
 141;clay_pot;OBJECT;0;0;town;#8a5a3a;crate
 142;sack;OBJECT;0;0;town;#a08860;crate
 143;sewer_grate;OBJECT;1;0;town;#3a3a3e;hole
+# 2026-10-28: roslinnosc wg klimatu i slady napadu na wioski (grafiki z paczki OTSP)
+144;jungle_tree;OBJECT;0;0;equatorial;#2a6a30;tree
+145;jungle_bush;OBJECT;0;0;equatorial;#3a8a3a;bush
+146;jungle_plant;DECORATION;1;0;equatorial;#3a9a40;tuft
+147;mushrooms;DECORATION;1;0;temperate;#c04030;flowers
+148;reeds;DECORATION;1;0;temperate;#5a8a3a;tuft
+149;frost_pine;OBJECT;0;0;north;#9ab8c0;pine
+150;frost_bush;OBJECT;0;0;north;#b8c8d0;bush
+151;dry_bush;OBJECT;0;0;desert;#a08a50;bush
+152;dry_shrub;DECORATION;1;0;desert;#8a5a3a;tuft
+153;autumn_tree;OBJECT;0;0;temperate;#c07a30;tree
+154;burnt_tree;OBJECT;0;0;temperate;#2a2420;tree
+155;burnt_beam;OBJECT;0;0;town;#2a2018;rubble
+156;debris;DECORATION;1;0;town;#5a4a3a;tuft
+157;corpse;DECORATION;1;0;town;#8a7060;tuft
+158;blood;DECORATION;1;0;town;#8a1a1a;tuft

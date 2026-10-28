@@ -30,6 +30,15 @@ SOURCES = {
     "BL": (S, (4, 4), (3, 3), (1, 2), (4, 3)),
     "BR": (S, (3, 4), (4, 3), (2, 1), (3, 3)),
 }
+# Posadzki z paczki (2026-10-28, Darek: "podlogi wszedzie na podlogi od WsT"): pelne pole srodka arkusza,
+# przebarwione do barwy posadzki (None = bez zmian). Paczka nie ma desek, wiec podloga domow to plyty w barwie drewna.
+FLOORS = {
+    "stone_floor": ("tilestone", None), "paving": ("tilestone", (176, 170, 158)),
+    "marble_floor": ("tilestone", (226, 222, 214)), "brick_paving": ("tilestone", (170, 98, 76)),
+    "sandstone_floor": ("tilestone", (212, 178, 118)), "frozen_floor": ("tilestone", (172, 202, 226)),
+    "wood_floor": ("tilestone", (160, 112, 72)), "tomb_floor": ("tilestone2", (122, 110, 82)),
+    "cave_floor": ("tiledirt", (104, 96, 88)), "ash": ("tiledirt", (82, 78, 76)),
+}
 QUAD = {"TL": (0, 0), "TR": (16, 0), "BL": (0, 16), "BR": (16, 16)}
 # przesuniecie okna zrodla na odslonieta strone (arkusze 192 px maja obwodke wystajaca 2 px poza pole)
 EXPOSED = {
@@ -60,7 +69,30 @@ def main(art):
             full.alpha_composite(quadrant(sheet, origin, shift, SOURCES[q][4], q, 4), QUAD[q])
         atlas.save(os.path.join(art, "autotiles", key + ".png"), optimize=True)
         full.save(os.path.join(art, "tiles", key + ".png"), optimize=True)
-    print("Zapisano", len(SHEETS), "autokafelkow do", art)
+    for key, (name, rgb) in FLOORS.items():
+        sheet = Image.open(os.path.join(HERE, "wst", name + ".png")).convert("RGBA")
+        origin = 16 if sheet.width == 192 else 48
+        shift = max(0, origin - sheet.getbbox()[0])
+        full = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+        for q in ("TL", "TR", "BL", "BR"):
+            full.alpha_composite(quadrant(sheet, origin, shift, SOURCES[q][4], q, 4), QUAD[q])
+        (full if rgb is None else recolor(full, rgb)).save(os.path.join(art, "tiles", key + ".png"), optimize=True)
+    print("Zapisano", len(SHEETS), "autokafelkow i", len(FLOORS), "posadzek do", art)
+
+
+def recolor(img, rgb):
+    """Barwa posadzki * jasnosc piksela wzgledem sredniej (wzor plyt zostaje)."""
+    img = img.copy()
+    px = img.load()
+    lums = [0.3 * px[x, y][0] + 0.59 * px[x, y][1] + 0.11 * px[x, y][2]
+            for y in range(img.height) for x in range(img.width) if px[x, y][3]]
+    mean = max(1.0, sum(lums) / len(lums))
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b, a = px[x, y]
+            k = (0.3 * r + 0.59 * g + 0.11 * b) / mean
+            px[x, y] = tuple(min(255, int(c * k)) for c in rgb) + (a,)
+    return img
 
 
 if __name__ == "__main__":

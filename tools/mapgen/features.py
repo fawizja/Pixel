@@ -52,8 +52,11 @@ def road_cost(world, T, footprint):
     return cost
 
 
-def astar(cost, start, goal, hw=0.8):
-    """Najtansza droga 4-sasiedztwem (heurystyka manhattan * hw)."""
+DIRS8 = DIRS4 + ((1, 1), (1, -1), (-1, 1), (-1, -1))
+
+
+def astar(cost, start, goal, hw=0.8, diag=False):
+    """Najtansza droga 4-sasiedztwem (heurystyka manhattan * hw); diag: tez po skosie (koszt * 1.41)."""
     S = cost.shape[0]
     sx, sy = start
     gx, gy = goal
@@ -67,7 +70,7 @@ def astar(cost, start, goal, hw=0.8):
         if d > best.get(p, 1e18):
             continue
         x, y = p
-        for dx, dy in DIRS4:
+        for dx, dy in (DIRS8 if diag else DIRS4):
             nx, ny = x + dx, y + dy
             if not (0 <= nx < S and 0 <= ny < S):
                 continue
@@ -76,11 +79,17 @@ def astar(cost, start, goal, hw=0.8):
                 c = 1.0
             if c == np.inf:
                 continue
+            if dx and dy:
+                # skos tylko gdy oba pola obok sa przejezdne (droga nie przecina rogu muru ani brzegu)
+                if cost[y, nx] == np.inf or cost[ny, x] == np.inf:
+                    continue
+                c *= 1.41
             nd = d + c
             if nd < best.get((nx, ny), 1e18):
                 best[(nx, ny)] = nd
                 prev[(nx, ny)] = p
-                h = (abs(gx - nx) + abs(gy - ny)) * hw
+                h = (max(abs(gx - nx), abs(gy - ny)) + 0.41 * min(abs(gx - nx), abs(gy - ny)) if diag
+                     else abs(gx - nx) + abs(gy - ny)) * hw
                 heapq.heappush(heap, (nd + h, nd, (nx, ny)))
     if goal not in prev:
         return None
@@ -132,8 +141,89 @@ def paint_road(world, T, path, cost, width=2, ground='dirt', keep=None):
     return bridges
 
 
+_WIGGLE = {}
+
+
+def wiggle_field(shape):
+    """Gladki szum 0..1 (dwie skale): mnoznik kosztu pol poza drogami, zeby drogi kluczyly zamiast isc prosto."""
+    if shape not in _WIGGLE:
+        rs = np.random.RandomState(20261028)
+        out = np.zeros(shape)
+        for base, amp in ((31, 0.65), (11, 0.35)):
+            n = shape[0] // base + 2
+            g = rs.uniform(0, 1, (n, n))
+            ys, xs = np.mgrid[0:shape[0], 0:shape[1]] / base
+            x0, y0 = xs.astype(int), ys.astype(int)
+            fx, fy = xs - x0, ys - y0
+            fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+            top = g[y0, x0] * (1 - fx) + g[y0, x0 + 1] * fx
+            bot = g[y0 + 1, x0] * (1 - fx) + g[y0 + 1, x0 + 1] * fx
+            out += amp * (top * (1 - fy) + bot * fy)
+        _WIGGLE[shape] = out
+    return _WIGGLE[shape]
+
+
+def winding_path(cost, a, b):
+    """Droga z zakretami (2026-10-28, Darek: "drogi nie maja byc prostymi kreskami"): przez punkty posrednie
+    odsuniete na przemian w bok od prostej a-b, po terenie z szumem kosztu (laczy sie z istniejacymi drogami)."""
+    ax, ay = a
+    bx, by = b
+    length = abs(bx - ax) + abs(by - ay)
+    rng = random.Random(ax * 7919 + ay * 104729 + bx * 31 + by)
+    field = wiggle_field(cost.shape)
+    noisy = np.where((cost >= 1.0) & np.isfinite(cost), cost * (1.0 + 2.2 * field), cost)
+    points = [a]
+    if length >= 36:
+        n = max(1, length // 45)
+        dx, dy = (bx - ax) / length, (by - ay) / length
+        side = rng.choice((-1, 1))
+        for i in range(1, n + 1):
+            t = i / (n + 1) + rng.uniform(-0.08, 0.08)
+            amp = side * min(22, 0.18 * length) * rng.uniform(0.5, 1.0)
+            px, py = int(ax + (bx - ax) * t - dy * amp), int(ay + (by - ay) * t + dx * amp)
+            best = None
+            for r in range(0, 7):
+                for qy in range(py - r, py + r + 1):
+                    for qx in range(px - r, px + r + 1):
+                        if 0 <= qx < cost.shape[1] and 0 <= qy < cost.shape[0] and cost[qy, qx] <= 3.0:
+                            best = (qx, qy)
+                            break
+                    if best:
+                        break
+                if best:
+                    break
+            if best:
+                points.append(best)
+            side = -side
+    points.append(b)
+    path = [a]
+    for p, q in zip(points, points[1:]):
+        seg = astar(noisy, p, q, diag=True)
+        if seg is None:
+            seg = astar(cost, p, q)
+        if seg is None:
+            return astar(cost, a, b)
+        path += seg[1:]
+    # bez petli: przy powrocie na pole juz odwiedzone wycinamy kawalek miedzy wizytami
+    seen, out = {}, []
+    for p in path:
+        if p in seen:
+            out = out[:seen[p] + 1]
+            seen = {q: i for i, q in enumerate(out)}
+            continue
+        seen[p] = len(out)
+        out.append(p)
+    # krok po skosie dopelniony polem obok (droga zostaje spojna dla chodzenia w czterech kierunkach)
+    full = out[:1]
+    for (px, py), (qx, qy) in zip(out, out[1:]):
+        if px != qx and py != qy:
+            full.append((qx, py) if np.isfinite(cost[py, qx]) else (px, qy))
+        full.append((qx, qy))
+    return full
+
+
 def connect(world, T, cost, a, b, width=2, keep=None):
-    path = astar(cost, a, b)
+    path = winding_path(cost, a, b)
     assert path is not None, f'no road {a} -> {b}'
     return paint_road(world, T, path, cost, width, keep=keep), path
 
@@ -300,8 +390,8 @@ def harbour_with_ship(world, start, d, pier=4):
 
 BIOME_STYLE = {
     # biom: (podloze, mur domow, podloga, drzewo)
-    'snow': ('snow', 'log_wall', 'wood_floor', 'pine'),
-    'taiga': ('snow', 'log_wall', 'wood_floor', 'pine'),
+    'snow': ('snow', 'log_wall', 'wood_floor', 'frost_pine'),
+    'taiga': ('snow', 'log_wall', 'wood_floor', 'frost_pine'),
     'temperate': ('grass', 'timber_wall', 'wood_floor', 'tree'),
     'hills': ('grass', 'plaster_wall', 'wood_floor', 'tree'),
     'forest': ('grass', 'wood_wall', 'wood_floor', 'tree'),
@@ -309,8 +399,8 @@ BIOME_STYLE = {
     'desert': ('sand', 'sandstone_wall', 'sandstone_floor', 'palm'),
     'savanna': ('sand', 'sandstone_wall', 'sandstone_floor', 'palm'),
     'shadow': ('dark_sand', 'sandstone_wall', 'sandstone_floor', 'dead_tree'),
-    'jungle': ('jungle_grass', 'wood_wall', 'wood_floor', 'palm'),
-    'swamp': ('jungle_grass', 'wood_wall', 'wood_floor', 'tree'),
+    'jungle': ('jungle_grass', 'wood_wall', 'wood_floor', 'jungle_tree'),
+    'swamp': ('jungle_grass', 'wood_wall', 'wood_floor', 'jungle_tree'),
     'volcanic': ('ash', 'stone_wall', 'stone_floor', 'dead_tree'),
 }
 HOME_FURNITURE = ['bed', 'table', 'chair', 'chest', 'wardrobe', 'barrel', 'bookcase', 'potted_plant']
@@ -430,7 +520,7 @@ def village(world, T, footprint, near, kind, rng, w=24, h=18):
         if kind == 'living':
             inner, door = house(world, hx, hy, hw, hh, wall, floor, side, rng)
         elif kind == 'deserted':
-            inner, door = house(world, hx, hy, hw, hh, wall, floor, side, rng, furniture=False, ruined=0.35)
+            inner, door = house(world, hx, hy, hw, hh, wall, floor, side, rng, furniture=False, ruined=0.45, burnt=True)
         else:
             inner, door = house(world, hx, hy, hw, hh, wall, floor, side, rng, furniture=False, ruined=0.5, burnt=True)
         houses.append((inner, door))

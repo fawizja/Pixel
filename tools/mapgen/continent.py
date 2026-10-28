@@ -346,49 +346,65 @@ WALL_OF = {'snow': ('snow', 'snow_mountain'), 'taiga': ('snow', 'snow_mountain')
 
 
 def ground_cell(biome, r, wood, n2):
-    """Kafel ladu wg biomu; wood = gestosc lasu w tym miejscu (0..1), n2 = drobny szum."""
+    """Kafel ladu wg biomu; wood = gestosc lasu w tym miejscu (0..1), n2 = drobny szum.
+    Roslinnosc dopasowana do klimatu (2026-10-28): oszronione swierki i krzaki na lodach, drzewa i paprocie dzungli,
+    suche krzewy na pustyni, jesienne drzewa i grzyby w lasach, zweglone drzewa na ziemiach wulkanu."""
     v = r.random()
     if biome == 'snow':
         if v < 0.05 + 0.25 * wood:
-            return ('snow', '-', 'pine', '-')
+            return ('snow', '-', 'frost_pine' if r.random() < 0.85 else 'pine', '-')
         if v < 0.27 * wood + 0.07:
-            return ('snow', '-', 'snow_rock' if r.random() < 0.15 else '-', '-')
+            o = r.random()
+            return ('snow', '-', 'snow_rock' if o < 0.15 else 'frost_bush' if o < 0.3 else 'ice_crystal' if o < 0.33 else '-', '-')
         return ('snow', 'snow_tuft' if r.random() < 0.08 else '-', '-', '-')
     if biome == 'taiga':
         g = 'snow' if n2 > 0.1 else 'grass'
         if v < 0.08 + 0.4 * wood:
-            return (g, '-', 'pine' if r.random() < 0.8 else 'tree', '-')
+            o = r.random()
+            if g == 'snow':
+                return (g, '-', 'frost_pine' if o < 0.7 else 'pine' if o < 0.9 else 'frost_bush', '-')
+            return (g, '-', 'pine' if o < 0.75 else 'tree' if o < 0.9 else 'bush', '-')
         return (g, 'snow_tuft' if g == 'snow' and r.random() < 0.1 else ('tall_grass' if r.random() < 0.08 else '-'), '-', '-')
     if biome in ('temperate', 'hills', 'forest'):
         dens = {'temperate': 0.04 + 0.45 * wood, 'hills': 0.03 + 0.2 * wood, 'forest': 0.12 + 0.62 * wood}[biome]
         if v < dens:
-            return ('grass', '-', 'tree' if r.random() < 0.85 else 'bush', '-')
+            o = r.random()
+            autumn = 0.1 if biome == 'forest' else 0.05
+            return ('grass', '-', 'autumn_tree' if o < autumn else 'tree' if o < 0.82 else 'bush', '-')
         if biome == 'hills' and r.random() < 0.02:
             return ('grass', '-', 'rock', '-')
         w = r.random()
-        return ('grass', 'flowers' if w < 0.04 else 'tall_grass' if w < 0.16 else '-', '-', '-')
+        if biome == 'forest' or wood > 0.55:
+            return ('grass', 'mushrooms' if w < 0.025 else 'flowers' if w < 0.05 else 'tall_grass' if w < 0.2 else '-', '-', '-')
+        return ('grass', 'flowers' if w < 0.05 else 'tall_grass' if w < 0.17 else '-', '-', '-')
     if biome == 'desert':
         if v < 0.012:
             return ('sand', '-', 'cactus', '-')
         if v < 0.02:
             return ('sand', '-', 'sandstone_rock', '-')
-        return ('dark_sand' if n2 > 0.35 else 'sand', 'dry_grass' if r.random() < 0.03 else '-', '-', '-')
+        if v < 0.028:
+            return ('sand', '-', 'dry_bush', '-')
+        w = r.random()
+        return ('dark_sand' if n2 > 0.35 else 'sand', 'dry_grass' if w < 0.03 else 'dry_shrub' if w < 0.045 else '-', '-', '-')
     if biome == 'savanna':
         g = 'grass' if n2 > 0.15 else 'sand'
         if v < 0.03 + 0.08 * wood:
-            return (g, '-', 'palm' if g == 'sand' else 'bush', '-')
+            return (g, '-', 'palm' if g == 'sand' else ('dry_bush' if r.random() < 0.6 else 'bush'), '-')
         return (g, 'dry_grass' if r.random() < 0.3 else '-', '-', '-')
     if biome == 'jungle':
         if v < 0.1 + 0.55 * wood:
             o = r.random()
-            return ('jungle_grass', '-', 'palm' if o < 0.3 else 'tree' if o < 0.85 else 'bush', '-')
-        return ('jungle_grass', 'fern' if r.random() < 0.18 else '-', '-', '-')
+            return ('jungle_grass', '-', 'palm' if o < 0.15 else 'jungle_tree' if o < 0.72 else 'jungle_bush', '-')
+        w = r.random()
+        return ('jungle_grass', 'fern' if w < 0.12 else 'jungle_plant' if w < 0.2 else '-', '-', '-')
     if biome == 'swamp':
         if n2 > 0.25 and v < 0.6:
             return ('swamp', '-', '-', '-')
         if v < 0.15:
-            return ('jungle_grass', '-', 'dead_tree' if r.random() < 0.5 else 'tree', '-')
-        return ('jungle_grass', 'fern' if r.random() < 0.2 else '-', '-', '-')
+            o = r.random()
+            return ('jungle_grass', '-', 'dead_tree' if o < 0.4 else 'jungle_tree' if o < 0.8 else 'jungle_bush', '-')
+        w = r.random()
+        return ('jungle_grass', 'reeds' if w < 0.12 else 'fern' if w < 0.22 else '-', '-', '-')
     if biome == 'cursed':
         if v < 0.06 + 0.4 * wood:
             return ('blighted_grass', '-', 'dead_tree' if r.random() < 0.6 else 'tree', '-')
@@ -397,14 +413,14 @@ def ground_cell(biome, r, wood, n2):
         if v < 0.02:
             return ('dark_sand', '-', 'sandstone_rock', '-')
         if v < 0.035:
-            return ('dark_sand', '-', 'dead_tree', '-')
+            return ('dark_sand', '-', 'dead_tree' if r.random() < 0.5 else 'burnt_tree', '-')
         return ('dark_sand' if n2 > -0.3 else 'ash', 'bones' if r.random() < 0.02 else '-', '-', '-')
     if biome == 'volcanic':
         if v < 0.03:
             return ('ash', '-', 'obsidian_rock', '-')
         if v < 0.05:
-            return ('ash', '-', 'dead_tree', '-')
-        return ('ash' if n2 > -0.2 else 'dark_sand', '-', '-', '-')
+            return ('ash', '-', 'burnt_tree', '-')
+        return ('ash' if n2 > -0.2 else 'dark_sand', 'debris' if r.random() < 0.02 else '-', '-', '-')
     return ('grass', '-', '-', '-')
 
 

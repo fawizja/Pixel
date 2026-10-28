@@ -19,6 +19,8 @@ public final class WorldMap {
     private final List<int[]> levelGates = new ArrayList<>();
     private final List<Town> towns = new ArrayList<>();
     private final List<Region> regions = new ArrayList<>();
+    /** Towary wylozone na ladach sklepow: pole lady -> klucz przedmiotu (tylko grafika, nie do podniesienia). */
+    private final Map<Position, String> displays = new java.util.HashMap<>();
 
     public WorldMap(String name, int width, int height, TileRegistry tiles) {
         this.name = name;
@@ -49,6 +51,13 @@ public final class WorldMap {
     }
 
     void addRegion(Region r) { regions.add(r); }
+
+    void addDisplay(Position p, String itemKey) { displays.put(p, itemKey); }
+
+    /** Przedmiot wylozony na ladzie w tym polu (do ogladania) albo null. */
+    public String displayAt(Position p) { return displays.get(p); }
+
+    public Map<Position, String> displays() { return Collections.unmodifiableMap(displays); }
 
     /** Miasto o nazwie (bez rozrozniania wielkosci liter) albo null. */
     public Town town(String name) {

@@ -121,7 +121,7 @@ VARIANTS = {
     "pine": (1508, 1565, 1566, 1579),
     "dead_tree": (1500, 1502, 1576),
     "bush": (1498, 1538, 1541, 1544, 1550, 1539, 1540, 1542, 1546, 1548, 1553, 1556, 1443, 1456, 1482),
-    "flowers": (1401, 1404, 1405, 1406, 1315, 1329, 1339, 1341, 1344, 1386, 1387, 1394, 1452, 1454),
+    "flowers": (1387, 1394, 1400, 1422, 1424, 1448, 1449, 1451, 1452, 1454, 1480, 1405, 1406),
     "fern": (1408, 1409, 1411, 1415, 1416, 1417, 1490, 1499),
     "tall_grass": (1362, 1365, 1366, 1368, 1370, 1375, 1378, 1382),
     "rock": (1622, 1624, 1626, 1628, 1634, 1635, 1636, 1637, 1638, 1639, 1640, 1598, 1599),
@@ -143,6 +143,52 @@ VARIANTS = {
     "wardrobe": (1105, 1107, 1108),
     "barrel": (1185, 1187),
 }
+# Roslinnosc wg klimatu i slady napadu na wioski (2026-10-28, Darek: "lasy, dzungla, lodowe wyspy dopasowane do
+# klimatu, krzaczki"; "opuszczone wioski napadniete, zniszczone, spalone"). nazwa -> (numery, przerobka):
+# None = bez zmian, ("mix", barwa, udzial) = domieszka barwy (szron, susza), ("dark", mnoznik) = zweglone,
+# ("tint", barwa) = przebarwienie. Pierwszy numer to tiles/klucz.png, kolejne to warianty _vN.
+CLIMATE = {
+    "jungle_tree": ((1562, 1564, 1568, 1570, 1571, 1572, 1573, 1574, 1577, 1578, 1581, 1582, 1583, 1584), None),
+    "jungle_bush": ((1420, 1488, 1489, 1490, 1491, 1492, 1493, 1494, 1495, 1496, 1497, 1499, 1455, 1478, 1479), None),
+    "jungle_plant": ((1407, 1412, 1414, 1415, 1416, 1417, 1418, 1419, 1446, 1447), None),
+    "mushrooms": ((1401, 1402, 1403, 1404, 1405, 1406), None),
+    "reeds": ((1409, 1410, 1411, 1412, 1413, 1414), None),
+    "frost_pine": ((1508, 1565, 1566, 1579), ("mix", (238, 244, 250), 0.42)),
+    "frost_bush": ((1483, 1484, 1485, 1482, 1486), ("mix", (238, 244, 250), 0.5)),
+    "dry_bush": ((1486, 1467, 1469, 1471, 1473, 1483), ("mix", (196, 168, 100), 0.4)),
+    "dry_shrub": ((1440, 1441, 1442, 1421, 1422), None),
+    "autumn_tree": ((1567, 1575, 1517, 1527, 1528), None),
+    "burnt_tree": ((1500, 1501, 1502, 1576), ("dark", 0.32)),
+    "burnt_beam": ((1588, 1589, 1590, 1591), ("dark", 0.3)),
+    "debris": ((509, 510, 511, 512, 513, 514, 515, 516, 517), ("dark", 0.75)),
+    "corpse": ((2227, 2246, 2247, 2248), None),
+    "blood": ((2221, 2222, 2224, 2226), ("tint", (175, 25, 25))),
+}
+
+
+def rework(img, mode):
+    if mode is None:
+        return img
+    if mode[0] == "tint":
+        return tint(img, mode[1])
+    img = img.copy()
+    px = img.load()
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b, a = px[x, y]
+            if not a:
+                continue
+            if mode[0] == "dark":
+                k = mode[1]
+                px[x, y] = (int(r * k + 8), int(g * k + 5), int(b * k + 4), a)
+            else:
+                rgb, part = mode[1], mode[2]
+                lum = (0.3 * r + 0.59 * g + 0.11 * b) / 255
+                p = part * (0.4 + 0.6 * lum)   # szron na jasnych miejscach, cienie zostaja
+                px[x, y] = tuple(int(v * (1 - p) + m * p) for v, m in zip((r, g, b), rgb)) + (a,)
+    return img
+
+
 # Meble skladane z kilku pol paczki (2026-10-24, audyt precyzji): lozko z paczki to dwie polowki (wezglowie i nogi),
 # a stol i oltarz to rogi stolu 2x2 - pojedynczy wycinek wygladal na ucieta grafike.
 # COMPOSITES: wiersze numerow, kazdy na swoim polu (grafika w naturalnym rozmiarze, native/klucz.png).
@@ -409,7 +455,7 @@ def save(img, path):
 # Grafiki w naturalnym rozmiarze jak w Tibii (2026-10-24, Darek: "meble precyzyjne"): obiekty wieksze niz pole
 # (64x32, 32x64, 64x64) nie sa sciskane do 32 px, tylko rysowane w calosci od prawego dolnego rogu pola
 # (native/klucz.png i native/klucz_vN.png, plotno 64x64). Drzewa, wiatrak i manekin zostaja po staremu.
-NATIVE_SKIP = {"tree", "pine", "palm", "dead_tree", "ship_mast", "windmill", "training_dummy", "door_open",
+NATIVE_SKIP = {"tree", "pine", "palm", "dead_tree", "jungle_tree", "frost_pine", "autumn_tree", "burnt_tree", "ship_mast", "windmill", "training_dummy", "door_open",
                "carpet", "rug", "magma", "hole", "rope_spot", "sewer_grate", "stairs_up", "stairs_down", "ladder", "campfire"}
 
 
@@ -555,6 +601,10 @@ def main(client, art):
     for name, ids in VARIANTS.items():
         for k, i in enumerate(ids, 2):
             save(trim_square(ot.compose(spr, things["item"][i])), f"{art}/tiles/{name}_v{k}.png"); n += 1
+    for name, (ids, mode) in CLIMATE.items():
+        for k, i in enumerate(ids, 1):
+            img = trim_square(rework(ot.compose(spr, things["item"][i]).convert("RGBA"), mode))
+            save(img, f"{art}/tiles/{name}{'' if k == 1 else '_v' + str(k)}.png"); n += 1
     for name, i in EXTRA_OBJECTS.items():
         save(ot.compose(spr, things["item"][i]), f"{art}/objects/{name}.png"); n += 1
     for name, i in ROOFS.items():
@@ -661,6 +711,13 @@ def main(client, art):
     for name, ids in VARIANTS.items():
         for k, i in enumerate(ids, 2):
             n += native(name, i, None, f"_v{k}")
+    for name, (ids, mode) in CLIMATE.items():
+        if name in NATIVE_SKIP:
+            continue
+        for k, i in enumerate(ids, 1):
+            c = native_canvas(rework(ot.compose(spr, things["item"][i]).convert("RGBA"), mode))
+            if c is not None:
+                save(c, f"{art}/native/{name}{'' if k == 1 else '_v' + str(k)}.png"); n += 1
     closed = ot.compose(spr, things["item"][OTSP_OBJECTS["chest_closed"]]).convert("RGBA")
     save(native_canvas(closed), f"{art}/native/chest_closed.png")
     save(open_chest(closed), f"{art}/native/chest_open.png"); n += 2

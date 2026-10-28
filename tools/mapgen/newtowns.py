@@ -14,10 +14,10 @@ NONE = '-'
 TOWNS = {
     'Valmir': dict(centre=(491, 765), w=48, h=38, port='S', key='valmir', levels=(25, 80),
                    wall='stone_wall', floor='wood_floor', hall='stone_floor', street='cobblestone',
-                   ground='grass', trees=['tree', 'bush'], decos=['flowers', 'tall_grass']),
+                   ground='grass', trees=['tree', 'bush', 'autumn_tree'], decos=['flowers', 'tall_grass']),
     'Nerys': dict(centre=(866, 738), w=44, h=36, port='S', key='nerys', levels=(60, 200),
                   wall='whitewash_wall', floor='wood_floor', hall='marble_floor', street='brick_paving',
-                  ground='grass', trees=['palm', 'bush'], decos=['flowers', 'fern']),
+                  ground='grass', trees=['palm', 'jungle_bush', 'jungle_tree'], decos=['flowers', 'fern', 'jungle_plant']),
 }
 
 # NPC miast: (rola w kluczu, imie, rola, sklep, kolor, powitanie); {T} = nazwa miasta

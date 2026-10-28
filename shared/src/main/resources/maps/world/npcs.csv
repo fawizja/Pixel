@@ -73,10 +73,10 @@ valmir_captain;Kapitan Radomir;CAPTAIN;Valmir;490;845;0;-;#4a6a8a;Mój statek p�
 nerys_captain;Kapitanka Maren;CAPTAIN;Nerys;865;784;0;-;#4a6a8a;Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium.
 gull_ferryman;Przewoźnik Bolko;CAPTAIN;Mewia Skała;131;49;0;-;#4a6a8a;Przewożę łodzią na stały ląd. Tylko posiadacze konta premium.
 lighthouse_ferryman;Latarniczka Wanda;CAPTAIN;Latarnia;76;214;0;-;#4a6a8a;Przewożę łodzią na stały ląd. Tylko posiadacze konta premium.
-wierzbowo_merchant;Sołtys Bogumił;MERCHANT;Wierzbowo;420;441;0;village_shop;#7a6a3a;Witaj w Wierzbowie. Chleb, mięso i pochodnie dla wędrowców.
-osada_merchant;Handlarka Jagna;MERCHANT;Mroźna Osada;680;261;0;village_shop;#7a6a3a;Ciepła strawa i liny na drogę w góry.
-wola_merchant;Rybaczka Halina;MERCHANT;Rybacka Wola;600;816;0;village_shop;#7a6a3a;Świeże ryby, chleb i pochodnie dla wędrowców.
-oaza_merchant;Handlarz Karim;MERCHANT;Oaza Daktylowa;144;365;0;village_shop;#7a6a3a;Woda, daktyle i liny na drogę przez pustynię.
+wierzbowo_merchant;Sołtys Bogumił;MERCHANT;Wierzbowo;424;431;0;village_shop;#7a6a3a;Witaj w Wierzbowie. Chleb, mięso i pochodnie dla wędrowców.
+osada_merchant;Handlarka Jagna;MERCHANT;Mroźna Osada;676;263;0;village_shop;#7a6a3a;Ciepła strawa i liny na drogę w góry.
+wola_merchant;Rybaczka Halina;MERCHANT;Rybacka Wola;602;796;0;village_shop;#7a6a3a;Świeże ryby, chleb i pochodnie dla wędrowców.
+oaza_merchant;Handlarz Karim;MERCHANT;Oaza Daktylowa;124;377;0;village_shop;#7a6a3a;Woda, daktyle i liny na drogę przez pustynię.
 varden_king;Król Aurelian;KING;Varden;548;492;0;-;#c8a040;Witaj w moim królestwie. Konta premium i promocje załatwisz tutaj: napisz premium albo promocja.
 guard_1;Strażniczka Dobrosława;GUARD;Varden;564;486;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.
 guard_2;Kusznik Wszebor;GUARD;Qasirah;215;467;0;-;#5a6a8a;Spokojnie, wędrowcze. Pod moją strażą w mieście nic ci nie grozi.

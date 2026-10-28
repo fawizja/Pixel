@@ -30,6 +30,7 @@ import continent as C  # noqa: E402
 import town as tk  # noqa: E402
 import features as F  # noqa: E402
 import sidewalk  # noqa: E402
+import nature  # noqa: E402
 import newtowns  # noqa: E402
 import underground as U  # noqa: E402
 
@@ -338,9 +339,11 @@ def run_legacy():
 
 
 NATURAL_GROUND = {'grass', 'snow', 'sand', 'jungle_grass', 'dark_sand', 'blighted_grass', 'ash'}
-NATURAL_DECO = {NONE, 'tall_grass', 'flowers', 'snow_tuft', 'fern', 'dry_grass', 'shells', 'bones'}
+NATURAL_DECO = {NONE, 'tall_grass', 'flowers', 'snow_tuft', 'fern', 'dry_grass', 'shells', 'bones', 'mushrooms',
+                'jungle_plant', 'reeds', 'dry_shrub', 'debris'}
 NATURAL_OBJ = {NONE, 'tree', 'pine', 'palm', 'bush', 'rock', 'cactus', 'snow_rock', 'sandstone_rock', 'dead_tree',
-               'obsidian_rock'}
+               'obsidian_rock', 'jungle_tree', 'jungle_bush', 'frost_pine', 'frost_bush', 'dry_bush', 'autumn_tree',
+               'burnt_tree', 'ice_crystal'}
 VARDEN_CORE = (48, 64, 111, 111)      # kopia maps/varden - zostaje 1:1 (test GameWorldTest)
 BAND = 2
 
@@ -710,6 +713,7 @@ def restore_varden_core(ctx):
 def build(ctx):
     world, T, footprint = ctx['world'], ctx['T'], ctx['footprint']
     ctx['varden_core'] = {p: world.get(*p) for p in varden_core_cells(ctx)}
+    print('stawy i jeziorka:', nature.ponds(ctx))
     cost = F.road_cost(world, T, footprint)
     for b in ctx['blocks']:
         if b.kind == 'entrance':
@@ -813,6 +817,9 @@ def build(ctx):
                 F.connect(world, T, cost, start, road, width=1)
                 cost[start[1], start[0]] = saved
     towns_dressing(ctx)
+    core = set(ctx['varden_core'])
+    print('ozdoby w miastach:', nature.town_ornaments(ctx, town_rects(ctx), random.Random(20261029),
+                                                      protect=lambda x, y: (x, y) in core))
     restore_varden_core(ctx)
     street_sides(ctx)
     atmosphere(ctx)
@@ -896,6 +903,9 @@ def villages(ctx, cost):
         road = nearest_road(world, cost, (cx, cy), exclude=(x0, y0, x1, y1))
         if road is not None:
             F.connect(world, T, cost, (cx, y1 + 1), road, width=1)
+        if kind != 'living':
+            v['keep'] = [tuple(int(t) for t in sp.split(';')[1:3]) for sp in ctx['spawns'][-len(monsters):]] if monsters else []
+            nature.ravage(world, v, rng, burnt=True)
     ctx['villages'] = out
     return out
 
@@ -1469,10 +1479,10 @@ GUARD_FEMALE = ['Dobrosława', 'Wiesława', 'Jaromira', 'Bogna', 'Świętosława
 GATES = [((498, 482), 'Varden'), ((565, 482), 'Varden'), ((498, 531), 'Varden'), ((213, 464), 'Qasirah'),
          ((244, 486), 'Qasirah'), ((721, 213), 'Frostholm'), ((741, 230), 'Frostholm'), ((656, 700), 'Selvaran')]
 TOWN_BLOCKS = {'Varden': 'varden', 'Frostholm': 'frostholm', 'Qasirah': 'qasirah', 'Selvaran': 'selvaran'}
-TOWN_GREEN = {'Varden': (['tree', 'bush'], ['flowers', 'tall_grass']),
-              'Frostholm': (['pine', 'snow_rock'], ['snow_tuft']),
-              'Qasirah': (['palm', 'cactus', 'bush'], ['dry_grass', 'flowers']),
-              'Selvaran': (['tree', 'palm', 'bush'], ['fern', 'flowers'])}
+TOWN_GREEN = {'Varden': (['tree', 'bush', 'autumn_tree'], ['flowers', 'tall_grass', 'flowers']),
+              'Frostholm': (['frost_pine', 'frost_bush', 'snow_rock'], ['snow_tuft']),
+              'Qasirah': (['palm', 'cactus', 'dry_bush'], ['dry_grass', 'flowers', 'dry_shrub']),
+              'Selvaran': (['jungle_tree', 'palm', 'jungle_bush'], ['fern', 'flowers', 'jungle_plant'])}
 
 
 def in_pz(ctx, x, y, z=0):
@@ -1649,8 +1659,8 @@ def atmosphere(ctx):
 
 SOFT_GROUNDS = {'grass', 'snow', 'sand', 'dark_sand', 'ash', 'jungle_grass', 'blighted_grass'}
 # rosliny pasujace do podloza: po zmianie podloza nie zostaje sosna na piasku ani palma na sniegu
-COLD_ONLY = {'pine', 'snow_rock', 'snow_tuft'}
-WARM_ONLY = {'palm', 'cactus', 'sandstone_rock', 'dry_grass', 'shells'}
+COLD_ONLY = {'pine', 'snow_rock', 'snow_tuft', 'frost_pine', 'frost_bush', 'ice_crystal'}
+WARM_ONLY = {'palm', 'cactus', 'sandstone_rock', 'dry_grass', 'shells', 'dry_bush', 'dry_shrub'}
 COLD, WARM = {'snow'}, {'sand', 'dark_sand', 'ash'}
 
 
@@ -1947,6 +1957,20 @@ def fix_transition_targets(ctx):
 
 
 def finish(ctx):
+    shops = {}
+    with open(os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'shops.csv'), encoding='utf-8') as f:
+        for line in f:
+            if line.startswith('#') or not line.strip():
+                continue
+            p = line.strip().split(';')
+            if int(p[2]) > 0:
+                shops.setdefault(p[0], []).append(p[1])
+    vb = next(bb for bb in ctx['blocks'] if bb.name == 'varden')
+    vr = (vb.rect[0] + vb.dx, vb.rect[1] + vb.dy, vb.rect[2] + vb.dx, vb.rect[3] + vb.dy)
+    core = set(ctx['varden_core'])
+    ctx['displays'] = nature.shop_displays(ctx, shops, protect=lambda x, y: (x, y) in core or (
+        vr[0] <= x <= vr[2] and vr[1] <= y <= vr[3]))
+    print('towary na ladach:', len(ctx['displays']))
     snap_spawns(ctx)
     fix_transition_targets(ctx)
     temple = dict(ctx['towns'])['Varden']
@@ -1962,6 +1986,10 @@ def finish(ctx):
     ]
     write_world(ctx['world'], ctx['legacy'], props, ctx['transitions'], ctx['npcs'], ctx['spawns'], ctx['houses'],
                 ctx['routes'])
+    with open(os.path.join(OUT, 'displays.csv'), 'w', encoding='utf-8') as f:
+        f.write('# towary wylozone na ladach sklepow (tylko do ogladania): x;y;z;przedmiot\n')
+        for d in ctx['displays']:
+            f.write(';'.join(str(v) for v in d) + '\n')
 
 
 if __name__ == '__main__':

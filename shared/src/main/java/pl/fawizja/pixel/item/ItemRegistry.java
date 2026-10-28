@@ -85,6 +85,9 @@ public final class ItemRegistry {
         return t;
     }
 
+    /** Przedmiot o kluczu albo null. */
+    public ItemType byKeyOrNull(String key) { return byKey.get(key); }
+
     public ItemType byKey(String key) {
         ItemType t = byKey.get(key);
         if (t == null) throw new IllegalArgumentException("Unknown item key " + key);

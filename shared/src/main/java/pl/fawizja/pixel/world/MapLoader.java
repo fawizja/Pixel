@@ -117,6 +117,7 @@ public final class MapLoader {
 
         readTransitions(base + "transitions.csv", world);
         validateTransitions(world);
+        readDisplays(base + "displays.csv", world);
         return world;
     }
 
@@ -151,6 +152,23 @@ public final class MapLoader {
             FloorMap floor = world.floor(from.z());
             if (floor == null) throw new IOException(path + ": no floor " + from.z());
             floor.addTransition(new Transition(from, TransitionType.valueOf(f[3].trim()), to));
+        }
+    }
+
+    /** Towary na ladach sklepow (plik opcjonalny): x;y;z;przedmiot, tylko na polu z lada albo gablota. */
+    private void readDisplays(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 4) throw new IOException(path + ": expected 4 fields in '" + line + "'");
+            Position p = new Position(i(f[0]), i(f[1]), i(f[2]));
+            FloorMap floor = world.floor(p.z());
+            if (floor == null || !floor.inBounds(p.x(), p.y()) || floor.get(Layer.OBJECT, p.x(), p.y()) == 0) {
+                throw new IOException(path + ": display needs a counter at " + p);
+            }
+            world.addDisplay(p, f[3].trim());
         }
     }
 

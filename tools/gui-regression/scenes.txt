@@ -48,7 +48,7 @@ look|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -
 king|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=548,493,0 -Dpixel.open=npc
 qasirah_temple|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=21 -Dpixel.teleport=200,487,0
 windmill|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=206,453,0
-orc_village|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=317,633,0
+orc_village|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=307,618,0
 rope_bridge|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=410,168,1
 volcano|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=367,93,0
 # 2026-10-27: swiat 1000x1000 - nowe miasta, kanaly pod kratkami, kopalnia pod miastem
