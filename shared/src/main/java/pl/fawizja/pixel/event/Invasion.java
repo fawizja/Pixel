@@ -86,13 +86,13 @@ public final class Invasion {
     }
 
     /**
-     * Miejsce zbiorki za murami: kafelek na powierzchni 14-24 pol od swiatyni, do przejscia i poza strefa ochronna.
-     * null, gdy nic sie nie nadaje.
+     * Miejsce zbiorki za murami: kafelek na powierzchni 14-40 pol od swiatyni (duze miasta maja mury dalej), do
+     * przejscia i poza strefa ochronna. null, gdy nic sie nie nadaje.
      */
     public static Position gatherPoint(WorldMap world, Town town, Random rng) {
         Position t = town.temple();
-        for (int attempt = 0; attempt < 2000; attempt++) {
-            int dx = rng.nextInt(49) - 24, dy = rng.nextInt(49) - 24;
+        for (int attempt = 0; attempt < 4000; attempt++) {
+            int dx = rng.nextInt(81) - 40, dy = rng.nextInt(81) - 40;
             int d = Math.max(Math.abs(dx), Math.abs(dy));
             if (d < 14) continue;
             Position p = new Position(t.x() + dx, t.y() + dy, t.z());

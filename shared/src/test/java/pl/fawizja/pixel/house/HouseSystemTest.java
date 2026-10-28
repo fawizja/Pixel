@@ -85,7 +85,12 @@ class HouseSystemTest {
         pc.setPosition(nextTo(agent));
         GameSession s = session(pc, null);
 
-        Position inside = new Position(h.door().x(), h.door().y() + 1, h.z());
+        Position inside = null;
+        for (int[] d : new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+            Position q = h.door().translate(d[0], d[1]);
+            if (h.contains(q)) inside = q;
+        }
+        assertNotNull(inside, "door leads into the house");
         assertFalse(s.mayEnter(inside), "closed before buying");
         assertTrue(s.buyHouse(h.id(), 0));
         assertEquals(h.id(), pc.house());
@@ -115,7 +120,12 @@ class HouseSystemTest {
         assertEquals(h.price(), b.bank().balance(), "no money taken on failure");
 
         // obcy nie wejdzie przez drzwi, wlasciciel tak
-        Position inside = new Position(h.door().x(), h.door().y() + 1, h.z());
+        Position inside = null;
+        for (int[] d : new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+            Position q = h.door().translate(d[0], d[1]);
+            if (h.contains(q)) inside = q;
+        }
+        assertNotNull(inside, "door leads into the house");
         b.setPosition(h.door());
         assertFalse(sb.mayEnter(inside));
         assertTrue(sa.mayEnter(inside));

@@ -44,6 +44,8 @@ def ponds(ctx, count=170, seed=20261028):
         m = int(r) + 5
         if foot[cy - m:cy + m + 1, cx - m:cx + m + 1].any() or T.water[cy - m:cy + m + 1, cx - m:cx + m + 1].any():
             continue
+        if any(abs(cx - ax) <= m + 8 and abs(cy - ay) <= m + 8 for ax, ay in ctx.get('pond_avoid', ())):
+            continue                                       # konce drog i przystanie zostaja suche
         ok = True
         for y in range(cy - m, cy + m + 1):
             for x in range(cx - m, cx + m + 1):
@@ -275,11 +277,11 @@ def shop_displays(ctx, shops, protect=None):
             continue
         room = room_cells(world, (x, y), z)
         counters = sorted(p for p in room if world.get(p[0], p[1], z)[2] in COUNTERS
-                          and abs(p[0] - x) <= 3 and abs(p[1] - y) <= 3)
+                          and abs(p[0] - x) <= 4 and abs(p[1] - y) <= 3)
         if len(counters) < 3:
             counters += place_counters(world, (x, y), z, room, taken, protect, 3 - len(counters))
         counters.sort(key=lambda p: (abs(p[0] - x) + abs(p[1] - y), p))
-        for i, (cx, cy) in enumerate(counters[:4]):
+        for i, (cx, cy) in enumerate(counters[:7]):
             out.append((cx, cy, z, items[i % len(items)]))
     return out
 

@@ -7,6 +7,7 @@ nabrzeze z duzym statkiem kapitana. Funkcja build zwraca wszystko, czego potrzeb
 (swiatynia, NPC, domy, strefa ochronna, punkty za bramami).
 """
 import features as F
+import organic
 
 NONE = '-'
 
@@ -61,133 +62,15 @@ FURNITURE = {
 
 
 def build(world, name, rng):
-    spec = TOWNS[name]
-    W, H = spec['w'], spec['h']
-    cx0, cy0 = spec['centre']
-    x0, y0 = cx0 - W // 2, cy0 - H // 2
-    cx, cy = W // 2, H // 2
-    wall, street, ground = spec['wall'], spec['street'], spec['ground']
-
-    def put(x, y, cell):
-        world.put(x0 + x, y0 + y, 0, cell)
-
-    # plac budowy: podloze, ulice, mury
-    for y in range(H):
-        for x in range(W):
-            put(x, y, (ground, NONE, NONE, NONE))
-    for y in range(H):
-        for x in range(W):
-            ring = x in (1, 2, W - 3, W - 2) or y in (1, 2, H - 3, H - 2)
-            main = cx - 1 <= x <= cx + 1 or cy - 1 <= y <= cy + 1
-            plaza = abs(x - cx) <= 3 and abs(y - cy) <= 3
-            if (ring or main or plaza) and 0 < x < W - 1 and 0 < y < H - 1:
-                put(x, y, (street, NONE, NONE, NONE))
-            if x in (0, W - 1) or y in (0, H - 1):
-                put(x, y, (ground, NONE, NONE, wall))
-    gates = {}
-    for side, cells, out in (('N', [(cx + d, 0) for d in (-1, 0, 1)], (cx, -1)),
-                             ('S', [(cx + d, H - 1) for d in (-1, 0, 1)], (cx, H)),
-                             ('W', [(0, cy + d) for d in (-1, 0, 1)], (-1, cy)),
-                             ('E', [(W - 1, cy + d) for d in (-1, 0, 1)], (W, cy))):
-        for (x, y) in cells:
-            put(x, y, (street, NONE, NONE, NONE))
-        gates[side] = (x0 + out[0], y0 + out[1])
-        # droga tuz za brama (2 pola), zeby generator drog mial gdzie dolaczyc
-        for k in (1, 2):
-            ox, oy = out[0] + (out[0] - cells[1][0]) * (k - 1), out[1] + (out[1] - cells[1][1]) * (k - 1)
-            for d in (-1, 0, 1):
-                if side in 'NS':
-                    world.put(x0 + ox + d, y0 + oy, 0, ('dirt', NONE, NONE, NONE))
-                else:
-                    world.put(x0 + ox, y0 + oy + d, 0, ('dirt', NONE, NONE, NONE))
-    # fontanna na placu i latarnie przy niej
-    put(cx, cy, (street, NONE, 'fountain', NONE))
-    for (dx, dy) in ((-3, -3), (3, -3), (-3, 3), (3, 3)):
-        put(cx + dx, cy + dy, (street, NONE, 'street_lamp', NONE))
-
-    # kwartaly: (x od, x do, y od, y do) wnetrza kwartalu w ukladzie lokalnym
-    qx = [(3, cx - 4), (cx + 4, W - 4)]
-    qy = [(3, cy - 4), (cy + 4, H - 4)]
-    npcs, houses = [], []
-    roles = [r[0] for r in NPCS[name]]
-    lots = []
-    for j, (ya, yb) in enumerate(qy):
-        for i, (xa, xb) in enumerate(qx):
-            if i == 0 and j == 0:
-                continue                          # swiatynia
-            mid = (xa + xb) // 2
-            assert yb - ya >= 10, f'{name}: quarter too low'
-            rows = [(ya, ya + 5), (max(ya + 6, yb - 5), yb)]
-            for r, (ra, rb) in enumerate(rows):
-                for (ca, cb) in ((xa, mid), (mid + 2, xb)):
-                    side = 'N' if r == 0 else 'S'
-                    lots.append((ca, ra, cb, rb, side))
-    # swiatynia: caly kwartal polnocno-zachodni, drzwi na poludnie (do glownej ulicy)
-    (ta, tb), (tc, td) = qx[0], qy[0]
-    hall = spec['hall']
-    inner, door = F.house(world, x0 + ta, y0 + tc, tb - ta + 1, td - tc + 1, wall, hall, 'S', rng, furniture=False)
-    altar = (door[0], y0 + tc + 2)
-    world.put(altar[0], altar[1], 0, (hall, 'carpet', 'altar', NONE))
-    for y in range(altar[1] + 1, door[1]):
-        world.put(altar[0], y, 0, (hall, 'carpet', NONE, NONE))
-    for (dx, dy) in ((-3, 0), (3, 0), (-3, 3), (3, 3), (-6, 5), (6, 5)):
-        c = world.get(altar[0] + dx, altar[1] + dy)
-        if c is not None and c[3] == NONE:
-            world.put(altar[0] + dx, altar[1] + dy, 0, (hall, NONE, 'candle', NONE))
-    for (dx, dy) in ((-2, 6), (2, 6), (-2, 8), (2, 8)):
-        world.put(altar[0] + dx, altar[1] + dy, 0, (hall, NONE, 'bench', NONE))
-    temple = (altar[0], altar[1] + 1)
-    key = spec['key']
-    priest = NPCS[name][0]
-    npcs.append([f'{key}_priest', priest[1], priest[2], name, altar[0] + 1, altar[1] + 1, 0, priest[3], priest[4], priest[5]])
-
-    # pozostale budynki: NPC po kolei, reszta to domy do wynajecia
-    others = [r for r in NPCS[name][1:]]
-    lots.sort(key=lambda lot: (lot[4], lot[1], lot[0]))
-    for k, (ca, ra, cb, rb, side) in enumerate(lots):
-        bw, bh = cb - ca + 1, rb - ra + 1
-        if k < len(others):
-            role = others[k]
-            floor = spec['floor'] if role[0] not in ('smith', 'carrier') else 'stone_floor'
-            inner, door = F.house(world, x0 + ca, y0 + ra, bw, bh, wall, floor, side, rng, furniture=False)
-            furnish(world, inner, door, FURNITURE.get(role[0], []), floor)
-            spot = npc_spot(world, inner, door)
-            npcs.append([f'{key}_{role[0]}', role[1], role[2], name, spot[0], spot[1], 0, role[3], role[4], role[5]])
-        else:
-            inner, door = F.house(world, x0 + ca, y0 + ra, bw, bh, wall, spec['floor'], side, rng, furniture=True)
-            xs = [p[0] for p in inner]
-            ys = [p[1] for p in inner]
-            n = len(houses) + 1
-            area = len(inner)
-            houses.append([f'{key}_{n}', f'{"Port" if name == "Valmir" else "Willa"} {n}', name,
-                           min(xs), min(ys), max(xs), max(ys), 0, door[0], door[1], area * 5000])
-        # drozka od drzwi do ulicy
-        dx_, dy_ = door
-        step = -1 if side == 'N' else 1
-        y = dy_ + step
-        while 0 < y - y0 < H - 1:
-            c = world.get(dx_, y)
-            if c[0] == street:
-                break
-            world.put(dx_, y, 0, (street, NONE, NONE, NONE))
-            y += step
-    assert len(lots) >= len(others), f'{name}: too few lots'
-    # zielen na podworkach: drzewa z wolnymi sasiadami, kwiaty
-    for y in range(1, H - 1):
-        for x in range(1, W - 1):
-            c = world.get(x0 + x, y0 + y)
-            if c[0] != ground or c[2] != NONE or c[3] != NONE:
-                continue
-            r = rng.random()
-            free = all(F.walk(world.get(x0 + x + a, y0 + y + b)) and world.get(x0 + x + a, y0 + y + b)[2] == NONE
-                       for a in (-1, 0, 1) for b in (-1, 0, 1))
-            if r < 0.06 and free:
-                put(x, y, (ground, NONE, rng.choice(spec['trees']), NONE))
-            elif r < 0.2:
-                put(x, y, (ground, rng.choice(spec['decos']), NONE, NONE))
-    rect = (x0, y0, x0 + W - 1, y0 + H - 1)
-    return {'name': name, 'rect': rect, 'temple': temple, 'npcs': npcs, 'houses': houses, 'gates': gates,
-            'pz': (x0 + 1, y0 + 1, x0 + W - 2, y0 + H - 2)}
+    """Miasto o nieregularnym ksztalcie (organic.py): mur po falujacym obrysie, krete ulice, budynki przy ulicach."""
+    spec = dict(TOWNS[name])
+    spec['name'] = name
+    spec['rx'], spec['ry'] = spec['w'] * 0.72, spec['h'] * 0.72
+    spec['gates'] = 'NSWE'
+    spec['house_label'] = 'Port' if name == 'Valmir' else 'Willa'
+    roles = [dict(key=f"{spec['key']}_{r[0]}", name=r[1], role=r[2], shop=r[3], color=r[4], greet=r[5], kind=r[0],
+                  central=r[0] in ('banker', 'innkeeper')) for r in NPCS[name]]
+    return organic.build(world, spec, rng, roles, houses=12)
 
 
 def furnish(world, inner, door, items, floor):

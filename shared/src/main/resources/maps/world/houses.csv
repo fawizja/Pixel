@@ -1,25 +1,49 @@
 # id;nazwa;miasto;wnetrze x0;y0;x1;y1;z;drzwi x;drzwi y;cena (gp, z konta)
-frostholm_1;Dolne Miasto 1;Frostholm;726;223;729;225;0;727;222;60000
-frostholm_2;Dolne Miasto 2;Frostholm;733;223;736;225;0;734;222;60000
-frostholm_3;Dolne Miasto 3;Frostholm;747;223;750;225;0;748;222;60000
-frostholm_4;Dolne Miasto 4;Frostholm;754;223;757;225;0;755;222;60000
-frostholm_5;Taras Zachodni;Frostholm;725;201;729;203;1;727;204;75000
-frostholm_6;Taras Wschodni 1;Frostholm;747;200;750;202;1;748;203;60000
-frostholm_7;Taras Wschodni 2;Frostholm;754;200;757;202;1;755;203;60000
-qasirah_1;Uliczka Palmowa 1;Qasirah;192;504;195;506;0;193;503;60000
-qasirah_2;Uliczka Palmowa 2;Qasirah;199;504;202;506;0;200;503;60000
-qasirah_3;Uliczka Palmowa 3;Qasirah;206;504;209;506;0;207;503;60000
-selvaran_1;Zaulek Palmowy 1;Selvaran;666;704;670;707;0;668;703;100000
-selvaran_2;Zaulek Palmowy 2;Selvaran;666;711;670;714;0;668;710;100000
-selvaran_3;Zaulek Palmowy 3;Selvaran;674;711;678;714;0;676;710;100000
-varden_1;Dzielnica Krolewska 1;Varden;557;510;561;513;0;558;509;200000
-varden_2;Dzielnica Krolewska 2;Varden;565;510;569;513;0;566;509;200000
-varden_3;Dzielnica Krolewska 3;Varden;565;517;569;520;0;566;516;200000
-valmir_1;Port 1;Valmir;471;776;477;779;0;474;780;140000
-valmir_2;Port 2;Valmir;481;776;486;779;0;484;780;120000
-valmir_3;Port 3;Valmir;496;776;502;779;0;499;780;140000
-valmir_4;Port 4;Valmir;506;776;510;779;0;508;780;100000
-nerys_1;Willa 1;Nerys;848;749;853;751;0;851;752;90000
-nerys_2;Willa 2;Nerys;857;749;861;751;0;859;752;75000
-nerys_3;Willa 3;Nerys;871;749;876;751;0;874;752;90000
-nerys_4;Willa 4;Nerys;880;749;883;751;0;882;752;60000
+valmir_1;Port 1;Valmir;519;769;525;771;0;524;768;105000
+valmir_2;Port 2;Valmir;476;753;478;757;0;477;758;75000
+valmir_3;Port 3;Valmir;483;778;485;782;0;484;777;75000
+valmir_4;Port 4;Valmir;503;770;505;775;0;502;772;90000
+valmir_5;Port 5;Valmir;478;747;482;749;0;483;749;75000
+valmir_6;Port 6;Valmir;495;780;498;784;0;498;779;100000
+valmir_7;Port 7;Valmir;517;760;519;763;0;520;760;60000
+valmir_8;Port 8;Valmir;472;763;474;765;0;472;762;45000
+valmir_9;Port 9;Valmir;503;761;506;764;0;502;761;80000
+valmir_10;Port 10;Valmir;465;769;467;771;0;464;769;60000;467,772,467,774
+valmir_11;Port 11;Valmir;509;778;511;780;0;508;780;65000;511,774,511,777
+valmir_12;Port 12;Valmir;489;781;491;785;0;491;786;75000
+nerys_1;Willa 1;Nerys;851;721;855;725;0;856;724;125000
+nerys_2;Willa 2;Nerys;893;747;895;751;0;895;752;75000
+nerys_3;Willa 3;Nerys;864;713;866;716;0;863;715;60000
+nerys_4;Willa 4;Nerys;860;734;862;736;0;863;735;45000
+nerys_5;Willa 5;Nerys;854;749;857;752;0;858;749;80000
+nerys_6;Willa 6;Nerys;865;754;868;758;0;864;754;100000
+nerys_7;Willa 7;Nerys;874;753;877;755;0;876;752;60000
+nerys_8;Willa 8;Nerys;845;734;847;737;0;845;738;60000
+nerys_9;Willa 9;Nerys;870;715;872;717;0;871;714;45000
+nerys_10;Willa 10;Nerys;890;740;892;742;0;892;739;45000
+qasirah_1;Dom 1;Qasirah;197;494;199;496;0;196;494;60000;199,491,199,493
+qasirah_2;Dom 2;Qasirah;197;479;203;481;0;203;482;125000;193,479,196,479
+qasirah_3;Dom 3;Qasirah;241;503;244;506;0;240;506;80000
+qasirah_4;Dom 4;Qasirah;200;473;203;475;0;204;475;60000
+qasirah_5;Dom 5;Qasirah;232;497;235;500;0;231;499;80000
+qasirah_6;Dom 6;Qasirah;241;487;243;489;0;243;486;45000
+qasirah_7;Dom 7;Qasirah;198;464;200;467;0;201;467;70000;198,462,198,463
+qasirah_8;Dom 8;Qasirah;194;473;196;475;0;196;476;45000
+qasirah_9;Dom 9;Qasirah;239;494;243;499;0;244;494;150000
+qasirah_10;Dom 10;Qasirah;248;499;250;501;0;249;498;45000
+frostholm_1;Chata 1;Frostholm;763;193;766;197;0;763;192;100000
+frostholm_2;Chata 2;Frostholm;721;196;723;198;0;724;196;45000
+frostholm_3;Chata 3;Frostholm;728;195;731;197;0;727;197;75000;731,192,731,194
+frostholm_4;Chata 4;Frostholm;752;192;754;194;0;753;191;45000
+frostholm_5;Chata 5;Frostholm;715;217;717;219;0;715;216;45000
+selvaran_1;Dom 1;Selvaran;702;682;708;686;0;706;687;175000
+selvaran_2;Dom 2;Selvaran;700;707;703;709;0;700;710;60000
+selvaran_3;Dom 3;Selvaran;671;715;675;718;0;675;719;100000
+selvaran_4;Dom 4;Selvaran;661;692;666;694;0;665;695;100000;667,692,668,692
+selvaran_5;Dom 5;Selvaran;710;706;712;708;0;712;705;45000
+selvaran_6;Dom 6;Selvaran;690;683;693;685;0;689;683;60000
+selvaran_7;Dom 7;Selvaran;665;710;667;712;0;664;712;45000
+varden_1;Dzielnica Krolewska 1;Varden;545;515;547;517;0;548;515;130000;545,511,545,514
+varden_2;Dzielnica Krolewska 2;Varden;552;490;555;492;0;555;493;120000
+varden_3;Dzielnica Krolewska 3;Varden;570;497;572;500;0;571;501;120000
+varden_4;Dzielnica Krolewska 4;Varden;542;522;544;524;0;542;525;90000

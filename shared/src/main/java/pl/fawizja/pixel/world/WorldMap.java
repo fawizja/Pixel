@@ -16,6 +16,7 @@ public final class WorldMap {
     private final Map<Integer, FloorMap> floors = new TreeMap<>();
     private Position spawn;
     private final List<int[]> protectionZones = new ArrayList<>();
+    private volatile java.util.Map<Integer, java.util.BitSet> pzCells;
     private final List<int[]> levelGates = new ArrayList<>();
     private final List<Town> towns = new ArrayList<>();
     private final List<Region> regions = new ArrayList<>();
@@ -99,6 +100,7 @@ public final class WorldMap {
     /** Dodaje prostokatna strefe ochronna (bez walki, potwory nie wchodza). */
     public void addProtectionZone(int x0, int y0, int x1, int y1, int z) {
         protectionZones.add(new int[] {Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1), Math.max(y0, y1), z});
+        pzCells = null;
     }
 
     /** Przejscie strzezone: wejsc moga tylko postacie od danego poziomu. */
@@ -116,10 +118,30 @@ public final class WorldMap {
     }
 
     public boolean isProtectionZone(Position p) {
-        for (int[] r : protectionZones) {
-            if (p.z() == r[4] && p.x() >= r[0] && p.x() <= r[2] && p.y() >= r[1] && p.y() <= r[3]) return true;
+        if (p.x() < 0 || p.y() < 0 || p.x() >= width() || p.y() >= height()) {
+            for (int[] r : protectionZones) {
+                if (p.z() == r[4] && p.x() >= r[0] && p.x() <= r[2] && p.y() >= r[1] && p.y() <= r[3]) return true;
+            }
+            return false;
         }
-        return false;
+        java.util.Map<Integer, java.util.BitSet> cells = pzCells;
+        if (cells == null) cells = pzCells = protectionBits();
+        java.util.BitSet b = cells.get(p.z());
+        return b != null && b.get(p.y() * width() + p.x());
+    }
+
+    /** Strefy ochronne jako mapa bitowa pieter (miasta o nieregularnym ksztalcie maja setki prostokatow). */
+    private java.util.Map<Integer, java.util.BitSet> protectionBits() {
+        java.util.Map<Integer, java.util.BitSet> out = new java.util.HashMap<>();
+        int w = width(), h = height();
+        for (int[] r : protectionZones) {
+            java.util.BitSet b = out.computeIfAbsent(r[4], k -> new java.util.BitSet(w * h));
+            for (int y = Math.max(0, r[1]); y <= Math.min(h - 1, r[3]); y++) {
+                if (r[0] > r[2] || r[0] >= w) continue;
+                b.set(y * w + Math.max(0, r[0]), y * w + Math.min(w - 1, r[2]) + 1);
+            }
+        }
+        return out;
     }
 
     /** Linia wzroku na tym samym pietrze (Bresenham, pomija punkt startowy i docelowy). */

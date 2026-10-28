@@ -12,7 +12,8 @@ import pl.fawizja.pixel.world.WorldMap;
 
 /**
  * Domy z /maps/&lt;mapa&gt;/houses.csv (tworzy go generator miast):
- * id;nazwa;miasto;x0;y0;x1;y1;z;drzwi x;drzwi y;cena. Wnetrze lezy w strefie ochronnej, drzwi sa przechodnie.
+ * id;nazwa;miasto;x0;y0;x1;y1;z;drzwi x;drzwi y;cena[;skrzydla x0,y0,x1,y1/...]. Wnetrze lezy w strefie ochronnej,
+ * drzwi sa przechodnie. Skrzydla to dodatkowe prostokaty wnetrza domow w ksztalcie litery L.
  */
 public final class HouseRegistry {
     private final Map<String, House> byId;
@@ -39,12 +40,13 @@ public final class HouseRegistry {
             String t = line.trim();
             if (t.isEmpty() || t.startsWith("#")) continue;
             String[] f = t.split(";");
-            if (f.length != 11) throw new IOException("houses.csv line " + n + ": expected 11 fields");
+            if (f.length != 11 && f.length != 12) throw new IOException("houses.csv line " + n + ": expected 11 or 12 fields");
             try {
                 int z = Integer.parseInt(f[7].trim());
                 House h = new House(f[0].trim(), f[1].trim(), f[2].trim(), Integer.parseInt(f[3].trim()),
                         Integer.parseInt(f[4].trim()), Integer.parseInt(f[5].trim()), Integer.parseInt(f[6].trim()), z,
-                        new Position(Integer.parseInt(f[8].trim()), Integer.parseInt(f[9].trim()), z), Long.parseLong(f[10].trim()));
+                        new Position(Integer.parseInt(f[8].trim()), Integer.parseInt(f[9].trim()), z), Long.parseLong(f[10].trim()),
+                        f.length == 12 ? wings(f[11]) : new int[0]);
                 if (world.town(h.town()) == null) throw new IllegalArgumentException("unknown town " + h.town());
                 if (!world.isWalkable(h.door())) throw new IllegalArgumentException("door not walkable " + h.door());
                 if (h.contains(h.door())) throw new IllegalArgumentException("door inside " + h.id());
@@ -59,6 +61,17 @@ public final class HouseRegistry {
             }
         }
         return new HouseRegistry(map);
+    }
+
+    private static int[] wings(String text) {
+        String[] parts = text.trim().split("/");
+        int[] out = new int[parts.length * 4];
+        for (int i = 0; i < parts.length; i++) {
+            String[] v = parts[i].split(",");
+            if (v.length != 4) throw new IllegalArgumentException("wing " + parts[i]);
+            for (int k = 0; k < 4; k++) out[i * 4 + k] = Integer.parseInt(v[k].trim());
+        }
+        return out;
     }
 
     public House get(String id) { return id == null ? null : byId.get(id); }

@@ -32,6 +32,7 @@ import features as F  # noqa: E402
 import sidewalk  # noqa: E402
 import nature  # noqa: E402
 import newtowns  # noqa: E402
+import organic  # noqa: E402
 import underground as U  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -649,18 +650,138 @@ def main():
     for name in newtowns.TOWNS:
         t = newtowns.build(world, name, trng)
         x0, y0, x1, y1 = t['rect']
-        footprint[y0:y1 + 1, x0:x1 + 1] = True
+        for (x, y) in t['cells']:
+            footprint[y, x] = True
         npcs += t['npcs']
         houses += t['houses']
-        pz.append((*t['pz'], 0))
+        pz += [(*r, 0) for r in t['pz_rects']]
         towns.append((name, (*t['temple'], 0)))
         lo, hi = newtowns.TOWNS[name]['levels']
         regions.insert(0, (name, x0, y0, x1, y1, 0, 2, lo, hi))
         new_towns.append(t)
     ctx = dict(legacy=legacy, blocks=blocks, T=T, world=world, remap=remap, transitions=transitions, npcs=npcs,
                unplaced=unplaced, spawns=spawns, dropped=dropped, houses=houses, pz=pz, gates=gates, towns=towns,
-               regions=regions, routes=routes, footprint=footprint, new_towns=new_towns)
+               regions=regions, routes=routes, footprint=footprint, new_towns=new_towns, fresh=fresh)
+    rebuild_towns(ctx, random.Random(20261030))
     return ctx
+
+
+# ------------------------------------------------------------------ przebudowa starych miast (2026-10-28)
+# Darek: "miasta nie takie same kwadratowe, losowe rozne ksztalty". Stare miasta (poza Varden) powstaja od nowa
+# z organic.py w miejscu dawnych klockow. Zostaja zejscia do starych lochow, port Selvaran i klucze NPC (zadania).
+REBUILD = {
+    'Qasirah': dict(key='qas', centre=(215, 487), rx=36, ry=28, gates='NSEW', wall='sandstone_wall',
+                    bwalls=['sandstone_wall'], floor='sandstone_floor', hall='sandstone_floor', street='sandstone_floor',
+                    ground='sand', trees=['palm', 'dry_bush', 'cactus'], decos=['dry_grass', 'dry_shrub', 'flowers'],
+                    house_label='Dom', houses=10, keep_below=None),
+    'Frostholm': dict(key='frost', centre=(742, 207), rx=31, ry=25, gates='NSEW', wall='stone_wall',
+                      bwalls=['wood_wall', 'log_wall', 'stone_wall'], floor='wood_floor', hall='stone_floor',
+                      street='cobblestone', ground='snow', trees=['frost_pine', 'frost_bush', 'snow_rock'],
+                      decos=['snow_tuft'], house_label='Chata', houses=10, keep_below=None),
+    'Selvaran': dict(key='selv', centre=(687, 699), rx=34, ry=25, gates='NSEW', wall='mossy_wall',
+                     bwalls=['wood_wall', 'mossy_wall', 'timber_wall'], floor='wood_floor', hall='stone_floor',
+                     street='cobblestone', ground='jungle_grass', trees=['jungle_tree', 'palm', 'jungle_bush'],
+                     decos=['fern', 'flowers', 'jungle_plant'], house_label='Dom', houses=10,
+                     bounds=(655, 668, 716, 725), keep_below=726),
+    # dzielnica krolewska Varden (wschodnia czesc klocka; stare miasto Varden zostaje 1:1)
+    'Varden-East': dict(town='Varden', key='varden', centre=(555, 506), rx=24, ry=23, gates='NSEW',
+                        wall='stone_wall', bwalls=['stone_wall', 'timber_wall', 'plaster_wall'], floor='wood_floor',
+                        hall='marble_floor', street='cobblestone', ground='grass', trees=['tree', 'bush', 'autumn_tree'],
+                        decos=['flowers', 'tall_grass'], house_label='Dzielnica Krolewska', houses=8,
+                        bounds=(534, 482, 576, 530), old=(533, 483, 576, 530), keep_below=None, palace=True,
+                        lockers=True, price_per_cell=10000),
+}
+KING = dict(key='varden_king', name='Król Aurelian', role='KING', shop='-', color='#c8a040', kind='king',
+            greet='Witaj w moim królestwie. Konta premium i promocje załatwisz tutaj: napisz premium albo promocja.')
+BUILDING_ROLES = {'PRIEST', 'BANKER', 'MERCHANT', 'HOUSING', 'GUIDE', 'CARRIER'}
+
+
+def npc_kind(key, role):
+    tail = key.split('_', 1)[1] if '_' in key else key
+    if tail in organic.SHELVES or tail in organic.SHOP_EXTRA or tail in organic.OFFICE:
+        return tail
+    return {'BANKER': 'banker', 'HOUSING': 'housing', 'GUIDE': 'guide', 'CARRIER': 'carrier', 'PRIEST': 'priest'}.get(
+        role, 'merchant')
+
+
+def rebuild_towns(ctx, rng):
+    world, fresh = ctx['world'], ctx['fresh']
+    ctx['rebuilt'] = {}
+    for entry, spec0 in REBUILD.items():
+        spec = dict(spec0)
+        name = spec.pop('town', entry)
+        spec['name'] = name
+        b = next(bb for bb in ctx['blocks'] if bb.name == TOWN_BLOCKS[name])
+        old = spec.pop('old', None) or (b.rect[0] + b.dx, b.rect[1] + b.dy, b.rect[2] + b.dx, b.rect[3] + b.dy)
+        palace = spec.get('palace')
+        keep_below = spec.pop('keep_below')
+
+        def in_old(x, y):
+            return old[0] <= x <= old[2] and old[1] <= y <= old[3] and (keep_below is None or y < keep_below)
+        # zejscia do starych lochow zostaja (pole schodow i pole wyjscia); pietra nad miastem znikaja
+        reserved, links = {}, []
+        for (x, y, z, typ, tx, ty, tz) in ctx['transitions']:
+            if z == 0 and tz < 0 and in_old(x, y):
+                reserved[(x, y)] = world.get(x, y)
+            if z < 0 and tz == 0 and in_old(tx, ty):
+                reserved[(tx, ty)] = world.get(tx, ty)
+                links.append((tx, ty))
+        ctx['transitions'][:] = [t for t in ctx['transitions']
+                                 if not ((t[2] > 0 and in_old(t[0], t[1])) or (t[6] > 0 and in_old(t[4], t[5])))]
+        for z in range(1, 6):
+            for y in range(old[1], old[3] + 1):
+                for x in range(old[0], old[2] + 1):
+                    if in_old(x, y) and world.get(x, y, z) is not None:
+                        world.floors[z][y][x] = None
+        # stare budynki poza nowym obrysem ustepuja naturalnemu terenowi
+        for y in range(old[1], old[3] + 1):
+            for x in range(old[0], old[2] + 1):
+                if in_old(x, y) and (x, y) not in reserved and not natural(world.get(x, y)):
+                    f = fresh[y][x]
+                    world.put(x, y, 0, f if f[0] != 'water' else (spec['ground'], NONE, NONE, NONE))
+        for (x, y), c in reserved.items():
+            world.put(x, y, 0, (spec['street'], NONE, c[2] if c[2] in F.STAIRS else NONE, NONE))
+        mine = [n for n in ctx['npcs'] if n[3] == name and n[2] in BUILDING_ROLES and int(n[6]) >= 0
+                and old[0] - 2 <= int(n[4]) <= old[2] + 2 and old[1] - 2 <= int(n[5]) <= old[3] + 2]
+        assert sum(1 for n in mine if n[2] == 'PRIEST') == (0 if palace else 1), f'{name}: priest'
+        mine.sort(key=lambda n: n[2] != 'PRIEST')
+        ctx['npcs'][:] = [n for n in ctx['npcs'] if n not in mine]
+        roles = [dict(key=n[0], name=n[1], role=n[2], shop=n[7], color=n[8], greet=n[9], kind=npc_kind(n[0], n[2]),
+                      central=n[2] == 'BANKER' or n[0].endswith('innkeeper')) for n in mine]
+        if palace:
+            roles.insert(0, dict(KING))
+
+        def house_here(h):
+            return h[2] == name and in_old(int(h[8]), int(h[9]))
+        prefix = next((h[0].rsplit('_', 1)[0] for h in ctx['houses'] if house_here(h)), spec['key'])
+        spec['key'] = prefix
+        t = organic.build(world, spec, rng, roles, houses=spec['houses'], reserved=set(reserved), links=links)
+        spec['key'] = spec0['key']
+        for n in t['npcs']:
+            n[0] = next(r['key'] for r in roles if r['name'] == n[1])
+        ctx['npcs'] += t['npcs']
+        ctx['houses'][:] = [h for h in ctx['houses'] if not house_here(h)] + t['houses']
+        for y in range(old[1], old[3] + 1):
+            for x in range(old[0], old[2] + 1):
+                if in_old(x, y):
+                    ctx['footprint'][y, x] = False      # poza murami znow zwykly teren (drogi, stawy)
+        for (x, y) in t['cells']:
+            ctx['footprint'][y, x] = True
+        x0, y0, x1, y1 = t['rect']
+        ctx['pz'][:] = [r for r in ctx['pz'] if not (r[4] >= 0 and in_old(r[0], r[1]) and in_old(r[2], r[3]))]
+        ctx['pz'] += [(*r, 0) for r in t['pz_rects']]
+        ox, oy, _oz = dict(ctx['towns'])[name]
+        levels = next(((r[7], r[8]) for r in ctx['regions'] if r[1] <= ox <= r[3] and r[2] <= oy <= r[4] and r[5] <= 0 <= r[6]),
+                      (40, 90))
+        if not palace:
+            ctx['towns'][:] = [(n, (*t['temple'], 0)) if n == name else (n, p) for n, p in ctx['towns']]
+        ctx['regions'].insert(0, (name, x0, y0, x1, y1, 0, 2, *levels))
+        ctx['spawns'][:] = [ln for ln in ctx['spawns'] if ln.startswith('#') or not (
+            (int(ln.split(';')[3]) > 0 and in_old(int(ln.split(';')[1]), int(ln.split(';')[2])))
+            or (int(ln.split(';')[3]) == 0 and (int(ln.split(';')[1]), int(ln.split(';')[2])) in t['cells']))]
+        t['old'] = old
+        ctx['rebuilt'][entry] = t
+        print('przebudowa', name, 'obrys', t['rect'], 'domy', len(t['houses']), 'zejscia', len(reserved))
 
 
 # nowe przystanie z duzymi statkami: klucz kapitana, imie, miasto, punkt na ladzie, kierunek do wody
@@ -679,21 +800,22 @@ NEW_ROUTES = [('varden_captain', 'selv_captain'), ('varden_captain', 'qas_captai
               ('valmir_captain', 'nerys_captain'), ('east_captain', 'nerys_captain')]
 # drogi: (skad, dokad) - pola tuz za bramami miast i przy celach; kolejne drogi korzystaja z poprzednich
 ROADS = [
-    ((498, 482), (741, 230)),        # Varden (polnoc) -> Frostholm (poludnie)
-    ((498, 531), (491, 745)),        # Varden (poludnie) -> Valmir (polnoc)
-    ((498, 482), (244, 486)),        # Varden (polnoc) -> Qasirah (wschod)
-    ((565, 482), (455, 283)),        # Varden (dzielnica krolewska) -> oboz w Szarych Turniach
-    ((213, 464), (250, 332)),        # Qasirah (polnoc) -> Plaskowyz
-    ((212, 511), (116, 555)),        # Qasirah (poludnie) -> piramida
-    ((212, 511), (70, 470)),         # Qasirah -> przystan Qasirah
-    ((721, 213), (520, 243)),        # Frostholm (zachod) -> Szare Turnie
-    ((721, 213), (602, 62)),         # Frostholm (zachod) -> Lodowe Szczyty
-    ((721, 213), (760, 97)),         # Frostholm -> Lodowe Jaskinie
-    ((741, 230), (800, 215)),        # Frostholm -> przystan Frostholm
-    ((515, 765), (656, 700)),        # Valmir (wschod) -> Selvaran (zachod)
+    ((498, 482), ('Frostholm', 'S')),  # Varden (polnoc) -> Frostholm (poludnie)
+    ((498, 531), ('Valmir', 'N')),   # Varden (poludnie) -> Valmir (polnoc)
+    ((498, 482), ('Qasirah', 'E')),  # Varden (polnoc) -> Qasirah (wschod)
+    (('Varden-East', 'N'), (455, 283)),  # Varden (dzielnica krolewska) -> oboz w Szarych Turniach
+    ((532, 505), ('Varden-East', 'W')),  # stare miasto Varden -> dzielnica krolewska
+    (('Qasirah', 'N'), (250, 332)),  # Qasirah (polnoc) -> Plaskowyz
+    (('Qasirah', 'S'), (116, 555)),  # Qasirah (poludnie) -> piramida
+    (('Qasirah', 'W'), (70, 470)),   # Qasirah -> przystan Qasirah
+    (('Frostholm', 'W'), (520, 243)),  # Frostholm (zachod) -> Szare Turnie
+    (('Frostholm', 'N'), (602, 62)),   # Frostholm (polnoc) -> Lodowe Szczyty
+    (('Frostholm', 'N'), (760, 97)),   # Frostholm -> Lodowe Jaskinie
+    (('Frostholm', 'E'), (800, 215)),  # Frostholm -> przystan Frostholm
+    (('Valmir', 'E'), ('Selvaran', 'W')),  # Valmir (wschod) -> Selvaran (zachod)
     ((785, 560), (703, 589)),        # Przystan Wschodnia -> ruiny w dzungli
-    ((703, 589), (656, 700)),        # ruiny w dzungli -> Selvaran
-    ((466, 765), (160, 643)),        # Valmir (zachod) -> Skaliste Ziemie (Otchlan)
+    ((703, 589), ('Selvaran', 'N')),  # ruiny w dzungli -> Selvaran
+    (('Valmir', 'W'), (160, 643)),   # Valmir (zachod) -> Skaliste Ziemie (Otchlan)
 ]
 
 
@@ -713,6 +835,7 @@ def restore_varden_core(ctx):
 def build(ctx):
     world, T, footprint = ctx['world'], ctx['T'], ctx['footprint']
     ctx['varden_core'] = {p: world.get(*p) for p in varden_core_cells(ctx)}
+    ctx['pond_avoid'] = [p for r in ROADS for p in r if not isinstance(p[0], str)] + [h[3] for h in HARBOURS]
     print('stawy i jeziorka:', nature.ponds(ctx))
     cost = F.road_cost(world, T, footprint)
     for b in ctx['blocks']:
@@ -760,12 +883,17 @@ def build(ctx):
             F.connect(world, T, cost, start, quay)
     ctx['routes'] += NEW_ROUTES
     ferries(ctx)
-    for t in ctx['new_towns']:
+    for t in ctx['new_towns'] + list(ctx['rebuilt'].values()):
         for (gx, gy) in t['gates'].values():
             cost[gy, gx] = 1.0
     bridges = []
+    gates = {t['name']: t['gates'] for t in ctx['new_towns']}
+    gates.update({k: t['gates'] for k, t in ctx['rebuilt'].items()})
+
+    def at(p):
+        return gates[p[0]][p[1]] if isinstance(p[0], str) else p
     for a, b in ROADS:
-        br, _path = F.connect(world, T, cost, a, b)
+        br, _path = F.connect(world, T, cost, at(a), at(b))
         bridges += br
     ctx['bridges'] = bridges
     ctx['regions_new'] = []
@@ -1287,15 +1415,15 @@ MINES = [
     # miasto, nazwa, okolica wejscia, pietra (spawny), poziomy regionu
     ('Varden', 'Stara Kopalnia', (445, 505), [[('goblin', 4, 3), ('goblin_shaman', 3, 2)],
                                              [('skeleton', 4, 3), ('cave_troll', 3, 1)]], (12, 40)),
-    ('Qasirah', 'Kopalnia Soli', (258, 478), [[('scorpion', 4, 3), ('hyena', 3, 2)],
+    ('Qasirah', 'Kopalnia Soli', (268, 470), [[('scorpion', 4, 3), ('hyena', 3, 2)],
                                              [('scorpion', 4, 3), ('sand_wraith', 3, 1)]], (45, 140)),
-    ('Frostholm', 'Kopalnia Lodu', (705, 220), [[('snow_wolf', 4, 3), ('yeti', 3, 1)],
+    ('Frostholm', 'Kopalnia Lodu', (698, 222), [[('snow_wolf', 4, 3), ('yeti', 3, 1)],
                                                [('yeti', 4, 3), ('ice_golem', 3, 1)]], (40, 130)),
-    ('Selvaran', 'Kopalnia Szmaragdów', (640, 690), [[('jungle_serpent', 4, 2), ('crocodile', 3, 2)],
+    ('Selvaran', 'Kopalnia Szmaragdów', (636, 692), [[('jungle_serpent', 4, 2), ('crocodile', 3, 2)],
                                                     [('jungle_hunter', 4, 3), ('jungle_serpent', 3, 2)]], (55, 90)),
-    ('Valmir', 'Kopalnia Miedzi', (452, 770), [[('goblin', 4, 3), ('bandit', 3, 2)],
+    ('Valmir', 'Kopalnia Miedzi', (436, 772), [[('goblin', 4, 3), ('bandit', 3, 2)],
                                               [('cave_troll', 4, 2), ('skeleton', 3, 2)]], (12, 45)),
-    ('Nerys', 'Kopalnia Pereł', (835, 745), [[('cave_troll', 4, 3), ('crystal_golem', 3, 1)],
+    ('Nerys', 'Kopalnia Pereł', (815, 748), [[('cave_troll', 4, 3), ('crystal_golem', 3, 1)],
                                             [('crystal_golem', 4, 3), ('cave_troll', 3, 2)]], (32, 60)),
 ]
 
@@ -1303,6 +1431,9 @@ MINES = [
 def town_rects(ctx):
     out = {}
     for town, bname in TOWN_BLOCKS.items():
+        if town in ctx.get('rebuilt', {}):
+            out[town] = ctx['rebuilt'][town]['rect']
+            continue
         b = next(bb for bb in ctx['blocks'] if bb.name == bname)
         out[town] = (b.rect[0] + b.dx, b.rect[1] + b.dy, b.rect[2] + b.dx, b.rect[3] + b.dy)
     for t in ctx['new_towns']:
@@ -1472,11 +1603,14 @@ def free_spot(world, near, npcs, radius=8):
 # ------------------------------------------------------------------ wystroj miast (2026-10-23)
 INTERIOR = {'stone_floor', 'sandstone_floor', 'marble_floor', 'wood_floor'}
 GUARD_NAMES = ['Bolesław', 'Radosław', 'Mścisław', 'Gniewomir', 'Sobiesław', 'Wojciech', 'Zbigniew', 'Lechosław',
-               'Dobromir', 'Jarogniew', 'Ziemowit', 'Bogusław', 'Przemysław', 'Siemowit', 'Wszebor', 'Czcibor']
+               'Dobromir', 'Jarogniew', 'Ziemowit', 'Bogusław', 'Przemysław', 'Siemowit', 'Wszebor', 'Czcibor',
+               'Bronisław', 'Dobiesław', 'Gościwit', 'Jaromir', 'Kazimierz', 'Mirosław', 'Racibor', 'Sędziwój',
+               'Świętopełk', 'Unisław', 'Wielisław', 'Zawisza', 'Budzisław', 'Chwalibóg', 'Domarad', 'Mieszko']
 GUARD_RANKS = ['Strażnik', 'Strażniczka', 'Halabardnik', 'Kusznik']
-GUARD_FEMALE = ['Dobrosława', 'Wiesława', 'Jaromira', 'Bogna', 'Świętosława', 'Zdzisława']
+GUARD_FEMALE = ['Dobrosława', 'Wiesława', 'Jaromira', 'Bogna', 'Świętosława', 'Zdzisława', 'Mirosława', 'Radomira',
+                'Bolesława', 'Wojsława', 'Gniewomira', 'Sławomira']
 # bramy miast: punkt tuz za brama (z ROADS) i miasto
-GATES = [((498, 482), 'Varden'), ((565, 482), 'Varden'), ((498, 531), 'Varden'), ((213, 464), 'Qasirah'),
+GATES = [((498, 482), 'Varden'), ((498, 531), 'Varden'), ((213, 464), 'Qasirah'),
          ((244, 486), 'Qasirah'), ((721, 213), 'Frostholm'), ((741, 230), 'Frostholm'), ((656, 700), 'Selvaran')]
 TOWN_BLOCKS = {'Varden': 'varden', 'Frostholm': 'frostholm', 'Qasirah': 'qasirah', 'Selvaran': 'selvaran'}
 TOWN_GREEN = {'Varden': (['tree', 'bush', 'autumn_tree'], ['flowers', 'tall_grass', 'flowers']),
@@ -1745,37 +1879,42 @@ def towns_dressing(ctx):
     towns = dict(ctx['towns'])
     # swiatynie poza Varden (Varden ma swiece z generate_varden.py, a jego rdzen zostaje 1:1)
     for name in ('Frostholm', 'Qasirah', 'Selvaran'):
+        if name in ctx['rebuilt']:
+            continue                      # nowe swiatynie maja juz swiece i lawki (organic.py)
         tx, ty, _ = towns[name]
         altars = [(x, y) for y in range(ty - 12, ty + 13) for x in range(tx - 12, tx + 13)
                   if (world.get(x, y) or WATER)[2] == 'altar']
         assert altars, f'no altar in the temple of {name}'
         altars.sort(key=lambda p: abs(p[0] - tx) + abs(p[1] - ty))
         stats[name] = dress_temple(world, altars[0], rng)
-    # sala tronowa krola Aureliana (dzielnica krolewska Varden): oltarz -> tron
-    kx, ky = ctx['remap'].point(129, 72, 0)[:2]
-    c = world.get(kx, ky)
-    assert c[2] == 'altar', f'throne room altar not found at {kx},{ky}: {c}'
-    world.put(kx, ky, 0, (c[0], 'carpet', 'throne', c[3]))
-    king = (kx, ky + 1)
-    hall = room_of(world, king, radius=10)
-    xs = [p[0] for p in hall]
-    ys = [p[1] for p in hall]
-    ctx['pz'].append((min(xs), min(ys), max(xs), max(ys), 0))
-    y = ky + 2
-    while (kx, y) in hall:
-        cc = world.get(kx, y)
-        world.put(kx, y, 0, (cc[0], 'carpet', cc[2], cc[3]))
-        y += 1
-    for (x, yy) in sorted(hall):
-        cc = world.get(x, yy)
-        if cc[2] == NONE and abs(x - kx) == 2 and yy in (ky, ky + 3):
-            world.put(x, yy, 0, (cc[0], cc[1], 'candle', cc[3]))
-    ctx['npcs'].append(['varden_king', 'Król Aurelian', 'KING', 'Varden', king[0], king[1], 0, '-', '#c8a040',
-                        'Witaj w moim królestwie. Konta premium i promocje załatwisz tutaj: napisz premium albo promocja.'])
+    # sala tronowa krola Aureliana (dzielnica krolewska Varden): oltarz -> tron; po przebudowie dzielnicy palac
+    # z tronem i krolem stawia organic.py
+    if 'Varden-East' not in ctx['rebuilt']:
+        kx, ky = ctx['remap'].point(129, 72, 0)[:2]
+        c = world.get(kx, ky)
+        assert c[2] == 'altar', f'throne room altar not found at {kx},{ky}: {c}'
+        world.put(kx, ky, 0, (c[0], 'carpet', 'throne', c[3]))
+        king = (kx, ky + 1)
+        hall = room_of(world, king, radius=10)
+        xs = [p[0] for p in hall]
+        ys = [p[1] for p in hall]
+        ctx['pz'].append((min(xs), min(ys), max(xs), max(ys), 0))
+        y = ky + 2
+        while (kx, y) in hall:
+            cc = world.get(kx, y)
+            world.put(kx, y, 0, (cc[0], 'carpet', cc[2], cc[3]))
+            y += 1
+        for (x, yy) in sorted(hall):
+            cc = world.get(x, yy)
+            if cc[2] == NONE and abs(x - kx) == 2 and yy in (ky, ky + 3):
+                world.put(x, yy, 0, (cc[0], cc[1], 'candle', cc[3]))
+        ctx['npcs'].append(['varden_king', 'Król Aurelian', 'KING', 'Varden', king[0], king[1], 0, '-', '#c8a040',
+                            'Witaj w moim królestwie. Konta premium i promocje załatwisz tutaj: napisz premium albo promocja.'])
     # straznicy przy bramach (w strefie ochronnej, tuz za brama)
     used = set()
     guards = 0
-    gates = list(GATES) + [(p, t['name']) for t in ctx['new_towns'] for p in t['gates'].values()]
+    gates = [g for g in GATES if g[1] not in ctx['rebuilt']] + \
+        [(p, t['name']) for t in ctx['new_towns'] + list(ctx['rebuilt'].values()) for p in t['gates'].values()]
     for (gx, gy), town in gates:
         spot = None
         for r in range(1, 9):
@@ -1830,6 +1969,8 @@ def towns_dressing(ctx):
     # zielen w miastach (poza rdzeniem Varden): drzewa tylko na polach z wolnymi 8 sasiadami (nigdy obok siebie)
     green = 0
     for town, bname in TOWN_BLOCKS.items():
+        if town in ctx.get('rebuilt', {}):
+            continue                       # nowe miasta maja wlasna zielen (organic.py)
         b = next(bb for bb in ctx['blocks'] if bb.name == bname)
         objs, decos = TOWN_GREEN[town]
         for (x, y) in sorted(b.surface):
@@ -1907,6 +2048,16 @@ def snap_spawns(ctx):
     """Srodek spawnu na polu przechodnim: przesuniety na najblizsze wolne pole (do 6 pol), inaczej usuniety."""
     world = ctx['world']
     out, moved, dropped = [], 0, 0
+    trans = {(t[0], t[1], t[2]) for t in ctx['transitions']}
+
+    def open_cell(x, y, z):
+        c = world.get(x, y, z)
+        return F.walk(c) and c[2] not in F.STAIRS and (x, y, z) not in trans
+
+    def good(x, y, z):
+        # nie w kieszeni zamknietej schodami (wejscie na schody przenosi pietro nizej)
+        return open_cell(x, y, z) and not in_pz(ctx, x, y, z) and \
+            any(open_cell(x + a, y + b, z) for a, b in F.DIRS4)
     for line in ctx['spawns']:
         if line.startswith('#'):
             out.append(line)
@@ -1918,11 +2069,13 @@ def snap_spawns(ctx):
             for dy in range(-r, r + 1):
                 for dx in range(-r, r + 1):
                     if best is None and max(abs(dx), abs(dy)) == r:
-                        c = world.get(x + dx, y + dy, z)
-                        if F.walk(c) and c[2] not in F.STAIRS and not in_pz(ctx, x + dx, y + dy, z):
+                        if good(x + dx, y + dy, z):
                             best = (x + dx, y + dy)
             if best:
                 break
+        boxes = [t['rect'] for t in ctx['new_towns'] + list(ctx.get('rebuilt', {}).values())]
+        if best is not None and z == 0 and any(r[0] <= best[0] <= r[2] and r[1] <= best[1] <= r[3] for r in boxes):
+            best = None                    # pod murami nowych miast (region miasta) nie ma spawnow
         if best is None:
             dropped += 1
             continue
