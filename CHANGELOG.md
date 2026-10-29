@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.214.0] - 2026-10-29
+
+### Zmieniono
+- Ekran na telefonach: przyciski, pasek czarów i pola ekwipunku 36-40 dp, napisy co najmniej 7 dp, krótsze podpisy
+  (Mów, Weź, Łów, Poch.), okno Walka mieści 5-6 pozycji, komunikaty systemowe jako 1-2 znikające linie
+  (pełny tekst w zakładce Serwer), umiejętności rozwinięte domyślnie, VIP zajmuje tyle miejsca, ile potrzebuje.
+  Na wąskich telefonach Wyjdź i Pochodnia są w menu Opcje. Nicki nad postaciami większe, z obwódką.
+- Naprawione rozjeżdżające się litery przy ułamkowej skali czcionki.
+
 ## [0.213.0] - 2026-10-29
 
 ### Zmieniono
