@@ -38,6 +38,9 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.mobileHud=1  uklad HUD-u na telefon (wariant B: widok gry na calym ekranie, luk czarow); na Androidzie zawsze
+ *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
+ *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..6) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
@@ -385,6 +388,26 @@ public final class DesktopLauncher {
                     gs.hud().openJournal();
                 }
                 if ("picker".equals(open)) ((GameScreen) getScreen()).hud().openPicker(6);
+                if (open != null && open.contains("mobile_")) {
+                    // uklad na telefon (-Dpixel.mobileHud=1): mobile_win_bag|equip|skills|vip|settings, mobile_chat,
+                    // mobile_picker (przycisk 3 luku), mobile_logout; kilka po przecinku, np. mobile_win_skills,mobile_chat
+                    GameScreen gs = (GameScreen) getScreen();
+                    for (String o : open.split(",")) {
+                        o = o.trim();
+                        if (o.equals("mobile_win_vip")) {
+                            gs.previewVip(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
+                                    new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Knight", 38),
+                                    new pl.fawizja.pixel.friends.FriendsView.Row("Mira", true, "Druid", 27),
+                                    new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", false, "Paladin", 51, 3 * 60),
+                                    new pl.fawizja.pixel.friends.FriendsView.Row("Olek", false, "Sorcerer", 19, 2 * 24 * 60))));
+                        }
+                        if (o.startsWith("mobile_win_")) gs.hud().openMobileWindow(o.substring("mobile_win_".length()));
+                        if (o.equals("mobile_chat")) gs.hud().setMobileChat(true);
+                        if (o.equals("mobile_picker")) gs.hud().openMobilePicker(Integer.getInteger("pixel.pickerButton", 2));
+                        if (o.equals("mobile_logout")) gs.press("logout");
+                        if (o.equals("mobile_journal")) gs.hud().openJournal();
+                    }
+                }
                 if ("pickerrune".equals(open)) {
                     ((GameScreen) getScreen()).hud().openPicker(6);
                     ((GameScreen) getScreen()).hud().pickCategory("rune");
@@ -394,7 +417,7 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.say(gs.session().character().name(), "Witajcie w Varden! Ktoś idzie ze mną do kopalni goblinów?");
                 }
-                if ("chattabs".equals(open)) {
+                if ("chattabs".equals(open) || open != null && open.startsWith("chattabs,")) {
                     // podglad zakladek czatu: wiadomosci z kilku kanalow (jak z serwera), czesc nieprzeczytana
                     GameScreen gs = (GameScreen) getScreen();
                     long t = gs.session().lastUpdateMs();

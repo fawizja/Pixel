@@ -66,6 +66,36 @@ public final class Hud {
     private final HudButton logout = new HudButton("logout", "Wyjdź");
     /** Uklad HUD-u jak w Tibii: kolumny, gorny pasek, widok gry, konsola. */
     private final HudLayout lay = new HudLayout();
+    /**
+     * Uklad na telefon (wariant B, 2026-10-29): zawsze na Androidzie, na komputerze z -Dpixel.mobileHud=1.
+     * Widok gry na calym ekranie, ramka u gory, luk czarow, okna kategorii - {@link MobileHudLayout}.
+     */
+    private final boolean mobile = mobileHudWanted();
+    private final MobileHudLayout mlay = new MobileHudLayout();
+    /** Okno kategorii z ikony ramki (plecak, ekwipunek, umiejetnosci, VIP, ustawienia); null = brak. */
+    private enum MobileWin { BAG, EQUIP, SKILLS, VIP, SETTINGS }
+    private MobileWin mWin;
+    /** Czat rozwiniety (telefon); zwiniety = zakladka "Czat" na dole. */
+    private boolean mChat;
+    private int mSettingsPage;
+    /** Przewiniecie listy walki (wiersze) i przeciaganie palcem po niej. */
+    private int mBattleScroll;
+    private int mBattlePointer = -1;
+    private float mBattleDownY;
+    private boolean mBattleDragged;
+    private int mBattleScrollAtDown;
+    /** Strona okna wyboru akcji przycisku luku. */
+    private int mPickPage;
+    private final HudLayout.Rect mRect = new HudLayout.Rect();
+
+    private static boolean mobileHudWanted() {
+        String p = System.getProperty("pixel.mobileHud");
+        if (p != null) return p.equals("1") || p.equalsIgnoreCase("true");
+        return Gdx.app != null && Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android;
+    }
+
+    /** Uklad na telefon (wariant B) zamiast ukladu jak w Tibii. */
+    public boolean mobile() { return mobile; }
     /** Lista VIP i okno umiejetnosci rozwiniete (umiejetnosci: null = domyslnie, zwiniete na telefonie). */
     private boolean vipOpen = true;
     private Boolean skillsOpen;
@@ -744,7 +774,8 @@ public final class Hud {
         h = viewport.getWorldHeight();
         // uklad jak w kliencie Tibii (2026-10-28): lewa kolumna (minimapa, VIP, umiejetnosci), prawa (ekwipunek
         // z przyciskami obok, walka, akcje, pasek czarow), u gory paski HP/MP, widok gry 15x11, pod nim czat
-        layoutSide();
+        if (mobile) layoutMobile();
+        else layoutSide();
         layoutRest();
     }
 
@@ -810,7 +841,11 @@ public final class Hud {
     public void setBattlePlayers(List<BattlePlayer> players) { battlePlayers = players == null ? List.of() : players; }
 
     /** Piksele ekranu na pole widoku gry (cala liczba z ukladu). */
-    public float tilePixels() { return lay.tilePixels; }
+    public float tilePixels() {
+        // telefon: widok gry pokrywa caly ekran (15 kolumn na szerokosc albo 11 wierszy na wysokosc), cala liczba pikseli
+        if (mobile) return (float) Math.ceil(Math.max(w * uiScale / HudLayout.VIEW_TILES_W, h * uiScale / HudLayout.VIEW_TILES_H) - 1e-3f);
+        return lay.tilePixels;
+    }
 
     /** Cala bryla HUD-u z {@link HudLayout}: panele, przyciski, pola paska, konsola i joystick. */
     private void layoutSide() {
@@ -905,6 +940,10 @@ public final class Hud {
      * odsloniete); okienko gracza i potwierdzenie wylogowania - male, na srodku widoku gry.
      */
     private void menuGeometry() {
+        if (mobile) {
+            mobileMenuGeometry();
+            return;
+        }
         if (playerMenu != null || logoutConfirm || optionsMenu) {
             // ekran dotykowy: wiersze co najmniej 36 dp; gdy nie mieszcza sie jeden pod drugim - dwie kolumny
             rowH = uiScale >= 1.5f || lay.compact ? 39 : 24;
@@ -1150,8 +1189,14 @@ public final class Hud {
         if (!inGameView(p.x, p.y) || p.x > gx + gw * 0.55f) return false;
         return joystick.floatAt(p.x, p.y, pointer);
     }
-    public boolean bagOpen() { return bagOpen; }
-    public void toggleBag() { bagOpen = !bagOpen; selectedSlot = -1; dragSlot = -1; dragging = false; if (bagOpen) menuOpen = false; }
+    public boolean bagOpen() { return bagOpen || mobile && mWin == MobileWin.BAG; }
+    public void toggleBag() {
+        if (mobile) {
+            openMobileWin(MobileWin.BAG);
+            return;
+        }
+        bagOpen = !bagOpen; selectedSlot = -1; dragSlot = -1; dragging = false; if (bagOpen) menuOpen = false;
+    }
 
     /** Pokazuje strone plecaka (desktop: -Dpixel.bagPage). */
     public void showBagPage(int page) { bagPage = Math.max(0, page); }
@@ -1210,6 +1255,15 @@ public final class Hud {
         }
         if (charOpen) {
             charOpen = false;
+            return true;
+        }
+        if (mobile && mWin != null) {
+            mWin = null;
+            selectedSlot = -1;
+            return true;
+        }
+        if (mobile && mChat) {
+            mChat = false;
             return true;
         }
         return false;
@@ -1424,8 +1478,11 @@ public final class Hud {
 
     public boolean playerMenuOpen() { return menuOpen && playerMenu != null; }
     public boolean bookOpen() { return menuOpen; }
-    public void toggleCharacter() { charOpen = !charOpen; }
-    public boolean characterOpen() { return charOpen; }
+    public void toggleCharacter() {
+        if (mobile) openMobileWin(MobileWin.EQUIP);
+        else charOpen = !charOpen;
+    }
+    public boolean characterOpen() { return charOpen || mobile && mWin == MobileWin.EQUIP; }
 
     /** Klucz czaru na pasku (0..3) albo null. */
     /** Akcja pola paska (do wyslania jak przycisk) albo null dla pustego pola. */
@@ -1464,6 +1521,18 @@ public final class Hud {
                 break;
             }
         }
+        if (mobile && auto[6] == null) {
+            // telefon: piaty przycisk luku bez runy dostaje kolejny znany czar (najwyzszy, jeszcze nie na luku)
+            // najpierw drugi atak, potem inne czary, na koncu leczenie
+            java.util.List<String> used = java.util.Arrays.asList(auto);
+            for (int pass = 0; pass < 3 && auto[6] == null; pass++) {
+                for (int k = known.size() - 1; k >= 0 && auto[6] == null; k--) {
+                    SpellType sp = known.get(k);
+                    int kind = sp.kind().isOffensive() ? 0 : sp.kind().isHeal() ? 2 : 1;
+                    if (kind == pass && sp.kind() != SpellKind.CONJURE && !used.contains("cast:" + sp.key())) auto[6] = "cast:" + sp.key();
+                }
+            }
+        }
         java.util.Set<String> knownKeys = new java.util.HashSet<>();
         for (SpellType sp : known) knownKeys.add(sp.key());
         String[] resolved = customBar.resolve(auto, knownKeys);
@@ -1493,6 +1562,12 @@ public final class Hud {
             // puste pole zostaje widoczne jako "+" - dotkniecie otwiera wybor akcji
             if (barEntries[i] == null) b.label = "+";
         }
+        if (mobile) {
+            // telefon: tylko pola pod przyciskami luku (5 czarow, 2 mikstury)
+            for (HudButton b : spellButtons) b.visible = false;
+            for (int s : MobileHudLayout.SPELL_SLOTS) spellButtons[s].visible = true;
+            for (int s : MobileHudLayout.POTION_SLOTS) spellButtons[s].visible = true;
+        }
     }
 
     public void setSpellBar(pl.fawizja.pixel.settings.SpellBar bar) { customBar = bar; }
@@ -1521,11 +1596,28 @@ public final class Hud {
             layoutPopupRows(rows);
             return;
         }
+        if (logoutConfirm && mobile) {
+            // telefon (makieta): "Na pewno chcesz sie wylogowac?" i dwa przyciski obok siebie
+            float bw = 110, bh = 36, by = menuY + 14;
+            MenuRow yes = new MenuRow("logout:yes", "Wyloguj", "", true);
+            MenuRow no = new MenuRow("logout:no", "Zostań", "", true);
+            yes.x = menuX + menuW / 2f - 10 - bw; no.x = menuX + menuW / 2f + 10;
+            yes.y = no.y = by;
+            yes.w = no.w = bw;
+            yes.h = no.h = bh;
+            menuRows.add(yes);
+            menuRows.add(no);
+            return;
+        }
         if (logoutConfirm) {
             List<MenuRow> rows = new ArrayList<>();
             rows.add(new MenuRow("logout:yes", "Wyloguj", "", true));
             rows.add(new MenuRow("logout:no", "Zostań w grze", "", true));
             layoutPopupRows(rows);
+            return;
+        }
+        if (pickSlot >= 0 && mobile) {
+            rebuildMobilePick(session);
             return;
         }
         if (pickSlot >= 0) {
@@ -1679,6 +1771,10 @@ public final class Hud {
             return;
         }
         if (a.equals("none")) return; // wiersz tylko informuje
+        if (a.equals("page")) {
+            mPickPage++; // telefon: nastepna strona wyboru (po ostatniej od poczatku)
+            return;
+        }
         if (a.equals("book")) {
             // ksiega czarow i rzemiosla (dawny przycisk KSIEGA; klawisz K)
             menuOpen = false;
@@ -1920,6 +2016,20 @@ public final class Hud {
         }
         if (rows.size() == (h.active() ? 2 : 1)) rows.add(new MenuRow("ach:none", "Brak zadań w toku", "przewodnicy w miastach mają zlecenia", false));
         rows.addAll(available);
+        if (mobile) {
+            // telefon: okno kategorii 336 dp, dwie kolumny wierszy pod paskiem tytulu
+            float rh = 34, cw = (menuW - 20) / 2f;
+            int pc2 = Math.max(1, (int) ((menuH - 30) / rh));
+            for (int i = 0; i < rows.size() && i < pc2 * 2; i++) {
+                MenuRow row = rows.get(i);
+                row.x = menuX + 7 + (i / pc2) * (cw + 6);
+                row.y = menuY + menuH - 28 - (i % pc2 + 1) * rh;
+                row.w = cw;
+                row.h = rh - 3;
+                menuRows.add(row);
+            }
+            return;
+        }
         float colW = (menuW - 30) / 2f;
         for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
             MenuRow row = rows.get(i);
@@ -2456,6 +2566,7 @@ public final class Hud {
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
         if (houseWin != null) return houseTouch(p.x, p.y, actions);
+        if (mobile) return mobileTouchDown(p.x, p.y, pointer, session, actions);
         if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
         if (statusTouch(p.x, p.y, session)) return true;
         if (equipPanelTouch(p.x, p.y, session, actions)) return true;
@@ -2495,66 +2606,10 @@ public final class Hud {
         }
         if (menuOpen) {
             if (menuClose.hit(p.x, p.y)) {
-                if (trade != null) actions.onButton("trade:cancel"); // zamkniecie okna = rezygnacja
-                else if (optionsMenu) {
-                    optionsMenu = false;
-                    menuOpen = false;
-                } else if (logoutConfirm) closeLogoutConfirm();
-                else if (playerMenu != null) closePlayerMenu();
-                else {
-                    menuOpen = false;
-                    rankingView = null;
-                    friendsView = null;
-                    marketView = null;
-                    achievementsView = false;
-                }
+                menuCloseAction(actions);
                 return true;
             }
-            rebuildMenu(session);
-            for (MenuRow row : menuRows) {
-                if (p.x >= row.x && p.x <= row.x + row.w && p.y >= row.y && p.y <= row.y + row.h) {
-                    if (row.action.equals("npc:qty")) {
-                        int i = 0;
-                        while (i < QUANTITIES.length && QUANTITIES[i] != npcQty) i++;
-                        npcQty = QUANTITIES[(i + 1) % QUANTITIES.length];
-                    } else if (row.action.equals("npc:page")) {
-                        npcPage++;
-                    } else if (row.action.equals("ach:toggle")) {
-                        bestiaryMode = !bestiaryMode;
-                    } else if (row.action.equals("npc:depot")) {
-                        depotView = !depotView;
-                    } else if (row.action.equals("npc:smith")) {
-                        smithView = !smithView;
-                    } else if (row.action.equals("ach:page")) {
-                        achPage++;
-                    } else if (row.action.equals("book:page")) {
-                        bookPage++;
-                    } else if (row.action.equals("book:spells")) {
-                        spellPage = spellPage + Math.max(1, (int) ((menuH - 40) / rowH) - 1); // nastepna strona, po koncu od poczatku
-                    } else if (row.action.equals("book:journal")) {
-                        openJournal();
-                    } else if (row.action.startsWith("opt:")) {
-                        optionsMenu = false;
-                        menuOpen = false;
-                        actions.onButton(row.action.substring(4));
-                    } else if (row.action.equals("logout:no")) {
-                        closeLogoutConfirm();
-                    } else if (row.action.equals("player:none")) {
-                        // wiersz tylko informuje
-                    } else if (row.action.startsWith("pick:")) {
-                        pickRow(row.action.substring(5), session, actions);
-                    } else if (row.action.equals("book:assign")) {
-                        assignSlot = assignSlot >= spellButtons.length - 1 ? -1 : assignSlot + 1;
-                    } else if (assignSlot >= 0 && row.action.startsWith("cast:")) {
-                        customBar.assign(assignSlot, row.action);
-                        updateBar(session);
-                        actions.onButton("bar_saved");
-                    } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none") && !row.action.equals("market:none") && !row.action.equals("ach:none")) {
-                        actions.onButton(row.action);
-                    }
-                    return true;
-                }
-            }
+            if (menuRowTouch(p.x, p.y, session, actions)) return true;
             boolean inMenu = p.x >= menuX && p.x <= menuX + menuW && p.y >= menuY && p.y <= menuY + menuH;
             if (optionsMenu && !inMenu) {
                 // dotkniecie obok malego menu opcji zamyka je i dziala dalej (np. inny przycisk)
@@ -2636,8 +2691,82 @@ public final class Hud {
         return !inGameView(p.x, p.y); // panele interfejsu nie przepuszczaja dotyku na mape
     }
 
+    /** Krzyzyk otwartego okna: zamkniecie (handel = rezygnacja). */
+    private void menuCloseAction(Actions actions) {
+        if (trade != null) actions.onButton("trade:cancel"); // zamkniecie okna = rezygnacja
+        else if (optionsMenu) {
+            optionsMenu = false;
+            menuOpen = false;
+        } else if (logoutConfirm) closeLogoutConfirm();
+        else if (playerMenu != null) closePlayerMenu();
+        else {
+            menuOpen = false;
+            rankingView = null;
+            friendsView = null;
+            marketView = null;
+            achievementsView = false;
+        }
+    }
+
+    /** Dotkniecie wiersza otwartego okna; true, gdy trafil w wiersz. */
+    private boolean menuRowTouch(float px, float py, GameSession session, Actions actions) {
+        rebuildMenu(session);
+        for (MenuRow row : menuRows) {
+            if (px >= row.x && px <= row.x + row.w && py >= row.y && py <= row.y + row.h) {
+                if (row.action.equals("npc:qty")) {
+                    int i = 0;
+                    while (i < QUANTITIES.length && QUANTITIES[i] != npcQty) i++;
+                    npcQty = QUANTITIES[(i + 1) % QUANTITIES.length];
+                } else if (row.action.equals("npc:page")) {
+                    npcPage++;
+                } else if (row.action.equals("ach:toggle")) {
+                    bestiaryMode = !bestiaryMode;
+                } else if (row.action.equals("npc:depot")) {
+                    depotView = !depotView;
+                } else if (row.action.equals("npc:smith")) {
+                    smithView = !smithView;
+                } else if (row.action.equals("ach:page")) {
+                    achPage++;
+                } else if (row.action.equals("book:page")) {
+                    bookPage++;
+                } else if (row.action.equals("book:spells")) {
+                    spellPage = spellPage + Math.max(1, (int) ((menuH - 40) / rowH) - 1); // nastepna strona, po koncu od poczatku
+                } else if (row.action.equals("book:journal")) {
+                    openJournal();
+                } else if (row.action.startsWith("opt:")) {
+                    optionsMenu = false;
+                    menuOpen = false;
+                    actions.onButton(row.action.substring(4));
+                } else if (row.action.equals("logout:no")) {
+                    closeLogoutConfirm();
+                } else if (row.action.equals("player:none")) {
+                    // wiersz tylko informuje
+                } else if (row.action.startsWith("pick:")) {
+                    pickRow(row.action.substring(5), session, actions);
+                } else if (row.action.equals("book:assign")) {
+                    assignSlot = assignSlot >= spellButtons.length - 1 ? -1 : assignSlot + 1;
+                } else if (assignSlot >= 0 && row.action.startsWith("cast:")) {
+                    customBar.assign(assignSlot, row.action);
+                    updateBar(session);
+                    actions.onButton("bar_saved");
+                } else if (!row.action.equals("npc:none") && !row.action.equals("trade:none") && !row.action.equals("friend:none") && !row.action.equals("market:none") && !row.action.equals("ach:none")) {
+                    actions.onButton(row.action);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean touchDragged(int sx, int sy, int pointer) {
         Vector2 p = toUi(sx, sy);
+        if (mobile && pointer == mBattlePointer) {
+            // przewijanie listy walki palcem
+            int d = Math.round((p.y - mBattleDownY) / MobileHudLayout.BATTLE_ROW);
+            if (d != 0) mBattleDragged = true;
+            mBattleScroll = Math.max(0, mBattleScrollAtDown + d);
+            return true;
+        }
         if (dragSlot >= 0 && pointer == dragPointer) {
             dragX = p.x;
             dragY = p.y;
@@ -2676,6 +2805,11 @@ public final class Hud {
     }
 
     public boolean touchUp(int sx, int sy, int pointer) {
+        if (mobile && pointer == mBattlePointer) {
+            mBattlePointer = -1;
+            if (!mBattleDragged && mBattleActions != null) mobileBattleTap(mBattleDownY);
+            return true;
+        }
         if (dragSlot >= 0 && pointer == dragPointer) {
             Vector2 p = toUi(sx, sy);
             return dropDragged(p.x, p.y);
@@ -2761,7 +2895,7 @@ public final class Hud {
             barUpdatedMs = barNow;
             updateBar(session);
         }
-        if (pressSlot >= 0 && com.badlogic.gdx.utils.TimeUtils.millis() - pressStart >= LONG_PRESS_MS) {
+        if (pressSlot >= 0 && com.badlogic.gdx.utils.TimeUtils.millis() - pressStart >= (mobile ? MOBILE_LONG_PRESS_MS : LONG_PRESS_MS)) {
             openPicker(pressSlot);
             pressSlot = -1;
         }
@@ -2772,7 +2906,10 @@ public final class Hud {
         Monster tgt = session.combat().target();
         currentTarget = tgt;
         target.active = tgt != null;
-        if (visibleActionMask() != sideButtonsLaidOut) layoutSide(); // np. ROZMOWA obok NPC
+        if (visibleActionMask() != sideButtonsLaidOut) {
+            if (mobile) layoutMobile();
+            else layoutSide(); // np. ROZMOWA obok NPC
+        }
         layoutConsole(session, serverTimeMs);
         target.icon = itemIcon(session, "iron_sword");
         defensive.icon = itemIcon(session, "wooden_shield");
@@ -2793,6 +2930,10 @@ public final class Hud {
         logout.labelBottom = true;
         bag.icon = art.backpack();
         buffs(session, serverTimeMs);
+        if (mobile) {
+            renderMobile(batch, shapes, session, clock, serverTimeMs, diagInfo, tgt);
+            return;
+        }
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -3651,7 +3792,7 @@ public final class Hud {
     private float conScale() { return lay.compact ? 0.66f : CON_SCALE; }
 
     /** Wiersze konsoli i napisy zdarzen na widoku gry. */
-    private float chatScale() { return lay.compact ? 0.7f : CON_SCALE; }
+    private float chatScale() { return mobile ? 0.66f : lay.compact ? 0.7f : CON_SCALE; }
 
     /**
      * Skala napisu, ktory ma sie zmiescic w szerokosci room: najwyzej preferred, nie mniej niz prog 7 dp wielkiej
@@ -3738,7 +3879,7 @@ public final class Hud {
         }
         statusLines.clear();
         // na telefonie najwyzej 2 krotkie wiersze bez zawijania (reszta tylko w zakladce Serwer)
-        int maxLines = lay.compact ? 2 : STATUS_LINES;
+        int maxLines = lay.compact || mobile ? 2 : STATUS_LINES;
         float statusW = statusWidth();
         List<EventLog.Entry> last = session.log().latest(STATUS_LINES * 2);
         for (int i = last.size() - 1; i >= 0 && statusLines.size() < maxLines; i--) {
@@ -3748,7 +3889,7 @@ public final class Hud {
             float a = age > STATUS_KEEP_MS - 1000 ? Math.max(0f, (STATUS_KEEP_MS - age) / 1000f) : 1f;
             Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.55f, 0.35f, a)
                     : e.kind() == EventLog.Kind.LOOT ? new Color(0.55f, 1f, 0.55f, a) : new Color(1f, 1f, 1f, a);
-            if (lay.compact) {
+            if (lay.compact || mobile) {
                 String one = clip(e.text(), statusW);
                 layout.setText(font, one);
                 statusLines.add(0, new ConLine(one, c, layout.height + 4));
@@ -3832,7 +3973,7 @@ public final class Hud {
 
     /** Zdarzenia (lup, poziom, osiagniecia, ostrzezenia) na dole widoku gry, wysrodkowane, z cieniem. */
     /** Szerokosc napisow zdarzen na widoku gry. */
-    private float statusWidth() { return lay.compact ? gw - 16 : Math.min(gw - 20, 520); }
+    private float statusWidth() { return mobile ? mlay.chatPanel.w : lay.compact ? gw - 16 : Math.min(gw - 20, 520); }
 
     private void drawStatus(SpriteBatch batch) {
         if (statusLines.isEmpty() || menuOpen || bigMapOpen) return;
@@ -4357,6 +4498,1498 @@ public final class Hud {
     private void centered(SpriteBatch batch, String s, float cx, float cy) {
         layout.setText(font, s);
         font.draw(batch, s, cx - layout.width / 2f, cy + layout.height / 2f);
+    }
+
+    // ------------------------------------------------------------------ telefon: uklad wariant B (MobileHudLayout)
+
+    /** Przytrzymanie przycisku luku otwiera wybor akcji (makieta: 0,5 s). */
+    private static final long MOBILE_LONG_PRESS_MS = 500;
+    private Actions mBattleActions;
+
+    private static Color hex(int rgb, float a) {
+        return new Color(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, a);
+    }
+
+    /** Kolory makiety (drewno, pola, napisy). */
+    private static final Color M_WOOD = hex(0x3b2618, 1f), M_DARK = hex(0x1e120b, 1f), M_LINE = hex(0x7a5236, 1f),
+            M_BTN = hex(0x4a2f1d, 1f), M_TITLE = hex(0x5c3b25, 1f), M_CELL = hex(0x2a1a10, 1f), M_CELL_LINE = hex(0x120a05, 1f),
+            M_TEXT = hex(0xefe4d4, 1f), M_MUTED = hex(0xb8a48c, 1f), M_GOOD = hex(0x7ee06f, 1f), M_SEL = hex(0x2f5a25, 1f),
+            M_CLOSE = hex(0xa3231c, 1f), M_EDGE = hex(0x5c4330, 1f), M_RING = hex(0xe8d7bd, 0.75f), M_BG = hex(0x140c06, 0.72f);
+
+    private static final String[] M_ICON_LABELS = {"Plecak", "Ekwipunek", "Umiejętn.", "VIP", "Zadania", "Ustawienia", "Wyloguj"};
+
+    /** Polska nazwa profesji (tytul okna wyboru: "Rycerz, poz. 42"). */
+    private static String vocationName(pl.fawizja.pixel.vocation.Vocation v) {
+        switch (v) {
+            case KNIGHT: return "Rycerz";
+            case PALADIN: return "Paladyn";
+            case DRUID: return "Druid";
+            case SORCERER: return "Czarodziej";
+            case MONK: return "Mnich";
+            default: return capitalized(v.name().toLowerCase(java.util.Locale.ROOT));
+        }
+    }
+
+    /** Przycisk okragly w miejscu kola z ukladu (pole dotyku liczone z kola). */
+    private static void placeRound(HudButton b, MobileHudLayout.Circle c) {
+        b.x = c.x;
+        b.y = c.y;
+        b.r = c.r;
+        b.hw = 0;
+    }
+
+    /** Przyciski chwilowe na telefonie (widoczne tylko, gdy maja sens): rozmowa, podniesienie, lowienie, kon. */
+    private HudButton[] mobileContext() { return new HudButton[] {talk, pick, fish, mount}; }
+
+    private void layoutMobile() {
+        mlay.compute(w, h);
+        gx = 0;
+        gy = 0;
+        gw = w;
+        gh = h;
+        topH = 0;
+        panelX = w;
+        for (int i = 0; i < MobileHudLayout.SPELL_SLOTS.length; i++) placeRound(spellButtons[MobileHudLayout.SPELL_SLOTS[i]], mlay.spells[i]);
+        for (int i = 0; i < MobileHudLayout.POTION_SLOTS.length; i++) placeRound(spellButtons[MobileHudLayout.POTION_SLOTS[i]], mlay.potions[i]);
+        placeRound(target, mlay.row[MobileHudLayout.ROW_ATTACK]);
+        placeRound(defensive, mlay.row[MobileHudLayout.ROW_SHIELD]);
+        placeRound(pvp, mlay.row[MobileHudLayout.ROW_PVP]);
+        int k = 0;
+        for (HudButton b : mobileContext()) {
+            if (b.visible && k < MobileHudLayout.CONTEXT) placeRound(b, mlay.context[k++]);
+            else b.x = -1000;
+        }
+        sideButtonsLaidOut = visibleActionMask();
+        mmX = mlay.minimap.x;
+        mmY = mlay.minimap.y;
+        mmSize = mlay.minimap.w;
+        blX = mlay.battle.x;
+        blY = mlay.battle.y;
+        blW = mlay.battle.w;
+        blH = mlay.battle.h;
+        // czat rozwiniety: zakladki u gory panelu, wiersze, linia pisania na dole (26 dp)
+        conTabH = 17;
+        conX = mlay.chatPanel.x;
+        conY = 26;
+        conW = mlay.chatPanel.w;
+        conH = MobileHudLayout.CHAT_H - 26;
+        float jr = MobileHudLayout.JOY_R * (settings != null ? settings.joystickScale() : 1f);
+        joystick.layout(MobileHudLayout.JOY_X, MobileHudLayout.JOY_X, jr);
+    }
+
+    /** Polozenie okien na telefonie: okna kategorii pod ramka (336 dp), duze okna (NPC, ksiega) nad cala szerokoscia. */
+    private void mobileMenuGeometry() {
+        popupCols = 1;
+        rowH = 36;
+        if (pickSlot >= 0) {
+            setMenuRect(mlay.picker(mRect));
+            rowH = MobileHudLayout.PICK_ROW;
+        } else if (logoutConfirm) {
+            setMenuRect(mlay.window(mChat, true, mRect));
+        } else if (achievementsView && journalMode) {
+            setMenuRect(mlay.window(mChat, false, mRect));
+            rowH = 34;
+        } else if (playerMenu != null || optionsMenu) {
+            int rows = optionsMenu ? 2 : playerRowsCount;
+            float room = h - 46 - 6;
+            menuW = 240;
+            menuH = 24 + 20 + rows * rowH + 8;
+            if (menuH > room && rows > 1) {
+                popupCols = 2;
+                menuW = Math.min(w - 16, 400);
+                menuH = 24 + 20 + ((rows + 1) / 2) * rowH + 8;
+            }
+            menuX = (w - menuW) / 2f;
+            menuY = Math.max(4, (h - 46 - menuH) / 2f);
+        } else {
+            menuW = Math.min(w - 16, 620);
+            menuH = Math.min(h - 46 - 6, 400);
+            menuX = (w - menuW) / 2f;
+            menuY = h - 46 - menuH;
+            rowH = Math.max(26, Math.min(36, (menuH - 50) / 10f));
+        }
+        // czerwony krzyzyk 19 x 18 w pasku tytulu; pole dotyku ok. 36 dp
+        menuClose.r = 18;
+        menuClose.x = menuX + menuW - 14.5f;
+        menuClose.y = menuY + menuH - 13;
+    }
+
+    private void setMenuRect(HudLayout.Rect r) {
+        menuX = r.x;
+        menuY = r.y;
+        menuW = r.w;
+        menuH = r.h;
+    }
+
+    /** Czerwony krzyzyk okna: pole dotyku 36 x 30 w prawym gornym rogu. */
+    private static boolean closeHit(HudLayout.Rect win, float px, float py) {
+        return px >= win.right() - 36 && px <= win.right() + 2 && py >= win.top() - 30 && py <= win.top() + 2;
+    }
+
+    /** Otwiera okno kategorii (ponowne dotkniecie tej samej ikony zamyka); zamyka inne okna - tylko jedno naraz. */
+    private void openMobileWin(MobileWin win) {
+        selectedSlot = -1;
+        if (mWin == win) {
+            mWin = null;
+            return;
+        }
+        if (trade != null) return; // okno handlu ma pierwszenstwo
+        closeMenus();
+        mWin = win;
+        if (win == MobileWin.BAG) bagPage = 0;
+    }
+
+    /** Zamyka okna menu (ksiega, NPC, dziennik, wybor, okienka) i mape. */
+    private void closeMenus() {
+        menuOpen = false;
+        logoutConfirm = false;
+        optionsMenu = false;
+        playerMenu = null;
+        rankingView = null;
+        friendsView = null;
+        marketView = null;
+        achievementsView = false;
+        journalMode = false;
+        npcMode = false;
+        pickSlot = -1;
+        pickCat = null;
+        assignSlot = -1;
+        bigMapOpen = false;
+        charOpen = false;
+        bagOpen = false;
+    }
+
+    /** Dotkniecie ikony ramki: okno kategorii, dziennik zadan albo wylogowanie (z blokada PvP w GameScreen). */
+    private void mobileIcon(int icon, Actions actions) {
+        switch (icon) {
+            case MobileHudLayout.ICON_BAG: openMobileWin(MobileWin.BAG); break;
+            case MobileHudLayout.ICON_EQUIP: openMobileWin(MobileWin.EQUIP); break;
+            case MobileHudLayout.ICON_SKILLS: openMobileWin(MobileWin.SKILLS); break;
+            case MobileHudLayout.ICON_VIP: openMobileWin(MobileWin.VIP); break;
+            case MobileHudLayout.ICON_SETTINGS: openMobileWin(MobileWin.SETTINGS); break;
+            case MobileHudLayout.ICON_QUESTS:
+                mWin = null;
+                if (!journalOpen()) closeMenus();
+                openJournal();
+                break;
+            default:
+                mWin = null;
+                if (logoutConfirmOpen()) closeLogoutConfirm();
+                else {
+                    closeMenus();
+                    actions.onButton("logout");
+                }
+        }
+    }
+
+    /** Czy ikona ramki jest wlaczona (jej okno otwarte). */
+    private boolean mobileIconActive(int icon) {
+        switch (icon) {
+            case MobileHudLayout.ICON_BAG: return mWin == MobileWin.BAG;
+            case MobileHudLayout.ICON_EQUIP: return mWin == MobileWin.EQUIP;
+            case MobileHudLayout.ICON_SKILLS: return mWin == MobileWin.SKILLS;
+            case MobileHudLayout.ICON_VIP: return mWin == MobileWin.VIP;
+            case MobileHudLayout.ICON_SETTINGS: return mWin == MobileWin.SETTINGS;
+            case MobileHudLayout.ICON_QUESTS: return journalOpen();
+            default: return logoutConfirmOpen();
+        }
+    }
+
+    /** Okno kategorii otwarte z ikon ramki (podglad: -Dpixel.open=mobile_win_skills itd.). */
+    public void openMobileWindow(String name) {
+        switch (name) {
+            case "bag": openMobileWin(MobileWin.BAG); break;
+            case "equip": openMobileWin(MobileWin.EQUIP); break;
+            case "skills": openMobileWin(MobileWin.SKILLS); break;
+            case "vip": openMobileWin(MobileWin.VIP); break;
+            case "settings": openMobileWin(MobileWin.SETTINGS); break;
+            default:
+        }
+    }
+
+    /** Rozwija albo zwija czat (telefon; podglad: -Dpixel.open=mobile_chat). */
+    public void setMobileChat(boolean open) { mChat = open; }
+
+    /** Wybor akcji przycisku luku nr i (0..4 czary, 5..6 mikstury) - jak po przytrzymaniu. */
+    public void openMobilePicker(int button) {
+        int slot = button < MobileHudLayout.SPELL_SLOTS.length ? MobileHudLayout.SPELL_SLOTS[button]
+                : MobileHudLayout.POTION_SLOTS[Math.min(MobileHudLayout.POTION_SLOTS.length - 1, button - MobileHudLayout.SPELL_SLOTS.length)];
+        mWin = null;
+        mPickPage = 0;
+        openPicker(slot);
+    }
+
+    /** Numer przycisku luku (1..7) dla pola paska. */
+    private static int arcNumber(int slot) {
+        for (int i = 0; i < MobileHudLayout.SPELL_SLOTS.length; i++) if (MobileHudLayout.SPELL_SLOTS[i] == slot) return i + 1;
+        for (int i = 0; i < MobileHudLayout.POTION_SLOTS.length; i++) if (MobileHudLayout.POTION_SLOTS[i] == slot) return MobileHudLayout.SPELL_SLOTS.length + i + 1;
+        return slot + 1;
+    }
+
+    /** Pole paska pod przyciskiem: przytrzymanie = wybor akcji, krotkie dotkniecie = uzycie (po puszczeniu). */
+    private void slotPress(int slot, int pointer, Actions actions) {
+        if (barEntries[slot] == null) {
+            mWin = null;
+            mPickPage = 0;
+            openPicker(slot);
+            return;
+        }
+        pressSlot = slot;
+        pressPointer = pointer;
+        pressStart = com.badlogic.gdx.utils.TimeUtils.millis();
+        pressActions = actions;
+        mPickPage = 0;
+    }
+
+    private boolean mobileTouchDown(float px, float py, int pointer, GameSession session, Actions actions) {
+        if (bigMapOpen) {
+            bigMapOpen = false;
+            float[] img = bigMapImg;
+            if (img != null && px >= img[0] && py >= img[1] && py <= img[1] + img[3]) {
+                int tx = (int) ((px - img[0]) / img[2]);
+                int ty = (int) ((img[1] + img[3] - py) / img[2]);
+                if (tx < session.world().width() && ty >= 0 && ty < session.world().height()) actions.onButton("map:goto:" + tx + "," + ty);
+            }
+            return true;
+        }
+        if (menuOpen) {
+            if (menuClose.hit(px, py)) {
+                menuCloseAction(actions);
+                return true;
+            }
+            if (menuRowTouch(px, py, session, actions)) return true;
+            if (px >= menuX && px <= menuX + menuW && py >= menuY && py <= menuY + menuH) return true;
+            if (pickSlot >= 0) {
+                // dotkniecie obok okna wyboru zamyka je
+                menuOpen = false;
+                pickSlot = -1;
+                return true;
+            }
+        }
+        if (mWin != null) {
+            HudLayout.Rect win = mlay.window(mChat, false, mRect);
+            if (closeHit(win, px, py)) {
+                mWin = null;
+                selectedSlot = -1;
+                return true;
+            }
+            if (win.contains(px, py)) {
+                mobileWinTouch(win, px, py, session, actions);
+                return true;
+            }
+        }
+        int icon = mlay.iconAt(px, py);
+        if (icon >= 0) {
+            mobileIcon(icon, actions);
+            return true;
+        }
+        if (mlay.frame.contains(px, py)) {
+            // paski HP i many: okno umiejetnosci (jak karta postaci w starym ukladzie)
+            openMobileWin(MobileWin.SKILLS);
+            return true;
+        }
+        if (mobileStatusTouch(px, py, session)) return true;
+        if (mlay.minimap.contains(px, py)) {
+            toggleMap();
+            menuGeometry();
+            return true;
+        }
+        if (mlay.battle.contains(px, py)) {
+            mBattlePointer = pointer;
+            mBattleDownY = py;
+            mBattleDragged = false;
+            mBattleScrollAtDown = mBattleScroll;
+            mBattleActions = actions;
+            return true;
+        }
+        for (int i = 0; i < mlay.spells.length; i++) {
+            if (mlay.spells[i].hit(px, py)) {
+                slotPress(MobileHudLayout.SPELL_SLOTS[i], pointer, actions);
+                return true;
+            }
+        }
+        for (int i = 0; i < mlay.potions.length; i++) {
+            if (mlay.potions[i].hit(px, py)) {
+                slotPress(MobileHudLayout.POTION_SLOTS[i], pointer, actions);
+                return true;
+            }
+        }
+        for (HudButton b : new HudButton[] {target, defensive, pvp}) {
+            if (roundHit(b, px, py)) {
+                actions.onButton(b.id);
+                return true;
+            }
+        }
+        for (HudButton b : mobileContext()) {
+            if (b.visible && roundHit(b, px, py)) {
+                actions.onButton(b.id);
+                return true;
+            }
+        }
+        if (mChat) {
+            if (mlay.chatHandleHit.contains(px, py)) {
+                mChat = false;
+                return true;
+            }
+            if (mlay.chatPanel.contains(px, py)) {
+                if (py >= conY + conH - conTabH - 4) {
+                    for (int i = 0; i < tabRects.size(); i++) {
+                        float[] r = tabRects.get(i);
+                        if (px < r[0] || px > r[0] + r[1]) continue;
+                        if (r[2] >= 0 && px >= r[2]) chatTabs.close(i);
+                        else chatTabs.select(i);
+                        layoutTabs();
+                        return true;
+                    }
+                    return true;
+                }
+                actions.onButton("chat");
+                return true;
+            }
+        } else if (mlay.chatTabHit.contains(px, py)) {
+            mChat = true;
+            return true;
+        }
+        if (joystick.touchDown(px, py, pointer)) return true;
+        return false; // reszta ekranu to widok gry
+    }
+
+    /** Pole dotyku przycisku okraglego: co najmniej 36 dp srednicy. */
+    private static boolean roundHit(HudButton b, float px, float py) {
+        float dx = px - b.x, dy = py - b.y, r = Math.max(b.r, MobileHudLayout.MIN_TOUCH / 2f);
+        return b.x > -999 && dx * dx + dy * dy <= r * r;
+    }
+
+    /** Wiersze listy walki: gracze, potem potwory. */
+    private int mobileBattleCount() { return battlePlayers.size() + battle.size(); }
+
+    /** Dotkniecie wiersza listy walki (po puszczeniu bez przewiniecia): gracz - okienko, potwor - cel. */
+    private void mobileBattleTap(float py) {
+        int i = (int) Math.floor((mlay.battle.top() - MobileHudLayout.BATTLE_HEAD - py) / MobileHudLayout.BATTLE_ROW);
+        if (i < 0) return;
+        i += mBattleScroll;
+        if (i < battlePlayers.size()) mBattleActions.onButton("bplayer:" + battlePlayers.get(i).id());
+        else if (i - battlePlayers.size() < battle.size()) mBattleActions.onButton("battle:" + battle.get(i - battlePlayers.size()).id());
+    }
+
+    /** Wiersz ikon stanu i wzmocnien pod ramka: dotkniecie opisuje je w konsoli (pole 36 dp wysokosci). */
+    private boolean mobileStatusTouch(float px, float py, GameSession session) {
+        int n = statuses.size() + buffs.size() + (ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE || ownSkullMs > 0 ? 1 : 0);
+        if (n == 0) return false;
+        float x0 = mlay.statusRow.x, x1 = x0 + Math.max(MobileHudLayout.MIN_TOUCH, n * (STATUS_SIZE + 3) + 4);
+        if (px < x0 - 4 || px > x1 || py > mlay.frame.y || py < mlay.frame.y - MobileHudLayout.MIN_TOUCH) return false;
+        long now = session.lastUpdateMs();
+        for (Status st : statuses) session.log().add(now, EventLog.Kind.INFO, st.desc);
+        if (ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE) {
+            session.log().add(now, EventLog.Kind.INFO, skullName(ownSkull) + ": jeszcze " + skullTime(ownSkullMs) + ".");
+        } else if (ownSkullMs > 0) {
+            session.log().add(now, EventLog.Kind.INFO, "Blokada strefy ochronnej po walce: jeszcze " + skullTime(ownSkullMs) + ".");
+        }
+        for (Buff b : buffs) session.log().add(now, EventLog.Kind.INFO, b.desc());
+        return true;
+    }
+
+    // ------------------------------------------------------------------ telefon: okna kategorii
+
+    /** Pole plecaka nr i (10 x 2 na strone). */
+    private HudLayout.Rect mBagCell(HudLayout.Rect win, int i, HudLayout.Rect out) {
+        float cell = 30, pitch = 31.5f;
+        float x0 = win.x + (win.w - (9 * pitch + cell)) / 2f;
+        float top = win.top() - 26 - 4;
+        out.set(x0 + (i % 10) * pitch, top - cell - (i / 10) * (cell + 3), cell, cell);
+        return out;
+    }
+
+    /** Przycisk w oknie: akcja, napis, prostokat. */
+    private record MBtn(String id, String label, float x, float y, float w, float h) {
+        boolean hit(float px, float py) { return px >= x && px <= x + w && py >= y && py <= y + h; }
+    }
+
+    /** Przyciski pod plecakiem: z zaznaczonym przedmiotem Zaloz/Uzyj/Wyrzuc/Zachowaj, inaczej Sortuj i strony. */
+    private List<MBtn> mBagButtons(HudLayout.Rect win, GameSession session) {
+        List<MBtn> out = new ArrayList<>();
+        PlayerCharacter pc = session.character();
+        float by = win.y + 6, bh = 36, x = win.x + 8;
+        ItemStack sel = selectedSlot >= 0 && selectedSlot < pc.backpack().size() ? pc.backpack().get(selectedSlot) : null;
+        if (sel != null) {
+            ItemType t = session.items().get(sel.itemId());
+            float bw = (win.w - 16 - 3 * 6) / 4f;
+            if (t.slot() != EquipSlot.NONE) out.add(new MBtn("bag_equip", "Załóż", x, by, bw, bh));
+            out.add(new MBtn("bag_use", "Użyj", x + (bw + 6), by, bw, bh));
+            out.add(new MBtn("bag_drop", "Wyrzuć", x + 2 * (bw + 6), by, bw, bh));
+            out.add(new MBtn("bag_keep", pc.isKept(sel.itemId()) ? "Odblokuj" : "Zachowaj", x + 3 * (bw + 6), by, bw, bh));
+            return out;
+        }
+        out.add(new MBtn("bag_sort", "Sortuj", x, by, 76, bh));
+        bagPages = pc.bagPages();
+        float px = x + 82;
+        for (int k = 0; k < bagPages && bagPages > 1; k++) {
+            out.add(new MBtn("mbag:page:" + k, String.valueOf(k + 1), px, by, 36, bh));
+            px += 40;
+        }
+        if (bagPages > 1 && bagPage == bagPages - 1) out.add(new MBtn("bag_detach", "Odepnij", win.right() - 8 - 80, by, 80, bh));
+        return out;
+    }
+
+    /** Pola okna ekwipunku: lalka 3 x 4 jak w Tibii (9 miejsc, plecak w prawym gornym rogu, wzmocnienia obok butow). */
+    private float[] mEqCell(HudLayout.Rect win, int col, int row) {
+        float cell = 36, gx0 = win.x + 70, top = win.top() - 26 - 4;
+        return new float[] {gx0 + col * (cell + 6), top - cell - row * (cell + 2), cell};
+    }
+
+    /** Wpisy okna ustawien: {akcja, nazwa, wartosc}; pozostale przyciski starego ukladu tez tutaj. */
+    private List<String[]> mSettingsEntries(GameSession session) {
+        PlayerCharacter pc = session.character();
+        List<String[]> out = new ArrayList<>();
+        out.add(new String[] {"run", "Bieg za celem", pc.isRunning() ? "włączony" : "wyłączony"});
+        out.add(new String[] {"torch", "Pochodnia", pc.isTorchLit() ? "zapalona" : "zgaszona"});
+        out.add(new String[] {"book", "Księga czarów", "czary i rzemiosło (K)"});
+        out.add(new String[] {"diag", "Diagnostyka", diagnosticsOpen ? "pokazana" : "ukryta"});
+        if (settings != null) {
+            for (String[] r : settings.allRows()) {
+                int c = r[1].indexOf(": ");
+                out.add(c > 0 ? new String[] {r[0], r[1].substring(0, c), r[1].substring(c + 2)} : new String[] {r[0], r[1], ""});
+            }
+        }
+        return out;
+    }
+
+    /** Wiersze okna ustawien na biezacej stronie (2 kolumny po 36 dp, ostatni wiersz "Dalej", gdy stron jest wiecej). */
+    private List<MBtn> mSettingsButtons(HudLayout.Rect win, List<String[]> entries) {
+        float rh = 36, gap = 3, cw = (win.w - 16 - 6) / 2f;
+        int rows = Math.max(1, (int) ((win.h - 26 - 6 + gap) / (rh + gap)));
+        int per = rows * 2;
+        int pages = entries.size() <= per ? 1 : (entries.size() + per - 2) / (per - 1);
+        if (mSettingsPage >= pages) mSettingsPage = 0;
+        int shown = pages == 1 ? per : per - 1;
+        List<MBtn> out = new ArrayList<>();
+        int from = mSettingsPage * shown;
+        int k = 0;
+        for (int i = from; i < Math.min(entries.size(), from + shown); i++, k++) {
+            out.add(new MBtn("set:" + i, "", win.x + 8 + (k % 2) * (cw + 6), win.top() - 26 - 2 - (k / 2 + 1) * rh - (k / 2) * gap, cw, rh));
+        }
+        if (pages > 1) {
+            k = per - 1;
+            out.add(new MBtn("set:page", "Dalej (" + (mSettingsPage + 1) + " z " + pages + ")",
+                    win.x + 8 + (k % 2) * (cw + 6), win.top() - 26 - 2 - (k / 2 + 1) * rh - (k / 2) * gap, cw, rh));
+        }
+        return out;
+    }
+
+    /** Wiersze okna VIP (22 dp) i przycisk dodawania. */
+    private static final float M_VIP_ROW = 22;
+
+    private MBtn mVipAdd(HudLayout.Rect win) { return new MBtn("vip:add", "+ Dodaj znajomego", win.right() - 8 - 150, win.y + 6, 150, 36); }
+
+    private void mobileWinTouch(HudLayout.Rect win, float px, float py, GameSession session, Actions actions) {
+        PlayerCharacter pc = session.character();
+        switch (mWin) {
+            case BAG: {
+                for (MBtn b : mBagButtons(win, session)) {
+                    if (!b.hit(px, py)) continue;
+                    if (b.id().startsWith("mbag:page:")) {
+                        bagPage = Integer.parseInt(b.id().substring(10));
+                        selectedSlot = -1;
+                    } else {
+                        actions.onButton(b.id());
+                        if (b.id().equals("bag_detach")) bagPage = Math.max(0, bagPage - 1);
+                    }
+                    return;
+                }
+                HudLayout.Rect c = new HudLayout.Rect();
+                for (int i = 0; i < PAGE_SLOTS; i++) {
+                    if (!mBagCell(win, i, c).contains(px, py)) continue;
+                    int slot = bagPage * PAGE_SLOTS + i;
+                    if (slot >= pc.backpack().size()) return;
+                    if (selectedSlot < 0) {
+                        if (pc.backpack().get(slot) != null) selectedSlot = slot;
+                    } else if (selectedSlot == slot) {
+                        selectedSlot = -1;
+                    } else {
+                        actions.onButton("slot_move:" + selectedSlot + ":" + slot);
+                        selectedSlot = -1;
+                    }
+                    return;
+                }
+                return;
+            }
+            case EQUIP: {
+                for (int i = 0; i < EQ_SLOTS.length; i++) {
+                    float[] c = mEqCell(win, EQ_CELLS[i][0], EQ_CELLS[i][1]);
+                    if (px >= c[0] && px <= c[0] + c[2] && py >= c[1] && py <= c[1] + c[2]) {
+                        equipTap(i, session, actions);
+                        return;
+                    }
+                }
+                float[] bp = mEqCell(win, 2, 0);
+                if (px >= bp[0] && px <= bp[0] + bp[2] && py >= bp[1] && py <= bp[1] + bp[2]) {
+                    openMobileWin(MobileWin.BAG);
+                    return;
+                }
+                float[] bc = mEqCell(win, 0, 3);
+                if (px >= bc[0] && px <= bc[0] + bc[2] && py >= bc[1] && py <= bc[1] + bc[2]) {
+                    long now = session.lastUpdateMs();
+                    for (Buff b : buffs) session.log().add(now, EventLog.Kind.INFO, b.desc());
+                    if (buffs.isEmpty()) session.log().add(now, EventLog.Kind.INFO, "Brak aktywnych wzmocnień.");
+                }
+                return;
+            }
+            case VIP: {
+                if (mVipAdd(win).hit(px, py)) {
+                    actions.onButton("vip:add");
+                    return;
+                }
+                List<pl.fawizja.pixel.friends.FriendsView.Row> rows = vipRows();
+                int i = (int) ((win.top() - 26 - 4 - py) / M_VIP_ROW);
+                if (i >= 0 && i < rows.size() && py > win.y + 46) {
+                    mWin = null;
+                    openPlayerMenu(-1, rows.get(i).name(), false, false);
+                }
+                return;
+            }
+            case SETTINGS: {
+                List<String[]> entries = mSettingsEntries(session);
+                for (MBtn b : mSettingsButtons(win, entries)) {
+                    if (!b.hit(px, py)) continue;
+                    if (b.id().equals("set:page")) {
+                        mSettingsPage++;
+                    } else {
+                        String action = entries.get(Integer.parseInt(b.id().substring(4)))[0];
+                        actions.onButton(action);
+                    }
+                    return;
+                }
+                return;
+            }
+            default:
+        }
+    }
+
+    // ------------------------------------------------------------------ telefon: wybor akcji przycisku luku
+
+    /**
+     * Wybor akcji przycisku luku (makieta, przytrzymanie 0,5 s): czary i runy profesji (spells.csv, '*' = wszyscy)
+     * i mikstury z plecaka w dwoch kolumnach; czary powyzej poziomu postaci szare ("od poziomu X") i niedostepne.
+     */
+    private void rebuildMobilePick(GameSession session) {
+        PlayerCharacter pc = session.character();
+        pl.fawizja.pixel.magic.SpellRegistry reg = session.spells().registry();
+        int magic = pc.skills().level(Skill.MAGIC);
+        List<MenuRow> ok = new ArrayList<>(), locked = new ArrayList<>();
+        for (SpellType sp : reg.forVocation(pc.vocation())) {
+            boolean lv = pc.level() >= sp.minLevel(), mg = magic >= sp.minMagic();
+            if (lv && mg) ok.add(new MenuRow("pick:set:cast:" + sp.key(), sp.name(), "poziom " + sp.minLevel(), true));
+            else if (sp.minLevel() <= pc.level() + 100) {
+                locked.add(new MenuRow("pick:none", sp.name(), lv ? "od magii " + sp.minMagic() : "od poziomu " + sp.minLevel(), false));
+            }
+        }
+        List<ItemType> runes = new ArrayList<>(), potions = new ArrayList<>();
+        for (ItemType it : session.items().all()) {
+            if (!it.usableBy(pc.vocation())) continue;
+            if (it.category() == pl.fawizja.pixel.item.ItemCategory.RUNE && reg.find(it.key()) != null) runes.add(it);
+            if (it.category() == pl.fawizja.pixel.item.ItemCategory.POTION && pc.backpack().count(it.id()) > 0) potions.add(it);
+        }
+        runes.sort(java.util.Comparator.comparingInt((ItemType it) -> reg.find(it.key()).minLevel()).thenComparing(ItemType::name));
+        for (ItemType it : runes) {
+            SpellType rs = reg.find(it.key());
+            int lvl = Math.max(it.minLevel(), rs.minLevel());
+            boolean lv = pc.level() >= lvl, mg = magic >= rs.minMagic();
+            if (lv && mg) ok.add(new MenuRow("pick:set:item:" + it.key(), rs.name(), "poziom " + lvl, true));
+            else if (lvl <= pc.level() + 100) locked.add(new MenuRow("pick:none", rs.name(), lv ? "od magii " + rs.minMagic() : "od poziomu " + lvl, false));
+        }
+        potions.sort(java.util.Comparator.comparingInt(ItemType::minLevel).thenComparing(ItemType::name));
+        for (ItemType it : potions) {
+            boolean lv = pc.level() >= it.minLevel();
+            (lv ? ok : locked).add(new MenuRow(lv ? "pick:set:item:" + it.key() : "pick:none", it.name(),
+                    lv ? "z plecaka (" + pc.backpack().count(it.id()) + ")" : "od poziomu " + it.minLevel(), lv));
+        }
+        // najlepsza mikstura z plecaka (automat) - dziala tez, gdy plecak jest pusty
+        ok.add(new MenuRow("pick:set:potion_hp", "Najlepsza mikstura zdrowia", "z plecaka", true));
+        ok.add(new MenuRow("pick:set:potion_mp", "Najlepsza mikstura many", "z plecaka", true));
+        List<MenuRow> all = new ArrayList<>(ok);
+        all.addAll(locked);
+        HudLayout.Rect pr = new HudLayout.Rect();
+        pr.set(menuX, menuY, menuW, menuH);
+        int per = mlay.pickerRows(pr) * 2;
+        int pages = all.size() <= per ? 1 : (all.size() + per - 2) / (per - 1);
+        if (mPickPage >= pages) mPickPage = 0;
+        int shown = pages == 1 ? per : per - 1;
+        List<MenuRow> page = new ArrayList<>(all.subList(mPickPage * shown, Math.min(all.size(), (mPickPage + 1) * shown)));
+        if (pages > 1) page.add(new MenuRow("pick:page", "Dalej", "strona " + (mPickPage + 1) + " z " + pages, true));
+        for (int i = 0; i < page.size(); i++) {
+            MenuRow row = page.get(i);
+            row.w = 144;
+            row.h = 24;
+            row.x = menuX + 8 + (i % 2) * 150;
+            row.y = menuY + menuH - 30 - (i / 2) * MobileHudLayout.PICK_ROW - row.h;
+            menuRows.add(row);
+        }
+    }
+
+    /** Ikona akcji ("cast:", "item:", "potion_hp"): przedmiot albo null (czar - rysowany ksztaltami). */
+    private TextureRegion actionIcon(GameSession session, String e) {
+        if (e == null || e.startsWith("cast:")) return null;
+        String key = e.equals("potion_hp") ? session.quickPotion(false) : e.equals("potion_mp") ? session.quickPotion(true) : e.substring(5);
+        if (key == null) key = e.equals("potion_mp") ? "mana_potion" : "health_potion";
+        return session.items().containsKey(key) ? itemIcon(session, key) : null;
+    }
+
+    /** Czar akcji albo null. */
+    private static SpellType actionSpell(GameSession session, String e) {
+        return e != null && e.startsWith("cast:") ? session.spells().registry().find(e.substring(5)) : null;
+    }
+
+    // ------------------------------------------------------------------ telefon: rysowanie
+
+    /** Ramka linii o grubosci t (w przebiegu ksztaltow). */
+    private static void strokeRect(ShapeRenderer s, float x, float y, float w, float h, float t, Color c) {
+        s.setColor(c);
+        s.rect(x, y, w, t);
+        s.rect(x, y + h - t, w, t);
+        s.rect(x, y, t, h);
+        s.rect(x + w - t, y, t, h);
+    }
+
+    /** Okrag (pierscien) grubosci t z odcinkow; od kata start (stopnie, przeciwnie do wskazowek) przez deg. */
+    private static void ring(ShapeRenderer s, float cx, float cy, float r, float t, float start, float deg, Color c) {
+        s.setColor(c);
+        int seg = Math.max(8, (int) (Math.abs(deg) / 8));
+        float prevX = 0, prevY = 0;
+        for (int i = 0; i <= seg; i++) {
+            double a = Math.toRadians(start + deg * i / seg);
+            float x = cx + (float) Math.cos(a) * r, y = cy + (float) Math.sin(a) * r;
+            if (i > 0) s.rectLine(prevX, prevY, x, y, t);
+            prevX = x;
+            prevY = y;
+        }
+    }
+
+    /** Okno w stylu makiety: cien, drewniane tlo, pasek tytulu i czerwony krzyzyk. */
+    private void mWindowShapes(ShapeRenderer s, float x, float y, float ww, float wh, boolean close) {
+        s.setColor(0, 0, 0, 0.45f);
+        s.rect(x + 3, y - 4, ww, wh);
+        s.setColor(M_WOOD);
+        s.rect(x, y, ww, wh);
+        strokeRect(s, x, y, ww, wh, 1.5f, M_DARK);
+        s.setColor(M_TITLE);
+        s.rect(x + 2, y + wh - 24, ww - 4, 22);
+        if (close) {
+            float cx = x + ww - 24, cy = y + wh - 22;
+            s.setColor(hex(0x3a0a07, 1f));
+            s.rect(cx - 0.5f, cy - 0.5f, 20, 19);
+            s.setColor(M_CLOSE);
+            s.rect(cx, cy, 19, 18);
+            s.setColor(Color.WHITE);
+            s.rectLine(cx + 5, cy + 4, cx + 14, cy + 13, 2f);
+            s.rectLine(cx + 14, cy + 4, cx + 5, cy + 13, 2f);
+        }
+    }
+
+    /** Drewniany przycisk (ikona ramki, przyciski okien). */
+    private static void woodButton(ShapeRenderer s, float x, float y, float bw, float bh, boolean active) {
+        s.setColor(M_BTN);
+        s.rect(x, y, bw, bh);
+        strokeRect(s, x, y, bw, bh, active ? 2f : 1.5f, active ? M_GOOD : M_DARK);
+        strokeRect(s, x + 2, y + 2, bw - 4, bh - 4, 1f, M_LINE);
+    }
+
+    /** Okragly przycisk z makiety: polprzezroczyste tlo i jasny pierscien (wlaczony - grubszy, w kolorze). */
+    private static void roundButton(ShapeRenderer s, float cx, float cy, float r, Color ringColor, boolean hot) {
+        s.setColor(M_BG);
+        s.circle(cx, cy, r, 40);
+        ring(s, cx, cy, r, hot ? 3f : 1.6f, 0, 360, ringColor != null ? ringColor : M_RING);
+    }
+
+    /** Kolko zebate (Ustawienia). */
+    private static void gearGlyph(ShapeRenderer s, float cx, float cy, float r) {
+        s.setColor(hex(0xc9c2b6, 1f));
+        for (int i = 0; i < 8; i++) s.rect(cx - 2.4f, cy + r - 3, 2.4f, -(r - 3), 4.8f, 6, 1, 1, i * 45);
+        s.circle(cx, cy, r, 24);
+        s.setColor(M_BTN);
+        s.circle(cx, cy, r * 0.42f, 16);
+    }
+
+    /** Znak wylaczenia (Wyloguj). */
+    private static void powerGlyph(ShapeRenderer s, float cx, float cy) {
+        Color c = hex(0xff6a5a, 1f);
+        ring(s, cx, cy, 7.5f, 2.6f, 125, 290, c);
+        s.setColor(c);
+        s.rectLine(cx, cy + 1, cx, cy + 9, 2.6f);
+    }
+
+    /** Postac z gwiazdka (VIP). */
+    private static void vipGlyph(ShapeRenderer s, float cx, float cy) {
+        s.setColor(hex(0xd9c6a5, 1f));
+        s.circle(cx - 2, cy + 5, 4.6f, 16);
+        s.arc(cx - 2, cy - 8, 8, 0, 180, 16);
+        s.setColor(hex(0xf2c94c, 1f));
+        star(s, cx + 7, cy + 7, 5f);
+    }
+
+    /** Napis w skali sc (z obrysem dla czytelnosci na mapie, gdy outline). */
+    private void mText(SpriteBatch b, String s, float x, float y, float sc, Color c, boolean outline) {
+        font.getData().setScale(sc);
+        y += font.getCapHeight(); // y = linia bazowa (BitmapFont rysuje od gornej krawedzi liter)
+        if (outline) {
+            font.setColor(0, 0, 0, 0.85f * c.a);
+            font.draw(b, s, x + 0.7f, y - 0.7f);
+            font.draw(b, s, x - 0.7f, y + 0.7f);
+        }
+        font.setColor(c);
+        font.draw(b, s, x, y);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+    }
+
+    /** Napis wysrodkowany na (cx, cy) - srodek wysokosci wielkiej litery. */
+    private void mCentered(SpriteBatch b, String s, float cx, float cy, float sc, Color c, boolean outline) {
+        font.getData().setScale(sc);
+        layout.setText(font, s);
+        float x = cx - layout.width / 2f, y = cy - font.getCapHeight() / 2f;
+        font.getData().setScale(1f);
+        mText(b, s, x, y, sc, c, outline);
+    }
+
+    /** Szerokosc napisu w skali sc. */
+    private float mWidth(String s, float sc) {
+        font.getData().setScale(sc);
+        layout.setText(font, s);
+        font.getData().setScale(1f);
+        return layout.width;
+    }
+
+    /** Napis przyciety do szerokosci room w skali sc. */
+    private String mClip(String s, float room, float sc) {
+        font.getData().setScale(sc);
+        String out = clip(s, room);
+        font.getData().setScale(1f);
+        return out;
+    }
+
+    /** Ramka w batchu (biala tekstura). */
+    private void bStroke(SpriteBatch b, float x, float y, float bw, float bh, float t, Color c) {
+        b.setColor(c);
+        TextureRegion px = art.white();
+        b.draw(px, x, y, bw, t);
+        b.draw(px, x, y + bh - t, bw, t);
+        b.draw(px, x, y, t, bh);
+        b.draw(px, x + bw - t, y, t, bh);
+        b.setColor(Color.WHITE);
+    }
+
+    private void bFill(SpriteBatch b, float x, float y, float bw, float bh, Color c) {
+        b.setColor(c);
+        b.draw(art.white(), x, y, bw, bh);
+        b.setColor(Color.WHITE);
+    }
+
+    /** Odnowienie akcji pola paska: 0..1 (czesc zakryta). */
+    private float slotCooldown(GameSession session, int slot, long now) {
+        String e = barEntries[slot];
+        if (e == null) return 0;
+        SpellType sp = actionSpell(session, e);
+        if (sp == null && e.startsWith("item:")) sp = session.spells().registry().find(e.substring(5));
+        long rem;
+        float full;
+        if (sp != null) {
+            rem = session.spells().cooldowns().remaining(sp, now);
+            full = Math.max(sp.cooldownMs(), sp.group().groupCooldownMs);
+        } else {
+            rem = session.spells().cooldowns().groupRemaining(pl.fawizja.pixel.magic.SpellGroup.POTION, now);
+            full = pl.fawizja.pixel.magic.SpellGroup.POTION.groupCooldownMs;
+        }
+        return rem <= 0 ? 0f : Math.min(1f, rem / Math.max(1f, full));
+    }
+
+    /** Okragle pole czaru: kolor zywiolu, znak rodzaju, zaslona odnowienia i brak many. */
+    private void spellDisc(ShapeRenderer s, SpellType sp, float cx, float cy, float r, float cd, boolean noMana) {
+        Color c = spellColor(sp);
+        s.setColor(c.r, c.g, c.b, 1f);
+        s.circle(cx, cy, r, 32);
+        spellGlyph(s, sp.kind(), cx, cy, r * 0.55f);
+        if (cd > 0) {
+            s.setColor(0, 0, 0, 0.6f);
+            s.arc(cx, cy, r, 90, 360 * cd, 32);
+        }
+        if (noMana) {
+            s.setColor(0.1f, 0.1f, 0.4f, 0.55f);
+            s.circle(cx, cy, r, 32);
+        }
+    }
+
+    private void renderMobile(SpriteBatch batch, ShapeRenderer shapes, GameSession session, WorldClock clock,
+                              long serverTimeMs, DiagnosticsInfo diagInfo, Monster tgt) {
+        PlayerCharacter pc = session.character();
+        if (menuOpen && mWin != null) mWin = null; // tylko jedno okno naraz: nowe okno menu zamyka okno kategorii
+        if (trade != null) mWin = null;
+        if (bigMapOpen) menuGeometry();
+        statusIcons(session, serverTimeMs);
+        barRects.clear();
+        int nb = mobileBattleCount(), rowsVis = mlay.battleRowsVisible();
+        mBattleScroll = Math.max(0, Math.min(mBattleScroll, nb - rowsVis));
+        long nowMs = com.badlogic.gdx.utils.TimeUtils.millis();
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapes.setProjectionMatrix(viewport.getCamera().combined);
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        uiBatch = batch;
+        uiShapes = shapes;
+
+        // ---- warstwa 1: stale elementy HUD-u (ksztalty)
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        HudLayout.Rect f = mlay.frame;
+        shapes.setColor(M_WOOD);
+        shapes.rect(f.x, f.y, f.w, f.h);
+        strokeRect(shapes, f.x, f.y, f.w, f.h, 1.5f, M_DARK);
+        strokeRect(shapes, f.x + 2, f.y + 2, f.w - 4, f.h - 4, 1f, M_LINE);
+        mBar(shapes, mlay.hpBar, pc.health() / (float) Math.max(1, pc.maxHealth()), hex(0xc8312c, 1f));
+        mBar(shapes, mlay.mpBar, pc.mana() / (float) Math.max(1, pc.maxMana()), hex(0x2f63d6, 1f));
+        for (int i = 0; i < MobileHudLayout.ICONS; i++) {
+            HudLayout.Rect r = mlay.icons[i];
+            woodButton(shapes, r.x, r.y, r.w, r.h, mobileIconActive(i));
+            if (i == MobileHudLayout.ICON_VIP) vipGlyph(shapes, r.cx(), r.y + 18);
+            if (i == MobileHudLayout.ICON_SETTINGS) gearGlyph(shapes, r.cx(), r.y + 19, 6.5f);
+            if (i == MobileHudLayout.ICON_LOGOUT) powerGlyph(shapes, r.cx(), r.y + 17);
+        }
+        // ikony stanu pod ramka po lewej
+        float sx = mlay.statusRow.x, sy = mlay.statusRow.y;
+        for (Status st : statuses) {
+            drawStatusGlyph(shapes, st, sx, sy, STATUS_SIZE);
+            sx += STATUS_SIZE + 3;
+        }
+        for (Buff b : buffs) {
+            if (b.icon() == null) drawStatusGlyph(shapes, b.glyph(), sx, sy, STATUS_SIZE);
+            sx += STATUS_SIZE + 3;
+        }
+        // minimapa i lista walki
+        HudLayout.Rect mm = mlay.minimap;
+        shapes.setColor(M_DARK);
+        shapes.rect(mm.x - 1, mm.y - 1, mm.w + 2, mm.h + 2);
+        HudLayout.Rect bl = mlay.battle;
+        if (bl.h > 0) {
+            shapes.setColor(hex(0x140c06, 0.82f));
+            shapes.rect(bl.x, bl.y, bl.w, bl.h);
+            strokeRect(shapes, bl.x, bl.y, bl.w, bl.h, 1f, M_EDGE);
+            if (nb > rowsVis + mBattleScroll) {
+                // strzalka: ponizej sa kolejne wiersze
+                float ax = bl.right() - 5 - mWidth(String.valueOf(nb - rowsVis - mBattleScroll), 0.48f) - 9, ay = bl.top() - 7;
+                shapes.setColor(M_MUTED);
+                shapes.triangle(ax, ay + 2.5f, ax + 6, ay + 2.5f, ax + 3, ay - 2.5f);
+            }
+        }
+        // tlo luku czarow
+        shapes.setColor(0.04f, 0.024f, 0.012f, 0.22f);
+        float rr = MobileHudLayout.R1 + 26;
+        shapes.arc(mlay.arcX, mlay.arcY, rr, 90, 90, 40);
+        shapes.rect(mlay.arcX - rr, 0, rr, mlay.arcY);
+        shapes.rect(mlay.arcX, 0, w - mlay.arcX, mlay.arcY + rr);
+        // przyciski luku: czary i mikstury
+        for (int i = 0; i < mlay.spells.length; i++) mSlotShapes(shapes, session, pc, MobileHudLayout.SPELL_SLOTS[i], mlay.spells[i], false, serverTimeMs);
+        for (int i = 0; i < mlay.potions.length; i++) mSlotShapes(shapes, session, pc, MobileHudLayout.POTION_SLOTS[i], mlay.potions[i], true, serverTimeMs);
+        if (pressSlot >= 0) {
+            // przytrzymanie: zielony pierscien rosnie, az otworzy sie wybor
+            float fr = Math.min(1f, (nowMs - pressStart) / (float) MOBILE_LONG_PRESS_MS);
+            HudButton b = spellButtons[pressSlot];
+            ring(shapes, b.x, b.y, b.r + 5.5f, 3f, 90, -360 * fr, M_GOOD);
+        }
+        // Atak / Tarcza / PvP i przyciski chwilowe
+        roundButton(shapes, target.x, target.y, target.r, target.active ? hex(0xff6a4a, 1f) : null, target.active);
+        roundButton(shapes, defensive.x, defensive.y, defensive.r, defensive.active ? M_GOOD : null, defensive.active);
+        roundButton(shapes, pvp.x, pvp.y, pvp.r, pvp.active ? hex(0xff4a3a, 1f) : null, pvp.active);
+        for (HudButton b : mobileContext()) if (b.visible && b.x > -999) roundButton(shapes, b.x, b.y, b.r, b.active ? M_GOOD : null, b.active);
+        // joystick: polprzezroczysta podstawa i galka
+        float jr = joystick.radius();
+        shapes.setColor(1, 1, 1, 0.07f);
+        shapes.circle(joystick.baseX(), joystick.baseY(), jr, 48);
+        ring(shapes, joystick.baseX(), joystick.baseY(), jr, 1.5f, 0, 360, new Color(1, 1, 1, 0.3f));
+        float kr = jr * 22f / 54f;
+        shapes.setColor(1, 1, 1, joystick.active() ? 0.26f : 0.18f);
+        shapes.circle(joystick.knob().x, joystick.knob().y, kr, 32);
+        ring(shapes, joystick.knob().x, joystick.knob().y, kr, 1.5f, 0, 360, new Color(1, 1, 1, 0.45f));
+        // czat
+        if (mChat) {
+            HudLayout.Rect cp = mlay.chatPanel, hd = mlay.chatHandle;
+            shapes.setColor(M_WOOD);
+            shapes.rect(hd.x, hd.y, hd.w, hd.h);
+            strokeRect(shapes, hd.x, hd.y, hd.w, hd.h, 1f, M_DARK);
+            shapes.setColor(hex(0x24180f, 0.92f));
+            shapes.rect(cp.x, cp.y, cp.w, cp.h);
+            strokeRect(shapes, cp.x, cp.y, cp.w, cp.h, 1f, M_DARK);
+            drawTabShapes(shapes);
+            shapes.setColor(hex(0x160e08, 1f));
+            shapes.rect(cp.x + 4, 4, cp.w - 8, 22);
+            strokeRect(shapes, cp.x + 4, 4, cp.w - 8, 22, 1f, M_EDGE);
+            mTriangle(shapes, hd.cx() + 18, hd.cy(), false);
+        } else {
+            HudLayout.Rect t = mlay.chatTab;
+            shapes.setColor(hex(0x24180f, 0.88f));
+            shapes.rect(t.x, t.y, t.w, t.h);
+            strokeRect(shapes, t.x, t.y, t.w, t.h, 1f, M_DARK);
+            mTriangle(shapes, t.cx() + 16, t.cy(), true);
+        }
+        // pasek celu pod ramka
+        if (tgt != null && mWin == null && !menuOpen) {
+            float tw = 200, tx = w / 2f - tw / 2f, ty = mlay.frame.y - 4 - 30;
+            shapes.setColor(hex(0x140c06, 0.75f));
+            shapes.rect(tx - 6, ty, tw + 12, 30);
+            shapes.setColor(0, 0, 0, 0.6f);
+            shapes.rect(tx, ty + 4, tw, 7);
+            shapes.setColor(0.85f, 0.15f, 0.2f, 1f);
+            shapes.rect(tx, ty + 4, tw * Math.max(0, Math.min(1, tgt.healthFraction())), 7);
+        }
+        if (diagnosticsOpen && diagInfo != null) {
+            shapes.setColor(0, 0, 0, 0.7f);
+            shapes.rect(6, mlay.statusRow.y - 4 - 16 * diagInfo.lines().size() - 6, 250, 16 * diagInfo.lines().size() + 6);
+        }
+        shapes.end();
+
+        // ---- warstwa 1: napisy i obrazki
+        batch.begin();
+        String lv = "Lv " + pc.level();
+        mText(batch, lv, 12, mlay.frame.cy() - 4f, 0.72f, M_TEXT, false);
+        mCentered(batch, "HP " + pc.health() + " / " + pc.maxHealth(), mlay.hpBar.cx(), mlay.hpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
+        mCentered(batch, "Mana " + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mlay.mpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
+        TextureRegion[] iconImg = {art.backpack(), helmetIcon(session), itemIcon(session, "exp_scroll"), null, itemIcon(session, "challenge_scroll"), null, null};
+        for (int i = 0; i < MobileHudLayout.ICONS; i++) {
+            HudLayout.Rect r = mlay.icons[i];
+            if (iconImg[i] != null) batch.draw(iconImg[i], r.x + 5, r.y + 8, 22, 22);
+            String label = M_ICON_LABELS[i];
+            float sc = Math.min(0.42f, 0.42f * 30f / Math.max(1f, mWidth(label, 0.42f)));
+            mCentered(batch, label, r.cx(), r.y + 4.5f, Math.max(0.3f, sc), M_TEXT, false);
+        }
+        sx = mlay.statusRow.x + statuses.size() * (STATUS_SIZE + 3);
+        for (Buff b : buffs) {
+            if (b.icon() != null) {
+                bFill(batch, sx, sy, STATUS_SIZE, STATUS_SIZE, new Color(0, 0, 0, 0.55f));
+                batch.draw(b.icon(), sx, sy, STATUS_SIZE, STATUS_SIZE);
+            }
+            sx += STATUS_SIZE + 3;
+        }
+        if (ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE || ownSkullMs > 0) {
+            TextureRegion sk = skullIcon(ownSkull.name());
+            if (sk != null) batch.draw(sk, sx, sy, STATUS_SIZE, STATUS_SIZE);
+            String time = skullTime(ownSkullMs);
+            mText(batch, time, sx + (sk != null ? STATUS_SIZE + 2 : 0), sy + 3.5f, HudLayout.MIN_FONT, Color.WHITE, true);
+        }
+        if (session.chests() != null) minimap.setHazards(session.chests().traps());
+        minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, MINIMAP_TILES);
+        bStroke(batch, mm.x, mm.y, mm.w, mm.h, 1.5f, M_LINE);
+        drawMobileBattle(batch, rowsVis);
+        for (int i = 0; i < mlay.spells.length; i++) mSlotIcon(batch, session, pc, MobileHudLayout.SPELL_SLOTS[i], mlay.spells[i], false, serverTimeMs);
+        for (int i = 0; i < mlay.potions.length; i++) mSlotIcon(batch, session, pc, MobileHudLayout.POTION_SLOTS[i], mlay.potions[i], true, serverTimeMs);
+        if (pressSlot >= 0) {
+            HudButton b = spellButtons[pressSlot];
+            mText(batch, "przytrzymaj", b.x - b.r - 8 - mWidth("przytrzymaj", 0.6f), b.y - 3.3f, 0.6f, M_GOOD, true);
+        }
+        mRoundLabel(batch, target, itemIcon(session, "iron_sword"), "Atak");
+        mRoundLabel(batch, defensive, itemIcon(session, "wooden_shield"), "Tarcza");
+        mRoundLabel(batch, pvp, pvp.icon, "PvP");
+        for (HudButton b : mobileContext()) if (b.visible && b.x > -999) mRoundLabel(batch, b, b.icon, b.label);
+        if (mChat) {
+            drawTabTitles(batch);
+            float yy = conY + conH - 4 - conTabH - 2;
+            for (ConLine l : conLines) {
+                if (yy - l.height() < conY - 2) break;
+                font.getData().setScale(chatScaleMobile());
+                font.setColor(l.color());
+                font.draw(batch, l.text(), conX + 8, yy, conW - 16, com.badlogic.gdx.utils.Align.left, true);
+                yy -= l.height();
+            }
+            font.setColor(Color.WHITE);
+            font.getData().setScale(1f);
+            mText(batch, "dotknij, aby pisać...", conX + 10, 11.4f, 0.66f, hex(0x8a7660, 1f), false);
+            mCentered(batch, "Czat", mlay.chatHandle.cx() - 6, mlay.chatHandle.cy(), 0.7f, M_TEXT, false);
+        } else {
+            boolean unread = false;
+            for (pl.fawizja.pixel.chat.ChatTabs.Tab t : chatTabs.tabs()) unread |= t.unread();
+            mCentered(batch, "Czat", mlay.chatTab.cx() - 6, mlay.chatTab.cy(), 0.72f, unread ? hex(0xff8a7a, 1f) : M_TEXT, false);
+        }
+        drawMobileStatus(batch);
+        if (tgt != null && mWin == null && !menuOpen) {
+            float ty = mlay.frame.y - 4 - 30;
+            String name = mClip(tgt.type().name() + " (Lv " + tgt.type().level() + ")", 196, 0.66f);
+            mText(batch, name, w / 2f - mWidth(name, 0.66f) / 2f, ty + 15, 0.66f, Color.WHITE, true);
+        }
+        if (diagnosticsOpen && diagInfo != null) {
+            float dy = mlay.statusRow.y - 8;
+            for (String line : diagInfo.lines()) {
+                mText(batch, mClip(line, 240, 0.64f), 10, dy, 0.64f, Color.WHITE, false);
+                dy -= 16;
+            }
+        }
+        batch.end();
+
+        // ---- warstwa 2: okna (kategorie, menu, wybor, mapa, dom)
+        if (mWin == null && !menuOpen && !bigMapOpen && houseWin == null) return;
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        HudLayout.Rect win = mWin != null ? mlay.window(mChat, false, new HudLayout.Rect()) : null;
+        if (win != null) {
+            mWindowShapes(shapes, win.x, win.y, win.w, win.h, true);
+            mWinShapes(shapes, win, session);
+        }
+        if (menuOpen) {
+            rebuildMenu(session);
+            mWindowShapes(shapes, menuX, menuY, menuW, menuH, true);
+            String cur = pickSlot >= 0 ? barEntries[pickSlot] : null;
+            for (MenuRow row : menuRows) {
+                boolean sel = cur != null && row.action.equals("pick:set:" + cur);
+                if (logoutConfirm) {
+                    woodButton(shapes, row.x, row.y, row.w, row.h, false);
+                    continue;
+                }
+                Color fill = sel ? M_SEL : row.enabled ? M_CELL : hex(0x332014, 1f);
+                shapes.setColor(fill);
+                shapes.rect(row.x, row.y, row.w, row.h);
+                strokeRect(shapes, row.x, row.y, row.w, row.h, 1f, sel ? M_GOOD : row.enabled ? M_CELL_LINE : hex(0x271810, 1f));
+                if (pickSlot >= 0) {
+                    SpellType sp = actionSpell(session, row.action.startsWith("pick:set:") ? row.action.substring(9) : null);
+                    if (sp == null && row.action.equals("pick:none")) sp = spellByName(session, row.label);
+                    if (sp != null) {
+                        spellDisc(shapes, sp, row.x + 12, row.y + row.h / 2f, 9.5f, 0, false);
+                        if (!row.enabled) {
+                            shapes.setColor(0.16f, 0.1f, 0.06f, 0.55f);
+                            shapes.circle(row.x + 12, row.y + row.h / 2f, 9.5f, 20);
+                        }
+                    }
+                }
+            }
+            if (pickSlot >= 0) {
+                // przycisk, ktory wybieramy: zielony pierscien
+                HudButton b = spellButtons[pickSlot];
+                ring(shapes, b.x, b.y, b.r + 5.5f, 3f, 90, -290, M_GOOD);
+            }
+        }
+        if (bigMapOpen) mWindowShapes(shapes, menuX, menuY, menuW, menuH, false);
+        if (houseWin != null) drawHouseShapes(shapes, session);
+        shapes.end();
+        batch.begin();
+        if (win != null) {
+            mText(batch, mWinTitle(), win.x + 10, win.top() - 17, 0.82f, Color.WHITE, false);
+            mWinContent(batch, win, session);
+        }
+        if (menuOpen) drawMobileMenuText(batch, session);
+        if (bigMapOpen) drawBigMap(batch, session, pc.position().z() == 0 ? "0" : (pc.position().z() > 0 ? "+" + pc.position().z() : String.valueOf(pc.position().z())));
+        if (houseWin != null) drawHouseText(batch);
+        batch.end();
+    }
+
+    /** Pasek HP albo many w ramce: ciemne tlo, wypelnienie, ciemna obwodka. */
+    private static void mBar(ShapeRenderer s, HudLayout.Rect r, float frac, Color c) {
+        s.setColor(0.08f, 0.05f, 0.03f, 1f);
+        s.rect(r.x, r.y, r.w, r.h);
+        s.setColor(c);
+        s.rect(r.x, r.y, r.w * Math.max(0f, Math.min(1f, frac)), r.h);
+        strokeRect(s, r.x, r.y, r.w, r.h, 1f, M_DARK);
+    }
+
+    /** Trojkat przy napisie "Czat": w gore (zwiniety) albo w dol (rozwiniety). */
+    private static void mTriangle(ShapeRenderer s, float cx, float cy, boolean up) {
+        s.setColor(M_TEXT);
+        if (up) s.triangle(cx - 3.5f, cy - 2.5f, cx + 3.5f, cy - 2.5f, cx, cy + 3f);
+        else s.triangle(cx - 3.5f, cy + 2.5f, cx + 3.5f, cy + 2.5f, cx, cy - 3f);
+    }
+
+    /** Helm na ikonie Ekwipunek. */
+    private TextureRegion helmetIcon(GameSession session) {
+        TextureRegion r = session.items().containsKey("obsidian_helmet") ? itemIcon(session, "obsidian_helmet") : null;
+        return r != null ? r : itemIcon(session, "leather_helmet");
+    }
+
+    /** Czar o nazwie (zablokowany wiersz wyboru: ikona mimo braku akcji). */
+    private static SpellType spellByName(GameSession session, String name) {
+        for (SpellType sp : session.spells().registry().all()) if (sp.name().equals(name) && !sp.kind().isRune()) return sp;
+        return null;
+    }
+
+    /** Tlo i pierscien przycisku luku oraz okragly znak czaru (w przebiegu ksztaltow). */
+    private void mSlotShapes(ShapeRenderer s, GameSession session, PlayerCharacter pc, int slot, MobileHudLayout.Circle c, boolean potion, long now) {
+        String e = barEntries[slot];
+        Color ring = potion ? ("potion_mp".equals(e) || e != null && e.contains("mana") ? hex(0x7aa6ff, 1f) : hex(0xff7a6a, 1f)) : null;
+        boolean hot = pickSlot == slot && menuOpen;
+        roundButton(s, c.x, c.y, c.r, hot ? M_GOOD : ring, hot);
+        SpellType sp = actionSpell(session, e);
+        if (sp != null) spellDisc(s, sp, c.x, c.y, c.r - 4, slotCooldown(session, slot, now), pc.mana() < sp.mana());
+        else if (e == null) {
+            s.setColor(M_MUTED);
+            s.rect(c.x - 6, c.y - 1, 12, 2);
+            s.rect(c.x - 1, c.y - 6, 2, 12);
+        }
+    }
+
+    /** Ikona przedmiotu (mikstura, runa) na przycisku luku, liczba sztuk i zaslona odnowienia (w batchu). */
+    private void mSlotIcon(SpriteBatch b, GameSession session, PlayerCharacter pc, int slot, MobileHudLayout.Circle c, boolean potion, long now) {
+        String e = barEntries[slot];
+        TextureRegion icon = actionIcon(session, e);
+        if (icon == null) return;
+        float is = potion ? 24 : 28;
+        b.draw(icon, c.x - is / 2f, c.y - is / 2f + (potion ? 1 : 0), is, is);
+        float cd = slotCooldown(session, slot, now);
+        if (cd > 0) bFill(b, c.x - c.r * 0.7f, c.y + c.r * 0.7f - c.r * 1.4f * cd, c.r * 1.4f, c.r * 1.4f * cd, new Color(0, 0, 0, 0.6f));
+        String n = spellButtons[slot].label;
+        if (n != null && !n.isEmpty() && !n.equals("+")) mCentered(b, n, c.x + c.r * 0.62f, c.y - c.r * 0.66f, 0.6f, Color.WHITE, true);
+    }
+
+    /** Ikona i maly podpis na okraglym przycisku (Atak, Tarcza, PvP, przyciski chwilowe). */
+    private void mRoundLabel(SpriteBatch b, HudButton btn, TextureRegion icon, String label) {
+        float r = btn.r;
+        if (icon == null) {
+            if (label != null && !label.isEmpty()) mCentered(b, label, btn.x, btn.y, 0.62f, M_TEXT, true);
+            return;
+        }
+        float is = r * 1.25f;
+        b.draw(icon, btn.x - is / 2f, btn.y - is * 0.3f, is, is);
+        if (label != null && !label.isEmpty()) mCentered(b, label, btn.x, btn.y - r * 0.56f, 0.44f, M_TEXT, true);
+    }
+
+    /** Skala wierszy czatu na telefonie (makieta: 10 px). */
+    private float chatScaleMobile() { return 0.66f; }
+
+    /** Lista walki pod minimapa: "Walka (n)", gracze i potwory w wierszach 12,5 dp, cel w czerwonej ramce. */
+    private void drawMobileBattle(SpriteBatch batch, int rowsVis) {
+        HudLayout.Rect bl = mlay.battle;
+        if (bl.h <= 0) return;
+        int nb = mobileBattleCount();
+        mText(batch, "Walka (" + nb + ")", bl.x + 5, bl.top() - 10, 0.52f, M_TEXT, false);
+        int more = nb - rowsVis - mBattleScroll;
+        if (more > 0) {
+            String m = String.valueOf(more);
+            mText(batch, m, bl.right() - 5 - mWidth(m, 0.48f), bl.top() - 10, 0.48f, M_MUTED, false);
+        }
+        if (nb == 0) {
+            mText(batch, "Brak potworów.", bl.x + 5, bl.top() - MobileHudLayout.BATTLE_HEAD - 9, 0.5f, M_MUTED, false);
+            return;
+        }
+        float row = MobileHudLayout.BATTLE_ROW;
+        for (int k = 0; k < rowsVis && k + mBattleScroll < nb; k++) {
+            int i = k + mBattleScroll;
+            float top = bl.top() - MobileHudLayout.BATTLE_HEAD - k * row, base = top - 8;
+            String name;
+            Color nc = M_TEXT;
+            TextureRegion icon;
+            float hp;
+            if (i < battlePlayers.size()) {
+                BattlePlayer bp = battlePlayers.get(i);
+                name = bp.name();
+                icon = skullIcon(bp.skull());
+                Color skc = skullColor(bp.skull());
+                if (bp.ally()) nc = new Color(0.5f, 0.78f, 1f, 1f);
+                else if (skc != null) nc = skc;
+                hp = bp.healthPercent() / 100f;
+            } else {
+                Monster m = battle.get(i - battlePlayers.size());
+                name = m.type().name();
+                icon = art.monster(m.type().key());
+                hp = m.healthFraction();
+                if (m == currentTarget) bStroke(batch, bl.x + 2, top - 11, bl.w - 4, 12, 1f, hex(0xff4a3a, 1f));
+            }
+            if (icon != null) batch.draw(icon, bl.x + 4, top - 9, 9, 9);
+            float bx = bl.right() - 34;
+            mText(batch, mClip(name, bx - 3 - (bl.x + 15), 0.55f), bl.x + 15, base, 0.55f, nc, false);
+            bFill(batch, bx, top - 6.5f, 28, 3.5f, M_DARK);
+            float[] c = BarColors.health(hp);
+            bFill(batch, bx, top - 6.5f, 28 * Math.max(0, Math.min(1, hp)), 3.5f, new Color(c[0], c[1], c[2], 1f));
+        }
+    }
+
+    /** Napisy zdarzen (lup, poziom, ostrzezenia) nad czatem, miedzy joystickiem a lukiem. */
+    private void drawMobileStatus(SpriteBatch batch) {
+        if (statusLines.isEmpty() || menuOpen || bigMapOpen || mWin != null) return;
+        float width = mlay.chatPanel.w, x = mlay.chatPanel.x;
+        float yy = (mChat ? MobileHudLayout.CHAT_H + MobileHudLayout.HANDLE_H + 6 : MobileHudLayout.TAB_H + 6);
+        for (ConLine l : statusLines) yy += l.height();
+        font.getData().setScale(chatScale());
+        for (ConLine l : statusLines) {
+            Color c = l.color();
+            layout.setText(font, l.text(), c, width, com.badlogic.gdx.utils.Align.center, true);
+            batch.setColor(0f, 0f, 0f, 0.5f * c.a);
+            batch.draw(art.white(), x + (width - layout.width) / 2f - 4, yy - l.height() + 1, layout.width + 8, l.height());
+            batch.setColor(Color.WHITE);
+            font.setColor(0f, 0f, 0f, c.a * 0.85f);
+            font.draw(batch, l.text(), x + 1, yy - 1, width, com.badlogic.gdx.utils.Align.center, true);
+            font.setColor(c);
+            font.draw(batch, l.text(), x, yy, width, com.badlogic.gdx.utils.Align.center, true);
+            yy -= l.height();
+        }
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+    }
+
+    private String mWinTitle() {
+        switch (mWin) {
+            case BAG: return "Plecak";
+            case EQUIP: return "Ekwipunek";
+            case SKILLS: return "Umiejętności";
+            case VIP: return "VIP - znajomi";
+            default: return "Ustawienia";
+        }
+    }
+
+    /** Ksztalty w oknie kategorii: pola, paski umiejetnosci, przyciski, kropki stanu znajomych. */
+    private void mWinShapes(ShapeRenderer s, HudLayout.Rect win, GameSession session) {
+        PlayerCharacter pc = session.character();
+        switch (mWin) {
+            case BAG:
+                for (MBtn b : mBagButtons(win, session)) woodButton(s, b.x(), b.y(), b.w(), b.h(), b.id().equals("mbag:page:" + bagPage));
+                break;
+            case SKILLS: {
+                String[][] rows = skillRows(pc);
+                float rh = mSkillRow(win, rows.length);
+                for (int i = 0; i < rows.length; i++) {
+                    float yy = win.top() - 26 - 15 - i * rh;
+                    double prog = i == 0 ? 1 : i == 1 ? pc.levelProgress()
+                            : (double) pc.skills().tries(Skill.values()[i - 2]) / Math.max(1, Skills.triesForNext(pc.skills().level(Skill.values()[i - 2])));
+                    s.setColor(M_DARK);
+                    s.rect(win.x + 12, yy - 6, win.w - 24, 3);
+                    s.setColor(hex(0x5fbf4a, 1f));
+                    s.rect(win.x + 12, yy - 6, (win.w - 24) * (float) Math.max(0, Math.min(1, prog)), 3);
+                }
+                break;
+            }
+            case VIP: {
+                float yy = win.top() - 26 - 4;
+                for (pl.fawizja.pixel.friends.FriendsView.Row r : vipRows()) {
+                    if (yy - M_VIP_ROW < win.y + 46) break;
+                    s.setColor(r.online() ? hex(0x5fbf4a, 1f) : hex(0x7a6a5a, 1f));
+                    s.circle(win.x + 18, yy - M_VIP_ROW / 2f, 4, 12);
+                    yy -= M_VIP_ROW;
+                }
+                MBtn add = mVipAdd(win);
+                woodButton(s, add.x(), add.y(), add.w(), add.h(), false);
+                break;
+            }
+            case SETTINGS:
+                for (MBtn b : mSettingsButtons(win, mSettingsEntries(session))) {
+                    s.setColor(M_CELL);
+                    s.rect(b.x(), b.y(), b.w(), b.h());
+                    strokeRect(s, b.x(), b.y(), b.w(), b.h(), 1f, M_CELL_LINE);
+                }
+                break;
+            case EQUIP: {
+                float[] bc = mEqCell(win, 0, 3);
+                float m = (bc[2] - 4) / 2f;
+                float[][] spots = {{bc[0] + 2, bc[1] + 2 + m}, {bc[0] + 2 + m, bc[1] + 2 + m}, {bc[0] + 2, bc[1] + 2}, {bc[0] + 2 + m, bc[1] + 2}};
+                for (int i = 0; i < Math.min(4, buffs.size()); i++) {
+                    if (buffs.get(i).icon() == null) drawStatusGlyph(s, buffs.get(i).glyph(), spots[i][0], spots[i][1], m);
+                }
+                break;
+            }
+            default:
+        }
+    }
+
+    /** Wysokosc wiersza okna umiejetnosci (makieta 16 dp; mniej, gdy okno jest nizsze). */
+    private static float mSkillRow(HudLayout.Rect win, int rows) {
+        return Math.min(16, (win.h - 26 - 15 - 24) / Math.max(1, rows - 1));
+    }
+
+    /** Tresc okna kategorii (napisy, przedmioty) - w batchu. */
+    private void mWinContent(SpriteBatch b, HudLayout.Rect win, GameSession session) {
+        PlayerCharacter pc = session.character();
+        switch (mWin) {
+            case SKILLS: {
+                String[][] rows = skillRows(pc);
+                float rh = mSkillRow(win, rows.length);
+                for (int i = 0; i < rows.length; i++) {
+                    float yy = win.top() - 26 - 15 - i * rh;
+                    mText(b, rows[i][0], win.x + 12, yy, 0.72f, M_TEXT, false);
+                    float vw = mWidth(rows[i][1], 0.72f);
+                    mText(b, rows[i][1], win.right() - 12 - vw, yy, 0.72f, M_TEXT, false);
+                }
+                pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
+                String info = "Zdrowie " + pc.health() + "/" + pc.maxHealth() + "  Mana " + pc.mana() + "/" + pc.maxMana()
+                        + "  Szybkość " + pc.speed() + "  Udźwig " + pc.capacity() + "  Atak do " + ap.maxDamage();
+                mText(b, mClip(info, win.w - 24, 0.56f), win.x + 12, win.y + 6, 0.56f, M_MUTED, false);
+                break;
+            }
+            case BAG: {
+                bagPages = pc.bagPages();
+                if (bagPage >= bagPages) bagPage = bagPages - 1;
+                int base = bagPage * PAGE_SLOTS, used = 0;
+                HudLayout.Rect c = new HudLayout.Rect();
+                for (int i = 0; i < PAGE_SLOTS; i++) {
+                    int slot = base + i;
+                    mBagCell(win, i, c);
+                    ItemStack st = slot < pc.backpack().size() ? pc.backpack().get(slot) : null;
+                    if (st != null) used++;
+                    TextureRegion fr = slot == selectedSlot && wstSelected != null ? wstSelected : slotFrame(st, art.itemRegistry());
+                    if (fr != null) b.draw(fr, c.x, c.y, c.w, c.h);
+                    else bFill(b, c.x, c.y, c.w, c.h, M_CELL);
+                    if (slot == selectedSlot) bStroke(b, c.x, c.y, c.w, c.h, 1.5f, hex(0xf2cc40, 1f));
+                    if (st == null) continue;
+                    TextureRegion r = art.item(st.itemId());
+                    float ip = slotPad(c.w);
+                    if (r != null) b.draw(r, c.x + ip, c.y + ip, c.w - 2 * ip, c.h - 2 * ip);
+                    if (st.count() > 1) mText(b, String.valueOf(st.count()), c.right() - 2 - mWidth(String.valueOf(st.count()), 0.56f), c.y + 3, 0.56f, Color.WHITE, true);
+                    if (pc.isKept(st.itemId())) bFill(b, c.right() - 6, c.top() - 6, 4, 4, hex(0xf2cc40, 1f));
+                }
+                float ty = c.y - 12;
+                String head = (bagPages > 1 ? "Plecak " + (bagPage + 1) + "/" + bagPages + ": " : "Pojemność: ") + used + " / " + PAGE_SLOTS
+                        + "  ·  " + String.format("%,d", session.gold()) + " gp";
+                ItemStack sel = selectedSlot >= 0 && selectedSlot < pc.backpack().size() ? pc.backpack().get(selectedSlot) : null;
+                if (sel != null) {
+                    ItemType t = session.items().get(sel.itemId());
+                    ItemStack worn = t.slot() == EquipSlot.NONE ? null : pc.equipment().get(t.slot());
+                    ItemType wornType = worn == null ? null : session.items().get(worn.itemId());
+                    String stats = pl.fawizja.pixel.item.ItemCompare.stats(t, sel.upgrade(), wornType, worn == null ? 0 : worn.upgrade());
+                    String req = pl.fawizja.pixel.item.ItemCompare.requirements(t, pc);
+                    mText(b, mClip(stats, win.w - 24, 0.6f), win.x + 12, ty, 0.6f, M_TEXT, false);
+                    if (!req.isEmpty()) mText(b, mClip(req, win.w - 24, 0.56f), win.x + 12, ty - 13, 0.56f, hex(0xff8a7a, 1f), false);
+                } else {
+                    mText(b, head, win.x + 12, ty, 0.62f, M_MUTED, false);
+                    mText(b, "Dotknij przedmiotu, potem pola, aby przenieść.", win.x + 12, ty - 13, 0.56f, M_MUTED, false);
+                }
+                for (MBtn bt : mBagButtons(win, session)) mCentered(b, bt.label(), bt.x() + bt.w() / 2f, bt.y() + bt.h() / 2f, 0.66f, M_TEXT, false);
+                break;
+            }
+            case EQUIP: {
+                for (int i = 0; i < EQ_SLOTS.length; i++) {
+                    float[] c = mEqCell(win, EQ_CELLS[i][0], EQ_CELLS[i][1]);
+                    drawEquipSlot(b, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], c[2]);
+                }
+                float[] bp = mEqCell(win, 2, 0);
+                drawBackpackSlot(b, bp[0], bp[1], bp[2]);
+                float[] bc = mEqCell(win, 0, 3);
+                if (slotImg != null) b.draw(wstEmpty != null ? wstEmpty : slotImg, bc[0], bc[1], bc[2], bc[2]);
+                float m = (bc[2] - 4) / 2f;
+                float[][] spots = {{bc[0] + 2, bc[1] + 2 + m}, {bc[0] + 2 + m, bc[1] + 2 + m}, {bc[0] + 2, bc[1] + 2}, {bc[0] + 2 + m, bc[1] + 2}};
+                for (int i = 0; i < Math.min(4, buffs.size()); i++) {
+                    if (buffs.get(i).icon() != null) b.draw(buffs.get(i).icon(), spots[i][0], spots[i][1], m, m);
+                }
+                int atk = 0, def = 0, arm = 0;
+                for (EquipSlot es : EQ_SLOTS) {
+                    ItemStack st = pc.equipment().get(es);
+                    if (st == null) continue;
+                    ItemType t = session.items().get(st.itemId());
+                    atk += t.attack();
+                    def += t.defense();
+                    arm += t.armor();
+                }
+                pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
+                float tx = win.x + 70 + 3 * 42 + 14, ty = win.top() - 26 - 18;
+                String[] lines = {"Atak " + atk, "Obrona " + def, "Pancerz " + arm, "Obrażenia do " + ap.maxDamage(), "Udźwig " + pc.capacity()};
+                for (String l : lines) {
+                    mText(b, l, tx, ty, 0.66f, M_TEXT, false);
+                    ty -= 16;
+                }
+                mText(b, "Dotknij dwa razy, aby zdjąć.", tx, win.y + 10, 0.52f, M_MUTED, false);
+                break;
+            }
+            case VIP: {
+                List<pl.fawizja.pixel.friends.FriendsView.Row> rows = vipRows();
+                float yy = win.top() - 26 - 4;
+                if (rows.isEmpty()) {
+                    font.getData().setScale(0.66f);
+                    font.setColor(M_MUTED);
+                    font.draw(b, VIP_EMPTY, win.x + 12, yy - 6, win.w - 24, com.badlogic.gdx.utils.Align.left, true);
+                    font.setColor(Color.WHITE);
+                    font.getData().setScale(1f);
+                }
+                for (pl.fawizja.pixel.friends.FriendsView.Row r : rows) {
+                    if (yy - M_VIP_ROW < win.y + 46) break;
+                    float cy = yy - M_VIP_ROW / 2f;
+                    mText(b, r.name(), win.x + 30, cy - 4, 0.75f, r.online() ? M_TEXT : hex(0x9c876f, 1f), false);
+                    String info = (r.vocation() == null ? "" : r.vocation() + " ") + (r.level() > 0 ? r.level() : "");
+                    mText(b, info, win.right() - 12 - mWidth(info, 0.62f), cy - 3.4f, 0.62f, M_MUTED, false);
+                    yy -= M_VIP_ROW;
+                }
+                MBtn add = mVipAdd(win);
+                mCentered(b, add.label(), add.x() + add.w() / 2f, add.y() + add.h() / 2f, 0.66f, M_TEXT, false);
+                int online = vipView == null ? 0 : vipView.online();
+                mText(b, "W grze: " + online + " z " + rows.size(), win.x + 12, win.y + 20, 0.6f, M_MUTED, false);
+                break;
+            }
+            case SETTINGS: {
+                List<String[]> entries = mSettingsEntries(session);
+                for (MBtn bt : mSettingsButtons(win, entries)) {
+                    if (bt.id().equals("set:page")) {
+                        mCentered(b, bt.label(), bt.x() + bt.w() / 2f, bt.y() + bt.h() / 2f, 0.66f, M_GOOD, false);
+                        continue;
+                    }
+                    String[] e = entries.get(Integer.parseInt(bt.id().substring(4)));
+                    mText(b, mClip(e[1], bt.w() - 12, 0.68f), bt.x() + 6, bt.y() + 22.5f, 0.68f, M_TEXT, false);
+                    mText(b, mClip(e[2], bt.w() - 12, 0.58f), bt.x() + 6, bt.y() + 7, 0.58f, M_MUTED, false);
+                }
+                break;
+            }
+            default:
+        }
+    }
+
+    /** Tytul okna menu na telefonie i wiersz pod nim (opis), jak napisy okien w starym ukladzie. */
+    private void drawMobileMenuText(SpriteBatch batch, GameSession session) {
+        String title, sub = null;
+        if (trade != null) {
+            title = "Handel z " + trade.partner();
+            sub = "Twój plecak po prawej: dotknij, aby dodać do oferty";
+        } else if (logoutConfirm) {
+            title = "Wylogować się?";
+        } else if (pickSlot >= 0) {
+            PlayerCharacter pc = session.character();
+            title = "Przycisk " + arcNumber(pickSlot) + ": wybierz (" + vocationName(pc.vocation()) + ", poz. " + pc.level() + ")";
+        } else if (playerMenu != null) {
+            title = playerMenu.name();
+            sub = playerInfoLine(session);
+        } else if (achievementsView && journalMode) {
+            title = "Zadania (ukończone: " + session.character().quests().done().size() + ")";
+        } else if (achievementsView && infoTitle != null) {
+            title = infoTitle;
+        } else if (achievementsView) {
+            PlayerCharacter me = session.character();
+            title = bestiaryMode ? "Bestiariusz" + (monsterSpecies > 0 ? " (" + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
+                    : "Osiągnięcia " + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length;
+        } else if (marketView != null) {
+            title = "Rynek graczy (" + marketView.total() + " ofert)";
+        } else if (friendsView != null) {
+            title = "Znajomi (" + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")";
+        } else if (rankingView != null) {
+            title = rankingView.title() + " (" + rankingView.total() + " postaci)";
+        } else if (npcMode) {
+            title = npc.name() + " (" + npc.town() + ")";
+            sub = npc.greeting();
+        } else if (optionsMenu) {
+            title = "Opcje";
+        } else {
+            title = "Księga: czary (dotknij, aby rzucić) i rzemiosło";
+        }
+        mText(batch, mClip(title, menuW - 44, 0.76f), menuX + 10, menuY + menuH - 17, 0.76f, Color.WHITE, false);
+        if (sub != null && !sub.isEmpty()) mText(batch, mClip(sub, menuW - 20, 0.62f), menuX + 10, menuY + menuH - 36, 0.62f, M_MUTED, false);
+        if (logoutConfirm) mCentered(batch, "Na pewno chcesz się wylogować?", menuX + menuW / 2f, menuY + menuH - 50, 0.8f, M_TEXT, false);
+        boolean pick = pickSlot >= 0;
+        for (MenuRow row : menuRows) {
+            Color lc = row.enabled ? M_TEXT : hex(0xefe4d4, 0.45f), dc = row.enabled ? M_MUTED : hex(0xb8a48c, 0.45f);
+            if (logoutConfirm) {
+                mCentered(batch, row.label, row.x + row.w / 2f, row.y + row.h / 2f, 0.76f,
+                        row.action.equals("logout:yes") ? hex(0xff8a7a, 1f) : M_TEXT, false);
+                continue;
+            }
+            float tx = row.x + (pick ? 26 : 6);
+            if (pick) {
+                TextureRegion ic = actionIcon(session, row.action.startsWith("pick:set:") ? row.action.substring(9) : null);
+                if (ic == null && row.action.equals("pick:none")) ic = runeIconByName(session, row.label);
+                if (ic != null) {
+                    if (!row.enabled) batch.setColor(1, 1, 1, 0.45f);
+                    batch.draw(ic, row.x + 2, row.y + 2, 20, 20);
+                    batch.setColor(Color.WHITE);
+                }
+            }
+            float room = row.x + row.w - 4 - tx;
+            float ls = pick ? 0.6f : 0.7f, ds = pick ? 0.5f : 0.58f;
+            if (row.detail.isEmpty()) {
+                mText(batch, mClip(row.label, room, ls), tx, row.y + row.h / 2f - 5.5f * ls, ls, lc, false);
+            } else {
+                mText(batch, mClip(row.label, room, ls), tx, row.y + row.h - 3 - 11 * ls, ls, lc, false);
+                mText(batch, mClip(row.detail, room, ds), tx, row.y + 3.5f, ds, dc, false);
+            }
+        }
+    }
+
+    /** Ikona runy po nazwie czaru runy (zablokowany wiersz wyboru). */
+    private TextureRegion runeIconByName(GameSession session, String name) {
+        for (SpellType sp : session.spells().registry().all()) {
+            if (sp.kind().isRune() && sp.name().equals(name) && session.items().containsKey(sp.key())) return itemIcon(session, sp.key());
+        }
+        return null;
     }
 
     /** Dane do panelu diagnostyki. */

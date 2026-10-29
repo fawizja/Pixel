@@ -105,3 +105,7 @@ buffs_skull|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,4
 logout_confirm|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.button=logout
 hud_phone_s24|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pvp -Dpixel.width=2340 -Dpixel.height=1080 -Dpixel.uiScale=3
 hud_phone_narrow_popup|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=playerpopup -Dpixel.width=1280 -Dpixel.height=720 -Dpixel.uiScale=2
+# 2026-10-29: uklad na telefon, wariant B (-Dpixel.mobileHud=1): ramka, luk czarow, okno kategorii z czatem, wybor akcji
+mobile_hud|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=target
+mobile_window|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_skills,mobile_chat
+mobile_picker|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.open=mobile_picker
