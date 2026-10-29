@@ -594,7 +594,7 @@ public final class MonsterManager {
     }
 
     private boolean cornerFree(Position from, Direction d) {
-        return !d.diagonal() || (world.isWalkable(from.translate(d.dx, 0)) && world.isWalkable(from.translate(0, d.dy)));
+        return world.diagonalCornersOpen(from, d);
     }
 
     private void tryStep(Monster m, Direction d, long now, Position player) {

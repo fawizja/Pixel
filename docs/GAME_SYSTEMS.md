@@ -226,7 +226,9 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
 
 - Warstwy: podloze, dekoracje, obiekty (przeszkody), sciany, swiatlo, przejscia.
 - Pietra -5..+5 o wspolnym ukladzie wspolrzednych, mapy z plikow tekstowych + legenda.
-- Kolizje z cache (`boolean[]`), ruch w 8 kierunkach bez scinania rogow.
+- Kolizje z cache (`boolean[]`), ruch w 8 kierunkach. Skos nie scina rogu muru ani wody, ale miedzy drzewami,
+  krzakami, palmami, kaktusami i glazami mozna sie przecisnac po skosie jak w Tibii (`TileType.squeezable`,
+  `WorldMap.diagonalCornersOpen`; gracz i potwory).
 - Schody, dziury, tunele, drabiny (UZYJ), miejsca na line.
 - Przejscia strzezone poziomem: `gates=x0,y0,x1,y1,z,poziom` w map.properties, `WorldMap.requiredLevelAt`;
   `MovementSystem.step` zwraca `LEVEL_TOO_LOW`, sesja wypisuje ostrzezenie straznika (co 3 s), a klient online
@@ -239,7 +241,11 @@ Kolizje (etap 12): poza strefa ochronna gracze blokuja sobie pola (na serwerze, 
 w strefie ochronnej mozna przez siebie przejsc jak w Tibii; potwory nie wchodza na pole zadnego gracza (nie tylko celu).
 Przyspieszenie: czary utani hur / utani gran hur (`SpellKind.HASTE`, w spells.csv baza = procent, zasieg = sekundy),
 ikona stanu w HUD i pole na automatycznym pasku czarow (zamiast poswiaty, gdy postac zna przyspieszenie).
-Joystick ze strefa martwa, klawiatura na PC.
+Joystick (`StickFilter`): rusza przy wychyleniu 45%, staje ponizej 30%, kierunki proste maja pierwszenstwo (skos
+tylko w klinie +-10 stopni i przy wychyleniu 60%, potem trzyma sie w +-18), zmiana prosty-prosty z histereza 8 stopni,
+nowy kierunek musi trwac 70 ms (bez drgan kciuka); klawiatura na PC.
+Marsz po dotknieciu mapy (`Pathfinder.path`, A*): krok prosty 100, skos 350 (trwa jak 3 proste + zapas), drobna kara
+za zakret - trasa prosta / w ksztalcie L, skos tylko przy przecisnieciu sie miedzy przeszkodami.
 Sterowanie dotykiem (etap 17, `GameScreen` + `Hud.floatJoystick`): dotkniecie mapy rozstrzyga sie przy puszczeniu
 palca. Krotkie dotkniecie = pole (cel, marsz, rozmowa, lup), przytrzymanie 450 ms = podglad pola
 (`GameSession.lookAt`: potwor z poziomem i zdrowiem, NPC z rola, cialo, przedmioty, przejscia, strefa ochronna,
