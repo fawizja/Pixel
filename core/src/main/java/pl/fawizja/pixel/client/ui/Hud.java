@@ -46,24 +46,24 @@ public final class Hud {
     private final GlyphLayout layout = new GlyphLayout();
     private final VirtualJoystick joystick = new VirtualJoystick();
     private final List<HudButton> buttons = new ArrayList<>();
-    private final HudButton use = new HudButton("use", "UŻYJ");
+    private final HudButton use = new HudButton("use", "Użyj");
     private final HudButton run = new HudButton("run", "");
     private final HudButton torch = new HudButton("torch", "");
-    private final HudButton bag = new HudButton("bag", "PLECAK");
-    private final HudButton pick = new HudButton("pick", "PODNIEŚ");
+    private final HudButton bag = new HudButton("bag", "Plecak");
+    private final HudButton pick = new HudButton("pick", "Weź");
     private final HudButton diag = new HudButton("diag", "");
-    private final HudButton target = new HudButton("target", "ATAK");
+    private final HudButton target = new HudButton("target", "Atak");
     private final HudButton defensive = new HudButton("defensive", "");
     private final HudButton book = new HudButton("book", "KSIĘGA");
-    private final HudButton fish = new HudButton("fish", "ŁÓW");
-    private final HudButton talk = new HudButton("talk", "ROZMOWA");
-    private final HudButton mount = new HudButton("mount", "KOŃ");
+    private final HudButton fish = new HudButton("fish", "Łów");
+    private final HudButton talk = new HudButton("talk", "Mów");
+    private final HudButton mount = new HudButton("mount", "Koń");
     /** Przelacznik trybu PvP: biala czaszka = wylaczony, czerwona = wlaczony. */
     private final HudButton pvp = new HudButton("pvp", "");
     /** Dziennik zadan (dawny przycisk KSIEGA; ksiega czarow: klawisz K albo wybor pola paska). */
-    private final HudButton quest = new HudButton("quest", "ZADANIA");
+    private final HudButton quest = new HudButton("quest", "Zadania");
     /** Wylogowanie z potwierdzeniem (nie w trakcie walki - blokada PZ). */
-    private final HudButton logout = new HudButton("logout", "WYJDŹ");
+    private final HudButton logout = new HudButton("logout", "Wyjdź");
     /** Uklad HUD-u jak w Tibii: kolumny, gorny pasek, widok gry, konsola. */
     private final HudLayout lay = new HudLayout();
     /** Lista VIP i okno umiejetnosci rozwiniete (umiejetnosci: null = domyslnie, zwiniete na telefonie). */
@@ -605,7 +605,7 @@ public final class Hud {
         if (trade != null || marketView != null) return "gold";
         if (npcMode) return "wood";
         if (achievementsView) return "royal";
-        if (pickSlot >= 0 || playerMenu != null || rankingView != null || friendsView != null) return "stone";
+        if (pickSlot >= 0 || playerMenu != null || optionsMenu || rankingView != null || friendsView != null) return "stone";
         return "arcane";
     }
 
@@ -771,8 +771,8 @@ public final class Hud {
         return out;
     }
 
-    /** Czy okno umiejetnosci jest rozwiniete (domyslnie tak, na niskim ekranie zwiniete). */
-    private boolean skillsExpanded() { return skillsOpen != null ? skillsOpen : !(h < 420); }
+    /** Czy okno umiejetnosci jest rozwiniete (wybor gracza; domyslnie tak, gdy miesci sie w lewej kolumnie). */
+    private boolean skillsExpanded() { return lay.skillsShown; }
 
     /** Naglowek okna umiejetnosci: zwija i rozwija (tez -Dpixel.button=hud:skills). */
     public void toggleSkills() {
@@ -780,13 +780,31 @@ public final class Hud {
         layoutSide();
     }
 
+    /** Wiersze tresci listy VIP: znajomi albo zawiniety napis "brak znajomych" (do ukladu lewej kolumny). */
+    private int vipContentRows() {
+        int n = vipView == null ? 0 : vipView.rows().size();
+        if (n > 0) return n;
+        float lw = (h < 420 ? 150 : 200) - 2 * HudLayout.PAD - 14;
+        font.getData().setScale(conScale());
+        layout.setText(font, VIP_EMPTY, Color.WHITE, Math.max(40, lw), com.badlogic.gdx.utils.Align.left, true);
+        int lines = 1 + Math.max(0, Math.round((layout.height - font.getCapHeight()) / font.getLineHeight()));
+        font.getData().setScale(1f);
+        return Math.min(3, lines);
+    }
+
+    private static final String VIP_EMPTY = "Brak znajomych. Dotknij +, aby dodać.";
+
     public void toggleVip() {
         vipOpen = !vipOpen;
         layoutSide();
     }
 
     /** Znajomi do listy VIP (null = brak danych). */
-    public void setVip(pl.fawizja.pixel.friends.FriendsView view) { vipView = view; }
+    public void setVip(pl.fawizja.pixel.friends.FriendsView view) {
+        int before = vipView == null ? 0 : vipView.rows().size();
+        vipView = view;
+        if ((view == null ? 0 : view.rows().size()) != before && w > 0) layoutSide(); // VIP zajmuje tyle, ile potrzebuje
+    }
 
     /** Inni gracze w poblizu do listy walki (dotkniecie otwiera okienko gracza). */
     public void setBattlePlayers(List<BattlePlayer> players) { battlePlayers = players == null ? List.of() : players; }
@@ -798,7 +816,7 @@ public final class Hud {
     private void layoutSide() {
         List<HudButton> acts = visibleActions();
         sideButtonsLaidOut = visibleActionMask();
-        lay.compute(w, h, uiScale, acts.size(), vipOpen, skillsExpanded(), 2 + Skill.values().length);
+        lay.compute(w, h, uiScale, acts.size(), vipOpen, vipContentRows(), skillsOpen, 2 + Skill.values().length);
         topH = lay.topBarHeight();
         gx = lay.view.x;
         gy = lay.view.y;
@@ -815,12 +833,24 @@ public final class Hud {
         mmY = lay.minimap.y;
         mmSize = lay.minimap.w;
         for (int i = 0; i < toggleButtons.length; i++) {
-            HudLayout.Rect t = lay.toggles[i];
+            int slot = lay.toggleSlot[i];
+            // waski telefon: wyjscie schowane w menu "Opcje"
+            toggleButtons[i].visible = slot >= 0;
+            if (slot < 0) continue;
+            HudLayout.Rect t = lay.toggles[slot];
             place(toggleButtons[i], t.cx(), t.cy(), t.w);
         }
+        // akcje: obok ekwipunku (telefon), reszta w rzedach nad paskiem czarow
+        int inRow = 0;
         for (int i = 0; i < acts.size(); i++) {
-            lay.actionCell(i, acts.size(), r);
-            place(acts.get(i), r.cx(), r.cy(), r.w);
+            int slot = i < lay.actionSlot.length ? lay.actionSlot[i] : -1;
+            if (slot >= 0) {
+                HudLayout.Rect t = lay.toggles[slot];
+                place(acts.get(i), t.cx(), t.cy(), t.w);
+            } else {
+                lay.actionCell(inRow++, lay.rowActions, r);
+                place(acts.get(i), r.cx(), r.cy(), r.w);
+            }
         }
         epTibia = true;
         epX = lay.equipment.x;
@@ -836,7 +866,7 @@ public final class Hud {
         pskY = lay.skills.y;
         pskW = lay.skills.w;
         pskH = lay.skills.h;
-        conTabH = h >= 500 ? 18 : 16;
+        conTabH = lay.tabH;
         conX = lay.console.x;
         conY = lay.console.y;
         conW = lay.console.w;
@@ -875,13 +905,21 @@ public final class Hud {
      * odsloniete); okienko gracza i potwierdzenie wylogowania - male, na srodku widoku gry.
      */
     private void menuGeometry() {
-        if (playerMenu != null || logoutConfirm) {
-            rowH = lay.compact ? 20 : 22;
-            int rows = logoutConfirm ? 2 : playerRowsCount;
+        if (playerMenu != null || logoutConfirm || optionsMenu) {
+            // ekran dotykowy: wiersze co najmniej 36 dp; gdy nie mieszcza sie jeden pod drugim - dwie kolumny
+            rowH = uiScale >= 1.5f || lay.compact ? 39 : 24;
+            int rows = logoutConfirm ? 2 : optionsMenu ? 2 + (lay.folded[HudLayout.TORCH_TOGGLE] ? 1 : 0) : playerRowsCount;
+            popupCols = 1;
             menuW = Math.min(240, Math.max(160, gw - 16));
             menuH = 24 + 20 + rows * rowH + 8;
-            menuX = gx + (gw - menuW) / 2f;
-            menuY = Math.max(4, gy + (gh - menuH) / 2f);
+            if (menuH > Math.min(h - 8, gh + 4) && rows > 1) {
+                // dwie kolumny w szerokosci widoku gry: kolumny HUD-u zostaja odsloniete
+                popupCols = 2;
+                menuW = Math.max(menuW, Math.min(gw - 8, 400));
+                menuH = 24 + 20 + ((rows + 1) / 2) * rowH + 8;
+            }
+            menuX = Math.max(4, Math.min(w - menuW - 4, gx + (gw - menuW) / 2f));
+            menuY = Math.max(4, Math.min(h - menuH - 4, gy + (gh - menuH) / 2f));
         } else {
             menuW = Math.min(w - 40, 620);
             menuH = Math.min(h - 40, 400);
@@ -889,7 +927,9 @@ public final class Hud {
             menuY = (h - menuH) / 2f;
             rowH = Math.max(26, Math.min(36, (menuH - 50) / 10f));
         }
-        menuClose.x = menuX + menuW - 16; menuClose.y = menuY + menuH - 14; menuClose.r = 12;
+        // krzyzyk okna: na ekranie dotykowym wiekszy (pole dotyku ok. 36 dp)
+        menuClose.r = uiScale >= 1.5f || lay.compact ? 16 : 12;
+        menuClose.x = menuX + menuW - 4 - menuClose.r; menuClose.y = menuY + menuH - 2 - menuClose.r;
     }
 
     /** Wiersze okienka gracza w ostatnim ukladzie (wysokosc okienka). */
@@ -922,21 +962,31 @@ public final class Hud {
         else s.triangle(x + 1, cy + 4, x + 1, cy - 4, x + 7, cy);
     }
 
+    /** Napis naglowka malego okna: na telefonie mniejszy (naglowek 20 dp), nad srodkiem paska tytulu. */
+    private void headerText(SpriteBatch batch, String title, float x, float top) {
+        float sc = lay.compact ? 0.75f : 1f;
+        font.getData().setScale(sc);
+        layout.setText(font, title);
+        font.draw(batch, title, x, top - (lay.header - layout.height) / 2f - 1);
+        font.getData().setScale(1f);
+    }
+
     /** Umiejetnosci w lewej kolumnie (jak okno Skills w Tibii): naglowek zwija okno, wiersze z paskiem postepu. */
     private void drawPanelSkills(SpriteBatch batch, PlayerCharacter pc) {
         if (!panelSkillsVisible()) return;
-        text(batch, "Umiejętności", pskX + 18, pskY + pskH - 6);
+        headerText(batch, "Umiejętności", pskX + 18, pskY + pskH);
         if (!skillsExpanded()) return;
-        font.getData().setScale(CON_SCALE);
-        float yy = pskY + pskH - 23 - 3;
+        float row = lay.skillRow;
+        font.getData().setScale(conScale());
+        float yy = pskY + pskH - lay.header - 3;
         for (String[] r : skillRows(pc)) {
-            if (yy - PSK_ROW + 2 < pskY + 2) break;
+            if (yy - row + 2 < pskY + 2) break;
             font.setColor(0.85f, 0.85f, 0.8f, 1f);
             text(batch, r[0], pskX + 8, yy);
             font.setColor(Color.WHITE);
             layout.setText(font, r[1]);
             text(batch, r[1], pskX + pskW - 8 - layout.width, yy);
-            yy -= PSK_ROW;
+            yy -= row;
         }
         font.getData().setScale(1f);
     }
@@ -944,40 +994,57 @@ public final class Hud {
     /** Okno umiejetnosci (w przebiegu ksztaltow): ramka, strzalka i paski postepu pod wierszami. */
     private void drawPanelSkillBars(ShapeRenderer shapes, PlayerCharacter pc) {
         if (!panelSkillsVisible()) return;
-        miniWindow(shapes, "classic", pskX, pskY, pskW, pskH);
-        foldArrow(shapes, pskX + 6, pskY + pskH - 11, skillsExpanded());
+        miniWindow(shapes, "classic", pskX, pskY, pskW, pskH, lay.header - 2);
+        foldArrow(shapes, pskX + 6, pskY + pskH - lay.header / 2f, skillsExpanded());
         if (!skillsExpanded()) return;
-        float yy = pskY + pskH - 23 - 3;
+        float row = lay.skillRow;
+        float yy = pskY + pskH - lay.header - 3;
         for (int i = 0; i < 2 + Skill.values().length; i++) {
-            if (yy - PSK_ROW + 2 < pskY + 2) break;
+            if (yy - row + 2 < pskY + 2) break;
             double prog = i == 0 ? -1 : i == 1 ? pc.levelProgress()
                     : (double) pc.skills().tries(Skill.values()[i - 2]) / Math.max(1, Skills.triesForNext(pc.skills().level(Skill.values()[i - 2])));
-            if (prog >= 0) bar(shapes, pskX + 8, yy - PSK_ROW + 2, pskW - 16, 2, (float) prog,
+            if (prog >= 0) bar(shapes, pskX + 8, yy - row + 1, pskW - 16, 2, (float) prog,
                     i == 1 ? new Color(0.95f, 0.8f, 0.2f, 1) : new Color(0.3f, 0.75f, 0.4f, 1));
-            yy -= PSK_ROW;
+            yy -= row;
         }
+    }
+
+    /** "+" na liscie VIP: widoczny kwadrat i (wieksze) pole dotyku co najmniej 36 x 32 dp w prawym gornym rogu. */
+    private float[] vipPlus() {
+        HudLayout.Rect v = lay.vip;
+        float sz = lay.compact ? 16 : 14;
+        float cx = v.right() - 4 - sz / 2f - 2, cy = v.top() - lay.header / 2f;
+        return new float[] {cx, cy, sz};
+    }
+
+    private boolean vipPlusHit(float px, float py) {
+        HudLayout.Rect v = lay.vip;
+        float[] p = vipPlus();
+        return px >= v.right() - 40 && px <= v.right() + HudLayout.PAD && py >= p[1] - 18 && py <= v.top() + HudLayout.GAP + 1;
     }
 
     /** Lista VIP (znajomi) w lewej kolumnie: ramka, strzalka zwijania, "+" i kropki stanu (w przebiegu ksztaltow). */
     private void drawVipShapes(ShapeRenderer shapes) {
         if (!vipVisible()) return;
         HudLayout.Rect v = lay.vip;
-        miniWindow(shapes, "classic", v.x, v.y, v.w, v.h);
-        foldArrow(shapes, v.x + 6, v.top() - 11, vipOpen);
+        miniWindow(shapes, "classic", v.x, v.y, v.w, v.h, lay.header - 2);
+        foldArrow(shapes, v.x + 6, v.top() - lay.header / 2f, vipOpen);
         // "+" dodaje znajomego (czat: /znajomi dodaj Imie)
-        float px = v.right() - 13, py = v.top() - 11;
+        float[] p = vipPlus();
+        float px = p[0], py = p[1], hs = p[2] / 2f;
         shapes.setColor(0.25f, 0.5f, 0.3f, 1f);
-        shapes.rect(px - 6, py - 6, 12, 12);
+        shapes.rect(px - hs, py - hs, 2 * hs, 2 * hs);
         shapes.setColor(1f, 1f, 1f, 0.9f);
-        shapes.rect(px - 4, py - 1, 8, 2);
-        shapes.rect(px - 1, py - 4, 2, 8);
+        shapes.rect(px - hs + 2, py - 1, 2 * hs - 4, 2);
+        shapes.rect(px - 1, py - hs + 2, 2, 2 * hs - 4);
         if (!vipOpen || vipView == null) return;
-        float yy = v.top() - 23 - 3;
+        float row = lay.vipRow;
+        float yy = v.top() - lay.header - 3;
         for (pl.fawizja.pixel.friends.FriendsView.Row r : vipRows()) {
-            if (yy - HudLayout.VIP_ROW < v.y + 2) break;
+            if (yy - row < v.y + 2) break;
             shapes.setColor(r.online() ? new Color(0.25f, 0.85f, 0.3f, 1f) : new Color(0.75f, 0.2f, 0.18f, 1f));
-            shapes.circle(v.x + 11, yy - HudLayout.VIP_ROW / 2f + 1, 3f, 10);
-            yy -= HudLayout.VIP_ROW;
+            shapes.circle(v.x + 11, yy - row / 2f + 1, 3f, 10);
+            yy -= row;
         }
     }
 
@@ -995,29 +1062,26 @@ public final class Hud {
         HudLayout.Rect v = lay.vip;
         int online = vipView == null ? 0 : vipView.online(), all = vipView == null ? 0 : vipView.rows().size();
         String title = "VIP " + online + "/" + all;
-        text(batch, title, v.x + 18, v.top() - 6);
+        headerText(batch, title, v.x + 18, v.top());
         if (!vipOpen) return;
-        font.getData().setScale(CON_SCALE);
-        float yy = v.top() - 23 - 3;
+        float sc = conScale(), row = lay.vipRow;
+        font.getData().setScale(sc);
+        float yy = v.top() - lay.header - 3;
         if (all == 0) {
             font.setColor(0.7f, 0.7f, 0.65f, 1f);
-            font.draw(batch, "Brak znajomych. Dotknij +, aby dodać.", v.x + 8, yy, v.w - 14, com.badlogic.gdx.utils.Align.left, true);
+            font.draw(batch, VIP_EMPTY, v.x + 8, yy, v.w - 14, com.badlogic.gdx.utils.Align.left, true);
         }
         for (pl.fawizja.pixel.friends.FriendsView.Row r : vipRows()) {
-            if (yy - HudLayout.VIP_ROW < v.y + 2) break;
+            if (yy - row < v.y + 2) break;
             String lvl = r.level() > 0 ? String.valueOf(r.level()) : "";
             layout.setText(font, lvl);
             float lw = layout.width;
             font.setColor(r.online() ? new Color(0.45f, 1f, 0.45f, 1f) : new Color(1f, 0.45f, 0.4f, 1f));
-            String name = r.name();
-            layout.setText(font, name);
             float room = v.w - 20 - lw - 10;
-            if (layout.width > room) font.getData().setScale(CON_SCALE * Math.max(0.6f, room / layout.width));
-            text(batch, name, v.x + 18, yy - 2);
-            font.getData().setScale(CON_SCALE);
+            text(batch, clip(r.name(), room), v.x + 18, yy - 2);
             font.setColor(0.8f, 0.8f, 0.75f, 1f);
             if (!lvl.isEmpty()) text(batch, lvl, v.right() - 7 - lw, yy - 2);
-            yy -= HudLayout.VIP_ROW;
+            yy -= row;
         }
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
@@ -1027,20 +1091,23 @@ public final class Hud {
     private boolean leftColumnTouch(float px, float py, Actions actions) {
         if (windowOverLeft()) return false;
         HudLayout.Rect v = lay.vip;
+        if (vipVisible() && vipPlusHit(px, py)) {
+            actions.onButton("vip:add");
+            return true;
+        }
         if (v.contains(px, py)) {
-            if (py >= v.top() - 23) {
-                if (px >= v.right() - 24) actions.onButton("vip:add");
-                else toggleVip();
+            if (py >= v.top() - lay.header) {
+                toggleVip();
                 return true;
             }
             if (!vipOpen) return true;
-            int i = (int) ((v.top() - 23 - 3 - py) / HudLayout.VIP_ROW);
+            int i = (int) ((v.top() - lay.header - 3 - py) / lay.vipRow);
             List<pl.fawizja.pixel.friends.FriendsView.Row> rows = vipRows();
             if (i >= 0 && i < rows.size()) openPlayerMenu(-1, rows.get(i).name(), false, false);
             return true;
         }
         if (!charOpen && lay.skills.contains(px, py)) {
-            if (py >= lay.skills.top() - 23) toggleSkills();
+            if (py >= lay.skills.top() - lay.header) toggleSkills();
             return true;
         }
         return false;
@@ -1125,6 +1192,7 @@ public final class Hud {
                 toggleNpc(session);
             } else {
                 logoutConfirm = false;
+                optionsMenu = false;
                 playerMenu = null;
                 rankingView = null;
                 friendsView = null;
@@ -1149,6 +1217,7 @@ public final class Hud {
 
     public void toggleBook() {
         logoutConfirm = false;
+        optionsMenu = false;
         if (trade != null) return; // okno handlu ma pierwszenstwo
         spellPage = -1;
         playerMenu = null;
@@ -1200,6 +1269,7 @@ public final class Hud {
 
     public void openNpc(GameSession session) {
         logoutConfirm = false;
+        optionsMenu = false;
         pl.fawizja.pixel.npc.Npc n = session.npcNearby();
         if (n == null) return;
         playerMenu = null;
@@ -1223,6 +1293,7 @@ public final class Hud {
         trade = view;
         if (view != null) {
             logoutConfirm = false;
+            optionsMenu = false;
             menuOpen = true;
             npcMode = false;
             bagOpen = false;
@@ -1236,6 +1307,7 @@ public final class Hud {
     /** Menu gracza: atak, handel, druzyna, gildia - zamiast natychmiastowego ataku po dotknieciu. */
     public void openPlayerMenu(int id, String name, boolean attacking, boolean ally) {
         logoutConfirm = false;
+        optionsMenu = false;
         if (trade != null) return;
         playerMenu = new PlayerMenu(id, name, attacking, ally);
         menuOpen = true;
@@ -1246,6 +1318,7 @@ public final class Hud {
     /** Ranking z serwera: otwiera okno (handel ma pierwszenstwo). */
     public void openRanking(pl.fawizja.pixel.ranking.RankingView view) {
         logoutConfirm = false;
+        optionsMenu = false;
         if (view == null || trade != null) return;
         rankingView = view;
         friendsView = null;
@@ -1262,6 +1335,7 @@ public final class Hud {
     /** Lista znajomych z serwera: otwiera okno (handel ma pierwszenstwo). */
     public void openFriends(pl.fawizja.pixel.friends.FriendsView view) {
         logoutConfirm = false;
+        optionsMenu = false;
         if (view == null || trade != null) return;
         friendsView = view;
         rankingView = null;
@@ -1278,6 +1352,7 @@ public final class Hud {
     /** Rynek z serwera: otwiera okno (handel ma pierwszenstwo). */
     public void openMarket(pl.fawizja.pixel.market.MarketView view) {
         logoutConfirm = false;
+        optionsMenu = false;
         if (view == null || trade != null) return;
         marketView = view;
         rankingView = null;
@@ -1300,6 +1375,7 @@ public final class Hud {
     /** Osiagniecia (bestiary = false) albo bestiariusz; ponowne wywolanie z tym samym widokiem zamyka okno. */
     public void openAchievements(boolean bestiary) {
         logoutConfirm = false;
+        optionsMenu = false;
         if (trade != null) return;
         if (achievementsView && menuOpen && bestiaryMode == bestiary && !journalMode) {
             achievementsView = false;
@@ -1434,6 +1510,17 @@ public final class Hud {
             rebuildTradeMenu(session);
             return;
         }
+        if (optionsMenu) {
+            // waski telefon: "Opcje" zbiera ustawienia i wyjscie z gry
+            List<MenuRow> rows = new ArrayList<>();
+            rows.add(new MenuRow("opt:diag", "Ustawienia", "", true));
+            if (lay.folded[HudLayout.TORCH_TOGGLE]) {
+                rows.add(new MenuRow("opt:torch", session.character().isTorchLit() ? "Zgaś pochodnię" : "Zapal pochodnię", "", true));
+            }
+            rows.add(new MenuRow("opt:logout", "Wyjdź z gry", "", true));
+            layoutPopupRows(rows);
+            return;
+        }
         if (logoutConfirm) {
             List<MenuRow> rows = new ArrayList<>();
             rows.add(new MenuRow("logout:yes", "Wyloguj", "", true));
@@ -1545,6 +1632,7 @@ public final class Hud {
     /** Otwiera wybor akcji dla pola paska (rodzaj, potem konkretny czar, mikstura albo runa). */
     public void openPicker(int slot) {
         logoutConfirm = false;
+        optionsMenu = false;
         if (trade != null || slot < 0 || slot >= spellButtons.length) return;
         playerMenu = null;
         rankingView = null;
@@ -1703,13 +1791,19 @@ public final class Hud {
         layoutPopupRows(rows);
     }
 
-    /** Wiersze malego okienka jeden pod drugim pod naglowkiem (tytul + linia opisu). */
+    /** Kolumny wierszy malego okienka (2, gdy jedna kolumna nie miesci sie na niskim ekranie). */
+    private int popupCols = 1;
+
+    /** Wiersze malego okienka pod naglowkiem (tytul + linia opisu): jeden pod drugim albo w dwoch kolumnach. */
     private void layoutPopupRows(List<MenuRow> rows) {
+        int perCol = popupCols == 2 ? (rows.size() + 1) / 2 : rows.size();
+        float colW = (menuW - 16 - (popupCols - 1) * 6) / popupCols;
         for (int i = 0; i < rows.size(); i++) {
             MenuRow row = rows.get(i);
-            row.x = menuX + 8;
-            row.y = menuY + menuH - 24 - 20 - (i + 1) * rowH;
-            row.w = menuW - 16;
+            int col = i / Math.max(1, perCol), r = i % Math.max(1, perCol);
+            row.x = menuX + 8 + col * (colW + 6);
+            row.y = menuY + menuH - 24 - 20 - (r + 1) * rowH;
+            row.w = colW;
             row.h = rowH - 3;
             menuRows.add(row);
         }
@@ -1740,8 +1834,30 @@ public final class Hud {
 
     public boolean logoutConfirmOpen() { return menuOpen && logoutConfirm; }
 
+    /** Menu "Opcje" (ustawienia i wyjscie) - na waskim telefonie zamiast osobnego przycisku wyjscia. */
+    private boolean optionsMenu;
+
+    public void openOptions() {
+        if (trade != null) return;
+        playerMenu = null;
+        rankingView = null;
+        friendsView = null;
+        marketView = null;
+        achievementsView = false;
+        npcMode = false;
+        pickSlot = -1;
+        bagOpen = false;
+        logoutConfirm = false;
+        optionsMenu = true;
+        menuOpen = true;
+        menuGeometry();
+    }
+
+    public boolean optionsOpen() { return menuOpen && optionsMenu; }
+
     private void closeLogoutConfirm() {
         logoutConfirm = false;
+        optionsMenu = false;
         menuOpen = false;
         menuGeometry();
     }
@@ -2380,7 +2496,10 @@ public final class Hud {
         if (menuOpen) {
             if (menuClose.hit(p.x, p.y)) {
                 if (trade != null) actions.onButton("trade:cancel"); // zamkniecie okna = rezygnacja
-                else if (logoutConfirm) closeLogoutConfirm();
+                else if (optionsMenu) {
+                    optionsMenu = false;
+                    menuOpen = false;
+                } else if (logoutConfirm) closeLogoutConfirm();
                 else if (playerMenu != null) closePlayerMenu();
                 else {
                     menuOpen = false;
@@ -2414,6 +2533,10 @@ public final class Hud {
                         spellPage = spellPage + Math.max(1, (int) ((menuH - 40) / rowH) - 1); // nastepna strona, po koncu od poczatku
                     } else if (row.action.equals("book:journal")) {
                         openJournal();
+                    } else if (row.action.startsWith("opt:")) {
+                        optionsMenu = false;
+                        menuOpen = false;
+                        actions.onButton(row.action.substring(4));
                     } else if (row.action.equals("logout:no")) {
                         closeLogoutConfirm();
                     } else if (row.action.equals("player:none")) {
@@ -2432,7 +2555,13 @@ public final class Hud {
                     return true;
                 }
             }
-            if (p.x >= menuX && p.x <= menuX + menuW && p.y >= menuY && p.y <= menuY + menuH) return true;
+            boolean inMenu = p.x >= menuX && p.x <= menuX + menuW && p.y >= menuY && p.y <= menuY + menuH;
+            if (optionsMenu && !inMenu) {
+                // dotkniecie obok malego menu opcji zamyka je i dziala dalej (np. inny przycisk)
+                optionsMenu = false;
+                menuOpen = false;
+            }
+            if (inMenu) return true;
         }
         if (bagOpen) {
             if (bagClose.hit(p.x, p.y)) { toggleBag(); return true; }
@@ -2492,6 +2621,10 @@ public final class Hud {
         }
         for (HudButton b : buttons) {
             if (b.hit(p.x, p.y)) {
+                if (b == diag && lay.foldLogout) {
+                    openOptions();
+                    return true;
+                }
                 actions.onButton(b.id);
                 return true;
             }
@@ -2568,6 +2701,20 @@ public final class Hud {
 
     public void render(SpriteBatch batch, ShapeRenderer shapes, GameSession session, WorldClock clock,
                        long serverTimeMs, DiagnosticsInfo diagInfo) {
+        // Litery w calych pikselach ekranu, nie w calych jednostkach interfejsu: przy skali 2.625 zaokraglanie
+        // pozycji kazdej litery do jednostki (2-3 px) rozrywalo napisy ("TAR CZA", "Pięt ro"). Przy skali 1
+        // jednostka = piksel, wiec zostaje ostre zaokraglanie.
+        boolean intPos = font.usesIntegerPositions();
+        font.setUseIntegerPositions(uiScale == 1f);
+        try {
+            renderHud(batch, shapes, session, clock, serverTimeMs, diagInfo);
+        } finally {
+            font.setUseIntegerPositions(intPos);
+        }
+    }
+
+    private void renderHud(SpriteBatch batch, ShapeRenderer shapes, GameSession session, WorldClock clock,
+                           long serverTimeMs, DiagnosticsInfo diagInfo) {
         viewport.apply();
         if (trade != null && !bagOpen) menuOpen = true; // po zamknieciu plecaka wraca okno handlu
         if (menuOpen || bagOpen) bigMapOpen = false;
@@ -2587,7 +2734,11 @@ public final class Hud {
         pvp.icon = skullBtn;
         quest.active = journalOpen();
         logout.active = logoutConfirmOpen();
-        if (!menuOpen) logoutConfirm = false;
+        if (!menuOpen) {
+            logoutConfirm = false;
+            optionsMenu = false;
+        }
+        if (lay.foldLogout) diag.active = diagnosticsOpen || optionsOpen();
         book.active = menuOpen && !npcMode && pickSlot < 0 && trade == null && playerMenu == null && rankingView == null && friendsView == null && marketView == null && !achievementsView;
         if (playerMenu != null && !menuOpen) playerMenu = null;
         if (rankingView != null && !menuOpen) rankingView = null;
@@ -2631,16 +2782,16 @@ public final class Hud {
         if (infoIcon != null) diag.icon = infoIcon;
         fish.icon = itemIcon(session, "fishing_rod");
         mount.icon = itemIcon(session, "saddle");
-        // podpisy przyciskow obok ekwipunku, gdy pola sa dosc duze (telefon: same ikony)
-        boolean labels = lay.toggleSize >= 28;
-        run.label = labels ? "BIEG" : "";
-        defensive.label = labels ? "TARCZA" : "";
-        quest.label = labels ? "ZADANIA" : "";
-        torch.label = labels ? "POCH." : "";
-        pvp.label = labels ? (pc.pvpMode() ? "PvP!" : "PvP") : "";
-        diag.label = labels || diag.icon == null ? (diag.icon == null ? "i" : "OPCJE") : "";
-        logout.label = "WYJDŹ";
+        // podpisy przyciskow obok ekwipunku: rysowane, gdy mieszcza sie przy progu 7 dp (inaczej sama ikona)
+        run.label = "Bieg";
+        defensive.label = "Tarcza";
+        quest.label = "Zadania";
+        torch.label = "Poch.";
+        pvp.label = pc.pvpMode() ? "PvP!" : "PvP";
+        diag.label = diag.icon == null ? "i" : "Opcje";
+        logout.label = "Wyjdź";
         logout.labelBottom = true;
+        bag.icon = art.backpack();
         buffs(session, serverTimeMs);
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -2668,7 +2819,7 @@ public final class Hud {
         statusIcons(session, serverTimeMs);
         drawTopBarShapes(shapes, pc);
         drawStatusIcons(shapes, statusX(), statusY());
-        if (battleVisible()) miniWindow(shapes, "grim", blX, blY, blW, blH);
+        if (battleVisible()) miniWindow(shapes, "grim", blX, blY, blW, blH, lay.header - 2);
         drawVipShapes(shapes);
         drawPanelSkillBars(shapes, pc);
         frame(shapes, lay.hotbar.x - 4, HudLayout.PAD, lay.hotbar.w + 8, lay.hotbar.h + 8);
@@ -2804,7 +2955,7 @@ public final class Hud {
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
         if (equipPanelVisible()) {
-            if (epTibia) miniWindow(shapes, "wood", epX, epY, epW, epH);
+            if (epTibia) miniWindow(shapes, "wood", epX, epY, epW, epH, lay.eqHeader > 0 ? 21 : 0);
             else frame(shapes, epX, epY, epW, epH);
         }
         if (minimapVisible()) {
@@ -2845,12 +2996,14 @@ public final class Hud {
 
         for (HudButton b : buttons) {
             if (!b.visible || underMenu(b.x, b.y)) continue;
-            layout.setText(font, b.label);
-            float room = (b.hw > 0 ? b.hw : b.r) * 1.8f;
-            float fit = layout.width > room ? room / layout.width : 1f;
+            float cell = 2 * (b.hw > 0 ? b.hw : b.r), room = cell - 3;
             if (b.labelBottom) {
-                font.getData().setScale(Math.min(fit, Math.min(0.65f, b.r / 32f)));
-                centered(batch, b.label, b.x, b.y - b.r * 0.6f);
+                // znak (czar, wyjscie) nad malym podpisem u dolu pola
+                float sc = fitScale(b.label, room, 0.7f);
+                font.getData().setScale(sc > 0 ? sc : HudLayout.MIN_FONT);
+                String lb = sc > 0 ? b.label : clip(b.label, room);
+                layout.setText(font, lb);
+                font.draw(batch, lb, b.x - layout.width / 2f, b.y - b.r + 3 + layout.height);
             } else if (b.icon != null && b.id.startsWith("spell:")) {
                 // pole paska z mikstura albo runa: duza ikona, liczba sztuk w prawym dolnym rogu
                 float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.7f;
@@ -2862,22 +3015,29 @@ public final class Hud {
                     batch.draw(art.white(), b.x - in, b.y + in - in * 2 * cd, in * 2, in * 2 * cd);
                     batch.setColor(Color.WHITE);
                 }
-                font.getData().setScale(Math.min(0.7f, b.r / 28f));
+                font.getData().setScale(Math.max(HudLayout.MIN_FONT, Math.min(0.7f, b.r / 28f)));
                 layout.setText(font, b.label);
                 text(batch, b.label, b.x + b.hw - 3 - layout.width, b.y - b.r + 3 + layout.height);
-            } else if (b.icon != null && b.label.isEmpty()) {
-                // piktogram bez napisu (diagnostyka, bieg, tarcza, pochodnia): ikona we wnetrzu ramki
-                float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.5f;
-                batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
             } else if (b.icon != null) {
-                float is = b.r * 1.15f;
-                batch.draw(b.icon, b.x - is / 2f, b.y - is * 0.3f, is, is);
-                font.getData().setScale(Math.min(fit, Math.min(0.7f, b.r / 30f)));
-                centered(batch, b.label, b.x, b.y - b.r * 0.6f);
+                float sc = b.label.isEmpty() ? 0 : fitScale(b.label, room, 0.7f);
+                if (sc <= 0) {
+                    // piktogram bez napisu (podpis nie miesci sie przy progu 7 dp): ikona we wnetrzu ramki
+                    float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.5f;
+                    batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
+                } else {
+                    font.getData().setScale(sc);
+                    layout.setText(font, b.label);
+                    float lh = layout.height;
+                    float base = b.y - b.r + 3;
+                    float is = Math.min(b.r * 1.2f, cell - lh - 9);
+                    batch.draw(b.icon, b.x - is / 2f, base + lh + 2 + (b.y + b.r - 2 - (base + lh + 2) - is) / 2f, is, is);
+                    font.draw(batch, b.label, b.x - layout.width / 2f, base + lh);
+                }
             } else {
-                // kwadratowe pole obok ekwipunku (UŻYJ, ROZMOWA...): napis tej samej wielkosci co pod ikonami
-                font.getData().setScale(b.hw > 0 && b.hw == b.r ? Math.min(fit, Math.min(0.62f, b.r / 26f)) : fit);
-                centered(batch, b.label, b.x, b.y);
+                // pole z samym napisem (Użyj, Mów, "+" paska): napis na srodku, nie mniejszy niz prog 7 dp
+                float sc = fitScale(b.label, room, b.id.startsWith("spell:") ? 0.8f : 0.75f);
+                font.getData().setScale(sc > 0 ? sc : HudLayout.MIN_FONT);
+                centered(batch, sc > 0 ? b.label : clip(b.label, room), b.x, b.y);
             }
             font.getData().setScale(1f);
         }
@@ -2888,7 +3048,9 @@ public final class Hud {
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
-            if (trade == null && logoutConfirm) {
+            if (trade == null && optionsMenu) {
+                text(batch, "Opcje", menuX + 10, menuY + menuH - 7);
+            } else if (trade == null && logoutConfirm) {
                 text(batch, "Wylogować się?", menuX + 10, menuY + menuH - 7);
                 font.getData().setScale(0.8f);
                 font.setColor(0.85f, 0.85f, 0.7f, 1f);
@@ -2901,7 +3063,8 @@ public final class Hud {
                 font.setColor(0.85f, 0.85f, 0.7f, 1f);
                 String info = playerInfoLine(session);
                 layout.setText(font, info);
-                if (layout.width > menuW - 16) font.getData().setScale(0.8f * (menuW - 16) / layout.width);
+                if (layout.width > menuW - 16) font.getData().setScale(Math.max(HudLayout.MIN_FONT, 0.8f * (menuW - 16) / layout.width));
+                info = clip(info, menuW - 16);
                 text(batch, info, menuX + 10, menuY + menuH - 30);
                 font.setColor(Color.WHITE);
                 font.getData().setScale(1f);
@@ -2942,7 +3105,9 @@ public final class Hud {
             centered(batch, "X", menuClose.x, menuClose.y);
             for (MenuRow row : menuRows) {
                 font.setColor(row.enabled ? Color.WHITE : Color.GRAY);
-                text(batch, row.label, row.x + 4, row.y + row.h - 3);
+                // wiersz bez opisu (okienko gracza, opcje): napis na srodku wysokosci
+                if (row.detail.isEmpty()) text(batch, clip(row.label, row.w - 8), row.x + 6, row.y + (row.h + font.getCapHeight()) / 2f);
+                else text(batch, row.label, row.x + 4, row.y + row.h - 3);
                 font.getData().setScale(0.8f);
                 font.setColor(row.enabled ? new Color(0.8f, 0.85f, 0.7f, 1f) : Color.GRAY);
                 text(batch, row.detail, row.x + 4, row.y + row.h * 0.45f);
@@ -3126,7 +3291,7 @@ public final class Hud {
 
     /** Pole na lewo od butow (wiersz 4, kolumna 1 lalki): {x, y}. */
     private float[] buffCellPos() {
-        return new float[] {epX + 6, epY + epH - 23 - 4 - epCell - 3 * (epCell + 3)};
+        return new float[] {epX + epPad(), epY + epH - lay.eqHeader - 4 - epCell - 3 * (epCell + 3)};
     }
 
     /** Czas czaszki albo blokady PZ, np. "0:58" albo "9 min". */
@@ -3174,18 +3339,20 @@ public final class Hud {
         }
         if (skull) {
             TextureRegion icon = skullIcon(ownSkull.name());
-            if (icon != null) batch.draw(icon, x0 + 2, y0 + 2 + m, m, m);
-            String time = skullTime(ownSkullMs);
-            float room = cell - m - 4;
-            font.getData().setScale(Math.min(0.6f, cell / 60f));
+            // czas krotko ("0:58", "9m", "30d"), przy progu 7 dp; czaszka mniejsza, gdy czas jest szeroki
+            String time = skullTime(ownSkullMs).replace(" min", "m").replace(" h", "h").replace(" d", "d");
+            font.getData().setScale(HudLayout.MIN_FONT);
             layout.setText(font, time);
+            float is = icon == null ? 0 : Math.max(m * 0.6f, Math.min(m, cell - 5 - layout.width));
+            if (icon != null) batch.draw(icon, x0 + 2, y0 + 2 + m + (m - is) / 2f, is, is);
+            float room = cell - 4 - is;
             if (layout.width > room) {
-                font.getData().setScale(font.getData().scaleX * room / layout.width);
+                time = clip(time, room);
                 layout.setText(font, time);
             }
             font.setColor(ownSkull == pl.fawizja.pixel.pvp.PvpRules.Skull.RED || ownSkull == pl.fawizja.pixel.pvp.PvpRules.Skull.BLACK
                     ? new Color(1f, 0.45f, 0.4f, 1f) : Color.WHITE);
-            float tx = icon != null ? x0 + 2 + m + (room - layout.width) / 2f : x0 + (cell - layout.width) / 2f;
+            float tx = icon != null ? x0 + 2 + is + (room - layout.width) / 2f : x0 + (cell - layout.width) / 2f;
             font.draw(batch, time, tx, y0 + 2 + m + m / 2f + layout.height / 2f);
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
@@ -3294,8 +3461,9 @@ public final class Hud {
 
     /** Dotkniecie ikon stanu: opis kazdej w konsoli. */
     private boolean statusTouch(float px, float py, GameSession session) {
-        float y0 = statusY();
-        if (statuses.isEmpty() || py < y0 - 2 || py > y0 + STATUS_SIZE + 2 || px < statusX() - 4 || px > lay.topBar.right()) return false;
+        // pole dotyku: cala wysokosc gornego paska (32 dp na telefonie) i co najmniej 36 dp szerokosci
+        float x0 = Math.min(statusX() - 4, lay.topBar.right() - 36);
+        if (statuses.isEmpty() || py < lay.topBar.y - HudLayout.BORDER || py > lay.topBar.top() || px < x0 || px > lay.topBar.right() + HudLayout.PAD) return false;
         for (Status st : statuses) session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, st.desc);
         return true;
     }
@@ -3380,7 +3548,12 @@ public final class Hud {
 
     /** Male okno z naglowkiem 23 px (plecak, ekwipunek, umiejetnosci, konsola). */
     private void miniWindow(ShapeRenderer shapes, String style, float fx, float fy, float fw, float fh) {
-        if (wstPanel(shapes, style, fx, fy, fw, fh, 21)) return;
+        miniWindow(shapes, style, fx, fy, fw, fh, 21);
+    }
+
+    /** Male okno z paskiem tytulu wysokosci titleH (0 = bez paska, np. ekwipunek na telefonie). */
+    private void miniWindow(ShapeRenderer shapes, String style, float fx, float fy, float fw, float fh, float titleH) {
+        if (wstPanel(shapes, style, fx, fy, fw, fh, titleH)) return;
         if (miniPatch != null && uiBatch != null) patch(shapes, miniPatch, fx, fy, fw, fh, 0.96f);
         else window(shapes, fx, fy, fw, fh, true);
     }
@@ -3471,6 +3644,38 @@ public final class Hud {
     private static final float BATTLE_ROW = 18;
     private static final float CON_SCALE = 0.8f;
 
+    /** Skala interfejsu (pikseli ekranu na jednostke, dp) - GameScreen dobiera do niej imiona nad postaciami. */
+    public float uiScale() { return uiScale; }
+
+    /** Napisy w oknach kolumn (umiejetnosci, VIP, walka): na telefonie mniejsze, ale nie ponizej progu 7 dp. */
+    private float conScale() { return lay.compact ? 0.66f : CON_SCALE; }
+
+    /** Wiersze konsoli i napisy zdarzen na widoku gry. */
+    private float chatScale() { return lay.compact ? 0.7f : CON_SCALE; }
+
+    /**
+     * Skala napisu, ktory ma sie zmiescic w szerokosci room: najwyzej preferred, nie mniej niz prog 7 dp wielkiej
+     * litery ({@link HudLayout#MIN_FONT}); 0, gdy nie miesci sie nawet przy progu (wtedy bez napisu albo skrot).
+     */
+    private float fitScale(String s, float room, float preferred) {
+        font.getData().setScale(1f);
+        layout.setText(font, s);
+        float sc = layout.width <= 0 ? preferred : Math.min(preferred, room / layout.width);
+        return sc + 1e-4f >= HudLayout.MIN_FONT ? Math.max(HudLayout.MIN_FONT, sc) : 0f;
+    }
+
+    /** Napis przyciety z konca ("..") do szerokosci room przy biezacej skali. */
+    private String clip(String s, float room) {
+        layout.setText(font, s);
+        if (layout.width <= room) return s;
+        for (int n = s.length() - 1; n > 0; n--) {
+            String t = s.substring(0, n).trim() + "..";
+            layout.setText(font, t);
+            if (layout.width <= room) return t;
+        }
+        return "";
+    }
+
     /** Zakladki czatu jak w Tibii (Lokalny, Serwer, Handel, Gildia, Druzyna, rozmowy prywatne). 2026-10-24 (Darek:
      *  "w czacie na dole ma byc tylko zakladka czatu"): pozostale zdarzenia to tez krotkie napisy na widoku gry. */
     private final pl.fawizja.pixel.chat.ChatTabs chatTabs = new pl.fawizja.pixel.chat.ChatTabs();
@@ -3521,7 +3726,7 @@ public final class Hud {
         }
         battle.sort(java.util.Comparator.comparingInt(m -> m.position().distanceTo(pc.position())));
         float tw = conW - 14;
-        font.getData().setScale(CON_SCALE);
+        font.getData().setScale(chatScale());
         float used = 0;
         List<pl.fawizja.pixel.chat.ChatTabs.Line> lines = chatTabs.active().lines();
         for (int i = lines.size() - 1; i >= 0; i--) {
@@ -3532,15 +3737,24 @@ public final class Hud {
             conLines.add(0, l);
         }
         statusLines.clear();
+        // na telefonie najwyzej 2 krotkie wiersze bez zawijania (reszta tylko w zakladce Serwer)
+        int maxLines = lay.compact ? 2 : STATUS_LINES;
+        float statusW = statusWidth();
         List<EventLog.Entry> last = session.log().latest(STATUS_LINES * 2);
-        for (int i = last.size() - 1; i >= 0 && statusLines.size() < STATUS_LINES; i--) {
+        for (int i = last.size() - 1; i >= 0 && statusLines.size() < maxLines; i--) {
             EventLog.Entry e = last.get(i);
             long age = serverTimeMs - e.timeMs();
             if (e.kind() == EventLog.Kind.CHAT || age > STATUS_KEEP_MS) continue;
             float a = age > STATUS_KEEP_MS - 1000 ? Math.max(0f, (STATUS_KEEP_MS - age) / 1000f) : 1f;
             Color c = e.kind() == EventLog.Kind.WARNING ? new Color(1f, 0.55f, 0.35f, a)
                     : e.kind() == EventLog.Kind.LOOT ? new Color(0.55f, 1f, 0.55f, a) : new Color(1f, 1f, 1f, a);
-            statusLines.add(0, conLine(e.text(), c, Math.min(gw - 20, 520)));
+            if (lay.compact) {
+                String one = clip(e.text(), statusW);
+                layout.setText(font, one);
+                statusLines.add(0, new ConLine(one, c, layout.height + 4));
+            } else {
+                statusLines.add(0, conLine(e.text(), c, statusW));
+            }
         }
         layoutTabs();
         font.getData().setScale(1f);
@@ -3599,12 +3813,13 @@ public final class Hud {
             font.getData().setScale(TAB_SCALE);
             layout.setText(font, t.title());
             float sc = layout.width > textW - 6 ? TAB_SCALE * (textW - 6) / layout.width : TAB_SCALE;
-            font.getData().setScale(sc);
+            font.getData().setScale(Math.max(HudLayout.MIN_FONT, sc));
             if (act) font.setColor(1f, 1f, 1f, 1f);
             else if (t.unread()) font.setColor(1f, 0.32f, 0.25f, 1f);
             else font.setColor(0.7f, 0.68f, 0.62f, 1f);
-            layout.setText(font, t.title());
-            font.draw(batch, t.title(), r[0] + (textW - layout.width) / 2f, ty + conTabH / 2f + layout.height / 2f);
+            String title = clip(t.title(), textW - 4);
+            layout.setText(font, title);
+            font.draw(batch, title, r[0] + (textW - layout.width) / 2f, ty + conTabH / 2f + layout.height / 2f);
             if (r[2] >= 0) {
                 font.setColor(0.85f, 0.5f, 0.45f, 1f);
                 layout.setText(font, "x");
@@ -3616,15 +3831,25 @@ public final class Hud {
     }
 
     /** Zdarzenia (lup, poziom, osiagniecia, ostrzezenia) na dole widoku gry, wysrodkowane, z cieniem. */
+    /** Szerokosc napisow zdarzen na widoku gry. */
+    private float statusWidth() { return lay.compact ? gw - 16 : Math.min(gw - 20, 520); }
+
     private void drawStatus(SpriteBatch batch) {
         if (statusLines.isEmpty() || menuOpen || bigMapOpen) return;
-        font.getData().setScale(CON_SCALE);
-        float width = Math.min(gw - 20, 520);
+        font.getData().setScale(chatScale());
+        float width = statusWidth();
         float x = gx + (gw - width) / 2f;
         float yy = gy + 10;
         for (int i = statusLines.size() - 1; i >= 0; i--) yy += statusLines.get(i).height();
         for (ConLine l : statusLines) {
             Color c = l.color();
+            {
+                // ciemne tlo pod wierszem - bialy napis czytelny tez na jasnej podlodze
+                layout.setText(font, l.text(), c, width, com.badlogic.gdx.utils.Align.center, true);
+                batch.setColor(0f, 0f, 0f, 0.5f * c.a);
+                batch.draw(art.white(), x + (width - layout.width) / 2f - 4, yy - l.height() + 1, layout.width + 8, l.height());
+                batch.setColor(Color.WHITE);
+            }
             font.setColor(0f, 0f, 0f, c.a * 0.85f);
             font.draw(batch, l.text(), x + 1, yy - 1, width, com.badlogic.gdx.utils.Align.center, true);
             font.setColor(c);
@@ -3643,7 +3868,7 @@ public final class Hud {
     private void drawConsole(SpriteBatch batch) {
         if (!consoleVisible()) return;
         drawTabTitles(batch);
-        font.getData().setScale(CON_SCALE);
+        font.getData().setScale(chatScale());
         float yy = conY + conH - 4 - conTabH;
         for (ConLine l : conLines) {
             if (yy - l.height() < conY - 2) break;
@@ -3671,8 +3896,10 @@ public final class Hud {
 
     /** Dotkniecie zakladki ja wybiera (krzyzyk zamyka rozmowe), dotkniecie wierszy otwiera pisanie w tej zakladce. */
     private boolean consoleTouch(float px, float py, Actions actions) {
-        if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH) return false;
-        if (py >= conY + conH - conTabH - 2) {
+        // zakladki: pole dotyku siega do ramki widoku nad konsola i kilka dp w dol (razem co najmniej 28 dp)
+        float tabTouch = Math.max(0, 28 - conTabH - 2 - HudLayout.GAP);
+        if (!consoleVisible() || px < conX || px > conX + conW || py < conY || py > conY + conH + HudLayout.GAP) return false;
+        if (py >= conY + conH - conTabH - 2 - tabTouch) {
             for (int i = 0; i < tabRects.size(); i++) {
                 float[] r = tabRects.get(i);
                 if (px < r[0] || px > r[0] + r[1]) continue;
@@ -3690,62 +3917,59 @@ public final class Hud {
     /** Dotkniecie listy walki: gracz - okienko gracza, potwor - cel. */
     private boolean battleTouch(float px, float py, Actions actions) {
         if (!battleVisible() || px < blX || px > blX + blW || py < blY || py > blY + blH) return false;
-        int i = (int) ((blY + blH - 23 - 4 - py) / BATTLE_ROW);
+        int i = (int) ((blY + blH - lay.header - 4 - py) / lay.battleRow);
         if (i >= 0 && i < battlePlayers.size()) actions.onButton("bplayer:" + battlePlayers.get(i).id());
         else if (i >= battlePlayers.size() && i - battlePlayers.size() < battle.size()) actions.onButton("battle:" + battle.get(i - battlePlayers.size()).id());
         return true;
     }
 
     private boolean battleVisible() {
-        return blH >= 23 + BATTLE_ROW && !windowOverPanel() && !charOpen;
+        return blH >= lay.header + lay.battleRow && !windowOverPanel() && !charOpen;
     }
 
     /** Lista walki w panelu (jak battle list w Tibii): gracze, potem potwory - imie, pasek zycia, ramka celu. */
     private void drawBattle(SpriteBatch batch) {
         if (!battleVisible()) return;
-        text(batch, "Walka (" + (battle.size() + battlePlayers.size()) + ")", blX + 6, blY + blH - 6);
+        headerText(batch, "Walka (" + (battle.size() + battlePlayers.size()) + ")", blX + 6, blY + blH);
         Monster tgt = currentTarget;
-        float yy = blY + blH - 23 - 4;
-        font.getData().setScale(CON_SCALE);
+        float row = lay.battleRow;
+        float yy = blY + blH - lay.header - 4;
+        font.getData().setScale(conScale());
         if (battle.isEmpty() && battlePlayers.isEmpty()) {
             font.setColor(0.75f, 0.75f, 0.7f, 1f);
-            text(batch, "Brak potworów w pobliżu.", blX + 8, yy);
+            text(batch, "Brak potworów w pobliżu.", blX + 8, yy - 2);
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
             return;
         }
         float bw = Math.min(70, blW * 0.3f), bx = blX + blW - 10 - bw;
+        float ic = row - 3;
+        float textY = yy - (row - font.getCapHeight()) / 2f + 0.5f;
         for (BattlePlayer bp : battlePlayers) {
-            if (yy - BATTLE_ROW < blY + 2) break;
-            float rowY = yy - BATTLE_ROW + 1;
+            if (yy - row < blY + 2) break;
+            float rowY = yy - row + 1;
             TextureRegion sk = skullIcon(bp.skull());
-            if (sk != null) batch.draw(sk, blX + 7, rowY + 1, BATTLE_ROW - 3, BATTLE_ROW - 3);
+            if (sk != null) batch.draw(sk, blX + 7, rowY + 1, ic, ic);
             Color skc = skullColor(bp.skull());
             font.setColor(bp.ally() ? new Color(0.5f, 0.78f, 1f, 1f) : skc != null ? skc : Color.WHITE);
-            String name = bp.name();
-            layout.setText(font, name);
-            float room = bx - 6 - (blX + 7 + BATTLE_ROW);
-            if (layout.width > room) font.getData().setScale(CON_SCALE * Math.max(0.6f, room / layout.width));
-            text(batch, name, blX + 7 + BATTLE_ROW, yy - 2);
-            font.getData().setScale(CON_SCALE);
+            float room = bx - 6 - (blX + 7 + row);
+            text(batch, clip(bp.name(), room), blX + 7 + row, textY);
             font.setColor(Color.WHITE);
-            healthBar(batch, bx, rowY + 5, bw, bp.healthPercent() / 100f);
-            yy -= BATTLE_ROW;
+            healthBar(batch, bx, rowY + row / 2f - 3.5f, bw, bp.healthPercent() / 100f);
+            yy -= row;
+            textY -= row;
         }
         for (Monster m : battle) {
-            if (yy - BATTLE_ROW < blY + 2) break;
-            float rowY = yy - BATTLE_ROW + 1;
-            if (m == tgt) outline(batch, blX + 4, rowY, blW - 8, BATTLE_ROW - 1, new Color(0.95f, 0.25f, 0.2f, 1f));
+            if (yy - row < blY + 2) break;
+            float rowY = yy - row + 1;
+            if (m == tgt) outline(batch, blX + 4, rowY, blW - 8, row - 1, new Color(0.95f, 0.25f, 0.2f, 1f));
             TextureRegion icon = art.monster(m.type().key());
-            if (icon != null) batch.draw(icon, blX + 7, rowY + 1, BATTLE_ROW - 3, BATTLE_ROW - 3);
-            String name = m.type().name();
-            layout.setText(font, name);
-            float room = bx - 6 - (blX + 7 + BATTLE_ROW);
-            if (layout.width > room) font.getData().setScale(CON_SCALE * Math.max(0.6f, room / layout.width));
-            text(batch, name, blX + 7 + BATTLE_ROW, yy - 2);
-            font.getData().setScale(CON_SCALE);
-            healthBar(batch, bx, rowY + 5, bw, m.healthFraction());
-            yy -= BATTLE_ROW;
+            if (icon != null) batch.draw(icon, blX + 7, rowY + 1, ic, ic);
+            float room = bx - 6 - (blX + 7 + row);
+            text(batch, clip(m.type().name(), room), blX + 7 + row, textY);
+            healthBar(batch, bx, rowY + row / 2f - 3.5f, bw, m.healthFraction());
+            yy -= row;
+            textY -= row;
         }
         font.getData().setScale(1f);
     }
@@ -3776,13 +4000,16 @@ public final class Hud {
 
     /** Gniazdo plecaka w panelu: jak w Tibii prawy gorny rog lalki, w ukladzie 5x2 ostatnie pole. */
     private float[] epBackpackPos() {
-        if (epTibia) return new float[] {epX + 6 + 2 * (epCell + 3), epY + epH - 23 - 4 - epCell};
+        if (epTibia) return new float[] {epX + epPad() + 2 * (epCell + 3), epY + epH - lay.eqHeader - 4 - epCell};
         return new float[] {epX + 4 + 4 * (epCell + 2), epY + epH - 4 - epCell - (epCell + 2)};
     }
 
+    /** Lewy margines pol w oknie ekwipunku (telefon: wezszy, okno bez naglowka). */
+    private float epPad() { return lay.compact ? 4 : 6; }
+
     private float[] epCellPos(int i) {
         if (epTibia) {
-            return new float[] {epX + 6 + EQ_CELLS[i][0] * (epCell + 3), epY + epH - 23 - 4 - epCell - EQ_CELLS[i][1] * (epCell + 3)};
+            return new float[] {epX + epPad() + EQ_CELLS[i][0] * (epCell + 3), epY + epH - lay.eqHeader - 4 - epCell - EQ_CELLS[i][1] * (epCell + 3)};
         }
         return new float[] {epX + 4 + EQ_COMPACT[i][0] * (epCell + 2), epY + epH - 4 - epCell - EQ_COMPACT[i][1] * (epCell + 2)};
     }
@@ -3831,7 +4058,7 @@ public final class Hud {
     }
 
     private void drawEquipPanel(SpriteBatch batch, GameSession session) {
-        if (epTibia) text(batch, "Ekwipunek", epX + 6, epY + epH - 6);
+        if (epTibia && lay.eqHeader > 0) headerText(batch, "Ekwipunek", epX + 6, epY + epH);
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = epCellPos(i);
             drawEquipSlot(batch, session.character().equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], epCell);
@@ -3861,15 +4088,16 @@ public final class Hud {
         if (r != null) {
             float pad = slotPad(cell);
             batch.draw(r, x + pad, y + pad, cell - pad * 2, cell - pad * 2);
-            font.getData().setScale(Math.min(0.7f, cell / 50f));
+            font.getData().setScale(Math.max(HudLayout.MIN_FONT, Math.min(0.7f, cell / 50f)));
             if (st.count() > 1) text(batch, String.valueOf(st.count()), x + 2, y + cell * 0.32f);
             if (st.upgrade() > 0) text(batch, "+" + st.upgrade(), x + cell * 0.55f, y + cell - 2);
             font.getData().setScale(1f);
         } else {
-            font.getData().setScale(Math.min(0.6f, cell / 60f));
+            // nazwa pustego gniazda tylko, gdy miesci sie przy progu 7 dp
+            float sc = fitScale(name, cell - 4, 0.66f);
+            font.getData().setScale(sc);
             font.setColor(0.6f, 0.6f, 0.6f, 1f);
-            layout.setText(font, name);
-            if (layout.width < cell - 2) centered(batch, name, x + cell / 2f, y + cell / 2f);
+            if (sc > 0) centered(batch, name, x + cell / 2f, y + cell / 2f);
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
         }

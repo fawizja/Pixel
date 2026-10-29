@@ -169,6 +169,22 @@ public final class GameScreen extends ScreenAdapter {
         return pl.fawizja.pixel.net.Emotes.rise((String) b[0], uiMs());
     }
 
+    private final com.badlogic.gdx.graphics.g2d.GlyphLayout nameLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
+
+    /** Napis nad postacia z ciemnym obrysem (4 przesuniecia o ok. 0.6 dp), czytelny na jasnej podlodze. */
+    private static void outlined(SpriteBatch batch, BitmapFont font, String text, float x, float y, float r, float g, float b, float ui) {
+        float o = Math.max(1f, Math.round(ui * 0.6f));
+        x = Math.round(x);
+        y = Math.round(y);
+        font.setColor(0f, 0f, 0f, 0.8f);
+        font.draw(batch, text, x - o, y);
+        font.draw(batch, text, x + o, y);
+        font.draw(batch, text, x, y - o);
+        font.draw(batch, text, x, y + o);
+        font.setColor(r, g, b, 1f);
+        font.draw(batch, text, x, y);
+    }
+
     private void drawBubble(SpriteBatch batch, BitmapFont font, float scale, String name, float wx, float wy) {
         Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
         if (b == null) return;
@@ -2255,9 +2271,12 @@ public final class GameScreen extends ScreenAdapter {
         batch.setProjectionMatrix(screenMatrix);
         batch.begin();
         BitmapFont font = game.font();
-        float scale = Math.max(1f, Gdx.graphics.getDensity() * 1.1f);
-        // imiona NPC w poblizu
-        font.getData().setScale(scale * 0.8f);
+        float ui = hud.uiScale();
+        float scale = Math.max(1f, ui * 1.1f);
+        // imiona nad postaciami: ok. 7 dp wielkiej litery (przeglad z telefonow 2026-10-29), z ciemnym obrysem
+        // (duzy monitor przy skali 1: rosnie z polem widoku, zeby nie ginelo na polach 80+ px)
+        float nameScale = Math.max(Math.max(0.88f, 0.64f * ui), hud.tilePixels() * 0.0135f);
+        font.getData().setScale(nameScale);
         Position me = session.character().position();
         // pod widocznym dachem postaci nie widac (jak w Tibii) - ich imion tez nie
         boolean roofsShown = roofs != null && !roofs.covered(me);
@@ -2268,11 +2287,12 @@ public final class GameScreen extends ScreenAdapter {
             if (roofsShown && roofs.at(n.position().x(), n.position().y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
             projected.set(n.position().x() + 0.5f, worldRenderer.worldY(n.position().y()) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            float nx = projected.x - n.name().length() * 2.8f * scale;
+            nameLayout.setText(font, n.name());
+            float nx = projected.x - nameLayout.width / 2f;
             // imie nie wchodzi na gorny pasek ani na prawy panel (ramka widoku gry)
             if (projected.y > viewTop || nx > viewRight - 20) continue;
-            font.setColor(0.75f, 0.95f, 1f, 1f);
-            font.draw(batch, n.name(), Math.max(gv[0] + 2, Math.min(nx, viewRight - n.name().length() * 5.6f * scale - 2)), projected.y);
+            outlined(batch, font, n.name(), Math.max(gv[0] + 2, Math.min(nx, viewRight - nameLayout.width - 2)), projected.y,
+                    0.75f, 0.95f, 1f, ui);
         }
         if (target != null && !target.isDead() && target.position().z() == z) {
             // imie celu w kolorze trudnosci wzgledem poziomu postaci
@@ -2281,8 +2301,8 @@ public final class GameScreen extends ScreenAdapter {
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             projected.y += 6 * scale; // nad paskiem zycia
             String label = target.type().name() + " (" + d.label + ")";
-            font.setColor(d.r, d.g, d.b, 1f);
-            font.draw(batch, label, projected.x - label.length() * 2.8f * scale, projected.y);
+            nameLayout.setText(font, label);
+            outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, d.r, d.g, d.b, ui);
         }
         for (RemotePlayer rp : remotePlayers.values()) {
             if (rp.to.z() != z) continue;
@@ -2297,16 +2317,15 @@ public final class GameScreen extends ScreenAdapter {
             else font.setColor(0.55f, 1f, 0.55f, 1f);
             String label = rp.name + (ally ? " [drużyna]" : "")
                     + (rp.guild == null ? "" : " <" + rp.guild + ">");
-            float lx = projected.x - label.length() * 2.8f * scale;
+            nameLayout.setText(font, label);
+            float lx = projected.x - nameLayout.width / 2f;
             Color nameColor = font.getColor().cpy();
-            font.setColor(0f, 0f, 0f, 0.85f); // cien: imie czytelne tez na jasnej podlodze
-            font.draw(batch, label, lx + scale, projected.y - scale);
-            font.setColor(nameColor);
-            font.draw(batch, label, lx, projected.y);
+            // ciemny obrys: imie czytelne tez na jasnej podlodze
+            outlined(batch, font, label, lx, projected.y, nameColor.r, nameColor.g, nameColor.b, ui);
             // czaszka PvP (biala/czerwona) przed imieniem; maly czerwony znacznik = gracz z wlaczonym trybem PvP
             com.badlogic.gdx.graphics.g2d.TextureRegion sk = hud.skullIcon(rp.skull);
-            float is = Math.max(12f, 16f * scale);
-            if (sk != null) batch.draw(sk, lx - is - 2 * scale, projected.y - is + 1 * scale, is, is);
+            float is = Math.max(12f, font.getCapHeight() * 1.6f); // czaszka wielkosci imienia
+            if (sk != null) batch.draw(sk, lx - is - 2 * ui, projected.y - font.getCapHeight() / 2f - is / 2f, is, is);
             else if (!"NONE".equals(rp.skull)) font.draw(batch, "[czaszka]", lx - 50 * scale, projected.y);
             if (rp.pvp && "NONE".equals(rp.skull)) {
                 batch.setColor(0.9f, 0.15f, 0.15f, 1f);
@@ -2316,8 +2335,8 @@ public final class GameScreen extends ScreenAdapter {
             if (rp.title != null) {
                 // tytul z osiagniecia nad imieniem
                 String tl = "\"" + rp.title + "\""; // cudzyslowy ASCII - pewne w kazdej czcionce
-                font.setColor(1f, 0.85f, 0.35f, 1f);
-                font.draw(batch, tl, projected.x - tl.length() * 2.8f * scale, projected.y + 14f * scale);
+                nameLayout.setText(font, tl);
+                outlined(batch, font, tl, projected.x - nameLayout.width / 2f, projected.y + nameLayout.height + 5f * ui, 1f, 0.85f, 0.35f, ui);
             }
             drawBubble(batch, font, scale, rp.name, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)));
         }

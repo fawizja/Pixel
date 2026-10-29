@@ -103,3 +103,5 @@ vip_list|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499
 skills_phone|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.uiScale=2 -Dpixel.teleport=498,499,0 -Dpixel.open=vip -Dpixel.button=hud:skills
 buffs_skull|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=buffs
 logout_confirm|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.button=logout
+hud_phone_s24|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=pvp -Dpixel.width=2340 -Dpixel.height=1080 -Dpixel.uiScale=3
+hud_phone_narrow_popup|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=playerpopup -Dpixel.width=1280 -Dpixel.height=720 -Dpixel.uiScale=2
