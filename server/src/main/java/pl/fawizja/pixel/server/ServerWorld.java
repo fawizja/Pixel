@@ -1763,8 +1763,15 @@ final class ServerWorld {
             client.send("ERR", "Konto zablokowane " + Moderation.describeUntil(banned) + ".");
             return null;
         }
-        if (find(name) != null) {
-            client.send("ERR", "Postać " + name + " jest już w grze.");
+        ServerPlayer already = find(name);
+        if (already != null) {
+            if (already.lingering) {
+                long left = (already.pvp.logoutBlockedMs(now) + 999) / 1000;
+                client.send("ERR", "Postać " + name + " jest jeszcze w świecie po walce z graczem (blokada wylogowania, "
+                        + (left >= 60 ? left / 60 + " min " + left % 60 + " s" : left + " s") + ").");
+            } else {
+                client.send("ERR", "Postać " + name + " jest już w grze.");
+            }
             return null;
         }
         PlayerCharacter pc;
@@ -1829,7 +1836,7 @@ final class ServerWorld {
                     }
                     if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
                 }));
-        s.combat().setExperienceSharer((type, pct, t) -> shareKill(p, type, pct, t));
+        s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
         s.combat().setDeathListener(m -> {
             invasionKill(p, m);
             bossQuestKill(m);
@@ -1877,35 +1884,45 @@ final class ServerWorld {
     }
 
     /**
-     * Doswiadczenie za potwora zabitego przez p dzielone w druzynie ({@link pl.fawizja.pixel.party.PartyRules}).
-     * false = brak warunkow (zabojca dostaje doswiadczenie sam).
+     * Doswiadczenie za potwora zabitego przez czlonka druzyny, jak w Tibii ({@link pl.fawizja.pixel.party.PartyRules}):
+     * dzielone tylko, gdy wszyscy czlonkowie sa do 30 pol od lidera (pietro +-1), aktywni w ostatnich 2 min
+     * i maja zgodne poziomy (2/3). Kazdy dostaje ceil(M x (1 + premia) / P) x C. false = brak warunkow
+     * (zabojca dostaje doswiadczenie sam).
      */
     boolean shareKill(ServerPlayer killer, pl.fawizja.pixel.monster.MonsterType type, long now) {
-        return shareKill(killer, type, 100, now);
-    }
-
-    /** Jak wyzej; expPercent = czesc doswiadczenia za potwora (stado: CombatSystem.PACK_EXP_PERCENT). */
-    boolean shareKill(ServerPlayer killer, pl.fawizja.pixel.monster.MonsterType type, int expPercent, long now) {
         List<String> names = parties.members(killer.name());
         if (names.size() < 2) return false;
-        Position at = killer.session.character().position();
-        List<ServerPlayer> eligible = new ArrayList<>();
+        ServerPlayer leader = find(names.get(0));
+        if (leader == null) return false;
+        Position at = leader.session.character().position();
+        List<ServerPlayer> all = new ArrayList<>();
         List<Integer> levels = new ArrayList<>();
+        List<pl.fawizja.pixel.vocation.Vocation> vocations = new ArrayList<>();
         for (String n : names) {
             ServerPlayer m = find(n);
-            if (m == null || m.session.character().isDead()) continue;
-            if (!pl.fawizja.pixel.party.PartyRules.inShareRange(at, m.session.character().position())) continue;
-            eligible.add(m);
-            levels.add(m.session.character().level());
+            if (m == null) return false;
+            PlayerCharacter c = m.session.character();
+            if (!pl.fawizja.pixel.party.PartyRules.inShareRange(at, c.position())) return false;
+            if (m != killer && !pl.fawizja.pixel.party.PartyRules.active(m.session.combat().lastMonsterAttackMs(), now)) {
+                return false;
+            }
+            all.add(m);
+            levels.add(c.level());
+            vocations.add(c.vocation());
         }
-        if (eligible.size() < 2 || !pl.fawizja.pixel.party.PartyRules.levelsCompatible(levels)) return false;
-        List<pl.fawizja.pixel.vocation.Vocation> vocations = new ArrayList<>();
-        for (ServerPlayer m : eligible) vocations.add(m.session.character().vocation());
-        int bonus = pl.fawizja.pixel.party.PartyRules.bonusPercent(vocations);
-        for (ServerPlayer m : eligible) {
-            long solo = m.session.combat().killExperience(type, m.session.character().level()) * expPercent / 100;
-            long share = pl.fawizja.pixel.party.PartyRules.share(solo, eligible.size(), bonus);
-            m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name(), now);
+        if (!pl.fawizja.pixel.party.PartyRules.levelsCompatible(levels)) return false;
+        int bonus = pl.fawizja.pixel.party.PartyRules.bonusPercent(type.experience(), vocations);
+        for (ServerPlayer m : all) {
+            PlayerCharacter c = m.session.character();
+            long exp = m.session.combat().killExperience(type, c.level());
+            long share = pl.fawizja.pixel.party.PartyRules.share(exp, all.size(), bonus);
+            boolean rested = c.useRested(); // premia postaci (C) po podziale, jak stamina w Tibii
+            if (rested) {
+                share = share * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
+                c.stats().recordRestedKill();
+            }
+            m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name()
+                    + (rested ? ", wypoczęty" : ""), now);
             if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
         }
         return true;
@@ -2411,6 +2428,29 @@ final class ServerWorld {
 
     boolean saved(String name) { return saves.exists("player_" + name.toLowerCase(java.util.Locale.ROOT)); }
 
+    /**
+     * Rozlaczenie klienta (BYE albo zerwane polaczenie). Jak w Tibii: z blokada wylogowania (walka z graczem w
+     * ostatniej minucie, 15 min po nieusprawiedliwionym zabojstwie) postac zostaje w swiecie, dopoki blokada
+     * nie minie - mozna ja dalej atakowac. Potem {@link #leave}.
+     */
+    void disconnect(ServerPlayer p, long now) {
+        if (!players.containsKey(p.id)) return;
+        if (p.pvp.logoutBlockedMs(now) > 0 && !p.session.character().isDead()) {
+            p.lingering = true;
+            p.move = null;
+            LOG.info("logout blocked " + p.name() + " for " + p.pvp.logoutBlockedMs(now) + " ms");
+            return;
+        }
+        leave(p);
+    }
+
+    /** Postacie rozlaczone z blokada wylogowania wychodza, gdy blokada minie. */
+    private void releaseLingering(long now) {
+        List<ServerPlayer> done = new ArrayList<>();
+        for (ServerPlayer p : players.values()) if (p.lingering && p.pvp.logoutBlockedMs(now) <= 0) done.add(p);
+        for (ServerPlayer p : done) leave(p);
+    }
+
     void leave(ServerPlayer p) {
         if (!players.containsKey(p.id)) return;
         save(p); // najpierw zapis, potem usuniecie z listy graczy
@@ -2834,7 +2874,7 @@ final class ServerWorld {
             p.pvpTarget = -1;
             return;
         }
-        PvpRules.Verdict v = PvpRules.check(p.session.character(), t.session.character(), t.pvp, world, now);
+        PvpRules.Verdict v = PvpRules.check(p.session.character(), p.pvp, t.session.character(), t.pvp, world, now);
         if (v != PvpRules.Verdict.OK) {
             p.session.log().add(now, EventLog.Kind.WARNING, v.message);
             p.pvpTarget = -1;
@@ -2904,6 +2944,7 @@ final class ServerWorld {
         updateAltarTorches();
         updateInvasion(now);
         updateDuels(now);
+        releaseLingering(now);
         refreshPartyInfo(now);
         updateShutdown(now);
         if (players.isEmpty()) return;
@@ -2936,7 +2977,7 @@ final class ServerWorld {
                 p.pvpTarget = -1;
                 continue;
             }
-            PvpRules.Verdict v = PvpRules.check(p.session.character(), t.session.character(), t.pvp, world, now);
+            PvpRules.Verdict v = PvpRules.check(p.session.character(), p.pvp, t.session.character(), t.pvp, world, now);
             if (v != PvpRules.Verdict.OK) {
                 p.session.log().add(now, EventLog.Kind.INFO, "Koniec walki z " + t.name() + ": " + v.message);
                 p.pvpTarget = -1;
@@ -3151,8 +3192,10 @@ final class ServerWorld {
                 p.lastChallenge = chLine;
             }
             // tryb PvP, czaszka i blokada PZ (czas serwera) - tylko po zmianie
+            // PVP tryb czaszka czaszkaDo blokadaPzDo blokadaWylogowaniaDo
             String pvpLine = Protocol.line("PVP", p.session.pvpMode() ? "1" : "0", p.pvp.skull(now).name(),
-                    String.valueOf(p.pvp.skullUntil(now)), String.valueOf(p.pvp.fightUntil() > now ? p.pvp.fightUntil() : 0));
+                    String.valueOf(p.pvp.skullUntil(now)), String.valueOf(p.pvp.fightUntil() > now ? p.pvp.fightUntil() : 0),
+                    String.valueOf(p.pvp.logoutUntil() > now ? p.pvp.logoutUntil() : 0));
             if (!pvpLine.equals(p.lastPvp)) {
                 p.client.send(Protocol.parse(pvpLine));
                 p.lastPvp = pvpLine;
@@ -3170,7 +3213,8 @@ final class ServerWorld {
                 PlayerCharacter oc = o.session.character();
                 frame.append(Protocol.line("PL", String.valueOf(o.id), oc.name(), oc.vocation().name(),
                         String.valueOf(op.x()), String.valueOf(op.y()), String.valueOf(op.z()),
-                        String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())), o.pvp.skull(now).name(),
+                        String.valueOf(100 * oc.health() / Math.max(1, oc.maxHealth())),
+                        PvpRules.skullSeenBy(p.pvp, oc.name(), o.pvp, now).name(), // zolta/pomaranczowa tylko dla p
                         guildTag(oc.name()), oc.isMounted() ? "M" : "-", oc.pet() == null ? "-" : oc.pet(),
                         oc.title() == null ? "-" : oc.title(), String.valueOf(oc.outfit()),
                         o.session.pvpMode() ? "P" : "-")).append('\n');

@@ -147,7 +147,7 @@ public final class PixelServer implements AutoCloseable {
 
     private void handle(ClientHandler c, String[] f, long now) {
         if (f[0].equals("BYE")) {
-            if (c.player != null) world.leave(c.player);
+            if (c.player != null) world.disconnect(c.player, now);
             c.player = null;
             c.close();
             return;

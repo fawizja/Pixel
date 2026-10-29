@@ -120,31 +120,37 @@ class PvpModeTest {
         assertEquals(Outcome.HIT, o);
         assertTrue(aggressor.character().health() <= hp);
         assertEquals(Skull.NONE, helper.pvpStatus().skull(20_000), "hitting an aggressor gives no skull");
-        assertEquals(0, helper.character().pzBlockedMs(0), "and no protection zone block");
+        assertTrue(helper.character().pzBlockedMs(0) > 0, "but, as in Tibia, any attack on a player blocks the PZ for 1 min");
+        assertEquals(Skull.YELLOW, PvpRules.skullSeenBy(aggressor.pvpStatus(), "Pomocnik", helper.pvpStatus(), 0),
+                "the aggressor sees the helper with a yellow skull");
+        assertEquals(Skull.NONE, PvpRules.skullSeenBy(victim.pvpStatus(), "Pomocnik", helper.pvpStatus(), 0),
+                "nobody else does");
         assertEquals(Verdict.PVP_OFF, PvpRules.check(helper.character(), victim.character(), victim.pvpStatus(), W, 0),
                 "the clean victim is still protected from players with PvP off");
     }
 
     @Test
-    void killingAnUnskulledPlayerGivesARedSkullAndATenMinuteBlock() {
+    void killingAnUnskulledPlayerGivesAFifteenMinuteWhiteSkullAndBlocks() {
         GameSession killer = player("Zabojca", FIELD);
         GameSession victim = player("Zabity", FIELD.translate(1, 0));
         killer.setPvpMode(true);
         long[] when = new long[1];
         assertEquals(Outcome.KILLED, fightToDeath(killer, victim, 0, new Random(5), when));
         long t = when[0];
-        assertEquals(Skull.RED, killer.pvpStatus().skull(t));
-        assertEquals(PvpRules.KILL_SKULL_MS, killer.character().pzBlockedMs(t), "10 min protection zone block");
-        assertEquals(Skull.RED, killer.pvpStatus().skull(t + PvpRules.KILL_SKULL_MS - 1));
-        assertEquals(Skull.NONE, killer.pvpStatus().skull(t + PvpRules.KILL_SKULL_MS), "one kill: red skull for 10 min");
+        assertEquals(Skull.WHITE, killer.pvpStatus().skull(t), "one unjustified kill is not a red skull in Tibia");
+        assertEquals(PvpRules.KILL_BLOCK_MS, killer.character().pzBlockedMs(t), "15 min protection zone block");
+        assertEquals(PvpRules.KILL_BLOCK_MS, killer.pvpStatus().logoutBlockedMs(t), "15 min logout block");
+        assertEquals(Skull.WHITE, killer.pvpStatus().skull(t + PvpRules.KILL_BLOCK_MS - 1));
+        assertEquals(Skull.NONE, killer.pvpStatus().skull(t + PvpRules.KILL_BLOCK_MS), "white skull for 15 min");
+        assertEquals(0, victim.pvpStatus().logoutBlockedMs(t), "death ends the victim's blocks");
         killer.update(t + 1, null);
-        assertEquals(Skull.RED, killer.character().skull());
-        assertTrue(killer.log().latest(10).stream().anyMatch(e -> e.text().contains("Czerwona czaszka")));
+        assertEquals(Skull.WHITE, killer.character().skull());
+        assertTrue(killer.log().latest(10).stream().anyMatch(e -> e.text().contains("Nieusprawiedliwione zabójstwo")));
     }
 
     /** Czarodziej z runa obszarowa celuje w dzika; obok dzika stoi drugi gracz. */
     @Test
-    void areaRunesSkipPlayersWithPvpOffAndSkullTheCasterWhenTheyHitOne() {
+    void areaRunesHitUnmarkedPlayersEvenInSecureModeAndSkullTheCaster() {
         PlayerCharacter pc = TestData.newCharacterNamed("Runiarz");
         pc.addExperience(Balance.experienceForLevel(40) - pc.experience());
         pc.skills().set(Skill.MAGIC, 10, 0);
@@ -163,31 +169,34 @@ class PvpModeTest {
         caster.spells().setPlayerTargeting(new PvpTargeting(caster, () -> null, () -> List.of(caster, bystander),
                 null, W, new Random(7), null));
 
-        // tryb PvP wylaczony: runa rani dzika, gracza obok omija
+        // tryb PvP wylaczony (tryb bezpieczny): jak w Tibii runa obszarowa i tak rani gracza obok - biala czaszka
         caster.combat().setTarget(boar);
         int hp = bystander.character().health();
+        assertFalse(PvpRules.SECURE_MODE_BLOCKS_AREA);
         assertEquals(CastResult.OK, caster.spells().useFirst("fireburst_rune", 1000));
         assertTrue(boar.health() < boar.type().maxHealth());
-        assertEquals(hp, bystander.character().health(), "area rune skips players with PvP off");
-        assertEquals(Skull.NONE, caster.pvpStatus().skull(1000));
+        assertTrue(bystander.character().health() < hp, "secure mode does not protect from area damage (Tibia)");
+        assertEquals(Skull.WHITE, caster.pvpStatus().skull(1000));
+        assertEquals(PvpRules.PZ_BLOCK_MS, caster.character().pzBlockedMs(1000));
+        assertEquals(Skull.NONE, bystander.pvpStatus().skull(1000));
+        // ale celowany atak na nieoznaczonego gracza w trybie bezpiecznym jest zablokowany
+        assertEquals(Verdict.PVP_OFF, PvpRules.check(caster.character(), caster.pvpStatus(), bystander.character(),
+                bystander.pvpStatus(), W, 1000));
 
-        // tryb PvP wlaczony: ten sam rzut trafia gracza - biala czaszka i blokada PZ
-        caster.setPvpMode(true);
-        assertEquals(CastResult.OK, caster.spells().useFirst("fireburst_rune", 5000));
-        assertTrue(bystander.character().health() < hp, "area rune hits the player with PvP on");
-        assertEquals(Skull.WHITE, caster.pvpStatus().skull(5000));
-        assertEquals(PvpRules.WHITE_SKULL_MS, caster.character().pzBlockedMs(5000));
-        assertEquals(Skull.NONE, bystander.pvpStatus().skull(5000));
-
-        // obszar trafia agresora nawet bez trybu PvP (bez czaszki dla rzucajacego)
+        // obszar gracza bez czaszki trafia oznaczonego rzucajacego bez kary, a nieoznaczonego - z biala czaszka
         GameSession clean = player("Czysty", new Position(10, 12, 0));
         int casterHp = caster.character().health();
-        PvpTargeting t = new PvpTargeting(clean, () -> null, () -> List.of(caster, bystander), null, W, new Random(9), null);
+        PvpTargeting t = new PvpTargeting(clean, () -> null, () -> List.of(caster), null, W, new Random(9), null);
         int hits = t.strikeArea(clean.character().position(), 3, p -> true, () -> 50,
                 pl.fawizja.pixel.combat.DamageType.FIRE, 6000);
-        assertEquals(1, hits, "only the skulled caster, not the clean bystander");
+        assertEquals(1, hits);
         assertTrue(caster.character().health() < casterHp);
-        assertEquals(Skull.NONE, clean.pvpStatus().skull(6000));
+        assertEquals(Skull.NONE, clean.pvpStatus().skull(6000), "the skulled caster is fair game");
+        // druzyna: obszar omija czlonkow wlasnej druzyny
+        PvpTargeting party = new PvpTargeting(clean, () -> null, () -> List.of(caster), (x, y) -> true, W,
+                new Random(9), null);
+        assertEquals(0, party.strikeArea(clean.character().position(), 3, p -> true, () -> 50,
+                pl.fawizja.pixel.combat.DamageType.FIRE, 7000));
     }
 
     @Test

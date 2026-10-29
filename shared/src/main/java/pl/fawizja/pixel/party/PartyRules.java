@@ -7,47 +7,52 @@ import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
 
 /**
- * Wspolne doswiadczenie druzyny (jak w Tibii). Dzielone, gdy co najmniej dwoch zywych czlonkow jest na pietrze
- * zabojcy w promieniu {@link #SHARE_RANGE} i poziomy sa zblizone (najnizszy >= 2/3 najwyzszego - bez "holowania"
- * nowych postaci przez wysokie poziomy). Gdy ktorys z czlonkow obok ma za niski poziom, druzyna nie dzieli
- * doswiadczenia wcale (kazdy dostaje swoje zabicia sam), tak jak w Tibii.
+ * Wspolne doswiadczenie druzyny dokladnie jak w Tibii (tibia.com, "Shared Experience"; TibiaWiki "Party").
  *
- * <p>Premia druzyny = premia za liczbe osob + premia za rozne profesje, najwyzej {@link #MAX_BONUS_PERCENT}%
- * (licza sie tylko czlonkowie, ktorzy dziela to zabicie):
+ * <p>Dziala tylko, gdy WSZYSCY czlonkowie druzyny spelniaja warunki - inaczej kazdy dostaje doswiadczenie
+ * za swoje zabicia sam:
+ * <ul>
+ *   <li>poziom najnizszego czlonka &gt;= 2/3 poziomu najwyzszego ({@link #levelsCompatible}),</li>
+ *   <li>kazdy jest najwyzej {@link #SHARE_RANGE} pol od lidera, na jego pietrze albo pietro wyzej/nizej,</li>
+ *   <li>kazdy byl aktywny w ostatnich {@link #ACTIVITY_MS} (2 min): zaatakowal potwora (w Tibii takze
+ *       uleczenie czlonka druzyny - u nas nie ma czarow leczacych innych).</li>
+ * </ul>
+ *
+ * <p>Premia zalezy tylko od liczby roznych profesji (nie od liczby osob):
  * <pre>
- *   osoby (n)        2     3     4     5+
- *   premia za n    +20%  +30%  +35%  +40%
- *
- *   rozne profesje   1     2     3     4      5
- *   premia          +0%  +20%  +50%  +100%  +160%
- *
- *   przyklady (n / profesje -> premia -> udzial kazdego z dosw., jakie dostalby sam):
- *     2 / 1 ->  +20% -> 60%      2 / 2 ->  +40% -> 70%
- *     3 / 1 ->  +30% -> 43%      3 / 3 ->  +80% -> 60%
- *     4 / 1 ->  +35% -> 34%      4 / 4 -> +135% -> 59%
- *     5 / 1 ->  +40% -> 28%      5 / 5 -> +200% -> 60%  (Knight, Paladin, Sorcerer, Druid, Monk)
+ *   rozne profesje   1     2     3     4     5 (z Monkiem)
+ *   premia         +20%  +30%  +60%  +100% +100%
  * </pre>
- * Pule (doswiadczenie, ktore kazdy czlonek dostalby sam, razy 1 + premia) dzieli sie po rowno, jak w Tibii,
- * a nie mnozy u kazdego: inaczej piec osob bijacych jednego potwora dostawaloby 15x wiecej doswiadczenia niz
- * jeden gracz i druzyna "na doczepke" bylaby obowiazkowa nawet na slabych potworach. Przy podziale pelna,
- * rozna druzyna dostaje za kazde zabicie 60% tego, co solo; poniewaz piec osob zabija potwory kilka razy
- * szybciej (a gesciejsze stada w lepszych lowiskach sa dla jednej postaci za trudne), na godzine kazdy
- * zarabia mniej wiecej 2-3x wiecej niz sam w tym samym miejscu. Druzyna jednej profesji zarabia malo
- * wiecej niz solo - liczy sie roznorodnosc.
+ * Premia jest tylko za potwory dajace bazowo co najmniej {@link #MIN_BONUS_EXPERIENCE} doswiadczenia.
+ * Podzial: kazdy z P czlonkow dostaje ceil(M x (1 + premia) / P) x C, gdzie M - doswiadczenie potwora,
+ * C - premie postaci (u nas: poziom wzgledem potwora, zwoj nauki, potwor dnia, wypoczynek).
+ * Przyklad: 4 profesje, 4 osoby, potwor za 1000 - kazdy 1000 x 2,0 / 4 = 500.
  */
 public final class PartyRules {
 
+    /** Najwieksza odleglosc czlonka od lidera (pola, "zasieg krzyku"). */
     public static final int SHARE_RANGE = 30;
-    /** Premia za liczbe osob w procentach, indeks = liczba osob (0..5, wiecej liczy sie jak 5). */
-    static final int[] SIZE_BONUS_PERCENT = {0, 0, 20, 30, 35, 40};
-    /** Premia za rozne profesje w procentach, indeks = liczba roznych profesji (0..5). */
-    static final int[] VOCATION_BONUS_PERCENT = {0, 0, 20, 50, 100, 160};
-    public static final int MAX_BONUS_PERCENT = 200;
+    /** Ile pieter od lidera (w gore albo w dol) wolno byc. */
+    public static final int FLOOR_RANGE = 1;
+    /** Czlonek musi byc aktywny (atak na potwora) w tym czasie. */
+    public static final long ACTIVITY_MS = 2 * 60_000L;
+    /** Potwory z mniejszym bazowym doswiadczeniem nie daja premii (podzial nadal dziala). */
+    public static final int MIN_BONUS_EXPERIENCE = 20;
+    /** Premia w procentach, indeks = liczba roznych profesji (0..5; 4 i 5 = +100%). */
+    static final int[] VOCATION_BONUS_PERCENT = {0, 20, 30, 60, 100, 100};
+    public static final int MAX_BONUS_PERCENT = 100;
 
     private PartyRules() {}
 
-    public static boolean inShareRange(Position killer, Position member) {
-        return killer.z() == member.z() && killer.distanceTo(member) <= SHARE_RANGE;
+    /** Czy czlonek jest dosc blisko lidera: do 30 pol i najwyzej pietro wyzej albo nizej. */
+    public static boolean inShareRange(Position leader, Position member) {
+        if (Math.abs(leader.z() - member.z()) > FLOOR_RANGE) return false;
+        return Math.max(Math.abs(leader.x() - member.x()), Math.abs(leader.y() - member.y())) <= SHARE_RANGE;
+    }
+
+    /** Czy czlonek byl aktywny w ostatnich 2 minutach (lastActionMs = ostatni atak na potwora). */
+    public static boolean active(long lastActionMs, long now) {
+        return now - lastActionMs <= ACTIVITY_MS;
     }
 
     public static boolean levelsCompatible(List<Integer> levels) {
@@ -65,29 +70,34 @@ public final class PartyRules {
         return (maxLevel * 2 + 2) / 3;
     }
 
-    /** Premia druzyny w procentach dla liczby osob i roznych profesji (0 dla jednej osoby). */
-    public static int bonusPercent(int members, int distinctVocations) {
-        if (members < 2) return 0;
-        int size = SIZE_BONUS_PERCENT[Math.min(members, SIZE_BONUS_PERCENT.length - 1)];
-        int voc = VOCATION_BONUS_PERCENT[Math.max(0, Math.min(Math.min(distinctVocations, members), VOCATION_BONUS_PERCENT.length - 1))];
-        return Math.min(MAX_BONUS_PERCENT, size + voc);
+    /** Najwyzszy poziom, z ktorym moze dzielic doswiadczenie postac na poziomie min (3/2, w dol). */
+    public static int maxSharingLevel(int minLevel) {
+        return minLevel * 3 / 2;
     }
 
-    /** Premia druzyny w procentach dla profesji jej czlonkow (po jednej na osobe; null pomijane w profesjach). */
+    /** Premia w procentach dla liczby roznych profesji (druzyna ma zawsze co najmniej dwie osoby). */
+    public static int bonusPercent(int distinctVocations) {
+        return VOCATION_BONUS_PERCENT[Math.max(0, Math.min(distinctVocations, VOCATION_BONUS_PERCENT.length - 1))];
+    }
+
+    /** Premia druzyny w procentach dla profesji jej czlonkow (po jednej na osobe; 0 dla jednej osoby). */
     public static int bonusPercent(Collection<Vocation> vocations) {
+        if (vocations.size() < 2) return 0;
         EnumSet<Vocation> distinct = EnumSet.noneOf(Vocation.class);
         for (Vocation v : vocations) if (v != null) distinct.add(v);
-        return bonusPercent(vocations.size(), distinct.size());
+        return bonusPercent(Math.max(1, distinct.size()));
     }
 
-    /** Udzial jednego czlonka z doswiadczenia, ktore dostalby sam (wg wlasnego poziomu), przy danej premii. */
-    public static long share(long soloExperience, int members, int bonusPercent) {
-        if (members <= 1) return soloExperience;
-        return Math.round(soloExperience * (100.0 + bonusPercent) / (100.0 * members));
+    /** Premia za konkretnego potwora: 0, gdy daje bazowo mniej niz {@link #MIN_BONUS_EXPERIENCE}. */
+    public static int bonusPercent(long monsterBaseExperience, Collection<Vocation> vocations) {
+        return monsterBaseExperience < MIN_BONUS_EXPERIENCE ? 0 : bonusPercent(vocations);
     }
 
-    /** Udzial przy druzynie jednej profesji (sama premia za liczbe osob). */
-    public static long share(long soloExperience, int members) {
-        return share(soloExperience, members, bonusPercent(members, 1));
+    /** Udzial jednego czlonka: ceil(exp x (100 + premia) / (100 x czlonkowie)). */
+    public static long share(long experience, int members, int bonusPercent) {
+        if (members <= 1) return experience;
+        long num = experience * (100L + bonusPercent);
+        long den = 100L * members;
+        return (num + den - 1) / den;
     }
 }

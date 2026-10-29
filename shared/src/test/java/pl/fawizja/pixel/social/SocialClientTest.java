@@ -66,7 +66,7 @@ class SocialClientTest {
         s.handle(PartyView.of(List.of(new PartyView.Member("Ela", 33, Vocation.DRUID, true),
                 new PartyView.Member("Ola", 30, Vocation.KNIGHT, true))).encode());
         assertTrue(s.version() > v);
-        assertEquals(40, s.party().bonusPercent());
+        assertEquals(30, s.party().bonusPercent(), "Tibia: 2 vocations = +30%");
         assertTrue(s.partyInvites().isEmpty());
         assertFalse(s.invitePlayerToParty("Kuba"), "only the leader invites");
         assertTrue(s.leaveParty());

@@ -296,7 +296,22 @@ class NetworkSyncTest {
                     return false;
                 }
             });
+            // blokada wylogowania (6. pole PVP): atakujacy i zaatakowany, 1 min
+            awaitMessage(b, "jan logout block", m -> m[0].equals("PVP") && m.length > 5 && Long.parseLong(m[5]) > 0
+                    && Long.parseLong(m[4]) == 0);
         }
+        // jak w Tibii: po rozlaczeniu w trakcie blokady wylogowania postacie zostaja w swiecie
+        Thread.sleep(500);
+        assertNotNull(server.world().find("Ivo"), "Ivo stays in the world while logout-blocked");
+        assertTrue(server.world().find("Ivo").lingering);
+        try (NetClient again = connect()) {
+            again.hello("Ivo", "PALADIN", "tajne-Ivo");
+            await("relogin refused", () -> again.error() != null);
+            assertTrue(again.error().contains("blokada wylogowania"), again.error());
+        }
+        server.enqueueTest(() -> {
+            for (ServerPlayer p : server.world().players()) p.pvp.liftBlocks();
+        });
         // czaszka przetrwa restart serwera
         await("both left", () -> server.world().players().isEmpty());
         server.close();
@@ -309,8 +324,9 @@ class NetworkSyncTest {
     }
 
     /**
-     * Trzech graczy: krag ognia bez trybu PvP omija graczy; w trybie PvP rani obu sasiadow i daje biala
-     * czaszke (widoczna dla innych), a wtedy gracz bez trybu PvP moze bic agresora bez wlasnej czaszki.
+     * Trzech graczy: jak w Tibii krag ognia rani obu sasiadow takze w trybie bezpiecznym (bez trybu PvP) i daje
+     * biala czaszke widoczna dla innych; atak celowany na nieoznaczonego jest wtedy zablokowany. Gracz bez trybu
+     * PvP moze bic agresora bez wlasnej czaszki - agresor widzi go z zolta czaszka, inni bez czaszki.
      */
     @Test
     void areaSpellsSkullsAndAggressorsWithThreePlayers() throws Exception {
@@ -347,16 +363,12 @@ class NetworkSyncTest {
             });
             int janFull = self(b).health(), olaFull = self(c).health();
 
-            // bez trybu PvP: obszar omija graczy (nie ma w co trafic)
-            a.send("ACT", "cast:flame_ring");
-            awaitMessage(a, "no target", m -> m[0].equals("LOG") && m[2].contains(pl.fawizja.pixel.magic.CastResult.NO_TARGET.message));
-            assertEquals(janFull, self(b).health());
-            assertEquals(olaFull, self(c).health());
+            // tryb bezpieczny: atak celowany na Jana odrzucony
+            a.send("ATTACK", String.valueOf(b.playerId()));
+            awaitMessage(a, "secure mode", m -> m[0].equals("LOG") && m[2].contains("Włącz tryb PvP"));
             assertEquals("NONE", seen(b, "Ivo").mark());
 
-            // w trybie PvP: krag ognia rani Jana i Ole, Ivo dostaje biala czaszke i blokade PZ
-            a.send("ACT", "pvp");
-            awaitMessage(a, "pvp on", m -> m[0].equals("PVP") && m[1].equals("1"));
+            // ale krag ognia rani Jana i Ole takze bez trybu PvP: Ivo dostaje biala czaszke i blokade PZ
             a.send("ACT", "cast:flame_ring");
             awaitMessage(a, "white skull and pz block", m -> m[0].equals("PVP") && m[2].equals("WHITE")
                     && Long.parseLong(m[4]) > 0);
@@ -381,7 +393,8 @@ class NetworkSyncTest {
                 }
             }, 20_000);
             assertEquals("NONE", b.frame().skull(), "attacking an aggressor is free");
-            assertEquals("NONE", seen(c, "Jan").mark());
+            assertEquals("NONE", seen(c, "Jan").mark(), "others see no skull on Jan");
+            await("ivo sees jan yellow", () -> seen(a, "Jan") != null && "YELLOW".equals(seen(a, "Jan").mark()));
         }
     }
 
@@ -827,11 +840,20 @@ class NetworkSyncTest {
             pl.fawizja.pixel.monster.MonsterType wolf = pl.fawizja.pixel.monster.MonsterRegistry
                     .loadDefault(ItemRegistry.loadDefault()).get("wolf");
             boolean[] shared = new boolean[1];
+            int[] inactiveShared = {-1};
             long[] soloExp = {-1};
             int[] ulaHunt = {-1};
             server.enqueueTest(() -> {
                 ServerPlayer killer = server.world().find("Ola");
                 server.world().find("Ula").session.character().hunt().restore("wolf;3;0");
+                // Tibia: kazdy czlonek musi byc aktywny (atak na potwora) w ostatnich 2 min
+                ServerPlayer ulaP = server.world().find("Ula");
+                // bez premii wypoczynku (liczona osobno po podziale)
+                killer.session.character().restoreRested(0);
+                ulaP.session.character().restoreRested(0);
+                boolean idle = server.world().shareKill(killer, wolf, server.now());
+                inactiveShared[0] = idle ? 1 : 0;
+                ulaP.session.combat().noteMonsterAttack(server.now());
                 // z premia potwora dnia, gdy dzis sa nim wilki
                 soloExp[0] = killer.session.combat().killExperience(wolf, 8);
                 shared[0] = server.world().shareKill(killer, wolf, server.now());
@@ -840,8 +862,12 @@ class NetworkSyncTest {
             await("kill shared", () -> soloExp[0] >= 0 && ulaHunt[0] >= 0);
             assertEquals(4, ulaHunt[0], "the party kill counts for Ula's hunting task");
             long solo = soloExp[0];
-            // paladyn + druid: +20% za dwie osoby, +20% za dwie profesje
-            long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2, 40);
+            assertEquals(0, inactiveShared[0], "an idle member switches shared experience off");
+            // paladyn + druid: dwie profesje = +30% (Tibia), wilk daje bazowo >= 20 doswiadczenia
+            int bonus = pl.fawizja.pixel.party.PartyRules.bonusPercent(wolf.experience(),
+                    java.util.List.of(pl.fawizja.pixel.vocation.Vocation.PALADIN, pl.fawizja.pixel.vocation.Vocation.DRUID));
+            assertEquals(wolf.experience() >= 20 ? 30 : 0, bonus);
+            long each = pl.fawizja.pixel.party.PartyRules.share(solo, 2, bonus);
             await("both got a share", () -> {
                 try {
                     return self(ola).experience() == olaExp + each && self(ula).experience() == ulaExp + each;
@@ -861,7 +887,7 @@ class NetworkSyncTest {
     }
 
     @Test
-    void fullDiversePartyGetsTwoHundredPercentAndTheLeaderCanKick() throws Exception {
+    void fullDiversePartyGetsOneHundredPercentAndTheLeaderCanKick() throws Exception {
         String[] names = {"Lider", "Pala", "Sora", "Drui", "Monka"};
         pl.fawizja.pixel.vocation.Vocation[] vocs = {pl.fawizja.pixel.vocation.Vocation.KNIGHT,
                 pl.fawizja.pixel.vocation.Vocation.PALADIN, pl.fawizja.pixel.vocation.Vocation.SORCERER,
@@ -881,15 +907,15 @@ class NetworkSyncTest {
                 awaitMessage(cs.get(i), "invite card " + names[i], m -> m[0].equals("PARTYINV") && m[1].equals("Lider"));
                 cs.get(k).send("PARTY", "ACCEPT", "Lider");
             }
-            // kazdy dostaje PARTYINFO z poziomami, profesjami i premia +200%
+            // kazdy dostaje PARTYINFO z poziomami, profesjami i premia +100% (Tibia: 4 albo 5 profesji)
             for (int i = 0; i < 5; i++) {
                 awaitMessage(cs.get(i), "party info " + names[i], m -> {
                     pl.fawizja.pixel.party.PartyView v = pl.fawizja.pixel.party.PartyView.parse(m);
-                    return v != null && v.members().size() == 5 && v.bonusPercent() == 200 && v.sharing()
+                    return v != null && v.members().size() == 5 && v.bonusPercent() == 100 && v.sharing()
                             && v.leader().equals("Lider") && v.distinctVocations() == 5;
                 });
             }
-            // wspolne zabicie: pula x3.0 dzielona na piec (kazdy 60% tego, co dostalby sam)
+            // wspolne zabicie: pula x2.0 dzielona na piec (kazdy ceil(40%) tego, co dostalby sam)
             pl.fawizja.pixel.monster.MonsterType wolf = pl.fawizja.pixel.monster.MonsterRegistry
                     .loadDefault(ItemRegistry.loadDefault()).get("wolf");
             long[] before = new long[5];
@@ -899,6 +925,8 @@ class NetworkSyncTest {
             server.enqueueTest(() -> {
                 for (int i = 0; i < 5; i++) {
                     ServerPlayer p = server.world().find(names[i]);
+                    p.session.combat().noteMonsterAttack(server.now());
+                    p.session.character().restoreRested(0); // wypoczynek liczony osobno po podziale
                     before[i] = p.session.character().experience();
                     solo[i] = p.session.combat().killExperience(wolf, p.session.character().level());
                 }
@@ -908,11 +936,12 @@ class NetworkSyncTest {
             await("shared kill", () -> after[4] >= 0);
             assertTrue(shared[0]);
             for (int i = 0; i < 5; i++) {
-                assertEquals(pl.fawizja.pixel.party.PartyRules.share(solo[i], 5, 200), after[i] - before[i], names[i]);
-                assertEquals(Math.round(solo[i] * 0.6), after[i] - before[i], names[i]);
+                int bonus = wolf.experience() >= 20 ? 100 : 0;
+                assertEquals(pl.fawizja.pixel.party.PartyRules.share(solo[i], 5, bonus), after[i] - before[i], names[i]);
+                assertEquals((solo[i] * (100 + bonus) + 499) / 500, after[i] - before[i], names[i]);
             }
-            // za daleko: Monka nie dzieli, czterech dzieli z premia 4 osob / 4 profesji
-            long[] far = {-1, -1};
+            // Tibia: jeden czlonek za daleko od lidera wylacza dzielenie calej druzynie - lider dostaje swoje sam
+            long[] far = {-1, -1, -1};
             server.enqueueTest(() -> {
                 ServerPlayer monk = server.world().find("Monka");
                 monk.session.character().setPosition(server.world().find("Lider").session.character().position()
@@ -920,14 +949,18 @@ class NetworkSyncTest {
                 long m0 = monk.session.character().experience();
                 ServerPlayer pala = server.world().find("Pala");
                 long p0 = pala.session.character().experience();
-                long ps = pala.session.combat().killExperience(wolf, pala.session.character().level());
-                server.world().shareKill(server.world().find("Lider"), wolf, server.now());
+                boolean on = server.world().shareKill(server.world().find("Lider"), wolf, server.now());
                 far[0] = monk.session.character().experience() - m0;
-                far[1] = pala.session.character().experience() - p0 - pl.fawizja.pixel.party.PartyRules.share(ps, 4, 135);
+                far[1] = pala.session.character().experience() - p0;
+                far[2] = on ? 1 : 0;
+                // z powrotem w zasiegu lidera (dalsza czesc testu)
+                monk.session.character().setPosition(server.world().find("Lider").session.character().position()
+                        .translate(3, 0));
             });
             await("far kill", () -> far[0] >= 0);
+            assertEquals(0, far[2], "one member out of range: shared experience off");
             assertEquals(0, far[0], "out of range: no share");
-            assertEquals(0, far[1], "four in range share with 4 people / 4 vocations");
+            assertEquals(0, far[1], "the others get nothing either - the killer keeps the solo experience");
 
             // informacja o graczu do okna po dotknieciu
             cs.get(1).send("PINFO", "monka");
@@ -944,7 +977,7 @@ class NetworkSyncTest {
             awaitMessage(cs.get(3), "new list", m -> m[0].equals("PARTY") && m[1].equals("Lider,Pala,Drui,Monka"));
             awaitMessage(cs.get(3), "new bonus", m -> {
                 pl.fawizja.pixel.party.PartyView v = pl.fawizja.pixel.party.PartyView.parse(m);
-                return v != null && v.members().size() == 4 && v.bonusPercent() == 135;
+                return v != null && v.members().size() == 4 && v.bonusPercent() == 100; // Tibia: 4 profesje = +100%
             });
         } finally {
             for (NetClient c : cs) c.close();

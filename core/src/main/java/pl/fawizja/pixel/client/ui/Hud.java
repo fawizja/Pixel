@@ -77,7 +77,7 @@ public final class Hud {
     /** Okienko potwierdzenia wylogowania. */
     private boolean logoutConfirm;
     /** Ikony czaszek (tools/art/skull_icons.py, assets/ui/pvp); null bez plikow - wtedy napis. */
-    private TextureRegion skullWhite, skullRed, pvpOffIcon, pvpOnIcon;
+    private TextureRegion skullWhite, skullRed, skullYellow, skullOrange, skullBlack, pvpOffIcon, pvpOnIcon;
     private boolean chatEnabled;
     /** Okno menu pokazuje rozmowe z NPC zamiast ksiegi. */
     private boolean npcMode;
@@ -617,11 +617,42 @@ public final class Hud {
         return new TextureRegion(new com.badlogic.gdx.graphics.Texture(f)); // pixel art: domyslnie Nearest
     }
 
-    /** Ikona czaszki dla "WHITE"/"RED" (jak w protokole) albo null (brak czaszki lub grafiki). */
+    /** Ikona czaszki dla nazwy z protokolu (WHITE, YELLOW, ORANGE, RED, BLACK) albo null (brak czaszki lub grafiki). */
     public TextureRegion skullIcon(String skull) {
-        if ("RED".equals(skull)) return skullRed;
-        if ("WHITE".equals(skull)) return skullWhite;
-        return null;
+        if (skull == null) return null;
+        switch (skull) {
+            case "RED": return skullRed;
+            case "WHITE": return skullWhite;
+            case "YELLOW": return skullYellow;
+            case "ORANGE": return skullOrange;
+            case "BLACK": return skullBlack;
+            default: return null;
+        }
+    }
+
+    /** Kolor imienia gracza z dana czaszka (null = bez czaszki - kolor domyslny). */
+    public static Color skullColor(String skull) {
+        if (skull == null) return null;
+        switch (skull) {
+            case "RED": return new Color(1f, 0.4f, 0.35f, 1f);
+            case "BLACK": return new Color(0.62f, 0.6f, 0.66f, 1f);
+            case "ORANGE": return new Color(1f, 0.62f, 0.25f, 1f);
+            case "YELLOW": return new Color(1f, 0.9f, 0.35f, 1f);
+            case "WHITE": return new Color(1f, 1f, 1f, 1f);
+            default: return null;
+        }
+    }
+
+    /** Polska nazwa czaszki ("Czerwona czaszka"). */
+    public static String skullName(pl.fawizja.pixel.pvp.PvpRules.Skull skull) {
+        switch (skull) {
+            case RED: return "Czerwona czaszka";
+            case BLACK: return "Czarna czaszka";
+            case ORANGE: return "Pomarańczowa czaszka";
+            case YELLOW: return "Żółta czaszka";
+            case WHITE: return "Biała czaszka";
+            default: return "Brak czaszki";
+        }
     }
 
     public TextureRegion whiteRegion() { return art.white(); }
@@ -630,6 +661,9 @@ public final class Hud {
         try {
             skullWhite = pvpIcon("skull_white");
             skullRed = pvpIcon("skull_red");
+            skullYellow = pvpIcon("skull_yellow");
+            skullOrange = pvpIcon("skull_orange");
+            skullBlack = pvpIcon("skull_black");
             pvpOffIcon = pvpIcon("pvp_off");
             pvpOnIcon = pvpIcon("pvp_on");
         } catch (RuntimeException e) {
@@ -3098,6 +3132,8 @@ public final class Hud {
     /** Czas czaszki albo blokady PZ, np. "0:58" albo "9 min". */
     private static String skullTime(long ms) {
         long sec = (ms + 999) / 1000;
+        if (sec >= 2 * 86_400) return (sec + 86_399) / 86_400 + " d"; // czerwona 30 dni, czarna 45 dni
+        if (sec >= 2 * 3_600) return (sec + 3_599) / 3_600 + " h";
         return sec >= 600 ? (sec + 59) / 60 + " min" : (sec / 60) + ":" + String.format("%02d", sec % 60);
     }
 
@@ -3147,7 +3183,8 @@ public final class Hud {
                 font.getData().setScale(font.getData().scaleX * room / layout.width);
                 layout.setText(font, time);
             }
-            font.setColor(ownSkull == pl.fawizja.pixel.pvp.PvpRules.Skull.RED ? new Color(1f, 0.45f, 0.4f, 1f) : Color.WHITE);
+            font.setColor(ownSkull == pl.fawizja.pixel.pvp.PvpRules.Skull.RED || ownSkull == pl.fawizja.pixel.pvp.PvpRules.Skull.BLACK
+                    ? new Color(1f, 0.45f, 0.4f, 1f) : Color.WHITE);
             float tx = icon != null ? x0 + 2 + m + (room - layout.width) / 2f : x0 + (cell - layout.width) / 2f;
             font.draw(batch, time, tx, y0 + 2 + m + m / 2f + layout.height / 2f);
             font.setColor(Color.WHITE);
@@ -3161,8 +3198,7 @@ public final class Hud {
         if (px < c[0] || px > c[0] + epCell || py < c[1] || py > c[1] + epCell) return false;
         long now = session.lastUpdateMs();
         if (ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE) {
-            session.log().add(now, EventLog.Kind.INFO, (ownSkull == pl.fawizja.pixel.pvp.PvpRules.Skull.RED ? "Czerwona" : "Biała")
-                    + " czaszka: jeszcze " + skullTime(ownSkullMs) + ".");
+            session.log().add(now, EventLog.Kind.INFO, skullName(ownSkull) + ": jeszcze " + skullTime(ownSkullMs) + ".");
         } else if (ownSkullMs > 0) {
             session.log().add(now, EventLog.Kind.INFO, "Blokada strefy ochronnej po walce: jeszcze " + skullTime(ownSkullMs) + ".");
         }
@@ -3684,7 +3720,8 @@ public final class Hud {
             float rowY = yy - BATTLE_ROW + 1;
             TextureRegion sk = skullIcon(bp.skull());
             if (sk != null) batch.draw(sk, blX + 7, rowY + 1, BATTLE_ROW - 3, BATTLE_ROW - 3);
-            font.setColor(bp.ally() ? new Color(0.5f, 0.78f, 1f, 1f) : "RED".equals(bp.skull()) ? new Color(1f, 0.4f, 0.35f, 1f) : Color.WHITE);
+            Color skc = skullColor(bp.skull());
+            font.setColor(bp.ally() ? new Color(0.5f, 0.78f, 1f, 1f) : skc != null ? skc : Color.WHITE);
             String name = bp.name();
             layout.setText(font, name);
             float room = bx - 6 - (blX + 7 + BATTLE_ROW);

@@ -511,8 +511,8 @@ public final class GameScreen extends ScreenAdapter {
             case "hud:vip": hud.toggleVip(); break;
             case "vip:add": openChat("/znajomi dodaj "); break;
             case "logout": {
-                // jak w Tibii: nie w trakcie walki z graczem (blokada strefy ochronnej)
-                long block = session.character().pzBlockedMs(t);
+                // jak w Tibii: nie w trakcie walki z graczem (blokada wylogowania, takze dla zaatakowanego)
+                long block = session.character().logoutBlockedMs(t);
                 if (block > 0) {
                     session.log().add(t, EventLog.Kind.WARNING, "Nie możesz się wylogować w trakcie walki. Poczekaj "
                             + (block + 999) / 1000 + " s.");
@@ -524,7 +524,7 @@ public final class GameScreen extends ScreenAdapter {
                 break;
             }
             case "logout:yes": {
-                long block = session.character().pzBlockedMs(t);
+                long block = session.character().logoutBlockedMs(t);
                 hud.closeTop(session);
                 if (block > 0) {
                     session.log().add(t, EventLog.Kind.WARNING, "Nie możesz się wylogować w trakcie walki.");
@@ -2291,9 +2291,9 @@ public final class GameScreen extends ScreenAdapter {
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             projected.y += 9 * scale; // imie nad paskiem zycia (jak w Tibii)
             boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));
+            Color skc = pl.fawizja.pixel.client.ui.Hud.skullColor(rp.skull);
             if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
-            else if ("RED".equals(rp.skull)) font.setColor(1f, 0.3f, 0.3f, 1f);
-            else if ("WHITE".equals(rp.skull)) font.setColor(1f, 1f, 1f, 1f);
+            else if (skc != null) font.setColor(skc);
             else font.setColor(0.55f, 1f, 0.55f, 1f);
             String label = rp.name + (ally ? " [drużyna]" : "")
                     + (rp.guild == null ? "" : " <" + rp.guild + ">");
@@ -2457,8 +2457,8 @@ public final class GameScreen extends ScreenAdapter {
             pvpTargetId = f.playerTargetId();
             if (f.skull() != null && !f.skull().equals(mySkull)) {
                 if (!f.skull().equals("NONE")) {
-                    session.log().add(now, EventLog.Kind.WARNING, f.skull().equals("RED")
-                            ? "Masz czerwoną czaszkę!" : "Masz biała czaszkę (atak na gracza).");
+                    session.log().add(now, EventLog.Kind.WARNING, f.skull().equals("BLACK") ? "Masz czarną czaszkę!"
+                            : f.skull().equals("RED") ? "Masz czerwoną czaszkę!" : "Masz białą czaszkę (atak na gracza).");
                 } else if (!mySkull.equals("NONE")) {
                     session.log().add(now, EventLog.Kind.INFO, "Czaszka zniknęła.");
                 }
@@ -2530,6 +2530,7 @@ public final class GameScreen extends ScreenAdapter {
                         me.setPvpMode("1".equals(m[1]));
                         me.setSkull(pl.fawizja.pixel.pvp.PvpRules.Skull.valueOf(m[2]), Long.parseLong(m[3]));
                         me.setPzBlockedUntil(Long.parseLong(m[4]));
+                        me.setLogoutBlockedUntil(m.length > 5 ? Long.parseLong(m[5]) : 0);
                     } catch (IllegalArgumentException e) {
                         // zly komunikat: pomijamy
                     }
@@ -2851,13 +2852,14 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     /**
-     * Podglad PvP bez serwera (-Dpixel.open=pvp): inni gracze obok postaci - z biala czaszka, z czerwona
-     * i z wlaczonym trybem PvP - oraz wlasny tryb PvP i biala czaszka z blokada PZ.
+     * Podglad PvP bez serwera (-Dpixel.open=pvp): inni gracze obok postaci - z biala, czerwona, zolta, pomaranczowa
+     * i czarna czaszka oraz z wlaczonym trybem PvP - oraz wlasny tryb PvP i biala czaszka z blokada PZ.
      */
     public void previewPvp() {
         Position me = session.character().position();
         Object[][] who = {{"Ula", Vocation.DRUID, 2, 0, "WHITE", false}, {"Kuba", Vocation.KNIGHT, -2, 1, "RED", true},
-                {"Mira", Vocation.SORCERER, 1, 2, "NONE", true}};
+                {"Mira", Vocation.SORCERER, 1, 2, "NONE", true}, {"Ewa", Vocation.PALADIN, -1, -2, "YELLOW", false},
+                {"Olek", Vocation.MONK, 3, -1, "ORANGE", false}, {"Zbir", Vocation.KNIGHT, -3, -1, "BLACK", true}};
         int id = 900;
         for (Object[] w : who) {
             RemotePlayer rp = new RemotePlayer();

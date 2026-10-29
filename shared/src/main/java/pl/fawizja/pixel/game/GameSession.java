@@ -2051,8 +2051,8 @@ public final class GameSession {
     public boolean togglePvpMode(long nowMs) {
         boolean on = togglePvpMode();
         log.add(nowMs, on ? EventLog.Kind.WARNING : EventLog.Kind.INFO, on
-                ? "Tryb PvP włączony: możesz atakować graczy, czary obszarowe ranią graczy (atak na gracza bez czaszki = biała czaszka)."
-                : "Tryb PvP wyłączony: atakujesz tylko graczy z czaszką.");
+                ? "Tryb PvP włączony (tryb bezpieczny wyłączony): możesz atakować graczy bez czaszki - dostaniesz białą czaszkę."
+                : "Tryb PvP wyłączony (tryb bezpieczny): atakujesz tylko graczy z czaszką. Uwaga: jak w Tibii czary i runy obszarowe ranią każdego gracza w zasięgu.");
         return on;
     }
 
@@ -2061,13 +2061,14 @@ public final class GameSession {
         pl.fawizja.pixel.pvp.PvpRules.Skull sk = pvpStatus.skull(nowMs);
         pc.setSkull(sk, pvpStatus.skullUntil(nowMs));
         pc.blockPzUntil(pvpStatus.fightUntil());
+        pc.setLogoutBlockedUntil(pvpStatus.logoutUntil());
     }
 
     /** Komunikat przy probie wejscia do PZ z blokada (czaszka po ataku na gracza). */
     public String pzBlockedMessage(long nowMs) {
         long left = (pc.pzBlockedUntil() - nowMs + 999) / 1000;
         String time = left >= 60 ? (left / 60) + " min " + (left % 60) + " s" : left + " s";
-        return "Masz czaszkę po ataku na gracza - nie wejdziesz do strefy ochronnej jeszcze przez " + time + ".";
+        return "Walczysz z graczem - nie wejdziesz do strefy ochronnej jeszcze przez " + time + ".";
     }
 
     private boolean pzLocked(Position from, Direction d, long nowMs) {

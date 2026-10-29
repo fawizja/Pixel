@@ -10,52 +10,57 @@ Stan: **Z** = zaimplementowane i przetestowane, **C** = czesciowo, **P** = zapla
   serwer prowadzi po jednej sesji na gracza (zrodlo prawdy o HP, manie, przedmiotach i walucie),
   a klient trzyma replike bez symulacji (`copyStateFrom`, `applyRemotePosition`, `MonsterManager.syncRemote`).
 
-## PvP (etap 13)
+## PvP (etap 13, zasady Tibii)
 
-Zasady w `pvp/PvpRules` (wspolne dla serwera i testow):
-- Postacie ponizej poziomu 30 nie atakuja graczy i nie moga byc atakowane (start na poziomie 8 = okres ochronny).
+Zasady w `pvp/PvpRules` (wspolne dla serwera i testow) odtwarzaja swiat Open PvP Tibii. Zrodla (pobrane 28.10.2026):
+[T1] https://www.tibia.com/gameguides/?subtopic=manual&section=combat (podrecznik: czaszki, blokady, 50% obrazen,
+czarna czaszka), [T2] https://www.tibia.com/support/?subtopic=gethelp&entryid=100 (progi 3/5/10 i 6/10/20, blokada
+PZ 15 min / 1 min), [W1] https://tibia.fandom.com/wiki/Skull_System, [W2] https://tibia.fandom.com/wiki/Combat_Controls
+(tryb bezpieczny), [W3] https://tibia.fandom.com/wiki/Protection_Zone_Block, [Q1] https://www.tibiaqa.com/225/how-long-does-the-white-skull-last.
+
+| Zasada | Tibia | Zrodlo | U nas |
+|---|---|---|---|
+| Tryb bezpieczny | nie atakujesz graczy bez czaszki; czary obszarowe ich nie omijaja | W2, T1 | przelacznik PvP wylaczony = tryb bezpieczny (`Verdict.PVP_OFF` dla ataku, czaru i runy celowanej); obszar rani kazdego (`SECURE_MODE_BLOCKS_AREA = false`) |
+| Biala czaszka | atak/zabicie nieoznaczonego; po ataku tyle co blokada wylogowania (60 s od ostatniej agresji), po zabiciu 15 min | T1, W1, Q1 | `WHITE_SKULL_MS` = 60 s, po zabiciu `KILL_BLOCK_MS` = 15 min, kazda agresja odnawia |
+| Zolta czaszka | kto (bez czaszki) atakuje oznaczonego, jest dla niego zolty; widzi tylko zaatakowany; zabicie zoltego jest usprawiedliwione | T1, W1 | `Status.yellow`, `skullSeenBy(...)` = YELLOW tylko dla ofiary, 60 s (`YELLOW_SKULL_MS`) |
+| Pomaranczowa (zemsta) | ofiara nieusprawiedliwionego zabojstwa widzi zabojce na pomaranczowo 7 dni albo do zemsty; moze go bic bez bialej czaszki | T1, W1 | `Status.revenge`, `REVENGE_MS` = 7 dni, zabicie zabojcy zuzywa jedna zemste |
+| Zielona (druzyna) | usunieta z Open PvP w 2013 r.; czlonkow druzyny nie mozna atakowac | W1 | brak zielonej czaszki; atak na czlonka druzyny odrzucony, obszar omija druzyne |
+| Czerwona | 3 nieusprawiedliwione zabojstwa w 24 h, 5 w 7 dni albo 10 w 30 dniach; trwa 30 dni od zabojstwa ponad limit; smierc = utrata wszystkiego mimo blogoslawienstw | T1, T2, W1 | `RED_SKULL_KILLS {3,5,10}` w oknach `KILL_WINDOWS_MS {24 h, 7 d, 30 d}`, `RED_SKULL_MS` = 30 dni; smierc: plecak i ekwipunek na ziemi |
+| Czarna | 6 w 24 h, 10 w 7 dni, 20 w 30 dniach; 45 dni; nie atakuje nieoznaczonych, bez czarow/run obszarowych, 100% obrazen od graczy, odrodzenie z 40 HP i 0 many, utrata wszystkiego | T1, T2, W1 | `BLACK_SKULL_KILLS {6,10,20}`, `BLACK_SKULL_MS` = 45 dni, `Verdict.BLACK_SKULL`, `CastResult.BLACK_SKULL`, `BLACK_SKULL_DAMAGE` = 1,0, `BLACK_SKULL_RESPAWN_HP` = 40 |
+| Blokada PZ | atakujacy: 1 min od ostatniej agresji (takze atak na oznaczonego i obrona); zabojca nieoznaczonego: 15 min | T1, T2 | `PZ_BLOCK_MS` = 60 s przy kazdym trafieniu gracza; `KILL_BLOCK_MS` = 15 min po nieusprawiedliwionym zabojstwie; zabicie oznaczonego - zwykle 60 s |
+| Blokada wylogowania | atakujacy i zaatakowany: 60 s od ostatniej agresji; zabojca 15 min; postac nie moze wyjsc | T1 | `LOGOUT_BLOCK_MS` = 60 s obu stronom, 15 min zabojcy; rozlaczony gracz zostaje w swiecie (`ServerWorld.disconnect`, `ServerPlayer.lingering`), ponowne logowanie odrzucone do konca blokady |
+| Obrazenia | 50% miedzy graczami, 100% na czarna czaszke | T1 | `PVP_DAMAGE` = 0,5 |
+| Punkty nieusprawiedliwione | kazde zabicie nieoznaczonego to pelny "frag"; w Retro: do 2 zabojcow (najwiecej obrazen + ostatni cios) | T2 | frag dostaje zadajacy ostatni cios (pomocnicy nie dostaja fragow) |
+
+Pozostale zasady:
+- Postacie ponizej poziomu 30 nie walcza z graczami (`PROTECTION_LEVEL`). W Tibii odpowiednikiem jest Rookgaard
+  (wyspa bez PvP do poziomu 8); u nas nie ma osobnej wyspy, wiec zostaje ochrona poziomu.
+- Usunieta (bo w Tibii jej nie ma): zasada "nie atakujesz postaci o ponad polowe slabszej".
 - W strefie ochronnej (PZ) nie ma walki - ani atakujacy, ani cel nie moga w niej stac.
-- Nie mozna atakowac postaci o poziomie mniejszym niz polowa wlasnego, chyba ze ma czaszke.
-- Tryb PvP (przelacznik czaszki, ponizej): bez niego nie atakujesz graczy bez czaszki.
-- Trafienie gracza bez czaszki = biala czaszka na 60 s; zabicie gracza bez czaszki = czerwona czaszka na 10 min.
-  Atak na gracza z czaszka jest usprawiedliwiony (bez czaszki i blokady PZ).
-- 3 nieusprawiedliwione zabojstwa w 24 h = czerwona czaszka na 6 h; smierc z czerwona = caly plecak zostaje na ziemi.
-- Smierc z reki gracza: ta sama kara exp co od potwora, odrodzenie w swiatyni miasta. Zabojca nie dostaje exp.
-- Obrazenia zadawane graczom x0,5 (walki trwaja dluzej niz z potworami - czas na ucieczke lub leczenie).
-- Stan czaszek trzyma serwer po imieniu postaci i zapisuje na dysku (`pvp_<imie>`, czasy jako zegar scienny),
-  wiec czaszki i licznik zabojstw przetrwaja wylogowanie i restart serwera.
-- Blokada strefy ochronnej: nieusprawiedliwione trafienie zamyka PZ atakujacemu na 60 s, zabicie na 10 min (wyjsc
-  mozna, wejsc nie - takze schodami prowadzacymi do PZ). Ofiara moze uciec do PZ. Blokada przetrwa ponowne zalogowanie
-  (do restartu serwera).
-- Czary i runy ofensywne trafiaja gracza, gdy jest celem PvP, a postac nie ma celu-potwora
-  (`SpellSystem.PlayerTargeting`, na serwerze `PvpRules.spellHit`): te same zasady, czaszki, blokada PZ i x0,5.
-  Czary i runy obszarowe (`ATTACK_AREA`, `RUNE_AREA`) trafiaja wszystkich graczy w obszarze, ktorych zasady pozwalaja
-  zaatakowac (`pvp/PvpTargeting`): w trybie PvP kazdego (poza druzyna), bez trybu PvP tylko graczy z czaszka.
-  Odmowa zasad dla czaru celowanego = bez kosztu many/runy.
+- Smierc z reki gracza: ta sama kara exp co od potwora, odrodzenie w swiatyni; smierc konczy blokady ofiary.
+  Zabojca nie dostaje exp (w Tibii PvP daje doswiadczenie tylko na swiatach Hardcore/Retro - tu Open PvP).
+- Stan (czaszki, zabojstwa, zemsta, blokady) trzyma serwer po imieniu i zapisuje (`pvp_<imie>`, zegar scienny):
+  `biala;czerwona;zabojstwa;czarna;blokadaPz;blokadaWylogowania;imie@t1/t2+...`; stary zapis z 3 polami sie wczyta.
+- Czary i runy celowane: te same zasady co atak (`PvpRules.spellHit`). Obszar: `PvpRules.areaHit` / `checkArea`
+  (`pvp/PvpTargeting`) - trafia kazdego gracza w zasiegu poza druzyna, PZ i ochrona poziomu; nieoznaczony = biala
+  czaszka. Odmowa zasad dla czaru celowanego = bez kosztu many/runy.
 
-### Tryb PvP i czaszki (przelacznik czaszki)
+### Przelacznik PvP i czaszki
 
-Model (najprostszy zgodny z opisem wlasciciela, jak w Tibii): `PvpRules.Skull { NONE, WHITE, RED }`, bez zoltej
-czaszki - "agresor" to po prostu gracz z czaszka (WHITE lub RED).
-- Tryb PvP: `PlayerCharacter.pvpMode()` - tylko w pamieci (bez zapisu w CharacterCodec), po zalogowaniu wylaczony.
-  Wylaczony: nie mozna wybrac ani zranic gracza bez czaszki (`Verdict.PVP_OFF`), obszar omija takich graczy.
-  Wlaczony: mozna atakowac graczy, obszar trafia graczy. Gracza z czaszka moze bic kazdy, takze bez trybu PvP.
-  W PZ nikt nikogo nie atakuje. Ochrona do poziomu 30, roznica poziomow i druzyna dzialaja jak wczesniej.
-- Trafienie (atak, czar, runa, obszar) gracza bez czaszki: biala czaszka + blokada wejscia do PZ na 60 s
-  (`WHITE_SKULL_MS`). Zabicie gracza bez czaszki: czerwona czaszka + blokada PZ na 10 min (`KILL_SKULL_MS`).
-  Kazda nowa agresja odnawia licznik. Czaszka znika po uplywie czasu. Postac z blokada nie wejdzie do PZ (komunikat
-  "Masz czaszkę po ataku na gracza - nie wejdziesz do strefy ochronnej jeszcze przez ..."); jesli juz w niej stoi,
-  zostaje (w PZ i tak nie ma walki).
-- Protokol: klient -> serwer `PVP ON|OFF|TOGGLE` albo `ACT pvp` (przycisk). Serwer -> klient po kazdej zmianie
-  `PVP 1|0 CZASZKA czaszkaDo blokadaPzDo` (czasy serwera, 0 = brak). Inni gracze: pole `czaszka` (jak dotad) i nowe
-  pole `P|-` (tryb PvP) na koncu wiersza `PL` (`RemoteEntity.mark()`, `RemoteEntity.pvpMode()`).
-- Offline logika dziala tak samo (sesja ma wlasny `PvpRules.Status`), testy uzywaja "udawanego" drugiego gracza:
-  druga `GameSession` i `PvpTargeting` (`PvpModeTest`). Serwer: `NetworkSyncTest.areaSpellsSkullsAndAggressorsWithThreePlayers`.
-- Ikony: `assets/ui/pvp/skull_white.png`, `skull_red.png` (16x16) i `pvp_off.png` / `pvp_on.png` (32x32,
-  przelacznik) rysowane kodem w `tools/art/skull_icons.py` (OTSP nie ma ikon czaszek).
-- Interfejs (tymczasowy): `/pvp [wł|wył]`, przelacznik czaszki w kolumnie obok ekwipunku (pod BIEG/TARCZA/pochodnia),
-  czaszka przed imieniem innych graczy (maly czerwony kwadrat = gracz bez czaszki z wlaczonym trybem PvP), wlasna
-  czaszka z pozostalym czasem na gornym pasku na lewo od ikon stanu. Podglad: `-Dpixel.open=pvp|pzblock`.
+`PvpRules.Skull { NONE, WHITE, YELLOW, ORANGE, RED, BLACK }`. NONE/WHITE/RED/BLACK widza wszyscy (`Status.skull(now)`);
+YELLOW i ORANGE tylko jeden gracz (`PvpRules.skullSeenBy(viewerStatus, imie, status, now)`, kolejnosc: BLACK, RED,
+ORANGE, WHITE, YELLOW). "Oznaczony" = ma dla atakujacego jakakolwiek czaszke (`PvpRules.marked`).
+- Tryb PvP: `PlayerCharacter.pvpMode()` - tylko w pamieci, po zalogowaniu wylaczony (= tryb bezpieczny Tibii).
+- Postac z blokada nie wejdzie do PZ (komunikat "Walczysz z graczem - nie wejdziesz do strefy ochronnej jeszcze
+  przez ..."); jesli juz w niej stoi, zostaje.
+- Protokol: klient -> serwer `PVP ON|OFF|TOGGLE` albo `ACT pvp`. Serwer -> klient po kazdej zmianie
+  `PVP 1|0 CZASZKA czaszkaDo blokadaPzDo blokadaWylogowaniaDo` (czasy serwera, 0 = brak; 6. pole nowe). Inni gracze:
+  pole `czaszka` w `PL` to czaszka widziana przez odbiorce (moze byc YELLOW/ORANGE), na koncu `P|-` (tryb PvP).
+- Testy: `TibiaSkullsTest` (progi, zolta, pomaranczowa, czarna, blokady 1/15 min, 50%/100%), `PvpRulesTest`,
+  `PvpModeTest`; serwer: `NetworkSyncTest.pvpFollowsTheRulesOverTheNetwork` (blokada wylogowania, postac zostaje),
+  `areaSpellsSkullsAndAggressorsWithThreePlayers` (obszar w trybie bezpiecznym, zolta czaszka).
+- Ikony: `assets/ui/pvp/skull_white|red|yellow|orange|black.png` (16x16) i `pvp_off.png` / `pvp_on.png` (32x32)
+  rysowane kodem w `tools/art/skull_icons.py`. Podglad: `-Dpixel.open=pvp|pzblock`.
 
 API dla HUD (wszystko we wspolnym module):
 
@@ -71,9 +76,11 @@ API dla HUD (wszystko we wspolnym module):
 | `character.skull(now)` | jw., ale `NONE` po uplywie czasu czaszki |
 | `character.skullMs(now)` | pozostaly czas czaszki w ms (0 = brak) |
 | `character.pzBlockedMs(now)` | pozostaly czas blokady wejscia do PZ w ms (0 = mozna) |
+| `character.logoutBlockedMs(now)` | pozostaly czas blokady wylogowania (wieksza z blokad; ma ja tez zaatakowany) |
 | `session.pzBlockedMessage(now)` | polski komunikat blokady PZ |
-| `session.pvpStatus()` | pelny stan `PvpRules.Status` (skull(now), skullUntil(now), pzBlockedMs(now), aggressor(now)) |
-| `hud.skullIcon("WHITE"/"RED")` | `TextureRegion` ikony 16x16 albo null |
+| `session.pvpStatus()` | pelny stan `PvpRules.Status` (skull(now), skullUntil(now), pzBlockedMs(now), logoutBlockedMs(now), unjustKills(now, okno), revengeOn(imie, now), yellowOf(imie, now)) |
+| `hud.skullIcon("WHITE"/"YELLOW"/"ORANGE"/"RED"/"BLACK")` | `TextureRegion` ikony 16x16 albo null |
+| `Hud.skullColor(nazwa)` / `Hud.skullName(skull)` | kolor imienia i polska nazwa czaszki |
 
 `now` to czas swiata klienta (`GameScreen.now()`, online zgrany z serwerem) - ten sam, ktory dostaje `Hud.render`
 jako `serverTimeMs`.
@@ -398,29 +405,28 @@ przy pauzie, utracie fokusu i zamknieciu.
 - `party/PartyManager`: zaproszenie przez lidera (wazne 60 s), przyjecie, wyjscie, wyrzucenie przez lidera (`kick`);
   maks. 8 osob; po wyjsciu lidera przywodztwo przechodzi na nastepnego, przy jednej osobie druzyna sie rozpada.
   Wylogowanie = wyjscie z druzyny. Druzyna dziala tylko online (offline nie ma innych graczy).
-- `party/PartyRules` (etap 9, jak w Tibii): doswiadczenie dzielone, gdy >= 2 zywych czlonkow jest na pietrze zabojcy
-  w promieniu 30 pol od zabojcy i najnizszy poziom >= 2/3 najwyzszego (`minSharingLevel`) - inaczej nikt nie dzieli
-  (kazdy dostaje swoje zabicia sam). Premia = premia za liczbe osob + premia za rozne profesje, maks. +200%;
-  licza sie tylko czlonkowie dzielacy to zabicie:
+- `party/PartyRules` - wspolne doswiadczenie dokladnie jak w Tibii. Zrodla: [P1] https://www.tibia.com/support/?subtopic=gethelp&entryid=91
+  (tibia.com, "Shared Experience"), [P2] https://tibia.fandom.com/wiki/Party (wzor podzialu, 2 min aktywnosci).
+  Dziala tylko, gdy WSZYSCY czlonkowie spelniaja warunki (inaczej kazdy dostaje swoje zabicia sam):
+  najnizszy poziom >= 2/3 najwyzszego (P1: "poziom 40 dzieli z 60, a nie z 20"), kazdy najwyzej 30 pol od lidera,
+  takze pietro wyzej albo nizej (P1), kazdy aktywny w ostatnich 2 min (P2; P1: "uleczyl czlonka albo zaatakowal
+  agresywnego potwora" - u nas atak na potwora, `CombatSystem.lastMonsterAttackMs`, bo nie ma czarow leczacych innych).
+  Premia zalezy tylko od liczby roznych profesji (P1):
 
-  | osoby | premia | | rozne profesje | premia |
-  |---|---|---|---|---|
-  | 2 | +20% | | 1 | +0% |
-  | 3 | +30% | | 2 | +20% |
-  | 4 | +35% | | 3 | +50% |
-  | 5+ | +40% | | 4 | +100% |
-  | | | | 5 | +160% |
+  | rozne profesje | 1 | 2 | 3 | 4 | 5 (z Monkiem) |
+  |---|---|---|---|---|---|
+  | premia | +20% | +30% | +60% | +100% | +100% |
 
-  Udzial = solo(wlasny poziom) * (100 + premia)% / n (pula dzielona po rowno, jak w Tibii). Przyklady:
-  2 osoby/1 profesja +20% -> 60% solo za zabicie; 2/2 +40% -> 70%; 3/3 +80% -> 60%; 4/4 +135% -> 59%;
-  5/1 +40% -> 28%; 5/5 (Knight, Paladin, Sorcerer, Druid, Monk) +200% -> pula x3,0, kazdy 60%.
-  Dlaczego podzial, a nie x3 dla kazdego: piec osob bijacych jednego potwora dostawaloby razem 15x tyle co solo i druzyna
-  bylaby obowiazkowa nawet na szczurach. Pelna, rozna piatka zabija kilka razy szybciej niz jedna postac (i daje rade
-  stadom w lepszych lowiskach), wiec na godzine kazdy zarabia ok. 2-3x tyle co solo; druzyna jednej profesji - malo
-  wiecej niz solo. Zabicie liczy sie do zadan dnia, zlecen i zadan calej druzyny obok.
+  P1 wprost: "party members of all 4 or 5 vocations ... bonus raised to 100%". Premia tylko za potwory dajace
+  bazowo >= 20 doswiadczenia (`MIN_BONUS_EXPERIENCE`, P1). Podzial (P2): kazdy z P czlonkow dostaje
+  ceil(M x (1 + premia) / P) x C; u nas M x C = doswiadczenie potwora dla wlasnego poziomu czlonka z jego zwojem nauki
+  i potworem dnia, wypoczynek (odpowiednik staminy) liczony po podziale. Przyklady (M = 1000): 2 rycerzy 600 kazdy,
+  rycerz + druid 650, 3 profesje po 534, 4 profesje w 4 osoby po 500, 5 profesji w 5 osob po 400.
+  Roznica: w Tibii dzielenie wlacza lider (menu) i nie moze miec wtedy znaku walki; u nas dziala od razu w kazdej
+  druzynie. Zabicie liczy sie do zadan dnia, zlecen i zadan calej druzyny.
 - Klient: panel druzyny (imiona, poziom i profesja, HP% gdy widoczni, "daleko" poza zasiegiem; w naglowku premia
-  "+200% exp" albo "bez wspolnego exp"), zakladka Druzyna pokazuje `PartyView.bonusLine()`; imiona niebieskie.
-- `CombatSystem.setExperienceSharer(type, expPercent, now)` - punkt podpiecia serwera. PvP miedzy czlonkami zablokowane.
+  "+100% exp" albo "bez wspolnego exp"), zakladka Druzyna pokazuje `PartyView.bonusLine()`; imiona niebieskie.
+- `CombatSystem.setExperienceSharer(type, now)` - punkt podpiecia serwera (`ServerWorld.shareKill`). PvP miedzy czlonkami zablokowane.
 - Protokol: `PARTY INVITE|ACCEPT|KICK imie`, `PARTY LEAVE|INFO`, `PCHAT tekst`; serwer odsyla `PARTY imie1,imie2`
   albo `PARTY -`, `PARTYINFO premia dzieli imie;poziom;PROFESJA;online ...` (`party/PartyView`, po kazdej zmianie
   i co 3 s, gdy cos sie zmienilo), `PARTYINV lider` do zaproszonego. `PINFO imie` -> `PINFO imie;poziom;PROFESJA;gildia;online`
@@ -440,8 +446,8 @@ przy pauzie, utracie fokusu i zamknieciu.
   niz 60 pol od swiatyn, bez bossow, nocnych i kanalow, dostaja znacznik `stado` w spawns.csv: pietro -2 albo potwor
   od poz. 60 -> 3-4 sztuki (promien >= 4); pietro -3 i nizej albo potwor od poz. 150 -> 4-6 sztuk (promien >= 5) i w 40%
   drugie stado 3-4 sztuk obok (tylko na polu osiagalnym pieszo, w tym samym regionie). Okolice miast i Varden bez zmian.
-- Za potwora ze stada `CombatSystem.PACK_EXP_PERCENT` = 85% doswiadczenia (postacie z czarami obszarowymi zabijaja stada
-  szybciej; dzieki temu doswiadczenie solo na godzine zostaje mniej wiecej jak przed zageszczeniem - szacunek, bez symulacji).
+- Potwory ze stada daja pelne doswiadczenie: dawne `CombatSystem.PACK_EXP_PERCENT` = 85% usuniete przy przejsciu na zasady Tibii, bo w Tibii
+  nie ma zadnej obnizki doswiadczenia za gestosc potworow.
 - Liczby (0.212 -> etap 9): punkty spawnu 960 -> 1071, potwory 2283 -> 3803 (pietro 0: 1527 -> 2322, -1: 367 -> 622,
   -2: 206 -> 416, -3: 85 -> 213, -4: 46 -> 131, -5: 18 -> 40). `ServerLoadBudgetTest` (200 graczy): 4,7 ms -> 6,7 ms na tik
   (bez optymalizacji ok. 10 ms); pomogly zbior pol graczy w `MonsterManager.canOccupy` (zamiast petli po 200 graczach

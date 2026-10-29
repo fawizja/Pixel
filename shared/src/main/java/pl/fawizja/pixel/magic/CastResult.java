@@ -4,6 +4,7 @@ package pl.fawizja.pixel.magic;
 public enum CastResult {
     OK("OK"),
     NOT_ALLOWED("Zasady PvP na to nie pozwalają."),
+    BLACK_SKULL("Z czarną czaszką nie używasz czarów ani run obszarowych."),
     WRONG_VOCATION("Twoja profesja nie zna tego czaru."),
     LEVEL_TOO_LOW("Za niski poziom."),
     MAGIC_TOO_LOW("Za niski poziom magii."),

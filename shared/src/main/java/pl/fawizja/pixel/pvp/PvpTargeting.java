@@ -14,8 +14,9 @@ import pl.fawizja.pixel.world.WorldMap;
 /**
  * Czary i runy na graczy (wspolne dla serwera i testow z "udawanym" drugim graczem): cel-gracz dla czarow
  * celowanych oraz wszyscy gracze w obszarze dla czarow i run obszarowych. O tym, kogo wolno trafic, decyduje
- * {@link PvpRules#check}: tryb PvP rzucajacego albo czaszka ofiary, PZ, ochrona poziomu. Stan PvP kazdego gracza
- * to {@link GameSession#pvpStatus()}.
+ * {@link PvpRules#check} (celowane: tryb PvP/bezpieczny, czaszka ofiary, PZ, ochrona poziomu) i
+ * {@link PvpRules#checkArea} (obszar: jak w Tibii tryb bezpieczny nie chroni). Druzyny obszar omija.
+ * Stan PvP kazdego gracza to {@link GameSession#pvpStatus()}.
  */
 public final class PvpTargeting implements SpellSystem.PlayerTargeting {
 
@@ -70,7 +71,7 @@ public final class PvpTargeting implements SpellSystem.PlayerTargeting {
         int hits = 0;
         for (GameSession o : others.get()) {
             if (!hittable(o, center, radius, reach, now)) continue;
-            PvpRules.Outcome out = PvpRules.spellHit(me, me.pvpStatus(), o, o.pvpStatus(), amount.getAsInt(), type,
+            PvpRules.Outcome out = PvpRules.areaHit(me, me.pvpStatus(), o, o.pvpStatus(), amount.getAsInt(), type,
                     world, now, rng);
             if (out == PvpRules.Outcome.NOT_ALLOWED) continue;
             hits++;
@@ -91,6 +92,13 @@ public final class PvpTargeting implements SpellSystem.PlayerTargeting {
         if (friendly.test(me, o) && !o.pvpStatus().duelling(me.character().name())) return false;
         Position p = o.character().position();
         if (p.z() != center.z() || p.distanceTo(center) > radius || !reach.test(p)) return false;
-        return PvpRules.check(me.character(), o.character(), o.pvpStatus(), world, now) == PvpRules.Verdict.OK;
+        return PvpRules.checkArea(me.character(), me.pvpStatus(), o.character(), o.pvpStatus(), world, now)
+                == PvpRules.Verdict.OK;
+    }
+
+    /** Czarna czaszka nie uzywa czarow ani run obszarowych (jak w Tibii). */
+    @Override
+    public boolean areaForbidden(long now) {
+        return me.pvpStatus().skull(now) == PvpRules.Skull.BLACK;
     }
 }

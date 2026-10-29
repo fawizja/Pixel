@@ -2,7 +2,8 @@
 """Ikony czaszek PvP rysowane kodem (bez cudzych grafik).
 
 Zapisuje do assets/ui/pvp:
-  skull_white.png, skull_red.png - 16x16, czaszka przy imieniu gracza i we wlasnym HUD,
+  skull_white.png, skull_red.png, skull_yellow.png, skull_orange.png, skull_black.png
+                                 - 16x16, czaszka przy imieniu gracza i we wlasnym HUD (zasady: PvpRules),
   pvp_off.png, pvp_on.png        - 32x32, przelacznik trybu PvP obok ekwipunku (biala / czerwona czaszka
                                    na skrzyzowanych mieczach).
 Uzycie: python3 tools/art/skull_icons.py [katalog wyjsciowy]
@@ -38,15 +39,20 @@ HOLE = (28, 18, 16, 255)
 PALETTES = {
     'white': ((240, 238, 228, 255), (176, 170, 158, 255)),
     'red': ((222, 44, 36, 255), (140, 20, 18, 255)),
+    'yellow': ((246, 214, 52, 255), (176, 140, 20, 255)),
+    'orange': ((244, 140, 36, 255), (166, 80, 16, 255)),
+    'black': ((52, 50, 54, 255), (28, 26, 30, 255)),
 }
+# czarna czaszka: jasny kontur i oczodoly, zeby byla widoczna na ciemnym tle
+SPECIAL = {'black': ((170, 168, 160, 255), (226, 222, 210, 255))}
 BLADE, BLADE_DARK, HILT = (196, 204, 214, 255), (110, 118, 130, 255), (134, 90, 44, 255)
 
 
-def skull(bone, shade):
+def skull(bone, shade, outline=OUTLINE, hole=HOLE):
     im = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
     for y, row in enumerate(SKULL):
         for x, c in enumerate(row):
-            col = {'#': OUTLINE, 'o': bone, 's': shade, '.': HOLE}.get(c)
+            col = {'#': outline, 'o': bone, 's': shade, '.': hole}.get(c)
             if col:
                 im.putpixel((x, y), col)
     return im
@@ -74,7 +80,7 @@ def toggle(bone, shade):
 def main():
     os.makedirs(OUT, exist_ok=True)
     for name, (bone, shade) in PALETTES.items():
-        skull(bone, shade).save(os.path.join(OUT, 'skull_' + name + '.png'))
+        skull(bone, shade, *SPECIAL.get(name, (OUTLINE, HOLE))).save(os.path.join(OUT, 'skull_' + name + '.png'))
     toggle(*PALETTES['white']).save(os.path.join(OUT, 'pvp_off.png'))
     toggle(*PALETTES['red']).save(os.path.join(OUT, 'pvp_on.png'))
     print('zapisano', os.path.normpath(OUT))

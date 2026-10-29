@@ -30,6 +30,8 @@ final class ServerPlayer {
     String lastPvp;
     /** Gracz oglosil, ze szuka druzyny (/szukam; tylko w pamieci). */
     boolean lookingForParty;
+    /** Klient sie rozlaczyl, ale postac zostaje w swiecie do konca blokady wylogowania (walka z graczem). */
+    boolean lingering;
     /** Ostatnio wyslany komunikat PARTYINFO (bez powtorzen przy odswiezaniu). */
     String lastPartyInfo = "";
 

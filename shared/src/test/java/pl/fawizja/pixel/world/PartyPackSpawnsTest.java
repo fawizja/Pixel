@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.TestData;
 import pl.fawizja.pixel.combat.CombatSystem;
-import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.monster.MonsterRegistry;
 import pl.fawizja.pixel.monster.MonsterType;
 import pl.fawizja.pixel.monster.SpawnPoint;
@@ -58,12 +57,11 @@ class PartyPackSpawnsTest {
         }
     }
 
+    /** Jak w Tibii: brak obnizki doswiadczenia za potwory ze stada (dawne PACK_EXP_PERCENT = 85% usuniete). */
     @Test
-    void packMonstersGiveSlightlyLessExperience() {
+    void packMonstersGiveFullExperience() {
         SpawnPoint pack = spawns.stream().filter(SpawnPoint::pack).findFirst().orElseThrow();
-        SpawnPoint plain = spawns.stream().filter(sp -> !sp.pack()).findFirst().orElseThrow();
-        assertEquals(CombatSystem.PACK_EXP_PERCENT, CombatSystem.expPercent(new Monster(1, reg.get(pack.monsterKey()), pack, pack.center())));
-        assertEquals(100, CombatSystem.expPercent(new Monster(2, reg.get(plain.monsterKey()), plain, plain.center())));
-        assertTrue(CombatSystem.PACK_EXP_PERCENT >= 80 && CombatSystem.PACK_EXP_PERCENT < 100, "only slightly less");
+        assertThrows(NoSuchFieldException.class, () -> CombatSystem.class.getField("PACK_EXP_PERCENT"));
+        assertTrue(reg.get(pack.monsterKey()).experience() > 0);
     }
 }

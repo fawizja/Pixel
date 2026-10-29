@@ -48,58 +48,70 @@ class PartyTest {
         assertEquals(Result.FULL, pm.invite("Lider", "Nadmiar", 0));
     }
 
+    /** Tibia: najnizszy poziom >= 2/3 najwyzszego, do 30 pol od lidera i pietro +-1, aktywnosc w 2 min. */
     @Test
-    void sharedExperienceNeedsCloseLevelsAndRangeAndRewardsTeamwork() {
+    void sharedExperienceActivationLevelsDistanceFloorsAndActivity() {
         assertTrue(PartyRules.levelsCompatible(List.of(60, 90)));
         assertFalse(PartyRules.levelsCompatible(List.of(8, 300)), "a high level cannot power-level a new character");
         assertFalse(PartyRules.levelsCompatible(List.of(50)));
-        assertTrue(PartyRules.levelsCompatible(List.of(40, 60)), "exactly 2/3 still shares");
+        assertTrue(PartyRules.levelsCompatible(List.of(40, 60)), "exactly 2/3 still shares (tibia.com: 40 with 60)");
+        assertFalse(PartyRules.levelsCompatible(List.of(20, 60)), "tibia.com: 60 does not share with 20");
         assertFalse(PartyRules.levelsCompatible(List.of(39, 60)));
+        assertTrue(PartyRules.levelsCompatible(List.of(100, 67, 80, 90)));
+        assertFalse(PartyRules.levelsCompatible(List.of(100, 66, 80, 90)), "every member counts, not just the killer");
         assertEquals(40, PartyRules.minSharingLevel(60));
         assertEquals(67, PartyRules.minSharingLevel(100));
+        assertEquals(150, PartyRules.maxSharingLevel(100));
         assertTrue(PartyRules.levelsCompatible(List.of(PartyRules.minSharingLevel(100), 100)));
         assertFalse(PartyRules.levelsCompatible(List.of(PartyRules.minSharingLevel(100) - 1, 100)));
-        assertEquals(600, PartyRules.share(1000, 2));
-        assertEquals(338, PartyRules.share(1000, 4));
-        assertEquals(1000, PartyRules.share(1000, 1));
-        Position at = new Position(100, 100, 0);
-        assertTrue(PartyRules.inShareRange(at, new Position(130, 70, 0)));
-        assertFalse(PartyRules.inShareRange(at, new Position(131, 100, 0)));
-        assertFalse(PartyRules.inShareRange(at, new Position(100, 100, -1)), "other floor");
+
+        Position leader = new Position(100, 100, 0);
+        assertEquals(30, PartyRules.SHARE_RANGE);
+        assertTrue(PartyRules.inShareRange(leader, new Position(130, 70, 0)));
+        assertFalse(PartyRules.inShareRange(leader, new Position(131, 100, 0)));
+        assertTrue(PartyRules.inShareRange(leader, new Position(110, 100, -1)), "one floor down still shares");
+        assertTrue(PartyRules.inShareRange(leader, new Position(110, 100, 1)), "one floor up still shares");
+        assertFalse(PartyRules.inShareRange(leader, new Position(100, 100, -2)), "two floors away");
+
+        assertEquals(120_000, PartyRules.ACTIVITY_MS);
+        assertTrue(PartyRules.active(0, 120_000));
+        assertFalse(PartyRules.active(0, 120_001), "idle for over 2 minutes");
+        assertFalse(PartyRules.active(Long.MIN_VALUE / 2, 5_000), "never attacked");
     }
 
+    /** Tibia: premia zalezy od liczby roznych profesji: 1 = 20%, 2 = 30%, 3 = 60%, 4 albo 5 = 100%. */
     @Test
-    void bonusTableGrowsWithSizeAndMuchMoreWithVocationVariety() {
-        // {osoby, rozne profesje, premia %}
-        int[][] table = {
-            {1, 1, 0},
-            {2, 1, 20}, {2, 2, 40},
-            {3, 1, 30}, {3, 2, 50}, {3, 3, 80},
-            {4, 1, 35}, {4, 4, 135},
-            {5, 1, 40}, {5, 2, 60}, {5, 3, 90}, {5, 4, 140}, {5, 5, 200},
-            {8, 5, 200}, {8, 1, 40},
-        };
-        for (int[] r : table) {
-            assertEquals(r[2], PartyRules.bonusPercent(r[0], r[1]), r[0] + " members, " + r[1] + " vocations");
-        }
-        assertEquals(PartyRules.MAX_BONUS_PERCENT, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.PALADIN,
-                Vocation.SORCERER, Vocation.DRUID, Vocation.MONK)), "full diverse party = +200%");
+    void bonusDependsOnlyOnDistinctVocationsAsInTibia() {
         assertEquals(20, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.KNIGHT)));
+        assertEquals(20, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.KNIGHT, Vocation.KNIGHT,
+                Vocation.KNIGHT, Vocation.KNIGHT)), "party size alone gives nothing more");
+        assertEquals(30, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.DRUID)));
+        assertEquals(30, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.DRUID, Vocation.DRUID)));
+        assertEquals(60, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.DRUID, Vocation.PALADIN)));
+        assertEquals(100, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.DRUID, Vocation.PALADIN,
+                Vocation.SORCERER)));
+        assertEquals(100, PartyRules.bonusPercent(List.of(Vocation.KNIGHT, Vocation.PALADIN, Vocation.SORCERER,
+                Vocation.DRUID, Vocation.MONK)), "tibia.com: all 4 or 5 vocations = 100%");
+        assertEquals(PartyRules.MAX_BONUS_PERCENT, 100);
         assertEquals(0, PartyRules.bonusPercent(List.of(Vocation.KNIGHT)));
-        // wiecej osob -> wieksza premia; wiecej profesji -> duzo wieksza
-        for (int n = 2; n < 5; n++) assertTrue(PartyRules.bonusPercent(n + 1, 1) > PartyRules.bonusPercent(n, 1));
-        for (int v = 1; v < 5; v++) {
-            int step = PartyRules.bonusPercent(5, v + 1) - PartyRules.bonusPercent(5, v);
-            assertTrue(step >= PartyRules.bonusPercent(5, 1) - PartyRules.bonusPercent(4, 1), "variety step " + v);
-        }
-        // pula x3.0 dzielona na 5: kazdy dostaje 60% exp solo za zabicie; diverse zawsze lepsze od jednej profesji
-        assertEquals(600, PartyRules.share(1000, 5, PartyRules.bonusPercent(5, 5)));
-        assertEquals(280, PartyRules.share(1000, 5, PartyRules.bonusPercent(5, 1)));
-        assertEquals(3.0, 5 * PartyRules.share(1000, 5, 200) / 1000.0, 1e-9, "the pool is x3.0 of the base exp");
-        // na godzine: piec osob zabija co najmniej 2x szybciej niz jedna -> kazdy zarabia wiecej niz solo
-        long soloPerHour = 1000L * 100;
-        long partyEachPerHour = PartyRules.share(1000, 5, 200) * 100 * 2;
-        assertTrue(partyEachPerHour > soloPerHour);
+        // premia tylko za potwory dajace bazowo co najmniej 20 doswiadczenia
+        List<Vocation> four = List.of(Vocation.KNIGHT, Vocation.DRUID, Vocation.PALADIN, Vocation.SORCERER);
+        assertEquals(0, PartyRules.bonusPercent(19, four));
+        assertEquals(100, PartyRules.bonusPercent(20, four));
+    }
+
+    /** Tibia: kazdy z P czlonkow dostaje ceil(M x (1 + premia) / P). */
+    @Test
+    void experienceIsSplitEquallyWithTheBonusAndRoundedUp() {
+        assertEquals(1000, PartyRules.share(1000, 1, 100), "alone: no split");
+        assertEquals(600, PartyRules.share(1000, 2, 20), "2 knights: 1000 x 1.2 / 2");
+        assertEquals(650, PartyRules.share(1000, 2, 30), "knight + druid: 1000 x 1.3 / 2");
+        assertEquals(534, PartyRules.share(1000, 3, 60), "3 vocations: 1600 / 3 = 533.3 -> rounded up");
+        assertEquals(500, PartyRules.share(1000, 4, 100), "4 vocations: 2000 / 4");
+        assertEquals(400, PartyRules.share(1000, 5, 100), "5 vocations: 2000 / 5");
+        assertEquals(240, PartyRules.share(1000, 5, 20), "5 knights: 1200 / 5");
+        assertEquals(1, PartyRules.share(1, 2, 20), "1.2 / 2 = 0.6 -> 1");
+        assertEquals(5, PartyRules.share(10, 2, 0), "small monster without the bonus");
     }
 
     @Test
@@ -110,17 +122,17 @@ class PartyTest {
                 new PartyView.Member("Ela", 61, Vocation.SORCERER, true),
                 new PartyView.Member("Kuba", 55, Vocation.DRUID, true),
                 new PartyView.Member("Ada", 57, Vocation.MONK, true)));
-        assertEquals(200, v.bonusPercent());
+        assertEquals(100, v.bonusPercent());
         assertTrue(v.sharing());
         assertEquals("Ola", v.leader());
-        assertEquals("Premia doświadczenia: +200% (5 osób, 5 profesji)", v.bonusLine());
+        assertEquals("Premia doświadczenia: +100% (5 osób, 5 profesji)", v.bonusLine());
         PartyView back = PartyView.parse(v.encode());
         assertEquals(v, back);
         // czlonek poza gra nie liczy sie do premii; za niski poziom wylacza dzielenie
         PartyView off = PartyView.of(List.of(new PartyView.Member("Ola", 60, Vocation.KNIGHT, true),
                 new PartyView.Member("Ula", 58, Vocation.PALADIN, false), new PartyView.Member("Ela", 20, Vocation.DRUID, true)));
         assertFalse(off.sharing());
-        assertEquals(40, off.bonusPercent());
+        assertEquals(30, off.bonusPercent());
         assertTrue(off.bonusLine().contains("najniższy poz. 40"), off.bonusLine());
         assertSame(PartyView.NONE, PartyView.of(List.of(new PartyView.Member("Ola", 1, Vocation.KNIGHT, true))));
     }

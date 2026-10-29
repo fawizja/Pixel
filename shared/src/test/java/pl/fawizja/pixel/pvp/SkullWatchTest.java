@@ -15,5 +15,7 @@ class SkullWatchTest {
         assertTrue(w.update(Map.of("Ola", "RED")).isEmpty(), "no repeat while in view");
         assertTrue(w.update(Map.of()).isEmpty());
         assertTrue(w.update(Map.of("Ola", "RED")).get(0).contains("Ola"), "back in view warns again");
+        assertTrue(w.update(Map.of("Ola", "RED", "Zbir", "BLACK")).get(0).contains("czarną"), "black skulls warn too");
+        assertTrue(w.update(Map.of("Ola", "RED", "Zbir", "BLACK", "Ewa", "YELLOW", "Olek", "ORANGE")).isEmpty());
     }
 }

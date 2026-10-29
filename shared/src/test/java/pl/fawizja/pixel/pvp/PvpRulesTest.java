@@ -57,26 +57,21 @@ class PvpRulesTest {
         assertEquals(Verdict.SELF, PvpRules.check(a.character(), a.character(), new Status(), W, 0));
     }
 
+    /** W Tibii nie ma ograniczenia roznicy poziomow (dawna zasada "o polowe slabszy" usunieta). */
     @Test
-    void muchStrongerPlayersCannotHuntWeakOnesUnlessMarked() {
+    void thereIsNoLevelGapRuleAsInTibia() {
         GameSession strong = at("Strong", 100, FIELD);
         GameSession weak = at("Weak", 40, FIELD.translate(1, 0));
-        Status weakStatus = new Status();
-        assertEquals(Verdict.LEVEL_GAP, PvpRules.check(strong.character(), weak.character(), weakStatus, W, 0));
-        // slabszy atakuje silniejszego - dostaje czaszke i wtedy moze zostac zaatakowany
-        assertNotEquals(Outcome.NOT_ALLOWED, PvpRules.attack(weak, weakStatus, strong, new Status(), W, 0, new Random(2)));
-        assertEquals(Skull.WHITE, weakStatus.skull(1000));
-        assertEquals(Verdict.OK, PvpRules.check(strong.character(), weak.character(), weakStatus, W, 1000));
-        assertEquals(Skull.NONE, weakStatus.skull(PvpRules.WHITE_SKULL_MS + 1));
+        assertEquals(Verdict.OK, PvpRules.check(strong.character(), weak.character(), new Status(), W, 0));
     }
 
     @Test
-    void killingGivesNoExperienceAndThreeUnjustKillsGiveRedSkull() {
+    void killingGivesNoExperienceAndThreeUnjustKillsInADayGiveARedSkullForThirtyDays() {
         Random rng = new Random(3);
         GameSession killer = at("Killer", 60, FIELD);
         Status ks = new Status();
         long t = 0;
-        for (int i = 0; i < PvpRules.RED_SKULL_KILLS; i++) {
+        for (int i = 0; i < 3; i++) {
             GameSession victim = at("Victim " + (char) ('A' + i), 45, FIELD.translate(1, 0));
             long exp = killer.character().experience();
             long vexp = victim.character().experience();
@@ -85,11 +80,16 @@ class PvpRulesTest {
             assertTrue(victim.character().experience() < vexp, "victim pays the death penalty");
             assertFalse(victim.character().isDead(), "revived in the temple");
             assertTrue(W.isProtectionZone(victim.character().position()));
-            t += 120_000;
+            if (i < 2) assertEquals(Skull.WHITE, ks.skull(t + 700_000), "kill " + (i + 1) + ": white skull, not red yet");
+            t += 1_200_000;
         }
+        long last = t - 1_200_000;
         assertEquals(Skull.RED, ks.skull(t));
-        assertEquals(PvpRules.RED_SKULL_KILLS, ks.unjustKills(t));
-        assertEquals(0, ks.unjustKills(t + PvpRules.KILL_WINDOW_MS + 1), "kills expire");
+        assertEquals(3, ks.unjustKills(t));
+        assertEquals(Skull.RED, ks.skull(t + PvpRules.RED_SKULL_MS - 1_200_000));
+        assertTrue(ks.skullUntil(t) >= last + PvpRules.RED_SKULL_MS && ks.skullUntil(t) <= t + PvpRules.RED_SKULL_MS);
+        assertEquals(Skull.NONE, ks.skull(t + PvpRules.RED_SKULL_MS), "a red skull lasts 30 days");
+        assertEquals(0, ks.unjustKills(t + PvpRules.KILL_MEMORY_MS), "kills are forgotten after 30 days");
     }
 
     @Test
@@ -100,14 +100,17 @@ class PvpRulesTest {
         rs.redUntil = 10_000_000L;
         int stacks = 0;
         for (int i = 0; i < red.character().backpack().size(); i++) if (red.character().backpack().get(i) != null) stacks++;
+        int worn = red.character().equipment().all().size();
         assertTrue(stacks > 0);
+        assertTrue(worn > 0);
         GameSession hunter = at("Hunter", 50, FIELD);
         Status hs = new Status();
         assertEquals(Outcome.KILLED, fight(hunter, hs, red, rs, 0, rng));
         assertEquals(Skull.NONE, hs.skull(1000), "attacking a skulled player is justified");
         assertEquals(0, hs.unjustKills(1000));
         for (int i = 0; i < red.character().backpack().size(); i++) assertNull(red.character().backpack().get(i));
-        assertEquals(stacks, red.ground().at(FIELD.translate(1, 0)).size(), "backpack left at the death spot");
+        assertTrue(red.character().equipment().all().isEmpty(), "red skull: the equipment is lost too");
+        assertEquals(stacks + worn, red.ground().at(FIELD.translate(1, 0)).size(), "everything left at the death spot");
     }
 
     /**
@@ -150,14 +153,20 @@ class PvpRulesTest {
     }
 
     @Test
-    void afterAPlayerFightTheProtectionZoneStaysClosedForAMinute() {
+    void afterAPlayerFightTheProtectionZoneAndLogoutStayBlockedForAMinute() {
         GameSession a = at("Lockera", 60, FIELD);
         GameSession b = at("Lockerb", 60, FIELD.translate(1, 0));
         Status as = new Status(), bs = new Status();
         assertEquals(Outcome.HIT, PvpRules.attack(a, as, b, bs, W, 10_000, new Random(1)));
-        assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, as.fightUntil());
-        assertEquals(10_000 + PvpRules.FIGHT_LOCK_MS, a.protectionZoneLockedUntil());
+        assertEquals(60_000, PvpRules.PZ_BLOCK_MS);
+        assertEquals(10_000 + PvpRules.PZ_BLOCK_MS, as.fightUntil());
+        assertEquals(10_000 + PvpRules.PZ_BLOCK_MS, a.protectionZoneLockedUntil());
+        assertEquals(10_000 + PvpRules.LOGOUT_BLOCK_MS, as.logoutUntil());
         assertEquals(0, b.protectionZoneLockedUntil(), "the victim may flee into the protection zone");
+        assertEquals(10_000 + PvpRules.LOGOUT_BLOCK_MS, bs.logoutUntil(), "but cannot log out for a minute");
+        b.setPvpStatus(bs);
+        b.update(10_001, null);
+        assertEquals(PvpRules.LOGOUT_BLOCK_MS - 1, b.character().logoutBlockedMs(10_001), "mirrored for the HUD");
 
         // pole tuz przed strefa ochronna
         Position edge = null;
@@ -184,7 +193,7 @@ class PvpRulesTest {
         a.update(20_000, into);
         assertEquals(edge, a.character().position(), "locked out of the protection zone");
         assertTrue(a.log().latest(5).stream().anyMatch(e -> e.text().contains("nie wejdziesz do strefy ochronnej")));
-        a.update(20_000 + PvpRules.FIGHT_LOCK_MS, into);
+        a.update(20_000 + PvpRules.PZ_BLOCK_MS, into);
         assertTrue(W.isProtectionZone(a.character().position()), "open again after the lock");
     }
 
@@ -207,6 +216,17 @@ class PvpRulesTest {
         assertEquals(Skull.RED, back.skull(50));
         assertEquals(3, back.unjustKills(50));
         assertEquals(Skull.NONE, back.skull(50 + PvpRules.RED_SKULL_MS), "the red skull still expires on time");
+
+        // czarna czaszka, blokada wylogowania i zemsta tez przetrwaja restart
+        Status b = new Status();
+        PvpRules.markForPreview(b, Skull.BLACK, 1_000);
+        b.revenge.computeIfAbsent("zabojca", k -> new java.util.ArrayDeque<>()).addLast(500L);
+        Status b2 = Status.decode(b.encode(1_000, wall), 7, wall + 1_000);
+        assertEquals(Skull.BLACK, b2.skull(7));
+        assertTrue(b2.logoutBlockedMs(7) > 0);
+        assertTrue(b2.revengeOn("Zabojca", 7));
+        // starszy zapis (trzy pola) nadal sie wczytuje
+        assertEquals(Skull.RED, Status.decode((wall + 5_000) + ";" + (wall + 9_000) + ";", 0, wall).skull(6_000));
         assertEquals(Skull.NONE, Status.decode("smieci;;", 0, wall).skull(0));
         assertEquals(Skull.NONE, Status.decode(new Status().encode(5, wall), 5, wall).skull(5));
     }

@@ -73,22 +73,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     /**
      * Podzial doswiadczenia w druzynie (serwer); true = doswiadczenie juz rozdane, zabojca nie dostaje go sam.
-     * expPercent - czesc doswiadczenia za tego potwora (100, w stadzie {@link #PACK_EXP_PERCENT}).
+     * Potwory ze stad (spawn "stado") daja pelne doswiadczenie - w Tibii nie ma zadnej obnizki za gestosc.
      */
-    public interface ExperienceSharer { boolean share(MonsterType killed, int expPercent, long now); }
-
-    /**
-     * Doswiadczenie za potwora ze stada (spawn "stado" w lepszych lowiskach, {@link pl.fawizja.pixel.monster.SpawnPoint#pack()}).
-     * Stada maja 3-6 potworow na punkt i dodatkowe stada obok, wiec postac z czarami obszarowymi zabija tam wiecej
-     * na godzine niz w zwyklym lowisku; 85% za sztuke trzyma doswiadczenie solo na godzine mniej wiecej jak przed
-     * zageszczeniem, a druzyna (premia do +200%) i tak zarabia tam najwiecej.
-     */
-    public static final int PACK_EXP_PERCENT = 85;
-
-    /** Procent doswiadczenia za tego potwora (stado: {@link #PACK_EXP_PERCENT}). */
-    public static int expPercent(Monster m) {
-        return m != null && m.spawn() != null && m.spawn().pack() ? PACK_EXP_PERCENT : 100;
-    }
+    public interface ExperienceSharer { boolean share(MonsterType killed, long now); }
 
     private ExperienceSharer experienceSharer;
 
@@ -175,6 +162,17 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         return target;
     }
 
+    private long lastMonsterAttackMs = Long.MIN_VALUE / 2;
+
+    /**
+     * Ostatni atak gracza na potwora (bron, czar, runa); Long.MIN_VALUE / 2 = nigdy. Wspolne doswiadczenie
+     * w druzynie wymaga aktywnosci w ostatnich 2 min ({@link pl.fawizja.pixel.party.PartyRules#ACTIVITY_MS}).
+     */
+    public long lastMonsterAttackMs() { return lastMonsterAttackMs; }
+
+    /** Zapis aktywnosci w druzynie (atak na potwora z innego miejsca niz bron i czar; testy). */
+    public void noteMonsterAttack(long now) { lastMonsterAttackMs = now; }
+
     /** Krok walki gracza: atak celu, gdy jest w zasiegu, widoczny i minal odstep ataku. */
     public void update(long now) {
         if (pc.isDead()) return;
@@ -194,6 +192,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
         if (ap.range() > 1) useAmmunition(now);
         int dealt = target.damage(dmg);
+        lastMonsterAttackMs = now;
         leech(dealt);
         monsters.provoke(target);
         if (!isTrivial(target.type())) pc.skills().addTries(ap.skill(), 1);
@@ -214,6 +213,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Obrazenia z czaru lub runy: odpornosci, zdarzenie, prowokacja, smierc. Zwraca zadane HP. */
     public int damageMonster(Monster m, int raw, DamageType type, long now) {
         if (m.isDead()) return 0;
+        lastMonsterAttackMs = now;
         int dmg = CombatFormulas.mitigateOnMonster(m.type(), critical(raw), type, rng);
         int dealt = m.damage(dmg);
         leech(dealt);
@@ -289,9 +289,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         boolean lootElsewhere = lootOwner != null && lootOwner.test(m);   // przed sluchaczem: on konczy wyprawe
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
-        int expPercent = expPercent(m);
-        if (experienceSharer == null || !experienceSharer.share(t, expPercent, now)) {
-            long exp = killExperience(t, pc.level()) * expPercent / 100;
+        if (experienceSharer == null || !experienceSharer.share(t, now)) {
+            long exp = killExperience(t, pc.level());
             boolean rested = pc.useRested();
             if (rested) {
                 exp = exp * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
@@ -421,6 +420,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                     dropped++;
                 }
             }
+            // czerwona/czarna czaszka: jak w Tibii przepada wszystko, takze ekwipunek
+            for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
+                ItemStack worn = pc.equipment().get(slot);
+                if (worn == null) continue;
+                pc.equipment().setDirect(slot, null);
+                ground.place(at, worn);
+                dropped++;
+            }
         }
         long before = pc.experience();
         boolean blessed = pc.applyDeathPenalty(minLevel);
@@ -430,7 +437,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         lastDeath = recap.build(killer + " (gracz)", before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś z ręki gracza " + killer + ". Strata: "
-                + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "") + (dropped > 0 ? ", plecak został na ziemi" : "")
+                + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "") + (dropped > 0 ? ", plecak i ekwipunek zostały na ziemi" : "")
                 + ". Odrodzenie w świątyni.");
         return dropped;
     }

@@ -72,6 +72,9 @@ public final class SpellSystem {
             Position p = position();
             return p != null && p.z() == center.z() && p.distanceTo(center) <= radius && reach.test(p);
         }
+
+        /** Czy rzucajacy nie moze teraz uzywac czarow i run obszarowych (czarna czaszka). */
+        default boolean areaForbidden(long now) { return false; }
     }
 
     public void setPlayerTargeting(PlayerTargeting t) { playerTarget = t; }
@@ -165,6 +168,8 @@ public final class SpellSystem {
         if (spell && pc.mana() < s.mana()) return CastResult.NOT_ENOUGH_MANA;
         if (!cooldowns.ready(s, now)) return CastResult.COOLDOWN;
         if (s.kind().isOffensive() && world.isProtectionZone(pc.position())) return CastResult.PROTECTION_ZONE;
+        if ((s.kind() == SpellKind.ATTACK_AREA || s.kind() == SpellKind.RUNE_AREA) && playerTarget != null
+                && playerTarget.areaForbidden(now)) return CastResult.BLACK_SKULL;
         if (s.kind().needsTarget()) {
             Monster t = combat.target();
             Position tp = t != null && !t.isDead() ? t.position() : playerTargetPosition();

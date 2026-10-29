@@ -379,7 +379,7 @@ public final class PlayerCharacter {
     public boolean pvpMode() { return pvpMode; }
     public void setPvpMode(boolean on) { pvpMode = on; }
 
-    /** Czaszka postaci (NONE, WHITE, RED) wg ostatniej synchronizacji ze stanem PvP. */
+    /** Czaszka postaci (NONE, WHITE, RED, BLACK) wg ostatniej synchronizacji ze stanem PvP. */
     public pl.fawizja.pixel.pvp.PvpRules.Skull skull() { return skull; }
     /** Czaszka w chwili now (po uplywie czasu - NONE, nawet bez synchronizacji). */
     public pl.fawizja.pixel.pvp.PvpRules.Skull skull(long now) {
@@ -399,6 +399,15 @@ public final class PlayerCharacter {
     public void blockPzUntil(long untilMs) { pzBlockedUntilMs = Math.max(pzBlockedUntilMs, untilMs); }
     /** Ustawia blokade dokladnie (klient - stan z serwera). */
     public void setPzBlockedUntil(long untilMs) { pzBlockedUntilMs = untilMs; }
+
+    private long logoutBlockedUntilMs;
+
+    /**
+     * Pozostaly czas blokady wylogowania w ms (0 = mozna wyjsc): po kazdej walce z graczem, takze dla
+     * zaatakowanego (blokada PZ ma tylko atakujacy). Zwraca wieksza z obu blokad.
+     */
+    public long logoutBlockedMs(long now) { return Math.max(pzBlockedMs(now), Math.max(0, logoutBlockedUntilMs - now)); }
+    public void setLogoutBlockedUntil(long untilMs) { logoutBlockedUntilMs = untilMs; }
 
     /** Zapala lub gasi pochodnie; zapalic mozna tylko majac pochodnie w plecaku. */
     public boolean setTorchLit(boolean lit, int torchItemId) {
