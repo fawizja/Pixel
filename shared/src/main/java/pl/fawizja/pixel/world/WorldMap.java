@@ -116,6 +116,23 @@ public final class WorldMap {
         return f != null && f.isWalkable(p.x(), p.y());
     }
 
+    /** Zob. {@link FloorMap#isSqueezable(int, int)}. */
+    public boolean isSqueezable(Position p) {
+        FloorMap f = fl(p.z());
+        return f != null && f.isSqueezable(p.x(), p.y());
+    }
+
+    /**
+     * Czy krok po skosie z from w kierunku d mija rogi: kazde z dwoch pol obok (poziomo i pionowo) jest przechodnie
+     * albo zajete tylko przez drzewo/krzak/glaz - miedzy takimi wolno sie przecisnac jak w Tibii. Mur ani woda
+     * w rogu nie przepuszczaja. Sam cel kroku sprawdza wywolujacy.
+     */
+    public boolean diagonalCornersOpen(Position from, Direction d) {
+        if (!d.diagonal()) return true;
+        Position a = from.translate(d.dx, 0), b = from.translate(0, d.dy);
+        return (isWalkable(a) || isSqueezable(a)) && (isWalkable(b) || isSqueezable(b));
+    }
+
     public Transition transitionAt(Position p) {
         FloorMap f = fl(p.z());
         return f == null ? null : f.transitionAt(p.x(), p.y());

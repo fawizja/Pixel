@@ -37,7 +37,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.bossWin=true  offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od razu - podglad lupu i portalu
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
- *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.mobileHud=1  uklad HUD-u na telefon (wariant B: widok gry na calym ekranie, luk czarow); na Androidzie zawsze
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..6) przy mobile_picker
@@ -285,6 +285,8 @@ public final class DesktopLauncher {
                     gs.previewPvp();
                 }
                 if ("pzblock".equals(open)) ((GameScreen) getScreen()).previewPzBlock();
+                if ("skull_red".equals(open)) ((GameScreen) getScreen()).previewOwnSkull(pl.fawizja.pixel.pvp.PvpRules.Skull.RED);
+                if ("skull_white".equals(open)) ((GameScreen) getScreen()).previewOwnSkull(pl.fawizja.pixel.pvp.PvpRules.Skull.WHITE);
                 if ("trade".equals(open)) {
                     // podglad okna handlu (bez serwera): przykladowe oferty
                     ((GameScreen) getScreen()).hud().setTrade(new pl.fawizja.pixel.trade.TradeView(

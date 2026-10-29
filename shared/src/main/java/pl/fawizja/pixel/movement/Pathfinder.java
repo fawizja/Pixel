@@ -53,7 +53,7 @@ public final class Pathfinder {
                 Position n = p.translate(d.dx, d.dy);
                 if (firstStep.containsKey(n)) continue;
                 if (!world.isWalkable(n)) continue;
-                if (d.diagonal() && (!world.isWalkable(p.translate(d.dx, 0)) || !world.isWalkable(p.translate(0, d.dy)))) continue;
+                if (!world.diagonalCornersOpen(p, d)) continue;
                 if (blocked.test(n)) continue;
                 boolean reached = n.distanceTo(goal) <= stopDistance;
                 Direction first = p.equals(from) ? d : firstStep.get(p);
@@ -83,45 +83,84 @@ public final class Pathfinder {
         return safe.isEmpty() ? path(world, from, goal, maxNodes, null) : safe;
     }
 
+    /** Koszt kroku prostego (N/S/E/W) w trasie marszu. */
+    static final int STEP_COST = 100;
+    /**
+     * Koszt kroku po skosie: krok trwa jak trzy proste ({@link MovementSystem#DIAGONAL_STEP_FACTOR}), a do tego
+     * zapas - skos tylko wtedy, gdy wyraznie skraca droge (przecisniecie miedzy drzewami), nigdy na otwartym polu.
+     */
+    static final int DIAGONAL_COST = 350;
+    /** Drobna kara za zmiane kierunku: z rownie krotkich tras wygrywa prosta / w ksztalcie L, nie zygzak. */
+    static final int TURN_COST = 1;
+
+    /** Klasa kierunku kroku: 0 poziomo, 1 pionowo, 2 skos, 3 start (brak poprzedniego kroku). */
+    private static int dirClass(Direction d) {
+        return d.diagonal() ? 2 : d.dx != 0 ? 0 : 1;
+    }
+
+    /**
+     * A* jak marsz w Tibii: kroki proste, skos tylko gdy bez niego droga jest wyraznie dluzsza (waskie przejscie
+     * po skosie miedzy przeszkodami), proste odcinki zamiast zygzaka. Stan = pole + klasa ostatniego kroku.
+     */
     private static List<Position> path(WorldMap world, Position from, Position goal, int maxNodes,
                                        java.util.function.Predicate<Position> avoid) {
         if (from.z() != goal.z() || from.equals(goal) || !world.isWalkable(goal)) return Collections.emptyList();
         int w = world.width(), h = world.height();
         if (goal.x() < 0 || goal.y() < 0 || goal.x() >= w || goal.y() >= h) return Collections.emptyList();
-        int[] parent = new int[w * h];
-        Arrays.fill(parent, -1);
-        int start = from.y() * w + from.x();
-        int target = goal.y() * w + goal.x();
-        parent[start] = start;
-        int[] queue = new int[w * h];
-        int head = 0, tail = 0;
-        queue[tail++] = start;
         int z = from.z();
-        int visited = 0;
-        while (head < tail && visited++ < maxNodes) {
-            int cur = queue[head++];
-            int cx = cur % w, cy = cur / w;
+        long startState = ((long) from.y() * w + from.x()) * 4 + 3;
+        int target = goal.y() * w + goal.x();
+        Map<Long, Integer> best = new HashMap<>();
+        Map<Long, Long> parent = new HashMap<>();
+        java.util.Set<Long> closed = new java.util.HashSet<>();
+        // {f, -g, state}: najmniejsze f, przy remisie glebszy wezel (szybciej do celu)
+        java.util.PriorityQueue<long[]> open = new java.util.PriorityQueue<>((a, b) ->
+                a[0] != b[0] ? Long.compare(a[0], b[0]) : Long.compare(a[1], b[1]));
+        best.put(startState, 0);
+        open.add(new long[] {heuristic(from.x(), from.y(), goal), 0, startState});
+        int expanded = 0;
+        while (!open.isEmpty() && expanded < maxNodes) {
+            long[] top = open.poll();
+            long state = top[2];
+            if (!closed.add(state)) continue;
+            int g = (int) -top[1];
+            int tile = (int) (state / 4), cls = (int) (state % 4);
+            if (tile == target) {
+                List<Position> out = new ArrayList<>();
+                for (long s = state; s != startState; s = parent.get(s)) {
+                    int t = (int) (s / 4);
+                    out.add(new Position(t % w, t / w, z));
+                }
+                Collections.reverse(out);
+                return out;
+            }
+            expanded++;
+            int cx = tile % w, cy = tile / w;
+            Position cp = new Position(cx, cy, z);
             for (Direction d : Direction.values()) {
                 int nx = cx + d.dx, ny = cy + d.dy;
                 if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
                 int n = ny * w + nx;
-                if (parent[n] != -1) continue;
+                int ncls = dirClass(d);
+                long ns = (long) n * 4 + ncls;
+                if (closed.contains(ns)) continue;
                 Position np = new Position(nx, ny, z);
                 if (!world.isWalkable(np)) continue;
-                if (d.diagonal() && (!world.isWalkable(new Position(cx + d.dx, cy, z))
-                        || !world.isWalkable(new Position(cx, cy + d.dy, z)))) continue;
+                if (!world.diagonalCornersOpen(cp, d)) continue;
                 if (n != target && world.transitionAt(np) != null) continue;
                 if (n != target && avoid != null && avoid.test(np)) continue;
-                parent[n] = cur;
-                if (n == target) {
-                    List<Position> out = new ArrayList<>();
-                    for (int c = n; c != start; c = parent[c]) out.add(new Position(c % w, c / w, z));
-                    Collections.reverse(out);
-                    return out;
-                }
-                queue[tail++] = n;
+                int ng = g + (d.diagonal() ? DIAGONAL_COST : STEP_COST) + (cls != 3 && cls != ncls ? TURN_COST : 0);
+                Integer old = best.get(ns);
+                if (old != null && old <= ng) continue;
+                best.put(ns, ng);
+                parent.put(ns, state);
+                open.add(new long[] {ng + heuristic(nx, ny, goal), -ng, ns});
             }
         }
         return Collections.emptyList();
+    }
+
+    private static long heuristic(int x, int y, Position goal) {
+        return (long) STEP_COST * (Math.abs(goal.x() - x) + Math.abs(goal.y() - y));
     }
 }

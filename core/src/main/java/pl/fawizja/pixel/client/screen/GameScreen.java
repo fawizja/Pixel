@@ -172,11 +172,14 @@ public final class GameScreen extends ScreenAdapter {
     private final com.badlogic.gdx.graphics.g2d.GlyphLayout nameLayout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
 
     /** Napis nad postacia z ciemnym obrysem (4 przesuniecia o ok. 0.6 dp), czytelny na jasnej podlodze. */
+    /** Kolor imion graczy nad postaciami (zielony jak w Tibii, czytelny na jasnej i ciemnej podlodze). */
+    private static final float[] PLAYER_NAME = {0.35f, 0.95f, 0.35f};
+
     private static void outlined(SpriteBatch batch, BitmapFont font, String text, float x, float y, float r, float g, float b, float ui) {
         float o = Math.max(1f, Math.round(ui * 0.6f));
         x = Math.round(x);
         y = Math.round(y);
-        font.setColor(0f, 0f, 0f, 0.8f);
+        font.setColor(0f, 0f, 0f, 0.95f);
         font.draw(batch, text, x - o, y);
         font.draw(batch, text, x + o, y);
         font.draw(batch, text, x, y - o);
@@ -1536,6 +1539,8 @@ public final class GameScreen extends ScreenAdapter {
     private Position queuedFrom;
     private boolean queuedPending;
     private static final long QUEUE_MS = 450;
+    /** Filtr joysticka (martwa strefa, histereza, pierwszenstwo kierunkow prostych). */
+    private final pl.fawizja.pixel.movement.StickFilter stick = new pl.fawizja.pixel.movement.StickFilter();
 
     private Direction keyboardDirection() {
         int dx = 0, dy = 0;
@@ -1568,7 +1573,10 @@ public final class GameScreen extends ScreenAdapter {
 
         Direction dir = chatDraft == null ? keyboardDirection() : null;
         if (dir == null && hud.joystick().active()) {
-            dir = Direction.fromStick(hud.joystick().value().x, hud.joystick().value().y, 0.25f);
+            // spokojny joystick: wyrazne wychylenie, histereza kierunku, skos tylko przy wyraznym skosie
+            dir = stick.update(hud.joystick().value().x, hud.joystick().value().y, TimeUtils.millis());
+        } else {
+            stick.reset();
         }
         // krotkie stukniecie klawisza w trakcie kroku nie ginie: krok wykona sie zaraz po biezacym
         if (dir == null && queuedDir != null) {
@@ -2195,6 +2203,27 @@ public final class GameScreen extends ScreenAdapter {
         }
     }
 
+    /**
+     * Czaszka PvP (biala/zolta/pomaranczowa/czerwona/czarna) wysrodkowana tuz pod paskami nad postacia; wx = lewa
+     * krawedz pola, barBottomWy = dolna krawedz paskow (jednostki swiata). Batch w pikselach ekranu.
+     */
+    private void drawSkullUnderBars(SpriteBatch batch, BitmapFont font, String skull, float wx, float barBottomWy, float ui) {
+        if (skull == null || "NONE".equals(skull)) return;
+        projected.set(wx + 0.5f, barBottomWy, 0);
+        camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+        // wielkosc: ok. 1/4 pola, nie mniej niz 12 px i nie wiecej niz 2.2 wielkiej litery imienia
+        float is = Math.max(12f, Math.min(font.getCapHeight() * 2.2f, hud.tilePixels() * 0.24f));
+        is = Math.round(is);
+        float x = Math.round(projected.x - is / 2f), y = Math.round(projected.y - is - Math.max(1f, ui));
+        com.badlogic.gdx.graphics.g2d.TextureRegion icon = hud.skullIcon(skull);
+        if (icon != null) {
+            batch.draw(icon, x, y, is, is);
+        } else {
+            Color c = pl.fawizja.pixel.client.ui.Hud.skullColor(skull);
+            outlined(batch, font, "X", x, y + is, c != null ? c.r : 1f, c != null ? c.g : 1f, c != null ? c.b : 1f, ui);
+        }
+    }
+
     private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
         Monster target = session.combat().target();
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -2311,10 +2340,9 @@ public final class GameScreen extends ScreenAdapter {
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             projected.y += 9 * scale; // imie nad paskiem zycia (jak w Tibii)
             boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));
-            Color skc = pl.fawizja.pixel.client.ui.Hud.skullColor(rp.skull);
+            // imie zielone jak w Tibii (druzyna niebieska); czaszka PvP rysowana osobno pod paskami
             if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
-            else if (skc != null) font.setColor(skc);
-            else font.setColor(0.55f, 1f, 0.55f, 1f);
+            else font.setColor(PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], 1f);
             String label = rp.name + (ally ? " [drużyna]" : "")
                     + (rp.guild == null ? "" : " <" + rp.guild + ">");
             nameLayout.setText(font, label);
@@ -2322,11 +2350,7 @@ public final class GameScreen extends ScreenAdapter {
             Color nameColor = font.getColor().cpy();
             // ciemny obrys: imie czytelne tez na jasnej podlodze
             outlined(batch, font, label, lx, projected.y, nameColor.r, nameColor.g, nameColor.b, ui);
-            // czaszka PvP (biala/czerwona) przed imieniem; maly czerwony znacznik = gracz z wlaczonym trybem PvP
-            com.badlogic.gdx.graphics.g2d.TextureRegion sk = hud.skullIcon(rp.skull);
-            float is = Math.max(12f, font.getCapHeight() * 1.6f); // czaszka wielkosci imienia
-            if (sk != null) batch.draw(sk, lx - is - 2 * ui, projected.y - font.getCapHeight() / 2f - is / 2f, is, is);
-            else if (!"NONE".equals(rp.skull)) font.draw(batch, "[czaszka]", lx - 50 * scale, projected.y);
+            // maly czerwony znacznik przed imieniem = gracz z wlaczonym trybem PvP (czaszka - pod paskami)
             if (rp.pvp && "NONE".equals(rp.skull)) {
                 batch.setColor(0.9f, 0.15f, 0.15f, 1f);
                 batch.draw(hud.whiteRegion(), lx - 6 * scale, projected.y - 7 * scale, 4 * scale, 4 * scale);
@@ -2338,7 +2362,21 @@ public final class GameScreen extends ScreenAdapter {
                 nameLayout.setText(font, tl);
                 outlined(batch, font, tl, projected.x - nameLayout.width / 2f, projected.y + nameLayout.height + 5f * ui, 1f, 0.85f, 0.35f, ui);
             }
+            drawSkullUnderBars(batch, font, rp.skull, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)) + 1.02f - 0.02f, ui);
             drawBubble(batch, font, scale, rp.name, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)));
+        }
+        PlayerCharacter self = session.character();
+        if (self.position().z() == z && !self.isDead()) {
+            // wlasna postac jak w Tibii: imie nad paskami HP/many, czaszka PvP tuz pod nimi
+            float ox = session.renderX(t), oy = worldRenderer.worldY(session.renderY(t));
+            String sk = self.skull(t).name();
+            projected.set(ox + 0.5f, oy + 1.15f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            projected.y += 9 * scale;
+            String label = self.name();
+            nameLayout.setText(font, label);
+            outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], ui);
+            drawSkullUnderBars(batch, font, sk, ox, oy + 1.06f - 0.075f - 0.04f, ui);
         }
         drawBubble(batch, font, scale, session.character().name(), session.renderX(t), worldRenderer.worldY(session.renderY(t)));
         font.getData().setScale(scale);
@@ -2901,6 +2939,32 @@ public final class GameScreen extends ScreenAdapter {
         long t = now();
         pl.fawizja.pixel.pvp.PvpRules.markForPreview(session.pvpStatus(), pl.fawizja.pixel.pvp.PvpRules.Skull.WHITE, t);
         session.lockProtectionZonesUntil(session.pvpStatus().fightUntil());
+    }
+
+    /**
+     * Podglad czaszki nad wlasna postacia (-Dpixel.open=skull_red / skull_white): imie nad paskami, czaszka pod
+     * nimi; przy bialej obok gracz z czerwona czaszka i gracz bez czaszki.
+     */
+    public void previewOwnSkull(pl.fawizja.pixel.pvp.PvpRules.Skull skull) {
+        long t = now();
+        session.setPvpMode(true);
+        pl.fawizja.pixel.pvp.PvpRules.markForPreview(session.pvpStatus(), skull, t);
+        session.lockProtectionZonesUntil(session.pvpStatus().fightUntil());
+        if (skull != pl.fawizja.pixel.pvp.PvpRules.Skull.WHITE) return;
+        Position me = session.character().position();
+        Object[][] who = {{"Kuba", Vocation.KNIGHT, 2, 0, "RED", true}, {"Ula", Vocation.DRUID, -2, 1, "NONE", false}};
+        int id = 950;
+        for (Object[] w : who) {
+            RemotePlayer rp = new RemotePlayer();
+            rp.name = (String) w[0];
+            rp.vocation = (Vocation) w[1];
+            rp.from = rp.to = me.translate((Integer) w[2], (Integer) w[3]);
+            rp.healthPercent = 100;
+            rp.skull = (String) w[4];
+            rp.pvp = (Boolean) w[5];
+            rp.seen = true;
+            remotePlayers.put(id++, rp);
+        }
     }
 
     /**

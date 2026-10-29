@@ -28,14 +28,14 @@ public final class MovementSystem {
         this.occupied = occupied;
     }
 
-    /** Czy krok z pozycji w danym kierunku jest dozwolony (bez scinania rogow po skosie). */
+    /**
+     * Czy krok z pozycji w danym kierunku jest dozwolony. Skos nie scina rogu muru ani wody, ale miedzy drzewami,
+     * krzakami i glazami mozna sie przecisnac jak w Tibii ({@link WorldMap#diagonalCornersOpen}).
+     */
     public boolean canStep(Position from, Direction d) {
         Position to = from.translate(d.dx, d.dy);
         if (!world.isWalkable(to) || occupied.test(to)) return false;
-        if (d.diagonal()) {
-            return world.isWalkable(from.translate(d.dx, 0)) && world.isWalkable(from.translate(0, d.dy));
-        }
-        return true;
+        return world.diagonalCornersOpen(from, d);
     }
 
     /** Wykonuje krok. Wejscie na schody/dziure/tunel od razu przenosi na pietro docelowe. */

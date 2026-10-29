@@ -109,3 +109,6 @@ hud_phone_narrow_popup|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.tel
 mobile_hud|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=target
 mobile_window|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_skills,mobile_chat
 mobile_picker|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.open=mobile_picker
+# 2026-10-29: imie nad paskami wlasnej postaci, czaszka PvP pod paskami (wlasna i innych graczy)
+skull_own_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=40 -Dpixel.open=skull_red -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+skull_others_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.teleport=574,72,0 -Dpixel.level=40 -Dpixel.open=skull_white -Dpixel.width=1920 -Dpixel.height=1080

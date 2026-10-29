@@ -115,6 +115,26 @@ public final class FloorMap {
         return c != null && !c.blocked[cell(x, y)];
     }
 
+    /**
+     * Czy kafelek blokuje tylko przeszkoda z natury ({@link TileType#squeezable()}) na przechodnim podlozu, bez muru
+     * - obok takiego pola wolno przejsc po skosie (przecisnac sie miedzy drzewami).
+     */
+    public boolean isSqueezable(int x, int y) {
+        if (!inBounds(x, y)) return false;
+        Chunk c = chunk(x, y);
+        if (c == null) return false;
+        int i = cell(x, y);
+        TileType ground = tiles.get(c.layers[Layer.GROUND.ordinal()][i]);
+        if (ground == null || !ground.walkable()) return false;
+        TileType obj = tiles.get(c.layers[Layer.OBJECT.ordinal()][i]);
+        if (obj == null || !obj.squeezable()) return false;
+        for (Layer l : new Layer[] {Layer.DECORATION, Layer.WALL}) {
+            TileType t = tiles.get(c.layers[l.ordinal()][i]);
+            if (t != null && !t.walkable()) return false;
+        }
+        return true;
+    }
+
     /** Czy kafelek zaslania widok i pociski (sciany i przeszkody; woda nie zaslania). */
     public boolean blocksSight(int x, int y) {
         if (!inBounds(x, y)) return true;
