@@ -81,13 +81,35 @@ public final class Container {
     }
 
     public boolean canAdd(int itemId, int count) {
-        return count > 0 && spaceFor(itemId) >= count;
+        if (count <= 0) return false;
+        if (spaceFor(itemId) >= count) return true;
+        return isCoin(itemId) && copy().addCoinsByValue(itemId, count);
     }
 
-    /** Dodaje caly stos (dopelniajac istniejace stosy) albo nic, jesli sie nie zmiesci. */
+    /**
+     * Dodaje caly stos (dopelniajac istniejace stosy) albo nic, jesli sie nie zmiesci.
+     * Monety lacza sie same jak w Tibii: 100 zlotych zamienia sie w 1 platynowa, 100 platynowych w 1 krysztalowa.
+     */
     public InventoryResult add(ItemStack stack) {
         Objects.requireNonNull(stack);
+        if (isCoin(stack.itemId())) {
+            if (spaceFor(stack.itemId()) >= stack.count()) {
+                addPlain(stack);
+                normalizeCoins();
+                return InventoryResult.OK;
+            }
+            // plecak pelny, ale po wymianie na wyzsze nominaly monety sie zmieszcza
+            Container tx = copy();
+            if (!tx.addCoinsByValue(stack.itemId(), stack.count())) return InventoryResult.NO_SPACE;
+            commitFrom(tx);
+            return InventoryResult.OK;
+        }
         if (!canAdd(stack.itemId(), stack.count())) return InventoryResult.NO_SPACE;
+        addPlain(stack);
+        return InventoryResult.OK;
+    }
+
+    private void addPlain(ItemStack stack) {
         int max = registry.maxStack(stack.itemId());
         int remaining = stack.count();
         if (max > 1) {
@@ -108,7 +130,86 @@ public final class Container {
             }
         }
         if (remaining != 0) throw new IllegalStateException("capacity check inconsistent");
-        return InventoryResult.OK;
+    }
+
+    // ------------------------------------------------------------------ monety
+
+    /** Monety (zlota, platynowa, krysztalowa) - lacza sie i wymieniaja same. */
+    private boolean isCoin(int itemId) {
+        return pl.fawizja.pixel.economy.Currency.isCoin(itemId) && registry.contains(itemId)
+                && registry.get(itemId).category() == pl.fawizja.pixel.item.ItemCategory.CURRENCY;
+    }
+
+    private long coinValue() {
+        long v = 0;
+        for (pl.fawizja.pixel.economy.Currency c : pl.fawizja.pixel.economy.Currency.values()) {
+            if (isCoin(c.itemId())) v += (long) count(c.itemId()) * c.value();
+        }
+        return v;
+    }
+
+    /**
+     * Wymienia kazde pelne 100 monet na monete wyzszego nominalu i laczy niepelne stosy monet.
+     * Wartosc pieniedzy sie nie zmienia, a miejsca w pojemniku nigdy nie ubywa (zdjecie 100 monet
+     * zawsze zwalnia co najmniej jedno pole). Zwraca true, gdy cos sie zmienilo.
+     */
+    public boolean normalizeCoins() {
+        boolean changed = false;
+        pl.fawizja.pixel.economy.Currency[] cs = pl.fawizja.pixel.economy.Currency.values();
+        for (int i = 0; i + 1 < cs.length; i++) {
+            if (!isCoin(cs[i].itemId()) || !isCoin(cs[i + 1].itemId())) continue;
+            int rate = (int) (cs[i + 1].value() / cs[i].value());
+            while (count(cs[i].itemId()) >= rate) {
+                remove(cs[i].itemId(), rate);
+                addPlain(ItemStack.of(cs[i + 1].itemId()));
+                changed = true;
+            }
+        }
+        // niepelne stosy tej samej monety w jeden (do pierwszego pola z ta moneta)
+        for (int i = 0; i < slots.length; i++) {
+            ItemStack a = slots[i];
+            if (a == null || !isCoin(a.itemId())) continue;
+            int max = registry.maxStack(a.itemId());
+            for (int j = i + 1; j < slots.length && slots[i].count() < max; j++) {
+                ItemStack b = slots[j];
+                if (b != null && b.itemId() == a.itemId()) {
+                    int put = Math.min(max - slots[i].count(), b.count());
+                    slots[i] = slots[i].withCount(slots[i].count() + put);
+                    slots[j] = put == b.count() ? null : b.withCount(b.count() - put);
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
+    /**
+     * Dodaje monety wg wartosci, gdy dosypanie stosu sie nie miesci: wszystkie monety zostaja przeliczone
+     * na najmniejsza liczbe sztuk (krysztalowe, platynowe, zlote). false, gdy i tak brak miejsca (pojemnik
+     * jest wtedy w nieokreslonym stanie - wolac tylko na kopii).
+     */
+    private boolean addCoinsByValue(int itemId, int count) {
+        pl.fawizja.pixel.economy.Currency cur = pl.fawizja.pixel.economy.Currency.byItemId(itemId);
+        long total = coinValue() + (long) count * cur.value();
+        for (pl.fawizja.pixel.economy.Currency c : pl.fawizja.pixel.economy.Currency.values()) {
+            if (!isCoin(c.itemId())) continue;
+            int n = count(c.itemId());
+            if (n > 0) remove(c.itemId(), n);
+        }
+        pl.fawizja.pixel.economy.Currency[] cs = pl.fawizja.pixel.economy.Currency.values();
+        for (int i = cs.length - 1; i >= 0 && total > 0; i--) {
+            if (!isCoin(cs[i].itemId())) continue;
+            long n = total / cs[i].value();
+            total -= n * cs[i].value();
+            int max = registry.maxStack(cs[i].itemId());
+            while (n > 0) {
+                int chunk = (int) Math.min(n, max);
+                if (spaceFor(cs[i].itemId()) < chunk) return false;
+                addPlain(new ItemStack(cs[i].itemId(), chunk));
+                n -= chunk;
+            }
+        }
+        return total == 0;
     }
 
     /**
@@ -179,6 +280,7 @@ public final class Container {
             if (put <= 0) return InventoryResult.NO_SPACE;
             slots[to] = dst.withCount(dst.count() + put);
             slots[from] = put == src.count() ? null : src.withCount(src.count() - put);
+            if (isCoin(src.itemId())) normalizeCoins();
             return InventoryResult.OK;
         }
         if (count != src.count()) return InventoryResult.NO_SPACE;

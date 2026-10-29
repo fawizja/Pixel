@@ -39,6 +39,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.mobileHud=1  uklad HUD-u na telefon (wariant B: widok gry na calym ekranie, luk czarow); na Androidzie zawsze
+ *   -Dpixel.open=coins|torchsel|torchlit  monety w plecaku, zaznaczona pochodnia, zapalona pochodnia w polu obok butow (z mobile_* po przecinku)
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..6) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
@@ -390,6 +391,35 @@ public final class DesktopLauncher {
                     gs.hud().openJournal();
                 }
                 if ("picker".equals(open)) ((GameScreen) getScreen()).hud().openPicker(6);
+                if (open != null && (open.contains("coins") || open.contains("torch"))) {
+                    // monety i pochodnia (kilka po przecinku): coins (stosy zlota, platyny i krysztalu + pochodnie, plecak
+                    // otwarty na komputerze), torchsel (zaznaczona pochodnia w plecaku - "Załóż"), torchlit (pochodnia
+                    // zalozona w polu obok butow, zapalona, 2 minuty wypalone)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.game.GameSession s = gs.session();
+                    pl.fawizja.pixel.character.PlayerCharacter hero = s.character();
+                    pl.fawizja.pixel.item.ItemRegistry reg = s.items();
+                    int torch = reg.byKey("torch").id();
+                    java.util.List<String> opts = java.util.Arrays.asList(open.split(","));
+                    if (opts.contains("coins")) {
+                        // monety laduja jak lup: same sie lacza i wymieniaja (60+40 zlotych = 1 platynowa itd.)
+                        int[][] coins = {{1, 60}, {1, 40}, {1, 47}, {2, 83}, {2, 99}, {1, 99}, {1, 4}, {3, 12}};
+                        for (int[] c : coins) hero.backpack().add(new pl.fawizja.pixel.item.ItemStack(c[0], c[1]));
+                        hero.backpack().add(new pl.fawizja.pixel.item.ItemStack(torch, 1));
+                        hero.backpack().add(new pl.fawizja.pixel.item.ItemStack(torch, 1));
+                        if (!opts.contains("mobile_win_bag")) gs.hud().toggleBag();
+                    }
+                    if (opts.contains("torchlit")) {
+                        for (int i = 0; i < hero.backpack().size(); i++) {
+                            if (hero.backpack().get(i) != null && hero.backpack().get(i).itemId() == torch) {
+                                s.equipFromSlot(i, 0L);
+                                break;
+                            }
+                        }
+                        s.toggleTorch(0L);
+                        hero.tickTorch(2 * 60_000L + 30_000L, torch);
+                    }
+                }
                 if (open != null && open.contains("mobile_")) {
                     // uklad na telefon (-Dpixel.mobileHud=1): mobile_win_bag|equip|skills|vip|settings, mobile_chat,
                     // mobile_picker (przycisk 3 luku), mobile_logout; kilka po przecinku, np. mobile_win_skills,mobile_chat
@@ -408,6 +438,18 @@ public final class DesktopLauncher {
                         if (o.equals("mobile_picker")) gs.hud().openMobilePicker(Integer.getInteger("pixel.pickerButton", 2));
                         if (o.equals("mobile_logout")) gs.press("logout");
                         if (o.equals("mobile_journal")) gs.hud().openJournal();
+                    }
+                }
+                if (open != null && java.util.Arrays.asList(open.split(",")).contains("torchsel")) {
+                    // po otwarciu okien (otwarcie okna czysci zaznaczenie): zaznaczona pochodnia w plecaku
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.inventory.Container bp = gs.session().character().backpack();
+                    int torch = gs.session().items().byKey("torch").id();
+                    for (int i = 0; i < bp.size(); i++) {
+                        if (bp.get(i) != null && bp.get(i).itemId() == torch) {
+                            gs.hud().selectSlot(i);
+                            break;
+                        }
                     }
                 }
                 if ("pickerrune".equals(open)) {

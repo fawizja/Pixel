@@ -14,7 +14,7 @@
 25;training_sword;Miecz ćwiczebny;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK,KNIGHT;0;1;PHYSICAL;#b0b0b8;Tępy miecz ćwiczebny.
 30;health_potion;Mikstura zdrowia;POTION;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;#d8263c;Przywraca część zdrowia.
 31;mana_potion;Mikstura many;POTION;100;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#3a5bd8;Przywraca część many.
-32;torch;Pochodnia;LIGHT;1;2;NONE;0;0;0;0;*;5;0;PHYSICAL;#ffb347;Pochodnia: rozjaśnia ciemne podziemia.
+32;torch;Pochodnia;LIGHT;1;2;LIGHT;0;0;0;0;*;5;0;PHYSICAL;#ffb347;Pochodnia: załóż ją w polu obok butów i dotknij, aby zapalić. Pali się 20 minut.
 33;rope;Lina;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#c8a165;Lina do wspinania się z dziur.
 34;shovel;Łopata;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;#8f8f8f;Łopata do odkopywania przejść.
 35;fishing_rod;Wędka;TOOL;1;150;NONE;0;0;0;0;*;0;0;PHYSICAL;#a07040;Wędka do łowienia ryb.

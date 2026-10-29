@@ -20,20 +20,6 @@ class MoneyTest {
     }
 
     @Test
-    void exchangeUpAndDownKeepsValue() {
-        Container c = bp();
-        c.add(new ItemStack(Currency.GOLD.itemId(), 100));
-        assertTrue(Money.exchangeUp(c, Currency.GOLD).ok());
-        assertEquals(1, c.count(Currency.PLATINUM.itemId()));
-        assertEquals(0, c.count(Currency.GOLD.itemId()));
-        assertTrue(Money.exchangeDown(c, Currency.PLATINUM).ok());
-        assertEquals(100, c.count(Currency.GOLD.itemId()));
-        assertEquals(100, Money.totalValue(c));
-        assertEquals(InventoryResult.NOT_ENOUGH_ITEMS, Money.exchangeUp(c, Currency.PLATINUM));
-        assertEquals(InventoryResult.INVALID_AMOUNT, Money.exchangeDown(c, Currency.GOLD));
-    }
-
-    @Test
     void payMakesChangeAndNeverLosesMoney() {
         Container c = bp();
         assertTrue(Money.add(c, 10_000).ok());

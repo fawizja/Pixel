@@ -26,6 +26,7 @@ class ReplicaSyncTest {
         PlayerCharacter server = TestData.newCharacter(Vocation.DRUID);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), server);
         s.toggleRun(0);
+        server.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, pl.fawizja.pixel.item.ItemStack.of(TestData.ITEMS.byKey("torch").id()));
         s.toggleTorch(0);
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         String save = codec.encode(server);

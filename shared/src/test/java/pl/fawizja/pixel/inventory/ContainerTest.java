@@ -144,8 +144,10 @@ class ContainerTest {
         bp.add(ItemStack.of(wand));
         assertEquals(InventoryResult.WRONG_VOCATION,
                 pc.equipment().equipFromBackpack(bp, indexOf(bp, wand), pc.vocation(), pc.level()));
+        int rope = TestData.ITEMS.byKey("rope").id();
+        if (bp.count(rope) == 0) bp.add(ItemStack.of(rope));
         assertEquals(InventoryResult.WRONG_SLOT_TYPE,
-                pc.equipment().equipFromBackpack(bp, indexOf(bp, TORCH), pc.vocation(), pc.level()));
+                pc.equipment().equipFromBackpack(bp, indexOf(bp, rope), pc.vocation(), pc.level()));
 
         while (!bp.isFull()) bp.add(ItemStack.of(TORCH));
         assertEquals(InventoryResult.NO_SPACE, pc.equipment().unequipToBackpack(EquipSlot.HEAD, bp));

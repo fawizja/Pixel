@@ -52,15 +52,48 @@ class GameSessionTest {
     }
 
     @Test
+    void equippedTorchBurnsOutWithAChatMessage() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
+        GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc);
+        int torch = TestData.ITEMS.byKey("torch").id();
+        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, pl.fawizja.pixel.item.ItemStack.of(torch));
+        s.toggleTorch(0);
+        long t = 0;
+        s.update(t, null);
+        boolean said = false;
+        while (t < PlayerCharacter.TORCH_BURN_MS + 5_000 && !said) {
+            t += 1000;
+            s.update(t, null);
+            for (EventLog.Entry e : s.log().latest(3)) said |= e.text().equals("Pochodnia się wypaliła.");
+        }
+        assertTrue(said, "burn-out message");
+        assertNull(pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.LIGHT));
+        assertFalse(pc.isTorchLit());
+        assertTrue(t >= PlayerCharacter.TORCH_BURN_MS && t <= PlayerCharacter.TORCH_BURN_MS + 2_000, "after 20 min: " + t);
+    }
+
+    @Test
     void torchToggleNeedsTorch() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc);
+        int torch = TestData.ITEMS.byKey("torch").id();
         s.toggleTorch(0);
-        assertTrue(pc.isTorchLit());
-        s.toggleTorch(1);
-        assertFalse(pc.isTorchLit());
-        pc.backpack().remove(TestData.ITEMS.byKey("torch").id(), 1);
+        assertFalse(pc.isTorchLit(), "torch in the backpack must be equipped first");
+        assertTrue(s.log().latest(1).get(0).text().startsWith("Nie masz założonej pochodni"));
+        int slot = -1;
+        for (int i = 0; i < pc.backpack().size(); i++) if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == torch) slot = i;
+        s.equipFromSlot(slot, 1);
+        assertTrue(pc.hasTorchEquipped(torch));
         s.toggleTorch(2);
+        assertTrue(pc.isTorchLit());
+        assertEquals("Zapalasz pochodnię (zostało 20 min).", s.log().latest(1).get(0).text());
+        s.toggleTorch(3);
+        assertFalse(pc.isTorchLit());
+        s.toggleTorch(4);
+        assertTrue(pc.isTorchLit());
+        s.unequip(pl.fawizja.pixel.item.EquipSlot.LIGHT, 5);
+        assertFalse(pc.isTorchLit(), "taking the torch off puts it out");
+        s.toggleTorch(6);
         assertFalse(pc.isTorchLit());
     }
 

@@ -58,14 +58,14 @@ public final class PlayerCharacter {
     private int extraBags;
     private int hastePercent;
     private int lightBuffRadius;
-    /** Pozostaly czas palenia biezacej pochodni (0 = nowa, nieuzywana). */
+    /** Pozostaly czas palenia zalozonej pochodni (0 = nowa, nieuzywana). */
     private long torchBurnMs;
 
-    /** Jedna pochodnia pali sie 30 minut czasu gry. */
-    public static final long TORCH_BURN_MS = 30 * 60_000L;
+    /** Jedna pochodnia pali sie 20 minut czasu gry (liczy sie tylko czas, gdy plonie). */
+    public static final long TORCH_BURN_MS = 20 * 60_000L;
 
     /** Wynik palenia pochodni w kroku symulacji. */
-    public enum TorchTick { NONE, NEXT_LIT, BURNED_OUT }
+    public enum TorchTick { NONE, BURNED_OUT }
 
     /** Maksymalna sytosc: 20 minut. */
     public static final long MAX_FED_MS = 20 * 60_000L;
@@ -409,9 +409,15 @@ public final class PlayerCharacter {
     public long logoutBlockedMs(long now) { return Math.max(pzBlockedMs(now), Math.max(0, logoutBlockedUntilMs - now)); }
     public void setLogoutBlockedUntil(long untilMs) { logoutBlockedUntilMs = untilMs; }
 
-    /** Zapala lub gasi pochodnie; zapalic mozna tylko majac pochodnie w plecaku. */
+    /** Czy w polu pochodni (na prawo od butow) jest zalozona pochodnia. */
+    public boolean hasTorchEquipped(int torchItemId) {
+        pl.fawizja.pixel.item.ItemStack t = equipment.get(pl.fawizja.pixel.item.EquipSlot.LIGHT);
+        return t != null && t.itemId() == torchItemId;
+    }
+
+    /** Zapala lub gasi pochodnie; zapalic mozna tylko zalozona pochodnie (pole obok butow). */
     public boolean setTorchLit(boolean lit, int torchItemId) {
-        if (lit && backpack.count(torchItemId) == 0) return false;
+        if (lit && !hasTorchEquipped(torchItemId)) return false;
         torchLit = lit;
         if (lit && torchBurnMs <= 0) torchBurnMs = TORCH_BURN_MS;
         return true;
@@ -419,24 +425,27 @@ public final class PlayerCharacter {
 
     public long torchBurnMs() { return torchBurnMs; }
 
+    /** Pozostaly czas palenia zalozonej pochodni (pelny dla nowej), 0 bez pochodni. */
+    public long torchRemainingMs(int torchItemId) {
+        if (!hasTorchEquipped(torchItemId)) return 0;
+        return torchBurnMs > 0 ? torchBurnMs : TORCH_BURN_MS;
+    }
+
     /**
-     * Zapalona pochodnia sie wypala: po TORCH_BURN_MS znika z plecaka, a jesli sa kolejne,
-     * zapala sie nastepna. Zgaszona pochodnia nie traci paliwa.
+     * Zapalona pochodnia sie wypala: po TORCH_BURN_MS czasu palenia znika z pola pochodni.
+     * Zgaszona pochodnia nie traci paliwa. Zdjeta pochodnia gasnie.
      */
     public TorchTick tickTorch(long deltaMs, int torchItemId) {
-        if (!torchLit || deltaMs <= 0) return TorchTick.NONE;
-        if (backpack.count(torchItemId) == 0) {
+        if (!torchLit) return TorchTick.NONE;
+        if (!hasTorchEquipped(torchItemId)) {
             torchLit = false;
-            torchBurnMs = 0;
-            return TorchTick.BURNED_OUT;
+            return TorchTick.NONE;
         }
+        if (deltaMs <= 0) return TorchTick.NONE;
+        if (torchBurnMs <= 0) torchBurnMs = TORCH_BURN_MS;
         torchBurnMs -= deltaMs;
         if (torchBurnMs > 0) return TorchTick.NONE;
-        backpack.remove(torchItemId, 1);
-        if (backpack.count(torchItemId) > 0) {
-            torchBurnMs = TORCH_BURN_MS;
-            return TorchTick.NEXT_LIT;
-        }
+        equipment.setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, null);
         torchLit = false;
         torchBurnMs = 0;
         return TorchTick.BURNED_OUT;
@@ -451,7 +460,7 @@ public final class PlayerCharacter {
         this.lightBuffMs = Math.max(0, lightBuffMs);
         this.lightBuffRadius = Math.max(0, lightBuffRadius);
         this.torchBurnMs = Math.max(0, Math.min(TORCH_BURN_MS, torchBurnMs));
-        this.torchLit = torchLit && backpack.count(torchItemId) > 0;
+        this.torchLit = torchLit && hasTorchEquipped(torchItemId);
     }
 
     public void setPosition(Position position) { this.position = Objects.requireNonNull(position); }

@@ -20,7 +20,7 @@ import pl.fawizja.pixel.world.WorldLayout;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 5;
+    public static final int CURRENT_VERSION = 6;
 
     private final ItemRegistry items;
 
@@ -135,7 +135,7 @@ public final class CharacterCodec {
         }
         migrate(version, m);
         try {
-            return build(m);
+            return build(m, version);
         } catch (RuntimeException e) {
             throw new SaveFormatException("invalid save data: " + e.getMessage(), e);
         }
@@ -168,7 +168,30 @@ public final class CharacterCodec {
         }
     }
 
-    private PlayerCharacter build(Map<String, String> m) {
+    /**
+     * v5 i starsze: pochodnia palila sie z plecaka (bez pola ekwipunku). Od v6 pochodnia ma wlasne pole
+     * (LIGHT, na prawo od butow): pochodnia z pola amunicji trafia do pola pochodni, a zapalona pochodnia
+     * z plecaka zostaje w nim zalozona (dalej plonie, najwyzej 20 minut). Wywolywane po odczycie plecaka.
+     */
+    private void migrateTorch(int version, Map<String, String> m, PlayerCharacter pc) {
+        if (version >= 6) return;
+        int torch = items.byKey("torch").id();
+        if (pc.equipment().get(EquipSlot.LIGHT) != null) return;
+        String timers = m.get("timers");
+        boolean lit = timers != null && timers.split(",").length > 3 && "1".equals(timers.split(",")[3]);
+        if (lit) {
+            for (int i = 0; i < pc.backpack().size(); i++) {
+                ItemStack s = pc.backpack().get(i);
+                if (s != null && s.itemId() == torch) {
+                    pc.backpack().takeFromSlot(i, 1);
+                    pc.equipment().setDirect(EquipSlot.LIGHT, ItemStack.of(torch));
+                    return;
+                }
+            }
+        }
+    }
+
+    private PlayerCharacter build(Map<String, String> m, int loadVersion) {
         String[] pos = require(m, "position").split(",");
         Position p = new Position(Integer.parseInt(pos[0]), Integer.parseInt(pos[1]), Integer.parseInt(pos[2]));
         long exp = Long.parseLong(require(m, "experience"));
@@ -197,6 +220,8 @@ public final class CharacterCodec {
             } else if (k.startsWith("eq.")) {
                 EquipSlot slot = EquipSlot.valueOf(k.substring(3));
                 ItemStack s = parseStack(e.getValue());
+                // stare zapisy: pochodnia w polu amunicji -> pole pochodni
+                if (slot == EquipSlot.AMMO && s.itemId() == items.byKey("torch").id()) slot = EquipSlot.LIGHT;
                 if (items.get(s.itemId()).slot() != slot) throw new IllegalArgumentException("item in wrong slot " + slot);
                 pc.equipment().setDirect(slot, s);
             } else if (k.startsWith("quest.")) {
@@ -214,6 +239,10 @@ public final class CharacterCodec {
         pc.setDefensive(flags.contains("D"));
         pc.setHasMount(flags.contains("H"));
         pc.setMounted(flags.contains("M"));
+        migrateTorch(loadVersion, m, pc);
+        // stare zapisy mogly miec po 100 monet w stosie - wymiana na wyzsze nominaly (wartosc bez zmian)
+        pc.backpack().normalizeCoins();
+        pc.depot().normalizeCoins();
         String timers = m.get("timers");
         if (timers != null) {
             String[] t = timers.split(",");

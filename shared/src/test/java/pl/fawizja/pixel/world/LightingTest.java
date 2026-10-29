@@ -26,9 +26,11 @@ class LightingTest {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         int torch = TestData.ITEMS.byKey("torch").id();
         assertEquals(Lighting.BASE_PLAYER_GLOW, Lighting.playerLightRadius(pc, TestData.ITEMS));
+        assertFalse(pc.setTorchLit(true, torch), "torch only in the backpack");
+        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, pl.fawizja.pixel.item.ItemStack.of(torch));
         assertTrue(pc.setTorchLit(true, torch));
         assertEquals(5f, Lighting.playerLightRadius(pc, TestData.ITEMS));
-        pc.backpack().remove(torch, 1);
+        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, null);
         assertEquals(Lighting.BASE_PLAYER_GLOW, Lighting.playerLightRadius(pc, TestData.ITEMS), "torch gone");
         assertFalse(pc.setTorchLit(true, torch));
         assertTrue(pc.setTorchLit(false, torch));

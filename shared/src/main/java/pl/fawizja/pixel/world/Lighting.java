@@ -27,7 +27,7 @@ public final class Lighting {
     public static float playerLightRadius(PlayerCharacter pc, ItemRegistry items) {
         float r = Math.max(BASE_PLAYER_GLOW, pc.lightBuffRadius());
         int torch = items.byKey("torch").id();
-        if (pc.isTorchLit() && pc.backpack().count(torch) > 0) {
+        if (pc.isTorchLit() && pc.hasTorchEquipped(torch)) {
             r = Math.max(r, items.get(torch).lightRadius());
         }
         return r;

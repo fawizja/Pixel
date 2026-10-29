@@ -19,6 +19,7 @@ public final class ItemCompare {
     /** Jak wyzej, z poziomami ulepszenia (u - ogladany przedmiot, eu - zalozony). */
     public static String stats(ItemType t, int u, ItemType equipped, int eu) {
         StringBuilder b = new StringBuilder(Upgrade.name(t, u));
+        if (t.slot() == EquipSlot.LIGHT) return b.append("  światło ").append(t.lightRadius()).append(", pali się 20 min (pole obok butów)").toString();
         if (equipped == t && u == eu) return b.append(" (założone)").toString();
         stat(b, "atak", Upgrade.attack(t, u), equipped == null ? 0 : Upgrade.attack(equipped, eu), equipped != null);
         stat(b, "obrona", Upgrade.defense(t, u), equipped == null ? 0 : Upgrade.defense(equipped, eu), equipped != null);
@@ -34,6 +35,7 @@ public final class ItemCompare {
      */
     public static String shopDelta(ItemType t, ItemType equipped, int eu, PlayerCharacter pc) {
         if (t.slot() == EquipSlot.NONE) return "";
+        if (t.slot() == EquipSlot.LIGHT) return "światło " + t.lightRadius() + ", 20 min, pole obok butów";
         if (t.category() == ItemCategory.BAIT) return "przynęta: do gniazda amunicji, 1 na zarzucenie";
         if (!t.vocations().contains(pc.vocation())) return "nie dla ciebie";
         if (t.slot() == EquipSlot.AMMO && equipped == null) return "amunicja, atak " + t.attack();
