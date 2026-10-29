@@ -151,6 +151,22 @@ class NetworkSyncTest {
                 old.send("HELLO", "0", "Dave", "MONK");
                 await("version rejected", () -> old.error() != null);
             }
+            // pochodnia z plecaka najpierw do pola obok butow ("Załóż"), potem zapalenie
+            await("save", () -> a.selfSave() != null);
+            pl.fawizja.pixel.character.PlayerCharacter me = self(a);
+            int torchId = me.backpack().registry().byKey("torch").id();
+            int torchSlot = -1;
+            for (int i = 0; i < me.backpack().size(); i++) {
+                if (me.backpack().get(i) != null && me.backpack().get(i).itemId() == torchId) torchSlot = i;
+            }
+            a.send("ACT", "slot_equip:" + torchSlot);
+            await("torch equipped", () -> {
+                try {
+                    return self(a).hasTorchEquipped(torchId);
+                } catch (Exception e) {
+                    return false;
+                }
+            });
             a.send("ACT", "torch");
             await("torch lit", () -> {
                 try {

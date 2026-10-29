@@ -1449,24 +1449,11 @@ public final class GameSession {
         return true;
     }
 
-    /** Uzycie monet jak w Tibii: 100 sztuk zamienia na monete wyzszego nominalu, pojedyncza wyzsza - rozmienia na 100. */
+    /** Uzycie monet: monety lacza sie i wymieniaja same, wiec tylko opis wartosci. */
     private CastResult exchangeCoins(int slot, long nowMs) {
-        pl.fawizja.pixel.economy.Currency cur = pl.fawizja.pixel.economy.Currency.byItemId(pc.backpack().get(slot).itemId());
-        int count = pc.backpack().get(slot).count();
-        InventoryResult r;
-        if (count >= pl.fawizja.pixel.economy.Currency.EXCHANGE_RATE && cur != pl.fawizja.pixel.economy.Currency.CRYSTAL) {
-            r = Money.exchangeUp(pc.backpack(), cur);
-        } else if (cur != pl.fawizja.pixel.economy.Currency.GOLD) {
-            r = Money.exchangeDown(pc.backpack(), cur);
-        } else {
-            log.add(nowMs, EventLog.Kind.INFO, "100 złotych monet = 1 platynowa, 100 platynowych = 1 kryształowa.");
-            return CastResult.NOT_USABLE;
-        }
-        if (!r.ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na wymianę monet.");
-            return CastResult.BACKPACK_FULL;
-        }
-        log.add(nowMs, EventLog.Kind.INFO, "Monety wymienione.");
+        pc.backpack().normalizeCoins();
+        log.add(nowMs, EventLog.Kind.INFO, "Monety wymieniają się same: 100 złotych = 1 platynowa, 100 platynowych = 1 kryształowa. Masz "
+                + String.format("%,d", Money.totalValue(pc.backpack())) + " gp.");
         return CastResult.OK;
     }
 
@@ -1891,10 +1878,8 @@ public final class GameSession {
                 pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);
                 if (gone != null) log.add(nowMs, EventLog.Kind.WARNING, "Zaklęcie wygasło: " + gone.label().toLowerCase(java.util.Locale.ROOT) + ".");
             }
-            switch (pc.tickTorch(dt, torchId)) {
-                case NEXT_LIT: log.add(nowMs, EventLog.Kind.INFO, "Pochodnia się wypaliła. Zapalasz następną."); break;
-                case BURNED_OUT: log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia się wypaliła. Nie masz kolejnej."); break;
-                default:
+            if (pc.tickTorch(dt, torchId) == pl.fawizja.pixel.character.PlayerCharacter.TorchTick.BURNED_OUT) {
+                log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia się wypaliła.");
             }
         }
         lastUpdateMs = nowMs;
@@ -2656,10 +2641,19 @@ public final class GameSession {
     public void toggleTorch(long nowMs) {
         boolean want = !pc.isTorchLit();
         if (!pc.setTorchLit(want, torchId)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz pochodni.");
+            log.add(nowMs, EventLog.Kind.WARNING, pc.backpack().count(torchId) > 0
+                    ? "Nie masz założonej pochodni. Dotknij pochodni w plecaku i wybierz \"Załóż\"."
+                    : "Nie masz założonej pochodni.");
         } else {
-            log.add(nowMs, EventLog.Kind.INFO, want ? "Zapalasz pochodnie." : "Gasisz pochodnie.");
+            long left = pc.torchRemainingMs(torchId);
+            log.add(nowMs, EventLog.Kind.INFO, want ? "Zapalasz pochodnię (zostało " + torchTime(left) + ")." : "Gasisz pochodnię.");
         }
+    }
+
+    /** Pozostaly czas pochodni do opisu: "18 min" albo "45 s". */
+    public static String torchTime(long ms) {
+        long sec = (ms + 999) / 1000;
+        return sec >= 60 ? (sec + 59) / 60 + " min" : sec + " s";
     }
 
     public boolean itemsAtFeet() {
@@ -2730,9 +2724,6 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, "Masz w tym domu tylko wstęp - nie możesz tu wyrzucać przedmiotów.");
             return;
         }
-        if (s.itemId() == torchId && pc.isTorchLit() && pc.backpack().count(torchId) == 1) {
-            pc.setTorchLit(false, torchId);
-        }
         InventoryResult r = ground.dropFrom(pc.backpack(), slot, s.count(), pc.position(), world);
         if (r.ok()) log.add(nowMs, EventLog.Kind.INFO, "Wyrzucono: " + describe(s));
     }
@@ -2750,9 +2741,16 @@ public final class GameSession {
     }
 
     public void equipFromSlot(int slot, long nowMs) {
+        ItemStack st = slot >= 0 && slot < pc.backpack().size() ? pc.backpack().get(slot) : null;
+        boolean torch = st != null && st.itemId() == torchId;
+        if (torch && pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.LIGHT) != null) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Masz już założoną pochodnię (pole obok butów).");
+            return;
+        }
         InventoryResult r = pc.equipment().equipFromBackpack(pc.backpack(), slot, pc.vocation(), pc.level());
         switch (r) {
-            case OK: log.add(nowMs, EventLog.Kind.INFO, "Założono przedmiot."); break;
+            case OK: log.add(nowMs, EventLog.Kind.INFO, torch
+                    ? "Założono pochodnię. Dotknij jej w polu obok butów, aby zapalić." : "Założono przedmiot."); break;
             case WRONG_VOCATION: log.add(nowMs, EventLog.Kind.WARNING, "Twoja profesja nie może tego używać."); break;
             case LEVEL_TOO_LOW: log.add(nowMs, EventLog.Kind.WARNING, "Za niski poziom."); break;
             case WRONG_SLOT_TYPE: log.add(nowMs, EventLog.Kind.WARNING, "Tego nie da się założyć."); break;
@@ -2764,6 +2762,7 @@ public final class GameSession {
     public InventoryResult unequip(pl.fawizja.pixel.item.EquipSlot slot, long nowMs) {
         if (slot == pl.fawizja.pixel.item.EquipSlot.NONE) return InventoryResult.EMPTY_SLOT;
         InventoryResult r = pc.equipment().unequipToBackpack(slot, pc.backpack());
+        if (r.ok() && slot == pl.fawizja.pixel.item.EquipSlot.LIGHT && pc.isTorchLit()) pc.setTorchLit(false, torchId);
         switch (r) {
             case OK: log.add(nowMs, EventLog.Kind.INFO, "Zdjęto przedmiot do plecaka."); break;
             case EMPTY_SLOT: break;
@@ -2780,12 +2779,7 @@ public final class GameSession {
     /** Porzadkuje plecak (przycisk SORTUJ, akcja "sort"). */
     public boolean sortBackpack(long nowMs) {
         // porzadkowanie wymienia tez pelne setki monet na wyzszy nominal (mniej zajetych pol)
-        boolean exchanged = false;
-        for (pl.fawizja.pixel.economy.Currency cur : new pl.fawizja.pixel.economy.Currency[] {
-                pl.fawizja.pixel.economy.Currency.GOLD, pl.fawizja.pixel.economy.Currency.PLATINUM}) {
-            while (pc.backpack().count(cur.itemId()) >= pl.fawizja.pixel.economy.Currency.EXCHANGE_RATE
-                    && Money.exchangeUp(pc.backpack(), cur).ok()) exchanged = true;
-        }
+        boolean exchanged = pc.backpack().normalizeCoins();
         boolean moved = pc.backpack().sort() || exchanged;
         log.add(nowMs, EventLog.Kind.INFO, moved ? "Plecak uporządkowany." : "Plecak jest już uporządkowany.");
         return moved;

@@ -92,28 +92,4 @@ public final class Money {
         c.commitFrom(tx);
         return InventoryResult.OK;
     }
-
-    /** Wymienia 100 monet danego nominalu na 1 monete wyzszego nominalu. */
-    public static InventoryResult exchangeUp(Container c, Currency from) {
-        if (from == Currency.CRYSTAL) return InventoryResult.INVALID_AMOUNT;
-        if (c.count(from.itemId()) < Currency.EXCHANGE_RATE) return InventoryResult.NOT_ENOUGH_ITEMS;
-        Currency to = Currency.values()[from.ordinal() + 1];
-        Container tx = c.copy();
-        tx.remove(from.itemId(), Currency.EXCHANGE_RATE);
-        InventoryResult r = tx.add(ItemStack.of(to.itemId()));
-        if (r.ok()) c.commitFrom(tx);
-        return r;
-    }
-
-    /** Rozmienia 1 monete na 100 monet nizszego nominalu. */
-    public static InventoryResult exchangeDown(Container c, Currency from) {
-        if (from == Currency.GOLD) return InventoryResult.INVALID_AMOUNT;
-        if (c.count(from.itemId()) < 1) return InventoryResult.NOT_ENOUGH_ITEMS;
-        Currency to = Currency.values()[from.ordinal() - 1];
-        Container tx = c.copy();
-        tx.remove(from.itemId(), 1);
-        InventoryResult r = tx.add(new ItemStack(to.itemId(), Currency.EXCHANGE_RATE));
-        if (r.ok()) c.commitFrom(tx);
-        return r;
-    }
 }

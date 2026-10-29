@@ -149,10 +149,12 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
 
 ## Waluty i bank (Z, UI banku - C)
 
-Gold / Platinum / Crystal (100:1). Wplata, wyplata, przelew, wymiana w gore i w dol, placenie z reszta.
-Uzycie monet jak w Tibii (etap 14): stos 100 sztuk zamienia sie na monete wyzszego nominalu (100 gp = 1 platinum,
-100 platinum = 1 crystal), pojedyncza platynowa lub krysztalowa rozmienia sie na 100 nizszych. SORTUJ wymienia
-pelne setki automatycznie.
+Gold / Platinum / Crystal (100:1). Wplata, wyplata, przelew, placenie z reszta (wszystkimi nominalami).
+Monety lacza sie same (`Container.normalizeCoins`): kazde dodanie monet (lup, podniesienie, sprzedaz u NPC, wyplata,
+reszta) i polaczenie stosow przy przenoszeniu wymienia pelne 100 zlotych na 1 platynowa i 100 platynowych na
+1 krysztalowa; niepelne stosy tej samej monety sie lacza. Pelny plecak przyjmie monety, jesli po wymianie sie zmieszcza.
+Stare zapisy ze stosami po 100 sztuk sa wymieniane przy odczycie (wartosc i saldo konta bez zmian). Uzycie monety
+tylko podaje wartosc; w plecaku monety wygladaja jak kupka (wiecej sztuk - wyzsza kupka).
 Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie (jedno konto).
 Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 60 miejsc, wspolny dla miast, tylko przy bankierze
 (`GameSession.depotStore/depotTake`, przenosi wszystkie sztuki ile sie zmiesci, monety odrzuca). Zapis: `dp.<slot>`.
@@ -253,8 +255,11 @@ rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
   (`GAME_HOUR_MS`; do 0.212 doba trwala 2 h). Fazy swit/dzien/zmierzch/noc, plynne przejscia, noc min. 38% jasnosci.
   Czynsz, zaproszenia, odliczania i inne timery licza czas rzeczywisty i nie zaleza od dlugosci doby.
 - Podziemia: jasnosc maleje z glebokoscia, min. 16%; postac zawsze ma poswiate 2,5 kafelka.
-- Pochodnia z plecaka (POCH) - promien 5; pali sie 30 min czasu gry, potem znika i zapala sie nastepna
-  (komunikat, gdy brak kolejnej). Zgaszona nie traci paliwa. Czas widac na karcie postaci.
+- Pochodnia (kupiona w sklepie ogolnym albo z lupu goblinow, bandytow, szkieletow, stonog) - w plecaku "Zaloz" kladzie ja
+  w pole na prawo od butow (EquipSlot.LIGHT). Dotkniecie pola (albo przycisk POCH., klawisz T) zapala i gasi; promien 5.
+  Pali sie 20 min czasu palenia (zgaszona nie traci paliwa), w polu widac pozostaly czas ("18m"); wypalona znika
+  z komunikatem "Pochodnia się wypaliła.". Zdjeta pochodnia gasnie. Zapis v6: stan w `timers`; starsze zapisy - zapalona
+  pochodnia z plecaka trafia do pola, pochodnia z pola amunicji tez.
 - Czar Poswiata (LIGHT) daje wiekszy promien na czas; sytosc, swiatlo z czaru i pochodnia sa zapisywane.
 - Zrodla swiatla na mapie: latarnie, pochodnie scienne, ogniska, krysztaly (takze lodowe), swiecacy mech,
   magma, swiatlo z otworu nad miejscem na line.

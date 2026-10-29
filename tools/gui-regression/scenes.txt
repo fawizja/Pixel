@@ -109,3 +109,7 @@ hud_phone_narrow_popup|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.tel
 mobile_hud|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=target
 mobile_window|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_skills,mobile_chat
 mobile_picker|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.open=mobile_picker
+# 2026-10-29: monety same sie lacza (100 zlotych = 1 platynowa, 100 platynowych = 1 krysztalowa), pochodnia w polu obok butow (zapalona, czas palenia)
+coins_torch|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.width=1920 -Dpixel.height=1080 -Dpixel.open=coins,torchlit
+mobile_coins_bag|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=coins,mobile_win_bag,torchsel
+mobile_torch_equip|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=coins,torchlit,mobile_win_equip

@@ -4130,7 +4130,7 @@ public final class Hud {
     // ------------------------------------------------------------------ staly panel ekwipunku pod minimapa
 
     /** Uklad 5x2 na niskich ekranach: {kolumna, wiersz} dla EQ_SLOTS. */
-    private static final int[][] EQ_COMPACT = {{1, 0}, {0, 0}, {0, 1}, {2, 0}, {1, 1}, {2, 1}, {3, 0}, {3, 1}, {4, 0}};
+    private static final int[][] EQ_COMPACT = {{1, 0}, {0, 0}, {0, 1}, {2, 0}, {1, 1}, {2, 1}, {3, 0}, {3, 1}, {4, 0}, {5, 0}};
     private float epX, epY, epW, epH, epCell;
     /** true = okno jak w Tibii (naglowek, 3x4), false = zwarty pasek 5x2 bez naglowka. */
     private boolean epTibia;
@@ -4161,6 +4161,17 @@ public final class Hud {
 
     private void equipTap(int i, GameSession session, Actions actions) {
         ItemStack st = session.character().equipment().get(EQ_SLOTS[i]);
+        if (EQ_SLOTS[i] == EquipSlot.LIGHT) {
+            // pole pochodni: dotkniecie zapala i gasi (bez pochodni - podpowiedz)
+            if (st == null) {
+                session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO,
+                        "Pole pochodni. Dotknij pochodni w plecaku i wybierz \"Załóż\".");
+            } else {
+                actions.onButton("torch");
+            }
+            eqTapSlot = -1;
+            return;
+        }
         if (st == null) return;
         long now = com.badlogic.gdx.utils.TimeUtils.millis();
         if (eqTapSlot == i && now - eqTapMs <= 2000) {
@@ -4203,6 +4214,7 @@ public final class Hud {
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = epCellPos(i);
             drawEquipSlot(batch, session.character().equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], epCell);
+            if (EQ_SLOTS[i] == EquipSlot.LIGHT) drawTorchState(batch, session, c[0], c[1], epCell);
         }
         float[] bp = epBackpackPos();
         drawBackpackSlot(batch, bp[0], bp[1], epCell);
@@ -4219,6 +4231,71 @@ public final class Hud {
         }
         float pad = slotPad(cell);
         batch.draw(art.backpack(), x + pad, y + pad, cell - pad * 2, cell - pad * 2);
+    }
+
+    /**
+     * Pole pochodni: zapalona swieci (cieply blask w polu i zolta ramka), w rogu pozostaly czas palenia
+     * ("18m", ostatnia minuta w sekundach); zgaszona - czas szary.
+     */
+    private void drawTorchState(SpriteBatch batch, GameSession session, float x, float y, float cell) {
+        PlayerCharacter pc = session.character();
+        int torch = session.items().byKey("torch").id();
+        if (!pc.hasTorchEquipped(torch)) return;
+        boolean lit = pc.isTorchLit();
+        if (lit) {
+            batch.setColor(1f, 0.62f, 0.18f, 0.25f);
+            batch.draw(art.white(), x + 2, y + 2, cell - 4, cell - 4);
+            batch.setColor(1f, 0.8f, 0.3f, 0.9f);
+            batch.draw(art.white(), x + 1, y + 1, cell - 2, 1);
+            batch.draw(art.white(), x + 1, y + cell - 2, cell - 2, 1);
+            batch.draw(art.white(), x + 1, y + 1, 1, cell - 2);
+            batch.draw(art.white(), x + cell - 2, y + 1, 1, cell - 2);
+            batch.setColor(Color.WHITE);
+            ItemStack st = pc.equipment().get(EquipSlot.LIGHT);
+            TextureRegion r = art.item(st.itemId());
+            if (r != null) {
+                float pad = slotPad(cell);
+                batch.draw(r, x + pad, y + pad, cell - pad * 2, cell - pad * 2);
+            }
+        }
+        long sec = (pc.torchRemainingMs(torch) + 999) / 1000;
+        String t = sec >= 60 ? (sec + 59) / 60 + "m" : sec + "s";
+        font.getData().setScale(Math.max(HudLayout.MIN_FONT, Math.min(0.7f, cell / 50f)));
+        layout.setText(font, t);
+        batch.setColor(0f, 0f, 0f, 0.6f);
+        batch.draw(art.white(), x + cell - layout.width - 4, y + 1, layout.width + 3, layout.height + 4);
+        batch.setColor(Color.WHITE);
+        font.setColor(lit ? new Color(1f, 0.86f, 0.4f, 1f) : new Color(0.75f, 0.75f, 0.75f, 1f));
+        font.draw(batch, t, x + cell - layout.width - 2.5f, y + 3 + layout.height);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+    }
+
+    /** Polozenie monet w kupce (ulamki pola), od spodu: wiecej monet - wyzsza kupka, jak w Tibii. */
+    private static final float[][] COIN_PILE = {{-0.15f, -0.12f}, {0.15f, -0.12f}, {0f, -0.18f}, {-0.08f, 0.04f},
+            {0.09f, 0.03f}, {0f, 0.19f}, {0.01f, -0.03f}};
+
+    /**
+     * Ikona stosu w polu plecaka: monety rysowane jako kupka (2, 3, 4 monety, od 5 - 5, od 10 - 6, od 25 - 7)
+     * z jednej grafiki monety (OTSP), wysrodkowana w polu; pozostale przedmioty bez zmian.
+     */
+    private void drawStackIcon(SpriteBatch batch, TextureRegion r, ItemStack st, float x, float y, float size) {
+        int n = st.count();
+        if (!pl.fawizja.pixel.economy.Currency.isCoin(st.itemId()) || n < 2) {
+            batch.draw(r, x, y, size, size);
+            return;
+        }
+        int k = n >= 25 ? 7 : n >= 10 ? 6 : n >= 5 ? 5 : n;
+        float cx = 0, cy = 0;
+        for (int i = 0; i < k; i++) {
+            cx += COIN_PILE[i][0];
+            cy += COIN_PILE[i][1];
+        }
+        cx /= k;
+        cy /= k;
+        for (int i = 0; i < k; i++) {
+            batch.draw(r, x + (COIN_PILE[i][0] - cx) * size, y + (COIN_PILE[i][1] - cy) * size, size, size);
+        }
     }
 
     /** Pole ekwipunku: tlo z OTClientV8, przedmiot albo szara nazwa gniazda. */
@@ -4248,9 +4325,10 @@ public final class Hud {
 
     /** Uklad lalki ekwipunku: {kolumna, wiersz} od gory. */
     private static final EquipSlot[] EQ_SLOTS = {EquipSlot.AMULET, EquipSlot.HEAD, EquipSlot.WEAPON, EquipSlot.ARMOR,
-            EquipSlot.SHIELD, EquipSlot.RING, EquipSlot.LEGS, EquipSlot.AMMO, EquipSlot.FEET};
-    private static final int[][] EQ_CELLS = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}, {1, 3}};
-    private static final String[] EQ_NAMES = {"Amulet", "Hełm", "Broń", "Zbroja", "Tarcza", "Pierśc.", "Nogi", "Amun.", "Buty"};
+            EquipSlot.SHIELD, EquipSlot.RING, EquipSlot.LEGS, EquipSlot.AMMO, EquipSlot.FEET, EquipSlot.LIGHT};
+    /** Ostatnie pole (na prawo od butow): pochodnia. */
+    private static final int[][] EQ_CELLS = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}, {1, 3}, {2, 3}};
+    private static final String[] EQ_NAMES = {"Amulet", "Hełm", "Broń", "Zbroja", "Tarcza", "Pierśc.", "Nogi", "Amun.", "Buty", "Poch."};
     private static final float SK_ROW = 15;
     private static final int SK_INFO_ROWS = 9;
     private float eqX, eqY, eqW, eqH, eqCell, skX, skY, skW, skH;
@@ -4310,6 +4388,7 @@ public final class Hud {
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = eqCellPos(i);
             drawEquipSlot(batch, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], eqCell);
+            if (EQ_SLOTS[i] == EquipSlot.LIGHT) drawTorchState(batch, session, c[0], c[1], eqCell);
         }
         float[] bp = eqBackpackPos();
         drawBackpackSlot(batch, bp[0], bp[1], eqCell);
@@ -4445,7 +4524,7 @@ public final class Hud {
             TextureRegion r = art.item(s.itemId());
             if (dragging && base + i == dragSlot) batch.setColor(1f, 1f, 1f, 0.35f); // przeciagany - blady w miejscu zrodla
             float ip = 1 + slotPad(slotSize - 2);
-            if (r != null) batch.draw(r, sx + ip, sy + ip, slotSize - ip * 2, slotSize - ip * 2);
+            if (r != null) drawStackIcon(batch, r, s, sx + ip, sy + ip, slotSize - ip * 2);
             batch.setColor(Color.WHITE);
             if (s.count() > 1) text(batch, String.valueOf(s.count()), sx + 5, sy + 15);
             if (s.upgrade() > 0) text(batch, "+" + s.upgrade(), sx + slotSize - 24, sy + slotSize - 6);
@@ -4942,7 +5021,10 @@ public final class Hud {
         PlayerCharacter pc = session.character();
         List<String[]> out = new ArrayList<>();
         out.add(new String[] {"run", "Bieg za celem", pc.isRunning() ? "włączony" : "wyłączony"});
-        out.add(new String[] {"torch", "Pochodnia", pc.isTorchLit() ? "zapalona" : "zgaszona"});
+        int torchId = session.items().byKey("torch").id();
+        String torchState = !pc.hasTorchEquipped(torchId) ? "nie założona"
+                : (pc.isTorchLit() ? "zapalona, " : "zgaszona, ") + GameSession.torchTime(pc.torchRemainingMs(torchId));
+        out.add(new String[] {"torch", "Pochodnia", torchState});
         out.add(new String[] {"book", "Księga czarów", "czary i rzemiosło (K)"});
         out.add(new String[] {"diag", "Diagnostyka", diagnosticsOpen ? "pokazana" : "ukryta"});
         if (settings != null) {
@@ -5819,7 +5901,7 @@ public final class Hud {
                     if (st == null) continue;
                     TextureRegion r = art.item(st.itemId());
                     float ip = slotPad(c.w);
-                    if (r != null) b.draw(r, c.x + ip, c.y + ip, c.w - 2 * ip, c.h - 2 * ip);
+                    if (r != null) drawStackIcon(b, r, st, c.x + ip, c.y + ip, c.w - 2 * ip);
                     if (st.count() > 1) mText(b, String.valueOf(st.count()), c.right() - 2 - mWidth(String.valueOf(st.count()), 0.56f), c.y + 3, 0.56f, Color.WHITE, true);
                     if (pc.isKept(st.itemId())) bFill(b, c.right() - 6, c.top() - 6, 4, 4, hex(0xf2cc40, 1f));
                 }
@@ -5846,6 +5928,7 @@ public final class Hud {
                 for (int i = 0; i < EQ_SLOTS.length; i++) {
                     float[] c = mEqCell(win, EQ_CELLS[i][0], EQ_CELLS[i][1]);
                     drawEquipSlot(b, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], c[2]);
+                    if (EQ_SLOTS[i] == EquipSlot.LIGHT) drawTorchState(b, session, c[0], c[1], c[2]);
                 }
                 float[] bp = mEqCell(win, 2, 0);
                 drawBackpackSlot(b, bp[0], bp[1], bp[2]);
@@ -5872,6 +5955,7 @@ public final class Hud {
                     mText(b, l, tx, ty, 0.66f, M_TEXT, false);
                     ty -= 16;
                 }
+                mText(b, "Pochodnię dotknij, aby zapalić.", tx, win.y + 24, 0.52f, M_MUTED, false);
                 mText(b, "Dotknij dwa razy, aby zdjąć.", tx, win.y + 10, 0.52f, M_MUTED, false);
                 break;
             }

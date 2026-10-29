@@ -85,23 +85,22 @@ class MultiBackpackTest {
     }
 
     @Test
-    void coinsChangeUpAndDownLikeInTibia() {
+    void coinsChangeUpByThemselvesLikeInTibia() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
         GameSession s = session(pc);
         pc.backpack().clear();
         pc.backpack().add(new ItemStack(id("gold_coin"), 100));
-        s.useSlot(0, 0);
         assertEquals(0, pc.backpack().count(id("gold_coin")));
         assertEquals(1, pc.backpack().count(id("platinum_coin")), "100 gp = 1 platinum");
-        s.useSlot(slotOf(pc.backpack(), "platinum_coin"), 1000);
-        assertEquals(100, pc.backpack().count(id("gold_coin")), "1 platinum = 100 gp");
+        s.useSlot(0, 1000); // uzycie monety tylko opisuje wartosc
+        assertEquals(1, pc.backpack().count(id("platinum_coin")));
+        assertTrue(s.log().latest(1).get(0).text().contains("100 gp"));
         pc.backpack().clear();
         pc.backpack().add(new ItemStack(id("platinum_coin"), 100));
-        s.useSlot(0, 2000);
         assertEquals(1, pc.backpack().count(id("crystal_coin")), "100 platinum = 1 crystal");
-        // porzadkowanie wymienia pelne setki
+        // stare stosy (np. z zapisu) - porzadkowanie wymienia pelne setki
         pc.backpack().clear();
-        for (int i = 0; i < 3; i++) pc.backpack().add(new ItemStack(id("gold_coin"), 90));
+        for (int i = 0; i < 3; i++) pc.backpack().putInSlot(i, new ItemStack(id("gold_coin"), 90));
         s.sortBackpack(3000);
         assertEquals(70, pc.backpack().count(id("gold_coin")));
         assertEquals(2, pc.backpack().count(id("platinum_coin")));
