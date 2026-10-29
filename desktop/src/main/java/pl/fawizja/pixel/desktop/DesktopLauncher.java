@@ -37,6 +37,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.bossWin=true  offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od razu - podglad lupu i portalu
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
+ *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
  *   -Dpixel.stamina=M    nowa postac z M minutami staminy (np. 750 = 12:30, pomaranczowa); -Dpixel.premium=1 konto premium
@@ -561,6 +562,18 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().openNpc(gs.session());
                     gs.hud().previewNpcPage(Integer.getInteger("pixel.npcPage", 0));
+                }
+            }
+            String taps = System.getProperty("pixel.taps");
+            if (taps != null && getScreen() instanceof GameScreen) {
+                // kolejne dotkniecia pol w wybranych klatkach: x,y@klatka;x,y@klatka (drzwi, drabina, krzak - zrzuty)
+                for (String one : taps.split(";")) {
+                    String[] at = one.split("@");
+                    if (at.length != 2 || Integer.parseInt(at[1].trim()) != frame) continue;
+                    String[] w = at[0].split(",");
+                    GameScreen gs = (GameScreen) getScreen();
+                    gs.tapTile(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()),
+                            gs.session().character().position().z()));
                 }
             }
             if (Boolean.getBoolean("pixel.bossWin") && frame == frames - 15 && getScreen() instanceof GameScreen) {

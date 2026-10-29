@@ -1,19 +1,22 @@
 # przedmiot;hpMin;hpMax;manaMin;manaMax;cooldownMs;sytosc (s)
+# sytosc jak w Tibii (TibiaWiki): mieso 180 s, chleb 120 s, ryba 144 s, jagody i maliny 12 s; maks. 1200 s (docs/GAME_SYSTEMS.md)
 health_potion;60;90;0;0;1000;0
 mana_potion;0;0;50;80;1000;0
 great_health_potion;220;300;0;0;1000;0
 great_mana_potion;0;0;140;200;1000;0
-bread;0;0;0;0;0;300
+bread;0;0;0;0;0;120
 meat;0;0;0;0;0;180
-fish;0;0;0;0;0;240
+fish;0;0;0;0;0;144
 strong_health_potion;420;560;0;0;1000;0
 strong_mana_potion;0;0;240;330;1000;0
 supreme_health_potion;800;1100;0;0;1000;0
 supreme_mana_potion;0;0;400;600;1000;0
-ice_cod;0;0;0;0;0;420
-swamp_eel;0;0;0;0;0;360
-oasis_carp;0;0;0;0;0;360
+ice_cod;0;0;0;0;0;300
+swamp_eel;0;0;0;0;0;240
+oasis_carp;0;0;0;0;0;240
 great_spirit_potion;250;350;250;350;1000;0
 ultimate_spirit_potion;420;580;420;580;1000;0
 ultimate_mana_potion;0;0;650;900;1000;0
 ultimate_health_potion;1100;1500;0;0;1000;0
+blueberry;0;0;0;0;0;12
+raspberry;0;0;0;0;0;12

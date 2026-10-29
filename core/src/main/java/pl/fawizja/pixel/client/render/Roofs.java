@@ -15,7 +15,8 @@ import pl.fawizja.pixel.world.WorldMap;
 /**
  * Dachy budynkow liczone z mapy (widok jak w Tibii): budynek to zamkniety murami obszar posadzki, do ktorego
  * wchodzi sie tylko przez drzwi. Dachowka nad drewnem, lupek nad kamieniem, piaskowa dachowka nad piaskowcem. Dach przykrywa posadzke, drzwi i otaczajace mury; znika, gdy gracz stoi pod
- * dachem albo pod wyzszym pietrem.
+ * dachem albo pod wyzszym pietrem, a dach jednego budynku takze wtedy, gdy gracz podchodzi do jego drzwi albo
+ * staje tuz przy murze (widac mury i drzwi do dotkniecia, jak w Tibii przy wejsciu do domu).
  */
 public final class Roofs {
 
@@ -29,14 +30,80 @@ public final class Roofs {
             "marble_floor");
     static final int MAX_BUILDING = 900;
 
+    /**
+     * Dach budynku znika, gdy gracz stoi najwyzej {@link #HIDE_RADIUS} pola od jego drzwi albo tuz przy murze
+     * ({@link #WALL_RADIUS}) - widac wtedy mury i drzwi do dotkniecia, jak w Tibii przy wejsciu do domu. Mniejszy
+     * zasieg przy murach, zeby na waskich ulicach miasta dachy nie znikaly na kazdym kroku.
+     */
+    public static final int HIDE_RADIUS = 2, WALL_RADIUS = 1;
+
     private final WorldMap world;
     private final Map<Integer, byte[]> roofs = new HashMap<>();
+    /** Numer budynku pod dachem (0 = brak) - dach jednego budynku znika, gdy gracz do niego podchodzi. */
+    private final Map<Integer, int[]> buildings = new HashMap<>();
+    private int nextBuilding = 1;
 
     public Roofs(WorldMap world) {
         this.world = world;
         for (Map.Entry<Integer, FloorMap> e : world.floors().entrySet()) {
-            if (e.getKey() >= 0) roofs.put(e.getKey(), compute(e.getValue()));
+            if (e.getKey() < 0) continue;
+            int[] ids = new int[e.getValue().width() * world.height()];
+            roofs.put(e.getKey(), compute(e.getValue(), ids));
+            buildings.put(e.getKey(), ids);
         }
+    }
+
+    /** Numer budynku z dachem nad polem (0 = brak dachu). */
+    public int buildingAt(int x, int y, int z) {
+        int[] b = buildings.get(z);
+        if (b == null || x < 0 || y < 0 || x >= world.width() || y >= world.height()) return 0;
+        return b[y * world.width() + x];
+    }
+
+    /**
+     * Budynki, ktorych dach znika przy graczu (najwyzej {@link #HIDE_RADIUS} pola od drzwi, {@link #WALL_RADIUS}
+     * od posadzki albo muru).
+     * Gracz pod dachem i tak nie widzi zadnego dachu ({@link #covered}).
+     */
+    public java.util.Set<Integer> nearBuildings(Position p) {
+        java.util.Set<Integer> out = new java.util.HashSet<>();
+        for (int dy = -HIDE_RADIUS; dy <= HIDE_RADIUS; dy++) {
+            for (int dx = -HIDE_RADIUS; dx <= HIDE_RADIUS; dx++) {
+                int id = buildingAt(p.x() + dx, p.y() + dy, p.z());
+                if (id == 0 || out.contains(id)) continue;
+                if (Math.max(Math.abs(dx), Math.abs(dy)) <= WALL_RADIUS || world.openings().isDoor(p.translate(dx, dy))) out.add(id);
+            }
+        }
+        return out;
+    }
+
+    /** Przezroczystosc dachu budynku (1 = zwykly dach, 0 = dach zdjety); brak wpisu = zwykly dach. */
+    public static float alpha(Map<Integer, Float> fade, int building) {
+        if (building == 0 || fade.isEmpty()) return 1f;
+        Float a = fade.get(building);
+        return a == null ? 1f : a;
+    }
+
+    /** Czas znikania i pojawiania sie dachu (ms). */
+    public static final long FADE_MS = 250;
+
+    /**
+     * Plynne zdejmowanie dachu: przezroczystosc kazdego budynku zmierza do 0 (gracz obok) albo 1 (gracz odszedl)
+     * w {@link #FADE_MS}. Zwraca biezace przezroczystosci (budynki z pelnym dachem sa pomijane).
+     */
+    public static Map<Integer, Float> stepFade(Map<Integer, Float> fade, java.util.Set<Integer> hidden, long dtMs) {
+        float step = Math.max(0f, Math.min(1f, dtMs / (float) FADE_MS));
+        for (Integer id : hidden) fade.putIfAbsent(id, 1f);
+        java.util.Iterator<Map.Entry<Integer, Float>> it = fade.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, Float> e = it.next();
+            float target = hidden.contains(e.getKey()) ? 0f : 1f;
+            float a = e.getValue();
+            a = a < target ? Math.min(target, a + step) : Math.max(target, a - step);
+            if (a >= 1f && target >= 1f) it.remove();
+            else e.setValue(a);
+        }
+        return fade;
     }
 
     /** Rodzaj dachu nad polem (NONE, RED, SLATE). */
@@ -57,7 +124,7 @@ public final class Roofs {
         return false;
     }
 
-    private byte[] compute(FloorMap f) {
+    private byte[] compute(FloorMap f, int[] ids) {
         int w = f.width(), h = world.height();
         byte[] out = new byte[w * h];
         boolean[] seen = new boolean[w * h];
@@ -96,12 +163,16 @@ public final class Roofs {
                 if (frozen * 2 > cells.size() || snowAround(f, cells)) kind = SNOW;
                 else if (marble * 2 > cells.size()) kind = ROYAL;
                 else if (kind == RED && ((x * 7 + y * 13) & 1) == 0) kind = ORANGE;
+                int building = nextBuilding++;
                 for (int[] c : cells) {
                     for (int dy = -1; dy <= 1; dy++) {
                         for (int dx = -1; dx <= 1; dx++) {
                             int nx = c[0] + dx, ny = c[1] + dy;
                             if (!f.inBounds(nx, ny)) continue;
-                            if ((dx == 0 && dy == 0) || wall(f, nx, ny)) out[ny * w + nx] = kind;
+                            if ((dx == 0 && dy == 0) || wall(f, nx, ny)) {
+                                out[ny * w + nx] = kind;
+                                ids[ny * w + nx] = building;
+                            }
                         }
                     }
                 }

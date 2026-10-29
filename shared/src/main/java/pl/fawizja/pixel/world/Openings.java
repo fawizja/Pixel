@@ -6,8 +6,8 @@ import java.util.Set;
 /**
  * Drzwi i okna w murach budynkow: dotkniecie otwiera, drugie zamyka. Na poczatku wszystko jest zamkniete.
  * Okno to prosty odcinek muru budynku (co trzecie pole, mur tego samego rodzaju po obu stronach, wnetrze z jednej
- * strony), drzwi to obiekt "door_open" z mapy. Kto wchodzi w zamkniete drzwi, otwiera je; potwory przez zamkniete
- * drzwi nie przechodza. Ten sam uklad liczy klient (grafika) i serwer.
+ * strony), drzwi to obiekt "door_open" z mapy. Jak w Tibii zamkniete drzwi zatrzymuja kazdego (otwiera je dopiero
+ * dotkniecie - uzycie); potwory przez zamkniete drzwi nie przechodza. Ten sam uklad liczy klient (grafika) i serwer.
  */
 public final class Openings {
 
@@ -51,13 +51,34 @@ public final class Openings {
 
     public boolean isClosedDoor(Position p) { return isDoor(p) && !isOpen(p); }
 
-    /** Otwiera albo zamyka; zwraca nowy stan. */
-    public synchronized boolean set(Position p, boolean opened) {
-        if (opened) open.add(p); else open.remove(p);
+    /** Otwiera albo zamyka; zwraca nowy stan. Zmiana trafia do sluchacza (serwer: komunikat DOOR do klientow). */
+    public boolean set(Position p, boolean opened) {
+        boolean changed;
+        java.util.function.Consumer<String[]> l;
+        synchronized (this) {
+            changed = opened ? open.add(p) : open.remove(p);
+            l = listener;
+        }
+        if (changed && l != null) {
+            l.accept(new String[] {"DOOR", String.valueOf(p.x()), String.valueOf(p.y()), String.valueOf(p.z()), opened ? "1" : "0"});
+        }
         return opened;
     }
 
-    public synchronized boolean toggle(Position p) { return set(p, !open.contains(p)); }
+    private java.util.function.Consumer<String[]> listener;
+
+    /** Sluchacz zmian (serwer rozsyla stan drzwi i okien wszystkim graczom); null wylacza. */
+    public synchronized void setListener(java.util.function.Consumer<String[]> listener) { this.listener = listener; }
+
+    /** Otwarte drzwi i okna (stan dla nowo zalogowanego klienta). */
+    public synchronized Set<Position> openPositions() { return new HashSet<>(open); }
+
+    /** Klient online: stan z serwera bez powiadamiania sluchacza. */
+    public synchronized void apply(Position p, boolean opened) {
+        if (opened) open.add(p); else open.remove(p);
+    }
+
+    public boolean toggle(Position p) { return set(p, !isOpen(p)); }
 
     /** Drzwi pionowe (mur na polnoc albo poludnie), inaczej poziome. */
     public boolean doorVertical(FloorMap f, int x, int y) {

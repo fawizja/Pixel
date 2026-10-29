@@ -1040,11 +1040,9 @@ public final class GameScreen extends ScreenAdapter {
             else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
             return true;
         }
-        if (session.chestAt(p) || game.world().openings().isDoor(p) || game.world().openings().isWindow(p)
-                || game.world().crates().isStorage(p) || game.world().wallLights().isWallLight(p)
-                || game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null
-                || game.world().bossQuestByLever(p) != null) {
-            // skrzynia, drzwi, okno, pochodnia na murze: obok = otwarcie (drugie dotkniecie zamyka), dalej = marsz na pole obok i otwarcie
+        if (p.z() == session.character().position().z() && session.usableAt(p)) {
+            // jak "Uzyj" w Tibii: skrzynia, drzwi, okno, pochodnia, dzwignia, drabina, krzak, drogowskaz, studnia...
+            // obok = uzycie od razu (drzwi: drugie dotkniecie zamyka), dalej = marsz na pole obok i uzycie
             if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
             else if (walkTo(p, now(), true, true)) walkUse = p;
             else session.log().add(now(), EventLog.Kind.INFO, "Nie ma tam drogi.");
@@ -1109,10 +1107,7 @@ public final class GameScreen extends ScreenAdapter {
             case "door":
                 // wlasciciel w srodku: drzwi otwiera i zamyka przycisk okna
                 if (net == null) session.useAt(h.door(), t);
-                else {
-                    net.send("ACT", "open:" + h.door().x() + ":" + h.door().y() + ":" + h.door().z());
-                    game.world().openings().toggle(h.door());
-                }
+                else net.send("ACT", "open:" + h.door().x() + ":" + h.door().y() + ":" + h.door().z()); // stan wraca jako DOOR
                 break;
             default:
                 return;
@@ -1144,14 +1139,11 @@ public final class GameScreen extends ScreenAdapter {
             session.useAt(p, t);
         } else {
             net.send("ACT", "open:" + p.x() + ":" + p.y() + ":" + p.z());
-            // dzwignia, oltarz, pochodnia zadania i drzwi poziomu: rozstrzyga tylko serwer (komunikat przyjdzie w logu)
-            boolean serverOnly = game.world().altarQuestByLever(p) != null || game.world().altarAt(p) != null
-                    || game.world().bossQuestByLever(p) != null
-                    || game.world().isQuestTorch(p) || game.world().levelDoorAt(p) > session.character().level();
-            if (serverOnly) return;
+            // drzwi i okna: stan przychodzi z serwera (DOOR); dzwignia, oltarz, drabina, krzak itd. rozstrzyga serwer
+            // (komunikat przyjdzie w logu); od razu na ekranie tylko skrzynia, pochodnia i obrany krzak
             if (crate) session.toggleCrateView(p);
-            else if (game.world().wallLights().isWallLight(p)) game.world().wallLights().toggle(p);
-            else if (!session.chestAt(p)) game.world().openings().toggle(p);
+            else if (game.world().wallLights().isWallLight(p) && !game.world().isQuestTorch(p)) game.world().wallLights().toggle(p);
+            else if (session.berries().kindAt(p) != null && !session.berries().isEmpty(p, t)) session.berries().pick(p, t);
         }
         if (crate && session.openCrate() != null && !hud.npcOpen()) hud.openNpc(session);
     }
@@ -1509,7 +1501,7 @@ public final class GameScreen extends ScreenAdapter {
         Position from = session.character().position();
         if (nextTo && from.distanceTo(goal) <= 1) return false;
         List<Position> path = nextTo ? pathNextTo(from, goal)
-                : pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, goal, WALK_MAX_NODES, this::isTrap);
+                : pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, goal, WALK_MAX_NODES, this::walkAvoid);
         if (path.isEmpty()) {
             stopWalk();
             if (!quiet) session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? "Już tu jesteś." : "Nie ma drogi do tego miejsca.");
@@ -1529,7 +1521,7 @@ public final class GameScreen extends ScreenAdapter {
         for (Direction d : Direction.values()) {
             Position n = goal.translate(d.dx, d.dy);
             if (session.npcs().at(n) != null) continue;
-            List<Position> p = pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, n, WALK_MAX_NODES, this::isTrap);
+            List<Position> p = pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, n, WALK_MAX_NODES, this::walkAvoid);
             if (!p.isEmpty() && (best.isEmpty() || p.size() < best.size())) best = p;
         }
         return best;
@@ -1565,7 +1557,7 @@ public final class GameScreen extends ScreenAdapter {
         int dx = next.x() - pos.x(), dy = next.y() - pos.y();
         if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
             // zepchniety z trasy (np. przez potwora): nowa trasa od biezacego pola
-            List<Position> again = pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), pos, goal, WALK_MAX_NODES, this::isTrap);
+            List<Position> again = pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), pos, goal, WALK_MAX_NODES, this::walkAvoid);
             if (again.isEmpty()) {
                 stopWalk();
                 return null;
@@ -1576,7 +1568,16 @@ public final class GameScreen extends ScreenAdapter {
             dx = next.x() - pos.x();
             dy = next.y() - pos.y();
         }
-        for (Direction d : Direction.values()) if (d.dx == dx && d.dy == dy) return d;
+        for (Direction d : Direction.values()) {
+            if (d.dx != dx || d.dy != dy) continue;
+            if (game.world().openings().isClosedDoor(next)) {
+                // zamkniete drzwi na trasie: marsz staje przed nimi (jak w Tibii), drzwi otwiera dotkniecie
+                stopWalk();
+                session.log().add(now(), EventLog.Kind.INFO, GameSession.DOOR_HINT);
+                return null;
+            }
+            return d;
+        }
         stopWalk();
         return null;
     }
@@ -1734,6 +1735,7 @@ public final class GameScreen extends ScreenAdapter {
         float[] myLunge = lunges.get(pc.position());
         float lx = myLunge == null ? 0f : myLunge[0], ly = myLunge == null ? 0f : myLunge[1];
         collectSplats(session.combat().recentEvents(t, 1200), t);
+        worldRenderer.setBerries(session.berries(), t);
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
             drawSplats(b, row, z, t);
             drawCorpses(b, row, z);
@@ -1868,6 +1870,17 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     /** Pole z pulapka z kolcami - marsz po mapie je omija, jesli sie da. */
+    /** Pole pod widocznym dachem (dach budynku, do ktorego gracz podszedl, jest zdjety). */
+    private boolean underRoof(java.util.Map<Integer, Float> near, int x, int y, int z) {
+        return roofs.at(x, y, z) != pl.fawizja.pixel.client.render.Roofs.NONE
+                && pl.fawizja.pixel.client.render.Roofs.alpha(near, roofs.buildingAt(x, y, z)) > 0.5f;
+    }
+
+    /** Marsz po dotknieciu omija pulapki, skrzynie i zamkniete drzwi (drzwi otwiera dopiero ich dotkniecie). */
+    private boolean walkAvoid(Position p) {
+        return isTrap(p) || game.world().openings().isClosedDoor(p);
+    }
+
     private boolean isTrap(Position p) {
         return game.chests() != null && (game.chests().trapAt(p) || game.chests().at(p) != null); // na skrzynie sie nie wchodzi
     }
@@ -2424,11 +2437,12 @@ public final class GameScreen extends ScreenAdapter {
         Position me = session.character().position();
         // pod widocznym dachem postaci nie widac (jak w Tibii) - ich imion tez nie
         boolean roofsShown = roofs != null && !roofs.covered(me);
+        java.util.Map<Integer, Float> nearRoofs = roofsShown ? worldRenderer.roofFade() : java.util.Map.of();
         float[] gv = hud.gameView();
         float viewTop = gv[1] + gv[3] - 2, viewRight = gv[0] + gv[2];
         for (pl.fawizja.pixel.npc.Npc n : session.npcs().all()) {
             if (n.position().z() != z || n.position().distanceTo(me) > 7) continue;
-            if (roofsShown && roofs.at(n.position().x(), n.position().y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
+            if (roofsShown && underRoof(nearRoofs, n.position().x(), n.position().y(), z)) continue;
             projected.set(n.position().x() + 0.5f, worldRenderer.worldY(n.position().y()) + 1.15f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             nameLayout.setText(font, n.name());
@@ -2449,7 +2463,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         for (RemotePlayer rp : remotePlayers.values()) {
             if (rp.to.z() != z) continue;
-            if (roofsShown && roofs.at(rp.to.x(), rp.to.y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
+            if (roofsShown && underRoof(nearRoofs, rp.to.x(), rp.to.y(), z)) continue;
             projected.y = nameYAbove(remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)) + 1.02f + BAR_TOP, font, ui); // imie nad paskiem zycia (jak w Tibii)
             boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));
             // imie zielone jak w Tibii (druzyna niebieska); czaszka PvP rysowana osobno pod paskami
@@ -2724,6 +2738,15 @@ public final class GameScreen extends ScreenAdapter {
                         session.world().crates().applyMove(
                                 new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])),
                                 new Position(Integer.parseInt(m[4]), Integer.parseInt(m[5]), Integer.parseInt(m[6])));
+                    } catch (NumberFormatException e) {
+                        // zly komunikat: pomijamy
+                    }
+                    break;
+                case "DOOR":                                     // drzwi i okna otwarte / zamkniete na serwerze
+                    if (m.length < 5) break;
+                    try {
+                        session.world().openings().apply(
+                                new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])), "1".equals(m[4]));
                     } catch (NumberFormatException e) {
                         // zly komunikat: pomijamy
                     }

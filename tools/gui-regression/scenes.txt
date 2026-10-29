@@ -122,3 +122,7 @@ mobile_store|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,
 skills_axe_club_stamina|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.premium=1 -Dpixel.stamina=2490
 mobile_skills_stamina|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_skills -Dpixel.stamina=750
 fishing_rod_in_hand|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=470,483,0 -Dpixel.open=fishing
+# 2026-10-29: uzycie dotknieciem jak w Tibii - zamkniete drzwi przed postacia (dach domu zdjety przy drzwiach), drzwi poziomu zamkniete za postacia, obrany krzak jagod
+door_closed_roof_off|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=491,501,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+leveldoor_closed_behind|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=191,431,0 -Dpixel.level=20 -Dpixel.taps=191,430@5;191,432@14 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+berry_bush_picked|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=500,445,0 -Dpixel.taps=500,444@10;500,444@14;500,444@18;500,444@22 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2

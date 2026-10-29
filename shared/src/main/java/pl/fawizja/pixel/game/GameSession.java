@@ -67,6 +67,8 @@ public final class GameSession {
     private final RecipeRegistry recipes;
     private final FishingSystem fishing;
     private final pl.fawizja.pixel.gathering.HerbGathering herbs;
+    private final pl.fawizja.pixel.gathering.BerryBushes berries;
+    private final ConsumableRegistry consumables;
     /** Zegar swiata; czas sesji 0 = 09:00 czasu gry. W trybie online czas poda serwer. */
     private WorldClock clock = new WorldClock(-9L * WorldClock.GAME_HOUR_MS, WorldClock.REAL_DAY_MS, 0.38f);
     private Boolean wasNight;
@@ -87,6 +89,12 @@ public final class GameSession {
     /** Czas ostatniego kroku symulacji (ms). */
     public long lastUpdateMs() { return lastUpdateMs; }
     private long lastGateWarningMs = -10_000;
+    /** Podpowiedz przy zamknietych drzwiach (najwyzej raz na {@link #DOOR_HINT_MS}). */
+    private long lastDoorHintMs = Long.MIN_VALUE / 2;
+    static final long DOOR_HINT_MS = 30_000;
+    public static final String DOOR_HINT = "Dotknij drzwi, aby je otworzyć.";
+    /** Drzwi poziomu, w ktorych stoi postac: zamykaja sie za nia, gdy z nich zejdzie (jak w Tibii). */
+    private Position inLevelDoor;
     private long lastPzWarningMs = -10_000;
 
     /** Sesja bez potworow (testy, edytor). */
@@ -142,7 +150,9 @@ public final class GameSession {
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
         this.fishing = new FishingSystem(world, items, rng);
         this.herbs = new pl.fawizja.pixel.gathering.HerbGathering(world);
+        this.berries = new pl.fawizja.pixel.gathering.BerryBushes(world);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
+        this.consumables = consumables;
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p) || !mayEnter(p)
                 || (!world.isProtectionZone(p) && otherPlayers.test(p)));
         this.combat.setKillListener(t -> {
@@ -1967,6 +1977,9 @@ public final class GameSession {
                 moving = true;
             } else if (r == MoveResult.CHANGED_FLOOR) {
                 onFloorChanged(nowMs);
+            } else if (r == MoveResult.DOOR_CLOSED && nowMs - lastDoorHintMs > DOOR_HINT_MS) {
+                lastDoorHintMs = nowMs;
+                log.add(nowMs, EventLog.Kind.INFO, DOOR_HINT);
             } else if (r == MoveResult.LEVEL_TOO_LOW && nowMs - lastGateWarningMs > 3000) {
                 lastGateWarningMs = nowMs;
                 Position gate = pc.position().translate(requested.dx, requested.dy);
@@ -1978,6 +1991,7 @@ public final class GameSession {
                 }
             }
         }
+        closeLevelDoorBehind();
         ground.decay(nowMs);
         if (!sharedWorld && altarsLocal) updateAltarTorches();
         boolean night = isNight(nowMs);
@@ -2352,6 +2366,7 @@ public final class GameSession {
                 if (openChest(nowMs)) break;
                 if (searchCorpse(nowMs)) break;
                 if (useCrateNearby(nowMs)) break;
+                if (pickBerriesNearby(nowMs)) break;
                 if (!gatherHerbs(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
         }
     }
@@ -2377,7 +2392,20 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
             return true;
         }
-        pl.fawizja.pixel.gathering.HerbGathering.Result r = herbs.gather(pc.position(), rng, nowMs);
+        return herbResult(herbs.gather(pc.position(), rng, nowMs), nowMs);
+    }
+
+    /** Dotkniety krzak z ziolami obok postaci. false = to nie jest krzak z ziolami. */
+    private boolean gatherHerbsAt(Position b, long nowMs) {
+        if (!items.containsKey("healing_herb") || !herbs.isHerbBush(b)) return false;
+        if (!pc.backpack().canAdd(items.byKey("healing_herb").id(), 2)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
+            return true;
+        }
+        return herbResult(herbs.gatherAt(b, rng, nowMs), nowMs);
+    }
+
+    private boolean herbResult(pl.fawizja.pixel.gathering.HerbGathering.Result r, long nowMs) {
         switch (r.outcome()) {
             case NO_BUSH:
                 return false;
@@ -2396,6 +2424,146 @@ public final class GameSession {
                 return true;
         }
     }
+
+    public pl.fawizja.pixel.gathering.BerryBushes berries() { return berries; }
+
+    /** Krzak z jagodami albo malinami obok: kilka owocow do plecaka, po kilku zbiorach krzak odrasta godzine. */
+    private boolean pickBerries(Position b, long nowMs) {
+        pl.fawizja.pixel.gathering.BerryBushes.Kind kind = berries.kindAt(b);
+        if (kind == null || !items.containsKey(kind.itemKey)) return false;
+        pl.fawizja.pixel.item.ItemType fruit = items.byKey(kind.itemKey);
+        String bush = kind == pl.fawizja.pixel.gathering.BerryBushes.Kind.BLUEBERRY ? "Krzak jagód" : "Krzak malin";
+        if (berries.isEmpty(b, nowMs)) {
+            pl.fawizja.pixel.gathering.BerryBushes.Result r = berries.pick(b, nowMs);
+            log.add(nowMs, EventLog.Kind.INFO, bush + " jest pusty. Owoce odrosną za "
+                    + Math.max(1, (r.readyInMs() + 59_999) / 60_000) + " min.");
+            return true;
+        }
+        if (!pc.backpack().canAdd(fruit.id(), pl.fawizja.pixel.gathering.BerryBushes.PER_PICK)) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na owoce.");
+            return true;
+        }
+        pl.fawizja.pixel.gathering.BerryBushes.Result r = berries.pick(b, nowMs);
+        if (!pc.backpack().add(new ItemStack(fruit.id(), r.count())).ok()) {
+            berries.undo(b);
+            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na owoce.");
+            return true;
+        }
+        pl.fawizja.pixel.magic.Consumable c = consumables == null ? null : consumables.get(fruit.id());
+        int food = c == null ? 0 : c.foodSeconds();
+        log.add(nowMs, EventLog.Kind.LOOT, "Zrywasz " + r.count() + "x " + fruit.name() + " (masz " + pc.backpack().count(fruit.id())
+                + (food > 0 ? "; każda syci " + food + " s" : "") + "). "
+                + (r.left() > 0 ? "Na krzaku zostało jeszcze trochę owoców." : bush + " jest teraz pusty - odrośnie za godzinę."));
+        return true;
+    }
+
+    /** Krzak z owocami obok postaci (przycisk UZYJ, klawisz E): najpierw krzak, ktory ma jeszcze owoce. */
+    private boolean pickBerriesNearby(long nowMs) {
+        Position me = pc.position(), found = null;
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                Position q = me.translate(dx, dy);
+                if (berries.kindAt(q) == null) continue;
+                if (!berries.isEmpty(q, nowMs)) return pickBerries(q, nowMs);
+                if (found == null) found = q;
+            }
+        }
+        return found != null && pickBerries(found, nowMs);
+    }
+
+    /** Drogowskaz: kraina i droga do najblizszego miasta (strona swiata i liczba pol). */
+    private String signText(Position p) {
+        StringBuilder b = new StringBuilder("Na drogowskazie napisano: ");
+        Region r = world.regionAt(p);
+        if (r != null) b.append('"').append(r.name()).append('"');
+        pl.fawizja.pixel.world.Town best = null;
+        int bestD = Integer.MAX_VALUE;
+        for (pl.fawizja.pixel.world.Town t : world.towns()) {
+            if (t.temple().z() != p.z()) continue;
+            int d = t.temple().distanceTo(p);
+            if (d < bestD) { bestD = d; best = t; }
+        }
+        if (best != null) {
+            if (r != null) b.append(". ");
+            if (bestD <= 12) b.append("Witamy w mieście ").append(best.name()).append('!');
+            else b.append(best.name()).append(" - ").append(compass(best.temple().x() - p.x(), best.temple().y() - p.y()))
+                    .append(", ").append(bestD).append(" pól.");
+        } else if (r == null) {
+            b.append("napis jest zatarty.");
+        }
+        return b.toString();
+    }
+
+    /** Strona swiata po polsku (y rosnie na poludnie). */
+    static String compass(int dx, int dy) {
+        double a = Math.toDegrees(Math.atan2(-dy, dx));        // 0 = wschod, 90 = polnoc
+        String[] names = {"na wschód", "na północny wschód", "na północ", "na północny zachód", "na zachód",
+                "na południowy zachód", "na południe", "na południowy wschód"};
+        int k = (int) Math.round(a / 45.0);
+        return names[Math.floorMod(k, 8)];
+    }
+
+    /** Uzycie obiektu na mapie (drabina, krzak, drogowskaz, studnia, lozko); false = nic do uzycia. */
+    private boolean useWorldObject(Position p, long nowMs) {
+        Position me = pc.position();
+        pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
+        if (tr != null && !tr.type().triggeredByWalking()) {
+            if (tr.type().requiresRope() && pc.backpack().count(items.byKey("rope").id()) == 0) {
+                log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
+                return true;
+            }
+            if (pc.isDead()) return true;
+            pc.setPosition(tr.to());
+            onFloorChanged(nowMs);
+            checkRegion(nowMs);
+            return true;
+        }
+        if (pickBerries(p, nowMs)) return true;
+        if (gatherHerbsAt(p, nowMs)) return true;
+        pl.fawizja.pixel.world.TileType obj = objectAt(p);
+        if (obj == null) return false;
+        switch (obj.key()) {
+            case "signpost":
+                log.add(nowMs, EventLog.Kind.INFO, signText(p));
+                return true;
+            case "well":
+                log.add(nowMs, EventLog.Kind.INFO, "Zaglądasz do studni. Woda jest zimna i czysta - pijesz kilka łyków.");
+                return true;
+            case "bed":
+                log.add(nowMs, EventLog.Kind.INFO, "Wygodne łóżko. Na sen przyjdzie jeszcze czas.");
+                return true;
+            case "lectern":
+                log.add(nowMs, EventLog.Kind.INFO, "Na pulpicie leży otwarta księga. Pismo jest zbyt wyblakłe, by je odczytać.");
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private pl.fawizja.pixel.world.TileType objectAt(Position p) {
+        pl.fawizja.pixel.world.FloorMap f = world.floor(p.z());
+        if (f == null || !f.inBounds(p.x(), p.y())) return null;
+        int id = f.get(pl.fawizja.pixel.world.Layer.OBJECT, p.x(), p.y());
+        return id == 0 ? null : world.tiles().get(id);
+    }
+
+    /**
+     * Czy dotkniecie pola ma cos uzyc (jak "Uzyj" w Tibii): skrzynia, drzwi, okno, dzwignia, pochodnia, drabina,
+     * miejsce na line, krzak z owocami albo ziolami, drogowskaz, studnia, lozko. Klient na tej podstawie podchodzi
+     * do pola i go uzywa zamiast wejsc na nie.
+     */
+    public boolean usableAt(Position p) {
+        if (chestAt(p) || world.openings().isDoor(p) || world.openings().isWindow(p) || world.crates().isStorage(p)
+                || world.wallLights().isWallLight(p) || world.altarQuestByLever(p) != null || world.altarAt(p) != null
+                || world.bossQuestByLever(p) != null) return true;
+        pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
+        if (tr != null && !tr.type().triggeredByWalking()) return true;
+        if (berries.kindAt(p) != null || herbs.isHerbBush(p)) return true;
+        pl.fawizja.pixel.world.TileType obj = objectAt(p);
+        return obj != null && USABLE_OBJECTS.contains(obj.key());
+    }
+
+    private static final java.util.Set<String> USABLE_OBJECTS = java.util.Set.of("signpost", "well", "bed", "lectern");
 
     private pl.fawizja.pixel.treasure.TreasureChests chests;
 
@@ -2551,6 +2719,29 @@ public final class GameSession {
         return t == null ? key : t.name();
     }
 
+    /**
+     * Drzwi poziomu sa otwarte tylko, gdy ktos w nich stoi: postac na polu drzwi je otwiera, a po zejsciu (krok,
+     * schody, teleport, smierc) zamyka za soba - chyba ze w drzwiach stoi juz ktos inny. Dziala osobno dla kazdej
+     * sesji (offline i na serwerze, gdzie drzwi sa wspolne dla wszystkich graczy).
+     */
+    private void closeLevelDoorBehind() {
+        Position me = pc.position();
+        if (inLevelDoor != null && !inLevelDoor.equals(me)) {
+            Position d = inLevelDoor;
+            inLevelDoor = null;
+            if (!otherPlayers.test(d) && (monsters == null || monsters.monsterAt(d) == null)) world.openings().set(d, false);
+        }
+        if (inLevelDoor == null && world.levelDoorAt(me) > 0) {
+            inLevelDoor = me;
+            world.openings().set(me, true);
+        }
+    }
+
+    /** Na polu stoi ktos inny (gracz, potwor, NPC). */
+    private boolean occupiedByOther(Position p) {
+        return otherPlayers.test(p) || (monsters != null && monsters.monsterAt(p) != null) || (npcs != null && npcs.at(p) != null);
+    }
+
     static String levelDoorRefusal(int level) {
         return "Na drzwiach napis: " + WorldMap.levelDoorSign(level) + ". Drzwi nie ustępują - wejdziesz od poziomu " + level + ".";
     }
@@ -2604,10 +2795,28 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, levelDoorRefusal(doorLevel));
             return true;
         }
-        if (doorLevel > 0 && !world.openings().isOpen(p)) {
+        if (doorLevel > 0) {
+            // jak w Tibii: uzycie drzwi poziomu wprowadza postac w drzwi, po zejsciu zamykaja sie za nia
+            if (p.equals(me)) {
+                log.add(nowMs, EventLog.Kind.INFO, "Stoisz w drzwiach. Zamkną się za tobą, gdy przejdziesz dalej.");
+                return true;
+            }
+            if (occupiedByOther(p)) {
+                log.add(nowMs, EventLog.Kind.INFO, "Ktoś stoi w drzwiach.");
+                return true;
+            }
+            if (pc.isDead() || isStepping(nowMs)) return true;
             log.add(nowMs, EventLog.Kind.INFO, "Na drzwiach napis: " + WorldMap.levelDoorSign(doorLevel)
                     + ". Masz poziom " + pc.level() + " - drzwi się otwierają.");
             world.openings().set(p, true);
+            pc.setPosition(p);
+            stepFrom = me;
+            stepStartMs = nowMs;
+            Direction d = Direction.fromDelta(p.x() - me.x(), p.y() - me.y());
+            stepDurationMs = d == null ? 0 : MovementSystem.stepDurationMs(pc, d);
+            moving = true;
+            if (d != null) facing = d;
+            closeLevelDoorBehind();
             return true;
         }
         if (wl.isWallLight(p)) {
@@ -2621,7 +2830,7 @@ public final class GameSession {
         }
         pl.fawizja.pixel.world.Openings o = world.openings();
         boolean door = o.isDoor(p);
-        if (!door && !o.isWindow(p)) return false;
+        if (!door && !o.isWindow(p)) return useWorldObject(p, nowMs);
         if (!mayUseOpening(p)) {
             pl.fawizja.pixel.house.House h = houses.ofOpening(p);
             log.add(nowMs, EventLog.Kind.WARNING, houseAccess(h) == pl.fawizja.pixel.house.HouseAccess.ENTRY
@@ -2629,7 +2838,7 @@ public final class GameSession {
                     : (door ? "To drzwi" : "To okno") + " domu " + h.name() + ". Otwiera je właściciel albo gość z pełnym dostępem.");
             return true;
         }
-        if (door && o.isOpen(p) && (p.equals(me) || monsters != null && monsters.monsterAt(p) != null)) {
+        if (door && o.isOpen(p) && (p.equals(me) || occupiedByOther(p))) {
             log.add(nowMs, EventLog.Kind.INFO, "Ktoś stoi w drzwiach.");
             return true;
         }

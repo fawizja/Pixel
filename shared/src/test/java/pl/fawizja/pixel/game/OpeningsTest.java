@@ -54,15 +54,93 @@ class OpeningsTest {
     }
 
     @Test
-    void walkingIntoAClosedDoorOpensIt() {
+    void walkingIntoAClosedDoorDoesNotOpenIt() {
+        // jak w Tibii: drzwi otwiera dopiero uzycie (dotkniecie), wejscie w nie tylko zatrzymuje i podpowiada
         WorldMap world = TestData.world();
         Openings o = world.openings();
         o.set(DOOR, false);
-        GameSession s = at(world, new Position(511, 498, 0));
-        for (long t = 0; t < 3000 && !s.character().position().equals(DOOR); t += 50) s.update(t, Direction.WEST);
-        assertEquals(DOOR, s.character().position());
+        Position front = new Position(511, 498, 0);
+        GameSession s = at(world, front);
+        for (long t = 0; t < 3000; t += 50) s.update(t, Direction.WEST);
+        assertEquals(front, s.character().position(), "a closed door stops the character");
+        assertFalse(o.isOpen(DOOR), "walking into a door does not open it");
+        long hints = s.log().latest(50).stream().filter(e -> e.text().equals(GameSession.DOOR_HINT)).count();
+        assertEquals(1, hints, "one hint, not one per frame");
+        assertFalse(new pl.fawizja.pixel.movement.MovementSystem(world, 0).canStep(front, Direction.WEST));
+        // dotkniecie otwiera - teraz przejscie jest wolne
+        assertTrue(s.useAt(DOOR, 3000));
         assertTrue(o.isOpen(DOOR));
+        for (long t = 3000; t < 6000 && !s.character().position().equals(DOOR); t += 50) s.update(t, Direction.WEST);
+        assertEquals(DOOR, s.character().position());
+        assertTrue(o.isOpen(DOOR), "an open door stays open after walking through");
         o.set(DOOR, false);
+    }
+
+    @Test
+    void doorStateChangesReachTheListenerOnce() {
+        WorldMap world = TestData.world();
+        Openings o = world.openings();
+        o.set(DOOR, false);
+        java.util.List<String> seen = new java.util.ArrayList<>();
+        o.setListener(m -> seen.add(String.join(" ", m)));
+        try {
+            o.set(DOOR, true);
+            o.set(DOOR, true);                                   // bez zmiany: bez komunikatu
+            o.toggle(DOOR);
+            o.apply(DOOR, true);                                 // stan z serwera u klienta: bez komunikatu
+        } finally {
+            o.setListener(null);
+        }
+        assertEquals(List.of("DOOR 510 498 0 1", "DOOR 510 498 0 0"), seen);
+        assertTrue(o.openPositions().contains(DOOR));
+        o.set(DOOR, false);
+    }
+
+    @Test
+    void tappingALadderClimbsIt() {
+        WorldMap world = TestData.world();
+        pl.fawizja.pixel.world.Transition ladder = null;
+        for (pl.fawizja.pixel.world.FloorMap f : world.floors().values()) {
+            for (int y = 0; y < f.height() && ladder == null; y++)
+                for (int x = 0; x < f.width() && ladder == null; x++) {
+                    pl.fawizja.pixel.world.Transition t = f.transitionAt(x, y);
+                    if (t != null && t.type() == pl.fawizja.pixel.world.TransitionType.LADDER) ladder = t;
+                }
+            if (ladder != null) break;
+        }
+        assertNotNull(ladder, "the world has ladders");
+        Position spot = null;
+        for (int dy = -1; dy <= 1 && spot == null; dy++)
+            for (int dx = -1; dx <= 1 && spot == null; dx++) {
+                Position q = ladder.from().translate(dx, dy);
+                if ((dx != 0 || dy != 0) && world.isWalkable(q) && world.transitionAt(q) == null) spot = q;
+            }
+        assertNotNull(spot);
+        GameSession s = at(world, spot);
+        assertTrue(s.usableAt(ladder.from()), "a ladder is used by tapping it");
+        assertTrue(s.useAt(ladder.from(), 0));
+        assertEquals(ladder.to(), s.character().position(), "tapping the ladder climbs it");
+    }
+
+    @Test
+    void signpostsTellTheWay() {
+        WorldMap world = TestData.world();
+        int sign = world.tiles().byKey("signpost").id();
+        pl.fawizja.pixel.world.FloorMap f = world.floor(0);
+        Position post = null, spot = null;
+        for (int y = 1; y < f.height() - 1 && spot == null; y++)
+            for (int x = 1; x < f.width() - 1 && spot == null; x++) {
+                if (f.get(pl.fawizja.pixel.world.Layer.OBJECT, x, y) != sign) continue;
+                for (int d = 0; d < 4 && spot == null; d++) {
+                    Position q = new Position(x + (d == 0 ? 1 : d == 1 ? -1 : 0), y + (d == 2 ? 1 : d == 3 ? -1 : 0), 0);
+                    if (world.isWalkable(q)) { post = new Position(x, y, 0); spot = q; }
+                }
+            }
+        assertNotNull(spot, "the world has signposts");
+        GameSession s = at(world, spot);
+        assertTrue(s.usableAt(post));
+        assertTrue(s.useAt(post, 0));
+        assertTrue(s.log().latest(1).get(0).text().startsWith("Na drogowskazie"), s.log().latest(1).get(0).text());
     }
 
     @Test

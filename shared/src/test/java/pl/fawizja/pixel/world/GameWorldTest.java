@@ -81,7 +81,7 @@ class GameWorldTest {
             Position p = q.poll();
             for (Direction d : Direction.values()) {
                 pc.setPosition(p);
-                if (ms.step(pc, d).moved() && seen.add(pc.position())) q.add(pc.position());
+                if (pl.fawizja.pixel.TestData.stepOpeningDoors(world, ms, pc, d).moved() && seen.add(pc.position())) q.add(pc.position());
             }
             pc.setPosition(p);
             if (ms.use(pc) == MoveResult.CHANGED_FLOOR && seen.add(pc.position())) q.add(pc.position());

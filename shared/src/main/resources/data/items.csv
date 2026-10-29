@@ -183,3 +183,5 @@
 199;gargoyle_shard;Odłamek gargulca;MATERIAL;100;700;NONE;0;0;0;0;*;0;0;PHYSICAL;-;#8a8a90;Kamień, który jeszcze drży. Zostaje po ożywionych posągach i gargulcach.
 200;crow_feather_hood;Kaptur z kruczych piór;ARMOR;1;3500;HEAD;0;0;4;25;*;0;0;PHYSICAL;-;#3a2a5a;Kaptur Wrońca, Kruczego Kniazia. Pióra szeleszczą przy każdym kroku.
 201;mirewood_rod;Laska z Topieli;WEAPON;1;9000;WEAPON;42;0;0;80;DRUID;0;7;EARTH;WAND;#4a7a3a;Laska z czarnego drewna z dna bagien. Zostawia ją tylko Szlamiara.
+240;blueberry;Jagody;FOOD;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;-;#3a4a9a;Garść jagód z leśnego krzaka. Syci krótko - jak w Tibii, 12 s na sztukę.
+241;raspberry;Maliny;FOOD;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;-;#c83a5a;Słodkie maliny z krzaka. Syci krótko - 12 s na sztukę.

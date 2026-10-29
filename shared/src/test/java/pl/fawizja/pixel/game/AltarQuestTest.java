@@ -177,17 +177,49 @@ class AltarQuestTest {
     }
 
     @Test
-    void levelDoorLetsLevel20Through() {
+    void levelDoorLetsLevel20ThroughAndClosesBehind() {
         Position door = levelDoor();
+        // wejscie w zamkniete drzwi poziomu ich nie otwiera (jak inne drzwi) - otwiera je uzycie
+        GameSession walked = walkNorthThroughDoor(20);
+        assertEquals(door.translate(0, 1), walked.character().position());
+        assertFalse(world.openings().isOpen(door));
+
         PlayerCharacter pc = hero(Vocation.DRUID, 20, door.translate(0, 1));
-        GameSession tap = new GameSession(TestData.ITEMS, world, pc);
-        assertTrue(tap.useAt(door, 0));
-        assertTrue(tap.log().latest(1).get(0).text().contains("drzwi się otwierają"));
-        assertTrue(world.openings().isOpen(door));
-        world.openings().set(door, false);
-        GameSession s = walkNorthThroughDoor(20);
-        Position p = s.character().position();
+        GameSession s = new GameSession(TestData.ITEMS, world, pc);
+        assertTrue(s.useAt(door, 0));
+        assertTrue(s.log().latest(1).get(0).text().contains("drzwi się otwierają"));
+        assertEquals(door, pc.position(), "using the level door steps into the doorway (like Tibia)");
+        assertTrue(world.openings().isOpen(door), "open while the character stands in it");
+        long t = 0;
+        for (; t < 3_000 && pc.position().equals(door); t += 50) s.update(t, Direction.NORTH);
+        Position p = pc.position();
         assertTrue(p.z() == -1 || p.y() < door.y(), "went through the door: " + p);
+        s.update(t + 50, null);
+        assertFalse(world.openings().isOpen(door), "the door closes behind the character");
+
+        // za nia postac z poziomem 19 nie przejdzie: drzwi zamkniete, wejscie i dotkniecie odmawiaja
+        GameSession low = walkNorthThroughDoor(19);
+        assertEquals(door.translate(0, 1), low.character().position());
+        assertFalse(low.useAt(door, 10_000) && world.openings().isOpen(door));
+        assertNotEquals(door, low.character().position());
+        assertTrue(low.log().latest(1).get(0).text().contains("Tylko dla poziomu 20+"));
+    }
+
+    @Test
+    void levelDoorStaysOpenWhileAnotherQualifiedCharacterStandsInIt() {
+        Position door = levelDoor();
+        PlayerCharacter a = hero(Vocation.DRUID, 20, door.translate(0, 1));
+        GameSession sa = new GameSession(TestData.ITEMS, world, a);
+        assertTrue(sa.useAt(door, 0));
+        assertEquals(door, a.position());
+        // druga sesja (serwer: inny gracz) widzi postac A w drzwiach: nie wejdzie i drzwi sie nie zamkna
+        PlayerCharacter b = hero(Vocation.KNIGHT, 30, door.translate(0, 1));
+        GameSession sb = new GameSession(TestData.ITEMS, world, b);
+        sb.setOtherPlayers(q -> q.equals(a.position()));
+        assertTrue(sb.useAt(door, 100));
+        assertNotEquals(door, b.position());
+        assertTrue(sb.log().latest(1).get(0).text().contains("Ktoś stoi"));
+        assertTrue(world.openings().isOpen(door));
     }
 
     // ------------------------------------------------------------------ pochodnie i dzwignia

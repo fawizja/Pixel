@@ -980,6 +980,26 @@ public final class TileArt implements Disposable {
         return k < n.length ? n[k] : null;
     }
 
+    /** Liczba wariantow grafiki obiektu (1 = tylko podstawowa). */
+    public int variantCount(int id) {
+        if (id > 0 && id < bigTiles.length && bigTiles[id] != null) return bigTiles[id].length;
+        TextureRegion[] v = variants.get(id);
+        return v == null ? 1 : v.length;
+    }
+
+    /** Obiekt w naturalnym rozmiarze dla wybranego wariantu (jak {@link #nativeTile}) albo null. */
+    public TextureRegion nativeVariant(int id, int k) {
+        TextureRegion[] n = id > 0 && id < nativeTiles.length ? nativeTiles[id] : null;
+        return n == null || k < 0 || k >= n.length ? null : n[k];
+    }
+
+    /** Zwykla grafika (1 pole) wybranego wariantu albo podstawowa. */
+    public TextureRegion tileVariant(int id, int k) {
+        TextureRegion[] v = variants.get(id);
+        if (v == null || k < 0 || k >= v.length) return tile(id);
+        return v[k];
+    }
+
     /** Ozdoba muru wnetrza (plotno 2x2 pola) wybrana wg liczby albo null, gdy brak grafik. */
     public TextureRegion wallDeco(boolean vertical, int pick) {
         List<TextureRegion> d = vertical ? decoV : decoH;
@@ -1531,6 +1551,17 @@ public final class TileArt implements Disposable {
                 rect(pm, ox, oy, 4, 4, 8, 8, c);
                 break;
             case FOOD:
+                if (it.key().equals("blueberry") || it.key().equals("raspberry")) {
+                    // garsc owocow z krzaka: kilka kulek z odblaskiem i listek
+                    float[][] berry = {{5.5f, 10f}, {8.5f, 11.5f}, {11f, 9.5f}, {7f, 7.5f}, {10f, 6.5f}, {8.5f, 9f}};
+                    for (float[] b : berry) {
+                        disc(pm, ox, oy, b[0], b[1], 1.9f, shade(c, 0.7f));
+                        disc(pm, ox, oy, b[0] - 0.3f, b[1] - 0.3f, 1.4f, c);
+                        px(pm, ox, oy, (int) (b[0] - 0.8f), (int) (b[1] - 0.8f), shade(c, 1.6f));
+                    }
+                    rect(pm, ox, oy, 9, 3, 3, 2, Color.valueOf("#4a8a3c"));
+                    break;
+                }
                 if (FISH_KEYS.contains(it.key())) {
                     // ryba: tulow, ogon i oko
                     disc(pm, ox, oy, 7f, 9f, 3.5f, c);

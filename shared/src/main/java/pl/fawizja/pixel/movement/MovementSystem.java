@@ -34,18 +34,22 @@ public final class MovementSystem {
      */
     public boolean canStep(Position from, Direction d) {
         Position to = from.translate(d.dx, d.dy);
-        if (!world.isWalkable(to) || occupied.test(to)) return false;
+        if (!world.isWalkable(to) || occupied.test(to) || world.openings().isClosedDoor(to)) return false;
         return world.diagonalCornersOpen(from, d);
     }
 
-    /** Wykonuje krok. Wejscie na schody/dziure/tunel od razu przenosi na pietro docelowe. */
+    /**
+     * Wykonuje krok. Wejscie na schody/dziure/tunel od razu przenosi na pietro docelowe. Zamkniete drzwi zatrzymuja
+     * (jak w Tibii otwiera je dopiero uzycie - dotkniecie drzwi), drzwi poziomu przepuszczaja tylko od poziomu.
+     */
     public MoveResult step(PlayerCharacter pc, Direction d) {
         if (pc.isDead()) return MoveResult.DEAD;
         Position from = pc.position();
-        if (!canStep(from, d)) return MoveResult.BLOCKED;
         Position to = from.translate(d.dx, d.dy);
+        if (world.levelDoorAt(to) > pc.level() && world.isWalkable(to) && !occupied.test(to)) return MoveResult.LEVEL_TOO_LOW;
+        if (world.openings().isClosedDoor(to) && world.isWalkable(to) && !occupied.test(to)) return MoveResult.DOOR_CLOSED;
+        if (!canStep(from, d)) return MoveResult.BLOCKED;
         if (world.requiredLevelAt(to) > pc.level()) return MoveResult.LEVEL_TOO_LOW;
-        if (world.openings().isClosedDoor(to)) world.openings().set(to, true); // wejscie w zamkniete drzwi je otwiera
         Transition t = world.transitionAt(to);
         if (t != null && t.type().triggeredByWalking()) {
             pc.setPosition(t.to());
