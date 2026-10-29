@@ -68,7 +68,7 @@ class HudLayoutTest {
                     for (int i = 0; i < HudLayout.TOGGLE_COUNT; i++) {
                         int s = l.toggleSlot[i];
                         if (s < 0) {
-                            assertTrue(l.folded[i] && (i == HudLayout.LOGOUT_TOGGLE || i == HudLayout.TORCH_TOGGLE), ctx + " przycisk " + i + " bez pola");
+                            assertTrue(l.folded[i] && (i == HudLayout.LOGOUT_TOGGLE || i == HudLayout.TORCH_TOGGLE || i == HudLayout.STORE_TOGGLE), ctx + " przycisk " + i + " bez pola");
                             continue;
                         }
                         assertFalse(l.toggles[s].empty(), ctx);
@@ -146,7 +146,7 @@ class HudLayoutTest {
             for (float row : new float[] {l.skillRow, l.vipRow, l.battleRow, l.conRow, l.tabH}) assertTrue(row >= cap + 4, p + " wiersz " + row);
             assertTrue(l.header >= HudLayout.FONT_CAP * 0.75f + 6, p + " naglowek " + l.header);
             // przyciski bez ikony (Użyj, Mów, Weź) i podpisy przelacznikow mieszcza sie w polu przy progu
-            for (String s : new String[] {"Użyj", "Mów", "Weź", "Bieg", "Tarcza", "Zadania", "Poch.", "Wyjdź", "PvP!", "Opcje", "Atak", "Łów", "Koń"}) {
+            for (String s : new String[] {"Użyj", "Mów", "Weź", "Podąż", "Sklep", "Tarcza", "Zadania", "Poch.", "Wyjdź", "PvP!", "Opcje", "Atak", "Łów", "Koń"}) {
                 float wpx = width(adv, s) * HudLayout.MIN_FONT;
                 assertTrue(wpx <= l.toggleSize - 3, p + " podpis " + s + " " + wpx + " > " + (l.toggleSize - 3));
             }

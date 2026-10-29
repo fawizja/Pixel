@@ -34,12 +34,13 @@ public final class HudLayout {
     public static final int MAX_TOGGLE_COLS = 3;
     /** Pola paska czarow (5 x 2) i przyciski akcji w rzedzie. */
     public static final int HOTBAR_COLS = 5;
-    /** Przyciski obok ekwipunku: bieg, tarcza, zadania, pochodnia, wyjscie, PvP, opcje (indeks wyjscia). */
-    public static final int TOGGLE_COUNT = 7;
+    /** Przyciski obok ekwipunku: podazaj, tarcza, zadania, pochodnia, wyjscie, PvP, opcje, sklep. */
+    public static final int TOGGLE_COUNT = 8;
     public static final int LOGOUT_TOGGLE = 4;
     public static final int TORCH_TOGGLE = 3;
-    /** Kolejnosc chowania przelacznikow w menu "Opcje" na waskim telefonie: najpierw wyjscie, potem pochodnia. */
-    private static final int[] FOLD_ORDER = {LOGOUT_TOGGLE, TORCH_TOGGLE};
+    public static final int STORE_TOGGLE = 7;
+    /** Kolejnosc chowania przelacznikow w menu "Opcje" na waskim telefonie: sklep, wyjscie, potem pochodnia. */
+    private static final int[] FOLD_ORDER = {STORE_TOGGLE, LOGOUT_TOGGLE, TORCH_TOGGLE};
     /** Najmniejszy przycisk i pole na telefonie (dp) oraz najwiekszy. */
     public static final float MIN_TOUCH = 36f;
     public static final float MAX_TOUCH = 40f;
@@ -276,8 +277,12 @@ public final class HudLayout {
         if (compact && toggleCols == 2) {
             int need = TOGGLE_COUNT + Math.min(3, actionCount) - slots;
             for (int f = 0; f < FOLD_ORDER.length && need > 0; f++, need--) folded[FOLD_ORDER[f]] = true;
+        } else if (compact && TOGGLE_COUNT + actionCount > slots) {
+            // szeroki telefon (3 kolumny): sklep do menu "Opcje", gdy jego pole zajelaby akcja
+            folded[STORE_TOGGLE] = true;
         }
-        foldLogout = folded[LOGOUT_TOGGLE];
+        // "Opcje" otwiera menu, gdy cos w nim schowano (sklep albo wyjscie)
+        foldLogout = folded[LOGOUT_TOGGLE] || folded[STORE_TOGGLE];
         boolean[] used = new boolean[slots];
         int k = 0;
         for (int i = 0; i < TOGGLE_COUNT; i++) {

@@ -69,6 +69,7 @@ class MobileHudLayoutTest {
             for (int j = i + 1; j < MobileHudLayout.ICONS; j++) assertFalse(l.icons[i].overlaps(l.icons[j]), ctx);
             assertTrue(s.encloses(l.iconHits[i]), ctx + ": pole ikony " + i + " poza ekranem");
             assertFalse(l.iconHits[i].overlaps(l.minimap), ctx + ": pole ikony " + i + " na minimapie");
+            assertFalse(l.iconHits[i].overlaps(l.battle), ctx + ": pole ikony " + i + " na liscie walki");
         }
         // pole dotyku ikony trafia w nia sama (sasiednie pola stykaja sie, wygrywa blizszy srodek)
         for (int i = 0; i < MobileHudLayout.ICONS; i++) {
@@ -76,7 +77,9 @@ class MobileHudLayoutTest {
             assertEquals(i, l.iconAt(l.icons[i].x + 0.5f, l.icons[i].y + 0.5f), ctx);
             assertEquals(i, l.iconAt(l.icons[i].right() - 0.5f, l.icons[i].top() - 0.5f), ctx);
         }
-        assertFalse(l.statusRow.overlaps(l.minimap) || l.statusRow.overlaps(l.frame), ctx);
+        assertFalse(l.statusRow.overlaps(l.minimap) || l.statusRow.overlaps(l.frame) || l.statusRow.overlaps(l.battle), ctx);
+        // pasek celu pod ramka (200 + 12 dp na srodku) nie wchodzi na liste walki
+        assertTrue(w / 2f + 106 <= l.battle.x, ctx + ": pasek celu na liscie walki");
         // przycisk luku i mikstury przechodzi przez pole dotyku przycisku chwilowego, rzedu i joysticka tylko u siebie
         for (MobileHudLayout.Circle a : circles) {
             for (MobileHudLayout.Circle b : circles) {
@@ -103,6 +106,11 @@ class MobileHudLayoutTest {
         for (HudLayout.Rect r : new HudLayout.Rect[] {l.chatTabHit, l.chatHandleHit, l.minimap}) {
             assertTrue(r.w >= MobileHudLayout.MIN_TOUCH && r.h >= MobileHudLayout.MIN_TOUCH, ctx + " " + r);
         }
+        // wiersz listy walki: co najmniej 20 dp wysokosci, cala szerokosc listy
+        assertTrue(MobileHudLayout.BATTLE_ROW >= 20, "wiersz walki " + MobileHudLayout.BATTLE_ROW);
+        for (HudLayout.Rect r : new HudLayout.Rect[] {l.battle}) {
+            assertTrue(r.w >= MobileHudLayout.MIN_TOUCH && r.h >= MobileHudLayout.MIN_TOUCH, ctx + " " + r);
+        }
         assertTrue(l.joystick.r * 2 >= MobileHudLayout.MIN_TOUCH);
         // pole dotyku zakladki czatu nie siega joysticka, rzedu ani luku
         for (MobileHudLayout.Circle c : allCircles(l)) assertFalse(c.overlaps(l.chatTabHit), ctx + ": " + c);
@@ -120,12 +128,15 @@ class MobileHudLayoutTest {
         assertEquals(46, l.hpBar.x, 1e-3);
         assertEquals(l.icons[0].x - 8, l.hpBar.right(), 1e-3);
         assertTrue(l.hpBar.y > l.mpBar.y, "HP nad mana");
-        // minimapa 90 dp pod ramka przy prawym brzegu, lista walki pod nia tej samej szerokosci
-        assertEquals(w - 98, l.minimap.x, 1e-3);
-        assertEquals(h - 136, l.minimap.y, 1e-3);
+        // minimapa 120 x 80 dp pod ramka przy prawym brzegu, lista walki pod nia (4 dp odstepu) tej samej szerokosci
+        assertEquals(w - 128, l.minimap.x, 1e-3);
+        assertEquals(h - 126, l.minimap.y, 1e-3);
+        assertEquals(120, l.minimap.w, 1e-3);
+        assertEquals(80, l.minimap.h, 1e-3);
         assertEquals(l.minimap.x, l.battle.x, 1e-3);
         assertEquals(l.minimap.w, l.battle.w, 1e-3);
-        assertTrue(l.battleRowsVisible() >= 4, "lista walki miesci co najmniej 4 wiersze: " + l.battleRowsVisible());
+        assertEquals(l.minimap.y - 4, l.battle.top(), 1e-3);
+        assertTrue(l.battleRowsVisible() >= (h >= 390 ? 4 : 3), "lista walki miesci co najmniej 3-4 wiersze: " + l.battleRowsVisible());
         // luk: srodek (W-20, 20 od dolu), czary na promieniu 110 od dolnego brzegu do prawego
         assertEquals(w - 130, l.spells[0].x, 1e-3);
         assertEquals(20, l.spells[0].y, 1e-3);
@@ -134,11 +145,15 @@ class MobileHudLayoutTest {
         for (MobileHudLayout.Circle c : l.potions) {
             assertEquals(58, Math.hypot(c.x - l.arcX, c.y - l.arcY), 1e-3);
         }
-        // rzad Atak / Tarcza / PvP na y = 22 od dolu
-        for (int i = 0; i < 3; i++) {
+        // rzad Atak / Podazaj / Tarcza / PvP na y = 22 od dolu (od prawej)
+        assertEquals(4, l.row.length);
+        for (int i = 0; i < l.row.length; i++) {
             assertEquals(22, l.row[i].y, 1e-3);
-            assertEquals(w - 20 - 160 - i * 44, l.row[i].x, 1e-3);
+            assertEquals(w - 20 - 160 - i * 42, l.row[i].x, 1e-3);
         }
+        assertTrue(l.row[MobileHudLayout.ROW_PVP].x < l.row[MobileHudLayout.ROW_SHIELD].x
+                && l.row[MobileHudLayout.ROW_SHIELD].x < l.row[MobileHudLayout.ROW_FOLLOW].x
+                && l.row[MobileHudLayout.ROW_FOLLOW].x < l.row[MobileHudLayout.ROW_ATTACK].x, "PvP, Tarcza, Podazaj, Atak");
         assertEquals(78, l.joystick.x, 1e-3);
         assertEquals(78, l.joystick.y, 1e-3);
         assertEquals(54, l.joystick.r, 1e-3);

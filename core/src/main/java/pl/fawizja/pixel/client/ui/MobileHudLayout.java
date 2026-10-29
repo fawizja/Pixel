@@ -3,23 +3,29 @@ package pl.fawizja.pixel.client.ui;
 /**
  * Uklad HUD-u na telefon, "wariant B" z makiety zatwierdzonej przez wlasciciela (2026-10-29,
  * scratchpad/mock/template3.html, funkcja phone()): widok gry na calym ekranie pod HUD-em, u gory jedna drewniana
- * ramka (poziom, paski HP i many, 7 ikon kategorii), pod nia po prawej minimapa i lista walki, w prawym dolnym rogu
- * luk 5 czarow i 2 mikstur, obok rzad Atak / Tarcza / PvP, joystick w lewym dolnym rogu, zwijany czat na dole.
+ * ramka (poziom, paski HP i many, 8 ikon kategorii), pod nia po prawej minimapa 120 x 80 dp i pod nia lista walki
+ * (wlasciciel: "Walka musi byc pod mapa"), w prawym dolnym rogu luk 5 czarow i 2 mikstur, obok rzad Atak / Podazaj / Tarcza / PvP, joystick w lewym
+ * dolnym rogu, zwijany czat na dole.
  *
  * <p>Makieta ma poczatek w lewym gornym rogu; tu wszystko jest przeliczone na libGDX (poczatek w lewym dolnym
  * rogu, y w gore). 1 jednostka = 1 dp. Czysta matematyka bez libGDX (testy: MobileHudLayoutTest).
  */
 public final class MobileHudLayout {
 
-    /** Ikony kategorii w ramce: Plecak, Ekwipunek, Umiejetnosci, VIP, Zadania, Ustawienia, Wyloguj. */
-    public static final int ICONS = 7;
-    public static final int ICON_BAG = 0, ICON_EQUIP = 1, ICON_SKILLS = 2, ICON_VIP = 3, ICON_QUESTS = 4, ICON_SETTINGS = 5, ICON_LOGOUT = 6;
+    /** Ikony kategorii w ramce: Plecak, Ekwipunek, Umiejetnosci, VIP, Zadania, Ustawienia, Sklep, Wyloguj. */
+    public static final int ICONS = 8;
+    public static final int ICON_BAG = 0, ICON_EQUIP = 1, ICON_SKILLS = 2, ICON_VIP = 3, ICON_QUESTS = 4, ICON_SETTINGS = 5, ICON_SHOP = 6,
+            ICON_LOGOUT = 7;
     public static final float ICON = 32f, ICON_GAP = 3f, ICON_MARGIN = 8f;
     /** Gorna ramka: y 2..42 od gory ekranu, 3 dp od bokow. */
     public static final float FRAME_TOP = 2f, FRAME_H = 40f;
     /** Paski HP i many: od x = 46 do 8 dp przed pierwsza ikona, po 13 dp wysokosci. */
     public static final float BAR_X = 46f, BAR_H = 13f;
-    public static final float MINIMAP = 90f;
+    /**
+     * Minimapa 120 x 80 dp (prostokatny wycinek wokol gracza) i lista walki pod nia, tej samej szerokosci - niska
+     * minimapa zostawia na telefonie 360 dp miejsce na 3 wiersze walki (wiecej na wyzszych ekranach) nad lukiem czarow.
+     */
+    public static final float MINIMAP = 120f, MINIMAP_H = 80f;
     /** Luk czarow: srodek 20 dp od prawego i dolnego brzegu, promienie lukow i przyciskow. */
     public static final float ARC_INSET = 20f, R1 = 110f, R2 = 58f, SPELL_R = 19.5f, POTION_R = 16f, ROW_R = 19f;
     public static final float[] SPELL_DEG = {180f, 202.5f, 225f, 247.5f, 270f};
@@ -27,16 +33,17 @@ public final class MobileHudLayout {
     /** Pola paska akcji pod przyciskami luku (czary 1-5) i miksturami (6-7) - pierwsze 7 pol paska. */
     public static final int[] SPELL_SLOTS = {1, 2, 6, 0, 3};
     public static final int[] POTION_SLOTS = {4, 5};
-    /** Rzad Atak / Tarcza / PvP: y = 22 od dolu, x = luk - 50 - i * 44. */
-    public static final float ROW_Y = 22f, ROW_STEP = 44f;
-    public static final int ROW_ATTACK = 0, ROW_SHIELD = 1, ROW_PVP = 2;
-    /** Przyciski chwilowe (Mow, Wez, Low, Kon): nad rzedem Atak/Tarcza/PvP, czwarty jeszcze wyzej. */
+    /** Rzad (od prawej) Atak / Podazaj / Tarcza / PvP: y = 22 od dolu, x = luk - 50 - i * 42. */
+    public static final float ROW_Y = 22f, ROW_STEP = 42f;
+    public static final int ROW_ATTACK = 0, ROW_FOLLOW = 1, ROW_SHIELD = 2, ROW_PVP = 3, ROW_COUNT = 4;
+    /** Przyciski chwilowe (Mow, Wez, Low, Kon): nad rzedem, czwarty jeszcze wyzej. */
     public static final int CONTEXT = 4;
     public static final float JOY_X = 78f, JOY_R = 54f;
     public static final float WIN_W = 336f, WIN_TOP = 48f, WIN_H = 196f, WIN_SMALL_H = 120f;
     public static final float CHAT_X = 142f, CHAT_H = 128f;
     public static final float TAB_W = 100f, TAB_H = 22f, HANDLE_W = 110f, HANDLE_H = 19f;
-    public static final float BATTLE_ROW = 12.5f, BATTLE_HEAD = 14f;
+    /** Wiersz listy walki 21 dp (latwo trafic palcem) i naglowek "Walka (n)". */
+    public static final float BATTLE_ROW = 20f, BATTLE_HEAD = 14f;
     public static final float PICK_W = 312f, PICK_MAX_H = 236f, PICK_ROW = 27f;
     /** Najmniejsze pole dotyku (dp). */
     public static final float MIN_TOUCH = 36f;
@@ -95,7 +102,7 @@ public final class MobileHudLayout {
     public float arcX, arcY;
     public final Circle[] spells = new Circle[SPELL_DEG.length];
     public final Circle[] potions = new Circle[POTION_DEG.length];
-    public final Circle[] row = new Circle[3];
+    public final Circle[] row = new Circle[ROW_COUNT];
     public final Circle[] context = new Circle[CONTEXT];
     public final Circle joystick = new Circle();
     /** Zwiniety czat ("Czat ▲") i jego pole dotyku (36 dp wysokosci). */
@@ -146,20 +153,20 @@ public final class MobileHudLayout {
             top(iconHits[i], hx, FRAME_TOP, MIN_TOUCH, 46 - FRAME_TOP);
         }
         float mx = w - ICON_MARGIN - MINIMAP;
-        top(minimap, mx, 46, MINIMAP, MINIMAP);
+        top(minimap, mx, 46, MINIMAP, MINIMAP_H);
         arcX = w - ARC_INSET;
         arcY = ARC_INSET;
-        float by = 46 + MINIMAP + 4;
-        // lista walki pod minimapa, do 4 dp nad najwyzszym przyciskiem luku
-        float bottomTop = (h - ARC_INSET - R1 - 21) - 4;
-        top(battle, mx, by, MINIMAP, Math.max(0, bottomTop - by));
-        top(statusRow, 8, 46, Math.max(0, mx - 16 - 8), 14);
+        float x0 = arcX - R1 - 50;
         for (int i = 0; i < spells.length; i++) onArc(spells[i], R1, SPELL_DEG[i], SPELL_R);
         for (int i = 0; i < potions.length; i++) onArc(potions[i], R2, POTION_DEG[i], POTION_R);
-        float x0 = arcX - R1 - 50;
         for (int i = 0; i < row.length; i++) row[i].set(x0 - i * ROW_STEP, ROW_Y, ROW_R);
         for (int i = 0; i < 3; i++) context[i].set(x0 - i * ROW_STEP, ROW_Y + ROW_STEP, ROW_R);
         context[3].set(x0, ROW_Y + 2 * ROW_STEP, ROW_R);
+        // lista walki pod minimapa, do 4 dp nad najwyzszym przyciskiem luku (ile wierszy sie zmiesci, reszta przewijana)
+        float by = 46 + MINIMAP_H + 4;
+        float bottomTop = (h - ARC_INSET - R1 - 21) - 4;
+        top(battle, mx, by, MINIMAP, Math.max(0, bottomTop - by));
+        top(statusRow, 8, 46, Math.max(0, mx - 16 - 8), 14);
         joystick.set(JOY_X, JOY_X, JOY_R);
         chatTab.set(w / 2f - TAB_W / 2f, 0, TAB_W, TAB_H - 1);
         chatTabHit.set(chatTab.x, 0, TAB_W, MIN_TOUCH);
@@ -169,10 +176,12 @@ public final class MobileHudLayout {
         chatHandleHit.set(chatHandle.x, CHAT_H, HANDLE_W, MIN_TOUCH);
     }
 
-    /** Lewa krawedz rzedu Atak / Tarcza / PvP. */
+    /** Lewa krawedz rzedu Atak / Podazaj / Tarcza / PvP. */
     public float rowLeft() { return row[row.length - 1].x - ROW_R; }
 
-    /** Okno kategorii (336 dp, pod ramka, na srodku); przy rozwinietym czacie nizsze, zeby go nie zaslaniac. */
+    /**
+     * Okno kategorii (336 dp, pod ramka, na srodku); przy rozwinietym czacie nizsze, zeby go nie zaslaniac.
+     */
     public HudLayout.Rect window(boolean chatOpen, boolean small, HudLayout.Rect out) {
         float wh = small ? WIN_SMALL_H : chatOpen ? Math.min(168, h - CHAT_H - 24 - WIN_TOP) : WIN_H;
         float x = Math.round((w - WIN_W) / 2f);

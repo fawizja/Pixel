@@ -44,6 +44,7 @@ public final class Actions {
                 case "slot_drop": s.dropFromSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_move": s.moveSlot(Integer.parseInt(p[1]), Integer.parseInt(p[2])); return true;
                 case "npc": return npc(s, p, now);
+                case "store": s.storeBuy(p[1], now); return true;
                 default: return false;
             }
         } catch (RuntimeException e) {
