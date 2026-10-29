@@ -23,8 +23,19 @@ public final class MonsterManager {
 
     /** Promien aktywnej symulacji wokol gracza. */
     public static final int ACTIVE_RADIUS = 20;
-    /** Dodatkowy dystans od spawnu, po ktorym potwor rezygnuje z poscigu. */
-    public static final int LEASH = 10;
+    /**
+     * Dodatkowy dystans od spawnu, po ktorym potwor rezygnuje z poscigu. W Tibii potwor goni gracza, dopoki ten jest
+     * na ekranie - smycz jest tylko zabezpieczeniem przed ciagnieciem stada przez pol mapy.
+     */
+    public static final int LEASH = 24;
+    /** Goniony cel potwor widzi o tyle pol dalej niz zauwaza nowego (jak wczesniej: zasieg wzroku + 4). */
+    public static final int CHASE_SIGHT_BONUS = 4;
+    /** Najwyzej tyle wyszukiwan drogi (A*) na jeden krok symulacji - reszta potworow probuje w nastepnym. */
+    public static final int MAX_PATH_SEARCHES_PER_UPDATE = 40;
+    /** Limit rozwinietych pol jednego wyszukiwania drogi (obejscie rzedu drzew, kawalek jaskini). */
+    public static final int PATH_NODES = 700;
+    /** Po nieudanym szukaniu drogi potwor czeka tyle przed kolejna proba (nie mieli procesora). */
+    public static final long NO_PATH_RETRY_MS = 800;
     /** Najkrotszy zasieg wzroku: potwor widzi mniej wiecej caly ekran przed soba (jak w Tibii). */
     public static final int MIN_SIGHT = 7;
     /** Najdalej, skad potwor zauwazy gracza (zasieg ekranu w poziomie + 2). */
@@ -327,7 +338,15 @@ public final class MonsterManager {
         }
     }
 
+    /** Pozostale wyszukiwania drogi w tym kroku symulacji. */
+    private int pathBudget;
+    /** Licznik wyszukiwan drogi od poczatku (testy wydajnosci). */
+    private long pathSearches;
+
+    public long pathSearches() { return pathSearches; }
+
     private void updateMonsters(long now, List<? extends Target> targets, AttackHandler handler) {
+        pathBudget = MAX_PATH_SEARCHES_PER_UPDATE;
         updateNightSpawns(now, targets);
         for (Map.Entry<SpawnPoint, List<Long>> e : respawnQueue.entrySet()) {
             List<Long> times = e.getValue();
@@ -448,11 +467,16 @@ public final class MonsterManager {
         int dist = mp.distanceTo(tp);
         boolean nightBonus = nightBonus(m);
         int sight = sightRange(t, nightBonus);
-        boolean canSee = dist <= sight + 4 && world.hasLineOfSight(mp, tp);
+        // jak w Tibii: potwor "widzi" gracza na ekranie (zasieg wzroku), takze zza drzew i rogow - obchodzi je
+        // szukajac drogi; linia strzalu liczy sie tylko do atakow z dystansu
+        // zauwaza gracza z zasiegu wzroku, a juz goniony cel trzyma o CHASE_SIGHT_BONUS pol dalej (obchodzac rzad
+        // drzew potwor bywa chwilowo dalej od gracza)
+        boolean inView = dist <= sight + (m.state() == MonsterState.IDLE ? 0 : CHASE_SIGHT_BONUS);
+        boolean los = inView && world.hasLineOfSight(mp, tp);
         boolean targetValid = target.attackable() && tp.z() == mp.z() && !world.isProtectionZone(tp);
-        if (targetValid && canSee) m.saw(tp, now);
-        // poscig z pamieci: gracz schowal sie za rogiem - potwor idzie tam, gdzie go ostatnio widzial
-        boolean remembers = !canSee && m.lastSeen() != null && now - m.lastSeenMs() < MEMORY_MS
+        if (targetValid && inView) m.saw(tp, now);
+        // poscig z pamieci: gracz uciekl poza zasieg wzroku - potwor idzie tam, gdzie go ostatnio widzial
+        boolean remembers = !inView && m.lastSeen() != null && now - m.lastSeenMs() < MEMORY_MS
                 && !mp.equals(m.lastSeen());
         boolean tooFarFromHome = mp.distanceTo(m.spawn().center()) > m.spawn().radius() + LEASH
                 || mp.z() != m.spawn().center().z();
@@ -460,11 +484,11 @@ public final class MonsterManager {
         // wybor stanu
         switch (m.state()) {
             case IDLE:
-                if (targetValid && canSee && notices(m, tp, sight)) m.setState(MonsterState.CHASE);
+                if (targetValid && notices(m, tp, sight)) m.setState(MonsterState.CHASE);
                 break;
             case CHASE:
             case FLEE:
-                if (!targetValid || (!canSee && !remembers) || tooFarFromHome) m.setState(MonsterState.RETURN);
+                if (!targetValid || (!inView && !remembers) || tooFarFromHome) m.setState(MonsterState.RETURN);
                 else if (!m.cornered() && t.fleeHealthPercent() > 0 && m.healthFraction() * 100 < t.fleeHealthPercent()) {
                     m.setState(MonsterState.FLEE);
                 }
@@ -500,7 +524,7 @@ public final class MonsterManager {
                         acted = true;
                     }
                 }
-                if (!acted && dist <= t.range() && canSee && m.state() == MonsterState.CHASE) {
+                if (!acted && dist <= t.range() && (dist <= 1 || los) && m.state() == MonsterState.CHASE) {
                     handler.monsterAttacks(m, now);
                     acted = true;
                 }
@@ -512,19 +536,18 @@ public final class MonsterManager {
         if (m.isMoving(now) || now < m.nextActionMs()) return;
         Direction step = null;
         switch (m.state()) {
-            case CHASE: step = canSee ? chaseStep(m, tp, dist, true)
-                    : Pathfinder.nextStepOrthogonalFirst(world, mp, m.lastSeen(), 0, 400, blockedFor(tp)); break;
+            case CHASE: step = inView ? chaseStep(m, tp, dist, los, now)
+                    : pathStep(m, m.lastSeen(), 0, tp, now); break;
             case FLEE:
                 step = fleeStep(m, tp);
                 if (step == null) {
                     // nie ma dokad uciec: walczy dalej
                     m.setCornered(true);
                     m.setState(MonsterState.CHASE);
-                    step = chaseStep(m, tp, dist, canSee);
+                    step = chaseStep(m, tp, dist, los, now);
                 }
                 break;
-            case RETURN: step = Pathfinder.nextStepOrthogonalFirst(world, mp, m.spawn().center(), Math.max(0, m.spawn().radius() - 1), 600,
-                    blockedFor(tp)); break;
+            case RETURN: step = pathStep(m, m.spawn().center(), Math.max(0, m.spawn().radius() - 1), tp, now); break;
             case IDLE:
                 // regeneracja poza walka: 5% zdrowia na kazdy "oddech" bezczynnosci
                 if (m.health() < t.maxHealth()) m.heal(Math.max(1, t.maxHealth() / 20));
@@ -563,17 +586,44 @@ public final class MonsterManager {
         return p -> !canOccupy(p, player);
     }
 
-    private Direction chaseStep(Monster m, Position tp, int dist, boolean canSee) {
+    /**
+     * Krok poscigu. Wrecz: najszybsza droga na pole obok gracza (A* po czasie krokow, skos przez szczeline miedzy
+     * drzewami gdy trzeba). Na dystans (lucznik, mag, uzdrowiciel z zasiegiem &gt; 1) jak w Tibii: trzyma odleglosc
+     * rowna zasiegowi ataku - za blisko odchodzi, za daleko albo bez linii strzalu podchodzi, w sam raz stoi.
+     */
+    private Direction chaseStep(Monster m, Position tp, int dist, boolean los, long now) {
         MonsterType t = m.type();
-        boolean keepsDistance = t.behavior() == MonsterBehavior.RANGED || t.behavior() == MonsterBehavior.MAGIC
-                || t.behavior() == MonsterBehavior.HEALER;
-        if (keepsDistance && t.range() > 1) {
-            if (dist < 2) return fleeStep(m, tp);
-            if (dist <= t.range() && canSee) return null;
-            return Pathfinder.nextStepOrthogonalFirst(world, m.position(), tp, Math.max(1, t.range() - 1), 400, blockedFor(tp));
+        if (keepsDistance(t)) {
+            int keep = t.range();
+            if (dist < keep) {
+                Direction away = fleeStep(m, tp);
+                if (away != null) return away;
+                if (los) return null; // osaczony: strzela z miejsca
+            }
+            if (dist <= keep && los) return null;
+            return pathStep(m, tp, los ? keep : 1, tp, now);
         }
         if (dist <= 1) return null;
-        return Pathfinder.nextStepOrthogonalFirst(world, m.position(), tp, 1, 400, blockedFor(tp));
+        return pathStep(m, tp, 1, tp, now);
+    }
+
+    /** Potwor trzymajacy dystans (zasieg ataku &gt; 1 i zachowanie strzelca, maga albo uzdrowiciela). */
+    static boolean keepsDistance(MonsterType t) {
+        return t.range() > 1 && (t.behavior() == MonsterBehavior.RANGED || t.behavior() == MonsterBehavior.MAGIC
+                || t.behavior() == MonsterBehavior.HEALER);
+    }
+
+    /**
+     * Krok z wyszukiwania drogi w ramach budzetu na krok symulacji; bez drogi potwor odczekuje {@link #NO_PATH_RETRY_MS}.
+     */
+    private Direction pathStep(Monster m, Position goal, int stop, Position player, long now) {
+        if (goal == null || m.position().distanceTo(goal) <= stop) return null;
+        if (pathBudget <= 0) return null; // limit na ten krok - sprobuje w nastepnym
+        pathBudget--;
+        pathSearches++;
+        Direction d = Pathfinder.nextStepTimed(world, m.position(), goal, stop, PATH_NODES, blockedFor(player));
+        if (d == null) m.setNextActionMs(now + NO_PATH_RETRY_MS + rng.nextInt(400));
+        return d;
     }
 
     private Direction fleeStep(Monster m, Position tp) {
@@ -602,7 +652,10 @@ public final class MonsterManager {
         Position to = from.translate(d.dx, d.dy);
         if (!canOccupy(to, player) || !cornerFree(from, d)) return;
         if (m.state() == MonsterState.IDLE && to.distanceTo(m.spawn().center()) > m.spawn().radius()) return;
-        m.moveTo(to, d, now, Balance.stepDurationMs(m.type().speed(), d.diagonal()));
+        // krok po skosie trwa jak u gracza: DIAGONAL_STEP_FACTOR prostych
+        long ms = Balance.stepDurationMs(m.type().speed(), false)
+                * (d.diagonal() ? pl.fawizja.pixel.movement.MovementSystem.DIAGONAL_STEP_FACTOR : 1);
+        m.moveTo(to, d, now, ms);
         grid.moved(m, from);
     }
 

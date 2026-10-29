@@ -151,6 +151,7 @@ public final class PlayerCharacter {
         defensive = o.defensive;
         fedMs = o.fedMs;
         restedMs = o.restedMs;
+        stamina.copyFrom(o.stamina);
         lightBuffMs = o.lightBuffMs;
         hasteMs = o.hasteMs;
         extraBags = o.extraBags;
@@ -556,6 +557,11 @@ public final class PlayerCharacter {
     public static final int RESTED_EXP_PERCENT = 50;
 
     public long restedMs() { return restedMs; }
+
+    private final Stamina stamina = new Stamina();
+
+    /** Stamina jak w Tibii (42:00, zuzycie przy polowaniu, odnowienie offline). */
+    public Stamina stamina() { return stamina; }
 
     /** Ile walk z premia zostalo (zaokraglone w gore). */
     public int restedKills() { return (int) ((restedMs + RESTED_PER_KILL_MS - 1) / RESTED_PER_KILL_MS); }

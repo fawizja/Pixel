@@ -23,12 +23,21 @@ public final class ItemType {
     private final int lightRadius;
     private final int range;
     private final DamageType damageType;
+    private final WeaponType weaponType;
     private final String color;
     private final String description;
 
     public ItemType(int id, String key, String name, ItemCategory category, boolean stackable, int maxStack,
                     long value, EquipSlot slot, int attack, int defense, int armor, int minLevel,
                     Set<Vocation> vocations, int lightRadius, int range, DamageType damageType,
+                    String color, String description) {
+        this(id, key, name, category, stackable, maxStack, value, slot, attack, defense, armor, minLevel, vocations,
+                lightRadius, range, damageType, WeaponType.NONE, color, description);
+    }
+
+    public ItemType(int id, String key, String name, ItemCategory category, boolean stackable, int maxStack,
+                    long value, EquipSlot slot, int attack, int defense, int armor, int minLevel,
+                    Set<Vocation> vocations, int lightRadius, int range, DamageType damageType, WeaponType weaponType,
                     String color, String description) {
         if (id <= 0) throw new IllegalArgumentException("item id must be > 0");
         if (stackable && maxStack < 2) throw new IllegalArgumentException("stackable item needs maxStack >= 2: " + key);
@@ -51,6 +60,7 @@ public final class ItemType {
         if (range < 0 || range > 8) throw new IllegalArgumentException("range 0..8: " + key);
         this.range = range;
         this.damageType = damageType;
+        this.weaponType = weaponType == null ? WeaponType.NONE : weaponType;
         this.color = color;
         this.description = description;
     }
@@ -73,6 +83,8 @@ public final class ItemType {
     /** Zasieg broni w kafelkach (1 = wrecz, 0 = nie dotyczy). */
     public int range() { return range; }
     public DamageType damageType() { return damageType; }
+    /** Rodzaj broni (kolumna weaponType w items.csv): ktora umiejetnosc liczy obrazenia i sie trenuje. */
+    public WeaponType weaponType() { return weaponType; }
     public String color() { return color; }
     public String description() { return description; }
 

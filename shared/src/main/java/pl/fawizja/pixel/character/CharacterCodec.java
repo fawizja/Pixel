@@ -23,10 +23,14 @@ public final class CharacterCodec {
     public static final int CURRENT_VERSION = 6;
 
     private final ItemRegistry items;
+    /** Zegar scienny do znacznika czasu zapisu staminy (testy podmieniaja). */
+    private java.util.function.LongSupplier wallClock = System::currentTimeMillis;
 
     public CharacterCodec(ItemRegistry items) {
         this.items = items;
     }
+
+    public void setWallClock(java.util.function.LongSupplier clock) { this.wallClock = clock; }
 
     public String encode(PlayerCharacter pc) {
         Map<String, String> m = new LinkedHashMap<>();
@@ -49,6 +53,8 @@ public final class CharacterCodec {
         m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         if (pc.restedMs() > 0) m.put("rested", Long.toString(pc.restedMs()));
+        // osobne pole (bez podbijania wersji): stary zapis bez niego = pelna stamina 42:00
+        m.put("stamina", pc.stamina().encode(wallClock.getAsLong()));
         if (pc.extraBags() > 0) m.put("bags", Integer.toString(pc.extraBags()));
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack s = pc.backpack().get(i);
@@ -203,6 +209,7 @@ public final class CharacterCodec {
         pc.restoreState(exp, Integer.parseInt(require(m, "health")), Integer.parseInt(require(m, "mana")));
         pc.restoreBags(Integer.parseInt(m.getOrDefault("bags", "0")));
         java.util.TreeMap<Integer, String> friends = new java.util.TreeMap<>();
+        ItemStack wormsFromAmmo = null;
         for (Map.Entry<String, String> e : m.entrySet()) {
             String k = e.getKey();
             if (k.startsWith("bp.")) {
@@ -220,6 +227,11 @@ public final class CharacterCodec {
             } else if (k.startsWith("eq.")) {
                 EquipSlot slot = EquipSlot.valueOf(k.substring(3));
                 ItemStack s = parseStack(e.getValue());
+                // stare zapisy: robaki w polu amunicji -> do plecaka (lowi sie z robakami z plecaka, jak w Tibii)
+                if (slot == EquipSlot.AMMO && s.itemId() == items.byKey("worm").id()) {
+                    wormsFromAmmo = s;
+                    continue;
+                }
                 // stare zapisy: pochodnia w polu amunicji -> pole pochodni
                 if (slot == EquipSlot.AMMO && s.itemId() == items.byKey("torch").id()) slot = EquipSlot.LIGHT;
                 if (items.get(s.itemId()).slot() != slot) throw new IllegalArgumentException("item in wrong slot " + slot);
@@ -231,9 +243,16 @@ public final class CharacterCodec {
                 else throw new IllegalArgumentException("bad quest state " + v);
             } else if (k.startsWith("skill.")) {
                 String[] v = e.getValue().split("/");
-                pc.skills().set(Skill.valueOf(k.substring(6)), Integer.parseInt(v[0]), Long.parseLong(v[1]));
+                Skill sk = skillOrNull(k.substring(6));
+                if (sk != null) pc.skills().set(sk, Integer.parseInt(v[0]), Long.parseLong(v[1]));
             }
         }
+        migrateWeaponSkills(m, pc);
+        if (wormsFromAmmo != null) {
+            // plecak (z dolaczonymi torbami) albo, gdy pelny, depozyt - robaki nie przepadaja
+            if (!pc.backpack().add(wormsFromAmmo).ok()) pc.depot().add(wormsFromAmmo);
+        }
+        pc.stamina().restore(m.get("stamina"));
         String flags = m.getOrDefault("flags", "");
         pc.setRunning(flags.contains("R"));
         pc.setDefensive(flags.contains("D"));
@@ -295,6 +314,28 @@ public final class CharacterCodec {
             for (String id : kept.split(",")) pc.keptItems().add(Integer.parseInt(id.trim()));
         }
         return pc;
+    }
+
+    private static Skill skillOrNull(String name) {
+        try {
+            return Skill.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return null; // umiejetnosc z nowszej wersji gry - pomijana
+        }
+    }
+
+    /**
+     * Zapisy sprzed podzialu walki wrecz na miecz, topor i maczuge (0.217): topor i maczuga dostaja poziom
+     * i postep miecza (hojnie - rycerz, ktory walczyl toporem, nie traci nic). Rozpoznawane po braku kluczy,
+     * wiec dziala niezaleznie od numeru wersji zapisu.
+     */
+    private static void migrateWeaponSkills(Map<String, String> m, PlayerCharacter pc) {
+        if (!m.containsKey("skill.SWORD")) return;
+        for (Skill s : new Skill[] {Skill.AXE, Skill.CLUB}) {
+            if (!m.containsKey("skill." + s.name())) {
+                pc.skills().set(s, pc.skills().level(Skill.SWORD), pc.skills().tries(Skill.SWORD));
+            }
+        }
     }
 
     /** "idxilosc", z ulepszeniem "idxilosc+poziom" (0.62.0). */

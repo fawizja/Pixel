@@ -119,6 +119,16 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public void setBonusExpPercent(int percent) { bonusExpPercent = Math.max(0, percent); }
     public int bonusExpPercent() { return bonusExpPercent; }
 
+    /** Dopisek do wpisu o pokonaniu potwora: stamina premiowa, niska albo pusta (jak kolor paska w Tibii). */
+    public static String staminaNote(PlayerCharacter pc) {
+        switch (pc.stamina().zone()) {
+            case EMPTY: return ", brak staminy - bez doświadczenia";
+            case LOW: return ", niska stamina (50% exp)";
+            case BONUS: return pc.isPremium() ? ", premia staminy (150% exp)" : "";
+            default: return "";
+        }
+    }
+
     /** Przyznaje doswiadczenie z wpisem w dzienniku i zdarzeniem awansu. */
     public void awardExperience(long exp, String what, long now) {
         int levels = pc.addExperience(exp);
@@ -296,7 +306,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                 exp = exp * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
                 pc.stats().recordRestedKill();
             }
-            awardExperience(exp, "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : ""), now);
+            exp = pc.stamina().hunt(exp, pc.isPremium(), now);
+            awardExperience(exp, "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : "")
+                    + staminaNote(pc), now);
         }
         Position corpse = m.position();
         List<ItemStack> drop;

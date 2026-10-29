@@ -119,3 +119,6 @@ mobile_torch_equip|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.telepor
 # 2026-10-29: przycisk Podazaj (postac idzie za celem), szersza minimapa i lista walki obok niej, ikona Sklep, sklep za zloto z banku
 mobile_follow|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=run -Dpixel.button2=target
 mobile_store|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=store
+skills_axe_club_stamina|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.premium=1 -Dpixel.stamina=2490
+mobile_skills_stamina|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_skills -Dpixel.stamina=750
+fishing_rod_in_hand|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=470,483,0 -Dpixel.open=fishing

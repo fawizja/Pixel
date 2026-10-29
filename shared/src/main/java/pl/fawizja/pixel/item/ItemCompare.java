@@ -36,7 +36,7 @@ public final class ItemCompare {
     public static String shopDelta(ItemType t, ItemType equipped, int eu, PlayerCharacter pc) {
         if (t.slot() == EquipSlot.NONE) return "";
         if (t.slot() == EquipSlot.LIGHT) return "światło " + t.lightRadius() + ", 20 min, pole obok butów";
-        if (t.category() == ItemCategory.BAIT) return "przynęta: do gniazda amunicji, 1 na zarzucenie";
+        if (t.category() == ItemCategory.BAIT) return "przynęta: trzymaj w plecaku, 1 na zarzucenie wędki";
         if (!t.vocations().contains(pc.vocation())) return "nie dla ciebie";
         if (t.slot() == EquipSlot.AMMO && equipped == null) return "amunicja, atak " + t.attack();
         StringBuilder b = new StringBuilder();

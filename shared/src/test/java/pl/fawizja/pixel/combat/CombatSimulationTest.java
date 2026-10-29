@@ -66,6 +66,8 @@ class CombatSimulationTest {
         if (level > pc.level()) pc.addExperience(Balance.experienceForLevel(level) - pc.experience());
         pc.heal(Integer.MAX_VALUE);
         pc.skills().set(Skill.SWORD, weaponSkill, 0);
+        pc.skills().set(Skill.AXE, weaponSkill, 0);
+        pc.skills().set(Skill.CLUB, weaponSkill, 0);
         pc.skills().set(Skill.FIST, weaponSkill, 0);
         pc.skills().set(Skill.DISTANCE, weaponSkill, 0);
         pc.skills().set(Skill.MAGIC, magic, 0);

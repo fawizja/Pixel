@@ -116,10 +116,24 @@ public final class SpellSystem {
     /** Wartosc bazowa efektu bez losowania (do opisow i testow). */
     public static double baseValue(SpellType s, PlayerCharacter pc) {
         double v = s.base() + pc.level() * s.levelFactor() + pc.skills().level(Skill.MAGIC) * s.magicFactor()
-                + pc.skills().level(weaponSkill(pc.vocation())) * s.skillFactor();
+                + pc.skills().level(weaponSkill(pc)) * s.skillFactor();
         if (s.kind().isHeal()) v *= pc.vocation().healingFactor();
         else if (s.kind().isRune()) v *= pc.vocation().magicFactor();
         return Math.max(0, v);
+    }
+
+    /**
+     * Umiejetnosc broni do czarow (jak w Tibii exori liczy sie z umiejetnosci trzymanej broni): rycerz z mieczem,
+     * toporem albo maczuga - ta umiejetnosc, bez broni wrecz - najwyzsza z trzech.
+     */
+    public static Skill weaponSkill(PlayerCharacter pc) {
+        Skill base = weaponSkill(pc.vocation());
+        if (base != Skill.SWORD) return base;
+        Skill held = pc.equipment().weaponType().skill();
+        if (held.isMeleeWeapon()) return held;
+        Skill best = Skill.SWORD;
+        for (Skill s : new Skill[] {Skill.AXE, Skill.CLUB}) if (pc.skills().level(s) > pc.skills().level(best)) best = s;
+        return best;
     }
 
     public static Skill weaponSkill(Vocation v) {

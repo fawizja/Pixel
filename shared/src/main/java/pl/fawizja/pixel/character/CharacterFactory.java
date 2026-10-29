@@ -51,12 +51,6 @@ public final class CharacterFactory {
         if (!r.ok()) throw new IllegalStateException("starting gold does not fit: " + r);
         for (StarterKits.Entry e : StarterKits.backpack(vocation, level)) {
             ItemStack stack = new ItemStack(items.byKey(e.key()).id(), e.count());
-            // robaki od razu w gniezdzie amunicji (tam ich szuka wedka); paladyn trzyma je w plecaku, bo gniazdo
-            // zajmuja mu wlocznie do rzucania
-            if (e.key().equals("worm") && vocation != Vocation.PALADIN && pc.equipment().get(EquipSlot.AMMO) == null) {
-                pc.equipment().setDirect(EquipSlot.AMMO, stack);
-                continue;
-            }
             r = pc.backpack().add(stack);
             if (!r.ok()) throw new IllegalStateException("starter kit does not fit: " + e.key());
         }
@@ -79,7 +73,7 @@ public final class CharacterFactory {
             int v;
             if (s == Skill.MAGIC) v = mage ? magic : magic / 4;
             else if (s == Skill.SHIELDING) v = mage ? Math.min(shield, 10 + lvl / 20) : shield;
-            else if (s == main) v = weapon;
+            else if (s == main || (main == Skill.SWORD && s.isMeleeWeapon())) v = weapon; // rycerz: miecz, topor i maczuga
             else if (s == Skill.FISHING) v = Skills.START_SKILL;
             else v = Math.min(weapon, mage ? 30 : 10 + lvl / 10);
             pc.skills().set(s, Math.max(pc.skills().level(s), v), 0);

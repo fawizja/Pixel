@@ -1446,11 +1446,9 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.WARNING, r.message);
         }
         if (r == FishingResult.CAUGHT || r == FishingResult.NOTHING) {
-            if (fishing.lastRefill() > 0) {
-                log.add(nowMs, EventLog.Kind.INFO, "Robaki uzupełnione z plecaka (" + fishing.lastRefill() + ").");
-            } else if (fishing.baitInSlot(pc) == 0) {
-                log.add(nowMs, EventLog.Kind.SYSTEM, "Skończyły się robaki na przynętę.");
-            }
+            int left = fishing.bait(pc);
+            if (left == 0) log.add(nowMs, EventLog.Kind.SYSTEM, "Skończyły się robaki na przynętę w plecaku.");
+            else if (left == 5) log.add(nowMs, EventLog.Kind.INFO, "Zostało 5 robaków w plecaku.");
         }
         return r;
     }

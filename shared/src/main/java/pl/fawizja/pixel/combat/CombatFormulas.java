@@ -47,27 +47,45 @@ public final class CombatFormulas {
         return weapon.key().endsWith("bow");
     }
 
+    /**
+     * Bron w rece liczaca sie do walki: przedmiot z kategorii WEAPON; cokolwiek innego w rece (np. wedka) = walka
+     * piesciami.
+     */
+    public static ItemType weapon(PlayerCharacter pc, ItemRegistry items) {
+        ItemStack w = pc.equipment().get(EquipSlot.WEAPON);
+        ItemType t = w == null ? null : items.get(w.itemId());
+        return t != null && t.category() == pl.fawizja.pixel.item.ItemCategory.WEAPON ? t : null;
+    }
+
+    /**
+     * Umiejetnosc broni jak w Tibii: wg kolumny weaponType z items.csv (miecz/topor/maczuga/piesci/dystans/rozdzka);
+     * stara bron bez typu - po zasiegu i rodzaju obrazen, wrecz mnich piesci, reszta miecz.
+     */
+    public static Skill weaponSkill(ItemType weapon, Vocation v) {
+        if (weapon == null) return Skill.FIST;
+        if (weapon.weaponType() != pl.fawizja.pixel.item.WeaponType.NONE) return weapon.weaponType().skill();
+        if (weapon.range() > 1) return weapon.damageType() != DamageType.PHYSICAL ? Skill.MAGIC : Skill.DISTANCE;
+        return v == Vocation.MONK ? Skill.FIST : Skill.SWORD;
+    }
+
     /** Profil ataku postaci na podstawie broni, umiejetnosci i profesji. */
     public static AttackProfile attackProfile(PlayerCharacter pc, ItemRegistry items) {
         Vocation v = pc.vocation();
         ItemStack w = pc.equipment().get(EquipSlot.WEAPON);
-        ItemType weapon = w == null ? null : items.get(w.itemId());
+        ItemType weapon = weapon(pc, items);
         int attack = weapon == null ? FIST_ATTACK : pl.fawizja.pixel.item.Upgrade.attack(weapon, w.upgrade());
         int range = weapon == null ? 1 : Math.max(1, weapon.range());
         DamageType type = weapon == null ? DamageType.PHYSICAL : weapon.damageType();
         double bonus = pc.level() / 5.0;
         double max;
-        Skill skill;
-        if (type != DamageType.PHYSICAL && range > 1) {
-            skill = Skill.MAGIC;
+        Skill skill = weaponSkill(weapon, v);
+        if (skill == Skill.MAGIC) {
             max = attack * (1.0 + pc.skills().level(Skill.MAGIC) / 25.0) * v.magicFactor() + bonus;
-        } else if (range > 1) {
-            skill = Skill.DISTANCE;
+        } else if (skill == Skill.DISTANCE) {
             ItemType ammo = ammunition(pc, items);
             if (ammo != null) attack += ammo.attack() / AMMO_ATTACK_DIVISOR;
             max = attack * (pc.skills().level(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() + bonus;
         } else {
-            skill = v == Vocation.MONK ? Skill.FIST : Skill.SWORD;
             max = attack * (pc.skills().level(skill) + 10) / 20.0 * v.meleeFactor() + bonus;
         }
         return new AttackProfile((int) Math.min(Integer.MAX_VALUE, Math.round(max)), range, type, skill, v.attackIntervalMs());
