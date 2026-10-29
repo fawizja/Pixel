@@ -29,6 +29,7 @@ class ReplicaSyncTest {
         server.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, pl.fawizja.pixel.item.ItemStack.of(TestData.ITEMS.byKey("torch").id()));
         s.toggleTorch(0);
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
+        codec.setWallClock(() -> 1_000L); // znacznik zapisu staminy staly w obu zapisach
         String save = codec.encode(server);
 
         PlayerCharacter client = TestData.newCharacter(Vocation.DRUID);

@@ -69,7 +69,7 @@ public enum Achievement {
             case SKILL: {
                 // najlepsza umiejetnosc walki (piesci, miecz, dystans, magia)
                 int best = 0;
-                for (Skill s : new Skill[] {Skill.FIST, Skill.SWORD, Skill.DISTANCE, Skill.MAGIC}) best = Math.max(best, pc.skills().level(s));
+                for (Skill s : new Skill[] {Skill.FIST, Skill.CLUB, Skill.SWORD, Skill.AXE, Skill.DISTANCE, Skill.MAGIC}) best = Math.max(best, pc.skills().level(s));
                 return best;
             }
             case CHESTS: return pc.openedChests().size();

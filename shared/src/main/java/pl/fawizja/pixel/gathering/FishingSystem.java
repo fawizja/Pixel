@@ -22,8 +22,9 @@ import pl.fawizja.pixel.world.Region;
 import pl.fawizja.pixel.world.WorldMap;
 
 /**
- * Lowienie ryb: wedka w reku albo w plecaku, robaki w gniezdzie amunicji (obok spodni) - kazde zarzucenie
- * zuzywa jednego robaka (oprocz proby, w ktorej zlowiona ryba nie zmiescilaby sie w plecaku); kafelek wody w zasiegu 3.
+ * Lowienie ryb jak w Tibii: wedka w rece (pole broni) albo w plecaku, robaki w plecaku - niczego nie trzeba
+ * zakladac; kazde zarzucenie zuzywa jednego robaka z plecaka (oprocz proby, w ktorej zlowiona ryba nie
+ * zmiescilaby sie w plecaku); kafelek wody w zasiegu 3.
  * Szansa rosnie z umiejetnoscia FISHING. Kafelek, z ktorego zlowiono rybe, "odpoczywa" przez
  * {@link #TILE_REST_MS} - nie da sie bez konca lowic z jednego miejsca.
  * W regionach z data/fishing.csv czesc polowu to ryby danego biomu (od progu umiejetnosci).
@@ -122,31 +123,16 @@ public final class FishingSystem {
         return pc.backpack().count(rodId) > 0 || (hand != null && hand.itemId() == rodId);
     }
 
-    /** Liczba robakow w gniezdzie amunicji (tylko stamtad bierze sie przynete). */
-    public int baitInSlot(PlayerCharacter pc) {
-        ItemStack a = pc.equipment().get(EquipSlot.AMMO);
-        return a != null && a.itemId() == wormId ? a.count() : 0;
+    /** Robaki na przynete w plecaku (jak w Tibii: wedka bierze je z plecaka, nic sie nie zaklada). */
+    public int bait(PlayerCharacter pc) {
+        return pc.backpack().count(wormId);
     }
 
     public int wormId() { return wormId; }
 
-    /**
-     * Zuzywa jednego robaka z gniazda amunicji; gdy stos sie skonczy, gniazdo uzupelnia sie robakami z plecaka
-     * (jak amunicja). Zwraca liczbe dolozonych z plecaka.
-     */
-    int useWorm(PlayerCharacter pc) {
-        ItemStack a = pc.equipment().get(EquipSlot.AMMO);
-        if (a.count() > 1) {
-            pc.equipment().setDirect(EquipSlot.AMMO, a.withCount(a.count() - 1));
-            return 0;
-        }
-        pc.equipment().setDirect(EquipSlot.AMMO, null);
-        int spare = Math.min(pc.backpack().countPlain(wormId), items.get(wormId).maxStack());
-        if (spare > 0 && pc.backpack().remove(wormId, spare).ok()) {
-            pc.equipment().setDirect(EquipSlot.AMMO, new ItemStack(wormId, spare));
-            return spare;
-        }
-        return 0;
+    /** Zuzywa jednego robaka z plecaka. */
+    void useWorm(PlayerCharacter pc) {
+        pc.backpack().remove(wormId, 1);
     }
 
     /** Najblizszy kafelek wody w zasiegu z linia wzroku; z onlyRested pomija "odpoczywajace". */
@@ -172,17 +158,14 @@ public final class FishingSystem {
     public FishingResult fish(PlayerCharacter pc, long now) {
         if (now < nextAttemptMs) return FishingResult.COOLDOWN;
         if (!hasRod(pc)) return FishingResult.NO_ROD;
-        if (baitInSlot(pc) <= 0) {
-            return pc.backpack().count(wormId) > 0 ? FishingResult.BAIT_NOT_IN_SLOT : FishingResult.NO_BAIT;
-        }
+        if (bait(pc) <= 0) return FishingResult.NO_BAIT;
         if (findSpot(pc.position(), now, false) == null) return FishingResult.NO_WATER;
         Position spot = findSpot(pc.position(), now, true);
         if (spot == null) return FishingResult.DEPLETED;
         nextAttemptMs = now + ATTEMPT_COOLDOWN_MS;
         pc.skills().addTries(Skill.FISHING, 1);
-        lastRefill = 0;
         if (rng.nextDouble() >= catchChance(pc.skills().level(Skill.FISHING))) {
-            lastRefill = useWorm(pc);
+            useWorm(pc);
             return FishingResult.NOTHING;
         }
 
@@ -191,17 +174,12 @@ public final class FishingSystem {
         Container copy = pc.backpack().copy();
         if (copy.add(new ItemStack(caught, 1)) != InventoryResult.OK) return FishingResult.BACKPACK_FULL;
         pc.backpack().commitFrom(copy);
-        lastRefill = useWorm(pc);
+        useWorm(pc);
         pc.skills().addTries(Skill.FISHING, 2);
         restingUntil.put(spot, now + TILE_REST_MS);
         lastCatchId = caught;
         return FishingResult.CAUGHT;
     }
-
-    private int lastRefill;
-
-    /** Ile robakow ostatnia proba dolozyla z plecaka do gniazda (0 = nic). */
-    public int lastRefill() { return lastRefill; }
 
     /** Ryba biomu dla wody w regionie (losowanie tylko tam, gdzie region ma wpis) albo zwykla ryba. */
     private int biomeCatch(Position spot, int skill) {

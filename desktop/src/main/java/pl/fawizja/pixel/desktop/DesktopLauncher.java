@@ -38,6 +38,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
+ *   -Dpixel.stamina=M    nowa postac z M minutami staminy (np. 750 = 12:30, pomaranczowa); -Dpixel.premium=1 konto premium
  *   -Dpixel.mobileHud=1  uklad HUD-u na telefon (wariant B: widok gry na calym ekranie, luk czarow); na Androidzie zawsze
  *   -Dpixel.open=coins|torchsel|torchlit  monety w plecaku, zaznaczona pochodnia, zapalona pochodnia w polu obok butow (z mobile_* po przecinku)
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
@@ -419,6 +421,21 @@ public final class DesktopLauncher {
                         s.toggleTorch(0L);
                         hero.tickTorch(2 * 60_000L + 30_000L, torch);
                     }
+                }
+                if (open != null && open.contains("fishing")) {
+                    // lowienie jak w Tibii: wedka z plecaka do reki, robaki zostaja w plecaku, kilka zarzucen nad woda
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.game.GameSession s = gs.session();
+                    pl.fawizja.pixel.character.PlayerCharacter hero = s.character();
+                    int rod = s.items().byKey("fishing_rod").id();
+                    for (int i = 0; i < hero.backpack().size(); i++) {
+                        if (hero.backpack().get(i) != null && hero.backpack().get(i).itemId() == rod) {
+                            s.equipFromSlot(i, 0L);
+                            break;
+                        }
+                    }
+                    for (int i = 0; i < 4; i++) s.fish(i * 2_000L);
+                    if (!open.contains("mobile_win_bag")) gs.hud().toggleBag();
                 }
                 if (open != null && open.contains("mobile_")) {
                     // uklad na telefon (-Dpixel.mobileHud=1): mobile_win_bag|equip|skills|vip|settings, mobile_chat,

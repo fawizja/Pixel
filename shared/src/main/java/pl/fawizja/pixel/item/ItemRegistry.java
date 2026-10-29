@@ -42,7 +42,7 @@ public final class ItemRegistry {
         }
     }
 
-    /** Format: id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations;light;range;damageType;color;description */
+    /** Format: id;key;name;category;maxStack;value;slot;attack;defense;armor;minLevel;vocations;light;range;damageType;weaponType;color;description */
     public static ItemRegistry parse(Reader reader) throws IOException {
         Map<Integer, ItemType> map = new LinkedHashMap<>();
         BufferedReader br = new BufferedReader(reader);
@@ -52,8 +52,8 @@ public final class ItemRegistry {
             lineNo++;
             String trimmed = line.trim();
             if (trimmed.isEmpty() || trimmed.startsWith("#")) continue;
-            String[] f = trimmed.split(";", 17); // opis moze zawierac ";"
-            if (f.length != 17) throw new IOException("items.csv line " + lineNo + ": expected 17 fields, got " + f.length);
+            String[] f = trimmed.split(";", 18); // opis moze zawierac ";"
+            if (f.length != 18) throw new IOException("items.csv line " + lineNo + ": expected 18 fields, got " + f.length);
             try {
                 int id = Integer.parseInt(f[0].trim());
                 int maxStack = Integer.parseInt(f[4].trim());
@@ -63,7 +63,7 @@ public final class ItemRegistry {
                         Integer.parseInt(f[7].trim()), Integer.parseInt(f[8].trim()), Integer.parseInt(f[9].trim()),
                         Integer.parseInt(f[10].trim()), parseVocations(f[11].trim()),
                         Integer.parseInt(f[12].trim()), Integer.parseInt(f[13].trim()),
-                        DamageType.valueOf(f[14].trim()), f[15].trim(), f[16].trim());
+                        DamageType.valueOf(f[14].trim()), WeaponType.parse(f[15]), f[16].trim(), f[17].trim());
                 if (map.put(id, t) != null) throw new IOException("items.csv line " + lineNo + ": duplicate id " + id);
             } catch (IllegalArgumentException e) {
                 throw new IOException("items.csv line " + lineNo + ": " + e.getMessage(), e);

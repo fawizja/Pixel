@@ -383,10 +383,18 @@ przy pauzie, utracie fokusu i zamknieciu.
 ## Potwory i AI (Z logika, C grafika)
 
 - `MonsterRegistry` (monsters.csv + loot.csv), `SpawnTable` (spawns.csv), `MonsterManager`.
-- Stany: IDLE (wedrowka w promieniu spawnu, regeneracja 5%), CHASE (BFS, max 400 wezlow), FLEE,
-  RETURN (smycz: promien spawnu + 10 lub inne pietro; po powrocie pelne HP).
+- Stany: IDLE (wedrowka w promieniu spawnu, regeneracja 5%), CHASE, FLEE,
+  RETURN (smycz: promien spawnu + `LEASH` 24 lub inne pietro; po powrocie pelne HP).
+- Poscig jak w Tibii (0.217): potwor zauwaza gracza w zasiegu wzroku (`sightRange` 7..9, przed soba pelny, za
+  plecami mniej) bez linii wzroku - takze zza drzew i rogow; gonionego trzyma do zasiegu + 4 i jeszcze
+  `MEMORY_MS` (5 s) idzie tam, gdzie go ostatnio widzial, potem wraca. Droga: `Pathfinder.nextStepTimed` (A* po
+  czasie marszu, skos = 3 proste jak u gracza, przecisniecie po skosie miedzy drzewami/krzakami/glazami wg
+  `WorldMap.diagonalCornersOpen`), najwyzej `PATH_NODES` 700 pol; na krok symulacji najwyzej
+  `MAX_PATH_SEARCHES_PER_UPDATE` 40 wyszukiwan, bez drogi potwor czeka ~0,8-1,2 s. Krok po skosie trwa 3x dluzej.
+  Linia wzroku liczy sie tylko do atakow z dystansu.
 - Zachowania: MELEE, TANK, SKIRMISHER (ucieka ponizej progu HP; osaczony walczy do konca),
-  RANGED / MAGIC (trzymaja dystans >= 2, strzelaja z linii wzroku), HEALER (leczy najslabszego
+  RANGED / MAGIC / HEALER z zasiegiem > 1 trzymaja dystans rowny zasiegowi ataku (za blisko - odchodza, za daleko
+  albo bez linii strzalu - podchodza), strzelaja z linii wzroku; HEALER (leczy najslabszego
   sojusznika < 70% w promieniu 4), boss (leczenie raz ponizej 30%, atak 30% szybszy ponizej 50%).
 - Potwory nie wchodza na strefy ochronne, przejscia, gracza ani siebie nawzajem; nie pojawiaja sie
   blizej niz 5 kafelkow od gracza.
@@ -712,15 +720,28 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
 ## Lowienie i umiejetnosci (Z logika, C UI)
 
 - `gathering/FishingSystem`: najblizszy kafelek wody w zasiegu 3 z linia wzroku; proba co 1,5 s;
-  szansa `min(70%, 10% + 0,6% * umiejetnosc)`. Potrzebna wedka (w plecaku albo w rece) i robaki w gniezdzie
-  amunicji (`EquipSlot.AMMO`, obok spodni - robak ma slot AMMO w items.csv); kazde zarzucenie zuzywa 1 robaka,
-  pusty stos uzupelnia sie robakami z plecaka. Bez wedki / bez robakow / robaki tylko w plecaku - osobne komunikaty
-  (`FishingResult.NO_ROD`, `NO_BAIT`, `BAIT_NOT_IN_SLOT`). Robak 1 gp u kazdego kupca z plecakami (tam tez wedka),
-  postac startowa (bez paladyna) ma 10 robakow w gniezdzie. Zlowiona ryba, ktora nie zmiesci sie w plecaku = robak
+  szansa `min(70%, 10% + 0,6% * umiejetnosc)`. Jak w Tibii (0.217): wedka w rece (pole broni, slot WEAPON
+  w items.csv; w rece walczy sie piesciami) albo w plecaku i robaki w plecaku - robakow sie nie zaklada (slot NONE);
+  kazde zarzucenie zuzywa 1 robaka z plecaka. Bez wedki / bez robakow - `FishingResult.NO_ROD`, `NO_BAIT`.
+  Stare zapisy: robaki z pola amunicji trafiaja przy wczytaniu do plecaka (pelny - do depozytu).
+  Robak 1 gp u kazdego kupca z plecakami (tam tez wedka), postac startowa ma 10 robakow w plecaku. Zlowiona
+  ryba, ktora nie zmiesci sie w plecaku = robak
   zostaje; kafelek po zlowieniu odpoczywa 2 min (stan ulotny); perla 3% od umiejetnosci 30.
 - Ryby biomow (`data/fishing.csv`): Mrozne Pustkowia - lodowy dorsz (35%, od umiejetnosci 15),
   Dzungla Selvaran - wegorz bagienny (35%, od 20; lowiskiem sa tam bagna), Pustynia Qasirah - karp z oazy
   (30%, od 25). Pozostale zlowienia to zwykla ryba. Ryby biomow dluzej syca i maja wyzszy skup w lokalnym sklepie.
+- Umiejetnosci (kolejnosc okna Skills z Tibii, `Skill.values()`): Piesci, Maczuga, Miecz, Topor, Dystans,
+  Tarcza, Wedkarstwo, Magia. Bron ma w items.csv kolumne `weaponType` (SWORD/AXE/CLUB/FIST/DISTANCE/WAND,
+  "-" = nie bron): obrazenia liczy i trenuje umiejetnosc tego rodzaju (`CombatFormulas.weaponSkill`), czary
+  broni rycerza - umiejetnosc trzymanej broni. Rycerz zaczyna z mieczem, toporem i maczuga na tym samym poziomie.
+  Stare zapisy bez `skill.AXE` / `skill.CLUB` dostaja poziom i postep miecza (hojnie; po kluczach, bez wersji).
+- Stamina (`character/Stamina`, TibiaWiki): 42:00, polowanie (doswiadczenie z potworow) zuzywa 1 minute na
+  minute; powyzej 39:00 premium 150% exp, od 14:00 w dol 50%, przy 0 brak exp (lup bez zmian). Offline: po
+  10 min 1 minuta na 3 min do 39:00, powyzej 1 na 6 min. Zapis w osobnym polu `stamina=minuty,czasZapisu`
+  (bez podbijania wersji; brak pola = 42:00), odnowienie przy logowaniu (`Stamina.onLogin`: serwer przy
+  wczytaniu postaci, gra lokalna w `PixelGame.playLocal`). Na serwerze stamina liczy sie w sesji gracza
+  (`CombatSystem` i podzial exp druzyny w `ServerWorld`), klient dostaje ja w zapisie SELF. Okno umiejetnosci
+  (`SkillSheet`): wiersz Stamina hh:mm z paskiem (zielony premia, zolty, pomaranczowy < 14:00, czerwony 0).
 - Trening: proba +1, zlowienie +2. Walka: brak treningu na potworach ponizej progu
   `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
 - Umiejetnosci: start 10 (magia 0), koszt kolejnego poziomu `50 * 1,1^(poziom-10)` prob, maks. 200.

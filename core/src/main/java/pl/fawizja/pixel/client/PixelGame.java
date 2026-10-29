@@ -101,6 +101,7 @@ public class PixelGame extends Game {
     public void playLocal() {
         PlayerCharacter loaded = loadCharacter();
         if (loaded != null) {
+            loaded.stamina().onLogin(System.currentTimeMillis()); // odnowienie staminy za czas poza gra
             startGame(loaded);
         } else {
             setScreen(new VocationSelectScreen(this));
@@ -141,6 +142,10 @@ public class PixelGame extends Game {
         // gra offline: postac od razu na poziomie start.level.offline (-Dpixel.startLevel nadpisuje, np. regresja GUI)
         int level = Integer.getInteger("pixel.startLevel", startingConfig.offlineStartLevel());
         PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()), level);
+        // podglad staminy (regresja GUI): -Dpixel.stamina=minuty, -Dpixel.premium=1
+        Integer stamina = Integer.getInteger("pixel.stamina");
+        if (stamina != null) pc.stamina().setMinutes(stamina);
+        if ("1".equals(System.getProperty("pixel.premium"))) pc.setPremium(true);
         saveCharacter(pc);
         startGame(pc);
     }

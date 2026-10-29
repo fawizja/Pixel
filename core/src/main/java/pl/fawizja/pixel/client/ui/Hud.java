@@ -851,7 +851,7 @@ public final class Hud {
     private void layoutSide() {
         List<HudButton> acts = visibleActions();
         sideButtonsLaidOut = visibleActionMask();
-        lay.compute(w, h, uiScale, acts.size(), vipOpen, vipContentRows(), skillsOpen, 2 + Skill.values().length);
+        lay.compute(w, h, uiScale, acts.size(), vipOpen, vipContentRows(), skillsOpen, pl.fawizja.pixel.character.SkillSheet.rowCount());
         topH = lay.topBarHeight();
         gx = lay.view.x;
         gy = lay.view.y;
@@ -984,14 +984,18 @@ public final class Hud {
 
     private boolean vipVisible() { return lay.vip.h > 0 && !windowOverLeft(); }
 
-    /** Wiersze okna umiejetnosci: poziom, doswiadczenie do poziomu, potem skille (wartosc, postep 0..1). */
+    /** Wiersze okna umiejetnosci ({@link pl.fawizja.pixel.character.SkillSheet}): poziom, doswiadczenie, stamina, skille. */
     private String[][] skillRows(PlayerCharacter pc) {
-        String[][] rows = new String[2 + Skill.values().length][];
-        rows[0] = new String[] {"Poziom", String.valueOf(pc.level())};
-        rows[1] = new String[] {"Doświadczenie", (int) (pc.levelProgress() * 100) + "%"};
-        int i = 2;
-        for (Skill sk : Skill.values()) rows[i++] = new String[] {sk.label(), String.valueOf(pc.skills().level(sk))};
+        List<pl.fawizja.pixel.character.SkillSheet.Row> sheet = pl.fawizja.pixel.character.SkillSheet.rows(pc);
+        String[][] rows = new String[sheet.size()][];
+        for (int i = 0; i < rows.length; i++) rows[i] = new String[] {sheet.get(i).label(), sheet.get(i).value()};
         return rows;
+    }
+
+    /** Kolor paska wiersza okna umiejetnosci. */
+    private static Color sheetColor(pl.fawizja.pixel.character.SkillSheet.Row r) {
+        int c = pl.fawizja.pixel.character.SkillSheet.color(r.bar());
+        return new Color(((c >> 16) & 255) / 255f, ((c >> 8) & 255) / 255f, (c & 255) / 255f, 1f);
     }
 
     /** Trojkat zwijania przy naglowku: w dol (rozwiniete) albo w prawo (zwiniete). */
@@ -1038,12 +1042,9 @@ public final class Hud {
         if (!skillsExpanded()) return;
         float row = lay.skillRow;
         float yy = pskY + pskH - lay.header - 3;
-        for (int i = 0; i < 2 + Skill.values().length; i++) {
+        for (pl.fawizja.pixel.character.SkillSheet.Row r : pl.fawizja.pixel.character.SkillSheet.rows(pc)) {
             if (yy - row + 2 < pskY + 2) break;
-            double prog = i == 0 ? -1 : i == 1 ? pc.levelProgress()
-                    : (double) pc.skills().tries(Skill.values()[i - 2]) / Math.max(1, Skills.triesForNext(pc.skills().level(Skill.values()[i - 2])));
-            if (prog >= 0) bar(shapes, pskX + 8, yy - row + 1, pskW - 16, 2, (float) prog,
-                    i == 1 ? new Color(0.95f, 0.8f, 0.2f, 1) : new Color(0.3f, 0.75f, 0.4f, 1));
+            if (r.progress() >= 0) bar(shapes, pskX + 8, yy - row + 1, pskW - 16, 2, (float) r.progress(), sheetColor(r));
             yy -= row;
         }
     }
@@ -4330,7 +4331,7 @@ public final class Hud {
     private static final int[][] EQ_CELLS = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}, {1, 3}, {2, 3}};
     private static final String[] EQ_NAMES = {"Amulet", "Hełm", "Broń", "Zbroja", "Tarcza", "Pierśc.", "Nogi", "Amun.", "Buty", "Poch."};
     private static final float SK_ROW = 15;
-    private static final int SK_INFO_ROWS = 9;
+    private static final int SK_INFO_ROWS = 10;
     private float eqX, eqY, eqW, eqH, eqCell, skX, skY, skW, skH;
 
     private void layoutCharWindows() {
@@ -4413,6 +4414,7 @@ public final class Hud {
                 {"Udźwig", String.valueOf(pc.capacity())},
                 {"Atak", "do " + ap.maxDamage() + " (" + ap.skill().label().toLowerCase(java.util.Locale.ROOT) + ")"},
                 {"Sytość", (pc.fedMs() / 60_000) + " min" + (pc.restedKills() > 0 ? ", wypoczęty " + pc.restedKills() : "")},
+                {"Stamina", pl.fawizja.pixel.character.SkillSheet.staminaDetail(pc)},
         };
         float yy = skY + skH - 23 - 3;
         font.getData().setScale(0.8f);
@@ -5815,15 +5817,16 @@ public final class Hud {
                 for (MBtn b : mBagButtons(win, session)) woodButton(s, b.x(), b.y(), b.w(), b.h(), b.id().equals("mbag:page:" + bagPage));
                 break;
             case SKILLS: {
-                String[][] rows = skillRows(pc);
-                float rh = mSkillRow(win, rows.length);
-                for (int i = 0; i < rows.length; i++) {
+                List<pl.fawizja.pixel.character.SkillSheet.Row> rows = pl.fawizja.pixel.character.SkillSheet.rows(pc);
+                float rh = mSkillRow(win, rows.size());
+                for (int i = 0; i < rows.size(); i++) {
                     float yy = win.top() - 26 - 15 - i * rh;
-                    double prog = i == 0 ? 1 : i == 1 ? pc.levelProgress()
-                            : (double) pc.skills().tries(Skill.values()[i - 2]) / Math.max(1, Skills.triesForNext(pc.skills().level(Skill.values()[i - 2])));
+                    pl.fawizja.pixel.character.SkillSheet.Row r = rows.get(i);
+                    double prog = r.progress() < 0 ? 1 : r.progress();
                     s.setColor(M_DARK);
                     s.rect(win.x + 12, yy - 6, win.w - 24, 3);
-                    s.setColor(hex(0x5fbf4a, 1f));
+                    s.setColor(r.bar() == pl.fawizja.pixel.character.SkillSheet.Bar.SKILL || r.bar() == pl.fawizja.pixel.character.SkillSheet.Bar.NONE
+                            ? hex(0x5fbf4a, 1f) : sheetColor(r));
                     s.rect(win.x + 12, yy - 6, (win.w - 24) * (float) Math.max(0, Math.min(1, prog)), 3);
                 }
                 break;

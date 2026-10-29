@@ -157,6 +157,9 @@ final class ServerWorld {
     private final ConsumableRegistry consumables;
     private final RecipeRegistry recipes;
     private final CharacterCodec codec = new CharacterCodec(items);
+    {
+        codec.setWallClock(() -> this.wallClock.getAsLong()); // znacznik wylogowania staminy wg zegara serwera
+    }
     /** Ranking wszystkich postaci (takze offline), budowany z zapisow przy starcie. */
     final pl.fawizja.pixel.ranking.Ranking ranking = new pl.fawizja.pixel.ranking.Ranking();
     private final SaveStore saves;
@@ -1780,6 +1783,8 @@ final class ServerWorld {
             if (pc == null) {
                 pc = new CharacterFactory(config, items).create(name, Vocation.valueOf(vocation),
                         world.templeOf(config.startTown()));
+            } else {
+                pc.stamina().onLogin(wallClock.getAsLong()); // stamina odnowiona za czas offline (zasady Tibii)
             }
         } catch (IllegalArgumentException e) {
             client.send("ERR", "Nieprawidłowe dane postaci: " + e.getMessage());
@@ -1921,8 +1926,9 @@ final class ServerWorld {
                 share = share * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
                 c.stats().recordRestedKill();
             }
+            share = c.stamina().hunt(share, c.isPremium(), now); // stamina jak w Tibii: po podziale, osobno dla kazdego
             m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name()
-                    + (rested ? ", wypoczęty" : ""), now);
+                    + (rested ? ", wypoczęty" : "") + pl.fawizja.pixel.combat.CombatSystem.staminaNote(c), now);
             if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
         }
         return true;

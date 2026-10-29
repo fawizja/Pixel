@@ -31,8 +31,8 @@ class RankingTest {
     @Test
     void skillRankingOrdersBySkillLevel() {
         Ranking r = new Ranking();
-        r.put(new Ranking.Entry("Ula", Vocation.DRUID, 60, 300_000, new int[] {10, 10, 10, 12, 70, 20}));
-        r.put(new Ranking.Entry("Ola", Vocation.SORCERER, 40, 100_000, new int[] {10, 10, 10, 12, 75, 30}));
+        r.put(new Ranking.Entry("Ula", Vocation.DRUID, 60, 300_000, new int[] {10, 10, 10, 10, 10, 12, 20, 70}));
+        r.put(new Ranking.Entry("Ola", Vocation.SORCERER, 40, 100_000, new int[] {10, 10, 10, 10, 10, 12, 30, 75}));
         r.put(new Ranking.Entry("Kuba", Vocation.PALADIN, 50, 200_000));
         assertEquals(List.of("Ola", "Ula", "Kuba"),
                 r.topSkill(10, Skill.MAGIC).stream().map(Ranking.Entry::name).toList());

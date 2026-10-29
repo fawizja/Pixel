@@ -91,6 +91,14 @@ public final class Equipment {
         return pl.fawizja.pixel.item.Upgrade.defense(def, s.upgrade());
     }
 
+    /** Rodzaj broni w rece (NONE: pusta reka albo nie bron, np. wedka). */
+    public pl.fawizja.pixel.item.WeaponType weaponType() {
+        ItemStack w = worn.get(EquipSlot.WEAPON);
+        ItemType t = w == null ? null : registry.get(w.itemId());
+        if (t == null || t.category() != pl.fawizja.pixel.item.ItemCategory.WEAPON) return pl.fawizja.pixel.item.WeaponType.NONE;
+        return t.weaponType();
+    }
+
     public int weaponAttack() {
         ItemStack w = worn.get(EquipSlot.WEAPON);
         return w == null ? 0 : pl.fawizja.pixel.item.Upgrade.attack(registry.get(w.itemId()), w.upgrade());

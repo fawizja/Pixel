@@ -38,6 +38,61 @@ public final class Pathfinder {
         return d != null ? d : nextStep(world, from, goal, stopDistance, maxNodes, blocked, Direction.values());
     }
 
+    /** Koszt prostego kroku w {@link #nextStepTimed}. */
+    static final int TIMED_STEP = 100;
+    /** Krok po skosie trwa tyle co {@link MovementSystem#DIAGONAL_STEP_FACTOR} prostych - tak tez go liczy poscig. */
+    static final int TIMED_DIAGONAL = TIMED_STEP * MovementSystem.DIAGONAL_STEP_FACTOR;
+
+    /**
+     * Pierwszy krok najszybszej drogi (A* po czasie marszu) do pola w odleglosci stopDistance od celu: proste kroki,
+     * a skos tam, gdzie sie oplaca albo jest jedynym przejsciem (szczelina miedzy drzewami/krzakami/glazami wg
+     * {@link WorldMap#diagonalCornersOpen}). Ograniczone do maxNodes rozwinietych pol; null = brak drogi w limicie.
+     */
+    public static Direction nextStepTimed(WorldMap world, Position from, Position goal, int stopDistance,
+                                          int maxNodes, Predicate<Position> blocked) {
+        if (from.z() != goal.z()) return null;
+        if (from.distanceTo(goal) <= stopDistance) return null;
+        Map<Position, Integer> best = new HashMap<>();
+        java.util.Set<Position> closed = new java.util.HashSet<>();
+        // {f, -g, kolejnosc}: najmniejsze f, przy remisie glebszy wezel
+        java.util.PriorityQueue<Object[]> open = new java.util.PriorityQueue<>((a, b) -> {
+            int c = Integer.compare((int) a[0], (int) b[0]);
+            if (c != 0) return c;
+            c = Integer.compare((int) b[1], (int) a[1]);
+            return c != 0 ? c : Integer.compare((int) a[4], (int) b[4]);
+        });
+        int seq = 0;
+        best.put(from, 0);
+        open.add(new Object[] {timedH(from, goal, stopDistance), 0, from, null, seq++});
+        int expanded = 0;
+        while (!open.isEmpty() && expanded < maxNodes) {
+            Object[] top = open.poll();
+            Position p = (Position) top[2];
+            if (!closed.add(p)) continue;
+            Direction first = (Direction) top[3];
+            if (first != null && p.distanceTo(goal) <= stopDistance) return first;
+            expanded++;
+            int g = (int) top[1];
+            for (Direction d : Direction.values()) {
+                Position n = p.translate(d.dx, d.dy);
+                if (closed.contains(n)) continue;
+                if (!world.isWalkable(n)) continue;
+                if (!world.diagonalCornersOpen(p, d)) continue;
+                if (blocked.test(n)) continue;
+                int ng = g + (d.diagonal() ? TIMED_DIAGONAL : TIMED_STEP);
+                Integer old = best.get(n);
+                if (old != null && old <= ng) continue;
+                best.put(n, ng);
+                open.add(new Object[] {ng + timedH(n, goal, stopDistance), ng, n, first == null ? d : first, seq++});
+            }
+        }
+        return null;
+    }
+
+    private static int timedH(Position p, Position goal, int stop) {
+        return TIMED_STEP * Math.max(0, p.distanceTo(goal) - stop);
+    }
+
     private static Direction nextStep(WorldMap world, Position from, Position goal, int stopDistance,
                                       int maxNodes, Predicate<Position> blocked, Direction[] dirs) {
         if (from.z() != goal.z()) return null;
