@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.216.0] - 2026-10-29
+
+### Zmieniono
+- Monety same się łączą jak w Tibii: 100 złotych = 1 platynowa, 100 platynowych = 1 kryształowa (łup, zakupy, reszta,
+  bank, depozyt, stare zapisy). Stosy monet rysowane jako kupka.
+- Pochodnie: kupuje się je w sklepie albo wypadają z goblinów, bandytów, szkieletów i stonóg. „Załóż” wkłada pochodnię
+  do nowego pola obok butów; dotknięcie pola zapala ją lub gasi. Pali się 20 minut, a zgaszona się nie wypala.
+- Chodzenie po dotknięciu mapy w 4 kierunkach; skosem tylko przy przeciskaniu się między drzewami, krzakami
+  i skałami (jak w Tibii). Mur i woda w rogu nadal blokują skos.
+- Joystick mniej czuły: większa martwa strefa, skos tylko przy wyraźnym wychyleniu, bez skakania kierunków.
+- Nad paskami własnej postaci jej nick, pod paskami czaszka PvP (także u innych graczy).
+
 ## [0.215.0] - 2026-10-29
 
 ### Dodano
