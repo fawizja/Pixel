@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.217.0] - 2026-10-29
+
+### Dodano
+- Przycisk „Podążaj” w dolnym rzędzie za Tarczą: gdy włączony, postać idzie za zaznaczonym potworem.
+- Ikona „Sklep” u góry obok Wyloguj: premium, promocja, błogosławieństwo, wzmocnienia polowania, koń i zwierzaki
+  kupowane złotem z banku, bez chodzenia do NPC.
+- Dotknięcie powiększonej mapy prowadzi postać w to miejsce, jeśli da się tam dojść.
+- Umiejętności Topór i Maczuga osobno od Miecza (każda broń ćwiczy swoją umiejętność).
+- Stamina jak w Tibii: 42 h, premia za doświadczenie przy 39–42 h dla premium, połowa doświadczenia poniżej 14 h,
+  odnawia się po wylogowaniu.
+- Krzaki z jagodami i malinami: kilka dotknięć daje krótkie nasycenie, potem krzak odrasta po godzinie.
+
+### Zmieniono
+- Nick nad paskiem życia wyżej, nie nachodzi na pasek.
+- Drzwi otwierają się tylko po dotknięciu, nie po wejściu w nie. Dotknięcie przedmiotu go używa (np. drabina).
+- Drzwi poziomu zamykają się za postacią, więc niższy poziom nie przejdzie za kimś.
+- Potwory idą do gracza, gdy go widzą, także skosem i dookoła przeszkód; potwory dystansowe trzymają odstęp.
+- Wędka wystarczy w ekwipunku, robaki w plecaku (1 robak na zarzut). Pole na robaki usunięte.
+- Szersza minimapa i lista Walka pod nią, większe wiersze łatwiejsze do dotknięcia.
+- Dach domu znika, gdy podchodzi się do drzwi lub ściany domu.
+- Czasy nasycenia jedzenia zbliżone do Tibii.
+
 ## [0.216.0] - 2026-10-29
 
 ### Zmieniono
