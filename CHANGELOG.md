@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.215.0] - 2026-10-29
+
+### Dodano
+- Nowy układ ekranu na telefonach i tabletach (wariant B według makiety): obraz gry na całym ekranie, u góry jedna ramka
+  z poziomem, paskami HP i many oraz ikonami Plecak, Ekwipunek, Umiejętności, VIP, Zadania, Ustawienia, Wyloguj.
+  Ikona otwiera okno na środku ekranu z krzyżykiem. Pod minimapą lista Walka. W prawym dolnym rogu 5 czarów na dużym
+  łuku i 2 mikstury na małym; dłuższe przytrzymanie przycisku otwiera wybór czaru, runy lub mikstury profesji.
+  Obok w rzędzie Atak, Tarcza, PvP. Czat schowany pod zakładką „Czat”. Bieg i Pochodnia są w oknie Ustawienia.
+  Wylogowanie pyta o potwierdzenie. Na komputerze układ bez zmian (podgląd: -Dpixel.mobileHud=1).
+
 ## [0.214.0] - 2026-10-29
 
 ### Zmieniono
