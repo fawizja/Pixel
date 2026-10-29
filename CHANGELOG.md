@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.213.0] - 2026-10-29
+
+### Zmieniono
+- Nowy układ ekranu jak w Tibii: po lewej minimapa, lista VIP i rozwijane okno umiejętności; u góry paski HP i many
+  z poziomem i paskiem doświadczenia; po prawej ekwipunek z polem wzmocnień i czaszki obok butów, kolumny przycisków
+  (Bieg, Tarcza, Zadania, Pochodnia | Wyjdź, PvP, Opcje), większe okno Walka i większy pasek akcji.
+  Paski HP nad postaciami i potworami, pod własnym HP pasek many. Mniejszy, ledwo widoczny joystick.
+- Okienko gracza po stuknięciu: profesja, poziom, gildia, wiadomość, znajomi, zaproszenie do drużyny, handel, pojedynek.
+- Doba: 3 godziny dnia i 3 godziny nocy.
+- PvP i drużyny według zasad Tibii: przełącznik PvP (bezpieczny tryb), czaszki biała, żółta, pomarańczowa,
+  czerwona (3/5/10 zabójstw w dobę/tydzień/miesiąc, 30 dni) i czarna (6/10/20, 45 dni), blokada PZ 1 min
+  po ataku i 15 min po zabójstwie, blokada wylogowania, obrażenia między graczami 50%.
+  Wspólne doświadczenie: premia 20/30/60/100% za 1/2/3/4+ profesje, poziomy w zakresie 2/3, do 30 pól od lidera,
+  aktywność w ostatnich 2 min.
+
+### Dodano
+- Stada potworów po 3-6 sztuk na lepszych łowiskach i w głębokich lochach (około 3800 potworów zamiast 2300).
+- Lista znajomych (VIP) i informacje o graczach z serwera.
+
 ## [0.212.0] - 2026-10-28
 
 ### Dodano
