@@ -14,21 +14,41 @@ import pl.fawizja.pixel.world.WorldMap;
 
 class HerbGatheringTest {
 
-    /** Pierwszy krzak swiata i wolne pole obok niego. */
+    /** Pierwszy krzak z ziolami (bez owocow) i wolne pole obok niego, przy ktorym nie rosna krzaki z owocami. */
     private static Position[] bushAndSpot(WorldMap w) {
         int bush = w.tiles().byKey("bush").id();
         var f = w.floor(0);
-        for (int y = 1; y < f.height() - 1; y++) {
-            for (int x = 1; x < f.width() - 1; x++) {
-                if (f.get(Layer.OBJECT, x, y) != bush) continue;
+        for (int y = 2; y < f.height() - 2; y++) {
+            for (int x = 2; x < f.width() - 2; x++) {
+                if (f.get(Layer.OBJECT, x, y) != bush || BerryBushes.kindAt(w, new Position(x, y, 0)) != null) continue;
                 for (int dy = -1; dy <= 1; dy++) {
                     for (int dx = -1; dx <= 1; dx++) {
-                        if (f.isWalkable(x + dx, y + dy)) return new Position[] {new Position(x, y, 0), new Position(x + dx, y + dy, 0)};
+                        Position spot = new Position(x + dx, y + dy, 0);
+                        if (f.isWalkable(x + dx, y + dy) && !berryNear(w, spot)) return new Position[] {new Position(x, y, 0), spot};
                     }
                 }
             }
         }
         throw new AssertionError("no bush");
+    }
+
+    private static boolean berryNear(WorldMap w, Position p) {
+        for (int dy = -1; dy <= 1; dy++)
+            for (int dx = -1; dx <= 1; dx++)
+                if (BerryBushes.kindAt(w, p.translate(dx, dy)) != null) return true;
+        return false;
+    }
+
+    @Test
+    void tappingAHerbBushGathersFromThatBush() {
+        WorldMap w = TestData.world();
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = new GameSession(TestData.ITEMS, w, pc);
+        Position[] bs = bushAndSpot(w);
+        pc.setPosition(bs[1]);
+        assertTrue(s.usableAt(bs[0]), "a herb bush can be used by tapping it");
+        assertTrue(s.useAt(bs[0], 1000));
+        assertTrue(pc.backpack().count(TestData.ITEMS.byKey("healing_herb").id()) >= 1);
     }
 
     @Test

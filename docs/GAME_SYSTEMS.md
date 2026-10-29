@@ -255,6 +255,48 @@ odleglosc; na PC prawy przycisk myszy), przeciagniecie po lewej czesci widoku gr
 (podstawa tam, gdzie palec dotknal; po puszczeniu wraca w rog). Ustawienia: joystick pod kciukiem / tylko w rogu,
 rozmiar 80-150%. Na Androidzie ekran nie gasnie w trakcie gry (`useWakelock`).
 
+## Uzycie dotknieciem, drzwi, dachy (Z logika, S serwer, C UI)
+
+Na telefonie nie ma przycisku "Uzyj" - dotkniecie obiektu na mapie dziala jak "Use" w Tibii
+(`GameSession.usableAt` / `useAt`, akcja `open:x:y:z`, klient `GameScreen.tapTile`; ta sama sciezka dla klikniecia na PC).
+Obiekt obok postaci (albo pod nia) - uzycie od razu; dalej - marsz na pole obok i uzycie po dojsciu.
+- Uzywalne: skrzynie, schowki, drzwi i okna, dzwignie, pochodnie na murach, drabiny i miejsca na line (wejscie pietro
+  wyzej, lina potrzebna), krzaki z owocami i ziolami, drogowskazy (kraina i droga do najblizszego miasta), studnie,
+  lozka, pulpity. Schody i dziury jak dotad - wejscie na pole. Przedmioty na ziemi: podglad/podnoszenie bez zmian.
+- Drzwi jak w Tibii: wejscie w zamkniete drzwi tylko zatrzymuje (`MoveResult.DOOR_CLOSED`, podpowiedz
+  "Dotknij drzwi, aby je otworzyć." najwyzej raz na 30 s); otwiera i zamyka je dotkniecie (zamkniecie nie, gdy ktos
+  stoi w drzwiach). Marsz po dotknieciu mapy omija zamkniete drzwi, a gdy trasa przez nie prowadzi - staje przed
+  nimi. Zasady domow (`HouseAccess`) bez zmian. Potwory przez zamkniete drzwi nie przechodza.
+- Online: stan drzwi i okien jest wspolny - serwer rozsyla zmiany komunikatem `DOOR x y z 1|0` (`Openings.setListener`)
+  i wysyla otwarte drzwi nowo zalogowanemu; klient nie przewiduje juz drzwi lokalnie.
+- Dachy (`client/render/Roofs`): pod dachem nie widac zadnych dachow (jak dotad); dodatkowo dach (i wyzsze pietra)
+  jednego budynku znika, gdy postac stoi najwyzej 2 pola od jego drzwi albo tuz przy jego murze (1 pole) - widac
+  mury i drzwi do dotkniecia. Dach znika i wraca plynnie w 250 ms (`Roofs.stepFade`; przy -Dpixel.hour od razu).
+
+## Krzaki z owocami i jedzenie (Z logika, C grafika)
+
+- Co piaty (srednio) zwykly krzak `bush` na powierzchni nosi owoce (`gathering/BerryBushes`, wybor wg pozycji pola -
+  bez zmian mapy, ten sam u klienta i na serwerze): 2/3 jagody (`blueberry`), 1/3 maliny (`raspberry`).
+- Dotkniecie krzaka obok: 3 owoce, po 3 zbiorach krzak jest pusty i odrasta po godzinie (komunikat "odrosną za N min").
+  Stan liczy sie osobno dla kazdej postaci (jak ziola). Przycisk UZYJ / klawisz E tez zrywa owoce z krzaka obok.
+- Zwykle krzaki bez owocow daja dalej ziela lecznicze (dotkniecie albo UZYJ, odrost 10 min).
+- Grafika: warianty krzakow z paczki OTSP - z owocami 1539/1542/1548 (jagody), 1540/1546 (maliny); obrany krzak to
+  ten sam krzak bez owocow (1538/1541/1544). Zwykle krzaki nie dostaja juz wariantow z owocami.
+- Sytosc (consumables.csv, sekundy; maks. 1200 s jak w Tibii). Porownanie z Tibia (TibiaWiki / food.lua serwerow OT,
+  wartosci podane z pamieci, bez sprawdzenia online w tej sesji):
+
+  | Przedmiot | Pixel | Tibia |
+  |---|---|---|
+  | Jagody / maliny (sztuka) | 12 s | blueberry / raspberry 12 s |
+  | Chleb | 120 s (bylo 300) | bread 120 s |
+  | Ryba | 144 s (bylo 240) | fish 144 s |
+  | Mieso | 180 s | meat 180 s |
+  | Bagienny wegorz, karp z oazy | 240 s (bylo 360) | rzadkie ryby, miedzy miesem a szynka |
+  | Lodowy dorsz | 300 s (bylo 420) | j.w. |
+  | (szynka - brak w grze) | - | ham 360 s |
+
+  Garsc owocow z jednego zbioru (3 x 12 s) syci krocej niz kawalek miesa.
+
 ## Swiatlo, dzien i noc (C)
 
 - `WorldClock`: doba gry = 6 h czasu rzeczywistego (`REAL_DAY_MS`): ok. 3 h jasno i 3 h ciemno, godzina gry = 15 min
@@ -505,7 +547,10 @@ pietrach). Lup rosnie x3 na pietro w dol. Otwieranie: `GameSession.openChest` (U
   `WorldMap.addLevelDoor(p, lvl)`: drzwi + straznik poziomu na tym jednym polu (`requiredLevelAt`). API:
   `world.levelDoorAt(p)` (0 = nie drzwi poziomu), `world.levelDoors()`, `WorldMap.levelDoorSign(lvl)`
   ("\"Tylko dla poziomu 20+\"" - proste cudzyslowy, czcionka gry nie ma „ ”). Dotkniecie (`GameSession.useAt`) pokazuje napis; nizszy poziom - drzwi sie nie
-  otwieraja, krok w drzwi konczy sie tym samym komunikatem; od poziomu - drzwi sie otwieraja i mozna przejsc.
+  otwieraja, krok w drzwi konczy sie tym samym komunikatem. Od poziomu (jak w Tibii) dotkniecie otwiera drzwi i
+  wprowadza postac w drzwi; drzwi sa otwarte, dopoki ktos w nich stoi, i zamykaja sie za postacia, gdy z nich zejdzie
+  (`GameSession.closeLevelDoorBehind`, takze po schodach, teleporcie i smierci; nie, gdy w drzwiach stoi inny gracz).
+  Kazda sesja pilnuje swoich drzwi, wiec dziala osobno dla kazdej postaci, na serwerze tez (komunikat `DOOR`).
   Generator: `ctx['level_doors'].append((x, y, z, poziom))` i obiekt `door_level` w przerwie muru.
 - Zadania z oltarzami: `world/AltarQuest` z pliku `altar_quests.csv` (wiersz `quest` + wiersze `altar` na kazda
   profesje: oltarz, pole przed nim, pochodnia na murze, przedmiot, cel teleportu, skrzynia). Przedmiot na oltarzu to

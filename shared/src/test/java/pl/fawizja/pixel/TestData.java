@@ -49,4 +49,22 @@ public final class TestData {
     public static PlayerCharacter newCharacter(Vocation v) {
         return new CharacterFactory(StartingConfig.loadDefault(), ITEMS).create("Test Hero", v, new Position(31, 16, 0));
     }
+
+    /**
+     * Krok w BFS testow dostepnosci: zamkniete drzwi (nie poziomu ponad sily postaci) gracz otwiera dotknieciem
+     * i przechodzi - jak w grze, gdzie wejscie w drzwi ich nie otwiera.
+     */
+    public static pl.fawizja.pixel.movement.MoveResult stepOpeningDoors(WorldMap w, pl.fawizja.pixel.movement.MovementSystem ms,
+                                                                       PlayerCharacter pc, pl.fawizja.pixel.world.Direction d) {
+        Position to = pc.position().translate(d.dx, d.dy);
+        if (!d.diagonal() && w.openings().isClosedDoor(to) && w.requiredLevelAt(to) <= pc.level()) {
+            w.openings().set(to, true);
+            try {
+                return ms.step(pc, d);
+            } finally {
+                w.openings().set(to, false);
+            }
+        }
+        return ms.step(pc, d);
+    }
 }

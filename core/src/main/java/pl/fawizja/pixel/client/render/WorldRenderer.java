@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import java.util.List;
+import pl.fawizja.pixel.gathering.BerryBushes;
 import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.world.FloorMap;
 import pl.fawizja.pixel.world.GroundItems;
@@ -42,6 +43,7 @@ public final class WorldRenderer {
     private final int[] rockDetail;
     /** Drzwi lacza mury (mur obok drzwi nie konczy sie slupkiem). */
     private final java.util.Set<Integer> doors;
+    private final int bushId;
 
     private final pl.fawizja.pixel.world.Openings openings;
     private final pl.fawizja.pixel.world.WallLights wallLights;
@@ -59,6 +61,8 @@ public final class WorldRenderer {
         java.util.Set<Integer> doors = new java.util.HashSet<>();
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) if (t.key().startsWith("door")) doors.add(t.id());
         this.doors = doors;
+        pl.fawizja.pixel.world.TileType bush = world.tiles().byKeyOrNull("bush");
+        this.bushId = bush == null ? -1 : bush.id();
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
             tall[t.id()] = java.util.Set.of("tree", "pine", "palm", "dead_tree", "ship_mast", "jungle_tree", "frost_pine", "autumn_tree", "burnt_tree").contains(t.key());
         }
@@ -267,8 +271,48 @@ public final class WorldRenderer {
     private final int[] borderGrounds = new int[8];
     private final int[] sideTiles = new int[8];
 
+    /**
+     * Krzaki z owocami (paczka OTSP, warianty tiles/bush_vN): jagody 1539/1542/1548, maliny 1540/1546, a pusty krzak
+     * po zbiorze to ten sam krzak bez owocow (1538, 1541, 1544). Zwykle krzaki dostaja tylko warianty bez owocow,
+     * wiec owoce widac dokladnie tam, gdzie mozna je zerwac ({@link BerryBushes}).
+     */
+    static final int[] BUSH_BLUE = {6, 8, 10}, BUSH_RED = {7, 9};
+    static final int[] BUSH_PLAIN = {0, 1, 2, 3, 4, 5, 11, 12, 13, 14, 15};
+    /** Wariant pustego krzaka dla wariantu z owocami (indeks = wariant z owocami). */
+    static final int[] BUSH_EMPTY = {0, 1, 2, 3, 4, 5, 2, 2, 3, 4, 4};
+    static final int BUSH_VARIANTS = 16;
+    private BerryBushes berries;
+    private long berriesNowMs;
+
+    /** Stan zbioru owocow do rysowania (sesja gracza) i biezacy czas gry. */
+    public void setBerries(BerryBushes berries, long nowMs) {
+        this.berries = berries;
+        this.berriesNowMs = nowMs;
+    }
+
+    /** Wariant grafiki krzaka na polu (-1 = jak inne obiekty, wg pozycji) i czy krzak jest pusty. */
+    static int bushVariant(BerryBushes.Kind kind, boolean empty, int spread) {
+        if (kind == null) return BUSH_PLAIN[spread % BUSH_PLAIN.length];
+        int[] set = kind == BerryBushes.Kind.BLUEBERRY ? BUSH_BLUE : BUSH_RED;
+        int k = set[spread % set.length];
+        return empty ? BUSH_EMPTY[k] : k;
+    }
+
+    private boolean drawBush(SpriteBatch batch, int id, int mx, int my, float x, float wy) {
+        if (id != bushId || art.variantCount(id) != BUSH_VARIANTS) return false;
+        Position p = new Position(mx, my, drawingFloor == null ? 0 : drawingFloor.z());
+        BerryBushes.Kind kind = BerryBushes.kindAt(world, p);
+        boolean empty = kind != null && berries != null && berries.isEmpty(p, berriesNowMs);
+        int k = bushVariant(kind, empty, TileArt.spread(mx, my));
+        TextureRegion nat = art.nativeVariant(id, k);
+        if (nat != null) batch.draw(nat, x - 1, wy, 2f, 2f);
+        else batch.draw(art.tileVariant(id, k), x, wy, 1f, 1f);
+        return true;
+    }
+
     private void drawObject(SpriteBatch batch, int id, int mx, int my, float x, float wy) {
         if (id == 0) return;
+        if (drawBush(batch, id, mx, my, x, wy)) return;
         if (doors.contains(id) && drawingFloor != null && doorArt(drawingFloor, mx, my) != 0) return; // drzwi w murze - drawWall
         if (wallLights.isLightTile(id) && drawingFloor != null && drawingFloor.get(Layer.WALL, mx, my) != 0) return; // na murze - drawWall
         TextureRegion nat = art.nativeTile(id, mx, my);
@@ -529,8 +573,21 @@ public final class WorldRenderer {
      * Wyzsze pietra i dachy nad biezacym pietrem (po postaciach). Gdy gracz stoi pod dachem albo pod wyzszym
      * pietrem, nic nie jest rysowane - widac wnetrze budynku.
      */
+    /** Przezroczystosc dachow budynkow, do ktorych gracz podszedl (plynne znikanie i powrot). */
+    private final java.util.Map<Integer, Float> roofFade = new java.util.HashMap<>();
+    private long roofFadeAt;
+    /** Zrzuty regresji GUI (-Dpixel.hour): dach od razu w stanie koncowym, bez zaleznosci od czasu klatki. */
+    private final boolean roofFadeInstant = System.getProperty("pixel.hour") != null;
+
+    /** Biezace przezroczystosci dachow (0 = zdjety) - imiona pod zdjetym dachem sa widoczne. */
+    public java.util.Map<Integer, Float> roofFade() { return roofFade; }
+
     public void renderAbove(SpriteBatch batch, OrthographicCamera cam, Position player, Roofs roofs) {
-        if (roofs == null || roofs.covered(player)) return;
+        if (roofs == null || roofs.covered(player)) {
+            roofFade.clear();                                         // pod dachem: po wyjsciu dach od razu zdjety
+            if (roofs != null) for (Integer id : roofs.nearBuildings(player)) roofFade.put(id, 0f);
+            return;
+        }
         float halfW = cam.viewportWidth * cam.zoom / 2f;
         float halfH = cam.viewportHeight * cam.zoom / 2f;
         int x0 = Math.max(0, (int) Math.floor(cam.position.x - halfW) - 1);
@@ -539,6 +596,12 @@ public final class WorldRenderer {
         int wy1 = (int) Math.ceil(cam.position.y + halfH) + 2;
         int y0 = Math.max(0, world.height() - 1 - wy1);
         int y1 = Math.min(world.height() - 1, world.height() - 1 - wy0);
+        // budynek, do ktorego gracz podchodzi: bez dachu i wyzszych pieter nad nim (widac mury i drzwi)
+        long nowMs = com.badlogic.gdx.utils.TimeUtils.millis();
+        long dt = roofFadeAt == 0 ? Roofs.FADE_MS : Math.max(0, nowMs - roofFadeAt);
+        roofFadeAt = nowMs;
+        java.util.Map<Integer, Float> near = Roofs.stepFade(roofFade, roofs.nearBuildings(player), roofFadeInstant ? Roofs.FADE_MS : dt);
+        float tint = batch.getPackedColor();
         for (int z = player.z(); z <= 5; z++) {
             FloorMap f = world.floor(z);
             if (f == null) continue;
@@ -546,6 +609,7 @@ public final class WorldRenderer {
                 for (int y = y0; y <= y1; y++) {
                     float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
+                        if (Roofs.alpha(near, roofs.buildingAt(x, y, player.z())) < 1f) continue;
                         draw(batch, f.get(Layer.GROUND, x, y), x, y, x - UP, wy);
                         draw(batch, f.get(Layer.DECORATION, x, y), x, y, x - UP, wy);
                     }
@@ -554,6 +618,7 @@ public final class WorldRenderer {
                 for (int y = y0; y <= y1; y++) {
                     float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
+                        if (Roofs.alpha(near, roofs.buildingAt(x, y, player.z())) < 1f) continue;
                         drawObject(batch, f.get(Layer.OBJECT, x, y), x, y, x - UP, wy);
                         drawWall(batch, f, x, y, x - UP, wy);
                     }
@@ -567,8 +632,12 @@ public final class WorldRenderer {
                     if (kind == Roofs.NONE) continue;
                     if (upper != null && upper.get(Layer.GROUND, x, y) != 0) continue;
                     // kalenica (gorny brzeg) i okap (dolny brzeg) z paczki tam, gdzie dach sie konczy
+                    float a = Roofs.alpha(near, roofs.buildingAt(x, y, z == player.z() ? z : player.z()));
+                    if (a <= 0f) continue;
                     boolean top = roofs.at(x, y - 1, z) != kind, bottom = roofs.at(x, y + 1, z) != kind;
+                    if (a < 1f) batch.setColor(1f, 1f, 1f, a);
                     batch.draw(art.roof(kind, top, bottom), x - UP, wy, 1f, 1f);
+                    if (a < 1f) batch.setPackedColor(tint);
                 }
             }
         }

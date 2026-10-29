@@ -267,6 +267,7 @@ final class ServerWorld {
             world.wallLights().restore(new String(java.nio.file.Files.readAllBytes(wallLightsFile.toPath()),
                     java.nio.charset.StandardCharsets.UTF_8));
         }
+        world.openings().setListener(msg -> broadcast(null, msg));   // drzwi i okna: stan wspolny dla wszystkich
         world.wallLights().setListener(msg -> {
             broadcast(null, msg);
             saveWallLights();
@@ -303,6 +304,9 @@ final class ServerWorld {
 
     /** Nowy klient dostaje obecny stan skrzyn (jego mapa jest swieza z pliku). */
     private void sendCrates(ClientHandler client) {
+        for (Position c : world.openings().openPositions()) {
+            client.send("DOOR", String.valueOf(c.x()), String.valueOf(c.y()), String.valueOf(c.z()), "1");
+        }
         for (java.util.Map.Entry<Position, Boolean> e : world.wallLights().changes().entrySet()) {
             Position c = e.getKey();
             client.send("WLIGHT", String.valueOf(c.x()), String.valueOf(c.y()), String.valueOf(c.z()), e.getValue() ? "1" : "0");
@@ -2458,6 +2462,11 @@ final class ServerWorld {
         leftTrade(p);
         leftDuel(p);
         players.remove(p.id);
+        // wylogowanie w drzwiach poziomu: drzwi zamykaja sie za postacia (chyba ze stoi w nich ktos inny)
+        Position at = p.session.character().position();
+        if (world.levelDoorAt(at) > 0 && players.values().stream().noneMatch(o -> o.session.character().position().equals(at))) {
+            world.openings().set(at, false);
+        }
         tellFriends(p, "wyszedł z gry.", lastNow);
         broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
         LOG.info("leave " + p.name() + " (" + players.size() + " online)");

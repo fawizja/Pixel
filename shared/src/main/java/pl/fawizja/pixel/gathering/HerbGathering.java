@@ -39,6 +39,7 @@ public final class HerbGathering {
                 int x = p.x() + dx, y = p.y() + dy;
                 if (!f.inBounds(x, y) || f.get(Layer.OBJECT, x, y) != bushTile) continue;
                 Position b = new Position(x, y, p.z());
+                if (BerryBushes.kindAt(world, b) != null) continue; // krzak z owocami: owoce zamiast ziol
                 if (readyAt.getOrDefault(b, Long.MIN_VALUE) <= now) return b;
                 if (found == null) found = b;
             }
@@ -47,7 +48,22 @@ public final class HerbGathering {
     }
 
     public Result gather(Position from, Random rng, long now) {
-        Position b = bushNear(from, now);
+        return gatherFrom(bushNear(from, now), rng, now);
+    }
+
+    /** Czy na polu rosnie krzak z ziolami (zwykly krzak bez owocow). */
+    public boolean isHerbBush(Position b) {
+        FloorMap f = world.floor(b.z());
+        return f != null && bushTile >= 0 && f.inBounds(b.x(), b.y()) && f.get(Layer.OBJECT, b.x(), b.y()) == bushTile
+                && BerryBushes.kindAt(world, b) == null;
+    }
+
+    /** Zbior z konkretnego krzaka (dotkniety krzak; odleglosc sprawdza wywolujacy). */
+    public Result gatherAt(Position b, Random rng, long now) {
+        return gatherFrom(isHerbBush(b) ? b : null, rng, now);
+    }
+
+    private Result gatherFrom(Position b, Random rng, long now) {
         if (b == null) return new Result(Outcome.NO_BUSH, 0, 0);
         long ready = readyAt.getOrDefault(b, Long.MIN_VALUE);
         if (ready > now) return new Result(Outcome.REGROWING, 0, ready - now);

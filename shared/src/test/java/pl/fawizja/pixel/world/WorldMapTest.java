@@ -126,7 +126,7 @@ class WorldMapTest {
             Position p = q.poll();
             for (Direction d : Direction.values()) {
                 pc.setPosition(p);
-                if (ms.step(pc, d).moved() && parent.putIfAbsent(pc.position(), p) == null) q.add(pc.position());
+                if (pl.fawizja.pixel.TestData.stepOpeningDoors(world, ms, pc, d).moved() && parent.putIfAbsent(pc.position(), p) == null) q.add(pc.position());
             }
             pc.setPosition(p);
             if (ms.use(pc) == MoveResult.CHANGED_FLOOR && parent.putIfAbsent(pc.position(), p) == null) q.add(pc.position());

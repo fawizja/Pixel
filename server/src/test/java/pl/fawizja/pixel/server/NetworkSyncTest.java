@@ -781,6 +781,48 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void levelDoorOnlineOpensForTheQualifiedAndClosesBehindThem() throws Exception {
+        Position door = server.world().world.levelDoors().entrySet().stream()
+                .filter(e -> e.getKey().z() == 0 && e.getValue() == 20).findFirst().orElseThrow().getKey();
+        Position front = door.translate(0, 1);
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "DRUID", "tajne-Ola");
+            ula.hello("Ula", "KNIGHT", "tajne-Ula");
+            await("welcome", () -> ola.playerId() > 0 && ula.playerId() > 0);
+            boolean[] ready = new boolean[1];
+            server.enqueueTest(() -> {
+                ServerPlayer o = server.world().find("Ola");
+                pl.fawizja.pixel.character.PlayerCharacter pc = o.session.character();
+                pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(20) - pc.experience());
+                o.session.teleport(front, server.now());
+                server.world().find("Ula").session.teleport(front.translate(0, 2), server.now());
+                ready[0] = true;
+            });
+            await("ready", () -> ready[0]);
+            ola.send("ACT", "open:" + door.x() + ":" + door.y() + ":" + door.z());
+            String[] open = {"DOOR", String.valueOf(door.x()), String.valueOf(door.y()), String.valueOf(door.z()), "1"};
+            awaitMessage(ula, "door open for everyone", m -> java.util.Arrays.equals(m, open));
+            await("Ola in the doorway", () -> server.world().find("Ola").session.character().position().equals(door));
+            ola.send("MOVE", "NORTH");
+            String[] closed = {"DOOR", String.valueOf(door.x()), String.valueOf(door.y()), String.valueOf(door.z()), "0"};
+            awaitMessage(ula, "door closed behind Ola", m -> java.util.Arrays.equals(m, closed));
+            ola.send("MOVE", "-");
+            Position past = server.world().find("Ola").session.character().position();
+            assertTrue(past.z() != 0 || past.y() < door.y(), "Ola went through: " + past);
+            // Ula (poziom 8) za nia: drzwi zamkniete i nie ustepuja
+            server.enqueueTest(() -> server.world().find("Ula").session.teleport(front, server.now()));
+            await("Ula in front", () -> server.world().find("Ula").session.character().position().equals(front));
+            ula.send("MOVE", "NORTH");
+            awaitMessage(ula, "level refusal", m -> m[0].equals("LOG") && m.length > 2 && m[2].contains("Tylko dla poziomu 20+"));
+            ula.send("ACT", "open:" + door.x() + ":" + door.y() + ":" + door.z());
+            ula.send("MOVE", "-");
+            assertEquals(front, server.world().find("Ula").session.character().position());
+            assertFalse(server.world().world.openings().isOpen(door));
+        }
+    }
+
     /** Czeka na komunikat spelniajacy warunek (pozostale komunikaty sa pomijane). */
     @Test
     void altarQuestTorchesAndLeverWorkForFivePlayersOnline() throws Exception {
