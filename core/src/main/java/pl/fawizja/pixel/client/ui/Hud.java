@@ -5525,7 +5525,7 @@ public final class Hud {
             strokeRect(shapes, bl.x, bl.y, bl.w, bl.h, 1f, M_EDGE);
             if (nb > rowsVis + mBattleScroll) {
                 // strzalka: ponizej sa kolejne wiersze
-                float ax = bl.right() - 5 - mWidth(String.valueOf(nb - rowsVis - mBattleScroll), 0.64f) - 10, ay = bl.top() - 8;
+                float ax = bl.right() - 5 - mWidth(String.valueOf(nb - rowsVis - mBattleScroll), 0.64f) - 10, ay = bl.top() - 7;
                 shapes.setColor(M_MUTED);
                 shapes.triangle(ax, ay + 2.5f, ax + 6, ay + 2.5f, ax + 3, ay - 2.5f);
             }
@@ -5627,7 +5627,7 @@ public final class Hud {
             mText(batch, time, sx + (sk != null ? STATUS_SIZE + 2 : 0), sy + 3.5f, HudLayout.MIN_FONT, Color.WHITE, true);
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
-        minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, MINIMAP_TILES);
+        minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, mm.h, Math.round(mm.w / 1.5f));
         bStroke(batch, mm.x, mm.y, mm.w, mm.h, 1.5f, M_LINE);
         drawMobileBattle(batch, rowsVis);
         for (int i = 0; i < mlay.spells.length; i++) mSlotIcon(batch, session, pc, MobileHudLayout.SPELL_SLOTS[i], mlay.spells[i], false, serverTimeMs);
@@ -5803,16 +5803,16 @@ public final class Hud {
     /** Skala wierszy czatu na telefonie (makieta: 10 px). */
     private float chatScaleMobile() { return 0.66f; }
 
-    /** Lista walki obok minimapy: "Walka (n)", gracze i potwory w wierszach 21 dp, cel w czerwonej ramce. */
+    /** Lista walki pod minimapa: "Walka (n)", gracze i potwory w wierszach 20 dp, cel w czerwonej ramce. */
     private void drawMobileBattle(SpriteBatch batch, int rowsVis) {
         HudLayout.Rect bl = mlay.battle;
         if (bl.h <= 0) return;
         int nb = mobileBattleCount();
-        mText(batch, "Walka (" + nb + ")", bl.x + 5, bl.top() - 12, 0.66f, M_TEXT, false);
+        mText(batch, "Walka (" + nb + ")", bl.x + 5, bl.top() - 11, 0.66f, M_TEXT, false);
         int more = nb - rowsVis - mBattleScroll;
         if (more > 0) {
             String m = String.valueOf(more);
-            mText(batch, m, bl.right() - 5 - mWidth(m, 0.64f), bl.top() - 12, 0.64f, M_MUTED, false);
+            mText(batch, m, bl.right() - 5 - mWidth(m, 0.64f), bl.top() - 11, 0.64f, M_MUTED, false);
         }
         if (nb == 0) {
             mText(batch, "Brak potworów.", bl.x + 5, bl.top() - MobileHudLayout.BATTLE_HEAD - 12, 0.66f, M_MUTED, false);
@@ -5821,7 +5821,7 @@ public final class Hud {
         float row = MobileHudLayout.BATTLE_ROW;
         for (int k = 0; k < rowsVis && k + mBattleScroll < nb; k++) {
             int i = k + mBattleScroll;
-            float top = bl.top() - MobileHudLayout.BATTLE_HEAD - k * row, base = top - 10f;
+            float top = bl.top() - MobileHudLayout.BATTLE_HEAD - k * row, base = top - 9.5f;
             String name;
             Color nc = M_TEXT;
             TextureRegion icon;
@@ -5845,9 +5845,9 @@ public final class Hud {
             // imie u gory wiersza, pod nim pasek zycia na cala szerokosc (jak w Tibii)
             float nx = bl.x + 23, nw = bl.right() - 5 - nx;
             mText(batch, mClip(name, nw, 0.66f), nx, base, 0.66f, nc, false);
-            bFill(batch, nx, top - 17.5f, nw, 4f, M_DARK);
+            bFill(batch, nx, top - 17f, nw, 3.5f, M_DARK);
             float[] c = BarColors.health(hp);
-            bFill(batch, nx, top - 17.5f, nw * Math.max(0, Math.min(1, hp)), 4f, new Color(c[0], c[1], c[2], 1f));
+            bFill(batch, nx, top - 17f, nw * Math.max(0, Math.min(1, hp)), 3.5f, new Color(c[0], c[1], c[2], 1f));
         }
     }
 

@@ -3,8 +3,8 @@ package pl.fawizja.pixel.client.ui;
 /**
  * Uklad HUD-u na telefon, "wariant B" z makiety zatwierdzonej przez wlasciciela (2026-10-29,
  * scratchpad/mock/template3.html, funkcja phone()): widok gry na calym ekranie pod HUD-em, u gory jedna drewniana
- * ramka (poziom, paski HP i many, 8 ikon kategorii), pod nia po prawej minimapa 120 dp i obok niej (na lewo) lista
- * walki, w prawym dolnym rogu luk 5 czarow i 2 mikstur, obok rzad Atak / Podazaj / Tarcza / PvP, joystick w lewym
+ * ramka (poziom, paski HP i many, 8 ikon kategorii), pod nia po prawej minimapa 120 x 80 dp i pod nia lista walki
+ * (wlasciciel: "Walka musi byc pod mapa"), w prawym dolnym rogu luk 5 czarow i 2 mikstur, obok rzad Atak / Podazaj / Tarcza / PvP, joystick w lewym
  * dolnym rogu, zwijany czat na dole.
  *
  * <p>Makieta ma poczatek w lewym gornym rogu; tu wszystko jest przeliczone na libGDX (poczatek w lewym dolnym
@@ -21,10 +21,11 @@ public final class MobileHudLayout {
     public static final float FRAME_TOP = 2f, FRAME_H = 40f;
     /** Paski HP i many: od x = 46 do 8 dp przed pierwsza ikona, po 13 dp wysokosci. */
     public static final float BAR_X = 46f, BAR_H = 13f;
-    /** Minimapa (kwadrat) i lista walki obok niej: po 120 dp szerokosci (2026-10-29: 90 bylo za waskie). */
-    public static final float MINIMAP = 120f, BATTLE_W = 120f;
-    /** Lista walki miesci najwyzej tyle wierszy (dalej przewijanie palcem), zeby nie zaslaniac widoku gry. */
-    public static final int BATTLE_MAX_ROWS = 6;
+    /**
+     * Minimapa 120 x 80 dp (prostokatny wycinek wokol gracza) i lista walki pod nia, tej samej szerokosci - niska
+     * minimapa zostawia na telefonie 360 dp miejsce na 3 wiersze walki (wiecej na wyzszych ekranach) nad lukiem czarow.
+     */
+    public static final float MINIMAP = 120f, MINIMAP_H = 80f;
     /** Luk czarow: srodek 20 dp od prawego i dolnego brzegu, promienie lukow i przyciskow. */
     public static final float ARC_INSET = 20f, R1 = 110f, R2 = 58f, SPELL_R = 19.5f, POTION_R = 16f, ROW_R = 19f;
     public static final float[] SPELL_DEG = {180f, 202.5f, 225f, 247.5f, 270f};
@@ -42,7 +43,7 @@ public final class MobileHudLayout {
     public static final float CHAT_X = 142f, CHAT_H = 128f;
     public static final float TAB_W = 100f, TAB_H = 22f, HANDLE_W = 110f, HANDLE_H = 19f;
     /** Wiersz listy walki 21 dp (latwo trafic palcem) i naglowek "Walka (n)". */
-    public static final float BATTLE_ROW = 21f, BATTLE_HEAD = 16f;
+    public static final float BATTLE_ROW = 20f, BATTLE_HEAD = 14f;
     public static final float PICK_W = 312f, PICK_MAX_H = 236f, PICK_ROW = 27f;
     /** Najmniejsze pole dotyku (dp). */
     public static final float MIN_TOUCH = 36f;
@@ -152,7 +153,7 @@ public final class MobileHudLayout {
             top(iconHits[i], hx, FRAME_TOP, MIN_TOUCH, 46 - FRAME_TOP);
         }
         float mx = w - ICON_MARGIN - MINIMAP;
-        top(minimap, mx, 46, MINIMAP, MINIMAP);
+        top(minimap, mx, 46, MINIMAP, MINIMAP_H);
         arcX = w - ARC_INSET;
         arcY = ARC_INSET;
         float x0 = arcX - R1 - 50;
@@ -161,13 +162,11 @@ public final class MobileHudLayout {
         for (int i = 0; i < row.length; i++) row[i].set(x0 - i * ROW_STEP, ROW_Y, ROW_R);
         for (int i = 0; i < 3; i++) context[i].set(x0 - i * ROW_STEP, ROW_Y + ROW_STEP, ROW_R);
         context[3].set(x0, ROW_Y + 2 * ROW_STEP, ROW_R);
-        // lista walki na lewo od minimapy (pod minimapa 120 dp na telefonie 360 dp nie ma miejsca nad lukiem):
-        // od ramki w dol, najwyzej BATTLE_MAX_ROWS wierszy i nie nizej niz 4 dp nad przyciskami chwilowymi
-        float bx = mx - 4 - BATTLE_W;
-        float bottomTop = h - (context[3].y + ROW_R) - 4;
-        float bh = Math.min(BATTLE_HEAD + BATTLE_MAX_ROWS * BATTLE_ROW + 4, bottomTop - 46);
-        top(battle, bx, 46, BATTLE_W, Math.max(0, bh));
-        top(statusRow, 8, 46, Math.max(0, bx - 8 - 8), 14);
+        // lista walki pod minimapa, do 4 dp nad najwyzszym przyciskiem luku (ile wierszy sie zmiesci, reszta przewijana)
+        float by = 46 + MINIMAP_H + 4;
+        float bottomTop = (h - ARC_INSET - R1 - 21) - 4;
+        top(battle, mx, by, MINIMAP, Math.max(0, bottomTop - by));
+        top(statusRow, 8, 46, Math.max(0, mx - 16 - 8), 14);
         joystick.set(JOY_X, JOY_X, JOY_R);
         chatTab.set(w / 2f - TAB_W / 2f, 0, TAB_W, TAB_H - 1);
         chatTabHit.set(chatTab.x, 0, TAB_W, MIN_TOUCH);
@@ -181,12 +180,11 @@ public final class MobileHudLayout {
     public float rowLeft() { return row[row.length - 1].x - ROW_R; }
 
     /**
-     * Okno kategorii (336 dp, pod ramka, na srodku); przy rozwinietym czacie nizsze, zeby go nie zaslaniac. Na
-     * waskim ekranie (780-800 dp) przesuniete w lewo tak, zeby nie zaslanialo listy walki.
+     * Okno kategorii (336 dp, pod ramka, na srodku); przy rozwinietym czacie nizsze, zeby go nie zaslaniac.
      */
     public HudLayout.Rect window(boolean chatOpen, boolean small, HudLayout.Rect out) {
         float wh = small ? WIN_SMALL_H : chatOpen ? Math.min(168, h - CHAT_H - 24 - WIN_TOP) : WIN_H;
-        float x = Math.min(Math.round((w - WIN_W) / 2f), Math.round(battle.x - 6 - WIN_W));
+        float x = Math.round((w - WIN_W) / 2f);
         top(out, x, WIN_TOP, WIN_W, wh);
         return out;
     }

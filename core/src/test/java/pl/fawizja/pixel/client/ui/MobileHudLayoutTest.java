@@ -128,14 +128,15 @@ class MobileHudLayoutTest {
         assertEquals(46, l.hpBar.x, 1e-3);
         assertEquals(l.icons[0].x - 8, l.hpBar.right(), 1e-3);
         assertTrue(l.hpBar.y > l.mpBar.y, "HP nad mana");
-        // minimapa 120 dp pod ramka przy prawym brzegu, lista walki 120 dp na lewo od niej, od tej samej wysokosci
+        // minimapa 120 x 80 dp pod ramka przy prawym brzegu, lista walki pod nia (4 dp odstepu) tej samej szerokosci
         assertEquals(w - 128, l.minimap.x, 1e-3);
-        assertEquals(h - 166, l.minimap.y, 1e-3);
+        assertEquals(h - 126, l.minimap.y, 1e-3);
         assertEquals(120, l.minimap.w, 1e-3);
-        assertEquals(120, l.battle.w, 1e-3);
-        assertEquals(l.minimap.x - 4, l.battle.right(), 1e-3);
-        assertEquals(l.minimap.top(), l.battle.top(), 1e-3);
-        assertEquals(MobileHudLayout.BATTLE_MAX_ROWS, l.battleRowsVisible(), "lista walki miesci 6 wierszy");
+        assertEquals(80, l.minimap.h, 1e-3);
+        assertEquals(l.minimap.x, l.battle.x, 1e-3);
+        assertEquals(l.minimap.w, l.battle.w, 1e-3);
+        assertEquals(l.minimap.y - 4, l.battle.top(), 1e-3);
+        assertTrue(l.battleRowsVisible() >= (h >= 390 ? 4 : 3), "lista walki miesci co najmniej 3-4 wiersze: " + l.battleRowsVisible());
         // luk: srodek (W-20, 20 od dolu), czary na promieniu 110 od dolnego brzegu do prawego
         assertEquals(w - 130, l.spells[0].x, 1e-3);
         assertEquals(20, l.spells[0].y, 1e-3);
@@ -177,10 +178,7 @@ class MobileHudLayoutTest {
                 HudLayout.Rect win = l.window(chatOpen, small, new HudLayout.Rect());
                 String c2 = ctx + " okno czat=" + chatOpen + " male=" + small;
                 assertEquals(MobileHudLayout.WIN_W, win.w, 1e-3);
-                // na srodku, a na waskim ekranie przesuniete w lewo tuz przed liste walki
-                if (Math.round((w - MobileHudLayout.WIN_W) / 2f) + MobileHudLayout.WIN_W + 6 <= l.battle.x) assertEquals(w / 2f, win.cx(), 0.51);
-                else assertEquals(l.battle.x - 6, win.right(), 0.51);
-                assertTrue(Math.abs(win.cx() - w / 2f) <= 40, c2 + ": okno daleko od srodka");
+                assertEquals(w / 2f, win.cx(), 0.51);
                 assertTrue(win.top() <= l.frame.y, c2 + ": na ramce");
                 assertTrue(s.encloses(win), c2);
                 List<HudLayout.Rect> rs = new ArrayList<>(List.of(l.minimap, l.battle, win));

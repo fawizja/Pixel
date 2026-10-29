@@ -69,35 +69,41 @@ final class Minimap {
     /** Wycinek tiles x tiles kafelkow wokol gracza w kwadracie (x, y, size). */
     void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
                     float x, float y, float size, int tiles) {
+        drawAround(batch, w, p, target, marks, x, y, size, size, tiles);
+    }
+
+    /**
+     * Wycinek wokol gracza w prostokacie (x, y, bw, bh): tilesW kafelkow w poziomie, w pionie tyle, ile wejdzie przy
+     * kwadratowych kafelkach (telefon: minimapa 120 x 80 dp). Gracz na srodku.
+     */
+    void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+                    float x, float y, float bw, float bh, int tilesW) {
+        float px = bw / tilesW;
+        int tilesH = Math.max(1, Math.round(bh / px));
+        float top = y + bh;
+        int sx0 = p.x() - tilesW / 2, sy0 = p.y() - tilesH / 2;
         Texture t = texture(w, p.z());
         if (t != null) {
-            int half = tiles / 2;
-            int sx0 = p.x() - half, sy0 = p.y() - half;
             int cx0 = Math.max(0, sx0), cy0 = Math.max(0, sy0);
-            int cx1 = Math.min(t.getWidth(), sx0 + tiles), cy1 = Math.min(t.getHeight(), sy0 + tiles);
+            int cx1 = Math.min(t.getWidth(), sx0 + tilesW), cy1 = Math.min(t.getHeight(), sy0 + tilesH);
             if (cx1 > cx0 && cy1 > cy0) {
-                float px = size / tiles;
                 // wiersz 0 tekstury = polnoc = gora okna
                 float dx = x + (cx0 - sx0) * px;
-                float dy = y + size - (cy1 - sy0) * px;
-                batch.draw(t, dx, dy, (cx1 - cx0) * px, (cy1 - cy0) * px, cx0, cy0, cx1 - cx0, cy1 - cy0, false, false);
+                float dy = top - (cy1 - sy0) * px;
+                batch.draw(t, dx, Math.max(y, dy), (cx1 - cx0) * px, Math.min(top - Math.max(y, dy), (cy1 - cy0) * px),
+                        cx0, cy0, cx1 - cx0, cy1 - cy0, false, false);
             }
         }
-        float px = size / tiles;
+        float ms = Math.max(4, px * 2);
         for (Position m : marks) {
-            if (m.z() != p.z()) continue;
-            int mx = m.x() - (p.x() - tiles / 2), my = m.y() - (p.y() - tiles / 2);
-            if (mx >= 0 && my >= 0 && mx < tiles && my < tiles) {
-                marker(batch, x + (mx + 0.5f) * px, y + size - (my + 0.5f) * px, Math.max(4, px * 2), MARK);
-            }
+            int mx = m.x() - sx0, my = m.y() - sy0;
+            if (m.z() == p.z() && mx >= 0 && my >= 0 && mx < tilesW && my < tilesH) marker(batch, x + (mx + 0.5f) * px, top - (my + 0.5f) * px, ms, MARK);
         }
         if (target != null && target.z() == p.z()) {
-            int tx = target.x() - (p.x() - tiles / 2), ty = target.y() - (p.y() - tiles / 2);
-            if (tx >= 0 && ty >= 0 && tx < tiles && ty < tiles) {
-                marker(batch, x + (tx + 0.5f) * px, y + size - (ty + 0.5f) * px, Math.max(4, px * 2), TARGET);
-            }
+            int tx = target.x() - sx0, ty = target.y() - sy0;
+            if (tx >= 0 && ty >= 0 && tx < tilesW && ty < tilesH) marker(batch, x + (tx + 0.5f) * px, top - (ty + 0.5f) * px, ms, TARGET);
         }
-        marker(batch, x + (tiles / 2 + 0.5f) * px, y + size - (tiles / 2 + 0.5f) * px, Math.max(4, px * 2), PLAYER);
+        marker(batch, x + (p.x() - sx0 + 0.5f) * px, top - (p.y() - sy0 + 0.5f) * px, ms, PLAYER);
     }
 
     /**
