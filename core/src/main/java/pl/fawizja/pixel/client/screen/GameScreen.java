@@ -526,6 +526,7 @@ public final class GameScreen extends ScreenAdapter {
                 break;
             case "book": hud.toggleBook(); break;
             case "quest": hud.openJournal(); break;
+            case "store": openStore(); break;
             case "hud:skills": hud.toggleSkills(); break;
             case "hud:vip": hud.toggleVip(); break;
             case "vip:add": openChat("/znajomi dodaj "); break;
@@ -684,9 +685,14 @@ public final class GameScreen extends ScreenAdapter {
                     } else if (walkTo(target.position(), t, false, true)) {
                         walkNpc = target;
                     }
+                } else if (id.startsWith("store:ask:")) {
+                    storeAsk(id.substring("store:ask:".length()));
+                } else if (id.startsWith("store:buy:")) {
+                    act("store:" + id.substring("store:buy:".length()), t);
+                    openStore();
                 } else if (id.startsWith("map:goto:")) {
                     String[] xy = id.substring(9).split(",");
-                    walkTo(new Position(Integer.parseInt(xy[0]), Integer.parseInt(xy[1]), session.character().position().z()), t, false, false);
+                    walkToMapSpot(Integer.parseInt(xy[0]), Integer.parseInt(xy[1]), t);
                 } else if (id.startsWith("friend:pm:")) {
                     hud.closeFriends();
                     openChat("/w " + id.substring(10) + ", ");
@@ -1266,6 +1272,85 @@ public final class GameScreen extends ScreenAdapter {
         return rows;
     }
 
+    /** Okno sklepu: tytul z saldem konta, wiersz na kazda oferte (dotkniecie = potwierdzenie zakupu). */
+    private void openStore() {
+        hud.openInfo(storeTitle(), storeRows());
+        storeRefreshMs = now();
+    }
+
+    private long storeRefreshMs;
+
+    private String storeTitle() {
+        return String.format("%s - w banku %,d gp", pl.fawizja.pixel.client.ui.Hud.STORE_TITLE, session.character().bank().balance());
+    }
+
+    private java.util.List<String[]> storeRows() {
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        for (pl.fawizja.pixel.game.Store.Offer o : pl.fawizja.pixel.game.Store.offers(session)) {
+            String price = String.format("%,d gp", o.price());
+            rows.add(o.available() ? new String[] {o.name(), price, o.desc(), "store:ask:" + o.key()}
+                    : new String[] {o.name(), price + " - " + o.blocked(), "", "store:ask:" + o.key(), "off"});
+        }
+        return rows;
+    }
+
+    /** Potwierdzenie zakupu ("Kupić...?"): Kup / Wróć do sklepu; oferta niedostepna - tylko powod w konsoli. */
+    private void storeAsk(String key) {
+        pl.fawizja.pixel.game.Store.Offer o = pl.fawizja.pixel.game.Store.find(session, key);
+        long t = now();
+        if (o == null) return;
+        if (!o.available()) {
+            session.log().add(t, EventLog.Kind.INFO, "Sklep: " + o.name() + " - " + o.blocked() + ".");
+            return;
+        }
+        long bank = session.character().bank().balance();
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        rows.add(new String[] {o.name(), o.desc()});
+        rows.add(new String[] {String.format("Cena: %,d gp", o.price()), bank >= o.price()
+                ? String.format("z konta w banku (zostanie %,d gp)", bank - o.price())
+                : String.format("na koncie masz tylko %,d gp", bank)});
+        rows.add(new String[] {"Tak, kupuję", String.format("zapłać %,d gp z banku", o.price()), "", "store:buy:" + key});
+        rows.add(new String[] {"Nie, wróć", "do listy sklepu", "", "store"});
+        hud.openInfo(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE + ": kupić " + o.name() + "?", rows);
+    }
+
+    /** Otwarta lista sklepu odswieza saldo i stan ofert (online zakup potwierdza serwer chwile pozniej). */
+    private void updateStore(long t) {
+        if (t - storeRefreshMs < 500 || !hud.infoOpen(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE + " - ")) return;
+        hud.updateInfo(storeTitle(), storeRows());
+        storeRefreshMs = t;
+    }
+
+    /**
+     * Dotkniecie duzej mapy: marsz na wskazane pole, a gdy jest nieprzechodnie (sciana, woda) - na najblizsze
+     * przechodnie w promieniu 2 pol (palec trafia z dokladnoscia kilku pol). Bez drogi: "Nie mozna tam dojsc.".
+     */
+    private void walkToMapSpot(int x, int y, long t) {
+        Position me = session.character().position();
+        Position goal = new Position(x, y, me.z());
+        if (!session.world().isWalkable(goal)) {
+            Position best = null;
+            for (int r = 1; r <= 2 && best == null; r++) {
+                for (int dy = -r; dy <= r; dy++) {
+                    for (int dx = -r; dx <= r; dx++) {
+                        Position p = goal.translate(dx, dy);
+                        if (session.world().isWalkable(p) && (best == null || p.distanceTo(goal) < best.distanceTo(goal))) best = p;
+                    }
+                }
+            }
+            if (best != null) goal = best;
+        }
+        if (goal.equals(me)) {
+            session.log().add(t, EventLog.Kind.INFO, "Już tu jesteś.");
+            return;
+        }
+        if (!walkTo(goal, t, true, false)) {
+            session.log().add(t, EventLog.Kind.WARNING, "Nie można tam dojść.");
+            return;
+        }
+        session.log().add(t, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + walkPath.size() + " pól). Joystick przerywa marsz.");
+    }
+
     private void openHunt() {
         long t = now();
         updateHunt(t);
@@ -1605,6 +1690,7 @@ public final class GameScreen extends ScreenAdapter {
         autoEat(t);
         autoTarget(t);
         updateHunt(t);
+        updateStore(t);
         checkDeath();
         updateGuard(t);
 
@@ -2188,6 +2274,21 @@ public final class GameScreen extends ScreenAdapter {
      * Maly pasek nad postacia (jednostki swiata, x = lewa krawedz pola): zycie w kolorze wg procentu, opcjonalnie
      * pod nim mana (gracze).
      */
+    /** Gorny brzeg paska zycia z czarna obwodka nad y paska (jednostki swiata, jak w overheadBar). */
+    private static final float BAR_TOP = 0.075f + 0.02f;
+
+    /**
+     * y dla font.draw imienia nad paskiem: dol liter (z ogonkami i obwodka) 1,5 dp nad gornym brzegiem paska, przy
+     * kazdej wielkosci pola i czcionki (wczesniej stala liczba pikseli - na telefonie imie wchodzilo na pasek).
+     * Ustawia tez projected.x na srodek pola.
+     */
+    private float nameYAbove(float wx, float barTopWy, BitmapFont font, float ui) {
+        projected.set(wx + 0.5f, barTopWy, 0);
+        camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+        float outline = Math.max(1f, Math.round(ui * 0.6f));
+        return projected.y + Math.max(1.5f, 1.5f * ui) + outline + font.getCapHeight() - font.getDescent();
+    }
+
     private static void overheadBar(ShapeRenderer shapes, float x, float y, float hp, Float mana) {
         float bw = 0.72f, bh = 0.075f, bx = x + (1f - bw) / 2f;
         float total = mana != null ? bh * 2 + 0.02f : bh;
@@ -2238,6 +2339,20 @@ public final class GameScreen extends ScreenAdapter {
             pl.fawizja.pixel.client.ui.Hud.star(shapes, cx, cy - 0.01f, 0.2f);
             shapes.setColor(1f, 0.84f, 0.25f, 1f);
             pl.fawizja.pixel.client.ui.Hud.star(shapes, cx, cy, 0.15f);
+        }
+        if (walkPath != null && chaseGoal == null && !walkPath.isEmpty()) {
+            // cel marszu (dotkniecie mapy albo swiata): pulsujacy znacznik X na polu, jak na minimapie
+            Position g = walkPath.get(walkPath.size() - 1);
+            if (g.z() == z) {
+                float cx = g.x() + 0.5f, cy = worldRenderer.worldY(g.y()) + 0.5f;
+                float a = 0.22f + 0.05f * (float) Math.sin(uiMs() / 160.0);
+                shapes.setColor(0f, 0f, 0f, 0.7f);
+                shapes.rectLine(cx - a, cy - a, cx + a, cy + a, 0.13f);
+                shapes.rectLine(cx - a, cy + a, cx + a, cy - a, 0.13f);
+                shapes.setColor(0.3f, 0.9f, 1f, 1f);
+                shapes.rectLine(cx - a, cy - a, cx + a, cy + a, 0.07f);
+                shapes.rectLine(cx - a, cy + a, cx + a, cy - a, 0.07f);
+            }
         }
         for (Monster m : visibleMonsters) {
             if (m.isDead() || m.position().z() != z) continue;
@@ -2326,9 +2441,8 @@ public final class GameScreen extends ScreenAdapter {
         if (target != null && !target.isDead() && target.position().z() == z) {
             // imie celu w kolorze trudnosci wzgledem poziomu postaci
             pl.fawizja.pixel.monster.Difficulty d = pl.fawizja.pixel.monster.Difficulty.of(target.type().level(), session.character().level());
-            projected.set(target.renderX(t) + 0.5f, worldRenderer.worldY(target.renderY(t)) + 1.3f, 0);
-            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            projected.y += 6 * scale; // nad paskiem zycia
+            float ny = nameYAbove(target.renderX(t), worldRenderer.worldY(target.renderY(t)) + 1.02f + BAR_TOP, font, ui); // nad paskiem zycia
+            projected.y = ny;
             String label = target.type().name() + " (" + d.label + ")";
             nameLayout.setText(font, label);
             outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, d.r, d.g, d.b, ui);
@@ -2336,9 +2450,7 @@ public final class GameScreen extends ScreenAdapter {
         for (RemotePlayer rp : remotePlayers.values()) {
             if (rp.to.z() != z) continue;
             if (roofsShown && roofs.at(rp.to.x(), rp.to.y(), z) != pl.fawizja.pixel.client.render.Roofs.NONE) continue;
-            projected.set(remoteX(rp, t) + 0.5f, worldRenderer.worldY(remoteY(rp, t)) + 1.15f, 0);
-            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            projected.y += 9 * scale; // imie nad paskiem zycia (jak w Tibii)
+            projected.y = nameYAbove(remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)) + 1.02f + BAR_TOP, font, ui); // imie nad paskiem zycia (jak w Tibii)
             boolean ally = party.contains(rp.name.toLowerCase(java.util.Locale.ROOT));
             // imie zielone jak w Tibii (druzyna niebieska); czaszka PvP rysowana osobno pod paskami
             if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
@@ -2370,9 +2482,7 @@ public final class GameScreen extends ScreenAdapter {
             // wlasna postac jak w Tibii: imie nad paskami HP/many, czaszka PvP tuz pod nimi
             float ox = session.renderX(t), oy = worldRenderer.worldY(session.renderY(t));
             String sk = self.skull(t).name();
-            projected.set(ox + 0.5f, oy + 1.15f, 0);
-            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            projected.y += 9 * scale;
+            projected.y = nameYAbove(ox, oy + 1.06f + BAR_TOP, font, ui);
             String label = self.name();
             nameLayout.setText(font, label);
             outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], ui);

@@ -1304,6 +1304,59 @@ public final class GameSession {
         return true;
     }
 
+    /**
+     * Sklep z gornej ramki ({@link Store}): ta sama usluga co u krola, kaplana, kowala albo kupca i w tej samej cenie,
+     * ale bez chodzenia do NPC - zawsze zlotem z konta w banku. Zwraca, czy zakup sie udal.
+     */
+    public boolean storeBuy(String key, long nowMs) {
+        Store.Offer o = Store.find(this, key);
+        if (o == null) return false;
+        if (!o.available()) {
+            log.add(nowMs, EventLog.Kind.INFO, "Sklep: " + o.name() + " - " + o.blocked() + ".");
+            return false;
+        }
+        if (pc.bank().balance() < o.price()) {
+            log.add(nowMs, EventLog.Kind.WARNING, String.format("Sklep: %s kosztuje %,d gp, a na koncie w banku masz %,d gp. Wpłać złoto u bankiera.",
+                    o.name(), o.price(), pc.bank().balance()));
+            return false;
+        }
+        pl.fawizja.pixel.inventory.Container tx = null;
+        if (items.containsKey(key)) {
+            tx = pc.backpack().copy();
+            if (!tx.add(new pl.fawizja.pixel.item.ItemStack(items.byKey(key).id(), 1)).ok()) {
+                log.add(nowMs, EventLog.Kind.WARNING, "Sklep: plecak jest pełny. Zrób miejsce i spróbuj znowu.");
+                return false;
+            }
+        }
+        if (!pc.bank().debit(o.price()).ok()) return false;
+        String done;
+        switch (key) {
+            case "premium":
+                pc.setPremium(true);
+                done = "Masz konto premium. Kapitanowie zabiorą cię na rejs.";
+                break;
+            case "promote":
+                pc.setPromoted(true);
+                done = "Jesteś teraz " + pc.vocationTitle() + ". Regenerujesz się o połowę szybciej.";
+                break;
+            case "bless":
+                pc.setBlessed(true);
+                done = "Otrzymujesz błogosławieństwo. Najbliższa śmierć zabierze połowę doświadczenia mniej.";
+                break;
+            default:
+                if (key.startsWith("enchant_")) {
+                    pl.fawizja.pixel.item.Enchantments.Kind k = pl.fawizja.pixel.item.Enchantments.Kind.valueOf(key.substring(8).toUpperCase(java.util.Locale.ROOT));
+                    pc.enchantments().extend(k);
+                    done = k.label() + " na " + pl.fawizja.pixel.item.Enchantments.describe(pc.enchantments().remainingMs(k)) + " polowania.";
+                } else {
+                    pc.backpack().commitFrom(tx);
+                    done = o.name() + " jest w plecaku. Dotknij go i wybierz \"Użyj\".";
+                }
+        }
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Sklep: kupiono %s za %,d gp z banku (zostało %,d gp). ", o.name(), o.price(), pc.bank().balance()) + done);
+        return true;
+    }
+
     /** Kaplan: zamieszkanie w miescie - tu postac odrodzi sie po smierci. */
     public void settleHere(long nowMs) {
         Npc n = talkTo(NpcRole.PRIEST, nowMs);
@@ -2635,7 +2688,7 @@ public final class GameSession {
 
     public void toggleRun(long nowMs) {
         pc.setRunning(!pc.isRunning());
-        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Bieg włączony: postać sama idzie do zaznaczonego potwora." : "Bieg wyłączony.");
+        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Podążanie włączone: postać idzie za zaznaczonym celem." : "Podążanie wyłączone.");
     }
 
     public void toggleTorch(long nowMs) {

@@ -64,6 +64,8 @@ public final class Hud {
     private final HudButton quest = new HudButton("quest", "Zadania");
     /** Wylogowanie z potwierdzeniem (nie w trakcie walki - blokada PZ). */
     private final HudButton logout = new HudButton("logout", "Wyjdź");
+    /** Sklep (konto premium, promocja, blogoslawienstwo...) za zloto z banku. */
+    private final HudButton store = new HudButton("store", "Sklep");
     /** Uklad HUD-u jak w Tibii: kolumny, gorny pasek, widok gry, konsola. */
     private final HudLayout lay = new HudLayout();
     /**
@@ -350,6 +352,12 @@ public final class Hud {
     public boolean infoOpen(String prefix) {
         return achievementsView && !journalMode && infoTitle != null && infoTitle.startsWith(prefix);
     }
+
+    /** Tytul okna sklepu (ikona Sklep w ramce, Opcje na komputerze) zaczyna sie od tego slowa. */
+    public static final String STORE_TITLE = "Sklep";
+
+    /** Okno sklepu (lista albo potwierdzenie zakupu) jest otwarte. */
+    public boolean storeOpen() { return infoOpen(STORE_TITLE); }
 
     /** Nowa tresc otwartego okna informacyjnego bez zamykania go. */
     public void updateInfo(String title, List<String[]> rows) {
@@ -754,6 +762,7 @@ public final class Hud {
         buttons.add(talk);
         buttons.add(mount);
         buttons.add(pvp);
+        buttons.add(store);
         for (int i = 0; i < spellButtons.length; i++) {
             spellButtons[i] = new HudButton("spell:" + i, "");
             buttons.add(spellButtons[i]);
@@ -791,10 +800,10 @@ public final class Hud {
     /** Przyciski akcji nad paskiem czarow (dawniej obok ekwipunku): stale ATAK i UZYJ, reszta gdy ma sens. */
     private final HudButton[] actionButtons = {target, use, bag, talk, pick, fish, mount};
     /**
-     * Dwie kolumny obok ekwipunku: 1. bieg (auto chodzenie za celem), postawa obronna (tarcza), dziennik zadan,
-     * pochodnia; 2. wylogowanie, tryb PvP (czaszka), ustawienia i diagnostyka.
+     * Dwie kolumny obok ekwipunku: 1. podazaj (auto chodzenie za celem), postawa obronna (tarcza), dziennik zadan,
+     * pochodnia; 2. wylogowanie, tryb PvP (czaszka), ustawienia i diagnostyka, sklep.
      */
-    private final HudButton[] toggleButtons = {run, defensive, quest, torch, logout, pvp, diag};
+    private final HudButton[] toggleButtons = {run, defensive, quest, torch, logout, pvp, diag, store};
 
     private List<HudButton> visibleActions() {
         List<HudButton> out = new ArrayList<>();
@@ -947,7 +956,8 @@ public final class Hud {
         if (playerMenu != null || logoutConfirm || optionsMenu) {
             // ekran dotykowy: wiersze co najmniej 36 dp; gdy nie mieszcza sie jeden pod drugim - dwie kolumny
             rowH = uiScale >= 1.5f || lay.compact ? 39 : 24;
-            int rows = logoutConfirm ? 2 : optionsMenu ? 2 + (lay.folded[HudLayout.TORCH_TOGGLE] ? 1 : 0) : playerRowsCount;
+            int rows = logoutConfirm ? 2 : optionsMenu ? 2 + (lay.folded[HudLayout.TORCH_TOGGLE] ? 1 : 0)
+                    + (lay.folded[HudLayout.STORE_TOGGLE] ? 1 : 0) : playerRowsCount;
             popupCols = 1;
             menuW = Math.min(240, Math.max(160, gw - 16));
             menuH = 24 + 20 + rows * rowH + 8;
@@ -1589,6 +1599,7 @@ public final class Hud {
             // waski telefon: "Opcje" zbiera ustawienia i wyjscie z gry
             List<MenuRow> rows = new ArrayList<>();
             rows.add(new MenuRow("opt:diag", "Ustawienia", "", true));
+            if (lay.folded[HudLayout.STORE_TOGGLE]) rows.add(new MenuRow("opt:store", "Sklep", "premium, promocja, błogosławieństwo", true));
             if (lay.folded[HudLayout.TORCH_TOGGLE]) {
                 rows.add(new MenuRow("opt:torch", session.character().isTorchLit() ? "Zgaś pochodnię" : "Zapal pochodnię", "", true));
             }
@@ -1966,7 +1977,8 @@ public final class Hud {
         // wiersz {etykieta, opis[, stan[, akcja]]}; bez akcji wiersz tylko informuje
         for (String[] r : infoRows) {
             String detail = r.length > 2 && !r[2].isEmpty() ? r[1] + " - " + r[2] : r[1];
-            rows.add(new MenuRow(r.length > 3 ? r[3] : "ach:none", r[0], detail, true));
+            // piaty element "off": wiersz wyszarzony (np. oferta sklepu, ktorej teraz nie da sie kupic)
+            rows.add(new MenuRow(r.length > 3 ? r[3] : "ach:none", r[0], detail, !(r.length > 4 && "off".equals(r[4]))));
         }
         if (rows.isEmpty()) rows.add(new MenuRow("ach:none", "Brak danych", "", false));
         for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
@@ -2579,15 +2591,7 @@ public final class Hud {
             return true;
         }
         if (bigMapOpen) {
-            bigMapOpen = false;
-            float[] img = bigMapImg;
-            if (img != null && p.x >= img[0] && p.y >= img[1] && p.y <= img[1] + img[3]) {
-                int tx = (int) ((p.x - img[0]) / img[2]);
-                int ty = (int) ((img[1] + img[3] - p.y) / img[2]);
-                if (tx < session.world().width() && ty >= 0 && ty < session.world().height()) {
-                    actions.onButton("map:goto:" + tx + "," + ty);
-                }
-            }
+            bigMapTap(p.x, p.y, session, actions);
             return true;
         }
         if (minimapVisible() && p.x >= mmX - 3 && p.x <= mmX + mmSize + 3 && p.y >= mmY - 3 && p.y <= mmY + mmSize + 3) {
@@ -2868,6 +2872,7 @@ public final class Hud {
         pvp.icon = skullBtn;
         quest.active = journalOpen();
         logout.active = logoutConfirmOpen();
+        store.active = storeOpen();
         if (!menuOpen) {
             logoutConfirm = false;
             optionsMenu = false;
@@ -2920,7 +2925,9 @@ public final class Hud {
         fish.icon = itemIcon(session, "fishing_rod");
         mount.icon = itemIcon(session, "saddle");
         // podpisy przyciskow obok ekwipunku: rysowane, gdy mieszcza sie przy progu 7 dp (inaczej sama ikona)
-        run.label = "Bieg";
+        run.label = "Podąż";
+        store.label = "Sklep";
+        store.icon = itemIcon(session, "crystal_coin");
         defensive.label = "Tarcza";
         quest.label = "Zadania";
         torch.label = "Poch.";
@@ -3107,6 +3114,7 @@ public final class Hud {
         }
         if (bigMapOpen) {
             if (!wstPanel(shapes, "stone", menuX, menuY, menuW, menuH, 24)) window(shapes, menuX, menuY, menuW, menuH, true);
+            mapZoomShapes(shapes);
         }
         if (diagnosticsOpen) {
             shapes.setColor(0, 0, 0, 0.75f);
@@ -3312,7 +3320,7 @@ public final class Hud {
         FED("Najedzony: szybsza regeneracja", new Color(0.55f, 0.4f, 0.2f, 1f)),
         HUNGRY("Głodny: zjedz coś, aby szybciej się regenerować", new Color(0.5f, 0.45f, 0.4f, 1f)),
         BLESSED("Błogosławieństwo: mniejsze straty po śmierci", new Color(0.75f, 0.62f, 0.2f, 1f)),
-        RUNNING("Bieg: idę do celu", new Color(0.2f, 0.4f, 0.7f, 1f)),
+        RUNNING("Podążam za celem", new Color(0.2f, 0.4f, 0.7f, 1f)),
         HASTE("Przyspieszenie: szybkość zwiększona przez czar", new Color(0.15f, 0.55f, 0.6f, 1f)),
         LIGHT("Światło: pochodnia albo czar", new Color(0.7f, 0.6f, 0.15f, 1f)),
         ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f)),
@@ -3749,23 +3757,73 @@ public final class Hud {
         return gx + gw / 2f - tw / 2f;
     }
 
+    /** Przyblizenie duzej mapy (1 = caly swiat); domyslnie okolica ok. 250 pol, zeby palec trafial w miejsce. */
+    private int bigMapZoom = 4;
+    private static final int BIG_MAP_MAX_ZOOM = 16;
+
+    /** Przyciski "-" i "+" w pasku tytulu duzej mapy (36 x 26 dp, prawy gorny rog; na komputerze przed krzyzykiem). */
+    private HudLayout.Rect mapZoomButton(boolean plus, HudLayout.Rect out) {
+        float bw = 36, bh = 24, right = menuX + menuW - (mobile ? 8 : 34);
+        out.set(right - (plus ? bw : 2 * bw + 6), menuY + menuH - bh - 2, bw, bh);
+        return out;
+    }
+
+    /**
+     * Dotkniecie przy otwartej duzej mapie: "-" / "+" zmienia przyblizenie, dotkniecie obrazu - marsz na to pole
+     * (GameScreen: "map:goto:x,y"), reszta zamyka mape.
+     */
+    private void bigMapTap(float px, float py, GameSession session, Actions actions) {
+        HudLayout.Rect r = new HudLayout.Rect();
+        if (mapZoomButton(false, r).contains(px, py)) {
+            bigMapZoom = Math.max(1, bigMapZoom / 2);
+            return;
+        }
+        if (mapZoomButton(true, r).contains(px, py)) {
+            bigMapZoom = Math.min(BIG_MAP_MAX_ZOOM, bigMapZoom * 2);
+            return;
+        }
+        bigMapOpen = false;
+        float[] img = bigMapImg;
+        if (img != null && px >= img[0] && px <= img[0] + img[6] && py >= img[1] && py <= img[1] + img[3]) {
+            int tx = (int) (img[4] + (px - img[0]) / img[2]);
+            int ty = (int) (img[5] + (img[1] + img[3] - py) / img[2]);
+            if (tx >= 0 && tx < session.world().width() && ty >= 0 && ty < session.world().height()) actions.onButton("map:goto:" + tx + "," + ty);
+        }
+    }
+
+    /** Ksztalty przyciskow przyblizenia (w przebiegu ksztaltow okna mapy). */
+    private void mapZoomShapes(ShapeRenderer shapes) {
+        HudLayout.Rect r = new HudLayout.Rect();
+        mapZoomButton(false, r);
+        woodButton(shapes, r.x, r.y, r.w, r.h, false);
+        mapZoomButton(true, r);
+        woodButton(shapes, r.x, r.y, r.w, r.h, false);
+    }
+
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
         pl.fawizja.pixel.world.Position p = session.character().position();
-        text(batch, "Mapa - piętro " + floor + " (dotknij miejsca, aby tam iść)", menuX + 10, menuY + menuH - 8);
-        float[] img = minimap.drawWhole(batch, session.world(), p, walkTarget, markerPositions(session), menuX + 8, menuY + 8, menuW - 16, menuH - 34);
+        text(batch, "Mapa - piętro " + floor + (bigMapZoom > 1 ? " x" + bigMapZoom : "") + " (dotknij miejsca, aby tam iść)", menuX + 10, menuY + menuH - 8);
+        HudLayout.Rect zr = new HudLayout.Rect();
+        centered(batch, "-", mapZoomButton(false, zr).cx(), zr.cy());
+        centered(batch, "+", mapZoomButton(true, zr).cx(), zr.cy());
+        float[] img = minimap.drawZoomed(batch, session.world(), p, walkTarget, markerPositions(session), menuX + 8, menuY + 8, menuW - 16, menuH - 34, bigMapZoom);
         bigMapImg = img;
         if (img == null) return;
+        float right = img[0] + img[6], top = img[1] + img[3];
         font.getData().setScale(0.85f);
         for (pl.fawizja.pixel.world.Town t : session.world().towns()) {
             if (t.temple().z() != p.z()) continue;
-            float tx = img[0] + t.temple().x() * img[2];
-            float ty = img[1] + img[3] - t.temple().y() * img[2];
+            float tx = img[0] + (t.temple().x() - img[4]) * img[2];
+            float ty = top - (t.temple().y() - img[5]) * img[2];
+            if (tx < img[0] || tx > right || ty < img[1] || ty > top) continue;
             text(batch, t.name(), tx - 20, ty + 14);
         }
         font.setColor(new Color(1f, 0.85f, 0.2f, 1f));
         for (pl.fawizja.pixel.settings.MapMarkers.Marker m : allMarkers(session)) {
             if (m.at().z() != p.z()) continue;
-            text(batch, m.name(), img[0] + m.at().x() * img[2] + 6, img[1] + img[3] - m.at().y() * img[2] + 6);
+            float mx = img[0] + (m.at().x() - img[4]) * img[2], my = top - (m.at().y() - img[5]) * img[2];
+            if (mx < img[0] || mx > right || my < img[1] || my > top) continue;
+            text(batch, m.name(), mx + 6, my + 6);
         }
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
@@ -4595,7 +4653,7 @@ public final class Hud {
             M_TEXT = hex(0xefe4d4, 1f), M_MUTED = hex(0xb8a48c, 1f), M_GOOD = hex(0x7ee06f, 1f), M_SEL = hex(0x2f5a25, 1f),
             M_CLOSE = hex(0xa3231c, 1f), M_EDGE = hex(0x5c4330, 1f), M_RING = hex(0xe8d7bd, 0.75f), M_BG = hex(0x140c06, 0.72f);
 
-    private static final String[] M_ICON_LABELS = {"Plecak", "Ekwipunek", "Umiejętn.", "VIP", "Zadania", "Ustawienia", "Wyloguj"};
+    private static final String[] M_ICON_LABELS = {"Plecak", "Ekwipunek", "Umiejętn.", "VIP", "Zadania", "Ustawienia", "Sklep", "Wyloguj"};
 
     /** Polska nazwa profesji (tytul okna wyboru: "Rycerz, poz. 42"). */
     private static String vocationName(pl.fawizja.pixel.vocation.Vocation v) {
@@ -4631,6 +4689,7 @@ public final class Hud {
         for (int i = 0; i < MobileHudLayout.SPELL_SLOTS.length; i++) placeRound(spellButtons[MobileHudLayout.SPELL_SLOTS[i]], mlay.spells[i]);
         for (int i = 0; i < MobileHudLayout.POTION_SLOTS.length; i++) placeRound(spellButtons[MobileHudLayout.POTION_SLOTS[i]], mlay.potions[i]);
         placeRound(target, mlay.row[MobileHudLayout.ROW_ATTACK]);
+        placeRound(run, mlay.row[MobileHudLayout.ROW_FOLLOW]);
         placeRound(defensive, mlay.row[MobileHudLayout.ROW_SHIELD]);
         placeRound(pvp, mlay.row[MobileHudLayout.ROW_PVP]);
         int k = 0;
@@ -4751,6 +4810,11 @@ public final class Hud {
                 if (!journalOpen()) closeMenus();
                 openJournal();
                 break;
+            case MobileHudLayout.ICON_SHOP:
+                mWin = null;
+                if (storeOpen()) closeMenus();
+                else actions.onButton("store");
+                break;
             default:
                 mWin = null;
                 if (logoutConfirmOpen()) closeLogoutConfirm();
@@ -4770,6 +4834,7 @@ public final class Hud {
             case MobileHudLayout.ICON_VIP: return mWin == MobileWin.VIP;
             case MobileHudLayout.ICON_SETTINGS: return mWin == MobileWin.SETTINGS;
             case MobileHudLayout.ICON_QUESTS: return journalOpen();
+            case MobileHudLayout.ICON_SHOP: return storeOpen();
             default: return logoutConfirmOpen();
         }
     }
@@ -4822,13 +4887,7 @@ public final class Hud {
 
     private boolean mobileTouchDown(float px, float py, int pointer, GameSession session, Actions actions) {
         if (bigMapOpen) {
-            bigMapOpen = false;
-            float[] img = bigMapImg;
-            if (img != null && px >= img[0] && py >= img[1] && py <= img[1] + img[3]) {
-                int tx = (int) ((px - img[0]) / img[2]);
-                int ty = (int) ((img[1] + img[3] - py) / img[2]);
-                if (tx < session.world().width() && ty >= 0 && ty < session.world().height()) actions.onButton("map:goto:" + tx + "," + ty);
-            }
+            bigMapTap(px, py, session, actions);
             return true;
         }
         if (menuOpen) {
@@ -4873,7 +4932,7 @@ public final class Hud {
             menuGeometry();
             return true;
         }
-        if (mlay.battle.contains(px, py)) {
+        if (mBattleBox().contains(px, py)) {
             mBattlePointer = pointer;
             mBattleDownY = py;
             mBattleDragged = false;
@@ -4893,7 +4952,7 @@ public final class Hud {
                 return true;
             }
         }
-        for (HudButton b : new HudButton[] {target, defensive, pvp}) {
+        for (HudButton b : new HudButton[] {target, run, defensive, pvp}) {
             if (roundHit(b, px, py)) {
                 actions.onButton(b.id);
                 return true;
@@ -4938,6 +4997,17 @@ public final class Hud {
         float dx = px - b.x, dy = py - b.y, r = Math.max(b.r, MobileHudLayout.MIN_TOUCH / 2f);
         return b.x > -999 && dx * dx + dy * dy <= r * r;
     }
+
+    /** Lista walki tak wysoka, jak jej wiersze (co najmniej jeden), zeby pusta czesc nie zaslaniala widoku gry. */
+    private HudLayout.Rect mBattleBox() {
+        HudLayout.Rect bl = mlay.battle;
+        int rows = Math.max(1, Math.min(mlay.battleRowsVisible(), mobileBattleCount()));
+        float bh = Math.min(bl.h, MobileHudLayout.BATTLE_HEAD + rows * MobileHudLayout.BATTLE_ROW + 4);
+        mBattleRect.set(bl.x, bl.top() - bh, bl.w, bh);
+        return mBattleRect;
+    }
+
+    private final HudLayout.Rect mBattleRect = new HudLayout.Rect();
 
     /** Wiersze listy walki: gracze, potem potwory. */
     private int mobileBattleCount() { return battlePlayers.size() + battle.size(); }
@@ -5020,7 +5090,7 @@ public final class Hud {
     private List<String[]> mSettingsEntries(GameSession session) {
         PlayerCharacter pc = session.character();
         List<String[]> out = new ArrayList<>();
-        out.add(new String[] {"run", "Bieg za celem", pc.isRunning() ? "włączony" : "wyłączony"});
+        out.add(new String[] {"run", "Podążaj za celem", pc.isRunning() ? "włączone" : "wyłączone"});
         int torchId = session.items().byKey("torch").id();
         String torchState = !pc.hasTorchEquipped(torchId) ? "nie założona"
                 : (pc.isTorchLit() ? "zapalona, " : "zgaszona, ") + GameSession.torchTime(pc.torchRemainingMs(torchId));
@@ -5448,14 +5518,14 @@ public final class Hud {
         HudLayout.Rect mm = mlay.minimap;
         shapes.setColor(M_DARK);
         shapes.rect(mm.x - 1, mm.y - 1, mm.w + 2, mm.h + 2);
-        HudLayout.Rect bl = mlay.battle;
+        HudLayout.Rect bl = mBattleBox();
         if (bl.h > 0) {
             shapes.setColor(hex(0x140c06, 0.82f));
             shapes.rect(bl.x, bl.y, bl.w, bl.h);
             strokeRect(shapes, bl.x, bl.y, bl.w, bl.h, 1f, M_EDGE);
             if (nb > rowsVis + mBattleScroll) {
                 // strzalka: ponizej sa kolejne wiersze
-                float ax = bl.right() - 5 - mWidth(String.valueOf(nb - rowsVis - mBattleScroll), 0.48f) - 9, ay = bl.top() - 7;
+                float ax = bl.right() - 5 - mWidth(String.valueOf(nb - rowsVis - mBattleScroll), 0.64f) - 10, ay = bl.top() - 8;
                 shapes.setColor(M_MUTED);
                 shapes.triangle(ax, ay + 2.5f, ax + 6, ay + 2.5f, ax + 3, ay - 2.5f);
             }
@@ -5477,6 +5547,7 @@ public final class Hud {
         }
         // Atak / Tarcza / PvP i przyciski chwilowe
         roundButton(shapes, target.x, target.y, target.r, target.active ? hex(0xff6a4a, 1f) : null, target.active);
+        roundButton(shapes, run.x, run.y, run.r, run.active ? hex(0x6ab8ff, 1f) : null, run.active);
         roundButton(shapes, defensive.x, defensive.y, defensive.r, defensive.active ? M_GOOD : null, defensive.active);
         roundButton(shapes, pvp.x, pvp.y, pvp.r, pvp.active ? hex(0xff4a3a, 1f) : null, pvp.active);
         for (HudButton b : mobileContext()) if (b.visible && b.x > -999) roundButton(shapes, b.x, b.y, b.r, b.active ? M_GOOD : null, b.active);
@@ -5532,7 +5603,8 @@ public final class Hud {
         mText(batch, lv, 12, mlay.frame.cy() - 4f, 0.72f, M_TEXT, false);
         mCentered(batch, "HP " + pc.health() + " / " + pc.maxHealth(), mlay.hpBar.cx(), mlay.hpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
         mCentered(batch, "Mana " + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mlay.mpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
-        TextureRegion[] iconImg = {art.backpack(), helmetIcon(session), itemIcon(session, "exp_scroll"), null, itemIcon(session, "challenge_scroll"), null, null};
+        TextureRegion[] iconImg = {art.backpack(), helmetIcon(session), itemIcon(session, "exp_scroll"), null, itemIcon(session, "challenge_scroll"), null,
+                itemIcon(session, "crystal_coin"), null};
         for (int i = 0; i < MobileHudLayout.ICONS; i++) {
             HudLayout.Rect r = mlay.icons[i];
             if (iconImg[i] != null) batch.draw(iconImg[i], r.x + 5, r.y + 8, 22, 22);
@@ -5565,6 +5637,7 @@ public final class Hud {
             mText(batch, "przytrzymaj", b.x - b.r - 8 - mWidth("przytrzymaj", 0.6f), b.y - 3.3f, 0.6f, M_GOOD, true);
         }
         mRoundLabel(batch, target, itemIcon(session, "iron_sword"), "Atak");
+        mRoundLabel(batch, run, itemIcon(session, "leather_boots"), "Podążaj");
         mRoundLabel(batch, defensive, itemIcon(session, "wooden_shield"), "Tarcza");
         mRoundLabel(batch, pvp, pvp.icon, "PvP");
         for (HudButton b : mobileContext()) if (b.visible && b.x > -999) mRoundLabel(batch, b, b.icon, b.label);
@@ -5642,7 +5715,10 @@ public final class Hud {
                 ring(shapes, b.x, b.y, b.r + 5.5f, 3f, 90, -290, M_GOOD);
             }
         }
-        if (bigMapOpen) mWindowShapes(shapes, menuX, menuY, menuW, menuH, false);
+        if (bigMapOpen) {
+            mWindowShapes(shapes, menuX, menuY, menuW, menuH, false);
+            mapZoomShapes(shapes);
+        }
         if (houseWin != null) drawHouseShapes(shapes, session);
         shapes.end();
         batch.begin();
@@ -5727,25 +5803,25 @@ public final class Hud {
     /** Skala wierszy czatu na telefonie (makieta: 10 px). */
     private float chatScaleMobile() { return 0.66f; }
 
-    /** Lista walki pod minimapa: "Walka (n)", gracze i potwory w wierszach 12,5 dp, cel w czerwonej ramce. */
+    /** Lista walki obok minimapy: "Walka (n)", gracze i potwory w wierszach 21 dp, cel w czerwonej ramce. */
     private void drawMobileBattle(SpriteBatch batch, int rowsVis) {
         HudLayout.Rect bl = mlay.battle;
         if (bl.h <= 0) return;
         int nb = mobileBattleCount();
-        mText(batch, "Walka (" + nb + ")", bl.x + 5, bl.top() - 10, 0.52f, M_TEXT, false);
+        mText(batch, "Walka (" + nb + ")", bl.x + 5, bl.top() - 12, 0.66f, M_TEXT, false);
         int more = nb - rowsVis - mBattleScroll;
         if (more > 0) {
             String m = String.valueOf(more);
-            mText(batch, m, bl.right() - 5 - mWidth(m, 0.48f), bl.top() - 10, 0.48f, M_MUTED, false);
+            mText(batch, m, bl.right() - 5 - mWidth(m, 0.64f), bl.top() - 12, 0.64f, M_MUTED, false);
         }
         if (nb == 0) {
-            mText(batch, "Brak potworów.", bl.x + 5, bl.top() - MobileHudLayout.BATTLE_HEAD - 9, 0.5f, M_MUTED, false);
+            mText(batch, "Brak potworów.", bl.x + 5, bl.top() - MobileHudLayout.BATTLE_HEAD - 12, 0.66f, M_MUTED, false);
             return;
         }
         float row = MobileHudLayout.BATTLE_ROW;
         for (int k = 0; k < rowsVis && k + mBattleScroll < nb; k++) {
             int i = k + mBattleScroll;
-            float top = bl.top() - MobileHudLayout.BATTLE_HEAD - k * row, base = top - 8;
+            float top = bl.top() - MobileHudLayout.BATTLE_HEAD - k * row, base = top - 10f;
             String name;
             Color nc = M_TEXT;
             TextureRegion icon;
@@ -5763,14 +5839,15 @@ public final class Hud {
                 name = m.type().name();
                 icon = art.monster(m.type().key());
                 hp = m.healthFraction();
-                if (m == currentTarget) bStroke(batch, bl.x + 2, top - 11, bl.w - 4, 12, 1f, hex(0xff4a3a, 1f));
+                if (m == currentTarget) bStroke(batch, bl.x + 2, top - row + 1, bl.w - 4, row - 1, 1.5f, hex(0xff4a3a, 1f));
             }
-            if (icon != null) batch.draw(icon, bl.x + 4, top - 9, 9, 9);
-            float bx = bl.right() - 34;
-            mText(batch, mClip(name, bx - 3 - (bl.x + 15), 0.55f), bl.x + 15, base, 0.55f, nc, false);
-            bFill(batch, bx, top - 6.5f, 28, 3.5f, M_DARK);
+            if (icon != null) batch.draw(icon, bl.x + 4, top - 18, 16, 16);
+            // imie u gory wiersza, pod nim pasek zycia na cala szerokosc (jak w Tibii)
+            float nx = bl.x + 23, nw = bl.right() - 5 - nx;
+            mText(batch, mClip(name, nw, 0.66f), nx, base, 0.66f, nc, false);
+            bFill(batch, nx, top - 17.5f, nw, 4f, M_DARK);
             float[] c = BarColors.health(hp);
-            bFill(batch, bx, top - 6.5f, 28 * Math.max(0, Math.min(1, hp)), 3.5f, new Color(c[0], c[1], c[2], 1f));
+            bFill(batch, nx, top - 17.5f, nw * Math.max(0, Math.min(1, hp)), 4f, new Color(c[0], c[1], c[2], 1f));
         }
     }
 

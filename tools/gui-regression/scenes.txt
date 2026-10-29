@@ -116,3 +116,6 @@ skull_others_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=23 -Dpixel.telepor
 coins_torch|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.width=1920 -Dpixel.height=1080 -Dpixel.open=coins,torchlit
 mobile_coins_bag|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=coins,mobile_win_bag,torchsel
 mobile_torch_equip|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=coins,torchlit,mobile_win_equip
+# 2026-10-29: przycisk Podazaj (postac idzie za celem), szersza minimapa i lista walki obok niej, ikona Sklep, sklep za zloto z banku
+mobile_follow|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=run -Dpixel.button2=target
+mobile_store|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.button=store

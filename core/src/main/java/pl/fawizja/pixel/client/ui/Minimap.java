@@ -100,23 +100,35 @@ final class Minimap {
         marker(batch, x + (tiles / 2 + 0.5f) * px, y + size - (tiles / 2 + 0.5f) * px, Math.max(4, px * 2), PLAYER);
     }
 
-    /** Cale pietro wpisane w prostokat; zwraca {x, y, skala} narysowanego obrazu (do podpisow). */
-    float[] drawWhole(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
-                      float x, float y, float bw, float bh) {
+    /**
+     * Duza mapa z przyblizeniem: zoom 1 = cale pietro wpisane w prostokat, 2, 4, 8... = wycinek wokol gracza (przy
+     * brzegu swiata dosuniety do krawedzi) wypelniajacy prostokat. Zwraca {x, y, skala, wysokosc, kafelek x lewej
+     * krawedzi, kafelek y gornej krawedzi, szerokosc} narysowanego obrazu (do podpisow i dotkniec) albo null.
+     */
+    float[] drawZoomed(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+                       float x, float y, float bw, float bh, int zoom) {
         Texture t = texture(w, p.z());
         if (t == null) return null;
-        float scale = Math.min(bw / t.getWidth(), bh / t.getHeight());
-        float iw = t.getWidth() * scale, ih = t.getHeight() * scale;
+        int tw = t.getWidth(), th = t.getHeight();
+        float scale = Math.min(bw / tw, bh / th) * Math.max(1, zoom);
+        int sw = Math.min(tw, (int) Math.floor(bw / scale)), sh = Math.min(th, (int) Math.floor(bh / scale));
+        int sx = Math.max(0, Math.min(tw - sw, p.x() - sw / 2)), sy = Math.max(0, Math.min(th - sh, p.y() - sh / 2));
+        float iw = sw * scale, ih = sh * scale;
         float ix = x + (bw - iw) / 2f, iy = y + (bh - ih) / 2f;
-        batch.draw(t, ix, iy, iw, ih, 0, 0, t.getWidth(), t.getHeight(), false, false);
+        batch.draw(t, ix, iy, iw, ih, sx, sy, sw, sh, false, false);
+        float ms = Math.max(5, Math.min(12, scale * 2));
         for (Position m : marks) {
-            if (m.z() == p.z()) marker(batch, ix + (m.x() + 0.5f) * scale, iy + ih - (m.y() + 0.5f) * scale, Math.max(5, scale * 2), MARK);
+            if (m.z() == p.z() && in(m, sx, sy, sw, sh)) marker(batch, ix + (m.x() - sx + 0.5f) * scale, iy + ih - (m.y() - sy + 0.5f) * scale, ms, MARK);
         }
-        if (target != null && target.z() == p.z()) {
-            marker(batch, ix + (target.x() + 0.5f) * scale, iy + ih - (target.y() + 0.5f) * scale, Math.max(5, scale * 2), TARGET);
+        if (target != null && target.z() == p.z() && in(target, sx, sy, sw, sh)) {
+            marker(batch, ix + (target.x() - sx + 0.5f) * scale, iy + ih - (target.y() - sy + 0.5f) * scale, ms + 2, TARGET);
         }
-        marker(batch, ix + (p.x() + 0.5f) * scale, iy + ih - (p.y() + 0.5f) * scale, Math.max(5, scale * 2), PLAYER);
-        return new float[] {ix, iy, scale, ih};
+        marker(batch, ix + (p.x() - sx + 0.5f) * scale, iy + ih - (p.y() - sy + 0.5f) * scale, ms, PLAYER);
+        return new float[] {ix, iy, scale, ih, sx, sy, iw};
+    }
+
+    private static boolean in(Position m, int sx, int sy, int sw, int sh) {
+        return m.x() >= sx && m.y() >= sy && m.x() < sx + sw && m.y() < sy + sh;
     }
 
     private static final Color PLAYER = new Color(1f, 0.2f, 0.2f, 1f);
