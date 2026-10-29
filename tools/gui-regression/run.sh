@@ -28,5 +28,11 @@ if [ "${1:-}" = "--update" ]; then
   rm -f "$HERE"/reference/*.png
   java -cp "$LIB/*" pl.fawizja.pixel.desktop.ScreenshotCompare update "$HERE/reference" "$OUT/shots"
 else
-  java -cp "$LIB/*" pl.fawizja.pixel.desktop.ScreenshotCompare compare "$HERE/reference" "$OUT/shots" "$OUT/diff" "$THRESHOLD"
+  status=0
+  java -cp "$LIB/*" pl.fawizja.pixel.desktop.ScreenshotCompare compare "$HERE/reference" "$OUT/shots" "$OUT/diff" "$THRESHOLD" | tee "$OUT/compare.txt" || status=$?
+  # przy bledzie koniec logu gry dla kazdej nieudanej sceny (artefaktow CI nie zawsze da sie pobrac)
+  for name in $(sed -n 's/^BLAD \([^ :]*\)\.png.*/\1/p' "$OUT/compare.txt"); do
+    echo "---- log: $name"; tail -n 25 "$OUT/$name.log" || true
+  done
+  exit "$status"
 fi

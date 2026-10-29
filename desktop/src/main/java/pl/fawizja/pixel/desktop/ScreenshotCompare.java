@@ -66,7 +66,12 @@ public final class ScreenshotCompare {
                 failed++;
                 diffDir.mkdirs();
                 ImageIO.write(actual, "png", new File(diffDir, "actual_" + ref.getName()));
-                if (sameSize(expected, actual)) ImageIO.write(diffImage(expected, actual), "png", new File(diffDir, "diff_" + ref.getName()));
+                if (sameSize(expected, actual)) {
+                    ImageIO.write(diffImage(expected, actual), "png", new File(diffDir, "diff_" + ref.getName()));
+                    printDiffSummary(expected, actual);
+                } else {
+                    System.out.printf("     rozmiar: wzorzec %dx%d, zrzut %dx%d%n", expected.getWidth(), expected.getHeight(), actual.getWidth(), actual.getHeight());
+                }
             }
         }
         return failed;
@@ -101,6 +106,37 @@ public final class ScreenshotCompare {
                 }
                 out.setRGB(x, y, ((r / 4) << 16) | ((g / 4) << 8) | (bl / 4));
             }
+        }
+        return out;
+    }
+
+    /** Obszar roznic i maly podglad obu obrazow w logu (artefakty CI nie zawsze da sie pobrac). */
+    private static void printDiffSummary(BufferedImage a, BufferedImage b) {
+        int x0 = a.getWidth(), y0 = a.getHeight(), x1 = -1, y1 = -1;
+        for (int y = 0; y < a.getHeight(); y++) {
+            for (int x = 0; x < a.getWidth(); x++) {
+                if (!differs(a.getRGB(x, y), b.getRGB(x, y))) continue;
+                x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+            }
+        }
+        System.out.printf("     roznice w prostokacie x %d..%d, y %d..%d (obraz %dx%d, polowa rozmiaru)%n", x0, x1, y0, y1, a.getWidth(), a.getHeight());
+        String[] wa = ascii(a), wb = ascii(b);
+        System.out.println("     wzorzec | zrzut");
+        for (int i = 0; i < wa.length; i++) System.out.println("     " + wa[i] + " | " + wb[i]);
+    }
+
+    private static String[] ascii(BufferedImage img) {
+        final String ramp = " .:-=+*#%@";
+        int cols = 64, rows = 20;
+        String[] out = new String[rows];
+        for (int r = 0; r < rows; r++) {
+            StringBuilder sb = new StringBuilder(cols);
+            for (int c = 0; c < cols; c++) {
+                int p = img.getRGB(Math.min(img.getWidth() - 1, c * img.getWidth() / cols), Math.min(img.getHeight() - 1, r * img.getHeight() / rows));
+                int lum = (((p >> 16) & 0xff) * 3 + ((p >> 8) & 0xff) * 6 + (p & 0xff)) / 10;
+                sb.append(ramp.charAt(lum * (ramp.length() - 1) / 255));
+            }
+            out[r] = sb.toString();
         }
         return out;
     }
