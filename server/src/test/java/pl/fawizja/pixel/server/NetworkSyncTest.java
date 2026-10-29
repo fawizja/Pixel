@@ -1971,6 +1971,58 @@ class NetworkSyncTest {
     }
 
     @Test
+    void boughtHousesLoseTheirSaleSignForEveryoneAndTheOwnerSleepsInHisBed() throws Exception {
+        pl.fawizja.pixel.house.House h = server.world().houses().inTown("Valmir").get(0);
+        Position[] bed = new Position[1];
+        try (NetClient ola = connect();
+             NetClient ula = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            ula.hello("Ula", "DRUID", "tajne-Ula");
+            await("welcome", () -> ola.selfSave() != null && ula.selfSave() != null);
+            boolean[] ready = new boolean[1];
+            server.enqueueTest(() -> {
+                pl.fawizja.pixel.game.GameSession s = server.world().find("Ola").session;
+                s.character().bank().credit(h.price());
+                for (int[] d : new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+                    Position q = h.door().translate(d[0], d[1]);
+                    if (server.world().world.isWalkable(q) && !h.contains(q)) {
+                        s.teleport(q, 0);
+                        break;
+                    }
+                }
+                bed[0] = s.bedsIn(h).get(0);
+                ready[0] = true;
+            });
+            await("ready", () -> ready[0]);
+            ola.send("HOUSE", "BUY", h.id());
+            // inni gracze dostaja liste zajetych domow (bez tabliczki "Na sprzedaż" nad drzwiami)
+            awaitMessage(ula, "taken", m -> m[0].equals("HACC") && m.length > 2 && java.util.Arrays.asList(m[2].split(",")).contains(h.id()));
+            boolean[] inside = new boolean[1];
+            server.enqueueTest(() -> {
+                for (int[] d : new int[][] {{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+                    Position q = bed[0].translate(d[0], d[1]);
+                    if (h.contains(q) && server.world().world.isWalkable(q)) {
+                        server.world().find("Ola").session.teleport(q, 0);
+                        break;
+                    }
+                }
+                inside[0] = true;
+            });
+            await("inside", () -> inside[0]);
+            ola.send("ACT", "open:" + bed[0].x() + ":" + bed[0].y() + ":" + bed[0].z());
+            awaitMessage(ola, "sleep", m -> m[0].equals("SLEEP") && m[1].equals(String.valueOf(bed[0].x()))
+                    && m[2].equals(String.valueOf(bed[0].y())));
+        }
+        await("logged out", () -> server.world().find("Ola") == null);
+        try (NetClient ola = connect()) {
+            ola.hello("Ola", "PALADIN", "tajne-Ola");
+            await("welcome back", () -> ola.selfSave() != null);
+            assertEquals(h.id(), self(ola).house());
+            assertEquals(0, self(ola).sleptAt(), "woke up: the bed mark is cleared");
+        }
+    }
+
+    @Test
     void pushedCratesAndTheirContentsReachEveryClientAndSurviveARestart() throws Exception {
         pl.fawizja.pixel.world.WorldMap w = server.world().world;
         pl.fawizja.pixel.world.Crates c = w.crates();

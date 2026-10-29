@@ -860,14 +860,17 @@ final class ServerWorld {
     static final long RENT_SWEEP_MS = 60_000;
     private long rentSweptMs = Long.MIN_VALUE / 2;
 
-    /** Cudze domy, do ktorych gracz ma wstep: {"HACC", "id:poziom,id:poziom"} (klient od razu wie, gdzie wejdzie). */
+    /**
+     * Cudze domy, do ktorych gracz ma wstep, i domy z wlascicielem: {"HACC", "id:poziom,id:poziom", "id,id"} (klient
+     * od razu wie, gdzie wejdzie, i nad ktorymi drzwiami nie stawiac tabliczki "Na sprzedaż").
+     */
     private void sendHouseAccess(ServerPlayer p) {
         List<String> out = new ArrayList<>();
         for (pl.fawizja.pixel.house.House h : houses.all()) {
             pl.fawizja.pixel.house.HouseAccess a = houseOwners.guestAccess(h.id(), p.name());
             if (a != pl.fawizja.pixel.house.HouseAccess.NONE) out.add(h.id() + ":" + a.code());
         }
-        p.client.send("HACC", String.join(",", out));
+        p.client.send("HACC", String.join(",", out), String.join(",", houseOwners.owned().keySet()));
     }
 
     /**
@@ -1860,6 +1863,8 @@ final class ServerWorld {
         client.send("WELCOME", String.valueOf(p.id), String.valueOf(PixelServer.TICK_MS));
         sendCrates(client);
         sendHouseAccess(p);
+        String wake = pl.fawizja.pixel.house.BedRest.wakeUp(pc, wallClock.getAsLong()); // sen w lozku: zycie i mana
+        if (wake != null) s.log().add(lastNow, EventLog.Kind.SYSTEM, wake);
         broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
         tellFriends(p, "jest teraz w grze.", lastNow);
         List<String> on = new ArrayList<>();
@@ -2482,7 +2487,16 @@ final class ServerWorld {
     void command(ServerPlayer p, String[] f, long now) {
         switch (f[0]) {
             case "MOVE": p.move = f.length > 1 && !f[1].equals("-") ? parseDir(f[1]) : null; break;
-            case "ACT": if (f.length > 1) Actions.apply(p.session, f[1], now); break;
+            case "ACT":
+                if (f.length > 1) Actions.apply(p.session, f[1], now);
+                Position bed = p.session.takeSleep();
+                if (bed != null) {
+                    // postac polozyla sie w lozku: zapis z chwila zasniecia, klient pokazuje sen i sie rozlacza
+                    save(p);
+                    p.client.send("SLEEP", String.valueOf(bed.x()), String.valueOf(bed.y()), String.valueOf(bed.z()));
+                    LOG.info("sleep " + p.name() + " at " + bed);
+                }
+                break;
             case "ATTACK":
                 if (f.length > 1) attackPlayer(p, parseInt(f[1]), now);
                 break;

@@ -40,8 +40,10 @@ final class HouseWindow {
     Mode mode;
     HouseAccess inviteLevel = HouseAccess.FULL;
     final StringBuilder name = new StringBuilder();
-    /** Saldo konta ogladajacego i czy ma juz dom (do przycisku Kup). */
+    /** Saldo konta i monety w plecaku ogladajacego, czy ma juz dom (do przycisku Kup) i lozka we wnetrzu. */
     long bank;
+    long cash;
+    int beds;
     boolean hasHouse;
     boolean doorOpen;
 
@@ -68,17 +70,17 @@ final class HouseWindow {
         long rent = HouseRent.rent(house);
         switch (mode) {
             case INFO:
-                out.add("Miasto: " + house.town() + "   Wielkość: " + house.size() + " pól");
+                out.add("Miasto: " + house.town() + "   Wielkość: " + house.size() + " pól   Łóżka: " + beds);
                 if (view.free()) {
-                    out.add("Stan: wolny - można kupić");
-                    out.add("Cena: " + gp(house.price()) + " (z konta w banku)");
+                    out.add("Stan: NA SPRZEDAŻ - wolny");
+                    out.add("Cena: " + gp(house.price()) + " (z konta, reszta z plecaka)");
                 } else {
                     out.add("Stan: zajęty");
                     out.add("Właściciel: " + view.owner());
                 }
                 out.add("Czynsz tygodniowy: " + gp(rent) + " (pobierany z konta)");
                 if (view.free()) {
-                    out.add("Na koncie: " + gp(bank) + (bank < house.price() ? " - za mało złota" : ""));
+                    out.add("Masz: konto " + gp(bank) + " + plecak " + gp(cash) + (bank + cash < house.price() ? " - za mało złota" : ""));
                     if (hasHouse) out.add("Masz już dom - najpierw go opuść.");
                 } else if (view.access() == HouseAccess.OWNER) {
                     out.add("To twój dom. Zaprosisz gości od środka, przy drzwiach.");
@@ -123,7 +125,7 @@ final class HouseWindow {
         List<Button> out = new ArrayList<>();
         switch (mode) {
             case INFO:
-                if (view.free()) out.add(new Button("house:buy:" + house.id(), "Kup", !hasHouse && bank >= house.price(), false));
+                if (view.free()) out.add(new Button("house:buy:" + house.id(), "Kup", !hasHouse && bank + cash >= house.price(), false));
                 out.add(new Button("house:close", "Zamknij", true, false));
                 break;
             case OWNER:

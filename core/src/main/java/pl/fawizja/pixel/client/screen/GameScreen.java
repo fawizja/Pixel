@@ -320,6 +320,8 @@ public final class GameScreen extends ScreenAdapter {
         }
         session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
                 + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
+        String wake = game.takeLoginNote();                     // pobudka po snie w lozku (PixelGame.playLocal)
+        if (wake != null) session.log().add(now(), EventLog.Kind.SYSTEM, wake);
         if (net != null) lastSelf = net.selfSave();
         hud.setChatEnabled(net != null); // offline przycisk czatu pojawia sie tylko obok NPC (rozmowa)
         lastSaveMs = now();
@@ -1022,6 +1024,8 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Dotkniecie pola swiata (desktop: -Dpixel.tap=x,y). */
     public boolean tapTile(Position p) {
+        if (sleepBed != null) return true;                      // postac juz spi
+        if (p.z() == session.character().position().z() && session.refuseBed(p, now())) return true;
         if (net != null) {
             for (Map.Entry<Integer, RemotePlayer> e : remotePlayers.entrySet()) {
                 if (e.getValue().to.equals(p)) {
@@ -1678,9 +1682,18 @@ public final class GameScreen extends ScreenAdapter {
             chase(TimeUtils.millis());
             if (walkPath != null) dir = walkStep();
         }
+        if (sleepBed != null) {
+            dir = null;                                         // postac lezy w lozku: zadnych krokow
+            stopWalk();
+        }
         if (net != null) syncWithServer(dir);
         final long t = now();
         if (net == null) session.update(t, dir);
+        if (net == null && sleepBed == null) {
+            Position bed = session.takeSleep();
+            if (bed != null) startSleep(bed, t);
+        }
+        if (sleepBed != null && t - sleepStartMs >= SLEEP_MS) finishSleep();
         if (queuedPending && (session.isMoving() || !session.character().position().equals(queuedFrom))) {
             queuedDir = null;
             queuedPending = false;
@@ -1782,7 +1795,8 @@ public final class GameScreen extends ScreenAdapter {
                 b.draw(game.art().character(rp.vocation, rp.facing, rp.outfit, rf), remoteX(rp, t) + (lg == null ? 0f : lg[0]),
                         worldRenderer.worldY(remoteY(rp, t) - rise + (lg == null ? 0f : lg[1])), 1f, 1f);
             }
-            if (row == playerRow) {
+            if (sleepBed != null && row == sleepBed.y() && sleepBed.z() == z) drawSleeper(b, pc);
+            if (row == playerRow && sleepBed == null) {
                 float rise = pc.isMounted() ? 0f : emoteRise(pc.name());
                 if (pc.isMounted()) {
                     b.draw(game.art().horse(session.facing()), px + lx, worldRenderer.worldY(py + ly), 1f, 1f);
@@ -1793,6 +1807,7 @@ public final class GameScreen extends ScreenAdapter {
             }
         });
         worldRenderer.renderAbove(batch, camera, pc.position(), roofs);
+        drawSaleSigns(batch, pc.position(), radius);
         batch.end();
 
         int minute = session.clock().minuteOfDay(t);
@@ -1815,6 +1830,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         drawCombatOverlay(batch, game.shapes(), t, z);
         drawLowHealth(game.shapes(), t);
+        drawSleepFade(game.shapes(), t);
         clipToView(false);
 
         if (profiler != null && profiler.isEnabled()) worldDrawCalls = profiler.getDrawCalls();
@@ -2386,7 +2402,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         // nad graczami: HP, pod nim mana (wlasna postac; u innych serwer podaje tylko procent zycia)
         PlayerCharacter me0 = session.character();
-        if (me0.position().z() == z && !me0.isDead()) {
+        if (me0.position().z() == z && !me0.isDead() && sleepBed == null) {
             float ox = session.renderX(t), oy = worldRenderer.worldY(session.renderY(t));
             overheadBar(shapes, ox, oy + 1.06f, me0.health() / (float) Math.max(1, me0.maxHealth()),
                     me0.mana() / (float) Math.max(1, me0.maxMana()));
@@ -2452,6 +2468,18 @@ public final class GameScreen extends ScreenAdapter {
             outlined(batch, font, n.name(), Math.max(gv[0] + 2, Math.min(nx, viewRight - nameLayout.width - 2)), projected.y,
                     0.75f, 0.95f, 1f, ui);
         }
+        for (pl.fawizja.pixel.house.House h : session.houses().all()) {
+            // wolny dom obok: napis nad tabliczka (cena po dotknieciu drzwi)
+            Position d = h.door();
+            if (d.z() != z || d.distanceTo(me) > 6 || !session.houseForSale(h)) continue;
+            projected.set(d.x() + 0.5f, worldRenderer.worldY(d.y()) + 1.72f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            String label = String.format("Na sprzedaż: %,d gp", h.price());
+            nameLayout.setText(font, label);
+            float nx = projected.x - nameLayout.width / 2f;
+            if (projected.y > viewTop || nx > viewRight - 20 || nx < gv[0]) continue;
+            outlined(batch, font, label, nx, projected.y, 1f, 0.88f, 0.35f, ui);
+        }
         if (target != null && !target.isDead() && target.position().z() == z) {
             // imie celu w kolorze trudnosci wzgledem poziomu postaci
             pl.fawizja.pixel.monster.Difficulty d = pl.fawizja.pixel.monster.Difficulty.of(target.type().level(), session.character().level());
@@ -2492,7 +2520,7 @@ public final class GameScreen extends ScreenAdapter {
             drawBubble(batch, font, scale, rp.name, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)));
         }
         PlayerCharacter self = session.character();
-        if (self.position().z() == z && !self.isDead()) {
+        if (self.position().z() == z && !self.isDead() && sleepBed == null) {
             // wlasna postac jak w Tibii: imie nad paskami HP/many, czaszka PvP tuz pod nimi
             float ox = session.renderX(t), oy = worldRenderer.worldY(session.renderY(t));
             String sk = self.skull(t).name();
@@ -2501,6 +2529,13 @@ public final class GameScreen extends ScreenAdapter {
             nameLayout.setText(font, label);
             outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], ui);
             drawSkullUnderBars(batch, font, sk, ox, oy + 1.06f - 0.075f - 0.04f, ui);
+        }
+        if (sleepBed != null && sleepBed.z() == z) {
+            // sen: "Zzz" nad poduszka, litery unosza sie po kolei
+            String zz = "Z z z".substring(0, Math.min(5, 1 + (int) ((uiMs() / 350) % 3) * 2));
+            projected.set(sleepBed.x() + 0.6f, worldRenderer.worldY(sleepBed.y()) + 2.25f, 0);
+            camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+            outlined(batch, font, zz, projected.x, projected.y, 0.85f, 0.9f, 1f, ui);
         }
         drawBubble(batch, font, scale, session.character().name(), session.renderX(t), worldRenderer.worldY(session.renderY(t)));
         font.getData().setScale(scale);
@@ -2730,6 +2765,22 @@ public final class GameScreen extends ScreenAdapter {
                         if (c > 0) acc.put(e.substring(0, c), pl.fawizja.pixel.house.HouseAccess.guestLevel(e.substring(c + 1)));
                     }
                     session.setRemoteHouseAccess(acc);
+                    // domy z wlascicielem (bez znaku "Na sprzedaż"); starszy serwer nie wysyla tego pola
+                    if (m.length > 2) {
+                        java.util.List<String> taken = new java.util.ArrayList<>();
+                        for (String id : m[2].split(",")) if (!id.isBlank()) taken.add(id.trim());
+                        session.setTakenHouses(taken);
+                    }
+                    break;
+                }
+                case "SLEEP": {
+                    // serwer polozyl postac w lozku (SLEEP x y z): sen na ekranie, potem wylogowanie
+                    if (m.length < 4 || sleepBed != null) break;
+                    try {
+                        startSleep(new Position(Integer.parseInt(m[1]), Integer.parseInt(m[2]), Integer.parseInt(m[3])), now);
+                    } catch (NumberFormatException e) {
+                        // zly komunikat: pomijamy
+                    }
                     break;
                 }
                 case "CRATEMV":
@@ -3026,8 +3077,117 @@ public final class GameScreen extends ScreenAdapter {
         if (net == null) game.saveCharacter(session.character());
     }
 
+    // ------------------------------------------------------------------ sen w lozku i domy na sprzedaz
+
+    /** Lozko, w ktorym lezy postac (sen przed wylogowaniem), i chwila zasniecia. */
+    private Position sleepBed;
+    private long sleepStartMs;
+    private boolean sleepFinished;
+    /** Jak dlugo widac postac w lozku przed wylogowaniem (-Dpixel.sleepMs, np. dluzej do zrzutow). */
+    private static final long SLEEP_MS = Long.getLong("pixel.sleepMs", 1800L);
+
+    /** Postac kladzie sie w lozku: zamkniete okna, sen na ekranie, po {@link #SLEEP_MS} wylogowanie. */
+    private void startSleep(Position bed, long t) {
+        sleepBed = bed;
+        sleepStartMs = t;
+        stopWalk();
+        hud.closeHouse();
+    }
+
+    private void finishSleep() {
+        if (sleepFinished) return;
+        sleepFinished = true;
+        if (net == null) game.saveCharacter(session.character());
+        Gdx.app.postRunnable(() -> game.backToMenu("Zasypiasz w łóżku. Postać zapisana - wypocznie, zanim wrócisz."));
+    }
+
+    /** Czy postac lezy w lozku (podglad i testy). */
+    public boolean sleeping() { return sleepBed != null; }
+
+    /**
+     * Postac w lozku: obrocona jak lezaca, z koldra z grafiki lozka na wierzchu. Lozko pionowe (wezglowie u gory,
+     * zajmuje pole lozka i pole nad nim) albo poziome (wezglowie z lewej, pole lozka i pole z lewej).
+     */
+    private void drawSleeper(SpriteBatch b, PlayerCharacter pc) {
+        TextureRegion me = game.art().character(pc.vocation(), Direction.SOUTH, pc.outfit(), 0);
+        int bedId = game.world().floor(sleepBed.z()).get(pl.fawizja.pixel.world.Layer.OBJECT, sleepBed.x(), sleepBed.y());
+        TextureRegion bed = bedId == 0 ? null : game.art().nativeTile(bedId, sleepBed.x(), sleepBed.y());
+        boolean horizontal = bed != null && bed == game.art().nativeVariant(bedId, 1);
+        float x = sleepBed.x(), wy = worldRenderer.worldY(sleepBed.y());
+        if (horizontal) {
+            b.draw(me, x - 0.75f, wy + 0.02f, 0.5f, 0.5f, 1f, 1f, 0.95f, 0.95f, 90f); // glowa na poduszce z lewej
+        } else {
+            b.draw(me, x + 0.02f, wy + 0.62f, 0.95f, 0.95f);
+        }
+        if (bed == null) return;
+        // koldra: dolna (pionowe) albo prawa (poziome) czesc grafiki lozka na postaci
+        int rw = bed.getRegionWidth(), rh = bed.getRegionHeight();
+        if (horizontal) {
+            TextureRegion quilt = new TextureRegion(bed, rw * 21 / 64, rh * 33 / 64, rw * 40 / 64, rh * 30 / 64);
+            b.draw(quilt, x - 1f + 21f / 32f, wy + 1f / 32f, 40f / 32f, 30f / 32f);
+        } else {
+            TextureRegion quilt = new TextureRegion(bed, rw * 32 / 64, rh * 31 / 64, rw * 32 / 64, rh * 30 / 64);
+            b.draw(quilt, x, wy + 3f / 32f, 1f, 30f / 32f);
+        }
+    }
+
+    /** Ekran gasnie, gdy postac zasypia. */
+    private void drawSleepFade(ShapeRenderer shapes, long t) {
+        if (sleepBed == null) return;
+        float k = Math.min(1f, Math.max(0f, (t - sleepStartMs) / (float) SLEEP_MS));
+        float[] r = hud.gameView();
+        screenMatrix.setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        shapes.setProjectionMatrix(screenMatrix);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(0.02f, 0.02f, 0.08f, Math.min(0.55f, 0.15f + 0.6f * k));
+        shapes.rect(r[0], r[1], r[2], r[3]);
+        shapes.end();
+    }
+
+    private TextureRegion saleSign;
+
+    /** Tabliczka "na sprzedaz" (rysowana, bez grafik z gry): deska na dwoch lancuszkach ze zlota moneta. */
+    private TextureRegion saleSign() {
+        if (saleSign != null) return saleSign;
+        com.badlogic.gdx.graphics.Pixmap p = new com.badlogic.gdx.graphics.Pixmap(32, 32, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        p.setColor(0.25f, 0.22f, 0.2f, 1f);                      // lancuszki
+        p.fillRectangle(8, 2, 2, 9);
+        p.fillRectangle(22, 2, 2, 9);
+        p.setColor(0.24f, 0.14f, 0.06f, 1f);                     // deska z ciemna ramka
+        p.fillRectangle(2, 10, 28, 18);
+        p.setColor(0.62f, 0.42f, 0.2f, 1f);
+        p.fillRectangle(3, 11, 26, 16);
+        p.setColor(0.7f, 0.5f, 0.26f, 1f);
+        p.fillRectangle(3, 11, 26, 3);
+        p.setColor(0.45f, 0.3f, 0.12f, 1f);
+        p.fillCircle(16, 19, 6);                                 // moneta
+        p.setColor(1f, 0.82f, 0.2f, 1f);
+        p.fillCircle(16, 19, 5);
+        p.setColor(1f, 0.95f, 0.6f, 1f);
+        p.fillCircle(14, 17, 2);
+        p.setColor(0.75f, 0.52f, 0.05f, 1f);
+        p.fillRectangle(15, 16, 2, 7);
+        saleSign = new TextureRegion(new com.badlogic.gdx.graphics.Texture(p));
+        p.dispose();
+        return saleSign;
+    }
+
+    /** Znak "na sprzedaz" nad drzwiami wolnych domow w poblizu (widoczny tez nad dachem, jak tabliczka). */
+    private void drawSaleSigns(SpriteBatch b, Position me, int radius) {
+        for (pl.fawizja.pixel.house.House h : session.houses().all()) {
+            Position d = h.door();
+            if (d.z() != me.z() || Math.abs(d.x() - me.x()) > radius || Math.abs(d.y() - me.y()) > radius) continue;
+            if (!session.houseForSale(h)) continue;
+            float bob = 0.03f * (float) Math.sin(uiMs() / 400.0 + d.x());
+            b.draw(saleSign(), d.x() + 0.12f, worldRenderer.worldY(d.y()) + 0.86f + bob, 0.76f, 0.76f);
+        }
+    }
+
     @Override
     public void dispose() {
+        if (saleSign != null) saleSign.getTexture().dispose();
         if (net != null) net.close();
         lightRenderer.dispose();
         hud.dispose();

@@ -80,7 +80,7 @@ ROYAL = (114, 66, 156, 104)
 
 # domy do kupienia (etap 6): wypelniane przez funkcje miast, zapisywane do maps/world/houses.csv
 HOUSES = []
-HOUSE_PRICE_PER_TILE = 5000
+HOUSE_PRICE_PER_TILE = 1000
 
 
 def house(name, town, x0, y0, x1, y1, z, door, factor=1):

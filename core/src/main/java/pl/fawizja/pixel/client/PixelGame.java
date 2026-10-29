@@ -101,11 +101,22 @@ public class PixelGame extends Game {
     public void playLocal() {
         PlayerCharacter loaded = loadCharacter();
         if (loaded != null) {
-            loaded.stamina().onLogin(System.currentTimeMillis()); // odnowienie staminy za czas poza gra
+            long now = System.currentTimeMillis();
+            loaded.stamina().onLogin(now); // odnowienie staminy za czas poza gra
+            loginNote = pl.fawizja.pixel.house.BedRest.wakeUp(loaded, now); // sen w lozku: zycie i mana
             startGame(loaded);
         } else {
             setScreen(new VocationSelectScreen(this));
         }
+    }
+
+    /** Komunikat do dziennika po wejsciu do gry (pobudka w lozku) albo null. */
+    private String loginNote;
+
+    public String takeLoginNote() {
+        String n = loginNote;
+        loginNote = null;
+        return n;
     }
 
     /** Krotki opis zapisanej postaci lokalnej (do menu) albo null. */

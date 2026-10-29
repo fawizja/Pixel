@@ -257,6 +257,8 @@ public final class Hud {
     private void refreshHouse(GameSession session) {
         PlayerCharacter pc = session.character();
         houseWin.bank = pc.bank().balance();
+        houseWin.cash = pl.fawizja.pixel.economy.Money.totalValue(pc.backpack());
+        houseWin.beds = session.houseBeds(houseWin.house);
         houseWin.hasHouse = pc.house() != null;
         houseWin.doorOpen = session.world().openings().isOpen(houseWin.house.door());
     }

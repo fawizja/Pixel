@@ -71,7 +71,11 @@ class HouseSystemTest {
                     }
                 }
                 assertTrue(walkable >= 4, h.id());
-                assertEquals(h.price(), h.size() * 5000L * (town.equals("Varden") ? 2 : 1), h.id());
+                // 2026-10-29: 1000 gp za pole w murach (bylo 5000 - dom za 45-175 tys. byl poza zasiegiem graczy),
+                // dzielnica krolewska Varden 2x; przedmiescia i chaty w dziczy 800, domy w wioskach 600
+                long perCell = h.id().startsWith("wies_") ? 600 : h.id().startsWith("wild_") || h.id().matches(".*_p\\d+") ? 800
+                        : 1000L * (town.equals("Varden") ? 2 : 1);
+                assertEquals(h.size() * perCell, h.price(), h.id());
             }
         }
     }
@@ -137,6 +141,9 @@ class HouseSystemTest {
         Npc agent = housing("Varden");
         House h = houses.inTown("Varden").get(0);
         PlayerCharacter pc = TestData.newCharacterNamed("Bolek");
+        // 2026-10-29: brakujaca reszte placa monety z plecaka - postac startowa bez monet, sam bank za maly
+        long cash = pl.fawizja.pixel.economy.Money.totalValue(pc.backpack());
+        if (cash > 0) assertTrue(pl.fawizja.pixel.economy.Money.pay(pc.backpack(), cash).ok());
         pc.bank().credit(h.price() - 1);
         pc.setPosition(nextTo(agent));
         assertFalse(session(pc, null).buyHouse(h.id(), 0));

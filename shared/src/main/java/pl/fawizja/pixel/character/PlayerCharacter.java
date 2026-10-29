@@ -289,6 +289,11 @@ public final class PlayerCharacter {
 
     /** Dom postaci (id z houses.csv) albo null. */
     private String house;
+    /** Chwila (ms od 1970), w ktorej postac zasnela w lozku i sie wylogowala; 0 = wylogowanie bez lozka. */
+    private long sleptAt;
+
+    public long sleptAt() { return sleptAt; }
+    public void setSleptAt(long wallMs) { sleptAt = Math.max(0, wallMs); }
 
     public String house() { return house; }
     public void setHouse(String id) { house = id == null || id.isEmpty() || id.equals("-") ? null : id; }
