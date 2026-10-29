@@ -2382,6 +2382,12 @@ public final class GameScreen extends ScreenAdapter {
         // w lewym gornym rogu okna gry 15x11 (poza nim jest czarna ramka i wycinanie)
         float x = clip[2] > 0 ? clip[0] + 12 * scale : 12 * scale;
         float y = clip[3] > 0 ? clip[1] + clip[3] - 14 * scale : Gdx.graphics.getHeight() * 0.62f;
+        if (hud.mobile()) {
+            // telefon: widok gry pokrywa ekran - panel pod ramka i wierszem ikon stanu, po lewej
+            float ui = hud.uiScale();
+            x = 12 * ui;
+            y = Gdx.graphics.getHeight() - 70 * ui;
+        }
         // tlo dla czytelnosci na jasnej podlodze
         float rows = partyNames.size(); // naglowek + pozostali czlonkowie
         batch.setColor(0f, 0f, 0f, 0.55f);
