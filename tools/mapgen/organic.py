@@ -19,6 +19,7 @@ import math
 from collections import deque
 
 import features as F
+import homes
 
 NONE = '-'
 DIRS4 = ((1, 0), (-1, 0), (0, 1), (0, -1))
@@ -218,7 +219,9 @@ class Town:
                 brush = [(0, 0)]
             for a, b in brush:
                 q = (x + a, y + b)
-                if q in self.inside and q not in self.reserved:
+                # szersza ulica nie wchodzi na stojace juz budynki (uliczka dobudowana po domach zjadala rog
+                # domu razem z drzwiami - Willa 10 w Nerys nie miala drzwi)
+                if q in self.inside and q not in self.reserved and q not in self.taken:
                     self.street.add(q)
                     if width == 3:
                         self.main.add(q)
@@ -499,7 +502,7 @@ class Town:
             self.npc(role, spot)
         self.buildings.append((key, shape, door))
 
-    def house(self, n, label, price_per_cell=5000):
+    def house(self, n, label, price_per_cell=homes.TOWN_PRICE):
         s = self.spec
         sizes = [(w, h) for w in (5, 6, 7, 8, 9) for h in (5, 6, 7)]
         got = self.lot(sizes, wing=0.4, tries=900)
@@ -510,6 +513,7 @@ class Town:
         items = list(HOME_FURNITURE)
         self.rng.shuffle(items)
         self.furnish(inner, door, items[:max(2, len(inner) // 5)], s['floor'])
+        homes.add_beds(self.world, inner, door, f'{s["key"]}_{n}')
         self.buildings.append(('house', shape, door))
         rects = rect_cover(set(inner))
         (x0, y0, x1, y1) = rects[0]
@@ -657,7 +661,7 @@ def build(world, spec, rng, roles, houses, reserved=(), links=()):
     out_houses = []
     n = 1
     while n <= houses:
-        h = t.house(n, spec['house_label'], spec.get('price_per_cell', 5000))
+        h = t.house(n, spec['house_label'], spec.get('price_per_cell', homes.TOWN_PRICE))
         if h is None:
             if not t.side_street():
                 break

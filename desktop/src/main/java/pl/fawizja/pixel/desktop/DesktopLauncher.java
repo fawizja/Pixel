@@ -194,7 +194,10 @@ public final class DesktopLauncher {
                     String hid = System.getProperty("pixel.houseId");
                     pl.fawizja.pixel.house.House h = hid != null ? s.houses().get(hid) : s.houses().inTown("Varden").get(0);
                     for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
-                    boolean owner = open.equals("house_owner") || open.equals("house_invite");
+                    // house_home: wlasciciel w srodku przy lozku (wnetrze z lozkami); house_sleep: do tego dotyka lozka
+                    // i kladzie sie spac (-Dpixel.sleepMs=60000 trzyma postac w lozku do zrzutu)
+                    boolean home = open.equals("house_home") || open.equals("house_sleep");
+                    boolean owner = home || open.equals("house_owner") || open.equals("house_invite");
                     pl.fawizja.pixel.house.HouseOwnersMap owners = new pl.fawizja.pixel.house.HouseOwnersMap();
                     if (open.equals("house_owned")) owners.claim(h.id(), "Halvar");
                     if (owner) {
@@ -215,8 +218,23 @@ public final class DesktopLauncher {
                             break;
                         }
                     }
-                    if (stand != null) s.teleport(stand, 0L);
-                    gs.tapTile(h.door());
+                    if (home) {
+                        java.util.List<Position> beds = s.bedsIn(h);
+                        Position bed = beds.isEmpty() ? null : beds.get(0);
+                        stand = null;
+                        for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+                            Position n = bed == null ? null : bed.translate(d.dx, d.dy);
+                            if (n != null && !d.diagonal() && h.contains(n) && s.world().isWalkable(n)) {
+                                stand = n;
+                                break;
+                            }
+                        }
+                        if (stand != null) s.teleport(stand, 0L);
+                        if (open.equals("house_sleep") && bed != null) gs.tapTile(bed);
+                    } else {
+                        if (stand != null) s.teleport(stand, 0L);
+                        gs.tapTile(h.door());
+                    }
                     if (open.equals("house_invite")) gs.hud().previewHouse("house:invitefull", "Stary Wilk");
                 }
                 if ("bossloot".equals(open)) {
@@ -574,6 +592,16 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.tapTile(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()),
                             gs.session().character().position().z()));
+                }
+            }
+            String presses = System.getProperty("pixel.buttons");
+            if (presses != null && getScreen() instanceof GameScreen) {
+                // przyciski w wybranych klatkach: id@klatka;id@klatka (np. Kup w oknie domu po dotknieciu drzwi)
+                for (String one : presses.split(";")) {
+                    int at = one.lastIndexOf('@');
+                    if (at > 0 && Integer.parseInt(one.substring(at + 1).trim()) == frame) {
+                        ((GameScreen) getScreen()).press(one.substring(0, at).trim());
+                    }
                 }
             }
             if (Boolean.getBoolean("pixel.bossWin") && frame == frames - 15 && getScreen() instanceof GameScreen) {

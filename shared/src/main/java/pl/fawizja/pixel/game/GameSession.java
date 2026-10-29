@@ -826,25 +826,144 @@ public final class GameSession {
         return claimHouse(h, nowMs);
     }
 
+    /** Zloto, ktorym postac moze zaplacic za dom: konto w banku plus monety w plecaku. */
+    public long houseFunds() {
+        return pc.bank().balance() + Money.totalValue(pc.backpack());
+    }
+
+    /**
+     * Kupno domu: najpierw z konta w banku, brakujaca reszta monetami z plecaka (jak w Tibii, gdzie dom placi sie
+     * z konta, a gracz z gotowka w plecaku nie musi isc do bankiera). Nic sie nie zmienia, gdy zlota jest za malo.
+     */
     private boolean claimHouse(pl.fawizja.pixel.house.House h, long nowMs) {
         String msg = null;
+        long bank = pc.bank().balance();
+        long cash = Money.totalValue(pc.backpack());
         if (pc.house() != null) msg = "Masz już dom. Najpierw go opuść.";
-        else if (owners().ownerOf(h.id()) != null) msg = "Ten dom ma już właściciela.";
-        else if (pc.bank().balance() < h.price()) msg = String.format("Dom kosztuje %,d gp, a na koncie masz %,d gp.", h.price(), pc.bank().balance());
+        else if (owners().ownerOf(h.id()) != null || takenHouses.contains(h.id())) msg = "Ten dom ma już właściciela.";
+        else if (bank + cash < h.price()) {
+            msg = String.format("Dom kosztuje %,d gp, a masz %,d gp (konto %,d gp, plecak %,d gp).", h.price(), bank + cash, bank, cash);
+        }
         if (msg != null) {
             log.add(nowMs, EventLog.Kind.WARNING, msg);
+            return false;
+        }
+        long fromBank = Math.min(bank, h.price());
+        long fromPack = h.price() - fromBank;
+        pl.fawizja.pixel.inventory.Container pack = pc.backpack().copy();
+        if (fromPack > 0 && !Money.pay(pack, fromPack).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie udało się odliczyć monet z plecaka (brak miejsca na resztę).");
             return false;
         }
         if (!owners().claim(h.id(), pc.name())) {
             log.add(nowMs, EventLog.Kind.WARNING, "Ten dom ma już właściciela.");
             return false;
         }
-        pc.bank().debit(h.price());
+        if (fromBank > 0) pc.bank().debit(fromBank);
+        if (fromPack > 0) pc.backpack().commitFrom(pack);
         pc.setHouse(h.id());
         owners().setRent(h.id(), wallClock.getAsLong() + pl.fawizja.pixel.house.HouseRent.period(), 0);   // pierwszy tydzien w cenie
         rentLowWarned = false;
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp z konta. Czynsz %,d gp tygodniowo pobierany "
-                + "automatycznie z banku. Gości zaprosisz przy drzwiach od środka.", h.name(), h.price(), pl.fawizja.pixel.house.HouseRent.rent(h)));
+        String paid = fromPack == 0 ? "z konta" : fromBank == 0 ? "z plecaka"
+                : String.format("%,d gp z konta i %,d gp z plecaka", fromBank, fromPack);
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp (%s). Czynsz %,d gp tygodniowo pobierany "
+                + "automatycznie z banku. Gości zaprosisz przy drzwiach od środka, a w łóżku możesz się położyć i wylogować.",
+                h.name(), h.price(), paid, pl.fawizja.pixel.house.HouseRent.rent(h)));
+        return true;
+    }
+
+    /** Online: domy z wlascicielem (wiadomosc HACC z serwera); offline zawsze pusto - wlascicielem jest tylko ta postac. */
+    private java.util.Set<String> takenHouses = java.util.Set.of();
+
+    public void setTakenHouses(java.util.Collection<String> ids) {
+        takenHouses = ids == null ? java.util.Set.of() : java.util.Set.copyOf(ids);
+    }
+
+    /** Czy dom jest na sprzedaz (wolny) - znak "Na sprzedaż" nad drzwiami i przycisk Kup. */
+    public boolean houseForSale(pl.fawizja.pixel.house.House h) {
+        return h != null && owners().ownerOf(h.id()) == null && !takenHouses.contains(h.id());
+    }
+
+    /** Lozka we wnetrzu domu (pola z obiektem "bed"). */
+    public int houseBeds(pl.fawizja.pixel.house.House h) {
+        return bedsIn(h).size();
+    }
+
+    public java.util.List<Position> bedsIn(pl.fawizja.pixel.house.House h) {
+        java.util.List<Position> out = new java.util.ArrayList<>();
+        if (h == null) return out;
+        int[] b = {h.x0(), h.y0(), h.x1(), h.y1()};
+        int[] w = h.wings();
+        for (int i = 0; i < w.length; i += 4) {
+            b[0] = Math.min(b[0], w[i]);
+            b[1] = Math.min(b[1], w[i + 1]);
+            b[2] = Math.max(b[2], w[i + 2]);
+            b[3] = Math.max(b[3], w[i + 3]);
+        }
+        for (int y = b[1]; y <= b[3]; y++) {
+            for (int x = b[0]; x <= b[2]; x++) {
+                Position p = new Position(x, y, h.z());
+                pl.fawizja.pixel.world.TileType o = h.contains(p) ? objectAt(p) : null;
+                if (o != null && o.key().equals("bed")) out.add(p);
+            }
+        }
+        return out;
+    }
+
+    // ------------------------------------------------------------------ lozka (jak w Tibii: sen = wylogowanie)
+
+    /** Lozko, w ktorym postac sie polozyla (klient pokazuje sen i wylogowuje); null = nie spi. */
+    private Position sleepBed;
+
+    /** Lozko, w ktorym postac wlasnie sie polozyla; odczyt zeruje (klient albo serwer wylogowuje postac). */
+    public Position takeSleep() {
+        Position b = sleepBed;
+        sleepBed = null;
+        return b;
+    }
+
+    /**
+     * Dotkniecie lozka w cudzym domu (bez wstepu): od razu "To nie twoje łóżko." zamiast marszu pod okno.
+     * True, gdy odmowiono.
+     */
+    public boolean refuseBed(Position p, long nowMs) {
+        pl.fawizja.pixel.world.TileType o = objectAt(p);
+        if (o == null || !o.key().equals("bed")) return false;
+        pl.fawizja.pixel.house.House h = houses.at(p);
+        if (h == null || houseAccess(h).mayEnter()) return false;
+        log.add(nowMs, EventLog.Kind.WARNING, "To nie twoje łóżko.");
+        return true;
+    }
+
+    /** Czy postac lezy w lozku (przed wylogowaniem). */
+    public Position sleepingIn() { return sleepBed; }
+
+    /**
+     * Dotkniecie lozka obok: w domu, do ktorego postac ma wstep (wlasciciel albo gosc), postac kladzie sie spac
+     * i wylogowuje (zapis z chwila zasniecia - po powrocie odnowione zycie i mana, patrz {@link
+     * pl.fawizja.pixel.house.BedRest}). W cudzym domu "To nie twoje łóżko.", w walce odmowa jak przy wylogowaniu.
+     */
+    private boolean useBed(Position p, long nowMs) {
+        pl.fawizja.pixel.house.House h = houses.at(p);
+        if (h == null) {
+            log.add(nowMs, EventLog.Kind.INFO, "Wygodne łóżko, ale nie twoje. Własne łóżko będziesz mieć we własnym domu.");
+            return true;
+        }
+        if (!houseAccess(h).mayEnter()) {
+            log.add(nowMs, EventLog.Kind.WARNING, "To nie twoje łóżko.");
+            return true;
+        }
+        long block = pc.logoutBlockedMs(nowMs);
+        if (block > 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, "Nie możesz zasnąć w trakcie walki. Poczekaj " + (block + 999) / 1000 + " s.");
+            return true;
+        }
+        if (pc.isDead() || sleepBed != null) return true;
+        sleepBed = p;
+        pc.setSleptAt(wallClock.getAsLong());
+        moving = false;
+        log.add(nowMs, EventLog.Kind.SYSTEM, "Kładziesz się do łóżka w domu " + h.name()
+                + " i zasypiasz. Postać wypocznie, zanim wrócisz (życie, mana i stamina).");
         return true;
     }
 
@@ -2530,8 +2649,7 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.INFO, "Zaglądasz do studni. Woda jest zimna i czysta - pijesz kilka łyków.");
                 return true;
             case "bed":
-                log.add(nowMs, EventLog.Kind.INFO, "Wygodne łóżko. Na sen przyjdzie jeszcze czas.");
-                return true;
+                return useBed(p, nowMs);
             case "lectern":
                 log.add(nowMs, EventLog.Kind.INFO, "Na pulpicie leży otwarta księga. Pismo jest zbyt wyblakłe, by je odczytać.");
                 return true;

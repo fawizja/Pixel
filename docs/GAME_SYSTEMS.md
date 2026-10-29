@@ -178,6 +178,17 @@ Czynsz (`HouseRent`): 2% ceny tygodniowo (czas rzeczywisty, `-Dpixel.rentPeriodM
 pobierany z banku (offline w sesji, stan w zapisie postaci `rent`/`hguests`; serwer: wlasciciel w grze w swojej sesji,
 offline `ServerWorld.sweepHouseRent` na zapisie postaci; linie `rent:id=oplacony_do,zalegle`). Brak zlota = zaleglosc
 i ostrzezenie; po 2 zaleglosciach dom wraca do miasta, rzeczy ze schowkow i podlogi ida do depozytu (monety na konto).
+Domy na sprzedaz i lozka (2026-10-29): cena 1000 gp za pole wnetrza (dzielnica krolewska Varden 2000, przedmiescia
+i chaty w dziczy 800, wioski 600); kupno najpierw z konta, reszta monetami z plecaka (`GameSession.claimHouse`,
+`houseFunds`). Mapgen `tools/mapgen/homes.py`: kazdy dom 1-4 lozka (`beds_for`: <=12 pol 1, <=20 2, <=30 3, wiecej 4;
+osobne ziarno z id domu), po 2 domy w zywych wioskach (`wies_*`), po 2 przy bramach miast (`<miasto>_pN`) i 6 chat
+w dziczy (`wild_N`) z drozka do drogi i PZ nad domem; `check_houses` sprawdza drzwi, lozka i przejscie. Pole `miasto`
+domu poza murami = najblizsze miasto. Wolne domy maja tabliczke nad drzwiami i napis "Na sprzedaż: cena"
+(`GameScreen.drawSaleSigns`; online HACC ma 3. pole: id domow z wlascicielem -> `GameSession.setTakenHouses`).
+Lozko (obiekt `bed`, uzycie dotknieciem): w domu z wstepem (wlasciciel/gosc) postac kladzie sie i wylogowuje
+(`GameSession.useBed` -> `takeSleep`, klient pokazuje sen `-Dpixel.sleepMs`, online serwer wysyla SLEEP x y z);
+w cudzym domu "To nie twoje łóżko.", w walce odmowa. Zapis `slept` = chwila zasniecia; po zalogowaniu
+`house/BedRest.wakeUp`: 2% zycia i many na minute snu (pelnia po 50 min), stamina jak po kazdym wylogowaniu.
 Skrzynie (0.208.0): `world/Crates` (WorldMap.crates()). Skrzynie, beczki, worki i kufry (`MOVABLE`) pcha sie,
 wchodzac w nie (tylko prosto, pole za nimi wolne, bez schodow i kratek, najdalej `MAX_DRIFT` = 6 pol od miejsca
 z mapy, meble domu nie wyjezdzaja z domu). `STORAGE` (+ szafy) otwiera sie dotknieciem albo UZYJ: 8 miejsc,

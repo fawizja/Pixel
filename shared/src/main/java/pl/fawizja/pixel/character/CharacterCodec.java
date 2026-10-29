@@ -81,6 +81,7 @@ public final class CharacterCodec {
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
         if (pc.house() != null) m.put("house", pc.house());
+        if (pc.sleptAt() > 0) m.put("slept", String.valueOf(pc.sleptAt()));
         if (!pc.houseGuests().isEmpty()) m.put("hguests", pc.houseGuests());
         if (pc.rentPaidUntil() > 0 || pc.rentMissed() > 0) m.put("rent", pc.rentPaidUntil() + "," + pc.rentMissed());
         if (pc.outfit() != 0) m.put("outfit", String.valueOf(pc.outfit()));
@@ -291,6 +292,13 @@ public final class CharacterCodec {
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
         pc.setHouse(m.get("house"));
+        if (m.containsKey("slept")) {
+            try {
+                pc.setSleptAt(Long.parseLong(m.get("slept").trim()));
+            } catch (NumberFormatException e) {
+                pc.setSleptAt(0);                               // uszkodzone pole: bez odpoczynku w lozku
+            }
+        }
         pc.setHouseGuests(m.get("hguests"));
         if (m.containsKey("rent")) {
             String[] r = m.get("rent").split(",");

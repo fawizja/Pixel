@@ -38,6 +38,7 @@ import underground as U  # noqa: E402
 import wall_lights  # noqa: E402
 import quests  # noqa: E402
 import boss_quests  # noqa: E402
+import homes  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -693,7 +694,7 @@ REBUILD = {
                         hall='marble_floor', street='cobblestone', ground='grass', trees=['tree', 'bush', 'autumn_tree'],
                         decos=['flowers', 'tall_grass'], house_label='Dzielnica Krolewska', houses=8,
                         bounds=(534, 482, 576, 530), old=(533, 483, 576, 530), keep_below=None, palace=True,
-                        lockers=True, price_per_cell=10000),
+                        lockers=True, price_per_cell=2 * homes.TOWN_PRICE),
 }
 KING = dict(key='varden_king', name='Król Aurelian', role='KING', shop='-', color='#c8a040', kind='king',
             greet='Witaj w moim królestwie. Konta premium i promocje załatwisz tutaj: napisz premium albo promocja.')
@@ -956,6 +957,10 @@ def build(ctx):
     street_sides(ctx)
     atmosphere(ctx)
     soften_edges(ctx)
+    # domy na sprzedaz poza murami: w zywych wioskach, przy bramach miast i chaty w dziczy (z lozkami)
+    print('domy w wioskach:', homes.village_houses(ctx))
+    print('domy poza miastami (przedmiescia, dzicz):', homes.homesteads(
+        ctx, cost, extra_gates={'Varden': {'X': dict(ctx['towns'])['Varden'][:2]}}))
     print('wyspy:', island_access(ctx, rng))
     zones = zone_grid(T)
     ctx['zones'] = zones
@@ -1023,6 +1028,7 @@ def villages(ctx, cost):
         x0, y0, x1, y1 = v['rect']
         taken[y0 - 6:y1 + 7, x0 - 6:x1 + 7] = True
         v['name'] = name
+        v['kind'] = kind
         out.append(v)
         for y in range(y0 - 2, y1 + 3):
             for x in range(x0 - 2, x1 + 3):
@@ -2757,6 +2763,7 @@ def finish(ctx):
         ('regions', '|'.join(';'.join(str(v) for v in r) for r in all_regions(ctx))),
     ]
     print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
+    print('domy na sprzedaz:', homes.check_houses(ctx))
     write_world(ctx['world'], ctx['legacy'], props, ctx['transitions'], ctx['npcs'], ctx['spawns'], ctx['houses'],
                 ctx['routes'])
     with open(os.path.join(OUT, 'displays.csv'), 'w', encoding='utf-8') as f:
