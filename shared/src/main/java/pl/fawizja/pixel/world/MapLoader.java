@@ -121,6 +121,7 @@ public final class MapLoader {
         readLevelDoors(base + "level_doors.csv", world);
         readAltarQuests(base + "altar_quests.csv", world);
         readBossQuests(base + "boss_quests.csv", world);
+        readLootChests(base + "chests.csv", world);
         return world;
     }
 
@@ -176,6 +177,20 @@ public final class MapLoader {
     }
 
     /** Drzwi poziomu (plik opcjonalny): x;y;z;minimalny poziom - tylko na polu z drzwiami. */
+    /** Skrzynie lupu w lochach: x;y;z;zloto;przedmiot (- = samo zloto);ilosc. */
+    private void readLootChests(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 6) throw new IOException(path + ": expected 6 fields in '" + line + "'");
+            Position p = new Position(i(f[0]), i(f[1]), i(f[2]));
+            String item = f[4].trim();
+            world.addLootChest(new WorldMap.LootChest(p, Long.parseLong(f[3].trim()), "-".equals(item) ? null : item, i(f[5])));
+        }
+    }
+
     private void readLevelDoors(String path, WorldMap world) throws IOException {
         if (MapLoader.class.getResource(path) == null) return;
         for (String line : readLines(path)) {

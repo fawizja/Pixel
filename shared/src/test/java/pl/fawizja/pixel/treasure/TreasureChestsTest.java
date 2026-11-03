@@ -26,10 +26,12 @@ class TreasureChestsTest {
         assertTrue(ms < 5_000, "generation took " + ms + " ms");
         Map<Integer, BitSet> reach = TreasureChests.reachable(world);
         for (int z : new int[] {-1, -2, -3, -4, -5}) {
-            assertEquals(4, c.all().stream().filter(x -> x.position().z() == z && x.vocation() == null).count(), "floor " + z);
+            // losowe skrzynie (id "c..."); skrzynie lupu z mapy (chests.csv, id "d...") licza sie osobno
+            assertEquals(4, c.all().stream().filter(x -> x.position().z() == z && x.vocation() == null
+                    && !x.id().startsWith(TreasureChests.LOOT_PREFIX)).count(), "floor " + z);
         }
         for (int z : new int[] {1, 2, 3}) {
-            assertEquals(2, c.all().stream().filter(x -> x.position().z() == z).count(), "floor +" + z);
+            assertEquals(2, c.all().stream().filter(x -> x.position().z() == z && !x.id().startsWith(TreasureChests.LOOT_PREFIX)).count(), "floor +" + z);
         }
         for (TreasureChests.Chest x : c.all()) {
             if (x.vocation() != null) continue; // nagrody zadan z oltarzami (AltarQuestTest): skarbiec tylko dzwignia
@@ -39,6 +41,10 @@ class TreasureChestsTest {
             TestData.ITEMS.byKey(x.itemKey());
         }
         assertEquals(c.all(), TreasureChests.generate(world).all());
+        java.util.List<TreasureChests.Chest> loot = c.all().stream().filter(x -> x.id().startsWith(TreasureChests.LOOT_PREFIX)).toList();
+        assertFalse(loot.isEmpty(), "loot chests in wild dungeons (chests.csv)");
+        assertEquals(loot.size(), loot.stream().map(TreasureChests.Chest::id).distinct().count(), "loot chest ids unique");
+        for (TreasureChests.Chest x : loot) assertTrue(x.position().z() < 0 && x.gold() > 0 && x.gold() < 5_000, x.id());
         long g1 = c.all().stream().filter(x -> x.position().z() == -1).findFirst().get().gold();
         long g5 = c.all().stream().filter(x -> x.position().z() == -5).findFirst().get().gold();
         assertEquals(500, g1);

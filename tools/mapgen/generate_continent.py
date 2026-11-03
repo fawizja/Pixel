@@ -38,6 +38,7 @@ import underground as U  # noqa: E402
 import wall_lights  # noqa: E402
 import quests  # noqa: E402
 import boss_quests  # noqa: E402
+import wilds  # noqa: E402
 import homes  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -969,11 +970,22 @@ def build(ctx):
     temple = dict(ctx['towns'])['Varden']
     helpers = dict(standable=standable, in_pz=lambda x, y: in_pz(ctx, x, y), footprint=ctx['footprint'],
                    reach=reach_surface(world, temple[:2], [p[:2] for _n, p in ctx['towns']]),
+              reach_varden=reach_surface(world, temple[:2]),
+              regions=lambda: all_regions(ctx),
                    find_free=find_free, mark=mark)
     print('grobowiec pieciu profesji:', quests.tomb_of_five(ctx, random.Random(20261040), helpers))
     # wyprawy na bossa w piec postaci: drzwi poziomu, loch, przedsionek z dzwignia, zamknieta arena
     for info in boss_quests.boss_quests(ctx, random.Random(20261050), helpers):
         print('wyprawa na bossa:', info)
+    # lowiska w dziczy (2026-11-03): jaskinie, kopalnie i zapadliska po calym ladzie, wiecej potworow w lasach
+    wh = dict(helpers, natural=natural, nearest_road=nearest_road, town_rects=town_rects(ctx),
+              zone_levels={k: v[:2] for k, v in ZONES.items()}, zone_cell=ZONE_CELL,
+              reach=reach_surface(world, temple[:2], [p[:2] for _n, p in ctx['towns']]),
+              reach_varden=reach_surface(world, temple[:2]),
+              regions=lambda: all_regions(ctx),
+              monsters_csv=os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'monsters.csv'))
+    print('lochy w dziczy:', wilds.wild_dungeons(ctx, cost, wh))
+    print('spawny w lasach i na lakach:', wilds.surface_spawns(ctx, wh))
 
 
 def monster_levels():
@@ -2701,6 +2713,8 @@ def party_packs(ctx):
             reach = walk_near(ctx['world'], x, y, z, 12)
             cand = [(x + dx, y + dy) for dx, dy in ((7, 0), (-7, 0), (0, 7), (0, -7), (5, 5), (-5, -5), (5, -5), (-5, 5))
                     if (x + dx, y + dy) in reach and region_of(x + dx, y + dy, z) == region_of(x, y, z)]
+            # stado obok tez z dala od miast (lochy dziczy pod okolica miast)
+            cand = [p for p in cand if not any(max(abs(p[0] - t[0]), abs(p[1] - t[1])) < PACK_TOWN_RADIUS for t in temples)]
             if cand:
                 sx, sy = rng.choice(cand)
                 k2 = rng.choice((3, 4))
@@ -2780,6 +2794,10 @@ def finish(ctx):
                 '# altar;id;PROFESJA;oltarz x,y,z;pole x,y,z;pochodnia x,y,z;przedmiot;cel x,y,z;skrzynia x,y,z\n')
         for line in ctx.get('altar_quests', []):
             f.write(line + '\n')
+    with open(os.path.join(OUT, 'chests.csv'), 'w', encoding='utf-8') as f:
+        f.write('# skrzynie lupu w lochach dziczy (wilds.py, world/WorldMap.LootChest): x;y;z;zloto;przedmiot;ilosc\n')
+        for c in ctx.get('loot_chests', []):
+            f.write(';'.join(str(v) for v in c) + '\n')
     with open(os.path.join(OUT, 'boss_quests.csv'), 'w', encoding='utf-8') as f:
         f.write('# wyprawy na bossa w piec postaci (world/BossQuest, game/BossQuestRuntime):\n'
                 '# quest;id;nazwa;poziom;boss;dzwignia x,y,z;przedsionek x0,y0,x1,y1,z;arena x0,y0,x1,y1,z;'

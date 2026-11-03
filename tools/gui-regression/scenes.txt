@@ -131,3 +131,6 @@ house_for_sale_street|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.tele
 house_beds_inside|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=706,689,0 -Dpixel.open=house_home -Dpixel.houseId=selvaran_1
 house_buy_tap|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=473,760,0 -Dpixel.taps=472,762@8 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 house_sleep_bed|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=706,689,0 -Dpixel.open=house_sleep -Dpixel.houseId=selvaran_1 -Dpixel.sleepMs=600000
+wild_mine_entrance|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=25 -Dpixel.teleport=641,515,0
+wild_hole_sewer|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=20 -Dpixel.teleport=499,482,-1
+quest_approach_grimtooth|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=35 -Dpixel.teleport=668,449,-1

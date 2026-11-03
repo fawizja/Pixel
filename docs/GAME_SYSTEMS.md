@@ -559,6 +559,21 @@ i bramami poziomu, >= 8 pol od przejsc, losowanie z ziarnem 20261015 + pietro, o
 pietrach). Lup rosnie x3 na pietro w dol. Otwieranie: `GameSession.openChest` (UZYJ obok), raz na postac
 (`openedChests`, zapis `chests`).
 
+Skrzynie lupu z mapy (2026-11-03): `maps/world/chests.csv` (x;y;z;zloto;przedmiot;ilosc) pisze generator
+(`tools/mapgen/wilds.py`) w ostatnich komorach lochow dziczy; `MapLoader` -> `WorldMap.lootChests()`,
+`TreasureChests.generate` dokleja je z identyfikatorem `d<x>_<y>_<z>` (`LOOT_PREFIX`). Skromny lup (do 2500 gp
+i kilka mikstur), raz na postac jak inne skrzynie.
+
+## Lowiska w dziczy (generator, 2026-11-03)
+
+`tools/mapgen/wilds.py` (wlasne ziarna, po zadaniach w `generate_continent.build`): 66 nowych wejsc do podziemi
+(jaskinia w skalnym wystepie, kopalnia w drewnianej ramie z placem, zapadlisko - dziura wsrod ruin z kanalem pod
+spodem i drabina) rozstawionych tak, by kazdy punkt drogi mial wejscie w zasiegu ~45 pol; 1-3 pietra po 5-8 komor,
+potwory wg poziomu krainy i odleglosci od miast, ciala poleglych, skrzynie lupu. `surface_spawns`: dodatkowe spawny
+niskiego (1-15) i sredniego (16-40) poziomu w lasach i na lakach obok drog (nie na nich), pasujace do regionu.
+Zadania w piec postaci maja dlugie podejscia: Grobowiec Pieciu Profesji ok. 1500 pol (3 pietra 150 x 96),
+wyprawy na bossa ok. 450 pol (17 komor 150 x 82).
+
 ## Drzwi poziomu i zadania z oltarzami profesji (Z logika, S serwer, C rysowanie)
 
 - Drzwi poziomu (wielokrotnego uzytku): plik mapy `level_doors.csv` (`x;y;z;minimalny poziom`, pole z obiektem

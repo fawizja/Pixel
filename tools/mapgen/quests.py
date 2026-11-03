@@ -26,23 +26,42 @@ GOLD = 20000
 # oltarze od lewej: dzwignia stoi na prawo od pola rycerza (miedzy rycerzem a druidem)
 ORDER = [('PALADIN', 'hunting_bow'), ('SORCERER', 'wand_of_embers'), ('KNIGHT', 'knight_sword'),
          ('DRUID', 'thornroot_rod'), ('MONK', 'iron_knuckles')]
-W, H = 76, 50
+# 2026-11-03 (Darek: "podejscia do questow musza byc trudniejsze, wiecej potworow, za krotkie"): kazde pietro to
+# dlugi waz komor (kolumny / rzedy co ~30 pol), razem ok. 3,5 raza dluzsza droga niz wczesniej (ok. 1500 pol)
+W, H = 150, 96
 # punkty pieter w ukladzie lokalnym (pierwszy: schody w gore, ostatni: schody w dol = pierwszy punkt nizej)
-PTS1 = [(8, 8), (26, 8), (46, 10), (64, 14), (62, 32), (40, 28), (20, 40)]
+PTS1 = [(8, 8), (10, 34), (8, 60), (10, 86), (38, 88), (40, 62), (36, 36), (40, 10), (68, 8), (70, 34), (66, 60),
+        (70, 86), (98, 88), (100, 62), (96, 36), (100, 10), (128, 8), (132, 34), (128, 60), (140, 86)]
 HALL = (51, 5)          # lewy gorny rog sali oltarzy (z murem), 17 x 8
 VAULT = (51, 24)        # lewy gorny rog skarbca (z murem), 17 x 7
 VAULT_EXIT = (VAULT[0] + 8, VAULT[1] + 5)
-PTS2 = [(20, 40), (8, 24), (26, 12), (48, 8), (66, 16), VAULT_EXIT, (40, 42), (14, 44)]
-PTS3 = [(14, 44), (32, 40), (12, 26), (28, 16)]
-# potwory na druzyne pieciu postaci od poziomu 20: (potwor, promien, liczba, punkt)
-SPAWNS = {
-    -1: [('skeleton', 4, 3, PTS1[1]), ('hyena', 4, 2, PTS1[2]), ('skeleton', 4, 3, PTS1[3]),
-         ('hyena', 3, 2, PTS1[4]), ('cave_troll', 3, 1, PTS1[5])],
-    -2: [('cave_troll', 4, 3, PTS2[1]), ('hyena', 4, 3, PTS2[2]), ('crystal_golem', 3, 2, PTS2[3]),
-         ('cave_troll', 4, 2, PTS2[4]), ('skeleton', 4, 3, PTS2[6])],
-    -3: [('scorpion', 4, 2, PTS3[1]), ('crystal_golem', 4, 2, PTS3[2]), ('scorpion', 3, 2, PTS3[3]),
-         ('cave_troll', 3, 2, (44, 17))],
+PTS2 = [(140, 86), (110, 88), (80, 84), (50, 88), (20, 86), (12, 62), (40, 58), (70, 62), (100, 58), (130, 62),
+        (142, 40), (112, 36), (86, 34), VAULT_EXIT, (34, 34), (12, 30), (12, 10), (40, 8), (70, 10), (100, 8), (132, 10)]
+# pietro -3: sala oltarzy i skarbiec (x 46..72, y 0..34) omijane szerokim lukiem, ostatnia komora (28, 16)
+PTS3 = [(132, 10), (100, 10), (80, 20), (90, 44), (120, 46), (140, 66), (110, 70), (80, 64), (50, 70), (20, 64),
+        (10, 42), (12, 26), (28, 16)]
+# potwory na druzyne pieciu postaci od poziomu 20: po grupie w kazdej komorze (bez komor ze schodami)
+FLOOR_MONSTERS = {
+    -1: [('skeleton', 4, 3), ('hyena', 4, 2), ('quarry_brute', 4, 3), ('cave_troll', 3, 2), ('tunnel_fence', 3, 3)],
+    -2: [('cave_troll', 4, 3), ('hyena', 4, 3), ('crystal_golem', 3, 2), ('skeleton', 4, 3), ('candle_acolyte', 3, 3),
+         ('barrow_lantern', 3, 2)],
+    -3: [('scorpion', 4, 2), ('crystal_golem', 4, 2), ('cave_troll', 3, 3), ('hyena', 4, 3), ('scorpion', 3, 2)],
 }
+
+
+def _spawns():
+    out = {}
+    for z, pts in ((-1, PTS1), (-2, PTS2), (-3, PTS3)):
+        rooms = [p for p in pts[1:-1] if p != VAULT_EXIT]
+        if z == -3:
+            rooms.append(pts[-1])
+        mons = FLOOR_MONSTERS[z]
+        out[z] = [(*mons[i % len(mons)], p) for i, p in enumerate(rooms)]
+    out[-3].append(('cave_troll', 3, 2, (44, 17)))      # korytarz przed sala oltarzy
+    return out
+
+
+SPAWNS = _spawns()
 REGION_LEVELS = (20, 60)
 
 

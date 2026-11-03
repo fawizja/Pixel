@@ -14,16 +14,19 @@ import numpy as np
 
 NONE = '-'
 
-W, H = 72, 48
+# 2026-11-03 (Darek: "podejscie za krotkie, za malo potworow"): dlugi waz 17 komor wokol przedsionka i areny
+# (lewa kolumna w dol, dolny rzad, prawa strona w gore, gorny rzad z powrotem) - ok. 4 razy dluzsza droga
+W, H = 150, 82
 # lokalny uklad lochu: punkty komor (pierwszy: schody w gore), ostatni prowadzi do przedsionka
-PTS = [(6, 6), (20, 10), (36, 7), (52, 12), (42, 22), (30, 26)]
+PTS = [(6, 6), (8, 30), (10, 56), (12, 74), (40, 72), (70, 68), (98, 74), (128, 70), (140, 46), (118, 34), (138, 14),
+       (108, 8), (84, 16), (66, 10), (52, 12), (42, 22), (30, 26)]
 LOBBY = (24, 32)        # lewy gorny rog przedsionka (z murem), 15 x 11
 LOBBY_W, LOBBY_H = 15, 11
 ARENA = (46, 28)        # lewy gorny rog areny (z murem), 21 x 17
 ARENA_W, ARENA_H = 21, 17
 
 # wyprawy: id, nazwa, poziom, boss, styl lochu, kraina (podloze, mur i podloga kapliczki), gdzie szukac miejsca,
-# potwory w komorach (potwor, promien, liczba) - po jednej grupie na komore 1..4
+# potwory w komorach (potwor, promien, liczba) - grupy po kolei w kolejnych komorach (w kolko)
 QUESTS = [
     dict(id='grimtooth', name='Leże Grimtootha', level=30, boss='grimtooth', style='orc', z=-1,
          grounds={'grass'}, wall='wood_wall', floor='wood_floor', near=(610, 395), lava=0.0,
@@ -225,12 +228,13 @@ def _one(ctx, q, rng, helpers, taken):
     t = ctx['transitions']
     t.append((stairs[0], stairs[1], 0, 'STAIRS', up[0], up[1] + 1, z))
     t.append((up[0], up[1], z, 'STAIRS', stairs[0], stairs[1] + 1, 0))
-    # potwory w komorach 1..5 (bez schodow), z dala od przedsionka i areny
+    # potwory w kazdej komorze (bez schodow), z dala od przedsionka i areny
     cells = [(x, y) for y in range(H) for x in range(W)
              if g[y][x] is not None and F.walk(g[y][x]) and g[y][x][2] == NONE
              and abs(x - PTS[0][0]) + abs(y - PTS[0][1]) > 6
              and not _in_rect((x, y), LOBBY, LOBBY_W, LOBBY_H, 2) and not _in_rect((x, y), ARENA, ARENA_W, ARENA_H, 1)]
-    for (monster, radius, count), want in zip(q['spawns'], PTS[1:]):
+    for i, want in enumerate(PTS[1:]):
+        monster, radius, count = q['spawns'][i % len(q['spawns'])]
         cx, cy = min(cells, key=lambda c: abs(c[0] - want[0]) + abs(c[1] - want[1]))
         ctx['spawns'].append(f'{monster};{tx + cx};{ty + cy};{z};{radius};{count};240')
     lobby = (tx + LOBBY[0] + 1, ty + LOBBY[1] + 1, tx + LOBBY[0] + LOBBY_W - 2, ty + LOBBY[1] + LOBBY_H - 2, z)
