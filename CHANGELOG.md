@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.219.0] - 2026-11-03
+
+### Dodano
+- 66 nowych wejść do podziemi w całym świecie (31 jaskiń, 19 kopalni, 16 dziur): w sumie 131. Z każdej drogi
+  najbliższe wejście jest zwykle w odległości około 23 kratek, najdalej 73. Wejścia widać z daleka (skalny występ,
+  drewniana rama kopalni z pochodnią, dziura w ruinach).
+- W środku 1–3 piętra po 5–8 sal, potwory dobrane do regionu i silniejsze głębiej, na końcu skrzynie z łupem.
+- Na powierzchni prawie dwa razy więcej potworów w lasach i na łąkach (351 miejsc z potworami poziomu 1–15,
+  232 z poziomu 16–40), z dala od miast i dróg.
+- Skały i góry jako tarasy 3D: wyższe, schodkowe, z zaokrąglonymi brzegami, ścianami i cieniem.
+- Mosty z poręczami, słupkami, palami w wodzie i rampą na brzeg; mosty linowe z linami.
+- Morze za krawędzią świata przechodzi w głęboką wodę zamiast czarnych kwadratów; pod ziemią pustka znika w mgle.
+  Przepaście mają skalny brzeg.
+
+### Zmieniono
+- Dojścia do questów dla 5 profesji dużo dłuższe i trudniejsze: Grobowiec Pięciu Profesji 3 piętra po 13–21 sal
+  (ok. 1500 kratek zamiast 227, 59 grup potworów zamiast 15), leża bossów po 17 sal z potworami w każdej
+  (ok. 400–460 kratek zamiast ok. 100).
+
 ## [0.218.0] - 2026-11-03
 
 ### Dodano
