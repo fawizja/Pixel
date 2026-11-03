@@ -135,3 +135,6 @@ house_sleep_bed|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=7
 terraces|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=212,124,0
 bridge_rails|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=60,630,0
 world_edge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=3,500,0
+wild_mine_entrance|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=25 -Dpixel.teleport=641,515,0
+wild_hole_sewer|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=20 -Dpixel.teleport=499,482,-1
+quest_approach_grimtooth|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=35 -Dpixel.teleport=668,449,-1

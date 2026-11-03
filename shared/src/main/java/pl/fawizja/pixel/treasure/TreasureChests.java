@@ -33,6 +33,9 @@ public final class TreasureChests {
 
     public static final long SEED = 20261015L;
 
+    /** Przedrostek identyfikatora skrzyn lupu z mapy (chests.csv); losowe skrzynie maja "c". */
+    public static final String LOOT_PREFIX = "d";
+
     /** Pulapki z kolcami na pietrach -2..-5: na pietrze tyle, ile wynosi glebokosc razy 4. */
     public static final int TRAPS_PER_DEPTH = 4;
 
@@ -146,6 +149,11 @@ public final class TreasureChests {
                 }
                 traps.addAll(placed);
             }
+        }
+        // skrzynie lupu z mapy (komory jaskin, kopaln i zapadlisk): skromne zloto i mikstury, id od pola
+        for (WorldMap.LootChest lc : world.lootChests()) {
+            Position p = lc.position();
+            out.add(new Chest(LOOT_PREFIX + p.x() + "_" + p.y() + "_" + p.z(), p, lc.gold(), lc.itemKey(), lc.count()));
         }
         // skrzynie nagrod zadan z oltarzami profesji: po jednej na profesje, samo zloto
         for (pl.fawizja.pixel.world.AltarQuest aq : world.altarQuests()) {

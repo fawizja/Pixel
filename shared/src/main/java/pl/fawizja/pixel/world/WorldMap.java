@@ -181,6 +181,17 @@ public final class WorldMap {
 
     public Map<Position, Integer> levelDoors() { return Collections.unmodifiableMap(levelDoors); }
 
+    // ------------------------------------------------------------------ skrzynie lupu w lochach (chests.csv)
+    /** Skrzynia z mapy (generator kladzie ja w komorach jaskin, kopaln i zapadlisk): pole, zloto, przedmiot, ilosc. */
+    public record LootChest(Position position, long gold, String itemKey, int count) {}
+
+    private final List<LootChest> lootChests = new ArrayList<>();
+
+    public void addLootChest(LootChest c) { lootChests.add(c); }
+
+    /** Skrzynie lupu z pliku mapy, w kolejnosci pliku (identyfikatory skrzyn zaleza od pola, nie od kolejnosci). */
+    public List<LootChest> lootChests() { return Collections.unmodifiableList(lootChests); }
+
     /** Napis na drzwiach poziomu (proste cudzyslowy: czcionka gry nie ma znakow „ i ”). */
     public static String levelDoorSign(int minLevel) { return "\"Tylko dla poziomu " + minLevel + "+\""; }
 
