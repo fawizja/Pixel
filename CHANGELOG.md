@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.218.0] - 2026-11-03
+
+### Dodano
+- Łóżka w domach na sprzedaż (1–4 w domu). Dotknięcie łóżka we własnym domu (albo jako gość) kładzie postać spać
+  i wylogowuje; po powrocie postać jest wypoczęta (2% HP i many na minutę snu). Obcy: „To nie twoje łóżko.”
+- Tabliczka z monetą nad drzwiami każdego wolnego domu i napis „Na sprzedaż: cena” z bliska.
+- 71 domów na sprzedaż: w miastach, przy bramach, po 2 w czterech wioskach i 6 chat w dziczy.
+
+### Zmieniono
+- Kupno domu działa: płaci się najpierw z konta w banku, resztę monetami z plecaka. Okno domu pokazuje liczbę łóżek
+  i ile masz złota.
+- Niższe ceny domów: 1000 gp za kratkę w mieście, 2000 w dzielnicy królewskiej Varden, 800 przy bramach i w dziczy,
+  600 we wsiach (czynsz tygodniowy 2% ceny).
+
+### Naprawiono
+- Willa 10 w Nerys nie miała drzwi (zamalowała je boczna uliczka).
+
 ## [0.217.0] - 2026-10-29
 
 ### Dodano
