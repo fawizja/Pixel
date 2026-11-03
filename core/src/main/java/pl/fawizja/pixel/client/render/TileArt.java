@@ -154,6 +154,7 @@ public final class TileArt implements Disposable {
         });
         loadAutotiles(tileRegistry);
         loadRockShapes(tileRegistry, base);
+        terrain = new TerrainArt(tileRegistry, id -> pixmap32(base, id));
         loadBigTiles(tileRegistry);
         loadNative(tileRegistry);
         loadEffects();
@@ -882,6 +883,9 @@ public final class TileArt implements Disposable {
     private static final String[] BORDER_EDGES = {"n", "e", "s", "w", "cne", "cse", "csw", "cnw", "dne", "dse", "dsw", "dnw"};
 
     public GroundBorders borders() { return borders; }
+    /** Tarasy skal, rozpadliny, mgla pustki i mosty (proceduralnie). */
+    public TerrainArt terrain() { return terrain; }
+    private TerrainArt terrain;
     private GroundBorders borders;
 
     public TextureRegion tile(int id) {
@@ -1956,6 +1960,7 @@ public final class TileArt implements Disposable {
         if (borders != null) borders.dispose();
         if (autoAtlas != null) autoAtlas.dispose();
         if (rockAtlas != null) rockAtlas.dispose();
+        if (terrain != null) terrain.dispose();
         if (bigAtlas != null) bigAtlas.dispose();
         if (nativeAtlas != null) nativeAtlas.dispose();
         if (fxAtlas != null) fxAtlas.dispose();

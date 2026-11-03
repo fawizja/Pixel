@@ -131,3 +131,7 @@ house_for_sale_street|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.tele
 house_beds_inside|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=706,689,0 -Dpixel.open=house_home -Dpixel.houseId=selvaran_1
 house_buy_tap|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=473,760,0 -Dpixel.taps=472,762@8 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 house_sleep_bed|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=706,689,0 -Dpixel.open=house_sleep -Dpixel.houseId=selvaran_1 -Dpixel.sleepMs=600000
+# 2026-10-29: teren - tarasy gor 3D, most z poreczami i palami, glebia morza za krawedzia swiata, mgla pustki
+terraces|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=212,124,0
+bridge_rails|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=60,630,0
+world_edge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=3,500,0
