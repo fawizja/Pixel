@@ -1,9 +1,9 @@
 # zadania z oltarzami profesji (world/AltarQuest):
 # quest;id;nazwa;zloto;dzwignia x,y,z;sala x0,y0,x1,y1,z;skarbiec x0,y0,x1,y1,z
 # altar;id;PROFESJA;oltarz x,y,z;pole x,y,z;pochodnia x,y,z;przedmiot;cel x,y,z;skrzynia x,y,z
-quest;desert;Grobowiec Pięciu Profesji;20000;243,418,-3;235,417,249,422,-3;235,436,249,440,-3
-altar;desert;PALADIN;236,417,-3;236,418,-3;237,416,-3;hunting_bow;236,437,-3;236,436,-3
-altar;desert;SORCERER;239,417,-3;239,418,-3;240,416,-3;wand_of_embers;239,437,-3;239,436,-3
-altar;desert;KNIGHT;242,417,-3;242,418,-3;243,416,-3;knight_sword;242,437,-3;242,436,-3
-altar;desert;DRUID;245,417,-3;245,418,-3;246,416,-3;thornroot_rod;245,437,-3;245,436,-3
-altar;desert;MONK;248,417,-3;248,418,-3;249,416,-3;iron_knuckles;248,437,-3;248,436,-3
+quest;desert;Grobowiec Pięciu Profesji;20000;267,328,-3;259,327,273,332,-3;259,346,273,350,-3
+altar;desert;PALADIN;260,327,-3;260,328,-3;261,326,-3;hunting_bow;260,347,-3;260,346,-3
+altar;desert;SORCERER;263,327,-3;263,328,-3;264,326,-3;wand_of_embers;263,347,-3;263,346,-3
+altar;desert;KNIGHT;266,327,-3;266,328,-3;267,326,-3;knight_sword;266,347,-3;266,346,-3
+altar;desert;DRUID;269,327,-3;269,328,-3;270,326,-3;thornroot_rod;269,347,-3;269,346,-3
+altar;desert;MONK;272,327,-3;272,328,-3;273,326,-3;iron_knuckles;272,347,-3;272,346,-3

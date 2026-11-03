@@ -7,21 +7,21 @@ square;grimtooth;630,421,-1;655,424,-1
 square;grimtooth;632,421,-1;657,424,-1
 square;grimtooth;634,421,-1;659,424,-1
 square;grimtooth;636,421,-1;661,424,-1
-quest;frost;Lodowy Tron Ysolde;100;frost_queen;649,125,-1;643,121,655,129,-1;665,117,683,131,-1;674,125,-1;666,130,-1;648,122,-1;624,96,0
-square;frost;645,126,-1;670,129,-1
-square;frost;647,126,-1;672,129,-1
-square;frost;649,126,-1;674,129,-1
-square;frost;651,126,-1;676,129,-1
-square;frost;653,126,-1;678,129,-1
-quest;pharaoh;Krypta Neferakha;200;pharaoh;131,418,-1;125,414,137,422,-1;147,410,165,424,-1;156,418,-1;148,423,-1;130,415,-1;112,389,0
-square;pharaoh;127,419,-1;152,422,-1
-square;pharaoh;129,419,-1;154,422,-1
-square;pharaoh;131,419,-1;156,422,-1
-square;pharaoh;133,419,-1;158,422,-1
-square;pharaoh;135,419,-1;160,422,-1
-quest;ignaroth;Kuźnia Ignarotha;400;ignaroth;260,185,-1;254,181,266,189,-1;276,177,294,191,-1;285,185,-1;277,190,-1;259,182,-1;235,156,0
-square;ignaroth;256,186,-1;281,189,-1
-square;ignaroth;258,186,-1;283,189,-1
-square;ignaroth;260,186,-1;285,189,-1
-square;ignaroth;262,186,-1;287,189,-1
-square;ignaroth;264,186,-1;289,189,-1
+quest;frost;Lodowy Tron Ysolde;100;frost_queen;631,125,-1;625,121,637,129,-1;647,117,665,131,-1;656,125,-1;648,130,-1;630,122,-1;624,96,0
+square;frost;627,126,-1;652,129,-1
+square;frost;629,126,-1;654,129,-1
+square;frost;631,126,-1;656,129,-1
+square;frost;633,126,-1;658,129,-1
+square;frost;635,126,-1;660,129,-1
+quest;pharaoh;Krypta Neferakha;200;pharaoh;71,436,-1;65,432,77,440,-1;87,428,105,442,-1;96,436,-1;88,441,-1;70,433,-1;112,389,0
+square;pharaoh;67,437,-1;92,440,-1
+square;pharaoh;69,437,-1;94,440,-1
+square;pharaoh;71,437,-1;96,440,-1
+square;pharaoh;73,437,-1;98,440,-1
+square;pharaoh;75,437,-1;100,440,-1
+quest;ignaroth;Kuźnia Ignarotha;400;ignaroth;266,170,-1;260,166,272,174,-1;282,162,300,176,-1;291,170,-1;283,175,-1;265,167,-1;235,156,0
+square;ignaroth;262,171,-1;287,174,-1
+square;ignaroth;264,171,-1;289,174,-1
+square;ignaroth;266,171,-1;291,174,-1
+square;ignaroth;268,171,-1;293,174,-1
+square;ignaroth;270,171,-1;295,174,-1
