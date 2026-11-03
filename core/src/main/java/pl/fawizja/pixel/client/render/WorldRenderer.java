@@ -44,6 +44,11 @@ public final class WorldRenderer {
     /** Drzwi lacza mury (mur obok drzwi nie konczy sie slupkiem). */
     private final java.util.Set<Integer> doors;
     private final int bushId;
+    /** Rozpadlina: skalny brzeg i ciemna glebia zamiast plaskiego pola. */
+    private final int chasmId;
+    private final boolean[] walkableGround;
+    /** Widoczny fragment mapy bez przyciecia do jej granic (krawedz swiata). */
+    private int viewX0, viewX1, viewY0, viewY1;
 
     private final pl.fawizja.pixel.world.Openings openings;
     private final pl.fawizja.pixel.world.WallLights wallLights;
@@ -71,6 +76,12 @@ public final class WorldRenderer {
                 pl.fawizja.pixel.item.ItemType it = art.itemRegistry().byKeyOrNull(e.getValue());
                 if (it != null) displays.put(e.getKey(), it.id());
             }
+        }
+        pl.fawizja.pixel.world.TileType ch = world.tiles().byKeyOrNull("chasm");
+        chasmId = ch == null ? -1 : ch.id();
+        walkableGround = new boolean[max + 1];
+        for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) {
+            walkableGround[t.id()] = t.layer() == Layer.GROUND && t.walkable();
         }
         pl.fawizja.pixel.world.TileType mill = world.tiles().byKeyOrNull("windmill");
         windmillId = mill == null ? -1 : mill.id();
@@ -102,6 +113,10 @@ public final class WorldRenderer {
         int wy1 = (int) Math.ceil(cam.position.y + halfH) + 1;
         int y0 = Math.max(0, world.height() - 1 - wy1);
         int y1 = Math.min(world.height() - 1, world.height() - 1 - wy0);
+        viewX0 = (int) Math.floor(cam.position.x - halfW) - 1;
+        viewX1 = (int) Math.ceil(cam.position.x + halfW) + 1;
+        viewY0 = world.height() - 1 - wy1;
+        viewY1 = world.height() - 1 - wy0;
 
         // pietra ponizej (widok z wiezy) przyciemnione
         if (currentFloor > 0) {
@@ -128,9 +143,16 @@ public final class WorldRenderer {
             float wy = worldY(y);
             for (int x = x0; x <= x1; x++) drawGround(batch, f, f.get(Layer.GROUND, x, y), x, y, wy);
         }
+        if (f.z() == 0) drawOutside(batch, f);
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
             for (int x = x0; x <= x1; x++) drawBorders(batch, f, f.get(Layer.GROUND, x, y), x, y, wy);
+        }
+        if (art.terrain() != null) {
+            for (int y = y0; y <= y1; y++) {
+                float wy = worldY(y);
+                for (int x = x0; x <= x1; x++) drawBridgeDetail(batch, f, x, y, x, wy);
+            }
         }
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
@@ -154,6 +176,7 @@ public final class WorldRenderer {
             }
             if (rows != null) rows.drawRow(batch, y);
         }
+        if (art.terrain() != null && f.z() <= 0) drawFog(batch, f, x0, x1, y0, y1);
     }
 
     /** Towary na ladach sklepow (z mapy): pole -> numer przedmiotu; tylko grafika, gracz ich nie podnosi. */
@@ -226,6 +249,19 @@ public final class WorldRenderer {
      * priorytecie, bez obrzezy (posadzki, mosty) albo poza mapa laczy sie bez krawedzi.
      */
     private void drawGround(SpriteBatch batch, FloorMap f, int g, int x, int y, float wy) {
+        TerrainArt ta = art.terrain();
+        if (ta != null && g != 0) {
+            int st = ta.bridgeStyle(g);
+            if (st >= 0) {
+                boolean vert = bridgeVertical(f, x, y);
+                batch.draw(ta.planks(st, vert, TileArt.spread(vert ? 0 : x, vert ? y : 0)), x, wy, 1f, 1f);
+                return;
+            }
+            if (g == chasmId) {
+                drawChasm(batch, f, ta, x, y, wy);
+                return;
+            }
+        }
         TextureRegion[] auto = art.autotile(g);
         GroundBorders b = art.borders();
         int own = b == null ? -1 : b.priority(g);
@@ -527,8 +563,15 @@ public final class WorldRenderer {
      * poludnie - poziomy, wschod - pionowy, rog poludniowo-wschodni - naroznik, samotna skala - slupek.
      */
     private void drawMountain(SpriteBatch batch, FloorMap f, int id, int x, int y, float sx, float wy) {
+        TerrainArt ta = art.terrain();
+        int lv = ta == null || ta.terrace(id, 0) == null ? 0 : rockLevel(f, x, y);
+        if (lv > 0) {
+            drawTerrace(batch, f, ta, id, x, y, lv, sx, wy);
+            return;
+        }
         int mask = rockMask(f, x, y);
         batch.draw(art.rockShape(id, mask), sx, wy, 1f, 1f);
+        if (ta != null && ta.terrace(id, 0) != null) drawTerraceShadow(batch, f, ta, id, x, y, 0, sx, wy);
         boolean south = (mask & TileArt.ROCK_S) != 0, east = (mask & TileArt.ROCK_E) != 0;
         int shape;
         if (south && east) shape = (mask & (TileArt.ROCK_N | TileArt.ROCK_W)) == (TileArt.ROCK_N | TileArt.ROCK_W)
@@ -538,6 +581,343 @@ public final class WorldRenderer {
         else return;
         TextureRegion piece = art.wallPiece(id, shape, x, y);
         if (piece != null) batch.draw(piece, sx - 1, wy, 2f, 2f);
+    }
+
+    // ------------------------------------------------------------------ tarasy skal (2026-10-29)
+
+    /** Najwyzszy poziom tarasu i odstep od brzegu skaly, od ktorego zaczynaja sie tarasy (pierscien zboczy z paczki). */
+    static final int MAX_LEVEL = 4, RIM = 2;
+    static final int BLOCK = 32, MARGIN = MAX_LEVEL + RIM + 2, WIN = BLOCK + 2 * MARGIN;
+    /** Poziomy tarasow w blokach 32x32 liczonych przy pierwszym rysowaniu (mury i skaly sie nie zmieniaja). */
+    private final java.util.Map<Integer, byte[][]> rockLevels = new java.util.HashMap<>();
+    private final int[] levelWindow = new int[WIN * WIN];
+    private final int[] levelIds = new int[WIN * WIN];
+
+    /** Poziom tarasu skaly na polu (0 = brzeg ze zboczem z paczki, 1..MAX_LEVEL = coraz wyzsze tarasy). */
+    int rockLevel(FloorMap f, int x, int y) {
+        if (!f.inBounds(x, y)) return 0;
+        byte[][] blocks = rockLevels.get(f.z());
+        int bw = (f.width() + BLOCK - 1) / BLOCK;
+        if (blocks == null) {
+            blocks = new byte[bw * ((f.height() + BLOCK - 1) / BLOCK)][];
+            rockLevels.put(f.z(), blocks);
+        }
+        int bi = (y / BLOCK) * bw + x / BLOCK;
+        byte[] b = blocks[bi];
+        if (b == null) b = blocks[bi] = computeLevels(f, (x / BLOCK) * BLOCK, (y / BLOCK) * BLOCK);
+        return b[(y % BLOCK) * BLOCK + x % BLOCK];
+    }
+
+    /** Czy mur jest skala rysowana tarasami (gory, jaskinie, klify z kawalkami zboczy z paczki). */
+    private boolean terraced(int id) {
+        if (id <= 0 || id >= terracedIds.length) return false;
+        if (terracedIds[id] == 0) {
+            boolean t = art.terrain() != null && art.terrain().terrace(id, 0) != null
+                    && art.rockShape(id, 0) != null && art.wallPiece(id, TileArt.WALL_V) != null;
+            terracedIds[id] = (byte) (t ? 1 : 2);
+        }
+        return terracedIds[id] == 1;
+    }
+
+    private final byte[] terracedIds = new byte[1024];
+
+    /**
+     * Odleglosc od brzegu skaly (8 sasiadow, ta sama skala) ograniczona wolno zmienna "wysokoscia gory" z szumu,
+     * wiec masywy maja rozne, zaokraglone sylwetki; sasiednie pola roznia sie najwyzej o jeden poziom.
+     */
+    private byte[] computeLevels(FloorMap f, int bx, int by) {
+        int[] v = levelWindow, ids = levelIds;
+        for (int j = 0; j < WIN; j++) {
+            for (int i = 0; i < WIN; i++) {
+                int x = bx - MARGIN + i, y = by - MARGIN + j;
+                int id = f.inBounds(x, y) ? f.get(Layer.WALL, x, y) : -1;
+                ids[j * WIN + i] = id;
+            }
+        }
+        return levelsOf(ids, v, terracedTest, bx - MARGIN, by - MARGIN);
+    }
+
+    private final java.util.function.IntPredicate terracedTest = this::terraced;
+
+    /**
+     * Poziomy tarasow bloku BLOCK x BLOCK ze skal okna WIN x WIN (ids: mur na polu, -1 = poza mapa; v - bufor roboczy).
+     * Okno zaczyna sie w (ox, oy) mapy, blok - MARGIN pol dalej.
+     */
+    static byte[] levelsOf(int[] ids, int[] v, java.util.function.IntPredicate terraced, int ox, int oy) {
+        int big = MAX_LEVEL + RIM;
+        for (int j = 0; j < WIN; j++) {
+            for (int i = 0; i < WIN; i++) {
+                int k = j * WIN + i, id = ids[k];
+                if (id == -1) { v[k] = big; continue; }                     // poza mapa: skala ciagnie sie dalej
+                if (!terraced.test(id)) { v[k] = 0; continue; }
+                int cap = RIM + mountainHeight(ox + i, oy + j);
+                for (int dj = -1; dj <= 1 && cap > 1; dj++) {
+                    for (int di = -1; di <= 1; di++) {
+                        int ni = i + di, nj = j + dj;
+                        if (ni < 0 || nj < 0 || ni >= WIN || nj >= WIN) continue;
+                        int n = ids[nj * WIN + ni];
+                        if (n != id && n != -1) { cap = 1; break; }
+                    }
+                }
+                v[k] = cap;
+            }
+        }
+        for (int pass = 0; pass < 2; pass++) {                              // dwa przebiegi odleglosci (8 sasiadow)
+            for (int jj = 0; jj < WIN; jj++) {
+                int j = pass == 0 ? jj : WIN - 1 - jj;
+                for (int ii = 0; ii < WIN; ii++) {
+                    int i = pass == 0 ? ii : WIN - 1 - ii, k = j * WIN + i;
+                    if (v[k] <= 1) continue;
+                    int d = pass == 0 ? 1 : -1;               // najpierw sasiedzi z zachodu i polnocy, potem odwrotnie
+                    int m = v[k];
+                    m = Math.min(m, near(v, ids, i - d, j, ids[k]) + 1);
+                    m = Math.min(m, near(v, ids, i, j - d, ids[k]) + 1);
+                    m = Math.min(m, near(v, ids, i - d, j - d, ids[k]) + 1);
+                    m = Math.min(m, near(v, ids, i + d, j - d, ids[k]) + 1);
+                    v[k] = m;
+                }
+            }
+        }
+        byte[] out = new byte[BLOCK * BLOCK];
+        for (int j = 0; j < BLOCK; j++) {
+            for (int i = 0; i < BLOCK; i++) {
+                int lv = v[(j + MARGIN) * WIN + i + MARGIN] - RIM;
+                out[j * BLOCK + i] = (byte) Math.max(0, Math.min(MAX_LEVEL, lv));
+            }
+        }
+        return out;
+    }
+
+    private static int near(int[] v, int[] ids, int i, int j, int id) {
+        if (i < 0 || j < 0 || i >= WIN || j >= WIN) return MAX_LEVEL + RIM;
+        int n = ids[j * WIN + i];
+        if (n == -1) return MAX_LEVEL + RIM;
+        return n == id ? v[j * WIN + i] : 0;
+    }
+
+    /** Wysokosc masywu 1..MAX_LEVEL z gladkiego szumu (siatka co 7 pol). */
+    static int mountainHeight(int x, int y) {
+        int gx = Math.floorDiv(x, 7), gy = Math.floorDiv(y, 7);
+        float fx = (Math.floorMod(x, 7) + 0.5f) / 7f, fy = (Math.floorMod(y, 7) + 0.5f) / 7f;
+        float a = lattice(gx, gy), b = lattice(gx + 1, gy), c = lattice(gx, gy + 1), d = lattice(gx + 1, gy + 1);
+        float sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+        float v = (a + (b - a) * sx) * (1 - sy) + (c + (d - c) * sx) * sy;
+        return 1 + Math.min(MAX_LEVEL - 1, (int) (v * MAX_LEVEL));
+    }
+
+    private static float lattice(int x, int y) {
+        return (TileArt.spread(x * 7 + 101, y * 13 + 57) % 1000) / 1000f;
+    }
+
+    /**
+     * Taras: wierzch podniesiony o {@link TerrainArt#STEP} pola na poziom, pod nim lico tam, gdzie sasiad jest nizej
+     * (od poludnia widac sciane). Zaokraglone rogi odslaniaja nizszy taras, rysowany pod spodem.
+     */
+    private void drawTerrace(SpriteBatch batch, FloorMap f, TerrainArt ta, int id, int x, int y, int lv,
+                             float sx, float wy) {
+        int mask = 0;
+        if (lowerRock(f, id, x, y - 1, lv)) mask |= TileArt.ROCK_N;
+        if (lowerRock(f, id, x + 1, y, lv)) mask |= TileArt.ROCK_E;
+        if (lowerRock(f, id, x, y + 1, lv)) mask |= TileArt.ROCK_S;
+        if (lowerRock(f, id, x - 1, y, lv)) mask |= TileArt.ROCK_W;
+        float step = TerrainArt.STEP;
+        // wyzszy taras przesuniety w lewo i w gore (jak wyzsze pietra w Tibii): widac lico od poludnia i od wschodu
+        if (mask != 0) batch.draw(ta.terraceFlat(id), sx - (lv - 1) * step, wy + (lv - 1) * step, 1f, 1f);
+        batch.draw(ta.terrace(id, mask), sx - lv * step, wy + (lv - 1) * step, 1f + step, 1f + step);
+        drawTerraceShadow(batch, f, ta, id, x, y, lv, sx - lv * step, wy + lv * step);
+        int d = id < rockDetail.length ? rockDetail[id] : 0;
+        if (d != 0) {
+            int h = TileArt.spread(x, y);
+            if ((h & 31) < 3) {                                             // glaz albo zaspa na czesci tarasow
+                TextureRegion rock = art.tile(d);
+                float off = ((h >>> 5) & 3) * 0.08f;
+                if (rock != null) batch.draw(rock, sx - lv * step + 0.1f + off, wy + lv * step + 0.12f, 0.72f, 0.72f);
+            }
+        }
+    }
+
+    /** Cien wyzszego tarasu od polnocy i od zachodu (swiatlo z polnocnego zachodu) na wierzchu nizszego pola. */
+    private void drawTerraceShadow(SpriteBatch batch, FloorMap f, TerrainArt ta, int id, int x, int y, int lv,
+                                   float tx, float ty) {
+        if (f.inBounds(x, y - 1) && f.get(Layer.WALL, x, y - 1) == id && rockLevel(f, x, y - 1) > lv)
+            batch.draw(ta.ao(TerrainArt.N), tx, ty, 1f, 1f);
+        if (f.inBounds(x - 1, y) && f.get(Layer.WALL, x - 1, y) == id && rockLevel(f, x - 1, y) > lv)
+            batch.draw(ta.ao(TerrainArt.W), tx, ty, 1f, 1f);
+    }
+
+    /** Sasiad nizszy od tarasu lv (nizszy taras, brzeg skaly albo inna skala). */
+    private boolean lowerRock(FloorMap f, int id, int x, int y, int lv) {
+        if (!f.inBounds(x, y)) return false;
+        if (f.get(Layer.WALL, x, y) != id) return true;
+        return rockLevel(f, x, y) < lv;
+    }
+
+    // ------------------------------------------------------------------ rozpadlina, mgla, krawedz swiata
+
+    private boolean chasmAt(FloorMap f, int x, int y) {
+        return !f.inBounds(x, y) || f.get(Layer.GROUND, x, y) == chasmId;
+    }
+
+    /** Rozpadlina: skalny brzeg (zaokraglony) od strony ladu, od polnocy skalna sciana w glab, dalej ciemnosc. */
+    private void drawChasm(SpriteBatch batch, FloorMap f, TerrainArt ta, int x, int y, float wy) {
+        boolean n = chasmAt(f, x, y - 1), e = chasmAt(f, x + 1, y), s = chasmAt(f, x, y + 1), w = chasmAt(f, x - 1, y);
+        int mask = (n ? 0 : TileArt.ROCK_N) | (e ? 0 : TileArt.ROCK_E) | (s ? 0 : TileArt.ROCK_S) | (w ? 0 : TileArt.ROCK_W);
+        batch.draw(ta.chasm(mask), x, wy, 1f, 1f);
+        if (n && e && !chasmAt(f, x + 1, y - 1)) batch.draw(ta.chasmCorner(0), x, wy, 1f, 1f);
+        if (s && e && !chasmAt(f, x + 1, y + 1)) batch.draw(ta.chasmCorner(1), x, wy, 1f, 1f);
+        if (s && w && !chasmAt(f, x - 1, y + 1)) batch.draw(ta.chasmCorner(2), x, wy, 1f, 1f);
+        if (n && w && !chasmAt(f, x - 1, y - 1)) batch.draw(ta.chasmCorner(3), x, wy, 1f, 1f);
+    }
+
+    /** Pustka pod ziemia: pole bez podloza albo poza mapa. */
+    private static boolean voidAt(FloorMap f, int x, int y) {
+        return !f.inBounds(x, y) || f.get(Layer.GROUND, x, y) == 0;
+    }
+
+    /**
+     * Miejsca bez mapy: pod ziemia pustka jest czarna, a pola przy niej zanikaja w ciemnosc miekka mgla z zaokraglonymi
+     * rogami (zamiast ostrej krawedzi kwadratow). Na powierzchni - ciemniejaca glebia morza za krawedzia swiata.
+     */
+    private void drawFog(SpriteBatch batch, FloorMap f, int x0, int x1, int y0, int y1) {
+        TerrainArt ta = art.terrain();
+        if (f.z() == 0) {
+            drawWorldEdge(batch, f, ta);
+            return;
+        }
+        float tint = batch.getPackedColor();
+        batch.setColor(0f, 0f, 0f, 1f);
+        for (int y = y0; y <= y1; y++) {
+            float wy = worldY(y);
+            for (int x = x0; x <= x1; x++) {
+                if (voidAt(f, x, y)) batch.draw(ta.solid(), x, wy, 1f, 1f); // przykrywa tez wystajace w pustke mury
+            }
+        }
+        batch.setColor(1f, 1f, 1f, 1f);
+        for (int y = y0; y <= y1; y++) {
+            float wy = worldY(y);
+            for (int x = x0; x <= x1; x++) {
+                if (voidAt(f, x, y)) continue;
+                boolean n = voidAt(f, x, y - 1), e = voidAt(f, x + 1, y), s = voidAt(f, x, y + 1), w = voidAt(f, x - 1, y);
+                int mask = (n ? TileArt.ROCK_N : 0) | (e ? TileArt.ROCK_E : 0) | (s ? TileArt.ROCK_S : 0) | (w ? TileArt.ROCK_W : 0);
+                if (mask != 0) batch.draw(ta.fog(mask), x, wy, 1f, 1f);
+                if (!n && !e && voidAt(f, x + 1, y - 1)) batch.draw(ta.fogCorner(0), x, wy, 1f, 1f);
+                if (!s && !e && voidAt(f, x + 1, y + 1)) batch.draw(ta.fogCorner(1), x, wy, 1f, 1f);
+                if (!s && !w && voidAt(f, x - 1, y + 1)) batch.draw(ta.fogCorner(2), x, wy, 1f, 1f);
+                if (!n && !w && voidAt(f, x - 1, y - 1)) batch.draw(ta.fogCorner(3), x, wy, 1f, 1f);
+            }
+        }
+        batch.setPackedColor(tint);
+    }
+
+    /** Za krawedzia swiata: to samo podloze co na brzegu (morze), rysowane do konca kadru. */
+    private void drawOutside(SpriteBatch batch, FloorMap f) {
+        int w = f.width(), h = f.height();
+        if (viewX0 >= 0 && viewY0 >= 0 && viewX1 < w && viewY1 < h) return;
+        for (int y = viewY0; y <= viewY1; y++) {
+            float wy = worldY(y);
+            int cy = Math.max(0, Math.min(h - 1, y));
+            for (int x = viewX0; x <= viewX1; x++) {
+                if (f.inBounds(x, y)) continue;
+                int cx = Math.max(0, Math.min(w - 1, x));
+                draw(batch, f.get(Layer.GROUND, cx, cy), x, y, x, wy);
+            }
+        }
+    }
+
+    private static final float EDGE_IN = 2.5f, EDGE_OUT = 3.5f;
+
+    /** Glebia za krawedzia swiata: gradient od kilku pol przed krawedzia do prawie czarnego granatu dalej. */
+    private void drawWorldEdge(SpriteBatch batch, FloorMap f, TerrainArt ta) {
+        int w = f.width(), h = f.height();
+        if (viewX0 > EDGE_IN && viewY0 > EDGE_IN && viewX1 < w - 1 - EDGE_IN && viewY1 < h - 1 - EDGE_IN) return;
+        float tint = batch.getPackedColor();
+        batch.setColor(0.02f, 0.05f, 0.12f, 0.88f);
+        float top = h;                                                    // gorna krawedz mapy w ukladzie swiata (y w gore)
+        float left = viewX0 - 1, right = viewX1 + 2, spanH = viewY1 - viewY0 + 3f;
+        float bottom = worldY(viewY1 + 1), height = spanH;
+        // zachod / wschod (pasy pionowe na cala wysokosc kadru)
+        if (viewX0 <= EDGE_IN) {
+            batch.draw(ta.edge(TerrainArt.W), -EDGE_OUT, bottom, EDGE_OUT + EDGE_IN, height);
+            if (left < -EDGE_OUT) batch.draw(ta.solid(), left, bottom, -EDGE_OUT - left, height);
+        }
+        if (viewX1 >= w - 1 - EDGE_IN) {
+            batch.draw(ta.edge(TerrainArt.E), w - EDGE_IN, bottom, EDGE_OUT + EDGE_IN, height);
+            if (right > w + EDGE_OUT) batch.draw(ta.solid(), w + EDGE_OUT, bottom, right - w - EDGE_OUT, height);
+        }
+        float span = right - left;
+        if (viewY0 <= EDGE_IN) {                                          // polnoc mapy = gora ekranu
+            batch.draw(ta.edge(TerrainArt.N), left, top - EDGE_IN, span, EDGE_OUT + EDGE_IN);
+            float above = worldY(viewY0 - 1) + 1f;
+            if (above > top + EDGE_OUT) batch.draw(ta.solid(), left, top + EDGE_OUT, span, above - top - EDGE_OUT);
+        }
+        float floorY = worldY(h - 1);                                     // dolna krawedz mapy
+        if (viewY1 >= h - 1 - EDGE_IN) {
+            batch.draw(ta.edge(TerrainArt.S), left, floorY - EDGE_OUT, span, EDGE_OUT + EDGE_IN);
+            float below = worldY(viewY1 + 1);
+            if (below < floorY - EDGE_OUT) batch.draw(ta.solid(), left, below, span, floorY - EDGE_OUT - below);
+        }
+        batch.setPackedColor(tint);
+    }
+
+    // ------------------------------------------------------------------ mosty i kladki
+
+    private int bridgeAt(FloorMap f, int x, int y) {
+        TerrainArt ta = art.terrain();
+        return f.inBounds(x, y) ? ta.bridgeStyle(f.get(Layer.GROUND, x, y)) : -1;
+    }
+
+    /** Droga mostu pionowa (deski poziome): dluzszy ciag pol mostu w pionie niz w poziomie. */
+    private boolean bridgeVertical(FloorMap f, int x, int y) {
+        int h = 1, v = 1;
+        for (int k = 1; k <= 6 && bridgeAt(f, x + k, y) >= 0; k++) h++;
+        for (int k = 1; k <= 6 && bridgeAt(f, x - k, y) >= 0; k++) h++;
+        for (int k = 1; k <= 6 && bridgeAt(f, x, y + k) >= 0; k++) v++;
+        for (int k = 1; k <= 6 && bridgeAt(f, x, y - k) >= 0; k++) v++;
+        return v > h;
+    }
+
+    /** Woda, bagno, lawa, rozpadlina albo pustka obok mostu (tam porecz). */
+    private boolean openBelow(FloorMap f, int x, int y) {
+        if (!f.inBounds(x, y)) return true;
+        int g = f.get(Layer.GROUND, x, y);
+        if (f.get(Layer.WALL, x, y) != 0) return false;
+        return g == 0 || g >= walkableGround.length || !walkableGround[g];
+    }
+
+    /**
+     * Wykonczenie mostu: porecze ze slupkami od wody/pustki, belka tam, gdzie most styka sie z ladem, na ladzie zjazd
+     * z desek w kierunku drogi; na wodzie cien mostu i pale. Bez szwow: deski wybierane wg kolumny/wiersza drogi.
+     */
+    private void drawBridgeDetail(SpriteBatch batch, FloorMap f, int x, int y, float sx, float wy) {
+        TerrainArt ta = art.terrain();
+        int g = f.get(Layer.GROUND, x, y);
+        int st = ta.bridgeStyle(g);
+        if (st >= 0) {
+            boolean vert = bridgeVertical(f, x, y);
+            for (int s = 0; s < 4; s++) {
+                int nx = x + SIDE_DX[s], ny = y + SIDE_DY[s];
+                if (bridgeAt(f, nx, ny) >= 0) continue;
+                if (openBelow(f, nx, ny)) batch.draw(ta.rail(st, s), sx, wy, 1f, 1f);
+                else if (f.get(Layer.WALL, nx, ny) == 0 && (vert == (s == TerrainArt.N || s == TerrainArt.S)))
+                    batch.draw(ta.endBeam(st, s), sx, wy, 1f, 1f);
+            }
+            return;
+        }
+        if (g == 0 && f.z() > 0) return;                                   // pustka nad nizszym pietrem
+        boolean open = openBelow(f, x, y);
+        for (int s = 0; s < 4; s++) {
+            int nx = x + SIDE_DX[s], ny = y + SIDE_DY[s];
+            int bs = bridgeAt(f, nx, ny);
+            if (bs < 0) continue;
+            if (open) {
+                if (s != TerrainArt.N && s != TerrainArt.W) continue;      // swiatlo z polnocnego zachodu
+                batch.draw(ta.shadow(s), sx, wy, 1f, 1f);
+                if (bs == 0 && g != chasmId && g != 0) batch.draw(ta.piling(s), sx, wy, 1f, 1f);
+            } else if (f.get(Layer.WALL, x, y) == 0 && walkableGround[g]) {
+                boolean vert = bridgeVertical(f, nx, ny);
+                if (vert == (s == TerrainArt.N || s == TerrainArt.S)) batch.draw(ta.ramp(bs, s), sx, wy, 1f, 1f);
+            }
+        }
     }
 
     /** Boki skaly, przy ktorych nie ma innej skaly (TileArt.ROCK_*): tam skala jest zaokraglona. */
@@ -610,7 +990,15 @@ public final class WorldRenderer {
                     float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
                         if (Roofs.alpha(near, roofs.buildingAt(x, y, player.z())) < 1f) continue;
-                        draw(batch, f.get(Layer.GROUND, x, y), x, y, x - UP, wy);
+                        int g = f.get(Layer.GROUND, x, y);
+                        int st = art.terrain() == null ? -1 : art.terrain().bridgeStyle(g);
+                        if (st >= 0) {                                   // most na wyzszym pietrze: te same deski
+                            boolean vert = bridgeVertical(f, x, y);
+                            batch.draw(art.terrain().planks(st, vert, TileArt.spread(vert ? 0 : x, vert ? y : 0)), x - UP, wy, 1f, 1f);
+                            drawBridgeDetail(batch, f, x, y, x - UP, wy);
+                        } else {
+                            draw(batch, g, x, y, x - UP, wy);
+                        }
                         draw(batch, f.get(Layer.DECORATION, x, y), x, y, x - UP, wy);
                     }
                 }
