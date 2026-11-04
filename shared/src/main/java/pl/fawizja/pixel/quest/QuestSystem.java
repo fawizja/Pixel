@@ -36,9 +36,32 @@ public final class QuestSystem {
         return q.requires() == null || pc.quests().state(q.requires()) == QuestLog.State.DONE;
     }
 
-    /** Opis nagrody do okna rozmowy i komunikatow. */
+    /**
+     * Doswiadczenie za zadanie dla postaci: stala nagroda z quests.csv razy mnoznik etapu serwera dla jej
+     * biezacego poziomu (Balance.expRate) - tak samo jak za zabicie potwora (Darek, 2026-11-04).
+     */
+    private long lastRewardExp;
+
+    /** Doswiadczenie przyznane przy ostatnim oddaniu zadania (komunikat po awansie liczylby juz z nowego poziomu). */
+    public long lastRewardExp() { return lastRewardExp; }
+
+    public static long rewardExp(PlayerCharacter pc, QuestType q) {
+        return pl.fawizja.pixel.balance.Balance.applyRate(q.rewardExp(), pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
+    }
+
+    /** Opis nagrody do okna rozmowy i komunikatow (doswiadczenie bez mnoznika etapu). */
     public String rewardText(QuestType q) {
-        StringBuilder b = new StringBuilder(q.rewardExp() + " exp");
+        return rewardText(q, q.rewardExp());
+    }
+
+    /** Opis nagrody z doswiadczeniem, jakie dostanie ta postac (z mnoznikiem etapu). */
+    public String rewardText(QuestType q, PlayerCharacter pc) {
+        return rewardText(q, rewardExp(pc, q));
+    }
+
+    /** Opis nagrody z podanym doswiadczeniem (np. przyznanym przy oddaniu). */
+    public String rewardText(QuestType q, long exp) {
+        StringBuilder b = new StringBuilder(exp + " exp");
         if (q.rewardGold() > 0) b.append(", ").append(q.rewardGold()).append(" gp");
         if (q.rewardItem() != null) {
             b.append(", ").append(q.rewardItemCount() > 1 ? q.rewardItemCount() + "x " : "").append(items.byKey(q.rewardItem()).name());
@@ -69,7 +92,8 @@ public final class QuestSystem {
             return QuestResult.NO_SPACE;
         }
         pc.backpack().commitFrom(tx);
-        pc.addExperience(q.rewardExp());
+        lastRewardExp = rewardExp(pc, q);
+        pc.addExperience(lastRewardExp);
         pc.quests().finish(q.key());
         return QuestResult.COMPLETED;
     }

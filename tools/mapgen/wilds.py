@@ -57,21 +57,22 @@ BIOME_MONSTERS = {'snow': {'north', 'underground'}, 'taiga': {'north', 'undergro
 LOW = {'temperate': ['wolf', 'boar', 'carrion_crow', 'forest_spider', 'goblin', 'snare_setter', 'bandit'],
        'forest': ['wolf', 'boar', 'forest_spider', 'forest_spider', 'goblin', 'snare_setter', 'carrion_crow'],
        'hills': ['goblin', 'bandit', 'carrion_crow', 'boar', 'snare_setter'],
-       'snow': ['wolf', 'boar', 'carrion_crow', 'snare_setter'],
-       'taiga': ['wolf', 'boar', 'snare_setter', 'forest_spider'],
-       'desert': ['carrion_crow', 'bandit', 'snare_setter', 'burrow_larva'],
-       'savanna': ['carrion_crow', 'bandit', 'boar', 'snare_setter'],
+       'snow': ['snow_wolf', 'wolf', 'carrion_crow', 'snare_setter'],
+       'taiga': ['snow_wolf', 'boar', 'snare_setter', 'forest_spider'],
+       'desert': ['hyena', 'scorpion', 'bandit', 'burrow_larva'],
+       'savanna': ['hyena', 'carrion_crow', 'bandit', 'scorpion'],
        'jungle': ['forest_spider', 'burrow_larva', 'boar', 'carrion_crow'],
        'swamp': ['forest_spider', 'burrow_larva', 'giant_rat', 'carrion_crow']}
-MID = {'temperate': ['goblin_shaman', 'skeleton', 'quarry_brute', 'spark_wisp', 'barrow_lantern', 'cave_troll'],
-       'forest': ['goblin_shaman', 'skeleton', 'barrow_lantern', 'spark_wisp', 'candle_acolyte', 'tunnel_fence'],
-       'hills': ['quarry_brute', 'cave_troll', 'spark_wisp', 'goblin_shaman', 'tunnel_fence'],
-       'snow': ['snow_wolf', 'skeleton', 'barrow_lantern', 'snow_wolf', 'frost_boar'],
-       'taiga': ['snow_wolf', 'skeleton', 'quarry_brute', 'barrow_lantern', 'frost_boar'],
-       'desert': ['skeleton', 'quarry_brute', 'tunnel_fence', 'candle_acolyte', 'hyena'],
-       'savanna': ['skeleton', 'quarry_brute', 'tunnel_fence', 'goblin_shaman', 'hyena'],
-       'jungle': ['cave_centipede', 'spark_wisp', 'goblin_shaman', 'candle_acolyte'],
-       'swamp': ['cave_centipede', 'spark_wisp', 'skeleton', 'barrow_lantern']}
+# 2026-11-04: szkielet, hiena, skorpion i snieżny wilk maja poziomy z Tibii (slabe) - w srednich ich miejsce zajmuja orki
+MID = {'temperate': ['goblin_shaman', 'orc_warrior', 'quarry_brute', 'spark_wisp', 'barrow_lantern', 'cave_troll'],
+       'forest': ['orc_shaman', 'orc_warrior', 'barrow_lantern', 'spark_wisp', 'candle_acolyte', 'tunnel_fence'],
+       'hills': ['quarry_brute', 'cave_troll', 'spark_wisp', 'orc_berserker', 'tunnel_fence'],
+       'snow': ['frost_boar', 'orc_warrior', 'barrow_lantern', 'quarry_brute', 'frost_boar'],
+       'taiga': ['frost_boar', 'orc_shaman', 'quarry_brute', 'barrow_lantern', 'orc_warrior'],
+       'desert': ['orc_berserker', 'quarry_brute', 'tunnel_fence', 'candle_acolyte', 'crocodile'],
+       'savanna': ['orc_warrior', 'quarry_brute', 'tunnel_fence', 'goblin_shaman', 'crocodile'],
+       'jungle': ['cave_centipede', 'spark_wisp', 'crocodile', 'candle_acolyte'],
+       'swamp': ['cave_centipede', 'spark_wisp', 'crocodile', 'barrow_lantern']}
 
 
 def _monsters(path):

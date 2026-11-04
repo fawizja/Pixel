@@ -1538,7 +1538,7 @@ public final class GameSession {
         QuestResult r = quests.interact(pc, q);
         String text = r.message();
         if (r == QuestResult.COMPLETED) {
-            text = "Ukończono \"" + q.name() + "\". Nagroda: " + quests.rewardText(q) + ".";
+            text = "Ukończono \"" + q.name() + "\". Nagroda: " + quests.rewardText(q, quests.lastRewardExp()) + ".";
         } else if (r == QuestResult.ACCEPTED) {
             text = "Przyjęto zadanie \"" + q.name() + "\".";
         } else if (r == QuestResult.LOCKED) {

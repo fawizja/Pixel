@@ -40,6 +40,7 @@ import quests  # noqa: E402
 import boss_quests  # noqa: E402
 import wilds  # noqa: E402
 import homes  # noqa: E402
+import route_levels  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -1251,16 +1252,16 @@ ZONES = {
     'Krainy Varden': (8, 60, [('wolf', 3), ('boar', 3), ('forest_spider', 2), ('bandit', 2), ('goblin', 2),
                               ('goblin_shaman', 1), ('skeleton', 1), ('carrion_crow', 2), ('snare_setter', 2),
                               ('quarry_brute', 1)], ['wolf']),
-    'Wzgorza Qasirah': (20, 70, [('crystal_golem', 2), ('goblin_shaman', 2), ('skeleton', 2), ('cave_troll', 2),
+    'Wzgorza Qasirah': (12, 70, [('crystal_golem', 2), ('goblin_shaman', 2), ('skeleton', 2), ('cave_troll', 2),
                                  ('spark_wisp', 2), ('quarry_brute', 1), ('barrow_lantern', 1)], ['hyena', 'barrow_lantern']),
-    'Mrozne Pustkowia': (40, 100, [('snow_wolf', 3), ('yeti', 2), ('frost_witch', 1), ('frost_boar', 2), ('rime_crawler', 1)],
+    'Mrozne Pustkowia': (10, 100, [('snow_wolf', 3), ('yeti', 2), ('frost_witch', 1), ('frost_boar', 2), ('rime_crawler', 1)],
                          ['snow_wolf']),
     'Lodowe Szczyty': (400, 560, [('frost_giant', 3), ('storm_harpy', 2), ('ice_dragon', 1), ('storm_wisp', 2),
                                   ('rime_gargoyle', 2)], []),
     'Spalone Wyzyny': (300, 400, [('fire_elemental', 3), ('lava_golem', 2), ('ember_beetle', 2), ('ash_magus', 2)], []),
-    'Dzungla Selvaran': (55, 80, [('crocodile', 2), ('jungle_hunter', 3), ('jungle_serpent', 2), ('swamp_hornet', 2),
+    'Dzungla Selvaran': (20, 80, [('crocodile', 2), ('jungle_hunter', 3), ('jungle_serpent', 2), ('swamp_hornet', 2),
                                   ('striped_prowler', 2), ('bog_wraith', 1)], ['bog_wraith']),
-    'Pustynia Qasirah': (45, 130, [('hyena', 3), ('scorpion', 3), ('sand_wraith', 1), ('sand_devourer', 2),
+    'Pustynia Qasirah': (10, 130, [('hyena', 3), ('scorpion', 3), ('sand_wraith', 1), ('sand_devourer', 2),
                                    ('gilded_beetle', 1), ('dune_zealot', 1)], ['hyena', 'sand_wraith']),
     'Pustkowia Cienia': (550, 750, [('shadow_stalker', 3), ('sand_titan', 2), ('void_priest', 2), ('dusk_gargoyle', 2),
                                     ('shadow_centipede', 2)], ['shadow_stalker', 'dusk_gargoyle']),
@@ -2765,6 +2766,12 @@ def finish(ctx):
     party_packs(ctx)
     snap_spawns(ctx)
     fix_transition_targets(ctx)
+    # poziomy potworow rosna stopniowo wzdluz drog od swiatyn; silne spawny na drogach do slabszych lowisk obnizone
+    # (route_levels.py, Darek 2026-11-04); regiony dostaja zalecane poziomy wg spawnow, ktore w nich zostaly
+    # swiatla i domy zmieniaja pola przejscia - poziomy drog licza sie na gotowym ukladzie
+    print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
+    print('domy na sprzedaz:', homes.check_houses(ctx))
+    regions = route_levels.apply(ctx, all_regions(ctx))
     temple = dict(ctx['towns'])['Varden']
     props = [
         ('spawn', f'{temple[0]},{temple[1]},0'),
@@ -2774,10 +2781,8 @@ def finish(ctx):
         ('# miasta: nazwa:x,y,z swiatyni (maks. 6)', None),
         ('towns', ';'.join(f'{n}:{p[0]},{p[1]},{p[2]}' for n, p in ctx['towns'])),
         ('# regiony: nazwa;x0;y0;x1;y1;z od;z do;zalecany poziom od;do (oddzielone |)', None),
-        ('regions', '|'.join(';'.join(str(v) for v in r) for r in all_regions(ctx))),
+        ('regions', '|'.join(';'.join(str(v) for v in r) for r in regions)),
     ]
-    print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
-    print('domy na sprzedaz:', homes.check_houses(ctx))
     write_world(ctx['world'], ctx['legacy'], props, ctx['transitions'], ctx['npcs'], ctx['spawns'], ctx['houses'],
                 ctx['routes'])
     with open(os.path.join(OUT, 'displays.csv'), 'w', encoding='utf-8') as f:

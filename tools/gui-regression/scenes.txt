@@ -140,3 +140,6 @@ wild_hole_sewer|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel
 quest_approach_grimtooth|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=35 -Dpixel.teleport=668,449,-1
 skills_train_knight|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.train=SWORD:2000
 skills_train_sorcerer|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.train=SWORD:2000
+route_low_varden|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=491,525,0
+route_west_rising|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=433,495,0
+route_mid_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=407,594,-1

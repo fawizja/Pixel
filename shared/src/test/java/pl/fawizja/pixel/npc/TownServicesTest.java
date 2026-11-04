@@ -476,8 +476,11 @@ class TownServicesTest {
         assertEquals(10, pc.quests().progress("varden_wolves"));
         long exp = pc.experience();
         long gold = s.gold();
+        // stala nagroda zadania (2000 exp) razy mnoznik etapu serwera dla poziomu postaci, jak za potwory
+        long staged = pl.fawizja.pixel.balance.Balance.applyRate(2000, pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
+        assertTrue(staged >= 2000L * 50, "early levels: x50 or more");
         assertEquals(QuestResult.COMPLETED, s.questAction("varden_wolves", t));
-        assertEquals(exp + 2000, pc.experience());
+        assertEquals(exp + staged, pc.experience());
         assertEquals(gold + 300, s.gold());
         assertEquals(QuestLog.State.DONE, pc.quests().state("varden_wolves"));
         assertEquals(QuestResult.ALREADY_DONE, s.questAction("varden_wolves", t));

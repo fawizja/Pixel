@@ -42,10 +42,10 @@ PTS3 = [(132, 10), (100, 10), (80, 20), (90, 44), (120, 46), (140, 66), (110, 70
         (10, 42), (12, 26), (28, 16)]
 # potwory na druzyne pieciu postaci od poziomu 20: po grupie w kazdej komorze (bez komor ze schodami)
 FLOOR_MONSTERS = {
-    -1: [('skeleton', 4, 3), ('hyena', 4, 2), ('quarry_brute', 4, 3), ('cave_troll', 3, 2), ('tunnel_fence', 3, 3)],
-    -2: [('cave_troll', 4, 3), ('hyena', 4, 3), ('crystal_golem', 3, 2), ('skeleton', 4, 3), ('candle_acolyte', 3, 3),
+    -1: [('orc_shaman', 4, 3), ('crocodile', 4, 2), ('quarry_brute', 4, 3), ('cave_troll', 3, 2), ('tunnel_fence', 3, 3)],
+    -2: [('cave_troll', 4, 3), ('orc_berserker', 4, 3), ('crystal_golem', 3, 2), ('candle_acolyte', 4, 3), ('candle_acolyte', 3, 3),
          ('barrow_lantern', 3, 2)],
-    -3: [('scorpion', 4, 2), ('crystal_golem', 4, 2), ('cave_troll', 3, 3), ('hyena', 4, 3), ('scorpion', 3, 2)],
+    -3: [('orc_berserker', 4, 2), ('crystal_golem', 4, 2), ('cave_troll', 3, 3), ('barrow_lantern', 4, 3), ('orc_warlord', 3, 1)],
 }
 
 
