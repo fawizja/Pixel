@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.221.0] - 2026-11-04
+
+### Zmieniono
+- Potwory zbalansowane według Tibii (TibiaWiki): poziom, życie, obrażenia i exp pasują do poziomu postaci, np.
+  orkowie i krokodyle dla poziomu 15–30 zamiast 55–150; złoto z łupu przeliczone do nowego poziomu.
+- Poziom potworów rośnie stopniowo z odległością od miast; przy miastach tylko słabe potwory (do poziomu 15).
+- Dojścia do słabych expowisk bez silnych potworów, a drogi do silnych mają po drodze coraz mocniejsze potwory.
+- Exp za questy przeliczany tak jak za potwory (np. x50 na poziomie 1–8).
+- Świat wygenerowany od nowa: układ jaskiń i pięter częściowo się zmienił.
+
 ## [0.220.0] - 2026-11-04
 
 ### Zmieniono
