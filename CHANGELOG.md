@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.220.0] - 2026-11-04
+
+### Zmieniono
+- Skille i magic level liczone jak w Tibii osobno dla każdej profesji: knight szybko skilluje broń i tarczę, paladin
+  dystans, sorcerer i druid magic level; mag z mieczem skilluje bardzo wolno, knight z magią także.
+- Przeliczniki etapowe jak na RubinOT:
+  - exp za potwory od x50 (poziom 1–8) i x80 (9–50), malejący do x3 przy poziomie 901–1000;
+  - skille x10 do 80, x7 do 100, x4 do 120, potem x2;
+  - magic x10 do 80, x7 do 100, x4 do 120, x3 do 130, potem x2.
+- Okno umiejętności pokazuje aktualny przelicznik, np. „Poziom 8 (exp x50)”, a przy skillach „x10”.
+- Tarczę skilluje się tylko z tarczą w ręce (mnich bez tarczy). Jedna mana wydana na czar to jedna próba magii.
+- Zadania dzienne, łowieckie i wyzwania dają exp przeliczony tak jak za potwory.
+
 ## [0.219.0] - 2026-11-03
 
 ### Dodano
