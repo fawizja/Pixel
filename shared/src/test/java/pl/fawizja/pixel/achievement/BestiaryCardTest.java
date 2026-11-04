@@ -23,8 +23,8 @@ class BestiaryCardTest {
         assertEquals(2, none.size(), "an unknown monster shows nothing more");
 
         List<String[]> few = BestiaryCard.rows(wolf, 3, TestData.ITEMS);
-        assertEquals("poziom 8, 55 HP", find(few, "Poziom i zdrowie"));
-        assertEquals("20 exp", find(few, "Doświadczenie"));
+        assertEquals("poziom 8, 40 HP", find(few, "Poziom i zdrowie"));
+        assertEquals("18 exp", find(few, "Doświadczenie"));
         assertEquals("pokonaj jeszcze 7, aby je poznać", find(few, "Odporności"));
         assertEquals("pokonaj jeszcze 22, aby je poznać", find(few, "Łupy"));
 

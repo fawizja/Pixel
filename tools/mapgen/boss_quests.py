@@ -31,7 +31,7 @@ QUESTS = [
     dict(id='grimtooth', name='Leże Grimtootha', level=30, boss='grimtooth', style='orc', z=-1,
          grounds={'grass'}, wall='wood_wall', floor='wood_floor', near=(610, 395), lava=0.0,
          levels=(25, 60),
-         spawns=[('skeleton', 3, 3), ('cave_troll', 3, 2), ('candle_acolyte', 3, 3), ('crystal_golem', 3, 2), ('cave_troll', 3, 3)]),
+         spawns=[('orc_berserker', 3, 3), ('cave_troll', 3, 2), ('candle_acolyte', 3, 3), ('crystal_golem', 3, 2), ('cave_troll', 3, 3)]),
     dict(id='frost', name='Lodowy Tron Ysolde', level=100, boss='frost_queen', style='ice', z=-1,
          grounds={'snow'}, wall='log_wall', floor='wood_floor', near=(625, 95), lava=0.0,
          levels=(85, 160),

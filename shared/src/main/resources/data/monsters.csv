@@ -1,26 +1,26 @@
 # key;name;level;hp;exp;speed;attackMin;attackMax;damageType;range;attackIntervalMs;armor;resistances(TYP:%);behavior;aggroRange;fleeHpPct;healAmount;boss;color;shape;biome;activity(NOCTURNAL/-);description
-sewer_rat;Szczur kanałowy;3;25;9;220;1;5;PHYSICAL;1;1800;1;;MELEE;4;0;0;0;#6a5a4a;beast;underground;-;Szczur z miejskich kanałów. Pierwsza zdobycz każdego wędrowca.
-giant_rat;Wielki szczur;6;45;16;230;2;8;PHYSICAL;1;1900;2;EARTH:10;SKIRMISHER;5;15;0;0;#5a4a3a;beast;underground;-;Tłusty szczur wielkości psa, ucieka gdy jest ranny.
-wolf;Wilk;8;55;20;260;2;10;PHYSICAL;1;2000;2;;SKIRMISHER;6;20;0;0;#8a8a8a;beast;temperate;NOCTURNAL;Szybki drapieżnik, ucieka gdy jest ranny.
-boar;Dzik;10;90;32;200;3;14;PHYSICAL;1;2000;6;EARTH:10;TANK;4;0;0;0;#6b4a2e;beast;temperate;-;Wytrzymały dzik o grubej skórze.
-forest_spider;Pająk leśny;12;70;35;230;2;12;EARTH;1;1800;3;EARTH:50,FIRE:-20;MELEE;5;0;0;0;#3a3028;spider;temperate;-;Jadowity pająk leśny.
-bandit;Bandyta;15;140;65;220;5;22;PHYSICAL;1;2000;5;;SKIRMISHER;6;15;0;0;#5a4a6a;humanoid;temperate;NOCTURNAL;Rabuś z traktu, ucieka gdy przegrywa.
-goblin;Goblin;12;60;30;220;2;12;PHYSICAL;4;2200;2;;RANGED;6;10;0;0;#6a9a3a;humanoid;underground;-;Rzuca kamieniami z dystansu.
-goblin_shaman;Goblin szaman;18;90;70;200;6;20;FIRE;4;2500;1;FIRE:30,ICE:-20;HEALER;6;0;25;0;#4a7a8a;humanoid;underground;-;Leczy inne gobliny i rzuca ogniem.
-skeleton;Szkielet;22;160;90;200;6;26;PHYSICAL;1;2000;6;DEATH:100,HOLY:-30,EARTH:30;MELEE;6;0;0;0;#e0dcc8;humanoid;underground;NOCTURNAL;Nieumarły strażnik kopalni.
-cave_troll;Troll jaskiniowy;32;320;220;190;10;40;PHYSICAL;1;2200;10;PHYSICAL:10,FIRE:-20;TANK;5;0;0;0;#5a6a3a;humanoid;underground;-;Powolny, ale bardzo wytrzymały.
+sewer_rat;Szczur kanałowy;3;30;9;200;1;8;PHYSICAL;1;1800;1;;MELEE;4;0;0;0;#6a5a4a;beast;underground;-;Szczur z miejskich kanałów. Pierwsza zdobycz każdego wędrowca.
+giant_rat;Wielki szczur;5;50;15;210;1;10;PHYSICAL;1;1900;2;EARTH:10;SKIRMISHER;5;15;0;0;#5a4a3a;beast;underground;-;Tłusty szczur wielkości psa, ucieka gdy jest ranny.
+wolf;Wilk;8;40;18;250;2;18;PHYSICAL;1;2000;2;;SKIRMISHER;6;20;0;0;#8a8a8a;beast;temperate;NOCTURNAL;Szybki drapieżnik, ucieka gdy jest ranny.
+boar;Dzik;15;315;95;200;4;30;PHYSICAL;1;2000;6;EARTH:10;TANK;4;0;0;0;#6b4a2e;beast;temperate;-;Wytrzymały dzik o grubej skórze.
+forest_spider;Pająk leśny;9;45;22;220;2;14;EARTH;1;1800;3;EARTH:50,FIRE:-20;MELEE;5;0;0;0;#3a3028;spider;temperate;-;Jadowity pająk leśny.
+bandit;Bandyta;15;140;65;220;4;30;PHYSICAL;1;2000;5;;SKIRMISHER;6;15;0;0;#5a4a6a;humanoid;temperate;NOCTURNAL;Rabuś z traktu, ucieka gdy przegrywa.
+goblin;Goblin;10;80;25;220;2;14;PHYSICAL;4;2200;3;;RANGED;6;10;0;0;#6a9a3a;humanoid;underground;-;Rzuca kamieniami z dystansu.
+goblin_shaman;Goblin szaman;12;95;37;210;4;22;FIRE;4;2500;2;FIRE:30,ICE:-20;HEALER;6;0;20;0;#4a7a8a;humanoid;underground;-;Leczy inne gobliny i rzuca ogniem.
+skeleton;Szkielet;13;80;35;200;3;25;PHYSICAL;1;2000;4;DEATH:100,HOLY:-30,EARTH:30;MELEE;6;0;0;0;#e0dcc8;humanoid;underground;NOCTURNAL;Nieumarły strażnik kopalni.
+cave_troll;Troll jaskiniowy;30;415;150;190;5;55;PHYSICAL;1;2200;10;PHYSICAL:10,FIRE:-20;TANK;5;0;0;0;#5a6a3a;humanoid;underground;-;Powolny, ale bardzo wytrzymały.
 crystal_golem;Kryształowy golem;45;620;450;170;15;55;ENERGY;2;2400;18;PHYSICAL:25,EARTH:50,ENERGY:80,ICE:-25;MAGIC;5;0;0;0;#7fd8ff;golem;underground;-;Żywy kryształ rażący energią.
 grimtooth;Grimtooth, Król Kopalni;60;3200;4000;200;40;160;PHYSICAL;1;1800;20;DEATH:50,FIRE:-10;TANK;8;0;400;1;#c8a040;boss;underground;-;Król kopalni. Leczy się raz i wpada w szał poniżej połowy zdrowia.
-snow_wolf;Śnieżny wilk;40;420;330;270;15;50;PHYSICAL;1;1800;8;ICE:50,FIRE:-15;SKIRMISHER;7;15;0;0;#dce8f0;beast;north;NOCTURNAL;Biały wilk polujący w stadach.
-yeti;Yeti;70;1100;950;200;30;95;PHYSICAL;1;2200;14;ICE:60,FIRE:-20;TANK;6;0;0;0;#f0f0e8;humanoid;north;-;Ogromny włochaty stwór gór.
-frost_witch;Mroźna wiedźma;85;800;1000;210;25;85;ICE;4;2300;6;ICE:90,FIRE:-25;MAGIC;7;0;0;0;#80b8e0;humanoid;north;-;Wiedźma rzucająca lodowe pociski z dystansu.
+snow_wolf;Śnieżny wilk;10;50;20;250;2;18;PHYSICAL;1;1800;3;ICE:50,FIRE:-15;SKIRMISHER;7;15;0;0;#dce8f0;beast;north;NOCTURNAL;Biały wilk polujący w stadach.
+yeti;Yeti;65;1520;460;200;20;120;PHYSICAL;1;2200;14;ICE:60,FIRE:-20;TANK;6;0;0;0;#f0f0e8;humanoid;north;-;Ogromny włochaty stwór gór.
+frost_witch;Mroźna wiedźma;75;1040;580;210;25;110;ICE;4;2300;6;ICE:90,FIRE:-25;MAGIC;7;0;0;0;#80b8e0;humanoid;north;-;Wiedźma rzucająca lodowe pociski z dystansu.
 ice_golem;Lodowy golem;120;2600;2600;160;50;150;ICE;2;2400;30;ICE:100,PHYSICAL:20,FIRE:-30,ENERGY:-10;MAGIC;6;0;0;0;#a8d8f0;golem;north;-;Golem z wiecznego lodu.
-crocodile;Krokodyl;55;650;520;180;20;70;PHYSICAL;1;2200;14;EARTH:20,ICE:-10;TANK;5;0;0;0;#4a6a30;beast;equatorial;-;Czai się przy bagnach.
+crocodile;Krokodyl;22;350;105;180;5;45;PHYSICAL;1;2200;12;EARTH:20,ICE:-10;TANK;5;0;0;0;#4a6a30;beast;equatorial;-;Czai się przy bagnach.
 jungle_serpent;Wąż z dżungli;75;760;800;260;20;80;EARTH;1;1800;8;EARTH:80,ICE:-20;SKIRMISHER;7;10;0;0;#7aa040;spider;equatorial;-;Jadowity wąż - szybki i zwinny.
 jungle_hunter;Łowca z dżungli;65;600;650;220;25;75;PHYSICAL;4;2200;6;;RANGED;8;0;0;0;#8a5a3a;humanoid;equatorial;-;Myśliwy strzelający z dmuchawki.
 temple_guardian;Strażnik świątyni;180;4800;5200;170;70;210;PHYSICAL;1;2200;40;PHYSICAL:30,HOLY:50,DEATH:-20;TANK;5;0;0;0;#9a9a70;golem;equatorial;-;Kamienny strażnik zatopionej świątyni.
-hyena;Hiena;45;480;360;280;15;55;PHYSICAL;1;1800;6;;SKIRMISHER;7;20;0;0;#b89a60;beast;desert;NOCTURNAL;Padlinożerca polujący w grupach.
-scorpion;Skorpion;60;700;600;200;20;75;EARTH;1;2000;18;EARTH:60,ICE:-20;MELEE;5;0;0;0;#a06030;spider;desert;-;Pancerny skorpion z jadowitym kolcem.
+hyena;Hiena;10;95;29;260;2;16;PHYSICAL;1;1800;3;;SKIRMISHER;7;20;0;0;#b89a60;beast;desert;NOCTURNAL;Padlinożerca polujący w grupach.
+scorpion;Skorpion;14;70;45;200;3;24;EARTH;1;2000;10;EARTH:60,ICE:-20;MELEE;5;0;0;0;#a06030;spider;desert;-;Pancerny skorpion z jadowitym kolcem.
 sand_wraith;Piaskowy upiór;130;1800;2300;220;40;130;DEATH;3;2300;10;DEATH:100,HOLY:-40,PHYSICAL:40;MAGIC;7;0;0;0;#c8b080;humanoid;desert;NOCTURNAL;Upiór z piasku i gniewu.
 mummy;Mumia;200;5200;6200;170;70;230;DEATH;1;2200;30;DEATH:80,FIRE:-30,HOLY:-30;TANK;5;0;0;0;#d8ccaa;humanoid;desert;NOCTURNAL;Prastary strażnik grobowców.
 frost_queen;Ysolde, Królowa Lodu;150;9000;12000;210;60;180;ICE;4;1800;20;ICE:100,FIRE:-20;MAGIC;8;0;1200;1;#c8f0ff;boss;north;-;Królowa lodowych głębin. Razi lodem z dystansu, leczy się raz.
@@ -55,17 +55,17 @@ bloodbeard;Kapitan Krwawa Broda;420;38000;52000;230;300;850;PHYSICAL;1;1800;40;P
 skaldra;Skaldra, Lodowa Matka;540;85000;110000;200;600;1700;ICE;3;1800;55;ICE:100,FIRE:-25;MAGIC;8;0;5000;1;#a0d8ff;boss;north;-;Matka lodowych smoków z dna Lodowych Grot. Wymaga drużyny.
 morvena;Morvena, Pani Mgieł;640;100000;140000;220;700;2000;DEATH;3;1800;45;DEATH:100,HOLY:-35,PHYSICAL:30;MAGIC;8;0;7000;1;#c0c8d8;boss;equatorial;-;Władczyni mgieł, której nikt nie widział dwa razy. Wymaga drużyny.
 pyrrax;Pyrrax, Serce Wulkanu;780;140000;200000;190;850;2400;FIRE;3;1800;70;FIRE:100,ICE:-25,PHYSICAL:25;MAGIC;8;0;10000;1;#ff6010;boss;equatorial;-;Żywe serce wulkanu. Wymaga silnej drużyny.
-orc_warrior;Ork wojownik;110;1500;1300;210;40;120;PHYSICAL;1;2000;18;PHYSICAL:10;MELEE;6;0;0;0;#4a6a2a;humanoid;temperate;-;Ork z najazdu na wioski. Bije toporem, nie ucieka.
-orc_shaman;Orczy szaman;125;1300;1500;200;35;110;FIRE;4;2400;8;FIRE:20,ICE:-15;HEALER;7;0;120;0;#6a5a2a;humanoid;temperate;-;Leczy inne orki i ciska ogniem z daleka.
-orc_berserker;Ork berserker;150;2200;2300;240;60;170;PHYSICAL;1;1800;14;PHYSICAL:5;MELEE;7;0;0;0;#7a3a2a;humanoid;temperate;-;Szybki i wściekły, rzuca się na każdego.
-orc_warlord;Gruzhak, Orczy Wódz;220;9000;11000;220;90;260;PHYSICAL;1;2000;28;PHYSICAL:20,FIRE:10;TANK;7;0;0;0;#3a4a1a;humanoid;temperate;-;Wódz orczych band. Pilnuje łupów w kopalni i na kurhanie.
+orc_warrior;Ork wojownik;18;200;60;210;5;45;PHYSICAL;1;2000;10;PHYSICAL:10;MELEE;6;0;0;0;#4a6a2a;humanoid;temperate;-;Ork z najazdu na wioski. Bije toporem, nie ucieka.
+orc_shaman;Orczy szaman;22;185;110;200;8;40;FIRE;4;2400;5;FIRE:20,ICE:-15;HEALER;7;0;40;0;#6a5a2a;humanoid;temperate;-;Leczy inne orki i ciska ogniem z daleka.
+orc_berserker;Ork berserker;32;335;195;250;10;90;PHYSICAL;1;1800;10;PHYSICAL:5;MELEE;7;0;0;0;#7a3a2a;humanoid;temperate;-;Szybki i wściekły, rzuca się na każdego.
+orc_warlord;Gruzhak, Orczy Wódz;50;1520;670;220;15;130;PHYSICAL;1;2000;18;PHYSICAL:20,FIRE:10;TANK;7;0;0;0;#3a4a1a;humanoid;temperate;-;Wódz orczych band. Pilnuje łupów w kopalni i na kurhanie.
 burrow_larva;Ryjąca larwa;9;80;32;150;2;9;EARTH;1;2300;4;EARTH:40,FIRE:-20;TANK;5;0;0;0;#8a6a40;spider;underground;-;Tłusta larwa ryjąca korytarze pod miastami. Powolna, ale gryzie kwasem.
 carrion_crow;Padlinożerna wrona;11;60;30;290;2;13;PHYSICAL;1;1800;2;EARTH:-10;SKIRMISHER;7;15;0;0;#4a4458;beast;temperate;-;Szara wrona krążąca nad traktami. Dziobie i odlatuje, gdy oberwie.
-snare_setter;Sidlarz;14;80;40;220;3;16;PHYSICAL;4;2300;3;;RANGED;7;0;0;0;#5a6a3a;humanoid;temperate;-;Kłusownik, który przy traktach stawia sidła i strzela z łuku do wszystkiego, co się w nie złapie.
+snare_setter;Sidlarz;14;120;40;220;3;18;PHYSICAL;4;2300;3;;RANGED;7;0;0;0;#5a6a3a;humanoid;temperate;-;Kłusownik, który przy traktach stawia sidła i strzela z łuku do wszystkiego, co się w nie złapie.
 cave_centipede;Jaskiniowa wij;16;100;50;240;5;19;EARTH;1;2000;4;EARTH:60,ICE:-15;MELEE;6;0;0;0;#6a5a80;spider;underground;-;Fioletowa wij z wilgotnych grot. Jej jad pali skórę.
 quarry_brute;Łamacz kamieni;24;230;130;190;6;26;PHYSICAL;1;2300;7;PHYSICAL:10,ENERGY:-10;TANK;5;0;0;0;#8a6a50;humanoid;temperate;-;Zbiegły robotnik z kamieniołomu. Wali kilofem tak samo w skałę, jak w ludzi.
 spark_wisp;Iskrzyk;26;160;110;260;8;33;ENERGY;3;2300;3;ENERGY:100,PHYSICAL:20,EARTH:-25;MAGIC;7;0;0;0;#f0d050;golem;temperate;-;Wirująca iskra z burz nad wzgórzami. Strzela małymi piorunami z dystansu.
-candle_acolyte;Akolita Czarnej Świecy;30;230;180;210;10;39;DEATH;3;2300;5;DEATH:50,HOLY:-25;MAGIC;7;0;0;0;#3a2a4a;humanoid;underground;-;Uczeń zakonu, który w grotach pali czarne świece i miota klątwy.
+candle_acolyte;Akolita Czarnej Świecy;30;300;180;210;10;39;DEATH;3;2300;5;DEATH:50,HOLY:-25;MAGIC;7;0;0;0;#3a2a4a;humanoid;underground;-;Uczeń zakonu, który w grotach pali czarne świece i miota klątwy.
 tunnel_fence;Paser z tuneli;34;320;240;250;12;44;PHYSICAL;1;1800;7;;SKIRMISHER;7;15;0;0;#4a5a6a;humanoid;temperate;-;Paser, który chowa skradzione towary w grotach. Tnie nożem i ucieka z łupem, gdy zrobi się gorąco.
 barrow_lantern;Latarnik z kurhanu;38;420;310;200;13;47;FIRE;1;2000;9;DEATH:80,FIRE:40,HOLY:-35,ICE:-10;MELEE;6;0;0;0;#5a4a3a;humanoid;temperate;NOCTURNAL;Zgarbiony nieumarły z pochodnią, który nocą szuka zabłąkanych na wzgórzach.
 frost_boar;Szroniasty odyniec;48;720;510;200;15;53;PHYSICAL;1;2300;14;ICE:50,FIRE:-15;TANK;5;0;0;0;#d8e0e8;beast;north;-;Dzik ze szronem na szczecinie. Szarżuje przez zaspy jak taran.
@@ -77,7 +77,7 @@ rime_crawler;Szronowy czerw;98;1620;1540;160;29;94;ICE;1;2300;15;ICE:90,EARTH:20
 gilded_beetle;Złotopancerz;105;1800;1700;180;32;101;EARTH;1;2300;20;EARTH:60,PHYSICAL:25,FIRE:-20;TANK;5;0;0;0;#e0b040;spider;desert;-;Chrząszcz o pancerzu jak z kutego złota. Kupcy płacą za jego skorupę.
 frost_centipede;Lodowa wij;115;1600;1700;240;39;122;ICE;1;2000;16;ICE:90,FIRE:-25;MELEE;6;0;0;0;#a0d8f0;spider;north;-;Wij o przezroczystych segmentach, żyjąca w szczelinach lodowców.
 dune_zealot;Fanatyk Białego Słońca;125;1600;1900;210;43;132;HOLY;4;2400;11;HOLY:80,FIRE:30,DEATH:-25;HEALER;7;0;150;0;#f0e8c8;humanoid;desert;-;Pustynny kaznodzieja w bieli. Leczy towarzyszy i razi oślepiającym światłem.
-stone_sentinel;Kamienny wartownik;140;2800;2600;150;44;135;PHYSICAL;1;2300;24;PHYSICAL:35,EARTH:50,ENERGY:-20;TANK;5;0;0;0;#a0a098;golem;underground;-;Posąg strażnika, w którym ktoś zostawił rozkaz: nikogo nie przepuszczać.
+stone_sentinel;Kamienny wartownik;140;2800;2600;150;60;220;PHYSICAL;1;2300;24;PHYSICAL:35,EARTH:50,ENERGY:-20;TANK;5;0;0;0;#a0a098;golem;underground;-;Posąg strażnika, w którym ktoś zostawił rozkaz: nikogo nie przepuszczać.
 sand_gargoyle;Piaskowy gargulec;165;3300;3700;230;61;185;PHYSICAL;1;2000;26;PHYSICAL:30,EARTH:40,ICE:-20;MELEE;6;0;0;0;#c8a870;golem;desert;-;Skrzydlaty posąg z piaskowca, który zrywa się z gzymsów grobowców.
 blade_warden;Wirujący strażnik;215;4800;6000;270;96;291;PHYSICAL;1;2000;30;PHYSICAL:30,ENERGY:-25,EARTH:20;MELEE;6;0;0;0;#7080a0;golem;equatorial;-;Starożytna machina z czterema ostrzami, wirująca w korytarzach świątyń.
 crimson_shade;Krwawa zmora;265;4700;6110;240;123;364;DEATH;4;2300;14;DEATH:100,PHYSICAL:40,HOLY:-40,FIRE:-10;MAGIC;7;0;0;0;#c04040;humanoid;temperate;NOCTURNAL;Czerwona zjawa Przeklętych Kniei. Nocą jej szept odbiera siły.

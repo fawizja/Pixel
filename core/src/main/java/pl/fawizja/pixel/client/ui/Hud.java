@@ -2024,7 +2024,7 @@ public final class Hud {
                     rows.add(new MenuRow("journal:goto:" + q.giver(), q.name(), ready ? "ODDAJ: " + who
                             : qs.progress(pc, q) + " / " + q.amount() + " - " + who, true));
                 } else if (st == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && qs.unlocked(pc, q) && pc.level() >= q.minLevel()) {
-                    available.add(new MenuRow("journal:goto:" + q.giver(), "Nowe: " + q.name(), "u " + who + " - " + qs.rewardText(q), true));
+                    available.add(new MenuRow("journal:goto:" + q.giver(), "Nowe: " + q.name(), "u " + who + " - " + qs.rewardText(q, pc), true));
                 }
             }
         }
@@ -2479,7 +2479,7 @@ public final class Hud {
                 for (pl.fawizja.pixel.quest.QuestType q : qs.registry().byGiver(npc.key())) {
                     // dalsze etapy lancucha widac dopiero po ukonczeniu poprzedniego
                     if (pc.quests().state(q.key()) == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && !qs.unlocked(pc, q)) continue;
-                    String reward = qs.rewardText(q);
+                    String reward = qs.rewardText(q, pc);
                     switch (pc.quests().state(q.key())) {
                         case DONE: done++; break;
                         case ACTIVE:
@@ -2498,7 +2498,7 @@ public final class Hud {
                 questRows.addAll(active);
                 questRows.addAll(avail);
                 if (next != null) {
-                    questRows.add(new MenuRow("npc:quest:" + next.key(), next.name(), "od poziomu " + next.minLevel() + ": " + qs.rewardText(next), false));
+                    questRows.add(new MenuRow("npc:quest:" + next.key(), next.name(), "od poziomu " + next.minLevel() + ": " + qs.rewardText(next, pc), false));
                 }
                 if (done > 0) questRows.add(new MenuRow("npc:none", "Ukończone zadania: " + done, "dziennik zadań: klawisz Z", false));
                 for (MenuRow row : questRows) {

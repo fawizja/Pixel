@@ -921,7 +921,7 @@ class NetworkSyncTest {
             assertEquals(4, ulaHunt[0], "the party kill counts for Ula's hunting task");
             long solo = soloExp[0];
             assertEquals(0, inactiveShared[0], "an idle member switches shared experience off");
-            // paladyn + druid: dwie profesje = +30% (Tibia), wilk daje bazowo >= 20 doswiadczenia
+            // paladyn + druid: dwie profesje = +30% (Tibia) za potwory od 20 exp; wilk daje 18 (jak w Tibii) - bez premii
             int bonus = pl.fawizja.pixel.party.PartyRules.bonusPercent(wolf.experience(),
                     java.util.List.of(pl.fawizja.pixel.vocation.Vocation.PALADIN, pl.fawizja.pixel.vocation.Vocation.DRUID));
             assertEquals(wolf.experience() >= 20 ? 30 : 0, bonus);
@@ -934,7 +934,8 @@ class NetworkSyncTest {
                 }
             });
             assertTrue(shared[0]);
-            assertTrue(each > solo / 2, "the party bonus beats an even split");
+            if (bonus > 0) assertTrue(each > solo / 2, "the party bonus beats an even split");
+            else assertEquals((solo + 1) / 2, each, "below 20 base experience the kill is split evenly");
 
             ola.send("ATTACK", String.valueOf(ula.playerId()));
             awaitMessage(ola, "no friendly fire", m -> m[0].equals("LOG") && m[2].contains("drużyny"));

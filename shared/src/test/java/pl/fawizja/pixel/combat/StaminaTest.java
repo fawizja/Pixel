@@ -121,8 +121,8 @@ class StaminaTest {
         assertEquals(Stamina.MAX_MINUTES, codec.decode(garbage).stamina().minutes(), "bad data is tolerated");
     }
 
-    /** Wilk (20 exp) dla postaci poziomu 8 z mnoznikiem etapu serwera. */
-    private static final long WOLF = pl.fawizja.pixel.balance.Balance.applyRate(20, pl.fawizja.pixel.balance.Balance.expRate(8));
+    /** Wilk (18 exp, jak w Tibii) dla postaci poziomu 8 z mnoznikiem etapu serwera. */
+    private static final long WOLF = pl.fawizja.pixel.balance.Balance.applyRate(18, pl.fawizja.pixel.balance.Balance.expRate(8));
 
     private static long killWolf(PlayerCharacter pc, long from) {
         pc.setPosition(new Position(10, 12, 0));
@@ -142,7 +142,7 @@ class StaminaTest {
     void killsUseStaminaAndItsModifier() {
         PlayerCharacter premium = TestData.newCharacter(Vocation.MONK);
         premium.setPremium(true);
-        assertEquals(WOLF * 3 / 2, killWolf(premium, 0), "premium happy hour: 20 exp x stage * 150%");
+        assertEquals(WOLF * 3 / 2, killWolf(premium, 0), "premium happy hour: 18 exp x stage * 150%");
         assertEquals(Stamina.MAX_MINUTES - 1, premium.stamina().minutes(), "one minute used");
 
         PlayerCharacter free = TestData.newCharacter(Vocation.MONK);
