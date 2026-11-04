@@ -121,7 +121,7 @@ jako `serverTimeMs`.
 - Tworzenie: poziom 8, 10 000 gp w plecaku, 0 gp w banku, zestaw startowy profesji, start w swiatyni Varden.
 - Poziomy 1..1000, doswiadczenie w `long` z nasyceniem; HP i mana rosna przy awansie.
 - Obrazenia, leczenie, mana, regeneracja co 6 s czasu gry.
-- Umiejetnosci (`Skills`): piesc, miecz, dystans, tarcza, magia, lowienie; rosna z uzyciem.
+- Umiejetnosci (`Skills`): piesci, bron, dystans, tarcza, magia, wedkarstwo; rosna z uzyciem wg krzywych Tibii dla profesji (sekcja umiejetnosci nizej).
 - Walidacja imienia (3-20 liter, spacje, apostrof).
 
 ## Profesje (C)
@@ -666,7 +666,7 @@ Klient: `WeatherRenderer` liczy pozycje kropli z numeru i czasu (bez stanu). Ser
 `training/TrainingDummies.generate(world, npcSpots)`: BFS od swiatyni kazdego miasta po polach strefy ochronnej,
 pierwsze 2 pola z 8 przechodnimi sasiadami, bez obiektow i przejsc, >= 3 pola od swiatyni, od siebie i od NPC.
 `GameSession.useNearby` -> `toggleTraining` (manekin obok); `updateTraining`: co `TRAIN_MS` (3 s) 1 proba
-umiejetnosci z `CombatFormulas.attackProfile`, co druga takze `SHIELDING`; zmiana pola albo smierc konczy.
+umiejetnosci z `CombatFormulas.attackProfile` (x etap serwera), co druga takze `SHIELDING` (tylko z tarcza w rece albo mnich); zmiana pola albo smierc konczy.
 Rownowaga: walka daje probe co atak (ok. 2 s) plus doswiadczenie, wiec polowanie zostaje szybsze.
 
 ## Analiza polowania (Z logika)
@@ -813,9 +813,31 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
   wczytaniu postaci, gra lokalna w `PixelGame.playLocal`). Na serwerze stamina liczy sie w sesji gracza
   (`CombatSystem` i podzial exp druzyny w `ServerWorld`), klient dostaje ja w zapisie SELF. Okno umiejetnosci
   (`SkillSheet`): wiersz Stamina hh:mm z paskiem (zielony premia, zolty, pomaranczowy < 14:00, czerwony 0).
-- Trening: proba +1, zlowienie +2. Walka: brak treningu na potworach ponizej progu
-  `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
-- Umiejetnosci: start 10 (magia 0), koszt kolejnego poziomu `50 * 1,1^(poziom-10)` prob, maks. 200.
+- Krzywe umiejetnosci jak w Tibii (TibiaWiki "Formulae"; `Skills.triesForNext(profesja, skill, poziom)`):
+  przejscie L -> L+1 kosztuje `A * b^(L - c)` prob (czesc calkowita), c = 10 (magia 0), maks. 200.
+  A: piesci/maczuga/miecz/topor 50, dystans 25, tarcza 100, wedkarstwo 20, magia 1600 (punktow many).
+  b (magia / bron wrecz / piesci / dystans / tarcza / wedkarstwo): Knight 3.0/1.1/1.1/1.4/1.1/1.1,
+  Paladin 1.4/1.2/1.2/1.1/1.1/1.1, Sorcerer 1.1/2.0/1.5/2.0/1.5/1.1, Druid 1.1/1.8/1.5/1.8/1.5/1.1,
+  Monk (vocations.xml Canary 15.x) 1.3/1.5/1.1/2.0/1.2/1.1. `Skills` zna profesje (tworzy je `PlayerCharacter`);
+  `new Skills()` = bez profesji (Rookgaard: 3.0/2.0/1.5/2.0/1.5/1.1).
+- Proby (`Skills.train`, mnozone przez etap serwera; `addTries` = surowe): cios bronia/piescia i strzal w potwora
+  +1 (`CombatSystem.update`), cios fizyczny potwora w postac +1 tarczy - tylko z tarcza w rece (mnich bez tarczy),
+  rzut wedka +1 (udany czy nie), kazdy punkt wydanej many na czar (takze tworzenie run) +1 magii
+  (`SpellSystem.trainMagic`, bez wspolczynnika profesji - profesja decyduje tylko o krzywej). Manekin
+  (`GameSession.updateTraining`): co 3 s +1 umiejetnosci broni, co 6 s +1 tarczy (z tarcza). Brak treningu na
+  potworach ponizej progu `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
+- Etapy serwera (`Balance.EXP_STAGES` / `SKILL_STAGES` / `MAGIC_STAGES`, jak "stages" na OTS, np. RubinOT;
+  wspolne dla gry offline i serwera): exp za potwory wg poziomu postaci 1-8 x50, 9-50 x80, 51-100 x60,
+  101-150 x40, 151-200 x30, 201-300 x15, 301-400 x12, 401-500 x10, 501-600 x7, 601-700 x6, 701-800 x5,
+  801-900 x4, 901-1000 x3 (dalej x2/x1.5/x1.2 - poza limitem 1000); umiejetnosci wg biezacego poziomu
+  umiejetnosci 1-80 x10, 81-100 x7, 101-120 x4, 121+ x2; magia 0-80 x10, 81-100 x7, 101-120 x4, 121-130 x3,
+  131+ x2. Mnoznik exp dziala w `CombatSystem.killExperience` (zabicie solo i podzial w druzynie - kazdy wg
+  swojego poziomu, przed stamina i premia wypoczecia) oraz na nagrodach liczonych z exp potwora (zadanie dnia,
+  zlecenie lowcy, wyzwanie). Stale nagrody questow (`quests.csv`), kara smierci (procent posiadanego exp)
+  i progi poziomow nie sa mnozone. Okno umiejetnosci pokazuje "Poziom 20 (exp x80)", okno postaci takze
+  mnoznik kazdej umiejetnosci.
+- Zgodnosc zapisow: zapis trzyma poziom i proby w biezacym poziomie; po zmianie krzywej poziomy zostaja,
+  a pasek postepu jest obcinany do 99% (nadmiar prob awansuje przy nastepnej probie).
 
 ## Swiat, miasta i regiony (Z)
 

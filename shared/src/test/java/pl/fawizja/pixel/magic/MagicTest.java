@@ -297,7 +297,8 @@ class MagicTest {
         PlayerCharacter monk = TestData.newCharacter(Vocation.MONK);
         GameSession sd = session(druid, null, null);
         GameSession sm = session(monk, null, null);
-        for (int i = 0; i < 20; i++) {
+        // ta sama mana, inna krzywa (Tibia: druid 1600 * 1.1^ML, mnich 1600 * 1.3^ML) - roznica rosnie z poziomem
+        for (int i = 0; i < 100; i++) {
             druid.restoreMana(1000);
             monk.restoreMana(1000);
             sd.castSpell("glow", i * 3000L);

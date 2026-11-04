@@ -18,7 +18,6 @@ import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
 import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.character.Skill;
-import pl.fawizja.pixel.character.Skills;
 import pl.fawizja.pixel.magic.CastResult;
 import pl.fawizja.pixel.magic.CraftingSystem;
 import pl.fawizja.pixel.magic.Recipe;
@@ -3085,7 +3084,7 @@ public final class Hud {
             miniWindow(shapes, "classic", skX, skY, skW, skH);
             float yy = skY + skH - 23 - SK_ROW * (SK_INFO_ROWS + 1);
             for (Skill sk : Skill.values()) {
-                double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
+                double prog = pc.skills().progress(sk);
                 bar(shapes, skX + 8, yy - SK_ROW + 1, skW - 16, 3, (float) prog, new Color(0.3f, 0.75f, 0.4f, 1));
                 yy -= SK_ROW;
             }
@@ -4465,7 +4464,7 @@ public final class Hud {
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
         String[][] info = {
-                {"Poziom", String.valueOf(pc.level())},
+                {"Poziom", pc.level() + "  (" + pl.fawizja.pixel.character.SkillSheet.expRateLabel(pc) + ")"},
                 {"Doświadczenie", String.format("%,d", pc.experience())},
                 {"Do poziomu", pl.fawizja.pixel.balance.Balance.percentToNextLevel(pc.experience(), pc.level()) + "% (" + String.format("%,d", Math.max(0, next - pc.experience())) + ")"},
                 {"Zdrowie", pc.health() + " / " + pc.maxHealth()},
@@ -4484,7 +4483,8 @@ public final class Hud {
         }
         yy -= SK_ROW; // odstep jak separator
         for (Skill sk : Skill.values()) {
-            row(batch, sk.label(), pc.skills().level(sk) + "  (" + pc.skills().percentToNext(sk) + "%)", yy);
+            row(batch, sk.label(), pc.skills().level(sk) + "  (" + pc.skills().percentToNext(sk) + "%, "
+                    + pl.fawizja.pixel.character.SkillSheet.skillRateLabel(pc, sk) + ")", yy);
             yy -= SK_ROW;
         }
         font.getData().setScale(1f);

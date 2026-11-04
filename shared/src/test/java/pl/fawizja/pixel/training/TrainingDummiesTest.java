@@ -80,8 +80,9 @@ class TrainingDummiesTest {
         s.useNearby(0);
         assertTrue(s.training());
         s.update(GameSession.TRAIN_MS * 4, null);
-        assertEquals(fist + 4, pc.skills().tries(Skill.FIST), "monk trains fist");
-        assertEquals(shield + 2, pc.skills().tries(Skill.SHIELDING));
+        long rate = (long) pl.fawizja.pixel.balance.Balance.skillRate(10);
+        assertEquals(fist + 4 * rate, pc.skills().tries(Skill.FIST), "monk trains fist (x stage multiplier)");
+        assertEquals(shield + 2 * rate, pc.skills().tries(Skill.SHIELDING), "monk trains shielding without a shield");
         assertEquals(exp, pc.experience(), "no experience from a dummy");
         assertFalse(s.dummies().at(spot));
         assertTrue(s.dummies().at(dummy));
@@ -89,6 +90,6 @@ class TrainingDummiesTest {
         s.teleport(world.templeOf(pc.homeTown()), GameSession.TRAIN_MS * 4);
         s.update(GameSession.TRAIN_MS * 5, null);
         assertFalse(s.training());
-        assertEquals(fist + 4, pc.skills().tries(Skill.FIST));
+        assertEquals(fist + 4 * rate, pc.skills().tries(Skill.FIST));
     }
 }

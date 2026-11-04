@@ -39,7 +39,7 @@ public final class PlayerCharacter {
     private final java.util.Set<String> completedBossQuests = new java.util.LinkedHashSet<>();
 
     public static final int DEPOT_SLOTS = 60;
-    private final Skills skills = new Skills();
+    private final Skills skills;
     private final AutoLootFilter autoLootFilter = new AutoLootFilter();
     /** Rodzaje przedmiotow oznaczone "Zachowaj": nie ida do hurtowej sprzedazy lupu, depozytu ani na ziemie. */
     private final java.util.Set<Integer> keptItems = new java.util.TreeSet<>();
@@ -75,6 +75,7 @@ public final class PlayerCharacter {
         this.id = Objects.requireNonNull(id);
         this.name = validateName(name);
         this.vocation = Objects.requireNonNull(vocation);
+        this.skills = new Skills(vocation);
         if (level < Balance.MIN_LEVEL || level > Balance.MAX_LEVEL) throw new IllegalArgumentException("level " + level);
         this.level = level;
         this.rewardedLevel = level;

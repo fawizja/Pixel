@@ -107,9 +107,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Potwor dnia (takze jego odmiana elitarna, bo ma ten sam klucz). */
     public boolean isBoosted(MonsterType t) { return boostedKey != null && t != null && boostedKey.equals(t.key()); }
 
-    /** Doswiadczenie za potwora dla poziomu postaci, z premia zwoju nauki i potwora dnia. */
+    /** Doswiadczenie za potwora dla poziomu postaci: mnoznik etapu serwera (Balance.expRate), premia zwoju nauki i potwora dnia. */
     public long killExperience(MonsterType t, int level) {
-        long exp = pc.enchantments().experience(Balance.experienceReward(t.experience(), t.level(), level));
+        long exp = pc.enchantments().experience(Balance.applyRate(Balance.experienceReward(t.experience(), t.level(), level), Balance.expRate(level)));
         if (isBoosted(t)) exp = pl.fawizja.pixel.daily.BoostedCreature.boostExp(exp);
         return bonusExpPercent > 0 ? exp * (100 + bonusExpPercent) / 100 : exp;
     }
@@ -205,7 +205,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         lastMonsterAttackMs = now;
         leech(dealt);
         monsters.provoke(target);
-        if (!isTrivial(target.type())) pc.skills().addTries(ap.skill(), 1);
+        if (!isTrivial(target.type())) pc.skills().train(ap.skill(), 1);
         // wrecz: "skad" = gracz (animacja wypadu na kliencie)
         push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
                 ap.range() > 1 ? null : pc.position(), null));
@@ -371,6 +371,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         return out;
     }
 
+    /**
+     * Tarcza rosnie jak w Tibii tylko z tarcza (albo ksiega czarow) w rece; mnich walczy bez tarczy,
+     * wiec u niego licza sie wszystkie odparte ciosy.
+     */
+    public static boolean trainsShielding(PlayerCharacter pc) {
+        return pc.equipment().shieldDefense() > 0 || pc.vocation() == pl.fawizja.pixel.vocation.Vocation.MONK;
+    }
+
     @Override
     public void monsterAttacks(Monster m, long now) {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
@@ -380,7 +388,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
         recap.record(t.name(), dealt, now);
-        if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t)) pc.skills().addTries(Skill.SHIELDING, 1);
+        if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, 1);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 t.range() > 1 ? null : m.position(), null));
         if (pc.isDead()) onPlayerDeath(m, now);
