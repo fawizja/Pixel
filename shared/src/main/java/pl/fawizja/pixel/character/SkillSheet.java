@@ -25,14 +25,24 @@ public final class SkillSheet {
 
     public static List<Row> rows(PlayerCharacter pc) {
         List<Row> out = new ArrayList<>(rowCount());
-        out.add(new Row("Poziom", String.valueOf(pc.level()), -1, Bar.NONE));
+        out.add(new Row("Poziom", pc.level() + " (" + expRateLabel(pc) + ")", -1, Bar.NONE));
         out.add(new Row("Doświadczenie", (int) (pc.levelProgress() * 100) + "%", pc.levelProgress(), Bar.EXPERIENCE));
         out.add(stamina(pc));
         for (Skill sk : Skill.values()) {
-            double prog = (double) pc.skills().tries(sk) / Math.max(1, Skills.triesForNext(pc.skills().level(sk)));
+            double prog = pc.skills().progress(sk);
             out.add(new Row(sk.label(), String.valueOf(pc.skills().level(sk)), prog, Bar.SKILL));
         }
         return out;
+    }
+
+    /** Biezacy mnoznik doswiadczenia z etapow serwera, np. "exp x80". */
+    public static String expRateLabel(PlayerCharacter pc) {
+        return "exp " + pl.fawizja.pixel.balance.Balance.rateLabel(pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
+    }
+
+    /** Biezacy mnoznik umiejetnosci z etapow serwera, np. "x10". */
+    public static String skillRateLabel(PlayerCharacter pc, Skill s) {
+        return pl.fawizja.pixel.balance.Balance.rateLabel(pc.skills().rate(s));
     }
 
     public static Row stamina(PlayerCharacter pc) {

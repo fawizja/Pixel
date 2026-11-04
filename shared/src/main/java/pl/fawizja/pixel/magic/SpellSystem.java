@@ -279,8 +279,9 @@ public final class SpellSystem {
 
     private void trainMagic(int mana, long now) {
         if (mana <= 0) return;
-        long tries = Math.round(mana * Math.min(1.0, pc.vocation().magicFactor()));
-        int gained = pc.skills().addTries(Skill.MAGIC, Math.max(1, tries));
+        // jak w Tibii: kazdy punkt wydanej many (takze na tworzenie run) to punkt do poziomu magii;
+        // profesja decyduje tylko o krzywej (Skills.vocationConstant), mnoznik serwera dolicza Skills.train
+        int gained = pc.skills().train(Skill.MAGIC, mana);
         if (gained > 0) log.add(now, EventLog.Kind.SYSTEM, "Poziom magii: " + pc.skills().level(Skill.MAGIC));
     }
 

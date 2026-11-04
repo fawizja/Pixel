@@ -121,6 +121,9 @@ class StaminaTest {
         assertEquals(Stamina.MAX_MINUTES, codec.decode(garbage).stamina().minutes(), "bad data is tolerated");
     }
 
+    /** Wilk (20 exp) dla postaci poziomu 8 z mnoznikiem etapu serwera. */
+    private static final long WOLF = pl.fawizja.pixel.balance.Balance.applyRate(20, pl.fawizja.pixel.balance.Balance.expRate(8));
+
     private static long killWolf(PlayerCharacter pc, long from) {
         pc.setPosition(new Position(10, 12, 0));
         SpawnPoint sp = new SpawnPoint("wolf", new Position(11, 12, 0), 0, 1, 60);
@@ -139,13 +142,13 @@ class StaminaTest {
     void killsUseStaminaAndItsModifier() {
         PlayerCharacter premium = TestData.newCharacter(Vocation.MONK);
         premium.setPremium(true);
-        assertEquals(30, killWolf(premium, 0), "premium happy hour: 20 exp * 150%");
+        assertEquals(WOLF * 3 / 2, killWolf(premium, 0), "premium happy hour: 20 exp x stage * 150%");
         assertEquals(Stamina.MAX_MINUTES - 1, premium.stamina().minutes(), "one minute used");
 
         PlayerCharacter free = TestData.newCharacter(Vocation.MONK);
-        assertEquals(20, killWolf(free, 0));
+        assertEquals(WOLF, killWolf(free, 0));
         free.stamina().setMinutes(Stamina.LOW_AT_MINUTES);
-        assertEquals(10, killWolf(free, 0), "low stamina: half");
+        assertEquals(WOLF / 2, killWolf(free, 0), "low stamina: half");
         free.stamina().setMinutes(0);
         assertEquals(0, killWolf(free, 0), "no stamina: no experience");
     }

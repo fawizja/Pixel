@@ -214,6 +214,8 @@ public final class GameSession {
         if (gold > 0 && !pc.bank().credit(gold).ok()) return;
         d.claim();
         log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zadanie dnia: " + String.format("%,d gp", gold) + " na konto.");
+        // nagroda liczona z doswiadczenia potwora, wiec dostaje ten sam mnoznik etapu co zabicie (Balance.expRate)
+        exp = pl.fawizja.pixel.balance.Balance.applyRate(exp, pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
         if (exp > 0) combat.awardExperience(exp, "Zadanie dnia", nowMs);
     }
 
@@ -286,6 +288,7 @@ public final class GameSession {
         h.complete();
         log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zlecenie łowcy: " + String.format("%,d gp", gold) + " na konto ("
                 + h.completed() + ". oddane zlecenie).");
+        exp = pl.fawizja.pixel.balance.Balance.applyRate(exp, pl.fawizja.pixel.balance.Balance.expRate(pc.level())); // jak przy zadaniu dnia
         if (exp > 0) combat.awardExperience(exp, "Zlecenie łowcy", nowMs);
     }
 
@@ -568,12 +571,12 @@ public final class GameSession {
             trainTicks++;
             Skill sk = CombatFormulas.attackProfile(pc, items).skill();
             trainSkill(nowMs, sk);
-            if (trainTicks % 2 == 0) trainSkill(nowMs, Skill.SHIELDING);
+            if (trainTicks % 2 == 0 && pl.fawizja.pixel.combat.CombatSystem.trainsShielding(pc)) trainSkill(nowMs, Skill.SHIELDING);
         }
     }
 
     private void trainSkill(long nowMs, Skill sk) {
-        if (pc.skills().addTries(sk, 1) > 0) {
+        if (pc.skills().train(sk, 1) > 0) {
             log.add(nowMs, EventLog.Kind.SYSTEM, sk.label() + ": poziom " + pc.skills().level(sk) + ".");
         }
     }
@@ -1739,7 +1742,7 @@ public final class GameSession {
         long gold = Challenge.rewardGold(c.type);
         pc.bank().credit(gold);
         log.add(nowMs, EventLog.Kind.SYSTEM, "Wyzwanie ukończone! " + String.format("%,d gp", gold) + " na konto.");
-        combat.awardExperience(Challenge.rewardExp(c.type), "Wyzwanie", nowMs);
+        combat.awardExperience(pl.fawizja.pixel.balance.Balance.applyRate(Challenge.rewardExp(c.type), pl.fawizja.pixel.balance.Balance.expRate(pc.level())), "Wyzwanie", nowMs);
     }
 
     /** Siodlo: oswaja konia na stale (przedmiot znika). */

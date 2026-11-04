@@ -16,7 +16,7 @@ class ProgressPercentTest {
 
         Skills s = new Skills();
         assertEquals(0, s.percentToNext(Skill.SWORD));
-        s.addTries(Skill.SWORD, Skills.triesForNext(s.level(Skill.SWORD)) / 4);
+        s.addTries(Skill.SWORD, s.triesForNext(Skill.SWORD) / 4);
         assertEquals(25, s.percentToNext(Skill.SWORD), 1);
     }
 }

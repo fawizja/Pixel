@@ -109,7 +109,7 @@ class CombatTest {
         long exp = pc.experience();
         for (long t = 0; t < 120_000 && !wolf.isDead(); t += 100) cs.update(t);
         assertTrue(wolf.isDead());
-        assertEquals(exp + 20, pc.experience());
+        assertEquals(exp + pl.fawizja.pixel.balance.Balance.applyRate(20, pl.fawizja.pixel.balance.Balance.expRate(pc.level())), pc.experience(), "wolf 20 exp x stage multiplier");
         assertTrue(mm.monsters().isEmpty(), "dead monster removed");
         assertEquals(1, cs.kills());
         assertTrue(pc.skills().tries(Skill.FIST) > 0 || pc.skills().level(Skill.FIST) > 10);
@@ -229,7 +229,7 @@ class CombatTest {
         long exp = pc.experience();
         for (long t = 0; t < 120_000 && !wolf.isDead(); t += 100) cs.update(t);
         assertTrue(wolf.isDead());
-        assertEquals(exp + 30, pc.experience(), "20 exp + 50%");
+        assertEquals(exp + pl.fawizja.pixel.balance.Balance.applyRate(20, pl.fawizja.pixel.balance.Balance.expRate(pc.level())) * 3 / 2, pc.experience(), "20 exp x stage + 50%");
         assertEquals(0, pc.restedKills(), "used up");
         assertEquals(1, pc.stats().restedKills(), "counted for the achievement");
         pc.restoreRested(12_345);

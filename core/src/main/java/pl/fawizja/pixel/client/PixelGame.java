@@ -157,6 +157,19 @@ public class PixelGame extends Game {
         Integer stamina = Integer.getInteger("pixel.stamina");
         if (stamina != null) pc.stamina().setMinutes(stamina);
         if ("1".equals(System.getProperty("pixel.premium"))) pc.setPremium(true);
+        // podglad krzywych umiejetnosci (regresja GUI): -Dpixel.train=SWORD:N = N prob manekina tej umiejetnosci
+        // (co druga takze tarczy, jak GameSession.updateTraining), z mnoznikiem etapu serwera
+        String train = System.getProperty("pixel.train");
+        if (train != null && train.contains(":")) {
+            pl.fawizja.pixel.character.Skill sk = pl.fawizja.pixel.character.Skill.valueOf(train.substring(0, train.indexOf(':')));
+            int n = Integer.parseInt(train.substring(train.indexOf(':') + 1));
+            for (int i = 1; i <= n; i++) {
+                pc.skills().train(sk, 1);
+                if (i % 2 == 0 && pl.fawizja.pixel.combat.CombatSystem.trainsShielding(pc)) {
+                    pc.skills().train(pl.fawizja.pixel.character.Skill.SHIELDING, 1);
+                }
+            }
+        }
         saveCharacter(pc);
         startGame(pc);
     }

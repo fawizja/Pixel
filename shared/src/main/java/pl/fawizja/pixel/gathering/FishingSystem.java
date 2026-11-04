@@ -163,7 +163,7 @@ public final class FishingSystem {
         Position spot = findSpot(pc.position(), now, true);
         if (spot == null) return FishingResult.DEPLETED;
         nextAttemptMs = now + ATTEMPT_COOLDOWN_MS;
-        pc.skills().addTries(Skill.FISHING, 1);
+        pc.skills().train(Skill.FISHING, 1); // jak w Tibii: jedna proba za kazdy rzut, udany czy nie
         if (rng.nextDouble() >= catchChance(pc.skills().level(Skill.FISHING))) {
             useWorm(pc);
             return FishingResult.NOTHING;
@@ -175,7 +175,6 @@ public final class FishingSystem {
         if (copy.add(new ItemStack(caught, 1)) != InventoryResult.OK) return FishingResult.BACKPACK_FULL;
         pc.backpack().commitFrom(copy);
         useWorm(pc);
-        pc.skills().addTries(Skill.FISHING, 2);
         restingUntil.put(spot, now + TILE_REST_MS);
         lastCatchId = caught;
         return FishingResult.CAUGHT;

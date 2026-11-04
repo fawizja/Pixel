@@ -10,6 +10,46 @@ public final class Balance {
 
     public static final int MIN_LEVEL = 1;
     public static final int MAX_LEVEL = 1000;
+
+    /*
+     * Mnozniki serwera rozlozone na etapy ("stages" jak na serwerach OTS, np. RubinOT). Wspolne dla gry offline
+     * i serwera online (oba korzystaja z modulu shared). Kazdy wiersz: {od poziomu, mnoznik}; obowiazuje ostatni
+     * wiersz, ktorego "od" nie przekracza biezacego poziomu. Zmiana tempa gry = zmiana liczb w tych tabelach.
+     */
+    /** Doswiadczenie za potwory wg poziomu postaci (1-8 x50, 9-50 x80, ... 1401+ x1.2). */
+    public static final double[][] EXP_STAGES = {
+            {1, 50}, {9, 80}, {51, 60}, {101, 40}, {151, 30}, {201, 15}, {301, 12}, {401, 10}, {501, 7},
+            {601, 6}, {701, 5}, {801, 4}, {901, 3}, {1001, 2}, {1201, 1.5}, {1401, 1.2}};
+    /** Proby piesci, broni, dystansu, tarczy i wedkarstwa wg biezacego poziomu tej umiejetnosci. */
+    public static final double[][] SKILL_STAGES = {{0, 10}, {81, 7}, {101, 4}, {121, 2}};
+    /** Mana liczona do poziomu magii wg biezacego poziomu magii. */
+    public static final double[][] MAGIC_STAGES = {{0, 10}, {81, 7}, {101, 4}, {121, 3}, {131, 2}};
+
+    /** Mnoznik z tabeli etapow dla poziomu. */
+    public static double stage(double[][] stages, int level) {
+        double m = stages[0][1];
+        for (double[] row : stages) if (level >= row[0]) m = row[1];
+        return m;
+    }
+
+    /** Mnoznik doswiadczenia za potwory dla poziomu postaci. */
+    public static double expRate(int level) { return stage(EXP_STAGES, level); }
+    /** Mnoznik prob umiejetnosci (nie magii) dla biezacego poziomu umiejetnosci. */
+    public static double skillRate(int skillLevel) { return stage(SKILL_STAGES, skillLevel); }
+    /** Mnoznik many do poziomu magii dla biezacego poziomu magii. */
+    public static double magicRate(int magicLevel) { return stage(MAGIC_STAGES, magicLevel); }
+
+    /** Mnoznik zapisany do okna postaci: "x80", "x1.5". */
+    public static String rateLabel(double rate) {
+        return rate == Math.rint(rate) ? "x" + (long) rate : "x" + rate;
+    }
+
+    /** Ilosc pomnozona przez mnoznik etapu (zaokraglona, z nasyceniem). */
+    public static long applyRate(long amount, double rate) {
+        if (amount <= 0) return 0;
+        double v = amount * rate;
+        return v >= Long.MAX_VALUE / 8.0 ? Long.MAX_VALUE / 8 : Math.max(1, Math.round(v));
+    }
     /** Poziom, od ktorego licza sie przyrosty profesji. */
     public static final int VOCATION_LEVEL = 8;
     public static final int HP_AT_VOCATION_LEVEL = 185;

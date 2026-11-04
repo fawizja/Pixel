@@ -1529,7 +1529,13 @@ class NetworkSyncTest {
             long expected = total[0] * pl.fawizja.pixel.event.Invasion.REWARD_PER_KILL + pl.fawizja.pixel.event.Invasion.LEADER_BONUS;
             await("reward on the account", () -> {
                 try {
-                    return self(ola).bank().balance() == expected + LOGIN_BONUS;
+                    // bandyci daja exp z mnoznikiem etapu (x50/x80), wiec Ola awansuje - doliczamy zloto za progi poziomu
+                    PlayerCharacter me = self(ola);
+                    long milestones = 0;
+                    for (int m : pl.fawizja.pixel.character.LevelRewards.MILESTONES) {
+                        if (m > 8 && m <= me.level()) milestones += pl.fawizja.pixel.character.LevelRewards.gold(m);
+                    }
+                    return me.bank().balance() == expected + LOGIN_BONUS + milestones;
                 } catch (Exception e) {
                     return false;
                 }
