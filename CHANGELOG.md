@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.227.0] - 2026-11-05
+
+### Zmieniono
+- Przycisk Tarcza zastąpiony 3 trybami walki jak w starej Tibii (wartości z serwera TFS), przełączanymi dotknięciem:
+  Ofensywa (miecz: +20% obrażeń bronią, słabsza obrona tarczą), Balans (miecz z tarczą, domyślny), Obrona (tarcza:
+  obrażenia bronią o połowę mniejsze niż w ofensywie, pełna obrona tarczą). Czary i różdżki bez zmian, jak w Tibii.
+
+### Dodano
+- Telefon: dwa nowe miejsca na miksturę albo czar w prawym dolnym zestawie – trzecie kółko obok dwóch mikstur
+  i jedno w rogu na środku łuków. Ustawia się je przytrzymaniem, jak pozostałe.
+
 ## [0.226.0] - 2026-11-05
 
 ### Dodano
