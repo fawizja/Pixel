@@ -595,11 +595,17 @@ class TownServicesTest {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = session(pc, List.of());
         s.teleport(talkSpot(npcs.get("varden_guide")), 1000);
-        String line = s.askNpc("Jakie masz zadania?", 1000);
-        assertTrue(line.startsWith(npcs.get("varden_guide").name() + ": Poniżej masz"), line);
-        assertTrue(s.askNpc("pogoda", 1000).contains("Zapytaj o: przemytnicy"), "unknown word lists topics");
-        assertTrue(pl.fawizja.pixel.game.Actions.apply(s, "npc:ask:wieza", 1000));
-        assertTrue(s.log().latest(1).get(0).text().contains("pięć pięter"));
+        Npc guide = npcs.get("varden_guide");
+        String line = s.askNpc("Gdzie jest kopalnia?", 1000);
+        assertTrue(line.startsWith(guide.name() + ": Wejście do kopalni"), line);
+        assertEquals(guide.name() + ": " + guide.greeting() + " Zapytaj o: kopalnia.", s.askNpc("cześć", 1000),
+                "greeting or an unknown word: the one greeting line and the topics, no chatter");
+        assertTrue(pl.fawizja.pixel.game.Actions.apply(s, "npc:ask:kopalnia", 1000));
+        assertTrue(s.log().latest(1).get(0).text().contains("Grimtooth"));
+        Npc guard = npcs.get("guard_21");
+        s.teleport(talkSpot(guard), 1000);
+        assertSame(guard, s.npcNearby());
+        assertEquals(guard.name() + ": " + guard.greeting(), s.askNpc("brama", 1000), "a guard only greets");
         s.teleport(TestData.world().spawn().translate(0, 6), 1000);
         if (s.npcNearby() == null) assertNull(s.askNpc("czesc", 1000));
     }

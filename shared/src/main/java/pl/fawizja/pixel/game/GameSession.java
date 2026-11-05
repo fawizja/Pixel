@@ -1556,8 +1556,10 @@ public final class GameSession {
         pl.fawizja.pixel.npc.DialogueRegistry d = pl.fawizja.pixel.npc.DialogueRegistry.defaults();
         String answer = d.answer(n, text);
         if (answer == null) {
+            // bez pogawedek: na powitanie i kazde inne slowo NPC mowi tylko swoje powitanie (i tematy, jesli ma)
             java.util.List<String> topics = d.topics(n);
-            answer = "Nie rozumiem. Zapytaj o: " + String.join(", ", topics.subList(0, Math.min(4, topics.size()))) + ".";
+            answer = topics.isEmpty() ? n.greeting()
+                    : n.greeting() + " Zapytaj o: " + String.join(", ", topics.subList(0, Math.min(4, topics.size()))) + ".";
         }
         String line = n.name() + ": " + answer;
         log.add(nowMs, EventLog.Kind.CHAT, line);

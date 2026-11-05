@@ -18,6 +18,6 @@ public enum NpcRole {
     HOUSING,
     /** Krol w zamku Varden: konto premium (rejsy statkami) i promocja profesji. */
     KING,
-    /** Straznik przy bramie miasta: tylko rozmowa (wskazowki), stoi w strefie ochronnej. */
+    /** Straznik przy bramie miasta: tylko powitanie (bez uslug), stoi w strefie ochronnej. */
     GUARD
 }

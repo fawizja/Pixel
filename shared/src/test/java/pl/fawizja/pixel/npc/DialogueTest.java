@@ -16,29 +16,36 @@ class DialogueTest {
     }
 
     @Test
-    void keywordsMatchWithoutCaseOrPolishLettersAndTheMostSpecificLineWins() {
+    void keywordsMatchWithoutCaseOrPolishLettersAndOnlyTheOwnNpcAnswers() {
         Npc guide = npc("varden_guide", NpcRole.GUIDE);
-        assertEquals("Witaj, wędrowcze.", D.answer(guide, "Cześć!"));
         assertTrue(D.answer(guide, "Jak dojść do KOPALNI?").startsWith("Wejście do kopalni"));
-        assertTrue(D.answer(guide, "masz jakąś pracę").startsWith("Poniżej masz moje zlecenia"), "role line");
-        assertEquals("Nazywam się Oren. Mieszkam w Varden.", D.answer(guide, "kim jesteś"));
+        assertTrue(D.answer(npc("frost_guide", NpcRole.GUIDE), "Królowa").contains("Lodowych Jaskiń"));
         assertNull(D.answer(guide, "kopalniany"), "whole words only");
-        assertNull(D.answer(guide, "handel"), "merchant topic is not the guide's");
-        assertNotNull(D.answer(npc("frost_merchant", NpcRole.MERCHANT), "handel"));
+        assertNull(D.answer(guide, "Cześć!"), "no greeting chatter - the greeting is the window header");
+        assertNull(D.answer(guide, "kim jesteś"), "no name chatter");
+        assertNull(D.answer(npc("frost_guide", NpcRole.GUIDE), "kopalnia"), "another guide's topic");
+        assertNull(D.answer(npc("frost_merchant", NpcRole.MERCHANT), "handel"), "trade is a window button, not talk");
         assertNull(D.answer(guide, "   "));
     }
 
     @Test
-    void topicsListOwnSubjectsFirstAndEveryNpcHasSome() throws Exception {
-        List<String> topics = D.topics(npc("varden_guide", NpcRole.GUIDE));
-        assertEquals("przemytnicy", topics.get(0));
-        assertTrue(topics.containsAll(List.of("zadania", "cześć")));
-        for (Npc n : NpcRegistry.load(pl.fawizja.pixel.world.WorldLayout.WORLD_MAP, pl.fawizja.pixel.TestData.world(),
-                ShopRegistry.loadDefault(pl.fawizja.pixel.TestData.ITEMS)).all()) {
+    void onlyGameplayInfoIsLeftAndEveryLineBelongsToAnExistingNpc() throws Exception {
+        assertEquals(List.of("kopalnia"), D.topics(npc("varden_guide", NpcRole.GUIDE)));
+        NpcRegistry all = NpcRegistry.load(pl.fawizja.pixel.world.WorldLayout.WORLD_MAP, pl.fawizja.pixel.TestData.world(),
+                ShopRegistry.loadDefault(pl.fawizja.pixel.TestData.ITEMS));
+        int withTopics = 0;
+        for (Npc n : all.all()) {
             List<String> t = D.topics(n);
-            assertTrue(t.size() >= 4, n.key() + " " + t);
+            if (n.role() == NpcRole.GUARD || n.role() == NpcRole.PRIEST || n.role() == NpcRole.BANKER
+                    || n.role() == NpcRole.CARRIER || n.role() == NpcRole.CAPTAIN || n.role() == NpcRole.KING) {
+                assertTrue(t.isEmpty(), n.key() + " should only greet and offer its buttons: " + t);
+            }
+            if (!t.isEmpty()) withTopics++;
+            assertTrue(t.size() <= 2, n.key() + " " + t);
             for (String topic : t) assertNotNull(D.answer(n, topic), n.key() + " topic " + topic);
+            assertFalse(n.greeting().isBlank(), n.key() + " keeps its one greeting line");
         }
+        assertEquals(5, withTopics, "quest-location guides and the camp quartermaster");
     }
 
     @Test

@@ -1,48 +1,12 @@
 # Rozmowy slowami kluczowymi: kto (klucz NPC, @ROLA albo * - wszyscy);slowa (przecinki, pierwsze = temat w oknie);odpowiedz
 # W odpowiedzi: {imie}, {miasto}, {powitanie}. Wybierana jest najbardziej szczegolowa pasujaca linia (NPC > rola > wszyscy).
-*;cześć,witaj,hej,dzień dobry,hi,hello;{powitanie}
-*;imię,kim jesteś,name;Nazywam się {imie}. Mieszkam w {miasto}.
-*;żegnaj,do widzenia,bye;Bezpiecznej drogi.
-*;noc,ciemno;W nocy z lasów wychodzą wilki i bandyci, a na pustyni hieny i upiory. Zapal pochodnię albo trzymaj się miasta.
-@MERCHANT;handel,towar,kupie,trade;Dotknij towaru po lewej, aby kupić, a przedmiotu po prawej, aby sprzedać. Ilość zmienisz pierwszym wierszem.
-@BANKER;bank,konto,złoto;Konto jest wspólne dla wszystkich miast. 100 gp to 1 platyna, 100 platyny to 1 kryształ.
-@PRIEST;leczenie,uzdrow,świątynia;Uleczę rany każdego wędrowca. Możesz też zamieszkać w tym mieście - tu będziesz się odradzać.
-@PRIEST;błogosławieństwo,bless;Za opłatę pobłogosławię cię: najbliższa śmierć zabierze ci połowę doświadczenia mniej. Cena rośnie z poziomem.
-@CARRIER;podróż,przejazd,wóz,jedź;Wybierz miasto z listy. Cena zależy od odległości, płacisz monetami z plecaka, a po walce z graczem musisz chwilę odczekać.
-@GUIDE;zadania,praca,quest;Poniżej masz moje zlecenia. Kolejne etapy dłuższych zadań odsłonią się, gdy skończysz poprzednie.
-varden_guide;przemytnicy,bandyci;Bandyci z wschodnich dróg handlują z goblinami z kopalni. Zacznij od zlecenia "Ślady przemytników".
+# Tylko informacje potrzebne do gry (gdzie szukac celu zadania, zasady wejscia, receptury). Uslugi NPC (handel, bank,
+# leczenie, podroz, premium, zadania) sa przyciskami w oknie rozmowy; powitanie NPC jest w npcs.csv. Na slowa bez linii
+# NPC odpowiada powitaniem i lista tematow (GameSession.askNpc).
 varden_guide;kopalnia,gobliny;Wejście do kopalni jest na zachód od świątyni. Gobliny są na pierwszych piętrach, głębiej - trolle i Grimtooth.
-varden_guide;wieża;Stara wieża na południowym wschodzie ma pięć pięter. Na szczycie widać cały kraj.
-varden_guide;frostholm,północ;Frostholm leży na północy, za zamarzniętymi pustkowiami. Idź tam od poziomu 40.
-varden_guide;qasirah,pustynia;Qasirah jest na dalekim południu, za dżunglą Selvaran. Pustynia nie wybacza słabym.
-varden_merchant;wędka,ryby;Wędkę i robaki kupisz u mnie. Wędkę weź do ręki, a robaki trzymaj w plecaku - każde zarzucenie zużywa jednego. Na północy i południu łowi się inne ryby niż w naszym jeziorze.
-frost_guide;yeti,zamieć;Yeti napadają na karawany, a wiedźmy mrozu ściągają zamieć. Kto pokona yeti, temu powierzę sprawę wiedźm.
 frost_guide;królowa,jaskinie;Królowa Lodu rządzi najgłębszym poziomem Lodowych Jaskiń. Nie schodź tam sam.
-frost_merchant;dorsz,ryby;Lodowy dorsz spod lodu syci na długo. Skupuje go chętniej niż zwykłe ryby.
-selv_guide;wyprawa,badacze;Wyprawa badaczy zaginęła w dżungli. Najpierw rozpraw się z łowcami, potem pójdź za śladem węży.
-selv_guide;ruiny,kolos;W Zatopionych Ruinach śpi kamienny kolos. Pilnuje serca ruin.
-selv_merchant;węgorz,bagna;Węgorze łowi się prosto z bagien. Potrzebujesz tylko wędki i cierpliwości.
-qas_guide;faraon,krypty;Neferakh spoczywa w najgłębszej krypcie. Jego klątwa budzi mumie.
-qas_merchant;karp,oaza;Karpie z oaz są złote jak piasek. Płaci się za nie najlepiej na całej pustyni.
+frost_guide;golemy,serce;Lodowe golemy krążą wokół jaskiń. Ich zamarznięte serca podtrzymują zamieć.
+selv_guide;świątynia,strażnicy;Za gniazdami węży stoi stara świątynia. Jej kamienni strażnicy nie wpuszczają nikogo.
 camp_guide;most,strażnik;Strażnik mostu wpuszcza tylko od poziomu 200. Dalej jest kraina, z której wielu nie wróciło.
 camp_guide;otchłań,morgath;Na samym południowym wschodzie leży Otchłań. Mor'gath czeka tam na najsilniejsze drużyny.
 camp_merchant;kuźnia,obsydian;Z obsydianu, lodowych rdzeni i esencji cienia wykujesz najlepszy sprzęt. Receptury masz w księdze.
-qas_guide;karawana,hieny,upiory;Karawany giną na szlaku: najpierw hieny, potem piaskowe upiory, a ktoś jeszcze okrada krypty. Pomóż, a Qasirah się odwdzięczy.
-selv_guide;świątynia,strażnicy;Za gniazdami węży stoi stara świątynia. Jej kamienni strażnicy nie wpuszczają nikogo.
-frost_guide;golemy,serce;Lodowe golemy krążą wokół jaskiń. Ich zamarznięte serca podtrzymują zamieć.
-# Etap 15: kapitanowie i przystan wschodnia
-@CAPTAIN;rejs,statek,podróż,travel;Pływam tam, gdzie pokazuje lista rejsów. Wybierz cel i zapłać monetami - reszta to moja sprawa.
-@CAPTAIN;wyspy,wyspa,islands;Na wschodzie są Wyspa Mgieł, Lodowa Wyspa i Wyspa Wulkaniczna. Na południu Wyspa Koralowa i Wyspa Piratów. Wszystkie dla twardych, od poziomu 300.
-@CAPTAIN;piraci,pirat,pirates;Piraci siedzą w Grocie Przemytników na swojej wyspie. Ich herszt to Krwawobrody.
-isle_guide;zadanie,zlecenie,praca,quest,mission;Wybierz zlecenie z listy. Każde kolejne odblokowuje się, gdy skończysz poprzednie - a za ostatnie z łańcucha daję koralowy ekwipunek.
-isle_guide;bossowie,boss,potwory;Matriarcha w Gnieździe Wiwern, Krwawobrody w Grocie Przemytników, Skaldra w Lodowych Grotach, Morvena w Krypcie Mgieł i Pyrrax w Sercu Wulkanu. Idźcie drużyną.
-isle_guide;koral,koralowy,coral;Koralowy ekwipunek z poziomu 350 noszą najlepsi marynarze. Dostaniesz go ode mnie za największe zlecenia albo z bossów.
-isle_merchant;skup,sprzedam,ceny,handel,trade;Kupię łuski wiwern, szczypce krabów, haki piratów, rogi z prochem, pierścienie topielców, esencje mgły i rogi smoków. Płacę od razu.
-# 2026-10-23: krol Aurelian (premium i promocja), straznicy bram, rejsy tylko z premium
-@KING;król,królestwo,king;Jestem Aurelian, władca Varden i całego kontynentu. Moi kapitanowie wożą tylko posiadaczy konta premium.
-@KING;zasady,cena,koszt;Konto premium kosztuje 500 000 gp, promocja 1 000 000 gp - oba z konta w banku. Promocję daję od poziomu 20 i tylko z premium. Napisz premium albo promocja.
-@KING;straż,strażnicy,guards;Moi strażnicy pilnują bram każdego miasta. W strefie ochronnej nic ci nie grozi.
-@GUARD;brama,miasto,droga,gate;Za bramą zaczynają się dzikie krainy. Trzymaj się drogi, póki nie poznasz okolicy.
-@GUARD;potwory,niebezpieczeństwo,orki,monsters;Orki spaliły kilka wiosek na zachodzie i południu. Na północnym wschodzie dymi wulkan - tam jest jeszcze gorzej.
-@GUARD;król,zamek,premium,promocja;Król Aurelian przyjmuje w sali tronowej zamku Varden. To u niego kupisz premium i promocję.
-@CAPTAIN;premium,konto;Wożę tylko posiadaczy konta premium. Kupisz je u króla Aureliana w zamku Varden.

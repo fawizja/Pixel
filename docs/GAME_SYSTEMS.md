@@ -222,7 +222,9 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
 - Rozmowa slowami kluczowymi (`data/dialogues.csv`, `npc/DialogueRegistry`): wiersze "Zapytaj: ..." w oknie
   NPC albo czat obok NPC (offline i online). Bez wielkosci liter i polskich znakow, z tolerancja odmiany
   (praca / prace); linia NPC wygrywa z linia roli i wspolna. Odpowiedz idzie do dziennika jako "Imie: tekst";
-  online liczy ja serwer (akcja `npc:ask:<tekst>`).
+  online liczy ja serwer (akcja `npc:ask:<tekst>`). Bez pogawedek: tylko linie potrzebne do gry (gdzie szukac
+  celu zadania, brama poziomu za mostem, receptury u kwatermistrza obozu); uslugi sa przyciskami okna, a na inne
+  slowa (np. "czesc") NPC odpowiada swoim jednym powitaniem z npcs.csv i lista tematow.
 
 ## Przystan Wschodnia - wyspy 300+ (etap 15, dane)
 

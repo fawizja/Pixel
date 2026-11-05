@@ -2431,7 +2431,8 @@ public final class Hud {
                 boolean canPromo = pc.isPremium() && !pc.isPromoted() && pc.level() >= pl.fawizja.pixel.game.GameSession.PROMOTION_LEVEL && bal >= promo;
                 left.add(new MenuRow("npc:promote", pc.isPromoted() ? "Promocja: " + pc.vocationTitle() : "Promocja: " + pc.vocation().promotedName(),
                         pc.isPromoted() ? "znak promocji i szybsza regeneracja"
-                                : String.format("%,d gp z banku, wymaga premium - znak przy postaci, regeneracja +50%%", promo), canPromo));
+                                : String.format("%,d gp z banku, premium i poziom %d - znak przy postaci, regeneracja +50%%", promo,
+                                        pl.fawizja.pixel.game.GameSession.PROMOTION_LEVEL), canPromo));
                 left.add(new MenuRow("npc:none", String.format("Saldo: %,d gp", bal), "opłaty pobiera król z konta w banku", false));
                 break;
             }
