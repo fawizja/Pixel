@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.222.0] - 2026-11-05
+
+### Zmieniono
+- Skille z expienia rosną jak na serwerze z przelicznikami RubinOT (tabela przeliczników bez zmian): knight na
+  poziomie 100 ma ok. 82/77 (broń/tarcza), paladin dystans ok. 83, sorcerer i druid magic level ok. 72.
+  Każde uderzenie, strzał i punkt many liczą się jak 30 prób, a tarcza jak 90 prób za cios potwora.
+- Tarcza ćwiczy się od każdego ciosu wręcz (także żywiołowego) i od pocisków fizycznych; czary potworów się nie liczą.
+- Postacie tworzone od razu na wysokim poziomie (start offline na 300) mają skille pasujące do tego tempa, np. knight
+  300: broń 106, tarcza 105; sorcerer 300: magic level 114.
+
 ## [0.221.0] - 2026-11-04
 
 ### Zmieniono
