@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.224.0] - 2026-11-05
+
+### Dodano
+- Wybór miasta startowego przy tworzeniu postaci, jak w Tibii: Varden, Frostholm, Selvaran, Qasirah, Valmir albo Nerys,
+  każde z opisem i podglądem mapy. Nowa postać zaczyna w świątyni wybranego miasta i ma je jako miasto domowe.
+  W grze online wybór miasta przy zakładaniu nowego konta.
+- Zmiana miasta jak dotąd u kapłana w świątyni („Zamieszkaj w ...”).
+
 ## [0.223.0] - 2026-11-05
 
 ### Zmieniono
