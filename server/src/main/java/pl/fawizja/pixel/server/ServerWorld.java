@@ -50,6 +50,8 @@ final class ServerWorld {
     private static final Logger LOG = Logger.getLogger("pixel.server");
     static final long SAVE_EVERY_MS = 60_000;
     static final long SELF_EVERY_MS = 250;
+    /** Kawalki mapy (64 x 64) w jednym komunikacie FOG: najwyzej ~44 KB base64 (limit linii 64 KB). */
+    static final int FOG_CHUNKS_PER_LINE = 64;
     /** Czat: najwyzej CHAT_MAX wiadomosci w CHAT_WINDOW_MS. */
     static final int CHAT_MAX = 5;
     static final long CHAT_WINDOW_MS = 10_000;
@@ -3220,8 +3222,14 @@ final class ServerWorld {
                 }
                 p.eventsSent = p.session.combat().eventTotal();
             }
+            if (!p.fogSent) {
+                // odkryta mapa raz po zalogowaniu (czesci mieszcza sie w linii protokolu); dalej klient odkrywa
+                // ja sam z pozycji z klatek, a serwer z wlasnych pozycji i zapisuje ja w zapisie postaci
+                for (String part : p.session.character().explored().encodeParts(FOG_CHUNKS_PER_LINE)) p.client.send("FOG", part);
+                p.fogSent = true;
+            }
             if (now - p.lastSelfMs >= SELF_EVERY_MS) {
-                String self = codec.encode(p.session.character());
+                String self = codec.encode(p.session.character(), false);
                 if (!self.equals(p.lastSelf)) {
                     p.client.send("SELF", self);
                     p.lastSelf = self;

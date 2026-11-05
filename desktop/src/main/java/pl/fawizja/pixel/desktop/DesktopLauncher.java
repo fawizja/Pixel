@@ -44,6 +44,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.dpad=NE      wcisniety kierunek krzyzyka (N, NE, E, SE, S, SW, W, NW)
  *   -Dpixel.hold=fx,fy   palec przytrzymany na widoku gry (ulamki 0..1) w wariancie "Przytrzymanie na mapie"
  *   -Dpixel.walkto=x,y  marsz do pola (jak dotkniecie duzej mapy)
+ *   -Dpixel.revealMap=1  cala mapa odkryta (bez mgly; regresja GUI domyslnie, sceny mgly ustawiaja 0)
+ *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
@@ -81,6 +83,26 @@ public final class DesktopLauncher {
         private boolean clockSet;
         private int frame;
         private boolean teleported;
+        private boolean revealed;
+
+        /** Odkrywa widok z kazdego pola odcinkow trasy (linie proste miedzy punktami, na pietrze punktu). */
+        private static void exploreRoute(pl.fawizja.pixel.world.ExploredMap map, String route) {
+            Position prev = null;
+            for (String pt : route.split(";")) {
+                String[] c = pt.split(",");
+                Position p = new Position(Integer.parseInt(c[0].trim()), Integer.parseInt(c[1].trim()), Integer.parseInt(c[2].trim()));
+                if (prev == null || prev.z() != p.z()) {
+                    map.revealView(p);
+                } else {
+                    int n = Math.max(Math.abs(p.x() - prev.x()), Math.abs(p.y() - prev.y()));
+                    for (int i = 1; i <= n; i++) {
+                        map.revealView(new Position(prev.x() + Math.round((p.x() - prev.x()) * (float) i / n),
+                                prev.y() + Math.round((p.y() - prev.y()) * (float) i / n), p.z()));
+                    }
+                }
+                prev = p;
+            }
+        }
 
         @Override
         public void create() {
@@ -120,7 +142,15 @@ public final class DesktopLauncher {
                         new pl.fawizja.pixel.time.WorldClock(-hour * pl.fawizja.pixel.time.WorldClock.GAME_HOUR_MS,
                                 pl.fawizja.pixel.time.WorldClock.REAL_DAY_MS, 0.38f));
             }
+            if (!revealed && getScreen() instanceof GameScreen) {
+                revealed = true;
+                if ("1".equals(System.getProperty("pixel.revealMap"))) {
+                    ((GameScreen) getScreen()).session().character().explored().revealAll();
+                }
+            }
             if (!teleported && teleport != null && getScreen() instanceof GameScreen) {
+                String route = System.getProperty("pixel.exploreRoute");
+                if (route != null) exploreRoute(((GameScreen) getScreen()).session().character().explored(), route);
                 String[] p = teleport.split(",");
                 ((GameScreen) getScreen()).session().teleport(
                         new Position(Integer.parseInt(p[0].trim()), Integer.parseInt(p[1].trim()), Integer.parseInt(p[2].trim())), 0L);

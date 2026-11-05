@@ -660,6 +660,19 @@ na inne pietra) i co klatke kierunek do nastepnego pola, podawany jak z joystick
 Dotkniecie swiata (`GameScreen.tapTile`): gracz online -> menu gracza, NPC blisko -> rozmowa, NPC daleko -> marsz na
 pole obok (`pathNextTo`) i rozmowa po dojsciu, potwor -> cel, cialo obok -> lup, wolne pole -> marsz bez komunikatu.
 
+Mgla mapy (2026-11-05, jak w Tibii): `world/ExploredMap` w `PlayerCharacter.explored()` - bit na kafelek na pietrze
+(z -7..7), kawalki 64x64 (512 B) tworzone przy pierwszym odkryciu (11 pieter 1000x1000 najwyzej ~1,4 MB).
+`GameSession.update` (offline i serwer) oraz `GameScreen` online odkrywaja widok 17x13 wokol postaci
+(`revealView`, okno 15x11 + pas 1 pola; nic, gdy postac stoi). Zapis: pole `fog` (deflate + base64), format v7;
+starsze zapisy (`markLegacy`) dostaja odkryty prostokat +-24 x +-18 wokol swiatyni miasta postaci (raz, w konstruktorze
+sesji). Online: serwer liczy mgle ze swoich pozycji i zapisuje ja; po zalogowaniu wysyla ja raz komunikatami
+`FOG` (po 64 kawalki, < 48 KB na linie), SELF jej nie zawiera (`encode(pc, false)`); klient OR-uje FOG i dalej
+odkrywa sam. `Minimap`: nieodkryte pola - ciemna mgla z lekkim szumem, 2 pola miekkiej krawedzi; nowe odkrycia
+dosylane do tekstury blokami 32x32 (`Texture.draw` z gotowych Pixmap, bufor cykliczny prostokatow w `ExploredMap`).
+Znaczniki i nazwy miast tylko na odkrytych polach (swoje miasto zawsze); dotkniecie nieodkrytego pola duzej mapy:
+"Nie znasz tej okolicy.". `-Dpixel.revealMap=1` odkrywa wszystko (regresja GUI domyslnie), `-Dpixel.exploreRoute`
+odkrywa trase do zrzutow.
+
 ## Podsumowanie smierci (Z logika)
 
 `combat/DeathRecap`: `record(zrodlo, obrazenia, czas)` z `CombatSystem.monsterAttacks` i `PvpRules.hit`

@@ -20,7 +20,7 @@ import pl.fawizja.pixel.world.WorldLayout;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 6;
+    public static final int CURRENT_VERSION = 7;
 
     private final ItemRegistry items;
     /** Zegar scienny do znacznika czasu zapisu staminy (testy podmieniaja). */
@@ -32,7 +32,13 @@ public final class CharacterCodec {
 
     public void setWallClock(java.util.function.LongSupplier clock) { this.wallClock = clock; }
 
-    public String encode(PlayerCharacter pc) {
+    public String encode(PlayerCharacter pc) { return encode(pc, true); }
+
+    /**
+     * withExplored = false: bez odkrytej mapy (komunikat SELF serwera co 250 ms - mapa idzie raz, w FOG,
+     * a dalej klient odkrywa ja sam ze swojej pozycji).
+     */
+    public String encode(PlayerCharacter pc, boolean withExplored) {
         Map<String, String> m = new LinkedHashMap<>();
         m.put("id", pc.id());
         m.put("name", pc.name());
@@ -108,6 +114,10 @@ public final class CharacterCodec {
             kept.append(id);
         }
         if (kept.length() > 0) m.put("kept", kept.toString());
+        if (withExplored) {
+            String fog = pc.explored().encode();
+            if (!fog.isEmpty()) m.put("fog", fog);
+        }
 
         StringBuilder body = new StringBuilder();
         for (Map.Entry<String, String> e : m.entrySet()) {
@@ -317,6 +327,9 @@ public final class CharacterCodec {
         if (!ignore.isEmpty()) {
             for (String id : ignore.split(",")) pc.autoLootFilter().ignore(Integer.parseInt(id.trim()));
         }
+        // v7: odkryta mapa (mgla); starsze zapisy - sesja odkryje okolice swiatyni miasta postaci
+        if (loadVersion < 7) pc.explored().markLegacy();
+        else pc.explored().merge(m.get("fog"));
         String kept = m.getOrDefault("kept", "");
         if (!kept.isEmpty()) {
             for (String id : kept.split(",")) pc.keptItems().add(Integer.parseInt(id.trim()));

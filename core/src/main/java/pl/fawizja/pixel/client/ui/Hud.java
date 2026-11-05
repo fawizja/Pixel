@@ -3324,7 +3324,7 @@ public final class Hud {
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
         if (equipPanelVisible()) drawEquipPanel(batch, session);
-        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
+        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
             float dy = diagTop() - 10;
@@ -3830,6 +3830,8 @@ public final class Hud {
      * Dotkniecie przy otwartej duzej mapie: "-" / "+" zmienia przyblizenie, dotkniecie obrazu - marsz na to pole
      * (GameScreen: "map:goto:x,y"), reszta zamyka mape.
      */
+    static final String UNKNOWN_AREA = "Nie znasz tej okolicy.";
+
     private void bigMapTap(float px, float py, GameSession session, Actions actions) {
         HudLayout.Rect r = new HudLayout.Rect();
         if (mapZoomButton(false, r).contains(px, py)) {
@@ -3845,7 +3847,14 @@ public final class Hud {
         if (img != null && px >= img[0] && px <= img[0] + img[6] && py >= img[1] && py <= img[1] + img[3]) {
             int tx = (int) (img[4] + (px - img[0]) / img[2]);
             int ty = (int) (img[5] + (img[1] + img[3] - py) / img[2]);
-            if (tx >= 0 && tx < session.world().width() && ty >= 0 && ty < session.world().height()) actions.onButton("map:goto:" + tx + "," + ty);
+            if (tx >= 0 && tx < session.world().width() && ty >= 0 && ty < session.world().height()) {
+                if (!session.character().explored().isExplored(tx, ty, session.character().position().z())) {
+                    // mgla: marsz tylko w znane miejsca
+                    session.log().add(session.lastUpdateMs(), pl.fawizja.pixel.game.EventLog.Kind.WARNING, UNKNOWN_AREA);
+                    return;
+                }
+                actions.onButton("map:goto:" + tx + "," + ty);
+            }
         }
     }
 
@@ -3864,13 +3873,16 @@ public final class Hud {
         HudLayout.Rect zr = new HudLayout.Rect();
         centered(batch, "-", mapZoomButton(false, zr).cx(), zr.cy());
         centered(batch, "+", mapZoomButton(true, zr).cx(), zr.cy());
-        float[] img = minimap.drawZoomed(batch, session.world(), p, walkTarget, markerPositions(session), menuX + 8, menuY + 8, menuW - 16, menuH - 34, bigMapZoom);
+        float[] img = minimap.drawZoomed(batch, session.world(), session.character().explored(), p, walkTarget, markerPositions(session), menuX + 8, menuY + 8, menuW - 16, menuH - 34, bigMapZoom);
         bigMapImg = img;
         if (img == null) return;
         float right = img[0] + img[6], top = img[1] + img[3];
         font.getData().setScale(0.85f);
+        pl.fawizja.pixel.world.ExploredMap fog = session.character().explored();
         for (pl.fawizja.pixel.world.Town t : session.world().towns()) {
             if (t.temple().z() != p.z()) continue;
+            // nazwy miast tylko odkrytych (swoje miasto zawsze - postac je zna)
+            if (!fog.isExplored(t.temple()) && !t.name().equalsIgnoreCase(session.character().homeTown())) continue;
             float tx = img[0] + (t.temple().x() - img[4]) * img[2];
             float ty = top - (t.temple().y() - img[5]) * img[2];
             if (tx < img[0] || tx > right || ty < img[1] || ty > top) continue;
@@ -3878,7 +3890,7 @@ public final class Hud {
         }
         font.setColor(new Color(1f, 0.85f, 0.2f, 1f));
         for (pl.fawizja.pixel.settings.MapMarkers.Marker m : allMarkers(session)) {
-            if (m.at().z() != p.z()) continue;
+            if (m.at().z() != p.z() || !fog.isExplored(m.at())) continue;
             float mx = img[0] + (m.at().x() - img[4]) * img[2], my = top - (m.at().y() - img[5]) * img[2];
             if (mx < img[0] || mx > right || my < img[1] || my > top) continue;
             text(batch, m.name(), mx + 6, my + 6);
@@ -5807,7 +5819,7 @@ public final class Hud {
             mText(batch, time, sx + (sk != null ? STATUS_SIZE + 2 : 0), sy + 3.5f, HudLayout.MIN_FONT, Color.WHITE, true);
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
-        minimap.drawAround(batch, session.world(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, mm.h, Math.round(mm.w / 1.5f));
+        minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, mm.h, Math.round(mm.w / 1.5f));
         bStroke(batch, mm.x, mm.y, mm.w, mm.h, 1.5f, M_LINE);
         drawMobileBattle(batch, rowsVis);
         for (int i = 0; i < mlay.spells.length; i++) mSlotIcon(batch, session, pc, MobileHudLayout.SPELL_SLOTS[i], mlay.spells[i], false, serverTimeMs);
