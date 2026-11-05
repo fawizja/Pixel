@@ -32,13 +32,30 @@ public final class CharacterFactory {
     }
 
     /**
+     * Nowa postac w miescie startowym wybranym przez gracza; pusty albo nieznany wybor = miasto domyslne
+     * ({@link StartingConfig#startTown()}). Pozycja startowa to swiatynia tego miasta.
+     */
+    public PlayerCharacter createIn(pl.fawizja.pixel.world.WorldMap world, String name, Vocation vocation, String town, int level) {
+        String home = StartingTowns.resolve(world, town, config.startTown());
+        return create(name, vocation, home, world.templeOf(home), level);
+    }
+
+    /**
      * Nowa postac na podanym poziomie (gra offline: {@link StartingConfig#offlineStartLevel()}). Powyzej zwyklego
      * poziomu startowego umiejetnosci sa podniesione do typowych dla tego poziomu ({@link #skillsForLevel}),
      * a HP i mana wynikaja z poziomu i sa pelne.
      */
     public PlayerCharacter create(String name, Vocation vocation, Position startTemple, int level) {
+        return create(name, vocation, config.startTown(), startTemple, level);
+    }
+
+    /**
+     * Nowa postac w wybranym miescie startowym (ekran tworzenia postaci, jak w Tibii): homeTown to klucz miasta
+     * (male litery), startTemple jego swiatynia. Wybor sprawdza wywolujacy ({@link StartingTowns#resolve}).
+     */
+    public PlayerCharacter create(String name, Vocation vocation, String homeTown, Position startTemple, int level) {
         PlayerCharacter pc = new PlayerCharacter(UUID.randomUUID().toString(), name, vocation,
-                level, startTemple, items, config.startBankBalance(), config.startTown());
+                level, startTemple, items, config.startBankBalance(), homeTown);
         if (level > BASE_LEVEL) skillsForLevel(pc);
         for (String key : StarterKits.equipped(vocation, level)) {
             ItemStack s = ItemStack.of(items.byKey(key).id());

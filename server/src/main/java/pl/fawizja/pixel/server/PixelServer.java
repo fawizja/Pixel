@@ -165,7 +165,7 @@ public final class PixelServer implements AutoCloseable {
                 c.send("ERR", "Podaj imię, profesję i hasło.");
                 return;
             }
-            c.player = world.join(c, f[2], f[3], f[4], now);
+            c.player = world.join(c, f[2], f[3], f[4], f.length > 5 ? f[5] : null, now);
             return;
         }
         world.command(c.player, f, now);

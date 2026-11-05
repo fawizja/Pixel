@@ -45,6 +45,12 @@ public final class LoginScreen extends ScreenAdapter {
     private String message = "";
     private boolean certificateChanged;
     private final Rectangle forget = new Rectangle();
+    /** Miasto startowe nowego konta (jak profesja: istniejaca postac je pomija). */
+    private final java.util.List<pl.fawizja.pixel.character.StartingTowns.Info> towns;
+    private int town;
+    private final Rectangle townPrev = new Rectangle();
+    private final Rectangle townNext = new Rectangle();
+    private final Rectangle townBox = new Rectangle();
 
     public LoginScreen(PixelGame game) {
         this.game = game;
@@ -60,6 +66,15 @@ public final class LoginScreen extends ScreenAdapter {
             // zostaje domyslna
         }
         if (values[NAME].length() > 0) focus = PASSWORD;
+        towns = pl.fawizja.pixel.character.StartingTowns.list(game.world());
+        String saved = prefs.getString("town", game.defaultStartTown());
+        for (int i = 0; i < towns.size(); i++) if (towns.get(i).key().equalsIgnoreCase(saved)) town = i;
+    }
+
+    private String townKey() { return towns.isEmpty() ? null : towns.get(town).key(); }
+
+    private void cycleTown(int step) {
+        if (!towns.isEmpty()) town = Math.floorMod(town + step, towns.size());
     }
 
     @Override
@@ -78,6 +93,8 @@ public final class LoginScreen extends ScreenAdapter {
                 for (int i = 0; i < vocations.length; i++) {
                     if (vocations[i].contains(p)) vocation = Vocation.values()[i];
                 }
+                if (townPrev.contains(p)) cycleTown(-1);
+                else if (townNext.contains(p) || townBox.contains(p)) cycleTown(1);
                 if (certificateChanged && forget.contains(p)) {
                     prefs.remove("pin." + values[SERVER].toString().trim());
                     prefs.flush();
@@ -134,10 +151,11 @@ public final class LoginScreen extends ScreenAdapter {
         message = "Łączenie z " + server + "...";
         Gdx.input.setOnscreenKeyboardVisible(false);
         Vocation voc = vocation;
+        String startTown = townKey();
         String pinKey = "pin." + server;
         String pinned = prefs.getString(pinKey, null);
         Thread t = new Thread(() -> {
-            PixelGame.OnlineLogin login = game.connectOnline(server, name, voc.name(), password, pinned);
+            PixelGame.OnlineLogin login = game.connectOnline(server, name, voc.name(), password, pinned, startTown);
             Gdx.app.postRunnable(() -> {
                 connecting = false;
                 if (login.problem() != null) {
@@ -152,6 +170,7 @@ public final class LoginScreen extends ScreenAdapter {
                 prefs.putString("server", server);
                 prefs.putString("name", login.character().name());
                 prefs.putString("vocation", voc.name());
+                if (startTown != null) prefs.putString("town", startTown);
                 prefs.flush();
                 game.startOnline(login);
             });
@@ -162,20 +181,29 @@ public final class LoginScreen extends ScreenAdapter {
 
     @Override
     public void resize(int width, int height) {
-        float scale = Math.max(1f, Math.min(3.5f, Gdx.graphics.getDensity()));
-        viewport.setUnitsPerPixel(1f / scale);
+        viewport.setUnitsPerPixel(1f / VocationSelectScreen.uiScale());
         viewport.update(width, height, true);
         float w = viewport.getWorldWidth(), h = viewport.getWorldHeight();
-        float fw = Math.min(360, w - 32), fh = 30;
-        float x = (w - fw) / 2f;
+        // niski ekran (telefon poziomo): pola po lewej, profesja, miasto i przyciski po prawej
+        boolean twoColumns = h < 470 && w >= 640;
+        float fw = twoColumns ? Math.min(380, (w - 48) / 2f) : Math.min(360, w - 32), fh = twoColumns ? 36 : 30;
+        float x = twoColumns ? w / 2f - 8 - fw : (w - fw) / 2f;
         float y = h - 70;
         for (int i = 0; i < fields.length; i++) {
             fields[i].set(x, y - fh, fw, fh);
             y -= fh + 26;
         }
+        if (twoColumns) {
+            x = w / 2f + 8;
+            y = h - 70;
+        }
         float vw = (fw - (vocations.length - 1) * 8) / vocations.length;
-        for (int i = 0; i < vocations.length; i++) vocations[i].set(x + i * (vw + 8), y - 38, vw, 38);
-        y -= 38 + 18;
+        for (int i = 0; i < vocations.length; i++) vocations[i].set(x + i * (vw + 8), y - 40, vw, 40);
+        y -= 40 + 26;
+        townPrev.set(x, y - 44, 48, 44);
+        townNext.set(x + fw - 48, y - 44, 48, 44);
+        townBox.set(x + 56, y - 44, fw - 112, 44);
+        y -= 44 + 44;
         connect.set(x + fw / 2f + 4, y - 40, fw / 2f - 4, 40);
         back.set(x, y - 40, fw / 2f - 4, 40);
         forget.set(x, y - 40 - 70, fw, 34);
@@ -204,6 +232,13 @@ public final class LoginScreen extends ScreenAdapter {
             shapes.setColor(sel ? 0.45f : 0.18f, sel ? 0.36f : 0.17f, sel ? 0.12f : 0.22f, 1f);
             shapes.rect(r.x, r.y, r.width, r.height);
         }
+        if (!towns.isEmpty()) {
+            shapes.setColor(0.25f, 0.22f, 0.3f, 1f);
+            shapes.rect(townPrev.x, townPrev.y, townPrev.width, townPrev.height);
+            shapes.rect(townNext.x, townNext.y, townNext.width, townNext.height);
+            shapes.setColor(0.45f, 0.36f, 0.12f, 1f);
+            shapes.rect(townBox.x, townBox.y, townBox.width, townBox.height);
+        }
         shapes.setColor(connecting ? 0.2f : 0.15f, connecting ? 0.2f : 0.4f, connecting ? 0.2f : 0.25f, 1f);
         shapes.rect(connect.x, connect.y, connect.width, connect.height);
         shapes.setColor(0.25f, 0.2f, 0.2f, 1f);
@@ -229,13 +264,32 @@ public final class LoginScreen extends ScreenAdapter {
         }
         Rectangle first = vocations[0];
         game.font().setColor(Color.LIGHT_GRAY);
-        game.font().draw(batch, "Profesja (tylko dla nowego konta)", first.x, first.y + first.height + 16);
+        boolean compact = first.width < 110; // waskie przyciski (telefon): sama postac, nazwa w podpisie
+        game.font().draw(batch, "Profesja (tylko dla nowego konta)" + (compact ? ": " + vocation.displayName() : ""),
+                first.x, first.y + first.height + 16);
         for (int i = 0; i < vocations.length; i++) {
             Rectangle r = vocations[i];
             Vocation v = Vocation.values()[i];
+            if (compact) {
+                batch.draw(game.art().character(v, Direction.SOUTH), r.x + r.width / 2f - 17, r.y + 3, 34, 34);
+                continue;
+            }
             batch.draw(game.art().character(v, Direction.SOUTH), r.x + 4, r.y + 3, 32, 32);
             game.font().setColor(Color.WHITE);
             game.font().draw(batch, v.displayName(), r.x + 38, r.y + r.height / 2f + 6);
+        }
+        if (!towns.isEmpty()) {
+            pl.fawizja.pixel.character.StartingTowns.Info t = towns.get(town);
+            game.font().setColor(Color.LIGHT_GRAY);
+            game.font().draw(batch, "Miasto startowe (tylko dla nowego konta)", townPrev.x, townPrev.y + townPrev.height + 16);
+            centered(batch, "<", townPrev.x + townPrev.width / 2f, townPrev.y + townPrev.height / 2f, Color.WHITE);
+            centered(batch, ">", townNext.x + townNext.width / 2f, townNext.y + townNext.height / 2f, Color.WHITE);
+            centered(batch, t.name(), townBox.x + townBox.width / 2f, townBox.y + townBox.height - 13, Color.GOLD);
+            centered(batch, t.climate(), townBox.x + townBox.width / 2f, townBox.y + 12, Color.LIGHT_GRAY);
+            game.font().setColor(Color.GRAY);
+            game.font().draw(batch, t.description(), townPrev.x, townPrev.y - 6, townNext.x + townNext.width - townPrev.x,
+                    com.badlogic.gdx.utils.Align.left, true);
+            game.font().setColor(Color.WHITE);
         }
         centered(batch, connecting ? "Łączenie..." : "Połącz", connect.x + connect.width / 2f, connect.y + connect.height / 2f, Color.WHITE);
         centered(batch, "Wstecz", back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);

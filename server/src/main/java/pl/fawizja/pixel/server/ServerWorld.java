@@ -1727,6 +1727,14 @@ final class ServerWorld {
 
     /** Logowanie: wczytuje zapis postaci o tym imieniu albo tworzy nowa. Zwraca null z komunikatem bledu w client. */
     ServerPlayer join(ClientHandler client, String name, String vocation, String password, long now) {
+        return join(client, name, vocation, password, null, now);
+    }
+
+    /**
+     * Jak wyzej, z miastem startowym nowej postaci (szoste pole HELLO; null/pusty/"-" = miasto domyslne
+     * start.town). Nieznane miasto przy zakladaniu konta = odmowa; dla istniejacej postaci pole jest pomijane.
+     */
+    ServerPlayer join(ClientHandler client, String name, String vocation, String password, String town, long now) {
         if (shutdownDone) {
             client.send("ERR", "Serwer jest wyłączany. Spróbuj za chwilę.");
             return null;
@@ -1743,6 +1751,11 @@ final class ServerWorld {
                 Vocation.valueOf(vocation);
             } catch (IllegalArgumentException e) {
                 client.send("ERR", "Nieznana profesja.");
+                return null;
+            }
+            if (town != null && !town.isBlank() && !town.equals("-")
+                    && !pl.fawizja.pixel.character.StartingTowns.isValid(world, town)) {
+                client.send("ERR", "Nieznane miasto startowe: " + town + ".");
                 return null;
             }
             java.util.ArrayDeque<Long> made = newAccounts.computeIfAbsent(client.address(), k -> new java.util.ArrayDeque<>());
@@ -1788,8 +1801,8 @@ final class ServerWorld {
         try {
             pc = load(name);
             if (pc == null) {
-                pc = new CharacterFactory(config, items).create(name, Vocation.valueOf(vocation),
-                        world.templeOf(config.startTown()));
+                pc = new CharacterFactory(config, items).createIn(world, name, Vocation.valueOf(vocation),
+                        town, config.startLevel());
             } else {
                 pc.stamina().onLogin(wallClock.getAsLong()); // stamina odnowiona za czas offline (zasady Tibii)
             }
