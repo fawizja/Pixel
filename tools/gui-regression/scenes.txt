@@ -158,3 +158,7 @@ create_town_desktop|-Dpixel.open=create -Dpixel.createTown=frostholm -Dpixel.cre
 start_frostholm|-Dpixel.autostart=Test:KNIGHT:frostholm -Dpixel.hour=12
 tap_marker_grow|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=500,447,0 -Dpixel.button=tips_off -Dpixel.taps=503,448@41 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 tap_marker_blocked|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=tips_off -Dpixel.taps=495,506@43
+# 2026-11-05: warianty sterowania (telefon): krzyzyk z wcisnietym skosem, plywajacy joystick 4 kierunki, przytrzymanie na mapie, ustawienia
+controls_dpad|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.controls=dpad -Dpixel.dpad=NE
+controls_float4|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.controls=float4 -Dpixel.joy=0.25,0.4 -Dpixel.joyDrag=80,-30
+controls_settings|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_settings -Dpixel.sens=4

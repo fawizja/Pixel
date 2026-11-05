@@ -303,6 +303,10 @@ public final class GameScreen extends ScreenAdapter {
         Gdx.input.setCatchKey(Input.Keys.BACK, true); // Wstecz na Androidzie zamyka okna zamiast konczyc gre
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
+        // zrzuty ekranu: -Dpixel.controls=dpad|float4|hold|classic, -Dpixel.sens=1..5 (bez zapisu)
+        settings.setControlScheme(pl.fawizja.pixel.movement.ControlScheme.byKey(System.getProperty("pixel.controls"), settings.controlScheme()));
+        Integer sens = Integer.getInteger("pixel.sens");
+        if (sens != null) settings.setSensitivity(sens);
         hud.setSettings(settings);
         // wlasny uklad paska czarow, osobno dla kazdej postaci
         this.barPrefs = Gdx.app.getPreferences("pixel-bar");
@@ -364,13 +368,21 @@ public final class GameScreen extends ScreenAdapter {
                 worldPointer = pointer;
                 worldDownX = sx;
                 worldDownY = sy;
+                worldCurX = sx;
+                worldCurY = sy;
                 worldDownMs = TimeUtils.millis();
                 worldGesture = 0;
+                // wariant "Przytrzymanie na mapie": krotkie dotkniecie = pole, dluzsze = marsz w strone palca
+                if (hud.controlScheme() == pl.fawizja.pixel.movement.ControlScheme.HOLD) hold.press(worldDownMs);
                 return true;
             }
 
             @Override
             public boolean touchDragged(int sx, int sy, int pointer) {
+                if (pointer == worldPointer) {
+                    worldCurX = sx;
+                    worldCurY = sy;
+                }
                 if (pointer == worldPointer && worldGesture == 0
                         && Math.abs(sx - worldDownX) + Math.abs(sy - worldDownY) > DRAG_SLOP_DP * Gdx.graphics.getDensity()) {
                     worldGesture = hud.floatJoystick(worldDownX, worldDownY, pointer) ? 1 : 3;
@@ -382,7 +394,11 @@ public final class GameScreen extends ScreenAdapter {
             public boolean touchUp(int sx, int sy, int pointer, int button) {
                 if (pointer == worldPointer) {
                     worldPointer = -1;
-                    if (worldGesture == 0) return tapWorld(worldDownX, worldDownY);
+                    boolean holdScheme = hold.down();
+                    boolean tap = hold.release(TimeUtils.millis());
+                    hud.holdIndicator(false, 0, 0, 0f, null);
+                    // przytrzymanie: dotknieciem pola jest tylko krotkie dotkniecie bez przeciagania
+                    if (worldGesture == 0 && (!holdScheme || tap)) return tapWorld(worldDownX, worldDownY);
                 }
                 return hud.touchUp(sx, sy, pointer);
             }
@@ -500,33 +516,25 @@ public final class GameScreen extends ScreenAdapter {
             houseAction(id, t);
             return;
         }
+        if (id.startsWith("settings:") && settings.apply(id)) {
+            if (id.equals("settings:joysize")) hud.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            if (id.equals("settings:controls")) {
+                // nowy wariant sterowania: stary palec nie prowadzi juz postaci
+                hud.resetMoveControls();
+                hold.cancel();
+                session.log().add(t, EventLog.Kind.INFO, "Sterowanie: " + settings.controlScheme().label + ".");
+            }
+            settingsPrefs.put(settings.toMap());
+            settingsPrefs.flush();
+            lastGuardSampleMs = 0; // nowy limit klatek od razu
+            return;
+        }
         switch (id) {
             case "bag": hud.toggleBag(); break;
             case "diag": hud.toggleDiagnostics(); break;
             case "bar_saved":
                 barPrefs.putString(barKey(session.character()), hud.spellBar().encode());
                 barPrefs.flush();
-                break;
-            case "settings:fps":
-            case "settings:battery":
-            case "settings:light":
-            case "settings:numbers":
-            case "settings:sound":
-            case "settings:loot":
-            case "settings:weather":
-            case "settings:heal":
-            case "settings:mana":
-            case "settings:eat":
-            case "settings:target":
-            case "settings:vibrate":
-            case "settings:joyfloat":
-            case "settings:joysize":
-            case "settings:page":
-                settings.apply(id);
-                if (id.equals("settings:joysize")) hud.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-                settingsPrefs.put(settings.toMap());
-                settingsPrefs.flush();
-                lastGuardSampleMs = 0; // nowy limit klatek od razu
                 break;
             case "book": hud.toggleBook(); break;
             case "quest": hud.openJournal(); break;
@@ -999,6 +1007,8 @@ public final class GameScreen extends ScreenAdapter {
     /** Dotyk na mapie czekajacy na rozstrzygniecie (-1: brak) i jego gest: 0 jeszcze nie wiadomo, 1 joystick, 2 podglad, 3 nic. */
     private int worldPointer = -1;
     private int worldDownX, worldDownY, worldGesture;
+    /** Biezace polozenie palca na mapie (ekran) - kierunek marszu w wariancie "Przytrzymanie na mapie". */
+    private int worldCurX, worldCurY;
     private long worldDownMs;
     /** Przytrzymanie palca na polu tak dlugo otwiera podglad pola (jak "Look" w Tibii). */
     static final long LONG_PRESS_MS = 450;
@@ -1020,6 +1030,7 @@ public final class GameScreen extends ScreenAdapter {
     /** Przytrzymanie palca bez ruchu: podglad pola (sprawdzane co klatke). */
     private void checkLongPress() {
         if (worldPointer < 0 || worldGesture != 0 || TimeUtils.millis() - worldDownMs < LONG_PRESS_MS) return;
+        if (hold.down()) return; // przytrzymanie na mapie to marsz (podglad pola: prawy przycisk myszy)
         worldGesture = 2;
         lookWorld(worldDownX, worldDownY);
     }
@@ -1658,6 +1669,61 @@ public final class GameScreen extends ScreenAdapter {
     private static final long QUEUE_MS = 450;
     /** Filtr joysticka (martwa strefa, histereza, pierwszenstwo kierunkow prostych). */
     private final pl.fawizja.pixel.movement.StickFilter stick = new pl.fawizja.pixel.movement.StickFilter();
+    /** Plywajacy joystick z 4 kierunkami, przytrzymanie na mapie i czulosc, z ktora je ustawiono. */
+    private final pl.fawizja.pixel.movement.FourWayStick fourWay = new pl.fawizja.pixel.movement.FourWayStick();
+    private final pl.fawizja.pixel.movement.HoldToWalk hold = new pl.fawizja.pixel.movement.HoldToWalk();
+    private int tunedSensitivity = -1;
+    private final Vector3 holdWorld = new Vector3();
+
+    /** Kierunek z dotyku wg wariantu sterowania albo null (krzyzyk, joysticki, przytrzymanie na mapie). */
+    private Direction touchDirection(boolean stepping) {
+        if (settings.sensitivity() != tunedSensitivity) {
+            tunedSensitivity = settings.sensitivity();
+            stick.setSensitivity(tunedSensitivity);
+            fourWay.setSensitivity(tunedSensitivity);
+            hold.setSensitivity(tunedSensitivity);
+        }
+        pl.fawizja.pixel.movement.ControlScheme scheme = hud.controlScheme();
+        long ms = TimeUtils.millis();
+        if (scheme != pl.fawizja.pixel.movement.ControlScheme.CLASSIC || !hud.joystick().active()) stick.reset();
+        if (scheme != pl.fawizja.pixel.movement.ControlScheme.FLOAT4 || !hud.joystick().active()) fourWay.reset();
+        if (scheme != pl.fawizja.pixel.movement.ControlScheme.HOLD && hold.down()) hold.cancel();
+        switch (scheme) {
+            case DPAD:
+                return hud.dpad().active() ? hud.dpad().direction() : null;
+            case FLOAT4:
+                return hud.joystick().active()
+                        ? fourWay.update(hud.joystick().value().x, hud.joystick().value().y, ms, stepping) : null;
+            case HOLD: {
+                if (worldPointer < 0 || !hold.down()) {
+                    hud.holdIndicator(false, 0, 0, 0f, null);
+                    return null;
+                }
+                // palec wzgledem srodka postaci, w polach (x na wschod, y na poludnie)
+                long t = now();
+                viewport.unproject(holdWorld.set(worldCurX, worldCurY, 0));
+                float dx = holdWorld.x - (session.renderX(t) + 0.5f);
+                float dy = (worldRenderer.worldY(session.renderY(t)) + 0.5f) - holdWorld.y;
+                Direction d = hold.update(dx, dy, ms, stepping);
+                float pr = hold.progress(ms);
+                hud.holdIndicator(pr >= 0.25f, worldCurX, worldCurY, pr, d);
+                return d;
+            }
+            default:
+                // spokojny joystick: wyrazne wychylenie, histereza kierunku, skos tylko przy wyraznym skosie
+                return hud.joystick().active() ? stick.update(hud.joystick().value().x, hud.joystick().value().y, ms) : null;
+        }
+    }
+
+    /** Podglad przytrzymania palca na mapie w punkcie ekranu (zrzuty: -Dpixel.hold=fx,fy), juz po progu marszu. */
+    public void simulateHold(int sx, int sy) {
+        worldPointer = 9;
+        worldDownX = worldCurX = sx;
+        worldDownY = worldCurY = sy;
+        worldDownMs = TimeUtils.millis() - 1000;
+        worldGesture = 3;
+        hold.press(worldDownMs);
+    }
 
     private Direction keyboardDirection() {
         int dx = 0, dy = 0;
@@ -1689,12 +1755,9 @@ public final class GameScreen extends ScreenAdapter {
         }
 
         Direction dir = chatDraft == null ? keyboardDirection() : null;
-        if (dir == null && hud.joystick().active()) {
-            // spokojny joystick: wyrazne wychylenie, histereza kierunku, skos tylko przy wyraznym skosie
-            dir = stick.update(hud.joystick().value().x, hud.joystick().value().y, TimeUtils.millis());
-        } else {
-            stick.reset();
-        }
+        Direction touch = touchDirection(session.isStepping(now()));
+        hud.setStickDirection(touch);
+        if (dir == null) dir = touch;
         // krotkie stukniecie klawisza w trakcie kroku nie ginie: krok wykona sie zaraz po biezacym
         if (dir == null && queuedDir != null) {
             if (TimeUtils.millis() - queuedAtMs > QUEUE_MS || chatDraft != null) queuedDir = null;

@@ -39,6 +39,10 @@ public final class GameSettings {
     /** Joystick pod kciukiem: przeciagniecie po lewej czesci widoku gry tworzy joystick tam, gdzie jest palec. */
     private boolean floatingJoystick = true;
     private int joystickSize = 100;
+    /** Wariant sterowania ruchem na ekranie dotykowym (2026-11-05, domyslnie krzyzyk). */
+    private pl.fawizja.pixel.movement.ControlScheme controlScheme = pl.fawizja.pixel.movement.ControlScheme.DEFAULT;
+    /** Suwak czulosci sterowania 1..5 ({@link pl.fawizja.pixel.movement.ControlTuning}). */
+    private int sensitivity = pl.fawizja.pixel.movement.ControlTuning.DEFAULT;
     /** Strona panelu ustawien (nie zapisywana). */
     private int page;
     /** Wierszy ustawien na stronie panelu (ostatni wiersz strony przelacza strone). */
@@ -74,6 +78,15 @@ public final class GameSettings {
         int i = 0;
         while (i < JOY_SIZE_CHOICES.length && JOY_SIZE_CHOICES[i] != joystickSize) i++;
         joystickSize = JOY_SIZE_CHOICES[(i + 1) % JOY_SIZE_CHOICES.length];
+    }
+
+    public pl.fawizja.pixel.movement.ControlScheme controlScheme() { return controlScheme; }
+    public void setControlScheme(pl.fawizja.pixel.movement.ControlScheme c) { if (c != null) controlScheme = c; }
+    public void cycleControlScheme() { controlScheme = controlScheme.next(); }
+    public int sensitivity() { return sensitivity; }
+    public void setSensitivity(int s) { sensitivity = pl.fawizja.pixel.movement.ControlTuning.clamp(s); }
+    public void cycleSensitivity() {
+        sensitivity = sensitivity >= pl.fawizja.pixel.movement.ControlTuning.MAX ? pl.fawizja.pixel.movement.ControlTuning.MIN : sensitivity + 1;
     }
 
     public int page() { return page; }
@@ -138,8 +151,20 @@ public final class GameSettings {
             case "settings:target": toggleAutoTarget(); return true;
             case "settings:joyfloat": toggleFloatingJoystick(); return true;
             case "settings:joysize": cycleJoystickSize(); return true;
+            case "settings:controls": cycleControlScheme(); return true;
+            case "settings:sens": cycleSensitivity(); return true;
             case "settings:page": page = (page + 1) % pages(); return true;
-            default: return false;
+            default:
+                // suwak czulosci: "settings:sens:N" ustawia wartosc wprost
+                if (action.startsWith("settings:sens:")) {
+                    try {
+                        setSensitivity(Integer.parseInt(action.substring(14).trim()));
+                        return true;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                }
+                return false;
         }
     }
 
@@ -159,6 +184,8 @@ public final class GameSettings {
         m.put("target", String.valueOf(autoTarget));
         m.put("joyfloat", String.valueOf(floatingJoystick));
         m.put("joysize", String.valueOf(joystickSize));
+        m.put("controls", controlScheme.key);
+        m.put("sens", String.valueOf(sensitivity));
         return m;
     }
 
@@ -180,6 +207,8 @@ public final class GameSettings {
         s.autoTarget = bool(m.get("target"), false);
         s.floatingJoystick = bool(m.get("joyfloat"), true);
         s.joystickSize = choice(m.get("joysize"), JOY_SIZE_CHOICES, 100);
+        s.controlScheme = pl.fawizja.pixel.movement.ControlScheme.byKey(m.get("controls"), pl.fawizja.pixel.movement.ControlScheme.DEFAULT);
+        s.sensitivity = choice(m.get("sens"), new int[] {1, 2, 3, 4, 5}, pl.fawizja.pixel.movement.ControlTuning.DEFAULT);
         return s;
     }
 
@@ -217,6 +246,22 @@ public final class GameSettings {
 
     /** Wszystkie ustawienia: akcja i opis. */
     public String[][] allRows() {
+        pl.fawizja.pixel.movement.ControlScheme c = controlScheme;
+        String[][] base = baseRows();
+        // sterowanie na koncu: "pod kciukiem" tylko dla klasycznego joysticka, rozmiar - gdy jest co rysowac
+        java.util.List<String[]> out = new java.util.ArrayList<>(java.util.Arrays.asList(base));
+        out.add(new String[] {"settings:controls", "Sterowanie: " + c.label});
+        out.add(new String[] {"settings:sens", "Czułość: " + sensitivity + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
+        if (c == pl.fawizja.pixel.movement.ControlScheme.CLASSIC) {
+            out.add(new String[] {"settings:joyfloat", "Joystick: " + (floatingJoystick ? "pod kciukiem (przeciągnij po mapie)" : "tylko w rogu ekranu")});
+        }
+        if (c != pl.fawizja.pixel.movement.ControlScheme.HOLD) {
+            out.add(new String[] {"settings:joysize", "Rozmiar " + (c == pl.fawizja.pixel.movement.ControlScheme.DPAD ? "krzyżyka" : "joysticka") + ": " + joystickSize + "%"});
+        }
+        return out.toArray(new String[0][]);
+    }
+
+    private String[][] baseRows() {
         return new String[][] {
             {"settings:fps", "Limit FPS: " + fpsCap + (batterySaver ? " (bateria: " + effectiveFpsCap() + ")" : "")},
             {"settings:battery", "Oszczędzanie baterii: " + (batterySaver ? "włączone" : "wyłączone")},
@@ -230,8 +275,6 @@ public final class GameSettings {
             {"settings:eat", "Jedzenie samo: " + (autoEat ? "gdy kończy się sytość" : "wyłączone")},
             {"settings:target", "Cel sam: " + (autoTarget ? "najbliższy potwór obok" : "wyłączony")},
             {"settings:vibrate", "Wibracje: " + (vibrate ? "przy niskim zdrowiu" : "wyłączone")},
-            {"settings:joyfloat", "Joystick: " + (floatingJoystick ? "pod kciukiem (przeciągnij po mapie)" : "tylko w rogu ekranu")},
-            {"settings:joysize", "Rozmiar joysticka: " + joystickSize + "%"},
         };
     }
 }
