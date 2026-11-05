@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.223.0] - 2026-11-05
+
+### Zmieniono
+- Trening na manekinie ok. 2/3 tempa expienia: cios co 2,5 s, 15 prób broni i 20 prób tarczy na cios (z przelicznikiem
+  serwera). Knight miecz 10 -> 60 w ok. 16 minut zamiast 4,8 godziny. Komunikat pokazuje tempo w próbach na minutę.
+- Trening zaczyna i kończy się dotknięciem manekina (bez przycisku Użyj); postać obraca się do manekina.
+- Manekin ma nowy wygląd: większy, słomiany na drewnianej podstawie, kołysze się po ciosie.
+
 ## [0.222.0] - 2026-11-05
 
 ### Zmieniono
