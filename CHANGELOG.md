@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.229.0] - 2026-11-05
+
+### Usunięto
+- Zbędne rozmowy z NPC: zniknęły ogólne pogawędki („cześć”, „imię”, „żegnaj”, „noc”) u wszystkich NPC oraz tematy,
+  które powtarzały to, co już pokazują przyciski okna (handel, bank, leczenie, błogosławieństwo, podróże, rejsy,
+  zadania, ceny u króla). Zostało 7 tematów z informacjami potrzebnymi do gry (np. kopalnia w Varden, Lodowe Jaskinie,
+  most na poziom 200, Otchłań).
+
+### Zmieniono
+- Okno NPC: od razu przyciski funkcji pod jednym zdaniem powitania. Inne słowo niż temat = NPC odpowiada powitaniem.
+- Strażnik nie otwiera już pustego okna: dotknięcie pokazuje tylko jego powitanie na czacie.
+- Wymóg poziomu 20 do promocji jest teraz widoczny na przycisku u króla.
+
 ## [0.228.0] - 2026-11-05
 
 ### Dodano

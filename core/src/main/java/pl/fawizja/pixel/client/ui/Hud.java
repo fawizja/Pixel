@@ -1385,6 +1385,11 @@ public final class Hud {
         optionsMenu = false;
         pl.fawizja.pixel.npc.Npc n = session.npcNearby();
         if (n == null) return;
+        if (n.role() == pl.fawizja.pixel.npc.NpcRole.GUARD) {
+            // straznik nic nie oferuje: tylko powitanie na czacie, bez pustego okna
+            session.log().add(session.lastUpdateMs(), EventLog.Kind.CHAT, n.name() + ": " + n.greeting());
+            return;
+        }
         playerMenu = null;
         if (n != npc) {
             npcPage = 0;
