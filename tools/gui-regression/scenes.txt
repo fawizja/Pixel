@@ -173,3 +173,6 @@ fog_underground_map|-Dpixel.revealMap=0 -Dpixel.autostart=Test:KNIGHT -Dpixel.ho
 # 2026-11-05: rozmowa z NPC bez pogawedek - przewodnik (zadania + jeden temat, odpowiedz na "czesc" w czacie), straznik (samo powitanie)
 npc_guide_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=497,499,0 -Dpixel.open=npc -Dpixel.button=cmd:czesc -Dpixel.button2=npc:ask:kopalnia
 npc_guard_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=560,490,0 -Dpixel.open=npc -Dpixel.button=cmd:brama
+combat_crit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.crit=true
+item_protection|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bagitem -Dpixel.lookItem=obsidian_armor
+combat_stats|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=combatgear

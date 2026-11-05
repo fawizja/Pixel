@@ -82,6 +82,54 @@ public final class Equipment {
         return sum;
     }
 
+    /**
+     * Suma ochron przed rodzajem obrazen ze wszystkich zalozonych przedmiotow (jak w Tibii: ochrony sie sumuja,
+     * ujemne oslabiaja), ograniczona do -100..100 (100 = calkowita odpornosc, np. helm glebin na utoniecie).
+     */
+    public int protection(pl.fawizja.pixel.combat.DamageType type) {
+        int sum = 0;
+        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().protection(type);
+        return Math.max(-100, Math.min(100, sum));
+    }
+
+    /** Wszystkie niezerowe ochrony ze sprzetu (okno postaci). */
+    public Map<pl.fawizja.pixel.combat.DamageType, Integer> protections() {
+        EnumMap<pl.fawizja.pixel.combat.DamageType, Integer> out = new EnumMap<>(pl.fawizja.pixel.combat.DamageType.class);
+        for (pl.fawizja.pixel.combat.DamageType t : pl.fawizja.pixel.combat.DamageType.values()) {
+            int p = protection(t);
+            if (p != 0) out.put(t, p);
+        }
+        return out;
+    }
+
+    /** Suma premii przedmiotow do szansy na krytyk (punkty procentowe). */
+    public double critChanceBonus() {
+        double sum = 0;
+        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().critChance();
+        return sum;
+    }
+
+    /** Suma premii przedmiotow do obrazen krytycznych (procent). */
+    public double critDamageBonus() {
+        double sum = 0;
+        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().critDamage();
+        return sum;
+    }
+
+    /** Suma kradziezy zycia z przedmiotow (procent). */
+    public double lifeLeech() {
+        double sum = 0;
+        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().lifeLeech();
+        return sum;
+    }
+
+    /** Suma kradziezy many z przedmiotow (procent). */
+    public double manaLeech() {
+        double sum = 0;
+        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().manaLeech();
+        return sum;
+    }
+
     /** Obrona samej tarczy (0, gdy postac nie nosi tarczy). */
     public int shieldDefense() {
         ItemStack s = worn.get(EquipSlot.SHIELD);

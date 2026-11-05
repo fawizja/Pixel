@@ -55,6 +55,17 @@ public final class SpellSystem {
         /** Zadaje obrazenia czaru; false, gdy zasady PvP na to nie pozwalaja. */
         boolean strike(int amount, DamageType type, long now);
 
+        /** Jak {@link #strike(int, DamageType, long)}; amount zawiera juz krytyk, critical = oznaczenie trafienia. */
+        default boolean strike(int amount, DamageType type, boolean critical, int targets, long now) {
+            return strike(amount, type, now);
+        }
+
+        /** Jak strikeArea ponizej, z oznaczeniem krytyka i liczba celow rzutu (kradziez zycia/many). */
+        default int strikeArea(Position center, int radius, java.util.function.Predicate<Position> reach,
+                               java.util.function.IntSupplier amount, DamageType type, boolean critical, int targets, long now) {
+            return strikeArea(center, radius, reach, amount, type, now);
+        }
+
         /**
          * Czar/runa obszarowa: trafia graczy w promieniu radius od center, ktorych zasady PvP pozwalaja zaatakowac
          * (tryb PvP wlaczony albo gracz z czaszka); reach = zasieg wzroku od srodka. Zwraca liczbe trafionych.
@@ -213,22 +224,22 @@ public final class SpellSystem {
                 combat.addEvent(CombatEvent.projectile(now, pc.position(),
                         playerTargetPosition() != null ? playerTargetPosition() : combat.target().position(), s.damageType().name()));
                 if (playerTargetPosition() != null) {
-                    return playerTarget.strike(roll(s), s.damageType(), now) ? CastResult.OK : CastResult.NOT_ALLOWED;
+                    boolean crit = combat.rollCritical();
+                    return playerTarget.strike(critAmount(roll(s), crit), s.damageType(), crit, 1, now) ? CastResult.OK : CastResult.NOT_ALLOWED;
                 }
-                combat.damageMonster(combat.target(), roll(s), s.damageType(), now);
+                combat.damageMonster(combat.target(), roll(s), s.damageType(), now, combat.rollCritical(), 1);
                 return CastResult.OK;
-            case ATTACK_AREA:
+            case ATTACK_AREA: {
                 combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), s.damageType().name()));
-                for (Monster m : targetsAround(pc.position(), s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
-                strikePlayers(pc.position(), s, now);
+                areaStrike(pc.position(), s, now);
                 return CastResult.OK;
+            }
             case RUNE_AREA: {
                 Position pvp = playerTargetPosition();
                 Position center = pvp != null ? pvp : combat.target().position();
                 combat.addEvent(CombatEvent.projectile(now, pc.position(), center, s.damageType().name()));
                 combat.addEvent(CombatEvent.area(now, center, s.radius(), s.damageType().name()));
-                for (Monster m : targetsAround(center, s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
-                strikePlayers(center, s, now);
+                areaStrike(center, s, now);
                 return CastResult.OK;
             }
             case LIGHT:
@@ -263,10 +274,28 @@ public final class SpellSystem {
         return playerTarget != null && playerTarget.anyInArea(center, radius, p -> world.hasLineOfSight(center, p));
     }
 
+    /**
+     * Czar albo runa obszarowa: jak w Tibii jeden rzut na krytyk dla calego czaru (wszystkie cele), kradziez
+     * zycia/many wg liczby trafionych celow (potwory + gracz w obszarze), osobny rzut obrazen na kazdy cel.
+     */
+    private void areaStrike(Position center, SpellType s, long now) {
+        boolean crit = combat.rollCritical();
+        List<Monster> hit = targetsAround(center, s.radius());
+        int targets = Math.max(1, hit.size() + (playerInArea(center, s.radius()) ? 1 : 0));
+        for (Monster m : hit) combat.damageMonster(m, roll(s), s.damageType(), now, crit, targets);
+        strikePlayers(center, s, crit, targets, now);
+    }
+
+    /** Krytyk dla obrazen w gracza (w potwory dolicza go CombatSystem.damageMonster). */
+    private int critAmount(int raw, boolean crit) {
+        return pl.fawizja.pixel.combat.CriticalHit.apply(pc, raw, crit);
+    }
+
     /** Obszar trafia graczy (tryb PvP albo agresorzy) - zasady w implementacji PlayerTargeting (PvpTargeting). */
-    private void strikePlayers(Position center, SpellType s, long now) {
+    private void strikePlayers(Position center, SpellType s, boolean crit, int targets, long now) {
         if (playerTarget == null) return;
-        playerTarget.strikeArea(center, s.radius(), p -> world.hasLineOfSight(center, p), () -> roll(s), s.damageType(), now);
+        playerTarget.strikeArea(center, s.radius(), p -> world.hasLineOfSight(center, p), () -> critAmount(roll(s), crit),
+                s.damageType(), crit, targets, now);
     }
 
     private List<Monster> targetsAround(Position center, int radius) {

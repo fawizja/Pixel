@@ -64,15 +64,15 @@ public final class MonsterRegistry {
             n++;
             String t = line.trim();
             if (t.isEmpty() || t.startsWith("#")) continue;
-            String[] f = t.split(";", 23);
-            if (f.length != 23) throw new IOException("monsters.csv line " + n + ": expected 23 fields, got " + f.length);
+            String[] f = t.split(";", 25);
+            if (f.length != 25) throw new IOException("monsters.csv line " + n + ": expected 25 fields, got " + f.length);
             try {
                 String key = f[0].trim();
                 MonsterType m = new MonsterType(key, f[1].trim(), i(f[2]), i(f[3]), Long.parseLong(f[4].trim()), i(f[5]),
                         i(f[6]), i(f[7]), DamageType.valueOf(f[8].trim()), i(f[9]), i(f[10]), i(f[11]),
                         parseResistances(f[12].trim()), MonsterBehavior.valueOf(f[13].trim()), i(f[14]), i(f[15]),
-                        i(f[16]), "1".equals(f[17].trim()), f[18].trim(), f[19].trim(), f[20].trim(), activity(f[21].trim()), f[22].trim(),
-                        loot.getOrDefault(key, Collections.emptyList()));
+                        i(f[16]), "1".equals(f[17].trim()), f[18].trim(), f[19].trim(), f[20].trim(), activity(f[21].trim()), f[24].trim(),
+                        loot.getOrDefault(key, Collections.emptyList()), f[22].trim(), ExtraAttack.parse(f[23]));
                 if (map.put(key, m) != null) throw new IOException("duplicate monster " + key);
             } catch (IllegalArgumentException e) {
                 throw new IOException("monsters.csv line " + n + ": " + e.getMessage(), e);

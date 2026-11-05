@@ -69,6 +69,22 @@ public final class SkillSheet {
         }
     }
 
+    /**
+     * Statystyki walki do okna postaci (jak sekcja "Combat Stats" w Tibii): krytyk, kradziez zycia/many i ochrony
+     * z zalozonego ekwipunku. Etykieta, wartosc - zawsze trzy wiersze.
+     */
+    public static List<String[]> combatRows(PlayerCharacter pc) {
+        List<String[]> out = new ArrayList<>(3);
+        out.add(new String[] {"Krytyk", pl.fawizja.pixel.combat.CriticalHit.describe(pc)});
+        double life = pl.fawizja.pixel.combat.Leech.lifePercent(pc), mana = pl.fawizja.pixel.combat.Leech.manaPercent(pc);
+        String leech = life <= 0 && mana <= 0 ? "brak"
+                : "życie " + pl.fawizja.pixel.item.ItemBonus.number(life) + "%, mana " + pl.fawizja.pixel.item.ItemBonus.number(mana) + "%";
+        out.add(new String[] {"Kradzież", leech});
+        String prot = pl.fawizja.pixel.item.ItemBonus.describeProtections(pc.equipment().protections());
+        out.add(new String[] {"Ochrona", prot.isEmpty() ? "brak" : prot});
+        return out;
+    }
+
     /** Opis do okna postaci: "41:37 (premia 150% exp)" itp. */
     public static String staminaDetail(PlayerCharacter pc) {
         Stamina s = pc.stamina();

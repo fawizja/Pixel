@@ -492,6 +492,42 @@ przy pauzie, utracie fokusu i zamknieciu.
   tarcza jak dawna "Tarcza". Zywioly bez zmian (jak w TFS). Zapis w flagach postaci ("O" / brak / "D" - stary zapis
   "D" = defensywny); akcja `fightmode:NAZWA` (klient wysyla tryb docelowy), `fightmode` i stare `defensive` przelaczaja.
 
+### Walka jak w Tibii: odpornosci, ochrony, krytyki, kradziez (Z logika, S serwer, C liczby i okno postaci)
+
+- Rodzaje obrazen (`DamageType`): fizyczne, ogien, lod, ziemia, energia, swiete, smierc oraz z Tibii utoniecie
+  (DROWN), wyssanie zycia (LIFE_DRAIN, omija pancerz jak w Canary) i wyssanie many (MANA_DRAIN - zabiera mane zamiast
+  zycia, liczba niebieska, efekt zdarzenia "MANA"). `DamageType.label()` - polskie nazwy (bestiariusz, opisy).
+- Odpornosci potworow (monsters.csv, kolumna `resistances`) przepisane z odpowiednikow w Tibii (pliki potworow Canary,
+  `elements` / `immunities`). Nowa kolumna `klasa(Tibia)` (Mammal, Undead, Demon, Dragon, Elemental, Human, Magical, ...).
+  Wzorce klas (test `TibiaCombatTest`): nieumarli odporni w 100% na smierc, utoniecie i wyssanie zycia, slabi na swiete;
+  zywiolaki odporne na wlasny zywiol; stwory lodu NIE sa automatycznie slabe na ogien (Ice Golem 100%, Ice Witch 50%,
+  Winter Wolf +10%); slabosci najwyzej -30%. Odchylenia od Tibii dla balansu (symulacje endgame, gdzie magowie
+  walcza jedna rozdzka): lava_golem HP 8000, ice_dragon ziemia 5 (Tibia 50 bylaby odpornoscia na jedyna rozdzke
+  druida tego poziomu), khazuul atak 950-2700, abyss_lord HP 26000 i fizyczne 25, bone_dragon lod 20, abyssal_demon
+  energia 40, sand_wraith fizyczne 40.
+- Ataki dodatkowe potworow (kolumna `atak dodatkowy(TYP:min-max:%)`, `monster/ExtraAttack`): przy kazdym ataku z
+  szansa % potwor zamiast zwyklego ciosu uzywa ataku tego typu (tani zamiennik listy atakow Tibii - wyssanie zycia
+  szkieletow i upiorow, wyssanie many kaplanow pustki itd.). `MonsterType.rollStrike` - jeden rzut; elity x1,3.
+  Pelne listy atakow zywiolowych z Tibii (fale, kule, kilka czarow) nie sa przeniesione.
+- Ochrona gracza: kolumna `premie` w items.csv (`ItemBonus`): `FIRE:8,ICE:-8,...` w procentach, wartosci z
+  najblizszych przedmiotow Tibii (Magma Coat, Glacier Robe, Helmet of the Deep - utoniecie 100%, Depth Ocrea - wyssanie
+  many 15%, Fur Armor). `Equipment.protection(typ)` sumuje zalozone przedmioty (-100..100). W `mitigateOnPlayer`
+  (potwory i gracze, takze czary PvP) obrazenia: `d -= round(d * ochrona / 100)` przed pancerzem, jak absorb w Canary;
+  ujemna ochrona zwieksza obrazenia.
+- Cios krytyczny (`CriticalHit`, jak obecna Tibia): kazdy ma 5% szansy i +10% obrazen; przedmioty `CRIT:x`
+  (szansa) i `CRITDMG:x` (dodatkowe obrazenia, bronie Soul War / Sanguine); zaklecie kowala "krytyk" dziala jak
+  imbuement Powerful Strike: +10% szansy, +50% obrazen. Wszystko sie sumuje; obrazenia = surowe x (1 + suma/100).
+  Jeden rzut na cios bronia lub na czar (czar obszarowy: jeden rzut dla wszystkich celow). Dziala w PvP
+  (`PvpRules.attack/spellHit/areaHit`, przed czynnikiem PvP). Zdarzenie trafienia z efektem "CRIT" - klient rysuje
+  wieksza pomaranczowa liczbe z "!" i napis "krytyk"; online EV z 10 polami ("skad" = cel, stary klient ignoruje).
+- Kradziez zycia/many (`Leech`, wzor Canary): `zadane * % * (0,1n + 0,9) / n` (n = liczba trafionych celow; 1 cel =
+  pelny %, czar w 2 cele po 55% itd.), zaokraglone. Przedmioty `LIFELEECH:x`, `MANALEECH:x`; zaklecia kowala zycie 6% i
+  mana 3% (wczesniej wlasne procenty) przechodza przez ten sam wzor. Przyszle imbuementy Vampirism/Void dodadza swoje
+  procenty w `Leech.lifePercent/manaPercent` (jedno miejsce sumowania).
+- Okno postaci (komputer: okno "Umiejetnosci", telefon: Ekwipunek) pokazuje "Krytyk", "Kradziez" i "Ochrona"
+  (`SkillSheet.combatRows`); opis przedmiotu (`ItemCompare.stats`) dopisuje ochrony, krytyk i kradziez.
+- Zapis: bez zmian (premie wynikaja z przedmiotow), `CharacterCodec` zostaje v7.
+
 ## Druzyny (Z logika, S serwer)
 
 - `party/PartyManager`: zaproszenie przez lidera (wazne 60 s), przyjecie, wyjscie, wyrzucenie przez lidera (`kick`);

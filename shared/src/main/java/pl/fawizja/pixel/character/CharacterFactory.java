@@ -90,9 +90,12 @@ public final class CharacterFactory {
     static final int[][] MONK_SKILLS = {{8, 10, 10, 0}, {20, 48, 31, 13}, {35, 59, 36, 20}, {50, 65, 40, 23},
             {75, 78, 48, 30}, {100, 82, 48, 33}, {150, 92, 54, 38}, {200, 100, 61, 41}, {250, 105, 65, 44},
             {300, 109, 67, 46}, {400, 116, 72, 50}, {500, 121, 72, 52}, {600, 126, 75, 55}};
-    /** Czarodziej i druid (roznica w symulacji najwyzej 1 poziom magii): tarcza zostaje 10. */
+    /**
+     * Czarodziej i druid (srednia obu; od odpornosci jak w Tibii druid poluje wiecej czarami - potwory odporne na
+     * ziemie - i ma w symulacji do 3 poziomow magii wiecej): tarcza zostaje 10.
+     */
     static final int[][] MAGE_SKILLS = {{8, 10, 10, 0}, {20, 10, 10, 33}, {35, 10, 10, 46}, {50, 10, 10, 54},
-            {75, 10, 10, 69}, {100, 10, 10, 72}, {150, 10, 10, 86}, {200, 10, 10, 94}, {250, 10, 10, 107},
+            {75, 10, 10, 70}, {100, 10, 10, 74}, {150, 10, 10, 88}, {200, 10, 10, 98}, {250, 10, 10, 107},
             {300, 10, 10, 114}, {400, 10, 10, 124}, {500, 10, 10, 130}, {600, 10, 10, 136}};
 
     static int[][] skillTable(Vocation v) {

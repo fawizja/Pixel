@@ -166,9 +166,13 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     gs.hud().toggleBag();
                     pl.fawizja.pixel.inventory.Container bp = gs.session().character().backpack();
-                    bp.add(new pl.fawizja.pixel.item.ItemStack(gs.session().items().byKey("iron_sword").id(), 1));
+                    // -Dpixel.lookItem=klucz: ten przedmiot zamiast miecza (np. obsidian_armor - ochrony)
+                    String lookItem = System.getProperty("pixel.lookItem");
+                    int lookId = gs.session().items().byKey(lookItem != null ? lookItem : "iron_sword").id();
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(lookId, 1));
                     for (int i = 0; i < bp.size(); i++) {
-                        if (bp.get(i) != null && gs.session().items().get(bp.get(i).itemId()).slot() != pl.fawizja.pixel.item.EquipSlot.NONE) {
+                        if (bp.get(i) != null && (lookItem != null ? bp.get(i).itemId() == lookId
+                                : gs.session().items().get(bp.get(i).itemId()).slot() != pl.fawizja.pixel.item.EquipSlot.NONE)) {
                             gs.hud().selectSlot(i);
                             break;
                         }
@@ -311,6 +315,19 @@ public final class DesktopLauncher {
                     gs.hud().openInfo("Łup: " + boss.name() + " (osobny rzut na gracza)", rows);
                 }
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
+                if ("combatgear".equals(open)) {
+                    // okno postaci ze statystykami walki: zbroja i nogi z obsydianu, helm z koralu, topor z kradzieza,
+                    // zaklecie kowala "krytyk" (krytyk, kradziez, ochrony w oknie Umiejetnosci)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    String[][] gear = {{"ARMOR", "obsidian_armor"}, {"LEGS", "obsidian_legs"}, {"HEAD", "coral_helmet"}, {"WEAPON", "skull_axe"}};
+                    for (String[] g : gear) {
+                        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.valueOf(g[0]), new pl.fawizja.pixel.item.ItemStack(reg.byKey(g[1]).id(), 1));
+                    }
+                    pc.enchantments().extend(pl.fawizja.pixel.item.Enchantments.Kind.CRIT);
+                    gs.hud().toggleCharacter();
+                }
                 if ("diag".equals(open)) ((GameScreen) getScreen()).hud().toggleDiagnostics();
                 if ("party".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();
@@ -684,6 +701,19 @@ public final class DesktopLauncher {
                 gs.session().ground().addCorpse(me.translate(1, 1), "wolf",
                         java.util.List.of(new pl.fawizja.pixel.item.ItemStack(1, 12)), now);
                 gs.session().ground().addCorpse(me.translate(-1, 1), "goblin", java.util.List.of(), now);
+            }
+            if (Boolean.getBoolean("pixel.crit") && frame == frames - 1 && getScreen() instanceof GameScreen) {
+                // podglad liczb walki: cios krytyczny (pomaranczowy z "krytyk"), zwykly cios, wyssanie many na postaci
+                GameScreen gs = (GameScreen) getScreen();
+                long now = gs.worldTime();
+                Position me = gs.session().character().position();
+                pl.fawizja.pixel.combat.CombatSystem cs = gs.session().combat();
+                cs.addEvent(new pl.fawizja.pixel.combat.CombatEvent(now, me.translate(2, 2), 172,
+                        pl.fawizja.pixel.combat.CombatEvent.Kind.HIT_MONSTER, null, pl.fawizja.pixel.combat.CriticalHit.EVENT_EFFECT));
+                cs.addEvent(new pl.fawizja.pixel.combat.CombatEvent(now, me.translate(-2, 2), 64,
+                        pl.fawizja.pixel.combat.CombatEvent.Kind.HIT_MONSTER));
+                cs.addEvent(new pl.fawizja.pixel.combat.CombatEvent(now, me, 35,
+                        pl.fawizja.pixel.combat.CombatEvent.Kind.HIT_PLAYER, null, pl.fawizja.pixel.combat.CombatSystem.MANA_EFFECT));
             }
             super.render();
             if (screenshot != null && ++frame == frames) {

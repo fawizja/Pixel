@@ -100,6 +100,13 @@ public final class CombatFormulas {
         return min + rng.nextInt(max - min + 1);
     }
 
+    /** Obrazenia po ochronie w procentach (Canary applyAbsorbDamageModifications: damage -= round(damage * p / 100)). */
+    public static int protect(int damage, int percent) {
+        if (damage <= 0 || percent == 0) return Math.max(0, damage);
+        long d = damage - Math.round(damage * percent / 100.0);
+        return (int) Math.max(0, Math.min(Integer.MAX_VALUE, d));
+    }
+
     /** Obrazenia po pancerzu i odpornosciach potwora. */
     public static int mitigateOnMonster(MonsterType m, int damage, DamageType type, Random rng) {
         if (damage <= 0) return 0;
@@ -117,14 +124,16 @@ public final class CombatFormulas {
     }
 
     /**
-     * Obrazenia po pancerzu i obronie. Jak w TFS (Creature::blockHit): tryb walki zmienia tylko obrone (tarcza, bron),
+     * Obrazenia po ochronach, pancerzu i obronie. Jak w Canary (Creature::blockHit): najpierw ochrona przed rodzajem
+     * obrazen ze sprzetu ({@link pl.fawizja.pixel.inventory.Equipment#protection}, takze fizyczna; ujemna zwieksza
+     * obrazenia), potem dla fizycznych pancerz i obrona. Jak w TFS tryb walki zmienia tylko obrone (tarcza, bron),
      * nie pancerz ani obrazenia od zywiolow; w trybie defensywnym z tarcza dochodzi pewny blok tarcza (pelna obrona
      * tarczy). attackedRecently = postac zaatakowala bronia w ostatnim odstepie ataku (bez tego TFS daje pelna obrone).
      */
     public static int mitigateOnPlayer(PlayerCharacter pc, int damage, DamageType type, FightMode mode, boolean attackedRecently,
                                        Random rng) {
         if (damage <= 0) return 0;
-        double d = damage;
+        double d = protect(damage, pc.equipment().protection(type));
         if (type == DamageType.PHYSICAL) {
             int armor = pc.equipment().totalArmor();
             d -= rollBetween(0, armor / 2, rng);

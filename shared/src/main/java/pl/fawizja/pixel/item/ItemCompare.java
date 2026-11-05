@@ -20,11 +20,16 @@ public final class ItemCompare {
     public static String stats(ItemType t, int u, ItemType equipped, int eu) {
         StringBuilder b = new StringBuilder(Upgrade.name(t, u));
         if (t.slot() == EquipSlot.LIGHT) return b.append("  światło ").append(t.lightRadius()).append(", pali się 20 min (pole obok butów)").toString();
-        if (equipped == t && u == eu) return b.append(" (założone)").toString();
+        if (equipped == t && u == eu) {
+            String bonus = t.bonus().describe();
+            return b.append(" (założone)").append(bonus.isEmpty() ? "" : "  " + bonus).toString();
+        }
         stat(b, "atak", Upgrade.attack(t, u), equipped == null ? 0 : Upgrade.attack(equipped, eu), equipped != null);
         stat(b, "obrona", Upgrade.defense(t, u), equipped == null ? 0 : Upgrade.defense(equipped, eu), equipped != null);
         stat(b, "pancerz", Upgrade.armor(t, u), equipped == null ? 0 : Upgrade.armor(equipped, eu), equipped != null);
         if (t.range() > 1) b.append("  zasięg ").append(t.range());
+        String bonus = t.bonus().describe();
+        if (!bonus.isEmpty()) b.append("  ").append(bonus);
         return b.toString();
     }
 
@@ -43,6 +48,8 @@ public final class ItemCompare {
         delta(b, "atak", t.attack(), equipped == null ? 0 : Upgrade.attack(equipped, eu));
         delta(b, "obrona", t.defense(), equipped == null ? 0 : Upgrade.defense(equipped, eu));
         delta(b, "pancerz", t.armor(), equipped == null ? 0 : Upgrade.armor(equipped, eu));
+        String prot = ItemBonus.describeProtections(t.bonus().protections());
+        if (!prot.isEmpty() && equipped != t) b.append(b.length() > 0 ? ", " : "").append("ochrona ").append(prot);
         String out = b.length() == 0 ? "jak założone" : b.toString();
         return pc.level() < t.minLevel() ? out + ", od poz. " + t.minLevel() : out;
     }

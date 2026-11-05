@@ -34,7 +34,8 @@ class EnchantmentTest {
         assertFalse(e.canExtend(Kind.LIFE), "at most 3 hours in stock");
         assertEquals(6, e.leech(Kind.LIFE, 100));
         assertEquals(0, e.leech(Kind.MANA, 100), "inactive enchantment does nothing");
-        assertEquals(1, e.leech(Kind.LIFE, 3), "at least 1 HP per hit");
+        assertEquals(0, e.leech(Kind.LIFE, 3), "rounded like Tibia (lround): 6% of 3 is nothing");
+        assertEquals(1, e.leech(Kind.LIFE, 9), "6% of 9 rounds to 1");
         assertEquals("3 h 00 min", Enchantments.describe(e.remainingMs(Kind.LIFE)));
 
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);

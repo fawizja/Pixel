@@ -10,6 +10,8 @@ import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.combat.AttackProfile;
 import pl.fawizja.pixel.combat.CombatEvent;
 import pl.fawizja.pixel.combat.CombatFormulas;
+import pl.fawizja.pixel.combat.CriticalHit;
+import pl.fawizja.pixel.combat.Leech;
 import pl.fawizja.pixel.combat.DamageType;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
@@ -36,7 +38,9 @@ import pl.fawizja.pixel.world.WorldMap;
  *       (45 dni). Smierc z czerwona albo czarna czaszka = caly plecak i ekwipunek zostaja na ziemi,</li>
  *   <li>czarna czaszka: nie atakuje nieoznaczonych graczy (nawet w trybie PvP), nie uzywa czarow ani run
  *       obszarowych, dostaje 100% obrazen od graczy, odradza sie z {@link #BLACK_SKULL_RESPAWN_HP} HP i 0 many,</li>
- *   <li>obrazenia miedzy graczami: {@link #PVP_DAMAGE} (50%), na czarna czaszke 100%; PvP nie daje doswiadczenia.</li>
+ *   <li>obrazenia miedzy graczami: {@link #PVP_DAMAGE} (50%), na czarna czaszke 100%; PvP nie daje doswiadczenia,</li>
+ *   <li>jak w Canary dzialaja ciosy krytyczne (przed modyfikatorem PvP), kradziez zycia i many oraz ochrony
+ *       zywiolow ofiary; charmy (w przyszlosci) tylko na potwory.</li>
  * </ul>
  */
 public final class PvpRules {
@@ -362,8 +366,10 @@ public final class PvpRules {
             return Outcome.OUT_OF_REACH;
         }
         as.nextAttackMs = now + ap.intervalMs();
-        int raw = CombatFormulas.roll(ap.maxDamage(), rng);
-        return hit(attacker, as, victim, vs, raw, ap.type(), now, rng);
+        // krytyk dziala tez w PvP (Canary Combat::applyExtensions): jeden rzut na cios
+        boolean crit = CriticalHit.roll(a, rng);
+        int raw = CriticalHit.apply(a, CombatFormulas.roll(ap.maxDamage(), rng), crit);
+        return hit(attacker, as, victim, vs, raw, ap.type(), crit, 1, now, rng);
     }
 
     /**
@@ -372,25 +378,37 @@ public final class PvpRules {
      */
     public static Outcome spellHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
                                    DamageType type, WorldMap world, long now, Random rng) {
+        return spellHit(attacker, as, victim, vs, raw, type, false, 1, world, now, rng);
+    }
+
+    /** Jak wyzej; raw zawiera juz krytyk (critical = oznaczenie), targets = cele rzutu (kradziez zycia/many). */
+    public static Outcome spellHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
+                                   DamageType type, boolean critical, int targets, WorldMap world, long now, Random rng) {
         if (check(attacker.character(), as, victim.character(), vs, world, now) != Verdict.OK) return Outcome.NOT_ALLOWED;
-        return hit(attacker, as, victim, vs, raw, type, now, rng);
+        return hit(attacker, as, victim, vs, raw, type, critical, targets, now, rng);
     }
 
     /** Trafienie gracza czarem albo runa obszarowa (tryb bezpieczny nie chroni - jak w Tibii). */
     public static Outcome areaHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
                                   DamageType type, WorldMap world, long now, Random rng) {
+        return areaHit(attacker, as, victim, vs, raw, type, false, 1, world, now, rng);
+    }
+
+    /** Jak wyzej, z krytykiem wylosowanym raz dla calego czaru i liczba celow rzutu. */
+    public static Outcome areaHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
+                                  DamageType type, boolean critical, int targets, WorldMap world, long now, Random rng) {
         if (checkArea(attacker.character(), as, victim.character(), vs, world, now) != Verdict.OK) {
             return Outcome.NOT_ALLOWED;
         }
-        return hit(attacker, as, victim, vs, raw, type, now, rng);
+        return hit(attacker, as, victim, vs, raw, type, critical, targets, now, rng);
     }
 
     /** Wspolna czesc trafienia: blokady, czaszki, obrazenia, zdarzenia, smierc, zemsta i czerwona/czarna czaszka. */
     private static Outcome hit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
-                               DamageType type, long now, Random rng) {
+                               DamageType type, boolean critical, int targets, long now, Random rng) {
         PlayerCharacter a = attacker.character();
         PlayerCharacter b = victim.character();
-        if (vs.duelling(a.name())) return duelHit(attacker, as, victim, vs, raw, type, now, rng);
+        if (vs.duelling(a.name())) return duelHit(attacker, as, victim, vs, raw, type, critical, now, rng);
         boolean justified = marked(as, b.name(), vs, now);
         // kazda agresja: blokada PZ i wylogowania atakujacego, blokada wylogowania ofiary (1 min od ostatniej)
         block(attacker, as, now + PZ_BLOCK_MS);
@@ -411,10 +429,13 @@ public final class PvpRules {
         int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, now < vs.nextAttackMs || victim.combat().attackedRecently(now), rng);
         int dealt = b.damage(dmg);
         victim.combat().recordDamage(a.name() + " (gracz)", dealt, now);
+        // kradziez zycia i many dziala tez na graczy (Canary applyLifeLeech/applyManaLeech)
+        Leech.apply(a, dealt, targets);
+        String fx = critical && dealt > 0 ? CriticalHit.EVENT_EFFECT : null;
         CombatEvent.Kind kind = dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED;
-        victim.combat().addEvent(new CombatEvent(now, b.position(), dealt, kind));
+        victim.combat().addEvent(new CombatEvent(now, b.position(), dealt, kind, null, fx));
         attacker.combat().addEvent(new CombatEvent(now, b.position(), dealt,
-                dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
+                dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED, null, fx));
         if (!b.isDead()) return Outcome.HIT;
 
         boolean dropAll = victimSkull == Skull.RED || victimSkull == Skull.BLACK;
@@ -513,7 +534,7 @@ public final class PvpRules {
 
     /** Trafienie w pojedynku: bez czaszek i blokad; cios, ktory by zabil, konczy pojedynek przy 1 HP. */
     private static Outcome duelHit(GameSession attacker, Status as, GameSession victim, Status vs, int raw,
-                                   DamageType type, long now, Random rng) {
+                                   DamageType type, boolean critical, long now, Random rng) {
         PlayerCharacter a = attacker.character();
         PlayerCharacter b = victim.character();
         raw = (int) Math.round(raw * PVP_DAMAGE);
@@ -521,10 +542,11 @@ public final class PvpRules {
         boolean won = dmg >= b.health();
         if (won) dmg = b.health() - 1;
         int dealt = b.damage(dmg);
+        String fx = critical && dealt > 0 ? CriticalHit.EVENT_EFFECT : null;
         victim.combat().addEvent(new CombatEvent(now, b.position(), dealt,
-                dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED));
+                dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED, null, fx));
         attacker.combat().addEvent(new CombatEvent(now, b.position(), dealt,
-                dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED));
+                dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED, null, fx));
         if (!won) return Outcome.HIT;
         endDuel(as, vs);
         attacker.log().add(now, EventLog.Kind.SYSTEM, "Wygrywasz pojedynek z " + b.name() + "!");
