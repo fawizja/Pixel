@@ -118,6 +118,9 @@ public final class GameSession {
      * Sesja gracza we wspolnym swiecie (serwer): sharedGround != null oznacza, ze potwory i przedmioty
      * na ziemi naleza do swiata, a {@link #update} nie aktualizuje potworow (robi to petla serwera).
      */
+    /** Zapis sprzed mgly mapy: odkryty prostokat wokol swiatyni miasta postaci (w kazda strone). */
+    public static final int LEGACY_REVEAL_X = 24, LEGACY_REVEAL_Y = 18;
+
     public GameSession(ItemRegistry items, WorldMap world, PlayerCharacter pc, MonsterManager monsters,
                        GroundItems sharedGround, Random rng, int minLevel, SpellRegistry spellRegistry,
                        ConsumableRegistry consumables, RecipeRegistry recipes) {
@@ -145,6 +148,15 @@ public final class GameSession {
         pl.fawizja.pixel.world.BossQuest arenaOf = world.bossQuestByArena(pc.position());
         if (!sharedWorld && arenaOf != null) pc.setPosition(arenaOf.exitTarget()); // arena po wczytaniu jest pusta
         this.stepFrom = pc.position();
+        if (pc.explored().takeLegacy()) {
+            // zapis sprzed mgly mapy (v6 i starsze): postac zna okolice swiatyni swojego miasta
+            Position temple = world.templeOf(pc.homeTown());
+            if (temple != null) {
+                pc.explored().reveal(temple.x() - LEGACY_REVEAL_X, temple.y() - LEGACY_REVEAL_Y,
+                        temple.x() + LEGACY_REVEAL_X, temple.y() + LEGACY_REVEAL_Y, temple.z());
+            }
+        }
+        pc.explored().revealView(pc.position());
         this.monsters = monsters != null ? monsters
                 : new MonsterManager(world, null, Collections.emptyList(), rng);
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
@@ -2054,6 +2066,7 @@ public final class GameSession {
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
     public void update(long nowMs, Direction requested) {
         syncPvp(nowMs);
+        pc.explored().revealView(pc.position()); // mgla mapy: odkryte to, co postac widzi (tani test bez ruchu)
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
         checkBoost(nowMs);

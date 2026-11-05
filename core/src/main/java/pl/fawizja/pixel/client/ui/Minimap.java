@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import java.util.HashMap;
 import java.util.Map;
+import pl.fawizja.pixel.world.ExploredMap;
 import pl.fawizja.pixel.world.FloorMap;
 import pl.fawizja.pixel.world.MinimapPalette;
 import pl.fawizja.pixel.world.Position;
@@ -22,31 +23,126 @@ final class Minimap {
     private WorldMap world;
     /** Pulapki z kolcami: wpisane w obraz pietra jako pomaranczowe punkty. */
     private java.util.List<Position> hazards = java.util.List.of();
+    /** Mgla: odkryta mapa postaci, ktorej obraz jest w teksturach, i kursor jej zmian (odkryc). */
+    private ExploredMap fog;
+    private long fogCursor;
+    private final int[] dirtyRect = new int[5];
+    /** Male obrazy do dosylania zmienionych blokow tekstury (klucz: szerokosc * 4096 + wysokosc). */
+    private final Map<Integer, Pixmap> patches = new HashMap<>();
+    /** Blok aktualizacji tekstury (kafelki) i szerokosc miekkiej krawedzi mgly. */
+    private static final int BLOCK = 32, FEATHER = 2;
+    private static final int FOG_R = 8, FOG_G = 8, FOG_B = 12;
 
     void setHazards(java.util.List<Position> traps) {
         if (traps == null || traps.equals(hazards)) return;
         hazards = traps;
-        for (Texture t : floors.values()) t.dispose();
-        floors.clear();
+        disposeFloors();
+    }
+
+    /**
+     * Wiaze obraz z odkryta mapa i dosyla do tekstur bloki z nowymi odkryciami (bez alokacji, gdy nic sie nie
+     * zmienilo; zgubione zmiany - wypadly z bufora - przebudowuja tekstury).
+     */
+    private void syncFog(ExploredMap e) {
+        if (e != fog) {
+            fog = e;
+            fogCursor = e == null ? 0 : e.dirtyTotal();
+            disposeFloors();
+            return;
+        }
+        if (e == null) return;
+        long total = e.dirtyTotal();
+        while (fogCursor < total) {
+            if (!e.dirty(fogCursor, dirtyRect)) {
+                disposeFloors();
+                fogCursor = total;
+                return;
+            }
+            fogCursor++;
+            Texture t = floors.get(dirtyRect[0]);
+            if (t != null) refresh(t, dirtyRect[0], dirtyRect[1] - FEATHER, dirtyRect[2] - FEATHER,
+                    dirtyRect[3] + FEATHER, dirtyRect[4] + FEATHER);
+        }
+    }
+
+    /** Przerysowuje bloki BLOCK x BLOCK tekstury pietra z pokrywajace prostokat (wlacznie). */
+    private void refresh(Texture t, int z, int x0, int y0, int x1, int y1) {
+        FloorMap f = world.floor(z);
+        if (f == null) return;
+        int w = t.getWidth(), h = t.getHeight();
+        x0 = Math.max(0, x0);
+        y0 = Math.max(0, y0);
+        x1 = Math.min(w - 1, x1);
+        y1 = Math.min(h - 1, y1);
+        for (int by = y0 / BLOCK * BLOCK; by <= y1; by += BLOCK) {
+            for (int bx = x0 / BLOCK * BLOCK; bx <= x1; bx += BLOCK) {
+                int pw = Math.min(BLOCK, w - bx), ph = Math.min(BLOCK, h - by);
+                Pixmap pm = patches.get(pw * 4096 + ph);
+                if (pm == null) {
+                    pm = new Pixmap(pw, ph, Pixmap.Format.RGBA8888);
+                    pm.setBlending(Pixmap.Blending.None);
+                    patches.put(pw * 4096 + ph, pm);
+                }
+                for (int y = 0; y < ph; y++) {
+                    for (int x = 0; x < pw; x++) pm.drawPixel(x, y, pixel(f, bx + x, by + y, z));
+                }
+                t.draw(pm, bx, by);
+            }
+        }
+    }
+
+    /** Kolor piksela: odkryte pole w kolorze mapy, nieodkryte - mgla, przy odkrytych polach rozjasniona (krawedz). */
+    private int pixel(FloorMap f, int x, int y, int z) {
+        ExploredMap e = fog;
+        if (e == null || e.isExplored(x, y, z)) return tileColor(f, x, y, z);
+        int noise = ((x * 73_856_093) ^ (y * 19_349_663)) >>> 28 & 3;
+        int fr = FOG_R + noise, fg = FOG_G + noise, fb = FOG_B + noise;
+        int d = FEATHER + 1;
+        if (e.chunkTouched((x - FEATHER) >> 6, (y - FEATHER) >> 6, z) || e.chunkTouched((x + FEATHER) >> 6, (y - FEATHER) >> 6, z)
+                || e.chunkTouched((x - FEATHER) >> 6, (y + FEATHER) >> 6, z) || e.chunkTouched((x + FEATHER) >> 6, (y + FEATHER) >> 6, z)) {
+            for (int dy = -FEATHER; dy <= FEATHER && d > 1; dy++) {
+                for (int dx = -FEATHER; dx <= FEATHER; dx++) {
+                    int dd = Math.max(Math.abs(dx), Math.abs(dy));
+                    if (dd < d && e.isExplored(x + dx, y + dy, z)) d = dd;
+                }
+            }
+        }
+        if (d > FEATHER) return MinimapPalette.rgba(fr, fg, fb);
+        // miekka krawedz: 1 pole od odkrytych - polowa koloru mapy, 2 pola - slad
+        int c = MinimapPalette.color(f, world.tiles(), x, y);
+        float k = d == 1 ? 0.45f : 0.2f;
+        int cr = c == MinimapPalette.TRANSPARENT ? fr : c >>> 24, cg = c == MinimapPalette.TRANSPARENT ? fg : c >>> 16 & 0xff,
+                cb = c == MinimapPalette.TRANSPARENT ? fb : c >>> 8 & 0xff;
+        return MinimapPalette.rgba(Math.round(fr + (cr - fr) * k), Math.round(fg + (cg - fg) * k), Math.round(fb + (cb - fb) * k));
+    }
+
+    private int tileColor(FloorMap f, int x, int y, int z) {
+        for (int i = 0; i < hazards.size(); i++) {
+            Position h = hazards.get(i);
+            if (h.x() == x && h.y() == y && h.z() == z) return Color.rgba8888(1f, 0.45f, 0.1f, 1f);
+        }
+        return MinimapPalette.color(f, world.tiles(), x, y);
     }
 
     private Texture texture(WorldMap w, int z) {
         if (w != world) {
-            dispose();
+            disposeFloors();
             world = w;
         }
         Texture t = floors.get(z);
         if (t != null) return t;
         FloorMap f = w.floor(z);
         if (f == null) return null;
-        int[] img = MinimapPalette.paint(f, w.tiles());
         Pixmap pm = new Pixmap(f.width(), f.height(), Pixmap.Format.RGBA8888);
         pm.setBlending(Pixmap.Blending.None);
+        java.util.List<Position> traps = hazards;
+        hazards = java.util.List.of(); // pulapki dorysowane nizej (bez szukania przy kazdym pikselu)
         for (int y = 0; y < f.height(); y++) {
-            for (int x = 0; x < f.width(); x++) pm.drawPixel(x, y, img[y * f.width() + x]);
+            for (int x = 0; x < f.width(); x++) pm.drawPixel(x, y, pixel(f, x, y, z));
         }
+        hazards = traps;
         for (Position h : hazards) {
-            if (h.z() == z && f.inBounds(h.x(), h.y())) pm.drawPixel(h.x(), h.y(), Color.rgba8888(1f, 0.45f, 0.1f, 1f));
+            if (h.z() == z && f.inBounds(h.x(), h.y()) && explored(h)) pm.drawPixel(h.x(), h.y(), Color.rgba8888(1f, 0.45f, 0.1f, 1f));
         }
         t = new Texture(pm);
         t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -54,6 +150,9 @@ final class Minimap {
         floors.put(z, t);
         return t;
     }
+
+    private boolean explored(Position p) { return fog == null || fog.isExplored(p); }
+
 
     private Texture dot() {
         if (dot == null) {
@@ -67,17 +166,18 @@ final class Minimap {
     }
 
     /** Wycinek tiles x tiles kafelkow wokol gracza w kwadracie (x, y, size). */
-    void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+    void drawAround(SpriteBatch batch, WorldMap w, ExploredMap fog, Position p, Position target, java.util.List<Position> marks,
                     float x, float y, float size, int tiles) {
-        drawAround(batch, w, p, target, marks, x, y, size, size, tiles);
+        drawAround(batch, w, fog, p, target, marks, x, y, size, size, tiles);
     }
 
     /**
      * Wycinek wokol gracza w prostokacie (x, y, bw, bh): tilesW kafelkow w poziomie, w pionie tyle, ile wejdzie przy
      * kwadratowych kafelkach (telefon: minimapa 120 x 80 dp). Gracz na srodku.
      */
-    void drawAround(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+    void drawAround(SpriteBatch batch, WorldMap w, ExploredMap fog, Position p, Position target, java.util.List<Position> marks,
                     float x, float y, float bw, float bh, int tilesW) {
+        syncFog(fog);
         float px = bw / tilesW;
         int tilesH = Math.max(1, Math.round(bh / px));
         float top = y + bh;
@@ -97,7 +197,7 @@ final class Minimap {
         float ms = Math.max(4, px * 2);
         for (Position m : marks) {
             int mx = m.x() - sx0, my = m.y() - sy0;
-            if (m.z() == p.z() && mx >= 0 && my >= 0 && mx < tilesW && my < tilesH) marker(batch, x + (mx + 0.5f) * px, top - (my + 0.5f) * px, ms, MARK);
+            if (m.z() == p.z() && explored(m) && mx >= 0 && my >= 0 && mx < tilesW && my < tilesH) marker(batch, x + (mx + 0.5f) * px, top - (my + 0.5f) * px, ms, MARK);
         }
         if (target != null && target.z() == p.z()) {
             int tx = target.x() - sx0, ty = target.y() - sy0;
@@ -111,8 +211,9 @@ final class Minimap {
      * brzegu swiata dosuniety do krawedzi) wypelniajacy prostokat. Zwraca {x, y, skala, wysokosc, kafelek x lewej
      * krawedzi, kafelek y gornej krawedzi, szerokosc} narysowanego obrazu (do podpisow i dotkniec) albo null.
      */
-    float[] drawZoomed(SpriteBatch batch, WorldMap w, Position p, Position target, java.util.List<Position> marks,
+    float[] drawZoomed(SpriteBatch batch, WorldMap w, ExploredMap fog, Position p, Position target, java.util.List<Position> marks,
                        float x, float y, float bw, float bh, int zoom) {
+        syncFog(fog);
         Texture t = texture(w, p.z());
         if (t == null) return null;
         int tw = t.getWidth(), th = t.getHeight();
@@ -124,7 +225,7 @@ final class Minimap {
         batch.draw(t, ix, iy, iw, ih, sx, sy, sw, sh, false, false);
         float ms = Math.max(5, Math.min(12, scale * 2));
         for (Position m : marks) {
-            if (m.z() == p.z() && in(m, sx, sy, sw, sh)) marker(batch, ix + (m.x() - sx + 0.5f) * scale, iy + ih - (m.y() - sy + 0.5f) * scale, ms, MARK);
+            if (m.z() == p.z() && explored(m) && in(m, sx, sy, sw, sh)) marker(batch, ix + (m.x() - sx + 0.5f) * scale, iy + ih - (m.y() - sy + 0.5f) * scale, ms, MARK);
         }
         if (target != null && target.z() == p.z() && in(target, sx, sy, sw, sh)) {
             marker(batch, ix + (target.x() - sx + 0.5f) * scale, iy + ih - (target.y() - sy + 0.5f) * scale, ms + 2, TARGET);
@@ -150,8 +251,14 @@ final class Minimap {
         batch.setColor(old);
     }
 
-    void dispose() {
+    private void disposeFloors() {
         for (Texture t : floors.values()) t.dispose();
         floors.clear();
+    }
+
+    void dispose() {
+        disposeFloors();
+        for (Pixmap pm : patches.values()) pm.dispose();
+        patches.clear();
     }
 }

@@ -20,6 +20,8 @@ final class ServerPlayer {
     String lastFrameBody;
     long framesKept;
     String lastSelf;
+    /** Odkryta mapa wyslana po zalogowaniu (FOG). */
+    boolean fogSent;
     long lastSelfMs = -1_000_000;
     long lastSaveMs;
     /** Ostatnie zgloszenie gracza (/zgłoś), limit 1 na minute. */

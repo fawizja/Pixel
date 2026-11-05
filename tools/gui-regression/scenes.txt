@@ -166,3 +166,7 @@ controls_settings|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport
 fightmode_offensive_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.fightMode=OFFENSIVE
 fightmode_defensive_desktop|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.fightMode=DEFENSIVE
 mobile_picker_corner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1560 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.open=mobile_picker -Dpixel.pickerButton=8
+# 2026-11-05: mgla mapy (run.sh domyslnie -Dpixel.revealMap=1; te sceny 0): nowa postac, trasa na duzej mapie, podziemia
+fog_new_mobile|-Dpixel.revealMap=0 -Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+fog_route_map|-Dpixel.revealMap=0 -Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=540,540,0 -Dpixel.exploreRoute=498,499,0;498,520,0;470,520,0;470,560,0;520,560,0;540,540,0 -Dpixel.open=map
+fog_underground_map|-Dpixel.revealMap=0 -Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.exploreRoute=510,472,-1;510,492,-1;530,488,-1;540,482,-1;486,510,-1;482,500,-1;475,506,-1 -Dpixel.open=map

@@ -1778,7 +1778,11 @@ public final class GameScreen extends ScreenAdapter {
             dir = null;                                         // postac lezy w lozku: zadnych krokow
             stopWalk();
         }
-        if (net != null) syncWithServer(dir);
+        if (net != null) {
+            syncWithServer(dir);
+            // mgla mapy online: klient odkrywa sam z pozycji (serwer liczy to samo i zapisuje)
+            session.character().explored().revealView(session.character().position());
+        }
         final long t = now();
         if (net == null) session.update(t, dir);
         if (net == null && sleepBed == null) {
@@ -2917,6 +2921,14 @@ public final class GameScreen extends ScreenAdapter {
                                 m.length > 4 ? m[4] : "", session.items());
                     } catch (NumberFormatException e) {
                         // zly komunikat: pomijamy
+                    }
+                    break;
+                case "FOG":
+                    if (m.length < 2) break;
+                    try {
+                        session.character().explored().merge(m[1]);
+                    } catch (RuntimeException e) {
+                        Gdx.app.error("Pixel", "Nieczytelna odkryta mapa z serwera", e);
                     }
                     break;
                 case "LOG":

@@ -24,6 +24,7 @@ import java.util.List;
  *                                       END                            (koniec klatki)
  *                                       LOG     RODZAJ tekst
  *                                       CHAT    imie tekst
+ *                                       FOG     czesc odkrytej mapy (ExploredMap, deflate+base64; po zalogowaniu)
  * </pre>
  */
 public final class Protocol {

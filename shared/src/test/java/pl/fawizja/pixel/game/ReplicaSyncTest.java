@@ -30,13 +30,14 @@ class ReplicaSyncTest {
         s.toggleTorch(0);
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         codec.setWallClock(() -> 1_000L); // znacznik zapisu staminy staly w obu zapisach
-        String save = codec.encode(server);
+        String save = codec.encode(server, false); // SELF serwera: bez odkrytej mapy (ta idzie osobno, w FOG)
 
         PlayerCharacter client = TestData.newCharacter(Vocation.DRUID);
         client.backpack().takeFromSlot(0, 1);
         client.copyStateFrom(codec.decode(save));
         // wszystko poza identyfikatorem, pozycja (przychodzi w klatkach) i suma kontrolna
-        assertEquals(strip(codec.encode(server)), strip(codec.encode(client)));
+        assertEquals(strip(codec.encode(server, false)), strip(codec.encode(client, false)));
+        assertTrue(client.explored().isEmpty(), "the explored map is not copied from SELF");
         assertTrue(client.isTorchLit());
 
         PlayerCharacter other = TestData.newCharacter(Vocation.MONK);

@@ -39,6 +39,8 @@ public final class PlayerCharacter {
     private final java.util.Set<String> completedBossQuests = new java.util.LinkedHashSet<>();
 
     public static final int DEPOT_SLOTS = 60;
+    /** Odkryta mapa (mgla minimapy) - nie kopiowana w copyStateFrom: klient online odkrywa sam i dostaje FOG. */
+    private final pl.fawizja.pixel.world.ExploredMap explored = new pl.fawizja.pixel.world.ExploredMap();
     private final Skills skills;
     private final AutoLootFilter autoLootFilter = new AutoLootFilter();
     /** Rodzaje przedmiotow oznaczone "Zachowaj": nie ida do hurtowej sprzedazy lupu, depozytu ani na ziemie. */
@@ -94,6 +96,8 @@ public final class PlayerCharacter {
      * Klient online: przepisuje stan postaci przyslany przez serwer (pozycje ustawia osobno klatka stanu,
      * zeby ruch byl plynny). Ta sama postac: imie i profesja musza sie zgadzac.
      */
+    public pl.fawizja.pixel.world.ExploredMap explored() { return explored; }
+
     public void copyStateFrom(PlayerCharacter o) {
         if (!o.name.equals(name) || o.vocation != vocation) throw new IllegalArgumentException("different character");
         level = o.level;
