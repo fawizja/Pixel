@@ -572,7 +572,7 @@ public final class GameSession {
         }
         sb.append(" (x etap serwera; ok. 2/3 tempa polowania, bez doświadczenia).");
         if (sk == Skill.MAGIC) sb.append(" Magię szybciej trenujesz czarami: każdy punkt many liczy się jak na polowaniu.");
-        return sb.append(" Ruch albo UŻYJ kończy trening.").toString();
+        return sb.append(" Ruch albo ponowne dotknięcie manekina kończy trening.").toString();
     }
 
     private void stopTraining(long nowMs, String why) {
@@ -2649,6 +2649,8 @@ public final class GameSession {
     /** Uzycie obiektu na mapie (drabina, krzak, drogowskaz, studnia, lozko); false = nic do uzycia. */
     private boolean useWorldObject(Position p, long nowMs) {
         Position me = pc.position();
+        // manekin: dotkniecie z sasiedniego pola zaczyna albo konczy trening (nie ma juz przycisku Uzyj)
+        if (dummies.at(p)) return toggleTraining(nowMs);
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null && !tr.type().triggeredByWalking()) {
             if (tr.type().requiresRope() && pc.backpack().count(items.byKey("rope").id()) == 0) {
@@ -2697,7 +2699,7 @@ public final class GameSession {
     public boolean usableAt(Position p) {
         if (chestAt(p) || world.openings().isDoor(p) || world.openings().isWindow(p) || world.crates().isStorage(p)
                 || world.wallLights().isWallLight(p) || world.altarQuestByLever(p) != null || world.altarAt(p) != null
-                || world.bossQuestByLever(p) != null) return true;
+                || world.bossQuestByLever(p) != null || dummies.at(p)) return true;
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null && !tr.type().triggeredByWalking()) return true;
         if (berries.kindAt(p) != null || herbs.isHerbBush(p)) return true;

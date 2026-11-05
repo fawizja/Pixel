@@ -105,6 +105,28 @@ public class TrainingDummiesTest {
         assertEquals(fistLevel, pc.skills().level(Skill.FIST));
     }
 
+    /** Na telefonie nie ma przycisku Uzyj: dotkniecie manekina zaczyna i konczy trening. */
+    @Test
+    void tappingTheDummyStartsAndStopsTraining() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
+        GameSession s = new GameSession(TestData.ITEMS, world, pc,
+                new MonsterManager(world, null, List.of(), new Random(1)), new Random(2), 8);
+        s.setTownServices(npcs, shops, quests);
+        Position dummy = s.dummies().all().get(0);
+        Position spot = null;
+        for (Direction dir : Direction.values()) {
+            Position q = dummy.translate(dir.dx, dir.dy);
+            if (!dir.diagonal() && world.isWalkable(q) && npcs.at(q) == null) { spot = q; break; }
+        }
+        assertNotNull(spot);
+        s.teleport(spot, 0);
+        assertTrue(s.usableAt(dummy), "dummy is usable by tap");
+        assertTrue(s.useAt(dummy, 0));
+        assertTrue(s.training());
+        assertTrue(s.useAt(dummy, 100));
+        assertFalse(s.training());
+    }
+
     /** Rycerz: miecz 10 -> 60 przy manekinie (porownanie z polowaniem: HuntBalanceSimulationTest#dummyTrainsAboutTwoThirdsAsFastAsHunting). */
     @Test
     void aKnightTrainsSword10To60AtTheDummyInAQuarterOfAnHour() {
