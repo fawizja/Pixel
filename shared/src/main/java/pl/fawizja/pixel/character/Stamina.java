@@ -3,9 +3,10 @@ package pl.fawizja.pixel.character;
 /**
  * Stamina jak w Tibii (TibiaWiki "Stamina"): najwyzej 42:00 godzin. Polowanie (zdobywanie doswiadczenia
  * z potworow) zuzywa 1 minute na kazda minute polowania. Ostatnie 3 godziny (powyzej 39:00, "happy hour")
- * daja kontom premium 150% doswiadczenia, ponizej 14:00 jest go o polowe mniej, a przy 0 - wcale.
- * Po wylogowaniu: pierwsze 10 minut nic, potem 1 minuta staminy na 3 minuty offline do 39:00 i 1 minuta
- * na 6 minut offline powyzej 39:00 (od 39 do 42 godzin trzeba 18 h 10 min offline).
+ * daja kontom premium 150% doswiadczenia, ponizej 14:00 jest go o polowe mniej, a przy 0 - wcale (i bez lupu).
+ * Po wylogowaniu: pierwsze 10 minut nic, potem odnowienie o 1/3 szybsze niz w Tibii: 1 minuta staminy na
+ * 2 min 15 s offline do 39:00 i 1 minuta na 4 min 30 s offline powyzej 39:00 (od 39 do 42 godzin trzeba
+ * 13 h 40 min offline, od 0:00 do 42:00 - 101 h 25 min).
  * Online stamina sie nie odnawia. Liczona na serwerze (sesja gracza), klient tylko ja pokazuje.
  */
 public final class Stamina {
@@ -17,10 +18,10 @@ public final class Stamina {
     public static final int LOW_AT_MINUTES = 14 * 60;
     /** Odnawianie zaczyna sie po 10 minutach offline. */
     public static final long OFFLINE_GRACE_MS = 10 * 60_000L;
-    /** Ponizej 39:00: 1 minuta staminy na 3 minuty offline. */
-    public static final long REGEN_MS_PER_MINUTE = 3 * 60_000L;
-    /** Powyzej 39:00: 1 minuta staminy na 6 minut offline. */
-    public static final long BONUS_REGEN_MS_PER_MINUTE = 6 * 60_000L;
+    /** Ponizej 39:00: 1 minuta staminy na 2 min 15 s offline (Tibia: 3 min; tempo x4/3). */
+    public static final long REGEN_MS_PER_MINUTE = 135_000L;
+    /** Powyzej 39:00: 1 minuta staminy na 4 min 30 s offline (Tibia: 6 min; tempo x4/3). */
+    public static final long BONUS_REGEN_MS_PER_MINUTE = 270_000L;
     /** Jedna minuta staminy na minute polowania. */
     public static final long USE_INTERVAL_MS = 60_000L;
 
@@ -80,7 +81,7 @@ public final class Stamina {
         return out;
     }
 
-    /** Odnowienie po czasie offline (ms) wg zasad Tibii; zwraca odzyskane minuty. */
+    /** Odnowienie po czasie offline (ms) wg zasad Tibii (tempo x4/3); zwraca odzyskane minuty. */
     public int regenerateOffline(long offlineMs) {
         long t = offlineMs - OFFLINE_GRACE_MS;
         if (t <= 0 || minutes >= MAX_MINUTES) return 0;

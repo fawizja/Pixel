@@ -119,10 +119,17 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public void setBonusExpPercent(int percent) { bonusExpPercent = Math.max(0, percent); }
     public int bonusExpPercent() { return bonusExpPercent; }
 
-    /** Dopisek do wpisu o pokonaniu potwora: stamina premiowa, niska albo pusta (jak kolor paska w Tibii). */
-    public static String staminaNote(PlayerCharacter pc) {
+    /** Dopisek do wpisu o pokonaniu potwora przez zabojce (jego cialo, jego lup): {@link #staminaNote(PlayerCharacter, boolean)}. */
+    public static String staminaNote(PlayerCharacter pc) { return staminaNote(pc, true); }
+
+    /**
+     * Dopisek do wpisu o pokonaniu potwora: stamina premiowa, niska albo pusta (jak kolor paska w Tibii). Przy pustej
+     * staminie zabojca nie dostaje ani doswiadczenia, ani lupu (cialo puste); czlonek druzyny tylko doswiadczenia,
+     * bo lup lezy w ciele zabojcy.
+     */
+    public static String staminaNote(PlayerCharacter pc, boolean killer) {
         switch (pc.stamina().zone()) {
-            case EMPTY: return ", brak staminy - bez doświadczenia";
+            case EMPTY: return killer ? ", brak staminy - bez expa i łupu" : ", brak staminy - bez expa";
             case LOW: return ", niska stamina (50% exp)";
             case BONUS: return pc.isPremium() ? ", premia staminy (150% exp)" : "";
             default: return "";
@@ -297,6 +304,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onMonsterDeath(Monster m, long now) {
         MonsterType t = m.type();
         kills++;
+        // stamina 0:00 jak w Tibii: bez lupu (strefa sprzed zuzycia za to zabicie - ostatnia minuta jeszcze daje lup)
+        boolean noStamina = pc.stamina().zone() == pl.fawizja.pixel.character.Stamina.Zone.EMPTY;
         boolean lootElsewhere = lootOwner != null && lootOwner.test(m);   // przed sluchaczem: on konczy wyprawe
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
@@ -307,13 +316,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                 exp = exp * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
                 pc.stats().recordRestedKill();
             }
+            String note = staminaNote(pc); // strefa sprzed zuzycia minuty za to zabicie
             exp = pc.stamina().hunt(exp, pc.isPremium(), now);
             awardExperience(exp, "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : "")
-                    + staminaNote(pc), now);
+                    + note, now);
         }
         Position corpse = m.position();
         List<ItemStack> drop;
-        if (lootElsewhere) {
+        if (lootElsewhere || noStamina) {
             rareRolled.clear();
             drop = new ArrayList<>();
         } else {

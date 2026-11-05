@@ -58,6 +58,9 @@ public final class BossQuestRuntime {
 
         /** Ostatecznosc: przedmiot na ziemi pod postacia. */
         void drop(ItemStack s, long nowMs);
+
+        /** Stamina 0:00 (jak w Tibii): wyprawa zaliczona, ale bez lupu z bossa. */
+        default boolean noStamina() { return false; }
     }
 
     public enum Phase { IDLE, FIGHT, CLEARED }
@@ -231,7 +234,8 @@ public final class BossQuestRuntime {
     }
 
     /**
-     * Smierc potwora: gdy to boss wyprawy, kazdy zywy uczestnik na arenie dostaje wlasny lup i zapis ukonczenia.
+     * Smierc potwora: gdy to boss wyprawy, kazdy zywy uczestnik na arenie dostaje wlasny lup i zapis ukonczenia
+     * (uczestnik bez staminy - tylko zapis ukonczenia, jak w Tibii).
      * Zwraca wyprawe, gdy to byl jej boss (uczestnicy: {@link #party}), inaczej null.
      */
     public BossQuest onMonsterDeath(Monster m, Collection<? extends Hero> everyone, long nowMs) {
@@ -250,7 +254,11 @@ public final class BossQuestRuntime {
                 h.markCompleted(q.id());
                 h.message(EventLog.Kind.SYSTEM, "Wyprawa " + q.name() + " ukończona! W rogu areny otworzył się portal"
                         + " z powrotem do przedsionka.", nowMs);
-                give(h, boss, loot.get(h.id()), nowMs);
+                if (h.noStamina()) {
+                    h.message(EventLog.Kind.LOOT, "Łup z bossa " + boss.name() + ": brak staminy - bez łupu.", nowMs);
+                } else {
+                    give(h, boss, loot.get(h.id()), nowMs);
+                }
             }
             a.phase = Phase.CLEARED;
             a.bossId = -1;

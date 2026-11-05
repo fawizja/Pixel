@@ -2754,6 +2754,9 @@ public final class GameSession {
 
         @Override
         public void drop(ItemStack st, long nowMs) { ground.place(pc.position(), st); }
+
+        @Override
+        public boolean noStamina() { return pc.stamina().zone() == pl.fawizja.pixel.character.Stamina.Zone.EMPTY; }
     };
     /** Kto bierze udzial w wyprawach: offline sama postac, na serwerze wszyscy gracze. */
     private java.util.function.Supplier<java.util.List<BossQuestRuntime.Hero>> bossHeroes = () -> java.util.List.of(bossHero);
