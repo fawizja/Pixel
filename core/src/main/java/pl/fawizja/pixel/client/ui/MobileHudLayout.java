@@ -4,7 +4,9 @@ package pl.fawizja.pixel.client.ui;
  * Uklad HUD-u na telefon, "wariant B" z makiety zatwierdzonej przez wlasciciela (2026-10-29,
  * scratchpad/mock/template3.html, funkcja phone()): widok gry na calym ekranie pod HUD-em, u gory jedna drewniana
  * ramka (poziom, paski HP i many, 8 ikon kategorii), pod nia po prawej minimapa 120 x 80 dp i pod nia lista walki
- * (wlasciciel: "Walka musi byc pod mapa"), w prawym dolnym rogu luk 5 czarow i 2 mikstur, obok rzad Atak / Podazaj / Tarcza / PvP, joystick w lewym
+ * (wlasciciel: "Walka musi byc pod mapa"), w prawym dolnym rogu luk 5 czarow, pod nim wewnetrzny luk 3 pol (mikstury
+ * albo czary) i pole w rogu, w srodku obu lukow (Darek, 0.227: "zmiesc jeszcze jedna miksture albo czar i jeszcze jedno
+ * w srodku"), obok rzad Atak / Podazaj / tryb walki / PvP, joystick w lewym
  * dolnym rogu, zwijany czat na dole.
  *
  * <p>Makieta ma poczatek w lewym gornym rogu; tu wszystko jest przeliczone na libGDX (poczatek w lewym dolnym
@@ -27,13 +29,19 @@ public final class MobileHudLayout {
      */
     public static final float MINIMAP = 120f, MINIMAP_H = 80f;
     /** Luk czarow: srodek 20 dp od prawego i dolnego brzegu, promienie lukow i przyciskow. */
-    public static final float ARC_INSET = 20f, R1 = 110f, R2 = 58f, SPELL_R = 19.5f, POTION_R = 16f, ROW_R = 19f;
+    public static final float ARC_INSET = 20f, R1 = 110f, R2 = 60f, SPELL_R = 19.5f, POTION_R = 16f, ROW_R = 19f;
     public static final float[] SPELL_DEG = {180f, 202.5f, 225f, 247.5f, 270f};
-    public static final float[] POTION_DEG = {196f, 254f};
-    /** Pola paska akcji pod przyciskami luku (czary 1-5) i miksturami (6-7) - pierwsze 7 pol paska. */
+    /** Wewnetrzny luk: 3 pola co 35 stopni (36 dp miedzy srodkami - pola dotyku 36 dp sie nie nakladaja). */
+    public static final float[] INNER_DEG = {190f, 225f, 260f};
+    /** Pole w rogu, w srodku obu lukow: srodek {@value} dp od prawego i dolnego brzegu (z dala od zaokraglonego rogu). */
+    public static final float CORNER_INSET = 24f;
+    /**
+     * Pola paska akcji pod przyciskami luku (czary 1-5), wewnetrznego luku (6-8) i rogu (9). Stare pola 4 i 5 (mikstury)
+     * zostaja na koncach wewnetrznego luku, nowe 7 (srodek luku) i 8 (rog) sa puste ("+") do przypisania.
+     */
     public static final int[] SPELL_SLOTS = {1, 2, 6, 0, 3};
-    public static final int[] POTION_SLOTS = {4, 5};
-    /** Rzad (od prawej) Atak / Podazaj / Tarcza / PvP: y = 22 od dolu, x = luk - 50 - i * 42. */
+    public static final int[] POTION_SLOTS = {4, 7, 5, 8};
+    /** Rzad (od prawej) Atak / Podazaj / tryb walki / PvP: y = 22 od dolu, x = luk - 50 - i * 42. */
     public static final float ROW_Y = 22f, ROW_STEP = 42f;
     public static final int ROW_ATTACK = 0, ROW_FOLLOW = 1, ROW_SHIELD = 2, ROW_PVP = 3, ROW_COUNT = 4;
     /** Przyciski chwilowe (Mow, Wez, Low, Kon): nad rzedem, czwarty jeszcze wyzej. */
@@ -101,7 +109,8 @@ public final class MobileHudLayout {
     public final HudLayout.Rect battle = new HudLayout.Rect();
     public float arcX, arcY;
     public final Circle[] spells = new Circle[SPELL_DEG.length];
-    public final Circle[] potions = new Circle[POTION_DEG.length];
+    /** Pola pod lukiem czarow: 3 na wewnetrznym luku i ostatnie w rogu (patrz {@link #POTION_SLOTS}). */
+    public final Circle[] potions = new Circle[INNER_DEG.length + 1];
     public final Circle[] row = new Circle[ROW_COUNT];
     public final Circle[] context = new Circle[CONTEXT];
     public final Circle joystick = new Circle();
@@ -158,7 +167,8 @@ public final class MobileHudLayout {
         arcY = ARC_INSET;
         float x0 = arcX - R1 - 50;
         for (int i = 0; i < spells.length; i++) onArc(spells[i], R1, SPELL_DEG[i], SPELL_R);
-        for (int i = 0; i < potions.length; i++) onArc(potions[i], R2, POTION_DEG[i], POTION_R);
+        for (int i = 0; i < INNER_DEG.length; i++) onArc(potions[i], R2, INNER_DEG[i], POTION_R);
+        potions[INNER_DEG.length].set(w - CORNER_INSET, CORNER_INSET, POTION_R);
         for (int i = 0; i < row.length; i++) row[i].set(x0 - i * ROW_STEP, ROW_Y, ROW_R);
         for (int i = 0; i < 3; i++) context[i].set(x0 - i * ROW_STEP, ROW_Y + ROW_STEP, ROW_R);
         context[3].set(x0, ROW_Y + 2 * ROW_STEP, ROW_R);

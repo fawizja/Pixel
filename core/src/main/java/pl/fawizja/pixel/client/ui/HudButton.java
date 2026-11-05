@@ -13,6 +13,8 @@ public final class HudButton {
     public float hw;
     /** Ikona przedmiotu nad etykieta (np. miecz na przycisku ataku); null = sama etykieta. */
     public com.badlogic.gdx.graphics.g2d.TextureRegion icon;
+    /** Druga ikona obok pierwszej (tryb walki zbalansowany: miecz i tarcza); null = jedna ikona. */
+    public com.badlogic.gdx.graphics.g2d.TextureRegion icon2;
     /** Etykieta mala, u dolu pola (nad nia rysowany jest znak czaru). */
     public boolean labelBottom;
 

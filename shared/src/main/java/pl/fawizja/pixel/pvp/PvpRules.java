@@ -363,7 +363,6 @@ public final class PvpRules {
         }
         as.nextAttackMs = now + ap.intervalMs();
         int raw = CombatFormulas.roll(ap.maxDamage(), rng);
-        if (a.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         return hit(attacker, as, victim, vs, raw, ap.type(), now, rng);
     }
 
@@ -409,7 +408,7 @@ public final class PvpRules {
         }
         Skull victimSkull = vs.skull(now);
         raw = (int) Math.round(raw * (victimSkull == Skull.BLACK ? BLACK_SKULL_DAMAGE : PVP_DAMAGE));
-        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, b.isDefensive(), rng);
+        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, now < vs.nextAttackMs || victim.combat().attackedRecently(now), rng);
         int dealt = b.damage(dmg);
         victim.combat().recordDamage(a.name() + " (gracz)", dealt, now);
         CombatEvent.Kind kind = dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED;
@@ -518,7 +517,7 @@ public final class PvpRules {
         PlayerCharacter a = attacker.character();
         PlayerCharacter b = victim.character();
         raw = (int) Math.round(raw * PVP_DAMAGE);
-        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, b.isDefensive(), rng);
+        int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, now < vs.nextAttackMs || victim.combat().attackedRecently(now), rng);
         boolean won = dmg >= b.health();
         if (won) dmg = b.health() - 1;
         int dealt = b.damage(dmg);

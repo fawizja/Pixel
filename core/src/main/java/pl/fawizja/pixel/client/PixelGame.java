@@ -168,6 +168,9 @@ public class PixelGame extends Game {
         Integer stamina = Integer.getInteger("pixel.stamina");
         if (stamina != null) pc.stamina().setMinutes(stamina);
         if ("1".equals(System.getProperty("pixel.premium"))) pc.setPremium(true);
+        // podglad przycisku trybu walki (regresja GUI): -Dpixel.fightMode=OFFENSIVE|BALANCED|DEFENSIVE
+        pl.fawizja.pixel.combat.FightMode fm = pl.fawizja.pixel.combat.FightMode.parse(System.getProperty("pixel.fightMode", ""));
+        if (fm != null) pc.setFightMode(fm);
         // podglad krzywych umiejetnosci (regresja GUI): -Dpixel.train=SWORD:N = N pojedynczych prob tej umiejetnosci
         // (co druga takze tarczy; tempo manekina do 0.222.0), z mnoznikiem etapu serwera
         String train = System.getProperty("pixel.train");

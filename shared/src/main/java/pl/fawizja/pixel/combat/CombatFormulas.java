@@ -20,11 +20,6 @@ public final class CombatFormulas {
     public static final int FIST_ATTACK = 7;
     /** Minimalny udzial maksymalnych obrazen w losowaniu (40%..100%). */
     public static final double MIN_ROLL = 0.4;
-    /** Postawa obronna: mniej zadawanych i otrzymywanych obrazen. */
-    public static final double DEFENSIVE_OUTGOING = 0.8;
-    public static final double DEFENSIVE_INCOMING = 0.75;
-    /** Postawa obronna z tarcza: mocniejsze zmniejszenie obrazen niz bez tarczy. */
-    public static final double DEFENSIVE_INCOMING_SHIELD = 0.6;
 
     private CombatFormulas() {}
 
@@ -79,14 +74,17 @@ public final class CombatFormulas {
         double bonus = pc.level() / 5.0;
         double max;
         Skill skill = weaponSkill(weapon, v);
+        // tryb walki jak w TFS (Weapons::getMaxWeaponDamage): dzieli czesc z broni i umiejetnosci, nie premie za poziom;
+        // rozdzki i laski (jak WeaponWand w TFS) i czary nie zaleza od trybu
+        double mode = pc.fightMode().damageFactor();
         if (skill == Skill.MAGIC) {
             max = attack * (1.0 + pc.skills().level(Skill.MAGIC) / 25.0) * v.magicFactor() + bonus;
         } else if (skill == Skill.DISTANCE) {
             ItemType ammo = ammunition(pc, items);
             if (ammo != null) attack += ammo.attack() / AMMO_ATTACK_DIVISOR;
-            max = attack * (pc.skills().level(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() + bonus;
+            max = attack * (pc.skills().level(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() * mode + bonus;
         } else {
-            max = attack * (pc.skills().level(skill) + 10) / 20.0 * v.meleeFactor() + bonus;
+            max = attack * (pc.skills().level(skill) + 10) / 20.0 * v.meleeFactor() * mode + bonus;
         }
         return new AttackProfile((int) Math.min(Integer.MAX_VALUE, Math.round(max)), range, type, skill, v.attackIntervalMs());
     }
@@ -113,28 +111,31 @@ public final class CombatFormulas {
         return (int) Math.max(0, Math.min(Integer.MAX_VALUE, d));
     }
 
-    /** Obrazenia po pancerzu, tarczy i postawie postaci. */
-    public static int mitigateOnPlayer(PlayerCharacter pc, int damage, DamageType type, boolean defensive, Random rng) {
+    /** Obrazenia po pancerzu, tarczy i trybie walki postaci (tryb wg {@link PlayerCharacter#fightMode()}). */
+    public static int mitigateOnPlayer(PlayerCharacter pc, int damage, DamageType type, boolean attackedRecently, Random rng) {
+        return mitigateOnPlayer(pc, damage, type, pc.fightMode(), attackedRecently, rng);
+    }
+
+    /**
+     * Obrazenia po pancerzu i obronie. Jak w TFS (Creature::blockHit): tryb walki zmienia tylko obrone (tarcza, bron),
+     * nie pancerz ani obrazenia od zywiolow; w trybie defensywnym z tarcza dochodzi pewny blok tarcza (pelna obrona
+     * tarczy). attackedRecently = postac zaatakowala bronia w ostatnim odstepie ataku (bez tego TFS daje pelna obrone).
+     */
+    public static int mitigateOnPlayer(PlayerCharacter pc, int damage, DamageType type, FightMode mode, boolean attackedRecently,
+                                       Random rng) {
         if (damage <= 0) return 0;
         double d = damage;
         if (type == DamageType.PHYSICAL) {
             int armor = pc.equipment().totalArmor();
             d -= rollBetween(0, armor / 2, rng);
             double defense = pc.equipment().totalDefense() * pc.vocation().defenseFactor()
-                    * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0;
+                    * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0 * mode.defenseFactor(attackedRecently);
             d -= rollBetween(0, (int) (defense / 3), rng);
-        }
-        if (defensive) {
             int shield = pc.equipment().shieldDefense();
-            if (shield > 0) {
-                // postawa obronna z tarcza: dodatkowe blokowanie ciosow tarcza i mniejsze obrazenia
-                if (type == DamageType.PHYSICAL) {
-                    double block = shield * pc.vocation().defenseFactor() * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0;
-                    d -= rollBetween((int) (block / 6), (int) (block / 2), rng);
-                }
-                d = Math.max(0, d) * DEFENSIVE_INCOMING_SHIELD;
-            } else {
-                d *= DEFENSIVE_INCOMING;
+            if (mode == FightMode.DEFENSIVE && shield > 0) {
+                // tryb defensywny z tarcza: dodatkowe blokowanie ciosow tarcza
+                double block = shield * pc.vocation().defenseFactor() * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0;
+                d -= rollBetween((int) (block / 6), (int) (block / 2), rng);
             }
         }
         return (int) Math.max(0, Math.round(d));

@@ -49,7 +49,7 @@ public final class CharacterCodec {
             m.put("quest." + q.getKey(), "A/" + q.getValue());
         }
         for (String q : pc.quests().done()) m.put("quest." + q, "D");
-        m.put("flags", (pc.isRunning() ? "R" : "") + (pc.isDefensive() ? "D" : "") + (pc.hasMount() ? "H" : "") + (pc.isMounted() ? "M" : ""));
+        m.put("flags", (pc.isRunning() ? "R" : "") + pc.fightMode().flag() + (pc.hasMount() ? "H" : "") + (pc.isMounted() ? "M" : ""));
         m.put("timers", pc.fedMs() + "," + pc.lightBuffMs() + "," + pc.lightBuffRadius() + ","
                 + (pc.isTorchLit() ? 1 : 0) + "," + pc.torchBurnMs());
         if (pc.restedMs() > 0) m.put("rested", Long.toString(pc.restedMs()));
@@ -256,7 +256,7 @@ public final class CharacterCodec {
         pc.stamina().restore(m.get("stamina"));
         String flags = m.getOrDefault("flags", "");
         pc.setRunning(flags.contains("R"));
-        pc.setDefensive(flags.contains("D"));
+        pc.setFightMode(pl.fawizja.pixel.combat.FightMode.fromFlags(flags)); // stare "D" (Tarcza) = defensywny
         pc.setHasMount(flags.contains("H"));
         pc.setMounted(flags.contains("M"));
         migrateTorch(loadVersion, m, pc);

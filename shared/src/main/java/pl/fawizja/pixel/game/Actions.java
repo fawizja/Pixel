@@ -18,7 +18,8 @@ public final class Actions {
             case "pick": s.pickUpHere(now); return true;
             case "loot": s.searchCorpse(now); return true;
             case "target": s.cycleTarget(now); return true;
-            case "defensive": s.toggleDefensive(now); return true;
+            case "defensive": // stara nazwa przycisku "Tarcza" (starsze klienty) - teraz przelacza tryb walki
+            case "fightmode": s.cycleFightMode(now); return true;
             case "pvp": s.togglePvpMode(now); return true;
             case "fish": s.fish(now); return true;
             case "sort": s.sortBackpack(now); return true;
@@ -36,6 +37,7 @@ public final class Actions {
                     s.useAt(new pl.fawizja.pixel.world.Position(Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[3])), now);
                     return true;
                 case "craft": s.craft(p[1], now); return true;
+                case "fightmode": s.setFightMode(pl.fawizja.pixel.combat.FightMode.parse(p[1]), now); return true;
                 case "item": return useBarItem(s, p[1], now);
                 case "slot_use": s.useSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_equip": s.equipFromSlot(Integer.parseInt(p[1]), now); return true;

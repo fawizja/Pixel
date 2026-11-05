@@ -371,6 +371,8 @@ Obiekt obok postaci (albo pod nia) - uzycie od razu; dalej - marsz na pole obok 
   mikstura, runa, automat, wyczysc. Odnowienie czarow, mikstur (grupa POTION) i run jako zaslona opadajaca z gory.
 - `settings/SpellBar`: zapis "cast:mend,-,item:...,none,..." w Preferences `pixel-bar` osobno dla kazdej postaci;
   stary zapis 4 kluczy czarow jest czytany jako czary. Klawisze 1-9 i 0.
+- Telefon: luk 5 czarow (pola 1, 2, 6, 0, 3), wewnetrzny luk 3 pol (4, 7, 5 - stare mikstury na koncach, nowe pole 7
+  w srodku) i pole 8 w rogu ekranu (srodek obu lukow); kazde przyjmie czar albo miksture (przytrzymanie = wybor).
 
 ## Uklad ekranu (C UI)
 
@@ -479,6 +481,14 @@ przy pauzie, utracie fokusu i zamknieciu.
 - Zdarzenia walki (`CombatEvent`) -> liczby obrazen, leczenia, awansu w kliencie.
 - Cios wrecz niesie pozycje atakujacego (`from`, `isMeleeStrike`): klient rysuje wypad atakujacego w strone celu
   (180 ms) i krotkie ciecie na celu. Dziala tez online (EV z 10 polami).
+- Tryb walki (`combat/FightMode`, przycisk w HUD i klawisz V, zamiast dawnej "Tarczy"): ofensywny (miecz) ->
+  zbalansowany (miecz i tarcza, domyslny) -> defensywny (tarcza). Wartosci z TFS (`Player::getAttackFactor` 1,0 / 1,2 /
+  2,0 jako dzielnik ataku, `Player::getDefenseFactor` 0,5 / 0,75 / 1,0 przy ataku w ostatnim odstepie, inaczej 1,0),
+  przeliczone wzgledem zbalansowanego (nasze formuly byly strojone dla zwyklej walki): obrazenia broni (bez premii
+  poziom/5, bez rozdzek i czarow) x1,2 / x1,0 / x0,6; obrona (tarcza, bron; nie pancerz) x0,67 / x1,0 / x1,33 gdy
+  postac atakowala bronia w ostatnim odstepie, inaczej x1,33 w kazdym trybie; defensywny z tarcza dodatkowo blokuje
+  tarcza jak dawna "Tarcza". Zywioly bez zmian (jak w TFS). Zapis w flagach postaci ("O" / brak / "D" - stary zapis
+  "D" = defensywny); akcja `fightmode:NAZWA` (klient wysyla tryb docelowy), `fightmode` i stare `defensive` przelaczaja.
 
 ## Druzyny (Z logika, S serwer)
 

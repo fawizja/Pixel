@@ -47,7 +47,7 @@ public final class PlayerCharacter {
     private String homeTown;
     private boolean running;
     private boolean torchLit;
-    private boolean defensive;
+    private pl.fawizja.pixel.combat.FightMode fightMode = pl.fawizja.pixel.combat.FightMode.BALANCED;
     private long regenAccumulatorMs;
     /** Pozostaly czas sytosci (podwojna regeneracja) i swiatla z czaru. */
     private long fedMs;
@@ -149,7 +149,7 @@ public final class PlayerCharacter {
         outfit = o.outfit;
         tips = o.tips;
         torchLit = o.torchLit;
-        defensive = o.defensive;
+        fightMode = o.fightMode;
         fedMs = o.fedMs;
         restedMs = o.restedMs;
         stamina.copyFrom(o.stamina);
@@ -370,9 +370,9 @@ public final class PlayerCharacter {
     public boolean isRunning() { return running; }
     public void setRunning(boolean running) { this.running = running; }
     public boolean isTorchLit() { return torchLit; }
-    /** Postawa obronna (tarcza w HUD): mniej obrazen zadawanych i otrzymywanych. */
-    public boolean isDefensive() { return defensive; }
-    public void setDefensive(boolean defensive) { this.defensive = defensive; }
+    /** Tryb walki jak w Tibii (przycisk w HUD): ofensywny, zbalansowany (domyslny) albo defensywny. */
+    public pl.fawizja.pixel.combat.FightMode fightMode() { return fightMode; }
+    public void setFightMode(pl.fawizja.pixel.combat.FightMode m) { fightMode = m == null ? pl.fawizja.pixel.combat.FightMode.BALANCED : m; }
 
     // ------------------------------------------------------------------ PvP (tylko w pamieci, bez zapisu)
     // Tryb PvP, czaszka i blokada PZ nie sa kodowane w CharacterCodec ani kopiowane w copyFrom: po zalogowaniu

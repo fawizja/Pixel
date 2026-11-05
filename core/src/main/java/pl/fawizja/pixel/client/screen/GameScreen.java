@@ -461,7 +461,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.F3: onButton("diag"); return true;
                     case Input.Keys.SPACE:
                     case Input.Keys.C: onButton("target"); return true;
-                    case Input.Keys.V: onButton("defensive"); return true;
+                    case Input.Keys.V: onButton("fightmode"); return true;
                     case Input.Keys.NUM_1: onButton("spell:0"); return true;
                     case Input.Keys.NUM_2: onButton("spell:1"); return true;
                     case Input.Keys.NUM_3: onButton("spell:2"); return true;
@@ -531,6 +531,8 @@ public final class GameScreen extends ScreenAdapter {
         }
         switch (id) {
             case "bag": hud.toggleBag(); break;
+            // tryb walki: wysylamy tryb docelowy (nie przelaczenie), zeby klient i serwer sie nie rozjechaly
+            case "fightmode": act("fightmode:" + session.character().fightMode().next().name(), t); break;
             case "diag": hud.toggleDiagnostics(); break;
             case "bar_saved":
                 barPrefs.putString(barKey(session.character()), hud.spellBar().encode());
@@ -725,7 +727,7 @@ public final class GameScreen extends ScreenAdapter {
                     String entry = hud.barEntry(Integer.parseInt(id.substring(6)));
                     if (entry != null) act(entry, t);
                 } else {
-                    // use, run, torch, pick, defensive, fish, potion_*, cast:, craft:, slot_move:, npc:*
+                    // use, run, torch, pick, fish, potion_*, cast:, craft:, slot_move:, npc:*
                     act(id, t);
                 }
         }

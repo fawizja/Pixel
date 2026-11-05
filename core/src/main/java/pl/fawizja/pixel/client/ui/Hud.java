@@ -58,7 +58,8 @@ public final class Hud {
     private final HudButton pick = new HudButton("pick", "Weź");
     private final HudButton diag = new HudButton("diag", "");
     private final HudButton target = new HudButton("target", "Atak");
-    private final HudButton defensive = new HudButton("defensive", "");
+    /** Tryb walki jak w Tibii: miecz (ofensywny), miecz i tarcza (zbalansowany), tarcza (defensywny). */
+    private final HudButton fightMode = new HudButton("fightmode", "");
     private final HudButton book = new HudButton("book", "KSIĘGA");
     private final HudButton fish = new HudButton("fish", "Łów");
     private final HudButton talk = new HudButton("talk", "Mów");
@@ -762,7 +763,7 @@ public final class Hud {
         buttons.add(pick);
         buttons.add(diag);
         buttons.add(target);
-        buttons.add(defensive);
+        buttons.add(fightMode);
         buttons.add(quest);
         buttons.add(logout);
         buttons.add(fish);
@@ -810,7 +811,7 @@ public final class Hud {
      * Dwie kolumny obok ekwipunku: 1. podazaj (auto chodzenie za celem), postawa obronna (tarcza), dziennik zadan,
      * pochodnia; 2. wylogowanie, tryb PvP (czaszka), ustawienia i diagnostyka, sklep.
      */
-    private final HudButton[] toggleButtons = {run, defensive, quest, torch, logout, pvp, diag, store};
+    private final HudButton[] toggleButtons = {run, fightMode, quest, torch, logout, pvp, diag, store};
 
     private List<HudButton> visibleActions() {
         List<HudButton> out = new ArrayList<>();
@@ -1621,7 +1622,7 @@ public final class Hud {
             if (barEntries[i] == null) b.label = "+";
         }
         if (mobile) {
-            // telefon: tylko pola pod przyciskami luku (5 czarow, 2 mikstury)
+            // telefon: tylko pola pod przyciskami luku (5 czarow, 3 pola wewnetrznego luku, pole w rogu)
             for (HudButton b : spellButtons) b.visible = false;
             for (int s : MobileHudLayout.SPELL_SLOTS) spellButtons[s].visible = true;
             for (int s : MobileHudLayout.POTION_SLOTS) spellButtons[s].visible = true;
@@ -2914,7 +2915,7 @@ public final class Hud {
         bag.visible = !equipPanelVisible();
         pick.visible = session.itemsAtFeet();
         diag.active = diagnosticsOpen;
-        defensive.active = pc.isDefensive();
+        fightMode.active = pc.fightMode() != pl.fawizja.pixel.combat.FightMode.BALANCED;
         pvp.active = pc.pvpMode();
         // czaszka jak w Tibii: biala = PvP wylaczone, czerwona = wlaczone
         TextureRegion skullBtn = pc.pvpMode() ? skullRed : skullWhite;
@@ -2967,7 +2968,7 @@ public final class Hud {
         }
         layoutConsole(session, serverTimeMs);
         target.icon = itemIcon(session, "iron_sword");
-        defensive.icon = itemIcon(session, "wooden_shield");
+        fightModeIcons(session, pc.fightMode(), fightMode);
         torch.icon = itemIcon(session, "torch");
         run.icon = itemIcon(session, "leather_boots");
         quest.icon = itemIcon(session, "return_scroll");
@@ -2978,7 +2979,7 @@ public final class Hud {
         run.label = "Podąż";
         store.label = "Sklep";
         store.icon = itemIcon(session, "crystal_coin");
-        defensive.label = "Tarcza";
+        fightMode.label = fightModeLabel(pc.fightMode());
         quest.label = "Zadania";
         torch.label = "Poch.";
         pvp.label = pc.pvpMode() ? "PvP!" : "PvP";
@@ -3229,14 +3230,14 @@ public final class Hud {
                 if (sc <= 0) {
                     // piktogram bez napisu (podpis nie miesci sie przy progu 7 dp): ikona we wnetrzu ramki
                     float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.5f;
-                    batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
+                    drawButtonIcon(batch, b, b.icon, b.x - is / 2f, b.y - is / 2f, is);
                 } else {
                     font.getData().setScale(sc);
                     layout.setText(font, b.label);
                     float lh = layout.height;
                     float base = b.y - b.r + 3;
                     float is = Math.min(b.r * 1.2f, cell - lh - 9);
-                    batch.draw(b.icon, b.x - is / 2f, base + lh + 2 + (b.y + b.r - 2 - (base + lh + 2) - is) / 2f, is, is);
+                    drawButtonIcon(batch, b, b.icon, b.x - is / 2f, base + lh + 2 + (b.y + b.r - 2 - (base + lh + 2) - is) / 2f, is);
                     font.draw(batch, b.label, b.x - layout.width / 2f, base + lh);
                 }
             } else {
@@ -4749,7 +4750,7 @@ public final class Hud {
         for (int i = 0; i < MobileHudLayout.POTION_SLOTS.length; i++) placeRound(spellButtons[MobileHudLayout.POTION_SLOTS[i]], mlay.potions[i]);
         placeRound(target, mlay.row[MobileHudLayout.ROW_ATTACK]);
         placeRound(run, mlay.row[MobileHudLayout.ROW_FOLLOW]);
-        placeRound(defensive, mlay.row[MobileHudLayout.ROW_SHIELD]);
+        placeRound(fightMode, mlay.row[MobileHudLayout.ROW_SHIELD]);
         placeRound(pvp, mlay.row[MobileHudLayout.ROW_PVP]);
         int k = 0;
         for (HudButton b : mobileContext()) {
@@ -4914,7 +4915,7 @@ public final class Hud {
     /** Rozwija albo zwija czat (telefon; podglad: -Dpixel.open=mobile_chat). */
     public void setMobileChat(boolean open) { mChat = open; }
 
-    /** Wybor akcji przycisku luku nr i (0..4 czary, 5..6 mikstury) - jak po przytrzymaniu. */
+    /** Wybor akcji przycisku luku nr i (0..4 czary, 5..7 wewnetrzny luk, 8 rog) - jak po przytrzymaniu. */
     public void openMobilePicker(int button) {
         int slot = button < MobileHudLayout.SPELL_SLOTS.length ? MobileHudLayout.SPELL_SLOTS[button]
                 : MobileHudLayout.POTION_SLOTS[Math.min(MobileHudLayout.POTION_SLOTS.length - 1, button - MobileHudLayout.SPELL_SLOTS.length)];
@@ -4923,7 +4924,7 @@ public final class Hud {
         openPicker(slot);
     }
 
-    /** Numer przycisku luku (1..7) dla pola paska. */
+    /** Numer przycisku luku (1..9) dla pola paska. */
     private static int arcNumber(int slot) {
         for (int i = 0; i < MobileHudLayout.SPELL_SLOTS.length; i++) if (MobileHudLayout.SPELL_SLOTS[i] == slot) return i + 1;
         for (int i = 0; i < MobileHudLayout.POTION_SLOTS.length; i++) if (MobileHudLayout.POTION_SLOTS[i] == slot) return MobileHudLayout.SPELL_SLOTS.length + i + 1;
@@ -5012,7 +5013,7 @@ public final class Hud {
                 return true;
             }
         }
-        for (HudButton b : new HudButton[] {target, run, defensive, pvp}) {
+        for (HudButton b : new HudButton[] {target, run, fightMode, pvp}) {
             if (roundHit(b, px, py)) {
                 actions.onButton(b.id);
                 return true;
@@ -5714,10 +5715,10 @@ public final class Hud {
             HudButton b = spellButtons[pressSlot];
             ring(shapes, b.x, b.y, b.r + 5.5f, 3f, 90, -360 * fr, M_GOOD);
         }
-        // Atak / Tarcza / PvP i przyciski chwilowe
+        // Atak / tryb walki / PvP i przyciski chwilowe
         roundButton(shapes, target.x, target.y, target.r, target.active ? hex(0xff6a4a, 1f) : null, target.active);
         roundButton(shapes, run.x, run.y, run.r, run.active ? hex(0x6ab8ff, 1f) : null, run.active);
-        roundButton(shapes, defensive.x, defensive.y, defensive.r, defensive.active ? M_GOOD : null, defensive.active);
+        roundButton(shapes, fightMode.x, fightMode.y, fightMode.r, fightModeColor(session.character().fightMode()), fightMode.active);
         roundButton(shapes, pvp.x, pvp.y, pvp.r, pvp.active ? hex(0xff4a3a, 1f) : null, pvp.active);
         for (HudButton b : mobileContext()) if (b.visible && b.x > -999) roundButton(shapes, b.x, b.y, b.r, b.active ? M_GOOD : null, b.active);
         // sterowanie: krzyzyk, joystick (polprzezroczysta podstawa i galka) albo pierscien pod palcem
@@ -5817,7 +5818,7 @@ public final class Hud {
         }
         mRoundLabel(batch, target, itemIcon(session, "iron_sword"), "Atak");
         mRoundLabel(batch, run, itemIcon(session, "leather_boots"), "Podążaj");
-        mRoundLabel(batch, defensive, itemIcon(session, "wooden_shield"), "Tarcza");
+        mRoundLabel(batch, fightMode, fightMode.icon, fightMode.label);
         mRoundLabel(batch, pvp, pvp.icon, "PvP");
         for (HudButton b : mobileContext()) if (b.visible && b.x > -999) mRoundLabel(batch, b, b.icon, b.label);
         if (mChat) {
@@ -5942,7 +5943,8 @@ public final class Hud {
     /** Tlo i pierscien przycisku luku oraz okragly znak czaru (w przebiegu ksztaltow). */
     private void mSlotShapes(ShapeRenderer s, GameSession session, PlayerCharacter pc, int slot, MobileHudLayout.Circle c, boolean potion, long now) {
         String e = barEntries[slot];
-        Color ring = potion ? ("potion_mp".equals(e) || e != null && e.contains("mana") ? hex(0x7aa6ff, 1f) : hex(0xff7a6a, 1f)) : null;
+        // obwodka mikstury (czerwona / niebieska) tylko pod przedmiotem; puste pole i czar - zwykla
+        Color ring = potion && e != null && !e.startsWith("cast:") ? ("potion_mp".equals(e) || e != null && e.contains("mana") ? hex(0x7aa6ff, 1f) : hex(0xff7a6a, 1f)) : null;
         boolean hot = pickSlot == slot && menuOpen;
         roundButton(s, c.x, c.y, c.r, hot ? M_GOOD : ring, hot);
         SpellType sp = actionSpell(session, e);
@@ -5967,7 +5969,46 @@ public final class Hud {
         if (n != null && !n.isEmpty() && !n.equals("+")) mCentered(b, n, c.x + c.r * 0.62f, c.y - c.r * 0.66f, 0.6f, Color.WHITE, true);
     }
 
-    /** Ikona i maly podpis na okraglym przycisku (Atak, Tarcza, PvP, przyciski chwilowe). */
+    /** Ikony przycisku trybu walki: miecz, miecz i tarcza, tarcza (jak w Tibii). */
+    private void fightModeIcons(GameSession session, pl.fawizja.pixel.combat.FightMode m, HudButton b) {
+        TextureRegion sword = itemIcon(session, "iron_sword"), shield = itemIcon(session, "wooden_shield");
+        switch (m) {
+            case OFFENSIVE: b.icon = sword; b.icon2 = null; break;
+            case DEFENSIVE: b.icon = shield; b.icon2 = null; break;
+            default: b.icon = sword; b.icon2 = shield;
+        }
+    }
+
+    /** Krotki podpis przycisku trybu walki (pelna nazwa w dzienniku: {@link pl.fawizja.pixel.combat.FightMode#label()}). */
+    static String fightModeLabel(pl.fawizja.pixel.combat.FightMode m) {
+        switch (m) {
+            case OFFENSIVE: return "Ofensywa";
+            case DEFENSIVE: return "Obrona";
+            default: return "Balans";
+        }
+    }
+
+    /** Obwodka przycisku trybu walki na telefonie: czerwona przy ataku, zielona przy obronie, zwykla przy balansie. */
+    private static Color fightModeColor(pl.fawizja.pixel.combat.FightMode m) {
+        switch (m) {
+            case OFFENSIVE: return hex(0xff6a4a, 1f);
+            case DEFENSIVE: return M_GOOD;
+            default: return null;
+        }
+    }
+
+    /** Ikona przycisku w kwadracie (x, y, rozmiar); z druga ikona: obie mniejsze, pierwsza z lewej u dolu, druga z prawej u gory. */
+    private static void drawButtonIcon(SpriteBatch b, HudButton btn, TextureRegion icon, float x, float y, float is) {
+        if (btn.icon2 == null || icon != btn.icon) {
+            b.draw(icon, x, y, is, is);
+            return;
+        }
+        float s = is * 0.78f, off = is - s;
+        b.draw(btn.icon2, x + off * 1.1f, y + off * 0.6f, s, s);
+        b.draw(icon, x - off * 0.1f, y + off * 0.2f, s, s);
+    }
+
+    /** Ikona i maly podpis na okraglym przycisku (Atak, tryb walki, PvP, przyciski chwilowe). */
     private void mRoundLabel(SpriteBatch b, HudButton btn, TextureRegion icon, String label) {
         float r = btn.r;
         if (icon == null) {
@@ -5975,8 +6016,12 @@ public final class Hud {
             return;
         }
         float is = r * 1.25f;
-        b.draw(icon, btn.x - is / 2f, btn.y - is * 0.3f, is, is);
-        if (label != null && !label.isEmpty()) mCentered(b, label, btn.x, btn.y - r * 0.56f, 0.44f, M_TEXT, true);
+        drawButtonIcon(b, btn, icon, btn.x - is / 2f, btn.y - is * 0.3f, is);
+        if (label == null || label.isEmpty()) return;
+        // dluzszy podpis (np. "Ofensywa") zmniejszony do szerokosci kola
+        float sc = 0.44f, room = 2 * r * 0.7f, lw = mWidth(label, sc);
+        if (lw > room) sc = Math.max(0.36f, sc * room / lw);
+        mCentered(b, label, btn.x, btn.y - r * 0.56f, sc, M_TEXT, true);
     }
 
     /** Skala wierszy czatu na telefonie (makieta: 10 px). */
