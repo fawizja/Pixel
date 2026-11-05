@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.226.0] - 2026-11-05
+
+### Dodano
+- 4 warianty sterowania do wyboru w ustawieniach („Sterowanie”) i suwak „Czułość” 1–5:
+  - Krzyżyk (domyślny): stały krzyżyk ze strzałkami i skosami w rogach, trzymanie = chód pole po polu;
+  - Pływający joystick (4 kierunki): gałka pojawia się pod kciukiem, skos dopiero po przytrzymaniu w ukosie,
+    kierunek zablokowany na całe pole;
+  - Przytrzymanie na mapie: trzymasz palec na ekranie, postać idzie w jego stronę (krótkie dotknięcie działa jak dotąd);
+  - Klasyczny joystick: dotychczasowa gałka.
+
+### Zmieniono
+- Dotknięcie mapy pokazuje delikatną białą kropkę, która rośnie i znika (zamiast X); w czasie marszu mała kropka
+  w miejscu docelowym; gdy nie da się dojść – krótka czerwonawa kropka.
+
 ## [0.225.0] - 2026-11-05
 
 ### Zmieniono
