@@ -48,7 +48,7 @@ class RareDropTest {
         CombatSystem cs = new CombatSystem(pc, TestData.varden(), TestData.ITEMS, mm, new GroundItems(), log, rng, 8);
         List<String> heard = new ArrayList<>();
         cs.setRareDropListener((t, item, now) -> heard.add(t.key() + ":" + TestData.ITEMS.get(item.itemId()).key()));
-        cs.damageMonster(golem, 1_000_000, DamageType.FIRE, 1000);
+        cs.damageMonster(golem, 1_000_000, DamageType.ENERGY, 1000); // lodowy golem jak w Tibii: odporny na ogien, slaby na energie
         assertTrue(golem.isDead());
         assertEquals(List.of("ice_golem:frost_blade"), heard);
         assertEquals(1, pc.stats().rareDrops(), "counted for the achievements");

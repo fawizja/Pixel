@@ -20,16 +20,7 @@ public final class BestiaryCard {
     private BestiaryCard() {}
 
     public static String damageName(DamageType t) {
-        switch (t) {
-            case PHYSICAL: return "fizyczne";
-            case FIRE: return "ogień";
-            case ICE: return "lód";
-            case EARTH: return "ziemia";
-            case ENERGY: return "energia";
-            case HOLY: return "święte";
-            case DEATH: return "śmierć";
-            default: return t.name();
-        }
+        return t.label();
     }
 
     /** Wiersze okna informacji: {etykieta, szczegol}. */

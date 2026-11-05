@@ -42,8 +42,10 @@ class RunShieldTest {
         // zywioly: jak w TFS tryb walki ich nie zmienia (tarcza blokuje tylko fizyczne)
         Random rng = new Random(3);
         for (FightMode m : FightMode.values()) {
-            assertEquals(100, CombatFormulas.mitigateOnPlayer(shielded, 100, DamageType.FIRE, m, true, rng));
-            assertEquals(100, CombatFormulas.mitigateOnPlayer(bare, 100, DamageType.FIRE, m, true, rng));
+            assertEquals(100, CombatFormulas.mitigateOnPlayer(shielded, 100, DamageType.ENERGY, m, true, rng));
+            assertEquals(100, CombatFormulas.mitigateOnPlayer(bare, 100, DamageType.ENERGY, m, true, rng));
+            // ochrona tarczy przed ogniem (obsydianowa: ogien +5%) dziala w kazdym trybie
+            assertEquals(95, CombatFormulas.mitigateOnPlayer(shielded, 100, DamageType.FIRE, m, true, rng));
         }
     }
 

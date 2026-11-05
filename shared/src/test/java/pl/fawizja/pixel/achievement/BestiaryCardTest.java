@@ -38,7 +38,8 @@ class BestiaryCardTest {
     void percentsAndResistances() {
         assertEquals("0,5%", BestiaryCard.percent(5));
         assertEquals("100%", BestiaryCard.percent(1000));
-        assertEquals("pancerz 2", BestiaryCard.resistances(REG.get("wolf")), "no resistances, only armor");
+        assertEquals("pancerz 6", BestiaryCard.resistances(REG.get("boar")), "no resistances, only armor (Tibia boar)");
+        assertEquals("lód -10%, święte +30%, śmierć -5%, pancerz 2", BestiaryCard.resistances(REG.get("wolf")), "Tibia wolf");
         String golem = BestiaryCard.resistances(REG.get("ice_golem"));
         assertFalse(golem.isEmpty());
         assertTrue(golem.contains("lód") || golem.contains("pancerz"), golem);

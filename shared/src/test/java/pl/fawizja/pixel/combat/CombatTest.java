@@ -47,10 +47,11 @@ class CombatTest {
         Random rng = new Random(7);
         assertEquals(0, CombatFormulas.mitigateOnMonster(REG.get("skeleton"), 100, DamageType.DEATH, rng), "immune");
         int holy = CombatFormulas.mitigateOnMonster(REG.get("skeleton"), 100, DamageType.HOLY, rng);
-        assertEquals(130, holy, "weakness");
+        assertEquals(125, holy, "weakness (Tibia: undead take 125% holy)");
+        assertEquals(0, CombatFormulas.mitigateOnMonster(REG.get("skeleton"), 100, DamageType.LIFE_DRAIN, rng), "undead: immune to life drain");
         for (int i = 0; i < 100; i++) {
-            int phys = CombatFormulas.mitigateOnMonster(REG.get("cave_troll"), 100, DamageType.PHYSICAL, rng);
-            assertTrue(phys >= 81 && phys <= 86, "armor 10 + 10% res: " + phys);
+            int phys = CombatFormulas.mitigateOnMonster(REG.get("crystal_golem"), 100, DamageType.PHYSICAL, rng);
+            assertTrue(phys >= 65 && phys <= 72, "armor 18 + 20% res: " + phys);
         }
         PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
         int sumNormal = 0;

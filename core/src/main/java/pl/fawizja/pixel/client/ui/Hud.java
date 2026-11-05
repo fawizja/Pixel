@@ -4578,7 +4578,7 @@ public final class Hud {
     private static final int[][] EQ_CELLS = {{0, 0}, {1, 0}, {0, 1}, {1, 1}, {2, 1}, {0, 2}, {1, 2}, {2, 2}, {1, 3}, {2, 3}};
     private static final String[] EQ_NAMES = {"Amulet", "Hełm", "Broń", "Zbroja", "Tarcza", "Pierśc.", "Nogi", "Amun.", "Buty", "Poch."};
     private static final float SK_ROW = 15;
-    private static final int SK_INFO_ROWS = 10;
+    private static final int SK_INFO_ROWS = 13;
     private float eqX, eqY, eqW, eqH, eqCell, skX, skY, skW, skH;
 
     private void layoutCharWindows() {
@@ -4667,6 +4667,27 @@ public final class Hud {
         font.getData().setScale(0.8f);
         for (String[] row : info) {
             row(batch, row[0], row[1], yy);
+            yy -= SK_ROW;
+        }
+        // statystyki walki: krytyk, kradziez, ochrony z ekwipunku (dluga lista ochron zmniejszona do szerokosci okna)
+        for (String[] row : pl.fawizja.pixel.character.SkillSheet.combatRows(pc)) {
+            float sc = fitScale(row[1], skW - 80, 0.8f);
+            String value = row[1];
+            if (sc <= 0) {
+                sc = HudLayout.MIN_FONT;
+                font.getData().setScale(sc);
+                value = clip(value, skW - 80);
+            }
+            font.getData().setScale(sc);
+            layout.setText(font, value);
+            float vw = layout.width;
+            font.getData().setScale(0.8f);
+            font.setColor(0.85f, 0.85f, 0.8f, 1f);
+            text(batch, row[0], skX + 8, yy);
+            font.setColor(Color.WHITE);
+            font.getData().setScale(sc);
+            text(batch, value, skX + skW - 8 - vw, yy);
+            font.getData().setScale(0.8f);
             yy -= SK_ROW;
         }
         yy -= SK_ROW; // odstep jak separator
@@ -6396,6 +6417,16 @@ public final class Hud {
                 for (String l : lines) {
                     mText(b, l, tx, ty, 0.66f, M_TEXT, false);
                     ty -= 16;
+                }
+                // statystyki walki (krytyk, kradziez, ochrony), o ile mieszcza sie nad podpowiedziami
+                for (String[] row : pl.fawizja.pixel.character.SkillSheet.combatRows(pc)) {
+                    if (ty < win.y + 40) break;
+                    String l = row[0] + " " + row[1];
+                    float room = win.right() - 8 - tx;
+                    float sc = 0.6f;
+                    while (sc > HudLayout.MIN_FONT && mWidth(l, sc) > room) sc -= 0.02f;
+                    mText(b, l, tx, ty, Math.max(HudLayout.MIN_FONT, sc), M_TEXT, false);
+                    ty -= 15;
                 }
                 mText(b, "Pochodnię dotknij, aby zapalić.", tx, win.y + 24, 0.52f, M_MUTED, false);
                 mText(b, "Dotknij dwa razy, aby zdjąć.", tx, win.y + 10, 0.52f, M_MUTED, false);

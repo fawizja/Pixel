@@ -233,7 +233,9 @@ class HuntBalanceSimulationTest {
                         }
                     }
                     if (pick != null) {
-                        mhp -= CombatFormulas.mitigateOnMonster(m, spellRoll(pick, pc, rng), pick.damageType(), rng);
+                        // jak w grze: jeden rzut na krytyk na czar (CriticalHit, baza 5% / +10%)
+                        int raw = CriticalHit.apply(pc, spellRoll(pick, pc, rng), CriticalHit.roll(pc, rng));
+                        mhp -= CombatFormulas.mitigateOnMonster(m, raw, pick.damageType(), rng);
                         actions++;
                         ready.put(pick.key(), now + pick.cooldownMs());
                         mp -= pick.mana();
@@ -241,16 +243,23 @@ class HuntBalanceSimulationTest {
                     }
                     tSpell += SpellGroup.ATTACK.groupCooldownMs;
                 } else if (now == tHit) {
-                    mhp -= CombatFormulas.mitigateOnMonster(m, CombatFormulas.roll(ap.maxDamage(), rng), ap.type(), rng);
+                    int raw = CriticalHit.apply(pc, CombatFormulas.roll(ap.maxDamage(), rng), CriticalHit.roll(pc, rng));
+                    mhp -= CombatFormulas.mitigateOnMonster(m, raw, ap.type(), rng);
                     actions++;
                     if (training != null) training[0]++;
                     tHit += ap.intervalMs();
                 } else {
-                    int raw = CombatFormulas.rollBetween(m.attackMin(), m.attackMax(), rng);
-                    int d = CombatFormulas.mitigateOnPlayer(pc, raw, m.damageType(), true, rng);
+                    // atak potwora jak w CombatSystem.monsterAttacks: czasem atak dodatkowy (np. wyssanie zycia),
+                    // ochrony ze sprzetu, wyssanie many zabiera mane zamiast zdrowia
+                    MonsterType.Strike st = m.rollStrike(rng);
+                    int d = CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), true, rng);
                     if (kites && rng.nextDouble() >= KITE_SHARE) d = 0;
-                    hp -= d;
-                    taken += d;
+                    if (st.type() == DamageType.MANA_DRAIN) {
+                        mp -= Math.min(mp, d);
+                    } else {
+                        hp -= d;
+                        taken += d;
+                    }
                     if (training != null && CombatSystem.blockable(m)) training[1]++;
                     tMonster += m.attackIntervalMs();
                 }

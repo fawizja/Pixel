@@ -4,14 +4,17 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Zaklecia kowala na czas polowania: kradziez zycia, kradziez many i cios krytyczny.
+ * Zaklecia kowala na czas polowania: kradziez zycia, kradziez many i cios krytyczny - dodaja sie do statystyk
+ * walki postaci ({@link pl.fawizja.pixel.combat.Leech}, {@link pl.fawizja.pixel.combat.CriticalHit}) tak jak
+ * imbuementy Vampirism / Void / Strike w Tibii.
  * Czas plynie tylko poza strefa ochronna; kazdy zakup dodaje godzine, najwyzej {@link #MAX_MS}.
  */
 public final class Enchantments {
     public enum Kind {
-        LIFE("Kradzież życia", "6% zadanych obrażeń leczy", true),
-        MANA("Kradzież many", "3% zadanych obrażeń wraca jako mana", true),
-        CRIT("Cios krytyczny", "10% szans na +50% obrażeń", true),
+        LIFE("Kradzież życia", "+6% kradzieży życia", true),
+        MANA("Kradzież many", "+3% kradzieży many", true),
+        /** Jak tibijski Powerful Strike: dodaje sie do bazowego krytyka 5% / +10% i premii przedmiotow. */
+        CRIT("Cios krytyczny", "+10% szansy na krytyk, +50% obrażeń krytycznych", true),
         /** Zwoj nauki z plecaka (nie u kowala): +30% doswiadczenia za potwory. */
         EXP("Zwój nauki", "+30% doświadczenia za potwory", false),
         /** Mikstury wzmacniajace (paczka ikon WsT): 10 minut polowania na lyk, do 30 minut zapasu. */
@@ -120,11 +123,11 @@ public final class Enchantments {
         return expired;
     }
 
-    /** Leczenie z kradziezy (0, gdy zaklecie nieaktywne). */
+    /** Kradziez z samego zaklecia przy trafieniu jednego celu (0, gdy nieaktywne); wzor {@link pl.fawizja.pixel.combat.Leech#amount}. */
     public int leech(Kind k, int dealt) {
         if (dealt <= 0 || !active(k)) return 0;
         int pct = k == Kind.LIFE ? LIFE_PERCENT : k == Kind.MANA ? MANA_PERCENT : 0;
-        return Math.max(1, Math.round(dealt * pct / 100f));
+        return pl.fawizja.pixel.combat.Leech.amount(dealt, pct, 1);
     }
 
     /** Opis czasu: "45 min" albo "1 h 05 min". */

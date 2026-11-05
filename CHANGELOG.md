@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.231.0] - 2026-11-05
+
+### Zmieniono
+- Odporności potworów jak w Tibii: każdy potwór ma odporności, słabości i odporności całkowite swojego odpowiednika
+  z Tibii (94 potwory zmienione) oraz klasę z Bestiary. Nieumarli są odporni na śmierć, utonięcie i wysysanie życia
+  i słabi na święte. Żywiołaki są odporne na własny żywioł. Lodowe potwory nie są już z automatu słabe na ogień.
+- Krytyki jak w obecnej Tibii: każdy ma 5% szansy na +10% obrażeń. Przedmioty mogą dawać szansę i siłę krytyka.
+  Zaklęcie kowala „krytyk” działa jak Powerful Strike (+10% szansy, +50% obrażeń). Krytyki działają też w PvP.
+  Krytyk widać jako większą pomarańczową liczbę z wykrzyknikiem.
+- Kradzież życia i many wzorem z Tibii (przy wielu celach mniej na cel).
+
+### Dodano
+- Ochrona przed żywiołami na przedmiotach, jak w Tibii (np. obsydianowy zestaw: ogień +, lód −; koralowy hełm:
+  utonięcie 100%). Działa na obrażenia od potworów i graczy. Widać ją w opisie przedmiotu i w oknie umiejętności
+  (wiersze Krytyk, Kradzież, Ochrona).
+- Nowe rodzaje obrażeń: utonięcie, wysysanie życia (omija pancerz) i wysysanie many (niebieska liczba).
+  21 potworów ma dodatkowy atak wysysający życie albo manę.
+
 ## [0.230.0] - 2026-11-05
 
 ### Dodano

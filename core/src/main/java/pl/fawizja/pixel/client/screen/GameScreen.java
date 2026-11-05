@@ -190,6 +190,22 @@ public final class GameScreen extends ScreenAdapter {
         font.draw(batch, text, x, y);
     }
 
+    /** Jak {@link #outlined}, ale znikajacy (alpha) - liczba ciosu krytycznego. */
+    private static void outlinedFade(SpriteBatch batch, BitmapFont font, String text, float x, float y, float r, float g, float b,
+                                     float alpha, float ui) {
+        float a = Math.max(0f, Math.min(1f, alpha));
+        float o = Math.max(1f, Math.round(ui * 0.6f));
+        x = Math.round(x);
+        y = Math.round(y);
+        font.setColor(0f, 0f, 0f, 0.95f * a);
+        font.draw(batch, text, x - o, y);
+        font.draw(batch, text, x + o, y);
+        font.draw(batch, text, x, y - o);
+        font.draw(batch, text, x, y + o);
+        font.setColor(r, g, b, a);
+        font.draw(batch, text, x, y);
+    }
+
     private void drawBubble(SpriteBatch batch, BitmapFont font, float scale, String name, float wx, float wy) {
         Object[] b = bubbles.get(name.toLowerCase(java.util.Locale.ROOT));
         if (b == null) return;
@@ -2165,6 +2181,9 @@ public final class GameScreen extends ScreenAdapter {
             case "ENERGY": return new Color(0.78f, 0.5f, 1f, 1f);
             case "HOLY": return new Color(1f, 0.95f, 0.55f, 1f);
             case "DEATH": return new Color(0.6f, 0.25f, 0.7f, 1f);
+            case "DROWN": return new Color(0.3f, 0.55f, 0.95f, 1f);
+            case "LIFE_DRAIN": return new Color(0.85f, 0.15f, 0.2f, 1f);
+            case "MANA_DRAIN": return new Color(0.35f, 0.4f, 1f, 1f);
             case "HEAL": return new Color(0.55f, 1f, 0.65f, 1f);
             case "HASTE": return new Color(0.5f, 0.8f, 1f, 1f);
             default: return new Color(0.9f, 0.85f, 0.75f, 1f);
@@ -2223,7 +2242,10 @@ public final class GameScreen extends ScreenAdapter {
             case "EARTH": return "earth";
             case "ENERGY": return area ? "magic" : "energy";
             case "HOLY": return "holy";
-            case "DEATH": return "death";
+            case "DEATH":
+            case "LIFE_DRAIN": return "death";
+            case "DROWN":
+            case "MANA_DRAIN": return "ice";
             case "HEAL": return "heal";
             case "HASTE": return "sparkle";
             case "PHYSICAL": return area ? "stones" : null;
@@ -2649,8 +2671,30 @@ public final class GameScreen extends ScreenAdapter {
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             String text;
             switch (e.kind()) {
-                case HIT_MONSTER: font.setColor(1f, 1f, 1f, 1f - age); text = String.valueOf(e.amount()); break;
-                case HIT_PLAYER: font.setColor(1f, 0.25f, 0.25f, 1f - age); text = String.valueOf(e.amount()); break;
+                case HIT_MONSTER:
+                case HIT_PLAYER:
+                    if (pl.fawizja.pixel.combat.CriticalHit.EVENT_EFFECT.equals(e.effect())) {
+                        // cios krytyczny: wieksza pomaranczowo-zolta liczba z wykrzyknikiem i napis "krytyk"
+                        text = e.amount() + "!";
+                        font.getData().setScale(scale * 1.35f);
+                        outlinedFade(batch, font, text, projected.x - text.length() * 3.5f * scale * 1.35f, projected.y + 6 * scale,
+                                1f, 0.72f, 0.12f, 1f - age, ui);
+                        font.getData().setScale(scale * 0.8f);
+                        outlinedFade(batch, font, "krytyk", projected.x - 6 * 3.5f * scale * 0.8f, projected.y + 22 * scale,
+                                1f, 0.85f, 0.35f, 1f - age, ui);
+                        font.getData().setScale(scale);
+                        continue;
+                    }
+                    if (pl.fawizja.pixel.combat.CombatSystem.MANA_EFFECT.equals(e.effect())) {
+                        // wyssanie many: niebieska liczba (utracona mana)
+                        font.setColor(0.35f, 0.55f, 1f, 1f - age);
+                    } else if (e.kind() == CombatEvent.Kind.HIT_MONSTER) {
+                        font.setColor(1f, 1f, 1f, 1f - age);
+                    } else {
+                        font.setColor(1f, 0.25f, 0.25f, 1f - age);
+                    }
+                    text = String.valueOf(e.amount());
+                    break;
                 case HEAL: font.setColor(0.4f, 1f, 0.4f, 1f - age); text = "+" + e.amount(); break;
                 case BLOCKED: font.setColor(0.6f, 0.8f, 1f, 1f - age); text = "blok"; break;
                 case LEVEL_UP: font.setColor(1f, 0.9f, 0.3f, 1f - age); text = "POZIOM " + e.amount() + "!"; break;
@@ -3017,6 +3061,9 @@ public final class GameScreen extends ScreenAdapter {
                     try {
                         Position from = m.length >= 10 ? new Position(Integer.parseInt(m[6]), Integer.parseInt(m[7]),
                                 Integer.parseInt(m[8])) : null;
+                        // trafienie z samym efektem (krytyk, wyssanie many) - serwer wysyla "skad" = cel
+                        if (from != null && from.equals(new Position(Integer.parseInt(m[2]), Integer.parseInt(m[3]),
+                                Integer.parseInt(m[4]))) && !m[1].equals("PROJECTILE")) from = null;
                         session.combat().addRemoteEvent(new CombatEvent(now, new Position(Integer.parseInt(m[2]),
                                 Integer.parseInt(m[3]), Integer.parseInt(m[4])), Integer.parseInt(m[5]),
                                 CombatEvent.Kind.valueOf(m[1]), from, m.length >= 10 && !m[9].equals("-") ? m[9] : null));

@@ -124,7 +124,7 @@ class CombatSimulationTest {
 
     @Test
     void vocationDamageStaysWithinBand() {
-        // bandyta nie ma odpornosci - porownanie "czystych" obrazen na atak
+        // dzik nie ma odpornosci (jak Boar w Tibii; bandyta ma fizyczne -10%), pancerz 6 jak dawny bandyta 5 - porownanie "czystych" obrazen na atak
         double[] starter = dpsRange(starters());
         assertTrue(starter[1] / starter[0] <= 1.6, "starter dps spread " + starter[0] + ".." + starter[1]);
         double[] mid = dpsRange(midLevel());
@@ -134,7 +134,7 @@ class CombatSimulationTest {
     private static double[] dpsRange(Map<Vocation, PlayerCharacter> chars) {
         double min = Double.MAX_VALUE, max = 0;
         for (PlayerCharacter pc : chars.values()) {
-            double d = duel(pc, REG.get("bandit"), 10).dps();
+            double d = duel(pc, REG.get("boar"), 10).dps();
             min = Math.min(min, d);
             max = Math.max(max, d);
         }

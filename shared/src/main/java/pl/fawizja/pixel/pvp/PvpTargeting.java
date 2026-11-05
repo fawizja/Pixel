@@ -58,9 +58,14 @@ public final class PvpTargeting implements SpellSystem.PlayerTargeting {
 
     @Override
     public boolean strike(int amount, DamageType type, long now) {
+        return strike(amount, type, false, 1, now);
+    }
+
+    @Override
+    public boolean strike(int amount, DamageType type, boolean critical, int targets, long now) {
         GameSession t = target.get();
         if (t == null) return false;
-        PvpRules.Outcome o = PvpRules.spellHit(me, me.pvpStatus(), t, t.pvpStatus(), amount, type, world, now, rng);
+        PvpRules.Outcome o = PvpRules.spellHit(me, me.pvpStatus(), t, t.pvpStatus(), amount, type, critical, targets, world, now, rng);
         if (o != PvpRules.Outcome.NOT_ALLOWED) listener.hit(t, o, now);
         return o != PvpRules.Outcome.NOT_ALLOWED;
     }
@@ -68,11 +73,17 @@ public final class PvpTargeting implements SpellSystem.PlayerTargeting {
     @Override
     public int strikeArea(Position center, int radius, Predicate<Position> reach, IntSupplier amount, DamageType type,
                           long now) {
+        return strikeArea(center, radius, reach, amount, type, false, 1, now);
+    }
+
+    @Override
+    public int strikeArea(Position center, int radius, Predicate<Position> reach, IntSupplier amount, DamageType type,
+                          boolean critical, int targets, long now) {
         int hits = 0;
         for (GameSession o : others.get()) {
             if (!hittable(o, center, radius, reach, now)) continue;
             PvpRules.Outcome out = PvpRules.areaHit(me, me.pvpStatus(), o, o.pvpStatus(), amount.getAsInt(), type,
-                    world, now, rng);
+                    critical, targets, world, now, rng);
             if (out == PvpRules.Outcome.NOT_ALLOWED) continue;
             hits++;
             listener.hit(o, out, now);

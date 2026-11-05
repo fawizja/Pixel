@@ -85,15 +85,23 @@ class EndgameSimulationTest {
                     }
                     tHeal += heal == null ? 600_000 : heal.cooldownMs();
                 } else if (next == tPlayer) {
-                    mhp -= CombatFormulas.mitigateOnMonster(m, CombatFormulas.roll(ap.maxDamage(), rng), ap.type(), rng);
+                    // jak CombatSystem.update: krytyk (raz na cios), odpornosci, kradziez zycia i many z jednego celu
+                    int raw = CriticalHit.apply(pc, CombatFormulas.roll(ap.maxDamage(), rng), CriticalHit.roll(pc, rng));
+                    int dealt = Math.min(Math.max(0, mhp), CombatFormulas.mitigateOnMonster(m, raw, ap.type(), rng));
+                    mhp -= dealt;
+                    hp = Math.min(pc.maxHealth(), hp + Leech.amount(dealt, Leech.lifePercent(pc), 1));
+                    mana = Math.min(pc.maxMana(), mana + Leech.amount(dealt, Leech.manaPercent(pc), 1));
                     if (m.boss() && !bossHealed && mhp > 0 && mhp < m.maxHealth() * 0.3) {
                         mhp += m.healAmount();
                         bossHealed = true;
                     }
                     tPlayer += ap.intervalMs();
                 } else {
-                    int raw = CombatFormulas.rollBetween(m.attackMin(), m.attackMax(), rng);
-                    hp -= CombatFormulas.mitigateOnPlayer(pc, raw, m.damageType(), true, rng);
+                    // jak CombatSystem.monsterAttacks: atak dodatkowy, ochrony, wyssanie many zabiera mane
+                    MonsterType.Strike st = m.rollStrike(rng);
+                    int d = CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), true, rng);
+                    if (st.type() == DamageType.MANA_DRAIN) mana -= Math.min(mana, d);
+                    else hp -= d;
                     tMonster += m.attackIntervalMs();
                 }
             }

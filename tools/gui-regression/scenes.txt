@@ -177,3 +177,6 @@ npc_guard_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=5
 monk_harmony|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=3 -Dpixel.virtue=HARMONY
 monk_harmony_mobile|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=5 -Dpixel.virtue=JUSTICE -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 monk_virtues|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=3 -Dpixel.virtue=HARMONY -Dpixel.open=virtues
+combat_crit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.crit=true
+item_protection|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bagitem -Dpixel.lookItem=obsidian_armor
+combat_stats|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=combatgear

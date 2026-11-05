@@ -26,6 +26,7 @@ public final class ItemType {
     private final WeaponType weaponType;
     private final String color;
     private final String description;
+    private final ItemBonus bonus;
 
     public ItemType(int id, String key, String name, ItemCategory category, boolean stackable, int maxStack,
                     long value, EquipSlot slot, int attack, int defense, int armor, int minLevel,
@@ -39,6 +40,14 @@ public final class ItemType {
                     long value, EquipSlot slot, int attack, int defense, int armor, int minLevel,
                     Set<Vocation> vocations, int lightRadius, int range, DamageType damageType, WeaponType weaponType,
                     String color, String description) {
+        this(id, key, name, category, stackable, maxStack, value, slot, attack, defense, armor, minLevel, vocations,
+                lightRadius, range, damageType, weaponType, ItemBonus.NONE, color, description);
+    }
+
+    public ItemType(int id, String key, String name, ItemCategory category, boolean stackable, int maxStack,
+                    long value, EquipSlot slot, int attack, int defense, int armor, int minLevel,
+                    Set<Vocation> vocations, int lightRadius, int range, DamageType damageType, WeaponType weaponType,
+                    ItemBonus bonus, String color, String description) {
         if (id <= 0) throw new IllegalArgumentException("item id must be > 0");
         if (stackable && maxStack < 2) throw new IllegalArgumentException("stackable item needs maxStack >= 2: " + key);
         if (!stackable && maxStack != 1) throw new IllegalArgumentException("non-stackable item needs maxStack 1: " + key);
@@ -63,6 +72,7 @@ public final class ItemType {
         this.weaponType = weaponType == null ? WeaponType.NONE : weaponType;
         this.color = color;
         this.description = description;
+        this.bonus = bonus == null ? ItemBonus.NONE : bonus;
     }
 
     public int id() { return id; }
@@ -87,6 +97,8 @@ public final class ItemType {
     public WeaponType weaponType() { return weaponType; }
     public String color() { return color; }
     public String description() { return description; }
+    /** Ochrony zywiolow, krytyk i kradziez zycia/many (kolumna premii w items.csv). */
+    public ItemBonus bonus() { return bonus; }
 
     @Override
     public String toString() { return key + "#" + id; }

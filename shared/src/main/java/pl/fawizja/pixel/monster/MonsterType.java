@@ -32,6 +32,10 @@ public final class MonsterType {
     private final boolean nocturnal;
     private final String description;
     private final List<LootEntry> loot;
+    /** Klasa potwora jak w bestiariuszu Tibii (Mammal, Undead, Dragon...). */
+    private final String race;
+    /** Drugi atak (np. wyssanie zycia) albo null. */
+    private final ExtraAttack extraAttack;
     /** Elitarna odmiana (wiekszy, silniejszy, wiecej doswiadczenia i lupow); ten sam klucz co zwykly. */
     private boolean elite;
     private MonsterType eliteVariant;
@@ -44,6 +48,17 @@ public final class MonsterType {
                        int armor, Map<DamageType, Integer> resistances, MonsterBehavior behavior, int aggroRange,
                        int fleeHealthPercent, int healAmount, boolean boss, String color, String shape,
                        String biome, boolean nocturnal, String description, List<LootEntry> loot) {
+        this(key, name, level, maxHealth, experience, speed, attackMin, attackMax, damageType, range, attackIntervalMs, armor,
+                resistances, behavior, aggroRange, fleeHealthPercent, healAmount, boss, color, shape, biome, nocturnal, description,
+                loot, "", null);
+    }
+
+    public MonsterType(String key, String name, int level, int maxHealth, long experience, int speed,
+                       int attackMin, int attackMax, DamageType damageType, int range, int attackIntervalMs,
+                       int armor, Map<DamageType, Integer> resistances, MonsterBehavior behavior, int aggroRange,
+                       int fleeHealthPercent, int healAmount, boolean boss, String color, String shape,
+                       String biome, boolean nocturnal, String description, List<LootEntry> loot, String race,
+                       ExtraAttack extraAttack) {
         if (maxHealth <= 0 || level <= 0 || experience < 0) throw new IllegalArgumentException("bad stats: " + key);
         if (attackMin < 0 || attackMax < attackMin) throw new IllegalArgumentException("bad attack: " + key);
         if (range < 1 || attackIntervalMs < 200) throw new IllegalArgumentException("bad range/interval: " + key);
@@ -74,6 +89,8 @@ public final class MonsterType {
         this.nocturnal = nocturnal;
         this.description = description;
         this.loot = Collections.unmodifiableList(new java.util.ArrayList<>(loot));
+        this.race = race == null ? "" : race;
+        this.extraAttack = extraAttack;
     }
 
     public String key() { return key; }
@@ -103,6 +120,24 @@ public final class MonsterType {
     public boolean nocturnal() { return nocturnal; }
     public String description() { return description; }
     public List<LootEntry> loot() { return loot; }
+    /** Klasa bestiariusza Tibii (np. "Undead"); pusta, gdy nie podano. */
+    public String race() { return race; }
+    /** Drugi atak potwora albo null. */
+    public ExtraAttack extraAttack() { return extraAttack; }
+
+    /** Wylosowany atak: rodzaj obrazen i obrazenia przed obrona postaci. */
+    public record Strike(DamageType type, int raw) {}
+
+    /**
+     * Jeden atak potwora: w {@link ExtraAttack#percent()}% atakow drugi atak, inaczej zwykly. Potwor bez drugiego
+     * ataku losuje tylko obrazenia (ta sama liczba losowan co dawniej - powtarzalne walki w testach).
+     */
+    public Strike rollStrike(java.util.Random rng) {
+        if (extraAttack != null && rng.nextInt(100) < extraAttack.percent()) {
+            return new Strike(extraAttack.type(), pl.fawizja.pixel.combat.CombatFormulas.rollBetween(extraAttack.min(), extraAttack.max(), rng));
+        }
+        return new Strike(damageType, pl.fawizja.pixel.combat.CombatFormulas.rollBetween(attackMin, attackMax, rng));
+    }
 
     public boolean isElite() { return elite; }
 
@@ -118,7 +153,7 @@ public final class MonsterType {
             MonsterType t = new MonsterType(key, name + " (elita)", level, maxHealth * 2, experience * 3, speed,
                     (int) Math.round(attackMin * 1.3), (int) Math.round(attackMax * 1.3), damageType, range, attackIntervalMs,
                     armor, resistances, behavior, aggroRange, fleeHealthPercent, healAmount, false, color, shape, biome,
-                    nocturnal, description, l);
+                    nocturnal, description, l, race, extraAttack == null ? null : extraAttack.scaled(1.3));
             t.elite = true;
             eliteVariant = t;
         }
