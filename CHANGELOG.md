@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.228.0] - 2026-11-05
+
+### Dodano
+- Mgła na mapie jak w Tibii: nowa postać widzi całą mapę (minimapę i dużą mapę) zakrytą, a teren odsłania się
+  wokół niej w miarę chodzenia (widok 17x13 pól, osobno na każdym piętrze i pod ziemią). Odkryta mapa zapisuje się
+  osobno dla każdej postaci, także w grze online (serwer wysyła ją po zalogowaniu).
+- Znaczniki na mapie widać tylko na odkrytych polach; dotknięcie nieodkrytego miejsca na dużej mapie pokazuje
+  „Nie znasz tej okolicy.”.
+
+### Zmieniono
+- Zapis postaci w wersji 7 (pole z odkrytą mapą). Starsze postacie dostają odkrytą okolicę swojego miasta.
+
 ## [0.227.0] - 2026-11-05
 
 ### Zmieniono
