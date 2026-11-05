@@ -836,6 +836,59 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
   ostateczna mikstura many (magowie, poz. 250), ostateczna mikstura zdrowia (paladyn i mnich, poz. 250).
   Przyciski HP/MP biora najsilniejsza dozwolona miksture z plecaka (`GameSession.HP_TIERS` / `MP_TIERS`).
 
+## Harmonia mnicha (Z logika, S serwer, C HUD)
+
+Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/getHarmonyBonus/updateSerenityState,
+`spells.cpp` postCastSpell, `combat.cpp` harmonyHeal, skrypty czarow mnicha). Stan: `vocation/Harmony`
+(`PlayerCharacter.harmony()`), logika w `SpellSystem` (`afterMonkCast`, `updateSerenity`).
+
+- **Harmonia 0-5.** Czar budujacy (kolumna "mnich" = `B` na koncu wiersza spells.csv, `MonkRole.BUILDER`) daje
+  +1 punkt; wydajacy (`S`) zuzywa wszystkie, mnozy obrazenia (i leczenie Zbiorowego uleczenia ducha) przez
+  `1 + B * 2^(h-1) / 100`, B = 8 (x2,28 przy 5 punktach), i skraca odnowienie czarow budujacych o 2 s za punkt.
+  Kazde zbudowanie i wydanie leczy (poziom/5 x2..x2,3, +5% za punkt, min. 10..25) mnicha albo najbardziej
+  rannego widocznego czlonka druzyny, jesli ma mniej zdrowia niz mnich.
+- **Cnoty** (poz. 20, 210 many, 10 s miedzy zmianami - grupa `SpellGroup.VIRTUE`, jedna aktywna): harmonii
+  (B +4, w spokoju +8, kazdy spender od razu oddaje 1 punkt), sprawiedliwosci (umiejetnosc walki piesciami
+  x1,15 / x1,30 w spokoju, `PlayerCharacter.effectiveSkill` - takze ciosy wrecz w `CombatFormulas`),
+  wytrwalosci (leczenie czarami mnicha x1,35 / x1,70, bez leczenia z harmonii - jak ORIGIN_HARMONY w Canary).
+  Premie dla druzyny z Tibii nie sa zrobione.
+- **Spokoj (Serene).** Mnich jest spokojny, chyba ze widzi czlonka druzyny (to samo pietro, 8 x 6 pol) i
+  jednoczesnie na 8 polach wokol stoi co najmniej 6 stworzen (potwory i inni gracze). Offline zawsze spokojny.
+  Liczone w `GameSession.update`; na serwerze druzyne i graczy obok daje `ServerWorld.monkAllies`.
+- **Skupienie spokoju** (`utamo tio`, poz. 150, 500 many, 10 min): pelna harmonia, odnowienia spenderow od
+  zera, spokoj wymuszony na 7 s. **Skupienie harmonii** (`utevo nia`, poz. 275, 500 many, 2 min): pelna harmonia.
+- **Smierc** zeruje harmonie (cnota zostaje), **wylogowanie** nie: pole `monk=punkty,CNOTA,spokoj,wymuszenieMs`
+  w zapisie postaci (bez podbijania wersji CharacterCodec; brak pola = stan poczatkowy). To samo pole idzie
+  w komunikacie SELF, wiec klient online widzi harmonie, cnote i spokoj serwera.
+- **Czary mnicha** (role i liczby z Canary; ataki fizyczne, wzor `moc * piesci/100 * atak broni/10 + poziom/5`
+  (`SpellSystem.monkPower`, bez broni atak 7), rozrzut +-10%):
+
+  | Czar (Tibia) | Klucz | Poz. | Mana | Odn. | Moc | Rola |
+  |---|---|---|---|---|---|---|
+  | Szybki cios (Swift Jab) | swift_jab | 1 | 3 | 2 s | 12 | B |
+  | Starcie tygrysa (Tiger Clash) | tiger_strike | 1 | 3 | 8 s | 15 | S |
+  | Podwojny cios (Double Jab) | double_jab | 14 | 30 | 4 s | 50 | B |
+  | Wielkie starcie tygrysa | greater_tiger_clash | 18 | 50 | 8 s | 44 | S |
+  | Mistyczne odepchniecie (zasieg 7) | mystic_repulse | 30 | 150 | 20 s | 72 | B |
+  | Grad ciosow (obszar 1) | flurry_of_blows | 35 | 110 | 4 s | 65 | B |
+  | Zamaszyste powalenie (obszar 1) | sweeping_takedown | 60 | 210 | 8 s | 72 (48 x1,5) | S |
+  | Lancuch pokuty (3 cele, promien 3) | chained_penance | 70 | 180 | 4 s | 74 | B |
+  | Wielki grad ciosow (obszar 2) | greater_flurry_of_blows | 90 | 300 | 16 s | 100 | B |
+  | Potezny podbrodkowy | forceful_uppercut | 110 | 325 | 60 s | 130 | B |
+  | Druzgocacy nokaut | devastating_knockout | 125 | 210 | 24 s | 62 | S |
+  | Wybuch ducha (6 celow, promien 3) | spiritual_outburst | 300 | 425 | 24 s | 42 | S |
+  | Uleczenie ducha (Spirit Mend) | spirit_mend | 80 | 210 | 1 s | 0,2 poz + 10 mag + 61 | - |
+  | Zbiorowe uleczenie ducha (promien 5) | mass_spirit_mend | 150 | 250 | 8 s | 0,2 poz + 8 mag + 44 | S |
+
+  Zostaly czary Pixela Wewnetrzny spokoj (12) i Gleboka medytacja (40). Obszary kierunkowe Tibii sa tu kolem
+  wokol mnicha, lancuchy - najblizsze cele w promieniu (kolumna "ilosc" = liczba celow). Uproszczenia: brak
+  odepchniecia (Mystic Repulse), premii za umiejetnosc >110 (Sweeping Takedown), drugiego uderzenia Wybuchu ducha
+  i progu 5-10 obrazen Starcia tygrysa. Inkantacje jak w Tibii (`exori infir pug`, `exori gran nia`, `utori virtu`...).
+- **HUD:** 5 kul (rysowane ksztaltami, `client/ui/HarmonyHud`), za nimi znak cnoty, niebieska poswiata = spokoj.
+  Desktop: drugi wiersz gornego paska, na lewo od ikon stanu; telefon: pod ramka za ikonami stanu. Dotkniecie
+  kul: opis w dzienniku i okienko wyboru cnoty (rzuca czar cnoty). Pasek automatyczny mnicha: leczenie, czar
+  budujacy, wydajacy, obszar. Podglad: `-Dpixel.harmony=N -Dpixel.virtue=HARMONY -Dpixel.open=virtues`.
+
 ## Lowienie i umiejetnosci (Z logika, C UI)
 
 - `gathering/FishingSystem`: najblizszy kafelek wody w zasiegu 3 z linia wzroku; proba co 1,5 s;

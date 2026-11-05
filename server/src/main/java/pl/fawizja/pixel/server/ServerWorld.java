@@ -1722,6 +1722,50 @@ final class ServerWorld {
 
     Collection<ServerPlayer> players() { return Collections.unmodifiableCollection(players.values()); }
 
+    /**
+     * Druzyna dla harmonii mnicha (Canary hasVisiblePartyMember / healFromHarmony): czlonkowie druzyny na tym samym
+     * pietrze w zasiegu ekranu (8 x 6 pol) i inni gracze na 8 polach wokol (tlum odbierajacy spokoj).
+     */
+    private pl.fawizja.pixel.magic.SpellSystem.Allies monkAllies(ServerPlayer p) {
+        return new pl.fawizja.pixel.magic.SpellSystem.Allies() {
+            @Override
+            public List<pl.fawizja.pixel.magic.SpellSystem.Ally> visible() {
+                List<pl.fawizja.pixel.magic.SpellSystem.Ally> out = new ArrayList<>();
+                Position me = p.session.character().position();
+                for (String name : parties.members(p.name())) {
+                    ServerPlayer o = find(name);
+                    if (o == null || o == p || o.session.character().isDead()) continue;
+                    Position op = o.session.character().position();
+                    if (op.z() != me.z() || Math.abs(op.x() - me.x()) > 8 || Math.abs(op.y() - me.y()) > 6) continue;
+                    pl.fawizja.pixel.character.PlayerCharacter c = o.session.character();
+                    out.add(new pl.fawizja.pixel.magic.SpellSystem.Ally() {
+                        @Override public Position position() { return c.position(); }
+                        @Override public int health() { return c.health(); }
+                        @Override public int heal(int amount) {
+                            int h = c.heal(amount);
+                            if (h > 0) o.session.combat().addEvent(new pl.fawizja.pixel.combat.CombatEvent(
+                                    o.session.lastUpdateMs(), c.position(), h, pl.fawizja.pixel.combat.CombatEvent.Kind.HEAL));
+                            return h;
+                        }
+                    });
+                }
+                return out;
+            }
+
+            @Override
+            public int playersAround() {
+                Position me = p.session.character().position();
+                int n = 0;
+                for (ServerPlayer o : players.values()) {
+                    if (o == p || o.session.character().isDead()) continue;
+                    Position op = o.session.character().position();
+                    if (!op.equals(me) && me.distanceTo(op) <= 1) n++;
+                }
+                return n;
+            }
+        };
+    }
+
     ServerPlayer find(String name) {
         for (ServerPlayer p : players.values()) if (p.name().equalsIgnoreCase(name)) return p;
         return null;
@@ -1863,6 +1907,7 @@ final class ServerWorld {
                     }
                     if (o == PvpRules.Outcome.DUEL_WON) duelOver(p, v, t);
                 }));
+        s.spells().setAllies(monkAllies(p));
         s.combat().setExperienceSharer((type, t) -> shareKill(p, type, t));
         s.combat().setDeathListener(m -> {
             invasionKill(p, m);

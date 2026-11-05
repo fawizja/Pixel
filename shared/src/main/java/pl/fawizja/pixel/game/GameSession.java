@@ -2092,6 +2092,7 @@ public final class GameSession {
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt, isResting(nowMs));
+            spells.updateSerenity(dt, nowMs); // mnich: spokoj (Serene) wg druzyny i tlumu wokol
             pc.stats().addPlayTime(dt);
             if (!world.isProtectionZone(pc.position())) {
                 pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);

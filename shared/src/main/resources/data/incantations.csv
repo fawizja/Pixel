@@ -7,7 +7,25 @@ ultimate_mend;exura max vito
 holy_mend;exura gran san
 inner_calm;exura med
 deep_meditation;exura gran med
-spirit_harmony;exura max med
+spirit_mend;exura gran tio
+mass_spirit_mend;exura mas nia
+swift_jab;exori infir pug
+tiger_strike;exori infir nia
+double_jab;exori pug
+greater_tiger_clash;exori nia
+mystic_repulse;exori amp pug
+flurry_of_blows;exori mas pug
+sweeping_takedown;exori mas nia
+chained_penance;exori med pug
+greater_flurry_of_blows;exori gran mas pug
+forceful_uppercut;exori gran pug
+devastating_knockout;exori gran nia
+spiritual_outburst;exori gran mas nia
+virtue_of_harmony;utori virtu
+virtue_of_justice;utito virtu
+virtue_of_sustain;utura tio
+focus_serenity;utamo tio
+focus_harmony;utevo nia
 ember_bolt;exori flam
 spark_bolt;exori vis
 flame_ring;exevo mas flam
@@ -35,14 +53,6 @@ light_blade;exori max san
 divine_caldera;exevo mas san
 strong_ethereal_spear;exori gran con
 divine_judgement;exori ultima san
-tiger_strike;exori pug
-whirlwind_kick;exevo pug
-dragon_fist;exori gran pug
-storm_of_blows;exevo mas pug
-phoenix_fist;exori max pug
-storm_fist;exori ultima pug
-chi_wave;exevo gran mas pug
-thousand_palms;exevo ultima pug
 glow;utevo lux
 haste;utani hur
 strong_haste;utani gran hur

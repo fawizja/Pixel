@@ -140,8 +140,8 @@ class MagicTest {
         PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
         GameSession s = session(pc, null, null);
         s.teleport(new Position(31, 16, 0), 0);
-        pc.addExperience(500_000);
-        assertEquals(CastResult.PROTECTION_ZONE, s.castSpell("whirlwind_kick", 0));
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(35) - pc.experience());
+        assertEquals(CastResult.PROTECTION_ZONE, s.castSpell("flurry_of_blows", 0));
         pc.damage(50);
         assertEquals(CastResult.OK, s.castSpell("mend", 0), "healing is allowed in town");
     }
@@ -149,7 +149,7 @@ class MagicTest {
     @Test
     void areaSpellHitsAllAdjacentMonsters() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
-        pc.addExperience(200_000); // poziom ~ 25
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(35) - pc.experience()); // Grad ciosow od 35
         MonsterManager mm = new MonsterManager(TestData.varden(), MONSTERS, List.of(
                 new SpawnPoint("boar", new Position(11, 12, 0), 0, 1, 600),
                 new SpawnPoint("boar", new Position(9, 12, 0), 0, 1, 600),
@@ -157,7 +157,7 @@ class MagicTest {
         mm.populate(null);
         GameSession s = new GameSession(TestData.ITEMS, TestData.varden(), pc, mm, new Random(2), 8, SPELLS, CONSUMABLES, RECIPES);
         s.teleport(new Position(10, 12, 0), 0);
-        assertEquals(CastResult.OK, s.castSpell("whirlwind_kick", 0));
+        assertEquals(CastResult.OK, s.castSpell("flurry_of_blows", 0));
         int hurt = 0;
         for (Monster m : mm.monsters()) if (m.health() < m.type().maxHealth()) hurt++;
         assertEquals(2, hurt, "only the two adjacent boars");

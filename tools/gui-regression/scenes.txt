@@ -173,3 +173,7 @@ fog_underground_map|-Dpixel.revealMap=0 -Dpixel.autostart=Test:KNIGHT -Dpixel.ho
 # 2026-11-05: rozmowa z NPC bez pogawedek - przewodnik (zadania + jeden temat, odpowiedz na "czesc" w czacie), straznik (samo powitanie)
 npc_guide_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=497,499,0 -Dpixel.open=npc -Dpixel.button=cmd:czesc -Dpixel.button2=npc:ask:kopalnia
 npc_guard_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=560,490,0 -Dpixel.open=npc -Dpixel.button=cmd:brama
+# harmonia mnicha: 5 kul (3 pelne), cnota harmonii, spokoj; telefon: 5 kul i cnota sprawiedliwosci; okienko wyboru cnoty
+monk_harmony|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=3 -Dpixel.virtue=HARMONY
+monk_harmony_mobile|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=5 -Dpixel.virtue=JUSTICE -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+monk_virtues|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=3 -Dpixel.virtue=HARMONY -Dpixel.open=virtues

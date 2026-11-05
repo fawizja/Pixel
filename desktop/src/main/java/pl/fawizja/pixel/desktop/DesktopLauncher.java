@@ -28,6 +28,8 @@ import pl.fawizja.pixel.world.Position;
  *                                     czas: 50 ms na klatke, staly dzien i czas rzeczywisty - zrzut nie zalezy od maszyny
  *   -Dpixel.frameMs=N                 krok czasu sesji na klatke (0 = zegar rzeczywisty)
  *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
+ *   -Dpixel.harmony=N    mnich: N punktow harmonii (0..5); -Dpixel.virtue=HARMONY|JUSTICE|SUSTAIN aktywna cnota;
+ *                        -Dpixel.open=virtues okienko wyboru cnoty
  *   -Dpixel.skills=AXE:82,SHIELDING:77  nowa postac z tymi poziomami umiejetnosci (np. z symulacji polowania)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.partySize=N  przy -Dpixel.open=party: wielkosc podgladanej druzyny (2..5, rozne profesje, premia exp)
@@ -158,7 +160,13 @@ public final class DesktopLauncher {
                 int level = Integer.getInteger("pixel.level", 0);
                 pl.fawizja.pixel.character.PlayerCharacter me = ((GameScreen) getScreen()).session().character();
                 while (me.level() < level) me.addExperience(Math.max(1000L, me.experience()));
+                // podglad harmonii mnicha: -Dpixel.harmony=0..5, -Dpixel.virtue=HARMONY|JUSTICE|SUSTAIN
+                Integer harmony = Integer.getInteger("pixel.harmony");
+                if (harmony != null) me.harmony().build(harmony - me.harmony().points());
+                String virtue = System.getProperty("pixel.virtue");
+                if (virtue != null) me.harmony().setVirtue(pl.fawizja.pixel.vocation.Harmony.Virtue.valueOf(virtue));
                 String open = System.getProperty("pixel.open");
+                if ("virtues".equals(open)) ((GameScreen) getScreen()).hud().openVirtues();
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("bagitem".equals(open)) {

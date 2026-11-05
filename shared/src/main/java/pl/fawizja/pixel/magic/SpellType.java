@@ -28,11 +28,24 @@ public final class SpellType {
     private final String consumesItem;
     private final int produceCount;
     private final String description;
+    private final MonkRole monkRole;
 
     public SpellType(String key, String name, Set<Vocation> vocations, int minLevel, int minMagic, int mana, int cooldownMs,
                      SpellGroup group, SpellKind kind, DamageType damageType, double base, double levelFactor,
                      double magicFactor, double skillFactor, int range, int radius, String producesItem,
                      String consumesItem, int produceCount, String description) {
+        this(key, name, vocations, minLevel, minMagic, mana, cooldownMs, group, kind, damageType, base, levelFactor, magicFactor,
+                skillFactor, range, radius, producesItem, consumesItem, produceCount, description, MonkRole.NONE);
+    }
+
+    /**
+     * monkRole: rola wobec harmonii mnicha. Czar ataku z rola (B/S) liczy obrazenia wzorem Canary:
+     * baza * umiejetnosc / 100 * atak broni / 10 + premia poziomu (kolumny x poziom/magia/umiejetnosc = 0).
+     */
+    public SpellType(String key, String name, Set<Vocation> vocations, int minLevel, int minMagic, int mana, int cooldownMs,
+                     SpellGroup group, SpellKind kind, DamageType damageType, double base, double levelFactor,
+                     double magicFactor, double skillFactor, int range, int radius, String producesItem,
+                     String consumesItem, int produceCount, String description, MonkRole monkRole) {
         if (mana < 0 || cooldownMs < 0 || minLevel < 1 || range < 0 || radius < 0 || produceCount < 0) {
             throw new IllegalArgumentException("bad spell values: " + key);
         }
@@ -59,6 +72,7 @@ public final class SpellType {
         this.consumesItem = consumesItem;
         this.produceCount = produceCount;
         this.description = description;
+        this.monkRole = monkRole == null ? MonkRole.NONE : monkRole;
     }
 
     public String key() { return key; }
@@ -82,4 +96,7 @@ public final class SpellType {
     public String consumesItem() { return consumesItem; }
     public int produceCount() { return produceCount; }
     public String description() { return description; }
+    public MonkRole monkRole() { return monkRole; }
+    /** Czar ataku mnicha liczony wzorem Canary (moc * piesci * atak broni). */
+    public boolean monkFormula() { return monkRole != MonkRole.NONE && kind.isOffensive() && !kind.isRune(); }
 }
