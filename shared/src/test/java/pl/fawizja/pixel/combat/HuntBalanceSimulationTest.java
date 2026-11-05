@@ -34,16 +34,19 @@ import pl.fawizja.pixel.world.Position;
  *
  * <ol>
  *   <li><b>Typowe umiejetnosci dla poziomu</b> nie sa zgadywane, tylko wynikaja z gry: postac od poziomu 1 poluje
- *       na potwora swojego poziomu ({@link #huntTarget}), kazdy cios to proba broni, kazdy cios potwora proba
- *       tarczy, kazda wydana mana proba magii (wszystko z mnoznikiem etapu), a czas na poziomie to brakujace
+ *       na potwora swojego poziomu ({@link #huntTarget}), kazdy cios to {@link Balance#HUNT_TRY_FACTOR} prob broni,
+ *       kazdy cios potwora do odparcia {@link Balance#BLOCK_TRY_FACTOR} prob tarczy, kazdy punkt wydanej many
+ *       HUNT_TRY_FACTOR prob magii (wszystko z mnoznikiem etapu, jak w grze), a czas na poziomie to brakujace
  *       doswiadczenie / (exp za potwora z mnoznikiem etapu) * (czas zabicia + {@link #OVERHEAD_S} s na dojscie
  *       i lup). Sprzet: najlepszy dostepny dla profesji i poziomu.</li>
  *   <li><b>Polowanie</b>: walka 1 na 1 (Monte Carlo) z leczeniem - mikstura zdrowia poziomu postaci, gdy HP < 60%
  *       (co 1 s), czar leczacy, gdy HP < 50% (co 1 s), czary ataku co 2 s (mana z mikstur, bez limitu).
  *       Mag stoi w miejscu (pesymistycznie: w grze trzyma dystans).</li>
  * </ol>
- * Wynik: tabela (czas zabicia, obrazenia na minute, smiertelnosc) dla rycerza i czarodzieja na poziomach
- * 8/20/50/100/200 wobec potworow ich krainy i potworow z wyzszych krain.
+ * Wynik: tabela rozwoju (rycerz, paladyn, czarodziej, druid) wobec typowych umiejetnosci poziomu
+ * ({@link #skillsFollowTheLevel}) i tabela walki (czas zabicia, obrazenia na minute, smiertelnosc) dla rycerza
+ * i czarodzieja z umiejetnosciami z tej symulacji na poziomach 8/20/50/100/200 wobec potworow ich krainy
+ * i potworow z wyzszych krain.
  */
 class HuntBalanceSimulationTest {
 
@@ -245,7 +248,7 @@ class HuntBalanceSimulationTest {
                     if (kites && rng.nextDouble() >= KITE_SHARE) d = 0;
                     hp -= d;
                     taken += d;
-                    if (training != null && m.damageType() == DamageType.PHYSICAL) training[1]++;
+                    if (training != null && CombatSystem.blockable(m)) training[1]++;
                     tMonster += m.attackIntervalMs();
                 }
                 if (m.boss() && !bossHealed && mhp > 0 && mhp < m.maxHealth() * 0.3) {
@@ -269,7 +272,13 @@ class HuntBalanceSimulationTest {
 
     record Progress(int level, Map<Skill, Integer> skills, double hours) {}
 
-    /** Postac od poziomu 1 do maxLevel polujaca na potwory swojego poziomu; umiejetnosci na kazdym poziomie. */
+    /**
+     * Postac od poziomu 1 do maxLevel polujaca na potwory swojego poziomu; umiejetnosci na kazdym poziomie.
+     * Proby jak w grze: kazdy atak bronia/strzal/rozdzka = {@link Balance#HUNT_TRY_FACTOR} prob
+     * (CombatSystem.update), kazdy atak potwora do odparcia tarcza = {@link Balance#BLOCK_TRY_FACTOR}
+     * (CombatSystem.monsterAttacks), kazdy punkt wydanej many = HUNT_TRY_FACTOR (SpellSystem.trainMagic);
+     * wszystko przez Skills.train, czyli z mnoznikiem etapu.
+     */
     static Map<Integer, Progress> grow(Vocation v, int maxLevel) {
         Map<Integer, Progress> out = new HashMap<>();
         PlayerCharacter pc = FACTORY.create("Sim", v, new Position(1, 1, 0), 1);
@@ -289,30 +298,24 @@ class HuntBalanceSimulationTest {
             seconds += kills * (f.killSeconds() + OVERHEAD_S);
             // proby z 12 walk przeskalowane na liczbe zabic na tym poziomie
             double scale = kills / 12.0;
-            Skill main = mainSkill(at);
-            trainMany(pc, main == Skill.MAGIC ? null : main, Math.round(tr[0] * scale));
-            if (CombatSystem.trainsShielding(at)) trainMany(pc, Skill.SHIELDING, Math.round(tr[1] * scale));
+            trainMany(pc, mainSkill(at), Math.round(tr[0] * scale), Balance.HUNT_TRY_FACTOR);
+            if (CombatSystem.trainsShielding(at)) trainMany(pc, Skill.SHIELDING, Math.round(tr[1] * scale), Balance.BLOCK_TRY_FACTOR);
             long manaSpent = Math.round(tr[2] * scale);
             while (manaSpent > 0) {
-                long chunk = Math.min(manaSpent, 200);
-                pc.skills().train(Skill.MAGIC, chunk);
+                long chunk = Math.min(manaSpent, 50); // jak pojedyncze czary: mnoznik etapu wg biezacego poziomu
+                pc.skills().train(Skill.MAGIC, chunk * Balance.HUNT_TRY_FACTOR);
                 manaSpent -= chunk;
             }
         }
         return out;
     }
 
-    private static void trainMany(PlayerCharacter pc, Skill s, long tries) {
-        if (s == null) return;
-        for (long i = 0; i < tries; i++) {
-            pc.skills().train(s, 1);
-            if (s.isMeleeWeapon()) {
-                // umiejetnosc broni rycerza: trzyma jeden typ, ale w tabeli liczy sie trzymana bron
-                continue;
-            }
-        }
+    private static void trainMany(PlayerCharacter pc, Skill s, long events, int triesPerEvent) {
+        for (long i = 0; i < events; i++) pc.skills().train(s, triesPerEvent);
+        // rycerz zmienia miecz/topor/maczuge na najlepsza bron poziomu: w tabeli liczy sie jedna umiejetnosc broni
+        // (poziom i postep przechodza na pozostale, inaczej kazda zmiana broni gubilaby postep)
         if (s.isMeleeWeapon()) for (Skill o : new Skill[] {Skill.SWORD, Skill.AXE, Skill.CLUB}) {
-            if (o != s) pc.skills().set(o, pc.skills().level(s), 0);
+            if (o != s) pc.skills().set(o, pc.skills().level(s), pc.skills().tries(s));
         }
     }
 
@@ -322,9 +325,10 @@ class HuntBalanceSimulationTest {
 
     /**
      * Umiejetnosci typowe dla poziomu w Tibii (postac bez dlugiego treningu offline; orientacyjnie z profili graczy
-     * na TibiaWiki/forach): rycerz bron/tarcza, czarodziej magia. Miedzy punktami liniowo.
+     * na TibiaWiki/forach; poziomy 50 i 100 wg Darka 2026-11-05): rycerz bron/tarcza (paladyn dystans tak jak bron
+     * rycerza), czarodziej i druid magia. Miedzy punktami liniowo.
      */
-    static final int[][] TIBIA_KNIGHT = {{1, 10, 10}, {8, 30, 28}, {20, 55, 50}, {50, 72, 68}, {100, 85, 80},
+    static final int[][] TIBIA_KNIGHT = {{1, 10, 10}, {8, 30, 28}, {20, 55, 50}, {50, 70, 65}, {100, 85, 80},
             {200, 98, 92}, {300, 105, 98}, {500, 115, 106}, {1000, 125, 115}};
     static final int[][] TIBIA_SORCERER = {{1, 0}, {8, 8}, {20, 25}, {50, 50}, {100, 68}, {200, 82}, {300, 90},
             {500, 100}, {1000, 112}};
@@ -337,21 +341,6 @@ class HuntBalanceSimulationTest {
             }
         }
         return t[t.length - 1][col];
-    }
-
-    /** Umiejetnosci "jak w Tibii" na poziomie: rycerz bron i tarcza, czarodziej magia (bron i tarcza slabe). */
-    static Map<Skill, Integer> tibiaSkills(Vocation v, int level) {
-        Map<Skill, Integer> m = new HashMap<>();
-        if (v == Vocation.KNIGHT) {
-            int w = interp(TIBIA_KNIGHT, level, 1);
-            for (Skill s : new Skill[] {Skill.SWORD, Skill.AXE, Skill.CLUB}) m.put(s, w);
-            m.put(Skill.SHIELDING, interp(TIBIA_KNIGHT, level, 2));
-            m.put(Skill.MAGIC, Math.min(12, level / 25 + 2));
-        } else {
-            m.put(Skill.MAGIC, interp(TIBIA_SORCERER, level, 1));
-            m.put(Skill.SHIELDING, Math.min(25, 10 + level / 20));
-        }
-        return m;
     }
 
     /** Potwory krainy (na poziomie postaci) i potwory "za daleko" (wyzsza kraina). */
@@ -375,7 +364,7 @@ class HuntBalanceSimulationTest {
         if (growthCache != null) return growthCache;
         Map<Vocation, Map<Integer, Progress>> g = new HashMap<>();
         growthCache = g;
-        for (Vocation v : new Vocation[] {Vocation.KNIGHT, Vocation.SORCERER}) g.put(v, grow(v, 200));
+        for (Vocation v : new Vocation[] {Vocation.KNIGHT, Vocation.PALADIN, Vocation.SORCERER, Vocation.DRUID}) g.put(v, grow(v, 200));
         return g;
     }
 
@@ -390,21 +379,75 @@ class HuntBalanceSimulationTest {
                 f.damagePerMinute() * 100 / pc.maxHealth(), f.winRate() * 100);
     }
 
-    @Test
-    void typicalSkillsGrowLikeOnAStagedServer() {
-        Map<Vocation, Map<Integer, Progress>> g = growth();
-        StringBuilder sb = new StringBuilder("\nUmiejetnosci tylko z polowania (etapy serwera, bez manekinow) vs typowe w Tibii:\n");
-        for (int l : LEVELS) {
-            Progress k = g.get(Vocation.KNIGHT).get(l), s = g.get(Vocation.SORCERER).get(l);
-            sb.append(String.format("L%-4d rycerz bron %3d tarcza %3d (Tibia %3d/%3d, %.1f h) | czarodziej magia %3d (Tibia %3d, %.1f h)%n", l,
-                    k.skills().get(Skill.AXE), k.skills().get(Skill.SHIELDING), interp(TIBIA_KNIGHT, l, 1), interp(TIBIA_KNIGHT, l, 2),
-                    k.hours(), s.skills().get(Skill.MAGIC), interp(TIBIA_SORCERER, l, 1), s.hours()));
+    /** Zgodnosc z typowa postacia (Darek 2026-11-05: "podnies umiejetnosci wg tabeli RubinOT"): +- tyle poziomow. */
+    static final int SKILL_TOLERANCE = 7;
+
+    /** Glowna umiejetnosc walki profesji w tabeli rozwoju (rycerz: bron wrecz, paladyn: dystans, magowie: magia). */
+    static int mainLevel(Vocation v, Map<Skill, Integer> skills) {
+        switch (v) {
+            case KNIGHT: return skills.get(Skill.AXE);
+            case PALADIN: return skills.get(Skill.DISTANCE);
+            case MONK: return skills.get(Skill.FIST);
+            default: return skills.get(Skill.MAGIC);
         }
+    }
+
+    /** Typowa glowna umiejetnosc profesji (paladyn jak bron rycerza, magowie jak magia czarodzieja). */
+    static int typicalMain(Vocation v, int level) {
+        return v == Vocation.SORCERER || v == Vocation.DRUID ? interp(TIBIA_SORCERER, level, 1) : interp(TIBIA_KNIGHT, level, 1);
+    }
+
+    @Test
+    void skillsFollowTheLevel() {
+        Map<Vocation, Map<Integer, Progress>> g = growth();
+        StringBuilder sb = new StringBuilder("\nUmiejetnosci tylko z polowania (etapy serwera, Balance.HUNT_TRY_FACTOR = "
+                + Balance.HUNT_TRY_FACTOR + ", bez manekinow) vs typowe w Tibii; czas polowania od poziomu 1:\n"
+                + "| poz. | rycerz bron/tarcza (typowo) | h | paladyn dystans (typowo) | h | czarodziej magia (typowo) | h | druid magia (typowo) | h |\n");
+        List<String> fails = new ArrayList<>();
+        for (int l : new int[] {20, 50, 100, 150, 200}) {
+            Progress k = g.get(Vocation.KNIGHT).get(l), p = g.get(Vocation.PALADIN).get(l);
+            Progress s = g.get(Vocation.SORCERER).get(l), d = g.get(Vocation.DRUID).get(l);
+            sb.append(String.format("| %4d | %3d/%3d (%3d/%3d) | %4.1f | %3d (%3d) | %4.1f | %3d (%3d) | %4.1f | %3d (%3d) | %4.1f |%n", l,
+                    k.skills().get(Skill.AXE), k.skills().get(Skill.SHIELDING), interp(TIBIA_KNIGHT, l, 1), interp(TIBIA_KNIGHT, l, 2), k.hours(),
+                    p.skills().get(Skill.DISTANCE), typicalMain(Vocation.PALADIN, l), p.hours(),
+                    s.skills().get(Skill.MAGIC), typicalMain(Vocation.SORCERER, l), s.hours(),
+                    d.skills().get(Skill.MAGIC), typicalMain(Vocation.DRUID, l), d.hours()));
+            if (l != 50 && l != 100) continue;
+            for (Vocation v : new Vocation[] {Vocation.KNIGHT, Vocation.PALADIN, Vocation.SORCERER, Vocation.DRUID}) {
+                int got = mainLevel(v, g.get(v).get(l).skills()), want = typicalMain(v, l);
+                if (Math.abs(got - want) > SKILL_TOLERANCE) fails.add("L" + l + " " + v + " main skill " + got + " vs typical " + want);
+            }
+            int shield = k.skills().get(Skill.SHIELDING), want = interp(TIBIA_KNIGHT, l, 2);
+            if (Math.abs(shield - want) > SKILL_TOLERANCE) fails.add("L" + l + " KNIGHT shielding " + shield + " vs typical " + want);
+        }
+        for (Vocation v : g.keySet()) sb.append("L100 ").append(v).append(": ").append(new java.util.TreeMap<>(g.get(v).get(100).skills())).append('\n');
         System.out.println(sb);
+        assertTrue(fails.isEmpty(), String.join("\n", fails));
         Progress k100 = g.get(Vocation.KNIGHT).get(100), s100 = g.get(Vocation.SORCERER).get(100);
         assertTrue(g.get(Vocation.KNIGHT).get(20).skills().get(Skill.AXE) < k100.skills().get(Skill.AXE));
         assertTrue(s100.skills().get(Skill.FIST) < 30, "mage stays weak in melee");
+        assertTrue(s100.skills().get(Skill.SHIELDING) < 30, "mage stays weak in shielding");
         assertTrue(s100.skills().get(Skill.MAGIC) > k100.skills().get(Skill.MAGIC) * 3, "mage magic >> knight magic");
+        assertTrue(g.get(Vocation.PALADIN).get(100).skills().get(Skill.MAGIC) < s100.skills().get(Skill.MAGIC), "paladin magic below mage");
+    }
+
+    /** Postac tworzona od razu na wyzszym poziomie (start offline 300) ma umiejetnosci z tej symulacji. */
+    @Test
+    void factoryStartSkillsMatchTheSimulation() {
+        Map<Vocation, Map<Integer, Progress>> g = growth();
+        List<String> fails = new ArrayList<>();
+        for (Vocation v : g.keySet()) {
+            for (int l : new int[] {20, 50, 100, 150, 200}) {
+                PlayerCharacter pc = FACTORY.create("Start", v, new Position(1, 1, 0), l);
+                Map<Skill, Integer> sim = g.get(v).get(l).skills();
+                for (Skill s : new Skill[] {Skill.AXE, Skill.DISTANCE, Skill.SHIELDING, Skill.MAGIC}) {
+                    if (Math.abs(pc.skills().level(s) - Math.max(Skill.MAGIC == s ? 0 : 10, sim.get(s))) > 2) {
+                        fails.add("L" + l + " " + v + " " + s + " factory " + pc.skills().level(s) + " vs simulated " + sim.get(s));
+                    }
+                }
+            }
+        }
+        assertTrue(fails.isEmpty(), String.join("\n", fails));
     }
 
     @Test
@@ -414,7 +457,8 @@ class HuntBalanceSimulationTest {
         List<String> fails = new ArrayList<>();
         for (int l : LEVELS) {
             for (Vocation v : new Vocation[] {Vocation.KNIGHT, Vocation.SORCERER}) {
-                PlayerCharacter pc = character(v, l, tibiaSkills(v, l));
+                // umiejetnosci z symulacji rozwoju (skillsFollowTheLevel), nie zgadywane
+                PlayerCharacter pc = character(v, l, growth().get(v).get(l).skills());
                 for (String key : REGION.get(l)) {
                     Fight f = fight(pc, REG.get(key), key.hashCode() + l, FIGHTS, null);
                     sb.append(row(l, v, pc, key, f, false));

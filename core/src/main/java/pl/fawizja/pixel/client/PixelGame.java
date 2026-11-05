@@ -170,6 +170,15 @@ public class PixelGame extends Game {
                 }
             }
         }
+        // podglad umiejetnosci z symulacji polowania (regresja GUI): -Dpixel.skills=AXE:82,SHIELDING:77 ustawia poziomy
+        String skills = System.getProperty("pixel.skills");
+        if (skills != null) {
+            for (String part : skills.split(",")) {
+                String[] kv = part.trim().split(":");
+                if (kv.length != 2) continue;
+                pc.skills().set(pl.fawizja.pixel.character.Skill.valueOf(kv[0].trim()), Integer.parseInt(kv[1].trim()), 0);
+            }
+        }
         saveCharacter(pc);
         startGame(pc);
     }

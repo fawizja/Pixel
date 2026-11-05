@@ -58,24 +58,60 @@ public final class CharacterFactory {
     }
 
     /**
-     * Umiejetnosci typowe dla poziomu postaci (wg progow z docs/GAME_BALANCE.md: poziom ~300 to bron ~90,
-     * magia magow ~70, obrona ~80). Magowie: slaba bron i obrona, mocna magia; paladyn i mnich odwrotnie.
+     * Umiejetnosci, jakie postac tej profesji ma na tym poziomie z samego polowania (wyniki
+     * HuntBalanceSimulationTest#skillsFollowTheLevel z Balance.HUNT_TRY_FACTOR i etapami serwera, polowanie od
+     * poziomu 1 na potwory swojego poziomu). Kolumny: poziom, glowna umiejetnosc walki (rycerz: bron wrecz - miecz,
+     * topor i maczuga; paladyn: dystans; mnich: piesci; magowie: brak), tarcza, magia. Miedzy wierszami liniowo,
+     * powyzej ostatniego wiersza tak jak miedzy dwoma ostatnimi (do {@link Skills#MAX_SKILL}).
+     */
+    static final int[][] KNIGHT_SKILLS = {{8, 10, 10, 0}, {20, 47, 43, 5}, {35, 58, 54, 6}, {50, 64, 59, 7},
+            {75, 77, 76, 9}, {100, 82, 77, 9}, {150, 90, 86, 11}, {200, 97, 96, 12}, {250, 103, 103, 12},
+            {300, 106, 105, 13}, {400, 114, 113, 14}, {500, 120, 114, 14}, {600, 124, 119, 15}};
+    static final int[][] PALADIN_SKILLS = {{8, 10, 10, 0}, {20, 54, 39, 12}, {35, 63, 52, 17}, {50, 68, 58, 20},
+            {75, 81, 74, 25}, {100, 83, 75, 27}, {150, 93, 85, 30}, {200, 101, 96, 33}, {250, 106, 102, 35},
+            {300, 110, 105, 37}, {400, 117, 112, 40}, {500, 122, 113, 42}, {600, 127, 118, 44}};
+    static final int[][] MONK_SKILLS = {{8, 10, 10, 0}, {20, 48, 31, 13}, {35, 59, 36, 20}, {50, 65, 40, 23},
+            {75, 78, 48, 30}, {100, 82, 48, 33}, {150, 92, 54, 38}, {200, 100, 61, 41}, {250, 105, 65, 44},
+            {300, 109, 67, 46}, {400, 116, 72, 50}, {500, 121, 72, 52}, {600, 126, 75, 55}};
+    /** Czarodziej i druid (roznica w symulacji najwyzej 1 poziom magii): tarcza zostaje 10. */
+    static final int[][] MAGE_SKILLS = {{8, 10, 10, 0}, {20, 10, 10, 33}, {35, 10, 10, 46}, {50, 10, 10, 54},
+            {75, 10, 10, 69}, {100, 10, 10, 72}, {150, 10, 10, 86}, {200, 10, 10, 94}, {250, 10, 10, 107},
+            {300, 10, 10, 114}, {400, 10, 10, 124}, {500, 10, 10, 130}, {600, 10, 10, 136}};
+
+    static int[][] skillTable(Vocation v) {
+        switch (v) {
+            case KNIGHT: return KNIGHT_SKILLS;
+            case PALADIN: return PALADIN_SKILLS;
+            case MONK: return MONK_SKILLS;
+            default: return MAGE_SKILLS;
+        }
+    }
+
+    /** Wartosc kolumny col tabeli dla poziomu: interpolacja liniowa, ekstrapolacja ostatniego odcinka. */
+    static int typicalSkill(int[][] t, int level, int col) {
+        int i = 0;
+        while (i + 2 < t.length && level > t[i + 1][0]) i++;
+        double f = (level - t[i][0]) / (double) (t[i + 1][0] - t[i][0]);
+        double v = t[i][col] + Math.max(0, f) * (t[i + 1][col] - t[i][col]);
+        return (int) Math.max(0, Math.min(Skills.MAX_SKILL, Math.round(v)));
+    }
+
+    /**
+     * Umiejetnosci typowe dla poziomu postaci (tabele wyzej, z symulacji polowania): glowna umiejetnosc profesji,
+     * tarcza i magia; pozostale zostaja na poziomie startowym. Poziomy nigdy nie sa obnizane.
      */
     static void skillsForLevel(PlayerCharacter pc) {
         int lvl = pc.level();
-        boolean mage = pc.vocation() == Vocation.DRUID || pc.vocation() == Vocation.SORCERER;
-        int weapon = Math.min(Skills.MAX_SKILL, 10 + (int) (lvl * 0.27));
-        int magic = Math.min(Skills.MAX_SKILL, (int) (lvl * 0.235));
-        int shield = Math.min(Skills.MAX_SKILL, 10 + (int) (lvl * 0.24));
-        Skill main = pc.vocation() == Vocation.PALADIN ? Skill.DISTANCE : pc.vocation() == Vocation.MONK ? Skill.FIST
-                : pc.vocation() == Vocation.KNIGHT ? Skill.SWORD : null;
+        int[][] t = skillTable(pc.vocation());
+        int main = typicalSkill(t, lvl, 1), shield = typicalSkill(t, lvl, 2), magic = typicalSkill(t, lvl, 3);
         for (Skill s : Skill.values()) {
             int v;
-            if (s == Skill.MAGIC) v = mage ? magic : magic / 4;
-            else if (s == Skill.SHIELDING) v = mage ? Math.min(shield, 10 + lvl / 20) : shield;
-            else if (s == main || (main == Skill.SWORD && s.isMeleeWeapon())) v = weapon; // rycerz: miecz, topor i maczuga
-            else if (s == Skill.FISHING) v = Skills.START_SKILL;
-            else v = Math.min(weapon, mage ? 30 : 10 + lvl / 10);
+            if (s == Skill.MAGIC) v = magic;
+            else if (s == Skill.SHIELDING) v = shield;
+            else if (pc.vocation() == Vocation.KNIGHT && s.isMeleeWeapon()) v = main; // miecz, topor i maczuga
+            else if (pc.vocation() == Vocation.PALADIN && s == Skill.DISTANCE) v = main;
+            else if (pc.vocation() == Vocation.MONK && s == Skill.FIST) v = main;
+            else v = Skills.START_SKILL;
             pc.skills().set(s, Math.max(pc.skills().level(s), v), 0);
         }
     }

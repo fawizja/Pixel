@@ -25,6 +25,22 @@ public final class Balance {
     /** Mana liczona do poziomu magii wg biezacego poziomu magii. */
     public static final double[][] MAGIC_STAGES = {{0, 10}, {81, 7}, {101, 4}, {121, 3}, {131, 2}};
 
+    /**
+     * Wyrownanie tempa umiejetnosci do tempa poziomow (stala kompensacji, przed mnoznikiem etapu): kazda proba z walki
+     * z potworem (cios albo strzal, takze chybiony) i kazdy punkt wydanej many liczy sie jak tyle prob. Potwory
+     * gina tu w 1,5-3 s (2-4 ciosy na zabicie zamiast kilkunastu w Tibii), a etapy exp sa jak na RubinOT, wiec bez
+     * tego czynnika rycerz 100 mial z samego polowania bron ~51 i tarcze ~45, czarodziej magie ~40. Z nim
+     * (HuntBalanceSimulationTest#skillsFollowTheLevel) rycerz 100 ma ok. 82/77, paladyn dystans ok. 83, mag magie
+     * ok. 72 - jak typowa postac tego poziomu. Manekin (GameSession.updateTraining) nie jest mnozony.
+     */
+    public static final int HUNT_TRY_FACTOR = 30;
+    /**
+     * Proba tarczy za kazdy atak potwora odparty tarcza (wrecz albo fizyczny pocisk): HUNT_TRY_FACTOR razy 3, bo
+     * tarcza ma 2x wyzsza stala A niz bron, a potwor zdazy zaatakowac na zabicie ok. 3x rzadziej niz gracz
+     * (gracz bije pierwszy i szybciej, w Tibii rycerz trzyma zwykle kilka potworow naraz).
+     */
+    public static final int BLOCK_TRY_FACTOR = 3 * HUNT_TRY_FACTOR;
+
     /** Mnoznik z tabeli etapow dla poziomu. */
     public static double stage(double[][] stages, int level) {
         double m = stages[0][1];
