@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.225.0] - 2026-11-05
+
+### Zmieniono
+- Przy staminie 0:00 potwory nie dają łupu ani expa (jak w Tibii): ciało jest puste, w dzienniku „brak staminy - bez
+  expa i łupu”. W wyprawie na bossa uczestnik z pustą staminą zalicza zadanie, ale nie dostaje łupu.
+- Stamina odnawia się o 1/3 szybciej niż w Tibii: 1 minuta co 2 min 15 s offline (powyżej 39:00 co 4 min 30 s).
+  Pełne odnowienie 0:00 -> 42:00 trwa ok. 101 h zamiast 135 h. Sen w łóżku działa tak samo.
+
 ## [0.224.0] - 2026-11-05
 
 ### Dodano
