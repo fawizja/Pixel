@@ -72,6 +72,8 @@ public final class GameScreen extends ScreenAdapter {
     private final WorldRenderer worldRenderer;
     /** Slady na sniegu (gracz, inni gracze, potwory). */
     private final pl.fawizja.pixel.client.render.Footprints footprints;
+    /** Miekka kropka w miejscu dotkniecia mapy (zamiast X) i mala kropka celu marszu. */
+    private final pl.fawizja.pixel.client.render.TapMarker tapMarker = new pl.fawizja.pixel.client.render.TapMarker();
     /** Towary kupcow na ladach obok nich. */
     private final pl.fawizja.pixel.client.render.ShopDisplays shopDisplays;
     private final pl.fawizja.pixel.client.render.Roofs roofs;
@@ -1040,22 +1042,32 @@ public final class GameScreen extends ScreenAdapter {
         pl.fawizja.pixel.npc.Npc npc = session.npcs().at(p);
         if (npc != null) {
             if (session.npcNearby() == npc) hud.openNpc(session);
-            else if (walkTo(p, now(), true, true)) walkNpc = npc; // rozmowa otworzy sie po dojsciu
-            else session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
+            else if (walkTo(p, now(), true, true)) {
+                walkNpc = npc; // rozmowa otworzy sie po dojsciu
+                tapPulse(p, false);
+            } else {
+                tapPulse(p, true);
+                session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
+            }
             return true;
         }
         if (p.z() == session.character().position().z() && session.usableAt(p)) {
             // jak "Uzyj" w Tibii: skrzynia, drzwi, okno, pochodnia, dzwignia, drabina, krzak, drogowskaz, studnia...
             // obok = uzycie od razu (drzwi: drugie dotkniecie zamyka), dalej = marsz na pole obok i uzycie
             if (p.distanceTo(session.character().position()) <= 1) useOpening(p);
-            else if (walkTo(p, now(), true, true)) walkUse = p;
-            else session.log().add(now(), EventLog.Kind.INFO, "Nie ma tam drogi.");
+            else if (walkTo(p, now(), true, true)) {
+                walkUse = p;
+                tapPulse(p, false);
+            } else {
+                tapPulse(p, true);
+                session.log().add(now(), EventLog.Kind.INFO, "Nie ma tam drogi.");
+            }
             return true;
         }
         if (session.dummies().at(p)) {
             // manekin: obok = trening (jak UZYJ), dalej = marsz na pole obok
             if (p.distanceTo(session.character().position()) <= 1) onButton("use");
-            else walkTo(p, now(), true, true);
+            else tapPulse(p, !walkTo(p, now(), true, true));
             return true;
         }
         boolean hit = session.targetAt(p);
@@ -1071,8 +1083,10 @@ public final class GameScreen extends ScreenAdapter {
                 return true;
             }
             // dotkniecie wolnego pola: marsz tam (jak na duzej mapie, bez komunikatu)
-            if (c != null && c.hasLoot()) return walkTo(p, now(), true, true);
-            return walkTo(p, now(), true, false);
+            boolean walking = walkTo(p, now(), true, c != null && c.hasLoot());
+            // jasna kropka w miejscu dotkniecia; bez drogi (sciana, woda, za daleko) - krotka czerwonawa
+            if (!p.equals(session.character().position())) tapPulse(p, !walking);
+            return walking;
         }
         return hit;
     }
@@ -1341,9 +1355,11 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         if (!walkTo(goal, t, true, false)) {
+            tapPulse(goal, true);
             session.log().add(t, EventLog.Kind.WARNING, "Nie można tam dojść.");
             return;
         }
+        tapPulse(goal, false);
         session.log().add(t, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + walkPath.size() + " pól). Joystick przerywa marsz.");
     }
 
@@ -1529,6 +1545,17 @@ public final class GameScreen extends ScreenAdapter {
             if (!p.isEmpty() && (best.isEmpty() || p.size() < best.size())) best = p;
         }
         return best;
+    }
+
+    /** Rozbłysk kropki na dotknietym polu (blocked: nie ma tam drogi). */
+    private void tapPulse(Position p, boolean blocked) {
+        tapMarker.pulse(p, blocked, uiMs());
+    }
+
+    /** Cel trwajacego marszu z dotkniecia (mala kropka na ziemi) albo null (brak marszu, poscig za celem). */
+    private Position walkGoal() {
+        if (walkPath == null || chaseGoal != null || walkPath.isEmpty()) return null;
+        return walkPath.get(walkPath.size() - 1);
     }
 
     private void stopWalk() {
@@ -1754,6 +1781,7 @@ public final class GameScreen extends ScreenAdapter {
             drawCorpses(b, row, z);
             drawChests(b, row, z);
             footprints.drawRow(b, game.art().white(), worldRenderer, row, z, t);
+            tapMarker.drawRow(b, worldRenderer, row, z, uiMs(), walkGoal());
             shopDisplays.drawRow(b, game.art(), worldRenderer, row, z);
             for (int i = 0; i < visibleMonsters.size(); i++) {
                 Monster m = visibleMonsters.get(i);
@@ -2387,20 +2415,6 @@ public final class GameScreen extends ScreenAdapter {
             pl.fawizja.pixel.client.ui.Hud.star(shapes, cx, cy - 0.01f, 0.2f);
             shapes.setColor(1f, 0.84f, 0.25f, 1f);
             pl.fawizja.pixel.client.ui.Hud.star(shapes, cx, cy, 0.15f);
-        }
-        if (walkPath != null && chaseGoal == null && !walkPath.isEmpty()) {
-            // cel marszu (dotkniecie mapy albo swiata): pulsujacy znacznik X na polu, jak na minimapie
-            Position g = walkPath.get(walkPath.size() - 1);
-            if (g.z() == z) {
-                float cx = g.x() + 0.5f, cy = worldRenderer.worldY(g.y()) + 0.5f;
-                float a = 0.22f + 0.05f * (float) Math.sin(uiMs() / 160.0);
-                shapes.setColor(0f, 0f, 0f, 0.7f);
-                shapes.rectLine(cx - a, cy - a, cx + a, cy + a, 0.13f);
-                shapes.rectLine(cx - a, cy + a, cx + a, cy - a, 0.13f);
-                shapes.setColor(0.3f, 0.9f, 1f, 1f);
-                shapes.rectLine(cx - a, cy - a, cx + a, cy + a, 0.07f);
-                shapes.rectLine(cx - a, cy + a, cx + a, cy - a, 0.07f);
-            }
         }
         for (Monster m : visibleMonsters) {
             if (m.isDead() || m.position().z() != z) continue;
@@ -3209,6 +3223,7 @@ public final class GameScreen extends ScreenAdapter {
         if (saleSign != null) saleSign.getTexture().dispose();
         if (net != null) net.close();
         lightRenderer.dispose();
+        tapMarker.dispose();
         hud.dispose();
     }
 
