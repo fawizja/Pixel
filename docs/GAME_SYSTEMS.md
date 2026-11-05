@@ -665,9 +665,24 @@ Klient: `WeatherRenderer` liczy pozycje kropli z numeru i czasu (bez stanu). Ser
 
 `training/TrainingDummies.generate(world, npcSpots)`: BFS od swiatyni kazdego miasta po polach strefy ochronnej,
 pierwsze 2 pola z 8 przechodnimi sasiadami, bez obiektow i przejsc, >= 3 pola od swiatyni, od siebie i od NPC.
-`GameSession.useNearby` -> `toggleTraining` (manekin obok); `updateTraining`: co `TRAIN_MS` (3 s) 1 proba
-umiejetnosci z `CombatFormulas.attackProfile` (x etap serwera), co druga takze `SHIELDING` (tylko z tarcza w rece albo mnich); zmiana pola albo smierc konczy.
-Rownowaga: walka daje probe co atak (ok. 2 s) plus doswiadczenie, wiec polowanie zostaje szybsze.
+`GameSession.useNearby` -> `toggleTraining` (manekin obok); `updateTraining`: co `TRAIN_MS` = `Balance.DUMMY_STRIKE_MS`
+(2,5 s, 24 ciosy/min) `Balance.DUMMY_TRY_FACTOR` = `HUNT_TRY_FACTOR / 2` = 15 prob umiejetnosci z
+`CombatFormulas.attackProfile` i (tylko z tarcza w rece albo mnich) `DUMMY_BLOCK_TRY_FACTOR` = `2 * HUNT_TRY_FACTOR / 3` = 20
+prob `SHIELDING`, wszystko x etap serwera; zmiana pola albo smierc konczy. Komunikat na start podaje tempo
+("Miecz 360 prób/min, Tarcza 480 prób/min (x etap serwera; ok. 2/3 tempa polowania ...)").
+Rownowaga (`HuntBalanceSimulationTest#dummyTrainsAboutTwoThirdsAsFastAsHunting`): proby/min przed etapem - manekin bron 360,
+tarcza 480; polowanie rycerza 50-100 bron 630-820 (21-27 atakow/min x 30), tarcza 1200-1900 (14-21 odpartych ciosow x 90).
+Do umiejetnosci rycerza 100 z polowania (miecz 82 / tarcza 77) manekin potrzebuje 2,3 / 2,1 h zamiast 1,4 h (tempo ok.
+62% / 69%), do poziomu 50 (64 / 59) ok. 84% / 90%. Rycerz miecz 10 -> 60: manekin ok. 16 min (do 0.222.0: 1 proba co 3 s,
+4,8 h), polowanie ok. 14 min. Bez doswiadczenia i lupu. Rozdzka trenuje przy manekinie magie tylko 15 "many" na cios;
+magie trenuje sie wydawaniem many (kazdy czar, takze leczenie i runy w miescie, `SpellSystem.trainMagic` x HUNT_TRY_FACTOR),
+o czym przypomina komunikat. Ataku czarami w manekin nie ma (czary ofensywne sa zablokowane w strefie ochronnej).
+Wyglad: `objects/training_dummy.png` (OTSP, przebarwiony na worek ze sloma i drewniana podstawe), rysowany w naturalnym
+rozmiarze 68 px od prawego dolnego rogu pola (`GameScreen.drawChests`, `TileArt.dummyNative`), po kazdym ciosie
+kolysze sie przez 0,45 s (`GameSession.lastTrainingStrikeMs`); postac obraca sie do manekina.
+Miejsca (`TrainingDummiesTest#listsWhereTheDummiesAre`): Varden 498,504 i 501,504 (plac 5 pol na poludnie od swiatyni),
+Frostholm 744,205 i 747,204, Selvaran 685,685 i 686,689, Qasirah 217,485 i 216,492, Valmir 492,757 i 495,757,
+Nerys 867,730 i 870,732 (wszystkie z = 0). Sceny GUI: `dummy_varden_mobile`, `dummy_training_mobile`, `dummy_training_sorcerer`.
 
 ## Analiza polowania (Z logika)
 
@@ -833,7 +848,7 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
   od razu wyzej (start offline 300, `-Dpixel.startLevel`) dostaje te same umiejetnosci z tabel
   `CharacterFactory.KNIGHT_SKILLS/PALADIN_SKILLS/MONK_SKILLS/MAGE_SKILLS` (wyniki symulacji do poziomu 600, dalej
   ekstrapolacja; poziom 300: rycerz 106/105, paladyn dystans 110 tarcza 105, mag magia 114, mnich piesci 109). Manekin
-  (`GameSession.updateTraining`): co 3 s +1 umiejetnosci broni, co 6 s +1 tarczy (z tarcza). Brak treningu na
+  (`GameSession.updateTraining`): co 2,5 s 15 prob broni i 20 tarczy (z tarcza), ok. 2/3 tempa polowania (sekcja Manekiny). Brak treningu na
   potworach ponizej progu `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
 - Etapy serwera (`Balance.EXP_STAGES` / `SKILL_STAGES` / `MAGIC_STAGES`, jak "stages" na OTS, np. RubinOT;
   wspolne dla gry offline i serwera): exp za potwory wg poziomu postaci 1-8 x50, 9-50 x80, 51-100 x60,

@@ -31,7 +31,7 @@ public final class Balance {
      * gina tu w 1,5-3 s (2-4 ciosy na zabicie zamiast kilkunastu w Tibii), a etapy exp sa jak na RubinOT, wiec bez
      * tego czynnika rycerz 100 mial z samego polowania bron ~51 i tarcze ~45, czarodziej magie ~40. Z nim
      * (HuntBalanceSimulationTest#skillsFollowTheLevel) rycerz 100 ma ok. 82/77, paladyn dystans ok. 83, mag magie
-     * ok. 72 - jak typowa postac tego poziomu. Manekin (GameSession.updateTraining) nie jest mnozony.
+     * ok. 72 - jak typowa postac tego poziomu. Manekin: {@link #DUMMY_TRY_FACTOR}.
      */
     public static final int HUNT_TRY_FACTOR = 30;
     /**
@@ -40,6 +40,24 @@ public final class Balance {
      * (gracz bije pierwszy i szybciej, w Tibii rycerz trzyma zwykle kilka potworow naraz).
      */
     public static final int BLOCK_TRY_FACTOR = 3 * HUNT_TRY_FACTOR;
+
+    /**
+     * Manekin treningowy (GameSession.updateTraining): cios co {@link #DUMMY_STRIKE_MS} (24/min), kazdy to tyle prob
+     * umiejetnosci broni z mnoznikiem etapu: 24 x 15 = 360 prob/min przed etapem (polowanie rycerza 50-100: 21-27
+     * atakow/min x HUNT_TRY_FACTOR = ok. 630-820). Wg HuntBalanceSimulationTest#dummyTrainsAboutTwoThirdsAsFastAsHunting
+     * miecz, jaki rycerz ma z polowania na poziomie 100 (82), manekin daje w ok. 1,6x dluzszym czasie (tempo ok. 62%),
+     * do poziomu 50 (miecz 64) ok. 84% - wolniej niz polowanie, bez doswiadczenia i lupu, ale bez ryzyka i przerw.
+     * Rycerz: miecz 10 -> 60 przy manekinie ok. 16 min (do 0.222.0: 1 proba co 3 s, 4,8 h).
+     */
+    public static final int DUMMY_TRY_FACTOR = HUNT_TRY_FACTOR / 2;
+    /**
+     * Proby tarczy za kazdy cios w manekin (tylko z tarcza albo mnich): 24 x 20 = 480/min przed etapem (polowanie
+     * 50-100: 14-21 odpartych atakow/min x BLOCK_TRY_FACTOR = 1200-1900, ale na niskich poziomach duzo mniej);
+     * tarcza z polowania na poziomie 100 (77): tempo manekina ok. 70%, na poziomie 50 (59) ok. 90%.
+     */
+    public static final int DUMMY_BLOCK_TRY_FACTOR = 2 * HUNT_TRY_FACTOR / 3;
+    /** Odstep ciosow w manekin (ms). */
+    public static final long DUMMY_STRIKE_MS = 2_500;
 
     /** Mnoznik z tabeli etapow dla poziomu. */
     public static double stage(double[][] stages, int level) {

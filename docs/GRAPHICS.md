@@ -497,7 +497,7 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 |---|---|---|
 | `objects/chest_closed.png` | skrzynia skarbów, zamknięta | tak |
 | `objects/chest_open.png` | skrzynia skarbów, otwarta |  |
-| `objects/training_dummy.png` | manekin treningowy | tak |
+| `objects/training_dummy.png` | manekin treningowy (OTSP 1275 przebarwiony `otsp_import.dummy_colors`: worek ze słomą, drewniana podstawa; rysowany w naturalnym rozmiarze ok. 2x2 pola) | tak |
 | `objects/spike_trap.png` | pułapka z kolcami |  |
 | `objects/roof_red.png` | dach z dachówki (drewniane domy) | tak |
 | `objects/roof_slate.png` | dach z łupku (kamienne budynki) | tak |

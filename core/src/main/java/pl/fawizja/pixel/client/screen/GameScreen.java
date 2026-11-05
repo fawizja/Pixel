@@ -1916,10 +1916,29 @@ public final class GameScreen extends ScreenAdapter {
         return Math.min(1f, (now - at) / 350f);
     }
 
+    /** Kolysanie manekina po ciosie podczas treningu (0 = spoczynek, wychylenie w polach do ok. 1). */
+    private float trainingHit(Position p) {
+        if (!p.equals(session.trainingDummy())) return 0f;
+        long since = now() - session.lastTrainingStrikeMs();
+        if (since < 0 || since > 450 || session.lastTrainingStrikeMs() <= 0) return 0f;
+        float t = since / 450f;
+        return (float) (Math.sin(t * Math.PI * 3) * (1 - t));
+    }
+
     /** Skrzynie skarbow w danym wierszu: zamknieta albo otwarta (gdy ta postac juz ja oproznila). */
     private void drawChests(SpriteBatch b, int row, int z) {
+        TextureRegion big = game.art().dummyNative();
         for (Position p : session.dummies().all()) {
-            if (p.y() == row && p.z() == z) b.draw(game.art().dummy(), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
+            if (p.y() != row || p.z() != z) continue;
+            float wy = worldRenderer.worldY(p.y());
+            if (big == null) {
+                b.draw(game.art().dummy(), p.x(), wy, 1f, 1f);
+                continue;
+            }
+            // naturalny rozmiar jak w Tibii (jak skrzynia): od prawego dolnego rogu pola, postac siega pola obok
+            float w = big.getRegionWidth() / 32f, h = big.getRegionHeight() / 32f;
+            float hit = trainingHit(p);
+            b.draw(big, p.x() + 1 - w + hit * 0.06f, wy, w, h);
         }
         if (game.chests() == null) return;
         for (Position p : game.chests().traps()) {
