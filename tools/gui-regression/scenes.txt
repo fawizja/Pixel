@@ -146,3 +146,7 @@ skills_hunt_sorcerer_100|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel
 route_low_varden|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=491,525,0
 route_west_rising|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=433,495,0
 route_mid_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=407,594,-1
+# 2026-11-05: manekin treningowy w naturalnym rozmiarze (OTSP przebarwiony na worek i drewno), trening z tempem w czacie
+dummy_varden_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=499,504,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+dummy_training_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=499,504,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.buttons=use@15 -Dpixel.open=mobile_chat -Dpixel.conTab=1
+dummy_training_sorcerer|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=745,205,0 -Dpixel.buttons=use@15

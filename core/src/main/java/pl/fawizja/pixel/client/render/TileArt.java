@@ -61,6 +61,9 @@ public final class TileArt implements Disposable {
     private static final int OUTFIT_BASE = 1100;
     private final java.util.Map<String, TextureRegion> pets = new java.util.HashMap<>();
     private TextureRegion dummy;
+    /** Manekin z OTSP w naturalnym rozmiarze (68 px = ok. 2x2 pola, podstawa na polu manekina) albo null. */
+    private Texture dummyNativeTexture;
+    private TextureRegion dummyNative;
 
     private final Texture atlas;
     private final Texture lightTexture;
@@ -221,6 +224,15 @@ public final class TileArt implements Disposable {
         horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
         chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
         dummy = region(DUMMY_CELL);
+        Pixmap dn = loadArt("objects/training_dummy.png");
+        if (dn != null) {
+            if (dn.getWidth() > 40) {
+                dummyNativeTexture = new Texture(dn);
+                dummyNativeTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+                dummyNative = new TextureRegion(dummyNativeTexture);
+            }
+            dn.dispose();
+        }
         trap = region(TRAP_CELL);
         backpack = region(BACKPACK_CELL);
         roof = new TextureRegion[] {region(ROOF_CELL), region(ROOF_CELL + 1), region(ROOF_CELL + 2),
@@ -1084,6 +1096,8 @@ public final class TileArt implements Disposable {
     public TextureRegion chest(boolean open) { return chest[open ? 1 : 0]; }
 
     public TextureRegion dummy() { return dummy; }
+    /** Manekin w naturalnym rozmiarze (szerokosc/wysokosc regionu w px, 32 px = pole) albo null. */
+    public TextureRegion dummyNative() { return dummyNative; }
     public TextureRegion trap() { return trap; }
     public TextureRegion backpack() { return backpack; }
 
@@ -1963,6 +1977,7 @@ public final class TileArt implements Disposable {
         if (terrain != null) terrain.dispose();
         if (bigAtlas != null) bigAtlas.dispose();
         if (nativeAtlas != null) nativeAtlas.dispose();
+        if (dummyNativeTexture != null) dummyNativeTexture.dispose();
         if (fxAtlas != null) fxAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();

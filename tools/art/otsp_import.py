@@ -434,6 +434,33 @@ def trim_square(img, box=None):
     return out
 
 
+def dummy_colors(img):
+    """Manekin treningowy (2026-11-05): szara zbroja OTSP przebarwiona na worek ze sloma, podstawa na drewno, miecz
+    zostaje stalowy - na szarym bruku miast manekin nie zlewa sie z posadzka i nie wyglada jak posag.
+    Wspolrzedne dla obrazka po trim_square (68x68): miecz w lewym dolnym rogu, podstawa w prawym dolnym."""
+    img = img.convert("RGBA").copy()
+    px = img.load()
+    w, h = img.size
+    lum = lambda p: 0.3 * p[0] + 0.59 * p[1] + 0.11 * p[2]
+    ls = sorted(lum(px[x, y]) for y in range(h) for x in range(w) if px[x, y][3])
+    top = max(ls[int(len(ls) * 0.9)] if ls else 255, 40)
+    body, base = (196, 150, 96), (110, 78, 50)
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if not a:
+                continue
+            fx, fy = x * 68 // w, y * 68 // h
+            if fx < 30 and fy > 36:
+                continue  # miecz
+            l = lum((r, g, b))
+            pedestal = fx >= 30 and fy >= 40 and abs(r - g) < 12 and l < 150 and (fx > 60 or fy > 58 or l < 120)
+            k = min(1.0, l / top) ** 0.8
+            c = base if pedestal else body
+            px[x, y] = (int(c[0] * k), int(c[1] * k), int(c[2] * k), a)
+    return img
+
+
 def tint(img, rgb):
     """Przebarwienie: barwa * jasnosc piksela (kontury i cienie zostaja ciemne)."""
     img = img.copy()
@@ -652,7 +679,8 @@ def main(client, art):
         img = trim_square(ot.compose(spr, things["item"][i]).convert("RGBA"))
         save(tint(img, rgb) if rgb else img, f"{art}/tiles/{name}.png"); n += 1
     for name, i in OTSP_OBJECTS.items():
-        save(trim_square(ot.compose(spr, things["item"][i]).convert("RGBA")), f"{art}/objects/{name}.png"); n += 1
+        img = trim_square(ot.compose(spr, things["item"][i]).convert("RGBA"))
+        save(dummy_colors(img) if name == "training_dummy" else img, f"{art}/objects/{name}.png"); n += 1
     for name, (ids, rgb) in TINTED_WALLS.items():
         for shape, i in zip(WALL_SHAPES, ids):
             save(tint(ot.compose(spr, things["item"][i]).convert("RGBA"), rgb), f"{art}/walls/{name}_{shape}.png"); n += 1

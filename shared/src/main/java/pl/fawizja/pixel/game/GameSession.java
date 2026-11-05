@@ -529,14 +529,20 @@ public final class GameSession {
 
     public pl.fawizja.pixel.training.TrainingDummies dummies() { return dummies; }
 
-    /** Trening przy manekinie: co TRAIN_MS proba umiejetnosci broni, co druga takze tarczy; bez doswiadczenia. */
-    public static final long TRAIN_MS = 3_000;
+    /**
+     * Trening przy manekinie: co TRAIN_MS cios = Balance.DUMMY_TRY_FACTOR prob umiejetnosci broni i (z tarcza
+     * albo mnich) Balance.DUMMY_BLOCK_TRY_FACTOR prob tarczy, z mnoznikiem etapu; ok. 2/3 tempa polowania, bez doswiadczenia.
+     */
+    public static final long TRAIN_MS = pl.fawizja.pixel.balance.Balance.DUMMY_STRIKE_MS;
     private Position trainingAt;
     private Position trainingFrom;
     private long trainNextMs;
-    private int trainTicks;
 
     public boolean training() { return trainingAt != null; }
+    /** Manekin, przy ktorym postac trenuje (albo null). */
+    public Position trainingDummy() { return trainingAt; }
+    /** Chwila ostatniego ciosu w manekin (animacja na kliencie); ujemna przed pierwszym. */
+    public long lastTrainingStrikeMs() { return trainNextMs - TRAIN_MS; }
 
     private boolean toggleTraining(long nowMs) {
         Position d = dummies.near(pc.position());
@@ -548,11 +554,25 @@ public final class GameSession {
         trainingAt = d;
         trainingFrom = pc.position();
         trainNextMs = nowMs + TRAIN_MS;
-        trainTicks = 0;
-        Skill sk = CombatFormulas.attackProfile(pc, items).skill();
-        log.add(nowMs, EventLog.Kind.INFO, "Trenujesz przy manekinie: " + sk.label()
-                + " (bez doświadczenia). Ruch albo UŻYJ kończy trening.");
+        Direction toDummy = Direction.fromDelta(Integer.signum(d.x() - pc.position().x()), Integer.signum(d.y() - pc.position().y()));
+        if (toDummy != null) facing = toDummy;
+        log.add(nowMs, EventLog.Kind.INFO, trainingMessage());
         return true;
+    }
+
+    /** Komunikat na start treningu: co i jak szybko (proby na minute z etapem serwera, ok. 2/3 polowania). */
+    String trainingMessage() {
+        Skill sk = CombatFormulas.attackProfile(pc, items).skill();
+        long perMin = 60_000 / TRAIN_MS;
+        StringBuilder sb = new StringBuilder("Trenujesz przy manekinie: ").append(sk.label()).append(" ")
+                .append(perMin * pl.fawizja.pixel.balance.Balance.DUMMY_TRY_FACTOR).append(" prób/min");
+        if (pl.fawizja.pixel.combat.CombatSystem.trainsShielding(pc)) {
+            sb.append(", ").append(Skill.SHIELDING.label()).append(" ")
+                    .append(perMin * pl.fawizja.pixel.balance.Balance.DUMMY_BLOCK_TRY_FACTOR).append(" prób/min");
+        }
+        sb.append(" (x etap serwera; ok. 2/3 tempa polowania, bez doświadczenia).");
+        if (sk == Skill.MAGIC) sb.append(" Magię szybciej trenujesz czarami: każdy punkt many liczy się jak na polowaniu.");
+        return sb.append(" Ruch albo UŻYJ kończy trening.").toString();
     }
 
     private void stopTraining(long nowMs, String why) {
@@ -568,15 +588,16 @@ public final class GameSession {
         }
         while (nowMs >= trainNextMs && trainingAt != null) {
             trainNextMs += TRAIN_MS;
-            trainTicks++;
             Skill sk = CombatFormulas.attackProfile(pc, items).skill();
-            trainSkill(nowMs, sk);
-            if (trainTicks % 2 == 0 && pl.fawizja.pixel.combat.CombatSystem.trainsShielding(pc)) trainSkill(nowMs, Skill.SHIELDING);
+            trainSkill(nowMs, sk, pl.fawizja.pixel.balance.Balance.DUMMY_TRY_FACTOR);
+            if (pl.fawizja.pixel.combat.CombatSystem.trainsShielding(pc)) {
+                trainSkill(nowMs, Skill.SHIELDING, pl.fawizja.pixel.balance.Balance.DUMMY_BLOCK_TRY_FACTOR);
+            }
         }
     }
 
-    private void trainSkill(long nowMs, Skill sk) {
-        if (pc.skills().train(sk, 1) > 0) {
+    private void trainSkill(long nowMs, Skill sk, int tries) {
+        if (pc.skills().train(sk, tries) > 0) {
             log.add(nowMs, EventLog.Kind.SYSTEM, sk.label() + ": poziom " + pc.skills().level(sk) + ".");
         }
     }

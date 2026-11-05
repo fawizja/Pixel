@@ -483,4 +483,32 @@ class HuntBalanceSimulationTest {
         System.out.println(sb);
         assertTrue(fails.isEmpty(), String.join("\n", fails));
     }
+
+    /**
+     * Manekin (Balance.DUMMY_TRY_FACTOR, co GameSession.TRAIN_MS) wobec polowania od poziomu 1 (rycerz): czas do
+     * miecza i tarczy, jakie rycerz ma z polowania na poziomie 50 i 100. Manekin ma byc wolniejszy, ale w tym samym
+     * rzedzie wielkosci: do umiejetnosci poziomu 100 polowanie / manekin = ok. 2/3 (0,55-0,8); do poziomu 50 manekin
+     * nie szybszy od polowania (na niskich poziomach polowanie daje mniej prob na minute, zwlaszcza tarczy).
+     */
+    @Test
+    void dummyTrainsAboutTwoThirdsAsFastAsHunting() {
+        Map<Integer, Progress> g = grow(Vocation.KNIGHT, 100);
+        StringBuilder sb = new StringBuilder("\nManekin vs polowanie (rycerz, od poziomu 1):\n");
+        List<String> fails = new ArrayList<>();
+        for (int level : new int[] {50, 100}) {
+            Progress p = g.get(level);
+            for (Skill s : new Skill[] {Skill.SWORD, Skill.SHIELDING}) {
+                int target = p.skills().get(s);
+                int tries = s == Skill.SHIELDING ? Balance.DUMMY_BLOCK_TRY_FACTOR : Balance.DUMMY_TRY_FACTOR;
+                double dummy = pl.fawizja.pixel.training.TrainingDummiesTest.hoursAtDummy(Vocation.KNIGHT, s, 10, target,
+                        tries, pl.fawizja.pixel.game.GameSession.TRAIN_MS);
+                double ratio = p.hours() / dummy;
+                sb.append(String.format("  %s 10->%d: polowanie %.2f h, manekin %.2f h (tempo manekina %.0f%%)%n",
+                        s.label(), target, p.hours(), dummy, ratio * 100));
+                if (ratio < 0.55 || ratio > (level == 100 ? 0.8 : 1.0)) fails.add(s + " " + target + " ratio " + ratio);
+            }
+        }
+        System.out.println(sb);
+        assertTrue(fails.isEmpty(), String.join("\n", fails));
+    }
 }
