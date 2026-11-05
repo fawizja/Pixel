@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.230.0] - 2026-11-05
+
+### Dodano
+- Harmonia mnicha jak w Tibii (liczby z serwera Canary): 0–5 punktów harmonii widocznych w HUD jako kule.
+  Czary budujące dają +1 punkt, czary kończące zużywają wszystkie i biją mocniej (do x2,28 przy 5 punktach,
+  x3,56 z Cnotą Harmonii w stanie Serene). Każde zbudowanie albo zużycie leczy mnicha lub najbardziej rannego
+  członka drużyny.
+- Stan Serene (niebieska poświata): mnich traci go tylko w drużynie, gdy otacza go 6 lub więcej potworów.
+- Trzy Cnoty od poziomu 20 (jedna naraz): Harmonii (silniejsze czary kończące i zwrot punktu), Sprawiedliwości
+  (pięść +15%, +30% w Serene) i Wytrwałości (leczenie x1,35, x1,70 w Serene). Wybór dotknięciem kul harmonii.
+- Czary Focus Serenity (utamo tio, poz. 150) i Focus Harmony (utevo nia, poz. 275): pełna harmonia.
+
+### Zmieniono
+- Czary mnicha przebudowane na role z Tibii (budujące, kończące, leczenie) z poziomami, maną i czasem odnowienia
+  z Tibii. Stare czary mnicha zastąpione odpowiednikami z Tibii. Na niskich poziomach mnich ma dodatkową premię
+  do obrażeń (zanika do poziomu 40), żeby polował tak szybko jak rycerz.
+- Harmonia i Cnota zapisują się z postacią; śmierć zeruje harmonię.
+
 ## [0.229.0] - 2026-11-05
 
 ### Usunięto
