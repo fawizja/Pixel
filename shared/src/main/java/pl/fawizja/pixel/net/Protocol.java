@@ -10,7 +10,8 @@ import java.util.List;
  *
  * <pre>
  * klient -> serwer                      serwer -> klient
- * HELLO  wersja imie PROFESJA           WELCOME idGracza tickMs
+ * HELLO  wersja imie PROFESJA haslo [miasto]  WELCOME idGracza tickMs
+ *        (miasto startowe nowego konta, opcjonalne: brak/- = start.town; starsi klienci go nie wysylaja)
  * MOVE   KIERUNEK | -                   ERR     komunikat
  * ACT    akcja (jak w HUD, np. cast:x)  SELF    zapis postaci (CharacterCodec)
  * TARGET idPotwora                      FRAME   czasSerwera            (poczatek klatki stanu)

@@ -226,6 +226,12 @@ public final class NetClient implements AutoCloseable {
         send("HELLO", String.valueOf(Protocol.VERSION), name, vocation, password);
     }
 
+    /** Logowanie z miastem startowym (uzywanym tylko przy zakladaniu konta; null = miasto domyslne serwera). */
+    public void hello(String name, String vocation, String password, String town) {
+        if (town == null || town.isBlank()) hello(name, vocation, password);
+        else send("HELLO", String.valueOf(Protocol.VERSION), name, vocation, password, town);
+    }
+
     public int playerId() { return playerId; }
     public String error() { return error; }
     public String selfSave() { return selfSave; }

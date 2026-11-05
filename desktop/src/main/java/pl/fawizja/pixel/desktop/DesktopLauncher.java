@@ -16,6 +16,9 @@ import pl.fawizja.pixel.world.Position;
  * Opcje deweloperskie (wlasciwosci systemowe, przydatne w CI i do zrzutow ekranu):
  *   -Dpixel.uiScale=2                 uklad HUD jak na telefonie (skala interfejsu)
  *   -Dpixel.autostart=Imie:PALADIN    pomija menu: gra lokalna (tworzy postac, jesli nie ma zapisu)
+ *   -Dpixel.autostart=Imie:PALADIN:frostholm  jak wyzej, nowa postac w tym miescie startowym (online: nowe konto)
+ *   -Dpixel.open=create               bez autostart: ekran tworzenia postaci (profesja + miasto startowe);
+ *                                     -Dpixel.createTown=nerys -Dpixel.createVocation=DRUID zaznaczaja wybor
  *   -Dpixel.server=host:port          z autostart: logowanie na serwer (haslo -Dpixel.password, domyslnie haslo-dev)
  *                                     bez autostart: domyslny adres w ekranie logowania
  *   -Dpixel.teleport=x,y,z            ustawia postac na pozycji (np. 8,23,-1)
@@ -82,13 +85,17 @@ public final class DesktopLauncher {
                 if ("login".equals(System.getProperty("pixel.open"))) {
                     setScreen(new pl.fawizja.pixel.client.screen.LoginScreen(this));
                 }
+                if ("create".equals(System.getProperty("pixel.open"))) {
+                    setScreen(new pl.fawizja.pixel.client.screen.VocationSelectScreen(this));
+                }
                 return;
             }
             String[] p = autostart.split(":");
             Vocation v = Vocation.valueOf(p.length > 1 ? p[1] : "PALADIN");
+            String town = p.length > 2 ? p[2] : null;
             String server = platform().serverAddress();
             if (server != null) {
-                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", "hasło-dev"));
+                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", "hasło-dev"), null, town);
                 if (login.problem() == null) {
                     startOnline(login);
                     return;
@@ -96,7 +103,7 @@ public final class DesktopLauncher {
                 Gdx.app.error("Pixel", "Online niedostępne: " + login.problem());
             }
             if (localSaveSummary() != null) playLocal();
-            else createCharacter(p[0], v);
+            else createCharacter(p[0], v, town);
         }
 
         @Override

@@ -119,6 +119,13 @@ jako `serverTimeMs`.
 ## Postac (Z)
 
 - Tworzenie: poziom 8, 10 000 gp w plecaku, 0 gp w banku, zestaw startowy profesji, start w swiatyni Varden.
+- Miasto startowe (jak w Tibii, 2026-11-05): ekran tworzenia postaci (`VocationSelectScreen`, karta z wycinkiem
+  minimapy, klimatem i opisem kazdego miasta - `StartingTowns`) i logowanie online (nowe konto) pozwalaja wybrac
+  dowolne miasto swiata (`world.towns()`: Varden, Frostholm, Selvaran, Qasirah, Valmir, Nerys; zadne nie wymaga
+  premium - na wyspy Nerys plywa prom woznicy). Postac tam mieszka (`homeTown`) i zaczyna w swiatyni. Domyslnie
+  `start.town` (Varden). Online: szoste, opcjonalne pole `HELLO` (brak/`-` = domyslne, nieznane miasto = odmowa
+  bez zakladania konta; dla istniejacej postaci pomijane). Offline nieznane miasto = domyslne. Zmiana miasta
+  pozniej: kaplan w swiatyni, wiersz "Zamieszkaj w ..." (`GameSession.settleHere`, darmowe). Sceny GUI: `create_town_mobile`, `create_town_desktop`, `start_frostholm`.
 - Poziomy 1..1000, doswiadczenie w `long` z nasyceniem; HP i mana rosna przy awansie.
 - Obrazenia, leczenie, mana, regeneracja co 6 s czasu gry.
 - Umiejetnosci (`Skills`): piesci, bron, dystans, tarcza, magia, wedkarstwo; rosna z uzyciem wg krzywych Tibii dla profesji (sekcja umiejetnosci nizej).

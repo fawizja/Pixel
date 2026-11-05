@@ -150,3 +150,7 @@ route_mid_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=40
 dummy_varden_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=499,504,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 dummy_training_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=499,504,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.buttons=use@15 -Dpixel.open=mobile_chat -Dpixel.conTab=1
 dummy_training_sorcerer|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=745,205,0 -Dpixel.buttons=use@15
+# 2026-11-05: wybor miasta startowego przy tworzeniu postaci (jak w Tibii): telefon i komputer, start we Frostholm
+create_town_mobile|-Dpixel.open=create -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+create_town_desktop|-Dpixel.open=create -Dpixel.createTown=frostholm -Dpixel.createVocation=DRUID
+start_frostholm|-Dpixel.autostart=Test:KNIGHT:frostholm -Dpixel.hour=12

@@ -150,9 +150,20 @@ public class PixelGame extends Game {
     public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
 
     public void createCharacter(String name, Vocation vocation) {
+        createCharacter(name, vocation, null);
+    }
+
+    /** Miasto startowe nowej postaci, gdy gracz nie wybral (start.town z starting.properties). */
+    public String defaultStartTown() { return startingConfig.startTown(); }
+
+    /**
+     * Nowa postac lokalna w wybranym miescie startowym (klucz albo nazwa z {@link pl.fawizja.pixel.character.StartingTowns};
+     * null lub nieznane = miasto domyslne): mieszka tam i zaczyna w jego swiatyni.
+     */
+    public void createCharacter(String name, Vocation vocation, String town) {
         // gra offline: postac od razu na poziomie start.level.offline (-Dpixel.startLevel nadpisuje, np. regresja GUI)
         int level = Integer.getInteger("pixel.startLevel", startingConfig.offlineStartLevel());
-        PlayerCharacter pc = new CharacterFactory(startingConfig, items).create(name, vocation, world.templeOf(startingConfig.startTown()), level);
+        PlayerCharacter pc = new CharacterFactory(startingConfig, items).createIn(world, name, vocation, town, level);
         // podglad staminy (regresja GUI): -Dpixel.stamina=minuty, -Dpixel.premium=1
         Integer stamina = Integer.getInteger("pixel.stamina");
         if (stamina != null) pc.stamina().setMinutes(stamina);
@@ -207,6 +218,11 @@ public class PixelGame extends Game {
      * odcisk zostanie przyjety i zwrocony do zapamietania). Inny odcisk niz przypiety = odmowa.
      */
     public OnlineLogin connectOnline(String address, String name, String vocation, String password, String pinned) {
+        return connectOnline(address, name, vocation, password, pinned, null);
+    }
+
+    /** Jak wyzej, z miastem startowym nowego konta (null = domyslne serwera; istniejaca postac je pomija). */
+    public OnlineLogin connectOnline(String address, String name, String vocation, String password, String pinned, String town) {
         int colon = address.lastIndexOf(':');
         String host = (colon > 0 ? address.substring(0, colon) : address).trim();
         int port = pl.fawizja.pixel.net.Protocol.DEFAULT_PORT;
@@ -230,7 +246,7 @@ public class PixelGame extends Game {
             }
             return OnlineLogin.failed("Brak połączenia z " + host + ":" + port + " (szyfrowane TLS).");
         }
-        net.hello(name.trim(), vocation, password);
+        net.hello(name.trim(), vocation, password, town);
         long deadline = System.currentTimeMillis() + 6000;
         while (net.selfSave() == null && net.error() == null && !net.isClosed() && System.currentTimeMillis() < deadline) {
             try {
