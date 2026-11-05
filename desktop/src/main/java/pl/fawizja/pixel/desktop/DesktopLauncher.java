@@ -48,10 +48,11 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
  *   -Dpixel.stamina=M    nowa postac z M minutami staminy (np. 750 = 12:30, pomaranczowa); -Dpixel.premium=1 konto premium
+ *   -Dpixel.fightMode=OFFENSIVE|BALANCED|DEFENSIVE  tryb walki nowej postaci (przycisk miecz / miecz z tarcza / tarcza)
  *   -Dpixel.mobileHud=1  uklad HUD-u na telefon (wariant B: widok gry na calym ekranie, luk czarow); na Androidzie zawsze
  *   -Dpixel.open=coins|torchsel|torchlit  monety w plecaku, zaznaczona pochodnia, zapalona pochodnia w polu obok butow (z mobile_* po przecinku)
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
- *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..6) przy mobile_picker
+ *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..8; 5-7 wewnetrzny luk, 8 rog) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala

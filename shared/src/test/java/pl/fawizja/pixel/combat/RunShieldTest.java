@@ -15,13 +15,13 @@ import pl.fawizja.pixel.movement.ChaseMode;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
 
-/** Przyciski Bieg (pogon za celem) i Tarcza (wiecej obrony z tarcza). */
+/** Przyciski Bieg (pogon za celem) i tryb walki defensywny (wiecej obrony z tarcza). */
 class RunShieldTest {
 
-    private static int taken(PlayerCharacter pc, boolean defensive) {
+    private static int taken(PlayerCharacter pc, FightMode mode) {
         Random rng = new Random(11);
         int sum = 0;
-        for (int i = 0; i < 2000; i++) sum += CombatFormulas.mitigateOnPlayer(pc, 120, DamageType.PHYSICAL, defensive, rng);
+        for (int i = 0; i < 2000; i++) sum += CombatFormulas.mitigateOnPlayer(pc, 120, DamageType.PHYSICAL, mode, true, rng);
         return sum;
     }
 
@@ -35,14 +35,16 @@ class RunShieldTest {
         assertTrue(shielded.equipment().shieldDefense() > 0);
         assertEquals(0, bare.equipment().shieldDefense());
 
-        double gainBare = 1 - taken(bare, true) / (double) taken(bare, false);
-        double gainShield = 1 - taken(shielded, true) / (double) taken(shielded, false);
-        assertTrue(gainBare > 0.2, "stance alone still helps: " + gainBare);
-        assertTrue(gainShield > gainBare + 0.1, "shield stance blocks more: " + gainShield + " vs " + gainBare);
-        // zywioly: tarcza nie blokuje, ale postawa z tarcza mocniej zmniejsza obrazenia
+        double gainBare = 1 - taken(bare, FightMode.DEFENSIVE) / (double) taken(bare, FightMode.BALANCED);
+        double gainShield = 1 - taken(shielded, FightMode.DEFENSIVE) / (double) taken(shielded, FightMode.BALANCED);
+        assertTrue(gainBare >= 0, "defensive never hurts: " + gainBare);
+        assertTrue(gainShield > gainBare + 0.1, "defensive with a shield blocks more: " + gainShield + " vs " + gainBare);
+        // zywioly: jak w TFS tryb walki ich nie zmienia (tarcza blokuje tylko fizyczne)
         Random rng = new Random(3);
-        assertEquals(60, CombatFormulas.mitigateOnPlayer(shielded, 100, DamageType.FIRE, true, rng));
-        assertEquals(75, CombatFormulas.mitigateOnPlayer(bare, 100, DamageType.FIRE, true, rng));
+        for (FightMode m : FightMode.values()) {
+            assertEquals(100, CombatFormulas.mitigateOnPlayer(shielded, 100, DamageType.FIRE, m, true, rng));
+            assertEquals(100, CombatFormulas.mitigateOnPlayer(bare, 100, DamageType.FIRE, m, true, rng));
+        }
     }
 
     @Test

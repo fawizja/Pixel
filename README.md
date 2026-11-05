@@ -61,7 +61,7 @@ uruchamia APK na emulatorze i zapisuje zrzut ekranu, logcat i pomiar klatek (art
 | Podnies przedmiot spod nog | PODNIES | G |
 | Diagnostyka i ustawienia | `i` w prawym gornym rogu, wiersze ustawien pod panelem | F3, klikniecie wiersza |
 | Nastepny cel (atak automatyczny) | ATAK w pasku akcji (prawy dolny rog) albo dotkniecie potwora | Spacja / C |
-| Postawa obronna (zielony = wlaczona) | TARCZA | V |
+| Tryb walki: ofensywny (miecz) -> zbalansowany (miecz i tarcza) -> defensywny (tarcza) | Ofensywa / Balans / Obrona | V |
 | Pasek akcji 5x2: czary, mikstury, runy | dotknij pola; przytrzymaj, aby wybrac czar leczacy, atakujacy, miksture albo rune | 1-9, 0 |
 | Mikstura zdrowia / many | pola 5 i 6 paska (automat) | Q / F |
 | Ksiega czarow i rzemiosla | KSIEGA | K |

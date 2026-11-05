@@ -50,7 +50,7 @@ class CombatSimulationTest {
                 } else {
                     now = tMonster;
                     int raw = CombatFormulas.rollBetween(m.attackMin(), m.attackMax(), rng);
-                    php -= CombatFormulas.mitigateOnPlayer(template, raw, m.damageType(), false, rng);
+                    php -= CombatFormulas.mitigateOnPlayer(template, raw, m.damageType(), true, rng);
                     tMonster += m.attackIntervalMs();
                 }
             }

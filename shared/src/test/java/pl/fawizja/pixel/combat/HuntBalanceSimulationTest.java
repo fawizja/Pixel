@@ -187,6 +187,9 @@ class HuntBalanceSimulationTest {
      */
     static Fight fight(PlayerCharacter pc, MonsterType m, long seed, int fights, long[] training) {
         Random rng = new Random(seed);
+        // gracz poluje w domyslnym trybie walki (zbalansowany = punkt odniesienia formul, FightModeTest) i atakuje bez
+        // przerwy, wiec obrona liczy sie z mnoznikiem "w walce" (mitigateOnPlayer(..., true, ...))
+        pc.setFightMode(FightMode.BALANCED);
         AttackProfile ap = CombatFormulas.attackProfile(pc, TestData.ITEMS);
         List<SpellType> spells = attackSpells(pc);
         SpellType heal = bestHeal(pc);
@@ -244,7 +247,7 @@ class HuntBalanceSimulationTest {
                     tHit += ap.intervalMs();
                 } else {
                     int raw = CombatFormulas.rollBetween(m.attackMin(), m.attackMax(), rng);
-                    int d = CombatFormulas.mitigateOnPlayer(pc, raw, m.damageType(), false, rng);
+                    int d = CombatFormulas.mitigateOnPlayer(pc, raw, m.damageType(), true, rng);
                     if (kites && rng.nextDouble() >= KITE_SHARE) d = 0;
                     hp -= d;
                     taken += d;

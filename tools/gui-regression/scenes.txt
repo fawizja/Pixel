@@ -162,3 +162,7 @@ tap_marker_blocked|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.telepor
 controls_dpad|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.controls=dpad -Dpixel.dpad=NE
 controls_float4|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.controls=float4 -Dpixel.joy=0.25,0.4 -Dpixel.joyDrag=80,-30
 controls_settings|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_settings -Dpixel.sens=4
+# 0.227: tryby walki jak w Tibii (miecz / miecz z tarcza / tarcza) i dwa nowe pola luku na telefonie (srodek wewnetrznego luku, rog)
+fightmode_offensive_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.fightMode=OFFENSIVE
+fightmode_defensive_desktop|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.fightMode=DEFENSIVE
+mobile_picker_corner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1560 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.level=42 -Dpixel.open=mobile_picker -Dpixel.pickerButton=8

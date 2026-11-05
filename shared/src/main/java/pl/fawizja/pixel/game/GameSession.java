@@ -2191,9 +2191,16 @@ public final class GameSession {
         checkRegion(nowMs);
     }
 
-    public void toggleDefensive(long nowMs) {
-        pc.setDefensive(!pc.isDefensive());
-        log.add(nowMs, EventLog.Kind.INFO, pc.isDefensive() ? "Postawa obronna." : "Postawa ofensywna.");
+    /** Przycisk trybu walki: ofensywny -> zbalansowany -> defensywny -> ofensywny. */
+    public void cycleFightMode(long nowMs) {
+        setFightMode(pc.fightMode().next(), nowMs);
+    }
+
+    /** Tryb walki (akcja "fightmode:NAZWA" od klienta). */
+    public void setFightMode(pl.fawizja.pixel.combat.FightMode m, long nowMs) {
+        if (m == null) return;
+        pc.setFightMode(m);
+        log.add(nowMs, EventLog.Kind.INFO, "Tryb walki: " + m.label().toLowerCase(java.util.Locale.ROOT) + ".");
     }
 
     public void cycleTarget(long nowMs) {

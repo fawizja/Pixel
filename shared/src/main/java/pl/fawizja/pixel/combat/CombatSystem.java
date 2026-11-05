@@ -190,6 +190,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Zapis aktywnosci w druzynie (atak na potwora z innego miejsca niz bron i czar; testy). */
     public void noteMonsterAttack(long now) { lastMonsterAttackMs = now; }
 
+    /** Postac zaatakowala bronia w ostatnim odstepie ataku (TFS: lastAttack) - wtedy tryb walki oslabia obrone. */
+    public boolean attackedRecently(long now) { return now < nextPlayerAttackMs; }
+
     /** Krok walki gracza: atak celu, gdy jest w zasiegu, widoczny i minal odstep ataku. */
     public void update(long now) {
         if (pc.isDead()) return;
@@ -204,7 +207,6 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (!inReach(target, ap.range())) return;
         nextPlayerAttackMs = now + ap.intervalMs();
         int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng));
-        if (pc.isDefensive()) raw = (int) Math.round(raw * CombatFormulas.DEFENSIVE_OUTGOING);
         int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
         if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
         if (ap.range() > 1) useAmmunition(now);
@@ -403,7 +405,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
         MonsterType t = m.type();
         int raw = CombatFormulas.rollBetween(t.attackMin(), t.attackMax(), rng);
-        int dmg = pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), pc.isDefensive(), rng));
+        int dmg = pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, raw, t.damageType(), attackedRecently(now), rng));
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
         recap.record(t.name(), dealt, now);

@@ -93,7 +93,7 @@ class EndgameSimulationTest {
                     tPlayer += ap.intervalMs();
                 } else {
                     int raw = CombatFormulas.rollBetween(m.attackMin(), m.attackMax(), rng);
-                    hp -= CombatFormulas.mitigateOnPlayer(pc, raw, m.damageType(), false, rng);
+                    hp -= CombatFormulas.mitigateOnPlayer(pc, raw, m.damageType(), true, rng);
                     tMonster += m.attackIntervalMs();
                 }
             }

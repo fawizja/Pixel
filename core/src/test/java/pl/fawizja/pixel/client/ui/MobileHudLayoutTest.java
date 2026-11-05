@@ -142,9 +142,22 @@ class MobileHudLayoutTest {
         assertEquals(20, l.spells[0].y, 1e-3);
         assertEquals(w - 20, l.spells[4].x, 1e-3);
         assertEquals(130, l.spells[4].y, 1e-3);
-        for (MobileHudLayout.Circle c : l.potions) {
-            assertEquals(58, Math.hypot(c.x - l.arcX, c.y - l.arcY), 1e-3);
+        // wewnetrzny luk: 3 pola na promieniu 60, czwarte w rogu (srodek obu lukow)
+        assertEquals(4, l.potions.length);
+        for (int i = 0; i < MobileHudLayout.INNER_DEG.length; i++) {
+            MobileHudLayout.Circle c = l.potions[i];
+            assertEquals(60, Math.hypot(c.x - l.arcX, c.y - l.arcY), 1e-3);
         }
+        MobileHudLayout.Circle corner = l.potions[3];
+        assertEquals(w - 24, corner.x, 1e-3);
+        assertEquals(24, corner.y, 1e-3);
+        assertEquals(MobileHudLayout.POTION_SLOTS.length, l.potions.length);
+        // pola luku sa rozne i miesza sie w 10 polach paska
+        java.util.Set<Integer> slots = new java.util.HashSet<>();
+        for (int s : MobileHudLayout.SPELL_SLOTS) slots.add(s);
+        for (int s : MobileHudLayout.POTION_SLOTS) slots.add(s);
+        assertEquals(MobileHudLayout.SPELL_SLOTS.length + MobileHudLayout.POTION_SLOTS.length, slots.size());
+        for (int s : slots) assertTrue(s >= 0 && s < pl.fawizja.pixel.settings.SpellBar.SLOTS);
         // rzad Atak / Podazaj / Tarcza / PvP na y = 22 od dolu (od prawej)
         assertEquals(4, l.row.length);
         for (int i = 0; i < l.row.length; i++) {
