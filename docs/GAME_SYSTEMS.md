@@ -861,7 +861,11 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   w zapisie postaci (bez podbijania wersji CharacterCodec; brak pola = stan poczatkowy). To samo pole idzie
   w komunikacie SELF, wiec klient online widzi harmonie, cnote i spokoj serwera.
 - **Czary mnicha** (role i liczby z Canary; ataki fizyczne, wzor `moc * piesci/100 * atak broni/10 + poziom/5`
-  (`SpellSystem.monkPower`, bez broni atak 7), rozrzut +-10%):
+  (`SpellSystem.monkPower`, bez broni atak 7), rozrzut +-10%). Dodatek Pixela: premia nowicjusza
+  `max(0, 40 - poziom) * 1` (`Harmony.noviceBonus`) - przy piesciach 10 sam wzor Canary daje na 8 poziomie ~4
+  obrazen, a rycerz Pixela ma brutalne uderzenie juz od 8 poziomu; od 40 poziomu premii nie ma.
+  `MonkBalanceSimulationTest` porownuje mnicha z rycerzem na tych samych polowaniach (8, 30, 100, 200;
+  rotacja: buildery, przy 5 punktach spender) i pilnuje, by mnich nie byl wolniejszy niz 1,5 raza:
 
   | Czar (Tibia) | Klucz | Poz. | Mana | Odn. | Moc | Rola |
   |---|---|---|---|---|---|---|

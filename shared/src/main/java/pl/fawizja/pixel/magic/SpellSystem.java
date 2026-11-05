@@ -184,7 +184,8 @@ public final class SpellSystem {
         int attack = pc.equipment().weaponType() != pl.fawizja.pixel.item.WeaponType.NONE
                 ? pc.equipment().weaponAttack() : pl.fawizja.pixel.combat.CombatFormulas.FIST_ATTACK;
         return s.base() * pc.effectiveSkill(Skill.FIST) / 100.0 * attack / 10.0
-                + pl.fawizja.pixel.vocation.Harmony.flatDamageHealing(pc.level());
+                + pl.fawizja.pixel.vocation.Harmony.flatDamageHealing(pc.level())
+                + pl.fawizja.pixel.vocation.Harmony.noviceBonus(pc.level());
     }
 
     /** Srednia wartosc efektu teraz: wartosc bazowa z premia harmonii (spender) i cnota wytrwalosci (leczenie mnicha). */

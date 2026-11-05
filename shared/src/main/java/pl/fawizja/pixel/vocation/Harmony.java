@@ -165,6 +165,20 @@ public final class Harmony {
         return Math.max(25, (int) Math.ceil(flatDamageHealing(level) * 2.3 * (1 + 0.05 * charges)));
     }
 
+    /** Poziom, do ktorego czary ataku mnicha dostaja premie nowicjusza (dodatek Pixela, nie ma go w Canary). */
+    public static final int NOVICE_LEVEL = 40;
+    /** Premia nowicjusza: tyle obrazen za kazdy poziom ponizej {@link #NOVICE_LEVEL}. */
+    public static final double NOVICE_PER_LEVEL = 1.0;
+
+    /**
+     * Premia nowicjusza do czarow ataku mnicha: (40 - poziom) x 1, od poziomu 40 zero. Wzor Canary
+     * (moc x piesci x atak) przy piesciach 10 daje na 8 poziomie kilka punktow, a rycerz Pixela ma juz od 8 poziomu
+     * brutalne uderzenie (w Tibii dopiero od 16) - bez premii mnich polowal na pierwszych potworach kilka razy wolniej.
+     */
+    public static double noviceBonus(int level) {
+        return Math.max(0, NOVICE_LEVEL - level) * NOVICE_PER_LEVEL;
+    }
+
     /**
      * Plaska premia obrazen i leczenia za poziom (Canary Player::calculateFlatDamageHealing): poziom / 5 do 500,
      * dalej coraz wolniej (progi 500, 1100, 1800, ... z dzielnikiem 6, 7, ...).
