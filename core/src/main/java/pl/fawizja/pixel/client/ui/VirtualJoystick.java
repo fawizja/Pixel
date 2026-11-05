@@ -70,6 +70,11 @@ public final class VirtualJoystick {
         return true;
     }
 
+    /** Puszczenie galki bez wzgledu na palec (zmiana wariantu sterowania). */
+    public void release() {
+        if (pointer >= 0) touchUp(pointer);
+    }
+
     public boolean active() { return pointer >= 0; }
     public Vector2 value() { return value; }
     public float baseX() { return baseX; }

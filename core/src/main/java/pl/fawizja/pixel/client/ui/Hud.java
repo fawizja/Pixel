@@ -44,6 +44,12 @@ public final class Hud {
     private final BitmapFont font;
     private final GlyphLayout layout = new GlyphLayout();
     private final VirtualJoystick joystick = new VirtualJoystick();
+    /** Krzyzyk (wariant sterowania domyslny od 2026-11-05) w miejscu joysticka. */
+    private final DpadControl dpad = new DpadControl();
+    /** Wariant "Przytrzymanie na mapie": pierscien pod palcem (ui), postep progu i kierunek marszu. */
+    private boolean holdShow;
+    private float holdX, holdY, holdProgress;
+    private pl.fawizja.pixel.world.Direction holdDir;
     private final List<HudButton> buttons = new ArrayList<>();
     private final HudButton use = new HudButton("use", "Użyj");
     private final HudButton run = new HudButton("run", "");
@@ -919,6 +925,7 @@ public final class Hud {
         // joystick: maly i prawie przezroczysty w lewym dolnym rogu widoku gry (na telefonie zwykle pod kciukiem)
         float jr = Math.min(34, Math.min(gw, gh) * 0.09f) * (settings != null ? settings.joystickScale() : 1f);
         joystick.layout(gx + jr * 1.5f, gy + jr * 1.5f, jr);
+        dpad.layout(gx + jr * 1.5f, gy + jr * 1.5f, jr);
     }
 
     /** Pole przycisku panelu: kwadrat o boku s ze srodkiem w (cx, cy). */
@@ -1190,13 +1197,52 @@ public final class Hud {
     }
 
     public VirtualJoystick joystick() { return joystick; }
+    public DpadControl dpad() { return dpad; }
+
+    /** Kierunek, ktory wybral filtr joysticka (podswietlenie strzalki plywajacego joysticka). */
+    private pl.fawizja.pixel.world.Direction lastStickDir;
+    public void setStickDirection(pl.fawizja.pixel.world.Direction d) { lastStickDir = d; }
+
+    /** Wariant sterowania z ustawien (bez ustawien: krzyzyk). */
+    public pl.fawizja.pixel.movement.ControlScheme controlScheme() {
+        return settings != null ? settings.controlScheme() : pl.fawizja.pixel.movement.ControlScheme.DEFAULT;
+    }
+
+    /** Zmiana wariantu sterowania: puszczenie krzyzyka i galki (stary palec nie prowadzi juz postaci). */
+    public void resetMoveControls() {
+        dpad.release();
+        joystick.release();
+        holdShow = false;
+    }
+
+    /** Pierscien pod palcem w wariancie "Przytrzymanie na mapie" (sx, sy: ekran; dir: kierunek marszu albo null). */
+    public void holdIndicator(boolean show, int sx, int sy, float progress, pl.fawizja.pixel.world.Direction dir) {
+        holdShow = show;
+        if (!show) return;
+        Vector2 p = toUi(sx, sy);
+        holdX = p.x;
+        holdY = p.y;
+        holdProgress = progress;
+        holdDir = dir;
+    }
+
+    /** Dotkniecie strefy sterowania w rogu: krzyzyk albo galka (zalezy od wariantu). */
+    private boolean moveControlDown(float x, float y, int pointer) {
+        switch (controlScheme()) {
+            case DPAD: return dpad.touchDown(x, y, pointer);
+            case HOLD: return false;
+            default: return joystick.touchDown(x, y, pointer);
+        }
+    }
 
     /**
      * Joystick pod kciukiem (etap 17): przeciagniecie zaczete na lewej czesci widoku gry tworzy joystick w miejscu
      * dotkniecia. Prawa czesc zostaje dla dotkniec pol (cel, marsz, rozmowa).
      */
     public boolean floatJoystick(int sx, int sy, int pointer) {
-        if (settings != null && !settings.floatingJoystick()) return false;
+        pl.fawizja.pixel.movement.ControlScheme c = controlScheme();
+        if (c != pl.fawizja.pixel.movement.ControlScheme.FLOAT4
+                && (c != pl.fawizja.pixel.movement.ControlScheme.CLASSIC || settings != null && !settings.floatingJoystick())) return false;
         Vector2 p = toUi(sx, sy);
         if (!inGameView(p.x, p.y) || p.x > gx + gw * 0.55f) return false;
         return joystick.floatAt(p.x, p.y, pointer);
@@ -2693,7 +2739,7 @@ public final class Hud {
         if (bagOpen && p.x >= bagX - 8 && p.x <= bagX + slotSize * 5 + (bagPages > 1 ? 44 : 8) && p.y >= bagY - 50 && p.y <= bagY + slotSize * 4 + 30) {
             return true;
         }
-        if (joystick.touchDown(p.x, p.y, pointer)) return true; // pad w rogu ekranu, takze nad dolnym paskiem
+        if (moveControlDown(p.x, p.y, pointer)) return true; // pad w rogu ekranu, takze nad dolnym paskiem
         return !inGameView(p.x, p.y); // panele interfejsu nie przepuszczaja dotyku na mape
     }
 
@@ -2779,6 +2825,7 @@ public final class Hud {
             if (!dragging && Math.abs(p.x - dragStartX) + Math.abs(p.y - dragStartY) > slotSize * 0.3f) dragging = true;
             return true;
         }
+        if (dpad.drag(p.x, p.y, pointer)) return true;
         return joystick.drag(p.x, p.y, pointer);
     }
 
@@ -2826,6 +2873,7 @@ public final class Hud {
             pressSlot = -1;
             return true;
         }
+        if (dpad.touchUp(pointer)) return true;
         return joystick.touchUp(pointer);
     }
 
@@ -2974,14 +3022,21 @@ public final class Hud {
         drawPanelSkillBars(shapes, pc);
         frame(shapes, lay.hotbar.x - 4, HudLayout.PAD, lay.hotbar.w + 8, lay.hotbar.h + 8);
 
-        // joystick: sama kulka, prawie przezroczysta (wyrazniejsza w trakcie ruchu); na telefonie zwykle pod kciukiem
-        float jrad = joystick.radius();
-        if (joystick.floating()) {
-            shapes.setColor(1, 1, 1, 0.08f); // podstawa joysticka pod kciukiem
-            shapes.circle(joystick.baseX(), joystick.baseY(), jrad, 36);
+        // sterowanie: krzyzyk albo joystick (sama kulka, prawie przezroczysta, wyrazniejsza w trakcie ruchu)
+        pl.fawizja.pixel.movement.ControlScheme scheme = controlScheme();
+        if (scheme == pl.fawizja.pixel.movement.ControlScheme.DPAD) {
+            drawDpad(shapes);
+        } else if (scheme.stick()) {
+            float jrad = joystick.radius();
+            if (joystick.floating()) {
+                shapes.setColor(1, 1, 1, 0.08f); // podstawa joysticka pod kciukiem
+                shapes.circle(joystick.baseX(), joystick.baseY(), jrad, 36);
+                if (scheme == pl.fawizja.pixel.movement.ControlScheme.FLOAT4) drawStickTicks(shapes, jrad);
+            }
+            shapes.setColor(1, 1, 1, joystick.active() ? 0.16f : 0.05f);
+            shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
         }
-        shapes.setColor(1, 1, 1, joystick.active() ? 0.16f : 0.05f);
-        shapes.circle(joystick.knob().x, joystick.knob().y, jrad * 0.45f, 30);
+        drawHoldIndicator(shapes);
 
 
         for (HudButton b : buttons) {
@@ -4717,6 +4772,7 @@ public final class Hud {
         conH = MobileHudLayout.CHAT_H - 26;
         float jr = MobileHudLayout.JOY_R * (settings != null ? settings.joystickScale() : 1f);
         joystick.layout(MobileHudLayout.JOY_X, MobileHudLayout.JOY_X, jr);
+        dpad.layout(MobileHudLayout.JOY_X, MobileHudLayout.JOY_X, jr);
     }
 
     /** Polozenie okien na telefonie: okna kategorii pod ramka (336 dp), duze okna (NPC, ksiega) nad cala szerokoscia. */
@@ -4992,7 +5048,7 @@ public final class Hud {
             mChat = true;
             return true;
         }
-        if (joystick.touchDown(px, py, pointer)) return true;
+        if (moveControlDown(px, py, pointer)) return true;
         return false; // reszta ekranu to widok gry
     }
 
@@ -5102,12 +5158,42 @@ public final class Hud {
         out.add(new String[] {"book", "Księga czarów", "czary i rzemiosło (K)"});
         out.add(new String[] {"diag", "Diagnostyka", diagnosticsOpen ? "pokazana" : "ukryta"});
         if (settings != null) {
+            // sterowanie na pierwszej stronie, zaraz po przyciskach postaci (wariant i suwak czulosci)
+            pl.fawizja.pixel.movement.ControlScheme cs = settings.controlScheme();
+            out.add(new String[] {"settings:controls", "Sterowanie", cs.shortLabel + " (" + (cs.ordinal() + 1) + " z "
+                    + pl.fawizja.pixel.movement.ControlScheme.values().length + ")"});
+            out.add(new String[] {"settings:sens", "Czułość", settings.sensitivity() + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
             for (String[] r : settings.allRows()) {
+                if (r[0].equals("settings:controls") || r[0].equals("settings:sens")) continue;
                 int c = r[1].indexOf(": ");
                 out.add(c > 0 ? new String[] {r[0], r[1].substring(0, c), r[1].substring(c + 2)} : new String[] {r[0], r[1], ""});
             }
         }
         return out;
+    }
+
+    /** Suwak czulosci w przycisku ustawien: 5 pol w dolnej czesci przycisku (x: lewa krawedz pola i, szerokosc pola). */
+    private static float sliderX(MBtn b, int i) { return b.x() + 6 + i * ((b.w() - 12) / 5f); }
+
+    /** Wartosc suwaka 1..5 pod palcem w przycisku czulosci. */
+    private static int sliderValue(MBtn b, float px) {
+        int v = 1 + (int) ((px - b.x() - 6) / ((b.w() - 12) / 5f));
+        return pl.fawizja.pixel.movement.ControlTuning.clamp(v);
+    }
+
+    /** Suwak czulosci: tor z 5 polami, wypelnione do wartosci, uchwyt na biezacej wartosci. */
+    private void sliderShapes(ShapeRenderer s, MBtn b, int value) {
+        float cw = (b.w() - 12) / 5f, y = b.y() + 6, h = 8;
+        for (int i = 0; i < 5; i++) {
+            float x = sliderX(b, i);
+            s.setColor(i < value ? M_GOOD : M_CELL_LINE);
+            s.rect(x + 1, y, cw - 2, h);
+        }
+        float kx = sliderX(b, value - 1) + cw / 2f;
+        s.setColor(M_TEXT);
+        s.circle(kx, y + h / 2f, 6.5f, 16);
+        s.setColor(M_CELL_LINE);
+        s.circle(kx, y + h / 2f, 3f, 12);
     }
 
     /** Wiersze okna ustawien na biezacej stronie (2 kolumny po 36 dp, ostatni wiersz "Dalej", gdy stron jest wiecej). */
@@ -5211,6 +5297,7 @@ public final class Hud {
                         mSettingsPage++;
                     } else {
                         String action = entries.get(Integer.parseInt(b.id().substring(4)))[0];
+                        if (action.equals("settings:sens")) action = "settings:sens:" + sliderValue(b, px);
                         actions.onButton(action);
                     }
                     return;
@@ -5304,6 +5391,84 @@ public final class Hud {
         s.rect(x, y + h - t, w, t);
         s.rect(x, y, t, h);
         s.rect(x + w - t, y, t, h);
+    }
+
+    private static final Color CTRL_FAINT = new Color(1, 1, 1, 0.16f);
+    private static final Color CTRL_LINE = new Color(1, 1, 1, 0.3f);
+    private static final Color CTRL_KNOB = new Color(1, 1, 1, 0.45f);
+    private static final Color CTRL_ON = new Color(1, 1, 1, 0.7f);
+
+    /**
+     * Krzyzyk: polprzezroczyste kolo jak podstawa joysticka, ramiona krzyza, 4 strzalki i male strzalki skosow w rogach;
+     * wcisniety kierunek podswietlony.
+     */
+    private void drawDpad(ShapeRenderer s) {
+        float cx = dpad.x(), cy = dpad.y(), r = dpad.radius(), a = r * pl.fawizja.pixel.movement.DpadInput.ARM;
+        pl.fawizja.pixel.world.Direction on = dpad.direction();
+        // ciemna, polprzezroczysta podstawa - czytelna i na jasnym bruku, i na trawie
+        s.setColor(0, 0, 0, 0.22f);
+        s.circle(cx, cy, r, 48);
+        ring(s, cx, cy, r, 1.5f, 0, 360, dpad.active() ? CTRL_KNOB : CTRL_LINE);
+        s.setColor(0, 0, 0, 0.2f);
+        s.rect(cx - a, cy - r * 0.9f, 2 * a, r * 1.8f);
+        s.rect(cx - r * 0.9f, cy - a, r * 0.9f - a, 2 * a);
+        s.rect(cx + a, cy - a, r * 0.9f - a, 2 * a);
+        if (on != null) {
+            float ux = on.dx, uy = -on.dy;
+            s.setColor(1, 1, 1, 0.36f);
+            if (on.diagonal()) {
+                float x0 = cx + ux * a, y0 = cy + uy * a, x1 = cx + ux * r * 0.68f, y1 = cy + uy * r * 0.68f;
+                s.rect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0));
+            } else if (ux != 0) {
+                float x0 = cx + ux * a, x1 = cx + ux * r * 0.9f;
+                s.rect(Math.min(x0, x1), cy - a, Math.abs(x1 - x0), 2 * a);
+            } else {
+                float y0 = cy + uy * a, y1 = cy + uy * r * 0.9f;
+                s.rect(cx - a, Math.min(y0, y1), 2 * a, Math.abs(y1 - y0));
+            }
+        }
+        // strzalki: proste wieksze, skosy mniejsze i bledsze
+        for (pl.fawizja.pixel.world.Direction d : DIRECTIONS) {
+            boolean diag = d.diagonal();
+            s.setColor(1, 1, 1, d == on ? 0.9f : diag ? 0.3f : 0.55f);
+            if (diag) arrow(s, cx, cy, d.dx * 0.7071f, -d.dy * 0.7071f, r * 0.5f, r * 0.68f, r * 0.11f);
+            else arrow(s, cx, cy, d.dx, -d.dy, r * 0.5f, r * 0.8f, r * 0.19f);
+        }
+        s.setColor(1, 1, 1, dpad.active() ? 0.22f : 0.14f);
+        s.circle(cx, cy, r * pl.fawizja.pixel.movement.DpadInput.CENTER, 16);
+    }
+
+    private static final pl.fawizja.pixel.world.Direction[] DIRECTIONS = pl.fawizja.pixel.world.Direction.values();
+
+    /** Trojkat strzalki w kierunku (ux, uy) od srodka: podstawa w odleglosci base, czubek w tip, polowa szerokosci hw. */
+    private static void arrow(ShapeRenderer s, float cx, float cy, float ux, float uy, float base, float tip, float hw) {
+        float bx = cx + ux * base, by = cy + uy * base;
+        s.triangle(cx + ux * tip, cy + uy * tip, bx - uy * hw, by + ux * hw, bx + uy * hw, by - ux * hw);
+    }
+
+    /** Plywajacy joystick (4 kierunki): strzalki 4 kierunkow prostych na obwodzie podstawy. */
+    private void drawStickTicks(ShapeRenderer s, float jr) {
+        float cx = joystick.baseX(), cy = joystick.baseY();
+        pl.fawizja.pixel.world.Direction on = joystick.active() ? lastStickDir : null;
+        for (pl.fawizja.pixel.world.Direction d : DIRECTIONS) {
+            if (d.diagonal()) continue;
+            s.setColor(1, 1, 1, d == on ? 0.9f : joystick.active() ? 0.45f : 0.18f);
+            arrow(s, cx, cy, d.dx, -d.dy, jr * 0.72f, jr * 0.94f, jr * 0.13f);
+        }
+    }
+
+    /** Wariant "Przytrzymanie na mapie": pierscien pod palcem rosnie do progu, potem strzalka kierunku marszu. */
+    private void drawHoldIndicator(ShapeRenderer s) {
+        if (!holdShow) return;
+        float hr = 20f;
+        s.setColor(0, 0, 0, holdProgress >= 1f ? 0.24f : 0.14f);
+        s.circle(holdX, holdY, hr, 30);
+        ring(s, holdX, holdY, hr, 2f, 90, -360 * holdProgress, holdProgress >= 1f ? CTRL_ON : CTRL_LINE);
+        if (holdProgress >= 1f && holdDir != null) {
+            float k = holdDir.diagonal() ? 0.7071f : 1f;
+            s.setColor(1, 1, 1, 0.75f);
+            arrow(s, holdX, holdY, holdDir.dx * k, -holdDir.dy * k, hr + 4, hr + 18, 8f);
+        }
     }
 
     /** Okrag (pierscien) grubosci t z odcinkow; od kata start (stopnie, przeciwnie do wskazowek) przez deg. */
@@ -5555,15 +5720,25 @@ public final class Hud {
         roundButton(shapes, defensive.x, defensive.y, defensive.r, defensive.active ? M_GOOD : null, defensive.active);
         roundButton(shapes, pvp.x, pvp.y, pvp.r, pvp.active ? hex(0xff4a3a, 1f) : null, pvp.active);
         for (HudButton b : mobileContext()) if (b.visible && b.x > -999) roundButton(shapes, b.x, b.y, b.r, b.active ? M_GOOD : null, b.active);
-        // joystick: polprzezroczysta podstawa i galka
-        float jr = joystick.radius();
-        shapes.setColor(1, 1, 1, 0.07f);
-        shapes.circle(joystick.baseX(), joystick.baseY(), jr, 48);
-        ring(shapes, joystick.baseX(), joystick.baseY(), jr, 1.5f, 0, 360, new Color(1, 1, 1, 0.3f));
-        float kr = jr * 22f / 54f;
-        shapes.setColor(1, 1, 1, joystick.active() ? 0.26f : 0.18f);
-        shapes.circle(joystick.knob().x, joystick.knob().y, kr, 32);
-        ring(shapes, joystick.knob().x, joystick.knob().y, kr, 1.5f, 0, 360, new Color(1, 1, 1, 0.45f));
+        // sterowanie: krzyzyk, joystick (polprzezroczysta podstawa i galka) albo pierscien pod palcem
+        pl.fawizja.pixel.movement.ControlScheme scheme = controlScheme();
+        if (scheme == pl.fawizja.pixel.movement.ControlScheme.DPAD) {
+            drawDpad(shapes);
+        } else if (scheme.stick()) {
+            float jr = joystick.radius();
+            boolean four = scheme == pl.fawizja.pixel.movement.ControlScheme.FLOAT4, idle4 = four && !joystick.active();
+            // plywajacy: ciemna podstawa jak krzyzyk (czytelna na jasnym bruku); w spoczynku tylko slaby slad w rogu
+            if (four) shapes.setColor(0, 0, 0, idle4 ? 0.08f : 0.22f);
+            else shapes.setColor(1, 1, 1, 0.07f);
+            shapes.circle(joystick.baseX(), joystick.baseY(), jr, 48);
+            ring(shapes, joystick.baseX(), joystick.baseY(), jr, 1.5f, 0, 360, idle4 ? CTRL_FAINT : CTRL_LINE);
+            float kr = jr * 22f / 54f;
+            shapes.setColor(1, 1, 1, joystick.active() ? 0.26f : idle4 ? 0.1f : 0.18f);
+            shapes.circle(joystick.knob().x, joystick.knob().y, kr, 32);
+            ring(shapes, joystick.knob().x, joystick.knob().y, kr, 1.5f, 0, 360, idle4 ? CTRL_LINE : CTRL_KNOB);
+            if (scheme == pl.fawizja.pixel.movement.ControlScheme.FLOAT4) drawStickTicks(shapes, jr);
+        }
+        drawHoldIndicator(shapes);
         // czat
         if (mChat) {
             HudLayout.Rect cp = mlay.chatPanel, hd = mlay.chatHandle;
@@ -5922,13 +6097,19 @@ public final class Hud {
                 woodButton(s, add.x(), add.y(), add.w(), add.h(), false);
                 break;
             }
-            case SETTINGS:
-                for (MBtn b : mSettingsButtons(win, mSettingsEntries(session))) {
+            case SETTINGS: {
+                List<String[]> entries = mSettingsEntries(session);
+                for (MBtn b : mSettingsButtons(win, entries)) {
                     s.setColor(M_CELL);
                     s.rect(b.x(), b.y(), b.w(), b.h());
                     strokeRect(s, b.x(), b.y(), b.w(), b.h(), 1f, M_CELL_LINE);
+                    if (!b.id().equals("set:page") && settings != null
+                            && entries.get(Integer.parseInt(b.id().substring(4)))[0].equals("settings:sens")) {
+                        sliderShapes(s, b, settings.sensitivity());
+                    }
                 }
                 break;
+            }
             case EQUIP: {
                 float[] bc = mEqCell(win, 0, 3);
                 float m = (bc[2] - 4) / 2f;
@@ -6073,6 +6254,11 @@ public final class Hud {
                         continue;
                     }
                     String[] e = entries.get(Integer.parseInt(bt.id().substring(4)));
+                    if (e[0].equals("settings:sens")) {
+                        // suwak: nazwa i wartosc w gornym wierszu, pod spodem 5 kresek (rysowane w przebiegu ksztaltow)
+                        mText(b, e[1] + ": " + e[2], bt.x() + 6, bt.y() + 26.5f, 0.66f, M_TEXT, false);
+                        continue;
+                    }
                     mText(b, mClip(e[1], bt.w() - 12, 0.68f), bt.x() + 6, bt.y() + 22.5f, 0.68f, M_TEXT, false);
                     mText(b, mClip(e[2], bt.w() - 12, 0.58f), bt.x() + 6, bt.y() + 7, 0.58f, M_MUTED, false);
                 }

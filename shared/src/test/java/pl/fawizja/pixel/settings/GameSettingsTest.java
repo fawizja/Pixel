@@ -127,4 +127,35 @@ class GameSettingsTest {
         s.apply("settings:page");
         assertEquals(0, s.page());
     }
+
+    @Test
+    void controlSchemeAndSensitivityAreSavedAndShown() {
+        GameSettings s = new GameSettings();
+        assertEquals(pl.fawizja.pixel.movement.ControlScheme.DPAD, s.controlScheme(), "krzyzyk domyslnie");
+        assertEquals(3, s.sensitivity());
+        assertTrue(java.util.Arrays.stream(s.allRows()).anyMatch(r -> r[1].equals("Sterowanie: Krzyżyk")));
+        assertTrue(java.util.Arrays.stream(s.allRows()).noneMatch(r -> r[0].equals("settings:joyfloat")),
+                "joystick pod kciukiem tylko dla klasycznego joysticka");
+        assertTrue(s.apply("settings:controls"));
+        assertEquals(pl.fawizja.pixel.movement.ControlScheme.FLOAT4, s.controlScheme());
+        s.apply("settings:controls");
+        s.apply("settings:controls");
+        assertEquals(pl.fawizja.pixel.movement.ControlScheme.CLASSIC, s.controlScheme());
+        assertTrue(java.util.Arrays.stream(s.allRows()).anyMatch(r -> r[0].equals("settings:joyfloat")));
+        assertTrue(s.apply("settings:sens:5"));
+        assertEquals(5, s.sensitivity());
+        assertTrue(s.apply("settings:sens"));
+        assertEquals(1, s.sensitivity(), "suwak w kolko 1..5");
+        assertTrue(s.apply("settings:sens:9"));
+        assertEquals(5, s.sensitivity(), "poza zakresem - najblizsza wartosc");
+        assertFalse(s.apply("settings:sens:x"));
+        GameSettings back = GameSettings.fromMap(s.toMap());
+        assertEquals(pl.fawizja.pixel.movement.ControlScheme.CLASSIC, back.controlScheme());
+        assertEquals(5, back.sensitivity());
+        GameSettings broken = GameSettings.fromMap(Map.of("controls", "turbo", "sens", "17"));
+        assertEquals(pl.fawizja.pixel.movement.ControlScheme.DPAD, broken.controlScheme());
+        assertEquals(3, broken.sensitivity());
+        assertEquals(pl.fawizja.pixel.movement.ControlScheme.DPAD, GameSettings.fromMap(Map.of("joyfloat", "true")).controlScheme(),
+                "stare ustawienia dostaja krzyzyk");
+    }
 }

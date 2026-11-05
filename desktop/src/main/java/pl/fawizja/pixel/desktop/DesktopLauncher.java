@@ -40,7 +40,10 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.bossGhosts=4  offline: "duchy" uzupelniaja druzyne na polach przy dzwigni wyprawy na bossa (test w 1 osobe)
  *   -Dpixel.bossWin=true  offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od razu - podglad lupu i portalu
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
- *   -Dpixel.walkto=x,y   marsz do pola (jak dotkniecie duzej mapy)
+ *   -Dpixel.controls=dpad|float4|hold|classic  wariant sterowania (bez zapisu); -Dpixel.sens=1..5 czulosc
+ *   -Dpixel.dpad=NE      wcisniety kierunek krzyzyka (N, NE, E, SE, S, SW, W, NW)
+ *   -Dpixel.hold=fx,fy   palec przytrzymany na widoku gry (ulamki 0..1) w wariancie "Przytrzymanie na mapie"
+ *   -Dpixel.walkto=x,y  marsz do pola (jak dotkniecie duzej mapy)
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
@@ -542,7 +545,24 @@ public final class DesktopLauncher {
                     float[] v = gs.hud().gameView();
                     int sx = (int) (v[0] + v[2] * Float.parseFloat(f[0].trim()));
                     int sy = com.badlogic.gdx.Gdx.graphics.getHeight() - (int) (v[1] + v[3] * Float.parseFloat(f[1].trim()));
-                    if (gs.hud().floatJoystick(sx, sy, 7)) gs.hud().touchDragged(sx + 40, sy - 25, 7);
+                    // -Dpixel.joyDrag=dx,dy: wychylenie w pikselach ekranu (domyslnie 40,-25: w prawo i w gore)
+                    String[] d = System.getProperty("pixel.joyDrag", "40,-25").split(",");
+                    int ddx = Integer.parseInt(d[0].trim()), ddy = Integer.parseInt(d[1].trim());
+                    if (gs.hud().floatJoystick(sx, sy, 7)) gs.hud().touchDragged(sx + ddx, sy + ddy, 7);
+                }
+                String dpad = System.getProperty("pixel.dpad");
+                if (dpad != null) {
+                    // wcisniety kierunek krzyzyka (N, NE, E, ... albo NORTH_EAST)
+                    ((GameScreen) getScreen()).hud().dpad().press(direction(dpad));
+                }
+                String hold = System.getProperty("pixel.hold");
+                if (hold != null) {
+                    String[] f = hold.split(",");
+                    GameScreen gs = (GameScreen) getScreen();
+                    float[] v = gs.hud().gameView();
+                    int sx = (int) (v[0] + v[2] * Float.parseFloat(f[0].trim()));
+                    int sy = com.badlogic.gdx.Gdx.graphics.getHeight() - (int) (v[1] + v[3] * Float.parseFloat(f[1].trim()));
+                    gs.simulateHold(sx, sy);
                 }
                 String walkTo = System.getProperty("pixel.walkto");
                 if (walkTo != null) {
@@ -643,6 +663,15 @@ public final class DesktopLauncher {
                 Gdx.app.log("Pixel", "Screenshot saved: " + screenshot);
                 Gdx.app.exit();
             }
+        }
+
+        /** Kierunek z -Dpixel.dpad: skrot (N, NE, E, SE, S, SW, W, NW) albo nazwa (NORTH_EAST). */
+        private static pl.fawizja.pixel.world.Direction direction(String s) {
+            String k = s.trim().toUpperCase(java.util.Locale.ROOT)
+                    .replace("N", "NORTH_").replace("S", "SOUTH_").replace("E", "EAST_").replace("W", "WEST_");
+            if (s.trim().length() > 2) return pl.fawizja.pixel.world.Direction.valueOf(s.trim().toUpperCase(java.util.Locale.ROOT));
+            k = k.replaceAll("_+$", "");
+            return pl.fawizja.pixel.world.Direction.valueOf(k);
         }
     }
 }

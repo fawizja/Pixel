@@ -30,19 +30,32 @@ public final class StickFilter {
     /** Ile ms nowy kierunek musi trwac, zanim zastapi poprzedni. */
     public static final long SETTLE_MS = 70;
 
+    /** Kopia Direction.values() - bez nowej tablicy w kazdej klatce. */
+    private static final Direction[] DIRS = Direction.values();
+
     private Direction current;
     private Direction pending;
     private long pendingSinceMs;
+    /** Progi z suwaka czulosci ({@link ControlTuning}); domyslnie stale powyzej (czulosc 3). */
+    private float engage = ENGAGE, release = RELEASE, diagonalPush = DIAGONAL_PUSH;
+    private double diagonalEnter = DIAGONAL_ENTER;
+
+    /** Czulosc 1..5 z ustawien (3 = stale {@link #ENGAGE}, {@link #DIAGONAL_ENTER} itd.). */
+    public void setSensitivity(int s) {
+        engage = ControlTuning.engage(s);
+        release = ControlTuning.release(s);
+        diagonalEnter = ControlTuning.classicDiagonal(s);
+        diagonalPush = ControlTuning.classicDiagonalPush(s);
+    }
 
     /** Kierunek dla wychylenia (vx, vy) w chwili nowMs albo null (postoj). */
     public Direction update(float vx, float vy, long nowMs) {
         double len = Math.sqrt(vx * vx + vy * vy);
-        if (len < (current == null ? ENGAGE : RELEASE)) {
+        if (len < (current == null ? engage : release)) {
             reset();
             return null;
         }
-        double angle = Math.toDegrees(Math.atan2(vy, vx));
-        if (angle < 0) angle += 360;
+        double angle = angleOf(vx, vy);
         Direction want = classify(angle, len);
         if (current == null) {
             current = want;
@@ -71,8 +84,8 @@ public final class StickFilter {
 
     private Direction classify(double angle, double len) {
         Direction diag = nearest(angle, true), card = nearest(angle, false);
-        if (current != null && current.diagonal() && len >= RELEASE && dist(angle, current) <= DIAGONAL_KEEP) return current;
-        if (len >= DIAGONAL_PUSH && dist(angle, diag) <= DIAGONAL_ENTER) return diag;
+        if (current != null && current.diagonal() && len >= release && dist(angle, current) <= diagonalEnter + DIAGONAL_KEEP - DIAGONAL_ENTER) return current;
+        if (len >= diagonalPush && dist(angle, diag) <= diagonalEnter) return diag;
         if (current != null && !current.diagonal() && dist(angle, current) <= 45 + HYSTERESIS) return current;
         return card;
     }
@@ -82,14 +95,20 @@ public final class StickFilter {
         return (Math.toDegrees(Math.atan2(-d.dy, d.dx)) + 360) % 360;
     }
 
-    private static double dist(double angle, Direction d) {
+    /** Kat wektora (os y w gore) w stopniach 0..360 (0 = wschod, 90 = polnoc). */
+    static double angleOf(float vx, float vy) {
+        double angle = Math.toDegrees(Math.atan2(vy, vx));
+        return angle < 0 ? angle + 360 : angle;
+    }
+
+    static double dist(double angle, Direction d) {
         double a = Math.abs(angle - angleOf(d)) % 360;
         return a > 180 ? 360 - a : a;
     }
 
-    private static Direction nearest(double angle, boolean diagonal) {
+    static Direction nearest(double angle, boolean diagonal) {
         Direction best = null;
-        for (Direction d : Direction.values()) {
+        for (Direction d : DIRS) {
             if (d.diagonal() != diagonal) continue;
             if (best == null || dist(angle, d) < dist(angle, best)) best = d;
         }
