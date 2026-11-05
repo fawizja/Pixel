@@ -75,7 +75,7 @@ public final class SkillSheet {
         switch (s.zone()) {
             case BONUS: return s.display() + (pc.isPremium() ? " (premia 150% exp)" : " (premia dla premium)");
             case LOW: return s.display() + " (50% exp)";
-            case EMPTY: return s.display() + " (bez exp)";
+            case EMPTY: return s.display() + " (bez exp i łupu)";
             default: return s.display();
         }
     }

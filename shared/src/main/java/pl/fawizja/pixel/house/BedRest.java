@@ -6,7 +6,8 @@ import pl.fawizja.pixel.character.PlayerCharacter;
  * Sen w lozku jak w Tibii: postac, ktora wylogowala sie, kladac sie do lozka we wlasnym domu (albo w domu, do
  * ktorego ma wstep), po powrocie jest wypoczeta - odzyskuje zycie i mane za czas snu: {@link #PERCENT_PER_MINUTE}
  * procent na minute, pelnie po {@link #FULL_AFTER_MINUTES} minutach. Stamina odnawia sie po kazdym wylogowaniu
- * wg {@link pl.fawizja.pixel.character.Stamina#onLogin} (pierwsze 10 minut nic, potem minuta na 3 minuty snu).
+ * wg {@link pl.fawizja.pixel.character.Stamina#onLogin} (pierwsze 10 minut nic, potem minuta na 2 min 15 s snu,
+ * powyzej 39:00 na 4 min 30 s) - sen w lozku nie zmienia tempa.
  */
 public final class BedRest {
 

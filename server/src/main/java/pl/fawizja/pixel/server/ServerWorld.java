@@ -1948,9 +1948,10 @@ final class ServerWorld {
                 share = share * (100 + PlayerCharacter.RESTED_EXP_PERCENT) / 100;
                 c.stats().recordRestedKill();
             }
+            String note = pl.fawizja.pixel.combat.CombatSystem.staminaNote(c, m == killer); // strefa sprzed zuzycia
             share = c.stamina().hunt(share, c.isPremium(), now); // stamina jak w Tibii: po podziale, osobno dla kazdego
             m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name()
-                    + (rested ? ", wypoczęty" : "") + pl.fawizja.pixel.combat.CombatSystem.staminaNote(c), now);
+                    + (rested ? ", wypoczęty" : "") + note, now);
             if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
         }
         return true;

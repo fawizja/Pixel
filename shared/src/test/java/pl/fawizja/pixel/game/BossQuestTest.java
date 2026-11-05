@@ -301,6 +301,26 @@ class BossQuestTest {
     }
 
     @Test
+    void aParticipantWithoutStaminaCompletesTheQuestButGetsNoLoot() {
+        List<GameSession> p = party(5);
+        GameSession tired = p.get(3);
+        assertTrue(p.get(0).useAt(quest.lever(), 1_000));
+        tired.character().stamina().setMinutes(0);
+        int bag = tired.character().backpack().size();
+        Monster b = boss();
+        p.get(1).combat().damageMonster(b, b.type().maxHealth() * 20, DamageType.HOLY, 2_000);
+        assertTrue(b.isDead());
+        assertTrue(tired.character().completedBossQuests().contains(quest.id()), "the quest still counts");
+        assertTrue(logged(tired, "brak staminy - bez łupu."), tired.log().latest(30).toString());
+        assertFalse(logged(tired, "Twój łup z bossa"));
+        assertFalse(logged(tired, "tylko chwała"));
+        assertEquals(bag, tired.character().backpack().size(), "nothing in the backpack");
+        for (GameSession s : p) {
+            if (s != tired) assertFalse(logged(s, "brak staminy - bez łupu"), s.character().name());
+        }
+    }
+
+    @Test
     void lootPerPlayerIsIndependentAndHighlightsBossOnlyItems() {
         MonsterType grim = MONSTERS.get("grimtooth");
         List<String> five = List.of("A", "B", "C", "D", "E");

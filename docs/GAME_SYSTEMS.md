@@ -195,7 +195,8 @@ domu poza murami = najblizsze miasto. Wolne domy maja tabliczke nad drzwiami i n
 Lozko (obiekt `bed`, uzycie dotknieciem): w domu z wstepem (wlasciciel/gosc) postac kladzie sie i wylogowuje
 (`GameSession.useBed` -> `takeSleep`, klient pokazuje sen `-Dpixel.sleepMs`, online serwer wysyla SLEEP x y z);
 w cudzym domu "To nie twoje łóżko.", w walce odmowa. Zapis `slept` = chwila zasniecia; po zalogowaniu
-`house/BedRest.wakeUp`: 2% zycia i many na minute snu (pelnia po 50 min), stamina jak po kazdym wylogowaniu.
+`house/BedRest.wakeUp`: 2% zycia i many na minute snu (pelnia po 50 min), stamina jak po kazdym wylogowaniu
+(`Stamina.onLogin`, to samo tempo odnowienia).
 Skrzynie (0.208.0): `world/Crates` (WorldMap.crates()). Skrzynie, beczki, worki i kufry (`MOVABLE`) pcha sie,
 wchodzac w nie (tylko prosto, pole za nimi wolne, bez schodow i kratek, najdalej `MAX_DRIFT` = 6 pol od miejsca
 z mapy, meble domu nie wyjezdzaja z domu). `STORAGE` (+ szafy) otwiera sie dotknieciem albo UZYJ: 8 miejsc,
@@ -829,8 +830,14 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
   broni rycerza - umiejetnosc trzymanej broni. Rycerz zaczyna z mieczem, toporem i maczuga na tym samym poziomie.
   Stare zapisy bez `skill.AXE` / `skill.CLUB` dostaja poziom i postep miecza (hojnie; po kluczach, bez wersji).
 - Stamina (`character/Stamina`, TibiaWiki): 42:00, polowanie (doswiadczenie z potworow) zuzywa 1 minute na
-  minute; powyzej 39:00 premium 150% exp, od 14:00 w dol 50%, przy 0 brak exp (lup bez zmian). Offline: po
-  10 min 1 minuta na 3 min do 39:00, powyzej 1 na 6 min. Zapis w osobnym polu `stamina=minuty,czasZapisu`
+  minute; powyzej 39:00 premium 150% exp, od 14:00 w dol 50%, przy 0 (strefa EMPTY) brak exp i brak lupu jak
+  w Tibii: cialo zabitego potwora puste (bez zlota i przedmiotow), wpis "brak staminy - bez expa i łupu"
+  (`CombatSystem.onMonsterDeath`, strefa sprzed zuzycia minuty - ostatnia minuta jeszcze daje exp i lup). Lup
+  lezy w ciele zabojcy, wiec liczy sie stamina zabojcy; czlonek druzyny bez staminy traci tylko swoj udzial exp
+  ("bez expa"). Wyprawa na bossa: uczestnik bez staminy ma wyprawe zaliczona, ale nie dostaje osobistego lupu
+  (`BossQuestRuntime.Hero.noStamina`). Offline odnowienie o 1/3 szybsze niz w Tibii: po 10 min 1 minuta na
+  2 min 15 s do 39:00, powyzej 1 na 4 min 30 s (39:00 -> 42:00: 13 h 40 min, 0:00 -> 42:00: 101 h 25 min;
+  sen w lozku tak samo). Zapis w osobnym polu `stamina=minuty,czasZapisu`
   (bez podbijania wersji; brak pola = 42:00), odnowienie przy logowaniu (`Stamina.onLogin`: serwer przy
   wczytaniu postaci, gra lokalna w `PixelGame.playLocal`). Na serwerze stamina liczy sie w sesji gracza
   (`CombatSystem` i podzial exp druzyny w `ServerWorld`), klient dostaje ja w zapisie SELF. Okno umiejetnosci
