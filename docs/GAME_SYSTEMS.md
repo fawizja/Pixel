@@ -829,7 +829,10 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
   gina w 1,5-3 s (2-4 ciosy na zabicie), a exp rosnie z etapami jak na RubinOT, wiec przy 1 probie na atak rycerz 100
   mial z polowania bron ~51 / tarcze ~45, a czarodziej magie ~40. Z czynnikiem (`HuntBalanceSimulationTest#skillsFollowTheLevel`,
   polowanie od poziomu 1): rycerz 50/100/200 bron 64/82/97, tarcza 59/77/96; paladyn dystans 68/83/101; czarodziej
-  i druid magia 54/72/94 - typowo dla poziomu (rycerz 70/65 i 85/80, magia 50 i 68, tolerancja 7). Manekin
+  i druid magia 54/72/94 - typowo dla poziomu (rycerz 70/65 i 85/80, magia 50 i 68, tolerancja 7). Postac tworzona
+  od razu wyzej (start offline 300, `-Dpixel.startLevel`) dostaje te same umiejetnosci z tabel
+  `CharacterFactory.KNIGHT_SKILLS/PALADIN_SKILLS/MONK_SKILLS/MAGE_SKILLS` (wyniki symulacji do poziomu 600, dalej
+  ekstrapolacja; poziom 300: rycerz 106/105, paladyn dystans 110 tarcza 105, mag magia 114, mnich piesci 109). Manekin
   (`GameSession.updateTraining`): co 3 s +1 umiejetnosci broni, co 6 s +1 tarczy (z tarcza). Brak treningu na
   potworach ponizej progu `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
 - Etapy serwera (`Balance.EXP_STAGES` / `SKILL_STAGES` / `MAGIC_STAGES`, jak "stages" na OTS, np. RubinOT;

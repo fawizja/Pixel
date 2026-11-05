@@ -431,6 +431,25 @@ class HuntBalanceSimulationTest {
         assertTrue(g.get(Vocation.PALADIN).get(100).skills().get(Skill.MAGIC) < s100.skills().get(Skill.MAGIC), "paladin magic below mage");
     }
 
+    /** Postac tworzona od razu na wyzszym poziomie (start offline 300) ma umiejetnosci z tej symulacji. */
+    @Test
+    void factoryStartSkillsMatchTheSimulation() {
+        Map<Vocation, Map<Integer, Progress>> g = growth();
+        List<String> fails = new ArrayList<>();
+        for (Vocation v : g.keySet()) {
+            for (int l : new int[] {20, 50, 100, 150, 200}) {
+                PlayerCharacter pc = FACTORY.create("Start", v, new Position(1, 1, 0), l);
+                Map<Skill, Integer> sim = g.get(v).get(l).skills();
+                for (Skill s : new Skill[] {Skill.AXE, Skill.DISTANCE, Skill.SHIELDING, Skill.MAGIC}) {
+                    if (Math.abs(pc.skills().level(s) - Math.max(Skill.MAGIC == s ? 0 : 10, sim.get(s))) > 2) {
+                        fails.add("L" + l + " " + v + " " + s + " factory " + pc.skills().level(s) + " vs simulated " + sim.get(s));
+                    }
+                }
+            }
+        }
+        assertTrue(fails.isEmpty(), String.join("\n", fails));
+    }
+
     @Test
     void charactersHuntTheirRegionAndFearHigherOnes() {
         StringBuilder sb = new StringBuilder("\n| poz. | profesja | umiejetnosci        |    HP | potwor            | poz. | HP pot. | czas s | ciosy | obr./zab. | obr./min | % HP/min | wygrane |\n"
