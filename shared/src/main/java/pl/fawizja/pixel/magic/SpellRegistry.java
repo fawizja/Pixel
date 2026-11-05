@@ -48,6 +48,13 @@ public final class SpellRegistry {
             if (t.isEmpty() || t.startsWith("#")) continue;
             String[] f = t.split(";", 20);
             if (f.length != 20) throw new IOException("spells.csv line " + n + ": expected 20 fields, got " + f.length);
+            // opcjonalne pole na koncu: rola wobec harmonii mnicha ";B" / ";S" (opis moze miec srednik w srodku)
+            String role = "";
+            java.util.regex.Matcher rm = java.util.regex.Pattern.compile("^(.*);\\s*([BS-])\\s*$").matcher(f[19]);
+            if (rm.matches()) {
+                f[19] = rm.group(1);
+                role = rm.group(2);
+            }
             try {
                 String produces = emptyToNull(f[16]);
                 String consumes = emptyToNull(f[17]);
@@ -56,7 +63,8 @@ public final class SpellRegistry {
                 SpellKind kind = SpellKind.valueOf(f[8].trim());
                 SpellType s = new SpellType(f[0].trim(), f[1].trim(), vocations(f[2].trim()), i(f[3]), i(f[4]), i(f[5]), i(f[6]),
                         SpellGroup.valueOf(f[7].trim()), kind, DamageType.valueOf(f[9].trim()), d(f[10]), d(f[11]),
-                        d(f[12]), d(f[13]), i(f[14]), i(f[15]), produces, consumes, i(f[18]), f[19].trim());
+                        d(f[12]), d(f[13]), i(f[14]), i(f[15]), produces, consumes, i(f[18]), f[19].trim(),
+                        MonkRole.parse(role));
                 if (kind.isRune()) items.byKey(s.key()); // efekt runy nosi klucz przedmiotu runy
                 if (map.put(s.key(), s) != null) throw new IOException("duplicate spell " + s.key());
             } catch (IllegalArgumentException e) {

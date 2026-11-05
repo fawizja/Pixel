@@ -965,10 +965,15 @@ public final class Hud {
         if (playerMenu != null || logoutConfirm || optionsMenu) {
             // ekran dotykowy: wiersze co najmniej 36 dp; gdy nie mieszcza sie jeden pod drugim - dwie kolumny
             rowH = uiScale >= 1.5f || lay.compact ? 39 : 24;
-            int rows = logoutConfirm ? 2 : optionsMenu ? 2 + (lay.folded[HudLayout.TORCH_TOGGLE] ? 1 : 0)
+            int rows = logoutConfirm ? 2 : optionsMenu && virtueMenu ? 3 : optionsMenu ? 2 + (lay.folded[HudLayout.TORCH_TOGGLE] ? 1 : 0)
                     + (lay.folded[HudLayout.STORE_TOGGLE] ? 1 : 0) : playerRowsCount;
             popupCols = 1;
             menuW = Math.min(240, Math.max(160, gw - 16));
+            if (optionsMenu && virtueMenu) {
+                // wybor cnoty: dluzsze opisy pod nazwa - szersze okienko i wyzsze wiersze
+                menuW = Math.min(470, Math.max(160, gw - 16));
+                rowH = Math.max(rowH, 38);
+            }
             menuH = 24 + 20 + rows * rowH + 8;
             if (menuH > Math.min(h - 8, gh + 4) && rows > 1) {
                 // dwie kolumny w szerokosci widoku gry: kolumny HUD-u zostaja odsloniete
@@ -1572,6 +1577,19 @@ public final class Hud {
                 default:
             }
         }
+        if (session.character().vocation() == pl.fawizja.pixel.vocation.Vocation.MONK) {
+            // mnich jak w Tibii: czar budujacy i wydajacy harmonie obok siebie
+            SpellType builder = null, spender = null;
+            for (SpellType sp : known) {
+                if (sp.kind() != SpellKind.ATTACK_TARGET) continue;
+                if (sp.monkRole() == pl.fawizja.pixel.magic.MonkRole.BUILDER && sp.cooldownMs() <= 4000) builder = sp;
+                if (sp.monkRole() == pl.fawizja.pixel.magic.MonkRole.SPENDER) spender = sp;
+            }
+            if (builder != null) attack = builder;
+            if (spender != null) attack2 = spender;
+            if (area == null) area = attack2;
+            else extra = attack2;
+        }
         SpellType[] bar = {heal, attack, area != null ? area : attack2, extra};
         String[] auto = new String[pl.fawizja.pixel.settings.SpellBar.SLOTS];
         for (int i = 0; i < bar.length; i++) auto[i] = bar[i] == null ? null : "cast:" + bar[i].key();
@@ -1647,6 +1665,12 @@ public final class Hud {
         menuGeometry();
         if (trade != null) {
             rebuildTradeMenu(session);
+            return;
+        }
+        if (optionsMenu && virtueMenu) {
+            List<MenuRow> rows = new ArrayList<>();
+            virtueRows(session, rows);
+            layoutPopupRows(rows);
             return;
         }
         if (optionsMenu) {
@@ -2010,6 +2034,7 @@ public final class Hud {
         bagOpen = false;
         logoutConfirm = false;
         optionsMenu = true;
+        virtueMenu = false;
         menuOpen = true;
         menuGeometry();
     }
@@ -2635,6 +2660,7 @@ public final class Hud {
         if (houseWin != null) return houseTouch(p.x, p.y, actions);
         if (mobile) return mobileTouchDown(p.x, p.y, pointer, session, actions);
         if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
+        if (harmonyTouch(p.x, p.y, session)) return true;
         if (statusTouch(p.x, p.y, session)) return true;
         if (equipPanelTouch(p.x, p.y, session, actions)) return true;
         if (leftColumnTouch(p.x, p.y, actions)) return true;
@@ -3024,6 +3050,10 @@ public final class Hud {
         statusIcons(session, serverTimeMs);
         drawTopBarShapes(shapes, pc);
         drawStatusIcons(shapes, statusX(), statusY());
+        if (showHarmony(pc)) {
+            HarmonyHud.draw(shapes, pc.harmony(), harmonyX(), statusY() + (STATUS_SIZE - HARMONY_ORB) / 2f, HARMONY_ORB,
+                    com.badlogic.gdx.utils.TimeUtils.millis());
+        }
         if (battleVisible()) miniWindow(shapes, "grim", blX, blY, blW, blH, lay.header - 2);
         drawVipShapes(shapes);
         drawPanelSkillBars(shapes, pc);
@@ -3262,7 +3292,7 @@ public final class Hud {
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
             if (trade == null && optionsMenu) {
-                text(batch, "Opcje", menuX + 10, menuY + menuH - 7);
+                text(batch, virtueMenu ? "Cnota mnicha" : "Opcje", menuX + 10, menuY + menuH - 7);
             } else if (trade == null && logoutConfirm) {
                 text(batch, "Wylogować się?", menuX + 10, menuY + menuH - 7);
                 font.getData().setScale(0.8f);
@@ -3465,11 +3495,11 @@ public final class Hud {
         x += layout.width + 14;
         String info = String.format("%02d:%02d   Piętro %s   %,d gp", minute / 60, minute % 60, floor, session.gold());
         layout.setText(font, info);
-        if (x + layout.width >= statusX() - 6) {
+        if (x + layout.width >= topRowEnd(pc) - 6) {
             info = String.format("%,d gp", session.gold()); // waski pasek (telefon): samo zloto
             layout.setText(font, info);
         }
-        if (x + layout.width < statusX() - 6) font.draw(batch, info, x, ty + layout.height / 2f);
+        if (x + layout.width < topRowEnd(pc) - 6) font.draw(batch, info, x, ty + layout.height / 2f);
         font.getData().setScale(1f);
     }
 
@@ -3591,6 +3621,72 @@ public final class Hud {
     /** Ikony stanu wyrownane do prawej krawedzi gornego paska. */
     private float statusX() { return lay.topBar.right() - 2 - statuses.size() * (STATUS_SIZE + 3); }
 
+    // ------------------------------------------------------------------ harmonia mnicha (5 kul, cnota, spokoj)
+
+    /** Srednica kuli harmonii (desktop: w wierszu ikon stanu). */
+    private static final float HARMONY_ORB = 11;
+
+    private static boolean showHarmony(PlayerCharacter pc) { return pc.vocation() == pl.fawizja.pixel.vocation.Vocation.MONK; }
+
+    /** Lewa krawedz kul harmonii (desktop): na lewo od ikon stanu. */
+    private float harmonyX() { return statusX() - 8 - HarmonyHud.width(HARMONY_ORB); }
+
+    /** Koniec miejsca na napisy w drugim wierszu gornego paska. */
+    private float topRowEnd(PlayerCharacter pc) { return showHarmony(pc) ? harmonyX() : statusX(); }
+
+    /** Dotkniecie kul harmonii: opis w dzienniku i wybor cnoty. */
+    private boolean harmonyTouch(float px, float py, GameSession session) {
+        PlayerCharacter pc = session.character();
+        if (!showHarmony(pc)) return false;
+        float x0 = harmonyX(), x1 = x0 + HarmonyHud.width(HARMONY_ORB);
+        if (px < x0 - 4 || px > x1 + 2 || py < lay.topBar.y - HudLayout.BORDER || py > statusY() + STATUS_SIZE + 4) return false;
+        session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, HarmonyHud.describe(pc.harmony()));
+        openVirtues();
+        return true;
+    }
+
+    /** Okienko wyboru cnoty (czary utori virtu / utito virtu / utura tio) - jak menu Opcje. */
+    private boolean virtueMenu;
+
+    public void openVirtues() {
+        openOptions();
+        virtueMenu = true;
+        menuGeometry();
+    }
+
+    public boolean virtuesOpen() { return menuOpen && optionsMenu && virtueMenu; }
+
+    private void virtueRows(GameSession session, List<MenuRow> rows) {
+        PlayerCharacter pc = session.character();
+        for (pl.fawizja.pixel.vocation.Harmony.Virtue v : pl.fawizja.pixel.vocation.Harmony.Virtue.values()) {
+            if (v.spellKey == null) continue;
+            SpellType sp = session.spells().registry().find(v.spellKey);
+            boolean ok = sp != null && pc.level() >= sp.minLevel();
+            String sub = v.effect
+                    + (ok ? "" : " (od poziomu " + (sp == null ? 20 : sp.minLevel()) + ")");
+            rows.add(new MenuRow("opt:cast:" + v.spellKey, v.label + (pc.harmony().virtue() == v ? " (aktywna)" : ""), sub, ok));
+        }
+    }
+
+    /** Lewa krawedz kul harmonii na telefonie: za ikonami stanu, wzmocnien i czaszki pod ramka. */
+    private float mHarmonyX() {
+        int n = statuses.size() + buffs.size();
+        boolean skull = ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE || ownSkullMs > 0;
+        return mlay.statusRow.x + n * (STATUS_SIZE + 3) + (skull ? 70 : 0) + (n > 0 ? 6 : 0);
+    }
+
+    private static final float M_HARMONY_ORB = 14;
+
+    private boolean mobileHarmonyTouch(float px, float py, GameSession session) {
+        PlayerCharacter pc = session.character();
+        if (!showHarmony(pc)) return false;
+        float x0 = mHarmonyX(), x1 = x0 + Math.max(MobileHudLayout.MIN_TOUCH, HarmonyHud.width(M_HARMONY_ORB));
+        if (px < x0 - 4 || px > x1 || py > mlay.frame.y || py < mlay.frame.y - MobileHudLayout.MIN_TOUCH) return false;
+        session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, HarmonyHud.describe(pc.harmony()));
+        openVirtues();
+        return true;
+    }
+
     /** Dolny wiersz gornego paska (ikony stanu, poziom, informacje). */
     private float statusY() { return lay.topBar.y + 2; }
 
@@ -3686,6 +3782,9 @@ public final class Hud {
         if (sp.kind().isHeal()) return new Color(0.2f, 0.55f, 0.35f, 0.85f);
         if (sp.kind() == SpellKind.LIGHT) return new Color(0.6f, 0.52f, 0.15f, 0.85f);
         if (sp.kind() == SpellKind.HASTE) return new Color(0.15f, 0.5f, 0.55f, 0.85f);
+        if (sp.kind() == SpellKind.VIRTUE) return new Color(0.62f, 0.45f, 0.12f, 0.85f);
+        if (sp.kind() == SpellKind.FOCUS_HARMONY || sp.kind() == SpellKind.FOCUS_SERENITY) return new Color(0.25f, 0.4f, 0.7f, 0.85f);
+        if (sp.monkRole() == pl.fawizja.pixel.magic.MonkRole.SPENDER) return new Color(0.6f, 0.4f, 0.15f, 0.85f);
         switch (sp.damageType()) {
             case FIRE: return new Color(0.7f, 0.25f, 0.1f, 0.85f);
             case ICE: return new Color(0.25f, 0.5f, 0.75f, 0.85f);
@@ -3704,6 +3803,7 @@ public final class Hud {
         switch (kind) {
             case HEAL_SELF:
             case RUNE_HEAL:
+            case HEAL_PARTY:
                 s.rect(cx - t / 2f, cy - r, t, r * 2);
                 s.rect(cx - r, cy - t / 2f, r * 2, t);
                 break;
@@ -3719,6 +3819,20 @@ public final class Hud {
                     double a = Math.PI / 4 * i;
                     s.rectLine(cx + (float) Math.cos(a) * r * 0.6f, cy + (float) Math.sin(a) * r * 0.6f,
                             cx + (float) Math.cos(a) * r, cy + (float) Math.sin(a) * r, t * 0.7f);
+                }
+                break;
+            case VIRTUE: // cnota mnicha: krag z jasnym srodkiem
+                s.circle(cx, cy, r * 0.8f, 16);
+                s.setColor(0.35f, 0.25f, 0.1f, 0.9f);
+                s.circle(cx, cy, r * 0.55f, 16);
+                s.setColor(1f, 0.95f, 0.75f, 0.95f);
+                s.circle(cx, cy, r * 0.25f, 10);
+                break;
+            case FOCUS_HARMONY:
+            case FOCUS_SERENITY: // skupienie: piec kul harmonii w kregu
+                for (int i = 0; i < 5; i++) {
+                    double a = Math.PI / 2 + i * 2 * Math.PI / 5;
+                    s.circle(cx + (float) Math.cos(a) * r * 0.65f, cy + (float) Math.sin(a) * r * 0.65f, r * 0.28f, 10);
                 }
                 break;
             case HASTE: // dwie strzalki do przodu
@@ -4807,9 +4921,9 @@ public final class Hud {
             setMenuRect(mlay.window(mChat, false, mRect));
             rowH = 34;
         } else if (playerMenu != null || optionsMenu) {
-            int rows = optionsMenu ? 2 : playerRowsCount;
+            int rows = optionsMenu ? (virtueMenu ? 3 : 2) : playerRowsCount;
             float room = h - 46 - 6;
-            menuW = 240;
+            menuW = optionsMenu && virtueMenu ? Math.min(w - 16, 470) : 240;
             menuH = 24 + 20 + rows * rowH + 8;
             if (menuH > room && rows > 1) {
                 popupCols = 2;
@@ -5005,6 +5119,7 @@ public final class Hud {
             openMobileWin(MobileWin.SKILLS);
             return true;
         }
+        if (mobileHarmonyTouch(px, py, session)) return true;
         if (mobileStatusTouch(px, py, session)) return true;
         if (mlay.minimap.contains(px, py)) {
             toggleMap();
@@ -5702,6 +5817,7 @@ public final class Hud {
             if (b.icon() == null) drawStatusGlyph(shapes, b.glyph(), sx, sy, STATUS_SIZE);
             sx += STATUS_SIZE + 3;
         }
+        if (showHarmony(pc)) HarmonyHud.draw(shapes, pc.harmony(), mHarmonyX(), sy, M_HARMONY_ORB, nowMs);
         // minimapa i lista walki
         HudLayout.Rect mm = mlay.minimap;
         shapes.setColor(M_DARK);
@@ -6363,7 +6479,7 @@ public final class Hud {
             title = npc.name() + " (" + npc.town() + ")";
             sub = npc.greeting();
         } else if (optionsMenu) {
-            title = "Opcje";
+            title = virtueMenu ? "Cnota mnicha (jedna aktywna)" : "Opcje";
         } else {
             title = "Księga: czary (dotknij, aby rzucić) i rzemiosło";
         }

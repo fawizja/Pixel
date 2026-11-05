@@ -37,6 +37,13 @@ public final class Cooldowns {
         groups.put(g, now + ms);
     }
 
+    /** Skraca odnowienie jednego czaru (spender mnicha: czary budujace o 2 s za punkt harmonii); ms = Long.MAX_VALUE zeruje. */
+    public void cut(SpellType s, long ms, long now) {
+        Long until = spells.get(s.key());
+        if (until == null || until <= now) return;
+        spells.put(s.key(), ms >= until - now ? now : until - ms);
+    }
+
     public void clear() {
         spells.clear();
         groups.clear();

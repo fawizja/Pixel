@@ -84,7 +84,7 @@ public final class CombatFormulas {
             if (ammo != null) attack += ammo.attack() / AMMO_ATTACK_DIVISOR;
             max = attack * (pc.skills().level(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() * mode + bonus;
         } else {
-            max = attack * (pc.skills().level(skill) + 10) / 20.0 * v.meleeFactor() * mode + bonus;
+            max = attack * (pc.effectiveSkill(skill) + 10) / 20.0 * v.meleeFactor() * mode + bonus; // mnich: cnota sprawiedliwosci
         }
         return new AttackProfile((int) Math.min(Integer.MAX_VALUE, Math.round(max)), range, type, skill, v.attackIntervalMs());
     }

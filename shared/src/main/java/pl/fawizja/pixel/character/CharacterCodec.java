@@ -84,6 +84,8 @@ public final class CharacterCodec {
         m.put("stats", pc.stats().encode());
         if (pc.weeklyBossWeek() >= 0) m.put("wboss", String.valueOf(pc.weeklyBossWeek()));
         if (!pc.enchantments().encode().isEmpty()) m.put("ench", pc.enchantments().encode());
+        // harmonia mnicha: osobne pole bez podbijania wersji - stary zapis bez niego = 0 punktow, bez cnoty
+        if (!pc.harmony().isDefault()) m.put("monk", pc.harmony().encode());
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
         if (pc.house() != null) m.put("house", pc.house());
@@ -299,6 +301,7 @@ public final class CharacterCodec {
         pc.stats().restore(m.get("stats"));
         if (m.containsKey("wboss")) pc.setWeeklyBossWeek(Long.parseLong(m.get("wboss")));
         pc.enchantments().restore(m.get("ench"));
+        pc.harmony().restore(m.get("monk"));
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
         pc.setHouse(m.get("house"));

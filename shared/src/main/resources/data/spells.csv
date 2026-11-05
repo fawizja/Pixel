@@ -1,9 +1,28 @@
-# klucz;nazwa;profesje(*);poziom;magia min;mana;cooldown ms;grupa;rodzaj;typ obrazen;baza;x poziom;x magia;x umiejetnosc;zasieg;promien;tworzy;zuzywa;ilosc;opis
+# klucz;nazwa;profesje(*);poziom;magia min;mana;cooldown ms;grupa;rodzaj;typ obrazen;baza;x poziom;x magia;x umiejetnosc;zasieg;promien;tworzy;zuzywa;ilosc;opis;mnich(B buduje/S wydaje harmonie - opcjonalnie)
 mend;Opatrzenie ran;*;8;0;20;1000;HEALING;HEAL_SELF;PHYSICAL;20;0.4;2.0;0;0;0;;;0;Lekkie leczenie dostępne dla każdego.
 greater_mend;Uzdrowienie;DRUID,SORCERER,PALADIN;20;0;60;1000;HEALING;HEAL_SELF;PHYSICAL;50;0.8;4.0;0;0;0;;;0;Mocniejsze leczenie.
 vital_surge;Przypływ życia;DRUID;35;0;120;1000;HEALING;HEAL_SELF;PHYSICAL;130;1.4;7.0;0;0;0;;;0;Najsilniejsze leczenie - specjalność druida.
 inner_calm;Wewnętrzny spokój;MONK;12;0;25;1000;HEALING;HEAL_SELF;PHYSICAL;30;0.6;0;0.8;0;0;;;0;Leczenie mnicha zależne od walki wręcz.
 deep_meditation;Głęboka medytacja;MONK;40;0;45;1000;HEALING;HEAL_SELF;PHYSICAL;50;0.7;0;1.0;0;0;;;0;Silne leczenie mnicha.
+spirit_mend;Uleczenie ducha;MONK;80;0;210;1000;HEALING;HEAL_SELF;PHYSICAL;61.5;0.2;10.0;0;0;0;;;0;Leczenie ducha (Spirit Mend): siła zależy od poziomu magii.
+mass_spirit_mend;Zbiorowe uleczenie ducha;MONK;150;0;250;8000;HEALING;HEAL_PARTY;PHYSICAL;44;0.2;8.07;0;0;5;;;0;Leczy mnicha i drużynę w promieniu 5. Wydaje harmonię: leczy mocniej o premię harmonii.;S
+swift_jab;Szybki cios;MONK;1;0;3;2000;ATTACK;ATTACK_TARGET;PHYSICAL;12;0;0;0;1;0;;;0;Szybki cios wręcz (Swift Jab). Buduje 1 punkt harmonii.;B
+tiger_strike;Starcie tygrysa;MONK;1;0;3;8000;ATTACK;ATTACK_TARGET;PHYSICAL;15;0;0;0;1;0;;;0;Cios wręcz (Tiger Clash). Wydaje całą harmonię: do x2,28 obrażeń przy 5 punktach.;S
+double_jab;Podwójny cios;MONK;14;0;30;4000;ATTACK;ATTACK_TARGET;PHYSICAL;50;0;0;0;1;0;;;0;Dwa szybkie ciosy (Double Jab). Buduje 1 punkt harmonii.;B
+greater_tiger_clash;Wielkie starcie tygrysa;MONK;18;0;50;8000;ATTACK;ATTACK_TARGET;PHYSICAL;44;0;0;0;1;0;;;0;Potężny cios wręcz (Greater Tiger Clash). Wydaje całą harmonię.;S
+mystic_repulse;Mistyczne odepchnięcie;MONK;30;0;150;20000;ATTACK;ATTACK_TARGET;PHYSICAL;72;0;0;0;7;0;;;0;Uderzenie mocą ducha z dystansu (Mystic Repulse). Buduje 1 punkt harmonii.;B
+flurry_of_blows;Grad ciosów;MONK;35;0;110;4000;ATTACK;ATTACK_AREA;PHYSICAL;65;0;0;0;0;1;;;0;Grad ciosów we wszystko obok mnicha (Flurry of Blows). Buduje 1 punkt harmonii.;B
+sweeping_takedown;Zamaszyste powalenie;MONK;60;0;210;8000;ATTACK;ATTACK_AREA;PHYSICAL;72;0;0;0;0;1;;;0;Zamach nogą we wszystko obok mnicha (Sweeping Takedown). Wydaje całą harmonię.;S
+chained_penance;Łańcuch pokuty;MONK;70;0;180;4000;ATTACK;ATTACK_AREA;PHYSICAL;74;0;0;0;0;3;;;3;Cios przeskakuje na 3 wrogów w promieniu 3 (Chained Penance). Buduje 1 punkt harmonii.;B
+greater_flurry_of_blows;Wielki grad ciosów;MONK;90;0;300;16000;ATTACK;ATTACK_AREA;PHYSICAL;100;0;0;0;0;2;;;0;Grad ciosów w promieniu 2 (Greater Flurry of Blows). Buduje 1 punkt harmonii.;B
+forceful_uppercut;Potężny podbródkowy;MONK;110;0;325;60000;ATTACK;ATTACK_TARGET;PHYSICAL;130;0;0;0;1;0;;;0;Niszczycielski cios w jeden cel (Forceful Uppercut). Buduje 1 punkt harmonii.;B
+devastating_knockout;Druzgocący nokaut;MONK;125;0;210;24000;ATTACK;ATTACK_TARGET;PHYSICAL;62;0;0;0;1;0;;;0;Nokautujący cios (Devastating Knockout). Wydaje całą harmonię.;S
+spiritual_outburst;Wybuch ducha;MONK;300;0;425;24000;ATTACK;ATTACK_AREA;PHYSICAL;42;0;0;0;0;3;;;6;Fala ducha przeskakuje na 6 wrogów w promieniu 3 (Spiritual Outburst). Wydaje całą harmonię.;S
+virtue_of_harmony;Cnota harmonii;MONK;20;0;210;10000;VIRTUE;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Premia czarów wydających +50% (w spokoju +100%), każdy z nich oddaje 1 punkt harmonii.
+virtue_of_justice;Cnota sprawiedliwości;MONK;20;0;210;10000;VIRTUE;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Walka pięściami +15% (w spokoju +30%).
+virtue_of_sustain;Cnota wytrwałości;MONK;20;0;210;10000;VIRTUE;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Leczenie czarami mnicha +35% (w spokoju +70%).
+focus_serenity;Skupienie spokoju;MONK;150;0;500;600000;SUPPORT;FOCUS_SERENITY;PHYSICAL;0;0;0;0;0;0;;;0;Pełna harmonia, odnowienie czarów wydających od zera i spokój na 7 s.
+focus_harmony;Skupienie harmonii;MONK;275;0;500;120000;SUPPORT;FOCUS_HARMONY;PHYSICAL;0;0;0;0;0;0;;;0;Natychmiast pełna harmonia (5 punktów).
 ember_bolt;Żar;SORCERER;8;0;20;2000;ATTACK;ATTACK_TARGET;FIRE;15;0.3;2.5;0;7;0;;;0;Pocisk ognia w cel.
 spark_bolt;Iskra;SORCERER;14;0;30;2000;ATTACK;ATTACK_TARGET;ENERGY;20;0.35;2.8;0;7;0;;;0;Pocisk energii w cel.
 flame_ring;Krąg ognia;SORCERER;25;0;80;4000;ATTACK;ATTACK_AREA;FIRE;30;0.4;3.0;0;0;2;;;0;Ogień wokół czarodzieja (promień 2).
@@ -22,11 +41,6 @@ piercing_throw;Przeszywający rzut;PALADIN;20;0;40;3000;ATTACK;ATTACK_TARGET;PHY
 divine_spear;Boska włócznia;PALADIN;45;0;90;3000;ATTACK;ATTACK_TARGET;HOLY;50;0.5;1.8;1.2;7;0;;;0;Włócznia świętego światła w cel.
 divine_wrath;Boski gniew;PALADIN;60;0;180;4000;ATTACK;ATTACK_AREA;HOLY;60;0.5;1.8;1.0;0;3;;;0;Święty gniew wokół paladyna (promień 3).
 light_blade;Ostrze światła;PALADIN;100;0;130;4000;ATTACK;ATTACK_TARGET;HOLY;90;0.55;2.0;1.4;7;0;;;0;Ostrze świętego światła w cel.
-tiger_strike;Cios tygrysa;MONK;8;0;15;2000;ATTACK;ATTACK_TARGET;PHYSICAL;15;0.3;0;1.2;1;0;;;0;Silny cios wręcz.
-whirlwind_kick;Wirujące kopnięcie;MONK;20;0;40;4000;ATTACK;ATTACK_AREA;PHYSICAL;25;0.4;0;1.4;0;1;;;0;Kopnięcie trafia wszystko obok mnicha.
-dragon_fist;Pięść smoka;MONK;45;0;60;2000;ATTACK;ATTACK_TARGET;PHYSICAL;35;0.4;0;1.4;1;0;;;0;Potężny cios wręcz.
-storm_of_blows;Burza ciosów;MONK;60;0;120;4000;ATTACK;ATTACK_AREA;PHYSICAL;40;0.45;0;1.5;0;1;;;0;Grad ciosów we wszystko obok mnicha.
-phoenix_fist;Pięść feniksa;MONK;100;0;100;2000;ATTACK;ATTACK_TARGET;PHYSICAL;60;0.5;0;1.7;1;0;;;0;Ognisty cios wręcz o ogromnej sile.
 glow;Poświata;*;8;0;20;2000;SUPPORT;LIGHT;PHYSICAL;0;0;0;0;0;4;;;0;Światło wokół postaci na 5 minut.
 conjure_spears;Przywołanie włóczni;PALADIN;10;0;40;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;spear;;5;Tworzy 5 włóczni.
 enchant_boulder;Zaklęcie głazu;PALADIN,DRUID,SORCERER;12;2;50;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;boulder_rune;blank_rune;2;Zamienia pustą runę w 2 runy głazu.
@@ -49,10 +63,6 @@ divine_caldera;Boska kaldera;PALADIN;150;0;160;6000;ATTACK;ATTACK_AREA;HOLY;150;
 strong_ethereal_spear;Silna eteryczna włócznia;PALADIN;200;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;7;0;;;0;Eteryczna włócznia zależna od umiejętności dystansu.
 divine_judgement;Boski sąd;PALADIN;300;0;250;12000;ATTACK;ATTACK_TARGET;HOLY;250;1.0;2.0;6.0;7;0;;;0;Najsilniejszy święty cios w cel.
 holy_mend;Wielkie święte uzdrowienie;PALADIN;120;0;90;1000;HEALING;HEAL_SELF;PHYSICAL;150;0.7;3.0;0;0;0;;;0;Silne leczenie paladyna.
-storm_fist;Pięść burzy;MONK;150;0;120;8000;ATTACK;ATTACK_TARGET;PHYSICAL;200;0.9;0;5.0;1;0;;;0;Uderzenie wręcz z siłą burzy.
-chi_wave;Fala chi;MONK;200;0;200;8000;ATTACK;ATTACK_AREA;PHYSICAL;150;0.8;0;4.0;0;2;;;0;Fala energii chi wokół mnicha (promień 2).
-thousand_palms;Tysiąc dłoni;MONK;300;0;250;12000;ATTACK;ATTACK_AREA;PHYSICAL;250;1.0;0;6.0;0;1;;;0;Grad ciosów we wszystko obok mnicha.
-spirit_harmony;Harmonia ducha;MONK;150;0;50;1000;HEALING;HEAL_SELF;PHYSICAL;120;0.6;0;1.0;0;0;;;0;Silne leczenie mnicha.
 enchant_great_fireball;Zaklęcie wielkiej kuli ognia;DRUID,SORCERER;30;4;120;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;great_fireball_rune;blank_rune;4;Zamienia pustą runę w 4 runy wielkiej kuli ognia.
 enchant_avalanche;Zaklęcie lawiny;DRUID;30;4;120;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;avalanche_rune;blank_rune;4;Zamienia pustą runę w 4 runy lawiny.
 enchant_sudden_death;Zaklęcie nagłej śmierci;SORCERER;45;15;220;2000;SUPPORT;CONJURE;PHYSICAL;0;0;0;0;0;0;sudden_death_rune;blank_rune;3;Zamienia pustą runę w 3 runy nagłej śmierci.

@@ -25,10 +25,16 @@ class HighLevelMagicTest {
     @Test
     void everyVocationGetsNewSpellsBetweenLevel150And300() {
         for (Vocation v : Vocation.values()) {
+            // mnich jak w Tibii: na 150+ poza Wybuchem ducha dostaje czary harmonii (Skupienie spokoju i harmonii)
+            // i Zbiorowe uleczenie ducha (leczenie druzyny) zamiast kolejnych atakow
+            boolean monk = v == Vocation.MONK;
             long attacks = SPELLS.forVocation(v).stream()
-                    .filter(s -> s.minLevel() >= 150 && s.kind().isOffensive()).count();
+                    .filter(s -> s.minLevel() >= 150 && (s.kind().isOffensive() || monk
+                            && (s.kind() == SpellKind.FOCUS_HARMONY || s.kind() == SpellKind.FOCUS_SERENITY || s.kind() == SpellKind.HEAL_PARTY)))
+                    .count();
             assertTrue(attacks >= 3, v + " has " + attacks + " attack spells at 150+");
-            assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() >= 120 && s.kind() == SpellKind.HEAL_SELF),
+            assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() >= 120
+                            && (s.kind() == SpellKind.HEAL_SELF || monk && s.kind() == SpellKind.HEAL_PARTY)),
                     v + " has a strong heal");
             assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() == 300), v + " has a level 300 spell");
         }

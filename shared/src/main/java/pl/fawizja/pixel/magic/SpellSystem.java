@@ -79,6 +79,34 @@ public final class SpellSystem {
 
     public void setPlayerTargeting(PlayerTargeting t) { playerTarget = t; }
 
+    /** Czlonek druzyny widziany przez mnicha (serwer): pozycja, zdrowie i leczenie. */
+    public interface Ally {
+        Position position();
+        int health();
+        /** Leczy i zwraca, ile faktycznie przybylo. */
+        int heal(int amount);
+    }
+
+    /**
+     * Druzyna rzucajacego (ustawia serwer; offline nikogo nie ma): do spokoju mnicha, leczenia z harmonii
+     * i Zbiorowego uleczenia ducha.
+     */
+    public interface Allies {
+        /** Czlonkowie druzyny (bez rzucajacego) na tym samym pietrze w zasiegu ekranu (|dx| <= 8, |dy| <= 6). */
+        List<Ally> visible();
+
+        /** Inni gracze na 8 polach wokol rzucajacego (licza sie do tlumu, ktory odbiera spokoj). */
+        default int playersAround() { return 0; }
+    }
+
+    private Allies allies;
+
+    public void setAllies(Allies a) { allies = a; }
+
+    private List<Ally> visibleAllies() {
+        return allies == null ? java.util.Collections.emptyList() : allies.visible();
+    }
+
     /** Cel-gracz, gdy brak celu-potwora (inaczej null). */
     private Position playerTargetPosition() {
         Monster m = combat.target();
@@ -113,10 +141,14 @@ public final class SpellSystem {
 
     // ------------------------------------------------------------------ formuly
 
-    /** Wartosc bazowa efektu bez losowania (do opisow i testow). */
+    /**
+     * Wartosc bazowa efektu bez losowania (do opisow i testow). Czar ataku mnicha z rola harmonii liczy sie
+     * wzorem Canary: moc * piesci / 100 * atak broni / 10 + premia poziomu (bez premii harmonii).
+     */
     public static double baseValue(SpellType s, PlayerCharacter pc) {
+        if (s.monkFormula()) return monkPower(s, pc);
         double v = s.base() + pc.level() * s.levelFactor() + pc.skills().level(Skill.MAGIC) * s.magicFactor()
-                + pc.skills().level(weaponSkill(pc)) * s.skillFactor();
+                + pc.effectiveSkill(weaponSkill(pc)) * s.skillFactor();
         if (s.kind().isHeal()) v *= pc.vocation().healingFactor();
         else if (s.kind().isRune()) v *= pc.vocation().magicFactor();
         return Math.max(0, v);
@@ -144,9 +176,105 @@ public final class SpellSystem {
         }
     }
 
+    /**
+     * Canary (np. swift_jab.lua): SPELL_BASE_POWER * (skill / 100) * (attack / 10) + calculateFlatDamageHealing();
+     * atak = bron w rece (kastety), bez broni piesci {@link pl.fawizja.pixel.combat.CombatFormulas#FIST_ATTACK}.
+     */
+    public static double monkPower(SpellType s, PlayerCharacter pc) {
+        int attack = pc.equipment().weaponType() != pl.fawizja.pixel.item.WeaponType.NONE
+                ? pc.equipment().weaponAttack() : pl.fawizja.pixel.combat.CombatFormulas.FIST_ATTACK;
+        return s.base() * pc.effectiveSkill(Skill.FIST) / 100.0 * attack / 10.0
+                + pl.fawizja.pixel.vocation.Harmony.flatDamageHealing(pc.level())
+                + pl.fawizja.pixel.vocation.Harmony.noviceBonus(pc.level());
+    }
+
+    /** Srednia wartosc efektu teraz: wartosc bazowa z premia harmonii (spender) i cnota wytrwalosci (leczenie mnicha). */
+    public double expectedValue(SpellType s) {
+        double v = baseValue(s, pc);
+        if (s.monkRole() == MonkRole.SPENDER) v *= pc.harmony().bonus();
+        if (s.kind().isHeal() && pc.vocation() == Vocation.MONK) v *= pc.harmony().healFactor();
+        return v;
+    }
+
+    /** Rozrzut czarow mnicha jak w Canary: od -10% do +10%. */
+    public static final double MONK_ROLL = 0.10;
+
+    /** Wartosc efektu z losowaniem: czary mnicha +-10% i premia harmonii (spender), leczenie mnicha x cnota wytrwalosci. */
     private int roll(SpellType s) {
-        double v = baseValue(s, pc) * (MIN_ROLL + rng.nextDouble() * (MAX_ROLL - MIN_ROLL));
+        double v = baseValue(s, pc) * (s.monkFormula() ? 1 - MONK_ROLL + rng.nextDouble() * 2 * MONK_ROLL
+                : MIN_ROLL + rng.nextDouble() * (MAX_ROLL - MIN_ROLL));
+        if (s.monkRole() == MonkRole.SPENDER) v *= pc.harmony().bonus();
+        if (s.kind().isHeal() && pc.vocation() == Vocation.MONK) v *= pc.harmony().healFactor();
         return (int) Math.max(1, Math.min(Integer.MAX_VALUE, Math.round(v)));
+    }
+
+    // ------------------------------------------------------------------ harmonia mnicha
+
+    /**
+     * Po udanym czarze (Canary Spell::postCastSpell): spender leczy za wszystkie punkty, zeruje je, skraca odnowienie
+     * czarow budujacych o 2 s za punkt, a z cnota harmonii od razu buduje 1 punkt; builder dodaje 1 punkt.
+     */
+    private void afterMonkCast(SpellType s, long now) {
+        pl.fawizja.pixel.vocation.Harmony h = pc.harmony();
+        if (s.monkRole() == MonkRole.SPENDER) {
+            int spent = h.points();
+            harmonyHeal(spent, now);
+            h.spend();
+            if (spent > 0) {
+                for (SpellType b : spells.all()) {
+                    if (b.monkRole() == MonkRole.BUILDER) cooldowns.cut(b, pl.fawizja.pixel.vocation.Harmony.COOLDOWN_CUT_PER_POINT_MS * spent, now);
+                }
+            }
+            if (h.virtue() == pl.fawizja.pixel.vocation.Harmony.Virtue.HARMONY) buildHarmony(1, now);
+        } else if (s.monkRole() == MonkRole.BUILDER) {
+            buildHarmony(1, now);
+        }
+    }
+
+    /** Buduje punkty harmonii; kazde zbudowanie leczy (Canary buildHarmony -> healFromHarmony). */
+    private void buildHarmony(int charges, long now) {
+        int added = pc.harmony().build(charges);
+        if (added > 0) harmonyHeal(added, now);
+    }
+
+    /**
+     * Leczenie z harmonii (Canary Player::healFromHarmony): najbardziej ranny widoczny czlonek druzyny, gdy ma mniej
+     * zdrowia niz mnich, inaczej sam mnich. Cnota wytrwalosci go nie wzmacnia (ORIGIN_HARMONY).
+     */
+    private void harmonyHeal(int charges, long now) {
+        int amount = pl.fawizja.pixel.combat.CombatFormulas.rollBetween(pl.fawizja.pixel.vocation.Harmony.healMin(pc.level(), charges),
+                pl.fawizja.pixel.vocation.Harmony.healMax(pc.level(), charges), rng);
+        Ally best = null;
+        int lowest = pc.health();
+        for (Ally a : visibleAllies()) {
+            if (a.health() > 0 && a.health() < lowest) {
+                best = a;
+                lowest = a.health();
+            }
+        }
+        if (best == null) {
+            int healed = pc.heal(amount);
+            if (healed > 0) combat.addEvent(new CombatEvent(now, pc.position(), healed, CombatEvent.Kind.HEAL));
+        } else {
+            int healed = best.heal(amount);
+            if (healed > 0) combat.addEvent(new CombatEvent(now, best.position(), healed, CombatEvent.Kind.HEAL));
+        }
+    }
+
+    /**
+     * Spokoj mnicha co krok gry (Canary Player::updateSerenityState): traci go mnich, ktory widzi czlonka druzyny
+     * i ma na 8 polach wokol co najmniej 6 stworzen (potwory i inni gracze). Zwraca true, gdy stan sie zmienil.
+     */
+    public boolean updateSerenity(long dtMs, long now) {
+        if (pc.vocation() != Vocation.MONK) return false;
+        Position me = pc.position();
+        int around = 0;
+        for (Monster m : monsters.near(me, 1)) {
+            if (!m.isDead() && m.position().z() == me.z() && !m.position().equals(me) && me.distanceTo(m.position()) <= 1) around++;
+        }
+        if (allies != null) around += allies.playersAround();
+        // bez wpisu w dzienniku (w tlumie stan zmienia sie czesto): spokoj widac przy kulach harmonii w HUD
+        return pc.harmony().update(dtMs, !visibleAllies().isEmpty(), around);
     }
 
     // ------------------------------------------------------------------ czary
@@ -170,6 +298,7 @@ public final class SpellSystem {
         if (r != CastResult.OK) return report(r, now);
         pc.spendMana(s.mana());
         trainMagic(s.mana(), now);
+        if (s.monkRole() != MonkRole.NONE) afterMonkCast(s, now);
         cooldowns.trigger(s, now);
         return CastResult.OK;
     }
@@ -219,8 +348,43 @@ public final class SpellSystem {
                 return CastResult.OK;
             case ATTACK_AREA:
                 combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), s.damageType().name()));
-                for (Monster m : targetsAround(pc.position(), s.radius())) combat.damageMonster(m, roll(s), s.damageType(), now);
+                for (Monster m : limitTargets(targetsAround(pc.position(), s.radius()), s.produceCount())) {
+                    combat.damageMonster(m, roll(s), s.damageType(), now);
+                }
                 strikePlayers(pc.position(), s, now);
+                return CastResult.OK;
+            case HEAL_PARTY: {
+                // Zbiorowe uleczenie ducha: mnich i druzyna w promieniu, kazdy z osobnym losowaniem (Canary mass_spirit_mend)
+                combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), "HEAL"));
+                int healed = pc.heal(roll(s));
+                combat.addEvent(new CombatEvent(now, pc.position(), healed, CombatEvent.Kind.HEAL));
+                for (Ally a : visibleAllies()) {
+                    if (a.health() <= 0 || a.position().z() != pc.position().z() || pc.position().distanceTo(a.position()) > s.radius()) continue;
+                    int h = a.heal(roll(s));
+                    if (h > 0) combat.addEvent(new CombatEvent(now, a.position(), h, CombatEvent.Kind.HEAL));
+                }
+                return CastResult.OK;
+            }
+            case VIRTUE: {
+                pl.fawizja.pixel.vocation.Harmony.Virtue v = pl.fawizja.pixel.vocation.Harmony.Virtue.ofSpell(s.key());
+                if (v == null) return CastResult.NOT_USABLE;
+                pc.harmony().setVirtue(v);
+                combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HEAL"));
+                log.add(now, EventLog.Kind.INFO, v.label + ": " + v.effect + ".");
+                return CastResult.OK;
+            }
+            case FOCUS_SERENITY:
+                // Canary focus_serenity.lua: zeruje odnowienia czarow wydajacych, spokoj na 7 s, pelna harmonia
+                for (SpellType o : spells.all()) if (o.monkRole() == MonkRole.SPENDER) cooldowns.cut(o, Long.MAX_VALUE, now);
+                pc.harmony().forceSerene(pl.fawizja.pixel.vocation.Harmony.FOCUS_SERENE_MS);
+                buildHarmony(pl.fawizja.pixel.vocation.Harmony.MAX, now);
+                combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
+                log.add(now, EventLog.Kind.INFO, s.name() + ": pełna harmonia i spokój na 7 s.");
+                return CastResult.OK;
+            case FOCUS_HARMONY:
+                buildHarmony(pl.fawizja.pixel.vocation.Harmony.MAX, now);
+                combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
+                log.add(now, EventLog.Kind.INFO, s.name() + ": pełna harmonia.");
                 return CastResult.OK;
             case RUNE_AREA: {
                 Position pvp = playerTargetPosition();
@@ -267,6 +431,22 @@ public final class SpellSystem {
     private void strikePlayers(Position center, SpellType s, long now) {
         if (playerTarget == null) return;
         playerTarget.strikeArea(center, s.radius(), p -> world.hasLineOfSight(center, p), () -> roll(s), s.damageType(), now);
+    }
+
+    /**
+     * Czar lancuchowy mnicha (Lancuch pokuty, Wybuch ducha): kolumna "ilosc" = najwiecej celow; najpierw wybrany cel,
+     * potem najblizsze. 0 = wszystkie w obszarze.
+     */
+    private List<Monster> limitTargets(List<Monster> all, int max) {
+        if (max <= 0 || all.size() <= max) return all;
+        Monster t = combat.target();
+        Position me = pc.position();
+        all.sort((a, b) -> {
+            if (a == t) return -1;
+            if (b == t) return 1;
+            return Integer.compare(me.distanceTo(a.position()), me.distanceTo(b.position()));
+        });
+        return new ArrayList<>(all.subList(0, max));
     }
 
     private List<Monster> targetsAround(Position center, int radius) {

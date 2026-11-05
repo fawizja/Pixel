@@ -33,6 +33,8 @@ public final class PlayerCharacter {
     private final pl.fawizja.pixel.quest.HuntTask hunt = new pl.fawizja.pixel.quest.HuntTask();
     private final pl.fawizja.pixel.daily.LoginStreak loginStreak = new pl.fawizja.pixel.daily.LoginStreak();
     private final pl.fawizja.pixel.item.Enchantments enchantments = new pl.fawizja.pixel.item.Enchantments();
+    /** Harmonia, cnota i spokoj mnicha (inne profesje maja stan poczatkowy). */
+    private final pl.fawizja.pixel.vocation.Harmony harmony = new pl.fawizja.pixel.vocation.Harmony();
     /** Otwarte skrzynie skarbow (identyfikatory). */
     private final java.util.Set<String> openedChests = new java.util.LinkedHashSet<>();
     /** Ukonczone wyprawy na bossa w piec postaci (identyfikatory z boss_quests.csv) - kazda raz na postac. */
@@ -120,6 +122,7 @@ public final class PlayerCharacter {
         hunt.copyFrom(o.hunt);
         loginStreak.copyFrom(o.loginStreak);
         enchantments.copyFrom(o.enchantments);
+        harmony.copyFrom(o.harmony);
         openedChests.clear();
         openedChests.addAll(o.openedChests);
         completedBossQuests.clear();
@@ -339,6 +342,17 @@ public final class PlayerCharacter {
     public pl.fawizja.pixel.quest.HuntTask hunt() { return hunt; }
     public pl.fawizja.pixel.daily.LoginStreak loginStreak() { return loginStreak; }
     public pl.fawizja.pixel.item.Enchantments enchantments() { return enchantments; }
+    public pl.fawizja.pixel.vocation.Harmony harmony() { return harmony; }
+
+    /**
+     * Poziom umiejetnosci do formul walki i czarow: walka piesciami mnicha z cnota sprawiedliwosci +15% (+30% w spokoju),
+     * jak premia SKILL_FISTPERCENT w Canary. Pozostale umiejetnosci bez zmian.
+     */
+    public int effectiveSkill(Skill s) {
+        int lvl = skills.level(s);
+        if (s != Skill.FIST || vocation != Vocation.MONK) return lvl;
+        return (int) Math.round(lvl * harmony.fistFactor());
+    }
     public java.util.Set<String> openedChests() { return openedChests; }
     public java.util.Set<String> completedBossQuests() { return completedBossQuests; }
 
@@ -616,6 +630,7 @@ public final class PlayerCharacter {
         health = maxHealth();
         mana = maxMana();
         regenAccumulatorMs = 0;
+        harmony.empty(); // jak w Canary: smierc zeruje harmonie mnicha (cnota zostaje)
     }
 
     /** Odtwarza stan z zapisu (waliduje zakresy). */
