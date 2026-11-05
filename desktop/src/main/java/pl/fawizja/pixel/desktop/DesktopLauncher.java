@@ -25,6 +25,7 @@ import pl.fawizja.pixel.world.Position;
  *                                     czas: 50 ms na klatke, staly dzien i czas rzeczywisty - zrzut nie zalezy od maszyny
  *   -Dpixel.frameMs=N                 krok czasu sesji na klatke (0 = zegar rzeczywisty)
  *   -Dpixel.level=N      podglad postaci na wyzszym poziomie (zrzuty)
+ *   -Dpixel.skills=AXE:82,SHIELDING:77  nowa postac z tymi poziomami umiejetnosci (np. z symulacji polowania)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
  *   -Dpixel.partySize=N  przy -Dpixel.open=party: wielkosc podgladanej druzyny (2..5, rozne profesje, premia exp)
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)

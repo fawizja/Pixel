@@ -820,10 +820,16 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
   Paladin 1.4/1.2/1.2/1.1/1.1/1.1, Sorcerer 1.1/2.0/1.5/2.0/1.5/1.1, Druid 1.1/1.8/1.5/1.8/1.5/1.1,
   Monk (vocations.xml Canary 15.x) 1.3/1.5/1.1/2.0/1.2/1.1. `Skills` zna profesje (tworzy je `PlayerCharacter`);
   `new Skills()` = bez profesji (Rookgaard: 3.0/2.0/1.5/2.0/1.5/1.1).
-- Proby (`Skills.train`, mnozone przez etap serwera; `addTries` = surowe): cios bronia/piescia i strzal w potwora
-  +1 (`CombatSystem.update`), cios fizyczny potwora w postac +1 tarczy - tylko z tarcza w rece (mnich bez tarczy),
-  rzut wedka +1 (udany czy nie), kazdy punkt wydanej many na czar (takze tworzenie run) +1 magii
-  (`SpellSystem.trainMagic`, bez wspolczynnika profesji - profesja decyduje tylko o krzywej). Manekin
+- Proby (`Skills.train`, mnozone przez etap serwera; `addTries` = surowe): kazdy atak bronia/piescia/rozdzka
+  i strzal w potwora, takze chybiony, +`Balance.HUNT_TRY_FACTOR` (30) (`CombatSystem.update`), kazdy atak potwora,
+  ktory tarcza moze odeprzec (wrecz dowolnego zywiolu albo fizyczny pocisk, `CombatSystem.blockable`),
+  +`Balance.BLOCK_TRY_FACTOR` (90) tarczy - tylko z tarcza w rece (mnich bez tarczy), rzut wedka +1 (udany czy nie),
+  kazdy punkt wydanej many na czar (takze tworzenie run) +HUNT_TRY_FACTOR magii (`SpellSystem.trainMagic`, bez
+  wspolczynnika profesji - profesja decyduje tylko o krzywej). HUNT_TRY_FACTOR to stala kompensacji: potwory
+  gina w 1,5-3 s (2-4 ciosy na zabicie), a exp rosnie z etapami jak na RubinOT, wiec przy 1 probie na atak rycerz 100
+  mial z polowania bron ~51 / tarcze ~45, a czarodziej magie ~40. Z czynnikiem (`HuntBalanceSimulationTest#skillsFollowTheLevel`,
+  polowanie od poziomu 1): rycerz 50/100/200 bron 64/82/97, tarcza 59/77/96; paladyn dystans 68/83/101; czarodziej
+  i druid magia 54/72/94 - typowo dla poziomu (rycerz 70/65 i 85/80, magia 50 i 68, tolerancja 7). Manekin
   (`GameSession.updateTraining`): co 3 s +1 umiejetnosci broni, co 6 s +1 tarczy (z tarcza). Brak treningu na
   potworach ponizej progu `poziom > 4 * poziom potwora + 20` (`CombatSystem.isTrivial`).
 - Etapy serwera (`Balance.EXP_STAGES` / `SKILL_STAGES` / `MAGIC_STAGES`, jak "stages" na OTS, np. RubinOT;

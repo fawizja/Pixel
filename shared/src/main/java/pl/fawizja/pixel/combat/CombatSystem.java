@@ -205,7 +205,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         lastMonsterAttackMs = now;
         leech(dealt);
         monsters.provoke(target);
-        if (!isTrivial(target.type())) pc.skills().train(ap.skill(), 1);
+        // jak w Tibii kazdy atak (takze chybiony albo zablokowany) to proba; Balance.HUNT_TRY_FACTOR wyrownuje krotkie walki
+        if (!isTrivial(target.type())) pc.skills().train(ap.skill(), Balance.HUNT_TRY_FACTOR);
         // wrecz: "skad" = gracz (animacja wypadu na kliencie)
         push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
                 ap.range() > 1 ? null : pc.position(), null));
@@ -379,6 +380,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         return pc.equipment().shieldDefense() > 0 || pc.vocation() == pl.fawizja.pixel.vocation.Vocation.MONK;
     }
 
+    /**
+     * Atak, ktory tarcza moze odeprzec (proba tarczy jak w Tibii): kazdy cios wrecz, takze zywiolowy, i fizyczny
+     * pocisk; czary potworow na dystans tarczy nie ucza.
+     */
+    public static boolean blockable(MonsterType t) {
+        return t.range() <= 1 || t.damageType() == DamageType.PHYSICAL;
+    }
+
     @Override
     public void monsterAttacks(Monster m, long now) {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
@@ -388,7 +397,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), t.damageType().name()));
         int dealt = pc.damage(dmg);
         recap.record(t.name(), dealt, now);
-        if (t.damageType() == DamageType.PHYSICAL && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, 1);
+        if (blockable(t) && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 t.range() > 1 ? null : m.position(), null));
         if (pc.isDead()) onPlayerDeath(m, now);

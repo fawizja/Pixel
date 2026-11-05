@@ -10,6 +10,7 @@ import pl.fawizja.pixel.TestData;
 import pl.fawizja.pixel.balance.Balance;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.character.Skill;
+import pl.fawizja.pixel.character.Skills;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.monster.Monster;
@@ -272,5 +273,31 @@ class CombatTest {
         assertEquals(tries, pc.skills().tries(Skill.FIST));
         assertEquals(lvl, pc.skills().level(Skill.FIST));
         assertFalse(system(TestData.newCharacter(Vocation.MONK), new Random(1), mm).isTrivial(REG.get("wolf")));
+    }
+
+    @Test
+    void everyAttackAndEveryBlockableHitCountsWithTheHuntFactor() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.MONK);
+        pc.setPosition(new Position(10, 12, 0));
+        SpawnPoint sp = new SpawnPoint("cave_troll", new Position(11, 12, 0), 0, 1, 60);
+        MonsterManager mm = new MonsterManager(TestData.varden(), REG, List.of(sp), new Random(3));
+        mm.populate(null);
+        Monster troll = mm.monsters().get(0);
+        CombatSystem cs = system(pc, new Random(5), mm);
+        cs.setTarget(troll);
+        cs.update(0); // jeden atak piescia (trafiony, chybiony czy zablokowany - zawsze proba)
+        Skills ref = new Skills(Vocation.MONK); // to samo co HUNT_TRY_FACTOR prob z etapem serwera
+        ref.train(Skill.FIST, Balance.HUNT_TRY_FACTOR);
+        assertTrue(ref.level(Skill.FIST) > 10, "one attack is worth several of Tibia's tries");
+        assertEquals(ref.level(Skill.FIST), pc.skills().level(Skill.FIST));
+        assertEquals(ref.tries(Skill.FIST), pc.skills().tries(Skill.FIST));
+        cs.monsterAttacks(troll, 100); // mnich trenuje tarcze bez tarczy; cios wrecz = BLOCK_TRY_FACTOR prob
+        ref.train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
+        assertEquals(ref.level(Skill.SHIELDING), pc.skills().level(Skill.SHIELDING));
+        assertEquals(ref.tries(Skill.SHIELDING), pc.skills().tries(Skill.SHIELDING));
+        // tarcza odpiera kazdy cios wrecz (takze zywiolowy) i fizyczne pociski, ale nie czary z dystansu
+        assertTrue(CombatSystem.blockable(REG.get("gilded_beetle")), "earth melee");
+        assertTrue(CombatSystem.blockable(REG.get("cave_troll")));
+        assertFalse(CombatSystem.blockable(REG.get("frost_witch")), "ranged ice spell");
     }
 }

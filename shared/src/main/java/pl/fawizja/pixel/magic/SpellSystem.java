@@ -280,8 +280,9 @@ public final class SpellSystem {
     private void trainMagic(int mana, long now) {
         if (mana <= 0) return;
         // jak w Tibii: kazdy punkt wydanej many (takze na tworzenie run) to punkt do poziomu magii;
-        // profesja decyduje tylko o krzywej (Skills.vocationConstant), mnoznik serwera dolicza Skills.train
-        int gained = pc.skills().train(Skill.MAGIC, mana);
+        // profesja decyduje tylko o krzywej (Skills.vocationConstant), mnoznik serwera dolicza Skills.train,
+        // a Balance.HUNT_TRY_FACTOR wyrownuje tempo magii do szybkich poziomow
+        int gained = pc.skills().train(Skill.MAGIC, (long) mana * pl.fawizja.pixel.balance.Balance.HUNT_TRY_FACTOR);
         if (gained > 0) log.add(now, EventLog.Kind.SYSTEM, "Poziom magii: " + pc.skills().level(Skill.MAGIC));
     }
 
