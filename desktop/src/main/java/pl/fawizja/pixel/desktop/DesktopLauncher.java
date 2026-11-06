@@ -50,6 +50,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=wheel[=id]  podglad Kola Przeznaczenia (np. wheel=wheel:q:P, wheel=wheel:perks); -Dpixel.wheelOrder=PRBG, -Dpixel.wheelAvatar=true
  *   -Dpixel.open=bestcard|bestclass|charms[=id]  podglad bestiariusza i charmow (np. charms=charm:sel:WOUND); -Dpixel.charmProc=true liczby charmow
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
  *   -Dpixel.stamina=M    nowa postac z M minutami staminy (np. 750 = 12:30, pomaranczowa); -Dpixel.premium=1 konto premium
@@ -438,6 +439,23 @@ public final class DesktopLauncher {
                     String id = o.length > 1 ? o[1] : open.startsWith("bestcard") ? "best:wolf" : open.startsWith("bestclass") ? "bestclass:Mammal" : "charm:open";
                     gs.press(id);
                 }
+                if (open != null && open.startsWith("wheel")) {
+                    // podglad Kola Przeznaczenia: promocja + premium, punkty rozdane wg -Dpixel.wheelOrder (domyslnie PRBG:
+                    // najpierw fioletowa cwiartka - objawienie awatara), -Dpixel.wheelAvatar=true wlacza awatara
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pc.setPromoted(true);
+                    pc.setPremium(true);
+                    fillWheel(pc, System.getProperty("pixel.wheelOrder", "PRBG"));
+                    if (Boolean.getBoolean("pixel.wheelAvatar")) {
+                        pc.wheel().startAvatar(pc.wheelBonus().stage(pl.fawizja.pixel.wheel.WheelDomain.PURPLE),
+                                pl.fawizja.pixel.wheel.DestinyWheel.AVATAR_COOLDOWN_MS);
+                    }
+                    pc.heal(pc.maxHealth());
+                    pc.restoreMana(pc.maxMana());
+                    String[] o = open.split("=", 2);
+                    gs.press(o.length > 1 ? o[1] : "wheel");
+                }
                 if ("mount".equals(open)) {
                     // podglad: postac na koniu (przycisk KON widoczny)
                     pl.fawizja.pixel.character.PlayerCharacter pc = ((GameScreen) getScreen()).session().character();
@@ -775,6 +793,25 @@ public final class DesktopLauncher {
             if (s.trim().length() > 2) return pl.fawizja.pixel.world.Direction.valueOf(s.trim().toUpperCase(java.util.Locale.ROOT));
             k = k.replaceAll("_+$", "");
             return pl.fawizja.pixel.world.Direction.valueOf(k);
+        }
+
+        /** Podglad kola: zapelnia otwarte pola cwiartek w podanej kolejnosci (np. "PRBG"), az skoncza sie punkty. */
+        private static void fillWheel(pl.fawizja.pixel.character.PlayerCharacter pc, String order) {
+            int av = pc.wheelPoints();
+            boolean progress = true;
+            while (progress && pc.wheel().unused(av) > 0) {
+                progress = false;
+                for (char c : order.toCharArray()) {
+                    pl.fawizja.pixel.wheel.WheelDomain d = pl.fawizja.pixel.wheel.WheelDomain.ofCode(c);
+                    if (d == null) continue;
+                    for (pl.fawizja.pixel.wheel.WheelSlice s : pl.fawizja.pixel.wheel.WheelSlice.of(d)) {
+                        int n = Math.min(pc.wheel().unused(av), s.capacity() - pc.wheel().points(s));
+                        if (n > 0 && pc.wheel().add(s, n, av) == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) progress = true;
+                    }
+                    if (progress) break; // cwiartka po cwiartce: najpierw wypelnij pierwsza
+                }
+            }
+            pc.refreshWheel();
         }
     }
 }

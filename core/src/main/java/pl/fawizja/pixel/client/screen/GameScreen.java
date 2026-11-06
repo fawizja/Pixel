@@ -320,6 +320,7 @@ public final class GameScreen extends ScreenAdapter {
                 () -> game.monsters() == null ? java.util.Collections.emptyList() : game.monsters().all();
         hud.setBestiaryTypes(types);
         this.bestiaryWindows = new pl.fawizja.pixel.client.ui.BestiaryWindows(hud, session, types, this::act);
+        this.wheelWindows = new pl.fawizja.pixel.client.ui.WheelWindows(hud, session, this::act);
         Gdx.input.setCatchKey(Input.Keys.BACK, true); // Wstecz na Androidzie zamyka okna zamiast konczyc gre
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
@@ -503,6 +504,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.J: hud.toggleMap(); return true;
                     case Input.Keys.Z: hud.openJournal(); return true;
                     case Input.Keys.H: openHunt(); return true;
+                    case Input.Keys.U: wheelWindows.open(); return true;
                     case Input.Keys.ESCAPE:
                         hud.closeTop(session);
                         return true;
@@ -561,6 +563,7 @@ public final class GameScreen extends ScreenAdapter {
             case "book": hud.toggleBook(); break;
             case "quest": hud.openJournal(); break;
             case "store": openStore(); break;
+            case "wheel": wheelWindows.open(); break;
             case "hud:skills": hud.toggleSkills(); break;
             case "hud:vip": hud.toggleVip(); break;
             case "vip:add": openChat("/znajomi dodaj "); break;
@@ -684,6 +687,8 @@ public final class GameScreen extends ScreenAdapter {
                     sendChat(id.substring("cmd:".length())); // polecenie z okna /pomoc
                 } else if (id.equals("ach:bestiary")) {
                     hud.openAchievements(true);
+                } else if (wheelWindows.handle(id, t)) {
+                    // Kolo Przeznaczenia: okna w WheelWindows, zmiany punktow przez act (online serwer)
                 } else if (bestiaryWindows.handle(id, t)) {
                     // bestiariusz (klasy, karta potwora) i charmy: okna w BestiaryWindows
                 } else if (id.startsWith("outfit:")) {
@@ -940,6 +945,10 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (cmd.equals("/znaczniki") || cmd.startsWith("/znacznik ") || cmd.equals("/znacznik")) {
             markerCommand(text.trim(), cmd);
+            return;
+        }
+        if (cmd.equals("/kolo") || cmd.equals("/koło")) {
+            wheelWindows.open();
             return;
         }
         if (cmd.equals("/bossowie")) {
@@ -1399,12 +1408,18 @@ public final class GameScreen extends ScreenAdapter {
     /** Odswiezanie otwartego okna analizy co sekunde; licznik startuje z pierwsza klatka gry. */
     /** Okna bestiariusza i charmow (klasa, karta, charmy). */
     private pl.fawizja.pixel.client.ui.BestiaryWindows bestiaryWindows;
+    /** Okna Kola Przeznaczenia. */
+    private pl.fawizja.pixel.client.ui.WheelWindows wheelWindows;
+
+    /** Podglad okien kola (-Dpixel.open=wheel...). */
+    public pl.fawizja.pixel.client.ui.WheelWindows wheelWindows() { return wheelWindows; }
 
     /** Podglad okien bestiariusza i charmow (-Dpixel.open=bestiary_stage / charms / charm). */
     public pl.fawizja.pixel.client.ui.BestiaryWindows bestiaryWindows() { return bestiaryWindows; }
 
     private void updateHunt(long t) {
         bestiaryWindows.update(t);
+        wheelWindows.update(t);
         if (hunt == null) hunt = new pl.fawizja.pixel.stats.HuntAnalyzer(session.items());
         if (!hunt.started()) hunt.reset(t, session.character());
         if (t - huntRefreshMs >= 1000 && hud.infoOpen(HUNT_TITLE)) {

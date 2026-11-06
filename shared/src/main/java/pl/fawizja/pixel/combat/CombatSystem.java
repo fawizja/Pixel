@@ -308,7 +308,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     /** Mikstura sily, potem cios krytyczny (raw * (1 + obrazenia krytyczne + charm Dziki cios)), gdy wypadl. */
     private int critical(int raw, boolean crit, MonsterType t) {
-        return CriticalHit.apply(pc, pc.enchantments().outgoing(raw), crit, pl.fawizja.pixel.charm.CharmEffects.critDamageBonus(pc, t));
+        return CriticalHit.apply(pc, pc.enchantments().outgoing(pl.fawizja.pixel.wheel.WheelEffects.outgoing(pc, raw)), crit,
+                pl.fawizja.pixel.charm.CharmEffects.critDamageBonus(pc, t)); // Kolo Przeznaczenia: premie i plaskie obrazenia
     }
 
     /** Zdarzenie do wyswietlenia (leczenie z czaru, mikstury). */
@@ -463,6 +464,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             return;
         }
         int dealt = pc.damage(dmg);
+        pl.fawizja.pixel.wheel.WheelEffects.onMonsterStrike(pc); // Kolo Przeznaczenia: Leczenie w boju
         recap.record(t.name(), dealt, now);
         if (blockable(t) && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,

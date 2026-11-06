@@ -28,9 +28,18 @@ public final class Cooldowns {
         return Math.max(0, groups.getOrDefault(g, 0L) - now);
     }
 
-    public void trigger(SpellType s, long now) {
-        spells.put(s.key(), now + s.cooldownMs());
+    public void trigger(SpellType s, long now) { trigger(s, now, s.cooldownMs()); }
+
+    /** Jak wyzej z wlasnym odnowieniem czaru (premia Kola Przeznaczenia). */
+    public void trigger(SpellType s, long now, long cooldownMs) {
+        spells.put(s.key(), now + Math.max(0, cooldownMs));
         groups.put(s.group(), now + s.group().groupCooldownMs);
+    }
+
+    /** Skraca wszystkie trwajace odnowienia czarow i grup o ms (Dar Zycia: -60 s). */
+    public void cutAll(long ms, long now) {
+        spells.replaceAll((k, until) -> until <= now ? until : Math.max(now, until - ms));
+        groups.replaceAll((k, until) -> until <= now ? until : Math.max(now, until - ms));
     }
 
     public void triggerGroup(SpellGroup g, long now, long ms) {

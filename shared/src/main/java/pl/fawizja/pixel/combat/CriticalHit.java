@@ -30,6 +30,7 @@ public final class CriticalHit {
     public static double chance(PlayerCharacter pc) {
         double c = BASE_CHANCE + pc.equipment().critChanceBonus();
         if (pc.enchantments().active(Enchantments.Kind.CRIT)) c += Enchantments.CRIT_CHANCE;
+        c += pl.fawizja.pixel.wheel.WheelEffects.critChance(pc); // Kolo Przeznaczenia: awatar, ulepszenie czaru
         return Math.min(100, c);
     }
 
@@ -37,7 +38,7 @@ public final class CriticalHit {
     public static double extraDamage(PlayerCharacter pc) {
         double d = BASE_DAMAGE + pc.equipment().critDamageBonus();
         if (pc.enchantments().active(Enchantments.Kind.CRIT)) d += Enchantments.CRIT_BONUS_PERCENT;
-        return d;
+        return d + pl.fawizja.pixel.wheel.WheelEffects.critDamage(pc); // Kolo Przeznaczenia
     }
 
     /** Jeden rzut na krytyk (szansa w setnych czesciach procenta, jak w Canary). */

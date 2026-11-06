@@ -78,11 +78,11 @@ public final class CombatFormulas {
         // rozdzki i laski (jak WeaponWand w TFS) i czary nie zaleza od trybu
         double mode = pc.fightMode().damageFactor();
         if (skill == Skill.MAGIC) {
-            max = attack * (1.0 + pc.skills().level(Skill.MAGIC) / 25.0) * v.magicFactor() + bonus;
+            max = attack * (1.0 + pc.effectiveSkill(Skill.MAGIC) / 25.0) * v.magicFactor() + bonus;
         } else if (skill == Skill.DISTANCE) {
             ItemType ammo = ammunition(pc, items);
             if (ammo != null) attack += ammo.attack() / AMMO_ATTACK_DIVISOR;
-            max = attack * (pc.skills().level(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() * mode + bonus;
+            max = attack * (pc.effectiveSkill(Skill.DISTANCE) + 10) / 20.0 * v.distanceFactor() * mode + bonus;
         } else {
             max = attack * (pc.effectiveSkill(skill) + 10) / 20.0 * v.meleeFactor() * mode + bonus; // mnich: cnota sprawiedliwosci
         }
@@ -136,17 +136,20 @@ public final class CombatFormulas {
         double d = protect(damage, pc.equipment().protection(type));
         if (type == DamageType.PHYSICAL) {
             int armor = pc.equipment().totalArmor();
-            d -= rollBetween(0, armor / 2, rng);
-            double defense = pc.equipment().totalDefense() * pc.vocation().defenseFactor()
-                    * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0 * mode.defenseFactor(attackedRecently);
-            d -= rollBetween(0, (int) (defense / 3), rng);
+            double absorbed = rollBetween(0, armor / 2, rng);
+            int shielding = pc.effectiveSkill(Skill.SHIELDING);
+            double defense = (pc.equipment().totalDefense() + pl.fawizja.pixel.wheel.WheelEffects.extraDefense(pc))
+                    * pc.vocation().defenseFactor() * (shielding + 10) / 20.0 * mode.defenseFactor(attackedRecently);
+            absorbed += rollBetween(0, (int) (defense / 3), rng);
             int shield = pc.equipment().shieldDefense();
             if (mode == FightMode.DEFENSIVE && shield > 0) {
                 // tryb defensywny z tarcza: dodatkowe blokowanie ciosow tarcza
-                double block = shield * pc.vocation().defenseFactor() * (pc.skills().level(Skill.SHIELDING) + 10) / 20.0;
-                d -= rollBetween((int) (block / 6), (int) (block / 2), rng);
+                double block = shield * pc.vocation().defenseFactor() * (shielding + 10) / 20.0;
+                absorbed += rollBetween((int) (block / 6), (int) (block / 2), rng);
             }
+            d -= absorbed * pl.fawizja.pixel.wheel.WheelEffects.mitigationFactor(pc); // mitygacja z Kola Przeznaczenia
         }
+        d = pl.fawizja.pixel.wheel.WheelEffects.incoming(pc, Math.max(0, d)); // awatar: -5/10/15%
         return (int) Math.max(0, Math.round(d));
     }
 }

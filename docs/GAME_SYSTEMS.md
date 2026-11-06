@@ -876,6 +876,69 @@ liczenie zabic (`CombatSystem.setDeathListener`), nagrody 100 gp / wrog, 1 000 g
 - Zapis: pole `charms` = `pkt,maxPkt,echa,maxEcha|NAZWA:stopien:klucz|...` (bez zmiany wersji zapisu);
   zapis bez pola dostaje punkty za juz ukonczone wpisy (`Charms.migrateFrom`). Klient online dostaje stan w SELF.
 
+## Kolo Przeznaczenia (Z logika `wheel/*`, S serwer, C okno, 2026-11-06)
+
+Liczby z Canary (`io_wheel.cpp`, `player_wheel.cpp`, skrypty czarow objawien); co jest przeskalowane albo zastapione,
+opisuje "Uproszczenia" nizej.
+
+- Dostep: poziom 51+, promocja (`isPromoted`) i premium; 1 punkt promocji za kazdy poziom od 51
+  (`DestinyWheel.available` = poziom - 50). Bez premium lub promocji punkty zostaja, ale premie sa uspione
+  (`PlayerCharacter.wheelBonus()` = `WheelBonus.NONE`). Po utracie poziomow `trim` zdejmuje nadmiar od zewnatrz
+  kola (pola 200, 150, ...) i usuwa pola odciete od srodka.
+- 36 pol (`WheelSlice`): 4 cwiartki (`WheelDomain`: zielona, czerwona, fioletowa, niebieska) x 9 pol o pojemnosci
+  50 / 75 x2 / 100 x3 / 150 x2 / 200. Pole mozna zasilic, gdy jedno z pol-poprzednikow (listy z Canary
+  `canPlayerSelectPointOnSlot`, z polaczeniami miedzy cwiartkami G_T-R_T, R_B-P_T, P_B-B_B, B_T-G_B) jest pelne
+  i postac ma lacznie co najmniej 50 / 125 / 225 / 375 punktow dla pol 75 / 100 / 150 / 200. Zdjecie punktu,
+  od ktorego zalezy inne niepuste pole, jest odrzucane.
+- Oddanie (kazdy punkt pola): HP rycerz 3 / paladyn 2 / mag 1 / mnich 2, mana 1 / 3 / 6 / 2, udzwig 5 / 4 / 2 / 5,
+  mitygacja 0,03% (mnoznik pochlaniania pancerza i obrony, jak Canary `calculateMitigation`).
+- Przekonanie (pelne pole): +1 umiejetnosci profesji (wrecz / dystans / magia / piesci), kradziez zycia 0,75%,
+  many 0,25%, ulepszenie czaru (`WheelPerks`, 5 grup na profesje; stopien = liczba pelnych pol grupy, 1-2),
+  pasywki pol 200 (`WheelPassive`: zielone 200 Instynkt bitewny / Taktyka pozycyjna / Mistrzostwo run / Wiez
+  lecznicza / Przewodnia obecnosc, fioletowe 200 Leczenie w boju / Mistrzostwo balistyki / Mistrzostwo skupienia /
+  Mistrzostwo run / Sanktuarium), naczynia klejnotow (puste - klejnoty to dalszy etap).
+- Objawienia: etap 1/2/3 przy 250/500/1000 punktach w cwiartce; kazdy etap kazdej cwiartki daje +4/+9/+20
+  obrazen (tylko w potwory) i leczenia. Zielona: Dar Zycia (smiertelny cios, ktorego nadwyzka nie przekracza
+  20/25/30% maks. HP, leczy tyle procent i postac przezywa; odnowienie 30/20/10 h gry; skraca odnowienia czarow
+  o minute). Fioletowa: awatar profesji (czar `avatar_of_*`, 15 s: -5/10/15% obrazen otrzymanych, kazdy cios
+  krytyczny, +5/10/15% obrazen krytycznych; odnowienie 2 h - 30 min za etap 2 i 3). Czerwona: Rzut kata,
+  Boski granat, Mistrzostwo promienia (Wielki promien smierci), Blogoslawienstwo gaju, Wybuch ducha.
+  Niebieska: Mistrzostwo walki, Boskie wzmocnienie, Wyssanie ciala, Blizniacze wybuchy, Asceta.
+- Warstwa modyfikatorow czarow (`WheelSpells`, wolana z `SpellSystem` jako male haki): mana, odnowienie,
+  % obrazen/leczenia, kradziez, krytyk, cele i promien (`SpellAugment`); czary objawien sa zablokowane
+  (`CastResult.WHEEL_LOCKED`, niewidoczne w ksiedze) bez etapu 1. Nowe rodzaje czarow: `ATTACK_BEAM` (promien
+  na linii do celu) i `WHEEL_BUFF` (awatar, Boskie wzmocnienie). Stan awatara jest czasowy (`DestinyWheel.tick`).
+- Haki walki (`WheelEffects`): `CombatSystem.critical` (premie procentowe i plaska), `CriticalHit` (szansa
+  i obrazenia krytyczne), `Leech`, `CombatFormulas.mitigateOnPlayer` (mitygacja, obrona tarczy z Mistrzostwa
+  walki, awatar), `PlayerCharacter.damage` (Dar Zycia), `effectiveSkill` (umiejetnosci z kola).
+- Zmiany tylko w swiatyni: strefa ochronna z kaplanem najwyzej 8 pol dalej na tym samym pietrze
+  (`GameSession.inTemple`). Tibia pozwala zmieniac kolo w kazdej strefie ochronnej; Pixel wiaze to ze swiatynia,
+  zeby przebudowa byla decyzja "w miescie", a nie w depozycie obok expowiska. Zapis zestawu dziala wszedzie,
+  wczytanie zestawu i reset (bez oplaty jak w Tibii) tylko w swiatyni. 3 zestawy.
+- Akcje (`Actions`, online ACT na serwerze): `wheel:add:KOD:n`, `wheel:remove:KOD:n`, `wheel:reset`,
+  `wheel:save:i`, `wheel:load:i` (KOD jak `GT75`, `R50`, `P200`). Stan wraca do klienta w SELF.
+- Okno (`WheelView` + klient `WheelWindows`, wspolne okno informacyjne HUD): przeglad (punkty, swiatynia,
+  4 kafle cwiartek z postepem objawienia, aktywne premie, zestawy, czyszczenie), cwiartka (9 pol), karta pola
+  (+1 / +10 / do pelna / -1 / -10 / oproznij). Na komputerze w pustej kolumnie rysowane jest kolo (36 pol,
+  kolor wg zapelnienia). Wejscie: klawisz U, `/koło`, Opcje, kaplan w rozmowie.
+- Zapis: osobne pole `wheel` = `p=G50:50,...;s0=...;g=ms;a=ms;as=etap;ac=ms` bez zmiany wersji zapisu
+  (rownolegle prace nad Kuznia podnosza wersje); zapis bez pola = puste kolo.
+- Uproszczenia i zamienniki:
+  - Czary bez odpowiednika w Pixel zastapione najblizszymi (np. Front Sweep -> Szal, Chivalrous Challenge ->
+    Unicestwienie, Sharpshooter -> Boski sad, Magic Shield -> Wielkie uzdrowienie); opis w karcie pola.
+  - Strong Ethereal Spear st. 2: Canary daje +380% obrazen; w Pixel czar jest juz pelnej mocy, wiec +38%.
+  - Odnowienia czarow objawien przeskalowane do odnowien Pixel (np. Rzut kata -2 s za etap 2 i 3).
+  - Boski granat wybucha od razu (Tibia: po 3 s), Wybuch ducha jest zwyklym czarem 300 poziomu (objawienie daje
+    drugie uderzenie przy pelnej harmonii i krotsze odnowienie).
+  - Wyssanie ciala dziala bez oslabien, Mistrzostwo run = 25% szansy na x1,2 wartosci runy, Wiez lecznicza
+    i Przewodnia obecnosc = +10% leczenia (brak leczenia innych / mantry).
+  - Plaskie premie objawien tylko w potwory; w PvP dziala jedynie zmniejszenie obrazen awatara.
+- Balans (`WheelBalanceTest`): 300 poziom, 250 pkt - srednio x1,02-1,15 "sily" (obrazenia x HP / otrzymane
+  x kradziez) zaleznie od kolejnosci cwiartek; pelne kolo na 1000 poziomie ok. x1,08, z awatarem ok. x1,44
+  na 15 s. Symulacja nie liczy ulepszen pojedynczych czarow (te ogranicza osobny test: najwyzej +50% obrazen).
+- Do zrobienia: klejnoty i naczynia (Gem Atelier, modyfikatory klejnotow), fragmenty (Lesser/Greater
+  Fragments), ulepszenia kolejnych etapow przez Revelation Mastery.
+
 ## Rynek graczy (Z logika, S serwer, C okno)
 
 `market/Market`: oferty (id, sprzedawca, przedmiot, ilosc, cena za calosc), do 10 na gracza, 2000 na serwer, prowizja 2%.

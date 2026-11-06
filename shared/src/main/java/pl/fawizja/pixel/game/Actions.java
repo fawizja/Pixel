@@ -48,6 +48,7 @@ public final class Actions {
                 case "npc": return npc(s, p, now);
                 case "store": s.storeBuy(p[1], now); return true;
                 case "charm": return charm(s, p, now);
+                case "wheel": return wheel(s, p, now);
                 default: return false;
             }
         } catch (RuntimeException e) {
@@ -71,6 +72,18 @@ public final class Actions {
             case "assign": s.assignCharm(pl.fawizja.pixel.charm.Charm.parse(p[2]), p[3], now); return true;
             case "remove": s.removeCharm(pl.fawizja.pixel.charm.Charm.parse(p[2]), now); return true;
             case "reset": s.resetCharms(now); return true;
+            default: return false;
+        }
+    }
+
+    /** Kolo Przeznaczenia: wheel:add:KOD:n, wheel:remove:KOD:n, wheel:reset, wheel:save:i, wheel:load:i. */
+    private static boolean wheel(GameSession s, String[] p, long now) {
+        switch (p[1]) {
+            case "add": s.wheelAdd(p[2], Integer.parseInt(p[3]), now); return true;
+            case "remove": s.wheelRemove(p[2], Integer.parseInt(p[3]), now); return true;
+            case "reset": s.wheelReset(now); return true;
+            case "save": s.wheelPresetSave(Integer.parseInt(p[2]), now); return true;
+            case "load": s.wheelPresetLoad(Integer.parseInt(p[2]), now); return true;
             default: return false;
         }
     }

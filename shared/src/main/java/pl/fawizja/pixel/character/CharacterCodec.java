@@ -88,6 +88,10 @@ public final class CharacterCodec {
         if (!pc.enchantments().encode().isEmpty()) m.put("ench", pc.enchantments().encode());
         // harmonia mnicha: osobne pole bez podbijania wersji - stary zapis bez niego = 0 punktow, bez cnoty
         if (!pc.harmony().isDefault()) m.put("monk", pc.harmony().encode());
+        // Kolo Przeznaczenia: osobne pole bez podbijania wersji (inny agent podbija wersje do 8 dla tierow przedmiotow);
+        // brak pola = zapis sprzed kola (puste kolo, migracja przy odczycie)
+        String wheel = pc.wheel().encode();
+        if (!wheel.isEmpty()) m.put("wheel", wheel);
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
         if (pc.house() != null) m.put("house", pc.house());
@@ -304,6 +308,10 @@ public final class CharacterCodec {
         if (m.containsKey("wboss")) pc.setWeeklyBossWeek(Long.parseLong(m.get("wboss")));
         pc.enchantments().restore(m.get("ench"));
         pc.harmony().restore(m.get("monk"));
+        pc.wheel().decode(m.get("wheel"));
+        // HP i mana z oddania kola licza sie dopiero po wczytaniu kola, promocji i premium
+        pc.restoreState(exp, Integer.parseInt(require(m, "health")), Integer.parseInt(require(m, "mana")));
+        pc.refreshWheel();
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
         pc.setHouse(m.get("house"));

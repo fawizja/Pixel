@@ -145,7 +145,7 @@ public final class SpellSystem {
     public List<SpellType> knownSpells() {
         List<SpellType> out = new ArrayList<>();
         for (SpellType s : spells.forVocation(pc.vocation())) {
-            if (pc.level() >= s.minLevel() && pc.skills().level(Skill.MAGIC) >= s.minMagic()) out.add(s);
+            if (pc.level() >= s.minLevel() && pc.skills().level(Skill.MAGIC) >= s.minMagic() && pl.fawizja.pixel.wheel.WheelSpells.unlocked(pc, s)) out.add(s);
         }
         return out;
     }
@@ -158,7 +158,7 @@ public final class SpellSystem {
      */
     public static double baseValue(SpellType s, PlayerCharacter pc) {
         if (s.monkFormula()) return monkPower(s, pc);
-        double v = s.base() + pc.level() * s.levelFactor() + pc.skills().level(Skill.MAGIC) * s.magicFactor()
+        double v = s.base() + pc.level() * s.levelFactor() + pc.effectiveSkill(Skill.MAGIC) * s.magicFactor()
                 + pc.effectiveSkill(weaponSkill(pc)) * s.skillFactor();
         if (s.kind().isHeal()) v *= pc.vocation().healingFactor();
         else if (s.kind().isRune()) v *= pc.vocation().magicFactor();
@@ -202,7 +202,7 @@ public final class SpellSystem {
     /** Srednia wartosc efektu teraz: wartosc bazowa z premia harmonii (spender) i cnota wytrwalosci (leczenie mnicha). */
     public double expectedValue(SpellType s) {
         double v = baseValue(s, pc);
-        if (s.monkRole() == MonkRole.SPENDER) v *= pc.harmony().bonus();
+        if (s.monkRole() == MonkRole.SPENDER) v *= pc.harmony().bonus(pl.fawizja.pixel.wheel.WheelSpells.ascetic(pc));
         if (s.kind().isHeal() && pc.vocation() == Vocation.MONK) v *= pc.harmony().healFactor();
         return v;
     }
@@ -214,8 +214,9 @@ public final class SpellSystem {
     private int roll(SpellType s) {
         double v = baseValue(s, pc) * (s.monkFormula() ? 1 - MONK_ROLL + rng.nextDouble() * 2 * MONK_ROLL
                 : MIN_ROLL + rng.nextDouble() * (MAX_ROLL - MIN_ROLL));
-        if (s.monkRole() == MonkRole.SPENDER) v *= pc.harmony().bonus();
+        if (s.monkRole() == MonkRole.SPENDER) v *= pc.harmony().bonus(pl.fawizja.pixel.wheel.WheelSpells.ascetic(pc));
         if (s.kind().isHeal() && pc.vocation() == Vocation.MONK) v *= pc.harmony().healFactor();
+        v = v * wheelFactor + pl.fawizja.pixel.wheel.WheelSpells.flatHealing(pc, s); // Kolo Przeznaczenia: ulepszenia i objawienia
         return (int) Math.max(1, Math.min(Integer.MAX_VALUE, Math.round(v)));
     }
 
@@ -230,6 +231,7 @@ public final class SpellSystem {
         if (s.monkRole() == MonkRole.SPENDER) {
             int spent = h.points();
             harmonyHeal(spent, now);
+            pl.fawizja.pixel.wheel.WheelSpells.onHarmonySpent(pc, spent); // Kolo Przeznaczenia: Sanktuarium
             h.spend();
             if (spent > 0) {
                 for (SpellType b : spells.all()) {
@@ -253,8 +255,8 @@ public final class SpellSystem {
      * zdrowia niz mnich, inaczej sam mnich. Cnota wytrwalosci go nie wzmacnia (ORIGIN_HARMONY).
      */
     private void harmonyHeal(int charges, long now) {
-        int amount = pl.fawizja.pixel.combat.CombatFormulas.rollBetween(pl.fawizja.pixel.vocation.Harmony.healMin(pc.level(), charges),
-                pl.fawizja.pixel.vocation.Harmony.healMax(pc.level(), charges), rng);
+        int amount = pl.fawizja.pixel.wheel.WheelSpells.harmonyHeal(pc, pl.fawizja.pixel.combat.CombatFormulas.rollBetween(pl.fawizja.pixel.vocation.Harmony.healMin(pc.level(), charges),
+                pl.fawizja.pixel.vocation.Harmony.healMax(pc.level(), charges), rng));
         Ally best = null;
         int lowest = pc.health();
         for (Ally a : visibleAllies()) {
@@ -305,22 +307,41 @@ public final class SpellSystem {
         if (s == null || s.kind().isRune()) return CastResult.NOT_USABLE;
         CastResult r = check(s, now, true);
         if (r != CastResult.OK) return report(r, now);
-        r = apply(s, now);
+        // Kolo Przeznaczenia: premie czaru na czas rzutu (mana, odnowienie, wartosc, krytyk, kradziez)
+        pl.fawizja.pixel.wheel.SpellAugment aug = pl.fawizja.pixel.wheel.WheelSpells.augment(pc, s);
+        pc.wheel().setCastAugment(aug);
+        wheelFactor = pl.fawizja.pixel.wheel.WheelSpells.castFactor(pc, s, aug);
+        try {
+            r = apply(s, now);
+        } finally {
+            pc.wheel().setCastAugment(null);
+            wheelFactor = 1;
+        }
         if (r != CastResult.OK) return report(r, now);
-        pc.spendMana(s.mana());
-        trainMagic(s.mana(), now);
+        int mana = pl.fawizja.pixel.wheel.WheelSpells.mana(pc, s);
+        pc.spendMana(mana);
+        trainMagic(mana, now);
         if (s.monkRole() != MonkRole.NONE) afterMonkCast(s, now);
-        cooldowns.trigger(s, now);
+        long cd = pl.fawizja.pixel.wheel.WheelSpells.cooldownMs(pc, s);
+        cooldowns.trigger(s, now, cd);
+        for (String k : pl.fawizja.pixel.wheel.WheelSpells.linked(s.key())) if (spells.find(k) != null) cooldowns.trigger(spells.find(k), now, cd);
         return CastResult.OK;
     }
+
+    /** Mnoznik wartosci biezacego rzutu z Kola Przeznaczenia (1 poza rzutem). */
+    private double wheelFactor = 1;
+
+    /** Promien czaru obszarowego z premia kola. */
+    private int radius(SpellType s) { return s.radius() + pc.wheel().castAugment().extraRadius; }
 
     private CastResult check(SpellType s, long now, boolean spell) {
         if (pc.isDead()) return CastResult.DEAD;
         if (spell && !s.allowedFor(pc.vocation())) return CastResult.WRONG_VOCATION;
         if (pc.level() < s.minLevel()) return CastResult.LEVEL_TOO_LOW;
         if (pc.skills().level(Skill.MAGIC) < s.minMagic()) return CastResult.MAGIC_TOO_LOW;
-        if (spell && pc.mana() < s.mana()) return CastResult.NOT_ENOUGH_MANA;
-        if (!cooldowns.ready(s, now)) return CastResult.COOLDOWN;
+        if (spell && !pl.fawizja.pixel.wheel.WheelSpells.unlocked(pc, s)) return CastResult.WHEEL_LOCKED;
+        if (spell && pc.mana() < pl.fawizja.pixel.wheel.WheelSpells.mana(pc, s)) return CastResult.NOT_ENOUGH_MANA;
+        if (!cooldowns.ready(s, now) || pl.fawizja.pixel.wheel.WheelSpells.avatarCoolingDown(pc, s)) return CastResult.COOLDOWN;
         if (s.kind().isOffensive() && world.isProtectionZone(pc.position())) return CastResult.PROTECTION_ZONE;
         if ((s.kind() == SpellKind.ATTACK_AREA || s.kind() == SpellKind.RUNE_AREA) && playerTarget != null
                 && playerTarget.areaForbidden(now)) return CastResult.BLACK_SKULL;
@@ -331,8 +352,9 @@ public final class SpellSystem {
             if (pc.position().distanceTo(tp) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
             if (!world.hasLineOfSight(pc.position(), tp)) return CastResult.NOT_VISIBLE;
         }
-        if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), s.radius()).isEmpty()
-                && !playerInArea(pc.position(), s.radius())) return CastResult.NO_TARGET;
+        int area = s.radius() + pl.fawizja.pixel.wheel.WheelSpells.augment(pc, s).extraRadius;
+        if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), area).isEmpty()
+                && !playerInArea(pc.position(), area)) return CastResult.NO_TARGET;
         if (s.kind() == SpellKind.CONJURE && s.consumesItem() != null
                 && pc.backpack().count(items.byKey(s.consumesItem()).id()) < 1) return CastResult.MISSING_ITEM;
         return CastResult.OK;
@@ -352,15 +374,52 @@ public final class SpellSystem {
             case RUNE_TARGET:
                 combat.addEvent(CombatEvent.projectile(now, pc.position(),
                         playerTargetPosition() != null ? playerTargetPosition() : combat.target().position(), s.damageType().name()));
+                if (s.kind() == SpellKind.ATTACK_TARGET && s.radius() > 0) {
+                    // Boski granat: wybuch wokol celu
+                    Position c = playerTargetPosition() != null ? playerTargetPosition() : combat.target().position();
+                    combat.addEvent(CombatEvent.area(now, c, s.radius(), s.damageType().name()));
+                    areaStrike(c, s, now);
+                    return CastResult.OK;
+                }
                 if (playerTargetPosition() != null) {
                     boolean crit = combat.rollCritical();
                     return playerTarget.strike(critAmount(roll(s), crit), s.damageType(), crit, 1, now) ? CastResult.OK : CastResult.NOT_ALLOWED;
                 }
-                combat.damageMonster(combat.target(), roll(s), s.damageType(), now, combat.rollCritical(), 1);
+                combat.damageMonster(combat.target(), pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, combat.target(), roll(s)), s.damageType(), now, combat.rollCritical(), 1);
                 return CastResult.OK;
             case ATTACK_AREA: {
-                combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), s.damageType().name()));
-                areaStrike(pc.position(), s, limitTargets(targetsAround(pc.position(), s.radius()), s.produceCount()), now);
+                combat.addEvent(CombatEvent.area(now, pc.position(), radius(s), s.damageType().name()));
+                List<Monster> hit = limitTargets(targetsAround(pc.position(), radius(s)),
+                        s.produceCount() > 0 ? s.produceCount() + pc.wheel().castAugment().extraTargets : 0);
+                double recast = pl.fawizja.pixel.wheel.WheelSpells.recast(pc, s);
+                areaStrike(pc.position(), s, hit, now);
+                if (recast > 0) {
+                    // Wybuch ducha z objawieniem: drugie uderzenie z pelnej harmonii (Canary combatRecast, bez 1 s opoznienia)
+                    double f = wheelFactor;
+                    wheelFactor = f * recast;
+                    hit.removeIf(Monster::isDead);
+                    areaStrike(pc.position(), s, hit, now);
+                    wheelFactor = f;
+                }
+                return CastResult.OK;
+            }
+            case ATTACK_BEAM: {
+                // Wielki promien smierci: pola w linii od postaci w strone celu, dlugosc = promien (+1 za stopien 2 i 3)
+                Position tp = playerTargetPosition() != null ? playerTargetPosition() : combat.target().position();
+                List<Position> line = beam(pc.position(), tp, radius(s));
+                for (Position p : line) combat.addEvent(CombatEvent.area(now, p, 0, s.damageType().name()));
+                List<Monster> hit = new ArrayList<>();
+                for (Monster m : targetsAround(pc.position(), radius(s))) if (line.contains(m.position())) hit.add(m);
+                boolean crit = combat.rollCritical();
+                for (Monster m : hit) combat.damageMonster(m, roll(s), s.damageType(), now, crit, Math.max(1, hit.size()));
+                if (hit.isEmpty() && playerTargetPosition() != null) playerTarget.strike(critAmount(roll(s), crit), s.damageType(), crit, 1, now);
+                return CastResult.OK;
+            }
+            case WHEEL_BUFF: {
+                String done = pl.fawizja.pixel.wheel.WheelSpells.buff(pc, s);
+                if (done == null) return CastResult.WHEEL_LOCKED;
+                combat.addEvent(CombatEvent.area(now, pc.position(), s.key().startsWith("avatar_") ? 0 : 1, "HASTE"));
+                log.add(now, EventLog.Kind.INFO, done);
                 return CastResult.OK;
             }
             case HEAL_PARTY: {
@@ -444,10 +503,24 @@ public final class SpellSystem {
         areaStrike(center, s, targetsAround(center, s.radius()), now);
     }
 
+    /** Pola promienia od from w strone to (najwyzej len pol, tylko w zasiegu wzroku), bez pola postaci. */
+    private List<Position> beam(Position from, Position to, int len) {
+        List<Position> out = new ArrayList<>();
+        double ax = to.x() - from.x(), ay = to.y() - from.y();
+        double norm = Math.max(Math.abs(ax), Math.abs(ay));
+        if (norm == 0) return out;
+        for (int i = 1; i <= len; i++) {
+            Position p = new Position(from.x() + (int) Math.round(ax / norm * i), from.y() + (int) Math.round(ay / norm * i), from.z());
+            if (!world.hasLineOfSight(from, p)) break;
+            out.add(p);
+        }
+        return out;
+    }
+
     private void areaStrike(Position center, SpellType s, List<Monster> hit, long now) {
         boolean crit = combat.rollCritical();
         int targets = Math.max(1, hit.size() + (playerInArea(center, s.radius()) ? 1 : 0));
-        for (Monster m : hit) combat.damageMonster(m, roll(s), s.damageType(), now, crit, targets);
+        for (Monster m : hit) combat.damageMonster(m, pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, m, roll(s)), s.damageType(), now, crit, targets);
         strikePlayers(center, s, crit, targets, now);
     }
 

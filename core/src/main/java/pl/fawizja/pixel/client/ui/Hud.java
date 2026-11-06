@@ -1686,6 +1686,7 @@ public final class Hud {
             // waski telefon: "Opcje" zbiera ustawienia i wyjscie z gry
             List<MenuRow> rows = new ArrayList<>();
             rows.add(new MenuRow("opt:diag", "Ustawienia", "", true));
+            rows.add(new MenuRow("opt:wheel", pl.fawizja.pixel.wheel.WheelView.TITLE, "punkty promocji od poziomu 51", true));
             if (lay.folded[HudLayout.STORE_TOGGLE]) rows.add(new MenuRow("opt:store", "Sklep", "premium, promocja, błogosławieństwo", true));
             if (lay.folded[HudLayout.TORCH_TOGGLE]) {
                 rows.add(new MenuRow("opt:torch", session.character().isTorchLit() ? "Zgaś pochodnię" : "Zapal pochodnię", "", true));
@@ -2055,6 +2056,91 @@ public final class Hud {
         optionsMenu = false;
         menuOpen = false;
         menuGeometry();
+    }
+
+    // ------------------------------------------------------------------ Kolo Przeznaczenia (rysunek)
+
+    /** Kolo rysowane proceduralnie w pustej prawej kolumnie okna kola (komputer; telefon ma same kafle cwiartek). */
+    private boolean wheelGraphic() {
+        if (mobile || trade != null || !achievementsView || journalMode || infoTitle == null
+                || !infoTitle.startsWith(pl.fawizja.pixel.wheel.WheelView.TITLE)) return false;
+        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        return infoRows.size() <= perCol && menuW >= 420;
+    }
+
+    private float wheelCx() { return menuX + menuW * 0.75f; }
+    private float wheelCy() { return menuY + (menuH - 30) / 2f; }
+    private float wheelR() { return Math.min(menuW / 4f - 16, (menuH - 60) / 2f); }
+
+    /** 36 pol: 4 cwiartki (zielona lewa gora, czerwona prawa gora, fioletowa prawy dol, niebieska lewy dol), 5 pierscieni. */
+    private void drawWheelShapes(ShapeRenderer shapes, PlayerCharacter pc) {
+        float cx = wheelCx(), cy = wheelCy(), R = wheelR();
+        if (R < 40) return;
+        pl.fawizja.pixel.wheel.DestinyWheel w = pc.wheel();
+        int av = pc.wheelPoints();
+        float[] outer = {0.40f, 0.55f, 0.70f, 0.85f, 1f};
+        for (int ring = 4; ring >= 0; ring--) {
+            float r = R * outer[ring];
+            shapes.setColor(0.08f, 0.06f, 0.07f, 1f);
+            shapes.circle(cx, cy, r + 2, 64);
+            for (pl.fawizja.pixel.wheel.WheelDomain d : pl.fawizja.pixel.wheel.WheelDomain.values()) {
+                java.util.List<pl.fawizja.pixel.wheel.WheelSlice> inRing = new java.util.ArrayList<>();
+                for (pl.fawizja.pixel.wheel.WheelSlice sl : pl.fawizja.pixel.wheel.WheelSlice.of(d)) if (wheelRing(sl.pos) == ring) inRing.add(sl);
+                float base = wheelQuadrantStart(d);
+                float step = 90f / inRing.size();
+                for (int i = 0; i < inRing.size(); i++) {
+                    pl.fawizja.pixel.wheel.WheelSlice sl = inRing.get(i);
+                    float fill = w.points(sl) / (float) sl.capacity();
+                    float k = fill >= 1 ? 1f : w.points(sl) > 0 ? 0.45f + 0.35f * fill : w.open(sl, av) ? 0.3f : 0.16f;
+                    int rgb = d.rgb;
+                    shapes.setColor(((rgb >> 16) & 255) / 255f * k, ((rgb >> 8) & 255) / 255f * k, (rgb & 255) / 255f * k, 1f);
+                    shapes.arc(cx, cy, r, base + i * step + 1.2f, step - 2.4f, 16);
+                }
+            }
+        }
+        // srodek: wolne punkty
+        shapes.setColor(0.08f, 0.06f, 0.07f, 1f);
+        shapes.circle(cx, cy, R * 0.25f + 2, 48);
+        shapes.setColor(0.25f, 0.2f, 0.16f, 1f);
+        shapes.circle(cx, cy, R * 0.25f, 48);
+    }
+
+    private void drawWheelText(SpriteBatch batch, PlayerCharacter pc) {
+        float cx = wheelCx(), cy = wheelCy(), R = wheelR();
+        if (R < 40) return;
+        int free = Math.max(0, pc.wheelPoints() - pc.wheel().spent());
+        font.getData().setScale(0.8f);
+        centered(batch, String.valueOf(free), cx, cy + 9);
+        font.getData().setScale(0.6f);
+        centered(batch, "wolne", cx, cy - 6);
+        font.getData().setScale(0.75f);
+        for (pl.fawizja.pixel.wheel.WheelDomain d : pl.fawizja.pixel.wheel.WheelDomain.values()) {
+            double a = Math.toRadians(wheelQuadrantStart(d) + 45);
+            float tx = cx + (float) Math.cos(a) * (R + 14), ty = cy + (float) Math.sin(a) * (R + 14);
+            centered(batch, String.valueOf(pc.wheel().domainPoints(d)), tx, ty + 5);
+        }
+        font.getData().setScale(1f);
+    }
+
+    /** Pierscien pola od srodka (0: pole 50 ... 4: pole 200). */
+    private static int wheelRing(pl.fawizja.pixel.wheel.WheelSlice.Pos p) {
+        switch (p) {
+            case S50: return 0;
+            case T75: case B75: return 1;
+            case T100: case M100: case B100: return 2;
+            case T150: case B150: return 3;
+            default: return 4;
+        }
+    }
+
+    /** Kat poczatku cwiartki (stopnie, przeciwnie do wskazowek zegara od prawej) - uklad jak w Tibii. */
+    private static float wheelQuadrantStart(pl.fawizja.pixel.wheel.WheelDomain d) {
+        switch (d) {
+            case RED: return 0;
+            case GREEN: return 90;
+            case BLUE: return 180;
+            default: return 270;
+        }
     }
 
     /** Osiagniecia w dwoch kolumnach albo bestiariusz (najczesciej zabijane potwory). */
@@ -2486,6 +2572,8 @@ public final class Hud {
                         !pc.isBlessed() && session.gold() >= bless));
                 left.add(new MenuRow("npc:settle", "Zamieszkaj w " + npc.town(),
                         home ? "już tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu będziesz się odradzać", !home));
+                left.add(new MenuRow("wheel:open", pl.fawizja.pixel.wheel.WheelView.TITLE, pc.wheelPoints() > 0
+                        ? "w świątyni rozdasz punkty promocji" : "od poziomu 51, z promocją i premium", true));
                 break;
             }
             case CARRIER:
@@ -3203,6 +3291,7 @@ public final class Hud {
                 shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
             }
+            if (wheelGraphic()) drawWheelShapes(shapes, session.character());
             shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
@@ -3323,6 +3412,7 @@ public final class Hud {
                 font.getData().setScale(1f);
             } else if (trade == null && achievementsView && infoTitle != null && !journalMode) {
                 text(batch, infoTitle, menuX + 10, menuY + menuH - 14);
+                if (wheelGraphic()) drawWheelText(batch, session.character());
             } else if (trade == null && achievementsView && journalMode) {
                 text(batch, "Dziennik zadań - ukończone: " + session.character().quests().done().size()
                         + " (dotknij zadania, aby iść do zleceniodawcy)", menuX + 10, menuY + menuH - 14);

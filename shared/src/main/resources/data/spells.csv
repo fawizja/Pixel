@@ -82,3 +82,13 @@ executioners_throw;Rzut kata;KNIGHT;150;0;150;8000;ATTACK;ATTACK_TARGET;PHYSICAL
 groundshaker;Wstrząs ziemi;KNIGHT;200;0;250;8000;ATTACK;ATTACK_AREA;PHYSICAL;150;0.8;0;4.0;0;2;;;0;Uderzenie w ziemię rani wszystko w promieniu 2.
 blade_storm;Burza ostrzy;KNIGHT;300;0;300;12000;ATTACK;ATTACK_AREA;PHYSICAL;250;1.0;0;6.0;0;1;;;0;Grad ciosów we wszystko obok rycerza.
 iron_will;Żelazna wola;KNIGHT;150;0;55;1000;HEALING;HEAL_SELF;PHYSICAL;130;0.65;0;1.1;0;0;;;0;Najsilniejsze leczenie rycerza na wysokich poziomach.
+avatar_of_steel;Awatar stali;KNIGHT;300;0;800;7200000;SUPPORT;WHEEL_BUFF;PHYSICAL;0;0;0;0;0;0;;;0;Objawienie Koła (fioletowe): przez 15 s mniej obrażeń, pewny krytyk i silniejsze krytyki.
+avatar_of_light;Awatar światła;PALADIN;300;0;1500;7200000;SUPPORT;WHEEL_BUFF;HOLY;0;0;0;0;0;0;;;0;Objawienie Koła (fioletowe): przez 15 s mniej obrażeń, pewny krytyk i silniejsze krytyki.
+avatar_of_storm;Awatar burzy;SORCERER;300;0;2200;7200000;SUPPORT;WHEEL_BUFF;ENERGY;0;0;0;0;0;0;;;0;Objawienie Koła (fioletowe): przez 15 s mniej obrażeń, pewny krytyk i silniejsze krytyki.
+avatar_of_nature;Awatar natury;DRUID;300;0;2200;7200000;SUPPORT;WHEEL_BUFF;EARTH;0;0;0;0;0;0;;;0;Objawienie Koła (fioletowe): przez 15 s mniej obrażeń, pewny krytyk i silniejsze krytyki.
+avatar_of_balance;Awatar równowagi;MONK;300;0;1200;7200000;SUPPORT;WHEEL_BUFF;PHYSICAL;0;0;0;0;0;0;;;0;Objawienie Koła (fioletowe): przez 15 s mniej obrażeń, pewny krytyk i silniejsze krytyki.
+divine_empowerment;Boskie wzmocnienie;PALADIN;300;0;500;32000;SUPPORT;WHEEL_BUFF;HOLY;0;0;0;0;0;0;;;0;Objawienie Koła (niebieskie): strefa pod paladynem wzmacnia jego obrażenia.
+divine_grenade;Boski granat;PALADIN;300;0;160;26000;ATTACK;ATTACK_TARGET;HOLY;150;0.8;2.0;0;7;2;;;0;Objawienie Koła (czerwone): święty wybuch wokół celu (promień 2).
+great_death_beam;Wielki promień śmierci;SORCERER;300;0;140;10000;ATTACK;ATTACK_BEAM;DEATH;100;0.6;4.0;0;7;6;;;0;Objawienie Koła (czerwone): promień śmierci przebijający wrogów na linii (6 pól).
+terra_burst;Wybuch ziemi;DRUID;300;0;230;22000;ATTACK;ATTACK_AREA;EARTH;150;0.8;5.5;0;0;3;;;0;Objawienie Koła (niebieskie): wybuch ziemi wokół druida (promień 3). Wspólne odnowienie z wybuchem lodu.
+ice_burst;Wybuch lodu;DRUID;300;0;230;22000;ATTACK;ATTACK_AREA;ICE;150;0.8;5.5;0;0;3;;;0;Objawienie Koła (niebieskie): wybuch lodu wokół druida (promień 3). Wspólne odnowienie z wybuchem ziemi.

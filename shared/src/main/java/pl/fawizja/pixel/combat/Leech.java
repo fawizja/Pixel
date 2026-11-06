@@ -27,14 +27,14 @@ public final class Leech {
     public static double lifePercent(PlayerCharacter pc) {
         double p = pc.equipment().lifeLeech();
         if (pc.enchantments().active(Enchantments.Kind.LIFE)) p += Enchantments.LIFE_PERCENT;
-        return p;
+        return p + pl.fawizja.pixel.wheel.WheelEffects.lifeLeech(pc); // Kolo Przeznaczenia
     }
 
     /** Kradziez many postaci w procentach (przedmioty + zaklecie kowala). */
     public static double manaPercent(PlayerCharacter pc) {
         double p = pc.equipment().manaLeech();
         if (pc.enchantments().active(Enchantments.Kind.MANA)) p += Enchantments.MANA_PERCENT;
-        return p;
+        return p + pl.fawizja.pixel.wheel.WheelEffects.manaLeech(pc); // Kolo Przeznaczenia
     }
 
     /**

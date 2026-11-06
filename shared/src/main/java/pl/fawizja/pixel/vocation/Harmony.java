@@ -87,6 +87,14 @@ public final class Harmony {
     /** Mnoznik obrazen/leczenia czaru wydajacego przy obecnych punktach. */
     public double bonus() { return bonus(points, virtue, serene()); }
 
+    /** Jak wyzej z dodatkowymi punktami procentowymi bazy (Asceta z Kola Przeznaczenia). */
+    public double bonus(int extraBase) {
+        if (points <= 0 || extraBase <= 0) return bonus();
+        double b = BASE_BONUS + extraBase;
+        if (virtue == Virtue.HARMONY) b += serene() ? 8 : 4;
+        return 1 + b * Math.pow(2, Math.min(MAX, points) - 1) / 100.0;
+    }
+
     /** Canary getHarmonyBonus: 1 + B * 2^(h-1) / 100, B = 8 (+4 cnota harmonii, +8 w spokoju); h = 0 -> 1. */
     public static double bonus(int points, Virtue virtue, boolean serene) {
         if (points <= 0) return 1;

@@ -19,7 +19,8 @@ public enum CastResult {
     NOT_ENOUGH_GOLD("Za mało złota."),
     NOT_USABLE("Tego nie można użyć."),
     FULL("Nie potrzebujesz tego teraz."),
-    DEAD("Postać nie żyje.");
+    DEAD("Postać nie żyje."),
+    WHEEL_LOCKED("Ten czar odblokujesz objawieniem Koła Przeznaczenia.");
 
     public final String message;
 

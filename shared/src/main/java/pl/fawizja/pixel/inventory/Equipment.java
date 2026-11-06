@@ -147,6 +147,13 @@ public final class Equipment {
         return t.weaponType();
     }
 
+    /** Klucz broni w rece (np. "crossbow") albo null. */
+    public String weaponKey() {
+        ItemStack w = worn.get(EquipSlot.WEAPON);
+        ItemType t = w == null ? null : registry.get(w.itemId());
+        return t == null ? null : t.key();
+    }
+
     public int weaponAttack() {
         ItemStack w = worn.get(EquipSlot.WEAPON);
         return w == null ? 0 : pl.fawizja.pixel.item.Upgrade.attack(registry.get(w.itemId()), w.upgrade());

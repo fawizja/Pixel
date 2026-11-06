@@ -37,6 +37,8 @@ public final class PlayerCharacter {
     private final pl.fawizja.pixel.item.Enchantments enchantments = new pl.fawizja.pixel.item.Enchantments();
     /** Harmonia, cnota i spokoj mnicha (inne profesje maja stan poczatkowy). */
     private final pl.fawizja.pixel.vocation.Harmony harmony = new pl.fawizja.pixel.vocation.Harmony();
+    /** Kolo Przeznaczenia (punkty promocji od poziomu 51, Dar Zycia, awatar). */
+    private final pl.fawizja.pixel.wheel.DestinyWheel wheel = new pl.fawizja.pixel.wheel.DestinyWheel();
     /** Otwarte skrzynie skarbow (identyfikatory). */
     private final java.util.Set<String> openedChests = new java.util.LinkedHashSet<>();
     /** Ukonczone wyprawy na bossa w piec postaci (identyfikatory z boss_quests.csv) - kazda raz na postac. */
@@ -126,6 +128,7 @@ public final class PlayerCharacter {
         loginStreak.copyFrom(o.loginStreak);
         enchantments.copyFrom(o.enchantments);
         harmony.copyFrom(o.harmony);
+        wheel.copyFrom(o.wheel);
         openedChests.clear();
         openedChests.addAll(o.openedChests);
         completedBossQuests.clear();
@@ -187,9 +190,24 @@ public final class PlayerCharacter {
     public long experience() { return experience; }
     public int health() { return health; }
     public int mana() { return mana; }
-    public int maxHealth() { return Balance.maxHealth(vocation, level); }
-    public int maxMana() { return Balance.maxMana(vocation, level); }
-    public int capacity() { return Balance.capacity(vocation, level); }
+    public int maxHealth() { return Balance.maxHealth(vocation, level) + wheelBonus().health; }
+    public int maxMana() { return Balance.maxMana(vocation, level) + wheelBonus().mana; }
+    public int capacity() { return Balance.capacity(vocation, level) + wheelBonus().capacity; }
+
+    public pl.fawizja.pixel.wheel.DestinyWheel wheel() { return wheel; }
+
+    /** Punkty promocji Kola Przeznaczenia: poziom - 50 od poziomu 51, z promocja i premium; inaczej 0. */
+    public int wheelPoints() { return pl.fawizja.pixel.wheel.DestinyWheel.available(level, promoted, premium); }
+
+    /** Premie z kola (oddanie, przekonanie, objawienia); puste bez promocji, premium albo poziomu 51. */
+    public pl.fawizja.pixel.wheel.WheelBonus wheelBonus() { return wheel.bonus(vocation, wheelPoints() > 0); }
+
+    /** Po zmianie kola albo utracie poziomu: nadmiar punktow schodzi od zewnatrz, HP i mana nie ponad maksimum. */
+    public void refreshWheel() {
+        if (wheelPoints() > 0) wheel.trim(wheelPoints());
+        health = Math.min(health, maxHealth());
+        mana = Math.min(mana, maxMana());
+    }
     /** Premia szybkosci na wierzchowcu. */
     public static final int MOUNT_SPEED = 60;
 
@@ -353,7 +371,7 @@ public final class PlayerCharacter {
      * jak premia SKILL_FISTPERCENT w Canary. Pozostale umiejetnosci bez zmian.
      */
     public int effectiveSkill(Skill s) {
-        int lvl = skills.level(s);
+        int lvl = skills.level(s) + pl.fawizja.pixel.wheel.WheelEffects.skillBonus(this, s); // Kolo Przeznaczenia
         if (s != Skill.FIST || vocation != Vocation.MONK) return lvl;
         return (int) Math.round(lvl * harmony.fistFactor());
     }
@@ -524,6 +542,12 @@ public final class PlayerCharacter {
     /** Zadaje obrazenia; zwraca faktycznie odjete HP. */
     public int damage(int amount) {
         if (amount <= 0 || isDead()) return 0;
+        int saved = pl.fawizja.pixel.wheel.WheelEffects.giftOfLife(this, health, amount); // Dar Zycia (Kolo Przeznaczenia)
+        if (saved > 0) {
+            int dealt = Math.max(0, health - saved);
+            health = saved;
+            return dealt;
+        }
         int dealt = Math.min(health, amount);
         health -= dealt;
         return dealt;
@@ -560,6 +584,7 @@ public final class PlayerCharacter {
         if (isDead() || deltaMs <= 0) return;
         lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
         hasteMs = Math.max(0, hasteMs - deltaMs);
+        wheel.tick(deltaMs);
         if (resting) restedMs = Math.min(MAX_RESTED_MS, restedMs + deltaMs);
         regenAccumulatorMs += deltaMs;
         long tick = Balance.REGEN_TICK_SECONDS * 1000L;
@@ -630,6 +655,7 @@ public final class PlayerCharacter {
         experience = after;
         level = Balance.levelForExperience(experience);
         blessed = false;
+        refreshWheel(); // utrata poziomu: mniej punktow promocji
         return used;
     }
 

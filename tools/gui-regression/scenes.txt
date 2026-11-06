@@ -186,3 +186,7 @@ bestiary_card|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498
 charm_list|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=charms
 charm_assigned|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=charms=charm:sel:WOUND
 charm_proc|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.charmProc=true
+# 2026-11-06: Kolo Przeznaczenia (przeglad z rysunkiem kola, cwiartka, premie z aktywnym awatarem, telefon)
+wheel_overview|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=400 -Dpixel.wheelOrder=PRGB -Dpixel.open=wheel
+wheel_quadrant|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=400 -Dpixel.open=wheel=wheel:q:P
+wheel_avatar_mobile|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=700 -Dpixel.wheelAvatar=true -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=wheel=wheel:perks

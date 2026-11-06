@@ -1469,6 +1469,107 @@ public final class GameSession {
         return true;
     }
 
+    // ------------------------------------------------------------------ Kolo Przeznaczenia
+
+    /** Promien wokol kaplana, w ktorym (w strefie ochronnej) mozna przestawiac punkty kola. */
+    public static final int WHEEL_TEMPLE_RANGE = 8;
+
+    /**
+     * Swiatynia: strefa ochronna z kaplanem najwyzej {@link #WHEEL_TEMPLE_RANGE} pol dalej na tym samym pietrze
+     * (w Tibii kolo zmienia sie tylko w strefie ochronnej; u nas dodatkowo przy kaplanie - jak "swiatynia").
+     */
+    public boolean inTemple() {
+        Position p = pc.position();
+        if (pc.isDead() || !world.isProtectionZone(p)) return false;
+        for (Npc n : npcs.all()) {
+            if (n.role() != NpcRole.PRIEST || n.position().z() != p.z()) continue;
+            if (Math.max(Math.abs(n.position().x() - p.x()), Math.abs(n.position().y() - p.y())) <= WHEEL_TEMPLE_RANGE) return true;
+        }
+        return false;
+    }
+
+    private pl.fawizja.pixel.wheel.DestinyWheel.Result wheelGate() {
+        if (pc.wheelPoints() <= 0) return pl.fawizja.pixel.wheel.DestinyWheel.Result.NOT_ELIGIBLE;
+        if (!inTemple()) return pl.fawizja.pixel.wheel.DestinyWheel.Result.NOT_IN_TEMPLE;
+        return pl.fawizja.pixel.wheel.DestinyWheel.Result.OK;
+    }
+
+    private boolean wheelDone(pl.fawizja.pixel.wheel.DestinyWheel.Result r, String okText, long nowMs) {
+        if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) {
+            pc.refreshWheel();
+            if (okText != null) log.add(nowMs, EventLog.Kind.SYSTEM, okText);
+            return true;
+        }
+        log.add(nowMs, EventLog.Kind.WARNING, r.message);
+        return false;
+    }
+
+    /** Kolo: n punktow do pola (akcja "wheel:add:KOD:n"). */
+    public boolean wheelAdd(String code, int n, long nowMs) {
+        pl.fawizja.pixel.wheel.WheelSlice sl = pl.fawizja.pixel.wheel.WheelSlice.ofCode(code);
+        if (sl == null || n <= 0) return false;
+        pl.fawizja.pixel.wheel.DestinyWheel.Result r = wheelGate();
+        if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) r = pc.wheel().add(sl, n, pc.wheelPoints());
+        return wheelDone(r, null, nowMs);
+    }
+
+    /** Kolo: n punktow z pola (akcja "wheel:remove:KOD:n"). */
+    public boolean wheelRemove(String code, int n, long nowMs) {
+        pl.fawizja.pixel.wheel.WheelSlice sl = pl.fawizja.pixel.wheel.WheelSlice.ofCode(code);
+        if (sl == null || n <= 0) return false;
+        pl.fawizja.pixel.wheel.DestinyWheel.Result r = wheelGate();
+        if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) r = pc.wheel().remove(sl, n, pc.wheelPoints());
+        return wheelDone(r, null, nowMs);
+    }
+
+    /** Kolo: zwrot wszystkich punktow, bez oplaty jak w Tibii (akcja "wheel:reset"). */
+    public boolean wheelReset(long nowMs) {
+        pl.fawizja.pixel.wheel.DestinyWheel.Result r = wheelGate();
+        if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) r = pc.wheel().reset();
+        return wheelDone(r, "Koło Przeznaczenia wyczyszczone - punkty wróciły do puli.", nowMs);
+    }
+
+    /** Kolo: zapis biezacego ustawienia do zestawu i (akcja "wheel:save:i"); zapis dziala wszedzie. */
+    public boolean wheelPresetSave(int i, long nowMs) {
+        if (i < 0 || i >= pl.fawizja.pixel.wheel.DestinyWheel.PRESETS) return false;
+        pl.fawizja.pixel.wheel.DestinyWheel.Result r = pc.wheelPoints() <= 0
+                ? pl.fawizja.pixel.wheel.DestinyWheel.Result.NOT_ELIGIBLE : pc.wheel().savePreset(i);
+        return wheelDone(r, "Zapisano zestaw koła " + (i + 1) + ".", nowMs);
+    }
+
+    /** Kolo: wczytanie zestawu i (akcja "wheel:load:i"), tylko w swiatyni. */
+    public boolean wheelPresetLoad(int i, long nowMs) {
+        if (i < 0 || i >= pl.fawizja.pixel.wheel.DestinyWheel.PRESETS) return false;
+        pl.fawizja.pixel.wheel.DestinyWheel.Result r = wheelGate();
+        if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) r = pc.wheel().loadPreset(i, pc.wheelPoints());
+        return wheelDone(r, "Wczytano zestaw koła " + (i + 1) + ".", nowMs);
+    }
+
+    /** Potwory na 8 polach wokol postaci (Instynkt bitewny, Taktyka pozycyjna). */
+    private int adjacentMonsters() {
+        Position p = pc.position();
+        int n = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0) continue;
+                pl.fawizja.pixel.monster.Monster m = monsters.monsterAt(p.translate(dx, dy));
+                if (m != null && !m.isDead()) n++;
+            }
+        }
+        return n;
+    }
+
+    /** Co klatke: tlum wokol postaci i zdarzenie Daru Zycia (log, skrocenie odnowien o minute jak w Canary). */
+    private void updateWheel(long nowMs) {
+        if (pc.wheelPoints() <= 0 && pc.wheel().isEmpty()) return;
+        pc.wheel().setAdjacentMonsters(monsters == null ? 0 : adjacentMonsters());
+        if (pc.wheel().consumeGift()) {
+            spells.cooldowns().cutAll(60_000, nowMs);
+            log.add(nowMs, EventLog.Kind.WARNING, "Dar Życia cię uratował! Odnowienie: "
+                    + pl.fawizja.pixel.house.HouseRent.describeIn(pc.wheel().giftCooldownMs()) + ".");
+        }
+    }
+
     /** Oplata jak removeMoney w Tibii: monety z plecaka, a gdy ich za malo - konto w banku. */
     private boolean payGold(long price) {
         if (price <= 0) return true;
@@ -2158,6 +2259,7 @@ public final class GameSession {
             checkHouseRent(nowMs);
         }
         updateRecall(nowMs);
+        updateWheel(nowMs);
         updateTraining(nowMs);
         updateChallenge(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
