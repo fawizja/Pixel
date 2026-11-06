@@ -347,8 +347,114 @@ public final class Hud {
         return true;
     }
 
+    // ------------------------------------------------------------------ Kolo Przeznaczenia w ramce (WheelPanel)
+
+    /** Okno kola w ramce (duze kolo, karta pola); tresc kart daje WheelWindows. */
+    private final WheelPanel wheelPanel;
+    /** Akcje z puszczenia palca na karcie kola. */
+    private Actions wheelActions;
+    /** Zakladka "Koło" u gory widoku gry (komputer). */
+    private final HudLayout.Rect wheelTab = new HudLayout.Rect();
+
+    public boolean wheelOpen() { return wheelPanel.isOpen(); }
+
+    /** Otwiera okno kola w ramce (zamyka menu i okna kategorii pod nim). */
+    public void openWheel() {
+        if (trade != null) return;
+        closeMenus();
+        mWin = null;
+        bagOpen = false;
+        bigMapOpen = false;
+        wheelPanel.open();
+    }
+
+    public void closeWheel() { wheelPanel.close(); }
+
+    public void wheelSelect(pl.fawizja.pixel.wheel.WheelSlice s) { wheelPanel.select(s); }
+
+    public void wheelShowRevelation(pl.fawizja.pixel.wheel.WheelDomain d) { wheelPanel.showRevelation(d); }
+
+    public void wheelShowSummary() { wheelPanel.showSummary(); }
+
+    public pl.fawizja.pixel.wheel.WheelSlice wheelSelected() { return wheelPanel.selected(); }
+
+    public pl.fawizja.pixel.wheel.WheelDomain wheelRevelation() { return wheelPanel.revelation(); }
+
+    /** Tresc karty po prawej stronie kola (wiersze jak w openInfo). */
+    public void setWheelCard(String title, List<String[]> rows) { wheelPanel.setCard(title, rows); }
+
+    private boolean wheelTouch(float px, float py, int pointer, Actions actions) {
+        wheelActions = actions;
+        wheelPanel.layout(w, h);
+        wheelDispatch(wheelPanel.touchDown(px, py, pointer), actions);
+        return true;
+    }
+
+    private void wheelDispatch(String id, Actions actions) {
+        if (id == null || id.isEmpty()) return;
+        if (id.equals("wheel:close")) wheelPanel.close();
+        else if (actions != null) actions.onButton(id);
+    }
+
+    /** Kolko myszy (komputer): przewijanie karty kola. */
+    public boolean scrolled(int sx, int sy, float amount) {
+        if (!wheelPanel.isOpen()) return false;
+        Vector2 p = toUi(sx, sy);
+        return wheelPanel.scrolled(p.x, p.y, amount);
+    }
+
+    /** Okno kola na wierzchu wszystkiego (osobny przebieg ksztaltow i napisow). */
+    private void drawWheelPanel(SpriteBatch batch, ShapeRenderer shapes, PlayerCharacter pc) {
+        if (!wheelPanel.isOpen()) return;
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapes.setProjectionMatrix(viewport.getCamera().combined);
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        wheelPanel.drawShapes(shapes, pc, w, h);
+        shapes.end();
+        batch.begin();
+        wheelPanel.drawText(batch, pc);
+        batch.end();
+    }
+
+    /** Zakladka kola u gory widoku gry: prawy gorny rog, zwisa spod gornego paska. */
+    private void layoutWheelTab() {
+        float tw = lay.compact ? 62 : 74, th = lay.compact ? 20 : 23;
+        wheelTab.set(lay.view.right() - 8 - tw, lay.view.top() - th, tw, th);
+    }
+
+    private void drawWheelTabShapes(ShapeRenderer shapes) {
+        layoutWheelTab();
+        HudLayout.Rect t = wheelTab;
+        boolean on = wheelPanel.isOpen();
+        shapes.setColor(0, 0, 0, 0.45f);
+        shapes.rect(t.x + 2, t.y - 2, t.w, t.h);
+        shapes.setColor(hex(0x1a110a, 1f));
+        shapes.rect(t.x, t.y, t.w, t.h);
+        shapes.setColor(on ? hex(0x5a3d22, 1f) : hex(0x3d2716, 1f));
+        shapes.rect(t.x + 1.5f, t.y + 1.5f, t.w - 3, t.h - 1.5f);
+        shapes.setColor(hex(0xd4ab52, 1f));
+        shapes.rect(t.x + 1.5f, t.y + 1.5f, t.w - 3, 1f);
+        shapes.rect(t.x + 1.5f, t.y + 1.5f, 1f, t.h - 1.5f);
+        shapes.rect(t.right() - 2.5f, t.y + 1.5f, 1f, t.h - 1.5f);
+        WheelPanel.glyph(shapes, t.x + 4 + (t.h - 8) / 2f, t.cy(), (t.h - 8) / 2f);
+    }
+
+    private void drawWheelTabText(SpriteBatch batch) {
+        HudLayout.Rect t = wheelTab;
+        font.getData().setScale(lay.compact ? 0.7f : 0.8f);
+        font.setColor(hex(0xf1e6d2, 1f));
+        layout.setText(font, "Koło");
+        float gx = t.x + 4 + (t.h - 8);
+        font.draw(batch, "Koło", gx + (t.right() - gx - layout.width) / 2f, t.cy() + layout.height / 2f);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+    }
+
     public void openInfo(String title, List<String[]> rows) {
         if (trade != null) return;
+        wheelPanel.close();
         achievementsView = false; // openAchievements nie zamknie wtedy okna
         menuOpen = false;
         openAchievements(false);
@@ -773,6 +879,7 @@ public final class Hud {
     public Hud(TileArt art, BitmapFont font) {
         this.art = art;
         this.font = font;
+        this.wheelPanel = new WheelPanel(font, mobile);
         loadUiImages();
         buttons.add(use);
         buttons.add(run);
@@ -1304,6 +1411,10 @@ public final class Hud {
     }
     /** Klawisz Wstecz / Esc: zamyka okno na wierzchu; false, gdy nic nie bylo otwarte (handel zamyka sie przyciskiem). */
     public boolean closeTop(GameSession session) {
+        if (wheelPanel.isOpen()) {
+            wheelPanel.close();
+            return true;
+        }
         if (houseWin != null) {
             if (houseWin.mode == HouseWindow.Mode.INVITE || houseWin.mode == HouseWindow.Mode.CONFIRM_LEAVE) houseWin.press("house:back");
             else houseWin = null;
@@ -2073,126 +2184,6 @@ public final class Hud {
         optionsMenu = false;
         menuOpen = false;
         menuGeometry();
-    }
-
-    // ------------------------------------------------------------------ Kolo Przeznaczenia (rysunek)
-
-    /** Kolo rysowane proceduralnie w pustej prawej kolumnie okna kola (komputer; telefon ma same kafle cwiartek). */
-    private boolean wheelGraphic() {
-        if (mobile || trade != null || !achievementsView || journalMode || infoTitle == null
-                || !infoTitle.startsWith(pl.fawizja.pixel.wheel.WheelView.TITLE)) return false;
-        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
-        return infoRows.size() <= perCol && menuW >= 420;
-    }
-
-    private float wheelCx() { return menuX + menuW * 0.75f; }
-    private float wheelCy() { return menuY + (menuH - 30) / 2f; }
-    private float wheelR() { return Math.min(menuW / 4f - 16, (menuH - 60) / 2f); }
-
-    /** 36 pol: 4 cwiartki (zielona lewa gora, czerwona prawa gora, fioletowa prawy dol, niebieska lewy dol), 5 pierscieni. */
-    private void drawWheelShapes(ShapeRenderer shapes, PlayerCharacter pc) {
-        float cx = wheelCx(), cy = wheelCy(), R = wheelR();
-        if (R < 40) return;
-        pl.fawizja.pixel.wheel.DestinyWheel w = pc.wheel();
-        int av = pc.wheelPoints();
-        float[] outer = {0.40f, 0.55f, 0.70f, 0.85f, 1f};
-        for (int ring = 4; ring >= 0; ring--) {
-            float r = R * outer[ring];
-            shapes.setColor(0.08f, 0.06f, 0.07f, 1f);
-            shapes.circle(cx, cy, r + 2, 64);
-            for (pl.fawizja.pixel.wheel.WheelDomain d : pl.fawizja.pixel.wheel.WheelDomain.values()) {
-                java.util.List<pl.fawizja.pixel.wheel.WheelSlice> inRing = new java.util.ArrayList<>();
-                for (pl.fawizja.pixel.wheel.WheelSlice sl : pl.fawizja.pixel.wheel.WheelSlice.of(d)) if (wheelRing(sl.pos) == ring) inRing.add(sl);
-                float base = wheelQuadrantStart(d);
-                float step = 90f / inRing.size();
-                for (int i = 0; i < inRing.size(); i++) {
-                    pl.fawizja.pixel.wheel.WheelSlice sl = inRing.get(i);
-                    float fill = w.points(sl) / (float) sl.capacity();
-                    float k = fill >= 1 ? 1f : w.points(sl) > 0 ? 0.45f + 0.35f * fill : w.open(sl, av) ? 0.3f : 0.16f;
-                    int rgb = d.rgb;
-                    shapes.setColor(((rgb >> 16) & 255) / 255f * k, ((rgb >> 8) & 255) / 255f * k, (rgb & 255) / 255f * k, 1f);
-                    shapes.arc(cx, cy, r, base + i * step + 1.2f, step - 2.4f, 16);
-                }
-            }
-        }
-        // naczynia klejnotow: romb na polu naczynia - jasny, gdy w naczyniu domeny jest klejnot i pole jest pelne (rezonans)
-        for (int ring = 0; ring <= 4; ring++) {
-            float rOut = R * outer[ring], rIn = ring == 0 ? R * 0.25f : R * outer[ring - 1];
-            float mid = (rOut + rIn) / 2f, size = Math.max(3f, (rOut - rIn) * 0.32f);
-            for (pl.fawizja.pixel.wheel.WheelDomain d : pl.fawizja.pixel.wheel.WheelDomain.values()) {
-                java.util.List<pl.fawizja.pixel.wheel.WheelSlice> inRing = new java.util.ArrayList<>();
-                for (pl.fawizja.pixel.wheel.WheelSlice sl : pl.fawizja.pixel.wheel.WheelSlice.of(d)) if (wheelRing(sl.pos) == ring) inRing.add(sl);
-                float step = 90f / inRing.size();
-                boolean gem = w.gems().socketed(d) != null;
-                for (int i = 0; i < inRing.size(); i++) {
-                    pl.fawizja.pixel.wheel.WheelSlice sl = inRing.get(i);
-                    if (sl.conviction != pl.fawizja.pixel.wheel.WheelSlice.Conv.VESSEL) continue;
-                    double a = Math.toRadians(wheelQuadrantStart(d) + i * step + step / 2f);
-                    float x = cx + (float) Math.cos(a) * mid, y = cy + (float) Math.sin(a) * mid;
-                    boolean full = w.points(sl) >= sl.capacity();
-                    shapes.setColor(0.05f, 0.04f, 0.05f, 1f);
-                    wheelGem(shapes, x, y, size + 1.5f);
-                    if (gem) {
-                        int rgb = d.rgb;
-                        float k = full ? 1f : 0.45f, wht = full ? 0.55f : 0.2f;
-                        shapes.setColor((((rgb >> 16) & 255) / 255f) * (1 - wht) * k + wht, (((rgb >> 8) & 255) / 255f) * (1 - wht) * k + wht,
-                                ((rgb & 255) / 255f) * (1 - wht) * k + wht, 1f);
-                    } else {
-                        shapes.setColor(0.22f, 0.2f, 0.2f, 1f);
-                    }
-                    wheelGem(shapes, x, y, size);
-                }
-            }
-        }
-        // srodek: wolne punkty
-        shapes.setColor(0.08f, 0.06f, 0.07f, 1f);
-        shapes.circle(cx, cy, R * 0.25f + 2, 48);
-        shapes.setColor(0.25f, 0.2f, 0.16f, 1f);
-        shapes.circle(cx, cy, R * 0.25f, 48);
-    }
-
-    /** Romb (szlif klejnotu) o srodku x, y i promieniu s. */
-    private static void wheelGem(ShapeRenderer shapes, float x, float y, float s) {
-        shapes.triangle(x - s, y, x + s, y, x, y + s * 1.25f);
-        shapes.triangle(x - s, y, x + s, y, x, y - s * 1.25f);
-    }
-
-    private void drawWheelText(SpriteBatch batch, PlayerCharacter pc) {
-        float cx = wheelCx(), cy = wheelCy(), R = wheelR();
-        if (R < 40) return;
-        int free = Math.max(0, pc.wheelPoints() - pc.wheel().spent());
-        font.getData().setScale(0.8f);
-        centered(batch, String.valueOf(free), cx, cy + 9);
-        font.getData().setScale(0.6f);
-        centered(batch, "wolne", cx, cy - 6);
-        font.getData().setScale(0.75f);
-        for (pl.fawizja.pixel.wheel.WheelDomain d : pl.fawizja.pixel.wheel.WheelDomain.values()) {
-            double a = Math.toRadians(wheelQuadrantStart(d) + 45);
-            float tx = cx + (float) Math.cos(a) * (R + 14), ty = cy + (float) Math.sin(a) * (R + 14);
-            centered(batch, String.valueOf(pc.wheel().domainPoints(d)), tx, ty + 5);
-        }
-        font.getData().setScale(1f);
-    }
-
-    /** Pierscien pola od srodka (0: pole 50 ... 4: pole 200). */
-    private static int wheelRing(pl.fawizja.pixel.wheel.WheelSlice.Pos p) {
-        switch (p) {
-            case S50: return 0;
-            case T75: case B75: return 1;
-            case T100: case M100: case B100: return 2;
-            case T150: case B150: return 3;
-            default: return 4;
-        }
-    }
-
-    /** Kat poczatku cwiartki (stopnie, przeciwnie do wskazowek zegara od prawej) - uklad jak w Tibii. */
-    private static float wheelQuadrantStart(pl.fawizja.pixel.wheel.WheelDomain d) {
-        switch (d) {
-            case RED: return 0;
-            case GREEN: return 90;
-            case BLUE: return 180;
-            default: return 270;
-        }
     }
 
     /** Osiagniecia w dwoch kolumnach albo bestiariusz (najczesciej zabijane potwory). */
@@ -2979,8 +2970,13 @@ public final class Hud {
     /** Zwraca true, jesli dotyk zostal obsluzony przez interfejs. */
     public boolean touchDown(int sx, int sy, int pointer, GameSession session, Actions actions) {
         Vector2 p = toUi(sx, sy);
+        if (wheelPanel.isOpen()) return wheelTouch(p.x, p.y, pointer, actions);
         if (houseWin != null) return houseTouch(p.x, p.y, actions);
         if (mobile) return mobileTouchDown(p.x, p.y, pointer, session, actions);
+        if (wheelTab.contains(p.x, p.y)) {
+            actions.onButton("wheel");
+            return true;
+        }
         if (charOpen && charWindowsTouch(p.x, p.y, session, actions)) return true;
         if (harmonyTouch(p.x, p.y, session)) return true;
         if (statusTouch(p.x, p.y, session)) return true;
@@ -3178,6 +3174,10 @@ public final class Hud {
 
     public boolean touchDragged(int sx, int sy, int pointer) {
         Vector2 p = toUi(sx, sy);
+        if (wheelPanel.owns(pointer)) {
+            wheelPanel.touchDragged(p.x, p.y, pointer);
+            return true;
+        }
         if (mobile && pointer == mBattlePointer) {
             // przewijanie listy walki palcem
             int d = Math.round((p.y - mBattleDownY) / MobileHudLayout.BATTLE_ROW);
@@ -3224,6 +3224,11 @@ public final class Hud {
     }
 
     public boolean touchUp(int sx, int sy, int pointer) {
+        if (wheelPanel.owns(pointer)) {
+            Vector2 p = toUi(sx, sy);
+            wheelDispatch(wheelPanel.touchUp(p.x, p.y, pointer), wheelActions);
+            return true;
+        }
         if (mobile && pointer == mBattlePointer) {
             mBattlePointer = -1;
             if (!mBattleDragged && mBattleActions != null) mobileBattleTap(mBattleDownY);
@@ -3355,6 +3360,7 @@ public final class Hud {
         buffs(session, serverTimeMs);
         if (mobile) {
             renderMobile(batch, shapes, session, clock, serverTimeMs, diagInfo, tgt);
+            drawWheelPanel(batch, shapes, pc);
             return;
         }
 
@@ -3382,6 +3388,7 @@ public final class Hud {
         shapes.rect(gx + gw, gy, 2, gh);
         statusIcons(session, serverTimeMs);
         drawTopBarShapes(shapes, pc);
+        drawWheelTabShapes(shapes);
         drawStatusIcons(shapes, statusX(), statusY());
         if (showHarmony(pc)) {
             HarmonyHud.draw(shapes, pc.harmony(), harmonyX(), statusY() + (STATUS_SIZE - HARMONY_ORB) / 2f, HARMONY_ORB,
@@ -3526,7 +3533,6 @@ public final class Hud {
                 shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
             }
-            if (wheelGraphic()) drawWheelShapes(shapes, session.character());
             shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
             shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
         }
@@ -3564,6 +3570,7 @@ public final class Hud {
         font.setColor(Color.WHITE);
         String floor = pc.position().z() == 0 ? "0" : (pc.position().z() > 0 ? "+" + pc.position().z() : String.valueOf(pc.position().z()));
         drawTopBarText(batch, session, clock.minuteOfDay(serverTimeMs), floor);
+        drawWheelTabText(batch);
         drawBattle(batch);
         drawPanelSkills(batch, pc);
         drawVip(batch);
@@ -3647,7 +3654,6 @@ public final class Hud {
                 font.getData().setScale(1f);
             } else if (trade == null && achievementsView && infoTitle != null && !journalMode) {
                 text(batch, infoTitle, menuX + 10, menuY + menuH - 14);
-                if (wheelGraphic()) drawWheelText(batch, session.character());
             } else if (trade == null && achievementsView && journalMode) {
                 text(batch, "Dziennik zadań - ukończone: " + session.character().quests().done().size()
                         + " (dotknij zadania, aby iść do zleceniodawcy)", menuX + 10, menuY + menuH - 14);
@@ -3713,6 +3719,7 @@ public final class Hud {
         }
         if (houseWin != null) drawHouseText(batch);
         batch.end();
+        drawWheelPanel(batch, shapes, pc);
     }
 
     private static final Color BORDER = new Color(0.5f, 0.44f, 0.32f, 0.85f);
@@ -5240,7 +5247,7 @@ public final class Hud {
             M_TEXT = hex(0xefe4d4, 1f), M_MUTED = hex(0xb8a48c, 1f), M_GOOD = hex(0x7ee06f, 1f), M_SEL = hex(0x2f5a25, 1f),
             M_CLOSE = hex(0xa3231c, 1f), M_EDGE = hex(0x5c4330, 1f), M_RING = hex(0xe8d7bd, 0.75f), M_BG = hex(0x140c06, 0.72f);
 
-    private static final String[] M_ICON_LABELS = {"Plecak", "Ekwipunek", "Umiejętn.", "VIP", "Zadania", "Ustawienia", "Sklep", "Wyloguj"};
+    private static final String[] M_ICON_LABELS = {"Plecak", "Ekwipunek", "Umiejętn.", "VIP", "Zadania", "Koło", "Ustawienia", "Sklep", "Wyloguj"};
 
     /** Polska nazwa profesji (tytul okna wyboru: "Rycerz, poz. 42"). */
     private static String vocationName(pl.fawizja.pixel.vocation.Vocation v) {
@@ -5403,6 +5410,10 @@ public final class Hud {
                 if (storeOpen()) closeMenus();
                 else actions.onButton("store");
                 break;
+            case MobileHudLayout.ICON_WHEEL:
+                mWin = null;
+                actions.onButton("wheel");
+                break;
             default:
                 mWin = null;
                 if (logoutConfirmOpen()) closeLogoutConfirm();
@@ -5423,6 +5434,7 @@ public final class Hud {
             case MobileHudLayout.ICON_SETTINGS: return mWin == MobileWin.SETTINGS;
             case MobileHudLayout.ICON_QUESTS: return journalOpen();
             case MobileHudLayout.ICON_SHOP: return storeOpen();
+            case MobileHudLayout.ICON_WHEEL: return wheelPanel.isOpen();
             default: return logoutConfirmOpen();
         }
     }
@@ -6201,6 +6213,7 @@ public final class Hud {
             if (i == MobileHudLayout.ICON_VIP) vipGlyph(shapes, r.cx(), r.y + 18);
             if (i == MobileHudLayout.ICON_SETTINGS) gearGlyph(shapes, r.cx(), r.y + 19, 6.5f);
             if (i == MobileHudLayout.ICON_LOGOUT) powerGlyph(shapes, r.cx(), r.y + 17);
+            if (i == MobileHudLayout.ICON_WHEEL) WheelPanel.glyph(shapes, r.cx(), r.y + 19, 9.5f);
         }
         // ikony stanu pod ramka po lewej
         float sx = mlay.statusRow.x, sy = mlay.statusRow.y;
@@ -6313,7 +6326,7 @@ public final class Hud {
         mCentered(batch, "HP " + pc.health() + " / " + pc.maxHealth(), mlay.hpBar.cx(), mlay.hpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
         mCentered(batch, "Mana " + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mlay.mpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
         TextureRegion[] iconImg = {art.backpack(), helmetIcon(session), itemIcon(session, "exp_scroll"), null, itemIcon(session, "challenge_scroll"), null,
-                itemIcon(session, "crystal_coin"), null};
+                null, itemIcon(session, "crystal_coin"), null};
         for (int i = 0; i < MobileHudLayout.ICONS; i++) {
             HudLayout.Rect r = mlay.icons[i];
             if (iconImg[i] != null) batch.draw(iconImg[i], r.x + 5, r.y + 8, 22, 22);

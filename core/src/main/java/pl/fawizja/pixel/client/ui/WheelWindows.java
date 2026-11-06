@@ -8,11 +8,13 @@ import pl.fawizja.pixel.wheel.WheelSlice;
 import pl.fawizja.pixel.wheel.WheelView;
 
 /**
- * Okna Kola Przeznaczenia (komputer i telefon - wspolne okno informacyjne HUD): przeglad z 4 kaflami cwiartek,
- * cwiartka (9 pol), karta pola, premie, zestawy, potwierdzenie resetu; klejnoty ({@link pl.fawizja.pixel.wheel.GemView}):
- * Pracownia, karta klejnotu, naczynie domeny i Warsztat okruchow. Akcje zmieniajace stan (wheel:add, remove,
- * reset, save, load) ida przez {@code act} - lokalnie od razu, online do serwera (wynik wraca w SELF); otwarte okno
- * odswieza sie co pol sekundy.
+ * Okna Kola Przeznaczenia (komputer i telefon). Glowne okno to duze kolo w ramce ({@link WheelPanel}, od 2026-11-06:
+ * zakladka "Koło" u gory, klawisz U, /koło): dotkniete pole pokazuje karte pola ({@link WheelView#slice}), odznaka
+ * cwiartki - karte objawienia, piasta - podsumowanie ({@link WheelView#summary}, przy nieaktywnym kole wymagania).
+ * Listy we wspolnym oknie informacyjnym HUD zostaja dla premii, zestawow, potwierdzenia resetu, cwiartki i klejnotow
+ * ({@link pl.fawizja.pixel.wheel.GemView}: Pracownia, karta klejnotu, naczynie domeny, Warsztat okruchow); ich
+ * "Wróć" (wheel:open) wraca do kola. Akcje zmieniajace stan (wheel:add, remove, reset, save, load) ida przez
+ * {@code act} - lokalnie od razu, online do serwera (wynik wraca w SELF); otwarte okno odswieza sie co pol sekundy.
  */
 public final class WheelWindows {
     private static final long REFRESH_MS = 500;
@@ -30,16 +32,77 @@ public final class WheelWindows {
         this.act = act;
     }
 
-    /** Otwiera okno glowne kola. */
-    public void open() { show(WheelView.OPEN, true); }
+    /** Otwiera kolo w ramce (podsumowanie); nieaktywne kolo - komunikat o wymaganiach w dzienniku. */
+    public void open() {
+        view = null;
+        hud.openWheel();
+        hud.wheelShowSummary();
+        refreshPanel();
+        String req = WheelView.requirementsMessage(session.character());
+        if (req != null) session.log().add(session.lastUpdateMs(), pl.fawizja.pixel.game.EventLog.Kind.INFO, req);
+    }
+
+    /** Zakladka u gory i klawisz U: otwiera albo zamyka kolo. */
+    public void toggle() {
+        if (hud.wheelOpen()) hud.closeWheel();
+        else open();
+    }
+
+    /** Tresc karty obok kola: wybrane pole, objawienie albo podsumowanie. */
+    private void refreshPanel() {
+        boolean temple = session.inTemple();
+        WheelSlice s = hud.wheelSelected();
+        WheelDomain d = hud.wheelRevelation();
+        List<String[]> rows;
+        String title;
+        if (s != null) {
+            title = cap(s.label()) + "  (" + s.capacity() + ")";
+            rows = new java.util.ArrayList<>(WheelView.slice(session.character(), s, temple, this::spellName));
+            if (!temple && session.character().wheelPoints() > 0) {
+                rows.add(1, new String[] {"Świątynia", "punkty rozdasz tylko w świątyni", "nie", "ach:none"});
+            }
+        } else if (d != null) {
+            title = "Objawienie: " + d.label.toLowerCase(java.util.Locale.ROOT) + " ćwiartka";
+            rows = WheelView.revelation(session.character(), d, this::spellName);
+        } else {
+            title = session.character().wheelPoints() > 0 ? "Podsumowanie" : "Wymagania";
+            rows = WheelView.summary(session.character(), temple, this::have);
+        }
+        hud.setWheelCard(title, rows);
+    }
+
+    private static String cap(String s) { return s.isEmpty() ? s : Character.toUpperCase(s.charAt(0)) + s.substring(1); }
 
     /** Obsluga wiersza okna; false, gdy identyfikator nie nalezy do kola. */
     public boolean handle(String id, long t) {
         if (!id.startsWith("wheel:")) return false;
         String[] f = id.split(":");
         switch (f[1]) {
-            case "open": case "q": case "sel": case "perks": case "presets": case "resetask":
-            case "gems": case "card": case "gemask": case "vessel": case "frag": case "rev":
+            case "open":
+                open();
+                return true;
+            case "sel": {
+                WheelSlice s = f.length > 2 ? WheelSlice.ofCode(f[2]) : null;
+                if (s == null) return true;
+                if (!hud.wheelOpen()) open();
+                hud.wheelSelect(s);
+                refreshPanel();
+                return true;
+            }
+            case "rev": {
+                WheelDomain d = f.length > 2 ? WheelDomain.ofCode(f[2].charAt(0)) : null;
+                if (d == null) return true;
+                if (!hud.wheelOpen()) open();
+                hud.wheelShowRevelation(d);
+                refreshPanel();
+                return true;
+            }
+            case "sum":
+                hud.wheelShowSummary();
+                refreshPanel();
+                return true;
+            case "q": case "perks": case "presets": case "resetask":
+            case "gems": case "card": case "gemask": case "vessel": case "frag":
                 show(id, true);
                 return true;
             case "gem": {
@@ -61,7 +124,8 @@ public final class WheelWindows {
                 return true;
             case "add": case "remove":
                 act.accept(id, t);
-                show("wheel:sel:" + f[2], true);
+                if (hud.wheelOpen()) refreshPanel();
+                else show("wheel:sel:" + f[2], true);
                 return true;
             case "save": case "load":
                 act.accept(id, t);
@@ -69,7 +133,7 @@ public final class WheelWindows {
                 return true;
             case "reset":
                 act.accept(id, t);
-                show(WheelView.OPEN, true);
+                open();
                 return true;
             default:
                 return false;
@@ -77,7 +141,13 @@ public final class WheelWindows {
     }
 
     public void update(long t) {
-        if (view == null || t - refreshMs < REFRESH_MS) return;
+        if (t - refreshMs < REFRESH_MS) return;
+        if (hud.wheelOpen()) {
+            refreshMs = t;
+            refreshPanel();
+            return;
+        }
+        if (view == null) return;
         refreshMs = t;
         if (viewTitle == null || !hud.infoOpen(viewTitle)) {
             view = null;

@@ -203,3 +203,10 @@ wheel_gem_card|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=49
 wheel_gem_vessel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:vessel:P
 wheel_slice_spell|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:sel:PT100
 wheel_revelation_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=wheel=wheel:rev:P
+# 2026-11-06: Kolo Przeznaczenia w ramce jak w Tibii (zakladka "Koło" u gory, duze kolo, karta pola, objawienie, wymagania)
+wheel_tab_desktop|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0
+wheel_frame_slice|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:sel:PT100
+wheel_frame_revelation|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:rev:P
+wheel_frame_lowlevel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.button=wheel
+wheel_frame_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=400 -Dpixel.open=wheel -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+wheel_frame_mobile_slice|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=700 -Dpixel.wheelOrder=GBRP -Dpixel.open=wheel=wheel:sel:G200 -Dpixel.mobileHud=1 -Dpixel.width=1560 -Dpixel.height=720 -Dpixel.uiScale=2

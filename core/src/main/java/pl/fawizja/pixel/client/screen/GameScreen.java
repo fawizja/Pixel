@@ -429,6 +429,11 @@ public final class GameScreen extends ScreenAdapter {
             }
 
             @Override
+            public boolean scrolled(float amountX, float amountY) {
+                return hud.scrolled(Gdx.input.getX(), Gdx.input.getY(), amountY);
+            }
+
+            @Override
             public boolean keyTyped(char c) {
                 if (chatDraft == null && hud.houseTyping()) {
                     if (c != '\r' && c != '\n') hud.houseType(c);
@@ -508,7 +513,7 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.J: hud.toggleMap(); return true;
                     case Input.Keys.Z: hud.openJournal(); return true;
                     case Input.Keys.H: openHunt(); return true;
-                    case Input.Keys.U: wheelWindows.open(); return true;
+                    case Input.Keys.U: wheelWindows.toggle(); return true;
                     case Input.Keys.ESCAPE:
                         hud.closeTop(session);
                         return true;
@@ -567,7 +572,7 @@ public final class GameScreen extends ScreenAdapter {
             case "book": hud.toggleBook(); break;
             case "quest": hud.openJournal(); break;
             case "store": openStore(); break;
-            case "wheel": wheelWindows.open(); break;
+            case "wheel": wheelWindows.toggle(); break;
             case "hud:skills": hud.toggleSkills(); break;
             case "hud:vip": hud.toggleVip(); break;
             case "vip:add": openChat("/znajomi dodaj "); break;

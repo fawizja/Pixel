@@ -70,6 +70,55 @@ public final class WheelView {
         return rows;
     }
 
+    /** Komunikat, gdy kolo jest nieaktywne: czego brakuje postaci (poziom, promocja, premium); null, gdy aktywne. */
+    public static String requirementsMessage(PlayerCharacter pc) {
+        if (pc.wheelPoints() > 0) return null;
+        List<String> miss = new ArrayList<>();
+        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add("poziomu " + DestinyWheel.MIN_LEVEL + " (masz " + pc.level() + ")");
+        if (!pc.isPromoted()) miss.add("promocji");
+        if (!pc.isPremium()) miss.add("konta premium");
+        return TITLE + " wymaga " + String.join(", ", miss) + ".";
+    }
+
+    /** Wiersze wymagan nieaktywnego kola: poziom, promocja, premium (stan: spelnione / brak). */
+    public static List<String[]> requirements(PlayerCharacter pc) {
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[] {"Koło nieaktywne", "punkty promocji: 1 za każdy poziom od " + DestinyWheel.MIN_LEVEL
+                + " (z promocją i kontem premium)", "", "ach:none"});
+        boolean lv = pc.level() >= DestinyWheel.MIN_LEVEL;
+        rows.add(new String[] {"Poziom " + DestinyWheel.MIN_LEVEL, "masz poziom " + pc.level(), lv ? "spełnione" : "brak", "ach:none"});
+        rows.add(new String[] {"Promocja", pc.isPromoted() ? "masz promocję" : "kup w Sklepie albo u króla", pc.isPromoted() ? "spełnione" : "brak",
+                "ach:none"});
+        rows.add(new String[] {"Konto premium", pc.isPremium() ? "aktywne" : "kup w Sklepie", pc.isPremium() ? "spełnione" : "brak", "ach:none"});
+        rows.add(new String[] {"Podgląd", "dotknij pola koła, aby zobaczyć, co daje", "", "ach:none"});
+        return rows;
+    }
+
+    /**
+     * Karta okna kola bez wybranego pola (duze kolo w ramce): punkty, swiatynia, 4 objawienia (do karty objawienia),
+     * awatar, klejnoty i wskazowka; nieaktywne kolo - wymagania.
+     */
+    public static List<String[]> summary(PlayerCharacter pc, boolean inTemple, java.util.function.ToIntFunction<String> have) {
+        if (pc.wheelPoints() <= 0) return requirements(pc);
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[] {"Punkty promocji", head(pc), "", "ach:none"});
+        rows.add(new String[] {"Świątynia", inTemple ? "jesteś w świątyni - możesz rozdawać punkty" : "punkty rozdasz tylko w świątyni",
+                inTemple ? "tak" : "nie", "ach:none"});
+        Vocation v = pc.vocation();
+        for (WheelDomain d : WheelDomain.values()) {
+            int pts = pc.wheel().domainPoints(d);
+            int bonus = pc.wheelBonus().gems().revelation(d);
+            int st = WheelDomain.stage(pts + bonus);
+            WheelRevelation r = WheelRevelation.of(d, v);
+            rows.add(new String[] {d.label + ": " + r.label, revelationProgress(pts + bonus), st > 0 ? "etap " + st : "", "wheel:rev:" + d.code});
+        }
+        String av = avatarLine(pc);
+        if (av != null) rows.add(new String[] {"Awatar", av, "", "ach:none"});
+        GemView.overviewRows(rows, pc, have);
+        rows.add(new String[] {"Wskazówka", "dotknij pola koła, aby zobaczyć jego kartę i rozdać punkty", "", "ach:none"});
+        return rows;
+    }
+
     /** Stan awatara (aktywny / odnowienie) albo null. */
     public static String avatarLine(PlayerCharacter pc) {
         DestinyWheel w = pc.wheel();

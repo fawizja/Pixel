@@ -3,7 +3,7 @@ package pl.fawizja.pixel.client.ui;
 /**
  * Uklad HUD-u na telefon, "wariant B" z makiety zatwierdzonej przez wlasciciela (2026-10-29,
  * scratchpad/mock/template3.html, funkcja phone()): widok gry na calym ekranie pod HUD-em, u gory jedna drewniana
- * ramka (poziom, paski HP i many, 8 ikon kategorii), pod nia po prawej minimapa 120 x 80 dp i pod nia lista walki
+ * ramka (poziom, paski HP i many, 9 ikon kategorii; Kolo od 2026-11-06), pod nia po prawej minimapa 120 x 80 dp i pod nia lista walki
  * (wlasciciel: "Walka musi byc pod mapa"), w prawym dolnym rogu luk 5 czarow, pod nim wewnetrzny luk 3 pol (mikstury
  * albo czary) i pole w rogu, w srodku obu lukow (Darek, 0.227: "zmiesc jeszcze jedna miksture albo czar i jeszcze jedno
  * w srodku"), obok rzad Atak / Podazaj / tryb walki / PvP, joystick w lewym
@@ -14,10 +14,10 @@ package pl.fawizja.pixel.client.ui;
  */
 public final class MobileHudLayout {
 
-    /** Ikony kategorii w ramce: Plecak, Ekwipunek, Umiejetnosci, VIP, Zadania, Ustawienia, Sklep, Wyloguj. */
-    public static final int ICONS = 8;
-    public static final int ICON_BAG = 0, ICON_EQUIP = 1, ICON_SKILLS = 2, ICON_VIP = 3, ICON_QUESTS = 4, ICON_SETTINGS = 5, ICON_SHOP = 6,
-            ICON_LOGOUT = 7;
+    /** Ikony kategorii w ramce: Plecak, Ekwipunek, Umiejetnosci, VIP, Zadania, Kolo Przeznaczenia, Ustawienia, Sklep, Wyloguj. */
+    public static final int ICONS = 9;
+    public static final int ICON_BAG = 0, ICON_EQUIP = 1, ICON_SKILLS = 2, ICON_VIP = 3, ICON_QUESTS = 4, ICON_WHEEL = 5, ICON_SETTINGS = 6,
+            ICON_SHOP = 7, ICON_LOGOUT = 8;
     public static final float ICON = 32f, ICON_GAP = 3f, ICON_MARGIN = 8f;
     /** Gorna ramka: y 2..42 od gory ekranu, 3 dp od bokow. */
     public static final float FRAME_TOP = 2f, FRAME_H = 40f;
