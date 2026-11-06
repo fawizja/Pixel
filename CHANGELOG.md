@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.235.0] - 2026-11-06
+
+### Dodano
+- Harmonia mnicha widoczna nad postacią jak w Tibii: 5 małych kwadratów pod paskami życia i many (złote = punkty
+  harmonii) oraz niebieski romb, gdy mnich jest w stanie Serene. Widać to u własnej postaci i u innych mnichów
+  w grze online. Kule harmonii w HUD zostają (tam widać Cnotę i tam się ją wybiera).
+
+### Zmieniono
+- Czaszka PvP nad mnichem przesunięta pod kwadraty harmonii.
+
 ## [0.234.0] - 2026-11-06
 
 ### Dodano
