@@ -530,3 +530,5 @@ Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i mebl
 | `pets/pet_cat.png` | kot | tak |
 | `pets/pet_raven.png` | kruk | tak |
 | `pets/pet_fennec.png` | fenek | tak |
+| `pets/pet_gull.png` | mewka (Valmir; przebarwiony kruk OTSP) | tak |
+| `pets/pet_parrot.png` | papużka (Nerys; przebarwiony kruk OTSP) | tak |

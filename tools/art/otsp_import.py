@@ -279,7 +279,9 @@ DECALS = {
 }
 # Pupile i potwory bez stroju w paczce: przebarwiony podobny stroj.
 MORE_TINTED = {"cursed_treant": (12, (100, 115, 55))}
-PET_TINTED = {"pet_dog": (1, (160, 115, 70)), "pet_fennec": (11, (235, 175, 95))}
+PET_TINTED = {"pet_dog": (1, (160, 115, 70)), "pet_fennec": (11, (235, 175, 95)),
+              # 2026-11-06: pupile Valmir i Nerys - przebarwiony kruk (mewa, papuga)
+              "pet_gull": (9, (240, 240, 235)), "pet_parrot": (9, (80, 200, 70))}
 # Plecak w gniezdzie ekwipunku (jak w Tibii: dotkniecie otwiera plecak).
 EXTRA_OBJECTS = {"backpack": 2099}
 ITEMS = {
@@ -394,6 +396,18 @@ _ROLE = {
     # 2026-10-23: krol Aurelian i straznicy bram (klucze guard_N)
     "king": (17, ((230, 190, 60), (120, 40, 140), (100, 30, 110), (210, 170, 60))),
     "guard": (19, ((150, 155, 165), (70, 90, 140), (120, 125, 135), (60, 50, 40))),
+    # 2026-11-06: uslugi w kazdym miescie (tools/mapgen/town_npcs.py): opiekun zwierzat, wladca, zaklinacz
+    "petkeeper": (44, ((120, 90, 50), (80, 130, 60), (110, 90, 60), (60, 40, 30))),
+    "ruler": (17, ((230, 190, 60), (40, 70, 140), (30, 50, 110), (210, 170, 60))),
+    "imbuer": (18, ((60, 40, 90), (110, 60, 170), (80, 50, 130), (40, 30, 40))),
+}
+# wladcy miast: krolewski stroj w barwach miasta (krol Aurelian w Varden ma swoj "king")
+RULER_COLORS = {
+    "frost_ruler": ((230, 230, 240), (90, 140, 200), (60, 100, 160), (200, 200, 210)),
+    "selv_ruler": ((230, 190, 60), (40, 120, 60), (30, 90, 50), (210, 170, 60)),
+    "qas_ruler": ((240, 200, 80), (190, 70, 40), (150, 50, 40), (220, 180, 70)),
+    "valmir_ruler": ((230, 190, 60), (40, 70, 140), (30, 50, 110), (210, 170, 60)),
+    "nerys_ruler": ((240, 240, 230), (40, 150, 140), (30, 110, 110), (220, 200, 90)),
 }
 _NPC_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
                         "shared/src/main/resources/maps/world/npcs.csv")
@@ -409,6 +423,8 @@ for _line in open(_NPC_CSV, encoding="utf-8"):
         NPCS[_key] = _ROLE["guard"]
     elif len(_cols) > 2 and _cols[2].lower() in _ROLE:   # np. gull_ferryman (CAPTAIN), isle_guide
         NPCS[_key] = _ROLE[_cols[2].lower()]
+    if _key in RULER_COLORS:
+        NPCS[_key] = (_ROLE["ruler"][0], RULER_COLORS[_key])
 PETS = {"pet_cat": (1, None), "pet_raven": (9, None)}
 
 MASK = {(255, 255, 0): 0, (255, 0, 0): 1, (0, 255, 0): 2, (0, 0, 255): 3}
@@ -736,7 +752,7 @@ def main(client, art):
     for voc, (i, colors) in CHARACTERS.items():
         for d, dname in enumerate(ot.DIRS):
             n += save_outfit(spr, things["outfit"][i], d, colors, f"{art}/characters/{voc}_{dname}")
-    for name in ("pet_cat", "pet_raven", "pet_dog", "pet_fennec"):   # ikona pupila w plecaku = jego postac
+    for name in ("pet_cat", "pet_raven", "pet_dog", "pet_fennec", "pet_gull", "pet_parrot"):   # ikona pupila w plecaku = jego postac
         src = Image.open(f"{art}/pets/{name}.png").convert("RGBA")
         save(src.resize((32, 32), Image.NEAREST) if src.width != 32 else src, f"{art}/items/{name}.png"); n += 1
     # obiekty w naturalnym rozmiarze

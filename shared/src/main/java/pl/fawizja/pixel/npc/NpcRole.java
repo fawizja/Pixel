@@ -16,8 +16,11 @@ public enum NpcRole {
     CAPTAIN,
     /** Zarzadca domow: lista domow miasta, kupno za zloto z banku i oddanie domu. */
     HOUSING,
-    /** Krol w zamku Varden: konto premium (rejsy statkami) i promocja profesji. */
+    /** Wladca miasta (krol Aurelian w zamku Varden, w innych miastach krol, krolowa albo lord): konto premium
+     *  (rejsy statkami) i promocja profesji - wszedzie tak samo. */
     KING,
     /** Straznik przy bramie miasta: tylko powitanie (bez uslug), stoi w strefie ochronnej. */
-    GUARD
+    GUARD,
+    /** Zaklinacz (klucz *_imbuer, w kazdym miescie): nasycenia (imbuementy) jak u kowala, bez sklepu. */
+    IMBUER
 }

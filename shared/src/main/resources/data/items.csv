@@ -109,10 +109,12 @@
 125;oasis_carp;Karp z oazy;FOOD;100;10;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e0a050;Złoty karp z oaz Qasirah.
 126;saddle;Siodło;TOOL;1;25000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#8a5a30;Siodło z wodzami. Użyj, aby oswoić konia: wierzchowiec zostaje na zawsze i dodaje 60 szybkości.
 127;return_scroll;Zwój powrotu;TOOL;20;150;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8d9a0;Zwój z modlitwą kapłanów: po 3 s skupienia przenosi do świątyni twojego miasta. Nie działa w walce z graczem.
-128;pet_dog;Szczenię;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#b07a40;Wierny piesek z Varden. Użyj, aby chodził za tobą (i jeszcze raz, aby odpoczął).
-129;pet_cat;Kocię;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e09a40;Rude kocię z Selvaran. Użyj, aby chodziło za tobą (i jeszcze raz, aby odpoczęło).
-130;pet_raven;Kruk;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#303040;Oswojony kruk z Frostholm. Użyj, aby leciał za tobą (i jeszcze raz, aby odpoczął).
-131;pet_fennec;Fenek;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8c890;Pustynny lisek z Qasirah. Użyj, aby biegł za tobą (i jeszcze raz, aby odpoczął).
+128;pet_dog;Szczenię;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#b07a40;Wierny piesek z Varden. Użyj, aby chodził za tobą (i jeszcze raz, aby odpoczął). Gdy chodzi za tobą: +5% doświadczenia z potworów.
+129;pet_cat;Kocię;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e09a40;Rude kocię z Selvaran. Użyj, aby chodziło za tobą (i jeszcze raz, aby odpoczęło). Gdy chodzi za tobą: +5% doświadczenia z potworów.
+130;pet_raven;Kruk;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#303040;Oswojony kruk z Frostholm. Użyj, aby leciał za tobą (i jeszcze raz, aby odpoczął). Gdy chodzi za tobą: +5% doświadczenia z potworów.
+131;pet_fennec;Fenek;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8c890;Pustynny lisek z Qasirah. Użyj, aby biegł za tobą (i jeszcze raz, aby odpoczął). Gdy chodzi za tobą: +5% doświadczenia z potworów.
+249;pet_gull;Mewka;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8e8e0;Oswojona mewa z portu Valmir. Użyj, aby leciała za tobą (i jeszcze raz, aby odpoczęła). Gdy chodzi za tobą: +5% doświadczenia z potworów.
+250;pet_parrot;Papużka;TOOL;1;2500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#50b040;Gadatliwa papużka z Nerys. Użyj, aby leciała za tobą (i jeszcze raz, aby odpoczęła). Gdy chodzi za tobą: +5% doświadczenia z potworów.
 132;exp_scroll;Zwój nauki;TOOL;20;400;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#9fd4ee;Przeczytany daje +30% doświadczenia za potwory przez godzinę polowania (czas płynie tylko poza strefą ochronną).
 133;challenge_scroll;Zwój wyzwania;TOOL;20;250;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e07050;Odczytany poza miastem przywołuje 3 fale potworów dobranych do poziomu. Pokonaj je w 5 minut, nie oddalając się, a dostaniesz złoto i doświadczenie.
 134;strong_health_potion;Potężna mikstura zdrowia;POTION;100;290;NONE;0;0;0;100;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;-;#c01838;Potężna mikstura zdrowia dla wojowników od poziomu 100.

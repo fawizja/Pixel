@@ -1356,7 +1356,7 @@ public final class GameSession {
         }
         boolean ship = n.role() == NpcRole.CAPTAIN;
         if (ship && !pc.isPremium()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": rejsy tylko dla kont premium. Premium kupisz u króla w zamku Varden.");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": rejsy tylko dla kont premium. " + premiumHint(n.town()));
             return false;
         }
         pl.fawizja.pixel.npc.Travel.Route route = null;
@@ -1711,7 +1711,21 @@ public final class GameSession {
         return pc.bank().balance() >= price && pc.bank().debit(price).ok();
     }
 
-    /** Krol: konto premium za zloto z banku - rejsy duzymi statkami miedzy portami. */
+    /** Wladca miasta (rola KING) w danym miescie albo null (wyspy, wioski). */
+    public Npc rulerOf(String town) {
+        if (npcs == null || town == null) return null;
+        for (Npc n : npcs.all()) if (n.role() == NpcRole.KING && town.equalsIgnoreCase(n.town())) return n;
+        return null;
+    }
+
+    /** Podpowiedz, gdzie kupic premium: wladca tego miasta albo kazdego miasta. */
+    public String premiumHint(String town) {
+        Npc r = rulerOf(town);
+        return r != null ? "Premium sprzedaje " + r.name() + " (władca " + r.town() + ")."
+                : "Premium sprzedaje władca każdego miasta (król, królowa albo lord).";
+    }
+
+    /** Wladca miasta (krol, krolowa, lord): konto premium za zloto z banku - rejsy duzymi statkami miedzy portami. */
     public boolean buyPremium(long nowMs) {
         Npc n = talkTo(NpcRole.KING, nowMs);
         if (n == null) return false;
@@ -1728,7 +1742,7 @@ public final class GameSession {
         return true;
     }
 
-    /** Krol: promocja profesji (premium, poziom 20+) - znak przy postaci i szybsza regeneracja. */
+    /** Wladca miasta: promocja profesji (premium, poziom 20+) - znak przy postaci i szybsza regeneracja (u kazdego wladcy tak samo). */
     public boolean buyPromotion(long nowMs) {
         Npc n = talkTo(NpcRole.KING, nowMs);
         if (n == null) return false;
@@ -2234,12 +2248,23 @@ public final class GameSession {
         return smithNearby(nowMs) != null && forge().raiseLimit(nowMs);
     }
 
+    /** Kowal albo zaklinacz obok postaci (nasycenia); inaczej ostrzezenie i null. */
+    public Npc imbuerNearby(long nowMs) {
+        Npc n = npcNearby();
+        if (n == null || !n.imbues()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n != null ? n.name() + ": nasycenia robi zaklinacz albo kowal (w każdym mieście)."
+                    : TradeResult.TOO_FAR.message());
+            return null;
+        }
+        return n;
+    }
+
     public boolean imbue(pl.fawizja.pixel.item.EquipSlot slot, pl.fawizja.pixel.item.Imbuement kind, int level, long nowMs) {
-        return smithNearby(nowMs) != null && forge().imbue(slot, kind, level, nowMs);
+        return imbuerNearby(nowMs) != null && forge().imbue(slot, kind, level, nowMs);
     }
 
     public boolean clearImbuement(pl.fawizja.pixel.item.EquipSlot slot, int index, long nowMs) {
-        return smithNearby(nowMs) != null && forge().clearImbuement(slot, index, nowMs);
+        return imbuerNearby(nowMs) != null && forge().clearImbuement(slot, index, nowMs);
     }
 
     /** Klient online: polozenia diabolicznych potworow z serwera (komunikat FIEND); null = gra lokalna. */
@@ -2292,7 +2317,8 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.INFO, pet.name() + " odpoczywa w plecaku.");
         } else {
             pc.setPet(pet.key());
-            log.add(nowMs, EventLog.Kind.INFO, pet.name() + " chodzi teraz za tobą.");
+            log.add(nowMs, EventLog.Kind.INFO, pet.name() + " chodzi teraz za tobą: +" + PlayerCharacter.PET_EXP_PERCENT
+                    + "% doświadczenia z potworów.");
         }
         return CastResult.OK;
     }
@@ -3590,7 +3616,8 @@ public final class GameSession {
             case GUIDE: return "przewodnik";
             case CARRIER: return "woźnica";
             case CAPTAIN: return "kapitan statku";
-            case KING: return "król";
+            case KING: return "władca miasta";
+            case IMBUER: return "zaklinacz";
             case GUARD: return "strażnik";
             default: return r.name().toLowerCase(java.util.Locale.ROOT);
         }

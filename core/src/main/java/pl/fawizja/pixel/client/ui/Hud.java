@@ -1400,9 +1400,15 @@ public final class Hud {
         smithView = npc != null && npc.isSmith();
     }
 
-    /** Podglad GUI: okno kowala na stronie (0 ulepszenia, 1 Kuznia, 2 nasycenia), z wybranym polem nasycen. */
+    /** Podglad GUI: okno kowala na stronie (0 ulepszenia, 1 Kuznia, 2 nasycenia), z wybranym polem nasycen;
+     *  obok zaklinacza od razu jego okno nasycen. */
     public void openSmithPage(GameSession session, int page, EquipSlot slot, int level) {
         openSmith(session);
+        if (npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.IMBUER) {
+            if (slot != null) imbueSlot = slot;
+            imbueLevel = Math.max(1, Math.min(3, level));
+            return;
+        }
         smithPage = page;
         if (slot != null) imbueSlot = slot;
         imbueLevel = Math.max(1, Math.min(3, level));
@@ -2613,11 +2619,15 @@ public final class Hud {
         }
     }
 
-    /** Nasycenia u kowala: zalozone przedmioty z miejscami (lewa), rodzaje do wybranego przedmiotu (prawa). */
+    /** Nasycenia u kowala i zaklinacza: zalozone przedmioty z miejscami (lewa), rodzaje do wybranego przedmiotu (prawa). */
     private void imbueRows(GameSession session, List<MenuRow> left, List<MenuRow> right, int perCol) {
         PlayerCharacter pc = session.character();
         pl.fawizja.pixel.item.ItemRegistry reg = session.items();
-        left.add(new MenuRow("npc:smith", "Wróć do sklepu", "nasycenia działają 20 h walki na założonym przedmiocie", true));
+        if (npc.role() == pl.fawizja.pixel.npc.NpcRole.IMBUER) {
+            left.add(new MenuRow("npc:none", "Nasycenia (imbuementy)", "działają 20 h walki na założonym przedmiocie; kowal robi to samo", false));
+        } else {
+            left.add(new MenuRow("npc:smith", "Wróć do sklepu", "nasycenia działają 20 h walki na założonym przedmiocie", true));
+        }
         String res = lastForgeResult(session);
         if (res != null) left.add(resultRow(res));
         if (imbueSlot != null && (pc.equipment().get(imbueSlot) == null
@@ -2702,6 +2712,15 @@ public final class Hud {
                             o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : "") + (delta.isEmpty() ? "" : "; " + delta), gold >= cost));
                 }
                 if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
+                if (npc.isPetKeeper()) {
+                    // opiekun zwierzat: tylko pupil miasta, bez skupu i zapasow
+                    right.add(new MenuRow("npc:none", "Pupil u boku: +" + PlayerCharacter.PET_EXP_PERCENT + "% doświadczenia",
+                            "z potworów, gdy chodzi za tobą (po etapach serwera)", false));
+                    right.add(new MenuRow("npc:none", "Przywołanie: użyj pupila w plecaku", "jeszcze raz - odpoczywa; bez niego w plecaku odchodzi", false));
+                    String now = pc.pet() == null ? "nikt" : session.items().containsKey(pc.pet()) ? session.items().byKey(pc.pet()).name() : pc.pet();
+                    right.add(new MenuRow("npc:none", "Teraz za tobą chodzi: " + now, "każde miasto ma swojego pupila", false));
+                    break;
+                }
                 if (npc.isSmith()) {
                     right.add(new MenuRow("npc:smith", "Kowal: ulepszenia, Kuźnia, nasycenia", "+1..+5, fuzja tierów, wampiryzm, ochrony", true));
                 }
@@ -2783,7 +2802,12 @@ public final class Hud {
                         pc.isPromoted() ? "znak promocji i szybsza regeneracja"
                                 : String.format("%,d gp z banku, premium i poziom %d - znak przy postaci, regeneracja +50%%", promo,
                                         pl.fawizja.pixel.game.GameSession.PROMOTION_LEVEL), canPromo));
-                left.add(new MenuRow("npc:none", String.format("Saldo: %,d gp", bal), "opłaty pobiera król z konta w banku", false));
+                left.add(new MenuRow("npc:none", String.format("Saldo: %,d gp", bal), "opłaty pobiera władca z konta w banku", false));
+                right.add(new MenuRow("npc:none", "Władca " + npc.town(), "te same ceny u każdego władcy (król, królowa, lord)", false));
+                break;
+            }
+            case IMBUER: {
+                imbueRows(session, left, right, perCol);
                 break;
             }
             case PRIEST: {
@@ -2807,7 +2831,7 @@ public final class Hud {
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
                     boolean locked = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN && !pc.isPremium();
                     left.add(new MenuRow("npc:travel:" + r.to().town(), verb + r.to().town(),
-                            String.format("%,d gp", r.price()) + (locked ? " - tylko z kontem premium (król w Varden)"
+                            String.format("%,d gp", r.price()) + (locked ? " - tylko z kontem premium (u władcy miasta)"
                                     : gold < r.price() ? " - za mało monet w plecaku" : ""), !locked && gold >= r.price()));
                 }
                 break;
@@ -2912,7 +2936,8 @@ public final class Hud {
         // tematy rozmowy (to samo mozna wpisac w czacie obok NPC)
         boolean depotRows = depotView && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER
                 || pl.fawizja.pixel.npc.Npc.CRATE.equals(npc.key())
-                || smithView && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT;
+                || smithView && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT
+                || npc.role() == pl.fawizja.pixel.npc.NpcRole.IMBUER;
         for (String topic : depotRows ? java.util.List.<String>of() : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
             MenuRow row = new MenuRow("npc:ask:" + topic, "Zapytaj: " + topic, "rozmowa", true);
             if (right.size() < perCol) right.add(row);

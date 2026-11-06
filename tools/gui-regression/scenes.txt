@@ -203,3 +203,8 @@ wheel_gem_card|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=49
 wheel_gem_vessel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:vessel:P
 wheel_slice_spell|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:sel:PT100
 wheel_revelation_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=wheel=wheel:rev:P
+petkeeper|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=547,495,0 -Dpixel.open=npc
+ruler_frostholm|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=750,214,0 -Dpixel.open=npc
+imbuer_nerys|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=886,741,0 -Dpixel.open=imbue
+pet_gull_card|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,509,0 -Dpixel.open=pet -Dpixel.pet=pet_gull -Dpixel.petCard=true
+pet_parrot_nerys|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=884,742,0 -Dpixel.open=pet -Dpixel.pet=pet_parrot

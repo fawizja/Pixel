@@ -106,11 +106,16 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Potwor dnia (takze jego odmiana elitarna, bo ma ten sam klucz). */
     public boolean isBoosted(MonsterType t) { return boostedKey != null && t != null && boostedKey.equals(t.key()); }
 
-    /** Doswiadczenie za potwora dla poziomu postaci: mnoznik etapu serwera (Balance.expRate), premia zwoju nauki i potwora dnia. */
+    /**
+     * Doswiadczenie za potwora dla poziomu postaci: mnoznik etapu serwera (Balance.expRate), premia zwoju nauki i potwora dnia,
+     * wydarzenie serwera i pupil chodzacy za postacia (+{@link PlayerCharacter#PET_EXP_PERCENT}%, po etapach).
+     */
     public long killExperience(MonsterType t, int level) {
         long exp = pc.enchantments().experience(Balance.applyRate(Balance.experienceReward(t.experience(), t.level(), level), Balance.expRate(level)));
         if (isBoosted(t)) exp = pl.fawizja.pixel.daily.BoostedCreature.boostExp(exp);
-        return bonusExpPercent > 0 ? exp * (100 + bonusExpPercent) / 100 : exp;
+        if (bonusExpPercent > 0) exp = exp * (100 + bonusExpPercent) / 100;
+        int pet = pc.petExpPercent();
+        return pet > 0 ? exp * (100 + pet) / 100 : exp;
     }
 
     /** Premia doswiadczenia z wydarzenia serwera (procent, 0 = brak). */

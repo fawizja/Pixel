@@ -19,8 +19,8 @@ public final class Store {
         public boolean available() { return blocked == null; }
     }
 
-    /** Zwierzaki od kupcow (data/shops.csv). */
-    static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec"};
+    /** Pupile od opiekunow zwierzat w miastach (sklepy *_pets w data/shops.csv). */
+    static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec", "pet_gull", "pet_parrot"};
 
     private Store() {}
 

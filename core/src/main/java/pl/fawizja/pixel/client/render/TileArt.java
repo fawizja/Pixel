@@ -43,9 +43,13 @@ public final class TileArt implements Disposable {
     private TextureRegion[] chest;
     /** Manekin treningowy. */
     private static final int DUMMY_CELL = 1004;
-    /** Pupile (0.58.0), zwrocone w prawo; w lewo rysowane odbiciem. */
-    private static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec"};
+    /** Pupile (0.58.0), zwrocone w prawo; w lewo rysowane odbiciem. Pierwsze cztery od PET_CELL, mewa i papuga
+     *  (opiekunowie zwierzat w Valmir i Nerys, 2026-11-06) od PET_EXTRA_CELL. */
+    private static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec", "pet_gull", "pet_parrot"};
     private static final int PET_CELL = 1005;
+    private static final int PET_EXTRA_CELL = 1017;
+
+    private static int petCell(int i) { return i < 4 ? PET_CELL + i : PET_EXTRA_CELL + i - 4; }
     /** Pulapka z kolcami (lochy). */
     private static final int TRAP_CELL = 1010;
     private TextureRegion trap;
@@ -127,7 +131,7 @@ public final class TileArt implements Disposable {
         paintRoof(pm, cellX(ROOF_CELL + 2), cellY(ROOF_CELL + 2), Color.valueOf("#c89a5a"));
         paintRoof(pm, cellX(ROOF_EXTRA_CELL), cellY(ROOF_EXTRA_CELL), Color.valueOf("#6a4a30"));
         paintRoof(pm, cellX(ROOF_EXTRA_CELL + 1), cellY(ROOF_EXTRA_CELL + 1), Color.valueOf("#7a5a58"));
-        for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(PET_CELL + i), cellY(PET_CELL + i), PETS[i]);
+        for (int i = 0; i < PETS.length; i++) paintPet(pm, cellX(petCell(i)), cellY(petCell(i)), PETS[i]);
         paintBackpack(pm, cellX(BACKPACK_CELL), cellY(BACKPACK_CELL));
         applyOverrides(pm, tileRegistry, itemRegistry, mtypes, npcList);
         int whiteCell = COLS * COLS - 1;
@@ -237,7 +241,7 @@ public final class TileArt implements Disposable {
         backpack = region(BACKPACK_CELL);
         roof = new TextureRegion[] {region(ROOF_CELL), region(ROOF_CELL + 1), region(ROOF_CELL + 2),
                 region(ROOF_EXTRA_CELL), region(ROOF_EXTRA_CELL + 1)};
-        for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(PET_CELL + i));
+        for (int i = 0; i < PETS.length; i++) pets.put(PETS[i], region(petCell(i)));
         for (Map.Entry<String, Integer> e : walkCells.entrySet()) {
             if (hiAtlas == null || !hiCells.containsKey(e.getValue()) || !hiCells.containsKey(e.getValue() + 1)) continue;
             walk.put(e.getKey(), new TextureRegion[] {region(e.getValue()), region(e.getValue() + 1)});
@@ -309,7 +313,7 @@ public final class TileArt implements Disposable {
         override(pm, ROOF_EXTRA_CELL, "objects/roof_wood");
         override(pm, ROOF_EXTRA_CELL + 1, "objects/roof_brown");
         override(pm, BACKPACK_CELL, "objects/backpack");
-        for (int i = 0; i < PETS.length; i++) override(pm, PET_CELL + i, "pets/" + PETS[i]);
+        for (int i = 0; i < PETS.length; i++) override(pm, petCell(i), "pets/" + PETS[i]);
         if (overrides > 0) Gdx.app.log("TileArt", "Grafiki z assets/art: " + overrides);
     }
 
@@ -1633,6 +1637,10 @@ public final class TileArt implements Disposable {
                 px(pm, ox, oy, 10, 0, Color.valueOf("#f8e070"));
                 rect(pm, ox, oy, 4, 6, 8, 1, Color.valueOf("#f0ece0"));
                 break;
+            case IMBUER: // laska z fioletowym krysztalem
+                rect(pm, ox, oy, 13, 3, 1, 11, Color.valueOf("#5a3a1a"));
+                rect(pm, ox, oy, 12, 1, 3, 2, Color.valueOf("#b070ff"));
+                break;
             case GUARD: // helm, napiersnik i halabarda
                 rect(pm, ox, oy, 5, 0, 6, 2, Color.valueOf("#9aa0a8"));
                 rect(pm, ox, oy, 5, 7, 6, 4, Color.valueOf("#8a9098"));
@@ -1793,9 +1801,12 @@ public final class TileArt implements Disposable {
                 rect(pm, ox, oy, 12, 8, 1, 1, Color.valueOf("#40a040"));
                 break;
             }
-            case "pet_raven": {
-                Color body = Color.valueOf("#303040");
-                Color edge = Color.valueOf("#8a8aa0");
+            case "pet_raven":
+            case "pet_gull":
+            case "pet_parrot": {
+                // kruk; mewa i papuga ten sam ptak w innych barwach (jak przebarwione grafiki OTSP)
+                Color body = Color.valueOf(key.equals("pet_gull") ? "#e8e8e0" : key.equals("pet_parrot") ? "#40a040" : "#303040");
+                Color edge = Color.valueOf(key.equals("pet_gull") ? "#808078" : key.equals("pet_parrot") ? "#d84030" : "#8a8aa0");
                 rect(pm, ox, oy, 5, 8, 6, 4, edge);     // jasny obrys (widoczny na ciemnym)
                 rect(pm, ox, oy, 6, 9, 5, 3, body);
                 rect(pm, ox, oy, 3, 9, 3, 2, body);     // ogon

@@ -35,9 +35,10 @@ public final class SkillSheet {
         return out;
     }
 
-    /** Biezacy mnoznik doswiadczenia z etapow serwera, np. "exp x80". */
+    /** Biezacy mnoznik doswiadczenia z etapow serwera, np. "exp x80", z pupilem "exp x80, pupil +5%". */
     public static String expRateLabel(PlayerCharacter pc) {
-        return "exp " + pl.fawizja.pixel.balance.Balance.rateLabel(pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
+        String base = "exp " + pl.fawizja.pixel.balance.Balance.rateLabel(pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
+        return pc.petExpPercent() > 0 ? base + ", pupil +" + pc.petExpPercent() + "%" : base;
     }
 
     /** Biezacy mnoznik umiejetnosci z etapow serwera, np. "x10". */

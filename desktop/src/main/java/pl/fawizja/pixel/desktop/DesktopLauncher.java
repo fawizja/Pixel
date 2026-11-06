@@ -49,7 +49,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.revealMap=1  cala mapa odkryta (bez mgly; regresja GUI domyslnie, sceny mgly ustawiaja 0)
  *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
- *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet(+ -Dpixel.petCard=1)|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=wheel[=id]  podglad Kola Przeznaczenia (np. wheel=wheel:q:P, wheel=wheel:perks, wheel=wheel:gems:0); -Dpixel.wheelOrder=PRBG,
  *                           -Dpixel.wheelAvatar=true, -Dpixel.wheelGems=true (klejnoty, naczynia i okruchy do podgladu)
  *   -Dpixel.open=bestcard|bestclass|charms[=id]  podglad bestiariusza i charmow (np. charms=charm:sel:WOUND); -Dpixel.charmProc=true liczby charmow
@@ -480,8 +480,19 @@ public final class DesktopLauncher {
                     GameScreen gs = (GameScreen) getScreen();
                     pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
                     String pet = System.getProperty("pixel.pet", "pet_dog");
-                    pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(gs.session().items().byKey(pet).id(), 1));
-                    pc.setPet(pet);
+                    int petId = gs.session().items().byKey(pet).id();
+                    pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(petId, 1));
+                    // przywolanie jak w grze (uzycie przedmiotu): komunikat "+5% doswiadczenia" w dzienniku
+                    for (int i = 0; i < pc.backpack().size(); i++) {
+                        pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(i);
+                        if (st != null && st.itemId() == petId) {
+                            gs.session().useSlot(i, gs.worldTime());
+                            break;
+                        }
+                    }
+                    if (!pet.equals(pc.pet())) pc.setPet(pet);
+                    // -Dpixel.petCard=1: od razu karta postaci (Poziom: "exp xN, pupil +5%")
+                    if (Boolean.getBoolean("pixel.petCard")) gs.hud().toggleCharacter();
                 }
                 if ("chest".equals(open)) {
                     // podglad: obok skrzyni bez silnych potworow w poblizu, najblizej swiatyni Varden
