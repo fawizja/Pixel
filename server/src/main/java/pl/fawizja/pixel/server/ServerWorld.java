@@ -3359,7 +3359,11 @@ final class ServerWorld {
                         PvpRules.skullSeenBy(p.pvp, oc.name(), o.pvp, now).name(), // zolta/pomaranczowa tylko dla p
                         guildTag(oc.name()), oc.isMounted() ? "M" : "-", oc.pet() == null ? "-" : oc.pet(),
                         oc.title() == null ? "-" : oc.title(), String.valueOf(oc.outfit()),
-                        o.session.pvpMode() ? "P" : "-")).append('\n');
+                        o.session.pvpMode() ? "P" : "-",
+                        // harmonia mnicha pod paskami nad postacia (jak w Tibii)
+                        oc.vocation() == pl.fawizja.pixel.vocation.Vocation.MONK
+                                ? pl.fawizja.pixel.net.RemoteEntity.harmonyField(oc.harmony().points(), oc.harmony().serene()) : "-"))
+                        .append('\n');
             }
             for (Monster m : monsters.near(me, Protocol.VIEW_RADIUS)) {
                 if (m.isDead() || m.position().z() != me.z()) continue;

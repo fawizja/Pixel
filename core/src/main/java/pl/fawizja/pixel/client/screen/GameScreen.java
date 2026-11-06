@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.client.PixelGame;
+import pl.fawizja.pixel.client.render.HarmonyPips;
 import pl.fawizja.pixel.client.render.LightRenderer;
 import pl.fawizja.pixel.client.render.TileArt;
 import pl.fawizja.pixel.client.render.WorldRenderer;
@@ -144,6 +145,9 @@ public final class GameScreen extends ScreenAdapter {
         String pet;
         String title;
         int outfit;
+        /** Harmonia mnicha z serwera (0..5, -1 = nie mnich) i spokoj - kropki pod paskami. */
+        int harmony = -1;
+        boolean serene;
         final pl.fawizja.pixel.client.render.PetFollower petFollower = new pl.fawizja.pixel.client.render.PetFollower();
         boolean seen;
     }
@@ -2501,13 +2505,19 @@ public final class GameScreen extends ScreenAdapter {
      * krawedz pola, barBottomWy = dolna krawedz paskow (jednostki swiata). Batch w pikselach ekranu.
      */
     private void drawSkullUnderBars(SpriteBatch batch, BitmapFont font, String skull, float wx, float barBottomWy, float ui) {
+        drawSkullUnderBars(batch, font, skull, wx, barBottomWy, ui, 0);
+    }
+
+    /** Jak wyzej, ale czaszka nizej o dropPx pikseli ekranu (pod kropkami harmonii mnicha). */
+    private void drawSkullUnderBars(SpriteBatch batch, BitmapFont font, String skull, float wx, float barBottomWy, float ui,
+                                    float dropPx) {
         if (skull == null || "NONE".equals(skull)) return;
         projected.set(wx + 0.5f, barBottomWy, 0);
         camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
         // wielkosc: ok. 1/4 pola, nie mniej niz 12 px i nie wiecej niz 2.2 wielkiej litery imienia
         float is = Math.max(12f, Math.min(font.getCapHeight() * 2.2f, hud.tilePixels() * 0.24f));
         is = Math.round(is);
-        float x = Math.round(projected.x - is / 2f), y = Math.round(projected.y - is - Math.max(1f, ui));
+        float x = Math.round(projected.x - is / 2f), y = Math.round(projected.y - dropPx - is - Math.max(1f, ui));
         com.badlogic.gdx.graphics.g2d.TextureRegion icon = hud.skullIcon(skull);
         if (icon != null) {
             batch.draw(icon, x, y, is, is);
@@ -2515,6 +2525,22 @@ public final class GameScreen extends ScreenAdapter {
             Color c = pl.fawizja.pixel.client.ui.Hud.skullColor(skull);
             outlined(batch, font, "X", x, y + is, c != null ? c.r : 1f, c != null ? c.g : 1f, c != null ? c.b : 1f, ui);
         }
+    }
+
+    /**
+     * Harmonia mnicha jak w Tibii: rzadek 5 malych kwadratowych kropek tuz pod paskami nad postacia (pelne zlote,
+     * puste ciemne, czarna obwodka - piksel-art bez grafik), a przy spokoju (Serene) obok niebieski rombik.
+     * points < 0 = nie mnich (nic nie rysuje). Batch w pikselach ekranu; zwraca wysokosc rzadku z odstepem
+     * (o tyle nizej idzie czaszka PvP).
+     */
+    private float drawHarmonyUnderBars(SpriteBatch batch, int points, boolean serene, float wx, float barBottomWy, float ui) {
+        if (points < 0) return 0;
+        projected.set(wx + 0.5f, barBottomWy, 0);
+        camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
+        HarmonyPips.Layout l = HarmonyPips.layout(hud.tilePixels(), ui);
+        float x = Math.round(projected.x - l.width() / 2f), y = Math.round(projected.y - l.gapAbove() - l.height());
+        HarmonyPips.draw(batch, hud.whiteRegion(), l, x, y, points, serene);
+        return l.gapAbove() + l.height();
     }
 
     private void drawCombatOverlay(SpriteBatch batch, ShapeRenderer shapes, long t, int z) {
@@ -2684,7 +2710,9 @@ public final class GameScreen extends ScreenAdapter {
                 nameLayout.setText(font, tl);
                 outlined(batch, font, tl, projected.x - nameLayout.width / 2f, projected.y + nameLayout.height + 5f * ui, 1f, 0.85f, 0.35f, ui);
             }
-            drawSkullUnderBars(batch, font, rp.skull, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)) + 1.02f - 0.02f, ui);
+            float rpBarBottom = worldRenderer.worldY(remoteY(rp, t)) + 1.02f - 0.02f;
+            float rpDrop = drawHarmonyUnderBars(batch, rp.harmony, rp.serene, remoteX(rp, t), rpBarBottom, ui);
+            drawSkullUnderBars(batch, font, rp.skull, remoteX(rp, t), rpBarBottom, ui, rpDrop);
             drawBubble(batch, font, scale, rp.name, remoteX(rp, t), worldRenderer.worldY(remoteY(rp, t)));
         }
         PlayerCharacter self = session.character();
@@ -2696,7 +2724,10 @@ public final class GameScreen extends ScreenAdapter {
             String label = self.name();
             nameLayout.setText(font, label);
             outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], ui);
-            drawSkullUnderBars(batch, font, sk, ox, oy + 1.06f - 0.075f - 0.04f, ui);
+            float myBarBottom = oy + 1.06f - 0.075f - 0.04f;
+            float myDrop = self.vocation() == Vocation.MONK
+                    ? drawHarmonyUnderBars(batch, self.harmony().points(), self.harmony().serene(), ox, myBarBottom, ui) : 0;
+            drawSkullUnderBars(batch, font, sk, ox, myBarBottom, ui, myDrop);
         }
         if (sleepBed != null && sleepBed.z() == z) {
             // sen: "Zzz" nad poduszka, litery unosza sie po kolei
@@ -2939,6 +2970,8 @@ public final class GameScreen extends ScreenAdapter {
                 rp.pet = e.pet();
                 rp.title = pl.fawizja.pixel.achievement.Achievement.titleOf(e.title());
                 rp.outfit = e.outfit();
+                rp.harmony = e.harmony();
+                rp.serene = e.serene();
                 rp.seen = true;
             }
             Map<String, String> skulls = new java.util.HashMap<>();
@@ -3476,6 +3509,29 @@ public final class GameScreen extends ScreenAdapter {
         long t = now();
         pl.fawizja.pixel.pvp.PvpRules.markForPreview(session.pvpStatus(), pl.fawizja.pixel.pvp.PvpRules.Skull.WHITE, t);
         session.lockProtectionZonesUntil(session.pvpStatus().fightUntil());
+    }
+
+    /**
+     * Podglad harmonii innych mnichow (-Dpixel.open=monks, bez serwera): obok postaci mnich z pelna harmonia bez
+     * spokoju, mnich z 2 punktami w spokoju (z czerwona czaszka - pod kropkami), mnich bez harmonii i rycerz (bez kropek).
+     */
+    public void previewMonks() {
+        Position me = session.character().position();
+        Object[][] who = {{"Olek", Vocation.MONK, 2, 0, 5, false, "NONE"}, {"Ina", Vocation.MONK, -1, -2, 2, true, "RED"},
+                {"Tao", Vocation.MONK, 1, -2, 0, false, "NONE"}, {"Kuba", Vocation.KNIGHT, -1, 2, -1, false, "NONE"}};
+        int id = 970;
+        for (Object[] w : who) {
+            RemotePlayer rp = new RemotePlayer();
+            rp.name = (String) w[0];
+            rp.vocation = (Vocation) w[1];
+            rp.from = rp.to = me.translate((Integer) w[2], (Integer) w[3]);
+            rp.healthPercent = 100;
+            rp.harmony = (Integer) w[4];
+            rp.serene = (Boolean) w[5];
+            rp.skull = (String) w[6];
+            rp.seen = true;
+            remotePlayers.put(id++, rp);
+        }
     }
 
     /**

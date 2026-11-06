@@ -138,6 +138,27 @@ class NetworkSyncTest {
     }
 
     @Test
+    void monkHarmonyAndSerenityAreShownToOtherPlayers() throws Exception {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
+            a.hello("Mnich", "MONK", "tajne-Mnich");
+            b.hello("Rycerz", "KNIGHT", "tajne-Rycerz");
+            await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
+            await("both see each other", () -> seen(a, "Rycerz") != null && seen(b, "Mnich") != null);
+            // mnich bez harmonii: 0 kropek, sam (bez druzyny) - w spokoju; rycerz nie ma harmonii
+            assertEquals(0, seen(b, "Mnich").harmony());
+            assertTrue(seen(b, "Mnich").serene());
+            assertEquals(-1, seen(a, "Rycerz").harmony());
+            assertFalse(seen(a, "Rycerz").serene());
+            server.enqueueTest(() -> server.world().find("Mnich").session.character().harmony().build(3));
+            await("knight sees 3 harmony", () -> seen(b, "Mnich") != null && seen(b, "Mnich").harmony() == 3);
+            assertTrue(seen(b, "Mnich").serene());
+            server.enqueueTest(() -> server.world().find("Mnich").session.character().harmony().spend());
+            await("harmony spent", () -> seen(b, "Mnich") != null && seen(b, "Mnich").harmony() == 0);
+        }
+    }
+
+    @Test
     void serverRejectsDuplicateLoginsAndBadVersionsAndRestoresSavedCharacters() throws Exception {
         try (NetClient a = connect()) {
             a.hello("Carol", "SORCERER", "tajne-Carol");
