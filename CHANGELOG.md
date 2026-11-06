@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.236.0] - 2026-11-06
+
+### Dodano
+- Każde pole Koła Przeznaczenia ma nazwę i dokładny opis działania, jak w Tibii. Lista ćwiartki pokazuje krótki
+  efekt (np. „+3 HP/pkt; pełne: +1 walka wręcz”). Dotknięcie pola otwiera kartę z pełnym opisem:
+  - co daje każdy punkt oddania, ile daje teraz i ile da pełne pole, oraz co da kolejny punkt;
+  - ulepszenie czaru z polską i tibijską nazwą oraz liczbami obu stopni;
+  - premie pasywne i naczynia na klejnoty.
+  Objawienia mają osobną kartę z etapami 1–3. Wszystkie opisy są liczone z tych samych danych, którymi liczy gra.
+- Klejnoty Koła jak w Tibii:
+  - mniejsze, zwykłe i większe; wypadają z potworów pod wpływem, diabolicznych i silnych bossów;
+  - Pracownia klejnotów w oknie koła: odkrycie modów, blokada, zmiana domeny, rozbicie na okruchy;
+  - naczynia w kole aktywują mody klejnotu zależnie od liczby pełnych pól naczyń w domenie (1, 2 lub 3);
+  - warsztat okruchów ze stopniami I–IV, a stopień IV daje +1 punkt promocji;
+  - mody podstawowe (HP, mana, udźwig, odporności, kradzież...) i najwyższe dla profesji (ulepszenia czarów,
+    unik, objawienie);
+  - ceny w złocie z Tibii podzielone przez 4, jak reszta ekonomii;
+  - klejnoty wkłada się i wyjmuje w świątyni.
+
 ## [0.235.0] - 2026-11-06
 
 ### Dodano

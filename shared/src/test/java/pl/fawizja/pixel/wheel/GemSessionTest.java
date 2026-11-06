@@ -83,7 +83,7 @@ class GemSessionTest {
         Actions.apply(s, "wheel:grade:b:ICE_RES", 1000);
         assertEquals(1, pc.wheel().gems().grade(BasicGemMod.ICE_RES));
         assertEquals(2, pc.backpack().count(id(GemAtelier.LESSER_FRAGMENT_KEY)));
-        assertEquals(bank - 2_000_000, pc.bank().balance());
+        assertEquals(bank - 500_000, pc.bank().balance());
         Actions.apply(s, "wheel:grade:s:KNIGHT_MASTERY_AVATAR", 1000);
         assertEquals(GemAtelier.Result.WRONG_VOCATION.message, WheelSessionTest.lastLog(s));
     }

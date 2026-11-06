@@ -35,9 +35,9 @@ public final class GemAtelier {
     public static final String LESSER_FRAGMENT_KEY = "lesser_gem_fragment";
     public static final String GREATER_FRAGMENT_KEY = "greater_gem_fragment";
     /** Koszt stopni II, III, IV modu podstawowego: {zloto, mniejsze okruchy} (Canary getLesserGradeCost). */
-    private static final long[][] BASIC_COST = {{2_000_000, 5}, {5_000_000, 15}, {30_000_000, 30}};
+    private static final long[][] BASIC_COST = {{500_000, 5}, {1_250_000, 15}, {7_500_000, 30}};
     /** Koszt stopni II, III, IV modu najwyzszego: {zloto, wieksze okruchy} (Canary getGreaterGradeCost). */
-    private static final long[][] SUPREME_COST = {{5_000_000, 5}, {12_000_000, 15}, {75_000_000, 30}};
+    private static final long[][] SUPREME_COST = {{1_250_000, 5}, {3_000_000, 15}, {18_750_000, 30}};
 
     public enum Result {
         OK(""),

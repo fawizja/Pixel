@@ -142,14 +142,14 @@ class GemAtelierTest {
     }
 
     @Test
-    void gradeCostsFollowCanary() {
+    void gradeCostsAreCanaryDividedByFour() {
         GemAtelier a = new GemAtelier();
-        assertArrayEquals(new long[] {2_000_000, 5}, a.basicGradeCost(BasicGemMod.MANA));
+        assertArrayEquals(new long[] {500_000, 5}, a.basicGradeCost(BasicGemMod.MANA));
         a.gradeUp(BasicGemMod.MANA);
-        assertArrayEquals(new long[] {5_000_000, 15}, a.basicGradeCost(BasicGemMod.MANA));
+        assertArrayEquals(new long[] {1_250_000, 15}, a.basicGradeCost(BasicGemMod.MANA));
         a.gradeUp(BasicGemMod.MANA);
-        assertArrayEquals(new long[] {30_000_000, 30}, a.basicGradeCost(BasicGemMod.MANA));
-        assertArrayEquals(new long[] {5_000_000, 5}, a.supremeGradeCost(SupremeGemMod.DODGE));
+        assertArrayEquals(new long[] {7_500_000, 30}, a.basicGradeCost(BasicGemMod.MANA));
+        assertArrayEquals(new long[] {1_250_000, 5}, a.supremeGradeCost(SupremeGemMod.DODGE));
         assertEquals(GemAtelier.Result.WRONG_VOCATION, a.gradeUp(SupremeGemMod.KNIGHT_MASTERY_AVATAR, Vocation.DRUID));
     }
 

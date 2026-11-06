@@ -1058,10 +1058,10 @@ opisuje "Uproszczenia" nizej.
   "archfoe" 0% / 9% / 3%; drugi los tylko po udanym pierwszym, najwyzej 2 / 2 / 1 sztuki. Archfoe w Pixelu =
   boss od poziomu 200 (`GemDrops.ARCHFOE_MIN_LEVEL`). Hak: `CombatSystem.onMonsterDeath` po odlamkach Kuzni.
 - Pracownia (okno "Klejnoty i naczynia", `wheel:gems:0`): odkrycie klejnotu wlasnej profesji z plecaka za
-  125 000 / 1 000 000 / 6 000 000 gp (plecak albo bank) daje losowa domene i mody: mniejszy 1 mod podstawowy
+  31 250 / 250 000 / 1 500 000 gp (ceny Tibii / 4) (plecak albo bank) daje losowa domene i mody: mniejszy 1 mod podstawowy
   (lista slotu 1 z Canary), zwykly 2 (drugi z listy slotu 2, inny niz pierwszy), wiekszy 2 + mod najwyzszy
   profesji (`SupremeGemMod`). Do 225 klejnotow. Blokada chroni przed rozbiciem i zmiana domeny. Zmiana domeny
-  na nastepna (zielona -> czerwona -> fioletowa -> niebieska) za 125 000 / 250 000 / 500 000 gp. Rozbicie daje
+  na nastepna (zielona -> czerwona -> fioletowa -> niebieska) za 31 250 / 62 500 / 125 000 gp. Rozbicie daje
   1-5 / 2-10 mniejszych albo 1-5 wiekszych okruchow (srodek przedzialu najczestszy jak `normal_random`).
 - Naczynia: na cwiartke 3 pola z przekonaniem "naczynie"; rezonans = liczba pelnych pol naczyn domeny. Klejnot
   domeny wlozony do naczynia (tylko w swiatyni) daje przy rezonansie 1 mod 1, przy 2 mod 2, przy 3 mod najwyzszy.
@@ -1070,8 +1070,8 @@ opisuje "Uproszczenia" nizej.
   Mody najwyzsze: unik 0,28%, obrazenia krytyczne 2%, kradziez zycia 2% / many 0,8%, Mistrzostwo objawienia
   (+150 punktow do etapu objawienia domeny), ulepszenia czarow profesji (obrazenia, krytyk, leczenie, odnowienie).
 - Warsztat okruchow: stopien modu I-IV wspolny dla wszystkich klejnotow postaci (mnoznik x1 / x1,1 / x1,2 / x1,5,
-  slabosci i odnowienia bez mnoznika). Podstawowy: 2 mln + 5, 5 mln + 15, 30 mln + 30 mniejszych okruchow;
-  najwyzszy: 5 mln + 5, 12 mln + 15, 75 mln + 30 wiekszych. Kazdy mod na stopniu IV daje +1 punkt promocji.
+  slabosci i odnowienia bez mnoznika). Podstawowy: 500 tys. + 5, 1,25 mln + 15, 7,5 mln + 30 mniejszych okruchow;
+  najwyzszy: 1,25 mln + 5, 3 mln + 15, 18,75 mln + 30 wiekszych. Kazdy mod na stopniu IV daje +1 punkt promocji.
 - Haki: `WheelBonus` (HP, mana, udzwig, mitygacja, kradziez, etap objawienia), `WheelEffects.critDamage`,
   `WheelEffects.gemResist` w `CombatFormulas.mitigateOnPlayer`, `gemDodge` w `ForgeEffects.rollRuse`,
   `WheelSpells.augment` (mody czarow). Akcje: `wheel:gem:reveal:L|R|G`, `wheel:gem:lock|destroy|switch|socket:ID`,

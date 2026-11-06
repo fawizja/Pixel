@@ -2,13 +2,13 @@ package pl.fawizja.pixel.wheel;
 
 /**
  * Jakosc klejnotu Kola Przeznaczenia (Canary WheelGemQuality_t): mniejszy ma 1 mod podstawowy, zwykly 2 podstawowe,
- * wiekszy 2 podstawowe i 1 najwyzszy. Ceny jak w Canary config.lua.dist (wheelAtelierReveal* / wheelAtelierRotate*),
+ * wiekszy 2 podstawowe i 1 najwyzszy. Ceny z Canary config.lua.dist (wheelAtelierReveal* / wheelAtelierRotate*) podzielone przez 4 jak reszta ekonomii,
  * okruchy z rozbicia jak PlayerWheel::destroyGem (mniejszy 1-5 mniejszych, zwykly 2-10 mniejszych, wiekszy 1-5 wiekszych).
  */
 public enum GemQuality {
-    LESSER('L', "mniejszy", "Mniejszy klejnot", 125_000, 125_000, 1, 5, false),
-    REGULAR('R', "zwykły", "Klejnot", 1_000_000, 250_000, 2, 10, false),
-    GREATER('G', "większy", "Większy klejnot", 6_000_000, 500_000, 1, 5, true);
+    LESSER('L', "mniejszy", "Mniejszy klejnot", 31_250, 31_250, 1, 5, false),
+    REGULAR('R', "zwykły", "Klejnot", 250_000, 62_500, 2, 10, false),
+    GREATER('G', "większy", "Większy klejnot", 1_500_000, 125_000, 1, 5, true);
 
     public final char code;
     public final String label;
