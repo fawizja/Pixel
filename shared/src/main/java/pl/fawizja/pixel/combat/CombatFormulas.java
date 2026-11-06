@@ -134,6 +134,7 @@ public final class CombatFormulas {
                                        Random rng) {
         if (damage <= 0) return 0;
         double d = protect(damage, pc.equipment().protection(type));
+        d = pl.fawizja.pixel.wheel.WheelEffects.gemResist(pc, type, d); // klejnoty Kola Przeznaczenia: odpornosci
         if (type == DamageType.PHYSICAL) {
             int armor = pc.equipment().totalArmor();
             double absorbed = rollBetween(0, armor / 2, rng);

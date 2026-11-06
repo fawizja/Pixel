@@ -46,6 +46,8 @@ public final class DestinyWheel {
     }
 
     private final int[] points = new int[WheelSlice.values().length];
+    /** Klejnoty i stopnie modow (zapis osobnym polem "gems", patrz {@link GemAtelier#encode}). */
+    private final GemAtelier gems = new GemAtelier();
     private final int[][] presets = new int[PRESETS][];
     private long giftCooldownMs;
     private long avatarMs;
@@ -65,6 +67,7 @@ public final class DestinyWheel {
     // pamiec podreczna premii
     private int version;
     private int cacheVersion = -1;
+    private int cacheGems = -1;
     private Vocation cacheVocation;
     private boolean cacheEligible;
     private WheelBonus cache = WheelBonus.NONE;
@@ -77,6 +80,12 @@ public final class DestinyWheel {
     public static boolean eligible(int level, boolean promoted, boolean premium) { return available(level, promoted, premium) > 0; }
 
     public int points(WheelSlice s) { return points[s.ordinal()]; }
+
+    /** Pracownia klejnotow, naczynia i stopnie modow. */
+    public GemAtelier gems() { return gems; }
+
+    /** Rezonans naczynia domeny (pelne pola naczyn, 0..3). */
+    public int resonance(WheelDomain d) { return GemAtelier.resonance(points, d); }
 
     public int spent() {
         int t = 0;
@@ -96,9 +105,10 @@ public final class DestinyWheel {
 
     /** Premie dla profesji; eligible = false (brak promocji/premium/poziomu) daje {@link WheelBonus#NONE}. */
     public WheelBonus bonus(Vocation v, boolean eligible) {
-        if (cacheVersion != version || cacheVocation != v || cacheEligible != eligible) {
-            cache = eligible ? new WheelBonus(v, points) : WheelBonus.NONE;
+        if (cacheVersion != version || cacheGems != gems.version() || cacheVocation != v || cacheEligible != eligible) {
+            cache = eligible ? new WheelBonus(v, points, gems.effects(v, points)) : WheelBonus.NONE;
             cacheVersion = version;
+            cacheGems = gems.version();
             cacheVocation = v;
             cacheEligible = eligible;
         }
@@ -418,6 +428,7 @@ public final class DestinyWheel {
         avatarMs = o.avatarMs;
         avatarStage = o.avatarStage;
         avatarCooldownMs = o.avatarCooldownMs;
+        gems.copyFrom(o.gems);
         version++;
     }
 

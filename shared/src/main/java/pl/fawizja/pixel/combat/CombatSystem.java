@@ -434,6 +434,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                 drop.add(new ItemStack(items.byKey(pl.fawizja.pixel.item.Forge.SLIVER_KEY).id(), CombatFormulas.rollBetween(
                         pl.fawizja.pixel.item.Forge.FIENDISH_MIN_SLIVERS, pl.fawizja.pixel.item.Forge.FIENDISH_MAX_SLIVERS, rng)));
             }
+            // klejnoty Kola Przeznaczenia: pod wplywem, diaboliczni i silni bossowie (Canary generateGemAtelierLoot)
+            for (java.util.Map.Entry<String, Integer> g : pl.fawizja.pixel.wheel.GemDrops.roll(t, rng).entrySet()) {
+                if (!items.containsKey(g.getKey())) continue;
+                ItemStack gem = new ItemStack(items.byKey(g.getKey()).id(), g.getValue());
+                drop.add(gem);
+                log.add(now, EventLog.Kind.LOOT, "Klejnot w łupie: " + describe(gem) + "!");
+            }
         }
         List<String> dropped = new ArrayList<>();
         for (ItemStack s : drop) dropped.add(describe(s));

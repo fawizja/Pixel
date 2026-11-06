@@ -93,14 +93,35 @@ public final class Actions {
         }
     }
 
-    /** Kolo Przeznaczenia: wheel:add:KOD:n, wheel:remove:KOD:n, wheel:reset, wheel:save:i, wheel:load:i. */
+    /**
+     * Kolo Przeznaczenia: wheel:add:KOD:n, wheel:remove:KOD:n, wheel:reset, wheel:save:i, wheel:load:i; klejnoty:
+     * wheel:gem:reveal:L|R|G, wheel:gem:lock:ID, wheel:gem:destroy:ID, wheel:gem:switch:ID, wheel:gem:socket:ID,
+     * wheel:gem:unsocket:G|R|P|B; stopnie modow: wheel:grade:b:MOD, wheel:grade:s:MOD.
+     */
     private static boolean wheel(GameSession s, String[] p, long now) {
         switch (p[1]) {
+            case "gem": return wheelGem(s, p, now);
+            case "grade":
+                if ("b".equals(p[2])) s.gemGradeBasic(pl.fawizja.pixel.wheel.BasicGemMod.parse(p[3]), now);
+                else s.gemGradeSupreme(pl.fawizja.pixel.wheel.SupremeGemMod.parse(p[3]), now);
+                return true;
             case "add": s.wheelAdd(p[2], Integer.parseInt(p[3]), now); return true;
             case "remove": s.wheelRemove(p[2], Integer.parseInt(p[3]), now); return true;
             case "reset": s.wheelReset(now); return true;
             case "save": s.wheelPresetSave(Integer.parseInt(p[2]), now); return true;
             case "load": s.wheelPresetLoad(Integer.parseInt(p[2]), now); return true;
+            default: return false;
+        }
+    }
+
+    private static boolean wheelGem(GameSession s, String[] p, long now) {
+        switch (p[2]) {
+            case "reveal": s.gemReveal(pl.fawizja.pixel.wheel.GemQuality.ofCode(p[3].charAt(0)), now); return true;
+            case "lock": s.gemLock(Integer.parseInt(p[3]), now); return true;
+            case "destroy": s.gemDestroy(Integer.parseInt(p[3]), now); return true;
+            case "switch": s.gemSwitch(Integer.parseInt(p[3]), now); return true;
+            case "socket": s.gemSocket(Integer.parseInt(p[3]), now); return true;
+            case "unsocket": s.gemUnsocket(pl.fawizja.pixel.wheel.WheelDomain.ofCode(p[3].charAt(0)), now); return true;
             default: return false;
         }
     }

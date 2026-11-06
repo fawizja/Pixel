@@ -217,6 +217,13 @@ TINTED_ROOFS = {"roof_sand": (184, (215, 180, 115)), "roof_sand_top": (183, (215
                 "roof_snow": (184, (240, 246, 252)), "roof_snow_top": (183, (240, 246, 252))}
 # Przedmioty bez wlasnego obrazka: najblizszy przedmiot z paczki, w razie potrzeby przebarwiony.
 MORE_ITEMS = {
+    # 2026-11-06: klejnoty Kola Przeznaczenia (mniejszy - szlif, zwykly - odlamek krysztalu, wiekszy - brylant)
+    "lesser_guardian_gem": (2212, (225, 70, 70)), "guardian_gem": (2211, (225, 70, 70)), "greater_guardian_gem": (2219, (225, 70, 70)),
+    "lesser_marksman_gem": (2212, (90, 195, 95)), "marksman_gem": (2211, (90, 195, 95)), "greater_marksman_gem": (2219, (90, 195, 95)),
+    "lesser_sage_gem": (2212, (170, 105, 235)), "sage_gem": (2211, (170, 105, 235)), "greater_sage_gem": (2219, (170, 105, 235)),
+    "lesser_mystic_gem": (2212, (75, 150, 235)), "mystic_gem": (2211, (75, 150, 235)), "greater_mystic_gem": (2219, (75, 150, 235)),
+    "lesser_spiritualist_gem": (2212, (235, 185, 65)), "spiritualist_gem": (2211, (235, 185, 65)), "greater_spiritualist_gem": (2219, (235, 185, 65)),
+    "lesser_gem_fragment": 2216, "greater_gem_fragment": 2215,
     # 2026-10-28: produkty nowych potworow i przedmioty tylko z nowych bossow
     "black_feather": (2167, (70, 62, 85)), "worm_slime": 2169, "chitin_plate": 2171, "ectoplasm": (2223, (170, 235, 200)),
     "gargoyle_shard": 2200, "crow_feather_hood": (1941, (80, 65, 110)), "mirewood_rod": 1901,

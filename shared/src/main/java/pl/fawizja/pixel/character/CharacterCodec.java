@@ -92,6 +92,9 @@ public final class CharacterCodec {
         // brak pola = zapis sprzed kola (puste kolo, migracja przy odczycie)
         String wheel = pc.wheel().encode();
         if (!wheel.isEmpty()) m.put("wheel", wheel);
+        // klejnoty kola (Pracownia klejnotow): osobne pole bez zmiany wersji; brak pola = brak klejnotow
+        String gems = pc.wheel().gems().encode();
+        if (!gems.isEmpty()) m.put("gems", gems);
         if (pc.forgeDust() > 0 || pc.dustLimit() != pl.fawizja.pixel.item.Forge.DUST_START_LIMIT) {
             m.put("forge", pc.forgeDust() + "," + pc.dustLimit());
         }
@@ -314,6 +317,7 @@ public final class CharacterCodec {
         pc.enchantments().restore(m.get("ench"));
         pc.harmony().restore(m.get("monk"));
         pc.wheel().decode(m.get("wheel"));
+        pc.wheel().gems().decode(m.get("gems"));
         // HP i mana z oddania kola licza sie dopiero po wczytaniu kola, promocji i premium
         pc.restoreState(exp, Integer.parseInt(require(m, "health")), Integer.parseInt(require(m, "mana")));
         pc.refreshWheel();

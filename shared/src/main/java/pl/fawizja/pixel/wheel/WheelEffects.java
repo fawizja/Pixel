@@ -98,7 +98,9 @@ public final class WheelEffects {
         WheelBonus b = pc.wheelBonus();
         if (b == WheelBonus.NONE) return 0;
         // awatar kola i Transcendencja z Kuzni to jeden stan awatara w Tibii: przy Transcendencji (+15%) awatar kola nic nie dodaje
-        double d = pc.wheel().castAugment().critDamage + (pc.avatarActive() ? 0 : 5 * pc.wheel().avatarStage());
+        double d = pc.wheel().castAugment().critDamage + (pc.avatarActive() ? 0 : 5 * pc.wheel().avatarStage())
+                + b.gems().critDamage; // klejnot: mod najwyzszy "obrazenia krytyczne"
+
         int cm = b.stage(WheelRevelation.COMBAT_MASTERY, pc.vocation());
         if (cm > 0 && pc.equipment().shieldDefense() <= 0) d += 4 * cm;
         if (b.has(WheelPassive.BALLISTIC_MASTERY) && ammo(pc) == Ammo.BOLT) d += 10;
@@ -123,6 +125,24 @@ public final class WheelEffects {
     public static double mitigationFactor(PlayerCharacter pc) {
         WheelBonus b = pc.wheelBonus();
         return b == WheelBonus.NONE ? 1 : 1 + b.mitigation / 100.0;
+    }
+
+    /**
+     * Odpornosci z klejnotow (Canary adjustDamageBasedOnResistanceAndSkill: obrazenia - ceil(obrazenia x odpornosc)).
+     * Slabosc (ujemna suma) zwieksza obrazenia jak opis modu w Tibii; Canary liczy tylko dodatnie - niezweryfikowane.
+     */
+    public static double gemResist(PlayerCharacter pc, pl.fawizja.pixel.combat.DamageType type, double damage) {
+        WheelBonus b = pc.wheelBonus();
+        if (b == WheelBonus.NONE || damage <= 0) return damage;
+        double r = b.gems().resist(type);
+        if (r == 0) return damage;
+        return r > 0 ? damage - Math.ceil(damage * r / 100.0) : damage * (1 - r / 100.0);
+    }
+
+    /** Unik z klejnotu (procent; dodawany do Uniku z tieru zbroi jak Canary Player::getDodgeChance). */
+    public static double gemDodge(PlayerCharacter pc) {
+        WheelBonus b = pc.wheelBonus();
+        return b == WheelBonus.NONE ? 0 : b.gems().dodge;
     }
 
     /** Mistrzostwo walki z tarcza: +10/20/30 obrony tarczy (Canary WheelMajor_t::DEFENSE). */

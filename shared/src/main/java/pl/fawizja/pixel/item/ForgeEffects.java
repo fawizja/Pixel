@@ -35,7 +35,10 @@ public final class ForgeEffects {
         return percent > 0 && rng.nextInt(10_000) < (int) Math.round(percent * 100);
     }
 
-    public static boolean rollRuse(PlayerCharacter pc, Random rng) { return roll(ruseChance(pc), rng); }
+    /** Unik: tier zbroi plus unik z klejnotu Kola Przeznaczenia (jak Canary Player::getDodgeChance). */
+    public static boolean rollRuse(PlayerCharacter pc, Random rng) {
+        return roll(ruseChance(pc) + pl.fawizja.pixel.wheel.WheelEffects.gemDodge(pc), rng);
+    }
 
     /** Obrazenia przyjete w czasie awatara (Transcendencja): -15%. */
     public static int avatarIncoming(PlayerCharacter pc, int dmg) {

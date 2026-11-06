@@ -2115,11 +2115,46 @@ public final class Hud {
                 }
             }
         }
+        // naczynia klejnotow: romb na polu naczynia - jasny, gdy w naczyniu domeny jest klejnot i pole jest pelne (rezonans)
+        for (int ring = 0; ring <= 4; ring++) {
+            float rOut = R * outer[ring], rIn = ring == 0 ? R * 0.25f : R * outer[ring - 1];
+            float mid = (rOut + rIn) / 2f, size = Math.max(3f, (rOut - rIn) * 0.32f);
+            for (pl.fawizja.pixel.wheel.WheelDomain d : pl.fawizja.pixel.wheel.WheelDomain.values()) {
+                java.util.List<pl.fawizja.pixel.wheel.WheelSlice> inRing = new java.util.ArrayList<>();
+                for (pl.fawizja.pixel.wheel.WheelSlice sl : pl.fawizja.pixel.wheel.WheelSlice.of(d)) if (wheelRing(sl.pos) == ring) inRing.add(sl);
+                float step = 90f / inRing.size();
+                boolean gem = w.gems().socketed(d) != null;
+                for (int i = 0; i < inRing.size(); i++) {
+                    pl.fawizja.pixel.wheel.WheelSlice sl = inRing.get(i);
+                    if (sl.conviction != pl.fawizja.pixel.wheel.WheelSlice.Conv.VESSEL) continue;
+                    double a = Math.toRadians(wheelQuadrantStart(d) + i * step + step / 2f);
+                    float x = cx + (float) Math.cos(a) * mid, y = cy + (float) Math.sin(a) * mid;
+                    boolean full = w.points(sl) >= sl.capacity();
+                    shapes.setColor(0.05f, 0.04f, 0.05f, 1f);
+                    wheelGem(shapes, x, y, size + 1.5f);
+                    if (gem) {
+                        int rgb = d.rgb;
+                        float k = full ? 1f : 0.45f, wht = full ? 0.55f : 0.2f;
+                        shapes.setColor((((rgb >> 16) & 255) / 255f) * (1 - wht) * k + wht, (((rgb >> 8) & 255) / 255f) * (1 - wht) * k + wht,
+                                ((rgb & 255) / 255f) * (1 - wht) * k + wht, 1f);
+                    } else {
+                        shapes.setColor(0.22f, 0.2f, 0.2f, 1f);
+                    }
+                    wheelGem(shapes, x, y, size);
+                }
+            }
+        }
         // srodek: wolne punkty
         shapes.setColor(0.08f, 0.06f, 0.07f, 1f);
         shapes.circle(cx, cy, R * 0.25f + 2, 48);
         shapes.setColor(0.25f, 0.2f, 0.16f, 1f);
         shapes.circle(cx, cy, R * 0.25f, 48);
+    }
+
+    /** Romb (szlif klejnotu) o srodku x, y i promieniu s. */
+    private static void wheelGem(ShapeRenderer shapes, float x, float y, float s) {
+        shapes.triangle(x - s, y, x + s, y, x, y + s * 1.25f);
+        shapes.triangle(x - s, y, x + s, y, x, y - s * 1.25f);
     }
 
     private void drawWheelText(SpriteBatch batch, PlayerCharacter pc) {

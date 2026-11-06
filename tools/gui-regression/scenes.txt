@@ -198,3 +198,8 @@ charm_proc|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,49
 wheel_overview|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=400 -Dpixel.wheelOrder=PRGB -Dpixel.open=wheel
 wheel_quadrant|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=400 -Dpixel.open=wheel=wheel:q:P
 wheel_avatar_mobile|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=700 -Dpixel.wheelAvatar=true -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=wheel=wheel:perks
+wheel_gems_atelier|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:gems:0
+wheel_gem_card|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:card:4
+wheel_gem_vessel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:vessel:P
+wheel_slice_spell|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.open=wheel=wheel:sel:PT100
+wheel_revelation_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=1000 -Dpixel.wheelGems=true -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=wheel=wheel:rev:P

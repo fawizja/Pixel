@@ -1545,6 +1545,136 @@ public final class GameSession {
         return wheelDone(r, "Wczytano zestaw koła " + (i + 1) + ".", nowMs);
     }
 
+    // ------------------------------------------------------------------ Klejnoty Kola Przeznaczenia
+
+    private boolean gemDone(pl.fawizja.pixel.wheel.GemAtelier.Result r, String okText, long nowMs) {
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK) {
+            pc.refreshWheel();
+            if (okText != null) log.add(nowMs, EventLog.Kind.SYSTEM, okText);
+            return true;
+        }
+        log.add(nowMs, EventLog.Kind.WARNING, r.message);
+        return false;
+    }
+
+    private boolean canPay(long gold) { return Money.totalValue(pc.backpack()) >= gold || pc.bank().balance() >= gold; }
+
+    private int itemId(String key) { return items.containsKey(key) ? items.byKey(key).id() : -1; }
+
+    /** Pracownia: odkrycie klejnotu swojej profesji z plecaka za zloto (akcja "wheel:gem:reveal:L|R|G"). */
+    public boolean gemReveal(pl.fawizja.pixel.wheel.GemQuality q, long nowMs) {
+        if (q == null) return false;
+        pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = pc.wheelPoints() <= 0 ? pl.fawizja.pixel.wheel.GemAtelier.Result.NOT_ELIGIBLE : a.canReveal();
+        int gemId = itemId(pl.fawizja.pixel.wheel.GemAtelier.gemKey(pc.vocation(), q));
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && (gemId < 0 || pc.backpack().count(gemId) <= 0)) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GEM;
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && !canPay(q.revealCost)) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD;
+        if (r != pl.fawizja.pixel.wheel.GemAtelier.Result.OK) return gemDone(r, null, nowMs);
+        if (!payGold(q.revealCost)) return gemDone(pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD, null, nowMs);
+        pc.backpack().remove(gemId, 1);
+        pl.fawizja.pixel.wheel.WheelGem g = a.reveal(q, pc.vocation(), rng);
+        return gemDone(r, String.format("Pracownia klejnotów: odkryto %s (%,d gp).", g.title(), q.revealCost), nowMs);
+    }
+
+    /** Pracownia: blokada / odblokowanie klejnotu (akcja "wheel:gem:lock:ID"). */
+    public boolean gemLock(int id, long nowMs) {
+        pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = a.toggleLock(id);
+        pl.fawizja.pixel.wheel.WheelGem g = a.gem(id);
+        return gemDone(r, g == null ? null : g.title() + (g.locked() ? ": zablokowany." : ": odblokowany."), nowMs);
+    }
+
+    /** Pracownia: rozbicie klejnotu na okruchy (akcja "wheel:gem:destroy:ID"); okruchy trafiaja do plecaka. */
+    public boolean gemDestroy(int id, long nowMs) {
+        pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = a.canChange(id);
+        if (r != pl.fawizja.pixel.wheel.GemAtelier.Result.OK) return gemDone(r, null, nowMs);
+        pl.fawizja.pixel.wheel.WheelGem g = a.gem(id);
+        String key = pl.fawizja.pixel.wheel.GemAtelier.fragmentKey(g.quality.greaterFragments);
+        int fragId = itemId(key);
+        int n = pl.fawizja.pixel.wheel.GemAtelier.rollFragments(g.quality, rng);
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (fragId < 0 || !tx.add(new ItemStack(fragId, n)).ok()) return gemDone(pl.fawizja.pixel.wheel.GemAtelier.Result.NO_ROOM, null, nowMs);
+        pc.backpack().commitFrom(tx);
+        a.destroy(id);
+        return gemDone(r, String.format("Rozbito %s: +%d %s.", g.title(), n, items.byKey(key).name().toLowerCase(java.util.Locale.ROOT)), nowMs);
+    }
+
+    /** Pracownia: zmiana domeny klejnotu na nastepna za zloto (akcja "wheel:gem:switch:ID"). */
+    public boolean gemSwitch(int id, long nowMs) {
+        pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = a.canChange(id);
+        pl.fawizja.pixel.wheel.WheelGem g = a.gem(id);
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && !canPay(g.quality.switchCost)) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD;
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && !payGold(g.quality.switchCost)) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD;
+        if (r != pl.fawizja.pixel.wheel.GemAtelier.Result.OK) return gemDone(r, null, nowMs);
+        a.switchDomain(id);
+        return gemDone(r, String.format("%s: nowa domena - %s (%,d gp).", "Klejnot #" + id, g.domain().label.toLowerCase(java.util.Locale.ROOT),
+                g.quality.switchCost), nowMs);
+    }
+
+    /** Naczynie: wlozenie klejnotu do naczynia jego domeny, tylko w swiatyni (akcja "wheel:gem:socket:ID"). */
+    public boolean gemSocket(int id, long nowMs) {
+        pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = gemTempleGate();
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK) r = a.socket(id);
+        pl.fawizja.pixel.wheel.WheelGem g = a.gem(id);
+        return gemDone(r, g == null ? null : g.title() + " w naczyniu: " + g.domain().label.toLowerCase(java.util.Locale.ROOT) + " domena (rezonans "
+                + pc.wheel().resonance(g.domain()) + "/3).", nowMs);
+    }
+
+    /** Naczynie: wyjecie klejnotu z naczynia domeny, tylko w swiatyni (akcja "wheel:gem:unsocket:G|R|P|B"). */
+    public boolean gemUnsocket(pl.fawizja.pixel.wheel.WheelDomain d, long nowMs) {
+        if (d == null) return false;
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = gemTempleGate();
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK) r = pc.wheel().gems().unsocket(d);
+        return gemDone(r, "Naczynie opróżnione: " + d.label.toLowerCase(java.util.Locale.ROOT) + " domena.", nowMs);
+    }
+
+    private pl.fawizja.pixel.wheel.GemAtelier.Result gemTempleGate() {
+        if (pc.wheelPoints() <= 0) return pl.fawizja.pixel.wheel.GemAtelier.Result.NOT_ELIGIBLE;
+        if (!inTemple()) return pl.fawizja.pixel.wheel.GemAtelier.Result.NOT_IN_TEMPLE;
+        return pl.fawizja.pixel.wheel.GemAtelier.Result.OK;
+    }
+
+    /** Warsztat okruchow: stopien modu podstawowego +1 za zloto i mniejsze okruchy (akcja "wheel:grade:b:MOD"). */
+    public boolean gemGradeBasic(pl.fawizja.pixel.wheel.BasicGemMod m, long nowMs) {
+        if (m == null) return false;
+        long[] cost = pc.wheel().gems().basicGradeCost(m);
+        return gradeUp(cost, false, () -> pc.wheel().gems().gradeUp(m), m.shortLabel(), pc.wheel().gems().grade(m) + 1, nowMs);
+    }
+
+    /** Warsztat okruchow: stopien modu najwyzszego +1 za zloto i wieksze okruchy (akcja "wheel:grade:s:MOD"). */
+    public boolean gemGradeSupreme(pl.fawizja.pixel.wheel.SupremeGemMod m, long nowMs) {
+        if (m == null) return false;
+        if (!m.allowed(pc.vocation())) return gemDone(pl.fawizja.pixel.wheel.GemAtelier.Result.WRONG_VOCATION, null, nowMs);
+        long[] cost = pc.wheel().gems().supremeGradeCost(m);
+        return gradeUp(cost, true, () -> pc.wheel().gems().gradeUp(m, pc.vocation()), m.shortLabel(this::spellName),
+                pc.wheel().gems().grade(m) + 1, nowMs);
+    }
+
+    private String spellName(String key) {
+        pl.fawizja.pixel.magic.SpellType t = spells == null ? null : spells.registry().find(key);
+        return t == null ? key : t.name();
+    }
+
+    private boolean gradeUp(long[] cost, boolean greater, java.util.function.Supplier<pl.fawizja.pixel.wheel.GemAtelier.Result> apply,
+                            String label, int newGrade, long nowMs) {
+        pl.fawizja.pixel.wheel.GemAtelier.Result r = pc.wheelPoints() <= 0 ? pl.fawizja.pixel.wheel.GemAtelier.Result.NOT_ELIGIBLE
+                : cost == null ? pl.fawizja.pixel.wheel.GemAtelier.Result.MAX_GRADE : pl.fawizja.pixel.wheel.GemAtelier.Result.OK;
+        int fragId = itemId(pl.fawizja.pixel.wheel.GemAtelier.fragmentKey(greater));
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && (fragId < 0 || pc.backpack().count(fragId) < cost[1])) {
+            r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_FRAGMENTS;
+        }
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && !canPay(cost[0])) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD;
+        if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && !payGold(cost[0])) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD;
+        if (r != pl.fawizja.pixel.wheel.GemAtelier.Result.OK) return gemDone(r, null, nowMs);
+        pc.backpack().remove(fragId, (int) cost[1]);
+        r = apply.get();
+        return gemDone(r, String.format("Warsztat okruchów: %s - stopień %s (%,d gp, %d okruchów).", label,
+                pl.fawizja.pixel.wheel.GemAtelier.roman(newGrade), cost[0], cost[1]), nowMs);
+    }
+
     /** Potwory na 8 polach wokol postaci (Instynkt bitewny, Taktyka pozycyjna). */
     private int adjacentMonsters() {
         Position p = pc.position();
