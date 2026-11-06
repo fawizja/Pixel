@@ -36,6 +36,8 @@ final class ServerPlayer {
     boolean lingering;
     /** Ostatnio wyslany komunikat PARTYINFO (bez powtorzen przy odswiezaniu). */
     String lastPartyInfo = "";
+    /** Ostatnio wyslane polozenia diabolicznych potworow (FIEND) - wysylane tylko po zmianie. */
+    String lastFiendish = "";
 
     ServerPlayer(int id, GameSession session, ClientHandler client, long now, pl.fawizja.pixel.pvp.PvpRules.Status pvp) {
         this.pvp = pvp;

@@ -109,6 +109,19 @@ class WheelPerksTest {
     }
 
     @Test
+    void wheelAvatarAndForgeTranscendenceDoNotStack() {
+        PlayerCharacter pc = WheelFixtures.hero(Vocation.KNIGHT, 400);
+        WheelFixtures.fill(pc, "PRGB");
+        pc.wheel().startAvatar(3, DestinyWheel.AVATAR_COOLDOWN_MS);
+        double withWheel = CriticalHit.extraDamage(pc);
+        assertEquals(85, WheelEffects.incoming(pc, 100), 1e-9);
+        pc.startAvatar(7_000); // Transcendencja z Kuzni: -15% i +15% krytyka w CombatSystem/CriticalHit
+        assertEquals(100, WheelEffects.incoming(pc, 100), 1e-9, "Forge already applies its -15%");
+        assertEquals(withWheel, CriticalHit.extraDamage(pc), 1e-9, "the larger avatar bonus wins (both +15%)");
+        assertTrue(CriticalHit.chance(pc) >= 100);
+    }
+
+    @Test
     void giftOfLifeSavesFromALethalBlowOncePerCooldown() {
         PlayerCharacter pc = WheelFixtures.hero(Vocation.DRUID, 400); // 350 pkt -> zielona etap 1
         WheelFixtures.fill(pc, "GRPB");

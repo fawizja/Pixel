@@ -179,7 +179,17 @@ public final class DesktopLauncher {
                     // -Dpixel.lookItem=klucz: ten przedmiot zamiast miecza (np. obsidian_armor - ochrony)
                     String lookItem = System.getProperty("pixel.lookItem");
                     int lookId = gs.session().items().byKey(lookItem != null ? lookItem : "iron_sword").id();
-                    bp.add(new pl.fawizja.pixel.item.ItemStack(lookId, 1));
+                    // -Dpixel.lookTier=7 -Dpixel.lookImbue=VAMPIRISM3,STRIKE2: tier Kuzni i nasycenia w opisie
+                    int lookTier = Integer.getInteger("pixel.lookTier", 0);
+                    pl.fawizja.pixel.item.Imbuements lookIm = pl.fawizja.pixel.item.Imbuements.NONE;
+                    String imb = System.getProperty("pixel.lookImbue");
+                    if (imb != null) {
+                        for (String k : imb.split(",")) {
+                            k = k.trim();
+                            lookIm = lookIm.with(pl.fawizja.pixel.item.Imbuement.valueOf(k.substring(0, k.length() - 1)), k.charAt(k.length() - 1) - '0');
+                        }
+                    }
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(lookId, 1, 0, lookTier, lookIm));
                     for (int i = 0; i < bp.size(); i++) {
                         if (bp.get(i) != null && (lookItem != null ? bp.get(i).itemId() == lookId
                                 : gs.session().items().get(bp.get(i).itemId()).slot() != pl.fawizja.pixel.item.EquipSlot.NONE)) {
@@ -689,6 +699,61 @@ public final class DesktopLauncher {
                     pl.fawizja.pixel.item.ItemStack shield = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.SHIELD);
                     if (shield != null) pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.SHIELD, shield.withUpgrade(2));
                     gs.hud().openSmith(gs.session());
+                }
+                if ("forge".equals(open) || "imbue".equals(open)) {
+                    // podglad Kuzni / nasycen u kowala (stac przy kowalu, np. Bogdan w Varden 566,498,0):
+                    // dwa topory klasy 4 do fuzji, miecz T3 jako dawca transferu, pyl, odlamki, rdzenie i zloto w banku;
+                    // -Dpixel.forgeFuse=1 od razu robi jedna fuzje (wiersz "Wynik")
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    pl.fawizja.pixel.inventory.Container bp = pc.backpack();
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("skull_axe").id(), 1));
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("skull_axe").id(), 1));
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("abyssal_greatsword").id(), 1, 0, 3, null));
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("umbral_blade").id(), 1));
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(pl.fawizja.pixel.item.Forge.CORE_KEY).id(), 3));
+                    bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(pl.fawizja.pixel.item.Forge.SLIVER_KEY).id(), 27));
+                    pc.restoreForge(125, 140);
+                    pc.bank().credit(20_000_000);
+                    if ("imbue".equals(open)) {
+                        pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.WEAPON, new pl.fawizja.pixel.item.ItemStack(
+                                reg.byKey("abyssal_greatsword").id(), 1, 0, 3, pl.fawizja.pixel.item.Imbuements.NONE
+                                .with(pl.fawizja.pixel.item.Imbuement.VAMPIRISM, 3)));
+                        for (pl.fawizja.pixel.item.Imbuement.Ingredient in : pl.fawizja.pixel.item.Imbuement.STRIKE.ingredients(2)) {
+                            bp.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(in.itemKey()).id(), in.count()));
+                        }
+                    }
+                    if (Boolean.getBoolean("pixel.forgeFuse")) {
+                        java.util.List<int[]> pairs = gs.session().forge().fusionPairs();
+                        if (!pairs.isEmpty()) gs.session().forgeFuse(pairs.get(0)[0], pairs.get(0)[1], true, false, gs.worldTime());
+                    }
+                    gs.hud().openSmithPage(gs.session(), "imbue".equals(open) ? 2 : 1, pl.fawizja.pixel.item.EquipSlot.WEAPON,
+                            Integer.getInteger("pixel.imbueLevel", 2));
+                }
+                if (Boolean.getBoolean("pixel.forgeMonsters")) {
+                    // podglad potworow Kuzni: najblizszy diaboliczny, kolejne pod wpływem 1..5, dwa dalsze diaboliczne (minimapa)
+                    GameScreen gs = (GameScreen) getScreen();
+                    Position heroAt = gs.session().character().position();
+                    pl.fawizja.pixel.monster.MonsterManager mm = gs.session().monsters();
+                    mm.spawnEvent("wolf", heroAt.translate(3, 1), 2, 3, gs.worldTime());
+                    mm.spawnEvent("boar", heroAt.translate(-3, 1), 2, 3, gs.worldTime());
+                    java.util.List<pl.fawizja.pixel.monster.Monster> near = new java.util.ArrayList<>();
+                    for (pl.fawizja.pixel.monster.Monster m : mm.monsters()) {
+                        if (m.position().z() == heroAt.z() && !m.isDead() && m.type().base().canBeForge()) near.add(m);
+                    }
+                    near.sort(java.util.Comparator.comparingInt(m -> m.position().distanceTo(heroAt)));
+                    for (int i = 0; i < near.size() && i < 6; i++) {
+                        if (i == 0) mm.debugMakeFiendish(near.get(i), gs.worldTime());
+                        else near.get(i).changeType(near.get(i).type().base().influenced(i));
+                    }
+                    for (int i = 0, made = 0; i < near.size() && made < 2; i++) {
+                        if (near.get(i).position().distanceTo(heroAt) >= 14) {
+                            mm.debugMakeFiendish(near.get(i), gs.worldTime());
+                            made++;
+                            i += 5;
+                        }
+                    }
                 }
                 if ("depot".equals(open)) {
                     // podglad depozytu: kilka rzeczy juz odlozonych

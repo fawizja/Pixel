@@ -36,7 +36,7 @@ class LootRulesTest {
         assertTrue(LootRules.bossOnlyKeys().size() >= 20);
         int bossDrops = 0;
         for (MonsterType t : REG.all()) {
-            for (MonsterType v : List.of(t, t.eliteVariant())) {
+            for (MonsterType v : List.of(t, t.influenced(5), t.fiendish())) {
                 for (LootEntry e : v.loot()) {
                     boolean bossOnly = LootRules.isBossOnly(TestData.ITEMS.get(e.itemId()));
                     if (bossOnly) {

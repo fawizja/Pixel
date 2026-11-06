@@ -245,6 +245,106 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
   serpent_spear i desert_knuckles (60), scarab_helmet (70) - z materialow krain (kly, futra, skory, ogony, bandaze).
 - Ksiega: receptury do poziomu postaci + 100, po kilka na strone ("Nastepna strona receptur").
 
+## Kuznia Wyniesienia, tiery i nasycenia (Z logika, S serwer, C okno kowala) - 2026-11-06
+
+Wzorowane na Tibii (zrodla Canary: `config.lua.dist`, `forge` w `game.cpp`/`player.cpp`, `item_tiers.lua`,
+`imbuements.xml`). Wartosci oznaczone **(niezweryfikowane)** nie sa potwierdzone w Tibii albo sa nasza skala.
+
+### Klasa i tier przedmiotu (`item/Forge`)
+- Kuznia obejmuje pojedyncze bronie (pole broni) oraz helmy, zbroje, spodnie i buty. Klasa wynika z rzadkosci
+  (`Rarity.tier` z wartosci): niepospolity 1, rzadki 2, epicki 3, legendarny 4; przedmiot tylko z bossow +1
+  (najwyzej 4). Zwykle przedmioty, tarcze, pierscienie i amulety nie maja klasy.
+- Najwyzszy tier wg klasy jak w Tibii: 1 / 2 / 3 / 10 (`MAX_TIER_BY_CLASS`).
+- Tier jest polem `ItemStack.tier` (przedmiot z tierem jest pojedynczy, nie laczy sie w stosy, nie sprzedaje kupcowi;
+  `isPlain()`). Nazwa "Miecz +2 (T3)", znaczek "T3" na polach ekwipunku i plecaka, opis w plecaku (klasa, tier,
+  efekt z szansa) - `ItemCompare.forgeLine` i wiersze opisu w `Hud`.
+- Zapis postaci v8: stos "idxilosc[+ulepszenie][*tier][#nasycenia]" (`ItemStack.encode/parse`), klucz
+  `forge=pyl,limit`. Zapis v7 i starsze czyta sie bez zmian (tier 0, bez nasycen, pyl 0, limit 100). Tier z pliku
+  jest ograniczany do limitu klasy. `Protocol.VERSION` = 4 (nowe znaczniki MO, wiadomosc FIEND).
+- Rynek: oferta pamieta ulepszenie i tier (linie "L2" w `market.txt`, stare "L" dalej sie czytaja); wystawic mozna
+  jeden przedmiot z tierem albo ulepszeniem, ale nie nasycony.
+
+### Pyl, odlamki, rdzenie
+- Pyl (`PlayerCharacter.forgeDust`) za zabicie potwora pod wpływem stopnia s albo diabolicznego (s = 15): s..3s
+  (`Forge.rollDust`); w druzynie kazdy czlonek dostaje wlasny rzut (`ServerWorld.shareKill`). Ponad limit przepada
+  z komunikatem.
+- Limit pylu 100 -> 225, podniesienie o 1 kosztuje (limit - 75) pylu (Canary).
+- Wymiana u kowala: 60 pylu -> 3 odlamki (`forge_sliver`), 50 odlamkow -> 1 wzniosly rdzen (`exalted_core`).
+  Diaboliczny potwor zostawia dodatkowo 3..7 odlamkow w ciele.
+
+### Fuzja i transfer (`game/ForgeService`, okno kowala "Kuźnia Wyniesienia")
+- Fuzja dwoch takich samych przedmiotow o tym samym tierze z plecaka: 100 pylu + zloto, szansa 50% (+15% za
+  rdzen "na szanse"). Porazka: pierwszy przedmiot zostaje, drugi traci tier (na tierze 0 przepada); rdzen "na
+  ochrone" zmniejsza szanse utraty do 50%. Porazka zawsze zuzywa pyl, zloto i rdzenie.
+- Premie sukcesu (rzut 0..10000, progi Canary 7400/9000/9500/9525/9550/9950/9975): brak, pyl wraca, rdzenie wracaja,
+  zloto wraca, drugi przedmiot ocalal z tierem -1, ocalal bez zmian, zyskal tier, pierwszy zyskal dwa tiery (tylko
+  ponizej limitu klasy).
+- Transfer: dawca z tierem >= 2 przepada, biorca z tierem 0 tej samej klasy i tego samego rodzaju (pole) dostaje
+  tier dawcy - 1. Koszt: 100 pylu, rdzenie wg tabeli Canary (klasa, tier wyniku), zloto = cena fuzji tieru dawcy.
+  W Tibii transfer dziala tez miedzy roznymi przedmiotami tej samej klasy i typu - u nas warunek "to samo pole".
+- **Zloto (wzor, niezweryfikowana skala):** `max(1000, wartosc_przedmiotu x 0,5 x R(klasa, tier))`, gdzie
+  `R = cena_Canary(klasa, tier) / cena_Canary(klasa, 1)` z `item_tiers.lua`. Tibia liczy stale ceny dla klasy;
+  u nas ceny przedmiotow sa duzo nizsze, wiec bierzemy proporcje miedzy tierami Canary i polowe wartosci przedmiotu
+  jako cene tieru 1.
+- Platnosc jak w Tibii: najpierw monety z plecaka, reszta z konta. Wszystko atomowe (kopia plecaka, potem
+  `commitFrom`).
+- Akcje: `npc:forge:fuse:poleA:poleB:rdzenSzansy:rdzenOchrony`, `npc:forge:transfer:dawca:biorca`,
+  `npc:forge:slivers`, `npc:forge:core`, `npc:forge:limit` - offline i online (ACT na serwerze), tylko przy kowalu.
+
+### Kowal tylko u kowali
+- `Npc.isSmith()`: kupiec z kluczem `*_smith` (6 kowali: Varden, Frostholm, Selvaran, Qasirah, Nerys, Valmir).
+  Wiersz "Kowal: ulepszenia, Kuźnia, nasycenia" pojawia sie tylko u nich (wczesniej u kazdego kupca), a ulepszenia
+  i zaklecia kowala (`upgradeEquipped`, `buyEnchantment`) tez wymagaja kowala (`GameSession.smithNearby`).
+- Okno kowala ma trzy strony: ulepszenia +1..+5 i zaklecia (jak dotad), Kuznia (fuzja z przelacznikami rdzeni,
+  wymiany, limit pylu, transfer w dwoch krokach: dawca, potem biorca) i nasycenia. Ostatni wynik ("Kuźnia: ...")
+  z dziennika jest wierszem "Wynik".
+
+### Efekty tierow (`ForgeEffects`, wzory Canary `a*t^2 + b*t + c`)
+- Natarcie (bron): 0,05/0,4/0,05 - szansa na +60% obrazen ciosu (efekt "FATAL", napis "natarcie"); rzut na kazdy
+  cel, bez PvP **(niezweryfikowane: Tibia liczy go raz na atak)**.
+- Unik (zbroja): 0,0307576/0,440697/0,026 - cios potwora chybia (zdarzenie BLOCKED "DODGE", napis "unik"); tylko
+  przeciw potworom.
+- Rozped (helm): 0,05/1,9/0,05 - co 2 s walki skraca odnowienia czarow o 2 s (`Cooldowns.cutAll`).
+- Transcendencja (spodnie): 0,0127/0,1070/0,0073 - co 2 s, gdy w ostatnich 2 s byl atak gracza: awatar na 7 s
+  (100% krytyka, +15% obrazen krytycznych, -15% obrazen przyjetych), jak awatar 3. stopnia w Tibii.
+- Wzmocnienie (buty): 0,4/1,7/0,4 - mnozy szanse pozostalych efektow x(1 + a/100).
+- Nowe buty klas 2-4 (dla Wzmocnienia): obsidian_boots, coral_boots, glacial_boots, shadow_boots, abyssal_treads
+  (tylko z Morgatha).
+
+### Potwory pod wpływem i diaboliczne (`MonsterType.forgeStack`, `MonsterManager`)
+- Zastepuja dawne elity (`isElite()` znaczy teraz "pod wpływem albo diaboliczny" - bestiariusz i osiagniecia
+  licza je jak dotad). Mnozniki Canary dla stopnia s (1..5, diaboliczny 15): zdrowie `1 + (15s + 35)/100`, obrazenia
+  `1,35 + (s - 1) x 0,1`, pancerz `1 + 0,1s`, doswiadczenie `(s + 10)/10` **(niezweryfikowane: Canary liczy to na
+  liczbach calkowitych)**. Lup bez zmian (Canary nie ma mnoznika lupu).
+- Pod wpływem: los z numeru potwora (jak dawne elity, bez zuzywania generatora) 3% spawnow **(nasza skala: ok. 220
+  z 7352 potworow)**, limit 300 naraz (Canary). Stopien wg rozkladu Canary `normal_random(1,5)`: 4,6% / 25,3% /
+  40,1% / 25,3% / 4,6%.
+- Diaboliczne: 4 naraz (Canary `forgeFiendishLimit`, nieskalowane), kazdy przez godzine, potem wraca do zwyklego
+  i zastepuje go inny; po zabiciu nowy po 270 s. Tylko w swiatach z >= 50 spawnami (bez testow i aren).
+  `Monster.changeType` zachowuje proporcje zdrowia.
+- Siec: znacznik MO "I1".."I5" / "F" / "-"; klient podmienia odmiane przy zmianie. Serwer co 5 s wysyla
+  "FIEND x,y,z ..." (tylko po zmianie); minimapa rysuje fioletowe znaczniki diabolicznych (offline z wlasnych
+  potworow). Na widoku: fioletowy odcien i kropki stopnia przy pasku zdrowia, diaboliczny wiekszy z korona.
+
+### Nasycenia (`item/Imbuement`, `item/Imbuements`)
+- 14 rodzajow, trzy stopnie (Podstawowe / Zlozone / Potezne = Basic / Intricate / Powerful), wartosci Tibii:
+  Wampiryzm 5/10/25% kradziezy zycia, Pustka 3/5/8% many, Cios +10% szansy krytyka i 15/25/50% obrazen
+  krytycznych, Zar/Jad/Mroz/Elektryzacja/Zniwo 10/25/50% obrazen fizycznych broni jako zywiol, ochrony Smocza
+  skora (ogien), Wezowa skora (ziemia), Luska quary (lod), Tkanina chmur (energia), Obecnosc demona (swiete)
+  3/8/15%, Calun licza (smierc) 2/5/10%.
+- Na co: kradziez i krytyk na bron (Wampiryzm tez zbroja, Pustka tez helm), zywioly na bron fizyczna, ochrony na
+  zbroje i tarcze. Na przedmiocie jedno nasycenie z grupy (ochrony: jedna na zywiol).
+- Miejsca: bron niepospolita 1, rzadka 2, epicka i legendarna 3; zbroja i helm 1 (do rzadkich) albo 2; tarcza 1;
+  reszta 0 **(niezweryfikowane: w Tibii zalezy od konkretnego przedmiotu)**.
+- Czas 20 h walki: plynie tylko na zalozonych przedmiotach, w walce (60 s od ataku albo ciosu) i poza strefa
+  ochronna (`Equipment.tickImbuements`).
+- Koszt: skladniki z naszego lupu (stopien n = n pierwszych pozycji, liczby jak w Tibii) + zloto 1250 / 7500 /
+  50 000 (Canary 5000 / 30 000 / 200 000 x 0,25 **(niezweryfikowana skala)**), usuniecie 3750. Nasycenie zawsze
+  sie udaje **(Canary ma procent powodzenia - pominiety)**.
+- Haki: `Leech` (suma LIFE_LEECH / MANA_LEECH), `CriticalHit` (Cios: +10% szansy za kazdy przedmiot, obrazenia z
+  sumy), `Equipment.protection` (ochrony), `CombatSystem.mitigateWeaponHit` (zamiana czesci ciosu na zywiol).
+- Akcje: `npc:imbue:POLE:RODZAJ:STOPIEN`, `npc:unimbue:POLE:indeks`.
+
 ## Mapa, kolizje, pietra (Z)
 
 - Warstwy: podloze, dekoracje, obiekty (przeszkody), sciany, swiatlo, przejscia.
@@ -442,7 +542,8 @@ Obiekt obok postaci (albo pod nia) - uzycie od razu; dalej - marsz na pole obok 
 ## Zapis (Z)
 
 Tekstowy format z wersja i CRC32, migracja v1 -> v2, odrzucanie uszkodzonych plikow,
-zapis atomowy (tmp + fsync + kopia .bak), odczyt z kopii przy uszkodzeniu. Autozapis co 60 s,
+zapis atomowy (tmp + fsync + kopia .bak), odczyt z kopii przy uszkodzeniu. v8: tier i nasycenia stosow oraz pyl
+Kuzni (patrz "Kuznia Wyniesienia"). Autozapis co 60 s,
 przy pauzie, utracie fokusu i zamknieciu.
 
 ## Potwory i AI (Z logika, C grafika)
@@ -507,7 +608,7 @@ przy pauzie, utracie fokusu i zamknieciu.
   energia 40, sand_wraith fizyczne 40.
 - Ataki dodatkowe potworow (kolumna `atak dodatkowy(TYP:min-max:%)`, `monster/ExtraAttack`): przy kazdym ataku z
   szansa % potwor zamiast zwyklego ciosu uzywa ataku tego typu (tani zamiennik listy atakow Tibii - wyssanie zycia
-  szkieletow i upiorow, wyssanie many kaplanow pustki itd.). `MonsterType.rollStrike` - jeden rzut; elity x1,3.
+  szkieletow i upiorow, wyssanie many kaplanow pustki itd.). `MonsterType.rollStrike` - jeden rzut; pod wpływem i diaboliczne x1,35..x1,75 (Kuznia).
   Pelne listy atakow zywiolowych z Tibii (fale, kule, kilka czarow) nie sa przeniesione.
 - Ochrona gracza: kolumna `premie` w items.csv (`ItemBonus`): `FIRE:8,ICE:-8,...` w procentach, wartosci z
   najblizszych przedmiotow Tibii (Magma Coat, Glacier Robe, Helmet of the Deep - utoniecie 100%, Depth Ocrea - wyssanie
@@ -933,6 +1034,9 @@ opisuje "Uproszczenia" nizej.
   - Wyssanie ciala dziala bez oslabien, Mistrzostwo run = 25% szansy na x1,2 wartosci runy, Wiez lecznicza
     i Przewodnia obecnosc = +10% leczenia (brak leczenia innych / mantry).
   - Plaskie premie objawien tylko w potwory; w PvP dziala jedynie zmniejszenie obrazen awatara.
+  - Awatar kola i Transcendencja z Kuzni to jeden stan awatara jak w Canary: gdy dzialaja oba, liczy sie
+    wiekszy efekt (Transcendencja -15% / +15% krytyka = etap 3), bez sumowania. Dar Zycia skraca odnowienia
+    tym samym `Cooldowns.cutAll` co Rozped z Kuzni.
 - Balans (`WheelBalanceTest`): 300 poziom, 250 pkt - srednio x1,02-1,15 "sily" (obrazenia x HP / otrzymane
   x kradziez) zaleznie od kolejnosci cwiartek; pelne kolo na 1000 poziomie ok. x1,08, z awatarem ok. x1,44
   na 15 s. Symulacja nie liczy ulepszen pojedynczych czarow (te ogranicza osobny test: najwyzej +50% obrazen).

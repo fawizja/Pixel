@@ -2011,7 +2011,7 @@ public final class GameSession {
      * nieudana proba zabiera zloto, przedmiot zostaje bez zmian.
      */
     public boolean upgradeEquipped(pl.fawizja.pixel.item.EquipSlot slot, long nowMs) {
-        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        Npc n = smithNearby(nowMs);
         if (n == null) return false;
         ItemStack worn = pc.equipment().get(slot);
         if (worn == null) {
@@ -2048,7 +2048,7 @@ public final class GameSession {
 
     /** Zaklecie u kowala (kupca): godzina polowania, placi z plecaka, najwyzej 3 godziny zapasu. */
     public boolean buyEnchantment(pl.fawizja.pixel.item.Enchantments.Kind kind, long nowMs) {
-        Npc n = talkTo(NpcRole.MERCHANT, nowMs);
+        Npc n = smithNearby(nowMs);
         if (n == null) return false;
         pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
         if (!e.canExtend(kind)) {
@@ -2067,6 +2067,62 @@ public final class GameSession {
         log.add(nowMs, EventLog.Kind.SYSTEM, kind.label() + " na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(kind))
                 + " polowania (" + price + " gp).");
         return true;
+    }
+
+    /** Kowal obok postaci (ulepszenia, zaklecia, Kuznia, nasycenia); inaczej ostrzezenie i null. */
+    public Npc smithNearby(long nowMs) {
+        Npc n = npcNearby();
+        if (n == null || !n.isSmith()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n != null && n.role() == NpcRole.MERCHANT
+                    ? n.name() + ": tym zajmuje się kowal (kuźnia w mieście)." : TradeResult.TOO_FAR.message());
+            return null;
+        }
+        return n;
+    }
+
+    private ForgeService forge;
+
+    /** Kuznia i nasycenia ({@link ForgeService}). */
+    public ForgeService forge() {
+        if (forge == null) forge = new ForgeService(this, rng);
+        return forge;
+    }
+
+    public boolean forgeFuse(int slotA, int slotB, boolean coreChance, boolean coreProtect, long nowMs) {
+        return smithNearby(nowMs) != null && forge().fuse(slotA, slotB, coreChance, coreProtect, nowMs);
+    }
+
+    public boolean forgeTransfer(int donorSlot, int receiverSlot, long nowMs) {
+        return smithNearby(nowMs) != null && forge().transfer(donorSlot, receiverSlot, nowMs);
+    }
+
+    public boolean forgeConvert(String kind, long nowMs) {
+        return smithNearby(nowMs) != null && forge().convert(kind, nowMs);
+    }
+
+    public boolean forgeRaiseLimit(long nowMs) {
+        return smithNearby(nowMs) != null && forge().raiseLimit(nowMs);
+    }
+
+    public boolean imbue(pl.fawizja.pixel.item.EquipSlot slot, pl.fawizja.pixel.item.Imbuement kind, int level, long nowMs) {
+        return smithNearby(nowMs) != null && forge().imbue(slot, kind, level, nowMs);
+    }
+
+    public boolean clearImbuement(pl.fawizja.pixel.item.EquipSlot slot, int index, long nowMs) {
+        return smithNearby(nowMs) != null && forge().clearImbuement(slot, index, nowMs);
+    }
+
+    /** Klient online: polozenia diabolicznych potworow z serwera (komunikat FIEND); null = gra lokalna. */
+    private List<Position> remoteFiendish;
+
+    public void setRemoteFiendish(List<Position> where) { remoteFiendish = where == null ? null : new java.util.ArrayList<>(where); }
+
+    /** Diaboliczne potwory na swiecie (minimapa): online z serwera, offline z wlasnych potworow. */
+    public List<Position> fiendishPositions() {
+        if (remoteFiendish != null) return java.util.Collections.unmodifiableList(remoteFiendish);
+        List<Position> out = new java.util.ArrayList<>();
+        for (pl.fawizja.pixel.monster.Monster m : monsters.fiendishMonsters()) out.add(m.position());
+        return out;
     }
 
     /** Tytul z osiagniecia: key null albo "-" zdejmuje tytul; tylko zdobyte osiagniecia. */
@@ -2271,6 +2327,7 @@ public final class GameSession {
             pc.tickRegeneration(dt, isResting(nowMs));
             spells.updateSerenity(dt, nowMs); // mnich: spokoj (Serene) wg druzyny i tlumu wokol
             pc.stats().addPlayTime(dt);
+            forge().tick(nowMs, dt, world.isProtectionZone(pc.position()));
             if (!world.isProtectionZone(pc.position())) {
                 pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);
                 if (gone != null) log.add(nowMs, EventLog.Kind.WARNING, "Zaklęcie wygasło: " + gone.label().toLowerCase(java.util.Locale.ROOT) + ".");

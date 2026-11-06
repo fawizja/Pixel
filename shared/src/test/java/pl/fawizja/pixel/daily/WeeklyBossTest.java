@@ -22,7 +22,7 @@ class WeeklyBossTest {
         MonsterType wolf = MONSTERS.get("wolf");
         MonsterType grim = MONSTERS.get("grimtooth");
         assertNull(WeeklyBoss.pick(5, List.of(wolf)));
-        assertEquals(grim, WeeklyBoss.pick(5, List.of(wolf, grim, grim.eliteVariant())));
+        assertEquals(grim, WeeklyBoss.pick(5, List.of(wolf, grim, grim.fiendish())));
         assertEquals(0, WeeklyBoss.week(6));
         assertEquals(1, WeeklyBoss.week(7));
         assertEquals(-1, WeeklyBoss.week(-1));

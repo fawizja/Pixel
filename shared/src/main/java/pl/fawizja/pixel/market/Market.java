@@ -10,7 +10,8 @@ import java.util.Map;
 /**
  * Rynek graczy (serwer): oferty wystawione u bankiera, kupowane takze wtedy, gdy sprzedawca jest offline.
  * Zaplata (cena minus prowizja) czeka w {@link #takeEarnings} do nastepnego wejscia sprzedawcy, jesli nie ma go w grze.
- * Zapis tekstowy: "N nastepneId", "L id;itemId;ilosc;cena;sprzedawca", "E kwota;sprzedawca".
+ * Zapis tekstowy: "N nastepneId", "L id;itemId;ilosc;cena;sprzedawca", "E kwota;sprzedawca"; przedmiot z ulepszeniem
+ * albo tierem Kuzni: "L2 id;itemId;ilosc;cena;ulepszenie;tier;sprzedawca" (rynek zachowuje ulepszenie i tier).
  */
 public final class Market {
 
@@ -20,7 +21,14 @@ public final class Market {
     /** Prowizja rynku w procentach (znika z gry - hamuje inflacje). */
     public static final int FEE_PERCENT = 2;
 
-    public record Listing(int id, String seller, int itemId, int count, long price) {}
+    public record Listing(int id, String seller, int itemId, int count, long price, int upgrade, int tier) {
+        public Listing(int id, String seller, int itemId, int count, long price) { this(id, seller, itemId, count, price, 0, 0); }
+
+        /** Stos, ktory kupujacy dostaje do plecaka (z ulepszeniem i tierem). */
+        public pl.fawizja.pixel.item.ItemStack stack() {
+            return new pl.fawizja.pixel.item.ItemStack(itemId, count, upgrade, tier, null);
+        }
+    }
 
     public enum Result {
         OK(null),
@@ -54,7 +62,12 @@ public final class Market {
 
     /** Nowa oferta; wywolujacy sprawdza najpierw {@link #canList} i zabiera przedmioty z plecaka. */
     public synchronized Listing add(String seller, int itemId, int count, long price) {
-        Listing l = new Listing(nextId++, seller, itemId, count, price);
+        return add(seller, new pl.fawizja.pixel.item.ItemStack(itemId, count), price);
+    }
+
+    /** Nowa oferta stosu z ulepszeniem i tierem (nasycen rynek nie przenosi - wywolujacy je odrzuca). */
+    public synchronized Listing add(String seller, pl.fawizja.pixel.item.ItemStack st, long price) {
+        Listing l = new Listing(nextId++, seller, st.itemId(), st.count(), price, st.upgrade(), st.tier());
         listings.put(l.id(), l);
         return l;
     }
@@ -135,6 +148,12 @@ public final class Market {
     public synchronized String encode() {
         StringBuilder sb = new StringBuilder("N ").append(nextId).append('\n');
         for (Listing l : listings.values()) {
+            if (l.upgrade() > 0 || l.tier() > 0) {
+                sb.append("L2 ").append(l.id()).append(';').append(l.itemId()).append(';').append(l.count()).append(';')
+                        .append(l.price()).append(';').append(l.upgrade()).append(';').append(l.tier()).append(';')
+                        .append(l.seller()).append('\n');
+                continue;
+            }
             sb.append("L ").append(l.id()).append(';').append(l.itemId()).append(';').append(l.count()).append(';')
                     .append(l.price()).append(';').append(l.seller()).append('\n');
         }
@@ -155,6 +174,13 @@ public final class Market {
             try {
                 if (line.startsWith("N ")) {
                     m.nextId = Math.max(m.nextId, Integer.parseInt(line.substring(2).trim()));
+                } else if (line.startsWith("L2 ")) {
+                    String[] f = line.substring(3).split(";", 7);
+                    Listing l = new Listing(Integer.parseInt(f[0]), f[6], Integer.parseInt(f[1]), Integer.parseInt(f[2]),
+                            Long.parseLong(f[3]), Integer.parseInt(f[4]), Integer.parseInt(f[5]));
+                    l.stack(); // walidacja (ulepszenie/tier tylko dla pojedynczych)
+                    m.listings.put(l.id(), l);
+                    m.nextId = Math.max(m.nextId, l.id() + 1);
                 } else if (line.startsWith("L ")) {
                     String[] f = line.substring(2).split(";", 5);
                     Listing l = new Listing(Integer.parseInt(f[0]), f[4], Integer.parseInt(f[1]), Integer.parseInt(f[2]), Long.parseLong(f[3]));

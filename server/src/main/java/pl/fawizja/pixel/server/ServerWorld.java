@@ -1249,9 +1249,18 @@ final class ServerWorld {
                     return;
                 }
                 int count = (int) what.count();
-                if (pc.backpack().countPlain(what.itemId()) < count) {
+                // jedna sztuka z ulepszeniem albo tierem Kuzni (najwyzszy tier), gdy brak zwyklych - rynek je zachowuje
+                int special = -1;
+                if (count == 1 && pc.backpack().countPlain(what.itemId()) < 1) {
+                    for (int i = 0; i < pc.backpack().size(); i++) {
+                        pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(i);
+                        if (st == null || st.itemId() != what.itemId() || st.isPlain() || !st.imbuements().isEmpty()) continue;
+                        if (special < 0 || st.tier() > pc.backpack().get(special).tier()) special = i;
+                    }
+                }
+                if (special < 0 && pc.backpack().countPlain(what.itemId()) < count) {
                     warn(p, "Nie masz w plecaku " + count + "x " + items.get(what.itemId()).name()
-                            + " (ulepszonych przedmiotów nie można wystawić).", now);
+                            + " (przedmiotów z nasyceniem nie można wystawić).", now);
                     return;
                 }
                 pl.fawizja.pixel.market.Market.Result r = market.canList(p.name(), price);
@@ -1259,11 +1268,18 @@ final class ServerWorld {
                     warn(p, r.message, now);
                     return;
                 }
-                if (!pc.backpack().remove(what.itemId(), count).ok()) return;
-                pl.fawizja.pixel.market.Market.Listing l = market.add(p.name(), what.itemId(), count, price);
+                pl.fawizja.pixel.item.ItemStack listed;
+                if (special >= 0) {
+                    listed = pc.backpack().takeFromSlot(special, 1);
+                    if (listed == null) return;
+                } else {
+                    if (!pc.backpack().remove(what.itemId(), count).ok()) return;
+                    listed = new pl.fawizja.pixel.item.ItemStack(what.itemId(), count);
+                }
+                pl.fawizja.pixel.market.Market.Listing l = market.add(p.name(), listed, price);
                 saveMarket();
                 save(p);
-                info(p, "Wystawiono na rynku: " + count + "x " + items.get(l.itemId()).name() + " za "
+                info(p, "Wystawiono na rynku: " + count + "x " + listingName(l) + " za "
                         + String.format("%,d gp", price) + " (oferta #" + l.id() + ").", now);
                 break;
             }
@@ -1288,10 +1304,10 @@ final class ServerWorld {
                     return;
                 }
                 market.sold(id);
-                market.recordSale(l.itemId(), l.count(), l.price());
-                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(l.itemId(), l.count()));
+                if (l.upgrade() == 0 && l.tier() == 0) market.recordSale(l.itemId(), l.count(), l.price());
+                pc.backpack().add(l.stack());
                 long earned = l.price() - pl.fawizja.pixel.market.Market.fee(l.price());
-                String what = l.count() + "x " + items.get(l.itemId()).name();
+                String what = l.count() + "x " + listingName(l);
                 ServerPlayer seller = find(l.seller());
                 if (seller != null && seller.session.character().bank().credit(earned).ok()) {
                     seller.session.log().add(now, EventLog.Kind.SYSTEM, "Rynek: " + p.name() + " kupił " + what
@@ -1319,10 +1335,10 @@ final class ServerWorld {
                     return;
                 }
                 market.cancel(id);
-                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(l.itemId(), l.count()));
+                pc.backpack().add(l.stack());
                 saveMarket();
                 save(p);
-                info(p, "Wycofano ofertę: " + l.count() + "x " + items.get(l.itemId()).name() + " wraca do plecaka.", now);
+                info(p, "Wycofano ofertę: " + l.count() + "x " + listingName(l) + " wraca do plecaka.", now);
                 break;
             }
             default:
@@ -1504,7 +1520,12 @@ final class ServerWorld {
     }
 
     private pl.fawizja.pixel.market.MarketView.Row marketRow(pl.fawizja.pixel.market.Market.Listing l, boolean mine) {
-        return new pl.fawizja.pixel.market.MarketView.Row(l.id(), items.get(l.itemId()).name(), l.count(), l.price(), l.seller(), mine);
+        return new pl.fawizja.pixel.market.MarketView.Row(l.id(), listingName(l), l.count(), l.price(), l.seller(), mine);
+    }
+
+    /** Nazwa oferty z ulepszeniem i tierem Kuzni: "Miecz +2 (T3)". */
+    private String listingName(pl.fawizja.pixel.market.Market.Listing l) {
+        return pl.fawizja.pixel.item.Forge.name(items.get(l.itemId()), l.stack());
     }
 
     private static String plainLower(String s) {
@@ -1997,6 +2018,7 @@ final class ServerWorld {
             }
             String note = pl.fawizja.pixel.combat.CombatSystem.staminaNote(c, m == killer); // strefa sprzed zuzycia
             share = c.stamina().hunt(share, c.isPremium(), now); // stamina jak w Tibii: po podziale, osobno dla kazdego
+            m.session.combat().awardForgeDust(type, now); // pyl Kuzni: kazdy z druzyny wlasny rzut (Canary ForgeMonster:onDeath)
             m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name()
                     + (rested ? ", wypoczęty" : "") + note, now);
             if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
@@ -3060,6 +3082,7 @@ final class ServerWorld {
                 }
             }
         });
+        sendFiendish(now);
         for (ServerPlayer p : players.values()) {
             if (p.pvpTarget < 0) continue;
             ServerPlayer t = players.get(p.pvpTarget);
@@ -3085,6 +3108,29 @@ final class ServerWorld {
                 save(p);
                 p.lastSaveMs = now;
             }
+        }
+    }
+
+    private long fiendishSentMs = Long.MIN_VALUE / 2;
+
+    /**
+     * Diaboliczne potwory na minimapie wszystkich graczy: "FIEND x,y,z x,y,z ..." co 5 s, tylko po zmianie
+     * (diabolicznych jest najwyzej {@link MonsterManager#FIENDISH_LIMIT}, ruszaja sie wolno).
+     */
+    private void sendFiendish(long now) {
+        if (now >= fiendishSentMs && now - fiendishSentMs < 5_000) return;
+        fiendishSentMs = now;
+        List<String> f = new ArrayList<>();
+        f.add("FIEND");
+        for (Monster m : monsters.fiendishMonsters()) {
+            Position mp = m.position();
+            f.add(mp.x() + "," + mp.y() + "," + mp.z());
+        }
+        String line = String.join(" ", f);
+        for (ServerPlayer p : players.values()) {
+            if (line.equals(p.lastFiendish)) continue;
+            p.lastFiendish = line;
+            p.client.send(f.toArray(new String[0]));
         }
     }
 
@@ -3320,7 +3366,7 @@ final class ServerWorld {
                 Position mp = m.position();
                 frame.append(Protocol.line("MO", String.valueOf(m.id()), m.type().key(), String.valueOf(mp.x()),
                         String.valueOf(mp.y()), String.valueOf(mp.z()), String.valueOf(Math.round(100 * m.healthFraction())),
-                        m.type().isElite() ? "E" : "-"))
+                        MonsterManager.mark(m.type())))
                         .append('\n');
             }
             ground.forEachNear(me, Protocol.VIEW_RADIUS, (gp, st) -> frame.append(Protocol.line("GI",

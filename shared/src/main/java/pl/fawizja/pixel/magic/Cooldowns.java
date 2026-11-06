@@ -36,12 +36,6 @@ public final class Cooldowns {
         groups.put(s.group(), now + s.group().groupCooldownMs);
     }
 
-    /** Skraca wszystkie trwajace odnowienia czarow i grup o ms (Dar Zycia: -60 s). */
-    public void cutAll(long ms, long now) {
-        spells.replaceAll((k, until) -> until <= now ? until : Math.max(now, until - ms));
-        groups.replaceAll((k, until) -> until <= now ? until : Math.max(now, until - ms));
-    }
-
     public void triggerGroup(SpellGroup g, long now, long ms) {
         groups.put(g, now + ms);
     }
@@ -51,6 +45,19 @@ public final class Cooldowns {
         Long until = spells.get(s.key());
         if (until == null || until <= now) return;
         spells.put(s.key(), ms >= until - now ? now : until - ms);
+    }
+
+    /**
+     * Rozped z Kuzni (Momentum): odnowienia wszystkich czarow krotsze o ms, a z grup tylko specjalne (cnoty mnicha) -
+     * jak Canary triggerMomentum (grupy ataku, leczenia i wsparcia bez zmian). Uzywa go tez Dar Zycia z Kola
+     * Przeznaczenia (-60 s, Canary reduceAllSpellsCooldownTimer).
+     */
+    public void cutAll(long ms, long now) {
+        for (Map.Entry<String, Long> e : spells.entrySet()) {
+            if (e.getValue() > now) e.setValue(Math.max(now, e.getValue() - ms));
+        }
+        Long v = groups.get(SpellGroup.VIRTUE);
+        if (v != null && v > now) groups.put(SpellGroup.VIRTUE, Math.max(now, v - ms));
     }
 
     public void clear() {

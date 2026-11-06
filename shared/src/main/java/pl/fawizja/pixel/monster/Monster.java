@@ -6,7 +6,8 @@ import pl.fawizja.pixel.world.Position;
 /** Instancja potwora w swiecie. */
 public final class Monster {
     private final int id;
-    private final MonsterType type;
+    /** Rodzaj; zmienia sie tylko przy staniu sie diabolicznym i powrocie (Kuznia, {@link #changeType}). */
+    private MonsterType type;
     private final SpawnPoint spawn;
     private int health;
     private Position position;
@@ -84,6 +85,16 @@ public final class Monster {
         facing = d;
         stepStartMs = now;
         stepDurationMs = durationMs;
+    }
+
+    /**
+     * Zmiana odmiany (diaboliczny i z powrotem): zdrowie w tej samej proporcji, potwor zostaje na miejscu.
+     */
+    public void changeType(MonsterType t) {
+        if (t == null || t == type) return;
+        float f = healthFraction();
+        type = t;
+        health = Math.max(isDead() ? 0 : 1, Math.round(t.maxHealth() * f));
     }
 
     /** Klient online: zdrowie z klatki stanu serwera (w procentach). */

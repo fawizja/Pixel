@@ -33,6 +33,11 @@ final class Minimap {
     private static final int BLOCK = 32, FEATHER = 2;
     private static final int FOG_R = 8, FOG_G = 8, FOG_B = 12;
 
+    /** Diaboliczne potwory (Kuznia): fioletowe znaczniki widoczne takze we mgle, jak ikona na mapie w Tibii. */
+    private java.util.List<Position> fiendish = java.util.List.of();
+
+    void setFiendish(java.util.List<Position> where) { fiendish = where == null ? java.util.List.of() : where; }
+
     void setHazards(java.util.List<Position> traps) {
         if (traps == null || traps.equals(hazards)) return;
         hazards = traps;
@@ -199,6 +204,10 @@ final class Minimap {
             int mx = m.x() - sx0, my = m.y() - sy0;
             if (m.z() == p.z() && explored(m) && mx >= 0 && my >= 0 && mx < tilesW && my < tilesH) marker(batch, x + (mx + 0.5f) * px, top - (my + 0.5f) * px, ms, MARK);
         }
+        for (Position f : fiendish) {
+            int fx = f.x() - sx0, fy = f.y() - sy0;
+            if (f.z() == p.z() && fx >= 0 && fy >= 0 && fx < tilesW && fy < tilesH) marker(batch, x + (fx + 0.5f) * px, top - (fy + 0.5f) * px, ms + 2, FIEND);
+        }
         if (target != null && target.z() == p.z()) {
             int tx = target.x() - sx0, ty = target.y() - sy0;
             if (tx >= 0 && ty >= 0 && tx < tilesW && ty < tilesH) marker(batch, x + (tx + 0.5f) * px, top - (ty + 0.5f) * px, ms, TARGET);
@@ -227,6 +236,9 @@ final class Minimap {
         for (Position m : marks) {
             if (m.z() == p.z() && explored(m) && in(m, sx, sy, sw, sh)) marker(batch, ix + (m.x() - sx + 0.5f) * scale, iy + ih - (m.y() - sy + 0.5f) * scale, ms, MARK);
         }
+        for (Position f : fiendish) {
+            if (f.z() == p.z() && in(f, sx, sy, sw, sh)) marker(batch, ix + (f.x() - sx + 0.5f) * scale, iy + ih - (f.y() - sy + 0.5f) * scale, ms + 3, FIEND);
+        }
         if (target != null && target.z() == p.z() && in(target, sx, sy, sw, sh)) {
             marker(batch, ix + (target.x() - sx + 0.5f) * scale, iy + ih - (target.y() - sy + 0.5f) * scale, ms + 2, TARGET);
         }
@@ -241,6 +253,7 @@ final class Minimap {
     private static final Color PLAYER = new Color(1f, 0.2f, 0.2f, 1f);
     private static final Color TARGET = new Color(0.3f, 0.9f, 1f, 1f);
     private static final Color MARK = new Color(1f, 0.85f, 0.2f, 1f);
+    private static final Color FIEND = new Color(0.85f, 0.2f, 1f, 1f);
 
     private void marker(SpriteBatch batch, float cx, float cy, float s, Color c) {
         Color old = batch.getColor().cpy();

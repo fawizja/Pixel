@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.233.0] - 2026-11-06
+
+### Dodano
+- Kuźnia Wyniesienia jak w Tibii, u każdego z 6 kowali (nowa strona „Kuźnia” w oknie kowala):
+  - klasy przedmiotów 1–4 i tiery (do T10 dla klasy 4), widoczne w nazwie, na slocie i w opisie przedmiotu;
+  - fuzja (50% szansy, 65% z rdzeniem; przy porażce drugi przedmiot traci tier, rdzeń ochrony zmniejsza ryzyko),
+    transfer tieru, wymiana 60 pyłu na 3 odłamki i 50 odłamków na 1 rdzeń, podnoszenie limitu pyłu (100 do 225);
+  - koszt w złocie liczony z wartości przedmiotu (dopasowany do naszej ekonomii).
+- Efekty tierów jak w Tibii: Onslaught (broń, +60% obrażeń), Ruse (zbroja, unik ciosu), Momentum (hełm, szybsze
+  odnawianie czarów), Transcendence (nogawice, krótki awatar z pewnymi krytykami), Amplification (buty, wzmacnia
+  pozostałe). 5 nowych par butów, m.in. otchłanne trzewiki od Mor'gatha.
+- Potwory pod wpływem (etapy 1–5, fioletowa kula z kropkami, około 3% potworów) i diaboliczne (korona, 4 naraz,
+  każdy na 1 godzinę, widoczne na minimapie) z mnożnikami z Tibii. Zastępują dawne elitarne potwory.
+  Dają pył kuźni, a diaboliczne także odłamki.
+- Imbuementy u kowala: 14 rodzajów (np. Vampirism, Void, Strike, żywiołowe obrażenia, ochrony) na 3 poziomach
+  z wartościami z Tibii. Działają 20 godzin czasu walki.
+
+### Zmieniono
+- Zakładka kowala pokazuje się już tylko u kowali, a nie u każdego kupca. Ulepszenia i zaklęcia też wymagają kowala.
+- Zapis postaci w wersji 8 (tiery przedmiotów, pył). Rynek zachowuje tier i ulepszenie.
+
+## [0.232.0] - 2026-11-06
+
+### Dodano
+- Bestiary jak w Tibii: 20 klas potworów, gwiazdki trudności i progi zabójstw z Tibii (np. średnie 50/500/1000).
+  Cztery etapy odkrywania: podstawy, potem zdrowie, doświadczenie i pospolity łup, potem odporności, miejsca
+  i rzadszy łup, a na koniec cały łup i punkty charmów. Łup jest opisany kategoriami rzadkości jak w Tibii
+  zamiast procentów.
+- Charmy jak w obecnej Tibii: wszystkie 25 charmów, 14 Major za punkty charmów i 11 Minor za echa, poziomy I/II/III.
+  Na stworzeniu może być 1 Major i 1 Minor; sloty: 2 bez premium, 6 z premium. Major wymaga ukończonego wpisu.
+  Działają w walce: żywiołowe (Rana, Podpalenie, Trucizna, Zamrożenie, Porażenie, Klątwa, Boski gniew), Niski
+  i Dziki cios (krytyki), kradzież życia i many, Unik, Riposta, Okaleczenie, Zastrzyk adrenaliny, Błogosławieństwo
+  (mniej straty doświadczenia) i inne. Zadziałanie charmu widać jako fioletową liczbę z nazwą.
+- Zdjęcie charmu kosztuje złoto (ceny z Tibii podzielone przez 4, jak reszta ekonomii).
+
 ## [0.231.0] - 2026-11-05
 
 ### Zmieniono

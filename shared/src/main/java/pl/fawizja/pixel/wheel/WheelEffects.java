@@ -97,7 +97,8 @@ public final class WheelEffects {
     public static double critDamage(PlayerCharacter pc) {
         WheelBonus b = pc.wheelBonus();
         if (b == WheelBonus.NONE) return 0;
-        double d = pc.wheel().castAugment().critDamage + 5 * pc.wheel().avatarStage();
+        // awatar kola i Transcendencja z Kuzni to jeden stan awatara w Tibii: przy Transcendencji (+15%) awatar kola nic nie dodaje
+        double d = pc.wheel().castAugment().critDamage + (pc.avatarActive() ? 0 : 5 * pc.wheel().avatarStage());
         int cm = b.stage(WheelRevelation.COMBAT_MASTERY, pc.vocation());
         if (cm > 0 && pc.equipment().shieldDefense() <= 0) d += 4 * cm;
         if (b.has(WheelPassive.BALLISTIC_MASTERY) && ammo(pc) == Ammo.BOLT) d += 10;
@@ -134,7 +135,7 @@ public final class WheelEffects {
     /** Awatar: -5/10/15% otrzymanych obrazen (Canary checkAvatarSkill DAMAGE_REDUCTION, zaokraglenie w gore). */
     public static double incoming(PlayerCharacter pc, double damage) {
         int st = pc.wheel().avatarStage();
-        if (st <= 0 || damage <= 0) return damage;
+        if (st <= 0 || damage <= 0 || pc.avatarActive()) return damage; // Transcendencja juz daje -15% (maks. etapu 3)
         return damage - Math.ceil(damage * 5 * st / 100.0);
     }
 
