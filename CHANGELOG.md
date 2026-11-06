@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.238.0] - 2026-11-06
+
+### Dodano
+- Pupile dają +5% doświadczenia z potworów, gdy chodzą za postacią (też w drużynie i online). Widać to w opisie
+  pupila, w komunikacie po przywołaniu i przy poziomie w umiejętnościach („pupil +5%”).
+- W każdym z 6 miast nowi NPC:
+  - opiekun zwierząt sprzedający pupila tego miasta (pupile zniknęły ze zwykłych sklepów). Nowe pupile: Mewka
+    w Valmirze i Papużka w Nerys;
+  - władca (król, królowa albo lord) sprzedający premium i promocję tak samo jak król Aurelian w Varden;
+  - zaklinacz z imbuementami: kradzież życia (Vampirism), many (Void), krytyk (Strike), obrażenia od żywiołów
+    i ochrony. Kowale dalej też je mają.
+- /idź znajduje nowych NPC (np. /idź pupil, /idź władca, /idź zaklinacz).
+
 ## [0.237.0] - 2026-11-06
 
 ### Dodano

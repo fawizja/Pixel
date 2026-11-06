@@ -226,6 +226,36 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
   celu zadania, brama poziomu za mostem, receptury u kwatermistrza obozu); uslugi sa przyciskami okna, a na inne
   slowa (np. "czesc") NPC odpowiada swoim jednym powitaniem z npcs.csv i lista tematow.
 
+## Uslugi w kazdym miescie: pupile, wladcy, zaklinacze (Z logika, S serwer, C okna, generator) - 2026-11-06
+
+Darek: "w kazdym miescie npc odpowiedni za kupno danego pupila, premium u krola, krolowej lub lorda, kradziez zycia,
+krytyk itp. u NPC w miastach". Kazde z 6 miast (map.properties `towns=`) ma trzech nowych NPC; stawia ich generator
+(`tools/mapgen/town_npcs.py`, wywolany na poczatku `generate_continent.finish`, wspolrzedne stale przy kazdym uruchomieniu):
+wewnatrz zamknietego budynku miasta (nie w domu na sprzedaz), na wolnym polu podlogi przy scianie, nie przy drzwiach
+ani schodach, bez zamykania przejscia, osiagalni ze swiatyni i co najmniej 5 pol (Chebyshev) od innych NPC - rozmowa
+wybiera najblizszego NPC w zasiegu 2, wiec gracz przy starym NPC nigdy nie trafi na nowego. Najpierw budynek
+"kotwicy" (opiekun u kupca/karczmarza, wladca u zarzadcy domow/bankiera/kaplana, zaklinacz u kowala/maga), potem
+najblizszy inny budynek miasta. Grafiki: stroje OTSP z maska kolorow (`_ROLE` petkeeper/ruler/imbuer i
+`RULER_COLORS` w `tools/art/otsp_import.py`).
+
+- **Pupile** (`pet_*`, `GameSession.togglePet`): pupil chodzacy za postacia daje +`PlayerCharacter.PET_EXP_PERCENT` (5)%
+  doswiadczenia z potworow. Liczy to `CombatSystem.killExperience` na koncu (po etapach serwera, zwoju nauki, potworze dnia
+  i wydarzeniu serwera; przed wypoczeciem i stamina), wiec tak samo solo, w druzynie (`ServerWorld.shareKill`) i online
+  (serwer trzyma `pet` w swojej sesji). Widac to w opisie przedmiotu, w komunikacie "... chodzi teraz za tobą: +5%
+  doświadczenia z potworów." i w karcie postaci (`SkillSheet.expRateLabel`: "exp x80, pupil +5%").
+- **Opiekun zwierzat** (`<miasto>_petkeeper`, rola MERCHANT, `Npc.isPetKeeper()`, sklep `<miasto>_pets`): sprzedaje
+  tylko pupila swojego miasta za 5000 gp, niczego nie skupuje (okno bez skupu i zapasow, z opisem premii). Pupile
+  zniknely ze sklepow ogolnych. Varden - szczenie, Frostholm - kruk, Selvaran - kocie, Qasirah - fenek, Valmir - mewka
+  (`pet_gull`, nowa), Nerys - papuzka (`pet_parrot`, nowa; obie to przebarwiony kruk OTSP, ta sama mechanika).
+- **Wladca** (rola KING, `<miasto>_ruler`; w Varden zostaje krol Aurelian `varden_king`): konto premium i promocja
+  dokladnie jak u krola (`buyPremium`, `buyPromotion`, slowa "premium"/"promocja") - promocja tez, bo to jedna rola i
+  jedno okno; w kazdym miescie te same ceny i warunki. Kapitan bez premium podpowiada wladce swojego miasta
+  (`GameSession.premiumHint`), `/idz krol|krolowa|lord|wladca|premium` prowadzi do najblizszego.
+- **Zaklinacz** (rola IMBUER, `<miasto>_imbuer`): okno nasycen (`imbueRows`) jak strona "Nasycenia" u kowala -
+  Wampiryzm (kradziez zycia), Pustka (many), Cios (krytyk), zywioly i ochrony. Kowal zostawia swoja strone nasycen:
+  `GameSession.imbue` / `clearImbuement` dzialaja przy kowalu albo zaklinaczu (`imbuerNearby`, `Npc.imbues()`);
+  Kuznia, ulepszenia i zaklecia zostaja tylko u kowala. `/idz zaklinacz|nasycenia`, opiekun: `/idz pupil|opiekun`.
+
 ## Przystan Wschodnia - wyspy 300+ (etap 15, dane)
 
 - Admiral Wenda (`isle_guide`, GUIDE): 15 zlecen od poziomu 300 na wyspach i w lochach (wiwerny, kraby, piraci,

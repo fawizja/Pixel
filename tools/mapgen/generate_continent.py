@@ -41,6 +41,7 @@ import boss_quests  # noqa: E402
 import wilds  # noqa: E402
 import homes  # noqa: E402
 import route_levels  # noqa: E402
+import town_npcs  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -2749,13 +2750,16 @@ def fix_transition_targets(ctx):
 
 
 def finish(ctx):
+    # opiekun zwierzat, wladca i zaklinacz w kazdym miescie (town_npcs.py; na gotowych budynkach, przed towarami na ladach)
+    for n in town_npcs.place(ctx):
+        print("uslugi miasta:", n[3], n[0], n[1], n[4], n[5])
     shops = {}
     with open(os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'shops.csv'), encoding='utf-8') as f:
         for line in f:
             if line.startswith('#') or not line.strip():
                 continue
             p = line.strip().split(';')
-            if int(p[2]) > 0:
+            if int(p[2]) > 0 and not p[0].endswith("_pets"):   # pupile nie leza na ladach (opiekun stoi bez lady)
                 shops.setdefault(p[0], []).append(p[1])
     vb = next(bb for bb in ctx['blocks'] if bb.name == 'varden')
     vr = (vb.rect[0] + vb.dx, vb.rect[1] + vb.dy, vb.rect[2] + vb.dx, vb.rect[3] + vb.dy)

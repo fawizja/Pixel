@@ -139,9 +139,8 @@ class TownServicesTest {
     void everyTownHasAllServicesReachableFromVarden() {
         for (String town : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah"}) {
             for (NpcRole role : NpcRole.values()) {
-                // statki tylko w miastach nad morzem (Frostholm lezy w glebi ladu), krol tylko w stolicy
+                // statki tylko w miastach nad morzem (Frostholm lezy w glebi ladu); wladca (KING) i zaklinacz w kazdym miescie
                 if (role == NpcRole.CAPTAIN && town.equals("Frostholm")) continue;
-                if (role == NpcRole.KING && !town.equals("Varden")) continue;
                 assertTrue(npcs.all().stream().anyMatch(n -> n.town().equals(town) && n.role() == role), town + " " + role);
             }
         }

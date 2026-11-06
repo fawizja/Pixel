@@ -339,10 +339,16 @@ public final class PlayerCharacter {
     public void setWeeklyBossWeek(long week) { weeklyBossWeek = week; }
     public void setRewardedLevel(int v) { rewardedLevel = Math.max(0, v); }
 
-    /** Przywolany pupil (klucz przedmiotu pet_*) albo null; ozdoba, chodzi za postacia. */
+    /** Przywolany pupil (klucz przedmiotu pet_*) albo null; chodzi za postacia i daje premie doswiadczenia. */
     private String pet;
 
+    /** Premia doswiadczenia z potworow, gdy pupil chodzi za postacia (procent, po etapach serwera). */
+    public static final int PET_EXP_PERCENT = 5;
+
     public String pet() { return pet; }
+
+    /** Biezaca premia doswiadczenia od pupila: {@link #PET_EXP_PERCENT} albo 0 bez pupila. */
+    public int petExpPercent() { return pet != null ? PET_EXP_PERCENT : 0; }
     public void setPet(String key) { pet = key == null || key.isEmpty() ? null : key; }
 
     /** Wybrany tytul: klucz zdobytego osiagniecia albo null. */

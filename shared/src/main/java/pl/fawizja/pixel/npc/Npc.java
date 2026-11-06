@@ -21,6 +21,12 @@ public record Npc(String key, String name, NpcRole role, String town, Position p
      */
     public boolean isSmith() { return role == NpcRole.MERCHANT && key.endsWith("_smith"); }
 
+    /** Opiekun zwierzat (klucz "*_petkeeper"): kupiec, ktory sprzedaje tylko pupila swojego miasta i niczego nie skupuje. */
+    public boolean isPetKeeper() { return role == NpcRole.MERCHANT && key.endsWith("_petkeeper"); }
+
+    /** Nasycenia (imbuementy) robi kowal i zaklinacz miasta. */
+    public boolean imbues() { return isSmith() || role == NpcRole.IMBUER; }
+
     public Npc {
         Objects.requireNonNull(key);
         Objects.requireNonNull(role);

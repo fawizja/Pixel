@@ -13,7 +13,13 @@ public final class NpcFinder {
             Map.entry("rynek", NpcRole.BANKER), Map.entry("kaplan", NpcRole.PRIEST), Map.entry("swiatynia", NpcRole.PRIEST),
             Map.entry("przewodnik", NpcRole.GUIDE), Map.entry("zadania", NpcRole.GUIDE), Map.entry("woznica", NpcRole.CARRIER),
             Map.entry("podroz", NpcRole.CARRIER), Map.entry("kapitan", NpcRole.CAPTAIN), Map.entry("statek", NpcRole.CAPTAIN),
-            Map.entry("rejs", NpcRole.CAPTAIN), Map.entry("dom", NpcRole.HOUSING), Map.entry("domy", NpcRole.HOUSING));
+            Map.entry("rejs", NpcRole.CAPTAIN), Map.entry("dom", NpcRole.HOUSING), Map.entry("domy", NpcRole.HOUSING),
+            Map.entry("krol", NpcRole.KING), Map.entry("krolowa", NpcRole.KING), Map.entry("lord", NpcRole.KING),
+            Map.entry("wladca", NpcRole.KING), Map.entry("premium", NpcRole.KING), Map.entry("zaklinacz", NpcRole.IMBUER),
+            Map.entry("nasycenia", NpcRole.IMBUER), Map.entry("imbuement", NpcRole.IMBUER));
+
+    /** Opiekun zwierzat (kupiec z pupilem miasta). */
+    private static final java.util.Set<String> PETS = java.util.Set.of("pupil", "pupile", "zwierzeta", "opiekun");
 
     private NpcFinder() {}
 
@@ -21,10 +27,11 @@ public final class NpcFinder {
         String q = ItemSearch.fold(query);
         if (q.length() < 2) return null;
         NpcRole role = ROLES.get(q);
+        boolean pets = PETS.contains(q);
         Npc best = null;
         for (Npc n : npcs.all()) {
             if (n.position().z() != from.z()) continue;
-            boolean match = role != null ? n.role() == role : ItemSearch.fold(n.name()).contains(q);
+            boolean match = pets ? n.isPetKeeper() : role != null ? n.role() == role : ItemSearch.fold(n.name()).contains(q);
             if (!match) continue;
             if (best == null || n.position().distanceTo(from) < best.position().distanceTo(from)) best = n;
         }
