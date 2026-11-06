@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.233.0] - 2026-11-06
+
+### Dodano
+- Kuźnia Wyniesienia jak w Tibii, u każdego z 6 kowali (nowa strona „Kuźnia” w oknie kowala):
+  - klasy przedmiotów 1–4 i tiery (do T10 dla klasy 4), widoczne w nazwie, na slocie i w opisie przedmiotu;
+  - fuzja (50% szansy, 65% z rdzeniem; przy porażce drugi przedmiot traci tier, rdzeń ochrony zmniejsza ryzyko),
+    transfer tieru, wymiana 60 pyłu na 3 odłamki i 50 odłamków na 1 rdzeń, podnoszenie limitu pyłu (100 do 225);
+  - koszt w złocie liczony z wartości przedmiotu (dopasowany do naszej ekonomii).
+- Efekty tierów jak w Tibii: Onslaught (broń, +60% obrażeń), Ruse (zbroja, unik ciosu), Momentum (hełm, szybsze
+  odnawianie czarów), Transcendence (nogawice, krótki awatar z pewnymi krytykami), Amplification (buty, wzmacnia
+  pozostałe). 5 nowych par butów, m.in. otchłanne trzewiki od Mor'gatha.
+- Potwory pod wpływem (etapy 1–5, fioletowa kula z kropkami, około 3% potworów) i diaboliczne (korona, 4 naraz,
+  każdy na 1 godzinę, widoczne na minimapie) z mnożnikami z Tibii. Zastępują dawne elitarne potwory.
+  Dają pył kuźni, a diaboliczne także odłamki.
+- Imbuementy u kowala: 14 rodzajów (np. Vampirism, Void, Strike, żywiołowe obrażenia, ochrony) na 3 poziomach
+  z wartościami z Tibii. Działają 20 godzin czasu walki.
+
+### Zmieniono
+- Zakładka kowala pokazuje się już tylko u kowali, a nie u każdego kupca. Ulepszenia i zaklęcia też wymagają kowala.
+- Zapis postaci w wersji 8 (tiery przedmiotów, pył). Rynek zachowuje tier i ulepszenie.
+
 ## [0.232.0] - 2026-11-06
 
 ### Dodano
