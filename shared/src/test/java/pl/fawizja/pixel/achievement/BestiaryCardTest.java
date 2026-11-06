@@ -17,21 +17,61 @@ class BestiaryCardTest {
     }
 
     @Test
-    void detailsUnlockWithKills() {
+    void detailsUnlockByTibiaStages() {
+        // wilk = Tibia Wolf (1 gwiazdka, Trivial): etapy od 1, 10, 100 zabic, ukonczony 250
         MonsterType wolf = REG.get("wolf");
         List<String[]> none = BestiaryCard.rows(wolf, 0, TestData.ITEMS);
-        assertEquals(2, none.size(), "an unknown monster shows nothing more");
+        assertEquals(3, none.size(), "unknown monster: kills, class, 'unknown'");
+        assertNotNull(find(none, "Nieznany"));
 
-        List<String[]> few = BestiaryCard.rows(wolf, 3, TestData.ITEMS);
-        assertEquals("poziom 8, 40 HP", find(few, "Poziom i zdrowie"));
-        assertEquals("18 exp", find(few, "Doświadczenie"));
-        assertEquals("pokonaj jeszcze 7, aby je poznać", find(few, "Odporności"));
-        assertEquals("pokonaj jeszcze 22, aby je poznać", find(few, "Łupy"));
+        List<String[]> s1 = BestiaryCard.rows(wolf, 3, TestData.ITEMS, "Krainy Varden", null);
+        assertEquals("3 / 250 (etap 1/4)", find(s1, "Pokonano"));
+        assertEquals("Ssaki, *---- banalny, pospolity", find(s1, "Klasa i trudność"));
+        assertEquals("pokonaj jeszcze 7: statystyki, łupy pospolite i niepospolite", find(s1, "Etap 2"));
+        assertNull(find(s1, "Zdrowie"), "stats from stage 2");
+        assertNull(find(s1, "Występuje"), "locations from stage 3");
+        assertNull(find(s1, TestData.ITEMS.byKey("gold_coin").name()), "stage 1 shows loot only as ?");
+        assertNotNull(find(s1, "?"));
 
-        List<String[]> many = BestiaryCard.rows(wolf, 25, TestData.ITEMS);
-        assertNull(find(many, "Łupy"), "the loot list replaces the hint");
-        assertEquals("80% 3-23 szt.", find(many, TestData.ITEMS.byKey("gold_coin").name()));
-        assertEquals("12%", find(many, TestData.ITEMS.byKey("wolf_pelt").name()));
+        List<String[]> s2 = BestiaryCard.rows(wolf, 10, TestData.ITEMS, "Krainy Varden", null);
+        assertEquals("40 HP, 18 exp, poziom 8", find(s2, "Zdrowie"));
+        assertEquals("wręcz, szybkość 250, pancerz 2", find(s2, "Walka"));
+        assertEquals("5 (za ukończenie)", find(s2, "Punkty charmów"));
+        assertNull(find(s2, "Odporności"));
+        assertEquals("pospolity, 3-23 szt.", find(s2, TestData.ITEMS.byKey("gold_coin").name()), "rarity instead of %");
+        assertEquals("niepospolity", find(s2, TestData.ITEMS.byKey("wolf_pelt").name()));
+
+        List<String[]> s3 = BestiaryCard.rows(wolf, 100, TestData.ITEMS, "Krainy Varden", "Okaleczenie I");
+        assertEquals("lód -10%, święte +30%, śmierć -5%, pancerz 2", find(s3, "Odporności"));
+        assertEquals("Krainy Varden", find(s3, "Występuje"));
+        assertEquals("Okaleczenie I", find(s3, "Charmy"));
+
+        List<String[]> done = BestiaryCard.rows(wolf, 250, TestData.ITEMS);
+        assertEquals("250 / 250 (etap 4/4)", find(done, "Pokonano"));
+        assertEquals("5 (zdobyte)", find(done, "Punkty charmów"));
+        assertNull(find(done, "?"), "completed entry shows all loot");
+    }
+
+    @Test
+    void lootRarityCategoriesFollowTibia() {
+        assertEquals(LootRarity.COMMON, LootRarity.of(250));
+        assertEquals(LootRarity.UNCOMMON, LootRarity.of(249));
+        assertEquals(LootRarity.UNCOMMON, LootRarity.of(50));
+        assertEquals(LootRarity.SEMI_RARE, LootRarity.of(49));
+        assertEquals(LootRarity.SEMI_RARE, LootRarity.of(10));
+        assertEquals(LootRarity.RARE, LootRarity.of(9));
+        assertEquals(LootRarity.RARE, LootRarity.of(2));
+        assertEquals(LootRarity.VERY_RARE, LootRarity.of(1));
+        assertEquals(2, LootRarity.UNCOMMON.revealStage());
+        assertEquals(3, LootRarity.SEMI_RARE.revealStage());
+        assertEquals(4, LootRarity.RARE.revealStage());
+    }
+
+    @Test
+    void bossesHaveNoBestiaryEntry() {
+        MonsterType boss = REG.get("grimtooth");
+        assertNull(BestiaryData.of(boss));
+        assertEquals("bossowie nie mają wpisu ani charmów", find(BestiaryCard.rows(boss, 1, TestData.ITEMS), "Bestiariusz"));
     }
 
     @Test

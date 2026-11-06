@@ -206,21 +206,23 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (!inReach(target, ap.range())) return;
         nextPlayerAttackMs = now + ap.intervalMs();
         // jak w Tibii: jeden rzut na krytyk na cios (baza 5% / +10%, przedmioty, zaklecie kowala)
-        boolean crit = rollCritical();
-        int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng), crit);
+        boolean crit = rollCritical(target.type());
+        int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng), crit, target.type());
         int dmg = mitigateWeaponHit(target.type(), raw, ap.type());
         if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
         if (ap.range() > 1) useAmmunition(now);
         int dealt = target.damage(dmg);
         lastMonsterAttackMs = now;
-        Leech.apply(pc, dealt, 1);
+        Leech.apply(pc, dealt, 1, target.type());
         monsters.provoke(target);
         // jak w Tibii kazdy atak (takze chybiony albo zablokowany) to proba; Balance.HUNT_TRY_FACTOR wyrownuje krotkie walki
         if (!isTrivial(target.type())) pc.skills().train(ap.skill(), Balance.HUNT_TRY_FACTOR);
         // wrecz: "skad" = gracz (animacja wypadu na kliencie)
         push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
                 ap.range() > 1 ? null : pc.position(), hitEffect(crit, dealt)));
-        if (target.isDead()) onMonsterDeath(target, now);
+        Monster hit = target;
+        charmsAfterHit(hit, dealt, now);
+        if (hit.isDead()) onMonsterDeath(hit, now);
     }
 
     /**
@@ -240,6 +242,30 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Rzut na cios krytyczny postaci ({@link CriticalHit}): raz na cios, czar albo rune. */
     public boolean rollCritical() { return CriticalHit.roll(pc, rng); }
 
+    /** Rzut na krytyk przeciw potworowi: z charmem Niski cios drugi rzut na brakujaca szanse. */
+    private boolean rollCritical(MonsterType t) {
+        return rollCritical() || pl.fawizja.pixel.charm.CharmEffects.lowBlowReroll(pc, t, CriticalHit.chance(pc), rng);
+    }
+
+    /**
+     * Charmy ofensywne po trafieniu potwora bronia, czarem albo runa ({@link pl.fawizja.pixel.charm.CharmEffects#onHit}):
+     * obrazenia charmu (po odpornosciach, bez pancerza), paraliz, zakaz ucieczki, Rzez po zabiciu. Obrazenia z samego
+     * charmu nie wyzwalaja kolejnych charmow ani kradziezy (Canary: damage.extension). Smierc trafionego potwora
+     * obsluguje wolajacy; tu tylko smierc innych potworow (Rzez).
+     */
+    private void charmsAfterHit(Monster m, int dealt, long now) {
+        if (dealt <= 0 || pc.charms().charmsOn(m.type().key()).isEmpty()) return;
+        for (pl.fawizja.pixel.charm.CharmEffects.Proc p : pl.fawizja.pixel.charm.CharmEffects.onHit(pc, m, monsters::monsterAt, rng, now)) {
+            Monster tm = p.target();
+            int d = p.amount() > 0 ? tm.damage(pl.fawizja.pixel.charm.CharmEffects.resisted(tm.type(), p.amount(), p.type())) : 0;
+            push(new CombatEvent(now, tm.position(), d, d > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED, null,
+                    pl.fawizja.pixel.charm.CharmEffects.eventEffect(p.charm())));
+            log.add(now, EventLog.Kind.INFO, "Charm " + p.charm().label() + ": " + tm.type().name() + (d > 0 ? " -" + d + " HP" : "") + ".");
+            if (d > 0 && tm != m) monsters.provoke(tm);
+            if (tm != m && tm.isDead()) onMonsterDeath(tm, now);
+        }
+    }
+
     /**
      * Obrazenia z czaru lub runy: mikstura sily, krytyk (wylosowany raz dla calego rzutu), odpornosci, kradziez
      * zycia/many wg liczby celow rzutu (targets), zdarzenie, prowokacja, smierc. Zwraca zadane HP.
@@ -247,12 +273,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public int damageMonster(Monster m, int raw, DamageType type, long now, boolean crit, int targets) {
         if (m.isDead()) return 0;
         lastMonsterAttackMs = now;
-        int dmg = CombatFormulas.mitigateOnMonster(m.type(), critical(raw, crit), type, rng);
+        crit = crit || pl.fawizja.pixel.charm.CharmEffects.lowBlowReroll(pc, m.type(), CriticalHit.chance(pc), rng);
+        int dmg = CombatFormulas.mitigateOnMonster(m.type(), critical(raw, crit, m.type()), type, rng);
         int dealt = m.damage(dmg);
-        Leech.apply(pc, dealt, targets);
+        Leech.apply(pc, dealt, targets, m.type());
         push(new CombatEvent(now, m.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
                 null, hitEffect(crit, dealt)));
         monsters.provoke(m);
+        charmsAfterHit(m, dealt, now);
         if (m.isDead()) onMonsterDeath(m, now);
         return dealt;
     }
@@ -277,9 +305,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
     }
 
-    /** Mikstura sily, potem cios krytyczny (raw * (1 + obrazenia krytyczne)), gdy wypadl, potem Natarcie z Kuzni. */
-    private int critical(int raw, boolean crit) {
-        int v = CriticalHit.apply(pc, pc.enchantments().outgoing(raw), crit);
+    /**
+     * Mikstura sily, potem cios krytyczny (raw * (1 + obrazenia krytyczne + charm Dziki cios)), gdy wypadl,
+     * potem Natarcie z Kuzni.
+     */
+    private int critical(int raw, boolean crit, MonsterType t) {
+        int v = CriticalHit.apply(pc, pc.enchantments().outgoing(raw), crit,
+                pl.fawizja.pixel.charm.CharmEffects.critDamageBonus(pc, t));
         lastOnslaught = v > 0 && rollOnslaught();
         if (lastOnslaught) v += (int) Math.round(v * pl.fawizja.pixel.item.Forge.ONSLAUGHT_BONUS);
         return v;
@@ -441,6 +473,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             if (!pl.fawizja.pixel.monster.LootRules.isBossOnly(items.get(e.itemId()))) {
                 chance = isBoosted(t) ? pl.fawizja.pixel.daily.BoostedCreature.boostChance(chance) : chance;
                 chance = pc.enchantments().lootChance(chance);
+                chance = pl.fawizja.pixel.charm.CharmEffects.lootChance(pc, t, e, items, chance); // Patroszenie, Skorowanie
             }
             if (rng.nextInt(1000) < chance) {
                 int count = CombatFormulas.rollBetween(e.min(), e.max(), rng);
@@ -486,6 +519,20 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dmg = pl.fawizja.pixel.item.ForgeEffects.avatarIncoming(pc,
                 pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), attackedRecently(now), rng)));
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), st.type().name()));
+        pl.fawizja.pixel.charm.CharmEffects.Defense charm = pl.fawizja.pixel.charm.CharmEffects.onMonsterAttack(pc, m, st.type(), dmg, rng, now);
+        for (pl.fawizja.pixel.charm.Charm c : charm.triggered()) log.add(now, EventLog.Kind.INFO, "Charm " + c.label() + " (" + t.name() + ").");
+        if (charm.noDamage()) {
+            // Unik albo Oczyszczenie: atak bez obrazen
+            push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, t.range() > 1 ? null : m.position(),
+                    pl.fawizja.pixel.charm.CharmEffects.eventEffect(charm.prevented())));
+            return;
+        }
+        if (st.type() == DamageType.MANA_DRAIN && charm.invertManaDrain()) {
+            // Odwrocenie pustki: wyssanie many daje mane
+            int got = pc.restoreMana(dmg);
+            push(new CombatEvent(now, pc.position(), got, CombatEvent.Kind.HEAL, null, MANA_EFFECT));
+            return;
+        }
         if (st.type() == DamageType.MANA_DRAIN) {
             // wyssanie many jak w Tibii: zabiera mane (najwyzej tyle, ile jest), zdrowia nie rusza
             int drained = Math.min(dmg, pc.mana());
@@ -499,6 +546,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (blockable(t) && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 t.range() > 1 ? null : m.position(), null));
+        if (charm.parry() != null && dealt > 0 && !m.isDead()) {
+            // Riposta: otrzymane obrazenia wracaja do atakujacego (neutralne, bez odpornosci)
+            int back = m.damage(dealt);
+            push(new CombatEvent(now, m.position(), back, CombatEvent.Kind.HIT_MONSTER, null,
+                    pl.fawizja.pixel.charm.CharmEffects.eventEffect(charm.parry())));
+            if (m.isDead()) onMonsterDeath(m, now);
+        }
         if (pc.isDead()) onPlayerDeath(m, now);
     }
 
@@ -522,7 +576,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onPlayerDeath(Monster killer, long now) {
         long before = pc.experience();
         lastDeathPlace = pc.position();
-        boolean blessed = pc.applyDeathPenalty(minLevel);
+        boolean blessed = pc.applyDeathPenalty(minLevel, pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killer.type()));
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;

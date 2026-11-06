@@ -374,6 +374,15 @@ public final class Hud {
     }
     private boolean bestiaryMode;
     private java.util.function.Function<String, String> monsterNames = k -> k;
+    /** Typy potworow do bestiariusza (klasy i potwory klas); null = lista klas pusta. */
+    private java.util.function.Supplier<java.util.Collection<pl.fawizja.pixel.monster.MonsterType>> bestiaryTypes;
+
+    public void setBestiaryTypes(java.util.function.Supplier<java.util.Collection<pl.fawizja.pixel.monster.MonsterType>> types) {
+        this.bestiaryTypes = types;
+    }
+
+    /** Ile wierszy miesci okno informacyjne (dwie kolumny) - strony list bestiariusza i charmow. */
+    public int infoCapacity() { return Math.max(3, (int) ((menuH - 70) / rowH)) * 2; }
     /** Okno rynku z serwera (null = zamkniete). */
     private pl.fawizja.pixel.market.MarketView marketView;
     private pl.fawizja.pixel.npc.Npc npc;
@@ -2179,12 +2188,13 @@ public final class Hud {
         } else {
             rows.add(new MenuRow("ach:toggle", "Pokaż osiągnięcia", String.format("%,d pokonanych, %d rodzajów, %d bossów",
                     b.total(), b.species(), b.bossesDefeated()), true));
-            for (String k : b.mostKilled()) {
-                if (rows.size() >= perCol * 2) break;
-                rows.add(new MenuRow("best:" + k, monsterNames.apply(k) + (b.isBoss(k) ? " (boss)" : ""),
-                        String.format("pokonano %,d; dotknij = karta", b.kills(k)), true));
+            // jak w Tibii: klasy potworow (dotkniecie = lista potworow klasy), na gorze charmy
+            List<String[]> list = new ArrayList<>();
+            list.add(pl.fawizja.pixel.achievement.BestiaryView.charmsRow(pc));
+            if (bestiaryTypes != null) list.addAll(pl.fawizja.pixel.achievement.BestiaryView.classRows(pc, bestiaryTypes.get()));
+            for (String[] r : pl.fawizja.pixel.achievement.BestiaryView.page(list, achPage, perCol * 2 - 1, "ach:page:")) {
+                rows.add(new MenuRow(r[3].startsWith("ach:page:") ? "ach:page" : r[3], r[0], r[1], true));
             }
-            if (rows.size() == 1) rows.add(new MenuRow("ach:none", "Jeszcze nic", "pokonane potwory pojawią się tutaj", false));
         }
         float colW = (menuW - 30) / 2f;
         for (int i = 0; i < rows.size() && i < perCol * 2; i++) {

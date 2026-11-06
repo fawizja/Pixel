@@ -170,6 +170,7 @@ public final class GameSession {
         this.combat.setKillListener(t -> {
             pc.bestiary().record(t.key(), t.boss());
             if (t.isElite()) pc.bestiary().recordElite();
+            bestiaryProgress(t, lastUpdateMs);
             taskKill(t);
             checkWeeklyBoss(t, lastUpdateMs);
             checkAchievements(lastUpdateMs);
@@ -1404,6 +1405,80 @@ public final class GameSession {
     public static final int PROMOTION_LEVEL = 20;
     private static final java.util.Set<String> PREMIUM_WORDS = java.util.Set.of("premium", "konto premium");
     private static final java.util.Set<String> PROMOTION_WORDS = java.util.Set.of("promocja", "promocję", "promocje", "promotion", "promote");
+
+    /**
+     * Bestiariusz jak w Tibii (Canary IOBestiary::addBestiaryKill): przy kazdym nowym etapie wpisu komunikat
+     * "odblokowano szczegoly", przy ukonczeniu punkty charmow.
+     */
+    private void bestiaryProgress(pl.fawizja.pixel.monster.MonsterType t, long nowMs) {
+        pl.fawizja.pixel.achievement.BestiaryEntry e = pl.fawizja.pixel.achievement.BestiaryData.of(t);
+        if (e == null) return;
+        int kills = pc.bestiary().kills(t.key());
+        int stage = e.stage(kills);
+        if (stage == e.stage(kills - 1)) return;
+        if (stage == pl.fawizja.pixel.achievement.BestiaryEntry.STAGES) {
+            pc.charms().addPoints(e.charmPoints());
+            log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Bestiariusz: ukończono wpis \"%s\" (+%,d pkt charmów, masz %,d).",
+                    t.name(), e.charmPoints(), pc.charms().points()));
+        } else {
+            log.add(nowMs, EventLog.Kind.INFO, "Bestiariusz: odblokowano szczegóły potwora \"" + t.name() + "\" (etap " + stage + "/"
+                    + pl.fawizja.pixel.achievement.BestiaryEntry.STAGES + ").");
+        }
+    }
+
+    /** Charmy: kupno albo ulepszenie o stopien (akcja "charm:buy:NAZWA"). */
+    public boolean buyCharm(pl.fawizja.pixel.charm.Charm c, long nowMs) {
+        if (c == null) return false;
+        pl.fawizja.pixel.charm.Charms.Result r = pc.charms().buy(c);
+        log.add(nowMs, r.ok() ? EventLog.Kind.SYSTEM : EventLog.Kind.WARNING, r.message());
+        return r.ok();
+    }
+
+    /** Charmy: zalozenie na potwora (akcja "charm:assign:NAZWA:klucz"). */
+    public boolean assignCharm(pl.fawizja.pixel.charm.Charm c, String monsterKey, long nowMs) {
+        if (c == null || monsterKey == null) return false;
+        pl.fawizja.pixel.charm.Charms.Result r = pc.charms().assign(c, monsterKey, pc.bestiary(), pc.isPremium(), monsterName(monsterKey));
+        log.add(nowMs, r.ok() ? EventLog.Kind.SYSTEM : EventLog.Kind.WARNING, r.message());
+        return r.ok();
+    }
+
+    /** Charmy: zdjecie z potwora za {@link pl.fawizja.pixel.charm.CharmPrices#removal} (akcja "charm:remove:NAZWA"). */
+    public boolean removeCharm(pl.fawizja.pixel.charm.Charm c, long nowMs) {
+        if (c == null || pc.charms().assignedTo(c) == null) return false;
+        long fee = pl.fawizja.pixel.charm.CharmPrices.removal(pc.level());
+        String from = monsterName(pc.charms().assignedTo(c));
+        if (!payGold(fee)) {
+            log.add(nowMs, EventLog.Kind.WARNING, String.format("Zdjęcie charmu kosztuje %,d gp (plecak albo konto).", fee));
+            return false;
+        }
+        pc.charms().remove(c);
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("%s zdjęty z: %s (%,d gp).", c.label(), from, fee));
+        return true;
+    }
+
+    /** Charmy: reset wszystkich za {@link pl.fawizja.pixel.charm.CharmPrices#resetAll} (akcja "charm:reset"). */
+    public boolean resetCharms(long nowMs) {
+        long fee = pl.fawizja.pixel.charm.CharmPrices.resetAll(pc.level());
+        if (!payGold(fee)) {
+            log.add(nowMs, EventLog.Kind.WARNING, String.format("Reset charmów kosztuje %,d gp (plecak albo konto).", fee));
+            return false;
+        }
+        pc.charms().resetAll(pc.isPromoted());
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Charmy zresetowane (%,d gp): masz z powrotem %,d pkt charmów i %,d ech.",
+                fee, pc.charms().points(), pc.charms().echoes()));
+        return true;
+    }
+
+    /** Oplata jak removeMoney w Tibii: monety z plecaka, a gdy ich za malo - konto w banku. */
+    private boolean payGold(long price) {
+        if (price <= 0) return true;
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) >= price && Money.pay(tx, price).ok()) {
+            pc.backpack().commitFrom(tx);
+            return true;
+        }
+        return pc.bank().balance() >= price && pc.bank().debit(price).ok();
+    }
 
     /** Krol: konto premium za zloto z banku - rejsy duzymi statkami miedzy portami. */
     public boolean buyPremium(long nowMs) {

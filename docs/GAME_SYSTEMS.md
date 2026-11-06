@@ -925,6 +925,58 @@ liczenie zabic (`CombatSystem.setDeathListener`), nagrody 100 gp / wrog, 1 000 g
 `Achievements` (zdobyte, raz na zawsze). `GameSession.checkAchievements` przy zabiciu i co sekunde w `update`
 (na serwerze dla graczy online; klient online nie liczy - dostaje stan w SELF). Zapis `kill.<klucz>` = n albo n/B, `achievements`.
 
+### Bestiariusz jak w Tibii (achievement/Bestiary*, 2026-11-06)
+
+- `data/bestiary.csv` (`klucz;odpowiednik z Tibii;gwiazdki;occurrence`) - kazdy zwykly potwor ma odpowiednik z Tibii
+  (gwiazdki i occurrence z Canary `data/monster/**`, np. wilk = Wolf 1*, dzik = Boar 2*, magma_drake = Dragon Lord 3*,
+  abyssal_demon = Demon 4*, abyss_lord = Brachiodemon 5*). Bossowie nie maja wpisu (test `BestiaryDataTest`).
+  Dobor odpowiednikow jest reczny (najblizszy potwor Tibii wg roli/poziomu). Yeti: occurrence 0 zamiast 3.
+- `BestiaryDifficulty` (progi etapow i punkty charmow jak w Canary): Harmless 5/10/25 (1 pkt), Trivial 10/100/250 (5),
+  Easy 25/250/500 (15), Medium 50/500/1000 (25), Hard 100/1000/2500 (50), Challenging 200/2000/5000 (100);
+  bardzo rzadkie (occurrence 3) 2/3/5 zabic i 10/30/50 pkt wg gwiazdek.
+- `BestiaryEntry.stage(zabicia)` 0..4: 1 - podstawy (nazwa, klasa, gwiazdki); 2 - zdrowie, exp, walka, lup pospolity
+  i niepospolity; 3 - odpornosci, wystepowanie, lup polrzadki; 4 (ukonczony) - caly lup i punkty charmow
+  (`GameSession.bestiaryProgress` wypisuje etap i dodaje punkty przy ukonczeniu).
+- `LootRarity` - lup jako kategorie Tibii zamiast %: pospolity >= 25%, niepospolity 5-25%, polrzadki 1-5%,
+  rzadki 0,2-1%, bardzo rzadki < 0,2% (progi zamierzone przez Tibie; Canary ma blad dzielenia calkowitego).
+- `BestiaryClasses` - 20 klas Tibii (rasa z monsters.csv) z polskimi nazwami; `BestiaryView` - lista klas
+  (wiersz Charmy, klasy `bestclass:<Klasa>`, Bossowie), lista gatunkow (nieznane jako "?"), stronicowanie.
+  Okna w `core/client/ui/BestiaryWindows` (desktop i mobile).
+
+### Charmy (charm/*, Tibia 2025)
+
+- `Charm` - 25 charmow w kolejnosci Canary: 14 Major (kupowane za punkty charmow), 11 Minor (za echa).
+  Wartosci i koszty stopni I/II/III z Canary `bestiary_charms.lua`. Kupno stopnia Major daje echa
+  25t^2+25t+50 (t = stopien przed kupnem).
+- `Charms` (stan postaci): sloty 2 (darmowe konto) / 6 (premium), na stwora 1 Major + 1 Minor, brak na bossach.
+  Major wymaga ukonczonego wpisu, Minor wystarcza znany stwor (1 zabicie - uproszczenie Pixel). Przed
+  przeniesieniem charm trzeba zdjac. `resetAll` oddaje wszystkie punkty (awansowani zachowuja 100 ech jak w Canary).
+- Ceny w zlocie (`CharmPrices`, ceny Tibii / 4 jak reszta ekonomii): zdjecie 25 x poziom, reset wszystkich
+  25 000 + 2 750 x poziom powyzej 100. Platnosc z plecaka, potem z banku (`GameSession.payGold`).
+- Dzialanie (`CharmEffects`, haki w `CombatSystem`, rzut `nextInt(10000)`):
+  - Rana/Podpalenie/Trucizna/Zamrozenie/Porazenie/Klatwa/Boski gniew: po trafieniu min(ceil(5% max HP potwora),
+    ceil(2 x poziom)) obrazen danego zywiolu (z odpornosciami potwora).
+  - Rzez: po zabiciu min(ceil(15% HP zabitego), 6 x poziom) w 4 sasiednie pola; Przytloczenie: min(8% HP celu,
+    5% max HP gracza); Przeplyw many: min(8% HP celu, 2,5% max many) - oba obrazenia neutralne.
+  - Niski cios: szansa krytyka p + wartosc (rzut uzupelniajacy l / (100 - p); Canary rzuca drugi raz).
+    Dziki cios: +% obrazen krytyka (`CriticalHit.apply`). Wampirzy uscisk/Zew pustki: dodatek do kradziezy
+    zycia/many (`Leech`), dziala tylko gdy postac ma juz kradziez z przedmiotow/zaklec (opis Tibii).
+  - Unik (cios potwora chybia, zdarzenie BLOCKED), Riposta (odbija przyjete obrazenia, neutralne, bez pancerza).
+    Kolejnosc obronna jak w Canary: najpierw Minor, potem Major.
+  - Blogoslawienstwo: -6/9/12% utraty exp przy smierci od tego stwora (`applyDeathPenalty(min, procent)`).
+  - Patroszenie (Gut): szansa przedmiotow MATERIAL + ceil(szansa x %) (Canary: produkty stworow);
+    Skorowanie (Scavenge): szansa "trofeum" (najrzadszy MATERIAL potwora) x (1 + %) - odpowiednik Pixel.
+  - Okaleczenie i Odretwienie: paraliz 10 s (krok potwora x3 - Pixel nie ma zwyklego spowolnienia).
+    Smiertelny chwyt: potwor nie ucieka przez 30 s. Zastrzyk adrenaliny: +250% szybkosci przez 10 s
+    (wzor Canary; nadpisuje biezace przyspieszenie).
+  - Oczyszczenie (odpowiednik Pixel - brak stanow typu trucizna/podpalenie): oczyszcza zywiolowy cios potwora
+    (brak obrazen). Odwrocenie pustki: wyssanie many przez potwora daje mane zamiast ja zabierac.
+  - Zdarzenia walki `CHARM:<NAZWA>` (klient rysuje fioletowa liczbe i nazwe charmu), log "Charm X: ...".
+  - Brak: Charm Expansion (sloty stale), Animus Mastery, tracker bestiariusza, bosstiariusz.
+- Akcje (`Actions`, takze ACT na serwerze): `charm:buy:X`, `charm:assign:X:klucz`, `charm:remove:X`, `charm:reset`.
+- Zapis: pole `charms` = `pkt,maxPkt,echa,maxEcha|NAZWA:stopien:klucz|...` (bez zmiany wersji zapisu);
+  zapis bez pola dostaje punkty za juz ukonczone wpisy (`Charms.migrateFrom`). Klient online dostaje stan w SELF.
+
 ## Rynek graczy (Z logika, S serwer, C okno)
 
 `market/Market`: oferty (id, sprzedawca, przedmiot, ilosc, cena za calosc), do 10 na gracza, 2000 na serwer, prowizja 2%.

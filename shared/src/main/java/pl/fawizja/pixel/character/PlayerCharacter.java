@@ -28,6 +28,8 @@ public final class PlayerCharacter {
     private final Container depot;
     private final pl.fawizja.pixel.friends.FriendList friends = new pl.fawizja.pixel.friends.FriendList();
     private final pl.fawizja.pixel.achievement.Bestiary bestiary = new pl.fawizja.pixel.achievement.Bestiary();
+    /** Charmy bestiariusza (punkty, echa, stopnie, przypisania do potworow). */
+    private final pl.fawizja.pixel.charm.Charms charms = new pl.fawizja.pixel.charm.Charms();
     private final pl.fawizja.pixel.achievement.Achievements achievements = new pl.fawizja.pixel.achievement.Achievements();
     private final pl.fawizja.pixel.daily.DailyTask daily = new pl.fawizja.pixel.daily.DailyTask();
     private final pl.fawizja.pixel.quest.HuntTask hunt = new pl.fawizja.pixel.quest.HuntTask();
@@ -120,6 +122,7 @@ public final class PlayerCharacter {
         bank.mirror(o.bank);
         friends.copyFrom(o.friends);
         bestiary.copyFrom(o.bestiary);
+        charms.copyFrom(o.charms);
         achievements.copyFrom(o.achievements);
         daily.copyFrom(o.daily);
         hunt.copyFrom(o.hunt);
@@ -377,6 +380,7 @@ public final class PlayerCharacter {
     public Container depot() { return depot; }
     public pl.fawizja.pixel.friends.FriendList friends() { return friends; }
     public pl.fawizja.pixel.achievement.Bestiary bestiary() { return bestiary; }
+    public pl.fawizja.pixel.charm.Charms charms() { return charms; }
     public pl.fawizja.pixel.achievement.Achievements achievements() { return achievements; }
     public pl.fawizja.pixel.daily.DailyTask daily() { return daily; }
     /** Zlecenie lowcy (przewodnik). */
@@ -656,10 +660,15 @@ public final class PlayerCharacter {
 
     /** Kara za smierc: utrata doswiadczenia (poziom moze spasc, ale nie ponizej minLevel). */
     /** Kara za smierc; zwraca true, gdy zuzyto blogoslawienstwo (polowa straty). */
-    public boolean applyDeathPenalty(int minLevel) {
+    public boolean applyDeathPenalty(int minLevel) { return applyDeathPenalty(minLevel, 0); }
+
+    /** Jak wyzej; reductionPercent zmniejsza utrate doswiadczenia (charm Blogoslawienstwo, jak w Canary). */
+    public boolean applyDeathPenalty(int minLevel, double reductionPercent) {
         boolean used = blessed;
         stats.recordDeath();
-        experience = Balance.experienceAfterDeath(experience, minLevel, used);
+        long after = Balance.experienceAfterDeath(experience, minLevel, used);
+        if (reductionPercent > 0 && after < experience) after += Math.round((experience - after) * Math.min(100, reductionPercent) / 100.0);
+        experience = after;
         level = Balance.levelForExperience(experience);
         blessed = false;
         return used;

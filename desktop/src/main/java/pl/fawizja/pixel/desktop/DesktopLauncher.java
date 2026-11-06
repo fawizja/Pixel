@@ -50,6 +50,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=bestcard|bestclass|charms[=id]  podglad bestiariusza i charmow (np. charms=charm:sel:WOUND); -Dpixel.charmProc=true liczby charmow
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
  *   -Dpixel.stamina=M    nowa postac z M minutami staminy (np. 750 = 12:30, pomaranczowa); -Dpixel.premium=1 konto premium
  *   -Dpixel.fightMode=OFFENSIVE|BALANCED|DEFENSIVE  tryb walki nowej postaci (przycisk miecz / miecz z tarcza / tarcza)
@@ -427,6 +428,26 @@ public final class DesktopLauncher {
                     gs.session().character().achievements().check(gs.session().character());
                     gs.hud().openAchievements("bestiary".equals(open));
                 }
+                if (open != null && (open.startsWith("bestcard") || open.startsWith("bestclass") || open.startsWith("charm"))) {
+                    // podglad bestiariusza i charmow: wilk 120 zabic (etap 3), goblin ukonczony (Major), charmy kupione
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pl.fawizja.pixel.achievement.Bestiary b = pc.bestiary();
+                    for (int i = 0; i < 120; i++) b.record("wolf", false);
+                    for (int i = 0; i < 250; i++) b.record("goblin", false);
+                    for (int i = 0; i < 12; i++) b.record("bandit", false);
+                    for (int i = 0; i < 3; i++) b.record("boar", false);
+                    pc.charms().addPoints(2000);
+                    gs.session().buyCharm(pl.fawizja.pixel.charm.Charm.WOUND, 0);
+                    gs.session().buyCharm(pl.fawizja.pixel.charm.Charm.WOUND, 0);
+                    gs.session().buyCharm(pl.fawizja.pixel.charm.Charm.DODGE, 0);
+                    gs.session().buyCharm(pl.fawizja.pixel.charm.Charm.CRIPPLE, 0);
+                    gs.session().assignCharm(pl.fawizja.pixel.charm.Charm.WOUND, "goblin", 0);
+                    gs.session().assignCharm(pl.fawizja.pixel.charm.Charm.CRIPPLE, "wolf", 0);
+                    String[] o = open.split("=", 2);
+                    String id = o.length > 1 ? o[1] : open.startsWith("bestcard") ? "best:wolf" : open.startsWith("bestclass") ? "bestclass:Mammal" : "charm:open";
+                    gs.press(id);
+                }
                 if ("mount".equals(open)) {
                     // podglad: postac na koniu (przycisk KON widoczny)
                     pl.fawizja.pixel.character.PlayerCharacter pc = ((GameScreen) getScreen()).session().character();
@@ -774,6 +795,19 @@ public final class DesktopLauncher {
                 gs.session().ground().addCorpse(me.translate(1, 1), "wolf",
                         java.util.List.of(new pl.fawizja.pixel.item.ItemStack(1, 12)), now);
                 gs.session().ground().addCorpse(me.translate(-1, 1), "goblin", java.util.List.of(), now);
+            }
+            if (Boolean.getBoolean("pixel.charmProc") && frame == frames - 1 && getScreen() instanceof GameScreen) {
+                // podglad charmow w walce: Rana (obrazenia), Okaleczenie (sam napis), Unik na postaci
+                GameScreen gs = (GameScreen) getScreen();
+                long now = gs.worldTime();
+                Position me = gs.session().character().position();
+                pl.fawizja.pixel.combat.CombatSystem cs = gs.session().combat();
+                cs.addEvent(new pl.fawizja.pixel.combat.CombatEvent(now, me.translate(2, 1), 96, pl.fawizja.pixel.combat.CombatEvent.Kind.HIT_MONSTER,
+                        null, pl.fawizja.pixel.charm.CharmEffects.eventEffect(pl.fawizja.pixel.charm.Charm.WOUND)));
+                cs.addEvent(new pl.fawizja.pixel.combat.CombatEvent(now, me.translate(-2, 1), 0, pl.fawizja.pixel.combat.CombatEvent.Kind.BLOCKED,
+                        null, pl.fawizja.pixel.charm.CharmEffects.eventEffect(pl.fawizja.pixel.charm.Charm.CRIPPLE)));
+                cs.addEvent(new pl.fawizja.pixel.combat.CombatEvent(now, me, 0, pl.fawizja.pixel.combat.CombatEvent.Kind.BLOCKED,
+                        null, pl.fawizja.pixel.charm.CharmEffects.eventEffect(pl.fawizja.pixel.charm.Charm.DODGE)));
             }
             if (Boolean.getBoolean("pixel.crit") && frame == frames - 1 && getScreen() instanceof GameScreen) {
                 // podglad liczb walki: cios krytyczny (pomaranczowy z "krytyk"), zwykly cios, wyssanie many na postaci
