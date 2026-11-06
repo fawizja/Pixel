@@ -44,6 +44,18 @@ public final class Cooldowns {
         spells.put(s.key(), ms >= until - now ? now : until - ms);
     }
 
+    /**
+     * Rozped z Kuzni (Momentum): odnowienia wszystkich czarow krotsze o ms, a z grup tylko specjalne (cnoty mnicha) -
+     * jak Canary triggerMomentum (grupy ataku, leczenia i wsparcia bez zmian).
+     */
+    public void cutAll(long ms, long now) {
+        for (Map.Entry<String, Long> e : spells.entrySet()) {
+            if (e.getValue() > now) e.setValue(Math.max(now, e.getValue() - ms));
+        }
+        Long v = groups.get(SpellGroup.VIRTUE);
+        if (v != null && v > now) groups.put(SpellGroup.VIRTUE, Math.max(now, v - ms));
+    }
+
     public void clear() {
         spells.clear();
         groups.clear();

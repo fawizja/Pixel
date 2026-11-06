@@ -25,17 +25,29 @@ public final class CriticalHit {
 
     private CriticalHit() {}
 
-    /** Szansa na krytyk w procentach (baza + przedmioty + zaklecie kowala), najwyzej 100. */
+    /**
+     * Awatar z Transcendencji (Kuznia, spodnie z tierem): do tej chwili (zegar gry) 100% krytyka i +15% obrazen
+     * krytycznych. Ustawia CombatSystem; stan ulotny.
+     */
+    public static boolean avatar(PlayerCharacter pc) { return pc.avatarActive(); }
+
+    /** Szansa na krytyk w procentach (baza + przedmioty + nasycenie Cios/Strike + zaklecie kowala), najwyzej 100. */
     public static double chance(PlayerCharacter pc) {
+        if (avatar(pc)) return 100;
         double c = BASE_CHANCE + pc.equipment().critChanceBonus();
+        int strikes = 0;
+        for (pl.fawizja.pixel.item.ItemStack s : pc.equipment().all().values()) if (s.imbuements().hasStrike()) strikes++;
+        c += strikes * pl.fawizja.pixel.item.Imbuement.STRIKE_CHANCE;
         if (pc.enchantments().active(Enchantments.Kind.CRIT)) c += Enchantments.CRIT_CHANCE;
         return Math.min(100, c);
     }
 
-    /** Dodatkowe obrazenia krytyczne w procentach (baza + przedmioty + zaklecie kowala). */
+    /** Dodatkowe obrazenia krytyczne w procentach (baza + przedmioty + nasycenie Cios + zaklecie kowala + awatar). */
     public static double extraDamage(PlayerCharacter pc) {
-        double d = BASE_DAMAGE + pc.equipment().critDamageBonus();
+        double d = BASE_DAMAGE + pc.equipment().critDamageBonus()
+                + pc.equipment().imbuementSum(pl.fawizja.pixel.item.Imbuement.Category.CRITICAL);
         if (pc.enchantments().active(Enchantments.Kind.CRIT)) d += Enchantments.CRIT_BONUS_PERCENT;
+        if (avatar(pc)) d += pl.fawizja.pixel.item.Forge.AVATAR_CRIT_DAMAGE;
         return d;
     }
 

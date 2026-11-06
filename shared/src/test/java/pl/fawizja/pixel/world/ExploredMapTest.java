@@ -119,7 +119,7 @@ class ExploredMapTest {
         pc.explored().revealView(new Position(480, 470, -2));
         pc.explored().revealView(new Position(700, 300, 0));
         String text = codec.encode(pc);
-        assertTrue(text.startsWith("PIXELSAVE 7\n"));
+        assertTrue(text.startsWith("PIXELSAVE " + CharacterCodec.CURRENT_VERSION + "\n"));
         assertTrue(text.contains("\nfog="));
         PlayerCharacter back = codec.decode(text);
         assertEquals(pc.explored().count(-2), back.explored().count(-2));

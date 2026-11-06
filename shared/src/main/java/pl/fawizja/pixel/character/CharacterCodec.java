@@ -20,7 +20,7 @@ import pl.fawizja.pixel.world.WorldLayout;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 7;
+    public static final int CURRENT_VERSION = 8;
 
     private final ItemRegistry items;
     /** Zegar scienny do znacznika czasu zapisu staminy (testy podmieniaja). */
@@ -86,6 +86,9 @@ public final class CharacterCodec {
         if (!pc.enchantments().encode().isEmpty()) m.put("ench", pc.enchantments().encode());
         // harmonia mnicha: osobne pole bez podbijania wersji - stary zapis bez niego = 0 punktow, bez cnoty
         if (!pc.harmony().isDefault()) m.put("monk", pc.harmony().encode());
+        if (pc.forgeDust() > 0 || pc.dustLimit() != pl.fawizja.pixel.item.Forge.DUST_START_LIMIT) {
+            m.put("forge", pc.forgeDust() + "," + pc.dustLimit());
+        }
         if (pc.pet() != null) m.put("pet", pc.pet());
         if (pc.title() != null) m.put("title", pc.title());
         if (pc.house() != null) m.put("house", pc.house());
@@ -164,6 +167,8 @@ public final class CharacterCodec {
      * Migracje formatu: v1 zapisywal pozycje bez pietra i saldo pod kluczem "gold.bank";
      * v1 i v2 zapisywaly pozycje na mapie Varden - w v3 to wspolrzedne swiata (przesuniecie regionu Varden);
      * v3 to swiat 352x320, v4 kontynent 448x448 - od v5 swiat 1000x1000, starsze pozycje wracaja do swiatyni.
+     * v8 (Kuznia): stosy moga miec tier "*t" i nasycenia "#..." ({@link ItemStack#encode()}), nowy klucz
+     * "forge=pyl,limit"; zapis v7 i starszy czyta sie bez zmian (tier 0, bez nasycen, pyl 0, limit 100).
      */
     static void migrate(int version, Map<String, String> m) {
         if (version < 2) {
@@ -302,6 +307,11 @@ public final class CharacterCodec {
         if (m.containsKey("wboss")) pc.setWeeklyBossWeek(Long.parseLong(m.get("wboss")));
         pc.enchantments().restore(m.get("ench"));
         pc.harmony().restore(m.get("monk"));
+        String forge = m.get("forge");
+        if (forge != null) {
+            String[] fv = forge.split(",");
+            pc.restoreForge(Integer.parseInt(fv[0].trim()), fv.length > 1 ? Integer.parseInt(fv[1].trim()) : pl.fawizja.pixel.item.Forge.DUST_START_LIMIT);
+        }
         pc.setPet(m.get("pet"));
         pc.setTitle(m.get("title"));
         pc.setHouse(m.get("house"));
@@ -362,16 +372,19 @@ public final class CharacterCodec {
         }
     }
 
-    /** "idxilosc", z ulepszeniem "idxilosc+poziom" (0.62.0). */
+    /**
+     * "idxilosc", z ulepszeniem "idxilosc+poziom" (0.62.0); od v8 takze tier Kuzni "*tier" i nasycenia "#..."
+     * ({@link ItemStack#encode()}). Zapis v7 i starsze nie maja '*' ani '#' (tier 0, bez nasycen).
+     */
     private static String stackText(ItemStack s) {
-        return s.itemId() + "x" + s.count() + (s.upgrade() > 0 ? "+" + s.upgrade() : "");
+        return s.encode();
     }
 
     private ItemStack parseStack(String v) {
-        int plus = v.indexOf('+');
-        int upgrade = plus < 0 ? 0 : Integer.parseInt(v.substring(plus + 1));
-        String[] f = (plus < 0 ? v : v.substring(0, plus)).split("x");
-        ItemStack s = new ItemStack(Integer.parseInt(f[0]), Integer.parseInt(f[1]), upgrade);
+        ItemStack s = ItemStack.parse(v);
+        if (s.tier() > pl.fawizja.pixel.item.Forge.maxTier(items.get(s.itemId()))) {
+            s = s.withTier(pl.fawizja.pixel.item.Forge.maxTier(items.get(s.itemId())));  // zmiana klasy przedmiotu w danych
+        }
         if (s.count() > items.maxStack(s.itemId())) throw new IllegalArgumentException("stack too large " + v);
         return s;
     }

@@ -223,7 +223,7 @@ public final class Container {
         for (int pass = 0; pass < 2 && remaining > 0; pass++) {
             for (int i = slots.length - 1; i >= 0 && remaining > 0; i--) {
                 ItemStack s = slots[i];
-                if (s != null && s.itemId() == itemId && (s.upgrade() > 0) == (pass == 1)) {
+                if (s != null && s.itemId() == itemId && !s.isPlain() == (pass == 1)) {
                     int take = Math.min(s.count(), remaining);
                     slots[i] = take == s.count() ? null : s.withCount(s.count() - take);
                     remaining -= take;
@@ -233,10 +233,10 @@ public final class Container {
         return InventoryResult.OK;
     }
 
-    /** Ilosc sztuk bez ulepszenia (tylko takie mozna sprzedac, oddac w handlu, wystawic albo wyslac). */
+    /** Ilosc sztuk bez ulepszenia, tieru i nasycen (tylko takie mozna sprzedac, oddac w handlu, wystawic albo wyslac). */
     public int countPlain(int itemId) {
         int n = 0;
-        for (ItemStack s : slots) if (s != null && s.itemId() == itemId && s.upgrade() == 0) n += s.count();
+        for (ItemStack s : slots) if (s != null && s.itemId() == itemId && s.isPlain()) n += s.count();
         return n;
     }
 
@@ -319,6 +319,7 @@ public final class Container {
         items.sort(java.util.Comparator
                 .comparingInt((ItemStack s) -> registry.get(s.itemId()).category().ordinal())
                 .thenComparingInt(ItemStack::itemId)
+                .thenComparing(ItemStack::tier, java.util.Comparator.reverseOrder())
                 .thenComparing(ItemStack::upgrade, java.util.Comparator.reverseOrder())
                 .thenComparing(ItemStack::count, java.util.Comparator.reverseOrder()));
         Arrays.fill(slots, null);

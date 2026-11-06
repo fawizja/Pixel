@@ -8,8 +8,8 @@ import pl.fawizja.pixel.item.Enchantments;
  * (100% szansy) z kazdego trafienia leczy obrazenia * % * (0,1 * n + 0,9) / n, gdzie n = liczba celow trafionych tym
  * samym rzutem - czar obszarowy w wiele celow daje mniej na cel (2 cele: 55% na cel, 8 celow: 21%). Wynik zaokraglony
  * (jak lround), najwyzej zadane obrazenia.
- * <p>Procent to suma przedmiotow ({@link pl.fawizja.pixel.item.ItemBonus}) i zaklec kowala (LIFE / MANA); przyszle
- * imbuementy Vampirism (5/10/25%) i Void (3/5/8%) dodadza sie w {@link #lifePercent} i {@link #manaPercent}.
+ * <p>Procent to suma przedmiotow ({@link pl.fawizja.pixel.item.ItemBonus}), zaklec kowala (LIFE / MANA) i nasycen
+ * Wampiryzm / Vampirism (5/10/25%) i Pustka / Void (3/5/8%) z zalozonych przedmiotow ({@link pl.fawizja.pixel.item.Imbuement}).
  * Dziala na potwory i graczy (PvP), jak w Canary.
  */
 public final class Leech {
@@ -23,16 +23,16 @@ public final class Leech {
         return (int) Math.max(0, Math.min(dealt, Math.round(v)));
     }
 
-    /** Kradziez zycia postaci w procentach (przedmioty + zaklecie kowala). */
+    /** Kradziez zycia postaci w procentach (przedmioty + nasycenia + zaklecie kowala). */
     public static double lifePercent(PlayerCharacter pc) {
-        double p = pc.equipment().lifeLeech();
+        double p = pc.equipment().lifeLeech() + pc.equipment().imbuementSum(pl.fawizja.pixel.item.Imbuement.Category.LIFE_LEECH);
         if (pc.enchantments().active(Enchantments.Kind.LIFE)) p += Enchantments.LIFE_PERCENT;
         return p;
     }
 
-    /** Kradziez many postaci w procentach (przedmioty + zaklecie kowala). */
+    /** Kradziez many postaci w procentach (przedmioty + nasycenia + zaklecie kowala). */
     public static double manaPercent(PlayerCharacter pc) {
-        double p = pc.equipment().manaLeech();
+        double p = pc.equipment().manaLeech() + pc.equipment().imbuementSum(pl.fawizja.pixel.item.Imbuement.Category.MANA_LEECH);
         if (pc.enchantments().active(Enchantments.Kind.MANA)) p += Enchantments.MANA_PERCENT;
         return p;
     }

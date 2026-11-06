@@ -64,6 +64,9 @@ public final class PlayerCharacter {
     private int lightBuffRadius;
     /** Pozostaly czas palenia zalozonej pochodni (0 = nowa, nieuzywana). */
     private long torchBurnMs;
+    /** Pyl Kuzni (zasob postaci, nie przedmiot) i jego limit ({@link pl.fawizja.pixel.item.Forge}). */
+    private int forgeDust;
+    private int dustLimit = pl.fawizja.pixel.item.Forge.DUST_START_LIMIT;
 
     /** Jedna pochodnia pali sie 20 minut czasu gry (liczy sie tylko czas, gdy plonie). */
     public static final long TORCH_BURN_MS = 20 * 60_000L;
@@ -166,6 +169,44 @@ public final class PlayerCharacter {
         hastePercent = o.hastePercent;
         lightBuffRadius = o.lightBuffRadius;
         torchBurnMs = o.torchBurnMs;
+        forgeDust = o.forgeDust;
+        dustLimit = o.dustLimit;
+    }
+
+    /** Pyl Kuzni (z potworow pod wplywem i diabolicznych). */
+    public int forgeDust() { return forgeDust; }
+    /** Limit pylu (100..225). */
+    public int dustLimit() { return dustLimit; }
+
+    /** Dodaje pyl do limitu; zwraca, ile faktycznie dodano. */
+    public int addDust(int amount) {
+        int add = Math.max(0, Math.min(amount, dustLimit - forgeDust));
+        forgeDust += add;
+        return add;
+    }
+
+    public boolean spendDust(int amount) {
+        if (amount < 0 || forgeDust < amount) return false;
+        forgeDust -= amount;
+        return true;
+    }
+
+    /** Podnosi limit pylu o 1 (koszt sprawdza wywolujacy). */
+    public void raiseDustLimit() {
+        dustLimit = Math.min(pl.fawizja.pixel.item.Forge.DUST_MAX_LIMIT, dustLimit + 1);
+    }
+
+    /** Awatar z Transcendencji (Kuznia): pozostaly czas; stan ulotny, nie zapisywany. */
+    private long avatarMs;
+
+    public boolean avatarActive() { return avatarMs > 0; }
+    public long avatarMs() { return avatarMs; }
+    public void startAvatar(long ms) { avatarMs = Math.max(avatarMs, ms); }
+    public void tickAvatar(long dtMs) { avatarMs = Math.max(0, avatarMs - Math.max(0, dtMs)); }
+
+    public void restoreForge(int dust, int limit) {
+        dustLimit = Math.max(pl.fawizja.pixel.item.Forge.DUST_START_LIMIT, Math.min(pl.fawizja.pixel.item.Forge.DUST_MAX_LIMIT, limit));
+        forgeDust = Math.max(0, Math.min(dustLimit, dust));
     }
 
     public static String validateName(String name) {

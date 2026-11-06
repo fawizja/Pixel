@@ -185,3 +185,10 @@
 201;mirewood_rod;Laska z Topieli;WEAPON;1;9000;WEAPON;42;0;0;80;DRUID;0;7;EARTH;WAND;-;#4a7a3a;Laska z czarnego drewna z dna bagien. Zostawia ją tylko Szlamiara.
 240;blueberry;Jagody;FOOD;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#3a4a9a;Garść jagód z leśnego krzaka. Syci krótko - jak w Tibii, 12 s na sztukę.
 241;raspberry;Maliny;FOOD;100;1;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#c83a5a;Słodkie maliny z krzaka. Syci krótko - 12 s na sztukę.
+242;forge_sliver;Odłamek kuźni;MATERIAL;100;400;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#7ad0ff;Lśniący odłamek z diabolicznych potworów. U kowala 50 odłamków daje wzniosły rdzeń.
+243;exalted_core;Wzniosły rdzeń;MATERIAL;100;25000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#ffd040;Rdzeń Kuźni Wyniesienia: +15% szansy fuzji, ochrona tieru albo zapłata za transfer u kowala.
+244;obsidian_boots;Obsydianowe buty;ARMOR;1;15000;FEET;0;0;3;250;*;0;0;PHYSICAL;-;FIRE:3;#3a2a3a;Ciężkie buty z płytek obsydianu.
+245;coral_boots;Koralowe buty;ARMOR;1;30000;FEET;0;0;3;350;*;0;0;PHYSICAL;-;DROWN:20;#c07050;Buty z koralu raf. Pływa się w nich lżej.
+246;glacial_boots;Lodowe buty;ARMOR;1;45000;FEET;0;0;4;450;*;0;0;PHYSICAL;-;ICE:4;#c8ecff;Buty z lodowego kryształu.
+247;shadow_boots;Buty cienia;ARMOR;1;140000;FEET;0;0;4;700;*;0;0;PHYSICAL;-;DEATH:3;#40305a;Bezgłośne buty utkane z cienia.
+248;abyssal_treads;Kroki Otchłani;ARMOR;1;450000;FEET;0;0;5;900;*;0;0;PHYSICAL;-;FIRE:4,DEATH:4;#ff6040;Buty władcy Otchłani. Zostawia je tylko Morgath.

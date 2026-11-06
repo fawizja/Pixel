@@ -15,6 +15,12 @@ public record Npc(String key, String name, NpcRole role, String town, Position p
     /** Otwarta zwykla skrzynia (schowek na mapie) - okno jak u bankiera w widoku depozytu. */
     public static final String CRATE = "crate";
 
+    /**
+     * Kowal (klucz "*_smith", np. varden_smith): ulepszenia, zaklecia, Kuznia i nasycenia. Inni kupcy (prowiant, magia,
+     * skup) tego nie robia.
+     */
+    public boolean isSmith() { return role == NpcRole.MERCHANT && key.endsWith("_smith"); }
+
     public Npc {
         Objects.requireNonNull(key);
         Objects.requireNonNull(role);

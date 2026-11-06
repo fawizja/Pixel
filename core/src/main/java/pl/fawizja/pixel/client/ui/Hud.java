@@ -382,6 +382,15 @@ public final class Hud {
     private boolean depotView;
     /** Rozmowa z kupcem w widoku kowala (ulepszanie wyposazenia). */
     private boolean smithView;
+    /** Strona okna kowala: 0 ulepszenia i zaklecia, 1 Kuznia, 2 nasycenia. */
+    private int smithPage;
+    /** Kuznia: rdzen na +15% szansy i rdzen na ochrone tieru przy nastepnej fuzji. */
+    private boolean fuseCoreChance, fuseCoreProtect;
+    /** Kuznia: wybrany dawca transferu (pole plecaka) albo -1. */
+    private int transferDonor = -1;
+    /** Nasycenia: wybrane pole ekwipunku, stopien (1..3) i strona listy rodzajow. */
+    private EquipSlot imbueSlot;
+    private int imbueLevel = 1, imbuePage;
     private int bookPage;
     /** Strona czarow w ksiedze (etap 16); -1 = strona z najwyzszym poznanym czarem. */
     private int spellPage = -1;
@@ -1379,7 +1388,15 @@ public final class Hud {
     /** Rozmowa z kupcem od razu w widoku kowala (podglad GUI). */
     public void openSmith(GameSession session) {
         openNpc(session);
-        smithView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT;
+        smithView = npc != null && npc.isSmith();
+    }
+
+    /** Podglad GUI: okno kowala na stronie (0 ulepszenia, 1 Kuznia, 2 nasycenia), z wybranym polem nasycen. */
+    public void openSmithPage(GameSession session, int page, EquipSlot slot, int level) {
+        openSmith(session);
+        smithPage = page;
+        if (slot != null) imbueSlot = slot;
+        imbueLevel = Math.max(1, Math.min(3, level));
     }
 
     /** Podglad (zrzuty ekranu): strona listy kupca. */
@@ -2327,6 +2344,203 @@ public final class Hud {
         return new ArrayList<>(seen);
     }
 
+    /** Okno kowala: nawigacja stron w prawej kolumnie, potem strona (ulepszenia / Kuznia / nasycenia). */
+    private void smithRows(GameSession session, List<MenuRow> left, List<MenuRow> right, int perCol) {
+        PlayerCharacter pc = session.character();
+        String[] names = {"Ulepszenia i zaklęcia", "Kuźnia Wyniesienia", "Nasycenia (imbuementy)"};
+        String[] details = {"+1..+5 i zaklęcia na godzinę", "fuzja, transfer, pył, odłamki, rdzenie", "wampiryzm, pustka, cios, żywioły, ochrony"};
+        for (int i = 0; i < 3; i++) {
+            right.add(new MenuRow(smithPage == i ? "npc:none" : "npc:ui:page:" + i, (smithPage == i ? "> " : "") + names[i], details[i], smithPage != i));
+        }
+        if (smithPage == 1) {
+            forgeRows(session, left, right, perCol);
+            return;
+        }
+        if (smithPage == 2) {
+            imbueRows(session, left, right, perCol);
+            return;
+        }
+        left.add(new MenuRow("npc:smith", "Wróć do sklepu", "ulepszanie zakładanego wyposażenia", true));
+        long money = session.gold();
+        for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
+            ItemStack worn = slot == pl.fawizja.pixel.item.EquipSlot.NONE ? null : pc.equipment().get(slot);
+            if (worn == null || left.size() >= perCol) continue;
+            pl.fawizja.pixel.item.ItemType t = session.items().get(worn.itemId());
+            if (!pl.fawizja.pixel.item.Upgrade.upgradable(t)) continue;
+            int next = worn.upgrade() + 1;
+            String label = "Ulepsz: " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade());
+            if (next > pl.fawizja.pixel.item.Upgrade.MAX) {
+                left.add(new MenuRow("npc:none", label, "ulepszone do końca", false));
+                continue;
+            }
+            long price = pl.fawizja.pixel.item.Upgrade.price(t, next);
+            left.add(new MenuRow("npc:upgrade:" + slot.name(), label, "do +" + next + ": " + price + " gp, szansa "
+                    + pl.fawizja.pixel.item.Upgrade.chancePercent(next) + "%", money >= price));
+        }
+        if (left.size() == 1) left.add(new MenuRow("npc:none", "Nic do ulepszenia", "załóż broń, tarczę albo zbroję", false));
+        right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; nieudana próba zabiera tylko złoto", false));
+        pl.fawizja.pixel.item.Enchantments ench = pc.enchantments();
+        for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
+            if (!k.smith()) continue;
+            long price = pl.fawizja.pixel.item.Enchantments.price(k, pc.level());
+            String left0 = ench.active(k) ? ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k)) : "";
+            right.add(new MenuRow("npc:enchant:" + k.name(), k.label() + " (1 h)", k.effect() + "; " + price + " gp" + left0,
+                    money >= price && ench.canExtend(k)));
+        }
+        right.add(new MenuRow("npc:none", "Czas zaklęć", "płynie tylko poza strefą ochronną, do 3 h zapasu", false));
+    }
+
+    /** Ostatni wynik Kuzni z dziennika (wiersz "Wynik"), albo null. */
+    private static String lastForgeResult(GameSession session) {
+        java.util.List<EventLog.Entry> l = session.log().latest(40);
+        for (int i = l.size() - 1; i >= 0; i--) {
+            String t = l.get(i).text();
+            if (t.startsWith(pl.fawizja.pixel.game.ForgeService.PREFIX)) return t.substring(pl.fawizja.pixel.game.ForgeService.PREFIX.length());
+        }
+        return null;
+    }
+
+    private static String gp(long v) { return v + " gp"; }
+
+    /** Wiersz wyniku Kuzni: "Fuzja udana! Topór (T1)" i reszta komunikatu jako opis. */
+    private static MenuRow resultRow(String res) {
+        int k = res.indexOf("; ");
+        String label = k > 0 ? res.substring(0, k) : res;
+        String detail = k > 0 ? res.substring(k + 2).trim() : "";
+        if (k < 0 && res.indexOf(" (") > 0) {
+            label = res.substring(0, res.indexOf(" ("));
+            detail = res.substring(res.indexOf(" (") + 1).trim();
+        }
+        if (!label.isEmpty()) label = Character.toUpperCase(label.charAt(0)) + label.substring(1);
+        return new MenuRow("npc:none", label, detail, false);
+    }
+
+    /** Kuznia u kowala: fuzja (lewa kolumna), wymiana, limit pylu i transfer (prawa). */
+    private void forgeRows(GameSession session, List<MenuRow> left, List<MenuRow> right, int perCol) {
+        PlayerCharacter pc = session.character();
+        pl.fawizja.pixel.item.ItemRegistry reg = session.items();
+        pl.fawizja.pixel.inventory.Container bp = pc.backpack();
+        int sliverId = reg.byKey(pl.fawizja.pixel.item.Forge.SLIVER_KEY).id();
+        int coreId = reg.byKey(pl.fawizja.pixel.item.Forge.CORE_KEY).id();
+        int slivers = bp.countPlain(sliverId), cores = bp.countPlain(coreId);
+        long funds = session.forge().funds();
+        left.add(new MenuRow("npc:smith", "Wróć do sklepu", "pył " + pc.forgeDust() + "/" + pc.dustLimit() + ", odłamki " + slivers
+                + ", rdzenie " + cores, true));
+        String res = lastForgeResult(session);
+        if (res != null) left.add(resultRow(res));
+        left.add(new MenuRow("npc:ui:fcore", "Rdzeń na szansę: " + (fuseCoreChance ? "TAK" : "NIE"), "szansa fuzji 50% -> 65% (1 rdzeń)", true));
+        left.add(new MenuRow("npc:ui:fprot", "Rdzeń na ochronę: " + (fuseCoreProtect ? "TAK" : "NIE"), "porażka: utrata tieru 100% -> 50% (1 rdzeń)", true));
+        int needCores = (fuseCoreChance ? 1 : 0) + (fuseCoreProtect ? 1 : 0);
+        java.util.List<int[]> pairs = session.forge().fusionPairs();
+        for (int[] pr : pairs) {
+            if (left.size() >= perCol) break;
+            ItemStack a = bp.get(pr[0]);
+            pl.fawizja.pixel.item.ItemType t = reg.get(a.itemId());
+            long gold = pl.fawizja.pixel.item.Forge.fusionGold(t, a.tier() + 1);
+            boolean ok = pc.forgeDust() >= pl.fawizja.pixel.item.Forge.FUSION_DUST && funds >= gold && cores >= needCores;
+            left.add(new MenuRow("npc:forge:fuse:" + pr[0] + ":" + pr[1] + ":" + (fuseCoreChance ? 1 : 0) + ":" + (fuseCoreProtect ? 1 : 0),
+                    "Fuzja: " + t.name() + " T" + a.tier() + " -> T" + (a.tier() + 1),
+                    pl.fawizja.pixel.item.Forge.FUSION_DUST + " pyłu, " + gp(gold) + ", szansa "
+                            + pl.fawizja.pixel.item.Forge.fusionChance(fuseCoreChance) + "%", ok));
+        }
+        if (pairs.isEmpty() && left.size() < perCol) {
+            left.add(new MenuRow("npc:none", "Brak par do fuzji", "dwa takie same przedmioty z klasą w plecaku", false));
+        }
+        right.add(new MenuRow("npc:forge:slivers", pl.fawizja.pixel.item.Forge.SLIVER_DUST + " pyłu -> "
+                + pl.fawizja.pixel.item.Forge.SLIVERS_PER_CONVERSION + " odłamki", "masz " + pc.forgeDust() + " pyłu",
+                pc.forgeDust() >= pl.fawizja.pixel.item.Forge.SLIVER_DUST));
+        right.add(new MenuRow("npc:forge:core", pl.fawizja.pixel.item.Forge.CORE_SLIVERS + " odłamków -> 1 rdzeń", "masz " + slivers + " odłamków",
+                slivers >= pl.fawizja.pixel.item.Forge.CORE_SLIVERS));
+        int cost = pl.fawizja.pixel.item.Forge.raiseLimitCost(pc.dustLimit());
+        right.add(new MenuRow("npc:forge:limit", "Limit pyłu " + pc.dustLimit() + "/" + pl.fawizja.pixel.item.Forge.DUST_MAX_LIMIT + " -> +1",
+                cost == 0 ? "najwyższy" : "koszt " + cost + " pyłu", cost > 0 && pc.forgeDust() >= cost));
+        ItemStack donor = transferDonor >= 0 && transferDonor < bp.size() ? bp.get(transferDonor) : null;
+        if (donor == null || donor.tier() < 2) {
+            transferDonor = -1;
+            for (int i = 0; i < bp.size() && right.size() < perCol; i++) {
+                ItemStack st = bp.get(i);
+                if (st == null || st.tier() < 2) continue;
+                right.add(new MenuRow("npc:ui:donor:" + i, "Transfer z: " + pl.fawizja.pixel.item.Forge.name(reg.get(st.itemId()), st),
+                        "wybierz dawcę (przepada), potem biorcę z tierem 0", true));
+            }
+            if (right.size() < perCol) right.add(new MenuRow("npc:none", "Transfer tieru", "dawca z tierem 2+ w plecaku", false));
+            return;
+        }
+        pl.fawizja.pixel.item.ItemType dt = reg.get(donor.itemId());
+        right.add(new MenuRow("npc:ui:donor:-1", "Dawca: " + pl.fawizja.pixel.item.Forge.name(dt, donor), "dotknij, aby anulować", true));
+        int result = donor.tier() - 1;
+        int needed = pl.fawizja.pixel.item.Forge.transferCores(dt, result);
+        long gold = pl.fawizja.pixel.item.Forge.transferGold(dt, donor.tier());
+        for (int i = 0; i < bp.size() && right.size() < perCol; i++) {
+            ItemStack st = bp.get(i);
+            if (st == null || i == transferDonor || st.tier() != 0) continue;
+            pl.fawizja.pixel.item.ItemType rt = reg.get(st.itemId());
+            if (pl.fawizja.pixel.item.Forge.classOf(rt) != pl.fawizja.pixel.item.Forge.classOf(dt) || rt.slot() != dt.slot()) continue;
+            right.add(new MenuRow("npc:forge:transfer:" + transferDonor + ":" + i, "na: " + rt.name() + " -> T" + result,
+                    pl.fawizja.pixel.item.Forge.TRANSFER_DUST + " pyłu, " + needed + " rdz., " + gp(gold),
+                    pc.forgeDust() >= pl.fawizja.pixel.item.Forge.TRANSFER_DUST && cores >= needed && funds >= gold));
+        }
+    }
+
+    /** Nasycenia u kowala: zalozone przedmioty z miejscami (lewa), rodzaje do wybranego przedmiotu (prawa). */
+    private void imbueRows(GameSession session, List<MenuRow> left, List<MenuRow> right, int perCol) {
+        PlayerCharacter pc = session.character();
+        pl.fawizja.pixel.item.ItemRegistry reg = session.items();
+        left.add(new MenuRow("npc:smith", "Wróć do sklepu", "nasycenia działają 20 h walki na założonym przedmiocie", true));
+        String res = lastForgeResult(session);
+        if (res != null) left.add(resultRow(res));
+        if (imbueSlot != null && (pc.equipment().get(imbueSlot) == null
+                || pl.fawizja.pixel.item.Imbuement.slots(reg.get(pc.equipment().get(imbueSlot).itemId())) == 0)) imbueSlot = null;
+        for (EquipSlot slot : EquipSlot.values()) {
+            ItemStack worn = slot == EquipSlot.NONE ? null : pc.equipment().get(slot);
+            if (worn == null || left.size() >= perCol) continue;
+            pl.fawizja.pixel.item.ItemType t = reg.get(worn.itemId());
+            int n = pl.fawizja.pixel.item.Imbuement.slots(t);
+            if (n == 0) continue;
+            if (imbueSlot == null) imbueSlot = slot;
+            left.add(new MenuRow("npc:ui:islot:" + slot.name(), (slot == imbueSlot ? "> " : "") + t.name() + " (" + worn.imbuements().size() + "/" + n + ")",
+                    worn.imbuements().isEmpty() ? "wolne miejsca na nasycenia" : "dotknij, aby wybrać", slot != imbueSlot));
+            for (int i = 0; i < worn.imbuements().size() && left.size() < perCol; i++) {
+                pl.fawizja.pixel.item.Imbuements.Slot sl = worn.imbuements().slots().get(i);
+                left.add(new MenuRow("npc:unimbue:" + slot.name() + ":" + i, "  Usuń: " + sl.kind().label() + " (" + pl.fawizja.pixel.item.Imbuement.LEVELS[sl.level()] + ")",
+                        sl.kind().effect(sl.level()) + ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(sl.msLeft()) + "; "
+                                + gp(pl.fawizja.pixel.item.Imbuement.CLEAR_COST), true));
+            }
+        }
+        if (imbueSlot == null) {
+            left.add(new MenuRow("npc:none", "Nic do nasycenia", "załóż broń, zbroję, hełm albo tarczę (od niepospolitych)", false));
+            return;
+        }
+        ItemStack worn = pc.equipment().get(imbueSlot);
+        pl.fawizja.pixel.item.ItemType t = reg.get(worn.itemId());
+        boolean full = worn.imbuements().size() >= pl.fawizja.pixel.item.Imbuement.slots(t);
+        right.add(new MenuRow("npc:ui:ilevel", "Stopień: " + pl.fawizja.pixel.item.Imbuement.LEVELS[imbueLevel] + " ("
+                + pl.fawizja.pixel.item.Imbuement.LEVELS_TIBIA[imbueLevel] + ")", gp(pl.fawizja.pixel.item.Imbuement.GOLD[imbueLevel])
+                + " + składniki; dotknij, aby zmienić", true));
+        java.util.List<pl.fawizja.pixel.item.Imbuement> kinds = new java.util.ArrayList<>();
+        for (pl.fawizja.pixel.item.Imbuement k : pl.fawizja.pixel.item.Imbuement.values()) if (k.fits(t)) kinds.add(k);
+        int per = Math.max(1, perCol - right.size() - 1);
+        int pages = Math.max(1, (kinds.size() + per - 1) / per);
+        if (imbuePage >= pages) imbuePage = 0;
+        long funds = session.forge().funds();
+        for (int i = imbuePage * per; i < Math.min(kinds.size(), (imbuePage + 1) * per); i++) {
+            pl.fawizja.pixel.item.Imbuement k = kinds.get(i);
+            StringBuilder need = new StringBuilder();
+            boolean have = true;
+            for (pl.fawizja.pixel.item.Imbuement.Ingredient in : k.ingredients(imbueLevel)) {
+                pl.fawizja.pixel.item.ItemType it = reg.byKeyOrNull(in.itemKey());
+                int got = it == null ? 0 : pc.backpack().countPlain(it.id());
+                if (got < in.count()) have = false;
+                if (need.length() > 0) need.append(", ");
+                need.append(in.count()).append("x ").append(it == null ? in.itemKey() : it.name()).append(" (").append(got).append(')');
+            }
+            boolean ok = have && !full && !worn.imbuements().conflicts(k) && funds >= pl.fawizja.pixel.item.Imbuement.GOLD[imbueLevel];
+            right.add(new MenuRow("npc:imbue:" + imbueSlot.name() + ":" + k.name() + ":" + imbueLevel,
+                    k.label() + ": " + k.effect(imbueLevel), need.toString(), ok));
+        }
+        if (pages > 1) right.add(new MenuRow("npc:ui:ipage", "Następne nasycenia", (imbuePage + 1) + " / " + pages, true));
+    }
+
     private void rebuildNpcMenu(GameSession session) {
         PlayerCharacter pc = session.character();
         List<MenuRow> left = new ArrayList<>();
@@ -2334,35 +2548,8 @@ public final class Hud {
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         switch (npc.role()) {
             case MERCHANT: {
-                if (smithView) {
-                    left.add(new MenuRow("npc:smith", "Wróć do sklepu", "ulepszanie zakładanego wyposażenia", true));
-                    long money = session.gold();
-                    for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
-                        ItemStack worn = slot == pl.fawizja.pixel.item.EquipSlot.NONE ? null : pc.equipment().get(slot);
-                        if (worn == null || left.size() >= perCol) continue;
-                        pl.fawizja.pixel.item.ItemType t = session.items().get(worn.itemId());
-                        if (!pl.fawizja.pixel.item.Upgrade.upgradable(t)) continue;
-                        int next = worn.upgrade() + 1;
-                        String label = "Ulepsz: " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade());
-                        if (next > pl.fawizja.pixel.item.Upgrade.MAX) {
-                            left.add(new MenuRow("npc:none", label, "ulepszone do końca", false));
-                            continue;
-                        }
-                        long price = pl.fawizja.pixel.item.Upgrade.price(t, next);
-                        left.add(new MenuRow("npc:upgrade:" + slot.name(), label, "do +" + next + ": " + price + " gp, szansa "
-                                + pl.fawizja.pixel.item.Upgrade.chancePercent(next) + "%", money >= price));
-                    }
-                    if (left.size() == 1) left.add(new MenuRow("npc:none", "Nic do ulepszenia", "załóż broń, tarczę albo zbroję", false));
-                    right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; nieudana próba zabiera tylko złoto", false));
-                    pl.fawizja.pixel.item.Enchantments ench = pc.enchantments();
-                    for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
-                        if (!k.smith()) continue;
-                        long price = pl.fawizja.pixel.item.Enchantments.price(k, pc.level());
-                        String left0 = ench.active(k) ? ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k)) : "";
-                        right.add(new MenuRow("npc:enchant:" + k.name(), k.label() + " (1 h)", k.effect() + "; " + price + " gp" + left0,
-                                money >= price && ench.canExtend(k)));
-                    }
-                    right.add(new MenuRow("npc:none", "Czas zaklęć", "płynie tylko poza strefą ochronną, do 3 h zapasu", false));
+                if (smithView && npc.isSmith()) {
+                    smithRows(session, left, right, perCol);
                     break;
                 }
                 pl.fawizja.pixel.npc.Shop shop = session.shopOf(npc);
@@ -2384,7 +2571,9 @@ public final class Hud {
                             o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : "") + (delta.isEmpty() ? "" : "; " + delta), gold >= cost));
                 }
                 if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
-                right.add(new MenuRow("npc:smith", "Ulepsz wyposażenie", "kowal: broń, tarcza i zbroja do +5", true));
+                if (npc.isSmith()) {
+                    right.add(new MenuRow("npc:smith", "Kowal: ulepszenia, Kuźnia, nasycenia", "+1..+5, fuzja tierów, wampiryzm, ochrony", true));
+                }
                 right.add(new MenuRow("npc:refill", "Uzupełnij zapasy", "mikstury i runy do " + pl.fawizja.pixel.game.GameSession.REFILL_TO
                         + ", amunicja do " + pl.fawizja.pixel.game.GameSession.REFILL_AMMO_TO, true));
                 right.add(new MenuRow("npc:sellloot", "Sprzedaj cały łup", "materiały bez przedmiotów do zadań; pojedynczo: dotknij", true));
@@ -2810,6 +2999,17 @@ public final class Hud {
                     depotView = !depotView;
                 } else if (row.action.equals("npc:smith")) {
                     smithView = !smithView;
+                    smithPage = 0;
+                    transferDonor = -1;
+                } else if (row.action.startsWith("npc:ui:")) {
+                    String u = row.action.substring(7);
+                    if (u.startsWith("page:")) { smithPage = Integer.parseInt(u.substring(5)); transferDonor = -1; }
+                    else if (u.equals("fcore")) fuseCoreChance = !fuseCoreChance;
+                    else if (u.equals("fprot")) fuseCoreProtect = !fuseCoreProtect;
+                    else if (u.startsWith("donor:")) transferDonor = Integer.parseInt(u.substring(6));
+                    else if (u.startsWith("islot:")) imbueSlot = EquipSlot.valueOf(u.substring(6));
+                    else if (u.equals("ilevel")) imbueLevel = imbueLevel % 3 + 1;
+                    else if (u.equals("ipage")) imbuePage++;
                 } else if (row.action.equals("ach:page")) {
                     achPage++;
                 } else if (row.action.equals("book:page")) {
@@ -3350,16 +3550,17 @@ public final class Hud {
                 font.setColor(row.enabled ? Color.WHITE : Color.GRAY);
                 // wiersz bez opisu (okienko gracza, opcje): napis na srodku wysokosci
                 if (row.detail.isEmpty()) text(batch, clip(row.label, row.w - 8), row.x + 6, row.y + (row.h + font.getCapHeight()) / 2f);
-                else text(batch, row.label, row.x + 4, row.y + row.h - 3);
+                else text(batch, clip(row.label, row.w - 8), row.x + 4, row.y + row.h - 3);
                 font.getData().setScale(0.8f);
                 font.setColor(row.enabled ? new Color(0.8f, 0.85f, 0.7f, 1f) : Color.GRAY);
-                text(batch, row.detail, row.x + 4, row.y + row.h * 0.45f);
+                text(batch, clip(row.detail, row.w - 8), row.x + 4, row.y + row.h * 0.45f);
                 font.getData().setScale(1f);
             }
             font.setColor(Color.WHITE);
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
         if (equipPanelVisible()) drawEquipPanel(batch, session);
+        minimap.setFiendish(session.fiendishPositions());
         if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
@@ -3993,6 +4194,7 @@ public final class Hud {
         HudLayout.Rect zr = new HudLayout.Rect();
         centered(batch, "-", mapZoomButton(false, zr).cx(), zr.cy());
         centered(batch, "+", mapZoomButton(true, zr).cx(), zr.cy());
+        minimap.setFiendish(session.fiendishPositions());
         float[] img = minimap.drawZoomed(batch, session.world(), session.character().explored(), p, walkTarget, markerPositions(session), menuX + 8, menuY + 8, menuW - 16, menuH - 34, bigMapZoom);
         bigMapImg = img;
         if (img == null) return;
@@ -4430,11 +4632,12 @@ public final class Hud {
         eqTapSlot = i;
         eqTapMs = now;
         ItemType it = session.items().get(st.itemId());
-        StringBuilder d = new StringBuilder(it.name());
-        if (st.upgrade() > 0) d.append(" +").append(st.upgrade());
+        StringBuilder d = new StringBuilder(pl.fawizja.pixel.item.Forge.name(it, st));
         if (it.attack() > 0) d.append(", atak ").append(it.attack());
         if (it.defense() > 0) d.append(", obrona ").append(it.defense());
         if (it.armor() > 0) d.append(", pancerz ").append(it.armor());
+        String forgeLine = pl.fawizja.pixel.item.ItemCompare.forgeLine(it, st);
+        if (!forgeLine.isEmpty()) d.append(" (").append(forgeLine).append(")");
         d.append(". Dotknij ponownie, aby zdjąć.");
         session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, d.toString());
     }
@@ -4546,6 +4749,13 @@ public final class Hud {
         }
     }
 
+    /** Tier Kuzni w rogu pola ("T3", fioletowy). */
+    private void tierBadge(SpriteBatch batch, int tier, float x, float y) {
+        font.setColor(0.82f, 0.62f, 1f, 1f);
+        text(batch, "T" + tier, x, y);
+        font.setColor(Color.WHITE);
+    }
+
     /** Pole ekwipunku: tlo z OTClientV8, przedmiot albo szara nazwa gniazda. */
     private void drawEquipSlot(SpriteBatch batch, ItemStack st, String name, float x, float y, float cell) {
         TextureRegion frame = slotFrame(st, art.itemRegistry());
@@ -4557,6 +4767,7 @@ public final class Hud {
             font.getData().setScale(Math.max(HudLayout.MIN_FONT, Math.min(0.7f, cell / 50f)));
             if (st.count() > 1) text(batch, String.valueOf(st.count()), x + 2, y + cell * 0.32f);
             if (st.upgrade() > 0) text(batch, "+" + st.upgrade(), x + cell * 0.55f, y + cell - 2);
+            if (st.tier() > 0) tierBadge(batch, st.tier(), x + 2, y + cell - 2);
             font.getData().setScale(1f);
         } else {
             // nazwa pustego gniazda tylko, gdy miesci sie przy progu 7 dp
@@ -4709,6 +4920,23 @@ public final class Hud {
     }
 
     private float bagTipW() { return Math.min(w - 20, Math.max(slotSize * 5 + 16, 420)); }
+
+    /** Wysokosc wiersza Kuzni i nasycen nad opisem przedmiotu w plecaku. */
+    private static final float FORGE_TIP_ROW = 14;
+
+    /**
+     * Wiersze Kuzni do opisu przedmiotu w plecaku (jak "Look" w Tibii): klasa, tier i efekt z liczba miejsc na
+     * nasycenia, potem kazde nasycenie osobno. Pusta lista dla przedmiotow bez klasy i miejsc.
+     */
+    private static java.util.List<String> forgeTipLines(ItemType t, ItemStack s) {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        String f = pl.fawizja.pixel.item.Forge.describe(t, s.tier());
+        int slots = pl.fawizja.pixel.item.Imbuement.slots(t);
+        String im = slots > 0 ? "nasycenia " + s.imbuements().size() + "/" + slots : "";
+        if (!f.isEmpty() || !im.isEmpty()) out.add(f.isEmpty() ? im : im.isEmpty() ? f : f + "; " + im);
+        out.addAll(s.imbuements().describe());
+        return out;
+    }
     private float bagTipX() { return bagX + slotSize * 2.5f - bagTipW() / 2f; }
 
     private void drawBagBackground(ShapeRenderer shapes, GameSession session) {
@@ -4716,8 +4944,10 @@ public final class Hud {
         float extra = selectedSlot >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
         miniWindow(shapes, "wood", bagX - 8, bagY - 50 - extra, slotSize * 5 + 16, slotSize * 4 + 80 + extra);
         if (selectedSlot >= 0 && session.character().backpack().get(selectedSlot) != null) {
+            ItemStack sel = session.character().backpack().get(selectedSlot);
+            int forgeRows = forgeTipLines(session.items().get(sel.itemId()), sel).size();
             shapes.setColor(0.06f, 0.05f, 0.04f, 0.9f);
-            shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38);
+            shapes.rect(bagTipX(), bagY + slotSize * 4 + 34, bagTipW(), 38 + FORGE_TIP_ROW * forgeRows);
         }
         bagPages = session.character().bagPages();
         if (bagPage >= bagPages) bagPage = bagPages - 1;
@@ -4799,6 +5029,7 @@ public final class Hud {
             batch.setColor(Color.WHITE);
             if (s.count() > 1) text(batch, String.valueOf(s.count()), sx + 5, sy + 15);
             if (s.upgrade() > 0) text(batch, "+" + s.upgrade(), sx + slotSize - 24, sy + slotSize - 6);
+            if (s.tier() > 0) tierBadge(batch, s.tier(), sx + 4, sy + slotSize - 6);
         }
         if (dragging && dragSlot >= 0 && dragSlot < pc.backpack().size() && pc.backpack().get(dragSlot) != null) {
             TextureRegion r = art.item(pc.backpack().get(dragSlot).itemId());
@@ -4812,9 +5043,17 @@ public final class Hud {
                 ItemStack worn = t.slot() == EquipSlot.NONE ? null : pc.equipment().get(t.slot());
                 ItemType wornType = worn == null ? null : session.items().get(worn.itemId());
                 float ty = bagY + slotSize * 4 + 66;
-                text(batch, pl.fawizja.pixel.item.ItemCompare.stats(t, s.upgrade(), wornType, worn == null ? 0 : worn.upgrade()), bagTipX() + 6, ty);
+                text(batch, pl.fawizja.pixel.item.ItemCompare.stats(t, s, wornType, worn == null ? 0 : worn.upgrade()), bagTipX() + 6, ty);
                 String req = pl.fawizja.pixel.item.ItemCompare.requirements(t, pc);
                 if (!req.isEmpty()) text(batch, req, bagTipX() + 6, ty - 17);
+                java.util.List<String> forge = forgeTipLines(t, s);
+                font.getData().setScale(0.8f);
+                font.setColor(0.8f, 0.7f, 1f, 1f);
+                for (int k = 0; k < forge.size(); k++) {
+                    text(batch, clip(forge.get(k), bagTipW() - 12), bagTipX() + 6, ty + 16 + FORGE_TIP_ROW * (forge.size() - 1 - k));
+                }
+                font.setColor(Color.WHITE);
+                font.getData().setScale(1f);
                 if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
                 centered(batch, bagUse.label, bagUse.x, bagUse.y);
@@ -5962,6 +6201,7 @@ public final class Hud {
             mText(batch, time, sx + (sk != null ? STATUS_SIZE + 2 : 0), sy + 3.5f, HudLayout.MIN_FONT, Color.WHITE, true);
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
+        minimap.setFiendish(session.fiendishPositions());
         minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, mm.h, Math.round(mm.w / 1.5f));
         bStroke(batch, mm.x, mm.y, mm.w, mm.h, 1.5f, M_LINE);
         drawMobileBattle(batch, rowsVis);
@@ -6366,6 +6606,7 @@ public final class Hud {
                     float ip = slotPad(c.w);
                     if (r != null) drawStackIcon(b, r, st, c.x + ip, c.y + ip, c.w - 2 * ip);
                     if (st.count() > 1) mText(b, String.valueOf(st.count()), c.right() - 2 - mWidth(String.valueOf(st.count()), 0.56f), c.y + 3, 0.56f, Color.WHITE, true);
+                    if (st.tier() > 0) mText(b, "T" + st.tier(), c.x + 3, c.top() - 11, 0.52f, hex(0xd0a0ff, 1f), true);
                     if (pc.isKept(st.itemId())) bFill(b, c.right() - 6, c.top() - 6, 4, 4, hex(0xf2cc40, 1f));
                 }
                 float ty = c.y - 12;
@@ -6376,8 +6617,10 @@ public final class Hud {
                     ItemType t = session.items().get(sel.itemId());
                     ItemStack worn = t.slot() == EquipSlot.NONE ? null : pc.equipment().get(t.slot());
                     ItemType wornType = worn == null ? null : session.items().get(worn.itemId());
-                    String stats = pl.fawizja.pixel.item.ItemCompare.stats(t, sel.upgrade(), wornType, worn == null ? 0 : worn.upgrade());
+                    String stats = pl.fawizja.pixel.item.ItemCompare.stats(t, sel, wornType, worn == null ? 0 : worn.upgrade());
                     String req = pl.fawizja.pixel.item.ItemCompare.requirements(t, pc);
+                    String forgeLine = pl.fawizja.pixel.item.ItemCompare.forgeLine(t, sel);
+                    if (!forgeLine.isEmpty()) mText(b, mClip(forgeLine, win.w - 24, 0.56f), win.x + 12, ty + 13, 0.56f, hex(0xc8b0ff, 1f), false);
                     mText(b, mClip(stats, win.w - 24, 0.6f), win.x + 12, ty, 0.6f, M_TEXT, false);
                     if (!req.isEmpty()) mText(b, mClip(req, win.w - 24, 0.56f), win.x + 12, ty - 13, 0.56f, hex(0xff8a7a, 1f), false);
                 } else {

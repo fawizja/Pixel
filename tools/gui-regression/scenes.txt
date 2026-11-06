@@ -32,7 +32,7 @@ hunting|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,
 bagitem|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.open=bagitem -Dpixel.teleport=498,503,0
 rain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.weather=rain -Dpixel.teleport=498,509,0
 pet|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,509,0 -Dpixel.open=pet
-smith|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=smith
+smith|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=566,498,0 -Dpixel.open=smith
 help|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/pomoc
 markers|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.open=map -Dpixel.markers=Kopalnia|60,70,0;Wieza|100,60,0;Obok|84,80,0
 events|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,503,0 -Dpixel.button=cmd:/wydarzenia
@@ -180,3 +180,7 @@ monk_virtues|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,49
 combat_crit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.crit=true
 item_protection|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bagitem -Dpixel.lookItem=obsidian_armor
 combat_stats|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=combatgear
+# 2026-11-06: Kuznia i nasycenia u kowala (tylko kowale), potwory pod wpływem i diaboliczne (minimapa)
+forge_fusion|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=566,498,0 -Dpixel.open=forge -Dpixel.forgeFuse=true
+forge_imbue|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=566,498,0 -Dpixel.open=imbue
+forge_monsters|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=478,494,0 -Dpixel.forgeMonsters=true

@@ -92,10 +92,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public void setRareDropListener(RareDropListener listener) { this.rareDropListener = listener; }
 
-    /** Szansa bazowa wpisu lupu (elita ma tabele z podwojona szansa). */
+    /** Szansa bazowa wpisu lupu (potwory pod wpływem i diaboliczne maja te sama tabele co zwykle, jak w Canary). */
     static boolean isRare(MonsterType t, int chancePermille) {
-        int base = t.isElite() ? chancePermille / 2 : chancePermille;
-        return base <= RARE_PERMILLE;
+        return chancePermille <= RARE_PERMILLE;
     }
 
     /** Klucz potwora dnia ({@link pl.fawizja.pixel.daily.BoostedCreature}); null = brak premii. */
@@ -209,7 +208,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         // jak w Tibii: jeden rzut na krytyk na cios (baza 5% / +10%, przedmioty, zaklecie kowala)
         boolean crit = rollCritical();
         int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng), crit);
-        int dmg = CombatFormulas.mitigateOnMonster(target.type(), raw, ap.type(), rng);
+        int dmg = mitigateWeaponHit(target.type(), raw, ap.type());
         if (ap.range() > 1) push(CombatEvent.projectile(now, pc.position(), target.position(), ap.type().name()));
         if (ap.range() > 1) useAmmunition(now);
         int dealt = target.damage(dmg);
@@ -220,7 +219,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (!isTrivial(target.type())) pc.skills().train(ap.skill(), Balance.HUNT_TRY_FACTOR);
         // wrecz: "skad" = gracz (animacja wypadu na kliencie)
         push(new CombatEvent(now, target.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
-                ap.range() > 1 ? null : pc.position(), crit && dealt > 0 ? CriticalHit.EVENT_EFFECT : null));
+                ap.range() > 1 ? null : pc.position(), hitEffect(crit, dealt)));
         if (target.isDead()) onMonsterDeath(target, now);
     }
 
@@ -252,7 +251,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dealt = m.damage(dmg);
         Leech.apply(pc, dealt, targets);
         push(new CombatEvent(now, m.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
-                null, crit && dealt > 0 ? CriticalHit.EVENT_EFFECT : null));
+                null, hitEffect(crit, dealt)));
         monsters.provoke(m);
         if (m.isDead()) onMonsterDeath(m, now);
         return dealt;
@@ -278,9 +277,71 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
     }
 
-    /** Mikstura sily, potem cios krytyczny (raw * (1 + obrazenia krytyczne)), gdy wypadl. */
+    /** Mikstura sily, potem cios krytyczny (raw * (1 + obrazenia krytyczne)), gdy wypadl, potem Natarcie z Kuzni. */
     private int critical(int raw, boolean crit) {
-        return CriticalHit.apply(pc, pc.enchantments().outgoing(raw), crit);
+        int v = CriticalHit.apply(pc, pc.enchantments().outgoing(raw), crit);
+        lastOnslaught = v > 0 && rollOnslaught();
+        if (lastOnslaught) v += (int) Math.round(v * pl.fawizja.pixel.item.Forge.ONSLAUGHT_BONUS);
+        return v;
+    }
+
+    // ------------------------------------------------------------------ Kuznia i nasycenia (male haki, ForgeEffects)
+
+    /** Efekt zdarzenia trafienia: Natarcie z Kuzni (+60%). */
+    public static final String ONSLAUGHT_EFFECT = "FATAL";
+    /** Efekt zdarzenia BLOCKED: Unik z Kuzni (Ruse) - cios potwora ominiety. */
+    public static final String DODGE_EFFECT = "DODGE";
+    /** Walka (jak tibijskie skrzyzowane miecze): tyle po ostatnim ataku lub trafieniu; wtedy plynie czas nasycen. */
+    public static final long BATTLE_MS = 60_000;
+
+    private boolean lastOnslaught;
+    private long lastHitTakenMs = Long.MIN_VALUE / 2;
+
+    private String hitEffect(boolean crit, int dealt) {
+        if (dealt <= 0) return null;
+        if (lastOnslaught) return ONSLAUGHT_EFFECT;
+        return crit ? CriticalHit.EVENT_EFFECT : null;
+    }
+
+    /** Szansa Natarcia (bron z tierem, wzmocnienie butow); 0 bez tieru - bez losowania. */
+    private boolean rollOnslaught() {
+        double c = pl.fawizja.pixel.item.ForgeEffects.onslaughtChance(pc);
+        return c > 0 && rng.nextInt(10_000) < (int) Math.round(c * 100);
+    }
+
+    /** Postac walczy: atakowala potwora albo byla trafiona w ostatniej minucie. */
+    public boolean inBattle(long now) {
+        return now - lastMonsterAttackMs < BATTLE_MS || now - lastHitTakenMs < BATTLE_MS;
+    }
+
+    /** Agresywna akcja (atak bronia, czar, runa) w ostatnich ms (Transcendencja: 2 s). */
+    public boolean aggressiveWithin(long now, long ms) { return now - lastMonsterAttackMs <= ms; }
+
+    /**
+     * Pancerz i odpornosci przy ciosie bronia; nasycenie zywiolowe broni (Zar, Jad, Mroz, Elektryzacja, Zniwo)
+     * zamienia czesc obrazen fizycznych na zywiol (osobno przez odpornosc potwora).
+     */
+    int mitigateWeaponHit(MonsterType t, int raw, DamageType type) {
+        pl.fawizja.pixel.item.ItemStack w = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.WEAPON);
+        pl.fawizja.pixel.item.Imbuements.Slot el = w == null || type != DamageType.PHYSICAL ? null : w.imbuements().elementDamage();
+        if (el == null || raw <= 0) return CombatFormulas.mitigateOnMonster(t, raw, type, rng);
+        int elem = (int) Math.round(raw * el.kind().value(el.level()) / 100.0);
+        return CombatFormulas.mitigateOnMonster(t, raw - elem, type, rng)
+                + CombatFormulas.mitigateOnMonster(t, elem, el.kind().element(), rng);
+    }
+
+    /** Pyl Kuzni za potwora pod wpływem / diabolicznego (s..3s), z komunikatem; serwer wola go dla kazdego z druzyny. */
+    public int awardForgeDust(MonsterType t, long now) {
+        if (t.forgeStack() <= 0) return 0;
+        int amount = pl.fawizja.pixel.item.Forge.rollDust(t.forgeStack(), rng);
+        int added = pc.addDust(amount);
+        if (added > 0) {
+            log.add(now, EventLog.Kind.LOOT, "Pył kuźni: +" + added + " (" + pc.forgeDust() + "/" + pc.dustLimit() + ").");
+        } else {
+            log.add(now, EventLog.Kind.INFO, "Nie otrzymano " + amount + " pyłu kuźni - masz już limit " + pc.dustLimit()
+                    + " (podnieś go u kowala).");
+        }
+        return added;
     }
 
     /** Zdarzenie do wyswietlenia (leczenie z czaru, mikstury). */
@@ -315,7 +376,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         boolean lootElsewhere = lootOwner != null && lootOwner.test(m);   // przed sluchaczem: on konczy wyprawe
         if (killListener != null) killListener.accept(t);
         if (deathListener != null) deathListener.accept(m);
-        if (experienceSharer == null || !experienceSharer.share(t, now)) {
+        boolean shared = experienceSharer != null && experienceSharer.share(t, now); // druzyna: pyl rozdaje serwer
+        if (!shared) awardForgeDust(t, now);
+        if (!shared) {
             long exp = killExperience(t, pc.level());
             boolean rested = pc.useRested();
             if (rested) {
@@ -324,7 +387,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             }
             String note = staminaNote(pc); // strefa sprzed zuzycia minuty za to zabicie
             exp = pc.stamina().hunt(exp, pc.isPremium(), now);
-            awardExperience(exp, "Pokonano: " + t.name() + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : "")
+            awardExperience(exp, "Pokonano: " + t.name() + (t.isElite() ? " " + t.forgeLabel() : "") + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : "")
                     + note, now);
         }
         Position corpse = m.position();
@@ -334,6 +397,11 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             drop = new ArrayList<>();
         } else {
             drop = rollLoot(t);
+            if (t.isFiendish() && items.containsKey(pl.fawizja.pixel.item.Forge.SLIVER_KEY)) {
+                // tylko diaboliczny zostawia odlamki: 3..7 w ciele (Canary forgeMinSlivers / forgeMaxSlivers)
+                drop.add(new ItemStack(items.byKey(pl.fawizja.pixel.item.Forge.SLIVER_KEY).id(), CombatFormulas.rollBetween(
+                        pl.fawizja.pixel.item.Forge.FIENDISH_MIN_SLIVERS, pl.fawizja.pixel.item.Forge.FIENDISH_MAX_SLIVERS, rng)));
+            }
         }
         List<String> dropped = new ArrayList<>();
         for (ItemStack s : drop) dropped.add(describe(s));
@@ -409,7 +477,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
         MonsterType t = m.type();
         MonsterType.Strike st = t.rollStrike(rng);
-        int dmg = pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), attackedRecently(now), rng));
+        lastHitTakenMs = now;
+        if (pl.fawizja.pixel.item.ForgeEffects.rollRuse(pc, rng)) {
+            // Unik (Ruse, zbroja z tierem): caly cios ominiety, jak "You dodged an attack." w Tibii
+            push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, t.range() > 1 ? null : m.position(), DODGE_EFFECT));
+            return;
+        }
+        int dmg = pl.fawizja.pixel.item.ForgeEffects.avatarIncoming(pc,
+                pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), attackedRecently(now), rng)));
         if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), st.type().name()));
         if (st.type() == DamageType.MANA_DRAIN) {
             // wyssanie many jak w Tibii: zabiera mane (najwyzej tyle, ile jest), zdrowia nie rusza

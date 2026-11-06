@@ -76,8 +76,8 @@ class TibiaCombatTest {
         assertEquals(DamageType.LIFE_DRAIN, REG.get("skeleton").extraAttack().type());
         assertEquals(DamageType.MANA_DRAIN, REG.get("void_priest").extraAttack().type());
         assertEquals(DamageType.DROWN, REG.get("drowned_sailor").damageType());
-        MonsterType elite = REG.get("skeleton").eliteVariant();
-        assertEquals(Math.round(REG.get("skeleton").extraAttack().max() * 1.3), elite.extraAttack().max());
+        MonsterType elite = REG.get("skeleton").influenced(1);
+        assertEquals(Math.round(REG.get("skeleton").extraAttack().max() * MonsterType.damageFactor(1)), elite.extraAttack().max());
         assertEquals("Undead", elite.race());
     }
 

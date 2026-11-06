@@ -231,8 +231,7 @@ public final class Crates {
             ItemStack st = c.get(i);
             if (st == null) continue;
             if (b.length() > 0) b.append('/');
-            b.append(i).append(':').append(st.itemId()).append('x').append(st.count());
-            if (st.upgrade() > 0) b.append('+').append(st.upgrade());
+            b.append(i).append(':').append(st.encode());
         }
         return b.toString();
     }
@@ -244,12 +243,9 @@ public final class Crates {
                 int colon = part.indexOf(':');
                 int slot = Integer.parseInt(part.substring(0, colon));
                 String v = part.substring(colon + 1);
-                int plus = v.indexOf('+');
-                int upgrade = plus < 0 ? 0 : Integer.parseInt(v.substring(plus + 1));
-                String[] f = (plus < 0 ? v : v.substring(0, plus)).split("x");
-                int id = Integer.parseInt(f[0]);
-                if (!c.registry().contains(id)) continue;
-                c.putInSlot(slot, new ItemStack(id, Integer.parseInt(f[1]), upgrade));
+                ItemStack st = ItemStack.parse(v);
+                if (!c.registry().contains(st.itemId())) continue;
+                c.putInSlot(slot, st);
             } catch (RuntimeException e) {
                 // uszkodzony wpis - pomijamy
             }

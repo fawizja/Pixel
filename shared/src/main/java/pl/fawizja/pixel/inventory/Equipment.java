@@ -88,7 +88,7 @@ public final class Equipment {
      */
     public int protection(pl.fawizja.pixel.combat.DamageType type) {
         int sum = 0;
-        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().protection(type);
+        for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().protection(type) + s.imbuements().protection(type);
         return Math.max(-100, Math.min(100, sum));
     }
 
@@ -128,6 +128,38 @@ public final class Equipment {
         double sum = 0;
         for (ItemStack s : worn.values()) sum += registry.get(s.itemId()).bonus().manaLeech();
         return sum;
+    }
+
+    /** Suma wartosci nasycen danej grupy na zalozonych przedmiotach (np. Wampiryzm: procent kradziezy zycia). */
+    public double imbuementSum(pl.fawizja.pixel.item.Imbuement.Category c) {
+        double sum = 0;
+        for (ItemStack s : worn.values()) sum += s.imbuements().sum(c);
+        return sum;
+    }
+
+    /** Tier Kuzni przedmiotu w polu (0 = brak przedmiotu albo tieru). */
+    public int tier(EquipSlot slot) {
+        ItemStack s = worn.get(slot);
+        return s == null ? 0 : s.tier();
+    }
+
+    /**
+     * Uplyw czasu walki nasycen zalozonych przedmiotow (jak w Tibii: tylko zalozone, tylko w walce). Zwraca nazwy
+     * nasycen, ktore wlasnie wygasly.
+     */
+    public java.util.List<String> tickImbuements(long dtMs) {
+        java.util.List<String> gone = new java.util.ArrayList<>();
+        for (Map.Entry<EquipSlot, ItemStack> e : worn.entrySet()) {
+            ItemStack s = e.getValue();
+            if (s.imbuements().isEmpty()) continue;
+            pl.fawizja.pixel.item.Imbuements next = s.imbuements().tick(dtMs);
+            if (next == s.imbuements()) continue;
+            for (pl.fawizja.pixel.item.Imbuements.Slot sl : s.imbuements().slots()) {
+                if (next.get(sl.kind()) == null) gone.add(sl.kind().label());
+            }
+            e.setValue(s.withImbuements(next));
+        }
+        return gone;
     }
 
     /** Obrona samej tarczy (0, gdy postac nie nosi tarczy). */

@@ -125,10 +125,123 @@ public final class MonsterManager {
         return false;
     }
 
-    /** Rodzaj z punktu spawnu; czasem (wg numeru potwora) odmiana elitarna. */
+    /**
+     * Rodzaj z punktu spawnu; czasem (wg numeru potwora, {@link MonsterType#forgeRoll}) potwor pod wpływem stopnia
+     * 1..5 - najwyzej {@link #INFLUENCED_LIMIT} naraz (Canary forgeInfluencedLimit).
+     */
     private MonsterType spawnType(SpawnPoint sp, int id) {
         MonsterType t = registry.get(sp.monsterKey());
-        return MonsterType.eliteRoll(id) ? t.eliteVariant() : t;
+        int stage = MonsterType.forgeRoll(id);
+        if (stage == 0 || !t.canBeForge() || influencedAlive >= INFLUENCED_LIMIT) return t;
+        influencedAlive++;
+        return t.influenced(stage);
+    }
+
+    // ------------------------------------------------------------------ Kuznia: pod wpływem i diaboliczne
+
+    /** Najwyzej tylu potworow pod wpływem naraz (Canary forgeInfluencedLimit = 300). */
+    public static final int INFLUENCED_LIMIT = 300;
+    /**
+     * Diabolicznych naraz: Canary forgeFiendishLimit = 4 (biblioteka Lua: 3). Nasz swiat (7352 potwory) jest mniejszy
+     * niz tibijski, ale ma tez mniej graczy - zostaje 4 i sa widoczne na minimapie.
+     */
+    public static final int FIENDISH_LIMIT = 4;
+    /** Potwor jest diaboliczny przez godzine (forgeFiendishIntervalTime), potem wraca do zwyklego, a inny zostaje diabolicznym. */
+    public static final long FIENDISH_MS = 3_600_000L;
+    /** Po zabiciu diabolicznego nowy pojawia sie po 270 s (Canary removeFiendishMonster). */
+    public static final long FIENDISH_RESPAWN_MS = 270_000L;
+    /** Diaboliczne tylko w prawdziwym swiecie (male swiaty testow i areny bez nich). */
+    public static final int FIENDISH_MIN_SPAWNS = 50;
+
+    private int influencedAlive;
+    private final Map<Monster, Long> fiendish = new java.util.LinkedHashMap<>();
+    private long nextFiendishMs = Long.MIN_VALUE;
+    private long forgeCheckedMs = Long.MIN_VALUE;
+    private Random forgeRng = new Random();
+    /** Klient online: potwory z klatek serwera - Kuznia dziala tylko na serwerze (albo offline). */
+    private boolean remote;
+
+    /** Testy: powtarzalny wybor diabolicznych. */
+    public void setForgeRandom(Random r) { forgeRng = r; }
+
+    public int influencedAlive() { return influencedAlive; }
+
+    /** Obecne diaboliczne potwory (minimapa, przewodnik). */
+    public List<Monster> fiendishMonsters() {
+        if (!remote) return new ArrayList<>(fiendish.keySet());
+        List<Monster> out = new ArrayList<>();
+        for (Monster m : monsters) if (m.type().isFiendish()) out.add(m);
+        return out;
+    }
+
+    /** Do kiedy potwor jest diaboliczny (zegar gry) albo 0. */
+    public long fiendishUntil(Monster m) {
+        Long v = fiendish.get(m);
+        return v == null ? 0 : v;
+    }
+
+    /**
+     * Kuznia co sekunde: diaboliczne wygasaja po godzinie (wracaja do zwyklych, a zastepuje je inny potwor), po zabiciu
+     * nowy pojawia sie po 270 s; liczba potworow pod wpływem jest przeliczana. Jak Game::updateForgeableMonsters.
+     */
+    void updateForge(long now) {
+        if (remote || registry == null) return;
+        if (forgeCheckedMs != Long.MIN_VALUE && now >= forgeCheckedMs && now - forgeCheckedMs < 1000) return;
+        forgeCheckedMs = now;
+        int infl = 0;
+        for (Monster m : monsters) if (m.type().isInfluenced()) infl++;
+        influencedAlive = infl;
+        if (spawns.size() < FIENDISH_MIN_SPAWNS) return;
+        java.util.Set<Monster> alive = new java.util.HashSet<>(monsters);
+        for (java.util.Iterator<Map.Entry<Monster, Long>> it = fiendish.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Monster, Long> e = it.next();
+            Monster m = e.getKey();
+            if (m.isDead() || !alive.contains(m)) {
+                it.remove();
+                nextFiendishMs = Math.max(nextFiendishMs, now + FIENDISH_RESPAWN_MS);
+            } else if (now >= e.getValue()) {
+                m.changeType(m.type().base());
+                it.remove();
+            }
+        }
+        while (fiendish.size() < FIENDISH_LIMIT && now >= nextFiendishMs) {
+            Monster c = pickFiendish();
+            if (c == null) break;
+            c.changeType(c.type().fiendish());
+            fiendish.put(c, now + FIENDISH_MS);
+        }
+    }
+
+    /** Podglad GUI: ten potwor staje sie diabolicznym na godzine (z pominieciem losowania i limitu). */
+    public void debugMakeFiendish(Monster m, long now) {
+        if (remote || m.isDead() || !m.type().base().canBeForge()) return;
+        m.changeType(m.type().base().fiendish());
+        fiendish.put(m, now + FIENDISH_MS);
+    }
+
+    private Monster pickFiendish() {
+        if (monsters.isEmpty()) return null;
+        for (int tries = 0; tries < 60; tries++) {
+            Monster m = monsters.get(forgeRng.nextInt(monsters.size()));
+            if (m.isDead() || !m.type().canBeForge() || eventSpawns.contains(m.spawn()) || fiendish.containsKey(m)) continue;
+            if (world.isProtectionZone(m.position())) continue;
+            return m;
+        }
+        return null;
+    }
+
+    /** Odmiana wg znacznika z klatki serwera: "I1".."I5" pod wpływem, "F" diaboliczny, "-" zwykly. */
+    static MonsterType variantFor(MonsterType base, String mark) {
+        if (mark == null || mark.isEmpty() || mark.equals("-")) return base;
+        if (mark.equals("F")) return base.fiendish();
+        if (mark.charAt(0) == 'I' && mark.length() == 2 && Character.isDigit(mark.charAt(1))) return base.influenced(mark.charAt(1) - '0');
+        return base;
+    }
+
+    /** Znacznik odmiany do klatki serwera (MO): "I3", "F" albo "-". */
+    public static String mark(MonsterType t) {
+        if (t.isFiendish()) return "F";
+        return t.isInfluenced() ? "I" + t.forgeStack() : "-";
     }
 
     public List<Monster> monsters() { return Collections.unmodifiableList(monsters); }
@@ -263,6 +376,7 @@ public final class MonsterManager {
      * Brakujace w klatce znikaja, nowe pojawiaja sie, przesuniete ida plynnie przez stepMs.
      */
     public void syncRemote(List<pl.fawizja.pixel.net.RemoteEntity> seen, long now, long stepMs) {
+        remote = true;
         Map<Integer, Monster> byId = new HashMap<>();
         for (Monster m : monsters) byId.put(m.id(), m);
         java.util.Set<Integer> keep = new java.util.HashSet<>();
@@ -271,12 +385,15 @@ public final class MonsterManager {
             keep.add(e.id());
             Monster m = byId.get(e.id());
             if (m == null) {
-                MonsterType type = registry.get(e.key());
-                if ("E".equals(e.mark())) type = type.eliteVariant(); // serwer oznacza elitarne
+                MonsterType type = variantFor(registry.get(e.key()), e.mark()); // serwer oznacza pod wpływem i diaboliczne
                 m = new Monster(e.id(), type, new SpawnPoint(e.key(), e.position(), 0, 1, 60), e.position());
                 monsters.add(m);
                 grid.add(m);
-            } else if (!m.position().equals(e.position())) {
+            } else {
+                MonsterType type = variantFor(m.type().base(), e.mark());
+                if (type != m.type()) m.changeType(type); // stal sie diaboliczny albo wrocil do zwyklego
+            }
+            if (!m.position().equals(e.position())) {
                 Position from = m.position();
                 Direction d = Direction.fromDelta(Integer.signum(e.position().x() - from.x()), Integer.signum(e.position().y() - from.y()));
                 if (from.distanceTo(e.position()) > 1 || from.z() != e.position().z() || d == null) m.placeAt(e.position());
@@ -348,6 +465,7 @@ public final class MonsterManager {
     private void updateMonsters(long now, List<? extends Target> targets, AttackHandler handler) {
         pathBudget = MAX_PATH_SEARCHES_PER_UPDATE;
         updateNightSpawns(now, targets);
+        updateForge(now);
         for (Map.Entry<SpawnPoint, List<Long>> e : respawnQueue.entrySet()) {
             List<Long> times = e.getValue();
             if (e.getKey().nightOnly() && !night) continue;

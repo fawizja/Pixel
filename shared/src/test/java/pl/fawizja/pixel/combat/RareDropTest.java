@@ -32,7 +32,8 @@ class RareDropTest {
         MonsterType golem = REG.get("ice_golem");
         assertTrue(CombatSystem.isRare(golem, 10));
         assertFalse(CombatSystem.isRare(golem, 11));
-        assertTrue(CombatSystem.isRare(golem.eliteVariant(), 20), "elite tables double the chance");
+        assertTrue(CombatSystem.isRare(golem.influenced(3), 10), "influenced creatures keep the loot table");
+        assertFalse(CombatSystem.isRare(golem.fiendish(), 11));
     }
 
     @Test

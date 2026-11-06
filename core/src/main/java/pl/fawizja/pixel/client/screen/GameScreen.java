@@ -1879,10 +1879,16 @@ public final class GameScreen extends ScreenAdapter {
                 float mx = mrx + (lg == null ? 0f : lg[0]);
                 float my = worldRenderer.worldY(mry + (lg == null ? 0f : lg[1]));
                 boolean flip = m.facing() != null && m.facing().dx < 0;
-                if (m.type().isElite()) {
-                    // elita: wiekszy i zlocisty
-                    b.setColor(1f, 0.85f, 0.45f, 1f);
+                if (m.type().isFiendish()) {
+                    // diaboliczny (Kuznia): wiekszy, czerwono-fioletowy
+                    b.setColor(1f, 0.55f, 0.75f, 1f);
                     b.draw(tr, flip ? mx + 1.15f : mx - 0.15f, my, flip ? -1.3f : 1.3f, 1.3f);
+                    b.setColor(Color.WHITE);
+                } else if (m.type().isInfluenced()) {
+                    // pod wpływem: fioletowa poswiata, odrobine wiekszy z kazdym stopniem
+                    float sc = 1f + 0.04f * m.type().forgeStack(), off = (sc - 1f) / 2f;
+                    b.setColor(0.85f, 0.75f, 1f, 1f);
+                    b.draw(tr, flip ? mx + 1f + off : mx - off, my, flip ? -sc : sc, sc);
                     b.setColor(Color.WHITE);
                 } else {
                     b.draw(tr, flip ? mx + 1f : mx, my, flip ? -1f : 1f, 1f);
@@ -2521,6 +2527,25 @@ public final class GameScreen extends ScreenAdapter {
                 shapes.triangle(cx - 0.12f, cy, cx + 0.12f, cy, cx, cy + 0.12f);
                 shapes.triangle(cx - 0.12f, cy, cx + 0.12f, cy, cx, cy - 0.12f);
             }
+            if (m.type().isElite()) {
+                // Kuznia: ikona z lewej nad paskiem - pod wpływem fioletowa z kropkami stopnia, diaboliczny czerwona korona
+                float cx = mx - 0.08f, cy = my + 1.07f;
+                boolean fiend = m.type().isFiendish();
+                shapes.setColor(0.08f, 0f, 0.1f, 0.9f);
+                shapes.circle(cx, cy, fiend ? 0.17f : 0.14f, 14);
+                shapes.setColor(fiend ? 0.95f : 0.62f, fiend ? 0.15f : 0.3f, fiend ? 0.35f : 0.95f, 1f);
+                shapes.circle(cx, cy, fiend ? 0.13f : 0.105f, 14);
+                if (fiend) {
+                    shapes.setColor(1f, 0.85f, 0.3f, 1f);
+                    shapes.triangle(cx - 0.09f, cy - 0.03f, cx - 0.03f, cy - 0.03f, cx - 0.06f, cy + 0.09f);
+                    shapes.triangle(cx - 0.03f, cy - 0.03f, cx + 0.03f, cy - 0.03f, cx, cy + 0.11f);
+                    shapes.triangle(cx + 0.03f, cy - 0.03f, cx + 0.09f, cy - 0.03f, cx + 0.06f, cy + 0.09f);
+                } else {
+                    int n = m.type().forgeStack();
+                    shapes.setColor(1f, 1f, 1f, 1f);
+                    for (int i = 0; i < n; i++) shapes.rect(mx + 0.1f + i * 0.09f, my + 1.13f, 0.06f, 0.06f);
+                }
+            }
             // pasek zycia nad kazdym potworem jak w Tibii (kolor wg procentu)
             overheadBar(shapes, mx, my + 1.02f, m.healthFraction(), null);
         }
@@ -2685,6 +2710,18 @@ public final class GameScreen extends ScreenAdapter {
                         font.getData().setScale(scale);
                         continue;
                     }
+                    if (pl.fawizja.pixel.combat.CombatSystem.ONSLAUGHT_EFFECT.equals(e.effect())) {
+                        // Natarcie (Kuznia): czerwona liczba i napis "natarcie"
+                        text = e.amount() + "!";
+                        font.getData().setScale(scale * 1.35f);
+                        outlinedFade(batch, font, text, projected.x - text.length() * 3.5f * scale * 1.35f, projected.y + 6 * scale,
+                                1f, 0.3f, 0.25f, 1f - age, ui);
+                        font.getData().setScale(scale * 0.8f);
+                        outlinedFade(batch, font, "natarcie", projected.x - 8 * 3.5f * scale * 0.8f, projected.y + 22 * scale,
+                                1f, 0.5f, 0.45f, 1f - age, ui);
+                        font.getData().setScale(scale);
+                        continue;
+                    }
                     if (pl.fawizja.pixel.combat.CombatSystem.MANA_EFFECT.equals(e.effect())) {
                         // wyssanie many: niebieska liczba (utracona mana)
                         font.setColor(0.35f, 0.55f, 1f, 1f - age);
@@ -2696,7 +2733,11 @@ public final class GameScreen extends ScreenAdapter {
                     text = String.valueOf(e.amount());
                     break;
                 case HEAL: font.setColor(0.4f, 1f, 0.4f, 1f - age); text = "+" + e.amount(); break;
-                case BLOCKED: font.setColor(0.6f, 0.8f, 1f, 1f - age); text = "blok"; break;
+                case BLOCKED:
+                    boolean dodge = pl.fawizja.pixel.combat.CombatSystem.DODGE_EFFECT.equals(e.effect());
+                    font.setColor(dodge ? 0.7f : 0.6f, dodge ? 1f : 0.8f, dodge ? 0.7f : 1f, 1f - age);
+                    text = dodge ? "unik" : "blok";
+                    break;
                 case LEVEL_UP: font.setColor(1f, 0.9f, 0.3f, 1f - age); text = "POZIOM " + e.amount() + "!"; break;
                 case EXP: font.setColor(1f, 1f, 1f, 1f - age); text = e.amount() + " exp"; break; // jak w Tibii: biala liczba doswiadczenia
                 default: continue;
@@ -3042,6 +3083,16 @@ public final class GameScreen extends ScreenAdapter {
                 case "MARKET":
                     hud.openMarket(pl.fawizja.pixel.market.MarketView.parse(m));
                     break;
+                case "FIEND": {
+                    // diaboliczne potwory na minimapie (serwer co 5 s po zmianie): "x,y,z" w kazdym polu
+                    List<Position> where = new ArrayList<>();
+                    for (int i = 1; i < m.length; i++) {
+                        String[] c = m[i].split(",");
+                        if (c.length == 3) where.add(new Position(Integer.parseInt(c[0]), Integer.parseInt(c[1]), Integer.parseInt(c[2])));
+                    }
+                    session.setRemoteFiendish(where);
+                    break;
+                }
                 case "FRIENDS":
                     if (!quiet) hud.openFriends(pl.fawizja.pixel.friends.FriendsView.parse(m));
                     break;

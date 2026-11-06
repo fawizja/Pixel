@@ -51,3 +51,6 @@ magma_cleaver;magma_cleaver;1;obsidian_shard:20;40000;250;Broń rycerza: Ostrze 
 glacier_axe;glacier_axe;1;glacial_core:20,obsidian_shard:10;150000;450;Broń rycerza: Topór wykuty w lodzie olbrzymów.
 umbral_blade;umbral_blade;1;shadow_essence:20,glacial_core:10;400000;700;Broń rycerza: Miecz z cienia, ostry jak noc.
 abyssal_greatsword;abyssal_greatsword;1;abyssal_ember:25,shadow_essence:15;1000000;850;Broń rycerza: Ostrze wykute z serca Otchłani.
+obsidian_boots;obsidian_boots;1;obsidian_shard:12;25000;250;Buty z płytek obsydianu.
+glacial_boots;glacial_boots;1;glacial_core:12,obsidian_shard:4;90000;450;Buty z lodowych rdzeni.
+shadow_boots;shadow_boots;1;shadow_essence:12,glacial_core:4;250000;700;Buty utkane z cienia.

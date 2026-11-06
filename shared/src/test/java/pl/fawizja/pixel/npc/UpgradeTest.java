@@ -78,7 +78,7 @@ class UpgradeTest {
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
         pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(40) - pc.experience());
         GameSession s = new TownServicesTest().session(pc, List.of());
-        Npc merchant = TownServicesTest.npcs.get("varden_merchant");
+        Npc merchant = TownServicesTest.npcs.get("varden_smith");
         s.teleport(TownServicesTest.talkSpot(merchant), 1000);
         pc.equipment().setDirect(EquipSlot.WEAPON, new ItemStack(sword, 1));
         assertTrue(Money.add(pc.backpack(), 2_000_000).ok());
@@ -97,6 +97,8 @@ class UpgradeTest {
         assertFalse(s.upgradeEquipped(EquipSlot.RING, t++), "nothing worn there");
 
         // hurtowa sprzedaz pomija ulepszony egzemplarz
+        s.teleport(TownServicesTest.talkSpot(TownServicesTest.npcs.get("varden_merchant")), t++);
+        assertFalse(s.upgradeEquipped(EquipSlot.WEAPON, t++), "only smiths upgrade");
         pc.backpack().add(new ItemStack(sword, 1, 4));
         pc.backpack().add(new ItemStack(sword, 1));
         assertTrue(s.sellAll(sword, t++).ok());

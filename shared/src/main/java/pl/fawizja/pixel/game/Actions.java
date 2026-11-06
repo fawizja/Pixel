@@ -63,6 +63,23 @@ public final class Actions {
         return true;
     }
 
+    /**
+     * Kuznia u kowala: npc:forge:fuse:poleA:poleB:rdzenSzansy(0/1):rdzenOchrony(0/1), npc:forge:transfer:dawca:biorca,
+     * npc:forge:slivers (60 pylu na 3 odlamki), npc:forge:core (50 odlamkow na rdzen), npc:forge:limit.
+     */
+    private static boolean forge(GameSession s, String[] p, long now) {
+        switch (p[2]) {
+            case "fuse":
+                s.forgeFuse(Integer.parseInt(p[3]), Integer.parseInt(p[4]), "1".equals(p[5]), "1".equals(p[6]), now);
+                return true;
+            case "transfer": s.forgeTransfer(Integer.parseInt(p[3]), Integer.parseInt(p[4]), now); return true;
+            case "slivers":
+            case "core": s.forgeConvert(p[2], now); return true;
+            case "limit": s.forgeRaiseLimit(now); return true;
+            default: return false;
+        }
+    }
+
     private static boolean npc(GameSession s, String[] p, long now) {
         switch (p[1]) {
             case "buy": s.buy(Integer.parseInt(p[2]), Integer.parseInt(p[3]), now); return true;
@@ -82,6 +99,11 @@ public final class Actions {
             case "promote": s.buyPromotion(now); return true;
             case "upgrade": s.upgradeEquipped(pl.fawizja.pixel.item.EquipSlot.valueOf(p[2]), now); return true;
             case "enchant": s.buyEnchantment(pl.fawizja.pixel.item.Enchantments.Kind.valueOf(p[2]), now); return true;
+            case "forge": return forge(s, p, now);
+            case "imbue": // npc:imbue:SLOT:RODZAJ:STOPIEN
+                s.imbue(pl.fawizja.pixel.item.EquipSlot.valueOf(p[2]), pl.fawizja.pixel.item.Imbuement.valueOf(p[3]), Integer.parseInt(p[4]), now);
+                return true;
+            case "unimbue": s.clearImbuement(pl.fawizja.pixel.item.EquipSlot.valueOf(p[2]), Integer.parseInt(p[3]), now); return true;
             case "travel": s.travel(p[2], now); return true;
             case "settle": s.settleHere(now); return true;
             case "housebuy": s.buyHouse(p[2], now); return true;

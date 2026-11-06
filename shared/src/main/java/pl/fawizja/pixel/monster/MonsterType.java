@@ -36,12 +36,26 @@ public final class MonsterType {
     private final String race;
     /** Drugi atak (np. wyssanie zycia) albo null. */
     private final ExtraAttack extraAttack;
-    /** Elitarna odmiana (wiekszy, silniejszy, wiecej doswiadczenia i lupow); ten sam klucz co zwykly. */
-    private boolean elite;
-    private MonsterType eliteVariant;
+    /**
+     * Stopien Kuzni (Tibia "forge stack"): 0 = zwykly, 1..5 = pod wpływem (Influenced), 15 = diaboliczny (Fiendish).
+     * Odmiany maja ten sam klucz co zwykly potwor: grafika, bestiariusz i zadania licza je jak zwyklego.
+     */
+    private int forgeStack;
+    private MonsterType base = this;
+    private final MonsterType[] forgeVariants = new MonsterType[FIENDISH_STACK + 1];
 
-    /** Szansa (promile) na elitarna odmiane zwyklego potwora przy pojawieniu sie. */
-    public static final int ELITE_PERMILLE = 40;
+    /** Stopien diabolicznego potwora (Canary configureForgeSystem). */
+    public static final int FIENDISH_STACK = 15;
+    /**
+     * Szansa (promile) na potwora pod wpływem przy pojawieniu sie. Tibia: 300 na serwer (forgeInfluencedLimit);
+     * u nas ok. 3% z 7352 potworow swiata (~220), limit 300 pilnuje MonsterManager.
+     */
+    public static final int INFLUENCED_PERMILLE = 30;
+    /**
+     * Rozklad stopni 1..5 (promile, narastajaco) jak Canary normal_random(1, 5): N(0,5; 0,25) obciety do [0, 1],
+     * zaokraglony do 5 stopni - 4,6% / 25,3% / 40,1% / 25,3% / 4,6%.
+     */
+    static final int[] STAGE_CUMULATIVE = {46, 299, 700, 953, 1000};
 
     public MonsterType(String key, String name, int level, int maxHealth, long experience, int speed,
                        int attackMin, int attackMax, DamageType damageType, int range, int attackIntervalMs,
@@ -139,33 +153,83 @@ public final class MonsterType {
         return new Strike(damageType, pl.fawizja.pixel.combat.CombatFormulas.rollBetween(attackMin, attackMax, rng));
     }
 
-    public boolean isElite() { return elite; }
+    /** Stopien Kuzni: 0, 1..5 (pod wpływem) albo 15 (diaboliczny). */
+    public int forgeStack() { return forgeStack; }
+    public boolean isInfluenced() { return forgeStack >= 1 && forgeStack <= 5; }
+    public boolean isFiendish() { return forgeStack == FIENDISH_STACK; }
+    /** Potwor pod wpływem albo diaboliczny (dawna "elita": bestiariusz i osiagniecia licza je razem). */
+    public boolean isElite() { return forgeStack > 0; }
+    /** Zwykla odmiana (dla zwyklego potwora: on sam). */
+    public MonsterType base() { return base; }
+
+    /** Mnozniki Canary wg stopnia s (monster.cpp): zdrowie 1 + (15s + 35) / 100. */
+    public static double healthFactor(int s) { return s <= 0 ? 1 : 1 + (15.0 * s + 35) / 100.0; }
+    /** Obrazenia 1,35 + (s - 1) x 0,1 (getAttackMultiplier). */
+    public static double damageFactor(int s) { return s <= 0 ? 1 : 1.35 + (s - 1) * 0.1; }
+    /** Obrona 1 + 0,1 x s (getDefenseMultiplier) - u nas pancerz. */
+    public static double defenseFactor(int s) { return s <= 0 ? 1 : 1 + 0.1 * s; }
+    /**
+     * Doswiadczenie (s + 10) / 10 jak zamierza Canary getLostExperience: +10..+50%, diaboliczny x2,5. (Canary liczy to
+     * na liczbach calkowitych i daje x1 / x2 - prawdziwa premia w Tibii niezweryfikowana.)
+     */
+    public static double experienceFactor(int s) { return s <= 0 ? 1 : (s + 10) / 10.0; }
+
+    /** Czy potwor moze zostac pod wpływem albo diaboliczny (jak canBeForgeMonster: nie boss, zostawia lup). */
+    public boolean canBeForge() { return forgeStack == 0 && !boss && !loot.isEmpty(); }
+
+    /** Pod wpływem stopnia 1..5. */
+    public MonsterType influenced(int stage) { return forgeVariant(Math.max(1, Math.min(5, stage))); }
+
+    public MonsterType fiendish() { return forgeVariant(FIENDISH_STACK); }
 
     /**
-     * Elitarna odmiana: 2x zdrowie, 1,3x obrazenia, 3x doswiadczenie, 2x szansa na kazdy lup (do 100%).
-     * Bossowie i odmiany elitarne zwracaja siebie. Ten sam klucz: grafika, bestiariusz i zadania licza go jak zwyklego.
+     * Odmiana Kuzni o stopniu stack (1..5 albo 15; 0 = zwykly); bossowie i potwory bez lupu zwracaja siebie.
+     * Lup bez zmian (Canary nie ma mnoznika lupu; diaboliczny dodaje odlamki - CombatSystem).
      */
-    public synchronized MonsterType eliteVariant() {
-        if (boss || elite) return this;
-        if (eliteVariant == null) {
-            List<LootEntry> l = new java.util.ArrayList<>();
-            for (LootEntry e : loot) l.add(new LootEntry(e.itemId(), Math.min(1000, e.chancePermille() * 2), e.min(), e.max()));
-            MonsterType t = new MonsterType(key, name + " (elita)", level, maxHealth * 2, experience * 3, speed,
-                    (int) Math.round(attackMin * 1.3), (int) Math.round(attackMax * 1.3), damageType, range, attackIntervalMs,
-                    armor, resistances, behavior, aggroRange, fleeHealthPercent, healAmount, false, color, shape, biome,
-                    nocturnal, description, l, race, extraAttack == null ? null : extraAttack.scaled(1.3));
-            t.elite = true;
-            eliteVariant = t;
+    public synchronized MonsterType forgeVariant(int stack) {
+        MonsterType b = base;
+        if (stack <= 0) return b;
+        if (stack != FIENDISH_STACK) stack = Math.max(1, Math.min(5, stack));
+        if (b.boss || b.loot.isEmpty()) return b;
+        if (b != this) return b.forgeVariant(stack);
+        if (forgeVariants[stack] == null) {
+            double d = damageFactor(stack);
+            MonsterType t = new MonsterType(key, name, level, (int) Math.ceil(maxHealth * healthFactor(stack)),
+                    Math.round(experience * experienceFactor(stack)), speed,
+                    (int) Math.round(attackMin * d), (int) Math.round(attackMax * d), damageType, range, attackIntervalMs,
+                    (int) Math.round(armor * defenseFactor(stack)), resistances, behavior, aggroRange, fleeHealthPercent,
+                    healAmount, false, color, shape, biome, nocturnal, description, loot, race,
+                    extraAttack == null ? null : extraAttack.scaled(d));
+            t.forgeStack = stack;
+            t.base = this;
+            forgeVariants[stack] = t;
         }
-        return eliteVariant;
+        return forgeVariants[stack];
     }
 
-    /** Czy potwor o danym numerze jest elitarny: los z numeru (bez zuzywania generatora - powtarzalne spawny). */
-    public static boolean eliteRoll(int monsterId) {
-        long x = monsterId * 0x9E3779B97F4A7C15L;
+    /** Opis stopnia: "pod wpływem (3)" / "diaboliczny" / "". */
+    public String forgeLabel() {
+        if (isFiendish()) return "diaboliczny";
+        return isInfluenced() ? "pod wpływem (" + forgeStack + ")" : "";
+    }
+
+    private static long mix(long x) {
+        x *= 0x9E3779B97F4A7C15L;
         x ^= x >>> 31;
         x *= 0xBF58476D1CE4E5B9L;
         x ^= x >>> 29;
-        return Math.floorMod(x, 1000L) < ELITE_PERMILLE;
+        return x;
     }
+
+    /**
+     * Stopien pod wpływem potwora o danym numerze (0 = zwykly): los z numeru, bez zuzywania generatora
+     * (powtarzalne spawny), {@link #INFLUENCED_PERMILLE} promili, stopien wg {@link #STAGE_CUMULATIVE}.
+     */
+    public static int forgeRoll(int monsterId) {
+        if (Math.floorMod(mix(monsterId), 1000L) >= INFLUENCED_PERMILLE) return 0;
+        long r = Math.floorMod(mix(monsterId ^ 0x5DEECE66DL), 1000L);
+        for (int i = 0; i < STAGE_CUMULATIVE.length; i++) if (r < STAGE_CUMULATIVE[i]) return i + 1;
+        return 5;
+    }
+
 }
