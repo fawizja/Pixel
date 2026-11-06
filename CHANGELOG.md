@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.237.0] - 2026-11-06
+
+### Dodano
+- Przycisk „Koło” na górze ekranu: na komputerze zakładka w prawym górnym rogu widoku gry, na telefonie
+  dziewiąta ikona na górnym pasku (między Zadaniami a Ustawieniami). Widoczny dla każdej postaci.
+- Koło Przeznaczenia jako duże koło w ramce, jak w Tibii:
+  - 4 kolorowe ćwiartki i 36 pól jako pierścienie (środek 50, potem 75, 100, 150, 200), wypełnienie każdego pola
+    widoczne na kole, znaczki tego, co daje pole (czar, umiejętność, kradzież, naczynie na klejnot);
+  - postęp objawień na obręczy i odznaki objawień w rogach;
+  - dotknięcie pola pokazuje obok jego kartę z opisem i przyciskami +1, +10, Do pełna, -1, Opróżnij;
+  - przyciski Klejnoty, Zestawy, Premie, Wyczyść;
+  - postać bez poziomu 51, promocji albo premium widzi zablokowane koło z listą brakujących wymagań.
+
+### Poprawiono
+- Układ pól na kole: każde pole leży obok pól, które je odblokowują (wcześniej górne pola czerwonej i fioletowej
+  ćwiartki były po złej stronie).
+
 ## [0.236.0] - 2026-11-06
 
 ### Dodano
