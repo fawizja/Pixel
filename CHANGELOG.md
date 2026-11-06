@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.232.0] - 2026-11-06
+
+### Dodano
+- Bestiary jak w Tibii: 20 klas potworów, gwiazdki trudności i progi zabójstw z Tibii (np. średnie 50/500/1000).
+  Cztery etapy odkrywania: podstawy, potem zdrowie, doświadczenie i pospolity łup, potem odporności, miejsca
+  i rzadszy łup, a na koniec cały łup i punkty charmów. Łup jest opisany kategoriami rzadkości jak w Tibii
+  zamiast procentów.
+- Charmy jak w obecnej Tibii: wszystkie 25 charmów, 14 Major za punkty charmów i 11 Minor za echa, poziomy I/II/III.
+  Na stworzeniu może być 1 Major i 1 Minor; sloty: 2 bez premium, 6 z premium. Major wymaga ukończonego wpisu.
+  Działają w walce: żywiołowe (Rana, Podpalenie, Trucizna, Zamrożenie, Porażenie, Klątwa, Boski gniew), Niski
+  i Dziki cios (krytyki), kradzież życia i many, Unik, Riposta, Okaleczenie, Zastrzyk adrenaliny, Błogosławieństwo
+  (mniej straty doświadczenia) i inne. Zadziałanie charmu widać jako fioletową liczbę z nazwą.
+- Zdjęcie charmu kosztuje złoto (ceny z Tibii podzielone przez 4, jak reszta ekonomii).
+
 ## [0.231.0] - 2026-11-05
 
 ### Zmieniono
