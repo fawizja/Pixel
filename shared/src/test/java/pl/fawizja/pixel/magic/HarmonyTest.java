@@ -205,4 +205,20 @@ class HarmonyTest {
         assertEquals(Virtue.JUSTICE, client.harmony().virtue());
         assertFalse(client.harmony().serene());
     }
+
+    @Test
+    void harmonyFieldOfThePlayerLineRoundTrips() {
+        assertEquals("-", pl.fawizja.pixel.net.RemoteEntity.harmonyField(-1, true));
+        assertEquals("3S", pl.fawizja.pixel.net.RemoteEntity.harmonyField(3, true));
+        assertEquals("5", pl.fawizja.pixel.net.RemoteEntity.harmonyField(9, false));
+        assertEquals(3, pl.fawizja.pixel.net.RemoteEntity.harmonyPoints("3S"));
+        assertTrue(pl.fawizja.pixel.net.RemoteEntity.harmonySerene("3S"));
+        assertEquals(0, pl.fawizja.pixel.net.RemoteEntity.harmonyPoints("0"));
+        assertFalse(pl.fawizja.pixel.net.RemoteEntity.harmonySerene("0"));
+        // starszy serwer (brak pola) albo smieci: brak harmonii
+        assertEquals(-1, pl.fawizja.pixel.net.RemoteEntity.harmonyPoints("-"));
+        assertEquals(-1, pl.fawizja.pixel.net.RemoteEntity.harmonyPoints("xS"));
+        assertFalse(pl.fawizja.pixel.net.RemoteEntity.harmonySerene("-"));
+        assertFalse(pl.fawizja.pixel.net.RemoteEntity.harmonySerene("S"));
+    }
 }

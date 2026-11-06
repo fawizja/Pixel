@@ -177,6 +177,10 @@ npc_guard_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=5
 monk_harmony|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=3 -Dpixel.virtue=HARMONY
 monk_harmony_mobile|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=5 -Dpixel.virtue=JUSTICE -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 monk_virtues|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=3 -Dpixel.virtue=HARMONY -Dpixel.open=virtues
+# harmonia nad postacia jak w Tibii: 5 kropek pod paskami (4 pelne) i rombik spokoju; obok inni mnisi z serwera
+# (5 bez spokoju, 2 w spokoju z czerwona czaszka pod kropkami, 0) i rycerz bez kropek; telefon: to samo w duzej skali
+monk_harmony_overhead|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=4 -Dpixel.open=monks
+monk_harmony_overhead_mobile|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=30 -Dpixel.harmony=4 -Dpixel.open=monks -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 combat_crit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.crit=true
 item_protection|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bagitem -Dpixel.lookItem=obsidian_armor
 combat_stats|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=combatgear

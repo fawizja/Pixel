@@ -1049,6 +1049,11 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
 - **Smierc** zeruje harmonie (cnota zostaje), **wylogowanie** nie: pole `monk=punkty,CNOTA,spokoj,wymuszenieMs`
   w zapisie postaci (bez podbijania wersji CharacterCodec; brak pola = stan poczatkowy). To samo pole idzie
   w komunikacie SELF, wiec klient online widzi harmonie, cnote i spokoj serwera.
+- **Harmonia nad postacia** (jak w Tibii, `HarmonyPips`): pod paskami zycia/many mnicha rzadek 5 malych
+  kwadratowych kropek (pelne zlote, puste ciemne), przy spokoju obok niebieski rombik; czaszka PvP schodzi pod
+  kropki. Inni gracze widza to z serwera: ostatnie pole wiersza `PL` (`-` = nie mnich, `3` = 3 punkty, `3S` =
+  3 punkty i spokoj; starsi klienci pomijaja pole, wersja protokolu bez zmian). Kule harmonii w HUD zostaja -
+  tylko tam widac cnote i tylko one otwieraja wybor cnoty/opis po dotknieciu. Podglad: `-Dpixel.open=monks`.
 - **Czary mnicha** (role i liczby z Canary; ataki fizyczne, wzor `moc * piesci/100 * atak broni/10 + poziom/5`
   (`SpellSystem.monkPower`, bez broni atak 7), rozrzut +-10%). Dodatek Pixela: premia nowicjusza
   `max(0, 40 - poziom) * 1` (`Harmony.noviceBonus`) - przy piesciach 10 sam wzor Canary daje na 8 poziomie ~4

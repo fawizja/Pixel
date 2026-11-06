@@ -17,8 +17,10 @@ import java.util.List;
  * TARGET idPotwora                      FRAME   czasSerwera            (poczatek klatki stanu)
  * CHAT   tekst                          ME      x y z KIERUNEK czaszka (wlasna pozycja)
  * PVP    ON|OFF|TOGGLE (tryb PvP)       TG      idPotwora | -          (cel walki)
- *                                       PL      id imie PROFESJA x y z hp% czaszka gildia M|- zwierze tytul stroj P|-
- *                                               (inny gracz w zasiegu, M = na koniu, P = tryb PvP wlaczony)
+ *                                       PL      id imie PROFESJA x y z hp% czaszka gildia M|- zwierze tytul stroj P|- harmonia
+ *                                               (inny gracz w zasiegu, M = na koniu, P = tryb PvP wlaczony;
+ *                                               harmonia mnicha: "-" = nie mnich, "N" = N punktow, "NS" = N i spokoj;
+ *                                               starsi klienci pomijaja dodatkowe pole, wersja protokolu bez zmian)
  *                                       PVP     1|0 czaszka czaszkaDo blokadaPzDo (po zmianie; czasy serwera, 0 = brak)
  * BYE                                   MO      id klucz x y z hp%     (potwor w zasiegu)
  *                                       END                            (koniec klatki)
