@@ -268,7 +268,14 @@ Każda profesja w 4 kierunkach.
 | `items/great_health_potion.png` | Silna mikstura zdrowia (potion) | tak |
 | `items/great_mana_potion.png` | Silna mikstura many (potion) | tak |
 | `items/great_spirit_potion.png` | Silna mikstura ducha (potion) | tak |
+| `items/greater_gem_fragment.png` | Większy okruch klejnotu (material, OTSP) | tak |
+| `items/greater_guardian_gem.png` | Większy klejnot strażnika (material, OTSP przebarwiony) | tak |
+| `items/greater_marksman_gem.png` | Większy klejnot strzelca (material, OTSP przebarwiony) | tak |
+| `items/greater_mystic_gem.png` | Większy klejnot mistyka (material, OTSP przebarwiony) | tak |
+| `items/greater_sage_gem.png` | Większy klejnot mędrca (material, OTSP przebarwiony) | tak |
+| `items/greater_spiritualist_gem.png` | Większy klejnot spirytualisty (material, OTSP przebarwiony) | tak |
 | `items/grimtooth_crown.png` | Korona Grimtootha (armor) | tak |
+| `items/guardian_gem.png` | Klejnot strażnika (material, OTSP przebarwiony) | tak |
 | `items/healing_herb.png` | Ziele lecznicze (material) | tak |
 | `items/healing_rune.png` | Runa leczenia (rune) | tak |
 | `items/health_potion.png` | Mikstura zdrowia (potion) | tak |
@@ -283,14 +290,22 @@ Każda profesja w 4 kierunkach.
 | `items/leather_boots.png` | Skórzane buty (armor) | tak |
 | `items/leather_helmet.png` | Skórzany hełm (armor) | tak |
 | `items/leather_legs.png` | Skórzane spodnie (armor) | tak |
+| `items/lesser_gem_fragment.png` | Mniejszy okruch klejnotu (material, OTSP) | tak |
+| `items/lesser_guardian_gem.png` | Mniejszy klejnot strażnika (material, OTSP przebarwiony) | tak |
+| `items/lesser_marksman_gem.png` | Mniejszy klejnot strzelca (material, OTSP przebarwiony) | tak |
+| `items/lesser_mystic_gem.png` | Mniejszy klejnot mistyka (material, OTSP przebarwiony) | tak |
+| `items/lesser_sage_gem.png` | Mniejszy klejnot mędrca (material, OTSP przebarwiony) | tak |
+| `items/lesser_spiritualist_gem.png` | Mniejszy klejnot spirytualisty (material, OTSP przebarwiony) | tak |
 | `items/magma_spear.png` | Magmowa włócznia (weapon) | tak |
 | `items/mana_potion.png` | Mikstura many (potion) | tak |
+| `items/marksman_gem.png` | Klejnot strzelca (material, OTSP przebarwiony) | tak |
 | `items/meat.png` | Mięso (food) | tak |
 | `items/miner_helmet.png` | Hełm górnika (armor) | tak |
 | `items/mirewood_rod.png` | Laska z Topieli (weapon) | tak |
 | `items/mist_essence.png` | Esencja mgły (material) | tak |
 | `items/molten_knuckles.png` | Stopione kastety (weapon) | tak |
 | `items/mummy_wrap.png` | Bandaż mumii (material) | tak |
+| `items/mystic_gem.png` | Klejnot mistyka (material, OTSP przebarwiony) | tak |
 | `items/oasis_carp.png` | Karp z oazy (food) |  |
 | `items/obsidian_armor.png` | Obsydianowa zbroja (armor) | tak |
 | `items/obsidian_helmet.png` | Obsydianowy hełm (armor) | tak |
@@ -318,6 +333,7 @@ Każda profesja w 4 kierunkach.
 | `items/rod_of_vines.png` | Laska pnączy (weapon) | tak |
 | `items/rope.png` | Lina (tool) | tak |
 | `items/saddle.png` | Siodło (tool) | tak |
+| `items/sage_gem.png` | Klejnot mędrca (material, OTSP przebarwiony) | tak |
 | `items/sandstone_shield.png` | Tarcza z piaskowca (shield) | tak |
 | `items/scarab_gem.png` | Klejnot skarabeusza (material) | tak |
 | `items/scarab_helmet.png` | Hełm skarabeusza (armor) | tak |
@@ -333,6 +349,7 @@ Każda profesja w 4 kierunkach.
 | `items/snake_skin.png` | Wężowa skóra (material) | tak |
 | `items/spear.png` | Włócznia (ammunition) | tak |
 | `items/spider_silk.png` | Pajęcza nić (material) | tak |
+| `items/spiritualist_gem.png` | Klejnot spirytualisty (material, OTSP przebarwiony) | tak |
 | `items/starfall_wand.png` | Różdżka spadających gwiazd (weapon) | tak |
 | `items/steel_spear.png` | Stalowa włócznia (weapon) | tak |
 | `items/stormcaller_wand.png` | Różdżka wołająca burzę (weapon) | tak |

@@ -162,19 +162,54 @@ public final class WheelPerks {
             case MANA: return "+" + manaPerPoint(v) + " many za punkt";
             case HP_MANA: return "+" + hpPerPoint(v) + " HP i +" + manaPerPoint(v) + " many za punkt";
             case CAP: return "+" + capPerPoint(v) + " udźwigu za punkt";
-            default: return "+0,03% mitygacji za punkt";
+            default: return "+" + SpellAugment.num(MITIGATION_PER_POINT) + "% mitygacji za punkt";
         }
+    }
+
+    /** Oddanie jednego punktu krotko: "+3 HP", "+3 HP, +1 many", "+0,03% mitygacji". */
+    public static String perPoint(WheelSlice s, Vocation v) { return dedicationAt(s, v, 1); }
+
+    /** Suma oddania przy p punktach w polu: "+150 HP", "+6% mitygacji". */
+    public static String dedicationAt(WheelSlice s, Vocation v, int p) {
+        switch (s.stat) {
+            case HP: return "+" + p * hpPerPoint(v) + " HP";
+            case MANA: return "+" + p * manaPerPoint(v) + " many";
+            case HP_MANA: return "+" + p * hpPerPoint(v) + " HP, +" + p * manaPerPoint(v) + " many";
+            case CAP: return "+" + p * capPerPoint(v) + " udźwigu";
+            default: return "+" + SpellAugment.num(Math.round(p * MITIGATION_PER_POINT * 100) / 100.0) + "% mitygacji";
+        }
+    }
+
+    /** Krotka nazwa umiejetnosci z przekonania do list: "walka wręcz", "dystans", "magia", "pięści". */
+    public static String skillShort(Vocation v) {
+        switch (v) {
+            case KNIGHT: return "walka wręcz";
+            case PALADIN: return "dystans";
+            case MONK: return "pięści";
+            default: return "poziom magii";
+        }
+    }
+
+    /** Angielska nazwa z Tibii z nazwy stalej: BATTLE_INSTINCT -> "Battle Instinct", AVATAR_OF_STEEL -> "Avatar of Steel". */
+    static String tibiaName(String constant) {
+        StringBuilder b = new StringBuilder();
+        for (String w : constant.toLowerCase(java.util.Locale.ROOT).split("_")) {
+            if (b.length() > 0) b.append(' ');
+            boolean small = b.length() > 0 && (w.equals("of") || w.equals("the"));
+            b.append(small ? w : Character.toUpperCase(w.charAt(0)) + w.substring(1));
+        }
+        return b.toString();
     }
 
     /** Opis przekonania pola po polsku dla profesji. */
     public static String conviction(WheelSlice s, Vocation v) {
         switch (s.conviction) {
             case SKILL: return "+1 " + skillLabel(v);
-            case LIFE_LEECH: return "+0,75% kradzieży życia";
-            case MANA_LEECH: return "+0,25% kradzieży many";
+            case LIFE_LEECH: return "+" + SpellAugment.num(LIFE_LEECH) + "% kradzieży życia";
+            case MANA_LEECH: return "+" + SpellAugment.num(MANA_LEECH) + "% kradzieży many";
             case PASSIVE_A: return WheelPassive.of(v, true).label + ": " + WheelPassive.of(v, true).description;
             case PASSIVE_B: return WheelPassive.of(v, false).label + ": " + WheelPassive.of(v, false).description;
-            case VESSEL: return "naczynie klejnotu (bez klejnotów)";
+            case VESSEL: return "naczynie klejnotu: +1 rezonansu domeny";
             default: {
                 Upgrade u = upgrade(v, s.conviction.spellGroup());
                 return "ulepszenie czaru " + u.tibia;

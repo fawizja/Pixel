@@ -237,8 +237,14 @@ public final class PlayerCharacter {
 
     public pl.fawizja.pixel.wheel.DestinyWheel wheel() { return wheel; }
 
-    /** Punkty promocji Kola Przeznaczenia: poziom - 50 od poziomu 51, z promocja i premium; inaczej 0. */
-    public int wheelPoints() { return pl.fawizja.pixel.wheel.DestinyWheel.available(level, promoted, premium); }
+    /**
+     * Punkty promocji Kola Przeznaczenia: poziom - 50 od poziomu 51, z promocja i premium; inaczej 0. Kazdy mod klejnotu
+     * na stopniu IV dodaje 1 punkt (jak w Tibii).
+     */
+    public int wheelPoints() {
+        int p = pl.fawizja.pixel.wheel.DestinyWheel.available(level, promoted, premium);
+        return p > 0 ? p + wheel.gems().maxedMods() : 0;
+    }
 
     /** Premie z kola (oddanie, przekonanie, objawienia); puste bez promocji, premium albo poziomu 51. */
     public pl.fawizja.pixel.wheel.WheelBonus wheelBonus() { return wheel.bonus(vocation, wheelPoints() > 0); }

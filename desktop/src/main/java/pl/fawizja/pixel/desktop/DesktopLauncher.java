@@ -50,7 +50,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
- *   -Dpixel.open=wheel[=id]  podglad Kola Przeznaczenia (np. wheel=wheel:q:P, wheel=wheel:perks); -Dpixel.wheelOrder=PRBG, -Dpixel.wheelAvatar=true
+ *   -Dpixel.open=wheel[=id]  podglad Kola Przeznaczenia (np. wheel=wheel:q:P, wheel=wheel:perks, wheel=wheel:gems:0); -Dpixel.wheelOrder=PRBG,
+ *                           -Dpixel.wheelAvatar=true, -Dpixel.wheelGems=true (klejnoty, naczynia i okruchy do podgladu)
  *   -Dpixel.open=bestcard|bestclass|charms[=id]  podglad bestiariusza i charmow (np. charms=charm:sel:WOUND); -Dpixel.charmProc=true liczby charmow
  *   -Dpixel.open=fishing  wedka w rece, robaki w plecaku, 4 zarzucenia nad woda (np. -Dpixel.teleport=470,483,0)
  *   -Dpixel.stamina=M    nowa postac z M minutami staminy (np. 750 = 12:30, pomaranczowa); -Dpixel.premium=1 konto premium
@@ -457,6 +458,7 @@ public final class DesktopLauncher {
                     pc.setPromoted(true);
                     pc.setPremium(true);
                     fillWheel(pc, System.getProperty("pixel.wheelOrder", "PRBG"));
+                    if (Boolean.getBoolean("pixel.wheelGems")) wheelGems(pc, gs.session().items());
                     if (Boolean.getBoolean("pixel.wheelAvatar")) {
                         pc.wheel().startAvatar(pc.wheelBonus().stage(pl.fawizja.pixel.wheel.WheelDomain.PURPLE),
                                 pl.fawizja.pixel.wheel.DestinyWheel.AVATAR_COOLDOWN_MS);
@@ -858,6 +860,34 @@ public final class DesktopLauncher {
             if (s.trim().length() > 2) return pl.fawizja.pixel.world.Direction.valueOf(s.trim().toUpperCase(java.util.Locale.ROOT));
             k = k.replaceAll("_+$", "");
             return pl.fawizja.pixel.world.Direction.valueOf(k);
+        }
+
+        /**
+         * Podglad klejnotow (-Dpixel.wheelGems=true): nieodkryte klejnoty i okruchy w plecaku, kilka odkrytych klejnotow
+         * (staly generator), wiekszy w naczyniu fioletowej domeny, zwykly w czerwonej, dwa mody na wyzszym stopniu.
+         */
+        private static void wheelGems(pl.fawizja.pixel.character.PlayerCharacter pc, pl.fawizja.pixel.item.ItemRegistry items) {
+            pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
+            java.util.Random rng = new java.util.Random(7);
+            for (pl.fawizja.pixel.wheel.GemQuality q : pl.fawizja.pixel.wheel.GemQuality.values()) {
+                pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(items.byKey(pl.fawizja.pixel.wheel.GemAtelier.gemKey(pc.vocation(), q)).id(),
+                        q == pl.fawizja.pixel.wheel.GemQuality.LESSER ? 3 : 1));
+            }
+            pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(items.byKey(pl.fawizja.pixel.wheel.GemAtelier.LESSER_FRAGMENT_KEY).id(), 12));
+            pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(items.byKey(pl.fawizja.pixel.wheel.GemAtelier.GREATER_FRAGMENT_KEY).id(), 6));
+            pl.fawizja.pixel.wheel.WheelGem lesser = a.reveal(pl.fawizja.pixel.wheel.GemQuality.LESSER, pc.vocation(), rng);
+            a.reveal(pl.fawizja.pixel.wheel.GemQuality.LESSER, pc.vocation(), rng);
+            pl.fawizja.pixel.wheel.WheelGem regular = a.reveal(pl.fawizja.pixel.wheel.GemQuality.REGULAR, pc.vocation(), rng);
+            pl.fawizja.pixel.wheel.WheelGem greater = a.reveal(pl.fawizja.pixel.wheel.GemQuality.GREATER, pc.vocation(), rng);
+            while (greater.domain() != pl.fawizja.pixel.wheel.WheelDomain.PURPLE) a.switchDomain(greater.id);
+            while (regular.domain() != pl.fawizja.pixel.wheel.WheelDomain.RED) a.switchDomain(regular.id);
+            a.socket(greater.id);
+            a.socket(regular.id);
+            a.toggleLock(lesser.id);
+            a.gradeUp(greater.basic1);
+            a.gradeUp(greater.basic1);
+            a.gradeUp(greater.supreme, pc.vocation());
+            pc.refreshWheel();
         }
 
         /** Podglad kola: zapelnia otwarte pola cwiartek w podanej kolejnosci (np. "PRBG"), az skoncza sie punkty. */

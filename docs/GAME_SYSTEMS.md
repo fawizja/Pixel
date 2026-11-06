@@ -997,7 +997,7 @@ opisuje "Uproszczenia" nizej.
   many 0,25%, ulepszenie czaru (`WheelPerks`, 5 grup na profesje; stopien = liczba pelnych pol grupy, 1-2),
   pasywki pol 200 (`WheelPassive`: zielone 200 Instynkt bitewny / Taktyka pozycyjna / Mistrzostwo run / Wiez
   lecznicza / Przewodnia obecnosc, fioletowe 200 Leczenie w boju / Mistrzostwo balistyki / Mistrzostwo skupienia /
-  Mistrzostwo run / Sanktuarium), naczynia klejnotow (puste - klejnoty to dalszy etap).
+  Mistrzostwo run / Sanktuarium), naczynia klejnotow (+1 rezonansu naczynia domeny, ponizej).
 - Objawienia: etap 1/2/3 przy 250/500/1000 punktach w cwiartce; kazdy etap kazdej cwiartki daje +4/+9/+20
   obrazen (tylko w potwory) i leczenia. Zielona: Dar Zycia (smiertelny cios, ktorego nadwyzka nie przekracza
   20/25/30% maks. HP, leczy tyle procent i postac przezywa; odnowienie 30/20/10 h gry; skraca odnowienia czarow
@@ -1018,10 +1018,19 @@ opisuje "Uproszczenia" nizej.
   wczytanie zestawu i reset (bez oplaty jak w Tibii) tylko w swiatyni. 3 zestawy.
 - Akcje (`Actions`, online ACT na serwerze): `wheel:add:KOD:n`, `wheel:remove:KOD:n`, `wheel:reset`,
   `wheel:save:i`, `wheel:load:i` (KOD jak `GT75`, `R50`, `P200`). Stan wraca do klienta w SELF.
-- Okno (`WheelView` + klient `WheelWindows`, wspolne okno informacyjne HUD): przeglad (punkty, swiatynia,
-  4 kafle cwiartek z postepem objawienia, aktywne premie, zestawy, czyszczenie), cwiartka (9 pol), karta pola
-  (+1 / +10 / do pelna / -1 / -10 / oproznij). Na komputerze w pustej kolumnie rysowane jest kolo (36 pol,
-  kolor wg zapelnienia). Wejscie: klawisz U, `/koło`, Opcje, kaplan w rozmowie.
+- Okno (`WheelView` + klient `WheelWindows`, wspolne okno informacyjne HUD): przeglad (punkty i swiatynia w jednym
+  wierszu, 4 kafle cwiartek z postepem objawienia, aktywne premie, klejnoty i naczynia, zestawy, czyszczenie),
+  cwiartka (objawienie + 9 pol z krotkim efektem `WheelView.shortEffect`, np. "+3 HP/pkt; pełne: +1 walka wręcz",
+  przy czarze "Wstrząs ziemi I: +12,5% obrażeń", stan w etykiecie), karta pola jak dymek z Tibii: oddanie za punkt /
+  teraz / przy pelnym polu, nastepny punkt, przekonanie (czar po polsku z nazwa z Tibii, stopien I i II z
+  `WheelPerks.Upgrade`, drugie pole grupy, uwaga o zamienniku; pasywka z nazwa z Tibii i dzialaniem; naczynie z
+  rezonansem i klejnotem), objawienie domeny, wymagania, przyciski +1 / +10 / do pelna / -1 / oproznij. Karta
+  objawienia (`wheel:rev:G|R|P|B`): nazwa (i z Tibii), czar, etapy 1-3 z progami i stanem, moc objawien
+  (+4/+9/+20), Mistrzostwo objawienia z klejnotu. Wszystkie opisy sa skladane z danych (`WheelPerks`,
+  `SpellAugment.describe`, `WheelPassive`, `WheelRevelation` - teksty Daru Zycia i awatara z `WheelEffects` /
+  `DestinyWheel`), wiec tekst nie rozjedzie sie z kodem. Na komputerze w pustej kolumnie rysowane jest kolo (36 pol,
+  kolor wg zapelnienia, romby na polach naczyn: jasny = klejnot w naczyniu i pole pelne). Wejscie: klawisz U,
+  `/koło`, Opcje, kaplan w rozmowie.
 - Zapis: osobne pole `wheel` = `p=G50:50,...;s0=...;g=ms;a=ms;as=etap;ac=ms` bez zmiany wersji zapisu
   (rownolegle prace nad Kuznia podnosza wersje); zapis bez pola = puste kolo.
 - Uproszczenia i zamienniki:
@@ -1040,8 +1049,39 @@ opisuje "Uproszczenia" nizej.
 - Balans (`WheelBalanceTest`): 300 poziom, 250 pkt - srednio x1,02-1,15 "sily" (obrazenia x HP / otrzymane
   x kradziez) zaleznie od kolejnosci cwiartek; pelne kolo na 1000 poziomie ok. x1,08, z awatarem ok. x1,44
   na 15 s. Symulacja nie liczy ulepszen pojedynczych czarow (te ogranicza osobny test: najwyzej +50% obrazen).
-- Do zrobienia: klejnoty i naczynia (Gem Atelier, modyfikatory klejnotow), fragmenty (Lesser/Greater
-  Fragments), ulepszenia kolejnych etapow przez Revelation Mastery.
+
+### Klejnoty Kola (Wheel gems, `GemAtelier`, `WheelGem`, `GemDrops`, `GemView`)
+
+- Lup (`GemDrops`, Canary `wheel_gems.cpp` / `config.lua`): klejnot mniejszy / zwykly / wiekszy (`GemQuality`)
+  losowej rodziny profesji (straznik - rycerz, strzelec - paladyn, medrzec - czarodziej, mistyk - druid,
+  duchowy - mnich; przedmioty 220-234) z potworow pod wplywem 9% / 0% / 0%, diabolicznych 3% / 3% / 9%,
+  "archfoe" 0% / 9% / 3%; drugi los tylko po udanym pierwszym, najwyzej 2 / 2 / 1 sztuki. Archfoe w Pixelu =
+  boss od poziomu 200 (`GemDrops.ARCHFOE_MIN_LEVEL`). Hak: `CombatSystem.onMonsterDeath` po odlamkach Kuzni.
+- Pracownia (okno "Klejnoty i naczynia", `wheel:gems:0`): odkrycie klejnotu wlasnej profesji z plecaka za
+  125 000 / 1 000 000 / 6 000 000 gp (plecak albo bank) daje losowa domene i mody: mniejszy 1 mod podstawowy
+  (lista slotu 1 z Canary), zwykly 2 (drugi z listy slotu 2, inny niz pierwszy), wiekszy 2 + mod najwyzszy
+  profesji (`SupremeGemMod`). Do 225 klejnotow. Blokada chroni przed rozbiciem i zmiana domeny. Zmiana domeny
+  na nastepna (zielona -> czerwona -> fioletowa -> niebieska) za 125 000 / 250 000 / 500 000 gp. Rozbicie daje
+  1-5 / 2-10 mniejszych albo 1-5 wiekszych okruchow (srodek przedzialu najczestszy jak `normal_random`).
+- Naczynia: na cwiartke 3 pola z przekonaniem "naczynie"; rezonans = liczba pelnych pol naczyn domeny. Klejnot
+  domeny wlozony do naczynia (tylko w swiatyni) daje przy rezonansie 1 mod 1, przy 2 mod 2, przy 3 mod najwyzszy.
+- Mody podstawowe (`BasicGemMod`, wartosci z Canary `WheelModifierContext`): odpornosci (1-3%, pary, odpornosc
+  ze slaboscia), mitygacja, HP / mana / udzwig zalezne od profesji (pelny mod albo polowa z odpornoscia).
+  Mody najwyzsze: unik 0,28%, obrazenia krytyczne 2%, kradziez zycia 2% / many 0,8%, Mistrzostwo objawienia
+  (+150 punktow do etapu objawienia domeny), ulepszenia czarow profesji (obrazenia, krytyk, leczenie, odnowienie).
+- Warsztat okruchow: stopien modu I-IV wspolny dla wszystkich klejnotow postaci (mnoznik x1 / x1,1 / x1,2 / x1,5,
+  slabosci i odnowienia bez mnoznika). Podstawowy: 2 mln + 5, 5 mln + 15, 30 mln + 30 mniejszych okruchow;
+  najwyzszy: 5 mln + 5, 12 mln + 15, 75 mln + 30 wiekszych. Kazdy mod na stopniu IV daje +1 punkt promocji.
+- Haki: `WheelBonus` (HP, mana, udzwig, mitygacja, kradziez, etap objawienia), `WheelEffects.critDamage`,
+  `WheelEffects.gemResist` w `CombatFormulas.mitigateOnPlayer`, `gemDodge` w `ForgeEffects.rollRuse`,
+  `WheelSpells.augment` (mody czarow). Akcje: `wheel:gem:reveal:L|R|G`, `wheel:gem:lock|destroy|switch|socket:ID`,
+  `wheel:gem:unsocket:G|R|P|B`, `wheel:grade:b|s:MOD` (online ACT, stan w SELF). Zapis: osobne pole `gems`
+  (bez zmiany wersji), pusta pracownia nie jest zapisywana.
+- Niezweryfikowane / dopasowania: udzwig mnicha z modow jak rycerza (brak w Canary); slabosci z modow
+  zwiekszaja obrazenia (Canary liczy tylko dodatnie odpornosci); premia Rozpedu z modow odnowienia pominieta;
+  koszty w zlocie jak w Tibii (ekonomia Pixela moze wymagac skalowania); mitygacja 500 = 5% (interpretacja
+  jednostki); rozklad okruchow przyblizony; czary Tibii bez odpowiednika zastapione (np. Front Sweep -> Burza
+  ostrzy, Divine Missile -> Swiety pocisk).
 
 ## Rynek graczy (Z logika, S serwer, C okno)
 

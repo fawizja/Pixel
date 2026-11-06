@@ -28,14 +28,20 @@ public final class WheelBonus {
     public final int flatDamage;
     public final int flatHealing;
     private final Set<WheelPassive> passives;
+    /** Premie klejnotow w naczyniach (HP, mana, udzwig, mitygacja i kradziez sa juz wliczone w pola wyzej). */
+    private final GemAtelier.Effects gems;
 
     private WheelBonus() {
         health = mana = capacity = skill = flatDamage = flatHealing = 0;
         mitigation = lifeLeech = manaLeech = 0;
         passives = EnumSet.noneOf(WheelPassive.class);
+        gems = GemAtelier.Effects.NONE;
     }
 
-    WheelBonus(Vocation v, int[] points) {
+    WheelBonus(Vocation v, int[] points) { this(v, points, GemAtelier.Effects.NONE); }
+
+    WheelBonus(Vocation v, int[] points, GemAtelier.Effects gems) {
+        this.gems = gems;
         int hp = 0, mp = 0, cap = 0, sk = 0;
         double mit = 0, ll = 0, ml = 0;
         passives = EnumSet.noneOf(WheelPassive.class);
@@ -65,16 +71,17 @@ public final class WheelBonus {
         }
         int flat = 0;
         for (WheelDomain d : WheelDomain.values()) {
-            stages[d.ordinal()] = WheelDomain.stage(domainPoints[d.ordinal()]);
+            // Mistrzostwo objawienia (mod najwyzszy klejnotu) dodaje punkty tylko do liczenia etapu (Canary getPlayerSliceStage)
+            stages[d.ordinal()] = WheelDomain.stage(domainPoints[d.ordinal()] + gems.revelation(d));
             if (stages[d.ordinal()] > 0) flat += WheelDomain.STAGE_FLAT[stages[d.ordinal()] - 1];
         }
-        health = hp;
-        mana = mp;
-        capacity = cap;
-        mitigation = mit;
+        health = hp + gems.health;
+        mana = mp + gems.mana;
+        capacity = cap + gems.capacity;
+        mitigation = mit + gems.mitigation;
         skill = sk;
-        lifeLeech = ll;
-        manaLeech = ml;
+        lifeLeech = ll + gems.lifeLeech;
+        manaLeech = ml + gems.manaLeech;
         flatDamage = flat;
         flatHealing = flat;
     }
@@ -82,6 +89,8 @@ public final class WheelBonus {
     public int grade(int group) { return grades[group]; }
     public int stage(WheelDomain d) { return stages[d.ordinal()]; }
     public int domainPoints(WheelDomain d) { return domainPoints[d.ordinal()]; }
+    /** Premie klejnotow (odpornosci, unik, krytyk, czary, Mistrzostwo objawienia). */
+    public GemAtelier.Effects gems() { return gems; }
     public boolean has(WheelPassive p) { return passives.contains(p); }
     public Set<WheelPassive> passives() { return java.util.Collections.unmodifiableSet(passives); }
 

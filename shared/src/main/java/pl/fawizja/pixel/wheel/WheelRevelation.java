@@ -8,10 +8,7 @@ import pl.fawizja.pixel.vocation.Vocation;
  * profesji. Stopien 1/2/3 od 250/500/1000 punktow w domenie. Opisy stopni po polsku.
  */
 public enum WheelRevelation {
-    GIFT_OF_LIFE("Dar Życia", null,
-            "śmiertelny cios leczy 20% HP zamiast zabić (odnowienie 30 h gry)",
-            "śmiertelny cios leczy 25% HP (odnowienie 20 h gry)",
-            "śmiertelny cios leczy 30% HP (odnowienie 10 h gry)"),
+    GIFT_OF_LIFE("Dar Życia", null, gift(1), gift(2), gift(3)),
     EXECUTIONERS_THROW("Rzut kata", "executioners_throw",
             "Rzut kata: +100% obrażeń w cel z HP do 30%",
             "+125% obrażeń w cel z HP do 30%, -2 s odnowienia",
@@ -69,9 +66,25 @@ public enum WheelRevelation {
         this.stages = new String[] {s1, s2, s3};
     }
 
+    private static String gift(int stage) {
+        return "śmiertelny cios leczy " + WheelEffects.GIFT_PERCENT[stage - 1] + "% HP" + (stage == 1 ? " zamiast zabić" : "")
+                + " (odnowienie " + WheelEffects.GIFT_COOLDOWN_H[stage - 1] + " h gry)";
+    }
+
     private static String avatar(int stage) {
-        return (stage == 1 ? "odblokowuje awatara: " : "") + "15 s: -" + (5 * stage) + "% otrzymanych obrażeń, 100% krytyków, +"
-                + (5 * stage) + "% obrażeń krytycznych; odnowienie " + (stage == 1 ? "2 h" : stage == 2 ? "1,5 h" : "1 h");
+        long cd = DestinyWheel.AVATAR_COOLDOWN_MS - (stage - 1) * DestinyWheel.AVATAR_COOLDOWN_CUT_MS;
+        return (stage == 1 ? "odblokowuje awatara: " : "") + DestinyWheel.AVATAR_MS / 1000 + " s: -" + (5 * stage)
+                + "% otrzymanych obrażeń, 100% krytyków, +" + (5 * stage) + "% obrażeń krytycznych; odnowienie "
+                + SpellAugment.num(cd / 3_600_000.0) + " h";
+    }
+
+    /** Nazwa w Tibii, np. "Executioner's Throw". */
+    public String tibia() {
+        switch (this) {
+            case EXECUTIONERS_THROW: return "Executioner's Throw";
+            case TWIN_BURST: return "Twin Bursts";
+            default: return WheelPerks.tibiaName(name());
+        }
     }
 
     /** Opis stopnia 1..3. */

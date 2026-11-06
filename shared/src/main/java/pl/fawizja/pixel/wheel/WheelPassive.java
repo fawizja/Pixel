@@ -47,6 +47,9 @@ public enum WheelPassive {
         this.description = description;
     }
 
+    /** Nazwa w Tibii, np. "Battle Instinct". */
+    public String tibia() { return WheelPerks.tibiaName(name()); }
+
     /** Pasywka pola GREEN_200 (a = true) albo PURPLE_200 dla profesji. */
     public static WheelPassive of(Vocation v, boolean a) {
         switch (v) {

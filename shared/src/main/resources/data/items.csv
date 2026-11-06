@@ -192,3 +192,21 @@
 246;glacial_boots;Lodowe buty;ARMOR;1;45000;FEET;0;0;4;450;*;0;0;PHYSICAL;-;ICE:4;#c8ecff;Buty z lodowego kryształu.
 247;shadow_boots;Buty cienia;ARMOR;1;140000;FEET;0;0;4;700;*;0;0;PHYSICAL;-;DEATH:3;#40305a;Bezgłośne buty utkane z cienia.
 248;abyssal_treads;Kroki Otchłani;ARMOR;1;450000;FEET;0;0;5;900;*;0;0;PHYSICAL;-;FIRE:4,DEATH:4;#ff6040;Buty władcy Otchłani. Zostawia je tylko Morgath.
+# 2026-11-06: klejnoty Kola Przeznaczenia (Pracownia klejnotow) i okruchy klejnotow
+220;lesser_guardian_gem;Mniejszy klejnot strażnika;MATERIAL;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e04848;Lśni mocą rycerzy. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+221;guardian_gem;Klejnot strażnika;MATERIAL;100;50000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e04848;Lśni mocą rycerzy. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+222;greater_guardian_gem;Większy klejnot strażnika;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e04848;Lśni mocą rycerzy. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+223;lesser_marksman_gem;Mniejszy klejnot strzelca;MATERIAL;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#58c060;Lśni mocą paladynów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+224;marksman_gem;Klejnot strzelca;MATERIAL;100;50000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#58c060;Lśni mocą paladynów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+225;greater_marksman_gem;Większy klejnot strzelca;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#58c060;Lśni mocą paladynów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+226;lesser_sage_gem;Mniejszy klejnot mędrca;MATERIAL;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#a868e8;Lśni mocą czarodziejów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+227;sage_gem;Klejnot mędrca;MATERIAL;100;50000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#a868e8;Lśni mocą czarodziejów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+228;greater_sage_gem;Większy klejnot mędrca;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#a868e8;Lśni mocą czarodziejów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+229;lesser_mystic_gem;Mniejszy klejnot mistyka;MATERIAL;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#4c98e8;Lśni mocą druidów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+230;mystic_gem;Klejnot mistyka;MATERIAL;100;50000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#4c98e8;Lśni mocą druidów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+231;greater_mystic_gem;Większy klejnot mistyka;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#4c98e8;Lśni mocą druidów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+232;lesser_spiritualist_gem;Mniejszy klejnot spirytualisty;MATERIAL;100;10000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8b840;Lśni mocą mnichów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+233;spiritualist_gem;Klejnot spirytualisty;MATERIAL;100;50000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8b840;Lśni mocą mnichów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+234;greater_spiritualist_gem;Większy klejnot spirytualisty;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8b840;Lśni mocą mnichów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
+235;lesser_gem_fragment;Mniejszy okruch klejnotu;MATERIAL;100;5000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#c8b8a0;Z rozbitego mniejszego albo zwykłego klejnotu. Podnosi stopień modyfikatorów podstawowych.
+236;greater_gem_fragment;Większy okruch klejnotu;MATERIAL;100;20000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#f0a0d0;Z rozbitego większego klejnotu. Podnosi stopień modyfikatorów najwyższych.

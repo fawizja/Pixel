@@ -71,6 +71,7 @@ public final class WheelSpells {
             WheelPerks.Upgrade u = WheelPerks.upgrade(v, g);
             if (u.spells.contains(s.key())) a = a.plus(u.at(b.grade(g)));
         }
+        a = a.plus(b.gems().spell(s.key())); // klejnoty: mody najwyzsze czarow (obrazenia, krytyk, leczenie, odnowienie)
         int st = revelationStage(pc, s.key());
         int extra = Math.max(0, st - 1); // stopnie 2 i 3
         switch (s.key()) {
