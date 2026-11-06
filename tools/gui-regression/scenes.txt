@@ -180,3 +180,9 @@ monk_virtues|-Dpixel.autostart=Test:MONK -Dpixel.hour=12 -Dpixel.teleport=498,49
 combat_crit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.crit=true
 item_protection|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bagitem -Dpixel.lookItem=obsidian_armor
 combat_stats|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=combatgear
+# 2026-11-06: bestiariusz jak w Tibii (gwiazdki, 4 etapy, rzadkosc lupu) i charmy (Major/Minor, stopnie I-III)
+bestiary_class|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bestclass
+bestiary_card|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=bestcard
+charm_list|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=charms
+charm_assigned|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=charms=charm:sel:WOUND
+charm_proc|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.charmProc=true

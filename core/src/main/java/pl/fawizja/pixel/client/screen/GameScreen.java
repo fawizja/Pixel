@@ -316,6 +316,10 @@ public final class GameScreen extends ScreenAdapter {
             }
         });
         if (game.monsters() != null) hud.setMonsterSpecies(game.monsters().all().size());
+        java.util.function.Supplier<java.util.Collection<pl.fawizja.pixel.monster.MonsterType>> types =
+                () -> game.monsters() == null ? java.util.Collections.emptyList() : game.monsters().all();
+        hud.setBestiaryTypes(types);
+        this.bestiaryWindows = new pl.fawizja.pixel.client.ui.BestiaryWindows(hud, session, types, this::act);
         Gdx.input.setCatchKey(Input.Keys.BACK, true); // Wstecz na Androidzie zamyka okna zamiast konczyc gre
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
@@ -678,17 +682,10 @@ public final class GameScreen extends ScreenAdapter {
                     String typed = id.substring("cmd:".length());
                     if (pl.fawizja.pixel.net.Emotes.text(typed) != null || pl.fawizja.pixel.net.Emotes.diceSides(typed) > 0) hud.closeTop(session);
                     sendChat(id.substring("cmd:".length())); // polecenie z okna /pomoc
-                } else if (id.startsWith("best:")) {
-                    // karta potwora z bestiariusza (dane z lokalnego rejestru, dziala tez online)
-                    String key = id.substring("best:".length());
-                    pl.fawizja.pixel.monster.MonsterType mt = game.monsters().contains(key) ? game.monsters().get(key) : null;
-                    if (mt != null) {
-                        java.util.List<String[]> card = pl.fawizja.pixel.achievement.BestiaryCard.rows(mt,
-                                session.character().bestiary().kills(key), session.items());
-                        String where = pl.fawizja.pixel.achievement.BestiaryCard.habitats(key, session.monsters().spawns(), session.world());
-                        if (!where.isEmpty() && session.character().bestiary().kills(key) > 0) card.add(1, new String[] {"Występuje", where});
-                        hud.openInfo(mt.name(), card);
-                    }
+                } else if (id.equals("ach:bestiary")) {
+                    hud.openAchievements(true);
+                } else if (bestiaryWindows.handle(id, t)) {
+                    // bestiariusz (klasy, karta potwora) i charmy: okna w BestiaryWindows
                 } else if (id.startsWith("outfit:")) {
                     chooseOutfit(id.substring("outfit:".length()));
                 } else if (id.startsWith("ach:title:")) {
@@ -1400,7 +1397,14 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     /** Odswiezanie otwartego okna analizy co sekunde; licznik startuje z pierwsza klatka gry. */
+    /** Okna bestiariusza i charmow (klasa, karta, charmy). */
+    private pl.fawizja.pixel.client.ui.BestiaryWindows bestiaryWindows;
+
+    /** Podglad okien bestiariusza i charmow (-Dpixel.open=bestiary_stage / charms / charm). */
+    public pl.fawizja.pixel.client.ui.BestiaryWindows bestiaryWindows() { return bestiaryWindows; }
+
     private void updateHunt(long t) {
+        bestiaryWindows.update(t);
         if (hunt == null) hunt = new pl.fawizja.pixel.stats.HuntAnalyzer(session.items());
         if (!hunt.started()) hunt.reset(t, session.character());
         if (t - huntRefreshMs >= 1000 && hud.infoOpen(HUNT_TITLE)) {
@@ -2670,6 +2674,22 @@ public final class GameScreen extends ScreenAdapter {
             projected.set(e.position().x() + 0.5f, worldRenderer.worldY(e.position().y()) + 0.9f + age * 0.8f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
             String text;
+            pl.fawizja.pixel.charm.Charm charmFx = pl.fawizja.pixel.charm.CharmEffects.fromEvent(e.effect());
+            if (charmFx != null && (e.kind() == CombatEvent.Kind.HIT_MONSTER || e.kind() == CombatEvent.Kind.BLOCKED)) {
+                // charm: fioletowa liczba (gdy zadal obrazenia) i nazwa charmu pod nia
+                if (e.amount() > 0) {
+                    text = String.valueOf(e.amount());
+                    font.getData().setScale(scale * 1.2f);
+                    outlinedFade(batch, font, text, projected.x - text.length() * 3.5f * scale * 1.2f, projected.y + 6 * scale,
+                            0.82f, 0.5f, 1f, 1f - age, ui);
+                }
+                String label = charmFx.label().toLowerCase(java.util.Locale.ROOT);
+                font.getData().setScale(scale * 0.8f);
+                outlinedFade(batch, font, label, projected.x - label.length() * 3.5f * scale * 0.8f,
+                        projected.y + (e.amount() > 0 ? 22 : 8) * scale, 0.9f, 0.7f, 1f, 1f - age, ui);
+                font.getData().setScale(scale);
+                continue;
+            }
             switch (e.kind()) {
                 case HIT_MONSTER:
                 case HIT_PLAYER:

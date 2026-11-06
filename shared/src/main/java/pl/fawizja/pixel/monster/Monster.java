@@ -23,6 +23,9 @@ public final class Monster {
     /** Ostatnie miejsce, gdzie potwor widzial gracza, i kiedy (poscig za znikajacym z oczu). */
     private Position lastSeen;
     private long lastSeenMs;
+    /** Charmy (Okaleczenie, Odretwienie, Smiertelny chwyt): paraliz i zakaz ucieczki do tego czasu. */
+    private long paralyzedUntilMs = Long.MIN_VALUE;
+    private long fleeBlockedUntilMs = Long.MIN_VALUE;
 
     public Monster(int id, MonsterType type, SpawnPoint spawn, Position position) {
         this.id = id;
@@ -46,6 +49,13 @@ public final class Monster {
     void markHealed() { healedOnce = true; }
     /** Osaczony potwor przestaje uciekac i walczy do konca (do powrotu na spawn). */
     public boolean cornered() { return cornered; }
+
+    /** Paraliz (charm Okaleczenie / Odretwienie): potwor chodzi wolniej do podanego czasu. */
+    public void paralyze(long untilMs) { paralyzedUntilMs = Math.max(paralyzedUntilMs, untilMs); }
+    public boolean paralyzed(long now) { return now < paralyzedUntilMs; }
+    /** Smiertelny chwyt: potwor nie ucieka (niskie zdrowie) do podanego czasu. */
+    public void holdFromFleeing(long untilMs) { fleeBlockedUntilMs = Math.max(fleeBlockedUntilMs, untilMs); }
+    public boolean fleeBlocked(long now) { return now < fleeBlockedUntilMs; }
 
     /** Gracz, na ktorego potwor teraz poluje (wielu graczy: serwer kieruje atak do jego sesji). */
     public MonsterManager.Target target() { return target; }

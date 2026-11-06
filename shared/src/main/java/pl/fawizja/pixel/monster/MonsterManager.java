@@ -489,7 +489,8 @@ public final class MonsterManager {
             case CHASE:
             case FLEE:
                 if (!targetValid || (!inView && !remembers) || tooFarFromHome) m.setState(MonsterState.RETURN);
-                else if (!m.cornered() && t.fleeHealthPercent() > 0 && m.healthFraction() * 100 < t.fleeHealthPercent()) {
+                else if (m.state() == MonsterState.FLEE && m.fleeBlocked(now)) m.setState(MonsterState.CHASE); // charm Smiertelny chwyt
+                else if (!m.cornered() && !m.fleeBlocked(now) && t.fleeHealthPercent() > 0 && m.healthFraction() * 100 < t.fleeHealthPercent()) {
                     m.setState(MonsterState.FLEE);
                 }
                 break;
@@ -655,6 +656,7 @@ public final class MonsterManager {
         // krok po skosie trwa jak u gracza: DIAGONAL_STEP_FACTOR prostych
         long ms = Balance.stepDurationMs(m.type().speed(), false)
                 * (d.diagonal() ? pl.fawizja.pixel.movement.MovementSystem.DIAGONAL_STEP_FACTOR : 1);
+        if (m.paralyzed(now)) ms *= pl.fawizja.pixel.charm.CharmEffects.PARALYZE_STEP_FACTOR; // charm Okaleczenie / Odretwienie
         m.moveTo(to, d, now, ms);
         grid.moved(m, from);
     }

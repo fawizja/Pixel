@@ -14,7 +14,8 @@ import pl.fawizja.pixel.item.Enchantments;
  *       szansy i +{@link Enchantments#CRIT_BONUS_PERCENT}% obrazen; wszystko sie dodaje (nie mnozy),</li>
  *   <li>krytyk losuje sie raz na rzut: cios bronia, czar albo runa - przy czarze obszarowym ten sam wynik dla
  *       wszystkich celow; leczenie nie bywa krytyczne,</li>
- *   <li>dziala na potwory i na graczy (PvP), jak w Canary.</li>
+ *   <li>dziala na potwory i na graczy (PvP), jak w Canary; charmy Niski cios (+szansa) i Dziki cios (+obrazenia)
+ *       tylko przeciw potworowi, na ktory je zalozono ({@link pl.fawizja.pixel.charm.CharmEffects}).</li>
  * </ul>
  */
 public final class CriticalHit {
@@ -45,9 +46,12 @@ public final class CriticalHit {
     }
 
     /** Obrazenia po krytyku: raw * (1 + obrazenia krytyczne). */
-    public static int apply(PlayerCharacter pc, int raw, boolean critical) {
+    public static int apply(PlayerCharacter pc, int raw, boolean critical) { return apply(pc, raw, critical, 0); }
+
+    /** Jak wyzej z dodatkowymi obrazeniami krytycznymi w procentach (charm Dziki cios przeciw potworowi). */
+    public static int apply(PlayerCharacter pc, int raw, boolean critical, double bonusDamage) {
         if (!critical || raw <= 0) return raw;
-        return (int) Math.min(Integer.MAX_VALUE, Math.round(raw * (1 + extraDamage(pc) / 100.0)));
+        return (int) Math.min(Integer.MAX_VALUE, Math.round(raw * (1 + (extraDamage(pc) + bonusDamage) / 100.0)));
     }
 
     /** Opis do okna postaci: "5% szansy, +10% obrażeń". */

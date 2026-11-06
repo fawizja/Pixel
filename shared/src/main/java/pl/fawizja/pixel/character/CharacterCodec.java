@@ -73,6 +73,8 @@ public final class CharacterCodec {
         for (int i = 0; i < pc.friends().size(); i++) m.put("fr." + i, pc.friends().names().get(i));
         for (String k : pc.bestiary().keys()) m.put("kill." + k, pc.bestiary().encodeValue(k));
         if (pc.bestiary().eliteKills() > 0) m.put("elites", String.valueOf(pc.bestiary().eliteKills()));
+        // charmy: osobne pole bez podbijania wersji, zapisywane zawsze - brak pola = zapis sprzed charmow (migracja przy odczycie)
+        m.put("charms", pc.charms().encode());
         if (pc.achievements().count() > 0) m.put("achievements", pc.achievements().encode());
         if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
         if (!pc.hunt().encode().isEmpty()) m.put("hunt", pc.hunt().encode());
@@ -320,6 +322,9 @@ public final class CharacterCodec {
         if (m.containsKey("outfit")) pc.setOutfit(Outfit.parse(m.get("outfit")));
         if (m.containsKey("tips")) pc.restoreTips(Long.parseLong(m.get("tips")));
         if (m.containsKey("elites")) pc.bestiary().restoreElites(m.get("elites"));
+        // zapis sprzed charmow: punkty za juz ukonczone wpisy bestiariusza, jakby przyznano je przy ukonczeniu
+        if (m.containsKey("charms")) pc.charms().decode(m.get("charms"));
+        else pc.charms().migrateFrom(pc.bestiary());
         pc.setCrates(m.getOrDefault("crates", ""));
         pc.setWallLights(m.getOrDefault("walllights", ""));
         String chests = m.get("chests");

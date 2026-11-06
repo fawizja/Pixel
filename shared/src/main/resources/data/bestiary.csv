@@ -1,0 +1,83 @@
+# Bestiariusz jak w Tibii: odpowiednik potwora w Tibii (pliki Canary monster.Bestiary) - trudnosc (gwiazdki 0-5)
+# i wystepowanie (0 pospolity, 1 niepospolity, 2 rzadki, 3 bardzo rzadki). Progi zabic i punkty charmow wynikaja
+# z trudnosci (BestiaryDifficulty). Bossowie nie maja wpisu (w Tibii sa w Bosstiary).
+# key;odpowiednik w Tibii;gwiazdki;wystepowanie
+sewer_rat;Rat;1;0
+giant_rat;Cave Rat;1;0
+wolf;Wolf;1;0
+boar;Boar;2;0
+forest_spider;Poison Spider;1;0
+bandit;Bandit;2;0
+goblin;Goblin;1;0
+goblin_shaman;Goblin Scavenger;2;0
+skeleton;Skeleton;2;0
+cave_troll;Troll;1;0
+crystal_golem;Crystalcrusher;3;0
+snow_wolf;Winter Wolf;1;0
+yeti;Yeti;3;0
+frost_witch;Ice Witch;3;0
+ice_golem;Ice Golem;3;0
+crocodile;Crocodile;2;0
+jungle_serpent;Serpent Spawn;3;0
+jungle_hunter;Hunter;2;0
+temple_guardian;Eternal Guardian;3;0
+hyena;Hyaena;2;0
+scorpion;Scorpion;2;0
+sand_wraith;Lost Soul;3;0
+mummy;Mummy;2;0
+cursed_treant;Haunted Treeling;3;0
+wraith_knight;Undead Gladiator;3;0
+fire_elemental;Fire Elemental;3;0
+lava_golem;Lava Golem;4;1
+frost_giant;Frost Giant;2;0
+storm_harpy;Harpy;4;1
+ice_dragon;Frost Dragon;3;0
+shadow_stalker;Nightstalker;3;0
+sand_titan;Behemoth;3;0
+void_priest;Warlock;3;0
+abyssal_demon;Demon;4;0
+bone_dragon;Undead Dragon;4;0
+abyss_lord;Brachiodemon;5;0
+wyvern;Wyvern;3;0
+coral_crab;Crab;2;0
+drowned_sailor;Pirate Ghost;2;0
+pirate_cutthroat;Pirate Cutthroat;3;0
+pirate_gunner;Pirate Buccaneer;3;0
+mist_wraith;Phantasm;4;0
+magma_drake;Dragon Lord;3;0
+orc_warrior;Orc Warrior;2;0
+orc_shaman;Orc Shaman;2;0
+orc_berserker;Orc Berserker;3;0
+orc_warlord;Orc Warlord;3;0
+burrow_larva;Larva;2;0
+carrion_crow;Seagull;1;0
+snare_setter;Poacher;2;0
+cave_centipede;Centipede;2;0
+quarry_brute;Wild Warrior;2;0
+spark_wisp;Wisp;1;0
+candle_acolyte;Dark Magician;2;0
+tunnel_fence;Smuggler;2;0
+barrow_lantern;Ghost;2;0
+frost_boar;Mammoth;2;0
+swamp_hornet;Wasp;1;0
+sand_devourer;Terramite;2;0
+striped_prowler;Tiger;2;0
+bog_wraith;Bog Raider;3;0
+rime_crawler;Spitter;3;0
+gilded_beetle;Ancient Scarab;3;0
+frost_centipede;Crystal Spider;3;0
+dune_zealot;Priestess;3;0
+stone_sentinel;Stone Golem;2;0
+sand_gargoyle;Gargoyle;2;0
+blade_warden;Orewalker;4;1
+crimson_shade;Vampire Viscount;3;0
+ember_beetle;Brimstone Bug;3;0
+ash_magus;Infernalist;4;0
+dune_drake;Wyrm;3;0
+storm_wisp;Massive Energy Elemental;3;1
+rime_gargoyle;Lamassu;4;0
+dusk_gargoyle;Manticore;4;0
+shadow_centipede;Tunnel Tyrant;4;0
+abyss_crawler;Cave Devourer;4;0
+winged_spawn;Infernal Demon;5;0
+obsidian_sentinel;Rotten Golem;5;0

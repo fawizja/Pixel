@@ -37,10 +37,28 @@ public final class Leech {
         return p;
     }
 
+    /**
+     * Kradziez zycia przeciw potworowi: jak wyzej plus charm Wampirzy uscisk na tego potwora (Canary applyLifeLeech;
+     * tylko gdy postac ma juz kradziez zycia - opis charmu w Tibii). t = null: cel nie jest potworem.
+     */
+    public static double lifePercent(PlayerCharacter pc, pl.fawizja.pixel.monster.MonsterType t) {
+        double p = lifePercent(pc);
+        return p + pl.fawizja.pixel.charm.CharmEffects.lifeLeechBonus(pc, t, p);
+    }
+
+    /** Kradziez many przeciw potworowi: jak wyzej plus charm Zew pustki (tylko gdy postac ma juz kradziez many). */
+    public static double manaPercent(PlayerCharacter pc, pl.fawizja.pixel.monster.MonsterType t) {
+        double p = manaPercent(pc);
+        return p + pl.fawizja.pixel.charm.CharmEffects.manaLeechBonus(pc, t, p);
+    }
+
     /** Leczy postac i oddaje mane po trafieniu (dealt obrazen, targets celow tego rzutu). */
-    public static void apply(PlayerCharacter pc, int dealt, int targets) {
+    public static void apply(PlayerCharacter pc, int dealt, int targets) { apply(pc, dealt, targets, null); }
+
+    /** Jak wyzej, po trafieniu potwora t (charmy kradziezy). */
+    public static void apply(PlayerCharacter pc, int dealt, int targets, pl.fawizja.pixel.monster.MonsterType t) {
         if (pc.isDead() || dealt <= 0) return;
-        pc.heal(amount(dealt, lifePercent(pc), targets));
-        if (!pc.isDead()) pc.restoreMana(amount(dealt, manaPercent(pc), targets));
+        pc.heal(amount(dealt, lifePercent(pc, t), targets));
+        if (!pc.isDead()) pc.restoreMana(amount(dealt, manaPercent(pc, t), targets));
     }
 }
