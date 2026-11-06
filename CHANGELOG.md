@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.234.0] - 2026-11-06
+
+### Dodano
+- Koło Przeznaczenia (Wheel of Destiny) jak w Tibii dla wszystkich 5 profesji:
+  - od poziomu 51, z promocją i premium; 1 punkt za każdy poziom od 51;
+  - 36 pól w 4 ćwiartkach, pojemności, sąsiedztwo i progi z Tibii; punkty przestawia się w świątyni
+    (obok kapłana; zapisanie zestawu działa wszędzie), czyszczenie koła za darmo; 3 zestawy;
+  - oddanie (HP, mana, udźwig, ochrona za każdy punkt), przekonanie (umiejętność, kradzież życia i many,
+    wzmocnienia czarów profesji, pasywne premie);
+  - objawienia w każdej ćwiartce (250/500/1000 punktów): Dar Życia, awatar profesji na 15 s
+    (Stali, Światła, Natury, Burzy, Równowagi) i czary z Tibii, m.in. Divine Grenade, Great Death Beam,
+    Divine Empowerment, Terra i Ice Burst, Combat Mastery, Drain Body;
+  - okno na komputerze z rysowanym kołem i na telefonie jako 4 kafelki ćwiartek. Otwiera się klawiszem U,
+    poleceniem /koło, z menu Opcje albo u kapłana.
+- Kamienie (Gem Atelier) jeszcze nie działają, będą w kolejnej wersji.
+
 ## [0.233.0] - 2026-11-06
 
 ### Dodano
