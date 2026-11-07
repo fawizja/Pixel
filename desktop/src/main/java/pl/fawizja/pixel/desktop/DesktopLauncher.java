@@ -62,12 +62,15 @@ import pl.fawizja.pixel.world.Position;
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..8; 5-7 wewnetrzny luk, 8 rog) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
+ *   -Dpixel.lpcTrial=a|b|1             PROBA: wybrani NPC (Varden, krolowa Frostholm) w postaciach LPC (a: klatka 1:2, b/1: wysokosc OTSP)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
  */
 public final class DesktopLauncher {
 
     public static void main(String[] args) {
         pl.fawizja.pixel.client.render.TileArt.exportDir = System.getProperty("pixel.exportArt");
+        String lpc = System.getProperty("pixel.lpcTrial");   // proba postaci LPC: a = klatka 1:2, b (albo 1) = wysokosc OTSP
+        if (lpc != null && !lpc.isEmpty()) pl.fawizja.pixel.client.render.TileArt.lpcTrial = "a".equals(lpc) ? "a" : "b";
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Pixel");
         config.setWindowedMode(Integer.getInteger("pixel.width", 1280), Integer.getInteger("pixel.height", 720));

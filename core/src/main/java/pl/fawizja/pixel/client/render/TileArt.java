@@ -294,7 +294,12 @@ public final class TileArt implements Disposable {
             }
         }
         for (int i = 0; i < mtypes.size(); i++) override(pm, MONSTER_BASE + i, "monsters/" + mtypes.get(i).key());
-        for (int i = 0; i < npcList.size(); i++) override(pm, NPC_BASE + i, "npcs/" + npcList.get(i).key());
+        for (int i = 0; i < npcList.size(); i++) {
+            String key = npcList.get(i).key();
+            if (lpcTrial == null || !override(pm, NPC_BASE + i, "lpc_trial/" + lpcTrial + "/npcs/" + key)) {
+                override(pm, NPC_BASE + i, "npcs/" + key);
+            }
+        }
         for (Vocation v : Vocation.values()) {
             for (String d : DIRS) loadWalk("characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + d);
         }
@@ -323,6 +328,12 @@ public final class TileArt implements Disposable {
 
     /** Ile obrazkow podmieniono plikami PNG (diagnostyka). */
     public int overrides() { return overrides; }
+
+    /**
+     * PROBA postaci LPC (desktop -Dpixel.lpcTrial=a|b, tylko do oceny): wybrani NPC z assets/art/lpc_trial/a|b/npcs/
+     * (tools/art/lpc_compose.py). Domyslnie null - gra bez zmian.
+     */
+    public static String lpcTrial;
 
     /** Narzedzie dla grafikow (desktop -Dpixel.exportArt=katalog): zapisuje obecne obrazki pod nazwami z docs/GRAPHICS.md. */
     public static String exportDir;

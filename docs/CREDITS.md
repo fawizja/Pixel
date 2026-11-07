@@ -100,3 +100,16 @@ Copyright (c) 2010-2017 OTClient, Copyright (c) 2018-2023 OTClientV8. Licencja M
 pełny tekst: `assets/ui/otc/LICENSE-OTCV8.txt`. Pliki są użyte bez zmian; gra rysuje je jako
 rozciągane ramki (9-patch). Nie użyto ikon z napisami ani grafik postaci z tego klienta.
 
+
+## Postacie LPC (PROBA, galaz lpctrial - tylko z -Dpixel.lpcTrial)
+
+Grafiki w `assets/art/lpc_trial/` (kilku NPC: opiekun zwierząt, król, królowa, zaklinacz, strażnik) złożone narzędziem
+`tools/art/lpc_compose.py` z warstw **Universal LPC Spritesheet Character Generator**
+(https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator, commit 86160e7).
+
+- Autorzy, licencje i źródła każdej użytej warstwy: `assets/art/lpc_trial/CREDITS-LPC.csv` (wyciąg z CREDITS.csv generatora).
+- Licencje warstw: większość OGA-BY 3.0 / CC-BY-SA 3.0 / GPL 3.0 (do wyboru); korona, tiara, kapelusz czarodzieja,
+  broda i część włosów tylko CC-BY-SA 3.0 / GPL 3.0 - złożone z nich postacie są utworami zależnymi i muszą być
+  udostępnione na CC-BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
+- Zmiany: warstwy przebarwione, złożone, zmniejszone (wariant a: klatka 64x64 do 32x32, wariant b: postać do wysokości
+  postaci OTSP), wybrane klatki chodu.

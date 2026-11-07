@@ -215,3 +215,6 @@ ruler_frostholm|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=
 imbuer_nerys|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=886,741,0 -Dpixel.open=imbue
 pet_gull_card|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,509,0 -Dpixel.open=pet -Dpixel.pet=pet_gull -Dpixel.petCard=true
 pet_parrot_nerys|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=884,742,0 -Dpixel.open=pet -Dpixel.pet=pet_parrot
+# 2026-11-07 PROBA (galaz lpctrial): NPC z generatora LPC obok postaci OTSP (opiekun zwierzat, straznik / krol, zaklinacz)
+lpc_trial|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=553,493,0 -Dpixel.lpcTrial=b
+lpc_trial_castle|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=565,510,0 -Dpixel.lpcTrial=a
