@@ -144,6 +144,12 @@ Każda profesja w 4 kierunkach.
 
 ## NPC (`assets/art/npcs/`)
 
+**Od 2026-11-07 NPC w grze rysowane są z `assets/art/lpc/npcs/<klucz>.png`** - postacie z warstw Universal LPC
+Spritesheet Character Generator, złożone narzędziem `tools/art/lpc_compose.py` (strój wg roli, kolor z `npcs.csv`,
+akcent miasta, skóra i fryzura z klucza NPC). Licencja tych obrazków: **CC BY-SA 3.0** (utwory zależne, share-alike),
+autorzy warstw: `assets/art/lpc/CREDITS-LPC.csv`, notka `assets/art/lpc/LICENSE.txt`. Nowy NPC w `npcs.csv` dostaje
+postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) działa tylko z `-Dpixel.lpcNpcs=0`.
+
 | Plik | Co to jest | Jest |
 |---|---|---|
 | `npcs/camp_banker.png` | Skarbniczka Wena | tak |
