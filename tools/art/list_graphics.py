@@ -70,7 +70,12 @@ lines = [
 ]
 lines += section("Postacie graczy", "characters", chars, "Każda profesja w 4 kierunkach.")
 lines += section("Potwory", "monsters", monsters)
-lines += section("NPC", "npcs", npcs)
+lines += section("NPC", "npcs", npcs, "\n".join([
+    "**Od 2026-11-07 NPC w grze rysowane są z `assets/art/lpc/npcs/<klucz>.png`** - postacie z warstw Universal LPC",
+    "Spritesheet Character Generator, złożone narzędziem `tools/art/lpc_compose.py` (strój wg roli, kolor z `npcs.csv`,",
+    "akcent miasta, skóra i fryzura z klucza NPC). Licencja tych obrazków: **CC BY-SA 3.0** (utwory zależne, share-alike),",
+    "autorzy warstw: `assets/art/lpc/CREDITS-LPC.csv`, notka `assets/art/lpc/LICENSE.txt`. Nowy NPC w `npcs.csv` dostaje",
+    "postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) działa tylko z `-Dpixel.lpcNpcs=0`."]))
 lines += section("Przedmioty", "items", items)
 lines += section("Kafelki mapy", "tiles", tiles, "Warstwa: ground = podłoże, decoration = trawa i kwiaty, object = drzewa i meble, wall = ściany.")
 lines += section("Obiekty", "objects", objects)

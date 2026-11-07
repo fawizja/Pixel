@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.239.0] - 2026-11-07
+
+### Zmieniono
+- Wszyscy NPC (137) mają nowe postacie złożone z warstw Universal LPC Character Generator (CC BY-SA 3.0).
+  Strój zależy od roli: strażnicy w zbrojach z tabardem w kolorze miasta i hełmem miasta, władcy w koronach,
+  kapłani w białych szatach, zaklinacze i magowie w kapeluszach czarodzieja, kowal w fartuchu z młotem,
+  kapitanowie w trójgraniastych kapeluszach, przewoźnicy jak marynarze. Twarze, włosy, karnacja i kolory
+  różnią się między NPC i są stałe. Gracze i potwory zostają w grafice OTSP.
+- NPC mają własny atlas grafik, bo atlas 32 px był już pełny (1024/1024).
+
+### Dodano
+- Autorzy warstw LPC w oknie /autorzy (sekcja „Postacie NPC”), w assets/art/lpc/CREDITS-LPC.csv
+  i assets/art/lpc/LICENSE.txt.
+
 ## [0.238.0] - 2026-11-06
 
 ### Dodano

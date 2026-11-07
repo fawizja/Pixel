@@ -224,7 +224,20 @@ public final class TileArt implements Disposable {
             }
         }
         for (int i = 0; i < mtypes.size(); i++) monsters.put(mtypes.get(i).key(), region(MONSTER_BASE + i));
-        for (int i = 0; i < npcList.size(); i++) npcs.put(npcList.get(i).key(), region(NPC_BASE + i));
+        if (npcPm != null) {
+            npcAtlas = new Texture(npcPm);
+            npcAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            npcPm.dispose();
+            npcPm = null;
+            Gdx.app.log("TileArt", "NPC LPC: " + npcSlots.size());
+        }
+        for (int i = 0; i < npcList.size(); i++) {
+            String key = npcList.get(i).key();
+            Integer slot = npcSlots.get(key);
+            npcs.put(key, slot != null && npcAtlas != null
+                    ? new TextureRegion(npcAtlas, (slot % NPC_COLS) * HI_SIZE, (slot / NPC_COLS) * HI_SIZE, HI_SIZE, HI_SIZE)
+                    : region(NPC_BASE + i));
+        }
         horse = new TextureRegion[] {region(HORSE_CELL), region(HORSE_CELL + 1)};
         chest = new TextureRegion[] {region(CHEST_CELL), region(CHEST_CELL + 1)};
         dummy = region(DUMMY_CELL);
@@ -294,7 +307,10 @@ public final class TileArt implements Disposable {
             }
         }
         for (int i = 0; i < mtypes.size(); i++) override(pm, MONSTER_BASE + i, "monsters/" + mtypes.get(i).key());
-        for (int i = 0; i < npcList.size(); i++) override(pm, NPC_BASE + i, "npcs/" + npcList.get(i).key());
+        for (int i = 0; i < npcList.size(); i++) {
+            String key = npcList.get(i).key();
+            if (!lpcNpcs || !loadLpcNpc(key)) override(pm, NPC_BASE + i, "npcs/" + key);
+        }
         for (Vocation v : Vocation.values()) {
             for (String d : DIRS) loadWalk("characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + d);
         }
@@ -323,6 +339,39 @@ public final class TileArt implements Disposable {
 
     /** Ile obrazkow podmieniono plikami PNG (diagnostyka). */
     public int overrides() { return overrides; }
+
+    /**
+     * NPC w postaciach LPC (2026-11-07): assets/art/lpc/npcs/klucz.png z tools/art/lpc_compose.py (CC BY-SA 3.0,
+     * autorzy w assets/art/lpc/CREDITS-LPC.csv). false (desktop -Dpixel.lpcNpcs=0) - dawne stroje OTSP, do porownania.
+     */
+    public static boolean lpcNpcs = true;
+
+    /** NPC LPC (32x32) w osobnym atlasie: atlas grafik 32 px jest juz pelny (1024 komorki). */
+    private static final int NPC_COLS = 16;
+    private Pixmap npcPm;
+    private Texture npcAtlas;
+    private final Map<String, Integer> npcSlots = new HashMap<>();
+
+    private boolean loadLpcNpc(String key) {
+        Pixmap src = loadArt("lpc/npcs/" + key + ".png");
+        if (src == null) return false;
+        if (npcPm == null) {
+            npcPm = new Pixmap(NPC_COLS * HI_SIZE, NPC_COLS * HI_SIZE, Pixmap.Format.RGBA8888);
+            npcPm.setBlending(Pixmap.Blending.None);
+            npcPm.setFilter(Pixmap.Filter.NearestNeighbour);
+        }
+        int slot = npcSlots.size();
+        if (slot >= NPC_COLS * NPC_COLS) {
+            src.dispose();
+            return false;
+        }
+        npcPm.drawPixmap(src, 0, 0, src.getWidth(), src.getHeight(),
+                (slot % NPC_COLS) * HI_SIZE, (slot / NPC_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
+        src.dispose();
+        npcSlots.put(key, slot);
+        overrides++;
+        return true;
+    }
 
     /** Narzedzie dla grafikow (desktop -Dpixel.exportArt=katalog): zapisuje obecne obrazki pod nazwami z docs/GRAPHICS.md. */
     public static String exportDir;
@@ -1991,6 +2040,7 @@ public final class TileArt implements Disposable {
         if (dummyNativeTexture != null) dummyNativeTexture.dispose();
         if (fxAtlas != null) fxAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
+        if (npcAtlas != null) npcAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();
         lightTexture.dispose();
     }

@@ -1,0 +1,14 @@
+Postacie NPC w tym katalogu (npcs/*.png) zlozono narzedziem tools/art/lpc_compose.py z warstw
+Universal LPC Spritesheet Character Generator
+https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator (commit 86160e7).
+
+Autorzy, licencje i adresy zrodel kazdej uzytej warstwy: CREDITS-LPC.csv (wyciag z CREDITS.csv generatora).
+Warstwy maja licencje do wyboru (np. "OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0"); czesc (korona, kapelusze, brody,
+niektore fryzury i stroje) jest tylko na CC-BY-SA 3.0 / GPL. Dlatego zlozone obrazki NPC (utwory zalezne:
+warstwy przebarwione, zlozone, zmniejszone do 32x32) sa udostepniane na licencji
+Creative Commons Attribution-ShareAlike 3.0 (CC BY-SA 3.0): https://creativecommons.org/licenses/by-sa/3.0/
+Mozesz je kopiowac i zmieniac pod warunkiem podania autorow (CREDITS-LPC.csv) i udostepnienia zmian na tej
+samej licencji. Pozostale grafiki gry maja wlasne licencje (docs/CREDITS.md).
+
+NPC characters in this directory are derived from Universal LPC Spritesheet Character Generator layers
+(authors and licenses per layer: CREDITS-LPC.csv) and are licensed CC BY-SA 3.0.
