@@ -61,6 +61,9 @@ lines = [
     "  (`assets/art/autotiles/`, `tools/art/wst_import.py`, warunki w docs/CREDITS.md). Pozostałe obrzeża: kawałki OTSP",
     "  w `assets/art/borders/` albo składane z maski. Własne rysunki zostały tylko tam, gdzie paczka nic nie ma: stragan, łódź,",
     "  ster, namiot orków, wiatrak (`tools/art/draw_town_props.py`).",
+    "- Przedmioty o id 256 i wyżej (zestawy Kogucie, Cukrowe, Zarazy, Zamieci, Smocze, Białego Słońca, Feniksa,",
+    "  Odmętów, Księżycowe, Anielskie, Piekielne i kilka pojedynczych) narysował **Hinas (OTLand) – przedmioty**:",
+    "  grafiki udostępnione publicznie bez licencji, użyte z podaniem autora (docs/CREDITS.md, `tools/art/hinas_import.py`).",
     "",
     f"Razem: {len(tiles)} kafelków, {len(items)} przedmiotów, {len(monsters)} potworów, {len(npcs)} NPC, "
     f"{len(chars)} obrazków postaci, {len(objects)} obiektów, {len(pets)} pupili. Podmienione: {done}.",

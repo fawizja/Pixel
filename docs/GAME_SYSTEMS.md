@@ -154,6 +154,20 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
 - Przeciaganie (etap 14): przytrzymanie i przesuniecie przedmiotu przenosi go na inne pole, na zakladke innego
   plecaka (pierwsze wolne pole tej strony) albo na panel ekwipunku (zalozenie). Krotkie dotkniecie dziala jak dotad.
 
+### Zestawy Hinasa (dane, 2026-11-10)
+- 11 zestawow z grafik Hinasa (OTLand, docs/CREDITS.md) i 8 pojedynczych przedmiotow, `items.csv` id 256..392
+  (`TileArt`: przedmioty od id 256 w komorkach od 2048, limit id 767; atlas grafik 32 px powiekszony do 2048 komorek).
+- Zestaw = helm, zbroja, nagolenniki, buty, tarcza, bron rycerza (miecz/topor/maczuga), luk, rozdzka (czarodziej),
+  laska (druid), ksiega czarow (tarcza magow: SHIELD z profesjami SORCERER,DRUID, mala obrona + ochrony) i amulet
+  (slot AMULET: ochrony, pancerz 0-2). Statystyki z krzywej istniejacych przedmiotow (interpolacja ataku / pancerza /
+  obrony miedzy progami), wartosc z poziomu, wiec rzadkosc, klasa Kuzni i miejsca nasycen wynikaja same.
+- Poziomy i zrodla: Kogucie 20 (kowale i czarodzieje miast, Iskrzyk, Akolita), Cukrowe 35 (Paser z tuneli, Latarnik),
+  Zarazy 80 (bagna, Szlamiara), Zamieci 120 (lodowe wije i golemy, Ysolde), Smocze 170 (Straznik swiatyni, dzungla),
+  Bialego Slonca 210 (mumie, gargulce, Faraon), Feniksa 330 (wulkan, Ignaroth), Odmetow 420 (topielcy, piraci, Krwawa
+  Broda), Ksiezycowe 600 (upiory mgly, Zmierzchnik, Morvena), Anielskie 720 (Otchlan, bronie z Kha'zuula), Piekielne 850
+  (Otchlan; zbroja i bronie legendarne tylko z bossow Pyrrax i Mor'gath, `boss_items.csv`).
+- Ochrony jak w zestawach Tibii (`premie`): kazdy zestaw chroni przed swoim zywiolem, czesc ma slabosc (np. Feniks: lod).
+
 ## Waluty i bank (Z, UI banku - C)
 
 Gold / Platinum / Crystal (100:1). Wplata, wyplata, przelew, placenie z reszta (wszystkimi nominalami).

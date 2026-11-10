@@ -218,3 +218,7 @@ pet_parrot_nerys|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport
 # 2026-11-07: NPC w postaciach LPC (tools/art/lpc_compose.py) - sala tronowa Varden, port Valmir, dawny wyglad do porownania
 lpc_npcs_throne|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=565,510,0
 lpc_npcs_otsp|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=553,493,0 -Dpixel.lpcNpcs=0
+# 2026-11-10: przedmioty Hinasa - zalozony zestaw Feniksa i inne zestawy w plecaku, telefon: zestaw Anielski, opis ksiegi czarow
+hinas_gear|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=330 -Dpixel.gear=phoenix_helmet,phoenix_armor,phoenix_legs,phoenix_boots,phoenix_shield,phoenix_sword,phoenix_amulet -Dpixel.bagItems=phoenix_axe,phoenix_mace,phoenix_bow,deep_helmet,deep_armor,deep_hammer,sun_shield,dragon_axe,blizzard_amulet,moon_sword -Dpixel.open=bag
+hinas_gear_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=720 -Dpixel.gear=angel_helmet,angel_armor,angel_legs,angel_boots,angel_shield,angel_sword,angel_amulet -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=mobile_win_equip
+hinas_spellbook|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.level=600 -Dpixel.open=bagitem -Dpixel.lookItem=moon_spellbook

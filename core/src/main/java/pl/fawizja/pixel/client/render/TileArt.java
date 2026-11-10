@@ -32,6 +32,12 @@ public final class TileArt implements Disposable {
     private static final int ATLAS = 1024;
     private static final int COLS = ATLAS / SIZE;
     private static final int ITEM_BASE = 256;
+    /** Przedmioty o id 256.. (przedmioty Hinasa, 2026-11-10): komorki od ITEM_EXTRA_BASE, bo 256..511 to jeden
+     *  blok 256 komorek (dalej postacie). Najwyzsze id: {@link #ITEM_LIMIT} - 1. */
+    private static final int ITEM_EXTRA_BASE = 2048;
+    public static final int ITEM_LIMIT = 768;
+
+    private static int itemCell(int id) { return id < 256 ? ITEM_BASE + id : ITEM_EXTRA_BASE + id - 256; }
     private static final int SPRITE_BASE = 512;
     private static final int MONSTER_BASE = 640;
     private static final int NPC_BASE = 800;
@@ -92,12 +98,13 @@ public final class TileArt implements Disposable {
         pm.fill();
 
         tiles = new TextureRegion[tileRegistry.maxId() + 1];
-        items = new TextureRegion[512];
+        items = new TextureRegion[ITEM_LIMIT];
         characters = new TextureRegion[Vocation.values().length][4];
 
         for (TileType t : tileRegistry.all()) paintTile(pm, cellX(t.id()), cellY(t.id()), t);
         for (ItemType it : itemRegistry.all()) {
-            int cell = ITEM_BASE + it.id();
+            if (it.id() >= ITEM_LIMIT) throw new IllegalStateException("item id " + it.id() + " >= " + ITEM_LIMIT + " (TileArt.ITEM_LIMIT)");
+            int cell = itemCell(it.id());
             paintItem(pm, cellX(cell), cellY(cell), it);
         }
         for (Vocation v : Vocation.values()) {
@@ -210,13 +217,13 @@ public final class TileArt implements Disposable {
             hiAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             hiPm.dispose();
             hiPm = null;
-            Gdx.app.log("TileArt", "Grafiki 32 px: " + hiCells.size() + " / " + HI_COLS * HI_COLS);
+            Gdx.app.log("TileArt", "Grafiki 32 px: " + hiCells.size() + " / " + HI_COLS * HI_ROWS + (hiDropped > 0 ? ", pominiete: " + hiDropped : ""));
         }
 
         for (TileType t : tileRegistry.all()) tiles[t.id()] = region(t.id());
         buildRoofPieces();
         buildVariants(tileRegistry);
-        for (ItemType it : itemRegistry.all()) items[it.id()] = region(ITEM_BASE + it.id());
+        for (ItemType it : itemRegistry.all()) items[it.id()] = region(itemCell(it.id()));
         for (Vocation v : Vocation.values()) {
             for (int d = 0; d < 4; d++) characters[v.ordinal()][d] = region(SPRITE_BASE + v.ordinal() * 4 + d);
             for (int o = 1; o < pl.fawizja.pixel.character.Outfit.count(); o++) {
@@ -298,7 +305,7 @@ public final class TileArt implements Disposable {
     private void overrideAll(Pixmap pm, TileRegistry tileRegistry, ItemRegistry itemRegistry, List<MonsterType> mtypes,
                              List<pl.fawizja.pixel.npc.Npc> npcList) {
         for (TileType t : tileRegistry.all()) override(pm, t.id(), "tiles/" + t.key());
-        for (ItemType it : itemRegistry.all()) override(pm, ITEM_BASE + it.id(), "items/" + it.key());
+        for (ItemType it : itemRegistry.all()) override(pm, itemCell(it.id()), "items/" + it.key());
         for (Vocation v : Vocation.values()) {
             for (int d = 0; d < 4; d++) {
                 if (override(pm, SPRITE_BASE + v.ordinal() * 4 + d, "characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + DIRS[d])) {
@@ -399,9 +406,12 @@ public final class TileArt implements Disposable {
     }
 
     private void putHi(int cell, Pixmap src) {
-        if (hiCells.size() >= HI_COLS * HI_COLS) return;
+        if (hiCells.size() >= HI_COLS * HI_ROWS) {
+            hiDropped++;
+            return;
+        }
         if (hiPm == null) {
-            hiPm = new Pixmap(HI_COLS * HI_SIZE, HI_COLS * HI_SIZE, Pixmap.Format.RGBA8888);
+            hiPm = new Pixmap(HI_COLS * HI_SIZE, HI_ROWS * HI_SIZE, Pixmap.Format.RGBA8888);
             hiPm.setBlending(Pixmap.Blending.None);
             hiPm.setFilter(Pixmap.Filter.NearestNeighbour);
         }
@@ -685,7 +695,13 @@ public final class TileArt implements Disposable {
     private static int cellY(int cell) { return (cell / COLS) * SIZE; }
 
     /** Atlas grafik wiekszych niz 16 px (rozmiar komorki 32), tworzony tylko gdy takie pliki istnieja. */
-    private static final int HI_SIZE = 32, HI_COLS = 32;
+    /** 1024x2048 px (2048 komorek): 1024 komorki zapelnily sie w 0.239.0 i dalsze grafiki 32 px (chod, sciany,
+     *  odmiany) przepadaly po cichu; 2048 px to rozmiar tekstury obslugiwany przez kazdy telefon. */
+    private static final int HI_SIZE = 32, HI_COLS = 32, HI_ROWS = 64;
+    private int hiDropped;
+
+    /** Grafiki 32 px, ktore nie zmiescily sie w atlasie (diagnostyka, test: 0). */
+    public int hiResDropped() { return hiDropped; }
     private Pixmap hiPm;
     private Texture hiAtlas;
     private final Map<Integer, Integer> hiCells = new java.util.HashMap<>();
