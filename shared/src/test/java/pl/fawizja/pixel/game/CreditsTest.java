@@ -19,6 +19,7 @@ class CreditsTest {
         assertTrue(all.toString().contains("OTClientV8 (MIT)"));
         for (String name : Credits.LPC_AUTHORS.split(", ")) assertTrue(all.toString().contains(name), name);
         assertTrue(all.toString().contains("CC BY-SA 3.0"));
+        assertTrue(all.toString().contains("Hinas (OTLand) - przedmioty"), "przedmioty Hinasa z podaniem autora");
     }
 
     /** Kazdy autor z assets/art/lpc/CREDITS-LPC.csv (warstwy postaci NPC) jest w oknie /autorzy. */

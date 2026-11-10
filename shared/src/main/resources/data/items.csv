@@ -212,3 +212,141 @@
 234;greater_spiritualist_gem;Większy klejnot spirytualisty;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8b840;Lśni mocą mnichów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
 235;lesser_gem_fragment;Mniejszy okruch klejnotu;MATERIAL;100;5000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#c8b8a0;Z rozbitego mniejszego albo zwykłego klejnotu. Podnosi stopień modyfikatorów podstawowych.
 236;greater_gem_fragment;Większy okruch klejnotu;MATERIAL;100;20000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#f0a0d0;Z rozbitego większego klejnotu. Podnosi stopień modyfikatorów najwyższych.
+# 2026-11-10: przedmioty Hinasa (OTLand), zestawy i pojedyncze - tools/art/hinas_import.py, docs/CREDITS.md
+256;rooster_helmet;Koguci hełm;ARMOR;1;300;HEAD;0;0;3;20;*;0;0;PHYSICAL;-;FIRE:2;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+257;rooster_armor;Kogucia zbroja;ARMOR;1;450;ARMOR;0;0;6;20;*;0;0;PHYSICAL;-;FIRE:4,ICE:-2;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+258;rooster_legs;Kogucie nagolenniki;ARMOR;1;270;LEGS;0;0;2;20;*;0;0;PHYSICAL;-;FIRE:3;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+259;rooster_boots;Kogucie buty;ARMOR;1;230;FEET;0;0;1;20;*;0;0;PHYSICAL;-;FIRE:1;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+260;rooster_shield;Kogucia tarcza;SHIELD;1;390;SHIELD;0;18;0;20;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:3;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+261;rooster_sword;Koguci miecz;WEAPON;1;600;WEAPON;33;8;0;20;KNIGHT;0;1;PHYSICAL;SWORD;-;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+262;rooster_club;Kogucia pałka;WEAPON;1;600;WEAPON;32;10;0;20;KNIGHT;0;1;PHYSICAL;CLUB;-;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+263;rooster_bow;Koguci łuk;WEAPON;1;600;WEAPON;33;0;0;20;PALADIN;0;7;PHYSICAL;DISTANCE;-;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+264;rooster_wand;Kogucia różdżka;WEAPON;1;600;WEAPON;24;0;0;20;SORCERER;0;7;FIRE;WAND;-;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+265;rooster_rod;Kogucia laska;WEAPON;1;600;WEAPON;24;0;0;20;DRUID;0;7;EARTH;WAND;-;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+266;rooster_spellbook;Kogucia księga;SHIELD;1;360;SHIELD;0;9;0;20;SORCERER,DRUID;0;0;PHYSICAL;-;FIRE:2;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+267;rooster_amulet;Koguci amulet;ARMOR;1;300;AMULET;0;0;0;20;*;0;0;PHYSICAL;-;FIRE:5;#d8402a;Z zestawu Koguciego: pióra, grzebień i iskry. Chroni przed ogniem.
+268;candy_helmet;Babeczkowy hełm;ARMOR;1;590;HEAD;0;0;4;35;*;0;0;PHYSICAL;-;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+269;candy_armor;Czekoladowa zbroja;ARMOR;1;880;ARMOR;0;0;7;35;*;0;0;PHYSICAL;-;HOLY:3;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+270;candy_legs;Cukrowe nagolenniki;ARMOR;1;530;LEGS;0;0;3;35;*;0;0;PHYSICAL;-;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+271;candy_boots;Cukrowe buty;ARMOR;1;450;FEET;0;0;1;35;*;0;0;PHYSICAL;-;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+272;candy_shield;Lizakowa tarcza;SHIELD;1;760;SHIELD;0;21;0;35;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+273;candy_sword;Cukrowy miecz;WEAPON;1;1200;WEAPON;38;10;0;35;KNIGHT;0;1;PHYSICAL;SWORD;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+274;candy_bow;Cukrowy łuk;WEAPON;1;1200;WEAPON;39;0;0;35;PALADIN;0;7;PHYSICAL;DISTANCE;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+275;candy_wand;Cukrowa różdżka;WEAPON;1;1200;WEAPON;29;0;0;35;SORCERER,DRUID;0;7;ENERGY;WAND;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+276;candy_spellbook;Cukrowa księga;SHIELD;1;700;SHIELD;0;11;0;35;SORCERER,DRUID;0;0;PHYSICAL;-;-;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+277;candy_amulet;Cukierkowy naszyjnik;ARMOR;1;590;AMULET;0;0;0;35;*;0;0;PHYSICAL;-;CRIT:3;#e070a0;Z zestawu Cukrowego. Słodki, ale twardy jak karmel.
+278;plague_helmet;Hełm zarazy;ARMOR;1;2800;HEAD;0;0;6;80;*;0;0;PHYSICAL;-;EARTH:3;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+279;plague_mask;Maska zarazy;ARMOR;1;2600;HEAD;0;0;5;80;*;0;0;PHYSICAL;-;EARTH:5;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+280;plague_armor;Zbroja zarazy;ARMOR;1;4300;ARMOR;0;0;8;80;*;0;0;PHYSICAL;-;EARTH:6,FIRE:-3;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+281;plague_legs;Nagolenniki zarazy;ARMOR;1;2600;LEGS;0;0;5;80;*;0;0;PHYSICAL;-;EARTH:4,FIRE:-2;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+282;plague_boots;Buty zarazy;ARMOR;1;2200;FEET;0;0;2;80;*;0;0;PHYSICAL;-;EARTH:2;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+283;plague_shield;Tarcza zarazy;SHIELD;1;3700;SHIELD;0;24;0;80;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;EARTH:4;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+284;plague_sword;Ostrze zarazy;WEAPON;1;5700;WEAPON;51;13;0;80;KNIGHT;0;1;PHYSICAL;SWORD;-;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+285;plague_axe;Topór zarazy;WEAPON;1;5700;WEAPON;51;11;0;80;KNIGHT;0;1;PHYSICAL;AXE;-;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+286;plague_bow;Łuk zarazy;WEAPON;1;5700;WEAPON;50;0;0;80;PALADIN;0;7;PHYSICAL;DISTANCE;-;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+287;plague_wand;Różdżka zarazy;WEAPON;1;5700;WEAPON;41;0;0;80;SORCERER;0;7;DEATH;WAND;-;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+288;plague_rod;Laska zarazy;WEAPON;1;5700;WEAPON;42;0;0;80;DRUID;0;7;EARTH;WAND;-;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+289;plague_spellbook;Księga zarazy;SHIELD;1;3400;SHIELD;0;14;0;80;SORCERER,DRUID;0;0;PHYSICAL;-;EARTH:3;#6ac040;Z zestawu Zarazy, noszonego przez strażników bagien. Chroni przed ziemią, gorzej znosi ogień.
+290;blizzard_helmet;Hełm zamieci;ARMOR;1;6200;HEAD;0;0;8;120;*;0;0;PHYSICAL;-;ICE:3;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+291;blizzard_armor;Zbroja zamieci;ARMOR;1;9300;ARMOR;0;0;9;120;*;0;0;PHYSICAL;-;ICE:6,ENERGY:-4;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+292;blizzard_legs;Nagolenniki zamieci;ARMOR;1;5600;LEGS;0;0;5;120;*;0;0;PHYSICAL;-;ICE:4,ENERGY:-2;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+293;blizzard_boots;Buty zamieci;ARMOR;1;4700;FEET;0;0;2;120;*;0;0;PHYSICAL;-;ICE:2;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+294;blizzard_shield;Tarcza zamieci;SHIELD;1;8100;SHIELD;0;26;0;120;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;ICE:4;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+295;blizzard_sword;Ostrze zamieci;WEAPON;1;12000;WEAPON;58;14;0;120;KNIGHT;0;1;PHYSICAL;SWORD;-;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+296;blizzard_axe;Topór zamieci;WEAPON;1;12000;WEAPON;58;12;0;120;KNIGHT;0;1;PHYSICAL;AXE;-;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+297;blizzard_bow;Łuk zamieci;WEAPON;1;12000;WEAPON;56;0;0;120;PALADIN;0;7;PHYSICAL;DISTANCE;-;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+298;blizzard_wand;Różdżka zamieci;WEAPON;1;12000;WEAPON;50;0;0;120;SORCERER;0;7;ENERGY;WAND;-;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+299;blizzard_rod;Laska zamieci;WEAPON;1;12000;WEAPON;51;0;0;120;DRUID;0;7;ICE;WAND;-;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+300;blizzard_spellbook;Księga zamieci;SHIELD;1;7400;SHIELD;0;16;0;120;SORCERER,DRUID;0;0;PHYSICAL;-;ICE:3;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+301;blizzard_amulet;Amulet zamieci;ARMOR;1;6200;AMULET;0;0;0;120;*;0;0;PHYSICAL;-;ICE:5;#40d0e0;Z zestawu Zamieci, wykutego w lodzie północy. Chroni przed lodem, przewodzi energię.
+302;dragon_helmet;Smoczy hełm;ARMOR;1;11000;HEAD;0;0;9;170;*;0;0;PHYSICAL;-;EARTH:3;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+303;dragon_armor;Smocza zbroja;ARMOR;1;17000;ARMOR;0;0;10;170;*;0;0;PHYSICAL;-;EARTH:4,PHYSICAL:1;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+304;dragon_legs;Smocze nagolenniki;ARMOR;1;10000;LEGS;0;0;6;170;*;0;0;PHYSICAL;-;EARTH:3;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+305;dragon_boots;Smocze buty;ARMOR;1;8700;FEET;0;0;2;170;*;0;0;PHYSICAL;-;EARTH:2;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+306;dragon_shield;Smocza tarcza;SHIELD;1;15000;SHIELD;0;27;0;170;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;EARTH:4;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+307;dragon_sword;Smoczy miecz;WEAPON;1;23000;WEAPON;64;16;0;170;KNIGHT;0;1;PHYSICAL;SWORD;-;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+308;dragon_axe;Smoczy topór;WEAPON;1;23000;WEAPON;64;14;0;170;KNIGHT;0;1;PHYSICAL;AXE;-;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+309;dragon_bow;Smoczy łuk;WEAPON;1;23000;WEAPON;61;0;0;170;PALADIN;0;7;PHYSICAL;DISTANCE;-;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+310;dragon_wand;Smocza różdżka;WEAPON;1;23000;WEAPON;58;0;0;170;SORCERER;0;7;FIRE;WAND;-;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+311;dragon_rod;Smocza laska;WEAPON;1;23000;WEAPON;58;0;0;170;DRUID;0;7;EARTH;WAND;-;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+312;dragon_spellbook;Księga gaju;SHIELD;1;14000;SHIELD;0;18;0;170;SORCERER,DRUID;0;0;PHYSICAL;-;EARTH:3;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+313;dragon_amulet;Smoczy talizman;ARMOR;1;11000;AMULET;0;0;0;170;*;0;0;PHYSICAL;-;EARTH:5;#58a040;Z zestawu Smoczej Świątyni z dżungli. Chroni przed ziemią.
+314;sun_helmet;Hełm kobry;ARMOR;1;15000;HEAD;0;0;9;210;*;0;0;PHYSICAL;-;FIRE:3;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+315;sun_armor;Słoneczna zbroja;ARMOR;1;23000;ARMOR;0;0;11;210;*;0;0;PHYSICAL;-;FIRE:4,DEATH:4;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+316;sun_legs;Słoneczne nagolenniki;ARMOR;1;14000;LEGS;0;0;6;210;*;0;0;PHYSICAL;-;DEATH:4;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+317;sun_boots;Słoneczne buty;ARMOR;1;12000;FEET;0;0;2;210;*;0;0;PHYSICAL;-;FIRE:2;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+318;sun_shield;Tarcza słońca;SHIELD;1;20000;SHIELD;0;28;0;210;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:3,DEATH:3;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+319;sun_sword;Słoneczny sejmitar;WEAPON;1;30000;WEAPON;68;17;0;210;KNIGHT;0;1;PHYSICAL;SWORD;-;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+320;sun_axe;Słoneczny topór;WEAPON;1;30000;WEAPON;68;15;0;210;KNIGHT;0;1;PHYSICAL;AXE;-;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+321;sun_bow;Słoneczny łuk;WEAPON;1;30000;WEAPON;64;0;0;210;PALADIN;0;7;PHYSICAL;DISTANCE;-;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+322;sun_wand;Słoneczna różdżka;WEAPON;1;30000;WEAPON;60;0;0;210;SORCERER;0;7;FIRE;WAND;-;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+323;sun_rod;Laska słońca;WEAPON;1;30000;WEAPON;60;0;0;210;DRUID;0;7;EARTH;WAND;-;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+324;sun_spellbook;Księga anchu;SHIELD;1;18000;SHIELD;0;19;0;210;SORCERER,DRUID;0;0;PHYSICAL;-;FIRE:3;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+325;sun_amulet;Talizman słońca;ARMOR;1;15000;AMULET;0;0;0;210;*;0;0;PHYSICAL;-;DEATH:5;#e0b040;Z zestawu Białego Słońca z pustyni. Chroni przed ogniem i śmiercią.
+326;phoenix_helmet;Hełm feniksa;ARMOR;1;33000;HEAD;0;0;9;330;*;0;0;PHYSICAL;-;FIRE:4,ICE:-3;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+327;phoenix_armor;Zbroja feniksa;ARMOR;1;50000;ARMOR;0;0;12;330;*;0;0;PHYSICAL;-;FIRE:8,ICE:-6;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+328;phoenix_legs;Nagolenniki feniksa;ARMOR;1;30000;LEGS;0;0;7;330;*;0;0;PHYSICAL;-;FIRE:6,ICE:-4;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+329;phoenix_boots;Buty feniksa;ARMOR;1;25000;FEET;0;0;3;330;*;0;0;PHYSICAL;-;FIRE:3;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+330;phoenix_shield;Tarcza feniksa;SHIELD;1;43000;SHIELD;0;32;0;330;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:5;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+331;phoenix_sword;Miecz feniksa;WEAPON;1;66000;WEAPON;78;20;0;330;KNIGHT;0;1;PHYSICAL;SWORD;-;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+332;phoenix_axe;Topór feniksa;WEAPON;1;66000;WEAPON;78;18;0;330;KNIGHT;0;1;PHYSICAL;AXE;-;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+333;phoenix_mace;Buzdygan feniksa;WEAPON;1;66000;WEAPON;77;22;0;330;KNIGHT;0;1;PHYSICAL;CLUB;-;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+334;phoenix_bow;Łuk feniksa;WEAPON;1;66000;WEAPON;73;0;0;330;PALADIN;0;7;PHYSICAL;DISTANCE;-;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+335;phoenix_wand;Różdżka feniksa;WEAPON;1;66000;WEAPON;69;0;0;330;SORCERER;0;7;FIRE;WAND;-;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+336;phoenix_spellbook;Księga feniksa;SHIELD;1;40000;SHIELD;0;21;0;330;SORCERER,DRUID;0;0;PHYSICAL;-;FIRE:4;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+337;phoenix_amulet;Amulet feniksa;ARMOR;1;33000;AMULET;0;0;1;330;*;0;0;PHYSICAL;-;FIRE:6;#ff6020;Z zestawu Feniksa, odradzającego się w popiele wulkanów. Chroni przed ogniem, słabnie na mrozie.
+338;deep_helmet;Hełm odmętów;ARMOR;1;52000;HEAD;0;0;10;420;*;0;0;PHYSICAL;-;ICE:4,DROWN:50;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+339;deep_armor;Zbroja odmętów;ARMOR;1;78000;ARMOR;0;0;14;420;*;0;0;PHYSICAL;-;ICE:6,ENERGY:-6;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+340;deep_legs;Nagolenniki odmętów;ARMOR;1;47000;LEGS;0;0;8;420;*;0;0;PHYSICAL;-;ICE:3,MANA_DRAIN:10;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+341;deep_boots;Buty odmętów;ARMOR;1;40000;FEET;0;0;3;420;*;0;0;PHYSICAL;-;DROWN:20;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+342;deep_shield;Tarcza odmętów;SHIELD;1;68000;SHIELD;0;35;0;420;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;ICE:5;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+343;deep_trident;Trójząb odmętów;WEAPON;1;105000;WEAPON;80;0;0;420;PALADIN;0;7;PHYSICAL;DISTANCE;-;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+344;deep_hammer;Młot odmętów;WEAPON;1;105000;WEAPON;86;24;0;420;KNIGHT;0;1;PHYSICAL;CLUB;-;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+345;deep_bow;Łuk odmętów;WEAPON;1;105000;WEAPON;81;0;0;420;PALADIN;0;7;PHYSICAL;DISTANCE;-;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+346;deep_wand;Różdżka odmętów;WEAPON;1;105000;WEAPON;77;0;0;420;SORCERER;0;7;ENERGY;WAND;-;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+347;deep_rod;Laska odmętów;WEAPON;1;105000;WEAPON;77;0;0;420;DRUID;0;7;ICE;WAND;-;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+348;deep_spellbook;Księga odmętów;SHIELD;1;63000;SHIELD;0;23;0;420;SORCERER,DRUID;0;0;PHYSICAL;-;ICE:4;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+349;deep_amulet;Amulet odmętów;ARMOR;1;52000;AMULET;0;0;1;420;*;0;0;PHYSICAL;-;ICE:4,DROWN:30;#30b0b0;Z zestawu Odmętów, wyłowionego z wraków. Chroni przed lodem i wodą.
+350;moon_helmet;Księżycowy hełm;ARMOR;1;120000;HEAD;0;0;11;600;*;0;0;PHYSICAL;-;DEATH:4;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+351;moon_armor;Księżycowa zbroja;ARMOR;1;180000;ARMOR;0;0;16;600;*;0;0;PHYSICAL;-;DEATH:6,HOLY:-3;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+352;moon_legs;Księżycowe nagolenniki;ARMOR;1;110000;LEGS;0;0;10;600;*;0;0;PHYSICAL;-;DEATH:5,HOLY:-2;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+353;moon_boots;Księżycowe buty;ARMOR;1;92000;FEET;0;0;4;600;*;0;0;PHYSICAL;-;DEATH:2;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+354;moon_shield;Księżycowa tarcza;SHIELD;1;155000;SHIELD;0;39;0;600;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;DEATH:4;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+355;moon_sword;Księżycowy miecz;WEAPON;1;240000;WEAPON;102;26;0;600;KNIGHT;0;1;PHYSICAL;SWORD;CRITDMG:5;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+356;moon_axe;Księżycowy topór;WEAPON;1;240000;WEAPON;102;24;0;600;KNIGHT;0;1;PHYSICAL;AXE;CRITDMG:5;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+357;moon_bow;Księżycowy łuk;WEAPON;1;240000;WEAPON;95;0;0;600;PALADIN;0;7;PHYSICAL;DISTANCE;CRITDMG:5;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+358;moon_wand;Księżycowa różdżka;WEAPON;1;240000;WEAPON;90;0;0;600;SORCERER,DRUID;0;7;DEATH;WAND;CRITDMG:5;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+359;moon_spellbook;Księżycowa księga;SHIELD;1;145000;SHIELD;0;26;0;600;SORCERER,DRUID;0;0;PHYSICAL;-;DEATH:3,ENERGY:3;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+360;moon_amulet;Księżycowy amulet;ARMOR;1;120000;AMULET;0;0;1;600;*;0;0;PHYSICAL;-;DEATH:6;#9060d0;Z zestawu Księżycowego, świecącego w mgłach. Chroni przed śmiercią.
+361;angel_helmet;Anielski hełm;ARMOR;1;190000;HEAD;0;0;12;720;*;0;0;PHYSICAL;-;DEATH:4,HOLY:2;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+362;angel_armor;Anielska zbroja;ARMOR;1;280000;ARMOR;0;0;18;720;*;0;0;PHYSICAL;-;DEATH:7,HOLY:4;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+363;angel_legs;Anielskie nagolenniki;ARMOR;1;170000;LEGS;0;0;11;720;*;0;0;PHYSICAL;-;DEATH:5;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+364;angel_boots;Anielskie buty;ARMOR;1;145000;FEET;0;0;4;720;*;0;0;PHYSICAL;-;DEATH:3;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+365;angel_shield;Anielska tarcza;SHIELD;1;245000;SHIELD;0;42;0;720;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;DEATH:5,HOLY:3;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+366;angel_sword;Anielski miecz;WEAPON;1;350000;WEAPON;112;28;0;720;KNIGHT;0;1;PHYSICAL;SWORD;LIFELEECH:3,MANALEECH:2;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+367;angel_axe;Anielski topór;WEAPON;1;350000;WEAPON;112;26;0;720;KNIGHT;0;1;PHYSICAL;AXE;LIFELEECH:3,MANALEECH:2;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+368;angel_bow;Anielski łuk;WEAPON;1;350000;WEAPON;104;0;0;720;PALADIN;0;7;PHYSICAL;DISTANCE;CRIT:5,CRITDMG:5;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+369;angel_wand;Anielska różdżka;WEAPON;1;350000;WEAPON;100;0;0;720;SORCERER;0;7;ENERGY;WAND;LIFELEECH:3,MANALEECH:2;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+370;angel_rod;Anielska laska;WEAPON;1;350000;WEAPON;103;0;0;720;DRUID;0;7;ICE;WAND;LIFELEECH:3,MANALEECH:2;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+371;angel_spellbook;Anielska księga;SHIELD;1;225000;SHIELD;0;28;0;720;SORCERER,DRUID;0;0;PHYSICAL;-;HOLY:5,DEATH:3;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+372;angel_amulet;Anielski amulet;ARMOR;1;190000;AMULET;0;0;1;720;*;0;0;PHYSICAL;-;DEATH:8;#f0e0b0;Z zestawu Anielskiego, lśniącego jak świt. Chroni przed śmiercią.
+373;infernal_helmet;Piekielny hełm;ARMOR;1;300000;HEAD;0;0;14;850;*;0;0;PHYSICAL;-;FIRE:4,DEATH:4,HOLY:-3;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+374;infernal_armor;Piekielna zbroja;ARMOR;1;450000;ARMOR;0;0;20;850;*;0;0;PHYSICAL;-;FIRE:7,DEATH:7,HOLY:-5;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+375;infernal_legs;Piekielne nagolenniki;ARMOR;1;270000;LEGS;0;0;12;850;*;0;0;PHYSICAL;-;FIRE:5,DEATH:5,HOLY:-4;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+376;infernal_boots;Piekielne buty;ARMOR;1;230000;FEET;0;0;5;850;*;0;0;PHYSICAL;-;FIRE:3,DEATH:3;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+377;infernal_shield;Piekielna tarcza;SHIELD;1;370000;SHIELD;0;45;0;850;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:5,DEATH:5;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+378;infernal_sword;Piekielny miecz;WEAPON;1;600000;WEAPON;128;32;0;850;KNIGHT;0;1;PHYSICAL;SWORD;CRIT:10,CRITDMG:10;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+379;infernal_axe;Piekielny topór;WEAPON;1;600000;WEAPON;128;30;0;850;KNIGHT;0;1;PHYSICAL;AXE;LIFELEECH:5,MANALEECH:3;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+380;infernal_bow;Piekielny łuk;WEAPON;1;600000;WEAPON;118;0;0;850;PALADIN;0;7;PHYSICAL;DISTANCE;CRIT:10,CRITDMG:10;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+381;infernal_wand;Piekielna różdżka;WEAPON;1;600000;WEAPON;114;0;0;850;SORCERER;0;7;FIRE;WAND;CRIT:10,CRITDMG:10;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+382;infernal_rod;Piekielna laska;WEAPON;1;600000;WEAPON;130;0;0;850;DRUID;0;7;EARTH;WAND;LIFELEECH:5,MANALEECH:3;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+383;infernal_spellbook;Piekielna księga;SHIELD;1;360000;SHIELD;0;30;0;850;SORCERER,DRUID;0;0;PHYSICAL;-;FIRE:5,DEATH:4;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+384;infernal_amulet;Piekielny amulet;ARMOR;1;300000;AMULET;0;0;2;850;*;0;0;PHYSICAL;-;FIRE:6,DEATH:6;#c03020;Z zestawu Piekielnego, wykutego w sercu Otchłani. Chroni przed ogniem i śmiercią, boi się świętości.
+385;forest_hood;Leśny kaptur;ARMOR;1;74;HEAD;0;0;2;10;*;0;0;PHYSICAL;-;EARTH:2;#3a6a2a;Zielony kaptur leśnych tropicieli. Trochę chroni przed ziemią.
+386;traveler_boots;Buty wędrowca;ARMOR;1;360;FEET;0;0;2;30;*;0;0;PHYSICAL;-;-;#8a5a3a;Wysokie skórzane buty na długie wędrówki.
+387;wolf_spellbook;Księga wilka;SHIELD;1;150;SHIELD;0;8;0;15;SORCERER,DRUID;0;0;PHYSICAL;-;-;#5a3a7a;Księga zaklęć z wilczym znakiem. Pierwsza tarcza maga.
+388;horned_helmet;Rogaty hełm;ARMOR;1;470;HEAD;0;0;4;30;*;0;0;PHYSICAL;-;-;#8a6a3a;Brązowy hełm z rogami i niebieskim kamieniem.
+389;gem_shield;Tarcza z klejnotem;SHIELD;1;610;SHIELD;0;20;0;30;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;-;#8a5a2a;Drewniana tarcza okuta metalem, z błękitnym klejnotem.
+390;crystal_shortsword;Kryształowy krótki miecz;WEAPON;1;940;WEAPON;36;9;0;30;KNIGHT;0;1;PHYSICAL;SWORD;-;#80e0f0;Krótki miecz z jednego kryształu.
+391;crystal_sword;Kryształowy miecz;WEAPON;1;1800;WEAPON;41;10;0;45;KNIGHT;0;1;PHYSICAL;SWORD;-;#80e0f0;Szeroki miecz z kryształu z kopalni. Dźwięczy przy każdym ciosie.
+392;emerald_amulet;Szmaragdowy amulet;ARMOR;1;730;AMULET;0;0;0;40;*;0;0;PHYSICAL;-;EARTH:4;#40c040;Srebrny łańcuszek ze szmaragdem. Chroni przed ziemią.

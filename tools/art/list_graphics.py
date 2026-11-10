@@ -67,6 +67,9 @@ lines = [
     "  `assets/ui/wst/`, ramki OTClientV8). Ramka rzadkości wg ceny (`Rarity`): zwykły szary, niepospolity zielony,",
     "  rzadki niebieski, epicki fioletowy, legendarny złoty; przedmiot tylko z bossów o stopień wyżej (legendarny z bossa -",
     "  mityczny czerwony).",
+    "- Przedmioty o id 256 i wyżej (zestawy Kogucie, Cukrowe, Zarazy, Zamieci, Smocze, Białego Słońca, Feniksa,",
+    "  Odmętów, Księżycowe, Anielskie, Piekielne i kilka pojedynczych) narysował **Hinas (OTLand) – przedmioty**:",
+    "  grafiki udostępnione publicznie bez licencji, użyte z podaniem autora (docs/CREDITS.md, `tools/art/hinas_import.py`).",
     "",
     f"Razem: {len(tiles)} kafelków, {len(items)} przedmiotów, {len(monsters)} potworów, {len(npcs)} NPC, "
     f"{len(chars)} obrazków postaci, {len(objects)} obiektów, {len(pets)} pupili. Podmienione: {done}.",

@@ -24,6 +24,21 @@ dostępna przy imporcie, więc obowiązuje ta sama zasada co przy paczkach WsT: 
 samej paczki. W repozytorium są tylko wycięte kawałki używane przez grę (narzędzie: `tools/art/zidane_import.py`;
 oryginał poza repozytorium: `tools/art/zidane/`, kopia w plikach projektu `pixel-zidane-ui/pack_ui_1.2.zip`).
 Ikon 24 px z paczki nie używamy (przedmioty mają ikony OTSP 32 px).
+## Hinas (OTLand) – przedmioty
+
+Od 2026-11-10 zestawy ekwipunku i część pojedynczych przedmiotów (137 obrazków w `assets/art/items/`: hełmy, zbroje,
+nagolenniki, buty, tarcze, miecze, topory, buzdygany, łuki, różdżki, laski, księgi czarów i amulety; lista kluczy
+w `tools/art/hinas_import.py`, statystyki w `items.csv`, id 256..392) narysował **Hinas** (spriter z forum OTLand).
+
+- Grafiki zostały udostępnione publicznie na OTLand. Plik z podziękowaniami w paczce zawiera tylko "Hinas", **bez
+  licencji**. Właściciel projektu zdecydował się ich użyć z podaniem autora (tutaj, w `docs/GRAPHICS.md` i w oknie
+  `/autorzy` w grze). Jeśli autor się nie zgadza, grafiki zostaną usunięte.
+- Zmiany: obrazki 32x32 kopiowane bez skalowania i rozmywania; tylko w jednym (`set 13/11.png`, Kogucia laska)
+  czarne tło zamieniono na przezroczyste. Oryginały (luźne PNG i rozpakowane zestawy) leżą poza repozytorium w `tools/art/hinas/`
+  (w `.gitignore`), tak jak źródła WsT.
+- Nie użyto: złotych nagolenników i złotego hełmu oraz kompletu kolorowych plecaków (za bliskie znanym przedmiotom
+  Tibii - przerysowania grafik CipSoft), skrzyni (brak przedmiotu) i dwóch prawie-duplikatów z `set 7`. Z tej samej
+  paczki nie użyto też niczego od innych autorów (LeoTBR "Some Edited Weapons", bałwan `.aec`, ikony 16x16 "Icon Store").
 
 ## OpenTibia Sprite Pack (CC BY 4.0)
 

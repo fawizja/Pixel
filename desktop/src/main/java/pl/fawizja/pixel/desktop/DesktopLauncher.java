@@ -173,9 +173,30 @@ public final class DesktopLauncher {
                 if (harmony != null) me.harmony().build(harmony - me.harmony().points());
                 String virtue = System.getProperty("pixel.virtue");
                 if (virtue != null) me.harmony().setVirtue(pl.fawizja.pixel.vocation.Harmony.Virtue.valueOf(virtue));
+                // -Dpixel.gear=klucz,klucz: te przedmioty zalozone (kazdy na swoje miejsce), -Dpixel.bagItems=klucz,...: do plecaka
+                // (podglad zestawow, np. przedmioty Hinasa)
+                String gearKeys = System.getProperty("pixel.gear");
+                if (gearKeys != null) {
+                    pl.fawizja.pixel.item.ItemRegistry reg = ((GameScreen) getScreen()).session().items();
+                    for (String k : gearKeys.split(",")) {
+                        pl.fawizja.pixel.item.ItemType t = reg.byKeyOrNull(k.trim());
+                        if (t != null && t.slot() != pl.fawizja.pixel.item.EquipSlot.NONE) {
+                            me.equipment().setDirect(t.slot(), new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
+                        }
+                    }
+                }
+                String bagKeys = System.getProperty("pixel.bagItems");
+                if (bagKeys != null) {
+                    pl.fawizja.pixel.item.ItemRegistry reg = ((GameScreen) getScreen()).session().items();
+                    for (String k : bagKeys.split(",")) {
+                        pl.fawizja.pixel.item.ItemType t = reg.byKeyOrNull(k.trim());
+                        if (t != null) me.backpack().add(new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
+                    }
+                }
                 String open = System.getProperty("pixel.open");
                 if ("virtues".equals(open)) ((GameScreen) getScreen()).hud().openVirtues();
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
+                if ("credits".equals(open)) ((GameScreen) getScreen()).hud().openInfo("Autorzy grafik", pl.fawizja.pixel.game.Credits.rows());
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("bagitem".equals(open)) {
                     // podglad opisu przedmiotu: pierwszy przedmiot z miejscem na ciele

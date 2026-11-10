@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.241.0] - 2026-11-10
+
+### Dodano
+- 137 nowych przedmiotów narysowanych przez Hinasa (OTLand), z podaniem autora w /autorzy: 11 zestawów od poziomu 20
+  do 850 (Kogucie, Cukrowe, Zarazy, Zamieci, Smocze, Białego Słońca, Feniksa, Odmętów, Księżycowe, Anielskie,
+  Piekielne) i 8 pojedynczych. Każdy zestaw ma hełm, zbroję, nagolenniki, buty, tarczę, broń rycerza, łuk,
+  różdżkę, laskę, księgę czarów i amulet, chroni przed swoim żywiołem, a część ma słabość. Wypadają z potworów
+  i bossów, zestaw Kogucie i kilka przedmiotów kupisz u kowala i maga.
+- Księgi czarów jako tarcze dla czarodziejów i druidów.
+
+### Poprawiono
+- Atlas grafik 32 px był pełny i część obrazków po cichu znikała. Teraz ma 2048 miejsc, a brakujące są liczone w logu.
+
 ## [0.240.0] - 2026-11-10
 
 ### Dodano
