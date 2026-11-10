@@ -61,6 +61,12 @@ lines = [
     "  (`assets/art/autotiles/`, `tools/art/wst_import.py`, warunki w docs/CREDITS.md). Pozostałe obrzeża: kawałki OTSP",
     "  w `assets/art/borders/` albo składane z maski. Własne rysunki zostały tylko tam, gdzie paczka nic nie ma: stragan, łódź,",
     "  ster, namiot orków, wiatrak (`tools/art/draw_town_props.py`).",
+    "- Interfejs ma dwa wyglądy (ustawienie „Wygląd interfejsu”): nowy z paczki Zidane42 (`assets/ui/zidane/`, paski,",
+    "  okna, przyciski, pola z ramkami rzadkości, przełączniki; `tools/art/zidane_import.py`, warunki w docs/CREDITS.md;",
+    "  elementy 9-slice, 1 piksel grafiki = 1 jednostka interfejsu, filtr Nearest) i klasyczny (panele i pola WsT,",
+    "  `assets/ui/wst/`, ramki OTClientV8). Ramka rzadkości wg ceny (`Rarity`): zwykły szary, niepospolity zielony,",
+    "  rzadki niebieski, epicki fioletowy, legendarny złoty; przedmiot tylko z bossów o stopień wyżej (legendarny z bossa -",
+    "  mityczny czerwony).",
     "",
     f"Razem: {len(tiles)} kafelków, {len(items)} przedmiotów, {len(monsters)} potworów, {len(npcs)} NPC, "
     f"{len(chars)} obrazków postaci, {len(objects)} obiektów, {len(pets)} pupili. Podmienione: {done}.",

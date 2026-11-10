@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.240.0] - 2026-11-10
+
+### Dodano
+- Nowy wygląd interfejsu z pakietu „Pixel RPG UI Kit” (Zidane42): paski życia, many i doświadczenia w ramkach,
+  okna z ramką i czerwonym przyciskiem zamknięcia, pola plecaka, ekwipunku i paska skrótów, zielone, żółte
+  i czerwone przyciski, przełączniki wł./wył. w ustawieniach. Działa na komputerze i telefonie.
+- Ustawienie „Wygląd interfejsu: nowy / klasyczny” (domyślnie nowy).
+- Ramki rzadkości przedmiotów: zwykły, niezwykły, rzadki, epicki, legendarny, mityczny (przedmioty tylko
+  z bossów o stopień wyżej).
+
 ## [0.239.0] - 2026-11-07
 
 ### Zmieniono

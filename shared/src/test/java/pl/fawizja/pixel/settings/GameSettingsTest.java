@@ -158,4 +158,20 @@ class GameSettingsTest {
         assertEquals(pl.fawizja.pixel.movement.ControlScheme.DPAD, GameSettings.fromMap(Map.of("joyfloat", "true")).controlScheme(),
                 "stare ustawienia dostaja krzyzyk");
     }
+
+    @Test
+    void newUiIsDefaultAndClassicIsRemembered() {
+        GameSettings s = new GameSettings();
+        assertTrue(s.newUi(), "nowy wyglad domyslnie");
+        assertTrue(java.util.Arrays.stream(s.allRows()).anyMatch(r -> r[1].equals("Wygląd interfejsu: nowy")));
+        assertTrue(s.apply("settings:ui"));
+        assertFalse(s.newUi());
+        assertTrue(java.util.Arrays.stream(s.allRows()).anyMatch(r -> r[1].equals("Wygląd interfejsu: klasyczny")));
+        assertFalse(GameSettings.fromMap(s.toMap()).newUi());
+        assertTrue(GameSettings.fromMap(new java.util.HashMap<>()).newUi(), "stare ustawienia - nowy wyglad");
+        assertTrue(GameSettings.fromMap(Map.of("ui", "cos")).newUi());
+        assertEquals(Boolean.FALSE, s.toggleState("settings:ui"));
+        assertEquals(Boolean.TRUE, s.toggleState("settings:loot"));
+        assertNull(s.toggleState("settings:fps"), "limit FPS ma kilka wartosci - bez przelacznika");
+    }
 }

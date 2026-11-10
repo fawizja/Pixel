@@ -411,6 +411,7 @@ public final class Hud {
         shapes.setProjectionMatrix(viewport.getCamera().combined);
         batch.setProjectionMatrix(viewport.getCamera().combined);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
+        wheelPanel.useSkin(zid() ? zSkin : null, batch);
         wheelPanel.drawShapes(shapes, pc, w, h);
         shapes.end();
         batch.begin();
@@ -678,13 +679,103 @@ public final class Hud {
         return t == null ? null : new TextureRegion(t);
     }
 
-    /** Odstep ikony od krawedzi pola: w ramce WsT ikona wypelnia wnetrze ramki. */
+    /**
+     * Odstep ikony od krawedzi pola: w ramce WsT ikona wypelnia wnetrze ramki; w wygladzie nowym ikona 32 px ma swoj
+     * rozmiar (1:1), gdy pole ma co najmniej 36 jednostek, i nie wchodzi glebiej niz 16% pola w ramke.
+     */
     private float slotPad(float cell) {
+        if (zid()) return cell >= 36 ? Math.max(2f, Math.min((cell - 32) / 2f, cell * 0.16f)) : Math.max(2f, cell * 0.1f);
         return wstSlot != null ? cell * 3f / 22f : Math.max(2, cell * 0.08f);
+    }
+
+    // ------------------------------------------------------------------ wyglad "nowy" (paczka Zidane42)
+
+    /** Grafiki wygladu nowego; null = brak plikow (zostaje klasyczny). */
+    private ZidaneSkin zSkin;
+    /** Obrazki wygladu nowego zlecone w przebiegu ksztaltow, rysowane na poczatku nastepnego przebiegu batcha. */
+    private final List<java.util.function.Consumer<SpriteBatch>> zQueue = new ArrayList<>();
+
+    /** Wyglad nowy wlaczony (ustawienie "Wygląd interfejsu", domyslnie nowy) i grafiki sa na miejscu. */
+    private boolean zid() {
+        return zSkin != null && (settings == null || settings.newUi());
+    }
+
+    /** Zleca obrazek z przebiegu ksztaltow (narysowany nad ksztaltami tego przebiegu, pod nastepnymi oknami). */
+    private void zQ(java.util.function.Consumer<SpriteBatch> draw) {
+        zQueue.add(draw);
+    }
+
+    private void zFlushQueue(SpriteBatch b) {
+        for (int i = 0; i < zQueue.size(); i++) zQueue.get(i).accept(b);
+        zQueue.clear();
+    }
+
+    /** Rysuje zlecone obrazki teraz (przerywa przebieg ksztaltow) - gdy kolejne ksztalty maja byc nad nimi. */
+    private void zFlush(ShapeRenderer shapes) {
+        if (zQueue.isEmpty() || uiBatch == null) return;
+        shapes.end();
+        uiBatch.begin();
+        zFlushQueue(uiBatch);
+        uiBatch.end();
+        resumeShapes(shapes);
+    }
+
+    /** Obrazek od razu, w trakcie przebiegu ksztaltow (okna: ksztalty tresci maja byc nad nimi). */
+    private void zNow(ShapeRenderer shapes, java.util.function.Consumer<SpriteBatch> draw) {
+        shapes.end();
+        uiBatch.begin();
+        drawBarOverlays(uiBatch);
+        draw.accept(uiBatch);
+        uiBatch.setColor(Color.WHITE);
+        uiBatch.end();
+        resumeShapes(shapes);
+    }
+
+    /** Okno wygladu nowego: ramka 9-slice, pod paskiem tytulu (titleH > 0) cienka listwa. */
+    private void zWindow(ShapeRenderer shapes, float fx, float fy, float fw, float fh, float titleH) {
+        zNow(shapes, b -> {
+            zSkin.window(b, fx, fy, fw, fh);
+            if (titleH > 0 && titleH < 24) zSkin.divider(b, fx + 7, fy + fh - titleH - 3, fw - 14);
+        });
+    }
+
+    /** Ramka pola: obrazki wygladu nowego jako 9-slice, pozostale rozciagane. */
+    private void slotDraw(SpriteBatch b, TextureRegion r, float x, float y, float w, float h) {
+        if (r == null) return;
+        if (zSkin != null && zSkin.isSlot(r)) zSkin.slot(b, r, x, y, w, h);
+        else b.draw(r, x, y, w, h);
+    }
+
+    /** Puste pole (bez przedmiotu). */
+    private TextureRegion slotEmptyImg() {
+        if (zid()) return zSkin.slot;
+        return wstEmpty != null ? wstEmpty : slotImg;
+    }
+
+    /** Pole przycisku albo zwykle pole. */
+    private TextureRegion slotBaseImg() {
+        return zid() ? zSkin.slot : slotImg;
+    }
+
+    /** Pole zaznaczone (wybrany przedmiot, otwarty plecak) albo null. */
+    private TextureRegion slotSelectedImg() {
+        return zid() ? zSkin.slotHover : wstSelected;
+    }
+
+    /** Pole wcisnietego przycisku albo null. */
+    private TextureRegion slotPressedImg() {
+        return zid() ? zSkin.slotHover : wstPressed;
     }
 
     /** Ramka pola dla przedmiotu: kolor rzadkosci wg ceny (puste pole - wglebione). */
     private TextureRegion slotFrame(ItemStack st, pl.fawizja.pixel.item.ItemRegistry items) {
+        if (zid()) {
+            if (st == null) return zSkin.slot;
+            ItemType t = items.get(st.itemId());
+            int tier = pl.fawizja.pixel.item.Rarity.tier(t);
+            // przedmiot tylko z bossow o stopien wyzej (legendarny z bossa - ramka mityczna)
+            return zSkin.rarityFrame(tier, tier > 0 && pl.fawizja.pixel.monster.LootRules.isBossOnly(t));
+        }
         if (wstSlot == null) return slotImg;
         if (st == null) return wstEmpty != null ? wstEmpty : wstSlot;
         int tier = pl.fawizja.pixel.item.Rarity.tier(items.get(st.itemId()));
@@ -756,6 +847,10 @@ public final class Hud {
      * grafik - wtedy wolajacy rysuje stara skorke OTClient.
      */
     private boolean wstPanel(ShapeRenderer shapes, String style, float fx, float fy, float fw, float fh, float titleH) {
+        if (zid() && uiBatch != null) {
+            zWindow(shapes, fx, fy, fw, fh, titleH);
+            return true;
+        }
         Tiled9[] p = wstPanels.get(style);
         if (p == null || uiBatch == null) return false;
         shapes.end();
@@ -840,6 +935,7 @@ public final class Hud {
             Gdx.app.error("Hud", "Brak ikon czaszek: " + e.getMessage());
         }
         loadWstPanels();
+        zSkin = ZidaneSkin.load();
         try {
             com.badlogic.gdx.graphics.Texture win = uiTexture("window.png");
             if (win != null) windowPatch = new com.badlogic.gdx.graphics.g2d.NinePatch(win, 6, 6, 27, 6);
@@ -1159,7 +1255,7 @@ public final class Hud {
         float sc = lay.compact ? 0.75f : 1f;
         font.getData().setScale(sc);
         layout.setText(font, title);
-        font.draw(batch, title, x, top - (lay.header - layout.height) / 2f - 1);
+        font.draw(batch, title, x, top - (lay.header - layout.height) / 2f - 1 - (zid() ? 3 : 0));
         font.getData().setScale(1f);
     }
 
@@ -3300,6 +3396,7 @@ public final class Hud {
     private void renderHud(SpriteBatch batch, ShapeRenderer shapes, GameSession session, WorldClock clock,
                            long serverTimeMs, DiagnosticsInfo diagInfo) {
         viewport.apply();
+        zQueue.clear();
         if (trade != null && !bagOpen) menuOpen = true; // po zamknieciu plecaka wraca okno handlu
         if (menuOpen || bagOpen) bigMapOpen = false;
         PlayerCharacter pc = session.character();
@@ -3463,8 +3560,8 @@ public final class Hud {
             batch.begin();
             if (slotImg != null) for (HudButton b : slotButtons()) {
                 if (!b.visible) continue;
-                batch.draw(b.active && wstPressed != null ? wstPressed : slotImg, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
-                if (b.active) outline(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2,
+                slotDraw(batch, b.active && slotPressedImg() != null ? slotPressedImg() : slotBaseImg(), b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2);
+                if (b.active && (!zid() || b == target)) outline(batch, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2,
                         b == target ? new Color(0.95f, 0.25f, 0.2f, 1f) : new Color(0.3f, 0.9f, 0.35f, 1f));
             }
             batch.end();
@@ -3532,8 +3629,15 @@ public final class Hud {
         if (tgt != null) {
             float tw = Math.min(200, gw * 0.4f);
             float tx = targetBarX(tw);
-            frame(shapes, tx - 6, gy + gh - 42, tw + 12, 38);
-            bar(shapes, tx, gy + gh - 36, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
+            if (zid()) {
+                // okno celu z ramka paczki: nazwa u gory, pasek zdrowia w ramce pod nia
+                frame(shapes, tx - 10, gy + gh - 50, tw + 20, 46);
+                float tf = tgt.healthFraction();
+                zQ(b -> zSkin.bar(b, ZidaneSkin.Bar.LIFE, tx, gy + gh - 42, tw, 16, tf));
+            } else {
+                frame(shapes, tx - 6, gy + gh - 42, tw + 12, 38);
+                bar(shapes, tx, gy + gh - 36, tw, 10, tgt.healthFraction(), new Color(0.85f, 0.15f, 0.2f, 1));
+            }
         }
         if (charOpen) {
             layoutCharWindows();
@@ -3555,11 +3659,22 @@ public final class Hud {
             rebuildMenu(session);
             if (!wstPanel(shapes, menuStyle(), menuX, menuY, menuW, menuH, 24)) window(shapes, menuX, menuY, menuW, menuH, true);
             for (MenuRow row : menuRows) {
+                if (zid()) {
+                    // wiersze jako przyciski z paczki: zielony dostepny, szary niedostepny
+                    ZidaneSkin.Btn c = row.action.equals("logout:yes") ? ZidaneSkin.Btn.RED : row.enabled ? ZidaneSkin.Btn.GREEN : ZidaneSkin.Btn.DISABLED;
+                    zQ(b -> zSkin.listButton(b, c, row.x, row.y, row.w, row.h));
+                    continue;
+                }
                 shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
             }
-            shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
-            shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
+            if (zid()) {
+                float cr = menuClose.r;
+                zQ(b -> zSkin.button(b, ZidaneSkin.Btn.RED, menuClose.x - cr, menuClose.y - cr, cr * 2, cr * 2));
+            } else {
+                shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
+                shapes.circle(menuClose.x, menuClose.y, menuClose.r, 20);
+            }
         }
         if (equipPanelVisible()) {
             if (epTibia) miniWindow(shapes, "wood", epX, epY, epW, epH, lay.eqHeader > 0 ? 21 : 0);
@@ -3579,8 +3694,18 @@ public final class Hud {
             shapes.setColor(0, 0, 0, 0.75f);
             shapes.rect(settingsRowX() - 4, diagTop() - 216, 238, 216);
             if (settings != null) {
-                int n = settings.rows().length;
-                for (int i = 0; i < n; i++) {
+                String[][] rows = settings.rows();
+                for (int i = 0; i < rows.length; i++) {
+                    if (zid()) {
+                        // przycisk z paczki, przy ustawieniach wlacz/wylacz przelacznik po prawej
+                        float rx = settingsRowX(), ry = settingsRowY(i);
+                        Boolean on = settings.toggleState(rows[i][0]);
+                        zQ(b -> {
+                            zSkin.listButton(b, ZidaneSkin.Btn.GREEN, rx, ry, 238, SETTINGS_ROW_H);
+                            if (on != null) zSkin.toggle(b, on, rx + 238 - 50, ry + SETTINGS_ROW_H / 2f - 12, 24);
+                        });
+                        continue;
+                    }
                     shapes.setColor(0.2f, 0.26f, 0.32f, 0.9f);
                     shapes.rect(settingsRowX(), settingsRowY(i), 238, SETTINGS_ROW_H);
                 }
@@ -3615,7 +3740,7 @@ public final class Hud {
                 font.draw(batch, lb, b.x - layout.width / 2f, b.y - b.r + 3 + layout.height);
             } else if (b.icon != null && b.id.startsWith("spell:")) {
                 // pole paska z mikstura albo runa: duza ikona, liczba sztuk w prawym dolnym rogu
-                float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.7f;
+                float is = zid() ? b.r * 2f - 2 * slotPad(b.r * 2f) : wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.7f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
                 float cd = itemCd[Integer.parseInt(b.id.substring(6))];
                 if (cd > 0) {
@@ -3631,7 +3756,7 @@ public final class Hud {
                 float sc = b.label.isEmpty() ? 0 : fitScale(b.label, room, 0.7f);
                 if (sc <= 0) {
                     // piktogram bez napisu (podpis nie miesci sie przy progu 7 dp): ikona we wnetrzu ramki
-                    float is = wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.5f;
+                    float is = zid() ? b.r * 2f - 2 * slotPad(b.r * 2f) : wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.5f;
                     drawButtonIcon(batch, b, b.icon, b.x - is / 2f, b.y - is / 2f, is);
                 } else {
                     font.getData().setScale(sc);
@@ -3652,7 +3777,7 @@ public final class Hud {
         }
         if (tgt != null) {
             float tw = Math.min(200, gw * 0.4f);
-            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", targetBarX(tw) + tw / 2f, gy + gh - 14);
+            centered(batch, tgt.type().name() + " (Lv " + tgt.type().level() + ")", targetBarX(tw) + tw / 2f, gy + gh - (zid() ? 20 : 14));
         }
         if (charOpen) drawCharacterSheet(batch, session);
         if (bagOpen) drawBagContents(batch, session);
@@ -3713,13 +3838,14 @@ public final class Hud {
             }
             centered(batch, "X", menuClose.x, menuClose.y);
             for (MenuRow row : menuRows) {
-                font.setColor(row.enabled ? Color.WHITE : Color.GRAY);
-                // wiersz bez opisu (okienko gracza, opcje): napis na srodku wysokosci
-                if (row.detail.isEmpty()) text(batch, clip(row.label, row.w - 8), row.x + 6, row.y + (row.h + font.getCapHeight()) / 2f);
-                else text(batch, clip(row.label, row.w - 8), row.x + 4, row.y + row.h - 3);
+                font.setColor(row.enabled ? Color.WHITE : zid() ? Z_OFF_TEXT : Color.GRAY);
+                // wiersz bez opisu (okienko gracza, opcje): napis na srodku wysokosci; na przycisku z paczki dalej od ramki
+                float zx = zid() ? 3 : 0;
+                if (row.detail.isEmpty()) text(batch, clip(row.label, row.w - 8 - zx), row.x + 6 + zx, row.y + (row.h + font.getCapHeight()) / 2f);
+                else text(batch, clip(row.label, row.w - 8 - zx), row.x + 4 + zx, row.y + row.h - 3 - zx / 3f);
                 font.getData().setScale(0.8f);
-                font.setColor(row.enabled ? new Color(0.8f, 0.85f, 0.7f, 1f) : Color.GRAY);
-                text(batch, clip(row.detail, row.w - 8), row.x + 4, row.y + row.h * 0.45f);
+                font.setColor(row.enabled ? (zid() ? Z_DETAIL_TEXT : new Color(0.8f, 0.85f, 0.7f, 1f)) : zid() ? Z_OFF_TEXT : Color.GRAY);
+                text(batch, clip(row.detail, row.w - 8 - zx), row.x + 4 + zx, row.y + row.h * 0.45f);
                 font.getData().setScale(1f);
             }
             font.setColor(Color.WHITE);
@@ -3738,7 +3864,10 @@ public final class Hud {
             if (settings != null) {
                 String[][] rows = settings.rows();
                 font.getData().setScale(0.85f);
-                for (int i = 0; i < rows.length; i++) text(batch, rows[i][1], settingsRowX() + 6, settingsRowY(i) + 16);
+                for (int i = 0; i < rows.length; i++) {
+                    boolean sw = zid() && settings.toggleState(rows[i][0]) != null;
+                    text(batch, sw ? clip(rows[i][1], 238 - 62) : rows[i][1], settingsRowX() + (zid() ? 8 : 6), settingsRowY(i) + 16);
+                }
                 font.getData().setScale(1f);
             }
         }
@@ -3748,6 +3877,12 @@ public final class Hud {
     }
 
     private static final Color BORDER = new Color(0.5f, 0.44f, 0.32f, 0.85f);
+    /** Napis na szarym (niedostepnym) przycisku wygladu nowego. */
+    private static final Color Z_OFF_TEXT = new Color(0.22f, 0.22f, 0.22f, 1f);
+    /** Napis na zoltym przycisku wygladu nowego. */
+    private static final Color Z_DARK_TEXT = new Color(0.25f, 0.12f, 0.02f, 1f);
+    /** Opis pod nazwa na zielonym przycisku wygladu nowego. */
+    private static final Color Z_DETAIL_TEXT = new Color(0.9f, 0.96f, 0.8f, 1f);
     /** Tlo paneli bryly (prawy panel, paski nad i pod widokiem gry). */
     private static final Color PANEL_BG = new Color(0.17f, 0.16f, 0.15f, 1f);
     private static final Color FILL = new Color(0.1f, 0.09f, 0.08f, 0.72f);
@@ -3764,6 +3899,10 @@ public final class Hud {
 
     /** Ciemne okienko z jasniejsza ramka (styl klienta mobilnego). */
     private void frame(ShapeRenderer shapes, float fx, float fy, float fw, float fh) {
+        if (zid() && uiBatch != null) {
+            zWindow(shapes, fx, fy, fw, fh, 0);
+            return;
+        }
         if (panelPatch != null && uiBatch != null) {
             patch(shapes, panelPatch, fx, fy, fw, fh, 0.92f);
             return;
@@ -3822,14 +3961,30 @@ public final class Hud {
         float bh = topBarH();
         float half = (t.w - 4 - 6) / 2f;
         float y = topBarRowY();
-        bar(shapes, t.x + 2, y, half, bh, pc.health() / (float) Math.max(1, pc.maxHealth()), new Color(0.85f, 0.15f, 0.2f, 1));
-        bar(shapes, t.x + 2 + half + 6, y, half, bh, pc.mana() / (float) Math.max(1, pc.maxMana()), new Color(0.2f, 0.35f, 0.95f, 1));
+        float hp = pc.health() / (float) Math.max(1, pc.maxHealth()), mp = pc.mana() / (float) Math.max(1, pc.maxMana());
         float[] ex = expBar(pc);
-        bar(shapes, ex[0], statusY() + (STATUS_SIZE - 5) / 2f, ex[1], 5, (float) pc.levelProgress(), new Color(0.95f, 0.8f, 0.2f, 1));
+        float lv = (float) pc.levelProgress();
+        if (zid()) {
+            // paski w ramkach z paczki: prostokat paska to zewnetrzna krawedz ramki (wnetrze 10 px, na telefonie 8)
+            zQ(b -> {
+                zSkin.bar(b, ZidaneSkin.Bar.LIFE, t.x + 2, y, half, bh, hp);
+                zSkin.bar(b, ZidaneSkin.Bar.MANA, t.x + 2 + half + 6, y, half, bh, mp);
+                zSkin.bar(b, ZidaneSkin.Bar.EXP, ex[0], statusY(), ex[1], STATUS_SIZE, lv);
+            });
+            return;
+        }
+        bar(shapes, t.x + 2, y, half, bh, hp, new Color(0.85f, 0.15f, 0.2f, 1));
+        bar(shapes, t.x + 2 + half + 6, y, half, bh, mp, new Color(0.2f, 0.35f, 0.95f, 1));
+        bar(shapes, ex[0], statusY() + (STATUS_SIZE - 5) / 2f, ex[1], 5, lv, new Color(0.95f, 0.8f, 0.2f, 1));
     }
 
-    private float topBarH() { return lay.compact ? 11 : 13; }
-    private float topBarRowY() { return lay.topBar.top() - (lay.compact ? 2 : 3) - topBarH(); }
+    /** Wysokosc paskow HP i many (w wygladzie nowym razem z ramka 4 px z kazdej strony). */
+    private float topBarH() {
+        if (zid()) return lay.compact ? 16 : 18;
+        return lay.compact ? 11 : 13;
+    }
+
+    private float topBarRowY() { return lay.topBar.top() - (zid() ? 0 : lay.compact ? 2 : 3) - topBarH(); }
 
     /** Pasek postepu poziomu w drugim wierszu: {x, szerokosc} (za napisem "Lv N"). */
     private float[] expBar(PlayerCharacter pc) {
@@ -3920,7 +4075,7 @@ public final class Hud {
     private void drawBuffCell(SpriteBatch batch) {
         float[] c = buffCellPos();
         float cell = epCell, x0 = c[0], y0 = c[1];
-        if (slotImg != null) batch.draw(wstEmpty != null ? wstEmpty : slotImg, x0, y0, cell, cell);
+        if (slotImg != null) slotDraw(batch, slotEmptyImg(), x0, y0, cell, cell);
         boolean skull = ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE || ownSkullMs > 0;
         float m = (cell - 4) / 2f;
         float[][] spots = {{x0 + 2, y0 + 2 + m}, {x0 + 2 + m, y0 + 2 + m}, {x0 + 2, y0 + 2}, {x0 + 2 + m, y0 + 2}};
@@ -4841,8 +4996,8 @@ public final class Hud {
 
     /** Plecak w gniezdzie ekwipunku (dotkniecie otwiera plecak), podswietlony gdy plecak jest otwarty. */
     private void drawBackpackSlot(SpriteBatch batch, float x, float y, float cell) {
-        if (slotImg != null) batch.draw(bagOpen && wstSelected != null ? wstSelected : slotImg, x, y, cell, cell);
-        if (bagOpen) {
+        if (slotImg != null) slotDraw(batch, bagOpen && slotSelectedImg() != null ? slotSelectedImg() : slotBaseImg(), x, y, cell, cell);
+        if (bagOpen && !zid()) {
             batch.setColor(1f, 0.85f, 0.3f, 0.35f);
             batch.draw(art.white(), x + 1, y + 1, cell - 2, cell - 2);
             batch.setColor(Color.WHITE);
@@ -4926,7 +5081,7 @@ public final class Hud {
     /** Pole ekwipunku: tlo z OTClientV8, przedmiot albo szara nazwa gniazda. */
     private void drawEquipSlot(SpriteBatch batch, ItemStack st, String name, float x, float y, float cell) {
         TextureRegion frame = slotFrame(st, art.itemRegistry());
-        if (frame != null) batch.draw(frame, x, y, cell, cell);
+        if (frame != null) slotDraw(batch, frame, x, y, cell, cell);
         TextureRegion r = st == null ? null : art.item(st.itemId());
         if (r != null) {
             float pad = slotPad(cell);
@@ -5140,7 +5295,23 @@ public final class Hud {
                 shapes.triangle(sx + slotSize - 4, sy + slotSize - 4, sx + slotSize - 16, sy + slotSize - 4, sx + slotSize - 4, sy + slotSize - 16);
             }
         }
-        if (selectedSlot >= 0) {
+        if (zid()) {
+            // przyciski plecaka z paczki: zielone, wyrzucenie i odpiecie czerwone
+            zQ(b -> {
+                if (selectedSlot >= 0) {
+                    for (HudButton hb : new HudButton[] {bagEquip, bagDrop, bagUse}) {
+                        zSkin.button(b, hb == bagDrop ? ZidaneSkin.Btn.RED : ZidaneSkin.Btn.GREEN,
+                                hb.x - hb.r * 1.3f, hb.y - hb.r * 0.6f, hb.r * 2.6f, hb.r * 1.2f);
+                    }
+                    zSkin.button(b, ZidaneSkin.Btn.YELLOW, bagKeep.x - bagKeep.r * 1.8f, bagKeep.y - bagKeep.r * 0.6f, bagKeep.r * 3.6f, bagKeep.r * 1.2f);
+                } else {
+                    zSkin.button(b, ZidaneSkin.Btn.GREEN, bagSort.x - bagSort.r * 1.6f, bagSort.y - bagSort.r * 0.6f, bagSort.r * 3.2f, bagSort.r * 1.2f);
+                    if (bagPages > 1 && bagPage == bagPages - 1) {
+                        zSkin.button(b, ZidaneSkin.Btn.RED, bagDetach.x - bagDetach.r * 1.8f, bagDetach.y - bagDetach.r * 0.6f, bagDetach.r * 3.6f, bagDetach.r * 1.2f);
+                    }
+                }
+            });
+        } else if (selectedSlot >= 0) {
             for (HudButton b : new HudButton[] {bagEquip, bagDrop, bagUse}) {
                 shapes.setColor(0.25f, 0.45f, 0.3f, 0.95f);
                 shapes.rect(b.x - b.r * 1.3f, b.y - b.r * 0.6f, b.r * 2.6f, b.r * 1.2f);
@@ -5175,8 +5346,8 @@ public final class Hud {
                 float sx = bagX + (i % 5) * slotSize;
                 float sy = bagY + (3 - i / 5) * slotSize;
                 ItemStack st = pc.backpack().get(base + i);
-                batch.draw(base + i == selectedSlot && wstSelected != null ? wstSelected : slotFrame(st, art.itemRegistry()), sx + 1, sy + 1, slotSize - 2, slotSize - 2);
-                if (base + i == selectedSlot) outline(batch, sx + 1, sy + 1, slotSize - 2, slotSize - 2, new Color(0.95f, 0.8f, 0.25f, 1f));
+                slotDraw(batch, base + i == selectedSlot && slotSelectedImg() != null ? slotSelectedImg() : slotFrame(st, art.itemRegistry()), sx + 1, sy + 1, slotSize - 2, slotSize - 2);
+                if (base + i == selectedSlot && !zid()) outline(batch, sx + 1, sy + 1, slotSize - 2, slotSize - 2, new Color(0.95f, 0.8f, 0.25f, 1f));
                 if (st != null && pc.isKept(st.itemId())) {
                     batch.setColor(0.95f, 0.8f, 0.25f, 1f);
                     batch.draw(art.white(), sx + slotSize - 10, sy + slotSize - 10, 7, 7);
@@ -5224,7 +5395,9 @@ public final class Hud {
                 if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
                 centered(batch, bagUse.label, bagUse.x, bagUse.y);
+                if (zid()) font.setColor(Z_DARK_TEXT); // ciemny napis na zoltym przycisku
                 centered(batch, pc.isKept(s.itemId()) ? "ODBLOKUJ" : bagKeep.label, bagKeep.x, bagKeep.y);
+                font.setColor(Color.WHITE);
             }
         } else {
             centered(batch, bagSort.label, bagSort.x, bagSort.y);
@@ -5242,6 +5415,7 @@ public final class Hud {
 
     /** Nakladka paska (cieniowanie i ramka z OTClientV8) na paski narysowane w tej klatce. */
     private void drawBarOverlays(SpriteBatch batch) {
+        zFlushQueue(batch);
         if (barPatch == null) return;
         for (float[] r : barRects) barPatch.draw(batch, r[0], r[1], r[2], r[3]);
         barRects.clear();
@@ -5724,18 +5898,34 @@ public final class Hud {
         out.add(new String[] {"book", "Księga czarów", "czary i rzemiosło (K)"});
         out.add(new String[] {"diag", "Diagnostyka", diagnosticsOpen ? "pokazana" : "ukryta"});
         if (settings != null) {
+            // wyglad interfejsu na pierwszej stronie (porownanie nowego i klasycznego)
+            out.add(new String[] {"settings:ui", "Wygląd interfejsu", settings.newUi() ? "nowy" : "klasyczny"});
             // sterowanie na pierwszej stronie, zaraz po przyciskach postaci (wariant i suwak czulosci)
             pl.fawizja.pixel.movement.ControlScheme cs = settings.controlScheme();
             out.add(new String[] {"settings:controls", "Sterowanie", cs.shortLabel + " (" + (cs.ordinal() + 1) + " z "
                     + pl.fawizja.pixel.movement.ControlScheme.values().length + ")"});
             out.add(new String[] {"settings:sens", "Czułość", settings.sensitivity() + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
             for (String[] r : settings.allRows()) {
-                if (r[0].equals("settings:controls") || r[0].equals("settings:sens")) continue;
+                if (r[0].equals("settings:controls") || r[0].equals("settings:sens") || r[0].equals("settings:ui")) continue;
                 int c = r[1].indexOf(": ");
                 out.add(c > 0 ? new String[] {r[0], r[1].substring(0, c), r[1].substring(c + 2)} : new String[] {r[0], r[1], ""});
             }
         }
         return out;
+    }
+
+    /** Stan przelacznika pola ustawien na telefonie (null - pole bez przelacznika). */
+    private Boolean mToggleState(GameSession session, String action) {
+        if (action.equals("run")) return session.character().isRunning();
+        if (action.equals("diag")) return diagnosticsOpen;
+        return settings == null ? null : settings.toggleState(action);
+    }
+
+    /** Kolor przycisku okna kategorii: wyrzucenie i odpiecie czerwone, wybrana strona plecaka zolta. */
+    private static ZidaneSkin.Btn mZButton(String id, boolean on) {
+        if (on) return ZidaneSkin.Btn.YELLOW;
+        if (id.equals("bag_drop") || id.equals("bag_detach")) return ZidaneSkin.Btn.RED;
+        return ZidaneSkin.Btn.GREEN;
     }
 
     /** Suwak czulosci w przycisku ustawien: 5 pol w dolnej czesci przycisku (x: lewa krawedz pola i, szerokosc pola). */
@@ -6053,6 +6243,21 @@ public final class Hud {
 
     /** Okno w stylu makiety: cien, drewniane tlo, pasek tytulu i czerwony krzyzyk. */
     private void mWindowShapes(ShapeRenderer s, float x, float y, float ww, float wh, boolean close) {
+        if (zid() && uiBatch != null) {
+            // okno z paczki; krzyzyk na czerwonym przycisku z paczki (kreski w przebiegu ksztaltow, nad przyciskiem)
+            float cx = x + ww - 26, cy = y + wh - 26;
+            zNow(s, b -> {
+                zSkin.window(b, x, y, ww, wh);
+                zSkin.divider(b, x + 7, y + wh - 28, ww - 14);
+                if (close) zSkin.button(b, ZidaneSkin.Btn.RED, cx, cy, 20, 20);
+            });
+            if (close) {
+                s.setColor(Color.WHITE);
+                s.rectLine(cx + 6, cy + 6, cx + 14, cy + 14, 2f);
+                s.rectLine(cx + 14, cy + 6, cx + 6, cy + 14, 2f);
+            }
+            return;
+        }
         s.setColor(0, 0, 0, 0.45f);
         s.rect(x + 3, y - 4, ww, wh);
         s.setColor(M_WOOD);
@@ -6207,6 +6412,7 @@ public final class Hud {
     private void renderMobile(SpriteBatch batch, ShapeRenderer shapes, GameSession session, WorldClock clock,
                               long serverTimeMs, DiagnosticsInfo diagInfo, Monster tgt) {
         PlayerCharacter pc = session.character();
+        zQueue.clear();
         if (menuOpen && mWin != null) mWin = null; // tylko jedno okno naraz: nowe okno menu zamyka okno kategorii
         if (trade != null) mWin = null;
         if (bigMapOpen) menuGeometry();
@@ -6226,15 +6432,30 @@ public final class Hud {
         // ---- warstwa 1: stale elementy HUD-u (ksztalty)
         shapes.begin(ShapeRenderer.ShapeType.Filled);
         HudLayout.Rect f = mlay.frame;
-        shapes.setColor(M_WOOD);
-        shapes.rect(f.x, f.y, f.w, f.h);
-        strokeRect(shapes, f.x, f.y, f.w, f.h, 1.5f, M_DARK);
-        strokeRect(shapes, f.x + 2, f.y + 2, f.w - 4, f.h - 4, 1f, M_LINE);
-        mBar(shapes, mlay.hpBar, pc.health() / (float) Math.max(1, pc.maxHealth()), hex(0xc8312c, 1f));
-        mBar(shapes, mlay.mpBar, pc.mana() / (float) Math.max(1, pc.maxMana()), hex(0x2f63d6, 1f));
+        float hpFrac = pc.health() / (float) Math.max(1, pc.maxHealth()), mpFrac = pc.mana() / (float) Math.max(1, pc.maxMana());
+        if (zid()) {
+            // ramka z paczki, paski HP i many w ramkach (wnetrze 10 dp, nachodza na krawedz ramki), ikony w polach
+            float[] hb = mZBar(true), mb = mZBar(false);
+            zNow(shapes, b -> {
+                zSkin.window(b, f.x, f.y, f.w, f.h);
+                zSkin.bar(b, ZidaneSkin.Bar.LIFE, hb[0], hb[1], hb[2], hb[3], hpFrac);
+                zSkin.bar(b, ZidaneSkin.Bar.MANA, mb[0], mb[1], mb[2], mb[3], mpFrac);
+                for (int i = 0; i < MobileHudLayout.ICONS; i++) {
+                    HudLayout.Rect r = mlay.icons[i];
+                    zSkin.slot(b, mobileIconActive(i) ? zSkin.slotHover : zSkin.slot, r.x, r.y, r.w, r.h);
+                }
+            });
+        } else {
+            shapes.setColor(M_WOOD);
+            shapes.rect(f.x, f.y, f.w, f.h);
+            strokeRect(shapes, f.x, f.y, f.w, f.h, 1.5f, M_DARK);
+            strokeRect(shapes, f.x + 2, f.y + 2, f.w - 4, f.h - 4, 1f, M_LINE);
+            mBar(shapes, mlay.hpBar, hpFrac, hex(0xc8312c, 1f));
+            mBar(shapes, mlay.mpBar, mpFrac, hex(0x2f63d6, 1f));
+        }
         for (int i = 0; i < MobileHudLayout.ICONS; i++) {
             HudLayout.Rect r = mlay.icons[i];
-            woodButton(shapes, r.x, r.y, r.w, r.h, mobileIconActive(i));
+            if (!zid()) woodButton(shapes, r.x, r.y, r.w, r.h, mobileIconActive(i));
             if (i == MobileHudLayout.ICON_VIP) vipGlyph(shapes, r.cx(), r.y + 18);
             if (i == MobileHudLayout.ICON_SETTINGS) gearGlyph(shapes, r.cx(), r.y + 19, 6.5f);
             if (i == MobileHudLayout.ICON_LOGOUT) powerGlyph(shapes, r.cx(), r.y + 17);
@@ -6333,10 +6554,15 @@ public final class Hud {
             float tw = 200, tx = w / 2f - tw / 2f, ty = mlay.frame.y - 4 - 30;
             shapes.setColor(hex(0x140c06, 0.75f));
             shapes.rect(tx - 6, ty, tw + 12, 30);
-            shapes.setColor(0, 0, 0, 0.6f);
-            shapes.rect(tx, ty + 4, tw, 7);
-            shapes.setColor(0.85f, 0.15f, 0.2f, 1f);
-            shapes.rect(tx, ty + 4, tw * Math.max(0, Math.min(1, tgt.healthFraction())), 7);
+            if (zid()) {
+                float tf = tgt.healthFraction();
+                zQ(b -> zSkin.bar(b, ZidaneSkin.Bar.LIFE, tx, ty + 1, tw, 14, tf));
+            } else {
+                shapes.setColor(0, 0, 0, 0.6f);
+                shapes.rect(tx, ty + 4, tw, 7);
+                shapes.setColor(0.85f, 0.15f, 0.2f, 1f);
+                shapes.rect(tx, ty + 4, tw * Math.max(0, Math.min(1, tgt.healthFraction())), 7);
+            }
         }
         if (diagnosticsOpen && diagInfo != null) {
             shapes.setColor(0, 0, 0, 0.7f);
@@ -6346,10 +6572,12 @@ public final class Hud {
 
         // ---- warstwa 1: napisy i obrazki
         batch.begin();
+        zFlushQueue(batch);
         String lv = "Lv " + pc.level();
         mText(batch, lv, 12, mlay.frame.cy() - 4f, 0.72f, M_TEXT, false);
-        mCentered(batch, "HP " + pc.health() + " / " + pc.maxHealth(), mlay.hpBar.cx(), mlay.hpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
-        mCentered(batch, "Mana " + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mlay.mpBar.cy(), HudLayout.MIN_FONT, Color.WHITE, true);
+        float hpCy = zid() ? mZBar(true)[1] + mZBar(true)[3] / 2f : mlay.hpBar.cy(), mpCy = zid() ? mZBar(false)[1] + mZBar(false)[3] / 2f : mlay.mpBar.cy();
+        mCentered(batch, "HP " + pc.health() + " / " + pc.maxHealth(), mlay.hpBar.cx(), hpCy, HudLayout.MIN_FONT, Color.WHITE, true);
+        mCentered(batch, "Mana " + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mpCy, HudLayout.MIN_FONT, Color.WHITE, true);
         TextureRegion[] iconImg = {art.backpack(), helmetIcon(session), itemIcon(session, "exp_scroll"), null, itemIcon(session, "challenge_scroll"), null,
                 null, itemIcon(session, "crystal_coin"), null};
         for (int i = 0; i < MobileHudLayout.ICONS; i++) {
@@ -6357,7 +6585,7 @@ public final class Hud {
             if (iconImg[i] != null) batch.draw(iconImg[i], r.x + 5, r.y + 8, 22, 22);
             String label = M_ICON_LABELS[i];
             float sc = Math.min(0.42f, 0.42f * 30f / Math.max(1f, mWidth(label, 0.42f)));
-            mCentered(batch, label, r.cx(), r.y + 4.5f, Math.max(0.3f, sc), M_TEXT, false);
+            mCentered(batch, label, r.cx(), r.y + 4.5f, Math.max(0.3f, sc), M_TEXT, zid());
         }
         sx = mlay.statusRow.x + statuses.size() * (STATUS_SIZE + 3);
         for (Buff b : buffs) {
@@ -6435,16 +6663,34 @@ public final class Hud {
             rebuildMenu(session);
             mWindowShapes(shapes, menuX, menuY, menuW, menuH, true);
             String cur = pickSlot >= 0 ? barEntries[pickSlot] : null;
+            if (zid()) {
+                // wiersze menu jako przyciski z paczki (wybrany jasniejszy, niedostepny szary, wylogowanie czerwone)
+                for (MenuRow row : menuRows) {
+                    boolean sel = cur != null && row.action.equals("pick:set:" + cur);
+                    ZidaneSkin.Btn c = logoutConfirm ? (row.action.equals("logout:yes") ? ZidaneSkin.Btn.RED : ZidaneSkin.Btn.GREEN)
+                            : row.enabled ? ZidaneSkin.Btn.GREEN : ZidaneSkin.Btn.DISABLED;
+                    boolean plain = sel || logoutConfirm;
+                    zQ(b -> {
+                        if (plain) zSkin.button(b, c, row.x, row.y, row.w, row.h);
+                        else zSkin.listButton(b, c, row.x, row.y, row.w, row.h);
+                    });
+                }
+                zFlush(shapes);
+            }
             for (MenuRow row : menuRows) {
                 boolean sel = cur != null && row.action.equals("pick:set:" + cur);
-                if (logoutConfirm) {
+                if (zid()) {
+                    if (logoutConfirm) continue;
+                } else if (logoutConfirm) {
                     woodButton(shapes, row.x, row.y, row.w, row.h, false);
                     continue;
                 }
-                Color fill = sel ? M_SEL : row.enabled ? M_CELL : hex(0x332014, 1f);
-                shapes.setColor(fill);
-                shapes.rect(row.x, row.y, row.w, row.h);
-                strokeRect(shapes, row.x, row.y, row.w, row.h, 1f, sel ? M_GOOD : row.enabled ? M_CELL_LINE : hex(0x271810, 1f));
+                if (!zid()) {
+                    Color fill = sel ? M_SEL : row.enabled ? M_CELL : hex(0x332014, 1f);
+                    shapes.setColor(fill);
+                    shapes.rect(row.x, row.y, row.w, row.h);
+                    strokeRect(shapes, row.x, row.y, row.w, row.h, 1f, sel ? M_GOOD : row.enabled ? M_CELL_LINE : hex(0x271810, 1f));
+                }
                 if (pickSlot >= 0) {
                     SpellType sp = actionSpell(session, row.action.startsWith("pick:set:") ? row.action.substring(9) : null);
                     if (sp == null && row.action.equals("pick:none")) sp = spellByName(session, row.label);
@@ -6470,14 +6716,25 @@ public final class Hud {
         if (houseWin != null) drawHouseShapes(shapes, session);
         shapes.end();
         batch.begin();
+        zFlushQueue(batch);
         if (win != null) {
-            mText(batch, mWinTitle(), win.x + 10, win.top() - 17, 0.82f, Color.WHITE, false);
+            mText(batch, mWinTitle(), win.x + 10, win.top() - (zid() ? 19 : 17), 0.82f, Color.WHITE, false);
             mWinContent(batch, win, session);
         }
         if (menuOpen) drawMobileMenuText(batch, session);
         if (bigMapOpen) drawBigMap(batch, session, pc.position().z() == 0 ? "0" : (pc.position().z() > 0 ? "+" + pc.position().z() : String.valueOf(pc.position().z())));
         if (houseWin != null) drawHouseText(batch);
         batch.end();
+    }
+
+    /**
+     * Pasek HP (hp) albo many w wygladzie nowym: {x, y, szerokosc, wysokosc} zewnetrznej krawedzi ramki - 18 dp
+     * (wnetrze 10 dp), od 2 dp pod gorna krawedzia ramki HUD-u; ramki obu paskow stykaja sie czarna obwodka.
+     */
+    private float[] mZBar(boolean hp) {
+        HudLayout.Rect f = mlay.frame, r = hp ? mlay.hpBar : mlay.mpBar;
+        float y = f.top() - 2 - 18 - (hp ? 0 : 17);
+        return new float[] {r.x, y, r.w, 18};
     }
 
     /** Pasek HP albo many w ramce: ciemne tlo, wypelnienie, ciemna obwodka. */
@@ -6681,7 +6938,11 @@ public final class Hud {
         PlayerCharacter pc = session.character();
         switch (mWin) {
             case BAG:
-                for (MBtn b : mBagButtons(win, session)) woodButton(s, b.x(), b.y(), b.w(), b.h(), b.id().equals("mbag:page:" + bagPage));
+                for (MBtn b : mBagButtons(win, session)) {
+                    boolean on = b.id().equals("mbag:page:" + bagPage);
+                    if (zid()) zQ(bt -> zSkin.button(bt, mZButton(b.id(), on), b.x(), b.y(), b.w(), b.h()));
+                    else woodButton(s, b.x(), b.y(), b.w(), b.h(), on);
+                }
                 break;
             case SKILLS: {
                 List<pl.fawizja.pixel.character.SkillSheet.Row> rows = pl.fawizja.pixel.character.SkillSheet.rows(pc);
@@ -6707,15 +6968,31 @@ public final class Hud {
                     yy -= M_VIP_ROW;
                 }
                 MBtn add = mVipAdd(win);
-                woodButton(s, add.x(), add.y(), add.w(), add.h(), false);
+                if (zid()) zQ(bt -> zSkin.button(bt, ZidaneSkin.Btn.GREEN, add.x(), add.y(), add.w(), add.h()));
+                else woodButton(s, add.x(), add.y(), add.w(), add.h(), false);
                 break;
             }
             case SETTINGS: {
                 List<String[]> entries = mSettingsEntries(session);
-                for (MBtn b : mSettingsButtons(win, entries)) {
+                List<MBtn> btns = mSettingsButtons(win, entries);
+                for (MBtn b : btns) {
+                    if (zid()) {
+                        // pole ustawienia jako przycisk z paczki, wlacz/wylacz - przelacznik z paczki po prawej
+                        Boolean on = b.id().equals("set:page") ? null : mToggleState(session, entries.get(Integer.parseInt(b.id().substring(4)))[0]);
+                        boolean page = b.id().equals("set:page");
+                        zQ(bt -> {
+                            if (page) zSkin.button(bt, ZidaneSkin.Btn.YELLOW, b.x(), b.y(), b.w(), b.h());
+                            else zSkin.listButton(bt, ZidaneSkin.Btn.GREEN, b.x(), b.y(), b.w(), b.h());
+                            if (on != null) zSkin.toggle(bt, on, b.x() + b.w() - 6 - 48, b.y() + b.h() / 2f - 12, 24);
+                        });
+                        continue;
+                    }
                     s.setColor(M_CELL);
                     s.rect(b.x(), b.y(), b.w(), b.h());
                     strokeRect(s, b.x(), b.y(), b.w(), b.h(), 1f, M_CELL_LINE);
+                }
+                zFlush(s);
+                for (MBtn b : btns) {
                     if (!b.id().equals("set:page") && settings != null
                             && entries.get(Integer.parseInt(b.id().substring(4)))[0].equals("settings:sens")) {
                         sliderShapes(s, b, settings.sensitivity());
@@ -6757,7 +7034,7 @@ public final class Hud {
                 pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
                 String info = "Zdrowie " + pc.health() + "/" + pc.maxHealth() + "  Mana " + pc.mana() + "/" + pc.maxMana()
                         + "  Szybkość " + pc.speed() + "  Udźwig " + pc.capacity() + "  Atak do " + ap.maxDamage();
-                mText(b, mClip(info, win.w - 24, 0.56f), win.x + 12, win.y + 6, 0.56f, M_MUTED, false);
+                mText(b, mClip(info, win.w - 24, 0.56f), win.x + 12, win.y + (zid() ? 9 : 6), 0.56f, M_MUTED, false);
                 break;
             }
             case BAG: {
@@ -6770,10 +7047,10 @@ public final class Hud {
                     mBagCell(win, i, c);
                     ItemStack st = slot < pc.backpack().size() ? pc.backpack().get(slot) : null;
                     if (st != null) used++;
-                    TextureRegion fr = slot == selectedSlot && wstSelected != null ? wstSelected : slotFrame(st, art.itemRegistry());
-                    if (fr != null) b.draw(fr, c.x, c.y, c.w, c.h);
+                    TextureRegion fr = slot == selectedSlot && slotSelectedImg() != null ? slotSelectedImg() : slotFrame(st, art.itemRegistry());
+                    if (fr != null) slotDraw(b, fr, c.x, c.y, c.w, c.h);
                     else bFill(b, c.x, c.y, c.w, c.h, M_CELL);
-                    if (slot == selectedSlot) bStroke(b, c.x, c.y, c.w, c.h, 1.5f, hex(0xf2cc40, 1f));
+                    if (slot == selectedSlot && !zid()) bStroke(b, c.x, c.y, c.w, c.h, 1.5f, hex(0xf2cc40, 1f));
                     if (st == null) continue;
                     TextureRegion r = art.item(st.itemId());
                     float ip = slotPad(c.w);
@@ -6800,7 +7077,10 @@ public final class Hud {
                     mText(b, head, win.x + 12, ty, 0.62f, M_MUTED, false);
                     mText(b, "Dotknij przedmiotu, potem pola, aby przenieść.", win.x + 12, ty - 13, 0.56f, M_MUTED, false);
                 }
-                for (MBtn bt : mBagButtons(win, session)) mCentered(b, bt.label(), bt.x() + bt.w() / 2f, bt.y() + bt.h() / 2f, 0.66f, M_TEXT, false);
+                for (MBtn bt : mBagButtons(win, session)) {
+                    boolean dark = zid() && bt.id().equals("mbag:page:" + bagPage);
+                    mCentered(b, bt.label(), bt.x() + bt.w() / 2f, bt.y() + bt.h() / 2f, 0.66f, dark ? Z_DARK_TEXT : M_TEXT, false);
+                }
                 break;
             }
             case EQUIP: {
@@ -6812,7 +7092,7 @@ public final class Hud {
                 float[] bp = mEqCell(win, 2, 0);
                 drawBackpackSlot(b, bp[0], bp[1], bp[2]);
                 float[] bc = mEqCell(win, 0, 3);
-                if (slotImg != null) b.draw(wstEmpty != null ? wstEmpty : slotImg, bc[0], bc[1], bc[2], bc[2]);
+                if (slotImg != null) slotDraw(b, slotEmptyImg(), bc[0], bc[1], bc[2], bc[2]);
                 float m = (bc[2] - 4) / 2f;
                 float[][] spots = {{bc[0] + 2, bc[1] + 2 + m}, {bc[0] + 2 + m, bc[1] + 2 + m}, {bc[0] + 2, bc[1] + 2}, {bc[0] + 2 + m, bc[1] + 2}};
                 for (int i = 0; i < Math.min(4, buffs.size()); i++) {
@@ -6876,7 +7156,7 @@ public final class Hud {
                 List<String[]> entries = mSettingsEntries(session);
                 for (MBtn bt : mSettingsButtons(win, entries)) {
                     if (bt.id().equals("set:page")) {
-                        mCentered(b, bt.label(), bt.x() + bt.w() / 2f, bt.y() + bt.h() / 2f, 0.66f, M_GOOD, false);
+                        mCentered(b, bt.label(), bt.x() + bt.w() / 2f, bt.y() + bt.h() / 2f, 0.66f, zid() ? Z_DARK_TEXT : M_GOOD, false);
                         continue;
                     }
                     String[] e = entries.get(Integer.parseInt(bt.id().substring(4)));
@@ -6885,8 +7165,9 @@ public final class Hud {
                         mText(b, e[1] + ": " + e[2], bt.x() + 6, bt.y() + 26.5f, 0.66f, M_TEXT, false);
                         continue;
                     }
-                    mText(b, mClip(e[1], bt.w() - 12, 0.68f), bt.x() + 6, bt.y() + 22.5f, 0.68f, M_TEXT, false);
-                    mText(b, mClip(e[2], bt.w() - 12, 0.58f), bt.x() + 6, bt.y() + 7, 0.58f, M_MUTED, false);
+                    float room = bt.w() - 12 - (zid() && mToggleState(session, e[0]) != null ? 52 : 0), tx = bt.x() + (zid() ? 8 : 6);
+                    mText(b, mClip(e[1], room, 0.68f), tx, bt.y() + 22.5f, 0.68f, M_TEXT, false);
+                    mText(b, mClip(e[2], room, 0.58f), tx, bt.y() + 7, 0.58f, zid() ? Z_DETAIL_TEXT : M_MUTED, false);
                 }
                 break;
             }
@@ -6930,18 +7211,19 @@ public final class Hud {
         } else {
             title = "Księga: czary (dotknij, aby rzucić) i rzemiosło";
         }
-        mText(batch, mClip(title, menuW - 44, 0.76f), menuX + 10, menuY + menuH - 17, 0.76f, Color.WHITE, false);
+        mText(batch, mClip(title, menuW - 44, 0.76f), menuX + 10, menuY + menuH - (zid() ? 19 : 17), 0.76f, Color.WHITE, false);
         if (sub != null && !sub.isEmpty()) mText(batch, mClip(sub, menuW - 20, 0.62f), menuX + 10, menuY + menuH - 36, 0.62f, M_MUTED, false);
         if (logoutConfirm) mCentered(batch, "Na pewno chcesz się wylogować?", menuX + menuW / 2f, menuY + menuH - 50, 0.8f, M_TEXT, false);
         boolean pick = pickSlot >= 0;
         for (MenuRow row : menuRows) {
-            Color lc = row.enabled ? M_TEXT : hex(0xefe4d4, 0.45f), dc = row.enabled ? M_MUTED : hex(0xb8a48c, 0.45f);
+            Color lc = row.enabled ? M_TEXT : zid() ? Z_OFF_TEXT : hex(0xefe4d4, 0.45f);
+            Color dc = row.enabled ? (zid() ? Z_DETAIL_TEXT : M_MUTED) : zid() ? Z_OFF_TEXT : hex(0xb8a48c, 0.45f);
             if (logoutConfirm) {
                 mCentered(batch, row.label, row.x + row.w / 2f, row.y + row.h / 2f, 0.76f,
                         row.action.equals("logout:yes") ? hex(0xff8a7a, 1f) : M_TEXT, false);
                 continue;
             }
-            float tx = row.x + (pick ? 26 : 6);
+            float tx = row.x + (pick ? 26 : zid() ? 8 : 6);
             if (pick) {
                 TextureRegion ic = actionIcon(session, row.action.startsWith("pick:set:") ? row.action.substring(9) : null);
                 if (ic == null && row.action.equals("pick:none")) ic = runeIconByName(session, row.label);
