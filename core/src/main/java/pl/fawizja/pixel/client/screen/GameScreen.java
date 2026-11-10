@@ -332,6 +332,9 @@ public final class GameScreen extends ScreenAdapter {
         settings.setControlScheme(pl.fawizja.pixel.movement.ControlScheme.byKey(System.getProperty("pixel.controls"), settings.controlScheme()));
         Integer sens = Integer.getInteger("pixel.sens");
         if (sens != null) settings.setSensitivity(sens);
+        // -Dpixel.ui=classic|new: wyglad interfejsu do porownania zrzutow (bez zapisu)
+        String ui = System.getProperty("pixel.ui");
+        if (ui != null && settings.newUi() != !"classic".equals(ui)) settings.toggleNewUi();
         hud.setSettings(settings);
         // wlasny uklad paska czarow, osobno dla kazdej postaci
         this.barPrefs = Gdx.app.getPreferences("pixel-bar");

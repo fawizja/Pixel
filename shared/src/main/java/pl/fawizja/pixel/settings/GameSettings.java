@@ -43,6 +43,8 @@ public final class GameSettings {
     private pl.fawizja.pixel.movement.ControlScheme controlScheme = pl.fawizja.pixel.movement.ControlScheme.DEFAULT;
     /** Suwak czulosci sterowania 1..5 ({@link pl.fawizja.pixel.movement.ControlTuning}). */
     private int sensitivity = pl.fawizja.pixel.movement.ControlTuning.DEFAULT;
+    /** Wyglad interfejsu: nowy (paczka Zidane42: paski, okna, pola, przyciski) albo klasyczny (2026-11-07, domyslnie nowy). */
+    private boolean newUi = true;
     /** Strona panelu ustawien (nie zapisywana). */
     private int page;
     /** Wierszy ustawien na stronie panelu (ostatni wiersz strony przelacza strone). */
@@ -64,6 +66,8 @@ public final class GameSettings {
     /** Jedzenie z plecaka samo, gdy sytosc konczy sie (mniej niz minuta). */
     public boolean autoEat() { return autoEat; }
     public void toggleAutoEat() { autoEat = !autoEat; }
+    public boolean newUi() { return newUi; }
+    public void toggleNewUi() { newUi = !newUi; }
     public boolean vibrate() { return vibrate; }
     public void toggleVibrate() { vibrate = !vibrate; }
     /** Cel sam: najblizszy potwor obok postaci, gdy nie ma celu (poza strefa ochronna). */
@@ -148,6 +152,7 @@ public final class GameSettings {
             case "settings:mana": cycleAutoMana(); return true;
             case "settings:eat": toggleAutoEat(); return true;
             case "settings:vibrate": toggleVibrate(); return true;
+            case "settings:ui": toggleNewUi(); return true;
             case "settings:target": toggleAutoTarget(); return true;
             case "settings:joyfloat": toggleFloatingJoystick(); return true;
             case "settings:joysize": cycleJoystickSize(); return true;
@@ -165,6 +170,26 @@ public final class GameSettings {
                     }
                 }
                 return false;
+        }
+    }
+
+    /**
+     * Stan ustawienia wlacz/wylacz dla przelacznika w panelu ("settings:loot" itd.); null - ustawienie z wieloma
+     * wartosciami (limit FPS, glosnosc, progi) albo nieznane.
+     */
+    public Boolean toggleState(String action) {
+        switch (action) {
+            case "settings:battery": return batterySaver;
+            case "settings:light": return highLighting;
+            case "settings:numbers": return damageNumbers;
+            case "settings:loot": return autoLoot;
+            case "settings:weather": return weather;
+            case "settings:eat": return autoEat;
+            case "settings:vibrate": return vibrate;
+            case "settings:target": return autoTarget;
+            case "settings:joyfloat": return floatingJoystick;
+            case "settings:ui": return newUi;
+            default: return null;
         }
     }
 
@@ -186,6 +211,7 @@ public final class GameSettings {
         m.put("joysize", String.valueOf(joystickSize));
         m.put("controls", controlScheme.key);
         m.put("sens", String.valueOf(sensitivity));
+        m.put("ui", newUi ? "new" : "classic");
         return m;
     }
 
@@ -209,6 +235,8 @@ public final class GameSettings {
         s.joystickSize = choice(m.get("joysize"), JOY_SIZE_CHOICES, 100);
         s.controlScheme = pl.fawizja.pixel.movement.ControlScheme.byKey(m.get("controls"), pl.fawizja.pixel.movement.ControlScheme.DEFAULT);
         s.sensitivity = choice(m.get("sens"), new int[] {1, 2, 3, 4, 5}, pl.fawizja.pixel.movement.ControlTuning.DEFAULT);
+        Object ui = m.get("ui");
+        s.newUi = ui == null || !"classic".equals(ui.toString().trim()); // stare zapisy dostaja nowy wyglad
         return s;
     }
 
@@ -275,6 +303,7 @@ public final class GameSettings {
             {"settings:eat", "Jedzenie samo: " + (autoEat ? "gdy kończy się sytość" : "wyłączone")},
             {"settings:target", "Cel sam: " + (autoTarget ? "najbliższy potwór obok" : "wyłączony")},
             {"settings:vibrate", "Wibracje: " + (vibrate ? "przy niskim zdrowiu" : "wyłączone")},
+            {"settings:ui", "Wygląd interfejsu: " + (newUi ? "nowy" : "klasyczny")},
         };
     }
 }

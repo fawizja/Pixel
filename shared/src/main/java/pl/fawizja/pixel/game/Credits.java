@@ -61,6 +61,8 @@ public final class Credits {
         rows.add(new String[] {"Szczegóły", LPC_FILE});
         rows.add(new String[] {"Interfejs", UI_PACK + " (" + UI_LICENSE + "): ramki okien, pola, przyciski"});
         rows.add(new String[] {"Źródło", UI_URL});
+        rows.add(new String[] {"Wygląd nowy", "Pixel RPG UI Kit - Zidane42 (itch.io)"});
+        rows.add(new String[] {"", "paski, okna, przyciski, pola; kupiony do gry"});
         rows.add(new String[] {"Reszta", "grafiki rysowane przez kod gry"});
         return rows;
     }

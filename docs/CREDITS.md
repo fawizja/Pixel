@@ -15,6 +15,16 @@ i panele okien interfejsu (`assets/ui/wst/`) pochodzą z dwóch płatnych paczek
 Darka). Licencja pozwala używać ich w grach, także komercyjnych, ale zabrania udostępniania samych plików. W repozytorium są tylko
 elementy używane przez grę, bez oryginalnych paczek.
 
+## Zidane42 - "Pixel RPG UI Kit - HUD, Buttons, Icons, Inventory & Slots (9-Slice)"
+
+Wygląd interfejsu „nowy” (ustawienie „Wygląd interfejsu: nowy / klasyczny”, domyślnie nowy): ramki i wypełnienia pasków
+zdrowia, many i doświadczenia, ramka okien, przyciski, pola i ramki rzadkości przedmiotów oraz przełączniki ustawień
+(`assets/ui/zidane/`) pochodzą z płatnej paczki **Zidane42** (itch.io, kupiona przez Darka). Licencja paczki nie była
+dostępna przy imporcie, więc obowiązuje ta sama zasada co przy paczkach WsT: użycie tylko w grze, bez rozpowszechniania
+samej paczki. W repozytorium są tylko wycięte kawałki używane przez grę (narzędzie: `tools/art/zidane_import.py`;
+oryginał poza repozytorium: `tools/art/zidane/`, kopia w plikach projektu `pixel-zidane-ui/pack_ui_1.2.zip`).
+Ikon 24 px z paczki nie używamy (przedmioty mają ikony OTSP 32 px).
+
 ## OpenTibia Sprite Pack (CC BY 4.0)
 
 Część grafik w `assets/art/` (podłoże, drzewa i kamienie, potwory, NPC, postacie graczy, przedmioty) pochodzi z
