@@ -28,6 +28,11 @@ public final class MobileHudLayout {
      * minimapa zostawia na telefonie 360 dp miejsce na 3 wiersze walki (wiecej na wyzszych ekranach) nad lukiem czarow.
      */
     public static final float MINIMAP = 120f, MINIMAP_H = 80f;
+    /**
+     * Wyglad nowy (2026-11-11, Darek: "mapke zrob w kolku z nowych grafik"): okragla minimapa w ramce z paczki Zidane42,
+     * 95 x 95 dp (1 piksel grafiki = 1 dp) na srodku kolumny 120 dp; lista walki pod nia jest o 15 dp nizsza.
+     */
+    public static final float MINIMAP_RING = 95f;
     /** Luk czarow: srodek 20 dp od prawego i dolnego brzegu, promienie lukow i przyciskow. */
     public static final float ARC_INSET = 20f, R1 = 110f, R2 = 60f, SPELL_R = 19.5f, POTION_R = 16f, ROW_R = 19f;
     public static final float[] SPELL_DEG = {180f, 202.5f, 225f, 247.5f, 270f};
@@ -105,7 +110,10 @@ public final class MobileHudLayout {
     public final HudLayout.Rect[] iconHits = new HudLayout.Rect[ICONS];
     /** Wiersz ikon stanu i wzmocnien pod ramka po lewej. */
     public final HudLayout.Rect statusRow = new HudLayout.Rect();
+    /** Minimapa: prostokat 120 x 80 albo (round) kwadrat ramki okraglej minimapy 95 x 95. */
     public final HudLayout.Rect minimap = new HudLayout.Rect();
+    /** Okragla minimapa (wyglad nowy) przy ostatnim ukladzie. */
+    public boolean round;
     public final HudLayout.Rect battle = new HudLayout.Rect();
     public float arcX, arcY;
     public final Circle[] spells = new Circle[SPELL_DEG.length];
@@ -147,7 +155,11 @@ public final class MobileHudLayout {
         c.set(arcX + (float) Math.cos(a) * radius, arcY - (float) Math.sin(a) * radius, r);
     }
 
-    public void compute(float w, float h) {
+    public void compute(float w, float h) { compute(w, h, false); }
+
+    /** Uklad; round = okragla minimapa wygladu nowego (wyzsza, lista walki zaczyna sie nizej). */
+    public void compute(float w, float h, boolean round) {
+        this.round = round;
         this.w = w;
         this.h = h;
         top(frame, 3, FRAME_TOP, w - 6, FRAME_H);
@@ -162,7 +174,9 @@ public final class MobileHudLayout {
             top(iconHits[i], hx, FRAME_TOP, MIN_TOUCH, 46 - FRAME_TOP);
         }
         float mx = w - ICON_MARGIN - MINIMAP;
-        top(minimap, mx, 46, MINIMAP, MINIMAP_H);
+        float mmH = round ? MINIMAP_RING : MINIMAP_H;
+        if (round) top(minimap, mx + Math.round((MINIMAP - MINIMAP_RING) / 2f), 46, MINIMAP_RING, MINIMAP_RING);
+        else top(minimap, mx, 46, MINIMAP, MINIMAP_H);
         arcX = w - ARC_INSET;
         arcY = ARC_INSET;
         float x0 = arcX - R1 - 50;
@@ -173,7 +187,7 @@ public final class MobileHudLayout {
         for (int i = 0; i < 3; i++) context[i].set(x0 - i * ROW_STEP, ROW_Y + ROW_STEP, ROW_R);
         context[3].set(x0, ROW_Y + 2 * ROW_STEP, ROW_R);
         // lista walki pod minimapa, do 4 dp nad najwyzszym przyciskiem luku (ile wierszy sie zmiesci, reszta przewijana)
-        float by = 46 + MINIMAP_H + 4;
+        float by = 46 + mmH + 4;
         float bottomTop = (h - ARC_INSET - R1 - 21) - 4;
         top(battle, mx, by, MINIMAP, Math.max(0, bottomTop - by));
         top(statusRow, 8, 46, Math.max(0, mx - 16 - 8), 14);

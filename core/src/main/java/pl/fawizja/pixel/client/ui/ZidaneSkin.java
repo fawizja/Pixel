@@ -31,6 +31,18 @@ final class ZidaneSkin {
     /** Ramki rzadkosci: zwykly, niepospolity, rzadki, epicki, legendarny, mityczny. */
     final TextureRegion[] rarity = new TextureRegion[6];
     final TextureRegion toggleOn, toggleOff;
+    /** Okragla ramka minimapy 95 x 95 z przyciskami + i - oraz same przyciski (22 x 21) do przyciemnienia/rozjasnienia. */
+    private final Texture minimapRing, minimapPlus, minimapMinus;
+
+    /** Bok ramki minimapy (piksele grafiki). */
+    static final float RING = 95f;
+    /** Srodek kola mapy i promien wnetrza (piksele grafiki od lewego dolnego rogu ramki; wnetrze 6..88 px). */
+    static final float RING_CX = 47.5f, RING_CY = 47.5f, RING_INNER = 41.5f;
+    /** Srodki przyciskow + i - (od lewego dolnego rogu ramki) i ich promien. */
+    static final float PLUS_CX = 84f, PLUS_CY = 84.5f, MINUS_CX = 84f, MINUS_CY = 10.5f, BUTTON_R = 10.5f;
+
+    /** Stan przycisku ramki minimapy: zwykly, wcisniety (jasniejszy), nieczynny (koniec skali, ciemniejszy). */
+    enum RingButton { NORMAL, PRESSED, DISABLED }
 
     private ZidaneSkin() {
         barFrame = tex("bar_frame");
@@ -48,6 +60,9 @@ final class ZidaneSkin {
         for (int i = 0; i < tiers.length; i++) rarity[i] = reg("rarity_" + tiers[i]);
         toggleOn = reg("toggle_on");
         toggleOff = reg("toggle_off");
+        minimapRing = tex("minimap_ring");
+        minimapPlus = tex("minimap_plus");
+        minimapMinus = tex("minimap_minus");
     }
 
     /** Grafiki z assets/ui/zidane albo null, gdy ich brak (wtedy tylko wyglad klasyczny). */
@@ -190,6 +205,32 @@ final class ZidaneSkin {
     TextureRegion rarityFrame(int tier, boolean bossOnly) {
         if (tier <= 0) return slot;
         return rarity[Math.min(6, tier + (bossOnly ? 1 : 0)) - 1];
+    }
+
+    /**
+     * Ramka okraglej minimapy w skali s (1 = 95 x 95) z lewym dolnym rogiem (x, y); przyciski + i - rysowane jeszcze
+     * raz w swoim stanie (wycinek ma przezroczyste rogi, wiec zwykly stan wyglada jak sama ramka).
+     */
+    void minimapRing(SpriteBatch b, float x, float y, float s, RingButton plus, RingButton minus) {
+        b.draw(minimapRing, x, y, RING * s, RING * s);
+        ringButton(b, minimapPlus, x + 73 * s, y + (RING - 21) * s, s, plus);
+        ringButton(b, minimapMinus, x + 73 * s, y, s, minus);
+    }
+
+    private static void ringButton(SpriteBatch b, Texture t, float x, float y, float s, RingButton st) {
+        if (st == RingButton.NORMAL) return;
+        if (st == RingButton.DISABLED) {
+            b.setColor(0.42f, 0.4f, 0.38f, 1f);
+            b.draw(t, x, y, 22 * s, 21 * s);
+        } else {
+            // wcisniety: przycisk dodany drugi raz (mieszanie addytywne) - jasniejszy
+            int src = b.getBlendSrcFunc(), dst = b.getBlendDstFunc();
+            b.setBlendFunction(com.badlogic.gdx.graphics.GL20.GL_SRC_ALPHA, com.badlogic.gdx.graphics.GL20.GL_ONE);
+            b.setColor(1f, 1f, 1f, 0.45f);
+            b.draw(t, x, y, 22 * s, 21 * s);
+            b.setBlendFunction(src, dst);
+        }
+        b.setColor(1f, 1f, 1f, 1f);
     }
 
     /** Przelacznik wl./wyl. (48 x 24) o wysokosci h; x, y = lewy dolny rog. */

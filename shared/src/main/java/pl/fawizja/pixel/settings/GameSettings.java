@@ -45,6 +45,14 @@ public final class GameSettings {
     private int sensitivity = pl.fawizja.pixel.movement.ControlTuning.DEFAULT;
     /** Wyglad interfejsu: nowy (paczka Zidane42: paski, okna, pola, przyciski) albo klasyczny (2026-11-07, domyslnie nowy). */
     private boolean newUi = true;
+    /**
+     * Przyblizenie okraglej minimapy (wyglad nowy, przyciski + i - na ramce): indeks w {@link #MINIMAP_ZOOM}, domyslnie
+     * {@link #MINIMAP_ZOOM_DEFAULT} (tyle pol, co dawna prostokatna minimapa).
+     */
+    private int minimapZoom = MINIMAP_ZOOM_DEFAULT;
+    /** Stopnie przyblizenia minimapy: piksele grafiki ramki na pole (ramka 95 px, wnetrze ~84 px: 112..21 pol). */
+    public static final float[] MINIMAP_ZOOM = {0.75f, 1f, 1.5f, 2f, 3f, 4f};
+    public static final int MINIMAP_ZOOM_DEFAULT = 2;
     /** Strona panelu ustawien (nie zapisywana). */
     private int page;
     /** Wierszy ustawien na stronie panelu (ostatni wiersz strony przelacza strone). */
@@ -68,6 +76,12 @@ public final class GameSettings {
     public void toggleAutoEat() { autoEat = !autoEat; }
     public boolean newUi() { return newUi; }
     public void toggleNewUi() { newUi = !newUi; }
+    public int minimapZoom() { return minimapZoom; }
+    /** Piksele grafiki ramki minimapy na pole dla obecnego przyblizenia. */
+    public float minimapPixelsPerTile() { return MINIMAP_ZOOM[minimapZoom]; }
+    public boolean canZoomMinimapIn() { return minimapZoom < MINIMAP_ZOOM.length - 1; }
+    public boolean canZoomMinimapOut() { return minimapZoom > 0; }
+    public void setMinimapZoom(int z) { minimapZoom = Math.max(0, Math.min(MINIMAP_ZOOM.length - 1, z)); }
     public boolean vibrate() { return vibrate; }
     public void toggleVibrate() { vibrate = !vibrate; }
     /** Cel sam: najblizszy potwor obok postaci, gdy nie ma celu (poza strefa ochronna). */
@@ -159,8 +173,18 @@ public final class GameSettings {
             case "settings:controls": cycleControlScheme(); return true;
             case "settings:sens": cycleSensitivity(); return true;
             case "settings:page": page = (page + 1) % pages(); return true;
+            case "settings:mmzoom+": setMinimapZoom(minimapZoom + 1); return true;
+            case "settings:mmzoom-": setMinimapZoom(minimapZoom - 1); return true;
             default:
                 // suwak czulosci: "settings:sens:N" ustawia wartosc wprost
+                if (action.startsWith("settings:mmzoom:")) {
+                    try {
+                        setMinimapZoom(Integer.parseInt(action.substring(16).trim()));
+                        return true;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                }
                 if (action.startsWith("settings:sens:")) {
                     try {
                         setSensitivity(Integer.parseInt(action.substring(14).trim()));
@@ -212,6 +236,7 @@ public final class GameSettings {
         m.put("controls", controlScheme.key);
         m.put("sens", String.valueOf(sensitivity));
         m.put("ui", newUi ? "new" : "classic");
+        m.put("mmzoom", String.valueOf(minimapZoom));
         return m;
     }
 
@@ -235,6 +260,7 @@ public final class GameSettings {
         s.joystickSize = choice(m.get("joysize"), JOY_SIZE_CHOICES, 100);
         s.controlScheme = pl.fawizja.pixel.movement.ControlScheme.byKey(m.get("controls"), pl.fawizja.pixel.movement.ControlScheme.DEFAULT);
         s.sensitivity = choice(m.get("sens"), new int[] {1, 2, 3, 4, 5}, pl.fawizja.pixel.movement.ControlTuning.DEFAULT);
+        s.minimapZoom = choice(m.get("mmzoom"), new int[] {0, 1, 2, 3, 4, 5}, MINIMAP_ZOOM_DEFAULT);
         Object ui = m.get("ui");
         s.newUi = ui == null || !"classic".equals(ui.toString().trim()); // stare zapisy dostaja nowy wyglad
         return s;

@@ -77,4 +77,65 @@ class StoreTest {
         assertTrue(pc.enchantments().remainingMs(Enchantments.Kind.LIFE) > 0);
         assertFalse(s.storeBuy("nothing", 8));
     }
+
+    @Test
+    void tabsSplitOffersAndPremiumExplainsWhatItGives() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
+        GameSession s = session(pc);
+        // kazda oferta w dokladnie jednej zakladce; premium i promocja w Premium, reszta w Uslugach
+        int total = 0;
+        for (Store.Tab t : Store.Tab.values()) total += Store.offers(s, t).size();
+        assertEquals(Store.offers(s).size(), total);
+        assertEquals(List.of("premium", "promote"), Store.offers(s, Store.Tab.PREMIUM).stream().map(Store.Offer::key).toList());
+        assertTrue(Store.offers(s, Store.Tab.SERVICES).stream().anyMatch(o -> o.key().equals("bless")));
+        assertTrue(Store.offers(s, Store.Tab.OUTFITS).isEmpty(), "stroje nie sa ofertami");
+
+        for (Store.Tab tab : Store.Tab.values()) {
+            List<String[]> rows = Store.rows(s, tab);
+            // najpierw trzy zakladki, wybrana oznaczona
+            for (int i = 0; i < Store.Tab.values().length; i++) {
+                Store.Tab t = Store.Tab.values()[i];
+                assertEquals(t.label, rows.get(i)[0]);
+                assertEquals(Store.TAB_ACTION + t.key, rows.get(i)[3]);
+                assertEquals(t == tab ? "tab_on" : "tab", rows.get(i)[4]);
+            }
+            assertEquals(tab, Store.Tab.byKey(tab.key));
+        }
+        assertEquals(List.of("Usługi", "Premium", "Outfity"), java.util.Arrays.stream(Store.Tab.values()).map(t -> t.label).toList());
+        assertEquals(Store.Tab.SERVICES, Store.Tab.byKey("cos"));
+
+        List<String[]> prem = Store.rows(s, Store.Tab.PREMIUM);
+        assertTrue(prem.stream().anyMatch(r -> r[3].equals("store:ask:premium") && r[1].equals(String.format("%,d gp", GameSession.PREMIUM_PRICE))),
+                "konto premium do kupienia w zakladce, cena jak u wladcy");
+        assertTrue(prem.stream().anyMatch(r -> r[0].equals("Rejsy statkami") && r.length > 4 && r[4].equals("info")), "opis premium jako tekst");
+        assertTrue(prem.stream().anyMatch(r -> r[0].equals("Twoje konto: darmowe")));
+        assertTrue(Store.rows(s, Store.Tab.SERVICES).stream().noneMatch(r -> r[3].equals("store:ask:premium")));
+
+        pc.bank().credit(GameSession.PREMIUM_PRICE);
+        assertTrue(s.storeBuy("premium", 0), "zakup z zakladki - ta sama logika co dotad");
+        assertTrue(Store.rows(s, Store.Tab.PREMIUM).stream().anyMatch(r -> r[0].equals("Twoje konto: premium")));
+    }
+
+    @Test
+    void outfitsTabListsFreeColoursAndFutureOutfitsFromData() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
+        GameSession s = session(pc);
+        List<String[]> rows = Store.rows(s, Store.Tab.OUTFITS);
+        int colours = 0;
+        for (String[] r : rows) if (r[3].startsWith("outfit:")) colours++;
+        assertEquals(pl.fawizja.pixel.character.Outfit.count(), colours, "wszystkie kolory stroju za darmo");
+        assertTrue(rows.stream().anyMatch(r -> r[3].equals("outfit:0") && r[1].equals("noszony teraz")));
+        List<StoreOutfits.Entry> data = StoreOutfits.all();
+        assertFalse(data.isEmpty(), "stroje na przyszlosc z data/store_outfits.csv");
+        for (StoreOutfits.Entry e : data) {
+            assertTrue(rows.stream().anyMatch(r -> r[3].equals("store:soon:" + e.key())), e.key());
+            assertSame(e, StoreOutfits.find(e.key()));
+        }
+        assertTrue(rows.stream().filter(r -> r[3].startsWith("store:soon:")).allMatch(r -> r[0].endsWith("(wkrótce)")), "na razie wszystkie wkrotce");
+        // nowy wiersz w pliku = nowy stroj; bledne wiersze pomijane
+        List<StoreOutfits.Entry> parsed = StoreOutfits.parse(new java.io.BufferedReader(new java.io.StringReader(
+                "# komentarz\nknight;Rycerz;zbroja;1000;dostepny\nzly;Zly;opis;abc;wkrotce\nkrotki;Krotki\n")));
+        assertEquals(1, parsed.size());
+        assertEquals(new StoreOutfits.Entry("knight", "Rycerz", "zbroja", 1000, false), parsed.get(0));
+    }
 }

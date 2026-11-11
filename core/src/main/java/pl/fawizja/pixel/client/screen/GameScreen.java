@@ -551,7 +551,8 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         if (id.startsWith("settings:") && settings.apply(id)) {
-            if (id.equals("settings:joysize")) hud.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            // wielkosc joysticka, wyglad (okragla minimapa na telefonie jest wyzsza): nowy uklad HUD-u
+            if (id.equals("settings:joysize") || id.equals("settings:ui")) hud.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             if (id.equals("settings:controls")) {
                 // nowy wariant sterowania: stary palec nie prowadzi juz postaci
                 hud.resetMoveControls();
@@ -705,6 +706,7 @@ public final class GameScreen extends ScreenAdapter {
                     // bestiariusz (klasy, karta potwora) i charmy: okna w BestiaryWindows
                 } else if (id.startsWith("outfit:")) {
                     chooseOutfit(id.substring("outfit:".length()));
+                    if (hud.storeOpen()) openStore(); // zakladka Outfity: nowy "noszony teraz" od razu
                 } else if (id.startsWith("ach:title:")) {
                     String key = id.substring("ach:title:".length());
                     if (key.equals(session.character().title())) key = "-"; // ponowne dotkniecie zdejmuje tytul
@@ -729,6 +731,12 @@ public final class GameScreen extends ScreenAdapter {
                     } else if (walkTo(target.position(), t, false, true)) {
                         walkNpc = target;
                     }
+                } else if (id.startsWith(pl.fawizja.pixel.game.Store.TAB_ACTION)) {
+                    storeTab = pl.fawizja.pixel.game.Store.Tab.byKey(id.substring(pl.fawizja.pixel.game.Store.TAB_ACTION.length()));
+                    openStore();
+                } else if (id.startsWith("store:soon:")) {
+                    pl.fawizja.pixel.game.StoreOutfits.Entry e = pl.fawizja.pixel.game.StoreOutfits.find(id.substring("store:soon:".length()));
+                    if (e != null) session.log().add(t, EventLog.Kind.INFO, "Sklep: strój " + e.name() + " będzie dostępny wkrótce.");
                 } else if (id.startsWith("store:ask:")) {
                     storeAsk(id.substring("store:ask:".length()));
                 } else if (id.startsWith("store:buy:")) {
@@ -1339,19 +1347,16 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private long storeRefreshMs;
+    /** Wybrana zakladka sklepu (pamietana do konca gry: powrot z potwierdzenia zakupu wraca na nia). */
+    private pl.fawizja.pixel.game.Store.Tab storeTab = pl.fawizja.pixel.game.Store.Tab.SERVICES;
 
     private String storeTitle() {
         return String.format("%s - w banku %,d gp", pl.fawizja.pixel.client.ui.Hud.STORE_TITLE, session.character().bank().balance());
     }
 
+    /** Zakladki (Uslugi / Premium / Outfity) i tresc wybranej - {@link pl.fawizja.pixel.game.Store#rows}. */
     private java.util.List<String[]> storeRows() {
-        java.util.List<String[]> rows = new java.util.ArrayList<>();
-        for (pl.fawizja.pixel.game.Store.Offer o : pl.fawizja.pixel.game.Store.offers(session)) {
-            String price = String.format("%,d gp", o.price());
-            rows.add(o.available() ? new String[] {o.name(), price, o.desc(), "store:ask:" + o.key()}
-                    : new String[] {o.name(), price + " - " + o.blocked(), "", "store:ask:" + o.key(), "off"});
-        }
-        return rows;
+        return pl.fawizja.pixel.game.Store.rows(session, storeTab);
     }
 
     /** Potwierdzenie zakupu ("Kupić...?"): Kup / Wróć do sklepu; oferta niedostepna - tylko powod w konsoli. */

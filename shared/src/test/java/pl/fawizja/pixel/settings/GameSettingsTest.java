@@ -174,4 +174,26 @@ class GameSettingsTest {
         assertEquals(Boolean.TRUE, s.toggleState("settings:loot"));
         assertNull(s.toggleState("settings:fps"), "limit FPS ma kilka wartosci - bez przelacznika");
     }
+
+    @Test
+    void minimapZoomStepsStopAtTheEndsAndIsSaved() {
+        GameSettings s = new GameSettings();
+        assertEquals(GameSettings.MINIMAP_ZOOM_DEFAULT, s.minimapZoom());
+        assertEquals(1.5f, s.minimapPixelsPerTile(), 1e-6, "domyslnie tyle pol co dawna minimapa");
+        for (int i = 0; i < 10; i++) assertTrue(s.apply("settings:mmzoom+"));
+        assertEquals(GameSettings.MINIMAP_ZOOM.length - 1, s.minimapZoom(), "najwieksze przyblizenie");
+        assertFalse(s.canZoomMinimapIn());
+        assertTrue(s.canZoomMinimapOut());
+        assertEquals(GameSettings.MINIMAP_ZOOM.length - 1, GameSettings.fromMap(s.toMap()).minimapZoom(), "zapisane");
+        for (int i = 0; i < 10; i++) s.apply("settings:mmzoom-");
+        assertEquals(0, s.minimapZoom());
+        assertFalse(s.canZoomMinimapOut());
+        assertEquals(0, GameSettings.fromMap(s.toMap()).minimapZoom());
+        assertTrue(s.apply("settings:mmzoom:3"));
+        assertEquals(3, GameSettings.fromMap(s.toMap()).minimapZoom());
+        assertFalse(s.apply("settings:mmzoom:x"));
+        assertEquals(GameSettings.MINIMAP_ZOOM_DEFAULT, GameSettings.fromMap(Map.of("mmzoom", "99")).minimapZoom(), "bledna wartosc");
+        assertEquals(GameSettings.MINIMAP_ZOOM_DEFAULT, GameSettings.fromMap(new java.util.HashMap<>()).minimapZoom(), "stare zapisy");
+        for (int i = 1; i < GameSettings.MINIMAP_ZOOM.length; i++) assertTrue(GameSettings.MINIMAP_ZOOM[i] > GameSettings.MINIMAP_ZOOM[i - 1]);
+    }
 }

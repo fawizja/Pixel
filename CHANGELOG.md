@@ -30,6 +30,20 @@
 - Kratki ściekowe w miastach: do kanału schodzisz, dotykając kratki. Samo wejście na kratkę nic nie robi.
 - Czary Koła Przeznaczenia odnoszą się do nowych czarów z Tibii.
 
+## [0.242.0] - 2026-11-11
+
+### Dodano
+- Okrągła minimapa w nowym wyglądzie: mapa w okrągłej ramce z pakietu Zidane42, na komputerze i telefonie.
+  Przyciski + i − na ramce przybliżają i oddalają mapę (6 stopni, zapamiętane w ustawieniach). Dotknięcie mapy
+  dalej otwiera dużą mapę. Wygląd klasyczny ma dawną prostokątną minimapę.
+- Zakładki w Sklepie: Usługi, Premium i Outfity.
+- Zakładka Premium: kupisz w niej konto premium i promocję (te same ceny co u władcy miasta). Widać też, co daje
+  premium: rejsy statkami, premię staminy, więcej miejsc na charmy, promocję i Koło Przeznaczenia.
+- Zakładka Outfity: darmowe kolory stroju do założenia jednym dotknięciem i lista strojów, które pojawią się wkrótce.
+
+### Zmieniono
+- Na telefonie lista walki jest w nowym wyglądzie o 15 dp niższa, bo okrągła minimapa jest wyższa.
+
 ## [0.241.0] - 2026-11-10
 
 ### Dodano
