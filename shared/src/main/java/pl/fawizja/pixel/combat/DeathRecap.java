@@ -20,7 +20,7 @@ public final class DeathRecap {
 
     public record Row(String source, long total, int hits) { }
 
-    public record Report(long timeMs, String killer, long expLost, boolean blessed, List<Row> rows) { }
+    public record Report(long timeMs, String killer, long expLost, int blessings, List<Row> rows) { }
 
     private final ArrayDeque<Hit> hits = new ArrayDeque<>();
 
@@ -32,7 +32,7 @@ public final class DeathRecap {
     }
 
     /** Raport z trafien z okna przed smiercia; potem lista trafien jest czyszczona. */
-    public Report build(String killer, long expLost, boolean blessed, long now) {
+    public Report build(String killer, long expLost, int blessings, long now) {
         Map<String, long[]> by = new LinkedHashMap<>();
         for (Hit h : hits) {
             if (h.timeMs() < now - WINDOW_MS) continue;
@@ -44,19 +44,26 @@ public final class DeathRecap {
         List<Row> rows = new ArrayList<>();
         for (Map.Entry<String, long[]> e : by.entrySet()) rows.add(new Row(e.getKey(), e.getValue()[0], (int) e.getValue()[1]));
         rows.sort((x, y) -> Long.compare(y.total(), x.total()));
-        return new Report(now, killer, expLost, blessed, rows);
+        return new Report(now, killer, expLost, blessings, rows);
     }
 
     /** Wiersze okna informacyjnego {etykieta, opis}. */
     public static List<String[]> rows(Report r) {
         List<String[]> out = new ArrayList<>();
         out.add(new String[] {Messages.get("death_recap.zabojca"), r.killer()});
-        out.add(new String[] {Messages.get("death_recap.strata"), r.expLost() + " exp" + (r.blessed() ? Messages.get("death_recap.polowa_dzieki_blogoslawienstwu") : "")});
+        out.add(new String[] {Messages.get("death_recap.strata"), r.expLost() + " exp" + blessingNote(r.blessings())});
         for (Row row : r.rows()) {
             out.add(new String[] {row.source(), row.total() + Messages.get("death_recap.obrazen_w") + row.hits() + " " + hitsWord(row.hits())
                     + " (ostatnie " + WINDOW_MS / 1000 + " s)"});
         }
         return out;
+    }
+
+    /** Dopisek do straty: " (3 błogosławieństwa: -24%)" albo pusty. */
+    public static String blessingNote(int blessings) {
+        if (blessings <= 0) return "";
+        int pct = Math.min(100, blessings * pl.fawizja.pixel.character.Blessing.REDUCTION_EACH_PERCENT);
+        return Messages.get(blessings == 1 ? "bless.note_1" : blessings < 5 ? "bless.note_2_4" : "bless.note_5", blessings, pct);
     }
 
     static String hitsWord(int n) {

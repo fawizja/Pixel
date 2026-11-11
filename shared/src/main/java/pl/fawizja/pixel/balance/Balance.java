@@ -1,5 +1,7 @@
 package pl.fawizja.pixel.balance;
 
+import pl.fawizja.pixel.i18n.Messages;
+
 import pl.fawizja.pixel.vocation.Vocation;
 
 /**
@@ -224,19 +226,33 @@ public final class Balance {
 
     /** Utrata doswiadczenia przy smierci: 5%, ale nie ponizej progu poziomu minLevel. */
     public static long experienceAfterDeath(long experience, int minLevel) {
-        return experienceAfterDeath(experience, minLevel, false);
+        return experienceAfterDeath(experience, minLevel, 0, 99);
     }
 
-    /** Jak wyzej; z blogoslawienstwem strata 2,5%. */
-    public static long experienceAfterDeath(long experience, int minLevel, boolean blessed) {
+    /**
+     * Jak wyzej, z blogoslawienstwami: kazde zmniejsza strate o 8% (jak w Canary); ponizej poziomu 24 piec
+     * blogoslawienstw (40%) daje 50%.
+     */
+    public static long experienceAfterDeath(long experience, int minLevel, int blessings, int level) {
+        int reductionPct = Math.min(100, blessings * 8);
+        if (level < 24 && reductionPct >= 40) reductionPct = 50;
+        long lost = experience * 5 * (100 - reductionPct) / 10_000;
         long floor = experienceForLevel(minLevel);
-        long after = experience - experience / (blessed ? 40 : 20);
+        long after = experience - lost;
         return Math.max(Math.min(experience, floor), after);
     }
 
-    /** Cena blogoslawienstwa u kaplana: 200 gp za poziom, co najmniej 1000 gp. */
+    /** Opis straty doswiadczenia przy smierci, np. "3,0% (bez blogoslawienstw 5%)". */
+    public static String deathLossLabel(int blessings, int level) {
+        int reductionPct = Math.min(100, blessings * 8);
+        if (level < 24 && reductionPct >= 40) reductionPct = 50;
+        String pct = pl.fawizja.pixel.i18n.Messages.decimal(5 * (100 - reductionPct) / 100.0, 1);
+        return blessings == 0 ? pl.fawizja.pixel.i18n.Messages.get("bless.loss_zero") : pl.fawizja.pixel.i18n.Messages.get("bless.loss_fmt", pct);
+    }
+
+    /** Cena zwyklego blogoslawienstwa u kaplana (patrz {@link pl.fawizja.pixel.character.Blessing#price}). */
     public static long blessingPrice(int level) {
-        return Math.max(1000L, 200L * level);
+        return pl.fawizja.pixel.character.Blessing.WISDOM.price(level);
     }
 
     /** Dodawanie doswiadczenia z nasyceniem: nigdy nie przekracza maksimum ani nie przepelnia long. */

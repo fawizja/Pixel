@@ -84,6 +84,7 @@ public final class SkillSheet {
         out.add(new String[] {Messages.get("skill_sheet.kradziez"), leech});
         String prot = pl.fawizja.pixel.item.ItemBonus.describeProtections(pc.equipment().protections());
         out.add(new String[] {Messages.get("skill_sheet.ochrona"), prot.isEmpty() ? Messages.get("server_world.brak") : prot});
+        out.add(new String[] {Messages.get("skill_sheet.blogoslawienstwa"), BlessingStatus.summary(pc)});
         return out;
     }
 

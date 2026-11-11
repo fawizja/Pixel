@@ -62,8 +62,9 @@ public final class Store {
                 : pc.level() < GameSession.PROMOTION_LEVEL ? Messages.get("hud.od_poziomu") + GameSession.PROMOTION_LEVEL : null;
         out.add(new Offer("promote", Messages.get("hud.promocja") + pc.vocation().promotedName(), Messages.get("store.znak_przy_postaci_regeneracja"),
                 GameSession.PROMOTION_PRICE, promo, "grimtooth_crown"));
-        out.add(new Offer("bless", Messages.get("hud.blogoslawienstwo"), Messages.get("store.najblizsza_smierc_polowa_strat"),
-                pl.fawizja.pixel.balance.Balance.blessingPrice(pc.level()), pc.isBlessed() ? Messages.get("store.juz_jestes_poblogoslawiony") : null, "healing_herb"));
+        out.add(new Offer("bless", Messages.get("bless.store_title"), Messages.get("bless.store_desc"),
+                s.bulkBlessingPrice(), pc.adventurerBlessing() ? Messages.get("bless.store_adventurer", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL)
+                        : s.bulkBlessingPrice() == 0 ? Messages.get("bless.store_all") : null, "healing_herb"));
         for (Enchantments.Kind k : Enchantments.Kind.values()) {
             if (!k.smith()) continue;
             Enchantments e = pc.enchantments();

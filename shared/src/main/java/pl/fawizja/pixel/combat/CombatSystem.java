@@ -683,14 +683,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onPlayerDeath(String killerName, MonsterType killerType, long now) {
         long before = pc.experience();
         lastDeathPlace = pc.position();
-        boolean blessed = pc.applyDeathPenalty(minLevel, killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType));
+        int blessed = pc.applyDeathPenalty(minLevel, killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType), false, false);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         lastDeath = recap.build(killerName, before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zginales") + killerName + Messages.get("combat_system.strata")
-                + (before - pc.experience()) + " exp" + (blessed ? Messages.get("death_recap.polowa_dzieki_blogoslawienstwu") : "")
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed)
                 + Messages.get("combat_system.odrodzenie_w_swiatyni"));
     }
 
@@ -722,14 +722,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             }
         }
         long before = pc.experience();
-        boolean blessed = pc.applyDeathPenalty(minLevel);
+        int blessed = pc.applyDeathPenalty(minLevel, 0, true, dropBackpack);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         lastDeath = recap.build(killer + Messages.get("combat_system.gracz"), before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zginales_z_reki_gracza") + killer + Messages.get("combat_system.strata_2")
-                + (before - pc.experience()) + " exp" + (blessed ? Messages.get("death_recap.polowa_dzieki_blogoslawienstwu") : "") + (dropped > 0 ? Messages.get("combat_system.plecak_i_ekwipunek_zostaly") : "")
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + (dropped > 0 ? Messages.get("combat_system.plecak_i_ekwipunek_zostaly") : "")
                 + Messages.get("combat_system.odrodzenie_w_swiatyni"));
         return dropped;
     }

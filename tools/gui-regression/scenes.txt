@@ -215,9 +215,8 @@ ruler_frostholm|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=
 imbuer_nerys|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=886,741,0 -Dpixel.open=imbue
 pet_gull_card|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,509,0 -Dpixel.open=pet -Dpixel.pet=pet_gull -Dpixel.petCard=true
 pet_parrot_nerys|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=884,742,0 -Dpixel.open=pet -Dpixel.pet=pet_parrot
-# 2026-11-07: NPC w postaciach LPC (tools/art/lpc_compose.py) - sala tronowa Varden, port Valmir, dawny wyglad do porownania
-lpc_npcs_throne|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=565,510,0
-lpc_npcs_otsp|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=553,493,0 -Dpixel.lpcNpcs=0
+# 2026-11-11: NPC w dawnych strojach OTSP (bez LPC) - sala tronowa Varden
+npcs_otsp_throne|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=565,510,0
 # wyglad interfejsu nowy (paczka Zidane42): ramki rzadkosci w plecaku i na ciele, telefon; klasyczny do porownania
 ui_rarity_bag|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=rarity
 ui_rarity_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.open=rarity,mobile_win_bag
@@ -254,6 +253,10 @@ cyclopolis_forge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=80 
 spell_gfb_circle|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=gfb -Dpixel.frames=30
 spell_wave_cone|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=wave -Dpixel.frames=30
 chest_reward_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=80 -Dpixel.spellDemo=chest -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+# 2026-11-11: blogoslawienstwa jak w Tibii (poziom 340): lista u kaplana, okno stanu, smierc z pieciom blogoslawienstwami
+bless_priest|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless
+bless_status|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_status
+bless_death|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_death
 # jezyki (angielski i hiszpanski): wybor jezyka w menu, okno kupca i ksiega czarow; wzorce do dopisania (--update)
 lang_menu_es|-Dpixel.lang=es
 lang_shop_en|-Dpixel.lang=en -Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc

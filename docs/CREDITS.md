@@ -127,22 +127,3 @@ pełny tekst: `assets/ui/otc/LICENSE-OTCV8.txt`. Pliki są użyte bez zmian; gra
 rozciągane ramki (9-patch). Nie użyto ikon z napisami ani grafik postaci z tego klienta.
 
 
-## Postacie NPC - Universal LPC Spritesheet Character Generator (CC BY-SA 3.0)
-
-Od 2026-11-07 wszyscy NPC (kupcy, kowale, kapłani, bankierzy, przewodnicy, woźnice, kapitanowie i przewoźnicy,
-zarządcy domów, władcy, zaklinacze, opiekunowie zwierząt, strażnicy) mają postacie złożone narzędziem
-`tools/art/lpc_compose.py` z warstw **Universal LPC Spritesheet Character Generator**
-(https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator, commit 86160e7).
-Postać gracza i potwory zostają z OpenTibia Sprite Pack.
-
-- Pliki: `assets/art/lpc/npcs/<klucz>.png` (32x32, jeden obrazek na NPC, przodem).
-- Autorzy, licencje i adresy źródeł każdej użytej warstwy: `assets/art/lpc/CREDITS-LPC.csv` (wyciąg z CREDITS.csv
-  generatora; narzędzie odmawia użycia warstwy bez wpisu albo z nieznanym autorem). Lista autorów jest też w oknie
-  `/autorzy` w grze (`Credits.java`).
-- Licencje warstw są do wyboru (np. OGA-BY 3.0 / CC-BY-SA 3.0 / GPL 3.0, CC0, CC-BY); część warstw (korona, kapelusze,
-  brody, niektóre fryzury i stroje) jest tylko na CC-BY-SA 3.0 / GPL 3.0.
-- **Share-alike:** złożone obrazki NPC to utwory zależne (warstwy przebarwione, złożone, zmniejszone do pola 32x32),
-  udostępniane na **CC BY-SA 3.0** (https://creativecommons.org/licenses/by-sa/3.0/) - każdy może je kopiować i zmieniać,
-  podając autorów i udostępniając zmiany na tej samej licencji. Notka: `assets/art/lpc/LICENSE.txt`. Dotyczy to tylko
-  tych obrazków, nie kodu gry ani pozostałych grafik.
-- Dawne stroje OTSP NPC (`assets/art/npcs/`) zostały w repozytorium tylko do porównania (`-Dpixel.lpcNpcs=0`).

@@ -37,7 +37,7 @@ class StoreTest {
         Store.Offer premium = Store.find(s, "premium"), promote = Store.find(s, "promote"), bless = Store.find(s, "bless");
         assertEquals(GameSession.PREMIUM_PRICE, premium.price());
         assertEquals(GameSession.PROMOTION_PRICE, promote.price());
-        assertEquals(Balance.blessingPrice(pc.level()), bless.price());
+        assertEquals(s.bulkBlessingPrice(), bless.price());
         assertEquals("najpierw konto premium", promote.blocked());
         assertEquals(Enchantments.price(Enchantments.Kind.CRIT, pc.level()), Store.find(s, "enchant_crit").price());
         assertEquals(50_000, Store.find(s, "saddle").price(), "price of the merchants (shops.csv)");

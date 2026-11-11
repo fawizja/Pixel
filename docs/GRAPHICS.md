@@ -27,7 +27,7 @@ po kawałku.
 - Runy 0.240 (id 400-423: pola, ściany, bomby, odtrutka, paraliż, przekonanie, ożywienie zwłok i inne) to przebarwione
   runy OTSP (leczenia, wybuchu ognia, lawiny, nagłej śmierci) - `tools/art/rune_tints.py`.
 
-Razem: 144 kafelków, 373 przedmiotów, 96 potworów, 137 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 722.
+Razem: 144 kafelków, 374 przedmiotów, 127 potworów, 160 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 804.
 
 Lista jest generowana: `python3 tools/art/list_graphics.py`.
 
@@ -74,16 +74,29 @@ Każda profesja w 4 kierunkach.
 | `monsters/carrion_crow.png` | Padlinożerna wrona, poziom 11 | tak |
 | `monsters/cave_centipede.png` | Jaskiniowa wij, poziom 16 | tak |
 | `monsters/cave_troll.png` | Troll jaskiniowy, poziom 30 | tak |
+| `monsters/cinder_salamander.png` | Popielna salamandra, poziom 420 | tak |
 | `monsters/coral_crab.png` | Krab koralowy, poziom 310 | tak |
 | `monsters/crimson_shade.png` | Krwawa zmora, poziom 265 | tak |
 | `monsters/crocodile.png` | Krokodyl, poziom 22 | tak |
 | `monsters/crystal_golem.png` | Kryształowy golem, poziom 45 | tak |
 | `monsters/cursed_treant.png` | Przeklęty drzewiec, poziom 240 | tak |
+| `monsters/deep_behemot.png` | Behemot, poziom 120 | tak |
+| `monsters/deep_worm.png` | Czerw padlinożerny, poziom 20 | tak |
 | `monsters/drowned_sailor.png` | Topielec, poziom 330 | tak |
 | `monsters/dune_drake.png` | Wydmowy smok, poziom 410 | tak |
 | `monsters/dune_zealot.png` | Fanatyk Białego Słońca, poziom 125 | tak |
 | `monsters/dusk_gargoyle.png` | Zmierzchnik, poziom 620 | tak |
+| `monsters/dwarf.png` | Krasnolud, poziom 10 | tak |
+| `monsters/dwarf_earthcaller.png` | Krasnolud geomanta, poziom 34 | tak |
+| `monsters/dwarf_miner.png` | Krasnolud górnik, poziom 12 | tak |
+| `monsters/dwarf_soldier.png` | Krasnolud żołnierz, poziom 16 | tak |
+| `monsters/dwarf_warden.png` | Krasnolud strażnik, poziom 26 | tak |
+| `monsters/earth_spirit.png` | Żywiołak ziemi, poziom 55 | tak |
+| `monsters/elf.png` | Elf, poziom 16 | tak |
+| `monsters/elf_arcanist.png` | Elfi arkanista, poziom 30 | tak |
+| `monsters/elf_scout.png` | Zwiadowca elfów, poziom 22 | tak |
 | `monsters/ember_beetle.png` | Żarowy chrząszcz, poziom 335 | tak |
+| `monsters/ember_hound.png` | Ogar Pożogi, poziom 520 | tak |
 | `monsters/fire_elemental.png` | Żywiołak ognia, poziom 320 | tak |
 | `monsters/forest_spider.png` | Pająk leśny, poziom 9 | tak |
 | `monsters/frost_boar.png` | Szroniasty odyniec, poziom 48 | tak |
@@ -96,6 +109,10 @@ Każda profesja w 4 kierunkach.
 | `monsters/goblin.png` | Goblin, poziom 10 | tak |
 | `monsters/goblin_shaman.png` | Goblin szaman, poziom 12 | tak |
 | `monsters/grimtooth.png` | Grimtooth, Król Kopalni, poziom 60, boss | tak |
+| `monsters/grove_crone.png` | Guślarka Gaju, poziom 22 | tak |
+| `monsters/grove_huntress.png` | Łowczyni Gaju, poziom 18 | tak |
+| `monsters/grove_matriarch.png` | Matrona Gaju, poziom 40 | tak |
+| `monsters/grove_shieldmaiden.png` | Tarczowniczka Gaju, poziom 24 | tak |
 | `monsters/hrimgar.png` | Hrimgar, Król Lodowców, poziom 560, boss | tak |
 | `monsters/hyena.png` | Hiena, poziom 10 | tak |
 | `monsters/ice_dragon.png` | Lodowy smok, poziom 520 | tak |
@@ -105,14 +122,26 @@ Każda profesja w 4 kierunkach.
 | `monsters/jungle_serpent.png` | Wąż z dżungli, poziom 75 | tak |
 | `monsters/khazuul.png` | Kha'zuul Pusty, poziom 750, boss | tak |
 | `monsters/lava_golem.png` | Lawowy golem, poziom 370 | tak |
+| `monsters/magma_colossus.png` | Magmowy kolos, poziom 620 | tak |
 | `monsters/magma_drake.png` | Smok magmy, poziom 690 | tak |
+| `monsters/mine_grub.png` | Czerw gnilny, poziom 8 | tak |
 | `monsters/mist_wraith.png` | Upiór mgły, poziom 540 | tak |
 | `monsters/morgath.png` | Mor'gath, Serce Otchłani, poziom 1000, boss | tak |
 | `monsters/morvena.png` | Morvena, Pani Mgieł, poziom 640, boss | tak |
 | `monsters/mummy.png` | Mumia, poziom 200 | tak |
 | `monsters/obsidian_sentinel.png` | Obsydianowy wartownik, poziom 930 | tak |
+| `monsters/oneeye_brute.png` | Jednooki olbrzym, poziom 30 | tak |
+| `monsters/oneeye_hauler.png` | Jednooki tragarz, poziom 36 | tak |
+| `monsters/oneeye_smith.png` | Jednooki kowal, poziom 42 | tak |
+| `monsters/orc.png` | Ork, poziom 12 | tak |
 | `monsters/orc_berserker.png` | Ork berserker, poziom 32 | tak |
+| `monsters/orc_cult_fanatic.png` | Fanatyk orczego kultu, poziom 60 | tak |
+| `monsters/orc_cult_priest.png` | Kapłan orczego kultu, poziom 55 | tak |
+| `monsters/orc_leader.png` | Ork przywódca, poziom 44 | tak |
+| `monsters/orc_marauder.png` | Ork maruder, poziom 36 | tak |
+| `monsters/orc_rider.png` | Ork jeździec, poziom 28 | tak |
 | `monsters/orc_shaman.png` | Orczy szaman, poziom 22 | tak |
+| `monsters/orc_spearman.png` | Ork włócznik, poziom 16 | tak |
 | `monsters/orc_warlord.png` | Gruzhak, Orczy Wódz, poziom 50 | tak |
 | `monsters/orc_warrior.png` | Ork wojownik, poziom 18 | tak |
 | `monsters/pharaoh.png` | Faraon Neferakh, poziom 230, boss | tak |
@@ -122,6 +151,7 @@ Każda profesja w 4 kierunkach.
 | `monsters/quarry_brute.png` | Łamacz kamieni, poziom 24 | tak |
 | `monsters/rime_crawler.png` | Szronowy czerw, poziom 98 | tak |
 | `monsters/rime_gargoyle.png` | Szronowy gargulec, poziom 500 | tak |
+| `monsters/rock_golem.png` | Kamienny golem, poziom 32 | tak |
 | `monsters/ruin_colossus.png` | Kolos z ruin, poziom 200, boss | tak |
 | `monsters/sand_devourer.png` | Piaskowy pożeracz, poziom 64 | tak |
 | `monsters/sand_gargoyle.png` | Piaskowy gargulec, poziom 165 | tak |
@@ -145,6 +175,7 @@ Każda profesja w 4 kierunkach.
 | `monsters/szlamiara.png` | Szlamiara, Matka Topieli, poziom 95, boss | tak |
 | `monsters/temple_guardian.png` | Strażnik świątyni, poziom 180 | tak |
 | `monsters/tunnel_fence.png` | Paser z tuneli, poziom 34 | tak |
+| `monsters/urgoth.png` | Urgoth, Pan Twierdzy, poziom 75, boss | tak |
 | `monsters/velmira.png` | Velmira, Szkarłatna Pani, poziom 290, boss | tak |
 | `monsters/void_priest.png` | Kapłan pustki, poziom 700 | tak |
 | `monsters/winged_spawn.png` | Skrzydlaty pomiot, poziom 860 | tak |
@@ -157,11 +188,9 @@ Każda profesja w 4 kierunkach.
 
 ## NPC (`assets/art/npcs/`)
 
-**Od 2026-11-07 NPC w grze rysowane są z `assets/art/lpc/npcs/<klucz>.png`** - postacie z warstw Universal LPC
-Spritesheet Character Generator, złożone narzędziem `tools/art/lpc_compose.py` (strój wg roli, kolor z `npcs.csv`,
-akcent miasta, skóra i fryzura z klucza NPC). Licencja tych obrazków: **CC BY-SA 3.0** (utwory zależne, share-alike),
-autorzy warstw: `assets/art/lpc/CREDITS-LPC.csv`, notka `assets/art/lpc/LICENSE.txt`. Nowy NPC w `npcs.csv` dostaje
-postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) działa tylko z `-Dpixel.lpcNpcs=0`.
+NPC rysowani są z OpenTibia Sprite Pack: stroje ludzi z maską kolorów (`tools/art/otsp_import.py`, tabele `_ROLE`,
+`RULER_COLORS`, `DWARF_NPCS`). Krasnoludy z Durnkaru (`durn_*`) to te same stroje ról z rudą/siwą brodą, ściśnięte w pionie
+jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <client_files>`.
 
 | Plik | Co to jest | Jest |
 |---|---|---|
@@ -169,7 +198,28 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `npcs/camp_guide.png` | Zwiadowczyni Ilka | tak |
 | `npcs/camp_merchant.png` | Kwatermistrz Bren | tak |
 | `npcs/coral_captain.png` | Sternik Lucjan | tak |
+| `npcs/durn_armorer.png` | Płatnerz Hagar | tak |
+| `npcs/durn_banker.png` | Bankier Grimbald | tak |
+| `npcs/durn_carrier.png` | Wózkarz Brodrik | tak |
+| `npcs/durn_guard_east.png` | Strażnik bramy Sigvald | tak |
+| `npcs/durn_guard_west.png` | Strażnik bramy Hroald | tak |
+| `npcs/durn_guide.png` | Przewodnik Dvalin | tak |
+| `npcs/durn_housing.png` | Zarządca Durgan | tak |
+| `npcs/durn_imbuer.png` | Zaklinacz Runnar | tak |
+| `npcs/durn_innkeeper.png` | Karczmarz Ulfrik | tak |
+| `npcs/durn_mage.png` | Runiarz Odvar | tak |
+| `npcs/durn_merchant.png` | Kupiec Gunnar | tak |
+| `npcs/durn_petkeeper.png` | Opiekun zwierząt Bodvar | tak |
+| `npcs/durn_priest.png` | Kapłan Thorvin | tak |
+| `npcs/durn_ruler.png` | Król Thorgrim | tak |
+| `npcs/durn_smith.png` | Kowal Brokk | tak |
+| `npcs/durn_tools.png` | Narzędziownik Skagi | tak |
 | `npcs/east_captain.png` | Kapitan Wiesław | tak |
+| `npcs/elandor_banker.png` | Skarbnik Faelar | tak |
+| `npcs/elandor_bowyer.png` | Łuczarz Thalion | tak |
+| `npcs/elandor_elder.png` | Starszy Aelindor | tak |
+| `npcs/elandor_herbalist.png` | Zielarka Ilyana | tak |
+| `npcs/elandor_priestess.png` | Kapłanka Liriel | tak |
 | `npcs/frost_banker.png` | Bankier Frostholm | tak |
 | `npcs/frost_captain.png` | Kapitan Ulf | tak |
 | `npcs/frost_carrier.png` | Woźnica Frostholm | tak |
@@ -189,17 +239,17 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `npcs/guard_12.png` | Kusznik Ziemowit | tak |
 | `npcs/guard_13.png` | Kusznik Mirosław | tak |
 | `npcs/guard_14.png` | Halabardnik Siemowit | tak |
-| `npcs/guard_15.png` | Kusznik Wszebor |  |
-| `npcs/guard_16.png` | Kusznik Chwalibóg |  |
-| `npcs/guard_17.png` | Kusznik Przemysław |  |
-| `npcs/guard_18.png` | Kusznik Mścisław |  |
-| `npcs/guard_19.png` | Kusznik Domarad |  |
+| `npcs/guard_15.png` | Kusznik Wszebor | tak |
+| `npcs/guard_16.png` | Kusznik Chwalibóg | tak |
+| `npcs/guard_17.png` | Kusznik Przemysław | tak |
+| `npcs/guard_18.png` | Kusznik Mścisław | tak |
+| `npcs/guard_19.png` | Kusznik Domarad | tak |
 | `npcs/guard_2.png` | Kusznik Budzisław | tak |
-| `npcs/guard_20.png` | Halabardnik Dobromir |  |
-| `npcs/guard_21.png` | Strażnik Wielisław |  |
-| `npcs/guard_22.png` | Strażnik Bolesław |  |
-| `npcs/guard_23.png` | Strażnik Bronisław |  |
-| `npcs/guard_24.png` | Halabardnik Jaromir |  |
+| `npcs/guard_20.png` | Halabardnik Dobromir | tak |
+| `npcs/guard_21.png` | Strażnik Wielisław | tak |
+| `npcs/guard_22.png` | Strażnik Bolesław | tak |
+| `npcs/guard_23.png` | Strażnik Bronisław | tak |
+| `npcs/guard_24.png` | Halabardnik Jaromir | tak |
 | `npcs/guard_3.png` | Strażniczka Jaromira | tak |
 | `npcs/guard_4.png` | Strażnik Unisław | tak |
 | `npcs/guard_5.png` | Halabardnik Świętopełk | tak |
@@ -209,23 +259,24 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `npcs/guard_9.png` | Strażnik Gniewomir | tak |
 | `npcs/gull_ferryman.png` | Przewoźnik Bolko | tak |
 | `npcs/ice_captain.png` | Kapitan Torvald | tak |
-| `npcs/isle0_ferryman.png` | Przewoźnik Gniewko |  |
-| `npcs/isle10_ferryman.png` | Przewoźnik Racibor |  |
-| `npcs/isle11_ferryman.png` | Przewoźniczka Bogumiła |  |
-| `npcs/isle12_ferryman.png` | Przewoźnik Dobromir |  |
-| `npcs/isle13_ferryman.png` | Przewoźniczka Sława |  |
-| `npcs/isle14_ferryman.png` | Przewoźnik Ciechosław |  |
-| `npcs/isle15_ferryman.png` | Przewoźniczka Grzymisława |  |
-| `npcs/isle16_ferryman.png` | Przewoźnik Mirogniew |  |
-| `npcs/isle1_ferryman.png` | Przewoźniczka Jagna |  |
-| `npcs/isle2_ferryman.png` | Przewoźnik Wojsław |  |
-| `npcs/isle3_ferryman.png` | Przewoźniczka Dobrawa |  |
-| `npcs/isle4_ferryman.png` | Przewoźnik Sambor |  |
-| `npcs/isle5_ferryman.png` | Przewoźniczka Mila |  |
-| `npcs/isle6_ferryman.png` | Przewoźnik Bratumił |  |
-| `npcs/isle7_ferryman.png` | Przewoźniczka Ludmiła |  |
-| `npcs/isle8_ferryman.png` | Przewoźnik Zbysław |  |
-| `npcs/isle9_ferryman.png` | Przewoźniczka Wiesna |  |
+| `npcs/isle0_ferryman.png` | Przewoźnik Gniewko | tak |
+| `npcs/isle10_ferryman.png` | Przewoźnik Racibor | tak |
+| `npcs/isle11_ferryman.png` | Przewoźniczka Bogumiła | tak |
+| `npcs/isle12_ferryman.png` | Przewoźnik Dobromir | tak |
+| `npcs/isle13_ferryman.png` | Przewoźniczka Sława | tak |
+| `npcs/isle14_ferryman.png` | Przewoźnik Ciechosław | tak |
+| `npcs/isle15_ferryman.png` | Przewoźniczka Grzymisława | tak |
+| `npcs/isle16_ferryman.png` | Przewoźnik Mirogniew | tak |
+| `npcs/isle17_ferryman.png` | Przewoźniczka Wanda | tak |
+| `npcs/isle1_ferryman.png` | Przewoźniczka Jagna | tak |
+| `npcs/isle2_ferryman.png` | Przewoźnik Wojsław | tak |
+| `npcs/isle3_ferryman.png` | Przewoźniczka Dobrawa | tak |
+| `npcs/isle4_ferryman.png` | Przewoźnik Sambor | tak |
+| `npcs/isle5_ferryman.png` | Przewoźniczka Mila | tak |
+| `npcs/isle6_ferryman.png` | Przewoźnik Bratumił | tak |
+| `npcs/isle7_ferryman.png` | Przewoźniczka Ludmiła | tak |
+| `npcs/isle8_ferryman.png` | Przewoźnik Zbysław | tak |
+| `npcs/isle9_ferryman.png` | Przewoźniczka Wiesna | tak |
 | `npcs/isle_guide.png` | Admirał Wenda | tak |
 | `npcs/isle_merchant.png` | Kwatermistrz Olaf | tak |
 | `npcs/lighthouse_ferryman.png` | Latarniczka Wanda | tak |
@@ -246,6 +297,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `npcs/oaza_merchant.png` | Handlarz Karim | tak |
 | `npcs/osada_merchant.png` | Handlarka Jagna | tak |
 | `npcs/pirate_captain.png` | Kapitan Czarna Mewa | tak |
+| `npcs/pozoga_captain.png` | Kapitan Ignacy Smolarz | tak |
 | `npcs/qas_banker.png` | Bankier Qasirah | tak |
 | `npcs/qas_captain.png` | Kapitan Rahim | tak |
 | `npcs/qas_carrier.png` | Woźnica Qasirah | tak |
@@ -672,6 +724,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/wand_of_storms.png` | Różdżka burz (weapon) | tak |
 | `items/wand_of_the_deep.png` | Różdżka głębin (weapon) | tak |
 | `items/war_hammer.png` | Młot bojowy (weapon) | tak |
+| `items/warlord_helmet.png` | Hełm Pana Twierdzy (armor) | tak |
 | `items/wild_growth_rune.png` | Runa dzikiego wzrostu (rune) | tak |
 | `items/wolf_pelt.png` | Wilcze futro (material) | tak |
 | `items/wolf_spellbook.png` | Księga wilka (shield) | tak |
