@@ -14,9 +14,11 @@ wyciete kawalki (assets/ui/zidane/), z ktorych Hud sklada elementy dowolnej wiel
 - okno: rogi 16 px, krawedzie 8 px i tlo 16 px zlozone w jeden obrazek 9-slice 40 x 40,
 - przyciski: lewa i prawa krawedz po 6 px i 1 px srodka (szerokosc dowolna),
 - pola: zwykle, wskazane i ramki rzadkosci 32 x 32 (9-slice 8 px),
-- przelacznik wlacz/wylacz (ustawienia).
-Ikony 24 px paczki, pola wyboru i okragla ramka minimapy nie sa uzywane (przedmioty maja ikony OTSP 32 px,
-minimapa telefonu jest prostokatem 120 x 80 dp).
+- przelacznik wlacz/wylacz (ustawienia),
+- okragla ramka minimapy 95 x 95 z przyciskami + i - (2026-11-11, Darek: "mapke zrob w kolku z nowych grafik z + i
+  - oddalenia") i same przyciski + i - wyciete z niej (kolo o promieniu 11 px) - gra rysuje je jeszcze raz na ramce
+  przyciemnione (koniec skali) albo rozjasnione (wcisniety).
+Ikony 24 px paczki i pola wyboru nie sa uzywane (przedmioty maja ikony OTSP 32 px).
 """
 import os
 import sys
@@ -103,6 +105,22 @@ def buttons(out):
         pick(src, list(range(6)) + [32] + list(range(58, 64)), list(range(32))).save(os.path.join(out, "button_" + color + ".png"))
 
 
+# przyciski ramki minimapy: lewy gorny rog wycinka 22 x 21 i srodek kola przycisku (piksele ramki, y od gory)
+MINIMAP_BUTTONS = {"minimap_plus": ((73, 0), (83.5, 10)), "minimap_minus": ((73, 74), (83.5, 84))}
+
+
+def minimap(out):
+    ring = load("background/minimap")
+    ring.save(os.path.join(out, "minimap_ring.png"))
+    for name, ((x0, y0), (cx, cy)) in MINIMAP_BUTTONS.items():
+        piece = ring.crop((x0, y0, x0 + 22, y0 + 21))
+        for x in range(piece.width):
+            for y in range(piece.height):
+                if (x0 + x - cx) ** 2 + (y0 + y - cy) ** 2 > 11 ** 2:
+                    piece.putpixel((x, y), (0, 0, 0, 0))
+        piece.save(os.path.join(out, name + ".png"))
+
+
 def main():
     assets = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "..", "..", "assets")
     if not os.path.isdir(os.path.join(SRC, "hud")):
@@ -112,6 +130,7 @@ def main():
     bars(out)
     window(out)
     buttons(out)
+    minimap(out)
     for name, rel in SLOTS.items():
         load(rel).save(os.path.join(out, name + ".png"))
     for r in RARITY:

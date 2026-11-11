@@ -210,4 +210,28 @@ class MobileHudLayoutTest {
         assertTrue(l.pickerRows(pick) >= 5, ctx + ": za malo wierszy wyboru");
         for (MobileHudLayout.Circle c : l.spells) assertFalse(c.overlaps(pick), ctx + ": wybor zaslania " + c);
     }
+
+    @ParameterizedTest
+    @CsvSource({"800,360", "780,360", "852,393", "915,412", "960,600"})
+    void roundMinimapOfTheNewLookFitsTheColumnAboveTheBattleList(float w, float h) {
+        MobileHudLayout l = new MobileHudLayout();
+        l.compute(w, h, true);
+        String ctx = "okragla " + w + "x" + h;
+        assertTrue(l.round);
+        // ramka 95 x 95 dp (piksel grafiki = 1 dp) pod ramka HUD-u, na srodku kolumny 120 dp, lista walki pod nia
+        assertEquals(MobileHudLayout.MINIMAP_RING, l.minimap.w, 1e-3);
+        assertEquals(MobileHudLayout.MINIMAP_RING, l.minimap.h, 1e-3);
+        assertEquals(h - 46, l.minimap.top(), 1e-3);
+        assertTrue(l.minimap.x >= l.battle.x && l.minimap.right() <= l.battle.right(), ctx);
+        assertEquals(l.minimap.y - 4, l.battle.top(), 1e-3);
+        assertEquals(MobileHudLayout.MINIMAP, l.battle.w, 1e-3);
+        noOverlaps(ctx, restRects(l), allCircles(l));
+        for (int i = 0; i < MobileHudLayout.ICONS; i++) assertFalse(l.iconHits[i].overlaps(l.minimap), ctx + ": ikona " + i);
+        // wyzsza minimapa zabiera liscie walki 15 dp: co najmniej 2 wiersze na 360 dp, 3 od 390, 4 od 410
+        assertTrue(l.battleRowsVisible() >= (h >= 410 ? 4 : h >= 390 ? 3 : 2), ctx + ": walka " + l.battleRowsVisible());
+        // klasyczny wyglad bez zmian
+        l.compute(w, h, false);
+        assertFalse(l.round);
+        assertEquals(MobileHudLayout.MINIMAP_H, l.minimap.h, 1e-3);
+    }
 }

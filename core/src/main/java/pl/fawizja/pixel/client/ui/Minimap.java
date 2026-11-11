@@ -216,6 +216,84 @@ final class Minimap {
     }
 
     /**
+     * Okragla minimapa (wyglad nowy, 2026-11-11): wycinek wokol gracza w kole o srodku (cx, cy) i promieniu r, px
+     * jednostek ekranu na pole (przyblizenie z przyciskow + i -). Bez shaderow i bufora: kolo skladane z poziomych pasow
+     * wysokosci 1 jednostki, kazdy z wlasnym wycinkiem tekstury (cieciwa kola), pod spodem ciemne tlo w tym samym
+     * ksztalcie. Gracz na srodku kola, znaczniki tylko wewnatrz kola.
+     */
+    void drawCircle(SpriteBatch batch, WorldMap w, ExploredMap fog, Position p, Position target, java.util.List<Position> marks,
+                    float cx, float cy, float r, float px) {
+        syncFog(fog);
+        Texture t = texture(w, p.z());
+        Color old = batch.getColor().cpy();
+        int rows = Math.max(1, (int) Math.ceil(r));
+        // tlo: ciemne kolo (poza swiatem i pod przezroczystymi polami)
+        batch.setColor(FOG_R / 255f, FOG_G / 255f, FOG_B / 255f, 1f);
+        for (int j = -rows; j < rows; j++) {
+            float hc = chord(r, j);
+            if (hc > 0) batch.draw(dot(), cx - hc, cy + j, 2 * hc, 1);
+        }
+        batch.setColor(old);
+        if (t != null) {
+            float tw = t.getWidth(), th = t.getHeight();
+            // srodek kola = srodek pola gracza
+            float ox = p.x() + 0.5f, oy = p.y() + 0.5f;
+            for (int j = -rows; j < rows; j++) {
+                float hc = chord(r, j);
+                if (hc <= 0) continue;
+                float x0 = cx - hc, x1 = cx + hc;
+                // pole (x, y) tekstury pod lewym i prawym koncem pasa; y w dol (wiersz 0 = polnoc = gora)
+                float u0 = ox + (x0 - cx) / px, u1 = ox + (x1 - cx) / px;
+                float vTop = oy - (j + 1) / px, vBot = oy - j / px;
+                if (vBot <= 0 || vTop >= th) continue;
+                if (u0 < 0) {
+                    x0 += -u0 * px;
+                    u0 = 0;
+                }
+                if (u1 > tw) {
+                    x1 -= (u1 - tw) * px;
+                    u1 = tw;
+                }
+                if (x1 <= x0) continue;
+                float y0 = cy + j, hh = 1;
+                if (vTop < 0) {
+                    hh -= -vTop * px;
+                    vTop = 0;
+                }
+                if (vBot > th) {
+                    y0 += (vBot - th) * px;
+                    hh -= (vBot - th) * px;
+                    vBot = th;
+                }
+                if (hh <= 0) continue;
+                batch.draw(t, x0, y0, x1 - x0, hh, u0 / tw, vBot / th, u1 / tw, vTop / th);
+            }
+        }
+        float ms = Math.max(4, Math.min(7, px * 1.5f));
+        for (Position m : marks) {
+            if (m.z() == p.z() && explored(m)) circleMarker(batch, m, p, cx, cy, r, px, ms, MARK);
+        }
+        for (Position f : fiendish) {
+            if (f.z() == p.z()) circleMarker(batch, f, p, cx, cy, r, px, ms + 2, FIEND);
+        }
+        if (target != null && target.z() == p.z()) circleMarker(batch, target, p, cx, cy, r, px, ms, TARGET);
+        marker(batch, cx, cy, ms, PLAYER);
+    }
+
+    /** Polowa cieciwy kola o promieniu r na wysokosci srodka pasa j (pas od j do j + 1 nad srodkiem). */
+    private static float chord(float r, int j) {
+        float yc = j + 0.5f;
+        float d = r * r - yc * yc;
+        return d <= 0 ? 0 : (float) Math.sqrt(d);
+    }
+
+    private void circleMarker(SpriteBatch batch, Position m, Position p, float cx, float cy, float r, float px, float s, Color c) {
+        float mx = cx + (m.x() - p.x()) * px, my = cy - (m.y() - p.y()) * px;
+        float dx = mx - cx, dy = my - cy, lim = r - s / 2f - 1;
+        if (dx * dx + dy * dy <= lim * lim) marker(batch, mx, my, s, c);
+    }
+
+    /**
      * Duza mapa z przyblizeniem: zoom 1 = cale pietro wpisane w prostokat, 2, 4, 8... = wycinek wokol gracza (przy
      * brzegu swiata dosuniety do krawedzi) wypelniajacy prostokat. Zwraca {x, y, skala, wysokosc, kafelek x lewej
      * krawedzi, kafelek y gornej krawedzi, szerokosc} narysowanego obrazu (do podpisow i dotkniec) albo null.

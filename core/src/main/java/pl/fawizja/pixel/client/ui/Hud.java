@@ -544,6 +544,10 @@ public final class Hud {
         final String label;
         final String detail;
         final boolean enabled;
+        /** Zakladka okna (rzad u gory, np. Sklep: Uslugi / Premium / Outfity) i czy jest wybrana. */
+        boolean tab, selected;
+        /** Wiersz tylko z tekstem (bez przycisku pod spodem), np. co daje konto premium. */
+        boolean info;
         float x, y, w, h;
 
         MenuRow(String action, String label, String detail, boolean enabled) {
@@ -2293,17 +2297,42 @@ public final class Hud {
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         float colW = (menuW - 30) / 2f;
         List<MenuRow> rows = new ArrayList<>();
+        List<MenuRow> tabs = new ArrayList<>();
         // wiersz {etykieta, opis[, stan[, akcja]]}; bez akcji wiersz tylko informuje
         for (String[] r : infoRows) {
+            String mark = r.length > 4 ? r[4] : "";
+            if (mark.equals("tab") || mark.equals("tab_on")) {
+                // piaty element "tab" / "tab_on": zakladka w rzedzie u gory okna (wybrana podswietlona)
+                MenuRow t = new MenuRow(r.length > 3 ? r[3] : "ach:none", r[0], "", true);
+                t.tab = true;
+                t.selected = mark.equals("tab_on");
+                tabs.add(t);
+                continue;
+            }
             String detail = r.length > 2 && !r[2].isEmpty() ? r[1] + " - " + r[2] : r[1];
-            // piaty element "off": wiersz wyszarzony (np. oferta sklepu, ktorej teraz nie da sie kupic)
-            rows.add(new MenuRow(r.length > 3 ? r[3] : "ach:none", r[0], detail, !(r.length > 4 && "off".equals(r[4]))));
+            // piaty element "off": wiersz wyszarzony (np. oferta sklepu, ktorej teraz nie da sie kupic), "info": sam tekst
+            MenuRow row = new MenuRow(r.length > 3 ? r[3] : "ach:none", r[0], detail, !"off".equals(mark));
+            row.info = mark.equals("info");
+            rows.add(row);
         }
         if (rows.isEmpty()) rows.add(new MenuRow("ach:none", "Brak danych", "", false));
+        if (!tabs.isEmpty()) {
+            float tw = (menuW - 20 - 6 * (tabs.size() - 1)) / tabs.size();
+            float th = Math.min(rowH - 3, mobile ? 26 : 24);
+            for (int i = 0; i < tabs.size(); i++) {
+                MenuRow t = tabs.get(i);
+                t.x = menuX + 10 + i * (tw + 6);
+                t.y = menuY + menuH - 40 - th;
+                t.w = tw;
+                t.h = th;
+                menuRows.add(t);
+            }
+            perCol = Math.max(2, perCol - 1);
+        }
         for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
             MenuRow row = rows.get(i);
             row.x = menuX + 10 + (i / perCol) * (colW + 10);
-            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
+            row.y = menuY + menuH - 40 - (i % perCol + (tabs.isEmpty() ? 1 : 2)) * rowH;
             row.w = colW;
             row.h = rowH - 3;
             menuRows.add(row);
@@ -3069,6 +3098,80 @@ public final class Hud {
         return mmSize >= 56 && !windowOverLeft();
     }
 
+    // ------------------------------------------------------------------ okragla minimapa (wyglad nowy, 2026-11-11)
+
+    /** Okragla minimapa w ramce z paczki Zidane42 z przyciskami + i - (wyglad nowy); klasyczny - stara prostokatna. */
+    private boolean roundMinimap() { return zid(); }
+
+    private final float[] ringGeom = new float[3];
+    /** Ostatnio wcisniety przycisk ramki (+1 / -1) i chwila wcisniecia (podswietlenie przez chwile). */
+    private int ringPressed;
+    private long ringPressedMs;
+    private static final long RING_PRESS_MS = 160;
+
+    /**
+     * Ramka okraglej minimapy: {x, y, skala} - na komputerze w kwadracie minimapy z ramka (skala calkowita od 2, mniejsza
+     * skala ulamkowa), na telefonie w kwadracie 95 x 95 dp z ukladu (skala 1).
+     */
+    private float[] ringGeom() {
+        float bx, by, bs;
+        if (mobile) {
+            bx = mlay.minimap.x;
+            by = mlay.minimap.y;
+            bs = Math.min(mlay.minimap.w, mlay.minimap.h);
+        } else {
+            bx = mmX - 3;
+            by = mmY - 3;
+            bs = mmSize + 6;
+        }
+        float sc = bs / ZidaneSkin.RING;
+        if (sc >= 2) sc = (float) Math.floor(sc);
+        float size = ZidaneSkin.RING * sc;
+        ringGeom[0] = Math.round(bx + (bs - size) / 2f);
+        ringGeom[1] = Math.round(by + bs - size);
+        ringGeom[2] = sc;
+        return ringGeom;
+    }
+
+    /** Przycisk ramki pod punktem: +1 (przyblizenie), -1 (oddalenie) albo 0; pole dotyku na telefonie promien 16 dp. */
+    private int ringButtonAt(float x, float y) {
+        float[] g = ringGeom();
+        float sc = g[2];
+        float r = Math.max(ZidaneSkin.BUTTON_R * sc + 2, mobile ? 16f : 0f);
+        if (Vector2.dst(x, y, g[0] + ZidaneSkin.PLUS_CX * sc, g[1] + ZidaneSkin.PLUS_CY * sc) <= r) return 1;
+        if (Vector2.dst(x, y, g[0] + ZidaneSkin.MINUS_CX * sc, g[1] + ZidaneSkin.MINUS_CY * sc) <= r) return -1;
+        return 0;
+    }
+
+    /** Dotkniecie przycisku + albo - ramki: zmiana przyblizenia (zapis w ustawieniach przez GameScreen). */
+    private boolean ringTouch(float x, float y, Actions actions) {
+        int b = ringButtonAt(x, y);
+        if (b == 0) return false;
+        ringPressed = b;
+        ringPressedMs = com.badlogic.gdx.utils.TimeUtils.millis();
+        actions.onButton(b > 0 ? "settings:mmzoom+" : "settings:mmzoom-");
+        return true;
+    }
+
+    private ZidaneSkin.RingButton ringState(int b, boolean can) {
+        if (!can) return ZidaneSkin.RingButton.DISABLED;
+        boolean pressed = ringPressed == b && com.badlogic.gdx.utils.TimeUtils.millis() - ringPressedMs < RING_PRESS_MS;
+        return pressed ? ZidaneSkin.RingButton.PRESSED : ZidaneSkin.RingButton.NORMAL;
+    }
+
+    /** Okragla minimapa: mapa w kole (przyblizenie z ustawien), na niej ramka z przyciskami + i -. */
+    private void drawRoundMinimap(SpriteBatch batch, GameSession session, PlayerCharacter pc) {
+        float[] g = ringGeom();
+        float sc = g[2];
+        float ppt = settings == null ? pl.fawizja.pixel.settings.GameSettings.MINIMAP_ZOOM[pl.fawizja.pixel.settings.GameSettings.MINIMAP_ZOOM_DEFAULT]
+                : settings.minimapPixelsPerTile();
+        minimap.drawCircle(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session),
+                g[0] + ZidaneSkin.RING_CX * sc, g[1] + ZidaneSkin.RING_CY * sc, (ZidaneSkin.RING_INNER + 0.5f) * sc, ppt * sc);
+        batch.setColor(1f, 1f, 1f, 1f);
+        zSkin.minimapRing(batch, g[0], g[1], sc, ringState(1, settings == null || settings.canZoomMinimapIn()),
+                ringState(-1, settings == null || settings.canZoomMinimapOut()));
+    }
+
     public void dispose() { minimap.dispose(); }
     public boolean diagnosticsOpen() { return diagnosticsOpen; }
     public void setSettings(pl.fawizja.pixel.settings.GameSettings settings) { this.settings = settings; }
@@ -3115,6 +3218,7 @@ public final class Hud {
             return true;
         }
         if (minimapVisible() && p.x >= mmX - 3 && p.x <= mmX + mmSize + 3 && p.y >= mmY - 3 && p.y <= mmY + mmSize + 3) {
+            if (roundMinimap() && ringTouch(p.x, p.y, actions)) return true;
             toggleMap();
             return true;
         }
@@ -3481,6 +3585,11 @@ public final class Hud {
         bag.icon = art.backpack();
         buffs(session, serverTimeMs);
         if (mobile) {
+            if (mlay.round != roundMinimap() && w > 0) {
+                // zmiana wygladu (okragla/prostokatna minimapa): nowy uklad telefonu
+                layoutMobile();
+                layoutRest();
+            }
             renderMobile(batch, shapes, session, clock, serverTimeMs, diagInfo, tgt);
             drawWheelPanel(batch, shapes, pc);
             return;
@@ -3660,11 +3769,22 @@ public final class Hud {
             if (!wstPanel(shapes, menuStyle(), menuX, menuY, menuW, menuH, 24)) window(shapes, menuX, menuY, menuW, menuH, true);
             for (MenuRow row : menuRows) {
                 if (zid()) {
-                    // wiersze jako przyciski z paczki: zielony dostepny, szary niedostepny
+                    // wiersze jako przyciski z paczki: zielony dostepny, szary niedostepny; wybrana zakladka zolta
+                    if (row.tab && row.selected) {
+                        zQ(b -> zSkin.button(b, ZidaneSkin.Btn.YELLOW, row.x, row.y, row.w, row.h));
+                        continue;
+                    }
+                    if (row.info) continue;
                     ZidaneSkin.Btn c = row.action.equals("logout:yes") ? ZidaneSkin.Btn.RED : row.enabled ? ZidaneSkin.Btn.GREEN : ZidaneSkin.Btn.DISABLED;
                     zQ(b -> zSkin.listButton(b, c, row.x, row.y, row.w, row.h));
                     continue;
                 }
+                if (row.tab) {
+                    shapes.setColor(row.selected ? new Color(0.55f, 0.45f, 0.18f, 1f) : new Color(0.2f, 0.24f, 0.22f, 1f));
+                    shapes.rect(row.x, row.y, row.w, row.h);
+                    continue;
+                }
+                if (row.info) continue;
                 shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
             }
@@ -3680,7 +3800,7 @@ public final class Hud {
             if (epTibia) miniWindow(shapes, "wood", epX, epY, epW, epH, lay.eqHeader > 0 ? 21 : 0);
             else frame(shapes, epX, epY, epW, epH);
         }
-        if (minimapVisible()) {
+        if (minimapVisible() && !roundMinimap()) {
             shapes.setColor(BORDER);
             shapes.rect(mmX - 3, mmY - 3, mmSize + 6, mmSize + 6);
             shapes.setColor(0.05f, 0.05f, 0.07f, 1f);
@@ -3838,6 +3958,12 @@ public final class Hud {
             }
             centered(batch, "X", menuClose.x, menuClose.y);
             for (MenuRow row : menuRows) {
+                if (row.tab) {
+                    font.setColor(row.selected ? (zid() ? hex(0x2a1606, 1f) : Color.WHITE) : hex(0xe8dcc0, 1f));
+                    centered(batch, row.label, row.x + row.w / 2f, row.y + row.h / 2f);
+                    font.setColor(Color.WHITE);
+                    continue;
+                }
                 font.setColor(row.enabled ? Color.WHITE : zid() ? Z_OFF_TEXT : Color.GRAY);
                 // wiersz bez opisu (okienko gracza, opcje): napis na srodku wysokosci; na przycisku z paczki dalej od ramki
                 float zx = zid() ? 3 : 0;
@@ -3853,7 +3979,8 @@ public final class Hud {
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
         if (equipPanelVisible()) drawEquipPanel(batch, session);
         minimap.setFiendish(session.fiendishPositions());
-        if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
+        if (minimapVisible() && roundMinimap()) drawRoundMinimap(batch, session, pc);
+        else if (minimapVisible()) minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mmX, mmY, mmSize, MINIMAP_TILES);
         if (bigMapOpen) drawBigMap(batch, session, floor);
         if (diagnosticsOpen && diagInfo != null) {
             float dy = diagTop() - 10;
@@ -5472,7 +5599,7 @@ public final class Hud {
     private HudButton[] mobileContext() { return new HudButton[] {talk, pick, fish, mount}; }
 
     private void layoutMobile() {
-        mlay.compute(w, h);
+        mlay.compute(w, h, roundMinimap());
         gx = 0;
         gy = 0;
         gw = w;
@@ -5727,6 +5854,7 @@ public final class Hud {
         }
         if (mobileHarmonyTouch(px, py, session)) return true;
         if (mobileStatusTouch(px, py, session)) return true;
+        if (mlay.round && roundMinimap() && ringTouch(px, py, actions)) return true;
         if (mlay.minimap.contains(px, py)) {
             toggleMap();
             menuGeometry();
@@ -6474,8 +6602,10 @@ public final class Hud {
         if (showHarmony(pc)) HarmonyHud.draw(shapes, pc.harmony(), mHarmonyX(), sy, M_HARMONY_ORB, nowMs);
         // minimapa i lista walki
         HudLayout.Rect mm = mlay.minimap;
-        shapes.setColor(M_DARK);
-        shapes.rect(mm.x - 1, mm.y - 1, mm.w + 2, mm.h + 2);
+        if (!mlay.round) {
+            shapes.setColor(M_DARK);
+            shapes.rect(mm.x - 1, mm.y - 1, mm.w + 2, mm.h + 2);
+        }
         HudLayout.Rect bl = mBattleBox();
         if (bl.h > 0) {
             shapes.setColor(hex(0x140c06, 0.82f));
@@ -6603,8 +6733,12 @@ public final class Hud {
         }
         if (session.chests() != null) minimap.setHazards(session.chests().traps());
         minimap.setFiendish(session.fiendishPositions());
-        minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, mm.h, Math.round(mm.w / 1.5f));
-        bStroke(batch, mm.x, mm.y, mm.w, mm.h, 1.5f, M_LINE);
+        if (mlay.round && roundMinimap()) {
+            drawRoundMinimap(batch, session, pc);
+        } else {
+            minimap.drawAround(batch, session.world(), pc.explored(), pc.position(), walkTarget, markerPositions(session), mm.x, mm.y, mm.w, mm.h, Math.round(mm.w / 1.5f));
+            bStroke(batch, mm.x, mm.y, mm.w, mm.h, 1.5f, M_LINE);
+        }
         drawMobileBattle(batch, rowsVis);
         for (int i = 0; i < mlay.spells.length; i++) mSlotIcon(batch, session, pc, MobileHudLayout.SPELL_SLOTS[i], mlay.spells[i], false, serverTimeMs);
         for (int i = 0; i < mlay.potions.length; i++) mSlotIcon(batch, session, pc, MobileHudLayout.POTION_SLOTS[i], mlay.potions[i], true, serverTimeMs);
@@ -6667,6 +6801,11 @@ public final class Hud {
                 // wiersze menu jako przyciski z paczki (wybrany jasniejszy, niedostepny szary, wylogowanie czerwone)
                 for (MenuRow row : menuRows) {
                     boolean sel = cur != null && row.action.equals("pick:set:" + cur);
+                    if (row.tab && row.selected) {
+                        zQ(b -> zSkin.button(b, ZidaneSkin.Btn.YELLOW, row.x, row.y, row.w, row.h));
+                        continue;
+                    }
+                    if (row.info) continue;
                     ZidaneSkin.Btn c = logoutConfirm ? (row.action.equals("logout:yes") ? ZidaneSkin.Btn.RED : ZidaneSkin.Btn.GREEN)
                             : row.enabled ? ZidaneSkin.Btn.GREEN : ZidaneSkin.Btn.DISABLED;
                     boolean plain = sel || logoutConfirm;
@@ -6678,7 +6817,8 @@ public final class Hud {
                 zFlush(shapes);
             }
             for (MenuRow row : menuRows) {
-                boolean sel = cur != null && row.action.equals("pick:set:" + cur);
+                boolean sel = (cur != null && row.action.equals("pick:set:" + cur)) || row.selected;
+                if (row.info) continue;
                 if (zid()) {
                     if (logoutConfirm) continue;
                 } else if (logoutConfirm) {
@@ -7221,6 +7361,11 @@ public final class Hud {
             if (logoutConfirm) {
                 mCentered(batch, row.label, row.x + row.w / 2f, row.y + row.h / 2f, 0.76f,
                         row.action.equals("logout:yes") ? hex(0xff8a7a, 1f) : M_TEXT, false);
+                continue;
+            }
+            if (row.tab) {
+                mCentered(batch, row.label, row.x + row.w / 2f, row.y + row.h / 2f, 0.72f,
+                        row.selected && zid() ? hex(0x2a1606, 1f) : M_TEXT, false);
                 continue;
             }
             float tx = row.x + (pick ? 26 : zid() ? 8 : 6);

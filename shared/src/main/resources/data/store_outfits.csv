@@ -1,0 +1,9 @@
+# Stroje w Sklepie (zakladka "Outfity", 2026-11-11): lista przygotowana na przyszle stroje. Nowy stroj = nowy wiersz.
+# klucz;nazwa;opis;cena (gp z banku);stan
+# stan: wkrotce = widoczny w sklepie, jeszcze nie do kupienia (brak grafiki stroju); dostepny = do kupienia (gdy beda grafiki)
+citizen;Obywatel;prosty strój mieszkańca miasta;0;wkrotce
+hunter;Łowca;skórzana kurtka i kaptur myśliwego;50000;wkrotce
+mage;Mag;długa szata z gwiaździstym haftem;80000;wkrotce
+warrior;Wojownik;kolczuga i naramienniki z brązu;80000;wkrotce
+nobleman;Szlachcic;płaszcz z futrzanym kołnierzem;150000;wkrotce
+barbarian;Barbarzyńca;futro, rzemienie i rogaty hełm;150000;wkrotce
