@@ -1069,3 +1069,12 @@ npc;nerys_ruler;name;Queen Jadwiga
 npc;nerys_ruler;greeting;Welcome to the Emerald Isles. I will give you a premium account and a promotion just like the king in Varden: type premium or promocja.
 npc;nerys_imbuer;name;Enchantress Aniela
 npc;nerys_imbuer;greeting;Island pearls carry the power of saturations. Life leech, mana leech, crit, elements and protections.
+monster;horn_raider;name;Horned Raider
+monster;horn_bowman;name;Horned Bowman
+monster;horn_guard;name;Horned Guard
+monster;horn_mystic;name;Horned Mystic
+monster;keep_hound;name;Keep Hound
+monster;keep_crossbow;name;Keep Crossbowman
+monster;keep_sentry;name;Keep Sentry
+monster;keep_chaplain;name;Keep Chaplain
+monster;castellan_gorvald;name;Gorvald, Castellan of the Keep

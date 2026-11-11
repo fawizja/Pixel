@@ -1069,3 +1069,12 @@ npc;nerys_ruler;name;Reina Jadwiga
 npc;nerys_ruler;greeting;Bienvenido a las Islas Esmeralda. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
 npc;nerys_imbuer;name;Encantadora Aniela
 npc;nerys_imbuer;greeting;Las perlas de las islas llevan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+monster;horn_raider;name;Saqueador Cornudo
+monster;horn_bowman;name;Arquero Cornudo
+monster;horn_guard;name;Guardia Cornudo
+monster;horn_mystic;name;Místico Cornudo
+monster;keep_hound;name;Sabueso de la Fortaleza
+monster;keep_crossbow;name;Ballestero de la Fortaleza
+monster;keep_sentry;name;Centinela de la Fortaleza
+monster;keep_chaplain;name;Capellán de la Fortaleza
+monster;castellan_gorvald;name;Gorvald, Castellano de la Fortaleza
