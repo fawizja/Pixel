@@ -15,7 +15,7 @@ import pl.fawizja.pixel.world.WorldMap;
 /**
  * Rysuje widoczny fragment swiata. Jednostka swiata = 1 kafelek; wiersz y mapy
  * jest odwracany (mapa ma y w dol, libGDX w gore). Rysowane sa tylko kafelki
- * w kadrze kamery, wiec koszt nie zalezy od rozmiaru mapy.
+ * w kadrze kamery, a puste chunki pietra (FloorMap.CHUNK_SIZE) sa pomijane w calosci.
  */
 public final class WorldRenderer {
 
@@ -91,6 +91,7 @@ public final class WorldRenderer {
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
             for (int x = x0; x <= x1; x++) {
+                if (!f.hasChunkAt(x, y)) { x |= FloorMap.CHUNK_SIZE - 1; continue; } // pusty chunk
                 draw(batch, f.get(Layer.GROUND, x, y), x, wy);
                 draw(batch, f.get(Layer.DECORATION, x, y), x, wy);
             }
@@ -180,6 +181,7 @@ public final class WorldRenderer {
                 for (int y = y0; y <= y1; y++) {
                     float wy = worldY(y) + UP;
                     for (int x = x0; x <= x1; x++) {
+                        if (!f.hasChunkAt(x, y)) { x |= FloorMap.CHUNK_SIZE - 1; continue; } // pusty chunk
                         draw(batch, f.get(Layer.GROUND, x, y), x - UP, wy);
                         draw(batch, f.get(Layer.DECORATION, x, y), x - UP, wy);
                     }

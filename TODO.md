@@ -18,7 +18,7 @@ Legenda: [x] zrobione i zweryfikowane, [~] czesciowo, [ ] do zrobienia.
 - [x] Kamera z przyciaganiem do pikseli, ExtendViewport (rozne proporcje ekranu), UI skalowane wg DPI
 - [x] Ruch w 8 kierunkach z interpolacja, kolizje, bez scinania rogow
 - [x] Joystick, przyciski, klawiatura
-- [~] Duzy swiat 160x232 dziala bez chunkow (rysowane tylko widoczne kafelki); chunki przy wiekszym swiecie
+- [~] Chunki 16x16 w FloorMap (leniwe, puste obszary bez pamieci, renderer i swiatla pomijaja puste chunki) - czeka na zielone CI
 
 ## Etap 4 - Postac, profesje, HP, MP, poziomy, doswiadczenie
 - [x] Start: poziom 8, 10 000 gp w plecaku (nie w banku), zestaw profesji, swiatynia Varden
