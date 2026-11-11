@@ -19,3 +19,5 @@ server-saves/
 keystore.pass
 *.acc
 tools/art/wst/
+tools/art/zidane/
+tools/art/hinas/

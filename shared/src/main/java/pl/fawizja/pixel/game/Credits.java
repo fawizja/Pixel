@@ -33,6 +33,14 @@ public final class Credits {
             + "Nila122, Page, Pierre Vigier (pvigier), Sander Frenken (castelonia), Stephen Challener (Redshrike), "
             + "Thane Brimhall (pennomi), thecilekli, TheraHedwig, Tracy, Tuomo Untinen (reemax)";
 
+    /**
+     * Przedmioty i zestawy (assets/art/items, tools/art/hinas_import.py): grafiki Hinasa udostepnione publicznie na
+     * OTLand bez licencji, uzyte z podaniem autora (na zyczenie autora zostana usuniete). docs/CREDITS.md. Zwykly
+     * myslnik, bo czcionka gry (lsans-15) nie ma polpauzy.
+     */
+    public static final String HINAS = "Hinas (OTLand) - przedmioty";
+    public static final String HINAS_NOTE = "udostępnione publicznie, użyte z podaniem autora";
+
     private static void authors(List<String[]> rows, String names) {
         StringBuilder line = new StringBuilder();
         boolean first = true;
@@ -54,6 +62,9 @@ public final class Credits {
         rows.add(new String[] {"Źródło", URL});
         rows.add(new String[] {"Zmiany", "wycięte, przycięte i pokolorowane do gry Pixel"});
         authors(rows, AUTHORS);
+        rows.add(new String[] {"Przedmioty", HINAS});
+        rows.add(new String[] {"", HINAS_NOTE});
+        rows.add(new String[] {"", "zestawy i ich bronie, księgi, amulety"});
         rows.add(new String[] {"Postacie NPC", "Universal LPC Spritesheet (" + LPC_LICENSE + ")"});
         rows.add(new String[] {"Źródło", LPC_URL});
         rows.add(new String[] {"Zmiany", "warstwy złożone, przebarwione i zmniejszone"});
@@ -61,6 +72,8 @@ public final class Credits {
         rows.add(new String[] {"Szczegóły", LPC_FILE});
         rows.add(new String[] {"Interfejs", UI_PACK + " (" + UI_LICENSE + "): ramki okien, pola, przyciski"});
         rows.add(new String[] {"Źródło", UI_URL});
+        rows.add(new String[] {"Wygląd nowy", "Pixel RPG UI Kit - Zidane42 (itch.io)"});
+        rows.add(new String[] {"", "paski, okna, przyciski, pola; kupiony do gry"});
         rows.add(new String[] {"Reszta", "grafiki rysowane przez kod gry"});
         return rows;
     }

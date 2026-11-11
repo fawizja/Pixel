@@ -43,6 +43,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.bossWin=true  offline: boss wyprawy (po dzwigni z -Dpixel.tap) ginie od razu - podglad lupu i portalu
  *   -Dpixel.joy=fx,fy    joystick pod kciukiem w punkcie widoku gry (ulamki 0..1) wychylony w prawo-gore (zrzuty)
  *   -Dpixel.controls=dpad|float4|hold|classic  wariant sterowania (bez zapisu); -Dpixel.sens=1..5 czulosc
+ *   -Dpixel.ui=classic|new  wyglad interfejsu (bez zapisu; domyslnie z ustawien, czyli nowy)
  *   -Dpixel.dpad=NE      wcisniety kierunek krzyzyka (N, NE, E, SE, S, SW, W, NW)
  *   -Dpixel.hold=fx,fy   palec przytrzymany na widoku gry (ulamki 0..1) w wariancie "Przytrzymanie na mapie"
  *   -Dpixel.walkto=x,y  marsz do pola (jak dotkniecie duzej mapy)
@@ -58,6 +59,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.fightMode=OFFENSIVE|BALANCED|DEFENSIVE  tryb walki nowej postaci (przycisk miecz / miecz z tarcza / tarcza)
  *   -Dpixel.mobileHud=1  uklad HUD-u na telefon (wariant B: widok gry na calym ekranie, luk czarow); na Androidzie zawsze
  *   -Dpixel.open=coins|torchsel|torchlit  monety w plecaku, zaznaczona pochodnia, zapalona pochodnia w polu obok butow (z mobile_* po przecinku)
+ *   -Dpixel.open=rarity: ramki rzadkosci (przedmioty kazdej rzadkosci w plecaku i na ciele; z mobile_win_bag/equip na telefonie)
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..8; 5-7 wewnetrzny luk, 8 rog) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
@@ -171,9 +173,30 @@ public final class DesktopLauncher {
                 if (harmony != null) me.harmony().build(harmony - me.harmony().points());
                 String virtue = System.getProperty("pixel.virtue");
                 if (virtue != null) me.harmony().setVirtue(pl.fawizja.pixel.vocation.Harmony.Virtue.valueOf(virtue));
+                // -Dpixel.gear=klucz,klucz: te przedmioty zalozone (kazdy na swoje miejsce), -Dpixel.bagItems=klucz,...: do plecaka
+                // (podglad zestawow, np. przedmioty Hinasa)
+                String gearKeys = System.getProperty("pixel.gear");
+                if (gearKeys != null) {
+                    pl.fawizja.pixel.item.ItemRegistry reg = ((GameScreen) getScreen()).session().items();
+                    for (String k : gearKeys.split(",")) {
+                        pl.fawizja.pixel.item.ItemType t = reg.byKeyOrNull(k.trim());
+                        if (t != null && t.slot() != pl.fawizja.pixel.item.EquipSlot.NONE) {
+                            me.equipment().setDirect(t.slot(), new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
+                        }
+                    }
+                }
+                String bagKeys = System.getProperty("pixel.bagItems");
+                if (bagKeys != null) {
+                    pl.fawizja.pixel.item.ItemRegistry reg = ((GameScreen) getScreen()).session().items();
+                    for (String k : bagKeys.split(",")) {
+                        pl.fawizja.pixel.item.ItemType t = reg.byKeyOrNull(k.trim());
+                        if (t != null) me.backpack().add(new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
+                    }
+                }
                 String open = System.getProperty("pixel.open");
                 if ("virtues".equals(open)) ((GameScreen) getScreen()).hud().openVirtues();
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
+                if ("credits".equals(open)) ((GameScreen) getScreen()).hud().openInfo("Autorzy grafik", pl.fawizja.pixel.game.Credits.rows());
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("bagitem".equals(open)) {
                     // podglad opisu przedmiotu: pierwszy przedmiot z miejscem na ciele
@@ -588,6 +611,47 @@ public final class DesktopLauncher {
                     }
                     for (int i = 0; i < 4; i++) s.fish(i * 2_000L);
                     if (!open.contains("mobile_win_bag")) gs.hud().toggleBag();
+                }
+                if (open != null && java.util.Arrays.asList(open.split(",")).contains("rarity")) {
+                    // podglad ramek rzadkosci (wyglad nowy): w plecaku po przedmiocie z kazdej ramki (zwykla..mityczna;
+                    // przedmiot tylko z bossow o stopien wyzej), na ciele zestaw roznych rzadkosci; plecak otwarty na komputerze
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter hero = gs.session().character();
+                    java.util.List<pl.fawizja.pixel.item.ItemType> gear = new java.util.ArrayList<>();
+                    for (pl.fawizja.pixel.item.ItemType t : gs.session().items().all()) {
+                        if (t.maxStack() == 1 && t.slot() != pl.fawizja.pixel.item.EquipSlot.NONE && t.slot() != pl.fawizja.pixel.item.EquipSlot.LIGHT) gear.add(t);
+                    }
+                    gear.sort(java.util.Comparator.comparingInt(pl.fawizja.pixel.item.ItemType::id));
+                    for (int tier = 1; tier <= 6; tier++) {
+                        for (pl.fawizja.pixel.item.ItemType t : gear) {
+                            boolean boss = pl.fawizja.pixel.monster.LootRules.isBossOnly(t);
+                            int r = pl.fawizja.pixel.item.Rarity.tier(t);
+                            if (r > 0 && Math.min(6, r + (boss ? 1 : 0)) == tier) {
+                                hero.backpack().add(new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
+                                break;
+                            }
+                        }
+                    }
+                    pl.fawizja.pixel.item.EquipSlot[] slots = {pl.fawizja.pixel.item.EquipSlot.AMULET, pl.fawizja.pixel.item.EquipSlot.HEAD,
+                            pl.fawizja.pixel.item.EquipSlot.ARMOR, pl.fawizja.pixel.item.EquipSlot.SHIELD, pl.fawizja.pixel.item.EquipSlot.LEGS,
+                            pl.fawizja.pixel.item.EquipSlot.FEET, pl.fawizja.pixel.item.EquipSlot.RING};
+                    int[] want = {4, 3, 5, 2, 6, 1, 3};
+                    for (int i = 0; i < slots.length; i++) {
+                        // przedmiot na to miejsce z ramka najblizsza zadanej
+                        pl.fawizja.pixel.item.ItemType best = null;
+                        int bestDiff = 99;
+                        for (pl.fawizja.pixel.item.ItemType t : gear) {
+                            int r = pl.fawizja.pixel.item.Rarity.tier(t);
+                            if (t.slot() != slots[i] || r == 0) continue;
+                            int diff = Math.abs(Math.min(6, r + (pl.fawizja.pixel.monster.LootRules.isBossOnly(t) ? 1 : 0)) - want[i]);
+                            if (diff < bestDiff) {
+                                best = t;
+                                bestDiff = diff;
+                            }
+                        }
+                        if (best != null) hero.equipment().setDirect(slots[i], new pl.fawizja.pixel.item.ItemStack(best.id(), 1));
+                    }
+                    if (!open.contains("mobile_")) gs.hud().toggleBag();
                 }
                 if (open != null && open.contains("mobile_")) {
                     // uklad na telefon (-Dpixel.mobileHud=1): mobile_win_bag|equip|skills|vip|settings, mobile_chat,

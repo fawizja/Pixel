@@ -338,10 +338,24 @@ final class WheelPanel {
         drawSide(s);
     }
 
+    /** Wyglad nowy: ramka okna z paczki Zidane42 (null = rama rysowana ksztaltami). */
+    private ZidaneSkin zSkin;
+    private SpriteBatch zBatch;
+
+    /** Ramka okna z paczki (wyglad nowy) albo null; batch do narysowania jej w trakcie przebiegu ksztaltow. */
+    void useSkin(ZidaneSkin skin, SpriteBatch batch) {
+        zSkin = skin;
+        zBatch = batch;
+    }
+
     private void drawFrame(ShapeRenderer s) {
         HudLayout.Rect wr = lay.win;
         s.setColor(0, 0, 0, 0.5f);
         s.rect(wr.x + 4, wr.y - 4, wr.w, wr.h);
+        if (zSkin != null && zBatch != null) {
+            drawSkinFrame(s, wr);
+            return;
+        }
         s.setColor(FRAME_DARK);
         s.rect(wr.x, wr.y, wr.w, wr.h);
         s.setColor(FRAME_WOOD);
@@ -385,6 +399,32 @@ final class WheelPanel {
         s.setColor(rgb(0x7a2418, 1f));
         s.rect(c.x, c.y, c.w, c.h);
         stroke(s, c, 1f, GOLD);
+        s.setColor(TEXT);
+        float k = c.w * 0.28f;
+        s.rectLine(c.cx() - k, c.cy() - k, c.cx() + k, c.cy() + k, 2f);
+        s.rectLine(c.cx() - k, c.cy() + k, c.cx() + k, c.cy() - k, 2f);
+    }
+
+    /** Rama z paczki: okno 9-slice, pasek tytulu jak w klasycznej, zamkniecie na czerwonym przycisku z paczki. */
+    private void drawSkinFrame(ShapeRenderer s, HudLayout.Rect wr) {
+        HudLayout.Rect c = lay.close;
+        s.end();
+        zBatch.begin();
+        zSkin.window(zBatch, wr.x, wr.y, wr.w, wr.h);
+        zSkin.button(zBatch, ZidaneSkin.Btn.RED, c.x, c.y, c.w, c.h);
+        zBatch.end();
+        com.badlogic.gdx.Gdx.gl.glEnable(com.badlogic.gdx.graphics.GL20.GL_BLEND);
+        com.badlogic.gdx.Gdx.gl.glBlendFunc(com.badlogic.gdx.graphics.GL20.GL_SRC_ALPHA, com.badlogic.gdx.graphics.GL20.GL_ONE_MINUS_SRC_ALPHA);
+        s.begin(ShapeRenderer.ShapeType.Filled);
+        HudLayout.Rect t = lay.title;
+        float mid = t.cx(), ty = t.cy();
+        float tw = textWidth(pl.fawizja.pixel.wheel.WheelView.TITLE, titleScale());
+        s.setColor(GOLD);
+        diamond(s, mid - tw / 2f - 14, ty, 3.5f);
+        diamond(s, mid + tw / 2f + 14, ty, 3.5f);
+        s.setColor(GOLD_DARK);
+        s.rect(mid - tw / 2f - 60, ty - 0.75f, 40, 1.5f);
+        s.rect(mid + tw / 2f + 20, ty - 0.75f, 40, 1.5f);
         s.setColor(TEXT);
         float k = c.w * 0.28f;
         s.rectLine(c.cx() - k, c.cy() - k, c.cx() + k, c.cy() + k, 2f);
