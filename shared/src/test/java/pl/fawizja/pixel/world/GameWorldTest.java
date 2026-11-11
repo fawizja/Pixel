@@ -111,7 +111,7 @@ class GameWorldTest {
                 assertTrue(reachable.contains(tr.to()), "transition target " + tr);
             }
         }
-        for (int z = -5; z <= 5; z++) {
+        for (int z = Position.MIN_FLOOR; z <= Position.MAX_FLOOR; z++) {   // -7..+7 (kopalnie, Wulkan Pozogi)
             final int fz = z;
             assertTrue(reachable.stream().anyMatch(p -> p.z() == fz), "floor " + z);
         }

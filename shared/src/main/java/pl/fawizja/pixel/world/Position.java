@@ -1,9 +1,9 @@
 package pl.fawizja.pixel.world;
 
-/** Pozycja kafelka w swiecie. z: od -7 (najglebsze kopalnie krasnoludow) do +5 (szczyty), 0 = powierzchnia. */
+/** Pozycja kafelka w swiecie. z: od -7 (najglebsze kopalnie i Trzewia Pozogi) do +7 (szczyt Wulkanu Pozogi), 0 = powierzchnia. */
 public record Position(int x, int y, int z) {
     public static final int MIN_FLOOR = -7;
-    public static final int MAX_FLOOR = 5;
+    public static final int MAX_FLOOR = 7;
 
     public Position {
         if (z < MIN_FLOOR || z > MAX_FLOOR) throw new IllegalArgumentException("floor out of range: " + z);

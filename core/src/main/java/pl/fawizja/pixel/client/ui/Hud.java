@@ -3103,9 +3103,9 @@ public final class Hud {
                 long gold = session.gold();
                 String verb = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN ? "Płyń: " : "Jedź do ";
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
-                    boolean locked = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN && !pc.isPremium();
+                    boolean locked = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN && !pc.canSail();
                     left.add(new MenuRow("npc:travel:" + r.to().town(), verb + r.to().town(),
-                            String.format("%,d gp", r.price()) + (locked ? " - tylko z kontem premium (u władcy miasta)"
+                            String.format("%,d gp", r.price()) + (locked ? " - wymaga premium lub promocji"
                                     : gold < r.price() ? " - za mało monet w plecaku" : ""), !locked && gold >= r.price()));
                 }
                 break;

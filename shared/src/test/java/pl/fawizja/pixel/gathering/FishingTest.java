@@ -236,7 +236,7 @@ class FishingTest {
     @Test
     void everyBiomeHasItsOwnFishAboveASkillThreshold() {
         FishingSystem fs = new FishingSystem(TestData.world(), TestData.ITEMS, new Random(6));
-        assertEquals(3, fs.biomeFish().size());
+        assertEquals(4, fs.biomeFish().size()); // trzy biomy i delta Srebrnej Rzeki (wegorze)
         for (FishingSystem.BiomeFish b : fs.biomeFish()) {
             PlayerCharacter pc = fisher(shoreIn(fs, b.region()));
             Map<Integer, Integer> skilled = catches(fs, pc, 29, 400); // ponizej progu perel

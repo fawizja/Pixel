@@ -380,6 +380,8 @@ TINTED = {
     "orc": (7, (150, 175, 110)), "orc_spearman": (19, (130, 165, 90)), "orc_rider": (11, (115, 100, 70)),
     "orc_marauder": (44, (140, 160, 95)), "orc_leader": (3, (115, 145, 75)), "orc_cult_priest": (10, (150, 95, 135)),
     "orc_cult_fanatic": (2, (180, 75, 60)), "urgoth": (46, (150, 75, 50)),
+    # 2026-11-11: potwory Wulkanu Pozogi (przebarwione stroje: pelzacz, drapieznik, skrzydlaty olbrzym)
+    "cinder_salamander": (30, (235, 110, 40)), "ember_hound": (11, (205, 70, 30)), "magma_colossus": (39, (215, 85, 35)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.

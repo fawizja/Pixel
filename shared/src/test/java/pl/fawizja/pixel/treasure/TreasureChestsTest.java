@@ -25,6 +25,21 @@ class TreasureChestsTest {
         long ms = (System.nanoTime() - t0) / 1_000_000;
         assertTrue(ms < 5_000, "generation took " + ms + " ms");
         Map<Integer, BitSet> reach = TreasureChests.reachable(world);
+        // skrzynie lupu z mapy moga lezec tez w lochach osiagalnych tylko statkiem (Trzewia Pozogi): od przystani
+        java.util.List<pl.fawizja.pixel.world.Position> harbours = new java.util.ArrayList<>();
+        try {
+            for (pl.fawizja.pixel.npc.Npc n : pl.fawizja.pixel.npc.NpcRegistry.load(pl.fawizja.pixel.world.WorldLayout.WORLD_MAP, world,
+                    pl.fawizja.pixel.npc.ShopRegistry.loadDefault(TestData.ITEMS)).all()) {
+                if (n.role() != pl.fawizja.pixel.npc.NpcRole.CAPTAIN) continue;
+                for (int[] d : new int[][] {{0, 1}, {1, 0}, {-1, 0}, {0, -1}}) {
+                    pl.fawizja.pixel.world.Position q = n.position().translate(d[0], d[1]);
+                    if (world.isWalkable(q)) harbours.add(q);
+                }
+            }
+        } catch (java.io.IOException e) {
+            throw new AssertionError(e);
+        }
+        Map<Integer, BitSet> bySea = TreasureChests.reachable(world, harbours);
         for (int z : new int[] {-1, -2, -3, -4, -5}) {
             // losowe skrzynie (id "c..."); skrzynie lupu z mapy (chests.csv, id "d...") licza sie osobno
             assertEquals(4, c.all().stream().filter(x -> x.position().z() == z && x.vocation() == null
@@ -37,7 +52,8 @@ class TreasureChestsTest {
             if (x.vocation() != null) continue; // nagrody zadan z oltarzami (AltarQuestTest): skarbiec tylko dzwignia
             assertTrue(world.isWalkable(x.position()), x.id());
             assertFalse(world.isProtectionZone(x.position()), x.id());
-            assertTrue(reach.get(x.position().z()).get(x.position().y() * world.width() + x.position().x()), x.id());
+            Map<Integer, BitSet> r = x.id().startsWith(TreasureChests.LOOT_PREFIX) ? bySea : reach;
+            assertTrue(r.get(x.position().z()).get(x.position().y() * world.width() + x.position().x()), x.id());
             TestData.ITEMS.byKey(x.itemKey());
         }
         assertEquals(c.all(), TreasureChests.generate(world).all());

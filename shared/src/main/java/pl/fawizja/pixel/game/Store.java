@@ -122,7 +122,7 @@ public final class Store {
         List<String[]> rows = new ArrayList<>();
         rows.add(new String[] {"Twoje konto: " + (pc.isPremium() ? "premium" : "darmowe"),
                 pc.isPremium() ? "premium bez limitu czasu" : String.format("premium raz na zawsze za %,d gp z banku", GameSession.PREMIUM_PRICE), "", "ach:none", "info"});
-        rows.add(new String[] {"Rejsy statkami", "kapitanowie zabiorą cię do innych portów", "", "ach:none", "info"});
+        rows.add(new String[] {"Rejsy statkami", "kapitanowie zabiorą cię do innych portów i na Wulkan Pożogi (wystarczy też promocja)", "", "ach:none", "info"});
         rows.add(new String[] {"Premia staminy", "150% doświadczenia przy zielonej staminie", "", "ach:none", "info"});
         rows.add(new String[] {"Charmy", pl.fawizja.pixel.charm.Charms.PREMIUM_SLOTS + " miejsc zamiast "
                 + pl.fawizja.pixel.charm.Charms.FREE_SLOTS, "", "ach:none", "info"});

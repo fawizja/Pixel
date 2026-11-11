@@ -982,7 +982,7 @@ public final class WorldRenderer {
         roofFadeAt = nowMs;
         java.util.Map<Integer, Float> near = Roofs.stepFade(roofFade, roofs.nearBuildings(player), roofFadeInstant ? Roofs.FADE_MS : dt);
         float tint = batch.getPackedColor();
-        for (int z = player.z(); z <= 5; z++) {
+        for (int z = player.z(); z <= pl.fawizja.pixel.world.Position.MAX_FLOOR; z++) {
             FloorMap f = world.floor(z);
             if (f == null) continue;
             if (z > player.z()) {

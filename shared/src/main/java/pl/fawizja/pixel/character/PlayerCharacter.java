@@ -321,6 +321,8 @@ public final class PlayerCharacter {
     public boolean isPremium() { return premium; }
     public void setPremium(boolean v) { premium = v; }
     public boolean isPromoted() { return promoted; }
+    /** Rejsy statkami (kapitanowie): konto premium albo promocja profesji (Darek 2026-11-11). */
+    public boolean canSail() { return premium || promoted; }
     public void setPromoted(boolean v) { promoted = v; }
 
     /** Nazwa profesji z uwzglednieniem promocji (np. Elite Knight). */

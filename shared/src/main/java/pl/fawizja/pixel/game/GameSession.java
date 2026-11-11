@@ -1357,8 +1357,9 @@ public final class GameSession {
             return false;
         }
         boolean ship = n.role() == NpcRole.CAPTAIN;
-        if (ship && !pc.isPremium()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": rejsy tylko dla kont premium. " + premiumHint(n.town()));
+        if (ship && !pc.canSail()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": rejsy tylko dla kont premium albo postaci z promocją. "
+                    + premiumHint(n.town()));
             return false;
         }
         pl.fawizja.pixel.npc.Travel.Route route = null;
