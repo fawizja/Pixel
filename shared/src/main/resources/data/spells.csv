@@ -44,9 +44,9 @@ greater_flurry_of_blows;Wielki grad ciosów;MONK;90;0;300;16000;ATTACK;ATTACK_AR
 forceful_uppercut;Potężny podbródkowy;MONK;110;0;325;60000;ATTACK;ATTACK_TARGET;PHYSICAL;130;0;0;0;1;0;;;0;Niszczycielski cios w jeden cel (Forceful Uppercut). Buduje 1 punkt harmonii.;B
 devastating_knockout;Druzgocący nokaut;MONK;125;0;210;24000;ATTACK;ATTACK_TARGET;PHYSICAL;62;0;0;0;1;0;;;0;Nokautujący cios (Devastating Knockout). Wydaje całą harmonię.;S
 spiritual_outburst;Wybuch ducha;MONK;300;0;425;24000;ATTACK;ATTACK_AREA;PHYSICAL;42;0;0;0;0;3;;;6;Fala ducha przeskakuje na 6 wrogów w promieniu 3 (Spiritual Outburst). Wydaje całą harmonię.;S
-virtue_of_harmony;Cnota harmonii;MONK;20;0;210;10000;VIRTUE;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Premia czarów wydających +50% (w spokoju +100%), każdy z nich oddaje 1 punkt harmonii.
-virtue_of_justice;Cnota sprawiedliwości;MONK;20;0;210;10000;VIRTUE;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Walka pięściami +15% (w spokoju +30%).
-virtue_of_sustain;Cnota wytrwałości;MONK;20;0;210;10000;VIRTUE;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Leczenie czarami mnicha +35% (w spokoju +70%).
+virtue_of_harmony;Cnota harmonii;MONK;20;0;210;10000;SUPPORT;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Premia czarów wydających +50% (w spokoju +100%), każdy z nich oddaje 1 punkt harmonii.
+virtue_of_justice;Cnota sprawiedliwości;MONK;20;0;210;10000;SUPPORT;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Walka pięściami +15% (w spokoju +30%).
+virtue_of_sustain;Cnota wytrwałości;MONK;20;0;210;10000;SUPPORT;VIRTUE;PHYSICAL;0;0;0;0;0;0;;;0;Leczenie czarami mnicha +35% (w spokoju +70%).
 focus_serenity;Skupienie spokoju;MONK;150;0;500;600000;SUPPORT;FOCUS_SERENITY;PHYSICAL;0;0;0;0;0;0;;;0;Pełna harmonia, odnowienie czarów wydających od zera i spokój na 7 s.
 focus_harmony;Skupienie harmonii;MONK;275;0;500;120000;SUPPORT;FOCUS_HARMONY;PHYSICAL;0;0;0;0;0;0;;;0;Natychmiast pełna harmonia (5 punktów).
 # ---------------------------------------------------------------- czarodziej
@@ -59,7 +59,7 @@ death_strike;Uderzenie śmierci;SORCERER;16;0;20;2000;ATTACK;ATTACK_TARGET;DEATH
 fire_wave;Fala ognia;SORCERER;18;0;25;4000;ATTACK;ATTACK_WAVE;FIRE;8;0.2;1.6;0;0;3;;;0;Fala ognia przed czarodziejem (Fire Wave).
 energy_beam;Promień energii;SORCERER;23;0;40;4000;ATTACK;ATTACK_BEAM;ENERGY;18;0.2;2.9;0;5;5;;;0;Promień energii na 5 pól (Energy Beam).
 ignite;Podpalenie;SORCERER;26;0;30;30000;ATTACK;CONDITION_TARGET;FIRE;45;0;0;0;3;25;;;3;Podpala cel: 25 razy po 45 obrażeń co 3 s (Ignite).
-great_energy_beam;Wielki promień energii;SORCERER;29;0;110;6000;ATTACK;ATTACK_BEAM;ENERGY;30;0.2;4.5;0;7;7;;;0;Długi promień energii na 7 pól (Great Energy Beam).
+great_energy_beam;Wielki promień energii;SORCERER;29;0;110;6000;ATTACK;ATTACK_BEAM;ENERGY;30;0.2;4.5;0;8;8;;;0;Długi promień energii na 8 pól (Great Energy Beam).
 electrify;Elektryzacja;SORCERER;34;0;30;30000;ATTACK;CONDITION_TARGET;ENERGY;45;0;0;0;3;25;;;3;Poraża cel: 25 razy po 45 obrażeń co 3 s (Electrify).
 great_fire_wave;Wielka fala ognia;SORCERER;38;0;120;4000;ATTACK;ATTACK_WAVE;FIRE;22;0.2;3.6;0;0;5;;;0;Szeroka fala ognia na 5 pól (Great Fire Wave).
 energy_wave;Fala energii;SORCERER;38;0;170;8000;ATTACK;ATTACK_WAVE;ENERGY;25;0.2;5.0;0;0;5;;;1;Szeroka fala energii na 5 pól (Energy Wave).
@@ -186,7 +186,7 @@ fire_bomb_rune;Bomba ognia (runa);*;27;5;0;2000;ATTACK;RUNE_FIELD;FIRE;0;0;0;0;7
 energy_bomb_rune;Bomba energii (runa);*;37;10;0;2000;ATTACK;RUNE_FIELD;ENERGY;0;0;0;0;7;1;;;0;Efekt runy bomby energii (3x3).
 poison_wall_rune;Ściana trucizny (runa);*;29;5;0;2000;ATTACK;RUNE_WALL;EARTH;0;0;0;0;7;2;;;0;Efekt runy ściany trucizny (5 pól).
 fire_wall_rune;Ściana ognia (runa);*;33;6;0;2000;ATTACK;RUNE_WALL;FIRE;0;0;0;0;7;2;;;0;Efekt runy ściany ognia (5 pól).
-energy_wall_rune;Ściana energii (runa);*;41;9;0;2000;ATTACK;RUNE_WALL;ENERGY;0;0;0;0;7;2;;;0;Efekt runy ściany energii (5 pól).
+energy_wall_rune;Ściana energii (runa);*;41;9;0;2000;ATTACK;RUNE_WALL;ENERGY;0;0;0;0;7;3;;;0;Efekt runy ściany energii (7 pól).
 magic_wall_rune;Magiczna ściana (runa);*;32;9;0;2000;ATTACK;RUNE_BARRIER;ENERGY;0;0;0;0;7;0;;;0;Efekt runy magicznej ściany: niezniszczalna ściana na 20 s.
 wild_growth_rune;Dziki wzrost (runa);*;27;8;0;2000;ATTACK;RUNE_BARRIER;EARTH;0;0;0;0;7;0;;;0;Efekt runy dzikiego wzrostu: gąszcz blokuje przejście na 20 s.
 destroy_field_rune;Niszczenie pól (runa);*;17;3;0;2000;SUPPORT;RUNE_DESTROY_FIELD;PHYSICAL;0;0;0;0;5;0;;;0;Efekt runy niszczenia pól: usuwa pole ognia, trucizny albo energii.

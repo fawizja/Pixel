@@ -1,0 +1,27 @@
+# Odnowienia grup jak w Canary (spell:group("attack", "special"), spell:groupCooldown(2 * 1000, 8 * 1000)):
+# klucz czaru;odnowienie grupy glownej ms (puste = domyslne: atak 2000, leczenie 1000, wsparcie 2000);druga grupa;odnowienie drugiej grupy ms
+# Czary bez wpisu maja tylko grupe glowna z spells.csv. Druga grupa blokuje wszystkie czary tej grupy.
+strong_flame_strike;;special;8000
+strong_energy_strike;;special;8000
+strong_terra_strike;;special;8000
+strong_ice_strike;;special;8000
+lightning;;special;8000
+ultimate_flame_strike;;ultimatestrikes;30000
+ultimate_energy_strike;;ultimatestrikes;30000
+ultimate_terra_strike;;ultimatestrikes;30000
+ultimate_ice_strike;;ultimatestrikes;30000
+hells_core;4000;focus;40000
+rage_of_the_skies;4000;focus;40000
+wrath_of_nature;4000;focus;40000
+eternal_winter;4000;focus;40000
+blood_rage;;focus;2000
+protector;;focus;2000
+swift_foot;;focus;10000
+sharpshooter;;focus;10000
+great_energy_beam;;greatbeams;6000
+great_death_beam;;greatbeams;6000
+terra_burst;;burstsofnature;22000
+ice_burst;;burstsofnature;22000
+virtue_of_harmony;;virtue;10000
+virtue_of_justice;;virtue;10000
+virtue_of_sustain;;virtue;10000

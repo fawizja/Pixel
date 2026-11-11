@@ -26,6 +26,17 @@ public record CombatEvent(long timeMs, Position position, int amount, Kind kind,
         return new CombatEvent(now, center, radius, Kind.AREA, null, effect);
     }
 
+    /**
+     * Efekt na polach obszaru czaru (ksztalt z Canary, {@link pl.fawizja.pixel.magic.SpellArea#encode}): amount = kod
+     * ksztaltu i kierunku (ujemny), from = pole rzucajacego dla czarow kierunkowych (linia wzroku), inaczej null.
+     */
+    public static CombatEvent shaped(long now, Position anchor, int shapeCode, Position origin, String effect) {
+        return new CombatEvent(now, anchor, shapeCode, Kind.AREA, origin == null || origin.equals(anchor) ? null : origin, effect);
+    }
+
+    /** Czy to efekt obszaru z ksztaltem czaru (a nie stary kwadrat o promieniu amount). */
+    public boolean isShapedArea() { return kind == Kind.AREA && amount < 0; }
+
     public boolean isVisualEffect() { return kind == Kind.PROJECTILE || kind == Kind.AREA; }
 
     /** Cios wrecz (trafiony albo zablokowany) z pozycja atakujacego w {@code from} - klient animuje wypad. */

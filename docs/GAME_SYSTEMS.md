@@ -784,8 +784,20 @@ pietrach). Lup rosnie x3 na pietro w dol. Otwieranie: `GameSession.openChest` (U
 
 Skrzynie lupu z mapy (2026-11-03): `maps/world/chests.csv` (x;y;z;zloto;przedmiot;ilosc) pisze generator
 (`tools/mapgen/wilds.py`) w ostatnich komorach lochow dziczy; `MapLoader` -> `WorldMap.lootChests()`,
-`TreasureChests.generate` dokleja je z identyfikatorem `d<x>_<y>_<z>` (`LOOT_PREFIX`). Skromny lup (do 2500 gp
-i kilka mikstur), raz na postac jak inne skrzynie.
+`TreasureChests.generate` dokleja je z identyfikatorem `d<x>_<y>_<z>` (`LOOT_PREFIX`), raz na postac jak inne skrzynie.
+
+Nagrody wg trudnosci (0.249, `treasure/ChestRewards`, prosba Darka): zawartosc z mapy jest minimum. Trudnosc
+(poziom) = najwyzsza z: poziomu drzwi poziomu na drodze do skrzyni (`TreasureChests.explore` - przeszukiwanie
+progami drzwi), srodka przedzialu poziomow regionu, poziomu najsilniejszych potworow w 12 polach (z bossem) i
+8 x glebokosc. Rodzaje:
+- **skrzynia zadania** (za drzwiami poziomu, przy bossie, w pokojach zadan, nagrody zadan z oltarzami, przedmiot
+  wpisany na mapie): zloto `100 x T + T^2/2` (T = trudnosc; np. 40 -> 4 800 gp, 75 -> 10 300 gp, 200 -> 40 000 gp),
+  jeden wybrany dobry przedmiot dla profesji otwierajacego (wpisany na mapie, jesli pasuje, inaczej z najwyzszej
+  polki do poziomu T, bez przedmiotow tylko z bossow) i 5 + T/20 mikstur (do 20);
+- **skrzynia lupu** w slepej komorze: `40 + 12 x T` gp (np. 30 -> 400, 125 -> 1 540), 2 + T/25 mikstur dla
+  profesji, co trzecia - slabszy przedmiot (do 60% T); losowe skrzynie skarbow ("c") podobnie, przedmiot co druga.
+Komunikat podaje wszystko w dwoch krotkich wierszach (mieszcza sie na telefonie), np. "Nagroda za zadanie
+(poziom ~75): 10 300 gp!" i "Otrzymujesz: Hełm Pana Twierdzy, 8x Silna mikstura zdrowia.". Losowanie zalezy tylko od skrzyni i profesji (klient i serwer licza to samo). Test: `ChestRewardsTest`.
 
 ## Lowiska w dziczy (generator, 2026-11-03)
 
@@ -1326,9 +1338,58 @@ Analiza luk wzgledem Tibii: `/mnt/project-files/analizy/czary-tibia.md`.
 
 - Profesje: druid 64 czary (z runami), czarodziej 57, mnich 27, paladyn 24, rycerz 23 oraz 38 wspolnych
   (swiatla, lina, lewitacja, exana pox, wszystkie runy). Ksiega pokazuje slowa, mane i poziom.
-- Drugie grupy odnowienia jak w Tibii (`SpellSystem.SECONDARY`): silne uderzenia i blyskawica 8 s, ostateczne 30 s,
-  czary "focus" (piekielny rdzen, gniew niebios, wieczna zima, gniew natury) 40 s, wielkie promienie 6 s.
-- Fale (`TibiaSpells.waveTiles`): stozek przed postacia, polszerokosc max(min, min(2, d/2)); dlugosc + promien z Kola.
+- Odnowienia (0.249, sprawdzone z Canary `spells.cpp`/`actions.cpp`, `magic/Cooldowns`, `SpellGroups`):
+  - kazdy czar ma wlasne odnowienie (`spells.csv`, wartosci z Canary `spell:cooldown`);
+  - grupa glowna: atak 2 s, leczenie 1 s, wsparcie 2 s - **niezalezne od siebie**: czar ataku i czar leczenia
+    mozna rzucic w tej samej chwili (dwa nacisniecia), dwa czary ataku - co 2 s. Czary skupienia (exevo gran mas
+    flam/frigo/vis/tera) blokuja grupe ataku na 4 s (`spell_groups.csv`, Canary `groupCooldown(4 * 1000, 40 * 1000)`);
+  - druga grupa (`data/spell_groups.csv`): "special" - silne uderzenia i blyskawica 8 s; "ultimatestrikes" -
+    ostateczne uderzenia 30 s; "focus" - czary skupienia 40 s oraz utito tempo / utamo tempo 2 s, utito tempo san /
+    utamo tempo san 10 s (jedna grupa dla czarow ataku i wsparcia jak w Canary); "greatbeams" 6 s; "burstsofnature"
+    22 s; "virtue" - cnoty mnicha 10 s (grupa glowna cnot to teraz wsparcie 2 s);
+  - runy: wlasne odnowienie runy i grupa jej czaru (runy ataku - grupa ataku 2 s, runy leczace - leczenie 1 s,
+    paraliz - wsparcie) jak w Canary `rune:group/groupCooldown`; do tego runy i mikstury dziela 1 s "uzycia
+    przedmiotu" (`SpellGroup.POTION`, Canary `nextPotionAction`, `timeBetweenExActions = 1000`): po miksturze runa
+    czeka 1 s i odwrotnie, ale runa ataku nie blokuje czaru leczenia (inne grupy);
+  - mikstury: 1 s (`SpellGroup.POTION`), bez wplywu na grupy czarow.
+- Combo z paska (`combo:a+b+c`, `SpellSystem.castCombo`): jedno nacisniecie = najwyzej jeden czar - pierwszy, ktory
+  mozna rzucic teraz (wszystkie odnowienia powyzej obowiazuja). Combo leczenie+atak przy jednym nacisnieciu rzuca
+  tylko leczenie; atak poleci przy nastepnym nacisnieciu (grupy sa niezalezne, wiec od razu) - jak dwa klawisze
+  w Tibii. Test: `TibiaCooldownsTest.comboFiresOneSpellPerPress`.
+- Obszary czarow i run (0.249, `magic/SpellArea`, `data/spell_areas.csv`): macierze jak w Canary
+  (`data/scripts/lib/register_spells.lua`), macierz dla kierunku polnocnego, obroty jak `AreaCombat::setupArea`
+  (wariant ukosny dla scian z run jak `setupExtArea`). Srodek: cel runy, postac (exori, exevo gran mas...) albo w
+  czarach kierunkowych pole przed postacia (Canary `needDirection` -> `getCasterPosition`). Trafione sa pola widoczne
+  ze srodka (fale i promienie - z postaci). Kierunek fali/promienia = patrzenie postaci; gdy wybrany cel stoi
+  w obszarze w innym prostym kierunku, czar idzie w jego strone (wygoda na telefonie). Bez nikogo na polach czar
+  obszarowy nie rusza (bez straty many).
+
+  | Czar / runa | Obszar Canary |
+  |---|---|
+  | wielka kula ognia, lawina, burza, deszcz kamieni | CIRCLE3X3 (37 pol, okrag, nie kwadrat 7x7) |
+  | eksplozja | CIRCLE1X1 (krzyz) |
+  | bomby ognia/trucizny/energii, exori, exori gran, exeta res | SQUARE1X1 (3x3) |
+  | pola z run | jedno pole |
+  | sciany ognia/trucizny | WALLFIELD (5 w poprzek rzutu, po skosie ukosna) |
+  | sciana energii | WALLFIELD_ENERGY (7) |
+  | exori mas, exevo mas san, exura gran mas res | CIRCLE3X3 |
+  | exevo gran mas flam / frigo | CIRCLE5X5 (61 pol) |
+  | exevo gran mas vis / tera | CIRCLE6X6 (85 pol) |
+  | wybuch ziemi/lodu (Kolo) | RING1_BURST3 |
+  | Boski granat | CIRCLE2X2 wokol celu |
+  | exevo flam hur, exevo frigo hur, scorch, chill out | WAVE4 (1, 3, 3, 5 szer.) |
+  | exevo gran flam hur | WAVE7 |
+  | exevo vis hur, exevo tera hur | SQUAREWAVE5 |
+  | exevo gran frigo hur | SHORTWAVE3 |
+  | exori min, exori min flam | WAVE6 (3 pola przed rycerzem) |
+  | exevo vis lux | BEAM5, exevo gran vis lux - BEAM8, exevo max mort - BEAM6/7/8 (stopien objawienia) |
+  | grad ciosow / wielki grad / zamaszyste powalenie (mnich) | FLURRY_OF_BLOWS / GREATER_FLURRY_OF_BLOWS / suma SWEEPING |
+  | Zbiorowe uleczenie ducha | MASS_SPIRIT_MEND |
+
+  Czary lancuchowe (Lancuch pokuty, Wybuch ducha, Boskie oslepienie, Rycerskie wyzwanie) przeskakuja miedzy celami w
+  promieniu (bez obszaru). Efekt: jedno zdarzenie `CombatEvent.shaped` (kod ksztaltu i kierunku w `amount`, pole
+  postaci w `from`), klient rysuje dokladnie te pola (`SpellArea.eventTiles`, `GameScreen`), podglad celownika runy
+  pokazuje ten sam obszar.
 - Czary z parametrem: `utevo res "wilk"` (przywolanie), `exura sio "imie"` (leczenie innego; bez imienia -
   najslabszy sojusznik albo ty), iluzja (`utevo res ina "szkielet"` albo cel). Akcja `cast:klucz:parametr`.
 - Slugi (`summons.csv`, `SummonTable`): najwyzej 2, mana z Tibii; ida za wlascicielem (teleport z innego pietra albo
@@ -1371,7 +1432,7 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   `1 + B * 2^(h-1) / 100`, B = 8 (x2,28 przy 5 punktach), i skraca odnowienie czarow budujacych o 2 s za punkt.
   Kazde zbudowanie i wydanie leczy (poziom/5 x2..x2,3, +5% za punkt, min. 10..25) mnicha albo najbardziej
   rannego widocznego czlonka druzyny, jesli ma mniej zdrowia niz mnich.
-- **Cnoty** (poz. 20, 210 many, 10 s miedzy zmianami - grupa `SpellGroup.VIRTUE`, jedna aktywna): harmonii
+- **Cnoty** (poz. 20, 210 many, 10 s miedzy zmianami - druga grupa "virtue" jak w Canary, grupa glowna wsparcie 2 s, jedna aktywna): harmonii
   (B +4, w spokoju +8, kazdy spender od razu oddaje 1 punkt), sprawiedliwosci (umiejetnosc walki piesciami
   x1,15 / x1,30 w spokoju, `PlayerCharacter.effectiveSkill` - takze ciosy wrecz w `CombatFormulas`),
   wytrwalosci (leczenie czarami mnicha x1,35 / x1,70, bez leczenia z harmonii - jak ORIGIN_HARMONY w Canary).

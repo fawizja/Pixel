@@ -31,7 +31,7 @@ public enum SpellKind {
     /** Czar/runa wymaga wybranego celu w zasiegu i polu widzenia. */
     public boolean needsTarget() {
         switch (this) {
-            case ATTACK_TARGET: case RUNE_TARGET: case RUNE_AREA: case ATTACK_BEAM: case CONDITION_TARGET:
+            case ATTACK_TARGET: case RUNE_TARGET: case RUNE_AREA: case CONDITION_TARGET:
             case RUNE_CONDITION: case RUNE_PARALYSE: case RUNE_CONVINCE:
                 return true;
             default:
@@ -53,7 +53,7 @@ public enum SpellKind {
 
     /** Czar/runa obszarowa (czarna czaszka ich zabrania, jak w Tibii). */
     public boolean isArea() {
-        return this == ATTACK_AREA || this == RUNE_AREA || this == ATTACK_WAVE || this == RUNE_FIELD || this == RUNE_WALL;
+        return this == ATTACK_AREA || this == RUNE_AREA || this == ATTACK_WAVE || this == ATTACK_BEAM || this == RUNE_FIELD || this == RUNE_WALL;
     }
 
     /** Runa celujaca w pole (cel albo pole przed postacia), nie w potwora. */

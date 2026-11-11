@@ -51,6 +51,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.spellDemo=field|gfb|poison|poison_cure|exani|summon  podglad czarow, run, pol i stanow (zrzuty 0.240)
+ *   -Dpixel.spellDemo=gfb|wave|beam|ultimate|chest  obszary czarow jak w Tibii na tlumie dzikow i nagroda skrzyni zadania
+ *                        (-Dpixel.chest=id skrzyni, domyslnie d668_467_-3)
  *   -Dpixel.spellDemo=aim|aimthrow|aimbag|pickermode|combo|pickercombo  paski akcji jak w Tibii: celownik runy (pole 7
  *                        paska: wielka kula ognia z celownikiem; aimthrow rzuca ja na pole -Dpixel.aimHover), "Uzyj z..."
  *                        z plecaka, menu trybu runy (cel / siebie / celownik), pole combo i jego edycja
@@ -942,8 +944,12 @@ public final class DesktopLauncher {
         /**
          * Podglad czarow i run z 0.240 (-Dpixel.spellDemo=...): field (pole ognia pod paralizowanym potworem, potwor sie pali),
          * gfb (wielka kula ognia w stado), poison (zatrucie), poison_cure (zatrucie i exana pox), exani (exani hur up spod
-         * dziury), summon (utevo res "wilk").
+         * dziury), summon (utevo res "wilk"). Obszary jak w Tibii: gfb (kolo 3x3 w tlum), wave (fala przed postacia),
+         * beam (promien), ultimate (hells core / rage of the skies wokol postaci), chest (skrzynia zadania i komunikat nagrody,
+         * -Dpixel.chest=id).
          */
+        private static final java.util.Set<String> AREA_DEMOS = java.util.Set.of("gfb", "wave", "beam", "ultimate");
+
         private static void spellDemo(GameScreen gs, String demo, int frame, int frames) {
             pl.fawizja.pixel.game.GameSession s = gs.session();
             pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
@@ -979,10 +985,22 @@ public final class DesktopLauncher {
                     if (combo != null) gs.hud().spellBar().set(1, combo);
                     gs.press("bar_saved");
                 }
-                if (demo.equals("field") || demo.equals("gfb") || bar || demo.equals("combo")) {
+                boolean crowd = AREA_DEMOS.contains(demo);
+                if (demo.equals("field") || bar || demo.equals("combo") || crowd) {
                     pc.setInvisible(600_000); // potwory stoja w miejscu (nie widza postaci); zdjete przed zrzutem
                     String key = demo.equals("field") ? "wolf" : "boar";
                     int[][] spots = demo.equals("field") ? new int[][] {{0, -2}} : new int[][] {{0, -2}, {1, -2}, {-1, -2}, {0, -3}, {1, -3}, {-1, -3}};
+                    if (crowd) {
+                        // tlum na calym polu przed postacia (i wokol niej przy ultimate): widac, ktore pola trafia ksztalt
+                        java.util.List<int[]> l = new java.util.ArrayList<>();
+                        int top = demo.equals("beam") ? -9 : -6, bottom = demo.equals("ultimate") ? 6 : -1, side = demo.equals("ultimate") ? 7 : 4;
+                        for (int dy = top; dy <= bottom; dy++) {
+                            for (int dx = -side; dx <= side; dx++) {
+                                if ((dx != 0 || dy != 0) && (dx + dy) % 2 == 0) l.add(new int[] {dx, dy});
+                            }
+                        }
+                        spots = l.toArray(new int[0][]);
+                    }
                     for (int[] d : spots) {
                         for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(d[0], d[1]), 0, 1, now)) {
                             m.paralyze(now + 600_000);
@@ -1007,7 +1025,37 @@ public final class DesktopLauncher {
                 pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(s.items().byKey("great_fireball_rune").id(), 3));
                 s.spells().useFirst("great_fireball_rune", now);
             }
-            if ((demo.equals("field") || demo.equals("gfb")) && frame == frames - 2) pc.breakInvisibility();
+            if (frame == frames - 7 && (demo.equals("wave") || demo.equals("beam") || demo.equals("ultimate"))) {
+                // postac patrzy na polnoc, cel w ksztalcie przed nia; czar: fala / promien / ultimate najwyzszy znany
+                s.applyRemotePosition(me, pl.fawizja.pixel.world.Direction.NORTH, now, 0);
+                pl.fawizja.pixel.monster.Monster m = s.monsters().monsterAt(me.translate(0, -2));
+                if (m != null) s.combat().setTarget(m);
+                String[] order = demo.equals("wave") ? new String[] {"great_fire_wave", "fire_wave", "terra_wave", "ice_wave", "front_sweep"}
+                        : demo.equals("beam") ? new String[] {"great_energy_beam", "energy_beam", "great_death_beam"}
+                        : new String[] {"hells_core", "rage_of_the_skies", "wrath_of_nature", "eternal_winter", "divine_caldera", "groundshaker"};
+                for (String k : order) {
+                    if (s.spells().knownSpells().stream().anyMatch(sp -> sp.key().equals(k))) {
+                        s.castSpell(k, now);
+                        break;
+                    }
+                }
+            }
+            if (demo.equals("chest") && frame == 2) {
+                // skrzynia zadania (-Dpixel.chest=id, domyslnie twierdza): postac obok niej
+                String id = System.getProperty("pixel.chest", "d668_467_-3");
+                for (pl.fawizja.pixel.treasure.TreasureChests.Chest c : s.chests().all()) {
+                    if (!c.id().equals(id)) continue;
+                    for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+                        Position n = c.position().translate(d.dx, d.dy);
+                        if (s.world().isWalkable(n)) {
+                            s.teleport(n, now);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (demo.equals("chest") && frame == frames - 6) s.openChest(now);
+            if ((demo.equals("field") || AREA_DEMOS.contains(demo)) && frame == frames - 2) pc.breakInvisibility();
             String hover = System.getProperty("pixel.aimHover");
             if (hover != null && frame == 2) {
                 String[] w = hover.split(",");

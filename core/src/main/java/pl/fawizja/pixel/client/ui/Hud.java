@@ -3847,7 +3847,7 @@ public final class Hud {
             long rem = session.spells().cooldowns().remaining(sp, serverTimeMs);
             if (rem > 0) {
                 // odnowienie jak w Tibii: ciemna zaslona opadajaca z gory
-                float frac = Math.min(1f, rem / (float) Math.max(sp.cooldownMs(), sp.group().groupCooldownMs));
+                float frac = Math.min(1f, rem / (float) Math.max(sp.cooldownMs(), pl.fawizja.pixel.magic.SpellGroups.primaryMs(sp)));
                 shapes.setColor(0, 0, 0, 0.6f);
                 shapes.rect(b.x - in, b.y + in - in * 2 * frac, in * 2, in * 2 * frac);
             }
@@ -3879,7 +3879,7 @@ public final class Hud {
             SpellType rune = e.startsWith("item:") ? session.spells().registry().find(e.substring(5)) : null;
             if (rune != null) {
                 rem = session.spells().cooldowns().remaining(rune, serverTimeMs);
-                full = Math.max(rune.cooldownMs(), rune.group().groupCooldownMs);
+                full = Math.max(rune.cooldownMs(), pl.fawizja.pixel.magic.SpellGroups.primaryMs(rune));
             } else {
                 rem = session.spells().cooldowns().groupRemaining(pl.fawizja.pixel.magic.SpellGroup.POTION, serverTimeMs);
                 full = pl.fawizja.pixel.magic.SpellGroup.POTION.groupCooldownMs;
@@ -6809,7 +6809,7 @@ public final class Hud {
         float full;
         if (sp != null) {
             rem = session.spells().cooldowns().remaining(sp, now);
-            full = Math.max(sp.cooldownMs(), sp.group().groupCooldownMs);
+            full = Math.max(sp.cooldownMs(), pl.fawizja.pixel.magic.SpellGroups.primaryMs(sp));
         } else {
             rem = session.spells().cooldowns().groupRemaining(pl.fawizja.pixel.magic.SpellGroup.POTION, now);
             full = pl.fawizja.pixel.magic.SpellGroup.POTION.groupCooldownMs;

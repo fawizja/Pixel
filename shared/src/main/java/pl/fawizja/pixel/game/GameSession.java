@@ -3579,31 +3579,24 @@ public final class GameSession {
                     ? "Ta skrzynia jest pusta. Ta postać już odebrała nagrodę za to zadanie." : "Ta skrzynia jest już pusta.");
             return true;
         }
-        if (c.itemKey() == null) {
-            // nagroda zadania: samo zloto
-            pl.fawizja.pixel.inventory.Container gold = pc.backpack().copy();
-            if (!pl.fawizja.pixel.economy.Money.add(gold, c.gold()).ok()) {
-                log.add(nowMs, EventLog.Kind.WARNING, "Plecak nie ma miejsca na nagrodę. Zrób miejsce i spróbuj znowu.");
-                return true;
-            }
-            pc.backpack().commitFrom(gold);
-            pc.openedChests().add(c.id());
-            log.add(nowMs, EventLog.Kind.LOOT, "Nagroda za zadanie: " + String.format("%,d gp", c.gold()) + "!");
-            return true;
-        }
-        int itemId = items.byKey(c.itemKey()).id();
+        // nagroda wg trudnosci miejsca (ChestRewards): zloto, przedmiot dla profesji i mikstury
+        pl.fawizja.pixel.treasure.ChestRewards.Reward r = chestReward(c);
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
-        boolean ok = pl.fawizja.pixel.economy.Money.add(tx, c.gold()).ok()
-                && tx.add(new pl.fawizja.pixel.item.ItemStack(itemId, c.count())).ok();
+        boolean ok = pl.fawizja.pixel.economy.Money.add(tx, r.gold()).ok();
+        for (pl.fawizja.pixel.item.ItemStack st : r.items()) ok = ok && tx.add(st).ok();
         if (!ok) {
             log.add(nowMs, EventLog.Kind.WARNING, "Skrzynia pełna skarbów, ale plecak nie ma miejsca. Zrób miejsce i spróbuj znowu.");
             return true;
         }
         pc.backpack().commitFrom(tx);
         pc.openedChests().add(c.id());
-        log.add(nowMs, EventLog.Kind.LOOT, "Skrzynia skarbów! " + String.format("%,d gp", c.gold()) + " i " + c.count() + "x "
-                + items.get(itemId).name() + ".");
+        for (String line : pl.fawizja.pixel.treasure.ChestRewards.lines(r, items)) log.add(nowMs, EventLog.Kind.LOOT, line);
         return true;
+    }
+
+    /** Nagroda ze skrzyni dla tej postaci (bez otwierania; podglad i testy). */
+    public pl.fawizja.pixel.treasure.ChestRewards.Reward chestReward(pl.fawizja.pixel.treasure.TreasureChests.Chest c) {
+        return pl.fawizja.pixel.treasure.ChestRewards.reward(c, world, monsters, items, pc.vocation());
     }
 
     public void toggleRun(long nowMs) {

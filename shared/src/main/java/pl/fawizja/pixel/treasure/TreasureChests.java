@@ -21,13 +21,19 @@ import pl.fawizja.pixel.world.WorldMap;
 public final class TreasureChests {
 
     /**
-     * Zawartosc skrzyni: zloto i przedmiot (klucz z items.csv, null = samo zloto) w ilosci. Skrzynia nagrody zadania
-     * moze nalezec do jednej profesji (vocation != null): inne profesje jej nie otworza.
+     * Skrzynia: zloto i przedmiot z mapy (klucz z items.csv, null = samo zloto) w ilosci - to minimum nagrody; pelna
+     * nagrode wg trudnosci liczy {@link ChestRewards}. Skrzynia nagrody zadania moze nalezec do jednej profesji
+     * (vocation != null): inne profesje jej nie otworza. doorLevel = najnizszy poziom, ktory dojdzie do skrzyni
+     * przez drzwi poziomu (0 = bez drzwi).
      */
     public record Chest(String id, Position position, long gold, String itemKey, int count,
-                        pl.fawizja.pixel.vocation.Vocation vocation) {
+                        pl.fawizja.pixel.vocation.Vocation vocation, int doorLevel) {
         public Chest(String id, Position position, long gold, String itemKey, int count) {
-            this(id, position, gold, itemKey, count, null);
+            this(id, position, gold, itemKey, count, null, 0);
+        }
+
+        public Chest(String id, Position position, long gold, String itemKey, int count, pl.fawizja.pixel.vocation.Vocation vocation) {
+            this(id, position, gold, itemKey, count, vocation, 0);
         }
     }
 
@@ -99,7 +105,14 @@ public final class TreasureChests {
 
     public static TreasureChests generate(WorldMap world) {
         int w = world.width(), h = world.height();
-        Map<Integer, BitSet> reach = reachable(world);
+        // skrzynie z mapy i nagrody zadan: najnizszy poziom, ktory do nich dojdzie przez drzwi poziomu
+        List<Position> fixed = new ArrayList<>();
+        for (WorldMap.LootChest lc : world.lootChests()) fixed.add(lc.position());
+        for (pl.fawizja.pixel.world.AltarQuest aq : world.altarQuests()) {
+            for (pl.fawizja.pixel.world.AltarQuest.Slot s : aq.slots()) fixed.add(s.chest());
+        }
+        Map<Position, Integer> doors = new HashMap<>();
+        Map<Integer, BitSet> reach = explore(world, List.of(), fixed, doors);
         List<Chest> out = new ArrayList<>();
         List<Position> traps = new ArrayList<>();
         int[] floors = {-1, -2, -3, -4, -5, 1, 2, 3};
@@ -158,12 +171,13 @@ public final class TreasureChests {
         // skrzynie lupu z mapy (komory jaskin, kopaln i zapadlisk): skromne zloto i mikstury, id od pola
         for (WorldMap.LootChest lc : world.lootChests()) {
             Position p = lc.position();
-            out.add(new Chest(LOOT_PREFIX + p.x() + "_" + p.y() + "_" + p.z(), p, lc.gold(), lc.itemKey(), lc.count()));
+            out.add(new Chest(LOOT_PREFIX + p.x() + "_" + p.y() + "_" + p.z(), p, lc.gold(), lc.itemKey(), lc.count(), null,
+                    doors.getOrDefault(p, 0)));
         }
         // skrzynie nagrod zadan z oltarzami profesji: po jednej na profesje, samo zloto
         for (pl.fawizja.pixel.world.AltarQuest aq : world.altarQuests()) {
             for (pl.fawizja.pixel.world.AltarQuest.Slot s : aq.slots()) {
-                out.add(new Chest(aq.chestId(s.vocation()), s.chest(), aq.gold(), null, 0, s.vocation()));
+                out.add(new Chest(aq.chestId(s.vocation()), s.chest(), aq.gold(), null, 0, s.vocation(), doors.getOrDefault(s.chest(), 0)));
             }
         }
         return new TreasureChests(out, traps);
@@ -176,25 +190,54 @@ public final class TreasureChests {
 
     /** Jak {@link #reachable(WorldMap)}, ale takze od dodatkowych pol (np. przystanie osiagalne tylko statkiem). */
     public static Map<Integer, BitSet> reachable(WorldMap world, java.util.Collection<Position> extraStarts) {
+        return explore(world, extraStarts, List.of(), new HashMap<>());
+    }
+
+    /**
+     * Kafelki osiagalne z miejsca startu (jak {@link #reachable}) i dla podanych pol najnizszy poziom potrzebny, by do
+     * nich dojsc przez drzwi poziomu i przejscia strzezone (wpis do levelOut; brak wpisu = nieosiagalne). Przeszukiwanie
+     * idzie progami: najpierw bez drzwi, potem otwiera drzwi od najnizszego poziomu.
+     */
+    public static Map<Integer, BitSet> explore(WorldMap world, java.util.Collection<Position> extraStarts,
+                                               java.util.Collection<Position> targets, Map<Position, Integer> levelOut) {
         int w = world.width(), h = world.height();
+        Map<Position, Integer> gate = new HashMap<>();
+        for (int[] r : world.levelGates()) {
+            for (int y = r[1]; y <= r[3]; y++) for (int x = r[0]; x <= r[2]; x++) gate.merge(new Position(x, y, r[4]), r[5], Math::max);
+        }
+        java.util.Set<Position> want = new java.util.HashSet<>(targets);
         Map<Integer, BitSet> seen = new HashMap<>();
+        java.util.TreeMap<Integer, List<Position>> pending = new java.util.TreeMap<>();
         ArrayDeque<Position> q = new ArrayDeque<>();
         Position start = world.spawn();
         mark(seen, start, w);
         q.add(start);
         for (Position p : extraStarts) if (mark(seen, p, w)) q.add(p);
+        int level = 0;
         int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        while (!q.isEmpty()) {
-            Position p = q.poll();
-            List<Position> next = new ArrayList<>(5);
-            for (int[] d : dirs) next.add(p.translate(d[0], d[1]));
-            Transition t = world.transitionAt(p);
-            if (t != null) next.add(t.to());
-            for (Position n : next) {
-                if (n.x() < 0 || n.y() < 0 || n.x() >= w || n.y() >= h) continue;
-                if (!world.isWalkable(n) && world.transitionAt(n) == null) continue;
-                if (mark(seen, n, w)) q.add(n);
+        while (true) {
+            while (!q.isEmpty()) {
+                Position p = q.poll();
+                if (!want.isEmpty() && want.remove(p)) levelOut.put(p, level);
+                List<Position> next = new ArrayList<>(5);
+                for (int[] d : dirs) next.add(p.translate(d[0], d[1]));
+                Transition t = world.transitionAt(p);
+                if (t != null) next.add(t.to());
+                for (Position n : next) {
+                    if (n.x() < 0 || n.y() < 0 || n.x() >= w || n.y() >= h) continue;
+                    if (!world.isWalkable(n) && world.transitionAt(n) == null) continue;
+                    Integer need = gate.get(n);
+                    if (need != null && need > level) {
+                        pending.computeIfAbsent(need, k -> new ArrayList<>()).add(n);
+                        continue;
+                    }
+                    if (mark(seen, n, w)) q.add(n);
+                }
             }
+            Map.Entry<Integer, List<Position>> e = pending.pollFirstEntry();
+            if (e == null) break;
+            level = e.getKey();
+            for (Position n : e.getValue()) if (mark(seen, n, w)) q.add(n);
         }
         return seen;
     }

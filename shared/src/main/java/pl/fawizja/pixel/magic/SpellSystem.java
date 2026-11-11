@@ -443,7 +443,6 @@ public final class SpellSystem {
         long cd = pl.fawizja.pixel.wheel.WheelSpells.cooldownMs(pc, s);
         cooldowns.trigger(s, now, cd);
         for (String k : pl.fawizja.pixel.wheel.WheelSpells.linked(s.key())) if (spells.find(k) != null) cooldowns.trigger(spells.find(k), now, cd);
-        triggerSecondaryGroup(s, now);
         if (s.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
         return CastResult.OK;
     }
@@ -451,34 +450,10 @@ public final class SpellSystem {
     /** Dodatkowa mana rzutu (przywolanie: koszt stworzenia jak w Tibii). */
     private int extraMana;
 
-    /**
-     * Drugie wspolne odnowienia z Tibii (Canary spell:group("attack", "special")): silne uderzenia i Blyskawica 8 s,
-     * ostateczne uderzenia 30 s, czary skupienia 40 s, wielkie promienie 6 s.
-     */
-    private static final java.util.Map<String, String> SECONDARY = java.util.Map.ofEntries(
-            java.util.Map.entry("strong_flame_strike", "special"), java.util.Map.entry("strong_energy_strike", "special"),
-            java.util.Map.entry("strong_ice_strike", "special"), java.util.Map.entry("strong_terra_strike", "special"),
-            java.util.Map.entry("lightning", "special"),
-            java.util.Map.entry("ultimate_flame_strike", "ultimate"), java.util.Map.entry("ultimate_energy_strike", "ultimate"),
-            java.util.Map.entry("ultimate_ice_strike", "ultimate"), java.util.Map.entry("ultimate_terra_strike", "ultimate"),
-            java.util.Map.entry("hells_core", "focus"), java.util.Map.entry("rage_of_the_skies", "focus"),
-            java.util.Map.entry("eternal_winter", "focus"), java.util.Map.entry("wrath_of_nature", "focus"),
-            java.util.Map.entry("great_energy_beam", "beams"), java.util.Map.entry("great_death_beam", "beams"));
-    private static final java.util.Map<String, Long> SECONDARY_MS = java.util.Map.of("special", 8000L, "ultimate", 30000L,
-            "focus", 40000L, "beams", 6000L);
-
-    /** Nazwa drugiej grupy odnowienia czaru (np. "special") albo null. */
-    public static String secondaryGroup(String key) { return SECONDARY.get(key); }
-
-    private void triggerSecondaryGroup(SpellType s, long now) {
-        String g = SECONDARY.get(s.key());
-        if (g == null) return;
-        long ms = SECONDARY_MS.get(g);
-        for (java.util.Map.Entry<String, String> e : SECONDARY.entrySet()) {
-            SpellType o = spells.find(e.getKey());
-            if (o == null || o == s || !e.getValue().equals(g)) continue;
-            if (cooldowns.remaining(o, now) < ms) cooldowns.extend(o, now + ms);
-        }
+    /** Nazwa drugiej grupy odnowienia czaru (np. "special", "focus") albo null ({@link SpellGroups}). */
+    public static String secondaryGroup(String key) {
+        SpellGroups.Secondary sec = SpellGroups.secondary(key);
+        return sec == null ? null : sec.group();
     }
 
     /** Mnoznik wartosci biezacego rzutu z Kola Przeznaczenia (1 poza rzutem). */
@@ -506,10 +481,15 @@ public final class SpellSystem {
             if (pc.position().distanceTo(tp) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
             if (!world.hasLineOfSight(pc.position(), tp)) return CastResult.NOT_VISIBLE;
         }
-        int area = s.radius() + pl.fawizja.pixel.wheel.WheelSpells.augment(pc, s).extraRadius;
-        if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), area).isEmpty()
-                && !playerInArea(pc.position(), area)) return CastResult.NO_TARGET;
-        if (s.kind() == SpellKind.ATTACK_WAVE && waveTargets(s).isEmpty() && !playerInWave(s)) return CastResult.NO_TARGET;
+        int extra = pl.fawizja.pixel.wheel.WheelSpells.augment(pc, s).extraRadius;
+        if (s.kind() == SpellKind.ATTACK_AREA && SpellAreas.chain(s)) {
+            int area = s.radius() + extra;
+            if (targetsAround(pc.position(), area).isEmpty() && !playerInArea(pc.position(), area)) return CastResult.NO_TARGET;
+        } else if (s.kind() == SpellKind.ATTACK_AREA || s.kind() == SpellKind.ATTACK_WAVE || s.kind() == SpellKind.ATTACK_BEAM) {
+            // jak w Tibii czar obszarowy trafia pola swojego ksztaltu; bez nikogo na nich nie marnuje many
+            AreaCast c = areaCast(s, pc.position(), extra);
+            if (c == null || monstersIn(c).isEmpty() && !playerIn(c)) return CastResult.NO_TARGET;
+        }
         if (s.kind().targetsTile() && aimTile == null) {
             Position aim = aim(s);
             if (aim == null) return CastResult.NO_TARGET;
@@ -538,10 +518,11 @@ public final class SpellSystem {
                 combat.addEvent(CombatEvent.projectile(now, pc.position(),
                         playerTargetPosition() != null ? playerTargetPosition() : target().position(), s.damageType().name()));
                 if (s.kind() == SpellKind.ATTACK_TARGET && s.radius() > 0) {
-                    // Boski granat: wybuch wokol celu
+                    // Boski granat: wybuch wokol celu (Canary AREA_CIRCLE2X2)
                     Position c = playerTargetPosition() != null ? playerTargetPosition() : target().position();
-                    combat.addEvent(CombatEvent.area(now, c, s.radius(), s.damageType().name()));
-                    areaStrike(c, s, now);
+                    AreaCast ac = areaCast(s, c, 0);
+                    effect(ac, s.damageType().name(), now);
+                    areaStrike(ac, s, monstersIn(ac), now);
                     return CastResult.OK;
                 }
                 if (playerTargetPosition() != null) {
@@ -551,31 +532,37 @@ public final class SpellSystem {
                 combat.damageMonster(target(), pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, target(), roll(s)), s.damageType(), now, combat.rollCritical(), 1);
                 return CastResult.OK;
             case ATTACK_AREA: {
-                combat.addEvent(CombatEvent.area(now, pc.position(), radius(s), s.damageType().name()));
-                List<Monster> hit = limitTargets(targetsAround(pc.position(), radius(s)),
-                        s.produceCount() > 0 ? s.produceCount() + pc.wheel().castAugment().extraTargets : 0);
+                AreaCast ac;
+                List<Monster> hit;
+                if (SpellAreas.chain(s)) {
+                    // czar lancuchowy: przeskakuje na najwyzej "ilosc" celow w promieniu
+                    ac = new AreaCast(SpellArea.circle(radius(s)), pc.position(), null, pc.position(),
+                            SpellArea.circle(radius(s)).visibleTiles(pc.position(), null, pc.position(), world));
+                    combat.addEvent(CombatEvent.area(now, pc.position(), radius(s), s.damageType().name()));
+                    hit = limitTargets(targetsAround(pc.position(), radius(s)), s.produceCount() + pc.wheel().castAugment().extraTargets);
+                } else {
+                    ac = areaCast(s, pc.position(), pc.wheel().castAugment().extraRadius);
+                    effect(ac, s.damageType().name(), now);
+                    hit = monstersIn(ac);
+                }
                 double recast = pl.fawizja.pixel.wheel.WheelSpells.recast(pc, s);
-                areaStrike(pc.position(), s, hit, now);
+                areaStrike(ac, s, hit, now);
                 if (recast > 0) {
                     // Wybuch ducha z objawieniem: drugie uderzenie z pelnej harmonii (Canary combatRecast, bez 1 s opoznienia)
                     double f = wheelFactor;
                     wheelFactor = f * recast;
                     hit.removeIf(Monster::isDead);
-                    areaStrike(pc.position(), s, hit, now);
+                    areaStrike(ac, s, hit, now);
                     wheelFactor = f;
                 }
                 return CastResult.OK;
             }
             case ATTACK_BEAM: {
-                // Wielki promien smierci: pola w linii od postaci w strone celu, dlugosc = promien (+1 za stopien 2 i 3)
-                Position tp = playerTargetPosition() != null ? playerTargetPosition() : target().position();
-                List<Position> line = beam(pc.position(), tp, radius(s));
-                for (Position p : line) combat.addEvent(CombatEvent.area(now, p, 0, s.damageType().name()));
-                List<Monster> hit = new ArrayList<>();
-                for (Monster m : targetsAround(pc.position(), radius(s))) if (line.contains(m.position())) hit.add(m);
-                boolean crit = combat.rollCritical();
-                for (Monster m : hit) combat.damageMonster(m, roll(s), s.damageType(), now, crit, Math.max(1, hit.size()));
-                if (hit.isEmpty() && playerTargetPosition() != null) playerTarget.strike(critAmount(roll(s), crit), s.damageType(), crit, 1, now);
+                // promien jak w Tibii (exevo vis lux, exevo gran vis lux, exevo max mort): prosta linia od pola przed
+                // postacia w strone patrzenia (albo celu w linii); Wielki promien smierci +1 pole za stopien 2 i 3
+                AreaCast ac = areaCast(s, pc.position(), pc.wheel().castAugment().extraRadius);
+                effect(ac, s.damageType().name(), now);
+                areaStrike(ac, s, monstersIn(ac), now);
                 return CastResult.OK;
             }
             case WHEEL_BUFF: {
@@ -586,12 +573,14 @@ public final class SpellSystem {
                 return CastResult.OK;
             }
             case HEAL_PARTY: {
-                // Zbiorowe uleczenie ducha: mnich i druzyna w promieniu, kazdy z osobnym losowaniem (Canary mass_spirit_mend)
-                combat.addEvent(CombatEvent.area(now, pc.position(), s.radius(), "HEAL"));
+                // exura gran mas res, Zbiorowe uleczenie ducha: rzucajacy i druzyna na polach obszaru (Canary
+                // AREA_CIRCLE3X3, AREA_MASS_SPIRIT_MEND), kazdy z osobnym losowaniem
+                AreaCast ac = areaCast(s, pc.position(), 0);
+                effect(ac, "HEAL", now);
                 int healed = pc.heal(roll(s));
                 combat.addEvent(new CombatEvent(now, pc.position(), healed, CombatEvent.Kind.HEAL));
                 for (Ally a : visibleAllies()) {
-                    if (a.health() <= 0 || a.position().z() != pc.position().z() || pc.position().distanceTo(a.position()) > s.radius()) continue;
+                    if (a.health() <= 0 || !ac.contains(a.position())) continue;
                     int h = a.heal(roll(s));
                     if (h > 0) combat.addEvent(new CombatEvent(now, a.position(), h, CombatEvent.Kind.HEAL));
                 }
@@ -622,8 +611,10 @@ public final class SpellSystem {
                 Position pvp = playerTargetPosition();
                 Position center = aimTile != null ? aimTile : pvp != null ? pvp : target().position();
                 combat.addEvent(CombatEvent.projectile(now, pc.position(), center, s.damageType().name()));
-                combat.addEvent(CombatEvent.area(now, center, s.radius(), s.damageType().name()));
-                areaStrike(center, s, now);
+                // wielka kula ognia i inne: okrag Canary AREA_CIRCLE3X3, eksplozja: krzyz AREA_CIRCLE1X1
+                AreaCast ac = areaCast(s, center, 0);
+                effect(ac, s.damageType().name(), now);
+                areaStrike(ac, s, monstersIn(ac), now);
                 return CastResult.OK;
             }
             case LIGHT:
@@ -663,41 +654,116 @@ public final class SpellSystem {
      * Czar albo runa obszarowa: jak w Tibii jeden rzut na krytyk dla calego czaru (wszystkie cele), kradziez
      * zycia/many wg liczby trafionych celow (potwory + gracz w obszarze), osobny rzut obrazen na kazdy cel.
      */
-    private void areaStrike(Position center, SpellType s, long now) {
-        areaStrike(center, s, targetsAround(center, s.radius()), now);
+    private void areaStrike(AreaCast c, SpellType s, List<Monster> hit, long now) {
+        boolean crit = combat.rollCritical();
+        int targets = Math.max(1, hit.size() + (playerIn(c) ? 1 : 0));
+        for (Monster m : hit) combat.damageMonster(m, pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, m, roll(s)), s.damageType(), now, crit, targets);
+        if (playerTarget != null) {
+            java.util.Set<Position> set = new java.util.HashSet<>(c.tiles());
+            playerTarget.strikeArea(c.anchor(), c.area().extent() + 1, set::contains, () -> critAmount(roll(s), crit),
+                    s.damageType(), crit, targets, now);
+        }
     }
 
-    /** Pola promienia od from w strone to (najwyzej len pol, tylko w zasiegu wzroku), bez pola postaci. */
-    private List<Position> beam(Position from, Position to, int len) {
-        List<Position> out = new ArrayList<>();
-        double ax = to.x() - from.x(), ay = to.y() - from.y();
-        double norm = Math.max(Math.abs(ax), Math.abs(ay));
-        if (norm == 0) return out;
-        for (int i = 1; i <= len; i++) {
-            Position p = new Position(from.x() + (int) Math.round(ax / norm * i), from.y() + (int) Math.round(ay / norm * i), from.z());
-            if (!world.hasLineOfSight(from, p)) break;
-            out.add(p);
+    // ------------------------------------------------------------------ obszary czarow jak w Tibii (SpellArea)
+
+    /**
+     * Obszar jednego rzutu: ksztalt z Canary, srodek (kotwica), kierunek (dla obszarow kierunkowych), punkt, z ktorego
+     * liczy sie linia wzroku, i trafione pola.
+     */
+    public record AreaCast(SpellArea area, Position anchor, pl.fawizja.pixel.world.Direction dir, Position origin,
+                           List<Position> tiles) {
+        public boolean contains(Position p) { return tiles.contains(p); }
+    }
+
+    /**
+     * Obszar rzutu czaru s. center = srodek obszaru bez kierunku (pole rzucajacego albo cel runy). Fale, promienie
+     * i ciosy przed soba zaczynaja sie na polu przed postacia (Canary needDirection) i obracaja sie z kierunkiem;
+     * sciany z run ustawiaja sie w poprzek kierunku rzutu (takze po skosie). extra = dodatkowe pola z Kola.
+     * null, gdy czar nie ma obszaru.
+     */
+    public AreaCast areaCast(SpellType s, Position center, int extra) {
+        SpellArea a = SpellAreas.of(s, extra);
+        if (a == null) return null;
+        Position me = pc.position();
+        if (SpellAreas.inFront(s, a)) {
+            pl.fawizja.pixel.world.Direction d = aimDirection(a);
+            Position anchor = me.translate(d.dx, d.dy);
+            return new AreaCast(a, anchor, d, me, a.visibleTiles(anchor, d, me, world));
+        }
+        pl.fawizja.pixel.world.Direction d = a.directional() ? throwDirection(center) : null;
+        return new AreaCast(a, center, d, center, a.visibleTiles(center, d, center, world));
+    }
+
+    /** Kierunek patrzenia bez skosu (po skosie w Tibii postac patrzy na wschod albo zachod). */
+    pl.fawizja.pixel.world.Direction straightFacing() {
+        pl.fawizja.pixel.world.Direction d = facing();
+        if (d.diagonal()) return d.dx > 0 ? pl.fawizja.pixel.world.Direction.EAST : pl.fawizja.pixel.world.Direction.WEST;
+        return d;
+    }
+
+    /**
+     * Kierunek czaru przed soba: patrzenie postaci jak w Tibii; gdy wybrany cel nie stoi w obszarze w tym kierunku,
+     * a stoi w obszarze w innym prostym kierunku - postac obraca sie do niego (wygoda na telefonie).
+     */
+    pl.fawizja.pixel.world.Direction aimDirection(SpellArea a) {
+        Position me = pc.position();
+        pl.fawizja.pixel.world.Direction f = straightFacing();
+        Position t = null;
+        Monster m = target();
+        if (m != null && !m.isDead()) t = m.position();
+        else if (playerTargetPosition() != null) t = playerTargetPosition();
+        if (t == null || t.z() != me.z() || t.equals(me)) return f;
+        if (a.tiles(me.translate(f.dx, f.dy), f).contains(t)) return f;
+        int dx = t.x() - me.x(), dy = t.y() - me.y();
+        pl.fawizja.pixel.world.Direction dom = Math.abs(dx) >= Math.abs(dy)
+                ? (dx > 0 ? pl.fawizja.pixel.world.Direction.EAST : pl.fawizja.pixel.world.Direction.WEST)
+                : (dy > 0 ? pl.fawizja.pixel.world.Direction.SOUTH : pl.fawizja.pixel.world.Direction.NORTH);
+        List<pl.fawizja.pixel.world.Direction> order = new ArrayList<>(List.of(dom, pl.fawizja.pixel.world.Direction.NORTH,
+                pl.fawizja.pixel.world.Direction.EAST, pl.fawizja.pixel.world.Direction.SOUTH, pl.fawizja.pixel.world.Direction.WEST));
+        for (pl.fawizja.pixel.world.Direction d : order) {
+            if (a.tiles(me.translate(d.dx, d.dy), d).contains(t)) return d;
+        }
+        return f;
+    }
+
+    /**
+     * Kierunek od postaci do pola celu (jak Canary AreaCombat::getArea): skos, gdy cel lezy po skosie; na wlasnym
+     * polu - patrzenie.
+     */
+    pl.fawizja.pixel.world.Direction throwDirection(Position to) {
+        Position me = pc.position();
+        int dx = Integer.signum(to.x() - me.x()), dy = Integer.signum(to.y() - me.y());
+        if (dx == 0 && dy == 0) return straightFacing();
+        return pl.fawizja.pixel.world.Direction.fromDelta(dx, dy);
+    }
+
+    /** Potwory (bez slug) na polach obszaru. */
+    List<Monster> monstersIn(AreaCast c) {
+        List<Monster> out = new ArrayList<>();
+        if (c == null) return out;
+        java.util.Set<Position> set = new java.util.HashSet<>(c.tiles());
+        for (Monster m : monsters.near(c.anchor(), c.area().extent() + 1)) {
+            if (!m.isDead() && !m.isSummon() && set.contains(m.position())) out.add(m);
         }
         return out;
     }
 
-    private void areaStrike(Position center, SpellType s, List<Monster> hit, long now) {
-        boolean crit = combat.rollCritical();
-        int targets = Math.max(1, hit.size() + (playerInArea(center, s.radius()) ? 1 : 0));
-        for (Monster m : hit) combat.damageMonster(m, pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, m, roll(s)), s.damageType(), now, crit, targets);
-        strikePlayers(center, s, crit, targets, now);
+    /** Czy na polach obszaru stoi gracz, ktorego zasady PvP pozwalaja trafic. */
+    boolean playerIn(AreaCast c) {
+        if (playerTarget == null || c == null) return false;
+        java.util.Set<Position> set = new java.util.HashSet<>(c.tiles());
+        return playerTarget.anyInArea(c.anchor(), c.area().extent() + 1, set::contains);
+    }
+
+    /** Efekt na polach obszaru - klient rysuje dokladnie trafione pola. */
+    void effect(AreaCast c, String fx, long now) {
+        combat.addEvent(CombatEvent.shaped(now, c.anchor(), c.area().encode(c.dir()), c.origin(), fx));
     }
 
     /** Krytyk dla obrazen w gracza (w potwory dolicza go CombatSystem.damageMonster). */
     private int critAmount(int raw, boolean crit) {
         return pl.fawizja.pixel.combat.CriticalHit.apply(pc, raw, crit);
-    }
-
-    /** Obszar trafia graczy (tryb PvP albo agresorzy) - zasady w implementacji PlayerTargeting (PvpTargeting). */
-    private void strikePlayers(Position center, SpellType s, boolean crit, int targets, long now) {
-        if (playerTarget == null) return;
-        playerTarget.strikeArea(center, s.radius(), p -> world.hasLineOfSight(center, p), () -> critAmount(roll(s), crit),
-                s.damageType(), crit, targets, now);
     }
 
     /**
@@ -744,7 +810,7 @@ public final class SpellSystem {
     Position playerTargetPos() { return playerTargetPosition(); }
     PlayerTargeting playerTargeting() { return playerTarget; }
     List<Ally> allies() { return visibleAllies(); }
-    void strikeArea(Position center, SpellType s, List<Monster> hit, long now) { areaStrike(center, s, hit, now); }
+    void strikeArea(AreaCast c, SpellType s, List<Monster> hit, long now) { areaStrike(c, s, hit, now); }
 
     private static boolean monsterOnly(SpellKind k) {
         return k == SpellKind.CONDITION_TARGET || k == SpellKind.RUNE_CONDITION || k == SpellKind.RUNE_PARALYSE
@@ -783,9 +849,6 @@ public final class SpellSystem {
         return pc.position().translate(d.dx, d.dy);
     }
 
-    List<Monster> waveTargets(SpellType s) { return tibia.waveTargets(s); }
-
-    private boolean playerInWave(SpellType s) { return tibia.playerInWave(s); }
 
     /**
      * Krok efektow czarow w czasie (co klatke gry): stany na potworach (utori, ogien duszy, pola), sludzy (utevo res),
@@ -847,6 +910,8 @@ public final class SpellSystem {
     private CastResult useRune(int slot, ItemType rune, long now) {
         SpellType effect = spells.find(rune.key());
         if (effect == null || !effect.kind().isRune()) return report(CastResult.NOT_USABLE, now);
+        // jak w Canary runy i mikstury dziela 1 s uzycia przedmiotu (nextPotionAction), niezaleznie od grup czarow
+        if (!cooldowns.groupReady(SpellGroup.POTION, now)) return CastResult.COOLDOWN;
         CastResult r = check(effect, now, false);
         if (r != CastResult.OK) return report(r, now);
         r = apply(effect, now);
@@ -862,6 +927,7 @@ public final class SpellSystem {
         }
         pc.backpack().takeFromSlot(slot, 1);
         cooldowns.trigger(effect, now);
+        cooldowns.triggerGroup(SpellGroup.POTION, now, SpellGroup.POTION.groupCooldownMs);
         if (effect.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
         return CastResult.OK;
     }

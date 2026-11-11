@@ -151,11 +151,14 @@ class TibiaSpellsTest {
 
     @Test
     void waveHitsTheConeInFrontOnly() {
-        List<Position> w = TibiaSpells.waveTiles(new Position(10, 10, 0), Direction.EAST, 5, 0, null);
-        assertTrue(w.contains(new Position(11, 10, 0)));
+        // exevo gran flam hur na wschod: Canary AREA_WAVE7, srodek na polu przed postacia
+        List<Position> w = SpellArea.WAVE7.tiles(new Position(11, 10, 0), Direction.EAST);
+        assertTrue(w.contains(new Position(11, 10, 0)), "the tile in front");
         assertTrue(w.contains(new Position(15, 12, 0)), "wide at the end");
+        assertFalse(w.contains(new Position(10, 10, 0)), "not the caster");
         assertFalse(w.contains(new Position(9, 10, 0)), "nothing behind");
         assertFalse(w.contains(new Position(11, 11, 0)), "narrow at the start");
+        assertFalse(w.contains(new Position(16, 10, 0)), "five tiles long");
     }
 
     @Test
