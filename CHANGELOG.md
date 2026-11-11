@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.248.0] - 2026-11-11
+
+### Dodano
+- Wyspa Bursztynowa (wyspa najsilniejszych potworów) jest dużo większa. Na nowym lądzie stoi Bursztynowa Skała:
+  wieża i urwiska na 3 piętra w górę oraz Bursztynowe Czeluście na 6 pięter w dół - grota morska, zalane jaskinie,
+  krypty, kryształy, grobowce w piasku i rdzeń skały. Na każdym piętrze bardzo dużo silnych stad, w ślepych komorach
+  skrzynie. Prom pływa jak dawniej.
+- Obóz Łowczyń w dżungli na wschód od Varden: palisada z bramą dla poziomu 20+, chaty, chata Matrony i piwnice
+  z grotą, w której Matrona Gaju pilnuje małej skrzyni zadania. Mieszkają tam Łowczynie Gaju, Tarczowniczki Gaju
+  i Guślarki Gaju (poziomy ok. 18-40, łup i bestiariusz).
+- Cyklopolis: ruiny miasta olbrzymów na górzystej wyspie, z Wielką Kuźnią, kuźnią kowala i kamiennymi ruinami.
+  Pod miastem Kuźnie Cyklopolis, 6 pięter w dół. Mieszkają tam Jednookie olbrzymy, tragarze i kowale oraz słabsze
+  zwierzęta jaskiń. Dopływa tam prom.
+
+### Zmieniono
+- Lochy w dziczy są większe i głębsze (2-7 pięter), mają ślepe komory, pętle i różne style pięter (także kryształowe
+  groty, zalane jaskinie i ruiny). Część łowisk w dziczy ma nowe nazwy i położenie.
+
 ## [0.247.0] - 2026-11-11
 
 ### Dodano

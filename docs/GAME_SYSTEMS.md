@@ -797,6 +797,32 @@ niskiego (1-15) i sredniego (16-40) poziomu w lasach i na lakach obok drog (nie 
 Zadania w piec postaci maja dlugie podejscia: Grobowiec Pieciu Profesji ok. 1500 pol (3 pietra 150 x 96),
 wyprawy na bossa ok. 450 pol (17 komor 150 x 82).
 
+Od 0.248 (`wilds.floors_for/layout/themes`): kazdy loch ma 2-7 pieter (glebiej przy wyzszym poziomie okolicy),
+pietro 56-74 x 40-52 z pnia 6-9 komor, 2-4 slepymi komorami (skrzynia, spawn albo ciala) i petlami; style pieter
+mieszane (`features.CAVE_STYLES` + `crystal`, `flooded`, `ruin`; `carve_rooms` wybiera krypte albo jaskinie,
+w `WATER_STYLES` lawa staje sie woda), `ensure_lights` doklada swiatla (DeepDungeonTest). Poziom spawnow rosnie
+z glebokoscia; `route_levels` dalej obniza podejscia (RouteLevelsTest). Recznie budowane miejsca pod ziemia
+(twierdza orkow, Elandor, Durnkar i kopalnie, wulkan) sa przypiete (`UNDER_PIN`, `UNDER_RESERVED`
+w `generate_continent`, `structures.stamp` czyta `ctx['under_pin']`), wiec nowe lochy ich nie przesuwaja.
+
+## Wyspa Bursztynowa, Oboz Lowczyn, Cyklopolis (generator `tools/mapgen/isles.py`, 0.248)
+
+- `grow_island`: wyspa najsilniejszych potworow (ziarno `ISLE_SEED` 790,880) powiekszona na poludnie o ~3900 pol
+  ladu. Bursztynowa Skala (srodek ~784,928): wieza u stop (drzwi 784,952), schody na +1..+3 (ruiny, urwiska),
+  nisza na zachodzie ze schodami w dol do Bursztynowych Czelusci -1..-6 (grota morska, zalane, krypta, krysztaly,
+  grobowce w piasku, rdzen). Na kazdym pietrze 36-102 spawny silnych stad (poziom >= 260, w dol rosnie), skrzynie
+  w slepych komorach. Prom zostaje (przystan 808,842); kolejnosc nazw promow liczy stary rozmiar wyspy.
+- `amazon_camp`: Oboz Lowczyn w dzungli na wschod od Varden (palisada, jedyne wejscie to drzwi poziomu 20 w bramie
+  757,627; chaty, chata matrony), Piwnice Obozu Lowczyn -1..-2, w grocie Matrona i skrzynia zadania (763,621,-2;
+  2500 gp + elficki luk). Potwory: Lowczyni Gaju 18, Guslarka Gaju 22, Tarczowniczka Gaju 24, Matrona Gaju 40
+  (`grove_*`, OTSP). W obozie i piwnicach sa tylko lowczynie, a brama jest drzwiami poziomu: inaczej `route_levels`
+  traktuje slabsze cele (zwierzyna, okoliczna dzungla) jako drogi przez oboz i obniza lowczynie.
+- `cyclopolis`: ruiny miasta olbrzymow na gorzystej wyspie (562,883; prom 579,878 - przystan nazywa sie teraz
+  Cyklopolis), Wielka Kuznia i kuznia kowala z paleniskami i kowadlami, cztery ruiny; Kuznie Cyklopolis -1..-6 pod
+  miastem (dwa zejscia: 576,891 i 588,889). Jednookie olbrzymy (`oneeye_brute` 30, `oneeye_hauler` 36,
+  `oneeye_smith` 42) i slabsza fauna jaskin, poziomy do 150.
+- Test: `IslandsCampCyclopolisTest` (dojscie do kazdego pietra, liczby i poziomy spawnow, lochy dziczy).
+
 ## Drzwi poziomu i zadania z oltarzami profesji (Z logika, S serwer, C rysowanie)
 
 - Drzwi poziomu (wielokrotnego uzytku): plik mapy `level_doors.csv` (`x;y;z;minimalny poziom`, pole z obiektem

@@ -599,7 +599,83 @@ CAVE_STYLES = {
     'mine': ('dirt', 'cave_wall', [], ['lumber', 'crate', 'rubble', 'barrel', 'rock'], 'wall_torch'),
     # lochy (2026-10-28): prostokatne sale z kamienia, proste korytarze, kosci i pajeczyny
     'crypt': ('tomb_floor', 'stone_wall', ['bones', 'cobweb', 'blood'], ['rubble', 'broken_wall'], 'wall_torch'),
+    # 2026-11-11 (podziemia bardziej urozmaicone): krysztalowe groty, zalane sale (oczka wody), ruiny starych hal
+    'crystal': ('cave_floor', 'cave_wall', ['glow_moss'], ['crystal', 'crystal', 'ice_crystal', 'rock'], 'glow_moss'),
+    'flooded': ('cave_floor', 'mossy_wall', ['reeds', 'shells', 'glow_moss'], ['rock', 'mushrooms'], 'glow_moss'),
+    'ruin': ('stone_floor', 'stone_wall', ['debris', 'bones', 'cobweb'], ['rubble', 'broken_wall', 'barrel'], 'wall_torch'),
 }
+# style z prostokatnymi salami (carve_crypt); reszta to naturalne jaskinie (carve_cave)
+CRYPT_STYLES = {'crypt', 'sewer', 'sandtomb', 'ruin', 'orc_hall', 'oneeye_hall', 'grove_cellar'}
+# zalane sale: jeziorka (jak lawa w carve_cave) zamieniane na wode
+WATER_STYLES = {'flooded'}
+
+
+def carve_rooms(w, h, points, style, rng, room=(3, 5), lava=0.0):
+    """Jedna komora albo ciag komor wg stylu: sale (crypt) albo jaskinia; zalane style dostaja oczka wody."""
+    if style in CRYPT_STYLES:
+        g = carve_crypt(w, h, points, style, rng)
+    else:
+        g = carve_cave(w, h, points, style, rng, room=room, lava=max(lava, 0.06 if style in WATER_STYLES else 0.0))
+        for row in g:
+            for x, c in enumerate(row):
+                if c is None:
+                    continue
+                if c[0] == 'lava' and style in WATER_STYLES:
+                    row[x] = ('water', NONE, NONE, NONE)
+                elif c[2] != NONE and tk.TILES[c[2]][0] == 'DECORATION':
+                    row[x] = (c[0], c[2], NONE, c[3])          # trzciny, muszle, trawa: warstwa ozdob, nie obiektow
+    return g
+
+
+LIGHT_OBJECTS = {'wall_torch', 'glow_moss', 'magma', 'crystal', 'ice_crystal', 'campfire', 'forge', 'candle',
+                 'wall_lantern'}
+
+
+def ensure_lights(cells_get, cells_put, cells, light, rng, per=90, minimum=5):
+    """Pietro lochu nie moze byc ciemne: dokladane swiatla stylu (przy scianach; blokujace tylko na polach z 8
+    wolnymi sasiadami), az bedzie co najmniej max(minimum, pola / per). cells - pola przechodnie pietra."""
+    cells = sorted(cells)
+    have = [q for q in cells if (cells_get(*q) or (None, None, NONE))[2] in LIGHT_OBJECTS]
+    want = max(minimum, len(cells) // per)
+    if len(have) >= want:
+        return 0
+    blocking = not tk.TILES[light][1]
+    cand = []
+    for (x, y) in cells:
+        c = cells_get(x, y)
+        if c is None or c[2] != NONE or c[3] != NONE or c[0] in ('water', 'lava'):
+            continue
+        nb = [cells_get(x + dx, y + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy]
+        if blocking:
+            if all(n is not None and walk(n) and n[2] == NONE for n in nb):
+                cand.append((x, y))
+        elif any(n is not None and n[3] != NONE for n in nb):
+            cand.append((x, y))
+    rng.shuffle(cand)
+    placed = list(have)
+    n = 0
+    for (x, y) in cand:
+        if len(placed) >= want:
+            break
+        if any(abs(x - a) + abs(y - b) < 7 for (a, b) in placed):
+            continue
+        c = cells_get(x, y)
+        cells_put(x, y, (c[0], c[1], light, NONE))
+        placed.append((x, y))
+        n += 1
+    return n
+
+
+def merge_grid(g, g2):
+    """Naklada siatke g2 na g: przejscia g2 otwieraja mury g, mury g2 tylko tam, gdzie g jest puste."""
+    for y, row in enumerate(g2):
+        for x, c in enumerate(row):
+            if c is None:
+                continue
+            old = g[y][x]
+            if old is None or (old[3] != NONE and c[3] == NONE):
+                g[y][x] = c
+    return g
 
 
 def carve_crypt(w, h, points, style, rng, lava=0.0):
@@ -755,7 +831,7 @@ def fix_lava(grid, points):
     floor = None
     for row in grid:
         for c in row:
-            if c is not None and c[3] == NONE and c[0] != 'lava':
+            if c is not None and c[3] == NONE and c[0] not in ('lava', 'water'):
                 floor = c[0]
                 break
         if floor:
@@ -765,7 +841,7 @@ def fix_lava(grid, points):
         return
     for y, row in enumerate(grid):
         for x, c in enumerate(row):
-            if c is not None and c[3] == NONE and (c[0] == 'lava' or not walk(c)):
+            if c is not None and c[3] == NONE and (c[0] in ('lava', 'water') or not walk(c)):
                 row[x] = (floor, NONE, NONE, NONE)
     seen = reachable_local(grid, points[0])
     assert all(p in seen for p in points), 'cave points not connected'
