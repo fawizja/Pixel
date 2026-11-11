@@ -46,6 +46,8 @@ import strongholds  # noqa: E402
 import dwarves  # noqa: E402
 import delta_volcano as DV  # noqa: E402
 import isles  # noqa: E402
+import realms  # noqa: E402
+import castle  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -1035,6 +1037,10 @@ def build(ctx):
     print('wyspa bursztynowa - skala i czelusci:', isles.amber_rock(ctx, cost, wh))
     print('oboz lowczyn:', isles.amazon_camp(ctx, cost, wh))
     print('cyklopolis:', isles.cyclopolis(ctx, cost, wh))
+    # 2026-11-11: Warownia Gorvalda (poziomy 20-70), wejscie tylko przez podziemia
+    print('warownia gorvalda:', castle.build(ctx, cost, wh))
+    # 2026-11-11: kontynent glowny (3 miasta startowe) i ziemie premium odciete kanalami - tylko statkiem
+    print('kontynent glowny i premium:', realms.split(ctx, S))
 
 
 def monster_levels():
@@ -2844,7 +2850,9 @@ def finish(ctx):
         ('# miasta: nazwa:x,y,z swiatyni (maks. 8)', None),
         ('towns', ';'.join(f'{n}:{p[0]},{p[1]},{p[2]}' for n, p in ctx['towns'])),
         ('# miasta tylko do zamieszkania (swiatynia, bez wyboru przy tworzeniu postaci)', None),
-        ('residence_only', ';'.join(ctx.get('residence_only', []))),
+        ('residence_only', ';'.join(ctx.get('residence_only', []) + list(realms.PREMIUM))),
+        ('# ziemie premium: miasto:numer ladu (poza kontynentem glownym; dojazd tylko statkiem, woznice jezdza w obrebie ladu)', None),
+        ('premium_towns', ';'.join(f'{n}:{k}' for n, k in realms.PREMIUM.items())),
         ('# regiony: nazwa;x0;y0;x1;y1;z od;z do;zalecany poziom od;do (oddzielone |)', None),
         ('regions', '|'.join(';'.join(str(v) for v in r) for r in regions)),
     ]

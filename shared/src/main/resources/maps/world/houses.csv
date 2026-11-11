@@ -70,15 +70,19 @@ wild_3;Chata Pustelnika;Qasirah;150;551;155;554;0;149;553;19200
 wild_4;Dom przy Trakcie;Varden;518;417;522;419;0;517;418;12000
 wild_5;Zagroda nad Strumieniem;Frostholm;684;221;687;224;0;686;225;12800
 wild_6;Chata Myśliwego;Valmir;383;763;386;765;0;385;762;9600
-durn_71;Kowadłowa 1;Durnkar;488;312;492;316;-5;490;317;25000
-durn_72;Kowadłowa 2;Durnkar;496;312;500;316;-5;498;317;25000
-durn_73;Kowadłowa 3;Durnkar;542;312;546;316;-5;544;317;25000
-durn_74;Kowadłowa 4;Durnkar;550;312;554;316;-5;552;317;25000
-durn_75;Kowadłowa 5;Durnkar;488;342;492;346;-5;490;341;25000
-durn_76;Kowadłowa 6;Durnkar;496;342;500;346;-5;498;341;25000
-durn_77;Kowadłowa 7;Durnkar;504;342;508;346;-5;506;341;25000
-durn_78;Kowadłowa 8;Durnkar;512;342;516;346;-5;514;341;25000
-durn_79;Głębinowa 1;Durnkar;526;342;530;346;-5;528;341;25000
-durn_80;Głębinowa 2;Durnkar;534;342;538;346;-5;536;341;25000
-durn_81;Głębinowa 3;Durnkar;542;342;546;346;-5;544;341;25000
-durn_82;Głębinowa 4;Durnkar;550;342;554;346;-5;552;341;25000
+durn_71;Kowadłowa 1;Durnkar;498;311;502;315;-4;503;313;25000
+durn_72;Kowadłowa 2;Durnkar;492;303;496;307;-4;497;305;25000
+durn_73;Kowadłowa 3;Durnkar;484;331;488;335;-4;489;333;25000
+durn_74;Kowadłowa 4;Durnkar;499;334;503;338;-4;498;336;25000
+durn_75;Kowadłowa 5;Durnkar;550;327;554;331;-4;549;329;25000
+durn_76;Kowadłowa 6;Durnkar;547;335;551;339;-4;546;337;25000
+durn_77;Kowadłowa 7;Durnkar;496;305;500;309;-5;495;307;25000
+durn_78;Kowadłowa 8;Durnkar;483;302;487;306;-5;488;304;25000
+durn_79;Kowadłowa 9;Durnkar;516;311;520;315;-5;521;313;25000
+durn_80;Głębinowa 1;Durnkar;511;302;515;306;-5;516;304;25000
+durn_81;Głębinowa 2;Durnkar;495;332;499;336;-5;500;334;25000
+durn_82;Głębinowa 3;Durnkar;509;338;513;342;-5;508;340;25000
+durn_83;Głębinowa 4;Durnkar;509;319;513;323;-6;508;321;25000
+durn_84;Głębinowa 5;Durnkar;494;316;498;320;-6;499;318;25000
+durn_85;Głębinowa 6;Durnkar;531;335;535;339;-6;536;337;25000
+durn_86;Głębinowa 7;Durnkar;508;298;512;302;-6;510;303;25000

@@ -348,6 +348,9 @@ MONSTERS = {
     "grove_huntress": (44, ((120, 70, 40), (140, 105, 55), (70, 115, 50), (95, 65, 35))),
     "grove_crone": (26, ((200, 200, 190), (90, 110, 60), (70, 90, 45), (60, 45, 30))),
     "grove_matriarch": (44, ((175, 60, 35), (200, 160, 60), (140, 40, 35), (110, 75, 35))),
+    # 2026-11-11: kusznik i kapelan Warowni Gorvalda (stroje ludzi z maska kolorow)
+    "keep_crossbow": (44, ((200, 170, 150), (80, 95, 130), (70, 70, 90), (50, 40, 35))),
+    "keep_chaplain": (18, ((235, 225, 200), (235, 230, 215), (215, 175, 70), (120, 90, 50))),
 }
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
@@ -389,6 +392,11 @@ TINTED = {
     # 2026-11-11: tarczowniczka obozu (rycerz w brazie) i jednookie olbrzymy Cyklopolis (wielki stroj, rozne barwy)
     "grove_shieldmaiden": (3, (215, 170, 95)),
     "oneeye_brute": (12, (180, 140, 100)), "oneeye_hauler": (12, (130, 150, 115)), "oneeye_smith": (12, (205, 100, 70)),
+    # 2026-11-11: rogaci z podziemnych chodnikow i straz Warowni Gorvalda (rogaty stwor 46, wojownik 19, mag 34, rycerz 3,
+    # ogar 11 - rozne barwy: brazowe rogacze, stalowa zbroja strazy)
+    "horn_raider": (46, (165, 105, 65)), "horn_guard": (46, (115, 80, 60)), "horn_bowman": (19, (170, 120, 70)),
+    "horn_mystic": (34, (170, 105, 175)), "keep_sentry": (3, (140, 150, 195)), "keep_hound": (11, (100, 100, 115)),
+    "castellan_gorvald": (3, (75, 80, 115)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.

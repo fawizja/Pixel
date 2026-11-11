@@ -254,3 +254,6 @@ cyclopolis_forge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=80 
 spell_gfb_circle|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=gfb -Dpixel.frames=30
 spell_wave_cone|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=wave -Dpixel.frames=30
 chest_reward_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=80 -Dpixel.spellDemo=chest -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+castle_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=822,490,-1
+castle_keep_top|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=781,357,3
+durnkar_market|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=500,322,-5

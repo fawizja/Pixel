@@ -91,6 +91,14 @@ public final class MapLoader {
         for (String n : props.getProperty("residence_only", "").split(";")) {
             if (!n.isBlank()) residenceOnly.add(n.trim().toLowerCase(java.util.Locale.ROOT));
         }
+        // ziemie premium: miasto:numer ladu (poza kontynentem glownym, dojazd tylko statkiem)
+        java.util.Map<String, Integer> landmass = new java.util.HashMap<>();
+        for (String e : props.getProperty("premium_towns", "").split(";")) {
+            if (e.isBlank()) continue;
+            String[] kv = e.trim().split(":");
+            if (kv.length != 2) throw new IOException("premium_towns entry needs Name:landmass: " + e);
+            landmass.put(kv[0].trim().toLowerCase(java.util.Locale.ROOT), Integer.parseInt(kv[1].trim()));
+        }
         if (!towns.isEmpty()) {
             for (String entry : towns.split(";")) {
                 String[] nv = entry.trim().split(":");
@@ -101,8 +109,8 @@ public final class MapLoader {
                     throw new IOException("temple of " + nv[0] + " must be walkable and protected: " + temple);
                 }
                 try {
-                    world.addTown(new Town(nv[0].trim(), temple,
-                            !residenceOnly.contains(nv[0].trim().toLowerCase(java.util.Locale.ROOT))));
+                    String key = nv[0].trim().toLowerCase(java.util.Locale.ROOT);
+                    world.addTown(new Town(nv[0].trim(), temple, !residenceOnly.contains(key), landmass.getOrDefault(key, 0)));
                 } catch (IllegalArgumentException e) {
                     throw new IOException(e.getMessage(), e);
                 }

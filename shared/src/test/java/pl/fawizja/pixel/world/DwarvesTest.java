@@ -28,8 +28,8 @@ import pl.fawizja.pixel.npc.ShopRegistry;
 import pl.fawizja.pixel.vocation.Vocation;
 
 /**
- * Durnkar, miasto krasnoludow na -5 pod gorami (ukryte wejscie przez wawoz i sztolnie -1..-4), i trzy kopalnie
- * krasnoludow do -7 z tools/mapgen/dwarves.py: wszystko osiagalne pieszo z Varden wg logiki ruchu.
+ * Durnkar, wielopietrowe miasto krasnoludow na -4..-6 pod gorami (ukryte wejscie przez wawoz i sztolnie -1..-3), i trzy
+ * kopalnie krasnoludow do -7 z tools/mapgen/dwarves.py: wszystko osiagalne pieszo z Varden wg logiki ruchu.
  */
 class DwarvesTest {
 
@@ -90,12 +90,12 @@ class DwarvesTest {
     }
 
     @Test
-    void theHiddenEntranceLeadsThroughWindingTunnelsToTheCityAtMinus5() {
+    void theHiddenEntranceLeadsThroughWindingTunnelsToTheCityAtMinus4() {
         Town city = world.town(CITY);
         assertNotNull(city);
-        assertEquals(-5, city.temple().z());
+        assertEquals(-4, city.temple().z());
         assertTrue(lv8.contains(city.temple()), "Durnkar temple reachable on foot from Varden");
-        for (int z = -4; z <= -1; z++) {
+        for (int z = -3; z <= -1; z++) {
             final int fz = z;
             assertTrue(lv8.stream().anyMatch(p -> p.z() == fz && in("Sztolnie do Durnkaru", p)), "tunnel floor " + z);
         }
@@ -135,16 +135,17 @@ class DwarvesTest {
         long shops = dwarves.stream().filter(n -> n.shopKey() != null).count();
         assertTrue(shops >= 6, "smith, armourer, runes, tools, tavern, merchant, pets: " + shops);
         for (Npc n : dwarves) {
-            assertEquals(-5, n.position().z(), n.key());
+            assertTrue(n.position().z() <= -4 && n.position().z() >= -6, n.key() + " floor " + n.position().z());
             assertTrue(world.isProtectionZone(n.position()), n.key() + " in PZ");
-            assertTrue(lv8.stream().anyMatch(p -> p.z() == -5 && p.distanceTo(n.position()) <= Npc.TALK_RANGE), n.key() + " reachable");
+            assertTrue(lv8.stream().anyMatch(p -> p.z() == n.position().z() && p.distanceTo(n.position()) <= Npc.TALK_RANGE), n.key() + " reachable");
         }
+        assertTrue(dwarves.stream().map(n -> n.position().z()).distinct().count() >= 3, "the city lives on three floors");
         // depozyt: skrzynie w banku przy swiatyni
         int locker = world.tiles().byKey("depot_locker").id();
         int lockers = 0;
         for (int y = city.temple().y() - 40; y <= city.temple().y() + 40; y++) {
             for (int x = city.temple().x() - 60; x <= city.temple().x() + 60; x++) {
-                if (world.floor(-5).get(Layer.OBJECT, x, y) == locker) lockers++;
+                if (world.floor(-4).get(Layer.OBJECT, x, y) == locker) lockers++;
             }
         }
         assertTrue(lockers >= 3, "depot lockers " + lockers);
@@ -156,9 +157,10 @@ class DwarvesTest {
             throw new AssertionError(e);
         }
         List<pl.fawizja.pixel.house.House> mine = houses.all().stream().filter(h -> h.town().equals(CITY)).toList();
-        assertTrue(mine.size() >= 10, "houses " + mine.size());
+        assertTrue(mine.size() >= 12, "houses " + mine.size());
+        assertEquals(3, mine.stream().map(pl.fawizja.pixel.house.House::z).distinct().count(), "houses on all three floors");
         for (pl.fawizja.pixel.house.House h : mine) {
-            assertEquals(-5, h.z());
+            assertTrue(h.z() >= -6 && h.z() <= -4, "house floor " + h.id());
             assertTrue(near(lv8, h.door()), "house door reachable " + h.id());
         }
     }
@@ -215,11 +217,14 @@ class DwarvesTest {
     void oneMineOpensIntoDurnkarThroughALevelDoorAtMinus5() {
         Position temple = world.town(CITY).temple();
         Map.Entry<Position, Integer> door = world.levelDoors().entrySet().stream()
-                .filter(e -> e.getKey().z() == -5 && e.getKey().distanceTo(temple) < 120 && e.getKey().x() > temple.x())
+                .filter(e -> e.getKey().z() == -5 && e.getKey().x() > temple.x() && e.getKey().x() - temple.x() < 120)
                 .findFirst().orElseThrow(() -> new AssertionError("no level door at the east gate"));
-        Set<Position> weak = explore(temple, door.getValue() - 1, true);
-        Set<Position> strong = explore(temple, door.getValue(), true);
-        assertTrue(near(weak, door.getKey()), "the gate can be reached from the city");
+        // start na pietrze -5 (srodkowym pietrze miasta), najblizej swiatyni
+        Position from = lv8.stream().filter(p -> p.z() == -5 && in(CITY, p)).min(java.util.Comparator.comparingInt(p -> p.distanceTo(temple)))
+                .orElseThrow();
+        Set<Position> weak = explore(from, door.getValue() - 1, true);
+        Set<Position> strong = explore(from, door.getValue(), true);
+        assertTrue(near(weak, door.getKey()), "the gate can be reached from the city floor -5");
         String mine = MINES[0];
         Position d = door.getKey();
         assertFalse(weak.stream().anyMatch(p -> p.x() > d.x() && in(mine, p)), "too weak - the door stays shut");

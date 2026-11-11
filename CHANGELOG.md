@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Warownia Gorvalda: zamek dla poziomów 20-70 na północy kontynentu głównego. Z zewnątrz nie da się wejść: fosa, mur
+  bez bram. Wejście jest tylko przez podziemia - jaskinię w skale, trzy piętra tuneli z orkami, rogaczami i trollami
+  jaskiniowymi oraz piwnicę pod twierdzą. W zamku (4 piętra) mieszkają Rogaci i żołnierze Warowni, a na szczycie za
+  drzwiami poziomu 55 czeka Gorvald, Kasztelan Warowni, ze skrzynią zadania. Nowe potwory z grafiką i bestiariuszem.
+
+### Zmieniono
+- Przy tworzeniu postaci można wybrać tylko 3 miasta kontynentu głównego: Varden, Frostholm i Qasirah. Valmir, Selvaran
+  i Nerys to ziemie premium - odcięte kanałami (nie ma do nich mostów ani dróg z kontynentu głównego), dopłynie się
+  tam statkiem (konto premium albo promocja). Postacie, które tam mieszkają, zachowują dom. Wozacy jeżdżą tylko po
+  jednym lądzie. Durnkar zostaje na kontynencie głównym (tylko zamieszkanie).
+- Durnkar to teraz trzypiętrowe, organiczne miasto (Wysokie Hale, Rynek, Głębiny) z krętymi ulicami zamiast kwadratu,
+  16 domów, schodami między piętrami i drzwiami poziomu do kopalni. Sztolnie do miasta mają 3 piętra.
+
 ## [0.249.0] - 2026-11-11
 
 ### Zmieniono

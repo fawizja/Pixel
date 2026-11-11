@@ -66,6 +66,16 @@ class StartingTownNetworkTest {
     }
 
     @Test
+    void aPremiumTownIsRefusedLikeAnUnknownOne() throws Exception {
+        for (String premium : new String[] {"Nerys", "Valmir", "Selvaran", "Durnkar"}) {
+            String[] err = new String[1];
+            assertNull(login("Premium" + premium, premium, err), premium);
+            assertNotNull(err[0], premium);
+            assertFalse(new File(new File(saves, "accounts"), "premium" + premium.toLowerCase(Locale.ROOT) + ".acc").exists(), premium);
+        }
+    }
+
+    @Test
     void anUnknownTownIsRejectedAndCreatesNoAccount() throws Exception {
         String[] err = new String[1];
         assertNull(login("Zbloto", "Atlantyda", err));

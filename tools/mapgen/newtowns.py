@@ -42,7 +42,7 @@ NPCS = {
         ('smith', 'Płatnerz Corvin', 'MERCHANT', 'nerys_arms', '#909090', 'Broń i zbroje z całego świata.'),
         ('mage', 'Czarodziejka Ysolde', 'MERCHANT', 'nerys_magic', '#5040c0', 'Runy i mikstury dla odkrywców wysp.'),
         ('merchant', 'Kupiec Nerys', 'MERCHANT', 'nerys_shop', '#c0a060', 'Skup łupów z wysp i dżungli.'),
-        ('carrier', 'Woźnica Nerys', 'CARRIER', '-', '#8a6a4a', 'Promem i wozem do innych miast. Płacisz monetami.'),
+        ('carrier', 'Woźnica Nerys', 'CARRIER', '-', '#8a6a4a', 'Wozy jeżdżą tylko po lądzie, a nasza wyspa jest otoczona morzem. Na kontynent popłyniesz statkiem kapitana (premium albo promocja).'),
         ('guide', 'Przewodnik Nerys', 'GUIDE', '-', '#6080a0', 'Wyspy Szmaragdowe kryją wiele tajemnic. Pomożesz?'),
     ],
 }

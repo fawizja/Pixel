@@ -245,7 +245,8 @@ class VolcanoDeltaTest {
         assertTrue(bridges >= 20, "bridges in the delta " + bridges);
         Set<Position> valmir = explore(world.town("Valmir").temple(), 8);
         assertTrue(valmir.contains(world.town("Selvaran").temple()), "Valmir - Selvaran road crosses the delta");
-        assertTrue(valmir.contains(world.town("Varden").temple()), "Valmir - Varden road");
+        // ziemie premium (Valmir, Selvaran) sa odciete od kontynentu glownego kanalami: do Varden tylko statkiem (RealmsTest)
+        assertFalse(valmir.contains(world.town("Varden").temple()), "no walking from the premium south to Varden");
         // lowisko: w delcie lowi sie wegorze (data/fishing.csv)
         assertTrue(pl.fawizja.pixel.gathering.FishingSystem.loadBiomeFish(TestData.ITEMS).stream()
                 .anyMatch(f -> f.region().equals(DELTA)), "delta fishing");
