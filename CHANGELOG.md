@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.244.0] - 2026-11-11
+
+### Dodano
+- Twierdza Krwawego Kła na wschód od Varden: rozpadlina z mostami, mury z wieżami, brama, cytadela, koszary,
+  kuźnia, zagroda wargów i obóz orków. Trzy piętra w górę (mury, wieże, wieża strażnicza) i trzy w dół
+  (jaskinie, krypty i najgłębsze sale). Im głębiej, tym silniejsze i liczniejsze orki.
+- Na najniższym piętrze twierdzy drzwi od poziomu 50 prowadzą do sali Urgotha, Pana Twierdzy (boss), i skarbca
+  ze skrzynią: Hełm Pana Twierdzy i 4000 zł, raz dla każdej postaci.
+- Nowe orki: Ork, Ork włócznik, Ork jeździec, Ork maruder, Ork przywódca, Kapłan orczego kultu i Fanatyk orczego
+  kultu.
+- Elandor, osada elfów w lesie na południowy zachód od Varden: Wielkie Drzewo, świątynia, depozyt, łuczarz,
+  zielarka i gospoda. Pomosty i mosty linowe w koronach drzew (trzy piętra w górę), krypta, piwnice i grota ze
+  źródłem pod ziemią. W osadzie jest bezpiecznie, a w lesie dookoła krążą elfy-wygnańcy: Elf, Zwiadowca elfów
+  i Elfi arkanista.
+
 ## [0.243.0] - 2026-11-11
 
 ### Dodano
@@ -43,7 +58,6 @@
 
 ### Zmieniono
 - Na telefonie lista walki jest w nowym wyglądzie o 15 dp niższa, bo okrągła minimapa jest wyższa.
-
 ## [0.241.0] - 2026-11-10
 
 ### Dodano

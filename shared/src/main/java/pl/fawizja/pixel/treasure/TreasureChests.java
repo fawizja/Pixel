@@ -144,6 +144,11 @@ public final class TreasureChests {
                     if (placed.size() >= TRAPS_PER_DEPTH * -z) break;
                     boolean ok = true;
                     for (Position q : picked) if (Math.max(Math.abs(q.x() - p.x()), Math.abs(q.y() - p.y())) < 3) ok = false;
+                    // takze z dala od skrzyn lupu z mapy (chests.csv, np. nagroda w skarbcu za drzwiami poziomu)
+                    for (WorldMap.LootChest lc : world.lootChests()) {
+                        Position q = lc.position();
+                        if (q.z() == z && Math.max(Math.abs(q.x() - p.x()), Math.abs(q.y() - p.y())) < 3) ok = false;
+                    }
                     for (Position q : placed) if (Math.max(Math.abs(q.x() - p.x()), Math.abs(q.y() - p.y())) < 5) ok = false;
                     if (ok) placed.add(p);
                 }

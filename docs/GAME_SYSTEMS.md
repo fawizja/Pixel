@@ -808,6 +808,30 @@ wyprawy na bossa ok. 450 pol (17 komor 150 x 82).
   grobowiec -1..-3 (szkielety, hieny, trolle, golemy, skorpiony; region 20-60), sala oltarzy i skarbiec na -3
   (strefy ochronne), nagroda 20 000 gp dla kazdej profesji.
 
+## Twierdza orkow i osada elfow (generator `tools/mapgen/strongholds.py`, klocki `structures.py`)
+
+- `structures.Plan`: wielopietrowy plan w ukladzie lokalnym - `box` (budynek z drzwiami), `platform`/`deck` (pomost,
+  most linowy), `stairs`/`ladder` (schody i drabina z dziura), `level_door`, `corridor`, `cave` (komory i krypty),
+  `spawn`, `trail` (sciezka przez las). `check()` sprawdza, ze kazdy spawn, przejscie, skrzynia i NPC sa osiagalne
+  z wejsc, a pola `behind` tylko przez drzwi poziomu. `find_site` szuka miejsca (min. 70 pol od swiatyn, bez miast,
+  drog i przejsc), `stamp` kladzie plan (podziemia najblizej, w prostokacie bez cudzych spawnow) i dopisuje
+  przejscia, spawny, skrzynie, drzwi, strefy ochronne, NPC i regiony. Potwory z `structures.HAND_PLACED` nie trafiaja
+  do losowych lowisk, a `route_levels` zamienia je tylko na slabszych z tej samej rodziny.
+- Twierdza Krwawego Kla (na wschod od Varden, ok. 652..718 x 505..563): rozpadlina z mostami, mur, cztery wieze,
+  brama z dwiema wiezami, wewnetrzna rozpadlina z dwoma mostami, cytadela, koszary, kuznia, zagroda wargow, oboz.
+  Pietra +1 (chodnik na murach, wieze, brama, koszary), +2 (wieze, taras cytadeli, mosty linowe), +3 (wieza
+  strazy); podziemia -1 (jaskinie, tajny tunel z wychodni za murem), -2 (krypty), -3 (najsilniejsze orki). Na -3
+  drzwi poziomu 50 do skrzydla z sala Urgotha (boss 75) i skarbcem: skrzynia z Helmem Pana Twierdzy i 4000 gp,
+  raz na postac. Orki od Orka (12) do Fanatyka orczego kultu (60); im glebiej, tym silniejsze i liczniejsze.
+  Regiony "Twierdza Krwawego Kla" (0..+3) i "Podziemia Twierdzy Krwawego Kla" (-3..-1).
+- Elandor, osada elfow (las na poludniowy zachod od Varden, ok. 352..412 x 507..557): polana z placem i fontanna,
+  Wielkie Drzewo, swiatynia, depozyt, luczarz, zielarka, gospoda. Pietra +1 (pomosty na drzewach i mosty linowe),
+  +2 (korona Wielkiego Drzewa, gniazdo zwiadowcow), +3 (szczyt drzewa ze Starszym), -1 (krypta, skarbiec, piwnica
+  gospody), -2 (grota ze zrodlem). Cala osada (-2..+3) jest strefa ochronna; elfy-wygnancy (Elf, Zwiadowca elfow,
+  Elfi arkanista) w lesie dookola i na czatowniach +1. Las w promieniu 30 pol ma limit poziomu 45
+  (`ctx['area_caps']` -> `route_levels`).
+- Test: `world/StrongholdsTest` (wszystkie pietra osiagalne pieszo z Varden, skarbiec dopiero od poziomu 50).
+
 ## Wyprawy na bossa w piec postaci (Z logika, S serwer, C rysowanie)
 
 - Dane: plik mapy `boss_quests.csv` (generator `tools/mapgen/boss_quests.py`), wiersz `quest;id;nazwa;poziom;boss;

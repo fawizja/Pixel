@@ -375,3 +375,4 @@
 421;paralyse_rune;Runa paraliżu;RUNE;100;1420;NONE;0;0;0;54;*;0;0;PHYSICAL;-;-;#c040c0;Runa paraliżu (Paralyse): spowalnia cel na 6 s. Poziom 54, magia 18.
 422;convince_creature_rune;Runa przekonania;RUNE;100;162;NONE;0;0;0;16;*;0;0;PHYSICAL;-;-;#e0b040;Runa przekonania stworzenia (Convince Creature): oswaja słabe stworzenie. Poziom 16, magia 5.
 423;animate_dead_rune;Runa ożywienia zwłok;RUNE;100;760;NONE;0;0;0;27;*;0;0;DEATH;-;-;#808080;Runa ożywienia zwłok (Animate Dead): zwłoki wstają jako szkielet-sługa. Poziom 27, magia 4.
+202;warlord_helmet;Hełm Pana Twierdzy;ARMOR;1;6000;HEAD;0;0;7;50;*;0;0;PHYSICAL;-;PHYSICAL:3,FIRE:2;#5a7a3a;Rogaty hełm Urgotha ze skarbca Twierdzy Krwawego Kła. Jeden na każdego śmiałka.

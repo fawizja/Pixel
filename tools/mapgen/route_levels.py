@@ -31,6 +31,7 @@ from collections import Counter, deque
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import town as tk  # noqa: E402
+from structures import HAND_PLACED  # noqa: E402
 
 RES = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources')
 FLOORS = list(range(-5, 6))
@@ -239,6 +240,10 @@ class Model:
         if s['z'] == 0 and any(max(abs(s['x'] - p[0]), abs(s['y'] - p[1])) <= TOWN_RADIUS and p[2] == 0
                                for _n, p in self.towns):
             cap = min(cap, TOWN_MAX)
+        # okolice osad spoza miast (np. Elandor): prostokat z limitem poziomu
+        for (x0, y0, x1, y1, z0, z1, lim) in getattr(self, 'area_caps', ()):
+            if x0 <= s['x'] <= x1 and y0 <= s['y'] <= y1 and z0 <= s['z'] <= z1:
+                cap = min(cap, lim)
         return cap
 
     def anywhere(self, s):
@@ -295,13 +300,21 @@ class Model:
 
 def _candidates(monsters, orig, z, night, cap):
     m0 = monsters[orig]
+    if orig in HAND_PLACED:
+        # potwory twierdzy orkow i osady elfow: zamiennik z tej samej rodziny (ork -> slabszy ork, elf -> elf)
+        fam = orig.split('_')[0]
+        out = [k for k, m in monsters.items() if not m['boss'] and m['level'] <= cap and k.split('_')[0] == fam
+               and not k.endswith('_elite')]
+        if out:
+            return out
     biomes = {m0['biome']} | ({'underground'} if z < 0 else set())
     out = [k for k, m in monsters.items() if not m['boss'] and m['level'] <= cap and m['biome'] in biomes
-           and not k.endswith('_elite') and (z >= 0 or k not in NOT_UNDERGROUND) and (not night or m['night'])]
+           and not k.endswith('_elite') and (z >= 0 or k not in NOT_UNDERGROUND) and (not night or m['night'])
+           and k not in HAND_PLACED]
     if not out:
         biomes = {'underground'} if z < 0 else {'temperate'}
         out = [k for k, m in monsters.items() if not m['boss'] and m['level'] <= cap and m['biome'] in biomes
-               and (z >= 0 or k not in NOT_UNDERGROUND) and (not night or m['night'])]
+               and (z >= 0 or k not in NOT_UNDERGROUND) and (not night or m['night']) and k not in HAND_PLACED]
     return out
 
 
@@ -459,6 +472,7 @@ def apply(ctx, regions, monsters_csv=None):
     S = len(world.floors[0])
     model = Model(S, world.get, ctx['transitions'], ctx['towns'], town_levels_of(regions, ctx['towns']), ctx['npcs'],
                   ctx['gates'], ctx.get('level_doors', []), monsters)
+    model.area_caps = ctx.get('area_caps', [])
     before = report(ctx['spawns'], monsters)
     ctx['spawns'], stats = run(model, ctx['spawns'])
     bad = violations(model, ctx['spawns'])
