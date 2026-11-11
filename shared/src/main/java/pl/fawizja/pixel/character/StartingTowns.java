@@ -10,7 +10,8 @@ import pl.fawizja.pixel.world.WorldMap;
 
 /**
  * Miasta, w ktorych mozna zaczac gre (jak w Tibii: wybor miasta przy tworzeniu postaci). Kazde miasto swiata
- * ({@link WorldMap#towns()}) jest miastem startowym; postac zaczyna w jego swiatyni i tam ma mieszkanie
+ * ({@link WorldMap#towns()}) poza miastami tylko do zamieszkania ({@link Town#starting()} = false, np. ukryte
+ * miasto krasnoludow - jak Kazordoon, trzeba do niego dojsc) jest miastem startowym; postac zaczyna w jego swiatyni i tam ma mieszkanie
  * (odrodzenie po smierci, zwoj powrotu). Zadne nie wymaga premium: do wysp Nerys plywa prom woznicy.
  * Nazwa spoza listy (albo pusta) oznacza miasto domyslne z {@code start.town}.
  */
@@ -40,6 +41,7 @@ public final class StartingTowns {
     public static List<Info> list(WorldMap world) {
         List<Info> out = new ArrayList<>();
         for (Town t : world.towns()) {
+            if (!t.starting()) continue;
             String key = key(t.name());
             String[] d = DESCRIPTIONS.getOrDefault(key, new String[] {"", "Miasto ze świątynią, bankiem i sklepami."});
             out.add(new Info(key, t.name(), t.temple(), d[0], d[1]));
@@ -49,7 +51,9 @@ public final class StartingTowns {
 
     /** Czy swiat ma takie miasto startowe (bez rozrozniania wielkosci liter). */
     public static boolean isValid(WorldMap world, String town) {
-        return town != null && !town.isBlank() && world.town(town.trim()) != null;
+        if (town == null || town.isBlank()) return false;
+        Town t = world.town(town.trim());
+        return t != null && t.starting();
     }
 
     /**

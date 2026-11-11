@@ -86,6 +86,11 @@ public final class MapLoader {
         }
 
         String towns = props.getProperty("towns", "").trim();
+        // miasta tylko do zamieszkania (bez wyboru przy tworzeniu postaci), np. ukryte miasto krasnoludow
+        java.util.Set<String> residenceOnly = new java.util.HashSet<>();
+        for (String n : props.getProperty("residence_only", "").split(";")) {
+            if (!n.isBlank()) residenceOnly.add(n.trim().toLowerCase(java.util.Locale.ROOT));
+        }
         if (!towns.isEmpty()) {
             for (String entry : towns.split(";")) {
                 String[] nv = entry.trim().split(":");
@@ -96,7 +101,8 @@ public final class MapLoader {
                     throw new IOException("temple of " + nv[0] + " must be walkable and protected: " + temple);
                 }
                 try {
-                    world.addTown(new Town(nv[0].trim(), temple));
+                    world.addTown(new Town(nv[0].trim(), temple,
+                            !residenceOnly.contains(nv[0].trim().toLowerCase(java.util.Locale.ROOT))));
                 } catch (IllegalArgumentException e) {
                     throw new IOException(e.getMessage(), e);
                 }

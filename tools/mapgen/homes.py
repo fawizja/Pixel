@@ -326,13 +326,24 @@ def homesteads(ctx, cost, extra_gates=None, per_town=2, wild=6):
     return per, k
 
 
+class _Floor:
+    """Widok jednego pietra swiata z get(x, y) jak powierzchnia (check_houses, _connected)."""
+
+    def __init__(self, world, z):
+        self.world, self.z = world, z
+
+    def get(self, x, y, z=None):
+        return self.world.get(x, y, self.z)
+
+
 def check_houses(ctx):
     """Kazdy dom na sprzedaz: drzwi w murze, 1-4 lozka, kazde wolne pole wnetrza osiagalne od drzwi."""
-    world = ctx['world']
+    W = ctx['world']
     bad = []
     stats = {}
     for h in ctx['houses']:
         hid, x0, y0, x1, y1 = h[0], int(h[3]), int(h[4]), int(h[5]), int(h[6])
+        world = _Floor(W, int(h[7]))          # domy pod ziemia (Durnkar na -5)
         door = (int(h[8]), int(h[9]))
         cells = {(x, y) for y in range(y0, y1 + 1) for x in range(x0, x1 + 1)}
         if len(h) > 11:

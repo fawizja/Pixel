@@ -29,7 +29,10 @@ NONE = '-'
 # potwory stawiane tylko recznie w budowlach (twierdza orkow, osada elfow): generator nie wybiera ich sam do lochow
 # dziczy (wilds.pool) ani jako zamiennikow przy obnizaniu poziomow wzdluz drog (route_levels._candidates)
 HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader', 'orc_cult_priest', 'orc_cult_fanatic',
-               'urgoth', 'elf', 'elf_scout', 'elf_arcanist'}
+               'urgoth', 'elf', 'elf_scout', 'elf_arcanist',
+               # 2026-11-11: kopalnie krasnoludow pod Durnkarem (dwarves.py)
+               'dwarf', 'dwarf_miner', 'dwarf_soldier', 'dwarf_warden', 'dwarf_earthcaller', 'mine_grub', 'deep_worm',
+               'rock_golem', 'earth_spirit', 'deep_behemot'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 
@@ -154,14 +157,14 @@ class Plan:
                     if self.get(x + dx, y + dy, z) is None:
                         self.put(x + dx, y + dy, z, (floor, NONE, NONE, wall))
 
-    def cave(self, z, x0, y0, w, h, points, style, rng, crypt=False, room=(3, 5), keep=None):
+    def cave(self, z, x0, y0, w, h, points, style, rng, crypt=False, room=(3, 5), keep=None, lava=0.0):
         """Jaskinia (albo prostokatne sale - crypt) w prostokacie planu; points we wspolrzednych planu.
         keep(x, y) - pola, ktorych jaskinia nie nadpisuje (np. wykute wczesniej sale)."""
         pts = [(x - x0, y - y0) for (x, y) in points]
         if crypt:
             g = F.carve_crypt(w, h, pts, style, rng)
         else:
-            g = F.carve_cave(w, h, pts, style, rng, room=room)
+            g = F.carve_cave(w, h, pts, style, rng, room=room, lava=lava)
         F.fix_lava(g, pts)
         for y in range(h):
             for x in range(w):
@@ -277,6 +280,9 @@ class Plan:
         for t in self.trans:
             if (t[0], t[1], t[2]) not in seen:
                 missing.append(('transition', t))
+            c = self.get(t[0], t[1], t[2])
+            if c is None or c[2] not in F.STAIRS:
+                missing.append(('transition without stairs (overwritten?)', t, c))
         for c in self.chests:
             if not any((c[0] + dx, c[1] + dy, c[2]) in seen for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
                 missing.append(('chest', c))
@@ -293,10 +299,16 @@ class Plan:
 
 
 # ---------------------------------------------------------------------- kladzenie na swiecie
-def free_under(world, masks, x0, y0, S, step=2, limit=200, avoid=()):
+def free_under(world, masks, x0, y0, S, step=2, limit=200, avoid=(), per_floor=False):
     """Najblizszy (x0, y0) lewy gorny rog, w ktorym maski pieter podziemi trafiaja w puste i niezajete pola,
-    a w calym prostokacie (region podziemi) nie ma cudzych spawnow ``avoid`` [(x, y, z)]."""
+    a w calym prostokacie (region podziemi) nie ma cudzych spawnow ``avoid`` [(x, y, z)]. per_floor: cudze spawny
+    sprawdzane tylko w prostokacie zajetym na danym pietrze (plan z osobnym regionem na kazde pietro)."""
     h, w = next(iter(masks.values())).shape
+    boxes = {}
+    if per_floor:
+        for z, m in masks.items():
+            ys, xs = np.nonzero(m)
+            boxes[z] = (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max()))
     for r in range(0, limit):
         ring = [(dx, dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1) if max(abs(dx), abs(dy)) == r]
         ring.sort(key=lambda d: d[0] * d[0] + d[1] * d[1])
@@ -304,7 +316,11 @@ def free_under(world, masks, x0, y0, S, step=2, limit=200, avoid=()):
             nx, ny = x0 + ddx * step, y0 + ddy * step
             if nx < 3 or ny < 3 or nx + w > S - 3 or ny + h > S - 3:
                 continue
-            ok = not any(z in masks and nx - 2 <= x < nx + w + 2 and ny - 2 <= y < ny + h + 2 for (x, y, z) in avoid)
+            if per_floor:
+                ok = not any(z in boxes and nx + boxes[z][0] - 2 <= x <= nx + boxes[z][2] + 2
+                             and ny + boxes[z][1] - 2 <= y <= ny + boxes[z][3] + 2 for (x, y, z) in avoid)
+            else:
+                ok = not any(z in masks and nx - 2 <= x < nx + w + 2 and ny - 2 <= y < ny + h + 2 for (x, y, z) in avoid)
             for z, m in masks.items():
                 if not ok:
                     break
@@ -321,7 +337,7 @@ def free_under(world, masks, x0, y0, S, step=2, limit=200, avoid=()):
     raise AssertionError('no free room underground')
 
 
-def stamp(ctx, plan, origin, mark):
+def stamp(ctx, plan, origin, mark, per_floor=False):
     """Kladzie plan: (0, 0) planu -> origin na powierzchni i wyzej; podziemia najblizej pod spodem.
     mark(world, masks, x, y) - jak generate_continent.mark. Zwraca funkcje plan -> swiat dla kazdego pietra."""
     world = ctx['world']
@@ -347,7 +363,7 @@ def stamp(ctx, plan, origin, mark):
             if not ln.startswith('#'):
                 f = ln.split(';')
                 avoid.append((int(f[1]), int(f[2]), int(f[3])))
-        nx, ny = free_under(world, masks, ox + bx0, oy + by0, S, avoid=avoid)
+        nx, ny = free_under(world, masks, ox + bx0, oy + by0, S, avoid=avoid, per_floor=per_floor)
         mark(world, masks, nx, ny)
         ux, uy = nx - bx0, ny - by0
     up = [z for z in plan.f if z > 0]

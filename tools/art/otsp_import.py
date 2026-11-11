@@ -381,6 +381,21 @@ TINTED = {
     "orc_marauder": (44, (140, 160, 95)), "orc_leader": (3, (115, 145, 75)), "orc_cult_priest": (10, (150, 95, 135)),
     "orc_cult_fanatic": (2, (180, 75, 60)), "urgoth": (46, (150, 75, 50)),
 }
+# 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
+# (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.
+# nazwa: (stroj, kolory maski albo None, przebarwienie albo None, skala wysokosci, skala szerokosci)
+STOCKY = {
+    "dwarf": (45, ((190, 95, 45), (140, 95, 55), (95, 75, 55), (70, 50, 35)), None, 0.76, 1.12),
+    "dwarf_miner": (44, ((200, 170, 80), (120, 85, 50), (80, 70, 60), (60, 45, 30)), None, 0.76, 1.12),
+    "dwarf_soldier": (19, None, (150, 150, 165), 0.76, 1.12),
+    "dwarf_warden": (3, None, (175, 180, 195), 0.78, 1.12),
+    "dwarf_earthcaller": (18, ((215, 205, 185), (105, 130, 60), (90, 115, 55), (70, 55, 40)), None, 0.78, 1.12),
+    "mine_grub": (24, None, (190, 130, 120), 1.0, 1.0),
+    "deep_worm": (29, None, (190, 170, 95), 1.0, 1.0),
+    "rock_golem": (12, None, (150, 145, 135), 1.0, 1.0),
+    "earth_spirit": (42, None, (135, 105, 60), 1.0, 1.0),
+    "deep_behemot": (46, None, (165, 120, 80), 1.0, 1.0),
+}
 CHARACTERS = {
     "paladin": (19, None),
     "druid": (32, None),
@@ -517,11 +532,15 @@ def walk_frames(t):
     return [0, 1, 2] if n == 3 else [0, max(1, n // 4), max(1, 3 * n // 4)] if n > 1 else [0]
 
 
-def save_outfit(spr, t, d, colors, path, rgb=None):
-    """Postoj jako path.png i kroki jako path_walk1.png / path_walk2.png, przyciete wspolnym prostokatem (bez drgan)."""
+def save_outfit(spr, t, d, colors, path, rgb=None, squash=None):
+    """Postoj jako path.png i kroki jako path_walk1.png / path_walk2.png, przyciete wspolnym prostokatem (bez drgan).
+    squash = (skala szerokosci, wysokosci): niska, kreca postac (krasnoludy), piksele bez wygladzania."""
     imgs = [outfit(spr, t, d, colors, f) for f in walk_frames(t)]
     if rgb:
         imgs = [tint(i, rgb) for i in imgs]
+    if squash and squash != (1.0, 1.0):
+        imgs = [i.resize((max(1, round(i.width * squash[0])), max(1, round(i.height * squash[1]))), Image.NEAREST)
+                for i in imgs]
     boxes = [i.getbbox() for i in imgs if i.getbbox()]
     box = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
     save(trim_square(imgs[0], box), path + ".png")
@@ -759,6 +778,8 @@ def main(client, art):
             n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}")
     for name, (i, rgb) in TINTED.items():
         n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)
+    for name, (i, colors, rgb, sy, sx) in STOCKY.items():
+        n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/monsters/{name}", rgb, squash=(sx, sy))
     for voc, (i, colors) in CHARACTERS.items():
         for d, dname in enumerate(ot.DIRS):
             n += save_outfit(spr, things["outfit"][i], d, colors, f"{art}/characters/{voc}_{dname}")

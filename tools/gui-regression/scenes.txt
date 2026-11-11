@@ -241,3 +241,7 @@ elandor_trees|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=38
 bar_rune_modes|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=pickermode -Dpixel.frames=30
 bar_crosshair|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=aim -Dpixel.aimHover=525,521 -Dpixel.frames=30
 bar_combo_mobile|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=pickercombo -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+# 2026-11-11: krasnoludy - ukryty wawoz do Durnkaru (0), plac miasta pod gorami (-5), Behemoty na dnie kopalni (-7)
+dwarves_ravine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=479,274,0
+durnkar_plaza|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=512,324,-5
+dwarves_mine_bottom|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=577,318,-7 -Dpixel.level=200

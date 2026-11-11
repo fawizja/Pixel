@@ -21,7 +21,12 @@ class StartingTownTest {
     @Test
     void everyTownOfTheWorldIsAStartingTownWithAPolishDescription() {
         List<StartingTowns.Info> towns = StartingTowns.list(world);
-        assertEquals(world.towns().size(), towns.size());
+        // ukryte miasto krasnoludow (jak Kazordoon) ma swiatynie, ale gry sie w nim nie zaczyna
+        assertEquals(world.towns().size() - 1, towns.size());
+        assertFalse(world.town("Durnkar").starting());
+        assertNull(StartingTowns.find(world, "durnkar"));
+        assertFalse(StartingTowns.isValid(world, "Durnkar"));
+        assertEquals("varden", StartingTowns.resolve(world, "Durnkar", "varden"));
         for (String k : new String[] {"varden", "frostholm", "selvaran", "qasirah", "valmir", "nerys"}) {
             StartingTowns.Info i = StartingTowns.find(world, k);
             assertNotNull(i, k);
@@ -35,6 +40,7 @@ class StartingTownTest {
     @Test
     void aCharacterCreatedInEachTownLivesThereAndStartsInItsTemple() {
         for (Town t : world.towns()) {
+            if (!t.starting()) continue;
             for (int level : new int[] {cfg.startLevel(), cfg.offlineStartLevel()}) {
                 PlayerCharacter pc = factory.createIn(world, "Nowy", Vocation.DRUID, t.name(), level);
                 assertEquals(t.name().toLowerCase(Locale.ROOT), pc.homeTown());

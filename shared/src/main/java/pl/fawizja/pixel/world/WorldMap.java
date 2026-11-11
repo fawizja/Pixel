@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-/** Caly swiat: pietra od -5 do +5 o wspolnym ukladzie wspolrzednych. */
+/** Caly swiat: pietra od -7 do +5 o wspolnym ukladzie wspolrzednych. */
 public final class WorldMap {
 
     private final String name;

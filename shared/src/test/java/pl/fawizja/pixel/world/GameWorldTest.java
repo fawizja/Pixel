@@ -90,10 +90,12 @@ class GameWorldTest {
     }
 
     @Test
-    void sixTownsWithProtectedTemples() {
-        assertEquals(6, world.towns().size());
+    void sevenTownsWithProtectedTemples() {
+        // szesc miast startowych i Durnkar - miasto krasnoludow na -5 (swiatynia, tylko do zamieszkania)
+        assertEquals(7, world.towns().size());
         assertTrue(world.towns().size() <= Town.MAX_TOWNS);
-        for (String name : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah", "Valmir", "Nerys"}) {
+        assertEquals(-5, world.town("Durnkar").temple().z());
+        for (String name : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah", "Valmir", "Nerys", "Durnkar"}) {
             Town t = world.town(name);
             assertNotNull(t, name);
             assertTrue(world.isWalkable(t.temple()) && world.isProtectionZone(t.temple()), name);

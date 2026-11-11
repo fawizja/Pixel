@@ -57,11 +57,17 @@ TOWN = {
     "Qasirah": ((200, 135, 55), {"tan": 3, "brown": 4, "dark": 2}),
     "Selvaran": ((70, 130, 60), {"light": 3, "tan": 3, "brown": 2, "dark": 1}),
     "Frostholm": ((150, 185, 220), {"light": 5, "fair": 4}),
+    "Durnkar": ((160, 95, 40), {"light": 3, "fair": 3, "tan": 3}),
 }
+# Krasnoludy (2026-11-11, Durnkar pod gorami): zawsze z broda, rude/brazowe/siwe wlosy, postac niska i kreca
+# (to_tile: nizsza o ok. 1/5 i szersza). NPC z wlasnym strojem OTSP (elfy Elandoru) nie dostaja postaci LPC.
+DWARF_TOWNS = {"Durnkar"}
+DWARF_BEARDS = ["beards/beard/medium", "beards/beard/basic", "beards/beard/winter/male", "beards/beard/medium"]
+OTSP_ONLY = ("elandor_",)
 DEFAULT_TOWN = ((110, 90, 70), {"light": 3, "fair": 2, "tan": 3, "brown": 2, "dark": 1})
 HELMETS = {"Varden": "hat/helmet/kettle/adult", "Valmir": "hat/helmet/nasal/adult", "Nerys": "hat/helmet/barbuta/{B}",
            "Qasirah": "hat/helmet/morion/adult", "Selvaran": "hat/helmet/norman/adult",
-           "Frostholm": "hat/helmet/spangenhelm_viking/adult"}
+           "Frostholm": "hat/helmet/spangenhelm_viking/adult", "Durnkar": "hat/helmet/spangenhelm_viking/adult"}
 MALE_HAIR = ["plain", "buzzcut", "parted", "messy1", "bedhead", "curly_short", "natural", "page", "swoop", "spiked"]
 FEMALE_HAIR = ["long", "bob", "ponytail", "braid", "bunches", "pixie", "loose", "long_tied", "curly_long", "bangslong"]
 TWO_PART_HAIR = {"ponytail", "braid", "bunches", "long_tied", "princess"}
@@ -137,6 +143,10 @@ def outfit(n):
                           "beards/mustache/walrus"])
         if n.town == "Frostholm" and r.random() < 0.6:
             beard = "beards/beard/winter/male"
+    if n.town in DWARF_TOWNS and not f:
+        beard = r.choice(DWARF_BEARDS)
+        if not old:
+            hair_c = r.choice([HAIR["ginger"], HAIR["auburn"], HAIR["brown"], HAIR["darkbrown"], HAIR["black"]])
     boots = r.choice(["feet/boots/basic/{L}", "feet/boots/fold/{L}", "feet/shoes/basic/{L}"])
 
     def clothes_common(top, top_c, legs="legs/pants/{L}", legs_c=None, feet=boots, feet_c=LEATHER):
@@ -379,17 +389,19 @@ def shrink(img, w, h):
     return Image.fromarray(out, "RGBA")
 
 
-def to_tile(fr):
+def to_tile(fr, stocky=False):
     """Klatka 64x64 -> pole 32x32: stala skala (gole cialo = wysokosc postaci OTSP), stopy przy dolnej krawedzi,
-    srodek klatki na srodku pola. Gdy kapelusz wystaje ponad pole - skala mniejsza, zeby sie zmiescic."""
+    srodek klatki na srodku pola. Gdy kapelusz wystaje ponad pole - skala mniejsza, zeby sie zmiescic.
+    stocky: krasnolud - nizszy o ok. 1/5 i nieco szerszy."""
     box = fr.getbbox()
     s = HEIGHT / (FEET - BODY_TOP)
     if box:
         s = min(s, 31.5 / (FEET + 1 - box[1]))   # szerokosc: wystajace boki (mlot) sa przycinane
-    n = max(1, round(FRAME * s))
-    small = shrink(fr, n, n)
+    sy, sx = (s * 0.78, s * 1.06) if stocky else (s, s)
+    n, nw = max(1, round(FRAME * sy)), max(1, round(FRAME * sx))
+    small = shrink(fr, nw, n)
     tile = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
-    ox, oy = 16 - n // 2, 32 - round((FEET + 1) * s)
+    ox, oy = 16 - nw // 2, 32 - round((FEET + 1) * sy)
     tile.paste(small, (ox, oy), small)
     return outline(tile)
 
@@ -434,6 +446,8 @@ def credits(src, used):
 def all_dirs():
     dirs = set()
     for n in load_npcs().values():
+        if n.key.startswith(OTSP_ONLY):
+            continue
         n.rnd = random.Random(zlib.crc32(n.key.encode()))
         dirs.update(d for d, _ in outfit(n))
     return sorted(dirs)
@@ -493,10 +507,12 @@ def main(argv):
     npcs = load_npcs()
     used, tiles, sheets = {}, {}, {}
     for key, n in sorted(npcs.items()):
+        if key.startswith(OTSP_ONLY):
+            continue
         sheet, paths = compose(src, outfit(n))
         for p in paths:
             used.setdefault(p, set()).add(key)
-        tiles[key] = to_tile(frame(sheet, "down"))
+        tiles[key] = to_tile(frame(sheet, "down"), stocky=n.town in DWARF_TOWNS)
         sheets[key] = sheet
     credits(src, used)
     for old in glob.glob(os.path.join(OUT, "npcs", "*.png")):

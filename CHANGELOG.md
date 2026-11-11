@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.246.0] - 2026-11-11
+
+### Dodano
+- Durnkar, krasnoludzkie miasto pod górami na północ od Varden (piętro -5). Wchodzi się ukrytym, krętym wąwozem
+  między szczytami i tunelami w dół. W mieście są świątynia z kapłanem, bank z depozytem, karczma, kowal, płatnerz,
+  runiarz, narzędziownik, kupiec, zaklinacz, sala tronowa króla, wózkarz do innych miast i 12 domów na sprzedaż.
+  Mieszkańcy to krępi, brodaci krasnoludowie.
+- W Durnkarze można zamieszkać u kapłana, ale nowa postać nie może w nim zacząć gry.
+- Trzy kopalnie krasnoludów, każda do piętra -7: Kopalnia Żelaznej Brody, Kopalnia Głębokiego Kilofa i Stara Sztolnia
+  Granitowa. Z każdym piętrem w dół potwory są silniejsze i jest ich więcej. Kopalnia Żelaznej Brody łączy się z
+  miastem przez drzwi od poziomu 25.
+- Nowe potwory: Czerw gnilny, Krasnolud, Krasnolud górnik, Krasnolud żołnierz, Czerw padlinożerny, Krasnolud strażnik,
+  Kamienny golem, Krasnolud geomanta, Żywiołak ziemi i Behemot. Każdy ma łup i wpis w bestiariuszu.
+
 ## [0.245.0] - 2026-11-11
 
 ### Dodano
@@ -21,7 +35,6 @@
   serwer, więc wraca na każdym urządzeniu. Dawny układ z urządzenia przenosi się sam przy pierwszym wejściu do gry.
 - Runa na stworzenie (np. nagła śmierć) użyta celownikiem na puste pole mówi "Tej runy możesz użyć tylko na
   stworzeniu.", a runa lecząca na cudze pole: "Tej runy możesz użyć tylko na sobie." Nieudana próba nic nie zużywa.
-
 ## [0.244.0] - 2026-11-11
 
 ### Dodano
