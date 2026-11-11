@@ -45,6 +45,7 @@ import town_npcs  # noqa: E402
 import strongholds  # noqa: E402
 import dwarves  # noqa: E402
 import delta_volcano as DV  # noqa: E402
+import isles  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -846,6 +847,15 @@ def restore_varden_core(ctx):
         world.put(x, y, 0, c)
 
 
+# podziemia Durnkaru i kopalni oraz Trzewi Pozogi (rezerwacja przed lochami dziczy, patrz build)
+UNDER_RESERVED = [(400, 250, 615, 395), (590, 790, 715, 915), (640, 458, 722, 526), (362, 506, 430, 562)]
+# podziemia budowli z 0.244-0.247 na dawnych miejscach (pole (0, 0) planu pod ziemia): wieksze lochy dziczy zmienily
+# zajetosc podziemi, a domy Durnkaru i drzwi poziomu twierdzy maja zostac tam, gdzie byly
+UNDER_PIN = {'Twierdza Krwawego Kla': (652, 463), 'Elandor': (368, 511), 'Durnkar': (516, 299),
+             'Kopalnia Głębokiego Kilofa': (451, 317), 'Stara Sztolnia Granitowa': (451, 345),
+             'Wulkan Pożogi': (652, 850)}
+
+
 def build(ctx):
     world, T, footprint = ctx['world'], ctx['T'], ctx['footprint']
     ctx['varden_core'] = {p: world.get(*p) for p in varden_core_cells(ctx)}
@@ -856,6 +866,8 @@ def build(ctx):
     print('delta i cypel wulkanu:', DV.delta_terrain(T, ctx['protect'], world))
     print('wulkan pozogi - powierzchnia:', DV.volcano_surface(ctx))
     print('delta - brzegi i trzciny:', DV.delta_dress(ctx))
+    # 2026-11-11: Wyspa Bursztynowa powiekszona na poludnie (przed przystaniami i dostepem do wysp)
+    print('wyspa bursztynowa - nowy lad:', isles.grow_island(ctx))
     cost = F.road_cost(world, T, footprint)
     for b in ctx['blocks']:
         if b.kind == 'entrance':
@@ -997,8 +1009,20 @@ def build(ctx):
               reach_varden=reach_surface(world, temple[:2]),
               regions=lambda: all_regions(ctx),
               monsters_csv=os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'monsters.csv'))
-    ctx['reserved'] = list(strongholds.RESERVED)
+    ctx['reserved'] = list(strongholds.RESERVED) + [isles.CAMP_RESERVED]
+    ctx['under_pin'] = dict(UNDER_PIN)
+    # podziemia budowli stawianych po lochach dziczy zarezerwowane na wszystkich pietrach (glebokie lochy dziczy
+    # nie odsuwaja ich od wejsc); po lochach dziczy rezerwacja znika, zostaja tylko pola zajete przez lochy
+    under_res = list(strongholds.RESERVED) + list(UNDER_RESERVED) + list(isles.UNDER_RESERVED)
+    occ_before = {z: m.copy() for z, m in world.occ.items()}
+    res_mask = np.zeros((S, S), bool)
+    for (a, b, c, d) in under_res:
+        res_mask[max(0, b):min(S, d + 1), max(0, a):min(S, c + 1)] = True
+    for z in world.occ:
+        world.occ[z] |= res_mask
     print('lochy w dziczy:', wilds.wild_dungeons(ctx, cost, wh))
+    for z in world.occ:
+        world.occ[z] = occ_before[z] | (world.occ[z] & ~(res_mask & ~occ_before[z]))
     print('spawny w lasach i na lakach:', wilds.surface_spawns(ctx, wh))
     # 2026-11-11: Twierdza Krwawego Kla (orki, -3..+3, drzwi poziomu 50) i Elandor, osada elfow (-2..+3)
     print('twierdza orkow i osada elfow:', strongholds.build(ctx, cost, wh))
@@ -1007,6 +1031,10 @@ def build(ctx):
     # 2026-11-11: Wulkan Pozogi: Trzewia -1..-7 i Stozek +1..+7 (lowisko dla druzyn), pomosty rybackie w delcie
     print('wulkan pozogi - pietra:', DV.volcano_depths(ctx, cost, wh))
     print('delta - pomosty:', DV.delta_docks(ctx, reach_surface(world, temple[:2], [p[:2] for _n, p in ctx['towns'] if p[2] == 0])))
+    # 2026-11-11: Bursztynowa Skala (+1..+3) i Czelusci (-1..-6), Oboz Lowczyn, Cyklopolis (-1..-6)
+    print('wyspa bursztynowa - skala i czelusci:', isles.amber_rock(ctx, cost, wh))
+    print('oboz lowczyn:', isles.amazon_camp(ctx, cost, wh))
+    print('cyklopolis:', isles.cyclopolis(ctx, cost, wh))
 
 
 def monster_levels():
@@ -2461,8 +2489,18 @@ def island_access(ctx, rng):
     # nazwy wysp nie moga powtarzac miejsc, do ktorych juz plywaja statki, ani starych regionow
     used = {n[3] for n in ctx['npcs']} | {r[0] for r in ctx['regions'] + ctx['regions_new']}
     ISLAND_NAMES[:] = [n for n in ISLAND_NAMES if n not in used]
-    for k in sorted(range(1, len(parts)), key=lambda i: -len(parts[i])):
-        if k in linked or len(parts[k]) < ISLAND_MIN or not sea_island[k]:
+    # 2026-11-11: powiekszone wyspy (Bursztynowa, Cyklopolis) zachowuja miejsce w kolejce (nazwy przewoznikow bez zmian)
+    grown = {}
+    for (ax, ay), n_old in ctx.get('isle_old_cells', {}).items():
+        k_ = next(int(lab[ay + dy, ax + dx]) for r in range(12) for dx in range(-r, r + 1) for dy in range(-r, r + 1)
+                  if lab[ay + dy, ax + dx])
+        grown[k_] = n_old
+
+    def ferry_order(i):
+        return -grown.get(i, len(parts[i]))
+    for k in sorted(range(1, len(parts)), key=ferry_order):
+        # powiekszona wyspa dostaje przewoznika takze wtedy, gdy nowy lad zlaczyl ja z kawalkiem z tunelem
+        if (k in linked and k not in grown) or len(parts[k]) < ISLAND_MIN or not sea_island[k]:
             continue
         cells = parts[k]
         best = None
@@ -2560,7 +2598,8 @@ def island_access(ctx, rng):
     ctx['island_starts'] = starts
     # Lochy Zapomnianych pod najwieksza wyspa bez miasta
     town_parts = {int(lab[p[1], p[0]]) for _n, p in ctx['towns']}
-    big = max((k for k, _h in islands if k not in town_parts), key=lambda k: len(parts[k]))
+    # 2026-11-11: powiekszone wyspy maja wlasne podziemia (isles.py) - lochy zostaja pod Wyspa Mewia
+    big = max((k for k, _h in islands if k not in town_parts and k not in grown), key=lambda k: len(parts[k]))
     cells = parts[big]
     cx = sum(c[0] for c in cells) / len(cells)
     cy = sum(c[1] for c in cells) / len(cells)

@@ -248,3 +248,6 @@ dwarves_mine_bottom|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.telepo
 delta_map|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=610,750,0 -Dpixel.open=map
 volcano_captain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=693,852,0 -Dpixel.open=npc
 volcano_crater|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -Dpixel.teleport=648,853,7
+amber_deep|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -Dpixel.teleport=714,912,-3
+amazon_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=757,622,0
+cyclopolis_forge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=80 -Dpixel.teleport=571,889,0

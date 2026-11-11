@@ -32,7 +32,10 @@ HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader',
                'urgoth', 'elf', 'elf_scout', 'elf_arcanist',
                # 2026-11-11: kopalnie krasnoludow pod Durnkarem (dwarves.py)
                'dwarf', 'dwarf_miner', 'dwarf_soldier', 'dwarf_warden', 'dwarf_earthcaller', 'mine_grub', 'deep_worm',
-               'rock_golem', 'earth_spirit', 'deep_behemot'}
+               'rock_golem', 'earth_spirit', 'deep_behemot',
+               # 2026-11-11: oboz lowczyn i Cyklopolis (isles.py)
+               'grove_huntress', 'grove_shieldmaiden', 'grove_crone', 'grove_matriarch',
+               'oneeye_brute', 'oneeye_hauler', 'oneeye_smith'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 
@@ -363,7 +366,11 @@ def stamp(ctx, plan, origin, mark, per_floor=False):
             if not ln.startswith('#'):
                 f = ln.split(';')
                 avoid.append((int(f[1]), int(f[2]), int(f[3])))
-        nx, ny = free_under(world, masks, ox + bx0, oy + by0, S, avoid=avoid, per_floor=per_floor)
+        # przypiete podziemia (ctx['under_pin'][nazwa planu] = swiat pola (0, 0) planu pod ziemia): szukanie zaczyna
+        # sie tam - budowla zostaje na swoim miejscu, gdy zmiany gdzie indziej zwolnia jej dawne sasiedztwo
+        pin = ctx.get('under_pin', {}).get(plan.name)
+        sx, sy = (pin[0] + bx0, pin[1] + by0) if pin else (ox + bx0, oy + by0)
+        nx, ny = free_under(world, masks, sx, sy, S, avoid=avoid, per_floor=per_floor)
         mark(world, masks, nx, ny)
         ux, uy = nx - bx0, ny - by0
     up = [z for z in plan.f if z > 0]

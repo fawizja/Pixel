@@ -9,7 +9,7 @@ Dwie czesci, obie z wlasnym ziarnem (reszta mapy i kolejnosc losowan generatora 
     - kopalnia: wejscie w drewnianej ramie z pochodnia, plac z drewnem, skrzyniami i kupka rudy; w srodku
       chodniki z drewnianymi stemplami przy scianach, glazy rudy i krysztaly,
     - zapadlisko: dziura w ziemi wsrod ruin, w dole stare kanaly z kamienia (drabina z powrotem).
-  Kazdy loch ma 1-3 pietra po 5-8 komor, potwory wg poziomu okolicy (kraina i odleglosc od miast), w komorach
+  Kazdy loch ma 2-7 pieter (od 0.248: pien 6-9 komor, 2-4 slepe komory, petle, mieszane style), potwory wg poziomu okolicy (kraina i odleglosc od miast), w komorach
   ciala poleglych, a w ostatniej komorze skrzynie z drobnym lupem (chests.csv, world/WorldMap.LootChest).
 * surface_spawns - dodatkowe spawny niskiego (1-15) i sredniego (16-40) poziomu w lasach i na lakach, obok drog
   (nigdy na drodze) i w glebi lasow, wg odleglosci od miast: blisko miast slabe, dalej srednie.
@@ -180,15 +180,25 @@ class Wilds:
         return True
 
     # ------------------------------------------------------------------ uklad lochu
+    def floors_for(self, level, rng):
+        """2026-11-11 (Darek: podziemia wieksze, wiecej pieter w dol): 2-3 pietra przy slabych okolicach, im silniejsza
+        okolica, tym glebiej - do -7."""
+        n = 2 + (rng.random() < 0.6)
+        n += (level >= 40) + (level >= 100) + (level >= 200 and rng.random() < 0.6) + (level >= 320 and rng.random() < 0.5)
+        return min(7, n)
+
     def layout(self, rng, floors):
-        W, H = rng.randint(44, 62), rng.randint(32, 44)
+        """Pietra lochu: pien komor (od schodow w gore do schodow w dol), boczne slepe komory (zakamarki ze skarbem
+        albo cialem poleglego) i petla (drugie przejscie miedzy dalszymi komorami pnia). Zwraca W, H i liste pieter
+        [(pien, slepe komory, petle)]."""
+        W, H = rng.randint(56, 74), rng.randint(40, 52)
         out = []
         start = (rng.randint(5, 10), rng.randint(5, 10))
         for i in range(floors):
-            n = rng.randint(5, 8)
+            n = rng.randint(6, 9)
             pts = [start]
             tries = 0
-            while len(pts) < n and tries < 400:
+            while len(pts) < n and tries < 600:
                 tries += 1
                 p = (rng.randint(5, W - 6), rng.randint(5, H - 6))
                 if all(abs(p[0] - q[0]) + abs(p[1] - q[1]) >= 12 for q in pts):
@@ -200,9 +210,48 @@ class Wilds:
                 nxt = min(left, key=lambda q: abs(q[0] - last[0]) + abs(q[1] - last[1]))
                 chain.append(nxt)
                 left.remove(nxt)
-            out.append(chain)
+            # slepe komory: 2-4 punkty w wolnych miejscach, kazdy podpiety do najblizszej komory pnia (bez schodow)
+            dead = []
+            want = rng.randint(2, 4)
+            tries = 0
+            while len(dead) < want and tries < 600:
+                tries += 1
+                p = (rng.randint(4, W - 5), rng.randint(4, H - 5))
+                if all(abs(p[0] - q[0]) + abs(p[1] - q[1]) >= 9 for q in chain + [d[1] for d in dead]):
+                    inner = chain[1:-1] if len(chain) > 2 else chain
+                    anchor = min(inner, key=lambda q: abs(q[0] - p[0]) + abs(q[1] - p[1]))
+                    if abs(anchor[0] - p[0]) + abs(anchor[1] - p[1]) <= 22:
+                        dead.append((anchor, p))
+            loops = []
+            if len(chain) >= 5 and rng.random() < 0.7:
+                k = rng.randint(0, len(chain) - 4)
+                loops.append((chain[k], chain[k + 3]))
+            out.append((chain, dead, loops))
             start = chain[-1]
         return W, H, out
+
+    def themes(self, kind, biome, floors, level, rng):
+        """Styl kazdego pietra: pierwsze wg rodzaju wejscia i biomu, glebsze urozmaicone (krysztaly, zalane sale,
+        ruiny, krypty, a w silnych okolicach na samym dnie ogien)."""
+        if kind == 'cave':
+            first = {'snow': 'ice', 'taiga': 'ice', 'volcanic': 'fire', 'jungle': 'moss', 'swamp': 'moss',
+                     'forest': 'moss'}.get(biome, 'rock')
+            deeper = ['rock', 'crystal', 'flooded', 'moss', 'ruin', 'crypt']
+        elif kind == 'mine':
+            first = 'mine'
+            deeper = ['mine', 'deep_mine', 'crystal', 'flooded', 'rock']
+        else:
+            first = 'sewer'
+            deeper = ['crypt', 'ruin', 'flooded', 'rock', 'sewer']
+        if biome in ('snow', 'taiga'):
+            deeper = deeper + ['ice', 'ice']
+        out = [first]
+        for i in range(1, floors):
+            cand = [s for s in deeper if s != out[-1]]
+            out.append(rng.choice(cand))
+        if floors >= 4 and level >= 150 and rng.random() < 0.5:
+            out[-1] = 'fire'
+        return out
 
     def pool(self, level, biome):
         allowed = BIOME_MONSTERS.get(biome, {'temperate', 'underground'})
@@ -244,24 +293,34 @@ class Wilds:
         ex, ey = site
         level = self.area_level(ex, ey)
         biome = str(self.T.biome[ey, ex])
-        floors = 1 + (rng.random() < 0.75) + (level >= 60 and rng.random() < 0.5)
-        W, H, chains = self.layout(rng, floors)
-        if kind == 'cave':
-            style = {'snow': 'ice', 'taiga': 'ice', 'volcanic': 'fire', 'jungle': 'moss', 'swamp': 'moss',
-                     'forest': 'moss'}.get(biome, 'rock')
-        else:
-            style = 'mine' if kind == 'mine' else 'sewer'
+        floors = self.floors_for(level, rng)
+        W, H, layout = self.layout(rng, floors)
+        chains = [f[0] for f in layout]
+        styles = self.themes(kind, biome, floors, level, rng)
         grids = {}
-        for i, pts in enumerate(chains):
+        for i, (pts, dead, loops) in enumerate(layout):
             z = -1 - i
-            if kind == 'hole':
-                g = F.carve_crypt(W, H, pts, style, rng)
-            else:
-                g = F.carve_cave(W, H, pts, style, rng, room=(3, 5) if kind == 'cave' else (2, 4))
-            F.fix_lava(g, pts)
-            if kind == 'mine':
-                self.mine_dressing(g, rng, pts)
-            assert all(p in F.reachable_local(g, pts[0]) for p in pts), name
+            style = styles[i]
+            room = (3, 5) if kind == 'cave' else (2, 4)
+            g = F.carve_rooms(W, H, pts, style, rng, room=room)
+            for (a, b) in dead:
+                F.merge_grid(g, F.carve_rooms(W, H, [a, b], style, rng, room=(2, 3)))
+            for (a, b) in loops:
+                F.merge_grid(g, F.carve_rooms(W, H, [a, b], style, rng, room=(2, 3)))
+            F.fix_lava(g, pts + [d[1] for d in dead])
+            if style in ('mine', 'deep_mine'):
+                self.mine_dressing(g, rng, pts + [d[1] for d in dead])
+            assert all(p in F.reachable_local(g, pts[0]) for p in pts + [d[1] for d in dead]), name
+            light = F.CAVE_STYLES[style][4]
+
+            def gget(x, y, g=g):
+                return g[y][x] if 0 <= x < W and 0 <= y < H else None
+
+            def gput(x, y, c, g=g):
+                g[y][x] = c
+            stairs_cells = {(q[0] + a, q[1] + b) for q in (pts[0], pts[-1]) for a in (-1, 0, 1) for b in (-1, 0, 1)}
+            F.ensure_lights(gget, gput, [(x, y) for y in range(H) for x in range(W) if F.walk(g[y][x])
+                                         and (x, y) not in stairs_cells], light, rng)
             grids[z] = g
         import numpy as np
         masks = {}
@@ -279,7 +338,7 @@ class Wilds:
                 for x in range(W):
                     if g[y][x] is not None:
                         world.put(tx + x, ty + y, z, g[y][x])
-        floor_of = {z: F.CAVE_STYLES[style][0] for z in grids}
+        floor_of = {-1 - i: F.CAVE_STYLES[styles[i]][0] for i in range(len(chains))}
         t = ctx['transitions']
         front = self.entrance(kind, site, rng)
         up = (tx + p0[0], ty + p0[1])
@@ -299,7 +358,7 @@ class Wilds:
             world.put(*d, z - 1, (floor_of[z - 1], NONE, 'stairs_up', NONE))
             t.append((d[0], d[1], z, 'STAIRS', d[0], d[1] + 1, z - 1))
             t.append((d[0], d[1], z - 1, 'STAIRS', d[0] + 1, d[1], z))
-        # potwory w komorach (bez komor ze schodami), ciala poleglych, skrzynie w ostatniej komorze
+        # potwory w komorach (bez komor ze schodami), ciala poleglych, skrzynie w slepych komorach i w ostatniej komorze
         spawns, chests, levels = 0, [], []
         for i, pts in enumerate(chains):
             z = -1 - i
@@ -325,6 +384,25 @@ class Wilds:
                             and g[b][a][1] == NONE:
                         world.put(tx + a, ty + b, z, (g[b][a][0], rng.choice(('corpse', 'bones', 'blood')), NONE, NONE))
                         break
+            # slepe komory: pierwsza ze skrzynia (skarb w zakamarku), co druga z kolejnych ze stadem, reszta z cialem
+            for j, (_anchor, want) in enumerate(layout[i][1]):
+                near = sorted(cells, key=lambda c: abs(c[0] - want[0]) + abs(c[1] - want[1]))
+                if not near or abs(near[0][0] - want[0]) + abs(near[0][1] - want[1]) > 4:
+                    continue
+                if j == 0 and self.h['reach_varden'][ey, ex] and (i == len(chains) - 1 or rng.random() < 0.5):
+                    c = near[0]
+                    chests.append((tx + c[0], ty + c[1], z) + loot(lv, rng))
+                    cells = [q for q in cells if max(abs(q[0] - c[0]), abs(q[1] - c[1])) > 1]
+                elif j % 2 == 1:
+                    sx, sy = near[0]
+                    key = pool[rng.randint(0, len(pool) - 1)]
+                    ctx['spawns'].append(f'{key};{tx + sx};{ty + sy};{z};3;{rng.choice((2, 3))};180')
+                    levels.append(self.mon[key]['level'])
+                    spawns += 1
+                else:
+                    a, b = near[min(2, len(near) - 1)]
+                    if world.get(tx + a, ty + b, z)[1] == NONE:
+                        world.put(tx + a, ty + b, z, (g[b][a][0], rng.choice(('corpse', 'bones')), NONE, NONE))
             if i == len(chains) - 1:
                 last = pts[-1]
                 spots = sorted((c for c in cells if world.get(tx + c[0], ty + c[1], z)[1] == NONE),
@@ -524,12 +602,14 @@ def wild_dungeons(ctx, cost, helpers, target=66, cover=44):
         d = np.sqrt(((L[:, None, :] - E[None, :, :]) ** 2).sum(-1)).min(1)
         order = np.argsort(-d)
         site = None
-        for i in order[:60]:
-            if d[i] < 34:
+        tried = 0
+        for i in order:
+            if d[i] < 34 or tried >= 60:
                 break
             p = tuple(int(v) for v in L[i])
             if p in failed:
-                continue
+                continue                     # nieudane miejsca (np. rezerwacje budowli) nie zajmuja kolejki prob
+            tried += 1
             site = try_near(p, 0, 14)
             if site:
                 break

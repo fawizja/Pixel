@@ -107,8 +107,8 @@ class RouteLevelsTest {
 
     @Test
     void approachesToTheLowHuntingGroundsAroundVardenAreNotGuardedByStrongMonsters() {
-        for (String name : new String[] {"Kanały Varden", "Zapadlisko Wiatru", "Stary Kanał Żuków", "Grota Pająków",
-                "Nora Zbójców", "Zielony Gaj", "Szyb Leszego", "Rozstaje"}) {
+        for (String name : new String[] {"Kanały Varden", "Dziura Szczurów", "Stary Kanał Miedzi", "Grota Pająków",
+                "Pieczara Ciem", "Zielony Gaj", "Dziura Topielców", "Rozstaje"}) {
             Region target = region(name);
             List<Position> path = route(target, Math.max(8, target.levelMin()));
             SpawnPoint worst = strongestNear(path, 0, Math.max(0, path.size() - SKIP_AT_TARGET));
@@ -120,7 +120,7 @@ class RouteLevelsTest {
 
     @Test
     void theRouteToAStrongerHuntingGroundRisesGradually() {
-        for (String name : new String[] {"Grota Węgla", "Pieczara Pajęczyn", "Zatopiona Świątynia"}) {
+        for (String name : new String[] {"Pieczara Węgla", "Grota Kretów", "Zatopiona Świątynia"}) {
             Region target = region(name);
             List<Position> path = route(target, Math.max(8, target.levelMin()));
             int end = Math.max(0, path.size() - SKIP_AT_TARGET);

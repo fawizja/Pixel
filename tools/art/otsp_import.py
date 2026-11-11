@@ -344,6 +344,10 @@ MONSTERS = {
     "elf": (16, ((230, 210, 140), (70, 140, 60), (90, 120, 60), (80, 60, 40))),
     "elf_scout": (44, ((220, 200, 120), (60, 110, 50), (70, 90, 50), (70, 50, 30))),
     "elf_arcanist": (20, ((240, 230, 180), (40, 120, 100), (30, 90, 80), (60, 50, 40))),
+    # 2026-11-11: oboz lowczyn w dzungli (stroje ludzi z maska kolorow: skora, zielen, braz)
+    "grove_huntress": (44, ((120, 70, 40), (140, 105, 55), (70, 115, 50), (95, 65, 35))),
+    "grove_crone": (26, ((200, 200, 190), (90, 110, 60), (70, 90, 45), (60, 45, 30))),
+    "grove_matriarch": (44, ((175, 60, 35), (200, 160, 60), (140, 40, 35), (110, 75, 35))),
 }
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
@@ -382,6 +386,9 @@ TINTED = {
     "orc_cult_fanatic": (2, (180, 75, 60)), "urgoth": (46, (150, 75, 50)),
     # 2026-11-11: potwory Wulkanu Pozogi (przebarwione stroje: pelzacz, drapieznik, skrzydlaty olbrzym)
     "cinder_salamander": (30, (235, 110, 40)), "ember_hound": (11, (205, 70, 30)), "magma_colossus": (39, (215, 85, 35)),
+    # 2026-11-11: tarczowniczka obozu (rycerz w brazie) i jednookie olbrzymy Cyklopolis (wielki stroj, rozne barwy)
+    "grove_shieldmaiden": (3, (215, 170, 95)),
+    "oneeye_brute": (12, (180, 140, 100)), "oneeye_hauler": (12, (130, 150, 115)), "oneeye_smith": (12, (205, 100, 70)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.
