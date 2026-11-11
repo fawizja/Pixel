@@ -904,6 +904,10 @@ public final class GameScreen extends ScreenAdapter {
             hud.openInfo("Autorzy grafik", pl.fawizja.pixel.game.Credits.rows());
             return;
         }
+        if (cmd.equals("/blogoslawienstwa") || cmd.equals("/błogosławieństwa") || cmd.equals("/bless")) {
+            hud.openInfo("Błogosławieństwa", pl.fawizja.pixel.character.BlessingStatus.rows(session.character()));
+            return;
+        }
         if (cmd.equals("/emotki")) {
             hud.openInfo("Emotki", pl.fawizja.pixel.net.Emotes.rows());
             return;

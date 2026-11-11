@@ -1771,24 +1771,84 @@ public final class GameSession {
         return true;
     }
 
-    /** Kaplan: blogoslawienstwo za monety z plecaka - najblizsza smierc zabierze polowe straty doswiadczenia. */
-    public boolean priestBless(long nowMs) {
+    /** Cena wszystkich brakujacych zwyklych blogoslawienstw naraz (+10%, jak u Henricusa); 0, gdy nic nie brakuje. */
+    public long bulkBlessingPrice() {
+        int missing = 0;
+        for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
+            if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR && !pc.boughtBlessing(b)) missing++;
+        }
+        return Math.round(missing * pl.fawizja.pixel.character.Blessing.WISDOM.price(pc.level())
+                * pl.fawizja.pixel.character.Blessing.BULK_MULTIPLIER);
+    }
+
+    /** Powod, dla ktorego blogoslawienstwa nie da sie teraz kupic u kaplana w miescie town (null = mozna). */
+    public String blessingBlocked(pl.fawizja.pixel.character.Blessing b, String town) {
+        if (pc.boughtBlessing(b)) return "już je masz";
+        if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.ENHANCED) {
+            return pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN.equalsIgnoreCase(town) ? null
+                    : "tylko u kapłana w " + pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN + "ze";
+        }
+        if (pc.adventurerBlessing()) return "do poziomu " + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL + " chroni cię Błogosławieństwo Poszukiwacza";
+        if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP) {
+            boolean other = false;
+            for (pl.fawizja.pixel.character.Blessing o : pl.fawizja.pixel.character.Blessing.values()) {
+                if (o.countsForLoss() && pc.boughtBlessing(o)) other = true;
+            }
+            if (!other) return "najpierw kup inne błogosławieństwo";
+        }
+        return null;
+    }
+
+    /** Kaplan: wszystkie brakujace zwykle blogoslawienstwa naraz (monety z plecaka). */
+    public boolean priestBless(long nowMs) { return priestBless("all", nowMs); }
+
+    /**
+     * Kaplan: blogoslawienstwo za monety z plecaka. which: "all" (wszystkie brakujace zwykle, +10%) albo klucz
+     * {@link pl.fawizja.pixel.character.Blessing#key()}. Gorskie sprzedaje tylko kaplan w Durnkarze.
+     */
+    public boolean priestBless(String which, long nowMs) {
         Npc n = talkTo(NpcRole.PRIEST, nowMs);
         if (n == null) return false;
-        if (pc.isBlessed()) {
-            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": już jesteś pobłogosławiony.");
-            return false;
+        java.util.List<pl.fawizja.pixel.character.Blessing> buy = new java.util.ArrayList<>();
+        long price;
+        if (which.equals("all")) {
+            if (pc.adventurerBlessing()) {
+                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": do poziomu " + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL
+                        + " chroni cię Błogosławieństwo Poszukiwacza - nic nie płacisz.");
+                return false;
+            }
+            for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
+                if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR && !pc.boughtBlessing(b)) buy.add(b);
+            }
+            if (buy.isEmpty()) {
+                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": masz już wszystkie zwykłe błogosławieństwa.");
+                return false;
+            }
+            price = bulkBlessingPrice();
+        } else {
+            pl.fawizja.pixel.character.Blessing b = pl.fawizja.pixel.character.Blessing.byKey(which);
+            if (b == null) return false;
+            String why = blessingBlocked(b, n.town());
+            if (why != null) {
+                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + b.label() + " - " + why + ".");
+                return false;
+            }
+            buy.add(b);
+            price = b.price(pc.level());
         }
-        long price = pl.fawizja.pixel.balance.Balance.blessingPrice(pc.level());
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": błogosławieństwo kosztuje " + price + " gp (monety w plecaku).");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(": to kosztuje %,d gp (monety w plecaku).", price));
             return false;
         }
         pc.backpack().commitFrom(tx);
-        pc.setBlessed(true);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Otrzymujesz błogosławieństwo (" + price
-                + " gp). Najbliższa śmierć zabierze połowę doświadczenia mniej.");
+        StringBuilder names = new StringBuilder();
+        for (pl.fawizja.pixel.character.Blessing b : buy) {
+            pc.addBlessing(b);
+            if (names.length() > 0) names.append(", ");
+            names.append(b.label());
+        }
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Otrzymujesz: %s (%,d gp). Zmniejszają stratę po śmierci.", names, price));
         return true;
     }
 
@@ -1828,8 +1888,10 @@ public final class GameSession {
                 done = "Jesteś teraz " + pc.vocationTitle() + ". Regenerujesz się o połowę szybciej.";
                 break;
             case "bless":
-                pc.setBlessed(true);
-                done = "Otrzymujesz błogosławieństwo. Najbliższa śmierć zabierze połowę doświadczenia mniej.";
+                for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
+                    if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR) pc.addBlessing(b);
+                }
+                done = "Masz pięć błogosławieństw. Zmniejszają stratę doświadczenia po śmierci.";
                 break;
             default:
                 if (key.startsWith("enchant_")) {

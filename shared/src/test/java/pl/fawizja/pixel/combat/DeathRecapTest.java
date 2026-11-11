@@ -16,13 +16,13 @@ class DeathRecapTest {
         r.record("Goblin", 25, 50_000);
         r.record("Wilk", 0, 51_000);       // zablokowane - pominiete
         r.record("Ula (gracz)", 10, 52_000);
-        DeathRecap.Report rep = r.build("Goblin", 1234, true, 60_000);
+        DeathRecap.Report rep = r.build("Goblin", 1234, 3, 60_000);
         assertEquals(List.of(new DeathRecap.Row("Goblin", 55, 2), new DeathRecap.Row("Wilk", 20, 1),
                 new DeathRecap.Row("Ula (gracz)", 10, 1)), rep.rows());
-        assertTrue(r.build("x", 0, false, 61_000).rows().isEmpty(), "hits cleared after a death");
+        assertTrue(r.build("x", 0, 0, 61_000).rows().isEmpty(), "hits cleared after a death");
         List<String[]> rows = DeathRecap.rows(rep);
         assertEquals("Goblin", rows.get(0)[1]);
-        assertTrue(rows.get(1)[1].contains("1234 exp") && rows.get(1)[1].contains("błogosławieństwu"));
+        assertTrue(rows.get(1)[1].contains("1234 exp") && rows.get(1)[1].contains("3 błogosławieństwa") && rows.get(1)[1].contains("24%"));
         assertTrue(rows.get(2)[1].startsWith("55 obrażeń w 2 ciosach"), rows.get(2)[1]);
         assertTrue(rows.get(3)[1].startsWith("20 obrażeń w 1 ciosie"), rows.get(3)[1]);
     }

@@ -59,8 +59,9 @@ public final class Store {
                 : pc.level() < GameSession.PROMOTION_LEVEL ? "od poziomu " + GameSession.PROMOTION_LEVEL : null;
         out.add(new Offer("promote", "Promocja: " + pc.vocation().promotedName(), "znak przy postaci, regeneracja o połowę szybsza",
                 GameSession.PROMOTION_PRICE, promo, "grimtooth_crown"));
-        out.add(new Offer("bless", "Błogosławieństwo", "najbliższa śmierć: połowa straty doświadczenia",
-                pl.fawizja.pixel.balance.Balance.blessingPrice(pc.level()), pc.isBlessed() ? "już jesteś pobłogosławiony" : null, "healing_herb"));
+        out.add(new Offer("bless", "Błogosławieństwa (pięć zwykłych)", "każde: -8% straty doświadczenia po śmierci",
+                s.bulkBlessingPrice(), pc.adventurerBlessing() ? "chroni cię Błogosławieństwo Poszukiwacza (do poz. "
+                        + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL + ")" : s.bulkBlessingPrice() == 0 ? "masz już wszystkie" : null, "healing_herb"));
         for (Enchantments.Kind k : Enchantments.Kind.values()) {
             if (!k.smith()) continue;
             Enchantments e = pc.enchantments();

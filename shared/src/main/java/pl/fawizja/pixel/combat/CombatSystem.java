@@ -682,14 +682,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void onPlayerDeath(String killerName, MonsterType killerType, long now) {
         long before = pc.experience();
         lastDeathPlace = pc.position();
-        boolean blessed = pc.applyDeathPenalty(minLevel, killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType));
+        int blessed = pc.applyDeathPenalty(minLevel, killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType), false, false);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         lastDeath = recap.build(killerName, before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killerName + "). Strata: "
-                + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "")
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed)
                 + ". Odrodzenie w świątyni.");
     }
 
@@ -721,14 +721,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             }
         }
         long before = pc.experience();
-        boolean blessed = pc.applyDeathPenalty(minLevel);
+        int blessed = pc.applyDeathPenalty(minLevel, 0, true, dropBackpack);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         lastDeath = recap.build(killer + " (gracz)", before - pc.experience(), blessed, now);
         log.add(now, EventLog.Kind.WARNING, "Zginąłeś z ręki gracza " + killer + ". Strata: "
-                + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "") + (dropped > 0 ? ", plecak i ekwipunek zostały na ziemi" : "")
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + (dropped > 0 ? ", plecak i ekwipunek zostały na ziemi" : "")
                 + ". Odrodzenie w świątyni.");
         return dropped;
     }

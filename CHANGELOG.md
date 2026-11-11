@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.250.0] - 2026-11-11
+
+### Zmieniono
+- NPC i strażnicy wracają do dawnych strojów OpenTibia Sprite Pack; postacie LPC zostały wycofane (assets/art/lpc,
+  tools/art/lpc_compose.py, flaga -Dpixel.lpcNpcs, autorzy LPC w /autorzy i docs/CREDITS.md). Brakujące obrazki
+  (strażnicy guard_15..24, przewoźnicy isle*_ferryman, gull/lighthouse_ferryman, kapitan Pożogi) wygenerowano z tych
+  samych strojów; 16 krasnoludów z Durnkaru ma stroje ról z rudą i siwą brodą, ściśnięte w pionie jak potwory dwarf*
+  (`tools/art/otsp_import.py`, tabela `DWARF_NPCS`; obrazki odtwarza `python3 tools/art/otsp_import.py <client_files>`).
+  Atlas grafik 32 px: 1335 / 2048.
+- Błogosławieństwa jak w Tibii zamiast jednego jednorazowego: pięć zwykłych (Mądrość Samotności, Iskra Feniksa, Ogień
+  Słońc, Duchowa Tarcza, Objęcia Świata) i dwa górskie (Serce Góry, Krew Góry) zmniejszają stratę doświadczenia po
+  8% każde (razem -56%); poniżej poziomu 24 pięć zwykłych daje -50%. Znikają przy śmierci. Ceny jak w Tibii: do
+  poziomu 30 po 2000 gp, potem 200 gp x (poziom - 20), od poziomu 120 20 000 + 75 gp za poziom; górskie drożej;
+  wszystkie pięć naraz u kapłana +10%. Zapisy ze starym błogosławieństwem dostają pięć zwykłych.
+
+### Dodano
+- Zrządzenie losu (PvP): przy śmierci z ręki gracza bez czerwonej czaszki znika tylko ono, a zwykłe błogosławieństwa
+  zostają; wymaga najpierw innego błogosławieństwa. Do poziomu 30 chroni darmowe Błogosławieństwo Poszukiwacza.
+- Górskie błogosławieństwa sprzedaje tylko kapłan w Durnkarze.
+- Okno kapłana z listą błogosławieństw i cenami, okno stanu `/blogoslawienstwa`, wiersz „Błogosławieństwa” w oknie
+  postaci, komunikat o śmierci z liczbą błogosławieństw i zmniejszeniem straty.
+
 ## [0.249.0] - 2026-11-11
 
 ### Zmieniono

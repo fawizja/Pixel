@@ -459,6 +459,27 @@ for _line in open(_NPC_CSV, encoding="utf-8"):
         NPCS[_key] = _ROLE[_cols[2].lower()]
     if _key in RULER_COLORS:
         NPCS[_key] = (_ROLE["ruler"][0], RULER_COLORS[_key])
+# 2026-11-11: krasnoludzcy NPC Durnkaru (durn_*): stroj roli jak u ludzi, ale glowa (broda i wlosy) w rudych i siwych
+# barwach i postac sciskana w pionie jak potwory dwarf* (STOCKY). klucz roli -> barwa glowy; reszta maski z _ROLE.
+DWARF_BEARDS = {
+    "default": (190, 95, 45), "priest": (225, 225, 220), "ruler": (205, 205, 200), "guide": (140, 95, 55),
+    "banker": (160, 160, 155), "smith": (200, 80, 35), "armorer": (95, 75, 55), "tools": (200, 170, 80),
+    "mage": (210, 210, 205), "imbuer": (175, 150, 190), "guard_west": (120, 80, 50), "guard_east": (230, 140, 60),
+}
+DWARF_ROLES = {   # klucz po durn_ -> klucz w _ROLE
+    "priest": "priest", "banker": "banker", "housing": "housing", "ruler": "king", "innkeeper": "innkeeper",
+    "smith": "smith", "armorer": "smith", "imbuer": "imbuer", "mage": "mage", "tools": "smith",
+    "merchant": "merchant", "petkeeper": "petkeeper", "guide": "guide", "carrier": "carrier",
+    "guard_west": "guard", "guard_east": "guard",
+}
+DWARF_NPCS = {}
+for _k, _r in DWARF_ROLES.items():
+    _o, _c = _ROLE[_r]
+    if _c is not None:
+        _c = (DWARF_BEARDS.get(_k, DWARF_BEARDS["default"]),) + tuple(_c[1:])
+    DWARF_NPCS["durn_" + _k] = (_o, _c)
+for _k in DWARF_NPCS:
+    NPCS.pop(_k, None)
 PETS = {"pet_cat": (1, None), "pet_raven": (9, None)}
 
 MASK = {(255, 255, 0): 0, (255, 0, 0): 1, (0, 255, 0): 2, (0, 0, 255): 3}
@@ -787,6 +808,8 @@ def main(client, art):
             n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}")
     for name, (i, rgb) in TINTED.items():
         n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)
+    for name, (i, colors) in DWARF_NPCS.items():
+        n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/npcs/{name}", None, squash=(1.12, 0.78))
     for name, (i, colors, rgb, sy, sx) in STOCKY.items():
         n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/monsters/{name}", rgb, squash=(sx, sy))
     for voc, (i, colors) in CHARACTERS.items():
