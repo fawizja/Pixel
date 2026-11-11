@@ -79,7 +79,7 @@ public final class CharacterCodec {
         if (!pc.daily().encode().isEmpty()) m.put("daily", pc.daily().encode());
         if (!pc.hunt().encode().isEmpty()) m.put("hunt", pc.hunt().encode());
         if (!pc.loginStreak().encode().isEmpty()) m.put("login", pc.loginStreak().encode());
-        if (pc.isBlessed()) m.put("bless", "1");
+        if (pc.blessingMask() != 0) m.put("blessings", Integer.toString(pc.blessingMask()));
         if (pc.isPremium()) m.put("premium", "1");
         if (pc.isPromoted()) m.put("promo", "1");
         m.put("lvlrew", String.valueOf(pc.rewardedLevel()));
@@ -313,7 +313,10 @@ public final class CharacterCodec {
         pc.daily().restore(m.get("daily"));
         pc.hunt().restore(m.get("hunt"));
         pc.loginStreak().restore(m.get("login"));
-        pc.setBlessed("1".equals(m.get("bless")));
+        if (m.containsKey("blessings")) pc.setBlessingMask(Integer.parseInt(m.get("blessings")));
+        else if ("1".equals(m.get("bless"))) { // stary zapis z jednym blogoslawienstwem: piec zwyklych
+            for (Blessing b : Blessing.values()) if (b.kind() == Blessing.Kind.REGULAR) pc.addBlessing(b);
+        }
         pc.setPremium("1".equals(m.get("premium")));
         pc.setPromoted("1".equals(m.get("promo")));
         if (m.containsKey("lvlrew")) pc.setRewardedLevel(Integer.parseInt(m.get("lvlrew")));

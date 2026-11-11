@@ -168,7 +168,7 @@ public final class Actions {
             case "crateput": s.cratePut(Integer.parseInt(p[2]), now); return true;
             case "cratetake": s.crateTake(Integer.parseInt(p[2]), now); return true;
             case "heal": s.priestHeal(now); return true;
-            case "bless": s.priestBless(now); return true;
+            case "bless": s.priestBless(p.length > 2 ? p[2] : "all", now); return true;
             case "premium": s.buyPremium(now); return true;
             case "promote": s.buyPromotion(now); return true;
             case "upgrade": s.upgradeEquipped(pl.fawizja.pixel.item.EquipSlot.valueOf(p[2]), now); return true;

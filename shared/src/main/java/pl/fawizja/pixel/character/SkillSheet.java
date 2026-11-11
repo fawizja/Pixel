@@ -83,6 +83,7 @@ public final class SkillSheet {
         out.add(new String[] {"Kradzież", leech});
         String prot = pl.fawizja.pixel.item.ItemBonus.describeProtections(pc.equipment().protections());
         out.add(new String[] {"Ochrona", prot.isEmpty() ? "brak" : prot});
+        out.add(new String[] {"Błogosławieństwa", BlessingStatus.summary(pc)});
         return out;
     }
 

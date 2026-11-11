@@ -224,7 +224,11 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
   z mapa; NPC tylko w strefie ochronnej, nie na przejsciach), `ShopRegistry` (data/shops.csv) z kontrola
   arbitrazu przy wczytywaniu, `TradeSystem` (kupno/sprzedaz atomowo na kopii plecaka).
 - Rozmowa w zasiegu 2 kafelkow, przez lade, ale nie przez sciane. NPC blokuja ruch.
-- Kaplan: pelne leczenie, zamieszkanie w miescie (`homeTown` - odrodzenie w jego swiatyni).
+- Kaplan: pelne leczenie, zamieszkanie w miescie (`homeTown` - odrodzenie w jego swiatyni) i blogoslawienstwa jak w Tibii
+  (`Blessing`, `PlayerCharacter.applyDeathPenalty`, `BlessingStatus`): Wiedza Samotnosci, Iskra Feniksa, Ogien Slonc, Duchowa Tarcza,
+  Objecia Swiata (po -8% straty exp, hurtem +10%), Zrzadzenie losu (PvP: przy smierci z reki gracza bez czerwonej czaszki znika tylko ono,
+  wymaga innego blogoslawienstwa) i gorskie Serce/Krew Gory (tylko kaplan w Durnkarze). Przy kazdej innej smierci znikaja zwykle i gorskie.
+  Do poz. 30 darmowe Blogoslawienstwo Poszukiwacza. Stan: okno `/blogoslawienstwa`, wiersz w oknie postaci, ikona przy pasku.
 - `quest/`: `QuestType` (KILL / COLLECT), `QuestRegistry` (data/quests.csv), `QuestLog` w postaci (zapisywany),
   `QuestSystem` (przyjecie, licznik zabic przez `CombatSystem.setKillListener`, oddanie z nagroda).
 - Klient: przycisk ROZMOWA (lub N / dotkniecie NPC), okno z kupnem (ilosc 1/5/25/100, strony), skupem,
@@ -897,7 +901,7 @@ w `generate_continent`, `structures.stamp` czyta `ctx['under_pin']`), wiec nowe 
   robaki i wedka), kowal z kuznia (bron), platnerz, zaklinacz, runiarz (runy i mikstury), narzedziownik, kupiec,
   opiekun zwierzat, przewodnik, dwoch straznikow bram i wozkarz (podroze do innych miast). 12 domow na sprzedaz
   (systemem domow, `houses.csv`, pietro -5). Cale miasto i przedsionek sa strefa ochronna. NPC to krepi, brodaci
-  krasnoludowie z LPC (`tools/art/lpc_compose.py`, `DWARF_TOWNS`, autorzy w `CREDITS-LPC.csv`).
+  krasnoludowie w strojach OTSP (`tools/art/otsp_import.py`, `DWARF_NPCS`).
 - Miasto tylko do zamieszkania: `map.properties` `residence_only=Durnkar` -> `Town.starting() == false`. Nie ma go
   w wyborze miasta startowego (`StartingTowns.list/isValid`, takze na serwerze), ale kaplan pozwala tu zamieszkac
   (`homeTown`, odrodzenie w swiatyni na -5). `Town.MAX_TOWNS` = 8.

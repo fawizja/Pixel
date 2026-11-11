@@ -71,15 +71,12 @@ import pl.fawizja.pixel.world.Position;
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..8; 5-7 wewnetrzny luk, 8 rog) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
- *   -Dpixel.lpcNpcs=0                 NPC w dawnych strojach OTSP zamiast postaci LPC (tylko do porownania)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
  */
 public final class DesktopLauncher {
 
     public static void main(String[] args) {
         pl.fawizja.pixel.client.render.TileArt.exportDir = System.getProperty("pixel.exportArt");
-        // -Dpixel.lpcNpcs=0: NPC w dawnych strojach OTSP (tylko do porownania; domyslnie postacie LPC)
-        if ("0".equals(System.getProperty("pixel.lpcNpcs"))) pl.fawizja.pixel.client.render.TileArt.lpcNpcs = false;
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("Pixel");
         config.setWindowedMode(Integer.getInteger("pixel.width", 1280), Integer.getInteger("pixel.height", 720));
@@ -851,6 +848,26 @@ public final class DesktopLauncher {
                         gs.session().character().depot().add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(it[0]).id(), Integer.parseInt(it[1])));
                     }
                     gs.hud().openDepot(gs.session());
+                }
+                if (open != null && open.startsWith("bless")) {
+                    // podglad blogoslawienstw (z -Dpixel.startLevel=340): bless = lista u kaplana, bless_status = okno stanu,
+                    // bless_death = smierc z pieciu blogoslawienstwami
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
+                    pl.fawizja.pixel.character.Blessing[] all = pl.fawizja.pixel.character.Blessing.values();
+                    if (open.equals("bless_death")) {
+                        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(400) - pc.experience());
+                        for (pl.fawizja.pixel.character.Blessing b : all) if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR) pc.addBlessing(b);
+                        long t = gs.worldTime();
+                        for (int i = 0; i < 3; i++) gs.session().combat().recordDamage("Goblin szaman", 60 + i, t);
+                        gs.session().combat().diedFromPlayer("Kuba", false, t);
+                    } else if (open.equals("bless_status")) {
+                        pc.addBlessing(all[1]); pc.addBlessing(all[3]); pc.addBlessing(all[5]); pc.addBlessing(all[0]);
+                        gs.hud().openInfo("Błogosławieństwa", pl.fawizja.pixel.character.BlessingStatus.rows(pc));
+                    } else {
+                        pc.addBlessing(all[2]);
+                        gs.hud().openBlessings(gs.session());
+                    }
                 }
                 if ("npc".equals(open)) {
                     GameScreen gs = (GameScreen) getScreen();

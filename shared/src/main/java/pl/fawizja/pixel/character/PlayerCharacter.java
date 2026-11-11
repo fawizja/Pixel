@@ -151,7 +151,7 @@ public final class PlayerCharacter {
         running = o.running;
         hasMount = o.hasMount;
         mounted = o.mounted;
-        blessed = o.blessed;
+        blessings = o.blessings;
         premium = o.premium;
         promoted = o.promoted;
         rewardedLevel = o.rewardedLevel;
@@ -308,10 +308,35 @@ public final class PlayerCharacter {
 
     private boolean hasMount;
     private boolean mounted;
-    /** Blogoslawienstwo kaplana: najblizsza smierc zabiera polowe zwyklej straty doswiadczenia. */
-    private boolean blessed;
+    /** Kupione blogoslawienstwa (maska bitow {@link Blessing#bit()}); zuzywaja sie przy smierci. */
+    private int blessings;
 
-    public boolean isBlessed() { return blessed; }
+    /** Poziom do {@link Blessing#ADVENTURER_LEVEL}: wszystkie zwykle i Zrzadzenie losu za darmo (Blogoslawienstwo Poszukiwacza). */
+    public boolean adventurerBlessing() { return level <= Blessing.ADVENTURER_LEVEL; }
+
+    /** Ma blogoslawienstwo (kupione albo z Blogoslawienstwa Poszukiwacza - ono nie obejmuje gorskich). */
+    public boolean hasBlessing(Blessing b) {
+        return (blessings & b.bit()) != 0 || adventurerBlessing() && b.kind() != Blessing.Kind.ENHANCED;
+    }
+
+    /** Czy blogoslawienstwo zostalo kupione (bez Blogoslawienstwa Poszukiwacza). */
+    public boolean boughtBlessing(Blessing b) { return (blessings & b.bit()) != 0; }
+
+    public void addBlessing(Blessing b) { blessings |= b.bit(); }
+
+    public int blessingMask() { return blessings; }
+
+    public void setBlessingMask(int mask) { blessings = mask & 0xFF; }
+
+    /** Ile blogoslawienstw zmniejsza strate (bez Zrzadzenia losu, 0..7). */
+    public int blessingCount() {
+        int n = 0;
+        for (Blessing b : Blessing.values()) if (b.countsForLoss() && hasBlessing(b)) n++;
+        return n;
+    }
+
+    /** Ma jakiekolwiek blogoslawienstwo zmniejszajace strate. */
+    public boolean isBlessed() { return blessingCount() > 0; }
 
     /** Konto premium (kupione u krola w Varden): rejsy duzymi statkami miedzy portami. */
     private boolean premium;
@@ -400,7 +425,6 @@ public final class PlayerCharacter {
         rentMissed = Math.max(0, missed);
     }
     public void setTitle(String key) { title = key == null || key.isEmpty() || key.equals("-") ? null : key; }
-    public void setBlessed(boolean v) { blessed = v; }
 
     public boolean hasMount() { return hasMount; }
     public void setHasMount(boolean v) {
@@ -862,21 +886,31 @@ public final class PlayerCharacter {
 
     public int lightBuffRadius() { return lightBuffMs > 0 ? lightBuffRadius : 0; }
 
-    /** Kara za smierc: utrata doswiadczenia (poziom moze spasc, ale nie ponizej minLevel). */
-    /** Kara za smierc; zwraca true, gdy zuzyto blogoslawienstwo (polowa straty). */
-    public boolean applyDeathPenalty(int minLevel) { return applyDeathPenalty(minLevel, 0); }
+    /** Kara za smierc od potwora; zwraca, ile blogoslawienstw zmniejszylo strate. */
+    public int applyDeathPenalty(int minLevel) { return applyDeathPenalty(minLevel, 0, false, false); }
 
-    /** Jak wyzej; reductionPercent zmniejsza utrate doswiadczenia (charm Blogoslawienstwo, jak w Canary). */
-    public boolean applyDeathPenalty(int minLevel, double reductionPercent) {
-        boolean used = blessed;
+    public int applyDeathPenalty(int minLevel, double reductionPercent) { return applyDeathPenalty(minLevel, reductionPercent, false, false); }
+
+    /**
+     * Kara za smierc (poziom moze spasc, ale nie ponizej minLevel). Kazde blogoslawienstwo zmniejsza strate o 8%;
+     * reductionPercent to dodatkowo talizman Blogoslawienstwo (Canary). Zuzycie jak w Canary: Blogoslawienstwo
+     * Poszukiwacza nic nie zuzywa; smierc z reki gracza bez czerwonej czaszki ({@code skulled} = false) zuzywa tylko
+     * Zrzadzenie losu; kazda inna smierc zabiera piec zwyklych i dwa gorskie (Zrzadzenie losu zostaje).
+     * Zwraca liczbe blogoslawienstw, ktore chronily (0 = brak).
+     */
+    public int applyDeathPenalty(int minLevel, double reductionPercent, boolean pvp, boolean skulled) {
+        int held = blessingCount();
         stats.recordDeath();
-        long after = Balance.experienceAfterDeath(experience, minLevel, used);
+        long after = Balance.experienceAfterDeath(experience, minLevel, held, level);
         if (reductionPercent > 0 && after < experience) after += Math.round((experience - after) * Math.min(100, reductionPercent) / 100.0);
+        if (!adventurerBlessing()) {
+            if (pvp && !skulled && boughtBlessing(Blessing.TWIST)) blessings &= ~Blessing.TWIST.bit();
+            else blessings &= Blessing.TWIST.bit();
+        }
         experience = after;
         level = Balance.levelForExperience(experience);
-        blessed = false;
         refreshWheel(); // utrata poziomu: mniej punktow promocji
-        return used;
+        return held;
     }
 
     /** Odrodzenie z pelnym zdrowiem i mana. */
