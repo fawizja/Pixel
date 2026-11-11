@@ -29,6 +29,11 @@ public final class Actions {
             case "tips_off": s.disableTips(now); return true;
             default:
         }
+        if (action.startsWith("bar:")) {
+            // uklad paska akcji postaci (SpellBar.encode; przecinki i dwukropki w srodku) - zapis w postaci, online na serwerze
+            s.character().setActionBar(action.substring(4));
+            return true;
+        }
         String[] p = action.split(":");
         try {
             switch (p[0]) {
@@ -41,7 +46,23 @@ public final class Actions {
                     return true;
                 case "craft": s.craft(p[1], now); return true;
                 case "fightmode": s.setFightMode(pl.fawizja.pixel.combat.FightMode.parse(p[1]), now); return true;
-                case "item": return useBarItem(s, p[1], now);
+                case "item": // item:klucz (na cel), item:klucz:self (na siebie), item:klucz:at:x:y:z (celownik)
+                    if (p.length == 2) return useBarItem(s, p[1], now);
+                    if (p[2].equals("self")) {
+                        s.useItemAt(p[1], s.character().position(), now);
+                        return true;
+                    }
+                    if (p[2].equals("at") && p.length == 6) {
+                        s.useItemAt(p[1], pos(p, 3), now);
+                        return true;
+                    }
+                    return false;
+                case "slot_at": // slot_at:pole:x:y:z - "Uzyj z..." z plecaka (celownik), takze na siebie
+                    s.useSlotAt(Integer.parseInt(p[1]), pos(p, 2), now);
+                    return true;
+                case "combo": // combo:a+b+c - pierwszy czar gotowy do rzucenia
+                    s.castCombo(java.util.Arrays.asList(p[1].split("\\+")), now);
+                    return true;
                 case "slot_use": s.useSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_equip": s.equipFromSlot(Integer.parseInt(p[1]), now); return true;
                 case "unequip": s.unequip(pl.fawizja.pixel.item.EquipSlot.valueOf(p[1]), now); return true;
@@ -57,6 +78,10 @@ public final class Actions {
         } catch (RuntimeException e) {
             return false; // zle sformatowana akcja od klienta - ignorujemy
         }
+    }
+
+    private static pl.fawizja.pixel.world.Position pos(String[] p, int i) {
+        return new pl.fawizja.pixel.world.Position(Integer.parseInt(p[i]), Integer.parseInt(p[i + 1]), Integer.parseInt(p[i + 2]));
     }
 
     /** Pole paska akcji z mikstura albo runa: pierwsza taka sztuka z plecaka. */

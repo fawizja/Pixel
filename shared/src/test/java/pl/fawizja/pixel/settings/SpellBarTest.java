@@ -57,4 +57,31 @@ class SpellBarTest {
         assertEquals("-,-,-,cast:ok_key,-,cast:extra,-,-,-,-", junk.encode());
         assertFalse(SpellBar.decode(null).isCustom());
     }
+
+    @Test
+    void runeModesAndCombos() {
+        assertTrue(SpellBar.valid("item:great_fireball_rune:aim"));
+        assertTrue(SpellBar.valid("item:great_fireball_rune:self"));
+        assertFalse(SpellBar.valid("item:great_fireball_rune:sideways"));
+        assertEquals(SpellBar.MODE_SELF, SpellBar.mode("item:x_rune:self"));
+        assertEquals(SpellBar.MODE_TARGET, SpellBar.mode("item:x_rune"));
+        assertEquals("item:x_rune:aim", SpellBar.withMode("item:x_rune:self", SpellBar.MODE_AIM));
+        assertEquals("item:x_rune", SpellBar.withMode("item:x_rune:aim", SpellBar.MODE_TARGET));
+        assertEquals("item:x_rune", SpellBar.base("item:x_rune:aim"));
+        assertTrue(SpellBar.valid("combo:mend+ember_bolt"));
+        assertFalse(SpellBar.valid("combo:a+b+c+d+e"), "at most four spells");
+        assertFalse(SpellBar.valid("combo:"));
+        assertEquals("combo:a+b", SpellBar.combo(java.util.List.of("a", "b", "a")));
+        assertNull(SpellBar.combo(java.util.List.of()));
+        assertEquals(java.util.List.of("a", "b"), SpellBar.comboSpells("combo:a+b"));
+        SpellBar bar = new SpellBar();
+        bar.set(0, "combo:mend+spark_bolt+glow");
+        bar.set(1, "combo:spark_bolt");
+        bar.set(2, "item:sudden_death_rune:aim");
+        String[] r = bar.resolve(AUTO, Set.of("mend", "glow"));
+        assertEquals("combo:mend+glow", r[0], "unknown spells drop out of the combo");
+        assertEquals("cast:ember_bolt", r[1], "no known spell left: automatic");
+        assertEquals("item:sudden_death_rune:aim", r[2]);
+        assertEquals(bar.encode(), SpellBar.decode(bar.encode()).encode());
+    }
 }

@@ -238,3 +238,6 @@ grate_tap|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=538,512
 # 2026-11-11: Twierdza Krwawego Kla (brama z mostem nad rozpadlina) i Elandor (pomosty i mosty linowe na drzewach, +1)
 orc_fortress|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=685,560,0
 elandor_trees|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=381,523,1
+bar_rune_modes|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=pickermode -Dpixel.frames=30
+bar_crosshair|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=aim -Dpixel.aimHover=525,521 -Dpixel.frames=30
+bar_combo_mobile|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=pickercombo -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2

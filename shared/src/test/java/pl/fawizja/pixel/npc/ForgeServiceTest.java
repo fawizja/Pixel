@@ -244,8 +244,8 @@ class ForgeServiceTest {
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         pc.backpack().add(new ItemStack(id("iron_sword"), 1, 3));
-        String v8 = codec.encode(pc);
-        assertTrue(v8.startsWith("PIXELSAVE 8\n"));
+        String v8 = codec.encode(pc); // biezacy zapis (v9: pasek akcji)
+        assertTrue(v8.startsWith("PIXELSAVE " + CharacterCodec.CURRENT_VERSION + "\n"));
         String body = v8.substring(v8.indexOf('\n') + 1, v8.lastIndexOf("crc="));
         StringBuilder old = new StringBuilder();
         for (String line : body.split("\n", -1)) if (!line.startsWith("forge=")) old.append(line).append('\n');
