@@ -189,7 +189,7 @@ public final class GuildRegistry {
         StringBuilder sb = new StringBuilder();
         for (Guild g : byName.values()) {
             sb.append(g.name).append(';').append(String.join(",", g.members));
-            if (g.treasury > 0) sb.append(Messages.get("guild_registry.bank")).append(g.treasury);
+            if (g.treasury > 0) sb.append(";bank=").append(g.treasury);
             if (g.motd != null) sb.append(';').append(g.motd);
             sb.append('\n');
         }

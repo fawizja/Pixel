@@ -1,0 +1,751 @@
+# kind;key;field;text - nazwy danych (zrodlo: polski w CSV z danymi); brak wiersza = polski
+item;gold_coin;name;Gold Coin
+item;platinum_coin;name;Platinum Coin
+item;crystal_coin;name;Crystal Coin
+item;leather_helmet;name;Leather Helmet
+item;leather_armor;name;Leather Armor
+item;leather_legs;name;Leather Legs
+item;leather_boots;name;Leather Boots
+item;hunting_spear;name;Hunting Spear
+item;wooden_shield;name;Wooden Shield
+item;wand_of_embers;name;Wand of Embers
+item;thornroot_rod;name;Thornroot Rod
+item;cloth_wraps;name;Cloth Wraps
+item;training_sword;name;Training Sword
+item;health_potion;name;Health Potion
+item;mana_potion;name;Mana Potion
+item;torch;name;Torch
+item;rope;name;Rope
+item;shovel;name;Shovel
+item;fishing_rod;name;Fishing Rod
+item;worm;name;Worm
+item;blank_rune;name;Blank Rune
+item;bread;name;Bread
+item;spear;name;Spear
+item;meat;name;Meat
+item;wolf_pelt;name;Wolf Pelt
+item;boar_tusk;name;Boar Tusk
+item;spider_silk;name;Spider Silk
+item;goblin_ear;name;Goblin Ear
+item;bone;name;Bone
+item;troll_hide;name;Troll Hide
+item;crystal_shard;name;Crystal Shard
+item;iron_ore;name;Iron Ore
+item;iron_sword;name;Iron Sword
+item;studded_armor;name;Studded Armor
+item;bone_shield;name;Bone Shield
+item;wand_of_sparks;name;Wand of Sparks
+item;rod_of_frost;name;Rod of Frost
+item;iron_knuckles;name;Iron Knuckles
+item;miner_helmet;name;Miner Helmet
+item;grimtooth_crown;name;Grimtooth Crown
+item;steel_spear;name;Steel Spear
+item;great_health_potion;name;Great Health Potion
+item;great_mana_potion;name;Great Mana Potion
+item;fireburst_rune;name;Fireburst Rune
+item;boulder_rune;name;Boulder Rune
+item;healing_rune;name;Healing Rune
+item;fish;name;Fish
+item;pearl;name;Pearl
+item;frost_pelt;name;Frost Pelt
+item;yeti_fur;name;Yeti Fur
+item;frozen_heart;name;Frozen Heart
+item;croc_leather;name;Croc Leather
+item;snake_skin;name;Snake Skin
+item;jungle_idol;name;Jungle Idol
+item;scorpion_tail;name;Scorpion Tail
+item;hyena_fang;name;Hyena Fang
+item;mummy_wrap;name;Mummy Wrap
+item;scarab_gem;name;Scarab Gem
+item;frost_blade;name;Frost Blade
+item;fur_armor;name;Fur Armor
+item;serpent_spear;name;Serpent Spear
+item;wand_of_storms;name;Wand of Storms
+item;rod_of_vines;name;Rod of Vines
+item;desert_knuckles;name;Desert Knuckles
+item;sandstone_shield;name;Sandstone Shield
+item;scarab_helmet;name;Scarab Helmet
+item;croc_legs;name;Croc Legs
+item;frost_tiara;name;Frost Tiara
+item;colossus_core;name;Colossus Core
+item;pharaoh_scepter;name;Pharaoh Scepter
+item;obsidian_shard;name;Obsidian Shard
+item;glacial_core;name;Glacial Core
+item;shadow_essence;name;Shadow Essence
+item;abyssal_ember;name;Abyssal Ember
+item;magma_spear;name;Magma Spear
+item;obsidian_wand;name;Obsidian Wand
+item;rod_of_hoarfrost;name;Rod of Hoarfrost
+item;molten_knuckles;name;Molten Knuckles
+item;frostfang_spear;name;Frostfang Spear
+item;wand_of_inferno;name;Wand of Inferno
+item;rod_of_stoneroot;name;Rod of Stoneroot
+item;frostbound_fists;name;Frostbound Fists
+item;shadowpiercer;name;Shadowpiercer
+item;stormcaller_wand;name;Stormcaller Wand
+item;rod_of_twilight;name;Rod of Twilight
+item;umbral_grips;name;Umbral Grips
+item;obsidian_armor;name;Obsidian Armor
+item;obsidian_helmet;name;Obsidian Helmet
+item;obsidian_legs;name;Obsidian Legs
+item;obsidian_shield;name;Obsidian Shield
+item;glacial_plate;name;Glacial Plate
+item;glacial_helm;name;Glacial Helm
+item;glacial_legs;name;Glacial Legs
+item;glacial_shield;name;Glacial Shield
+item;shadowweave_armor;name;Shadowweave Armor
+item;shadow_hood;name;Shadow Hood
+item;shadow_legs;name;Shadow Legs
+item;shadow_aegis;name;Shadow Aegis
+item;crown_of_the_abyss;name;Crown of the Abyss
+item;dawnspear;name;Dawnspear
+item;starfall_wand;name;Starfall Wand
+item;rod_of_eternal_winter;name;Rod of Eternal Winter
+item;fists_of_the_abyss;name;Fists of the Abyss
+item;supreme_health_potion;name;Supreme Health Potion
+item;supreme_mana_potion;name;Supreme Mana Potion
+item;ice_cod;name;Ice Cod
+item;swamp_eel;name;Swamp Eel
+item;oasis_carp;name;Oasis Carp
+item;saddle;name;Saddle
+item;return_scroll;name;Return Scroll
+item;pet_dog;name;Pet Dog
+item;pet_cat;name;Pet Cat
+item;pet_raven;name;Pet Raven
+item;pet_fennec;name;Pet Fennec
+item;pet_gull;name;Pet Gull
+item;pet_parrot;name;Pet Parrot
+item;exp_scroll;name;Exp Scroll
+item;challenge_scroll;name;Challenge Scroll
+item;strong_health_potion;name;Strong Health Potion
+item;strong_mana_potion;name;Strong Mana Potion
+item;healing_herb;name;Healing Herb
+item;tidal_harpoon;name;Tidal Harpoon
+item;wand_of_the_deep;name;Wand of the Deep
+item;rod_of_tides;name;Rod of Tides
+item;reef_gauntlets;name;Reef Gauntlets
+item;coral_helmet;name;Coral Helmet
+item;coral_armor;name;Coral Armor
+item;coral_legs;name;Coral Legs
+item;coral_shield;name;Coral Shield
+item;great_fireball_rune;name;Great Fireball Rune
+item;avalanche_rune;name;Avalanche Rune
+item;sudden_death_rune;name;Sudden Death Rune
+item;ultimate_healing_rune;name;Ultimate Healing Rune
+item;great_spirit_potion;name;Great Spirit Potion
+item;ultimate_spirit_potion;name;Ultimate Spirit Potion
+item;ultimate_mana_potion;name;Ultimate Mana Potion
+item;ultimate_health_potion;name;Ultimate Health Potion
+item;backpack;name;Backpack
+item;wyvern_scale;name;Wyvern Scale
+item;crab_pincer;name;Crab Pincer
+item;pirate_hook;name;Pirate Hook
+item;powder_horn;name;Powder Horn
+item;drowned_ring;name;Drowned Ring
+item;mist_essence;name;Mist Essence
+item;drake_horn;name;Drake Horn
+item;hand_axe;name;Hand Axe
+item;battle_axe;name;Battle Axe
+item;mace;name;Mace
+item;desert_scimitar;name;Desert Scimitar
+item;barbarian_axe;name;Barbarian Axe
+item;knight_sword;name;Knight Sword
+item;war_hammer;name;War Hammer
+item;crusader_axe;name;Crusader Axe
+item;magma_cleaver;name;Magma Cleaver
+item;obsidian_axe;name;Obsidian Axe
+item;coral_warhammer;name;Coral Warhammer
+item;glacier_axe;name;Glacier Axe
+item;frost_longsword;name;Frost Longsword
+item;umbral_blade;name;Umbral Blade
+item;skull_axe;name;Skull Axe
+item;abyssal_greatsword;name;Abyssal Greatsword
+item;abyss_hammer;name;Abyss Hammer
+item;short_bow;name;Short Bow
+item;hunting_bow;name;Hunting Bow
+item;crossbow;name;Crossbow
+item;elven_bow;name;Elven Bow
+item;serpent_bow;name;Serpent Bow
+item;composite_bow;name;Composite Bow
+item;heavy_crossbow;name;Heavy Crossbow
+item;magma_bow;name;Magma Bow
+item;tidal_bow;name;Tidal Bow
+item;frost_bow;name;Frost Bow
+item;glacier_crossbow;name;Glacier Crossbow
+item;shadow_bow;name;Shadow Bow
+item;dawn_bow;name;Dawn Bow
+item;strength_potion;name;Strength Potion
+item;stoneskin_potion;name;Stoneskin Potion
+item;swiftness_potion;name;Swiftness Potion
+item;luck_potion;name;Luck Potion
+item;black_feather;name;Black Feather
+item;worm_slime;name;Worm Slime
+item;chitin_plate;name;Chitin Plate
+item;ectoplasm;name;Ectoplasm
+item;gargoyle_shard;name;Gargoyle Shard
+item;crow_feather_hood;name;Crow Feather Hood
+item;mirewood_rod;name;Mirewood Rod
+item;blueberry;name;Blueberry
+item;raspberry;name;Raspberry
+item;forge_sliver;name;Forge Sliver
+item;exalted_core;name;Exalted Core
+item;obsidian_boots;name;Obsidian Boots
+item;coral_boots;name;Coral Boots
+item;glacial_boots;name;Glacial Boots
+item;shadow_boots;name;Shadow Boots
+item;abyssal_treads;name;Abyssal Treads
+item;lesser_guardian_gem;name;Lesser Guardian Gem
+item;guardian_gem;name;Guardian Gem
+item;greater_guardian_gem;name;Greater Guardian Gem
+item;lesser_marksman_gem;name;Lesser Marksman Gem
+item;marksman_gem;name;Marksman Gem
+item;greater_marksman_gem;name;Greater Marksman Gem
+item;lesser_sage_gem;name;Lesser Sage Gem
+item;sage_gem;name;Sage Gem
+item;greater_sage_gem;name;Greater Sage Gem
+item;lesser_mystic_gem;name;Lesser Mystic Gem
+item;mystic_gem;name;Mystic Gem
+item;greater_mystic_gem;name;Greater Mystic Gem
+item;lesser_spiritualist_gem;name;Lesser Spiritualist Gem
+item;spiritualist_gem;name;Spiritualist Gem
+item;greater_spiritualist_gem;name;Greater Spiritualist Gem
+item;lesser_gem_fragment;name;Lesser Gem Fragment
+item;greater_gem_fragment;name;Greater Gem Fragment
+item;rooster_helmet;name;Rooster Helmet
+item;rooster_armor;name;Rooster Armor
+item;rooster_legs;name;Rooster Legs
+item;rooster_boots;name;Rooster Boots
+item;rooster_shield;name;Rooster Shield
+item;rooster_sword;name;Rooster Sword
+item;rooster_club;name;Rooster Club
+item;rooster_bow;name;Rooster Bow
+item;rooster_wand;name;Rooster Wand
+item;rooster_rod;name;Rooster Rod
+item;rooster_spellbook;name;Rooster Spellbook
+item;rooster_amulet;name;Rooster Amulet
+item;candy_helmet;name;Candy Helmet
+item;candy_armor;name;Candy Armor
+item;candy_legs;name;Candy Legs
+item;candy_boots;name;Candy Boots
+item;candy_shield;name;Candy Shield
+item;candy_sword;name;Candy Sword
+item;candy_bow;name;Candy Bow
+item;candy_wand;name;Candy Wand
+item;candy_spellbook;name;Candy Spellbook
+item;candy_amulet;name;Candy Amulet
+item;plague_helmet;name;Plague Helmet
+item;plague_mask;name;Plague Mask
+item;plague_armor;name;Plague Armor
+item;plague_legs;name;Plague Legs
+item;plague_boots;name;Plague Boots
+item;plague_shield;name;Plague Shield
+item;plague_sword;name;Plague Sword
+item;plague_axe;name;Plague Axe
+item;plague_bow;name;Plague Bow
+item;plague_wand;name;Plague Wand
+item;plague_rod;name;Plague Rod
+item;plague_spellbook;name;Plague Spellbook
+item;blizzard_helmet;name;Blizzard Helmet
+item;blizzard_armor;name;Blizzard Armor
+item;blizzard_legs;name;Blizzard Legs
+item;blizzard_boots;name;Blizzard Boots
+item;blizzard_shield;name;Blizzard Shield
+item;blizzard_sword;name;Blizzard Sword
+item;blizzard_axe;name;Blizzard Axe
+item;blizzard_bow;name;Blizzard Bow
+item;blizzard_wand;name;Blizzard Wand
+item;blizzard_rod;name;Blizzard Rod
+item;blizzard_spellbook;name;Blizzard Spellbook
+item;blizzard_amulet;name;Blizzard Amulet
+item;dragon_helmet;name;Dragon Helmet
+item;dragon_armor;name;Dragon Armor
+item;dragon_legs;name;Dragon Legs
+item;dragon_boots;name;Dragon Boots
+item;dragon_shield;name;Dragon Shield
+item;dragon_sword;name;Dragon Sword
+item;dragon_axe;name;Dragon Axe
+item;dragon_bow;name;Dragon Bow
+item;dragon_wand;name;Dragon Wand
+item;dragon_rod;name;Dragon Rod
+item;dragon_spellbook;name;Dragon Spellbook
+item;dragon_amulet;name;Dragon Amulet
+item;sun_helmet;name;Sun Helmet
+item;sun_armor;name;Sun Armor
+item;sun_legs;name;Sun Legs
+item;sun_boots;name;Sun Boots
+item;sun_shield;name;Sun Shield
+item;sun_sword;name;Sun Sword
+item;sun_axe;name;Sun Axe
+item;sun_bow;name;Sun Bow
+item;sun_wand;name;Sun Wand
+item;sun_rod;name;Sun Rod
+item;sun_spellbook;name;Sun Spellbook
+item;sun_amulet;name;Sun Amulet
+item;phoenix_helmet;name;Phoenix Helmet
+item;phoenix_armor;name;Phoenix Armor
+item;phoenix_legs;name;Phoenix Legs
+item;phoenix_boots;name;Phoenix Boots
+item;phoenix_shield;name;Phoenix Shield
+item;phoenix_sword;name;Phoenix Sword
+item;phoenix_axe;name;Phoenix Axe
+item;phoenix_mace;name;Phoenix Mace
+item;phoenix_bow;name;Phoenix Bow
+item;phoenix_wand;name;Phoenix Wand
+item;phoenix_spellbook;name;Phoenix Spellbook
+item;phoenix_amulet;name;Phoenix Amulet
+item;deep_helmet;name;Deep Helmet
+item;deep_armor;name;Deep Armor
+item;deep_legs;name;Deep Legs
+item;deep_boots;name;Deep Boots
+item;deep_shield;name;Deep Shield
+item;deep_trident;name;Deep Trident
+item;deep_hammer;name;Deep Hammer
+item;deep_bow;name;Deep Bow
+item;deep_wand;name;Deep Wand
+item;deep_rod;name;Deep Rod
+item;deep_spellbook;name;Deep Spellbook
+item;deep_amulet;name;Deep Amulet
+item;moon_helmet;name;Moon Helmet
+item;moon_armor;name;Moon Armor
+item;moon_legs;name;Moon Legs
+item;moon_boots;name;Moon Boots
+item;moon_shield;name;Moon Shield
+item;moon_sword;name;Moon Sword
+item;moon_axe;name;Moon Axe
+item;moon_bow;name;Moon Bow
+item;moon_wand;name;Moon Wand
+item;moon_spellbook;name;Moon Spellbook
+item;moon_amulet;name;Moon Amulet
+item;angel_helmet;name;Angel Helmet
+item;angel_armor;name;Angel Armor
+item;angel_legs;name;Angel Legs
+item;angel_boots;name;Angel Boots
+item;angel_shield;name;Angel Shield
+item;angel_sword;name;Angel Sword
+item;angel_axe;name;Angel Axe
+item;angel_bow;name;Angel Bow
+item;angel_wand;name;Angel Wand
+item;angel_rod;name;Angel Rod
+item;angel_spellbook;name;Angel Spellbook
+item;angel_amulet;name;Angel Amulet
+item;infernal_helmet;name;Infernal Helmet
+item;infernal_armor;name;Infernal Armor
+item;infernal_legs;name;Infernal Legs
+item;infernal_boots;name;Infernal Boots
+item;infernal_shield;name;Infernal Shield
+item;infernal_sword;name;Infernal Sword
+item;infernal_axe;name;Infernal Axe
+item;infernal_bow;name;Infernal Bow
+item;infernal_wand;name;Infernal Wand
+item;infernal_rod;name;Infernal Rod
+item;infernal_spellbook;name;Infernal Spellbook
+item;infernal_amulet;name;Infernal Amulet
+item;forest_hood;name;Forest Hood
+item;traveler_boots;name;Traveler Boots
+item;wolf_spellbook;name;Wolf Spellbook
+item;horned_helmet;name;Horned Helmet
+item;gem_shield;name;Gem Shield
+item;crystal_shortsword;name;Crystal Shortsword
+item;crystal_sword;name;Crystal Sword
+item;emerald_amulet;name;Emerald Amulet
+item;light_magic_missile_rune;name;Light Magic Missile Rune
+item;heavy_magic_missile_rune;name;Heavy Magic Missile Rune
+item;icicle_rune;name;Icicle Rune
+item;holy_missile_rune;name;Holy Missile Rune
+item;thunderstorm_rune;name;Thunderstorm Rune
+item;stone_shower_rune;name;Stone Shower Rune
+item;explosion_rune;name;Explosion Rune
+item;antidote_rune;name;Antidote Rune
+item;poison_field_rune;name;Poison Field Rune
+item;fire_field_rune;name;Fire Field Rune
+item;energy_field_rune;name;Energy Field Rune
+item;poison_bomb_rune;name;Poison Bomb Rune
+item;fire_bomb_rune;name;Fire Bomb Rune
+item;energy_bomb_rune;name;Energy Bomb Rune
+item;poison_wall_rune;name;Poison Wall Rune
+item;fire_wall_rune;name;Fire Wall Rune
+item;energy_wall_rune;name;Energy Wall Rune
+item;magic_wall_rune;name;Magic Wall Rune
+item;wild_growth_rune;name;Wild Growth Rune
+item;destroy_field_rune;name;Destroy Field Rune
+item;soulfire_rune;name;Soulfire Rune
+item;paralyse_rune;name;Paralyse Rune
+item;convince_creature_rune;name;Convince Creature Rune
+item;animate_dead_rune;name;Animate Dead Rune
+item;warlord_helmet;name;Warlord Helmet
+monster;sewer_rat;name;Sewer Rat
+monster;giant_rat;name;Giant Rat
+monster;wolf;name;Wolf
+monster;boar;name;Boar
+monster;forest_spider;name;Forest Spider
+monster;bandit;name;Bandit
+monster;goblin;name;Goblin
+monster;goblin_shaman;name;Goblin Shaman
+monster;skeleton;name;Skeleton
+monster;cave_troll;name;Cave Troll
+monster;crystal_golem;name;Crystal Golem
+monster;grimtooth;name;Grimtooth
+monster;snow_wolf;name;Snow Wolf
+monster;yeti;name;Yeti
+monster;frost_witch;name;Frost Witch
+monster;ice_golem;name;Ice Golem
+monster;crocodile;name;Crocodile
+monster;jungle_serpent;name;Jungle Serpent
+monster;jungle_hunter;name;Jungle Hunter
+monster;temple_guardian;name;Temple Guardian
+monster;hyena;name;Hyena
+monster;scorpion;name;Scorpion
+monster;sand_wraith;name;Sand Wraith
+monster;mummy;name;Mummy
+monster;frost_queen;name;Frost Queen
+monster;ruin_colossus;name;Ruin Colossus
+monster;pharaoh;name;Pharaoh
+monster;cursed_treant;name;Cursed Treant
+monster;wraith_knight;name;Wraith Knight
+monster;fire_elemental;name;Fire Elemental
+monster;lava_golem;name;Lava Golem
+monster;ignaroth;name;Ignaroth
+monster;frost_giant;name;Frost Giant
+monster;storm_harpy;name;Storm Harpy
+monster;ice_dragon;name;Ice Dragon
+monster;hrimgar;name;Hrimgar
+monster;shadow_stalker;name;Shadow Stalker
+monster;sand_titan;name;Sand Titan
+monster;void_priest;name;Void Priest
+monster;khazuul;name;Khazuul
+monster;abyssal_demon;name;Abyssal Demon
+monster;bone_dragon;name;Bone Dragon
+monster;abyss_lord;name;Abyss Lord
+monster;morgath;name;Morgath
+monster;wyvern;name;Wyvern
+monster;coral_crab;name;Coral Crab
+monster;drowned_sailor;name;Drowned Sailor
+monster;pirate_cutthroat;name;Pirate Cutthroat
+monster;pirate_gunner;name;Pirate Gunner
+monster;mist_wraith;name;Mist Wraith
+monster;magma_drake;name;Magma Drake
+monster;wyvern_matriarch;name;Wyvern Matriarch
+monster;bloodbeard;name;Bloodbeard
+monster;skaldra;name;Skaldra
+monster;morvena;name;Morvena
+monster;pyrrax;name;Pyrrax
+monster;orc_warrior;name;Orc Warrior
+monster;orc_shaman;name;Orc Shaman
+monster;orc_berserker;name;Orc Berserker
+monster;orc_warlord;name;Orc Warlord
+monster;burrow_larva;name;Burrow Larva
+monster;carrion_crow;name;Carrion Crow
+monster;snare_setter;name;Snare Setter
+monster;cave_centipede;name;Cave Centipede
+monster;quarry_brute;name;Quarry Brute
+monster;spark_wisp;name;Spark Wisp
+monster;candle_acolyte;name;Candle Acolyte
+monster;tunnel_fence;name;Tunnel Fence
+monster;barrow_lantern;name;Barrow Lantern
+monster;frost_boar;name;Frost Boar
+monster;swamp_hornet;name;Swamp Hornet
+monster;sand_devourer;name;Sand Devourer
+monster;striped_prowler;name;Striped Prowler
+monster;bog_wraith;name;Bog Wraith
+monster;rime_crawler;name;Rime Crawler
+monster;gilded_beetle;name;Gilded Beetle
+monster;frost_centipede;name;Frost Centipede
+monster;dune_zealot;name;Dune Zealot
+monster;stone_sentinel;name;Stone Sentinel
+monster;sand_gargoyle;name;Sand Gargoyle
+monster;blade_warden;name;Blade Warden
+monster;crimson_shade;name;Crimson Shade
+monster;ember_beetle;name;Ember Beetle
+monster;ash_magus;name;Ash Magus
+monster;dune_drake;name;Dune Drake
+monster;storm_wisp;name;Storm Wisp
+monster;rime_gargoyle;name;Rime Gargoyle
+monster;dusk_gargoyle;name;Dusk Gargoyle
+monster;shadow_centipede;name;Shadow Centipede
+monster;abyss_crawler;name;Abyss Crawler
+monster;winged_spawn;name;Winged Spawn
+monster;obsidian_sentinel;name;Obsidian Sentinel
+monster;wroniec;name;Crowling
+monster;szlamiara;name;Slime Weaver
+monster;velmira;name;Velmira
+monster;suweren;name;Sovereign
+monster;orc;name;Orc
+monster;orc_spearman;name;Orc Spearman
+monster;orc_rider;name;Orc Rider
+monster;orc_marauder;name;Orc Marauder
+monster;orc_leader;name;Orc Leader
+monster;orc_cult_priest;name;Orc Cult Priest
+monster;orc_cult_fanatic;name;Orc Cult Fanatic
+monster;urgoth;name;Urgoth
+monster;elf;name;Elf
+monster;elf_scout;name;Elf Scout
+monster;elf_arcanist;name;Elf Arcanist
+monster;mine_grub;name;Mine Grub
+monster;dwarf;name;Dwarf
+monster;dwarf_miner;name;Dwarf Miner
+monster;dwarf_soldier;name;Dwarf Soldier
+monster;deep_worm;name;Deep Worm
+monster;dwarf_warden;name;Dwarf Warden
+monster;rock_golem;name;Rock Golem
+monster;dwarf_earthcaller;name;Dwarf Earthcaller
+monster;earth_spirit;name;Earth Spirit
+monster;deep_behemot;name;Deep Behemoth
+monster;cinder_salamander;name;Cinder Salamander
+monster;ember_hound;name;Ember Hound
+monster;magma_colossus;name;Magma Colossus
+monster;grove_huntress;name;Grove Huntress
+monster;grove_shieldmaiden;name;Grove Shieldmaiden
+monster;grove_crone;name;Grove Crone
+monster;grove_matriarch;name;Grove Matriarch
+monster;oneeye_brute;name;One-Eye Brute
+monster;oneeye_hauler;name;One-Eye Hauler
+monster;oneeye_smith;name;One-Eye Smith
+spell;magic_patch;name;Magic Patch
+spell;light_healing;name;Light Healing
+spell;intense_healing;name;Intense Healing
+spell;ultimate_healing;name;Ultimate Healing
+spell;restoration;name;Restoration
+spell;heal_friend;name;Heal Friend
+spell;mass_healing;name;Mass Healing
+spell;natures_embrace;name;Nature's Embrace
+spell;divine_healing;name;Divine Healing
+spell;salvation;name;Salvation
+spell;bruise_bane;name;Bruise Bane
+spell;wound_cleansing;name;Wound Cleansing
+spell;intense_wound_cleansing;name;Intense Wound Cleansing
+spell;fair_wound_cleansing;name;Fair Wound Cleansing
+spell;recovery;name;Recovery
+spell;intense_recovery;name;Intense Recovery
+spell;spirit_mend;name;Spirit Mend
+spell;restore_balance;name;Restore Balance
+spell;mass_spirit_mend;name;Mass Spirit Mend
+spell;cure_poison;name;Cure Poison
+spell;cure_electrification;name;Cure Electrification
+spell;cure_burning;name;Cure Burning
+spell;cure_bleeding;name;Cure Bleeding
+spell;cure_curse;name;Cure Curse
+spell;swift_jab;name;Swift Jab
+spell;tiger_strike;name;Tiger Strike
+spell;double_jab;name;Double Jab
+spell;greater_tiger_clash;name;Greater Tiger Clash
+spell;mystic_repulse;name;Mystic Repulse
+spell;flurry_of_blows;name;Flurry of Blows
+spell;sweeping_takedown;name;Sweeping Takedown
+spell;chained_penance;name;Chained Penance
+spell;greater_flurry_of_blows;name;Greater Flurry of Blows
+spell;forceful_uppercut;name;Forceful Uppercut
+spell;devastating_knockout;name;Devastating Knockout
+spell;spiritual_outburst;name;Spiritual Outburst
+spell;virtue_of_harmony;name;Virtue of Harmony
+spell;virtue_of_justice;name;Virtue of Justice
+spell;virtue_of_sustain;name;Virtue of Sustain
+spell;focus_serenity;name;Focus Serenity
+spell;focus_harmony;name;Focus Harmony
+spell;buzz;name;Buzz
+spell;scorch;name;Scorch
+spell;apprentices_strike;name;Apprentice's Strike
+spell;energy_strike;name;Energy Strike
+spell;flame_strike;name;Flame Strike
+spell;death_strike;name;Death Strike
+spell;fire_wave;name;Fire Wave
+spell;energy_beam;name;Energy Beam
+spell;ignite;name;Ignite
+spell;great_energy_beam;name;Great Energy Beam
+spell;electrify;name;Electrify
+spell;great_fire_wave;name;Great Fire Wave
+spell;energy_wave;name;Energy Wave
+spell;lightning;name;Lightning
+spell;rage_of_the_skies;name;Rage of the Skies
+spell;hells_core;name;Hell's Core
+spell;strong_flame_strike;name;Strong Flame Strike
+spell;curse;name;Curse
+spell;strong_energy_strike;name;Strong Energy Strike
+spell;ultimate_flame_strike;name;Ultimate Flame Strike
+spell;ultimate_energy_strike;name;Ultimate Energy Strike
+spell;mud_attack;name;Mud Attack
+spell;chill_out;name;Chill Out
+spell;terra_strike;name;Terra Strike
+spell;ice_strike;name;Ice Strike
+spell;physical_strike;name;Physical Strike
+spell;ice_wave;name;Ice Wave
+spell;terra_wave;name;Terra Wave
+spell;strong_ice_wave;name;Strong Ice Wave
+spell;envenom;name;Envenom
+spell;wrath_of_nature;name;Wrath of Nature
+spell;eternal_winter;name;Eternal Winter
+spell;strong_terra_strike;name;Strong Terra Strike
+spell;strong_ice_strike;name;Strong Ice Strike
+spell;ultimate_terra_strike;name;Ultimate Terra Strike
+spell;ultimate_ice_strike;name;Ultimate Ice Strike
+spell;lesser_ethereal_spear;name;Lesser Ethereal Spear
+spell;ethereal_spear;name;Ethereal Spear
+spell;divine_missile;name;Divine Missile
+spell;divine_caldera;name;Divine Caldera
+spell;holy_flash;name;Holy Flash
+spell;strong_ethereal_spear;name;Strong Ethereal Spear
+spell;divine_dazzle;name;Divine Dazzle
+spell;lesser_front_sweep;name;Lesser Front Sweep
+spell;brutal_strike;name;Brutal Strike
+spell;whirlwind_throw;name;Whirlwind Throw
+spell;groundshaker;name;Groundshaker
+spell;berserk;name;Berserk
+spell;inflict_wound;name;Inflict Wound
+spell;front_sweep;name;Front Sweep
+spell;fierce_berserk;name;Fierce Berserk
+spell;annihilation;name;Annihilation
+spell;executioners_throw;name;Executioner's Throw
+spell;light;name;Light
+spell;magic_rope;name;Magic Rope
+spell;levitate_up;name;Levitate Up
+spell;levitate_down;name;Levitate Down
+spell;great_light;name;Great Light
+spell;haste;name;Haste
+spell;strong_haste;name;Strong Haste
+spell;magic_shield;name;Magic Shield
+spell;food;name;Food
+spell;creature_illusion;name;Creature Illusion
+spell;summon_creature;name;Summon Creature
+spell;charge;name;Charge
+spell;challenge;name;Challenge
+spell;invisibility;name;Invisibility
+spell;ultimate_light;name;Ultimate Light
+spell;protector;name;Protector
+spell;swift_foot;name;Swift Foot
+spell;blood_rage;name;Blood Rage
+spell;sharpshooter;name;Sharpshooter
+spell;chivalrous_challenge;name;Chivalrous Challenge
+spell;conjure_spears;name;Conjure Spears
+spell;blank_rune_spell;name;Blank Rune Spell
+spell;enchant_poison_field;name;Rune of Poison Field
+spell;enchant_fire_field;name;Rune of Fire Field
+spell;enchant_healing;name;Rune of Healing
+spell;enchant_antidote;name;Rune of Antidote
+spell;enchant_light_missile;name;Rune of Light Missile
+spell;enchant_convince;name;Rune of Convince
+spell;enchant_destroy_field;name;Rune of Destroy Field
+spell;enchant_energy_field;name;Rune of Energy Field
+spell;enchant_boulder;name;Rune of Boulder
+spell;enchant_ultimate_healing;name;Rune of Ultimate Healing
+spell;enchant_heavy_missile;name;Rune of Heavy Missile
+spell;enchant_poison_bomb;name;Rune of Poison Bomb
+spell;enchant_fireburst;name;Rune of Fireburst
+spell;enchant_fire_bomb;name;Rune of Fire Bomb
+spell;enchant_soulfire;name;Rune of Soulfire
+spell;enchant_wild_growth;name;Rune of Wild Growth
+spell;enchant_animate_dead;name;Rune of Animate Dead
+spell;enchant_holy_missile;name;Rune of Holy Missile
+spell;enchant_icicle;name;Rune of Icicle
+spell;enchant_stone_shower;name;Rune of Stone Shower
+spell;enchant_thunderstorm;name;Rune of Thunderstorm
+spell;enchant_poison_wall;name;Rune of Poison Wall
+spell;enchant_great_fireball;name;Rune of Great Fireball
+spell;enchant_avalanche;name;Rune of Avalanche
+spell;enchant_explosion;name;Rune of Explosion
+spell;enchant_magic_wall;name;Rune of Magic Wall
+spell;enchant_fire_wall;name;Rune of Fire Wall
+spell;enchant_energy_bomb;name;Rune of Energy Bomb
+spell;enchant_energy_wall;name;Rune of Energy Wall
+spell;enchant_sudden_death;name;Rune of Sudden Death
+spell;enchant_paralyse;name;Rune of Paralyse
+spell;light_magic_missile_rune;name;Light Magic Missile (Rune)
+spell;boulder_rune;name;Boulder (Rune)
+spell;heavy_magic_missile_rune;name;Heavy Magic Missile (Rune)
+spell;fireburst_rune;name;Fireburst (Rune)
+spell;icicle_rune;name;Icicle (Rune)
+spell;holy_missile_rune;name;Holy Missile (Rune)
+spell;sudden_death_rune;name;Sudden Death (Rune)
+spell;great_fireball_rune;name;Great Fireball (Rune)
+spell;avalanche_rune;name;Avalanche (Rune)
+spell;thunderstorm_rune;name;Thunderstorm (Rune)
+spell;stone_shower_rune;name;Stone Shower (Rune)
+spell;explosion_rune;name;Explosion (Rune)
+spell;healing_rune;name;Healing (Rune)
+spell;ultimate_healing_rune;name;Ultimate Healing (Rune)
+spell;antidote_rune;name;Antidote (Rune)
+spell;poison_field_rune;name;Poison Field (Rune)
+spell;fire_field_rune;name;Fire Field (Rune)
+spell;energy_field_rune;name;Energy Field (Rune)
+spell;poison_bomb_rune;name;Poison Bomb (Rune)
+spell;fire_bomb_rune;name;Fire Bomb (Rune)
+spell;energy_bomb_rune;name;Energy Bomb (Rune)
+spell;poison_wall_rune;name;Poison Wall (Rune)
+spell;fire_wall_rune;name;Fire Wall (Rune)
+spell;energy_wall_rune;name;Energy Wall (Rune)
+spell;magic_wall_rune;name;Magic Wall (Rune)
+spell;wild_growth_rune;name;Wild Growth (Rune)
+spell;destroy_field_rune;name;Destroy Field (Rune)
+spell;soulfire_rune;name;Soulfire (Rune)
+spell;paralyse_rune;name;Paralyse (Rune)
+spell;convince_creature_rune;name;Convince Creature (Rune)
+spell;animate_dead_rune;name;Animate Dead (Rune)
+spell;avatar_of_steel;name;Avatar of Steel
+spell;avatar_of_light;name;Avatar of Light
+spell;avatar_of_storm;name;Avatar of Storm
+spell;avatar_of_nature;name;Avatar of Nature
+spell;avatar_of_balance;name;Avatar of Balance
+spell;divine_empowerment;name;Divine Empowerment
+spell;divine_grenade;name;Divine Grenade
+spell;great_death_beam;name;Great Death Beam
+spell;terra_burst;name;Terra Burst
+spell;ice_burst;name;Ice Burst
+quest;varden_wolves;name;Wolf Plague
+quest;varden_ears;name;Goblin Ears
+quest;varden_trolls;name;Trolls in the Depths
+quest;varden_king;name;King of the Mine
+quest;frost_pelts;name;Pelts for Winter
+quest;frost_yeti;name;Yeti Hunt
+quest;frost_queen;name;The Frozen Crown
+quest;selv_crocs;name;Crocodiles in the Canals
+quest;selv_idols;name;Lost Idols
+quest;selv_colossus;name;Heart of the Ruins
+quest;qas_scorpions;name;Scorpion Stingers
+quest;qas_mummies;name;Peace for the Dead
+quest;qas_pharaoh;name;The Pharaoh's Curse
+quest;camp_treants;name;The Cursed Forest
+quest;camp_knights;name;The Ghostly Guard
+quest;camp_golems;name;River of Lava
+quest;camp_ignaroth;name;Lord of the Volcano
+quest;camp_giants;name;Frost Giants
+quest;camp_dragons;name;Icy Wings
+quest;camp_hrimgar;name;King of Ice
+quest;camp_stalkers;name;Hunt in the Shadows
+quest;camp_essence;name;Shadow Essence
+quest;camp_khazuul;name;The Hollow King
+quest;camp_priests;name;Priests of the Void
+quest;camp_demons;name;Demons at the Gates
+quest;camp_lords;name;Lords of the Abyss
+quest;camp_morgath;name;Heart of the Abyss
+quest;varden_smug1;name;Smugglers' Tracks
+quest;varden_smug2;name;Shamans and Runes
+quest;varden_smug3;name;The Last Shipment
+quest;selv_exp1;name;The Lost Expedition
+quest;selv_exp2;name;On the Trail of Serpents
+quest;frost_storm;name;Blizzard
+quest;qas_caravan1;name;The Raided Caravan
+quest;qas_caravan2;name;Whispers in the Sand
+quest;qas_caravan3;name;The Gem Thief
+quest;selv_skins;name;Snake Skins
+quest;selv_temple;name;Temple Guardians
+quest;frost_hearts;name;Heart of Frost
+quest;varden_boars;name;Boars in the Grain
+quest;varden_spiders;name;Spider Nests
+quest;varden_crystals;name;Crystal Hearts
+quest;camp_elementals;name;Burning Fields
+quest;camp_harpies;name;Storm over the Pass
+quest;camp_titans;name;Sand Colossi
+quest;camp_bones;name;Wings of Bone
+quest;isle_wyverns;name;Wings over the Valley
+quest;isle_scales;name;Scales for Shields
+quest;isle_matriarch;name;Mother of Wyverns
+quest;isle_crabs;name;Pincers from the Reef
+quest;isle_pirates;name;The Black Flag
+quest;isle_hooks;name;Proof of Victory
+quest;isle_gunners;name;Silent Cannons
+quest;isle_bloodbeard;name;Bloodbeard
+quest;isle_drowned;name;The Drowned
+quest;isle_mist;name;Mist over the Island
+quest;isle_morvena;name;Lady of the Mists
+quest;isle_skaldra;name;The Ice Witch
+quest;isle_drakes;name;Fire from the Deep
+quest;isle_horns;name;Dragon Horns
+quest;isle_pyrrax;name;Lord of the Volcano

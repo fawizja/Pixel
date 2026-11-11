@@ -21,9 +21,10 @@ public final class PriceCheck {
         ItemType starts = null, contains = null;
         for (ItemType t : items.all()) {
             String n = ItemSearch.fold(t.name());
-            if (n.equals(q) || t.key().equals(q)) return t;
-            if (starts == null && n.startsWith(q)) starts = t;
-            if (contains == null && (n.contains(q) || t.key().contains(q))) contains = t;
+            String pn = ItemSearch.fold(t.polishName());
+            if (n.equals(q) || pn.equals(q) || t.key().equals(q)) return t;
+            if (starts == null && (n.startsWith(q) || pn.startsWith(q))) starts = t;
+            if (contains == null && (n.contains(q) || pn.contains(q) || t.key().contains(q))) contains = t;
         }
         return starts != null ? starts : contains;
     }

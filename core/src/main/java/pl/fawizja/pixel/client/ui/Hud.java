@@ -5207,7 +5207,7 @@ public final class Hud {
                 case SERVER: hint = Messages.get("hud.serwer_wiadomosci_gry_i"); break;
                 case TRADE: hint = Messages.get("hud.handel_kupno_i_sprzedaz"); break;
                 case GUILD: hint = Messages.get("hud.gildia_dotknij_aby_pisac"); break;
-                case PARTY: hint = partyLine != null ? partyLine + " Dotknij, aby pisać." : Messages.get("hud.druzyna_dotknij_aby_pisac"); break;
+                case PARTY: hint = partyLine != null ? partyLine + Messages.get("hud.dotknij_aby_pisac_3") : Messages.get("hud.druzyna_dotknij_aby_pisac"); break;
                 case PRIVATE: hint = Messages.get("hud.rozmowa_z") + t.peer() + Messages.get("hud.dotknij_aby_pisac_2"); break;
                 default: hint = Messages.get("hud.czat_dotknij_aby_pisac");
             }

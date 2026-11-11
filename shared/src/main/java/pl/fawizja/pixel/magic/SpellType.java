@@ -1,5 +1,7 @@
 package pl.fawizja.pixel.magic;
 
+import pl.fawizja.pixel.i18n.Messages;
+
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -76,7 +78,10 @@ public final class SpellType {
     }
 
     public String key() { return key; }
-    public String name() { return name; }
+    public String name() { return Messages.data("spell", key, name); }
+
+    /** Nazwa zrodlowa (polska) z danych, niezalezna od jezyka. */
+    public String polishName() { return name; }
     public Set<Vocation> vocations() { return Collections.unmodifiableSet(vocations); }
     public boolean allowedFor(Vocation v) { return vocations.contains(v); }
     public int minLevel() { return minLevel; }

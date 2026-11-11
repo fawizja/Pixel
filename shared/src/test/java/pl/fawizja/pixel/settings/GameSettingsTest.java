@@ -198,4 +198,25 @@ class GameSettingsTest {
         assertEquals(GameSettings.MINIMAP_ZOOM_DEFAULT, GameSettings.fromMap(new java.util.HashMap<>()).minimapZoom(), "stare zapisy");
         for (int i = 1; i < GameSettings.MINIMAP_ZOOM.length; i++) assertTrue(GameSettings.MINIMAP_ZOOM[i] > GameSettings.MINIMAP_ZOOM[i - 1]);
     }
+
+    @Test
+    void languageDefaultsToEnglishAndPersists() {
+        pl.fawizja.pixel.i18n.Language before = pl.fawizja.pixel.i18n.Messages.globalLanguage();
+        try {
+            assertEquals(pl.fawizja.pixel.i18n.Language.EN, new GameSettings().language(), "nowa instalacja: angielski");
+            assertEquals(pl.fawizja.pixel.i18n.Language.EN, GameSettings.fromMap(new java.util.HashMap<>()).language(), "stare zapisy bez jezyka");
+            for (pl.fawizja.pixel.i18n.Language l : pl.fawizja.pixel.i18n.Language.values()) {
+                GameSettings s = new GameSettings();
+                assertTrue(s.apply("settings:lang:" + l.code), l.code);
+                assertEquals(l, pl.fawizja.pixel.i18n.Messages.globalLanguage(), "zmiana dziala od razu");
+                assertEquals(l, GameSettings.fromMap(s.toMap()).language(), "zapis i odczyt");
+            }
+            GameSettings c = new GameSettings();
+            c.setLanguage(pl.fawizja.pixel.i18n.Language.EN);
+            c.apply("settings:lang");
+            assertEquals(pl.fawizja.pixel.i18n.Language.PL, c.language(), "przelaczanie po kolei");
+        } finally {
+            pl.fawizja.pixel.i18n.Messages.setLanguage(before);
+        }
+    }
 }

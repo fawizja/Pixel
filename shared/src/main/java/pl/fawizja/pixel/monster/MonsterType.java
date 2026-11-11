@@ -109,7 +109,10 @@ public final class MonsterType {
     }
 
     public String key() { return key; }
-    public String name() { return name; }
+    public String name() { return Messages.data("monster", key, name); }
+
+    /** Nazwa zrodlowa (polska) z danych, niezalezna od jezyka. */
+    public String polishName() { return name; }
     public int level() { return level; }
     public int maxHealth() { return maxHealth; }
     public long experience() { return experience; }

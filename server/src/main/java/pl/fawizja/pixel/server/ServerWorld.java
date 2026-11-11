@@ -1555,7 +1555,7 @@ final class ServerWorld {
     private void toGuild(pl.fawizja.pixel.guild.GuildRegistry.Guild g, String text, long now) {
         for (String n : g.members()) {
             ServerPlayer m = find(n);
-            if (m != null) m.session.log().add(now, EventLog.Kind.CHAT, Messages.get("server_world.gildia_3") + text);
+            if (m != null) m.session.log().add(now, EventLog.Kind.CHAT, "[Gildia] " + text);
         }
     }
 
