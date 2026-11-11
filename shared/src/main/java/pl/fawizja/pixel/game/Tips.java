@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.character.PlayerCharacter;
@@ -23,7 +24,9 @@ public final class Tips {
         AMMO("Włóż włócznie z plecaka do gniazda amunicji: każdy rzut zada więcej obrażeń (zużywa jedną)."),
         REST("Odpoczywasz w strefie ochronnej: regeneracja jest szybsza, a wypoczęcie da +50% exp za kolejne walki (karta postaci).");
 
-        public final String text;
+        private final String text;
+
+        public String text() { return Messages.tr(text); }
 
         Tip(String text) { this.text = text; }
     }
@@ -59,6 +62,6 @@ public final class Tips {
     private static void check(PlayerCharacter pc, Tip t, boolean when, List<String> out) {
         if (!when || pc.tipShown(t.ordinal()) || !out.isEmpty()) return; // najwyzej jedna naraz
         pc.markTip(t.ordinal());
-        out.add("Podpowiedź: " + t.text + (t == Tip.WELCOME ? " Wyłączysz je: /podpowiedzi" : ""));
+        out.add(Messages.get("tips.podpowiedz") + t.text + (t == Tip.WELCOME ? Messages.get("tips.wylaczysz_je_podpowiedzi") : ""));
     }
 }

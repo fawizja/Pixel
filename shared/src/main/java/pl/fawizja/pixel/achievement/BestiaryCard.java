@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.achievement;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +37,10 @@ public final class BestiaryCard {
     /** Co odslania etap (opis nastepnego etapu na karcie). */
     static String reveals(int stage) {
         switch (stage) {
-            case 1: return "nazwa i klasa";
-            case 2: return "statystyki, łupy pospolite i niepospolite";
-            case 3: return "odporności, miejsca, łupy półrzadkie";
-            default: return "wszystkie łupy i punkty charmów";
+            case 1: return Messages.get("bestiary_card.nazwa_i_klasa");
+            case 2: return Messages.get("bestiary_card.statystyki_lupy_pospolite_i");
+            case 3: return Messages.get("bestiary_card.odpornosci_miejsca_lupy_polrza");
+            default: return Messages.get("bestiary_card.wszystkie_lupy_i_punkty");
         }
     }
 
@@ -51,49 +52,49 @@ public final class BestiaryCard {
         List<String[]> rows = new ArrayList<>();
         BestiaryEntry e = BestiaryData.of(t);
         if (e == null) {
-            rows.add(new String[] {"Pokonano", String.format("%,d", kills) + (t.boss() ? " (boss)" : "")});
+            rows.add(new String[] {Messages.get("bestiary_card.pokonano"), String.format("%,d", kills) + (t.boss() ? " (boss)" : "")});
             if (kills <= 0) {
-                rows.add(new String[] {"Nieznany", "pokonaj go, aby poznać szczegóły"});
+                rows.add(new String[] {Messages.get("bestiary_card.nieznany"), Messages.get("bestiary_card.pokonaj_go_aby_poznac")});
                 return rows;
             }
-            rows.add(new String[] {"Zdrowie", String.format("%,d HP, %,d exp, poziom %d", t.maxHealth(), t.experience(), t.level())});
-            rows.add(new String[] {"Bestiariusz", t.boss() ? "bossowie nie mają wpisu ani charmów" : "brak wpisu"});
-            if (where != null && !where.isEmpty()) rows.add(new String[] {"Występuje", where});
+            rows.add(new String[] {Messages.get("hud.zdrowie_2"), String.format(Messages.get("bestiary_card.d_hp_d_exp"), t.maxHealth(), t.experience(), t.level())});
+            rows.add(new String[] {Messages.get("hud.bestiariusz_2"), t.boss() ? Messages.get("bestiary_card.bossowie_nie_maja_wpisu") : Messages.get("bestiary_card.brak_wpisu")});
+            if (where != null && !where.isEmpty()) rows.add(new String[] {Messages.get("bestiary_card.wystepuje"), where});
             return rows;
         }
         int stage = e.stage(kills);
-        rows.add(new String[] {"Pokonano", String.format("%,d / %,d", kills, e.complete()) + " (etap " + stage + "/" + BestiaryEntry.STAGES + ")"});
-        rows.add(new String[] {"Klasa i trudność", BestiaryClasses.label(t.race()) + ", " + e.difficulty().starsText() + " "
-                + e.difficulty().label + ", " + e.occurrenceLabel()});
+        rows.add(new String[] {Messages.get("bestiary_card.pokonano"), String.format("%,d / %,d", kills, e.complete()) + " (etap " + stage + "/" + BestiaryEntry.STAGES + ")"});
+        rows.add(new String[] {Messages.get("bestiary_card.klasa_i_trudnosc"), BestiaryClasses.label(t.race()) + ", " + e.difficulty().starsText() + " "
+                + e.difficulty().label() + ", " + e.occurrenceLabel()});
         if (stage == 0) {
-            rows.add(new String[] {"Nieznany", "pokonaj go, aby poznać szczegóły"});
+            rows.add(new String[] {Messages.get("bestiary_card.nieznany"), Messages.get("bestiary_card.pokonaj_go_aby_poznac")});
             return rows;
         }
         if (stage < BestiaryEntry.STAGES) {
             int next = e.nextThreshold(kills);
-            rows.add(new String[] {"Etap " + (stage + 1), String.format("pokonaj jeszcze %,d: %s", next - kills, reveals(stage + 1))});
+            rows.add(new String[] {Messages.get("bestiary_card.etap") + (stage + 1), String.format(Messages.get("bestiary_card.pokonaj_jeszcze_d_s"), next - kills, reveals(stage + 1))});
         }
         if (stage >= 2) {
-            rows.add(new String[] {"Zdrowie", String.format("%,d HP, %,d exp, poziom %d", t.maxHealth(), t.experience(), t.level())});
-            rows.add(new String[] {"Walka", (t.range() > 1 ? "z dystansu" : "wręcz") + ", szybkość " + t.speed() + ", pancerz " + t.armor()});
-            rows.add(new String[] {"Punkty charmów", e.charmPoints() + (stage >= BestiaryEntry.STAGES ? " (zdobyte)" : " (za ukończenie)")});
+            rows.add(new String[] {Messages.get("hud.zdrowie_2"), String.format(Messages.get("bestiary_card.d_hp_d_exp"), t.maxHealth(), t.experience(), t.level())});
+            rows.add(new String[] {Messages.get("bestiary_card.walka"), (t.range() > 1 ? Messages.get("bestiary_card.z_dystansu") : Messages.get("bestiary_card.wrecz")) + Messages.get("bestiary_card.szybkosc") + t.speed() + Messages.get("hud.pancerz") + t.armor()});
+            rows.add(new String[] {Messages.get("bestiary_card.punkty_charmow"), e.charmPoints() + (stage >= BestiaryEntry.STAGES ? " (zdobyte)" : Messages.get("bestiary_card.za_ukonczenie"))});
         }
         if (stage >= 3) {
-            rows.add(new String[] {"Odporności", resistances(t)});
-            if (where != null && !where.isEmpty()) rows.add(new String[] {"Występuje", where});
+            rows.add(new String[] {Messages.get("bestiary_card.odpornosci"), resistances(t)});
+            if (where != null && !where.isEmpty()) rows.add(new String[] {Messages.get("bestiary_card.wystepuje"), where});
         }
-        if (charms != null && !charms.isEmpty()) rows.add(new String[] {"Charmy", charms});
+        if (charms != null && !charms.isEmpty()) rows.add(new String[] {Messages.get("bestiary_card.charmy"), charms});
         for (LootEntry le : t.loot()) {
             LootRarity r = LootRarity.of(le.chancePermille());
             if (stage >= r.revealStage()) {
                 String name = items.get(le.itemId()).name();
                 String count = le.max() > 1 ? ", " + le.min() + "-" + le.max() + " szt." : "";
-                rows.add(new String[] {name, r.label + count});
+                rows.add(new String[] {name, r.label() + count});
             } else {
-                rows.add(new String[] {"?", r.label + " (etap " + r.revealStage() + ")"});
+                rows.add(new String[] {"?", r.label() + " (etap " + r.revealStage() + ")"});
             }
         }
-        if (t.loot().isEmpty()) rows.add(new String[] {"Łupy", "brak"});
+        if (t.loot().isEmpty()) rows.add(new String[] {Messages.get("bestiary_card.lupy"), Messages.get("server_world.brak")});
         return rows;
     }
 
@@ -113,7 +114,7 @@ public final class BestiaryCard {
             names.merge(name, sp.nightOnly(), (a, b) -> a && b);
         }
         List<String> out = new ArrayList<>();
-        for (Map.Entry<String, Boolean> e : names.entrySet()) out.add(e.getKey() + (e.getValue() ? " nocą" : ""));
+        for (Map.Entry<String, Boolean> e : names.entrySet()) out.add(e.getKey() + (e.getValue() ? Messages.get("bestiary_card.noca") : ""));
         if (out.size() > HABITATS_SHOWN) {
             int more = out.size() - HABITATS_SHOWN;
             out = new ArrayList<>(out.subList(0, HABITATS_SHOWN));
@@ -130,7 +131,7 @@ public final class BestiaryCard {
             sb.append(damageName(e.getKey())).append(' ').append(e.getValue() > 0 ? "+" : "").append(e.getValue()).append('%');
         }
         if (t.armor() > 0) sb.append(sb.length() > 0 ? ", " : "").append("pancerz ").append(t.armor());
-        return sb.length() == 0 ? "brak" : sb.toString();
+        return sb.length() == 0 ? Messages.get("server_world.brak") : sb.toString();
     }
 
     /** Szansa w promilach jako tekst: 0,5% albo 12%. */

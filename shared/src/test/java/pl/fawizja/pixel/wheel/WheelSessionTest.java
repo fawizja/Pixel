@@ -62,7 +62,7 @@ class WheelSessionTest {
         assertFalse(field.inTemple());
         assertTrue(Actions.apply(field, "wheel:add:G50:10", 1000));
         assertEquals(0, pc.wheel().spent());
-        assertEquals(DestinyWheel.Result.NOT_IN_TEMPLE.message, lastLog(field));
+        assertEquals(DestinyWheel.Result.NOT_IN_TEMPLE.message(), lastLog(field));
 
         GameSession temple = session(pc, TEMPLE);
         assertTrue(temple.inTemple());
@@ -86,7 +86,7 @@ class WheelSessionTest {
         pc.setPromoted(false);
         GameSession temple = session(pc, TEMPLE);
         assertFalse(temple.wheelAdd("R50", 5, 1000));
-        assertEquals(DestinyWheel.Result.NOT_ELIGIBLE.message, lastLog(temple));
+        assertEquals(DestinyWheel.Result.NOT_ELIGIBLE.message(), lastLog(temple));
     }
 
     @Test

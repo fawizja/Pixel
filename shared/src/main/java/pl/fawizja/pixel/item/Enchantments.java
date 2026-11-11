@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -51,8 +52,8 @@ public final class Enchantments {
             return null;
         }
 
-        public String label() { return label; }
-        public String effect() { return effect; }
+        public String label() { return Messages.tr(label); }
+        public String effect() { return Messages.tr(effect); }
         /** Czy zaklecie sprzedaje kowal (EXP pochodzi ze zwoju). */
         public boolean smith() { return smith; }
     }
@@ -133,7 +134,7 @@ public final class Enchantments {
     /** Opis czasu: "45 min" albo "1 h 05 min". */
     public static String describe(long ms) {
         long min = (ms + 59_999) / 60_000;
-        return min >= 60 ? (min / 60) + " h " + String.format("%02d", min % 60) + " min" : min + " min";
+        return min >= 60 ? (min / 60) + " h " + String.format("%02d", min % 60) + Messages.get("hud.min") : min + Messages.get("hud.min");
     }
 
     /** Zapis: "LIFE:123,CRIT:456". */

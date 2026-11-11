@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.treasure;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.item.EquipSlot;
@@ -139,10 +140,10 @@ public final class ChestRewards {
      * potem przedmioty.
      */
     public static List<String> lines(Reward r, ItemRegistry items) {
-        String head = (r.kind() == Kind.QUEST ? "Nagroda za zadanie" : "Skrzynia skarbów") + " (poziom ~" + r.difficulty() + "): "
+        String head = (r.kind() == Kind.QUEST ? Messages.get("chest_rewards.nagroda_za_zadanie") : Messages.get("chest_rewards.skrzynia_skarbow")) + Messages.get("chest_rewards.poziom") + r.difficulty() + "): "
                 + String.format(java.util.Locale.ROOT, "%,d gp", r.gold()).replace(',', ' ') + (r.kind() == Kind.QUEST ? "!" : ".");
         if (r.items().isEmpty()) return List.of(head);
-        StringBuilder b = new StringBuilder("Otrzymujesz: ");
+        StringBuilder b = new StringBuilder(Messages.get("chest_rewards.otrzymujesz"));
         for (int i = 0; i < r.items().size(); i++) {
             ItemStack s = r.items().get(i);
             if (i > 0) b.append(", ");

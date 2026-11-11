@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -62,7 +63,7 @@ public final class PolishFont {
             boolean upper = Character.isUpperCase(ch);
             List<Layer> layers = new ArrayList<>();
             layers.add(new Layer(base, 0, base.height, 0, 0, false));
-            boolean ogon = "ąęĄĘ".indexOf(ch) >= 0;
+            boolean ogon = Messages.get("polish_font.aeae").indexOf(ch) >= 0;
             boolean stroke = ch == 'ł' || ch == 'Ł';
             boolean above = !ogon && !stroke; // kreska albo kropka nad litera
             if (ogon) layers.add(ogonekFor(ogonek, base, ch == 'ę' || ch == 'Ę' ? 0.55f : 0.8f));
@@ -135,7 +136,7 @@ public final class PolishFont {
 
     private static Glyph g(BitmapFontData data, char ch) {
         Glyph gl = data.getGlyph(ch);
-        if (gl == null) throw new IllegalStateException("Brak znaku w czcionce: " + ch);
+        if (gl == null) throw new IllegalStateException(Messages.get("polish_font.brak_znaku_w_czcionce") + ch);
         return gl;
     }
 

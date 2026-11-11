@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.vocation.Vocation;
 
@@ -42,15 +43,15 @@ public final class ItemCompare {
     /** Jak wyzej, z poziomami ulepszenia (u - ogladany przedmiot, eu - zalozony). */
     public static String stats(ItemType t, int u, ItemType equipped, int eu) {
         StringBuilder b = new StringBuilder(Upgrade.name(t, u));
-        if (t.slot() == EquipSlot.LIGHT) return b.append("  światło ").append(t.lightRadius()).append(", pali się 20 min (pole obok butów)").toString();
+        if (t.slot() == EquipSlot.LIGHT) return b.append(Messages.get("item_compare.swiatlo")).append(t.lightRadius()).append(Messages.get("item_compare.pali_sie_20_min")).toString();
         if (equipped == t && u == eu) {
             String bonus = t.bonus().describe();
-            return b.append(" (założone)").append(bonus.isEmpty() ? "" : "  " + bonus).toString();
+            return b.append(Messages.get("item_compare.zalozone")).append(bonus.isEmpty() ? "" : "  " + bonus).toString();
         }
         stat(b, "atak", Upgrade.attack(t, u), equipped == null ? 0 : Upgrade.attack(equipped, eu), equipped != null);
         stat(b, "obrona", Upgrade.defense(t, u), equipped == null ? 0 : Upgrade.defense(equipped, eu), equipped != null);
         stat(b, "pancerz", Upgrade.armor(t, u), equipped == null ? 0 : Upgrade.armor(equipped, eu), equipped != null);
-        if (t.range() > 1) b.append("  zasięg ").append(t.range());
+        if (t.range() > 1) b.append(Messages.get("item_compare.zasieg")).append(t.range());
         String bonus = t.bonus().describe();
         if (!bonus.isEmpty()) b.append("  ").append(bonus);
         return b.toString();
@@ -63,18 +64,18 @@ public final class ItemCompare {
      */
     public static String shopDelta(ItemType t, ItemType equipped, int eu, PlayerCharacter pc) {
         if (t.slot() == EquipSlot.NONE) return "";
-        if (t.slot() == EquipSlot.LIGHT) return "światło " + t.lightRadius() + ", 20 min, pole obok butów";
-        if (t.category() == ItemCategory.BAIT) return "przynęta: trzymaj w plecaku, 1 na zarzucenie wędki";
-        if (!t.vocations().contains(pc.vocation())) return "nie dla ciebie";
-        if (t.slot() == EquipSlot.AMMO && equipped == null) return "amunicja, atak " + t.attack();
+        if (t.slot() == EquipSlot.LIGHT) return Messages.get("item_compare.swiatlo_2") + t.lightRadius() + Messages.get("item_compare.20_min_pole_obok");
+        if (t.category() == ItemCategory.BAIT) return Messages.get("item_compare.przyneta_trzymaj_w_plecaku");
+        if (!t.vocations().contains(pc.vocation())) return Messages.get("item_compare.nie_dla_ciebie");
+        if (t.slot() == EquipSlot.AMMO && equipped == null) return Messages.get("item_compare.amunicja_atak") + t.attack();
         StringBuilder b = new StringBuilder();
         delta(b, "atak", t.attack(), equipped == null ? 0 : Upgrade.attack(equipped, eu));
         delta(b, "obrona", t.defense(), equipped == null ? 0 : Upgrade.defense(equipped, eu));
         delta(b, "pancerz", t.armor(), equipped == null ? 0 : Upgrade.armor(equipped, eu));
         String prot = ItemBonus.describeProtections(t.bonus().protections());
         if (!prot.isEmpty() && equipped != t) b.append(b.length() > 0 ? ", " : "").append("ochrona ").append(prot);
-        String out = b.length() == 0 ? "jak założone" : b.toString();
-        return pc.level() < t.minLevel() ? out + ", od poz. " + t.minLevel() : out;
+        String out = b.length() == 0 ? Messages.get("item_compare.jak_zalozone") : b.toString();
+        return pc.level() < t.minLevel() ? out + Messages.get("item_compare.od_poz") + t.minLevel() : out;
     }
 
     private static void delta(StringBuilder b, String label, int value, int current) {
@@ -93,23 +94,23 @@ public final class ItemCompare {
     public static String requirements(ItemType t, PlayerCharacter pc) {
         StringBuilder b = new StringBuilder();
         if (t.minLevel() > 1) {
-            b.append("poziom ").append(t.minLevel());
-            if (pc.level() < t.minLevel()) b.append(" (za niski)");
+            b.append(Messages.get("hud.poziom_2")).append(t.minLevel());
+            if (pc.level() < t.minLevel()) b.append(Messages.get("item_compare.za_niski"));
         }
         if (t.slot() != EquipSlot.NONE && t.vocations().size() < Vocation.values().length) {
             if (b.length() > 0) b.append(", ");
-            b.append("tylko: ");
+            b.append(Messages.get("item_compare.tylko"));
             boolean first = true;
             for (Vocation v : t.vocations()) {
                 if (!first) b.append('/');
                 b.append(v.displayName());
                 first = false;
             }
-            if (!t.usableBy(pc.vocation())) b.append(" (nie dla ciebie)");
+            if (!t.usableBy(pc.vocation())) b.append(Messages.get("item_compare.nie_dla_ciebie_2"));
         }
         if (t.value() > 0) {
             if (b.length() > 0) b.append(", ");
-            b.append(String.format("wartość %,d gp", t.value()));
+            b.append(String.format(Messages.get("item_compare.wartosc_d_gp"), t.value()));
         }
         return b.toString();
     }

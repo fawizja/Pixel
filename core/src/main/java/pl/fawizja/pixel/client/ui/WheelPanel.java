@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -700,7 +701,7 @@ final class WheelPanel {
         if (av > 0) {
             int free = Math.max(0, av - wh.spent());
             centered(b, String.valueOf(free), cx, cy + hr * 0.22f, big, free > 0 ? GOOD : TEXT);
-            centered(b, "wolne", cx, cy - hr * 0.28f, small, MUTED);
+            centered(b, Messages.get("wheel_panel.wolne"), cx, cy - hr * 0.28f, small, MUTED);
             centered(b, "z " + av, cx, cy - hr * 0.6f, small * 0.9f, MUTED);
         } else {
             centered(b, "0", cx, cy + hr * 0.2f, big, MUTED);
@@ -738,10 +739,10 @@ final class WheelPanel {
     /** "Wymaga: poziom 51, promocja, premium" - tylko to, czego brakuje. */
     private static String requirementsShort(PlayerCharacter pc) {
         List<String> miss = new ArrayList<>();
-        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add("poziom " + DestinyWheel.MIN_LEVEL);
+        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add(Messages.get("hud.poziom_2") + DestinyWheel.MIN_LEVEL);
         if (!pc.isPromoted()) miss.add("promocja");
         if (!pc.isPremium()) miss.add("premium");
-        return miss.isEmpty() ? "Koło nieaktywne" : "Wymaga: " + String.join(", ", miss);
+        return miss.isEmpty() ? Messages.get("wheel_panel.kolo_nieaktywne") : Messages.get("wheel_panel.wymaga") + String.join(", ", miss);
     }
 
     private void drawSideText(SpriteBatch b) {
@@ -770,7 +771,7 @@ final class WheelPanel {
         }
         for (int i = 0; i < WheelPanelLayout.TOOLS; i++) {
             HudLayout.Rect r = lay.tools[i];
-            centered(b, clip(TOOL_LABELS[i], r.w - 4, bs), r.cx(), r.cy(), bs, toolEnabled(i) ? TEXT : MUTED);
+            centered(b, clip(Messages.tr(TOOL_LABELS[i]), r.w - 4, bs), r.cx(), r.cy(), bs, toolEnabled(i) ? TEXT : MUTED);
         }
     }
 
@@ -791,20 +792,18 @@ final class WheelPanel {
     // ------------------------------------------------------------------ tresc karty
 
     private static String buttonLabel(String label) {
-        switch (label) {
-            case "Dodaj 1": return "+1";
-            case "Dodaj 10": return "+10";
-            case "Dodaj do pełna": return "Do pełna";
-            case "Odejmij 1": return "-1";
-            case "Opróżnij pole": return "Opróżnij";
-            default: return label;
-        }
+        if (Messages.is(label, Messages.get("wheel_view.dodaj_1"))) return "+1";
+        if (Messages.is(label, Messages.get("wheel_view.dodaj_10"))) return "+10";
+        if (Messages.is(label, Messages.get("wheel_view.dodaj_do_pelna"))) return Messages.get("wheel_panel.do_pelna");
+        if (Messages.is(label, Messages.get("wheel_view.odejmij_1"))) return "-1";
+        if (Messages.is(label, Messages.get("wheel_view.oproznij_pole"))) return Messages.get("wheel_panel.oproznij");
+        return label;
     }
 
     private static Color stateColor(String st) {
-        if (st.startsWith("aktyw") || st.equals("pełne") || st.equals("spełnione") || st.equals("tak") || st.startsWith("etap")
-                || st.equals("otwarte")) return GOOD;
-        if (st.equals("brak") || st.equals("niespełnione") || st.equals("nie") || st.equals("nieaktywne") || st.equals("zamknięte")) return BAD;
+        if (Messages.is(st, "aktywne") || Messages.is(st, "aktywny") || Messages.is(st, Messages.get("wheel_view.pelne")) || Messages.is(st, Messages.get("wheel_view.spelnione")) || Messages.is(st, "tak")
+                || Messages.startsWithAny(st, "etap ") || Messages.is(st, "otwarte")) return GOOD;
+        if (Messages.is(st, Messages.get("server_world.brak")) || Messages.is(st, Messages.get("wheel_view.niespelnione")) || Messages.is(st, "nie") || Messages.is(st, "nieaktywne") || Messages.is(st, Messages.get("wheel_view.zamkniete"))) return BAD;
         return MUTED;
     }
 
@@ -824,8 +823,8 @@ final class WheelPanel {
                 cardBtns.add(new Btn(action, buttonLabel(r[0]), !off));
                 continue;
             }
-            if (r[0].equals("Wróć")) continue;
-            if (r[0].trim().equals("(cd.)") && !items.isEmpty()) {
+            if (Messages.is(r[0], Messages.get("bestiary_windows.wroc"))) continue;
+            if (Messages.is(r[0].trim(), "(cd.)") && !items.isEmpty()) {
                 String[] prev = items.get(items.size() - 1);
                 prev[1] = prev[1] + " " + r[1];
                 continue;

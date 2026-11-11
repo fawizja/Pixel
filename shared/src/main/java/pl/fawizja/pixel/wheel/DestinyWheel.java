@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Arrays;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
@@ -40,7 +41,9 @@ public final class DestinyWheel {
         NO_PRESET("Ten zestaw jest pusty."),
         PRESET_TOO_BIG("Zestaw wymaga więcej punktów, niż masz.");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message); }
 
         Result(String m) { message = m; }
     }

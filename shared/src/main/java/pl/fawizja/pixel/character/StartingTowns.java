@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -23,17 +24,17 @@ public final class StartingTowns {
     /** Klimat i jednozdaniowy opis miasta (po kluczu); miasta spoza tabeli dostaja opis ogolny. */
     private static final Map<String, String[]> DESCRIPTIONS = Map.of(
             "varden", new String[] {"umiarkowany",
-                    "Stolica z zamkiem króla i dzielnicą królewską; drogi do wszystkich krain. Najlepsze na początek."},
-            "frostholm", new String[] {"mróz i śnieg",
-                    "Surowe miasto na północy u stóp Lodowych Szczytów: zamiecie, yeti i lodowe jaskinie."},
-            "selvaran", new String[] {"dżungla",
-                    "Parne miasto z portem w dżungli na południowym wschodzie: bagna, krokodyle i zarośnięte ruiny."},
+                    Messages.get("starting_towns.stolica_z_zamkiem_krola")},
+            "frostholm", new String[] {Messages.get("starting_towns.mroz_i_snieg"),
+                    Messages.get("starting_towns.surowe_miasto_na_polnocy")},
+            "selvaran", new String[] {Messages.get("starting_towns.dzungla"),
+                    Messages.get("starting_towns.parne_miasto_z_portem")},
             "qasirah", new String[] {"pustynia",
-                    "Miasto z piaskowca na zachodniej pustyni: burze piaskowe, oazy i piramida na południu."},
-            "valmir", new String[] {"wybrzeże",
-                    "Port żeglarzy na południowym wybrzeżu: łagodny klimat, kanały i kopalnia miedzi."},
-            "nerys", new String[] {"tropikalne wyspy",
-                    "Białe wille wśród palm na Szmaragdowych Wyspach; na kontynent promem woźnicy albo statkiem."});
+                    Messages.get("starting_towns.miasto_z_piaskowca_na")},
+            "valmir", new String[] {Messages.get("starting_towns.wybrzeze"),
+                    Messages.get("starting_towns.port_zeglarzy_na_poludniowym")},
+            "nerys", new String[] {Messages.get("starting_towns.tropikalne_wyspy"),
+                    Messages.get("starting_towns.biale_wille_wsrod_palm")});
 
     private StartingTowns() { }
 
@@ -43,7 +44,7 @@ public final class StartingTowns {
         for (Town t : world.towns()) {
             if (!t.starting()) continue;
             String key = key(t.name());
-            String[] d = DESCRIPTIONS.getOrDefault(key, new String[] {"", "Miasto ze świątynią, bankiem i sklepami."});
+            String[] d = DESCRIPTIONS.getOrDefault(key, new String[] {"", Messages.get("starting_towns.miasto_ze_swiatynia_bankiem")});
             out.add(new Info(key, t.name(), t.temple(), d[0], d[1]));
         }
         return out;

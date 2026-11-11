@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.perf;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Monitorowane zasoby. Wartosc to wykorzystanie 0..1 lub NaN, gdy platforma jej nie udostepnia. */
 public enum Resource {
     APP_MEMORY("Pamięć aplikacji"),
@@ -12,5 +13,5 @@ public enum Resource {
 
     Resource(String label) { this.label = label; }
 
-    public String label() { return label; }
+    public String label() { return Messages.tr(label); }
 }

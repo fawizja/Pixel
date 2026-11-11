@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,10 +54,10 @@ public final class WheelPerks {
     /** Nazwa umiejetnosci z przekonania (+1): walka wrecz, dystans, magia albo piesci. */
     public static String skillLabel(Vocation v) {
         switch (v) {
-            case KNIGHT: return "walka wręcz (miecz, topór, młot)";
-            case PALADIN: return "walka na dystans";
-            case MONK: return "walka pięściami";
-            default: return "poziom magii";
+            case KNIGHT: return Messages.get("wheel_perks.walka_wrecz_miecz_topor");
+            case PALADIN: return Messages.get("wheel_perks.walka_na_dystans");
+            case MONK: return Messages.get("wheel_perks.walka_piesciami");
+            default: return Messages.get("wheel_perks.poziom_magii");
         }
     }
 
@@ -91,37 +92,37 @@ public final class WheelPerks {
             up("front_sweep", "Front Sweep", SpellAugment.lifeLeech(5), SpellAugment.damage(14), ""),
             up("groundshaker", "Groundshaker", SpellAugment.damage(12.5), SpellAugment.cooldown(2000), ""),
             up("chivalrous_challenge", "Chivalrous Challenge", SpellAugment.mana(20), SpellAugment.cooldown(2000),
-                    "st. 2: -2 s zamiast +1 celu"),
+                    Messages.get("wheel_perks.st_2_2_s")),
             up("intense_wound_cleansing", "Intense Wound Cleansing", SpellAugment.heal(125), SpellAugment.mana(10),
-                    "st. 2: -10 many zamiast -5 min (u nas odnowienie 1 s)"),
+                    Messages.get("wheel_perks.st_2_10_many")),
             up("fierce_berserk", "Fierce Berserk", SpellAugment.mana(30), SpellAugment.damage(10), "")};
 
     private static final Upgrade[] PALADIN = {
             up("sharpshooter", "Sharpshooter", SpellAugment.cooldown(2000), SpellAugment.cooldown(2000),
-                    "-2 s zamiast -8 s / -6 s"),
+                    Messages.get("wheel_perks.2_s_zamiast_8")),
             up("strong_ethereal_spear", "Strong Ethereal Spear", SpellAugment.cooldown(2000), SpellAugment.damage(38),
-                    "st. 2: +38% zamiast +380% z Canary (u nas czar ma już pełną moc)"),
+                    Messages.get("wheel_perks.st_2_38_zamiast")),
             up("divine_dazzle", "Divine Dazzle", SpellAugment.mana(20), SpellAugment.cooldown(1000), ""),
             up("swift_foot", "Swift Foot", SpellAugment.mana(10), SpellAugment.cooldown(2000),
-                    "przybliżenie: -10 many i -2 s odnowienia"),
+                    Messages.get("wheel_perks.przyblizenie_10_many_i")),
             up("divine_caldera", "Divine Caldera", SpellAugment.mana(20), SpellAugment.damage(8.5), "")};
 
     private static final Upgrade[] SORCERER = {
-            new Upgrade(List.of("hells_core", "rage_of_the_skies"), "dowolny czar skupienia", SpellAugment.damage(5),
+            new Upgrade(List.of("hells_core", "rage_of_the_skies"), Messages.get("wheel_perks.dowolny_czar_skupienia"), SpellAugment.damage(5),
                     SpellAugment.cooldown(4000), ""),
             up("magic_shield", "Magic Shield", SpellAugment.mana(10), SpellAugment.cooldown(2000),
-                    "przybliżenie: -10 many i -2 s zamiast większej tarczy"),
+                    Messages.get("wheel_perks.przyblizenie_10_many_i_2")),
             up("ultimate_energy_strike", "Sap Strength", SpellAugment.mana(20), SpellAugment.damage(5),
-                    "zamiennik: Ostateczne uderzenie energii (brak Sap Strength)"),
+                    Messages.get("wheel_perks.zamiennik_ostateczne_uderzenie")),
             up("energy_wave", "Energy Wave", SpellAugment.damage(5), SpellAugment.radius(1), ""),
             up("great_fire_wave", "Great Fire Wave", SpellAugment.crit(10, 15), SpellAugment.damage(5), "")};
 
     private static final Upgrade[] DRUID = {
             up("strong_ice_wave", "Strong Ice Wave", SpellAugment.manaLeech(3), SpellAugment.damage(10), ""),
             up("mass_healing", "Mass Healing", SpellAugment.heal(4), SpellAugment.heal(4),
-                    "st. 2: +4% zamiast obszaru"),
-            up("natures_embrace", "Nature's Embrace", SpellAugment.heal(11), SpellAugment.mana(10),
-                    "st. 2: -10 many zamiast -10 s"),
+                    Messages.get("wheel_perks.st_2_4_zamiast")),
+            up("natures_embrace", Messages.get("supreme_gem_mod.nature_s_embrace"), SpellAugment.heal(11), SpellAugment.mana(10),
+                    Messages.get("wheel_perks.st_2_10_many_2")),
             up("terra_wave", "Terra Wave", SpellAugment.damage(6.5), SpellAugment.lifeLeech(5), ""),
             up("heal_friend", "Heal Friend", SpellAugment.mana(10), SpellAugment.heal(5.5), "")};
 
@@ -157,11 +158,11 @@ public final class WheelPerks {
     /** Opis oddania pola po polsku dla profesji, za punkt: "+3 HP", "+6 many", "+5 udźwigu", "+0,03% mitygacji". */
     public static String dedication(WheelSlice s, Vocation v) {
         switch (s.stat) {
-            case HP: return "+" + hpPerPoint(v) + " HP za punkt";
-            case MANA: return "+" + manaPerPoint(v) + " many za punkt";
-            case HP_MANA: return "+" + hpPerPoint(v) + " HP i +" + manaPerPoint(v) + " many za punkt";
-            case CAP: return "+" + capPerPoint(v) + " udźwigu za punkt";
-            default: return "+" + SpellAugment.num(MITIGATION_PER_POINT) + "% mitygacji za punkt";
+            case HP: return "+" + hpPerPoint(v) + Messages.get("wheel_perks.hp_za_punkt");
+            case MANA: return "+" + manaPerPoint(v) + Messages.get("wheel_perks.many_za_punkt");
+            case HP_MANA: return "+" + hpPerPoint(v) + " HP i +" + manaPerPoint(v) + Messages.get("wheel_perks.many_za_punkt");
+            case CAP: return "+" + capPerPoint(v) + Messages.get("wheel_perks.udzwigu_za_punkt");
+            default: return "+" + SpellAugment.num(MITIGATION_PER_POINT) + Messages.get("wheel_perks.mitygacji_za_punkt");
         }
     }
 
@@ -174,18 +175,18 @@ public final class WheelPerks {
             case HP: return "+" + p * hpPerPoint(v) + " HP";
             case MANA: return "+" + p * manaPerPoint(v) + " many";
             case HP_MANA: return "+" + p * hpPerPoint(v) + " HP, +" + p * manaPerPoint(v) + " many";
-            case CAP: return "+" + p * capPerPoint(v) + " udźwigu";
-            default: return "+" + SpellAugment.num(Math.round(p * MITIGATION_PER_POINT * 100) / 100.0) + "% mitygacji";
+            case CAP: return "+" + p * capPerPoint(v) + Messages.get("basic_gem_mod.udzwigu");
+            default: return "+" + SpellAugment.num(Math.round(p * MITIGATION_PER_POINT * 100) / 100.0) + Messages.get("basic_gem_mod.mitygacji");
         }
     }
 
     /** Krotka nazwa umiejetnosci z przekonania do list: "walka wręcz", "dystans", "magia", "pięści". */
     public static String skillShort(Vocation v) {
         switch (v) {
-            case KNIGHT: return "walka wręcz";
+            case KNIGHT: return Messages.get("wheel_perks.walka_wrecz");
             case PALADIN: return "dystans";
-            case MONK: return "pięści";
-            default: return "poziom magii";
+            case MONK: return Messages.get("wheel_perks.piesci");
+            default: return Messages.get("wheel_perks.poziom_magii");
         }
     }
 
@@ -204,14 +205,14 @@ public final class WheelPerks {
     public static String conviction(WheelSlice s, Vocation v) {
         switch (s.conviction) {
             case SKILL: return "+1 " + skillLabel(v);
-            case LIFE_LEECH: return "+" + SpellAugment.num(LIFE_LEECH) + "% kradzieży życia";
-            case MANA_LEECH: return "+" + SpellAugment.num(MANA_LEECH) + "% kradzieży many";
-            case PASSIVE_A: return WheelPassive.of(v, true).label + ": " + WheelPassive.of(v, true).description;
-            case PASSIVE_B: return WheelPassive.of(v, false).label + ": " + WheelPassive.of(v, false).description;
-            case VESSEL: return "naczynie klejnotu: +1 rezonansu domeny";
+            case LIFE_LEECH: return "+" + SpellAugment.num(LIFE_LEECH) + Messages.get("spell_augment.kradziezy_zycia");
+            case MANA_LEECH: return "+" + SpellAugment.num(MANA_LEECH) + Messages.get("spell_augment.kradziezy_many");
+            case PASSIVE_A: return WheelPassive.of(v, true).label() + ": " + WheelPassive.of(v, true).description();
+            case PASSIVE_B: return WheelPassive.of(v, false).label() + ": " + WheelPassive.of(v, false).description();
+            case VESSEL: return Messages.get("wheel_perks.naczynie_klejnotu_1_rezonansu");
             default: {
                 Upgrade u = upgrade(v, s.conviction.spellGroup());
-                return "ulepszenie czaru " + u.tibia;
+                return Messages.get("wheel_perks.ulepszenie_czaru") + u.tibia;
             }
         }
     }

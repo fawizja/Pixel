@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.market;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,14 +27,16 @@ public final class BuyOrders {
 
     public enum Result {
         OK(""),
-        TOO_MANY("Masz już " + MAX_PER_BUYER + " zamówień. Wycofaj któreś: /kupię anuluj numer."),
+        TOO_MANY("Masz już {0} zamówień. Wycofaj któreś: /kupię anuluj numer."),
         FULL("Tablica zamówień jest pełna. Spróbuj później."),
         BAD_PRICE("Cena musi być większa od zera, a ilość od 1 do 100."),
         NO_ORDER("Nie ma takiego zamówienia."),
         OWN_ORDER("Nie zrealizujesz własnego zamówienia."),
         NOT_YOURS("To nie Twoje zamówienie.");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message).replace("{0}", String.valueOf(MAX_PER_BUYER)); }
 
         Result(String message) { this.message = message; }
     }

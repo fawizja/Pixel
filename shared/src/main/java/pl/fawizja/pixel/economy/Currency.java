@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.economy;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Waluty: 100 Gold = 1 Platinum, 100 Platinum = 1 Crystal. */
 public enum Currency {
     GOLD(1, 1L, "Złota moneta"),
@@ -20,7 +21,7 @@ public enum Currency {
 
     public int itemId() { return itemId; }
     public long value() { return value; }
-    public String displayName() { return displayName; }
+    public String displayName() { return Messages.tr(displayName); }
 
     public static Currency byItemId(int itemId) {
         for (Currency c : values()) if (c.itemId == itemId) return c;

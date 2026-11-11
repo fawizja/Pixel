@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.achievement;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -40,7 +41,7 @@ public final class BestiaryView {
     /** Wiersz charmow (punkty, echa, sloty) na gorze bestiariusza i okna charmow. */
     public static String[] charmsRow(PlayerCharacter pc) {
         Charms c = pc.charms();
-        return new String[] {"Charmy", String.format("%,d pkt charmów, %,d ech, sloty %d/%d", c.points(), c.echoes(), c.used(),
+        return new String[] {Messages.get("bestiary_card.charmy"), String.format(Messages.get("bestiary_view.d_pkt_charmow_d"), c.points(), c.echoes(), c.used(),
                 Charms.slots(pc.isPremium())), "", "charm:open"};
     }
 
@@ -55,11 +56,11 @@ public final class BestiaryView {
                 if (k > 0) known++;
                 if (k >= BestiaryData.of(t).complete()) done++;
             }
-            rows.add(new String[] {BestiaryClasses.label(e.getKey()), String.format("poznane %d/%d, ukończone %d", known,
+            rows.add(new String[] {BestiaryClasses.label(e.getKey()), String.format(Messages.get("bestiary_view.poznane_d_d_ukonczone"), known,
                     e.getValue().size(), done), "", CLASS_ACTION + e.getKey()});
         }
         if (b.bossesDefeated() > 0) {
-            rows.add(new String[] {"Bossowie", "pokonani: " + b.bossesDefeated() + " (bez wpisu i charmów)", "", CLASS_ACTION + BOSSES});
+            rows.add(new String[] {Messages.get("bestiary_windows.bossowie"), "pokonani: " + b.bossesDefeated() + Messages.get("bestiary_view.bez_wpisu_i_charmow"), "", CLASS_ACTION + BOSSES});
         }
         return rows;
     }
@@ -71,7 +72,7 @@ public final class BestiaryView {
         if (BOSSES.equals(tibiaClass)) {
             for (MonsterType t : types) {
                 if (!t.boss() || b.kills(t.key()) <= 0) continue;
-                rows.add(new String[] {t.name(), String.format("pokonano %,d", b.kills(t.key())), "", "best:" + t.key()});
+                rows.add(new String[] {t.name(), String.format(Messages.get("bestiary_view.pokonano_d"), b.kills(t.key())), "", "best:" + t.key()});
             }
             return rows;
         }
@@ -82,14 +83,14 @@ public final class BestiaryView {
             int k = b.kills(t.key());
             String stars = e.difficulty().starsText();
             if (k <= 0) {
-                rows.add(new String[] {"?", stars + " nie spotkany", "", "ach:none", "off"});
+                rows.add(new String[] {"?", stars + Messages.get("bestiary_view.nie_spotkany"), "", "ach:none", "off"});
                 continue;
             }
             int stage = e.stage(k);
             StringBuilder charms = new StringBuilder();
             for (Charm c : pc.charms().charmsOn(t.key())) charms.append(charms.length() == 0 ? " [" : ", ").append(c.label());
             if (charms.length() > 0) charms.append(']');
-            String progress = stage >= BestiaryEntry.STAGES ? "ukończony" : String.format("%,d/%,d", k, e.complete());
+            String progress = stage >= BestiaryEntry.STAGES ? Messages.get("bestiary_view.ukonczony") : String.format("%,d/%,d", k, e.complete());
             rows.add(new String[] {t.name() + charms, stars + " etap " + stage + "/" + BestiaryEntry.STAGES + ", " + progress, "",
                     "best:" + t.key()});
         }
@@ -117,7 +118,7 @@ public final class BestiaryView {
         int pages = (all.size() + per - 1) / per;
         int p = Math.floorMod(page, pages);
         List<String[]> out = new ArrayList<>(all.subList(p * per, Math.min(all.size(), (p + 1) * per)));
-        out.add(new String[] {"Strona " + (p + 1) + " / " + pages, "dotknij, aby zobaczyć następną", "", pageAction + ((p + 1) % pages)});
+        out.add(new String[] {Messages.get("hud.strona") + (p + 1) + " / " + pages, Messages.get("hud.dotknij_aby_zobaczyc_nastepna"), "", pageAction + ((p + 1) % pages)});
         return out;
     }
 }

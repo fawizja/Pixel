@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.monster.MonsterType;
@@ -37,7 +38,7 @@ public final class Challenge {
     /** Wiersz sledzenia na ekranie, np. "Wyzwanie: fala 2/3 (Wilk), 3:05". */
     public String line(long nowMs) {
         long s = Math.max(0, (untilMs - nowMs + 999) / 1000);
-        return "Wyzwanie: fala " + (wave + 1) + "/" + WAVES.length + " (" + type.name() + "), " + s / 60 + ":" + String.format("%02d", s % 60);
+        return Messages.get("challenge.wyzwanie_fala") + (wave + 1) + "/" + WAVES.length + " (" + type.name() + "), " + s / 60 + ":" + String.format("%02d", s % 60);
     }
 
     public static int totalMonsters() {

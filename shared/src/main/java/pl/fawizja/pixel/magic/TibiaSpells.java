@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.magic;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,20 +78,20 @@ public final class TibiaSpells {
             case REGENERATION:
                 pc().startRegeneration((int) Math.round(s.base()), Math.max(1, s.produceCount()) * 1000L, s.range() * 1000L);
                 effect(now, "HEAL");
-                log().add(now, EventLog.Kind.INFO, s.name() + ": " + (int) s.base() + " HP co " + s.produceCount() + " s przez " + s.range() + " s.");
+                log().add(now, EventLog.Kind.INFO, s.name() + ": " + (int) s.base() + " HP co " + s.produceCount() + Messages.get("tibia_spells.s_przez") + s.range() + " s.");
                 return CastResult.OK;
             case MAGIC_SHIELD: {
                 int cap = magicShieldCapacity(s, pc());
                 pc().setMagicShield(cap, s.range() * 1000L);
                 effect(now, "MAGIC");
-                log().add(now, EventLog.Kind.INFO, "Tarcza many: " + cap + " punktów na " + s.range() / 60 + " min.");
+                log().add(now, EventLog.Kind.INFO, Messages.get("hud.tarcza_many") + cap + Messages.get("tibia_spells.punktow_na") + s.range() / 60 + Messages.get("server_world.min_2"));
                 return CastResult.OK;
             }
             case INVISIBLE:
                 pc().setInvisible(s.range() * 1000L);
                 effect(now, "MAGIC");
                 if (combat().target() != null) combat().setTarget(null);
-                log().add(now, EventLog.Kind.INFO, "Jesteś niewidzialny dla potworów (" + s.range() + " s).");
+                log().add(now, EventLog.Kind.INFO, Messages.get("tibia_spells.jestes_niewidzialny_dla_potwor") + s.range() + " s).");
                 return CastResult.OK;
             case ILLUSION: return illusion(s, now);
             case SUMMON: return summon(s, now);
@@ -124,7 +125,7 @@ public final class TibiaSpells {
                 combat().addEvent(CombatEvent.projectile(now, pc().position(), m.position(), "MAGIC"));
                 combat().addEvent(CombatEvent.area(now, m.position(), 0, "MAGIC"));
                 monsters().provoke(m);
-                log().add(now, EventLog.Kind.INFO, m.type().name() + " jest sparaliżowany (" + s.radius() + " s).");
+                log().add(now, EventLog.Kind.INFO, m.type().name() + Messages.get("tibia_spells.jest_sparalizowany") + s.radius() + " s).");
                 return CastResult.OK;
             }
             case RUNE_CONVINCE: return convince(s, now);
@@ -184,7 +185,7 @@ public final class TibiaSpells {
         combat().addEvent(CombatEvent.projectile(now, pc().position(), m.position(), s.damageType().name()));
         combat().addEvent(CombatEvent.area(now, m.position(), 0, s.damageType().name()));
         monsters().provoke(m);
-        log().add(now, EventLog.Kind.INFO, m.type().name() + ": " + type.label.toLowerCase(Locale.ROOT) + " ("
+        log().add(now, EventLog.Kind.INFO, m.type().name() + ": " + type.label().toLowerCase(Locale.ROOT) + " ("
                 + s.radius() + " x " + perTick + ").");
         return CastResult.OK;
     }
@@ -193,7 +194,7 @@ public final class TibiaSpells {
         ConditionType type = ConditionType.of(s.damageType());
         if (!pc().conditions().remove(type)) return CastResult.NO_CONDITION;
         effect(now, "HEAL");
-        log().add(now, EventLog.Kind.INFO, type.label + " ustępuje.");
+        log().add(now, EventLog.Kind.INFO, type.label() + Messages.get("tibia_spells.ustepuje"));
         return CastResult.OK;
     }
 
@@ -258,12 +259,12 @@ public final class TibiaSpells {
             if (m != null && !m.isDead() && !m.type().boss()) t = m.type().base() != null ? m.type().base() : m.type();
         }
         if (t == null) {
-            log().add(now, EventLog.Kind.WARNING, "Podaj nazwę stworzenia: utevo res ina \"nazwa\" (albo wybierz cel).");
+            log().add(now, EventLog.Kind.WARNING, Messages.get("tibia_spells.podaj_nazwe_stworzenia_utevo"));
             return CastResult.NOT_POSSIBLE;
         }
         pc().setIllusion(t.key(), s.range() * 1000L);
         effect(now, "MAGIC");
-        log().add(now, EventLog.Kind.INFO, "Wyglądasz jak " + t.name() + " (" + s.range() / 60 + " min).");
+        log().add(now, EventLog.Kind.INFO, Messages.get("tibia_spells.wygladasz_jak") + t.name() + " (" + s.range() / 60 + Messages.get("spell_system.min"));
         return CastResult.OK;
     }
 
@@ -278,7 +279,7 @@ public final class TibiaSpells {
         if (sys.param() != null) {
             t = byName(sys.param(), true);
             if (t == null) {
-                log().add(now, EventLog.Kind.WARNING, "Nie możesz przywołać tego stworzenia.");
+                log().add(now, EventLog.Kind.WARNING, Messages.get("tibia_spells.nie_mozesz_przywolac_tego"));
                 return CastResult.NOT_POSSIBLE;
             }
         } else {
@@ -297,7 +298,7 @@ public final class TibiaSpells {
         lastDeathSeen = combat().lastDeath();
         sys.addExtraMana(cost);
         combat().addEvent(CombatEvent.area(now, m.position(), 0, "MAGIC"));
-        log().add(now, EventLog.Kind.INFO, "Przywołano: " + t.name() + " (" + cost + " many).");
+        log().add(now, EventLog.Kind.INFO, Messages.get("tibia_spells.przywolano") + t.name() + " (" + cost + " many).");
         return CastResult.OK;
     }
 
@@ -306,7 +307,7 @@ public final class TibiaSpells {
         if (m == null || m.isDead()) return CastResult.NO_TARGET;
         int cost = SummonTable.defaults().mana(m.type().key());
         if (cost < 0 || m.type().boss() || m.isSummon() || m.type().isElite()) {
-            log().add(now, EventLog.Kind.WARNING, "Tego stworzenia nie da się przekonać.");
+            log().add(now, EventLog.Kind.WARNING, Messages.get("tibia_spells.tego_stworzenia_nie_da"));
             return CastResult.NOT_POSSIBLE;
         }
         if (summons().size() >= SummonTable.MAX_SUMMONS) return CastResult.TOO_MANY_SUMMONS;
@@ -319,7 +320,7 @@ public final class TibiaSpells {
         sys.addExtraMana(cost);
         combat().addEvent(CombatEvent.projectile(now, pc().position(), m.position(), "MAGIC"));
         combat().addEvent(CombatEvent.area(now, m.position(), 0, "MAGIC"));
-        log().add(now, EventLog.Kind.INFO, m.type().name() + " służy ci teraz (" + cost + " many).");
+        log().add(now, EventLog.Kind.INFO, m.type().name() + Messages.get("tibia_spells.sluzy_ci_teraz") + cost + " many).");
         return CastResult.OK;
     }
 
@@ -334,7 +335,7 @@ public final class TibiaSpells {
             if (best[0] == null || p.distanceTo(aim) < best[0].distanceTo(aim)) best[0] = p;
         });
         if (best[0] == null || !monsters().registry().contains("skeleton")) {
-            log().add(now, EventLog.Kind.WARNING, "Tu nie ma zwłok do ożywienia.");
+            log().add(now, EventLog.Kind.WARNING, Messages.get("tibia_spells.tu_nie_ma_zwlok"));
             return CastResult.NOT_POSSIBLE;
         }
         Monster m = monsters().spawnSummon("skeleton", best[0], pc().name(), now);
@@ -344,7 +345,7 @@ public final class TibiaSpells {
         lastDeathSeen = combat().lastDeath();
         combat().addEvent(CombatEvent.projectile(now, pc().position(), best[0], "DEATH"));
         combat().addEvent(CombatEvent.area(now, m.position(), 0, "DEATH"));
-        log().add(now, EventLog.Kind.INFO, "Zwłoki wstają jako " + m.type().name() + ".");
+        log().add(now, EventLog.Kind.INFO, Messages.get("tibia_spells.zwloki_wstaja_jako") + m.type().name() + ".");
         return CastResult.OK;
     }
 
@@ -362,7 +363,7 @@ public final class TibiaSpells {
             monsters().provoke(m);
             m.holdFromFleeing(now + 6000);
         }
-        log().add(now, EventLog.Kind.INFO, s.name() + ": " + near.size() + " potworów atakuje ciebie.");
+        log().add(now, EventLog.Kind.INFO, s.name() + ": " + near.size() + Messages.get("tibia_spells.potworow_atakuje_ciebie"));
         return CastResult.OK;
     }
 
@@ -446,7 +447,7 @@ public final class TibiaSpells {
             ConditionType type = Fields.condition(f.kind());
             if (type == null || f.owner() != null && !f.owner().equals(me)) continue;
             monsterConditions.computeIfAbsent(m, k -> new Conditions())
-                    .add(type, Fields.ticks(f.kind()), Fields.intervalMs(f.kind()), false, now, f.kind().label);
+                    .add(type, Fields.ticks(f.kind()), Fields.intervalMs(f.kind()), false, now, f.kind().label());
             monsters().provoke(m);
         }
     }

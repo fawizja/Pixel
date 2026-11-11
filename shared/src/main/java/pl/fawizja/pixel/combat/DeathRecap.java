@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.combat;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,10 +50,10 @@ public final class DeathRecap {
     /** Wiersze okna informacyjnego {etykieta, opis}. */
     public static List<String[]> rows(Report r) {
         List<String[]> out = new ArrayList<>();
-        out.add(new String[] {"Zabójca", r.killer()});
-        out.add(new String[] {"Strata", r.expLost() + " exp" + (r.blessed() ? " (połowa dzięki błogosławieństwu)" : "")});
+        out.add(new String[] {Messages.get("death_recap.zabojca"), r.killer()});
+        out.add(new String[] {Messages.get("death_recap.strata"), r.expLost() + " exp" + (r.blessed() ? Messages.get("death_recap.polowa_dzieki_blogoslawienstwu") : "")});
         for (Row row : r.rows()) {
-            out.add(new String[] {row.source(), row.total() + " obrażeń w " + row.hits() + " " + hitsWord(row.hits())
+            out.add(new String[] {row.source(), row.total() + Messages.get("death_recap.obrazen_w") + row.hits() + " " + hitsWord(row.hits())
                     + " (ostatnie " + WINDOW_MS / 1000 + " s)"});
         }
         return out;

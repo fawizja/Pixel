@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.house;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.List;
 import pl.fawizja.pixel.economy.BankAccount;
 import pl.fawizja.pixel.economy.Currency;
@@ -87,9 +88,9 @@ public final class HouseRent {
     public static String describeIn(long ms) {
         long m = Math.max(0, ms) / 60_000L;
         long d = m / (24 * 60), h = m / 60 % 24, min = m % 60;
-        if (d > 0) return d + (d == 1 ? " dzień " : " dni ") + h + " godz.";
-        if (h > 0) return h + " godz. " + min + " min";
-        return Math.max(1, min) + " min";
+        if (d > 0) return d + (d == 1 ? Messages.get("house_rent.dzien") : Messages.get("house_rent.dni")) + h + Messages.get("house_rent.godz");
+        if (h > 0) return h + Messages.get("house_rent.godz_2") + min + Messages.get("hud.min");
+        return Math.max(1, min) + Messages.get("hud.min");
     }
 
     /**

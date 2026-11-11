@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -121,7 +122,7 @@ public record Imbuements(List<Slot> slots) {
     public List<String> describe() {
         List<String> out = new ArrayList<>();
         for (Slot s : slots) {
-            out.add(s.kind().label() + " (" + Imbuement.LEVELS[s.level()] + "): " + s.kind().effect(s.level()) + ", "
+            out.add(s.kind().label() + " (" + Messages.tr(Imbuement.LEVELS[s.level()]) + "): " + s.kind().effect(s.level()) + ", "
                     + Enchantments.describe(s.msLeft()));
         }
         return out;

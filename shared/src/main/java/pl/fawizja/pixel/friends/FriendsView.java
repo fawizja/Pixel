@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.friends;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +20,10 @@ public record FriendsView(List<Row> rows) {
     /** "przed chwila", "25 min temu", "3 h temu", "4 dni temu"; pusty tekst, gdy nie wiadomo. */
     public static String describeAgo(long minutes) {
         if (minutes < 0) return "";
-        if (minutes < 2) return "przed chwilą";
-        if (minutes < 60) return minutes + " min temu";
-        if (minutes < 48 * 60) return minutes / 60 + " h temu";
-        return minutes / (24 * 60) + " dni temu";
+        if (minutes < 2) return Messages.get("loot_log.przed_chwila");
+        if (minutes < 60) return minutes + Messages.get("loot_log.min_temu");
+        if (minutes < 48 * 60) return minutes / 60 + Messages.get("loot_log.h_temu");
+        return minutes / (24 * 60) + Messages.get("friends_view.dni_temu");
     }
 
     /** Pola komunikatu do wyslania (bez nazwy "FRIENDS"). */

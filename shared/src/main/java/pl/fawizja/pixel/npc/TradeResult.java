@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.npc;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Wynik handlu z komunikatem dla gracza. */
 public enum TradeResult {
     OK("Gotowe."),
@@ -15,6 +16,6 @@ public enum TradeResult {
 
     TradeResult(String message) { this.message = message; }
 
-    public String message() { return message; }
+    public String message() { return Messages.tr(message); }
     public boolean ok() { return this == OK; }
 }

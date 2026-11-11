@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Jakosc klejnotu Kola Przeznaczenia (Canary WheelGemQuality_t): mniejszy ma 1 mod podstawowy, zwykly 2 podstawowe,
  * wiekszy 2 podstawowe i 1 najwyzszy. Ceny z Canary config.lua.dist (wheelAtelierReveal* / wheelAtelierRotate*) podzielone przez 4 jak reszta ekonomii,
@@ -11,8 +12,10 @@ public enum GemQuality {
     GREATER('G', "większy", "Większy klejnot", 1_500_000, 125_000, 1, 5, true);
 
     public final char code;
-    public final String label;
-    public final String title;
+    private final String label;
+    public String label() { return Messages.tr(label); }
+    private final String title;
+    public String title() { return Messages.tr(title); }
     /** Cena odkrycia modow w Pracowni klejnotow (gp). */
     public final long revealCost;
     /** Cena zmiany domeny klejnotu (gp). */

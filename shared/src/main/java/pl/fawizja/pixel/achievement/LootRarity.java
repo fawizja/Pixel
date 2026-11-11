@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.achievement;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Rzadkosc lupu w bestiariuszu jak w Tibii: zamiast szansy w procentach kategoria (Canary
  * IOBestiary::calculateDifficult; progi z Tibii: pospolite od 25%, niepospolite 5-25%, polrzadkie 1-5%,
@@ -13,7 +14,9 @@ public enum LootRarity {
     RARE("rzadki", 2),
     VERY_RARE("bardzo rzadki", 0);
 
-    public final String label;
+    private final String label;
+
+    public String label() { return Messages.tr(label); }
     /** Najmniejsza szansa w promilach dla tej kategorii. */
     public final int minPermille;
 

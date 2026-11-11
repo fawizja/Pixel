@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -124,10 +125,10 @@ public enum BasicGemMod {
             switch (p.kind) {
                 case HEALTH: out.add("+" + Math.round(val) + " HP"); break;
                 case MANA: out.add("+" + Math.round(val) + " many"); break;
-                case CAPACITY: out.add("+" + Math.round(val) + " udźwigu"); break;
-                case MITIGATION: out.add("+" + pct(val) + "% mitygacji"); break;
+                case CAPACITY: out.add("+" + Math.round(val) + Messages.get("basic_gem_mod.udzwigu")); break;
+                case MITIGATION: out.add("+" + pct(val) + Messages.get("basic_gem_mod.mitygacji")); break;
                 default:
-                    out.add((val >= 0 ? "+" : "") + pct(val) + "% odp. (" + p.type.label() + ")");
+                    out.add((val >= 0 ? "+" : "") + pct(val) + Messages.get("basic_gem_mod.odp") + p.type.label() + ")");
             }
         }
         return String.join(", ", out);
@@ -141,9 +142,9 @@ public enum BasicGemMod {
             switch (p.kind) {
                 case HEALTH: s = "HP"; break;
                 case MANA: s = "mana"; break;
-                case CAPACITY: s = "udźwig"; break;
+                case CAPACITY: s = Messages.get("basic_gem_mod.udzwig"); break;
                 case MITIGATION: s = "mitygacja"; break;
-                default: s = p.base < 0 ? "słabość: " + p.type.label() : p.type.label();
+                default: s = p.base < 0 ? Messages.get("basic_gem_mod.slabosc") + p.type.label() : p.type.label();
             }
             if (b.length() > 0) b.append(p.base < 0 ? " / " : " + ");
             b.append(s);

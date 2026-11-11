@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.screen;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -328,6 +329,7 @@ public final class GameScreen extends ScreenAdapter {
         Gdx.input.setCatchKey(Input.Keys.BACK, true); // Wstecz na Androidzie zamyka okna zamiast konczyc gre
         this.settingsPrefs = Gdx.app.getPreferences("pixel-settings");
         this.settings = pl.fawizja.pixel.settings.GameSettings.fromMap(settingsPrefs.get());
+        settings.setLanguage(pl.fawizja.pixel.i18n.Language.byCode(System.getProperty("pixel.lang"), settings.language()));
         // zrzuty ekranu: -Dpixel.controls=dpad|float4|hold|classic, -Dpixel.sens=1..5 (bez zapisu)
         settings.setControlScheme(pl.fawizja.pixel.movement.ControlScheme.byKey(System.getProperty("pixel.controls"), settings.controlScheme()));
         Integer sens = Integer.getInteger("pixel.sens");
@@ -354,8 +356,8 @@ public final class GameScreen extends ScreenAdapter {
             settingsPrefs.putString("whatsnew", latest);
             settingsPrefs.flush();
         }
-        session.log().add(now(), EventLog.Kind.SYSTEM, "Witaj w Varden, " + pc.name() + "! "
-                + (net == null ? "(tryb lokalny)" : "(online, serwer: " + game.platform().serverAddress() + ")"));
+        session.log().add(now(), EventLog.Kind.SYSTEM, Messages.get("game_screen.witaj_w_varden") + pc.name() + "! "
+                + (net == null ? Messages.get("game_screen.tryb_lokalny") : Messages.get("game_screen.online_serwer") + game.platform().serverAddress() + ")"));
         String wake = game.takeLoginNote();                     // pobudka po snie w lozku (PixelGame.playLocal)
         if (wake != null) session.log().add(now(), EventLog.Kind.SYSTEM, wake);
         if (net != null) lastSelf = net.selfSave();
@@ -541,7 +543,7 @@ public final class GameScreen extends ScreenAdapter {
                             Gdx.app.exit();
                         } else {
                             backPressedMs = t;
-                            session.log().add(now(), EventLog.Kind.INFO, "Naciśnij Wstecz jeszcze raz, aby wyjść z gry.");
+                            session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nacisnij_wstecz_jeszcze_raz"));
                         }
                         return true;
                     }
@@ -570,7 +572,7 @@ public final class GameScreen extends ScreenAdapter {
                 // nowy wariant sterowania: stary palec nie prowadzi juz postaci
                 hud.resetMoveControls();
                 hold.cancel();
-                session.log().add(t, EventLog.Kind.INFO, "Sterowanie: " + settings.controlScheme().label + ".");
+                session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.sterowanie") + settings.controlScheme().label() + ".");
             }
             settingsPrefs.put(settings.toMap());
             settingsPrefs.flush();
@@ -596,7 +598,7 @@ public final class GameScreen extends ScreenAdapter {
                 // jak w Tibii: nie w trakcie walki z graczem (blokada wylogowania, takze dla zaatakowanego)
                 long block = session.character().logoutBlockedMs(t);
                 if (block > 0) {
-                    session.log().add(t, EventLog.Kind.WARNING, "Nie możesz się wylogować w trakcie walki. Poczekaj "
+                    session.log().add(t, EventLog.Kind.WARNING, Messages.get("game_screen.nie_mozesz_sie_wylogowac")
                             + (block + 999) / 1000 + " s.");
                 } else if (hud.logoutConfirmOpen()) {
                     hud.closeTop(session);
@@ -609,11 +611,11 @@ public final class GameScreen extends ScreenAdapter {
                 long block = session.character().logoutBlockedMs(t);
                 hud.closeTop(session);
                 if (block > 0) {
-                    session.log().add(t, EventLog.Kind.WARNING, "Nie możesz się wylogować w trakcie walki.");
+                    session.log().add(t, EventLog.Kind.WARNING, Messages.get("game_screen.nie_mozesz_sie_wylogowac_2"));
                     break;
                 }
                 if (net == null) game.saveCharacter(session.character());
-                Gdx.app.postRunnable(() -> game.backToMenu("Wylogowano. Postać zapisana."));
+                Gdx.app.postRunnable(() -> game.backToMenu(Messages.get("game_screen.wylogowano_postac_zapisana")));
                 break;
             }
             case "talk": hud.toggleNpc(session); break;
@@ -697,10 +699,10 @@ public final class GameScreen extends ScreenAdapter {
                     else if (id.equals("trade:cancel")) net.send("TRADE", "CANCEL");
                     else if (id.startsWith("trade:offer:")) net.send("TRADE", "OFFER", id.substring(12));
                 } else if (id.equals("npc:market")) {
-                    if (net == null) session.log().add(t, EventLog.Kind.INFO, "Rynek graczy działa online.");
+                    if (net == null) session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.rynek_graczy_dziala_online"));
                     else net.send("MARKET", "LIST");
                 } else if (id.equals("npc:orders")) {
-                    if (net == null) session.log().add(t, EventLog.Kind.INFO, "Zamówienia kupna działają online.");
+                    if (net == null) session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.zamowienia_kupna_dzialaja_onli"));
                     else net.send("WANT", "LIST");
                 } else if (id.startsWith("market:")) {
                     String[] f = id.split(":");
@@ -736,7 +738,7 @@ public final class GameScreen extends ScreenAdapter {
                     else session.chooseTitle(key, t);
                 } else if (id.equals("hunt:reset")) {
                     hunt.reset(t, session.character());
-                    session.log().add(t, EventLog.Kind.INFO, "Nowe polowanie: liczniki od zera.");
+                    session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.nowe_polowanie_liczniki_od"));
                     hud.updateInfo(HUNT_TITLE, huntRows(t));
                 } else if (id.equals("journal:hunt")) {
                     hud.openJournal(); // zamkniecie okna
@@ -747,7 +749,7 @@ public final class GameScreen extends ScreenAdapter {
                     pl.fawizja.pixel.npc.Npc target = key == null ? nearestGuide() : session.npcs().get(key);
                     hud.openJournal(); // zamkniecie okna
                     if (target == null || target.position().z() != session.character().position().z()) {
-                        session.log().add(t, EventLog.Kind.INFO, target == null ? "Nie znam drogi." : target.name() + " jest na innym piętrze.");
+                        session.log().add(t, EventLog.Kind.INFO, target == null ? Messages.get("game_screen.nie_znam_drogi") : target.name() + Messages.get("game_screen.jest_na_innym_pietrze"));
                     } else if (session.npcNearby() == target) {
                         hud.openNpc(session);
                     } else if (walkTo(target.position(), t, false, true)) {
@@ -758,7 +760,7 @@ public final class GameScreen extends ScreenAdapter {
                     openStore();
                 } else if (id.startsWith("store:soon:")) {
                     pl.fawizja.pixel.game.StoreOutfits.Entry e = pl.fawizja.pixel.game.StoreOutfits.find(id.substring("store:soon:".length()));
-                    if (e != null) session.log().add(t, EventLog.Kind.INFO, "Sklep: strój " + e.name() + " będzie dostępny wkrótce.");
+                    if (e != null) session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.sklep_stroj") + e.name() + Messages.get("game_screen.bedzie_dostepny_wkrotce"));
                 } else if (id.startsWith("store:ask:")) {
                     storeAsk(id.substring("store:ask:".length()));
                 } else if (id.startsWith("store:buy:")) {
@@ -822,8 +824,8 @@ public final class GameScreen extends ScreenAdapter {
 
                 @Override
                 public void canceled() { }
-            }, "Czat: " + hud.chatTabs().active().title(), start, chatHistory.last() != null ? "Ostatnio: " + chatHistory.last()
-                    : net == null ? "Rozmowa z NPC obok (np. praca, handel)" : "Wiadomość albo słowo do NPC obok");
+            }, Messages.get("game_screen.czat") + hud.chatTabs().active().title(), start, chatHistory.last() != null ? Messages.get("game_screen.ostatnio") + chatHistory.last()
+                    : net == null ? Messages.get("game_screen.rozmowa_z_npc_obok") : Messages.get("game_screen.wiadomosc_albo_slowo_do"));
         } else {
             chatHistory.resetCursor();
             chatDraft = new StringBuilder(start);
@@ -836,7 +838,7 @@ public final class GameScreen extends ScreenAdapter {
         String[] channelMsg = hud.chatTabs().outgoing(text);
         if (channelMsg != null) {
             if (net != null) net.send(channelMsg);
-            else session.log().add(now(), EventLog.Kind.INFO, "Kanał " + hud.chatTabs().active().title() + " działa online. Lokalny czat: zakładka Lokalny.");
+            else session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.kanal") + hud.chatTabs().active().title() + Messages.get("game_screen.dziala_online_lokalny_czat"));
             return;
         }
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
@@ -872,7 +874,7 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         if (cmd.equals("/pomoc") || cmd.equals("/polecenia") || cmd.equals("/help")) {
-            hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
+            hud.openInfo(Messages.get("game_screen.polecenia"), pl.fawizja.pixel.net.ChatCommands.helpRows());
             return;
         }
         if (cmd.equals("/nowosci") || cmd.equals("/nowości") || cmd.equals("/zmiany")) {
@@ -881,7 +883,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         if (cmd.equals("/wydarzenia") || cmd.equals("/dzis")) {
             if (net != null) net.send("EVENTS");
-            else hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, null));
+            else hud.openInfo(Messages.get("game_screen.wydarzenia"), pl.fawizja.pixel.game.EventsReport.rows(session, null));
             return;
         }
         if (cmd.equals("/lupy") || cmd.equals("/lup")) {
@@ -892,20 +894,20 @@ public final class GameScreen extends ScreenAdapter {
         if (cmd.equals("/szukaj") || cmd.startsWith("/szukaj ")) {
             String q = text.trim().length() > 7 ? text.trim().substring(7).trim() : "";
             if (q.length() < pl.fawizja.pixel.inventory.ItemSearch.MIN_QUERY) {
-                session.log().add(now(), EventLog.Kind.INFO, "Wpisz co najmniej 2 litery nazwy, np. /szukaj futro.");
+                session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.wpisz_co_najmniej_2"));
                 return;
             }
             List<String[]> rows = pl.fawizja.pixel.inventory.ItemSearch.rows(session.character(), session.items(), q);
-            if (rows.isEmpty()) session.log().add(now(), EventLog.Kind.INFO, "Nie masz przedmiotu \"" + q + "\" w plecaku, wyposażeniu ani depozycie.");
-            else hud.openInfo("Szukaj: " + q, rows);
+            if (rows.isEmpty()) session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nie_masz_przedmiotu") + q + Messages.get("game_screen.w_plecaku_wyposazeniu_ani"));
+            else hud.openInfo(Messages.get("game_screen.szukaj") + q, rows);
             return;
         }
         if (cmd.equals("/autorzy") || cmd.equals("/grafiki")) {
-            hud.openInfo("Autorzy grafik", pl.fawizja.pixel.game.Credits.rows());
+            hud.openInfo(Messages.get("game_screen.autorzy_grafik"), pl.fawizja.pixel.game.Credits.rows());
             return;
         }
         if (cmd.equals("/emotki")) {
-            hud.openInfo("Emotki", pl.fawizja.pixel.net.Emotes.rows());
+            hud.openInfo(Messages.get("game_screen.emotki"), pl.fawizja.pixel.net.Emotes.rows());
             return;
         }
         if (cmd.equals("/strój") || cmd.equals("/stroj") || cmd.startsWith("/strój ") || cmd.startsWith("/stroj ")) {
@@ -917,9 +919,9 @@ public final class GameScreen extends ScreenAdapter {
             List<String[]> rows = new ArrayList<>();
             int now = session.character().outfit();
             for (int i = 0; i < pl.fawizja.pixel.character.Outfit.count(); i++) {
-                rows.add(new String[] {"Kolor " + pl.fawizja.pixel.character.Outfit.name(i), i == now ? "noszony teraz" : "dotknij, aby założyć", "", "outfit:" + i});
+                rows.add(new String[] {Messages.get("game_screen.kolor") + pl.fawizja.pixel.character.Outfit.name(i), i == now ? Messages.get("game_screen.noszony_teraz") : Messages.get("game_screen.dotknij_aby_zalozyc"), "", "outfit:" + i});
             }
-            hud.openInfo("Strój", rows);
+            hud.openInfo(Messages.get("game_screen.stroj"), rows);
             return;
         }
         if (cmd.equals("/podpowiedzi")) {
@@ -935,14 +937,14 @@ public final class GameScreen extends ScreenAdapter {
             }
             pl.fawizja.pixel.npc.Npc n = pl.fawizja.pixel.npc.NpcFinder.find(session.npcs(), q, session.character().position());
             if (n == null) {
-                session.log().add(now(), EventLog.Kind.INFO, "Nie widzę tu nikogo takiego. Spróbuj: /idź kupiec, bank, kapłan, przewodnik, woźnica albo imię.");
+                session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nie_widze_tu_nikogo"));
             } else if (session.npcNearby() == n) {
                 hud.openNpc(session);
             } else if (walkTo(n.position(), now(), true, true)) {
                 walkNpc = n; // rozmowa otworzy sie po dojsciu
-                session.log().add(now(), EventLog.Kind.INFO, "Idziesz do: " + n.name() + ".");
+                session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.idziesz_do") + n.name() + ".");
             } else {
-                session.log().add(now(), EventLog.Kind.INFO, "Nie znam drogi do: " + n.name() + ".");
+                session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nie_znam_drogi_do") + n.name() + ".");
             }
             return;
         }
@@ -950,11 +952,11 @@ public final class GameScreen extends ScreenAdapter {
             String q = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
             pl.fawizja.pixel.item.ItemType it = pl.fawizja.pixel.npc.PriceCheck.find(session.items(), q);
             if (it == null) {
-                session.log().add(now(), EventLog.Kind.INFO, q.isEmpty() ? "Wpisz nazwę przedmiotu, np. /cena wilcze futro."
-                        : "Nie znam przedmiotu \"" + q + "\".");
+                session.log().add(now(), EventLog.Kind.INFO, q.isEmpty() ? Messages.get("game_screen.wpisz_nazwe_przedmiotu_np")
+                        : Messages.get("game_screen.nie_znam_przedmiotu") + q + "\".");
                 return;
             }
-            hud.openInfo("Cena: " + it.name(), pl.fawizja.pixel.npc.PriceCheck.rows(it, session.npcs(), session.shops()));
+            hud.openInfo(Messages.get("game_screen.cena") + it.name(), pl.fawizja.pixel.npc.PriceCheck.rows(it, session.npcs(), session.shops()));
             if (net != null) net.send("PRICE", it.key()); // ceny z rynku graczy przychodza w dzienniku
             return;
         }
@@ -962,29 +964,29 @@ public final class GameScreen extends ScreenAdapter {
             String who = text.indexOf(' ') < 0 ? "" : text.substring(text.indexOf(' ') + 1).trim();
             if (who.isEmpty()) {
                 List<String> all = ignored.all();
-                session.log().add(now(), EventLog.Kind.INFO, all.isEmpty() ? "Nikogo nie ignorujesz. /ignoruj Imię ukrywa wiadomości gracza."
-                        : "Ignorujesz: " + String.join(", ", all) + " (ponowne /ignoruj Imię przywraca).");
+                session.log().add(now(), EventLog.Kind.INFO, all.isEmpty() ? Messages.get("game_screen.nikogo_nie_ignorujesz_ignoruj")
+                        : Messages.get("game_screen.ignorujesz") + String.join(", ", all) + Messages.get("game_screen.ponowne_ignoruj_imie_przywraca"));
                 return;
             }
             boolean on = ignored.toggle(who);
-            session.log().add(now(), EventLog.Kind.SYSTEM, on ? "Ignorujesz " + who + ": wiadomości od tej osoby będą ukryte."
+            session.log().add(now(), EventLog.Kind.SYSTEM, on ? Messages.get("game_screen.ignorujesz_2") + who + Messages.get("game_screen.wiadomosci_od_tej_osoby")
                     : ignored.all().size() >= pl.fawizja.pixel.settings.IgnoreList.MAX && !ignored.ignores(who) && !who.isEmpty()
-                    ? "Lista ignorowanych jest pełna (" + pl.fawizja.pixel.settings.IgnoreList.MAX + ")." : "Nie ignorujesz już " + who + ".");
+                    ? Messages.get("game_screen.lista_ignorowanych_jest_pelna") + pl.fawizja.pixel.settings.IgnoreList.MAX + ")." : Messages.get("game_screen.nie_ignorujesz_juz") + who + ".");
             markerPrefs.putString("ignore:" + barKey(session.character()), ignored.encode());
             markerPrefs.flush();
             return;
         }
         if (cmd.equals("/statystyki") || cmd.equals("/staty")) {
-            hud.openInfo("Statystyki: " + session.character().name(), pl.fawizja.pixel.game.StatsReport.rows(session.character()));
+            hud.openInfo(Messages.get("game_screen.statystyki") + session.character().name(), pl.fawizja.pixel.game.StatsReport.rows(session.character()));
             return;
         }
         if (cmd.equals("/gracze") || cmd.equals("/online")) {
             if (net != null) net.send("WHO");
-            else session.log().add(now(), EventLog.Kind.INFO, "Lista graczy działa online.");
+            else session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.lista_graczy_dziala_online"));
             return;
         }
         if (cmd.equals("/potwor") || cmd.equals("/bonus")) {
-            session.log().add(now(), EventLog.Kind.SYSTEM, "Potwór dnia: " + pl.fawizja.pixel.daily.BoostedCreature.describe(session.boostedCreature()) + ".");
+            session.log().add(now(), EventLog.Kind.SYSTEM, Messages.get("game_screen.potwor_dnia") + pl.fawizja.pixel.daily.BoostedCreature.describe(session.boostedCreature()) + ".");
             return;
         }
         if (cmd.equals("/znaczniki") || cmd.startsWith("/znacznik ") || cmd.equals("/znacznik")) {
@@ -1038,7 +1040,7 @@ public final class GameScreen extends ScreenAdapter {
                     ? pl.fawizja.pixel.house.HouseAccess.ENTRY : pl.fawizja.pixel.house.HouseAccess.FULL, now());
             else if (house[1].equals("UNGUEST")) session.removeHouseGuest(house[2], now());
             else if (house[1].equals("INFO")) session.log().add(now(), EventLog.Kind.SYSTEM, session.houseInfo());
-            else session.log().add(now(), EventLog.Kind.INFO, "Sprzedaż domu innemu graczowi działa online. Miastu sprzedasz go u zarządcy domów.");
+            else session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.sprzedaz_domu_innemu_graczowi"));
             return;
         }
         String[] social = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
@@ -1048,13 +1050,13 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         if (net == null) {
-            session.log().add(now(), EventLog.Kind.INFO, "Czat z graczami działa online. Podejdź do NPC, aby z nim porozmawiać.");
+            session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.czat_z_graczami_dziala"));
             return;
         }
         String[] msg = social;
         if (msg == null) {
-            session.log().add(now(), EventLog.Kind.INFO, "Nieznane polecenie. Lista: /pomoc");
-            hud.openInfo("Polecenia", pl.fawizja.pixel.net.ChatCommands.helpRows());
+            session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nieznane_polecenie_lista_pomoc"));
+            hud.openInfo(Messages.get("game_screen.polecenia"), pl.fawizja.pixel.net.ChatCommands.helpRows());
             return;
         }
         net.send(msg);
@@ -1127,7 +1129,7 @@ public final class GameScreen extends ScreenAdapter {
                 tapPulse(p, false);
             } else {
                 tapPulse(p, true);
-                session.log().add(now(), EventLog.Kind.INFO, npc.name() + ": podejdź bliżej, aby porozmawiać.");
+                session.log().add(now(), EventLog.Kind.INFO, npc.name() + Messages.get("game_screen.podejdz_blizej_aby_porozmawiac"));
             }
             return true;
         }
@@ -1140,7 +1142,7 @@ public final class GameScreen extends ScreenAdapter {
                 tapPulse(p, false);
             } else {
                 tapPulse(p, true);
-                session.log().add(now(), EventLog.Kind.INFO, "Nie ma tam drogi.");
+                session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nie_ma_tam_drogi"));
             }
             return true;
         }
@@ -1285,19 +1287,19 @@ public final class GameScreen extends ScreenAdapter {
 
     private void showDeath(List<String[]> rows) {
         if (rows.isEmpty()) {
-            session.log().add(now(), EventLog.Kind.INFO, "Jeszcze nie zginąłeś w tej sesji.");
+            session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.jeszcze_nie_zginales_w"));
             return;
         }
-        hud.openInfo("Ostatnia śmierć", rows);
+        hud.openInfo(Messages.get("game_screen.ostatnia_smierc"), rows);
     }
 
     /** Okno ostatnich lupow (/lupy). */
     private void showLoot(List<String[]> rows) {
         if (rows.isEmpty()) {
-            session.log().add(now(), EventLog.Kind.INFO, "Nie pokonałeś jeszcze potwora w tej sesji.");
+            session.log().add(now(), EventLog.Kind.INFO, Messages.get("game_screen.nie_pokonales_jeszcze_potwora"));
             return;
         }
-        hud.openInfo("Ostatnie łupy", rows);
+        hud.openInfo(Messages.get("game_screen.ostatnie_lupy"), rows);
     }
 
     private void checkDeath() {
@@ -1326,24 +1328,24 @@ public final class GameScreen extends ScreenAdapter {
         String arg = sp < 0 ? "" : text.substring(sp + 1).trim();
         if (cmd.startsWith("/znacznik ") && (cmd.startsWith("/znacznik usun ") || cmd.startsWith("/znacznik usuń "))) {
             String name = arg.substring(arg.indexOf(' ') + 1);
-            session.log().add(t, EventLog.Kind.INFO, markers.remove(name) ? "Usunięto znacznik " + name + "." : "Nie ma znacznika " + name + ".");
+            session.log().add(t, EventLog.Kind.INFO, markers.remove(name) ? Messages.get("game_screen.usunieto_znacznik") + name + "." : Messages.get("game_screen.nie_ma_znacznika") + name + ".");
         } else if (cmd.startsWith("/znacznik ") && !arg.isEmpty()) {
             if (markers.put(arg, pc.position())) {
-                session.log().add(t, EventLog.Kind.SYSTEM, "Znacznik " + pl.fawizja.pixel.settings.MapMarkers.cleanName(arg) + " zapisany tutaj (żółta kropka na mapie).");
+                session.log().add(t, EventLog.Kind.SYSTEM, Messages.get("game_screen.znacznik") + pl.fawizja.pixel.settings.MapMarkers.cleanName(arg) + Messages.get("game_screen.zapisany_tutaj_zolta_kropka"));
             } else {
-                session.log().add(t, EventLog.Kind.WARNING, "Najwyżej " + pl.fawizja.pixel.settings.MapMarkers.MAX + " znaczników. Usuń któryś: /znacznik usuń nazwa");
+                session.log().add(t, EventLog.Kind.WARNING, Messages.get("game_screen.najwyzej") + pl.fawizja.pixel.settings.MapMarkers.MAX + Messages.get("game_screen.znacznikow_usun_ktorys_znaczni"));
             }
         } else {
             List<String[]> rows = new ArrayList<>();
             for (pl.fawizja.pixel.settings.MapMarkers.Marker m : hud.allMarkers(session)) {
                 boolean here = m.at().z() == pc.position().z();
                 int dist = here ? Math.max(Math.abs(m.at().x() - pc.position().x()), Math.abs(m.at().y() - pc.position().y())) : -1;
-                rows.add(here ? new String[] {m.name(), dist + " pól stąd (dotknij, aby iść)", "", "map:goto:" + m.at().x() + "," + m.at().y()}
-                        : new String[] {m.name(), "inne piętro (" + m.at().z() + ")"});
+                rows.add(here ? new String[] {m.name(), dist + Messages.get("game_screen.pol_stad_dotknij_aby"), "", "map:goto:" + m.at().x() + "," + m.at().y()}
+                        : new String[] {m.name(), Messages.get("game_screen.inne_pietro") + m.at().z() + ")"});
             }
-            if (rows.isEmpty()) rows.add(new String[] {"Brak znaczników", "/znacznik nazwa zapisuje miejsce, w którym stoisz"});
-            rows.add(new String[] {"Usuwanie", "/znacznik usuń nazwa"});
-            hud.openInfo("Znaczniki", rows);
+            if (rows.isEmpty()) rows.add(new String[] {Messages.get("game_screen.brak_znacznikow"), Messages.get("game_screen.znacznik_nazwa_zapisuje_miejsc")});
+            rows.add(new String[] {Messages.get("game_screen.usuwanie"), Messages.get("game_screen.znacznik_usun_nazwa")});
+            hud.openInfo(Messages.get("game_screen.znaczniki"), rows);
             return;
         }
         markerPrefs.putString(barKey(pc), markers.encode());
@@ -1353,12 +1355,12 @@ public final class GameScreen extends ScreenAdapter {
     private List<String[]> huntRows(long t) {
         List<String[]> rows = pl.fawizja.pixel.stats.HuntAnalyzer.rows(hunt.report(t, session.character()));
         pl.fawizja.pixel.monster.MonsterType boost = session.boostedCreature();
-        if (boost != null) rows.add(new String[] {"Potwór dnia", pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
+        if (boost != null) rows.add(new String[] {Messages.get("game_screen.potwor_dnia_2"), pl.fawizja.pixel.daily.BoostedCreature.describe(boost)});
         pl.fawizja.pixel.item.Enchantments ench = session.character().enchantments();
         for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
-            if (ench.active(k)) rows.add(new String[] {k.label(), "zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k))});
+            if (ench.active(k)) rows.add(new String[] {k.label(), Messages.get("game_screen.zostalo") + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k))});
         }
-        rows.add(new String[] {"Zacznij od nowa", "zeruje liczniki polowania", "", "hunt:reset"});
+        rows.add(new String[] {Messages.get("game_screen.zacznij_od_nowa"), Messages.get("game_screen.zeruje_liczniki_polowania"), "", "hunt:reset"});
         return rows;
     }
 
@@ -1373,7 +1375,7 @@ public final class GameScreen extends ScreenAdapter {
     private pl.fawizja.pixel.game.Store.Tab storeTab = pl.fawizja.pixel.game.Store.Tab.SERVICES;
 
     private String storeTitle() {
-        return String.format("%s - w banku %,d gp", pl.fawizja.pixel.client.ui.Hud.STORE_TITLE, session.character().bank().balance());
+        return String.format(Messages.get("game_screen.s_w_banku_d"), Messages.tr(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE), session.character().bank().balance());
     }
 
     /** Zakladki (Uslugi / Premium / Outfity) i tresc wybranej - {@link pl.fawizja.pixel.game.Store#rows}. */
@@ -1387,23 +1389,23 @@ public final class GameScreen extends ScreenAdapter {
         long t = now();
         if (o == null) return;
         if (!o.available()) {
-            session.log().add(t, EventLog.Kind.INFO, "Sklep: " + o.name() + " - " + o.blocked() + ".");
+            session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.sklep") + o.name() + " - " + o.blocked() + ".");
             return;
         }
         long bank = session.character().bank().balance();
         java.util.List<String[]> rows = new java.util.ArrayList<>();
         rows.add(new String[] {o.name(), o.desc()});
-        rows.add(new String[] {String.format("Cena: %,d gp", o.price()), bank >= o.price()
-                ? String.format("z konta w banku (zostanie %,d gp)", bank - o.price())
-                : String.format("na koncie masz tylko %,d gp", bank)});
-        rows.add(new String[] {"Tak, kupuję", String.format("zapłać %,d gp z banku", o.price()), "", "store:buy:" + key});
-        rows.add(new String[] {"Nie, wróć", "do listy sklepu", "", "store"});
-        hud.openInfo(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE + ": kupić " + o.name() + "?", rows);
+        rows.add(new String[] {String.format(Messages.get("game_screen.cena_d_gp"), o.price()), bank >= o.price()
+                ? String.format(Messages.get("game_screen.z_konta_w_banku"), bank - o.price())
+                : String.format(Messages.get("game_screen.na_koncie_masz_tylko"), bank)});
+        rows.add(new String[] {Messages.get("game_screen.tak_kupuje"), String.format(Messages.get("game_screen.zaplac_d_gp_z"), o.price()), "", "store:buy:" + key});
+        rows.add(new String[] {Messages.get("game_screen.nie_wroc"), Messages.get("game_screen.do_listy_sklepu"), "", "store"});
+        hud.openInfo(Messages.tr(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE) + Messages.get("game_screen.kupic") + o.name() + "?", rows);
     }
 
     /** Otwarta lista sklepu odswieza saldo i stan ofert (online zakup potwierdza serwer chwile pozniej). */
     private void updateStore(long t) {
-        if (t - storeRefreshMs < 500 || !hud.infoOpen(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE + " - ")) return;
+        if (t - storeRefreshMs < 500 || !hud.infoOpen(Messages.tr(pl.fawizja.pixel.client.ui.Hud.STORE_TITLE) + " - ")) return;
         hud.updateInfo(storeTitle(), storeRows());
         storeRefreshMs = t;
     }
@@ -1428,16 +1430,16 @@ public final class GameScreen extends ScreenAdapter {
             if (best != null) goal = best;
         }
         if (goal.equals(me)) {
-            session.log().add(t, EventLog.Kind.INFO, "Już tu jesteś.");
+            session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.juz_tu_jestes"));
             return;
         }
         if (!walkTo(goal, t, true, false)) {
             tapPulse(goal, true);
-            session.log().add(t, EventLog.Kind.WARNING, "Nie można tam dojść.");
+            session.log().add(t, EventLog.Kind.WARNING, Messages.get("game_screen.nie_mozna_tam_dojsc"));
             return;
         }
         tapPulse(goal, false);
-        session.log().add(t, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + walkPath.size() + " pól). Joystick przerywa marsz.");
+        session.log().add(t, EventLog.Kind.INFO, Messages.get("game_screen.ide_do_zaznaczonego_miejsca") + walkPath.size() + Messages.get("game_screen.pol_joystick_przerywa_marsz"));
     }
 
     private void openHunt() {
@@ -1472,7 +1474,7 @@ public final class GameScreen extends ScreenAdapter {
 
     /** Raport bossow: online od serwera (tam zyja potwory), lokalnie z wlasnego swiata. */
     private void huntingGrounds() {
-        hud.openInfo("Gdzie polować (poziom " + session.character().level() + ")", pl.fawizja.pixel.game.HuntingAdvisor.rows(session));
+        hud.openInfo(Messages.get("game_screen.gdzie_polowac_poziom") + session.character().level() + ")", pl.fawizja.pixel.game.HuntingAdvisor.rows(session));
     }
 
     private void bossReport(long t) {
@@ -1482,7 +1484,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         List<String[]> rows = new ArrayList<>();
         for (MonsterManager.BossStatus b : session.monsters().bossReport(t)) rows.add(MonsterManager.row(b, t));
-        hud.openInfo("Bossowie (" + rows.size() + ")", rows);
+        hud.openInfo(Messages.get("game_screen.bossowie") + rows.size() + ")", rows);
     }
 
     private pl.fawizja.pixel.npc.Npc nearestGuide() {
@@ -1576,18 +1578,18 @@ public final class GameScreen extends ScreenAdapter {
     /** Okno "Co nowego" z dziennika zmian dolaczonego do gry (3 ostatnie wersje). */
     private void showWhatsNew() {
         java.util.List<String[]> rows = pl.fawizja.pixel.game.WhatsNew.rows(pl.fawizja.pixel.game.WhatsNew.load(), 5, 18);
-        hud.openInfo("Co nowego w grze", rows);
+        hud.openInfo(Messages.get("game_screen.co_nowego_w_grze"), rows);
     }
 
     /** Marsz do najblizszego legowiska potwora ze zlecenia lowcy albo zadania dnia (/idz lowisko, dziennik). */
     private void goHunting(long now) {
         pl.fawizja.pixel.monster.SpawnPoint sp = session.huntingGround();
         if (sp == null) {
-            session.log().add(now, EventLog.Kind.INFO, "Brak zadania z potworami na tym piętrze. Zlecenie da przewodnik (/idź przewodnik).");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.brak_zadania_z_potworami"));
         } else if (walkTo(sp.center(), now, true, true)) {
-            session.log().add(now, EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(sp.monsterKey()) + ".");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.idziesz_na_lowisko") + session.monsterName(sp.monsterKey()) + ".");
         } else {
-            session.log().add(now, EventLog.Kind.INFO, "Nie znam drogi na łowisko" + session.whereToHunt(sp.monsterKey()) + ".");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.nie_znam_drogi_na") + session.whereToHunt(sp.monsterKey()) + ".");
         }
     }
 
@@ -1600,10 +1602,10 @@ public final class GameScreen extends ScreenAdapter {
             if (best == null || sp.center().distanceTo(me) < best.center().distanceTo(me)) best = sp;
         }
         if (best != null && walkTo(best.center(), now, true, true)) {
-            session.log().add(now, EventLog.Kind.INFO, "Idziesz na łowisko: " + session.monsterName(monsterKey) + ".");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.idziesz_na_lowisko") + session.monsterName(monsterKey) + ".");
         } else {
-            session.log().add(now, EventLog.Kind.INFO, "Stąd nie dojdziesz - szukaj: " + session.monsterName(monsterKey)
-                    + session.whereToHunt(monsterKey) + ". Woźnice przy fontannach wożą między miastami.");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.stad_nie_dojdziesz_szukaj") + session.monsterName(monsterKey)
+                    + session.whereToHunt(monsterKey) + Messages.get("game_screen.woznice_przy_fontannach_woza"));
         }
     }
 
@@ -1614,14 +1616,14 @@ public final class GameScreen extends ScreenAdapter {
                 : pl.fawizja.pixel.movement.Pathfinder.pathAvoiding(session.world(), from, goal, WALK_MAX_NODES, this::walkAvoid);
         if (path.isEmpty()) {
             stopWalk();
-            if (!quiet) session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? "Już tu jesteś." : "Nie ma drogi do tego miejsca.");
+            if (!quiet) session.log().add(now, EventLog.Kind.INFO, from.equals(goal) ? Messages.get("game_screen.juz_tu_jestes") : Messages.get("game_screen.nie_ma_drogi_do"));
             return false;
         }
         walkPath = path;
         walkIndex = 0;
         walkNpc = null;
         hud.setWalkTarget(path.get(path.size() - 1));
-        if (!quiet) session.log().add(now, EventLog.Kind.INFO, "Idę do zaznaczonego miejsca (" + path.size() + " pól). Joystick przerywa marsz.");
+        if (!quiet) session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.ide_do_zaznaczonego_miejsca") + path.size() + Messages.get("game_screen.pol_joystick_przerywa_marsz"));
         return true;
     }
 
@@ -1662,7 +1664,7 @@ public final class GameScreen extends ScreenAdapter {
             String key = pl.fawizja.pixel.settings.SpellBar.base(entry).substring(5);
             if (!session.items().containsKey(key)) return;
             if (session.character().backpack().count(session.items().byKey(key).id()) == 0) {
-                session.log().add(t, EventLog.Kind.WARNING, "Nie masz w plecaku: " + session.items().byKey(key).name() + ".");
+                session.log().add(t, EventLog.Kind.WARNING, Messages.get("game_screen.nie_masz_w_plecaku") + session.items().byKey(key).name() + ".");
                 return;
             }
             startAim("item:" + key + ":at", key, slot);
@@ -1681,8 +1683,8 @@ public final class GameScreen extends ScreenAdapter {
         aimSlot = slot;
         aimFrom = null;
         boolean phone = hud.mobile();
-        hud.setAim("Celownik: " + session.items().byKey(runeKey).name() + " - " + (phone ? "dotknij pola" : "kliknij pole")
-                + " (anuluj: " + (phone ? "Wstecz" : "Esc") + (slot >= 0 ? " albo to samo pole paska" : "") + ")", slot);
+        hud.setAim(Messages.get("game_screen.celownik") + session.items().byKey(runeKey).name() + " - " + (phone ? Messages.get("game_screen.dotknij_pola") : Messages.get("game_screen.kliknij_pole"))
+                + Messages.get("game_screen.anuluj") + (phone ? Messages.get("game_screen.wstecz") : "Esc") + (slot >= 0 ? Messages.get("game_screen.albo_to_samo_pole") : "") + ")", slot);
     }
 
     public void cancelAim() {
@@ -1870,7 +1872,7 @@ public final class GameScreen extends ScreenAdapter {
             if (game.world().openings().isClosedDoor(next)) {
                 // zamkniete drzwi na trasie: marsz staje przed nimi (jak w Tibii), drzwi otwiera dotkniecie
                 stopWalk();
-                session.log().add(now(), EventLog.Kind.INFO, GameSession.DOOR_HINT);
+                session.log().add(now(), EventLog.Kind.INFO, Messages.tr(GameSession.DOOR_HINT));
                 return null;
             }
             return d;
@@ -2003,8 +2005,8 @@ public final class GameScreen extends ScreenAdapter {
         frameTimeAvg = frameTimeAvg * 0.95f + Math.min(delta, 0.25f) * 0.05f;
         frameStats.add(delta);
         if (TimeUtils.millis() >= frameLogAtMs) {
-            Gdx.app.log("Pixel", frameStats.summary() + " limit=" + guard.fpsCap(settings.effectiveFpsCap())
-                    + " tryb=" + guard.mode());
+            Gdx.app.log("Pixel", frameStats.summary() + Messages.get("game_screen.limit") + guard.fpsCap(settings.effectiveFpsCap())
+                    + Messages.get("game_screen.tryb") + guard.mode());
             frameStats.reset();
             frameLogAtMs = TimeUtils.millis() + FRAME_LOG_MS;
         }
@@ -2982,7 +2984,7 @@ public final class GameScreen extends ScreenAdapter {
             if (d.z() != z || d.distanceTo(me) > 6 || !session.houseForSale(h)) continue;
             projected.set(d.x() + 0.5f, worldRenderer.worldY(d.y()) + 1.72f, 0);
             camera.project(projected, viewport.getScreenX(), viewport.getScreenY(), viewport.getScreenWidth(), viewport.getScreenHeight());
-            String label = String.format("Na sprzedaż: %,d gp", h.price());
+            String label = String.format(Messages.get("game_screen.na_sprzedaz_d_gp"), h.price());
             nameLayout.setText(font, label);
             float nx = projected.x - nameLayout.width / 2f;
             if (projected.y > viewTop || nx > viewRight - 20 || nx < gv[0]) continue;
@@ -2993,7 +2995,7 @@ public final class GameScreen extends ScreenAdapter {
             pl.fawizja.pixel.monster.Difficulty d = pl.fawizja.pixel.monster.Difficulty.of(target.type().level(), session.character().level());
             float ny = nameYAbove(target.renderX(t), worldRenderer.worldY(target.renderY(t)) + 1.02f + BAR_TOP, font, ui); // nad paskiem zycia
             projected.y = ny;
-            String label = target.type().name() + " (" + d.label + ")";
+            String label = target.type().name() + " (" + d.label() + ")";
             nameLayout.setText(font, label);
             outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, d.r, d.g, d.b, ui);
         }
@@ -3005,7 +3007,7 @@ public final class GameScreen extends ScreenAdapter {
             // imie zielone jak w Tibii (druzyna niebieska); czaszka PvP rysowana osobno pod paskami
             if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
             else font.setColor(PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], 1f);
-            String label = rp.name + (ally ? " [drużyna]" : "")
+            String label = rp.name + (ally ? Messages.get("game_screen.druzyna") : "")
                     + (rp.guild == null ? "" : " <" + rp.guild + ">");
             nameLayout.setText(font, label);
             float lx = projected.x - nameLayout.width / 2f;
@@ -3122,7 +3124,7 @@ public final class GameScreen extends ScreenAdapter {
                     font.setColor(dodge ? 0.7f : 0.6f, dodge ? 1f : 0.8f, dodge ? 0.7f : 1f, 1f - age);
                     text = dodge ? "unik" : "blok";
                     break;
-                case LEVEL_UP: font.setColor(1f, 0.9f, 0.3f, 1f - age); text = "POZIOM " + e.amount() + "!"; break;
+                case LEVEL_UP: font.setColor(1f, 0.9f, 0.3f, 1f - age); text = Messages.get("game_screen.poziom") + e.amount() + "!"; break;
                 case EXP: font.setColor(1f, 1f, 1f, 1f - age); text = e.amount() + " exp"; break; // jak w Tibii: biala liczba doswiadczenia
                 default: continue;
             }
@@ -3164,8 +3166,8 @@ public final class GameScreen extends ScreenAdapter {
         font.getData().setScale(scale * 0.85f);
         font.setColor(0.45f, 0.75f, 1f, 1f);
         pl.fawizja.pixel.party.PartyView pv = session.party();
-        String head = "Drużyna";
-        if (pv.inParty()) head += pv.sharing() ? "  +" + pv.bonusPercent() + "% exp" : "  (bez wspólnego exp)";
+        String head = Messages.get("game_screen.druzyna_2");
+        if (pv.inParty()) head += pv.sharing() ? "  +" + pv.bonusPercent() + Messages.get("game_screen.exp") : Messages.get("game_screen.bez_wspolnego_exp");
         font.draw(batch, head, x, y);
         y -= 16 * scale;
         for (String n : partyNames) {
@@ -3222,7 +3224,7 @@ public final class GameScreen extends ScreenAdapter {
             try {
                 session.character().copyStateFrom(game.codec().decode(self));
             } catch (Exception e) {
-                Gdx.app.error("Pixel", "Nieczytelny stan postaci z serwera", e);
+                Gdx.app.error("Pixel", Messages.get("game_screen.nieczytelny_stan_postaci_z"), e);
             }
         }
         NetClient.Frame f = net.frame();
@@ -3250,10 +3252,10 @@ public final class GameScreen extends ScreenAdapter {
             pvpTargetId = f.playerTargetId();
             if (f.skull() != null && !f.skull().equals(mySkull)) {
                 if (!f.skull().equals("NONE")) {
-                    session.log().add(now, EventLog.Kind.WARNING, f.skull().equals("BLACK") ? "Masz czarną czaszkę!"
-                            : f.skull().equals("RED") ? "Masz czerwoną czaszkę!" : "Masz białą czaszkę (atak na gracza).");
+                    session.log().add(now, EventLog.Kind.WARNING, f.skull().equals("BLACK") ? Messages.get("game_screen.masz_czarna_czaszke")
+                            : f.skull().equals("RED") ? Messages.get("game_screen.masz_czerwona_czaszke") : Messages.get("game_screen.masz_biala_czaszke_atak"));
                 } else if (!mySkull.equals("NONE")) {
-                    session.log().add(now, EventLog.Kind.INFO, "Czaszka zniknęła.");
+                    session.log().add(now, EventLog.Kind.INFO, Messages.get("game_screen.czaszka_zniknela"));
                 }
                 mySkull = f.skull();
             }
@@ -3399,7 +3401,7 @@ public final class GameScreen extends ScreenAdapter {
                     try {
                         session.character().explored().merge(m[1]);
                     } catch (RuntimeException e) {
-                        Gdx.app.error("Pixel", "Nieczytelna odkryta mapa z serwera", e);
+                        Gdx.app.error("Pixel", Messages.get("game_screen.nieczytelna_odkryta_mapa_z"), e);
                     }
                     break;
                 case "LOG":
@@ -3411,7 +3413,7 @@ public final class GameScreen extends ScreenAdapter {
                         kind = EventLog.Kind.INFO;
                     }
                     session.log().add(now, kind, m[2]);
-                    if (m[2].startsWith("Zginąłeś")) net.send("DEATH"); // podsumowanie smierci z serwera
+                    if (Messages.startsWithAny(m[2], Messages.get("ref.zginales"))) net.send("DEATH"); // podsumowanie smierci z serwera
                     break;
                 case "CHAL":
                     hud.setOnlineChallenge(m.length > 1 ? m[1] : null);
@@ -3435,7 +3437,7 @@ public final class GameScreen extends ScreenAdapter {
                     hud.openRanking(pl.fawizja.pixel.ranking.RankingView.parse(m));
                     break;
                 case "EVENTS":
-                    hud.openInfo("Wydarzenia", pl.fawizja.pixel.game.EventsReport.rows(session, m.length > 1 ? m[1] : null, m.length > 2 ? m[2] : null,
+                    hud.openInfo(Messages.get("game_screen.wydarzenia"), pl.fawizja.pixel.game.EventsReport.rows(session, m.length > 1 ? m[1] : null, m.length > 2 ? m[2] : null,
                             m.length > 3 ? m[3] : null));
                     break;
                 case "WHO": {
@@ -3444,7 +3446,7 @@ public final class GameScreen extends ScreenAdapter {
                         String[] r = m[i].split(";", 2);
                         if (r.length == 2) rows.add(r);
                     }
-                    hud.openInfo("W grze (" + rows.size() + ")", rows);
+                    hud.openInfo(Messages.get("game_screen.w_grze") + rows.size() + ")", rows);
                     break;
                 }
                 case "WANT": {
@@ -3453,8 +3455,8 @@ public final class GameScreen extends ScreenAdapter {
                         String[] r = m[i].split(";", 2);
                         if (r.length == 2) rows.add(r);
                     }
-                    if (rows.isEmpty()) rows.add(new String[] {"Brak zamówień", "/kupię 20 wilcze futro 2000 u bankiera"});
-                    hud.openInfo("Zamówienia kupna (" + (m.length - 1) + ")", rows);
+                    if (rows.isEmpty()) rows.add(new String[] {Messages.get("game_screen.brak_zamowien"), Messages.get("game_screen.kupie_20_wilcze_futro")});
+                    hud.openInfo(Messages.get("game_screen.zamowienia_kupna") + (m.length - 1) + ")", rows);
                     break;
                 }
                 case "BOSS": {
@@ -3463,7 +3465,7 @@ public final class GameScreen extends ScreenAdapter {
                         String[] r = m[i].split(";", 3);
                         if (r.length == 3) rows.add(r);
                     }
-                    hud.openInfo("Bossowie (" + rows.size() + ")", rows);
+                    hud.openInfo(Messages.get("game_screen.bossowie") + rows.size() + ")", rows);
                     break;
                 }
                 case "MARKET":
@@ -3514,12 +3516,12 @@ public final class GameScreen extends ScreenAdapter {
         if (net.isClosed() && !disconnectShown) {
             disconnectShown = true;
             disconnectAtMs = TimeUtils.millis();
-            String why = net.error() != null ? net.error() : "serwer zamknął połączenie";
-            session.log().add(now(), EventLog.Kind.WARNING, "Rozłączono z serwerem: " + why);
+            String why = net.error() != null ? net.error() : Messages.get("game_screen.serwer_zamknal_polaczenie");
+            session.log().add(now(), EventLog.Kind.WARNING, Messages.get("game_screen.rozlaczono_z_serwerem") + why);
         }
         if (disconnectShown && TimeUtils.millis() - disconnectAtMs > 4_000L) {
-            String why = net.error() != null ? net.error() : "serwer zamknął połączenie";
-            Gdx.app.postRunnable(() -> game.backToMenu("Rozłączono z serwerem: " + why));
+            String why = net.error() != null ? net.error() : Messages.get("game_screen.serwer_zamknal_polaczenie");
+            Gdx.app.postRunnable(() -> game.backToMenu(Messages.get("game_screen.rozlaczono_z_serwerem") + why));
             disconnectAtMs = Long.MAX_VALUE / 2;
         }
     }
@@ -3540,7 +3542,7 @@ public final class GameScreen extends ScreenAdapter {
         }
         GuardMode mode = guard.update(t, sample);
         if (mode != lastMode) {
-            session.log().add(t, EventLog.Kind.SYSTEM, "Ochrona zasobów: " + guard.describe());
+            session.log().add(t, EventLog.Kind.SYSTEM, Messages.get("game_screen.ochrona_zasobow") + guard.describe());
             Gdx.app.log("Pixel", "Resource guard -> " + guard.describe());
             lastMode = mode;
         }
@@ -3570,10 +3572,10 @@ public final class GameScreen extends ScreenAdapter {
     private List<String> diagnosticsLines() {
         List<String> l = new ArrayList<>();
         l.add("FPS: " + Gdx.graphics.getFramesPerSecond() + String.format("  (%.1f ms)", frameTimeAvg * 1000));
-        l.add("Rysowanie: " + lastDrawCalls + ", tekstury: " + lastTextureBinds);
+        l.add("Rysowanie: " + lastDrawCalls + Messages.get("game_screen.tekstury") + lastTextureBinds);
         Runtime rt = Runtime.getRuntime();
         long used = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
-        l.add("Pamięć aplikacji: " + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");
+        l.add(Messages.get("game_screen.pamiec_aplikacji") + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");
         Map<Resource, Float> last = guard.lastSample();
         for (Resource r : new Resource[] {Resource.SYSTEM_MEMORY, Resource.CPU, Resource.THERMAL, Resource.FRAME_TIME}) {
             Float v = last.get(r);
@@ -3584,7 +3586,7 @@ public final class GameScreen extends ScreenAdapter {
         String thermal = game.platform().thermalInfo();
         if (thermal != null) l.add("Termika: " + thermal);
         l.add("Tryb: " + guard.describe());
-        if (net != null) l.add("Sieć: online, poprawki ruchu: " + predictor.corrections() + (net.isClosed() ? " (rozłączono)" : ""));
+        if (net != null) l.add(Messages.get("game_screen.siec_online_poprawki_ruchu") + predictor.corrections() + (net.isClosed() ? Messages.get("game_screen.rozlaczono") : ""));
         l.add("Limit FPS: " + guard.fpsCap(settings.effectiveFpsCap()));
         return l;
     }
@@ -3692,7 +3694,7 @@ public final class GameScreen extends ScreenAdapter {
         if (sleepFinished) return;
         sleepFinished = true;
         if (net == null) game.saveCharacter(session.character());
-        Gdx.app.postRunnable(() -> game.backToMenu("Zasypiasz w łóżku. Postać zapisana - wypocznie, zanim wrócisz."));
+        Gdx.app.postRunnable(() -> game.backToMenu(Messages.get("game_screen.zasypiasz_w_lozku_postac")));
     }
 
     /** Czy postac lezy w lozku (podglad i testy). */

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import pl.fawizja.pixel.vocation.Harmony;
@@ -92,9 +93,9 @@ final class HarmonyHud {
 
     /** Opis do dziennika po dotknieciu kul. */
     static String describe(Harmony h) {
-        String virtue = h.virtue() == Harmony.Virtue.NONE ? "bez cnoty" : h.virtue().label;
-        return "Harmonia " + h.points() + "/" + Harmony.MAX + " (premia czaru wydającego x"
+        String virtue = h.virtue() == Harmony.Virtue.NONE ? Messages.get("harmony_hud.bez_cnoty") : h.virtue().label();
+        return Messages.get("harmony_hud.harmonia") + h.points() + "/" + Harmony.MAX + Messages.get("harmony_hud.premia_czaru_wydajacego_x")
                 + String.format(java.util.Locale.ROOT, "%.2f", h.bonus()) + "), " + virtue
-                + (h.serene() ? ", spokój" : ", bez spokoju");
+                + (h.serene() ? Messages.get("harmony_hud.spokoj") : Messages.get("harmony_hud.bez_spokoju"));
     }
 }

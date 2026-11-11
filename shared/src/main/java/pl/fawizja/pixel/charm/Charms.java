@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.charm;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.achievement.Bestiary;
@@ -105,53 +106,53 @@ public final class Charms {
     /** Kupno stopnia I albo ulepszenie o jeden stopien (Major za punkty, Minor za echa). */
     public Result buy(Charm c) {
         int t = tier(c);
-        if (t >= Charm.MAX_TIER) return Result.fail(c.label() + " ma już najwyższy stopień.");
+        if (t >= Charm.MAX_TIER) return Result.fail(c.label() + Messages.get("charms.ma_juz_najwyzszy_stopien"));
         int cost = c.cost(t + 1);
         if (c.major()) {
-            if (points < cost) return Result.fail(String.format("%s %s kosztuje %,d punktów charmów, masz %,d.", c.label(),
+            if (points < cost) return Result.fail(String.format(Messages.get("charms.s_s_kosztuje_d"), c.label(),
                     Charm.tierName(t + 1), cost, points));
             points -= cost;
             int got = echoesFor(t);
             addEchoes(got);
             tiers[c.ordinal()] = t + 1;
-            return Result.ok(String.format("%s: stopień %s (-%,d pkt charmów, +%,d ech).", c.label(), Charm.tierName(t + 1), cost, got));
+            return Result.ok(String.format(Messages.get("charms.s_stopien_s_d"), c.label(), Charm.tierName(t + 1), cost, got));
         }
-        if (echoes < cost) return Result.fail(String.format("%s %s kosztuje %,d ech, masz %,d. Echa dają ulepszenia charmów Major.",
+        if (echoes < cost) return Result.fail(String.format(Messages.get("charms.s_s_kosztuje_d_2"),
                 c.label(), Charm.tierName(t + 1), cost, echoes));
         echoes -= cost;
         tiers[c.ordinal()] = t + 1;
-        return Result.ok(String.format("%s: stopień %s (-%,d ech).", c.label(), Charm.tierName(t + 1), cost));
+        return Result.ok(String.format(Messages.get("charms.s_stopien_s_d_2"), c.label(), Charm.tierName(t + 1), cost));
     }
 
     /** Czy charm mozna zalozyc na potwora (bez sprawdzania slotow i zajetosci). */
     public static String canTarget(Charm c, String monsterKey, Bestiary bestiary) {
         BestiaryEntry e = BestiaryData.get(monsterKey);
-        if (e == null || bestiary.isBoss(monsterKey)) return "Charmy działają tylko na potwory z bestiariusza (nie na bossów).";
+        if (e == null || bestiary.isBoss(monsterKey)) return Messages.get("charms.charmy_dzialaja_tylko_na");
         int kills = bestiary.kills(monsterKey);
         if (c.major() && kills < e.complete()) {
-            return String.format("Charm Major wymaga ukończonego wpisu bestiariusza (%,d / %,d).", kills, e.complete());
+            return String.format(Messages.get("charms.charm_major_wymaga_ukonczonego"), kills, e.complete());
         }
-        if (kills <= 0) return "Najpierw pokonaj tego potwora.";
+        if (kills <= 0) return Messages.get("charms.najpierw_pokonaj_tego_potwora");
         return null;
     }
 
     /** Zaklada charm na potwora (jak akcja 1 w Canary). */
     public Result assign(Charm c, String monsterKey, Bestiary bestiary, boolean premium, String monsterName) {
-        if (!unlocked(c)) return Result.fail("Najpierw odblokuj charm " + c.label() + ".");
+        if (!unlocked(c)) return Result.fail(Messages.get("charms.najpierw_odblokuj_charm") + c.label() + ".");
         String why = canTarget(c, monsterKey, bestiary);
         if (why != null) return Result.fail(why);
         String old = assigned[c.ordinal()];
-        if (monsterKey.equals(old)) return Result.fail(c.label() + " jest już założony na: " + monsterName + ".");
-        if (old != null) return Result.fail(c.label() + " jest założony na innego potwora - najpierw go zdejmij.");
+        if (monsterKey.equals(old)) return Result.fail(c.label() + Messages.get("charms.jest_juz_zalozony_na") + monsterName + ".");
+        if (old != null) return Result.fail(c.label() + Messages.get("charms.jest_zalozony_na_innego"));
         if (used() >= slots(premium)) {
-            return Result.fail(premium ? "Wszystkie " + PREMIUM_SLOTS + " sloty charmów są zajęte."
-                    : "Wszystkie " + FREE_SLOTS + " sloty charmów są zajęte (konto premium ma " + PREMIUM_SLOTS + ").");
+            return Result.fail(premium ? Messages.get("charms.wszystkie") + PREMIUM_SLOTS + Messages.get("charms.sloty_charmow_sa_zajete")
+                    : Messages.get("charms.wszystkie") + FREE_SLOTS + Messages.get("charms.sloty_charmow_sa_zajete_2") + PREMIUM_SLOTS + ").");
         }
         if (on(monsterKey, c.category()) != null) {
-            return Result.fail("Na tym potworze jest już charm " + c.category().label + " (" + on(monsterKey, c.category()).label() + ").");
+            return Result.fail(Messages.get("charms.na_tym_potworze_jest") + c.category().label() + " (" + on(monsterKey, c.category()).label() + ").");
         }
         assigned[c.ordinal()] = monsterKey;
-        return Result.ok(c.labelWithTier(tier(c)) + " założony na: " + monsterName + ".");
+        return Result.ok(c.labelWithTier(tier(c)) + Messages.get("charms.zalozony_na") + monsterName + ".");
     }
 
     /** Zdejmuje charm z potwora (oplate pobiera sesja). */

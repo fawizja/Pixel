@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.trade;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,13 +31,19 @@ public final class PlayerTrade {
         NOT_PARTICIPANT("Nie bierzesz udziału w tej wymianie."),
         UNKNOWN_ITEM("Nie ma takiego przedmiotu. Przykład: /oferuj 5 mikstura zdrowia albo /oferuj 1000 gp"),
         NOT_ENOUGH("Nie masz tylu w plecaku."),
-        TOO_MANY_STACKS("Za dużo pozycji w ofercie (maks. " + MAX_STACKS + ")."),
-        TOO_FAR("Stój obok drugiego gracza (maks. " + MAX_DISTANCE + " pola, to samo piętro)."),
+        TOO_MANY_STACKS("Za dużo pozycji w ofercie (maks. {0})."),
+        TOO_FAR("Stój obok drugiego gracza (maks. {0} pola, to samo piętro)."),
         NO_SPACE("Wymiana anulowana: brak miejsca w plecaku."),
         CHANGED("Wymiana anulowana: przedmiotów z oferty już nie ma w plecaku."),
         EMPTY("Obie oferty są puste - nie ma czego wymieniać.");
 
-        public final String message;
+        private final String message;
+
+        public String message() {
+            String t = Messages.tr(message);
+            return this == TOO_MANY_STACKS ? t.replace("{0}", String.valueOf(MAX_STACKS))
+                    : this == TOO_FAR ? t.replace("{0}", String.valueOf(MAX_DISTANCE)) : t;
+        }
 
         Result(String message) { this.message = message; }
     }

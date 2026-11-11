@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +26,8 @@ public final class SkillSheet {
 
     public static List<Row> rows(PlayerCharacter pc) {
         List<Row> out = new ArrayList<>(rowCount());
-        out.add(new Row("Poziom", pc.level() + " (" + expRateLabel(pc) + ")", -1, Bar.NONE));
-        out.add(new Row("Doświadczenie", (int) (pc.levelProgress() * 100) + "%", pc.levelProgress(), Bar.EXPERIENCE));
+        out.add(new Row(Messages.get("hud.poziom"), pc.level() + " (" + expRateLabel(pc) + ")", -1, Bar.NONE));
+        out.add(new Row(Messages.get("hud.doswiadczenie"), (int) (pc.levelProgress() * 100) + "%", pc.levelProgress(), Bar.EXPERIENCE));
         out.add(stamina(pc));
         for (Skill sk : Skill.values()) {
             double prog = pc.skills().progress(sk);
@@ -38,7 +39,7 @@ public final class SkillSheet {
     /** Biezacy mnoznik doswiadczenia z etapow serwera, np. "exp x80", z pupilem "exp x80, pupil +5%". */
     public static String expRateLabel(PlayerCharacter pc) {
         String base = "exp " + pl.fawizja.pixel.balance.Balance.rateLabel(pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
-        return pc.petExpPercent() > 0 ? base + ", pupil +" + pc.petExpPercent() + "%" : base;
+        return pc.petExpPercent() > 0 ? base + Messages.get("skill_sheet.pupil") + pc.petExpPercent() + "%" : base;
     }
 
     /** Biezacy mnoznik umiejetnosci z etapow serwera, np. "x10". */
@@ -76,13 +77,13 @@ public final class SkillSheet {
      */
     public static List<String[]> combatRows(PlayerCharacter pc) {
         List<String[]> out = new ArrayList<>(3);
-        out.add(new String[] {"Krytyk", pl.fawizja.pixel.combat.CriticalHit.describe(pc)});
+        out.add(new String[] {Messages.get("skill_sheet.krytyk"), pl.fawizja.pixel.combat.CriticalHit.describe(pc)});
         double life = pl.fawizja.pixel.combat.Leech.lifePercent(pc), mana = pl.fawizja.pixel.combat.Leech.manaPercent(pc);
-        String leech = life <= 0 && mana <= 0 ? "brak"
-                : "życie " + pl.fawizja.pixel.item.ItemBonus.number(life) + "%, mana " + pl.fawizja.pixel.item.ItemBonus.number(mana) + "%";
-        out.add(new String[] {"Kradzież", leech});
+        String leech = life <= 0 && mana <= 0 ? Messages.get("server_world.brak")
+                : Messages.get("skill_sheet.zycie") + pl.fawizja.pixel.item.ItemBonus.number(life) + Messages.get("skill_sheet.mana") + pl.fawizja.pixel.item.ItemBonus.number(mana) + "%";
+        out.add(new String[] {Messages.get("skill_sheet.kradziez"), leech});
         String prot = pl.fawizja.pixel.item.ItemBonus.describeProtections(pc.equipment().protections());
-        out.add(new String[] {"Ochrona", prot.isEmpty() ? "brak" : prot});
+        out.add(new String[] {Messages.get("skill_sheet.ochrona"), prot.isEmpty() ? Messages.get("server_world.brak") : prot});
         return out;
     }
 
@@ -90,9 +91,9 @@ public final class SkillSheet {
     public static String staminaDetail(PlayerCharacter pc) {
         Stamina s = pc.stamina();
         switch (s.zone()) {
-            case BONUS: return s.display() + (pc.isPremium() ? " (premia 150% exp)" : " (premia dla premium)");
-            case LOW: return s.display() + " (50% exp)";
-            case EMPTY: return s.display() + " (bez exp i łupu)";
+            case BONUS: return s.display() + (pc.isPremium() ? " (premia 150% exp)" : Messages.get("skill_sheet.premia_dla_premium"));
+            case LOW: return s.display() + Messages.get("skill_sheet.50_exp");
+            case EMPTY: return s.display() + Messages.get("skill_sheet.bez_exp_i_lupu");
             default: return s.display();
         }
     }

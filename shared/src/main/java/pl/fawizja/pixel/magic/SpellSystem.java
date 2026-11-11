@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.magic;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -443,7 +444,7 @@ public final class SpellSystem {
         long cd = pl.fawizja.pixel.wheel.WheelSpells.cooldownMs(pc, s);
         cooldowns.trigger(s, now, cd);
         for (String k : pl.fawizja.pixel.wheel.WheelSpells.linked(s.key())) if (spells.find(k) != null) cooldowns.trigger(spells.find(k), now, cd);
-        if (s.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
+        if (s.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, Messages.get("combat_system.atakujesz_niewidzialnosc_znika"));
         return CastResult.OK;
     }
 
@@ -591,7 +592,7 @@ public final class SpellSystem {
                 if (v == null) return CastResult.NOT_USABLE;
                 pc.harmony().setVirtue(v);
                 combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HEAL"));
-                log.add(now, EventLog.Kind.INFO, v.label + ": " + v.effect + ".");
+                log.add(now, EventLog.Kind.INFO, v.label() + ": " + v.effect() + ".");
                 return CastResult.OK;
             }
             case FOCUS_SERENITY:
@@ -600,12 +601,12 @@ public final class SpellSystem {
                 pc.harmony().forceSerene(pl.fawizja.pixel.vocation.Harmony.FOCUS_SERENE_MS);
                 buildHarmony(pl.fawizja.pixel.vocation.Harmony.MAX, now);
                 combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
-                log.add(now, EventLog.Kind.INFO, s.name() + ": pełna harmonia i spokój na 7 s.");
+                log.add(now, EventLog.Kind.INFO, s.name() + Messages.get("spell_system.pelna_harmonia_i_spokoj"));
                 return CastResult.OK;
             case FOCUS_HARMONY:
                 buildHarmony(pl.fawizja.pixel.vocation.Harmony.MAX, now);
                 combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
-                log.add(now, EventLog.Kind.INFO, s.name() + ": pełna harmonia.");
+                log.add(now, EventLog.Kind.INFO, s.name() + Messages.get("spell_system.pelna_harmonia"));
                 return CastResult.OK;
             case RUNE_AREA: {
                 Position pvp = playerTargetPosition();
@@ -620,13 +621,13 @@ public final class SpellSystem {
             case LIGHT:
                 pc.addLightBuff(s.radius(), s.range() > 0 ? s.range() * 1000L : LIGHT_SPELL_MS);
                 combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
-                log.add(now, EventLog.Kind.INFO, "Światło otacza postać (" + Math.max(1, (s.range() > 0 ? s.range() : LIGHT_SPELL_MS / 1000) / 60) + " min).");
+                log.add(now, EventLog.Kind.INFO, Messages.get("spell_system.swiatlo_otacza_postac") + Math.max(1, (s.range() > 0 ? s.range() : LIGHT_SPELL_MS / 1000) / 60) + Messages.get("spell_system.min"));
                 return CastResult.OK;
             case HASTE: {
                 int before = pc.speed();
                 pc.addHaste((int) Math.round(s.base()), s.range() * 1000L);
                 combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
-                log.add(now, EventLog.Kind.INFO, s.name() + ": szybkość " + before + " -> " + pc.speed() + " na " + s.range() + " s.");
+                log.add(now, EventLog.Kind.INFO, s.name() + Messages.get("spell_system.szybkosc") + before + " -> " + pc.speed() + " na " + s.range() + " s.");
                 return CastResult.OK;
             }
             case CONJURE: {
@@ -637,7 +638,7 @@ public final class SpellSystem {
                 ItemType made = items.byKey(s.producesItem());
                 if (copy.add(new ItemStack(made.id(), s.produceCount())) != InventoryResult.OK) return CastResult.BACKPACK_FULL;
                 pc.backpack().commitFrom(copy);
-                log.add(now, EventLog.Kind.LOOT, "Stworzono: " + s.produceCount() + "x " + made.name());
+                log.add(now, EventLog.Kind.LOOT, Messages.get("spell_system.stworzono") + s.produceCount() + "x " + made.name());
                 return CastResult.OK;
             }
             default:
@@ -862,7 +863,7 @@ public final class SpellSystem {
         // profesja decyduje tylko o krzywej (Skills.vocationConstant), mnoznik serwera dolicza Skills.train,
         // a Balance.HUNT_TRY_FACTOR wyrownuje tempo magii do szybkich poziomow
         int gained = pc.skills().train(Skill.MAGIC, (long) mana * pl.fawizja.pixel.balance.Balance.HUNT_TRY_FACTOR);
-        if (gained > 0) log.add(now, EventLog.Kind.SYSTEM, "Poziom magii: " + pc.skills().level(Skill.MAGIC));
+        if (gained > 0) log.add(now, EventLog.Kind.SYSTEM, Messages.get("spell_system.poziom_magii") + pc.skills().level(Skill.MAGIC));
     }
 
     // ------------------------------------------------------------------ przedmioty
@@ -928,12 +929,12 @@ public final class SpellSystem {
         pc.backpack().takeFromSlot(slot, 1);
         cooldowns.trigger(effect, now);
         cooldowns.triggerGroup(SpellGroup.POTION, now, SpellGroup.POTION.groupCooldownMs);
-        if (effect.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
+        if (effect.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, Messages.get("combat_system.atakujesz_niewidzialnosc_znika"));
         return CastResult.OK;
     }
 
     private CastResult report(CastResult r, long now) {
-        if (r != CastResult.OK && r != CastResult.COOLDOWN) log.add(now, EventLog.Kind.WARNING, r.message);
+        if (r != CastResult.OK && r != CastResult.COOLDOWN) log.add(now, EventLog.Kind.WARNING, r.message());
         return r;
     }
 }

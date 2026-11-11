@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,7 +70,8 @@ public enum WheelSlice {
         /** Ile punktow promocji ogolem musi miec postac, zeby wlozyc tu punkt (Canary playerPoints < N). */
         public final int threshold;
         final String code;
-        public final String label;
+        private final String label;
+        public String label() { return Messages.tr(label); }
 
         Pos(int capacity, int threshold, String code, String label) {
             this.capacity = capacity;
@@ -109,7 +111,7 @@ public enum WheelSlice {
     public String code() { return domain.code + pos.code; }
 
     /** Opis po polsku: "Zielona, górne 75". */
-    public String label() { return domain.label + ", " + pos.label; }
+    public String label() { return domain.label() + ", " + pos.label(); }
 
     public static WheelSlice of(WheelDomain d, Pos p) { return values()[d.ordinal() * 9 + p.ordinal()]; }
 

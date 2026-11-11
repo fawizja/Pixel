@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -55,10 +56,10 @@ final class HouseWindow {
 
     String title() {
         switch (mode) {
-            case OWNER: return "Twój dom: " + house.name();
-            case INVITE: return "Zaproś do domu " + house.name();
-            case CONFIRM_LEAVE: return "Opuścić dom?";
-            default: return "Dom: " + house.name() + " (" + house.town() + ")";
+            case OWNER: return Messages.get("hud.twoj_dom") + house.name();
+            case INVITE: return Messages.get("house_window.zapros_do_domu") + house.name();
+            case CONFIRM_LEAVE: return Messages.get("house_window.opuscic_dom");
+            default: return Messages.get("house_window.dom") + house.name() + " (" + house.town() + ")";
         }
     }
 
@@ -70,44 +71,44 @@ final class HouseWindow {
         long rent = HouseRent.rent(house);
         switch (mode) {
             case INFO:
-                out.add("Miasto: " + house.town() + "   Wielkość: " + house.size() + " pól   Łóżka: " + beds);
+                out.add(Messages.get("house_window.miasto") + house.town() + Messages.get("house_window.wielkosc") + house.size() + Messages.get("house_window.pol_lozka") + beds);
                 if (view.free()) {
-                    out.add("Stan: NA SPRZEDAŻ - wolny");
-                    out.add("Cena: " + gp(house.price()) + " (z konta, reszta z plecaka)");
+                    out.add(Messages.get("house_window.stan_na_sprzedaz_wolny"));
+                    out.add(Messages.get("game_screen.cena") + gp(house.price()) + Messages.get("house_window.z_konta_reszta_z"));
                 } else {
-                    out.add("Stan: zajęty");
-                    out.add("Właściciel: " + view.owner());
+                    out.add(Messages.get("house_window.stan_zajety"));
+                    out.add(Messages.get("house_window.wlasciciel") + view.owner());
                 }
-                out.add("Czynsz tygodniowy: " + gp(rent) + " (pobierany z konta)");
+                out.add(Messages.get("house_window.czynsz_tygodniowy") + gp(rent) + Messages.get("house_window.pobierany_z_konta"));
                 if (view.free()) {
-                    out.add("Masz: konto " + gp(bank) + " + plecak " + gp(cash) + (bank + cash < house.price() ? " - za mało złota" : ""));
-                    if (hasHouse) out.add("Masz już dom - najpierw go opuść.");
+                    out.add(Messages.get("house_window.masz_konto") + gp(bank) + Messages.get("house_window.plecak") + gp(cash) + (bank + cash < house.price() ? Messages.get("house_window.za_malo_zlota") : ""));
+                    if (hasHouse) out.add(Messages.get("house_window.masz_juz_dom_najpierw"));
                 } else if (view.access() == HouseAccess.OWNER) {
-                    out.add("To twój dom. Zaprosisz gości od środka, przy drzwiach.");
+                    out.add(Messages.get("house_window.to_twoj_dom_zaprosisz"));
                 } else if (view.access() == HouseAccess.ENTRY || view.access() == HouseAccess.FULL) {
-                    out.add("Twój dostęp: " + view.access().label());
+                    out.add(Messages.get("house_window.twoj_dostep") + view.access().label());
                 }
                 break;
             case OWNER:
-                out.add(house.town() + ", " + house.size() + " pól, czynsz " + gp(rent) + " tygodniowo");
-                out.add(view.dueInMs() >= 0 ? "Następna płatność za " + HouseRent.describeIn(view.dueInMs()) + " (z konta)"
-                        : "Czynsz pobierany co tydzień z konta");
+                out.add(house.town() + ", " + house.size() + Messages.get("house_window.pol_czynsz") + gp(rent) + " tygodniowo");
+                out.add(view.dueInMs() >= 0 ? Messages.get("house_window.nastepna_platnosc_za") + HouseRent.describeIn(view.dueInMs()) + Messages.get("house_window.z_konta")
+                        : Messages.get("house_window.czynsz_pobierany_co_tydzien"));
                 if (view.missed() > 0) {
-                    out.add("Zaległe płatności: " + view.missed() + " z " + HouseRent.MAX_MISSED + " - wpłać złoto do banku!");
+                    out.add(Messages.get("house_window.zalegle_platnosci") + view.missed() + " z " + HouseRent.MAX_MISSED + Messages.get("house_window.wplac_zloto_do_banku"));
                 }
-                out.add("Goście (" + view.guests().size() + "/" + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + ")"
-                        + (view.guests().isEmpty() ? ": nikt" : ":"));
+                out.add(Messages.get("house_window.goscie") + view.guests().size() + "/" + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + ")"
+                        + (view.guests().isEmpty() ? Messages.get("house_window.nikt") : ":"));
                 break;
             case INVITE:
                 out.add(inviteLevel == HouseAccess.FULL
-                        ? "Pełny dostęp: wejście, skrzynie, drzwi, przedmioty."
-                        : "Tylko wejście: bez skrzyń, drzwi i przedmiotów.");
-                out.add("Imię postaci:");
+                        ? Messages.get("house_window.pelny_dostep_wejscie_skrzynie")
+                        : Messages.get("house_window.tylko_wejscie_bez_skrzyn"));
+                out.add(Messages.get("house_window.imie_postaci"));
                 break;
             default:
-                out.add("Miasto odkupi dom " + house.name() + " za " + gp(house.price() * pl.fawizja.pixel.game.GameSession.HOUSE_SELLBACK_PERCENT / 100) + ".");
-                out.add("Rzeczy ze skrzyń w domu trafią do depozytu.");
-                out.add("Goście stracą wstęp.");
+                out.add(Messages.get("house_window.miasto_odkupi_dom") + house.name() + " za " + gp(house.price() * pl.fawizja.pixel.game.GameSession.HOUSE_SELLBACK_PERCENT / 100) + ".");
+                out.add(Messages.get("house_window.rzeczy_ze_skrzyn_w"));
+                out.add(Messages.get("house_window.goscie_straca_wstep"));
         }
         return out;
     }
@@ -125,24 +126,24 @@ final class HouseWindow {
         List<Button> out = new ArrayList<>();
         switch (mode) {
             case INFO:
-                if (view.free()) out.add(new Button("house:buy:" + house.id(), "Kup", !hasHouse && bank + cash >= house.price(), false));
-                out.add(new Button("house:close", "Zamknij", true, false));
+                if (view.free()) out.add(new Button("house:buy:" + house.id(), Messages.get("house_window.kup"), !hasHouse && bank + cash >= house.price(), false));
+                out.add(new Button("house:close", Messages.get("house_window.zamknij"), true, false));
                 break;
             case OWNER:
-                for (String[] g : guestRows()) out.add(new Button("house:unguest:" + g[0], "Usuń", true, true));
-                out.add(new Button("house:invitefull", "Zaproś (pełny dostęp)", view.guests().size() < pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS, false));
-                out.add(new Button("house:inviteentry", "Zaproś (wejście)", view.guests().size() < pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS, false));
-                out.add(new Button("house:door", doorOpen ? "Zamknij drzwi" : "Otwórz drzwi", true, false));
-                out.add(new Button("house:leaveask", "Opuść dom", true, false));
-                out.add(new Button("house:close", "Zamknij", true, false));
+                for (String[] g : guestRows()) out.add(new Button("house:unguest:" + g[0], Messages.get("house_window.usun"), true, true));
+                out.add(new Button("house:invitefull", Messages.get("house_window.zapros_pelny_dostep"), view.guests().size() < pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS, false));
+                out.add(new Button("house:inviteentry", Messages.get("house_window.zapros_wejscie"), view.guests().size() < pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS, false));
+                out.add(new Button("house:door", doorOpen ? Messages.get("house_window.zamknij_drzwi") : Messages.get("house_window.otworz_drzwi"), true, false));
+                out.add(new Button("house:leaveask", Messages.get("house_window.opusc_dom"), true, false));
+                out.add(new Button("house:close", Messages.get("house_window.zamknij"), true, false));
                 break;
             case INVITE:
-                out.add(new Button("house:invitesend", "Zaproś", name.toString().trim().length() >= 3, false));
-                out.add(new Button("house:back", "Anuluj", true, false));
+                out.add(new Button("house:invitesend", Messages.get("house_window.zapros"), name.toString().trim().length() >= 3, false));
+                out.add(new Button("house:back", Messages.get("house_window.anuluj"), true, false));
                 break;
             default:
-                out.add(new Button("house:leave", "Tak, opuść dom", true, false));
-                out.add(new Button("house:back", "Nie", true, false));
+                out.add(new Button("house:leave", Messages.get("house_window.tak_opusc_dom"), true, false));
+                out.add(new Button("house:back", Messages.get("house_window.nie"), true, false));
         }
         return out;
     }

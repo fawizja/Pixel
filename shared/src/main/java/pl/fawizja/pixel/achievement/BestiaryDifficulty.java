@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.achievement;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Trudnosc wpisu bestiariusza jak w Tibii (gwiazdki 0-5). Progi zabic etapow 2, 3 i ukonczenia oraz punkty charmow
  * za ukonczenie - wartosci z plikow potworow Canary (monster.Bestiary: FirstUnlock / SecondUnlock / toKill /
@@ -14,7 +15,8 @@ public enum BestiaryDifficulty {
     CHALLENGING(5, "wymagający", 200, 2000, 5000, 100);
 
     public final int stars;
-    public final String label;
+    private final String label;
+    public String label() { return Messages.tr(label); }
     public final int secondStage;
     public final int thirdStage;
     public final int complete;
@@ -31,7 +33,7 @@ public enum BestiaryDifficulty {
 
     public static BestiaryDifficulty ofStars(int stars) {
         for (BestiaryDifficulty d : values()) if (d.stars == stars) return d;
-        throw new IllegalArgumentException("stars 0..5: " + stars);
+        throw new IllegalArgumentException(Messages.get("bestiary_difficulty.stars_0_5") + stars);
     }
 
     /** Gwiazdki jako tekst ("**---"; czcionka gry nie ma znaku gwiazdki). */

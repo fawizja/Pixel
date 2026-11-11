@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -31,11 +32,11 @@ public final class HuntingAdvisor {
         List<String[]> rows = new ArrayList<>();
         for (MonsterType t : picked) {
             String where = pl.fawizja.pixel.achievement.BestiaryCard.habitats(t.key(), s.monsters().spawns(), s.world());
-            rows.add(new String[] {t.name() + (boosted != null && boosted.key().equals(t.key()) ? " (potwór dnia)" : ""),
-                    "poz. " + t.level() + String.format(", %,d exp", t.experience()) + (where.isEmpty() ? "" : ", " + where),
+            rows.add(new String[] {t.name() + (boosted != null && boosted.key().equals(t.key()) ? Messages.get("hunting_advisor.potwor_dnia") : ""),
+                    "poz. " + t.level() + String.format(Messages.get("hunting_advisor.d_exp"), t.experience()) + (where.isEmpty() ? "" : ", " + where),
                     "", "hunt:go:" + t.key()});
         }
-        if (rows.isEmpty()) rows.add(new String[] {"Brak potworów", "na tej mapie nie ma nikogo do polowania"});
+        if (rows.isEmpty()) rows.add(new String[] {Messages.get("hunting_advisor.brak_potworow"), Messages.get("hunting_advisor.na_tej_mapie_nie")});
         return rows;
     }
 

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -89,10 +90,10 @@ public final class BestiaryWindows {
         if (id.startsWith(BestiaryView.CLASS_ACTION)) {
             String[] f = id.substring(BestiaryView.CLASS_ACTION.length()).split(":");
             String cls = f[0];
-            title = BestiaryView.TITLE + ": " + (BestiaryView.BOSSES.equals(cls) ? "Bossowie" : BestiaryClasses.label(cls));
+            title = BestiaryView.TITLE + ": " + (BestiaryView.BOSSES.equals(cls) ? Messages.get("bestiary_windows.bossowie") : BestiaryClasses.label(cls));
             List<String[]> all = BestiaryView.speciesRows(session.character(), types.get(), cls);
             rows = new java.util.ArrayList<>(BestiaryView.page(all, f.length > 1 ? parse(f[1]) : 0, cap - 1, BestiaryView.CLASS_ACTION + cls + ":"));
-            rows.add(new String[] {"Wróć", "klasy bestiariusza", "", "ach:bestiary"});
+            rows.add(new String[] {Messages.get("bestiary_windows.wroc"), Messages.get("bestiary_windows.klasy_bestiariusza"), "", "ach:bestiary"});
         } else if (id.startsWith("charm:sel:")) {
             String[] f = id.substring("charm:sel:".length()).split(":");
             Charm c = Charm.parse(f[0]);
@@ -100,7 +101,7 @@ public final class BestiaryWindows {
             title = CharmView.detailTitle(c);
             rows = CharmView.detail(session.character(), c, types.get(), f.length > 1 ? parse(f[1]) : 0, cap);
         } else if (id.equals("charm:resetask")) {
-            title = CharmView.TITLE + ": reset";
+            title = CharmView.TITLE + Messages.get("bestiary_windows.reset");
             rows = CharmView.resetConfirm(session.character());
         } else {
             title = CharmView.TITLE;

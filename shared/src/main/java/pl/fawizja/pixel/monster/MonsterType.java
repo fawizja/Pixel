@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.monster;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -210,7 +211,7 @@ public final class MonsterType {
     /** Opis stopnia: "pod wpływem (3)" / "diaboliczny" / "". */
     public String forgeLabel() {
         if (isFiendish()) return "diaboliczny";
-        return isInfluenced() ? "pod wpływem (" + forgeStack + ")" : "";
+        return isInfluenced() ? Messages.get("monster_type.pod_wplywem") + forgeStack + ")" : "";
     }
 
     private static long mix(long x) {

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.guild;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,13 +29,15 @@ public final class GuildRegistry {
         NOT_MEMBER("Nie należysz do gildii."),
         NOT_LEADER("Tylko lider gildii może to zrobić."),
         NO_INVITE("Nie masz zaproszenia do tej gildii (albo wygasło)."),
-        FULL("Gildia jest pełna (maks. " + MAX_MEMBERS + ")."),
+        FULL("Gildia jest pełna (maks. {0})."),
         NOT_IN_THIS_GUILD("Ten gracz nie należy do twojej gildii."),
         TREASURY_LOW("W skarbcu gildii nie ma tyle złota."),
         BAD_AMOUNT("Podaj kwotę większą od zera."),
         SELF("Nie możesz tego zrobić samemu sobie.");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message).replace("{0}", String.valueOf(MAX_MEMBERS)); }
 
         Result(String message) { this.message = message; }
     }
@@ -186,7 +189,7 @@ public final class GuildRegistry {
         StringBuilder sb = new StringBuilder();
         for (Guild g : byName.values()) {
             sb.append(g.name).append(';').append(String.join(",", g.members));
-            if (g.treasury > 0) sb.append(";bank=").append(g.treasury);
+            if (g.treasury > 0) sb.append(Messages.get("guild_registry.bank")).append(g.treasury);
             if (g.motd != null) sb.append(';').append(g.motd);
             sb.append('\n');
         }

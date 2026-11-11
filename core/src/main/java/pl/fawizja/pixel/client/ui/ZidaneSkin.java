@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
@@ -71,7 +72,7 @@ final class ZidaneSkin {
         try {
             return new ZidaneSkin();
         } catch (RuntimeException e) {
-            Gdx.app.error("Hud", "Brak grafik wygladu nowego: " + e.getMessage());
+            Gdx.app.error("Hud", Messages.get("zidane_skin.brak_grafik_wygladu_nowego") + e.getMessage());
             return null;
         }
     }
@@ -84,7 +85,7 @@ final class ZidaneSkin {
 
     private static Texture tex(String name) {
         FileHandle f = file(name);
-        if (f == null) throw new IllegalStateException("brak ui/zidane/" + name + ".png");
+        if (f == null) throw new IllegalStateException(Messages.get("zidane_skin.brak_ui_zidane") + name + ".png");
         Texture t = new Texture(f);
         t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         return t;

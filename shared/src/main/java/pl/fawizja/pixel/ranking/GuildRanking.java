@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.ranking;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +36,7 @@ public final class GuildRanking {
             Score s = scores.get(i);
             if (myGuild != null && s.guild().equalsIgnoreCase(myGuild)) mine = i + 1;
             if (i < Ranking.SHOWN) {
-                rows.add(new RankingView.Row(i + 1, s.guild(), s.members() + (s.members() == 1 ? " członek" : " członków"),
+                rows.add(new RankingView.Row(i + 1, s.guild(), s.members() + (s.members() == 1 ? Messages.get("guild_ranking.czlonek") : Messages.get("guild_ranking.czlonkow")),
                         (int) Math.min(Integer.MAX_VALUE, s.levels())));
             }
         }

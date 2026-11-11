@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,6 @@ public final class BossWatch {
     /** Tekst komunikatu, np. "Grimtooth odrodzil sie (Krainy Varden, pietro -5)." */
     public static String message(MonsterManager.BossStatus b, long now) {
         String[] r = MonsterManager.row(b, now);
-        return "Boss " + r[0] + " odrodził się (" + r[1] + ").";
+        return "Boss " + r[0] + Messages.get("boss_watch.odrodzil_sie") + r[1] + ").";
     }
 }

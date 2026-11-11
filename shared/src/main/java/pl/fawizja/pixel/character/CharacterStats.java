@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Liczniki postaci do okna /statystyki: czas gry, smierci i najwyzszy osiagniety poziom. */
 public final class CharacterStats {
     private long playMs;
@@ -46,9 +47,9 @@ public final class CharacterStats {
     /** "12 h 05 min" albo "7 min". */
     public static String describePlayTime(long ms) {
         long min = ms / 60_000;
-        if (min < 60) return min + " min";
+        if (min < 60) return min + Messages.get("hud.min");
         long h = min / 60;
-        return (h >= 24 ? (h / 24) + " d " + (h % 24) + " h " : h + " h ") + String.format("%02d", min % 60) + " min";
+        return (h >= 24 ? (h / 24) + " d " + (h % 24) + " h " : h + " h ") + String.format("%02d", min % 60) + Messages.get("hud.min");
     }
 
     /** Zapis: "czasMs,smierci,poziom,wyzwania,wypoczete,pojedynki,rzadkie,ziola" (starsze zapisy bez koncowych pol). */

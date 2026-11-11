@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.house;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Locale;
 
 /**
@@ -22,10 +23,10 @@ public enum HouseAccess {
     /** Opis po polsku. */
     public String label() {
         switch (this) {
-            case OWNER: return "właściciel";
-            case FULL: return "pełny dostęp";
-            case ENTRY: return "tylko wejście";
-            default: return "brak dostępu";
+            case OWNER: return Messages.get("house_access.wlasciciel");
+            case FULL: return Messages.get("house_access.pelny_dostep");
+            case ENTRY: return Messages.get("house_access.tylko_wejscie");
+            default: return Messages.get("house_access.brak_dostepu");
         }
     }
 

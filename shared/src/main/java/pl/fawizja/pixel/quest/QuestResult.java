@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.quest;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Wynik akcji zadania z komunikatem. */
 public enum QuestResult {
     ACCEPTED("Zadanie przyjęte."),
@@ -14,5 +15,5 @@ public enum QuestResult {
 
     QuestResult(String message) { this.message = message; }
 
-    public String message() { return message; }
+    public String message() { return Messages.tr(message); }
 }

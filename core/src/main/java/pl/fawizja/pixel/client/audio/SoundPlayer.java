@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.audio;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
@@ -35,7 +36,7 @@ public final class SoundPlayer {
             }
             available = true;
         } catch (RuntimeException e) {
-            Gdx.app.log("Pixel", "Dźwięk niedostępny: " + e.getMessage());
+            Gdx.app.log("Pixel", Messages.get("sound_player.dzwiek_niedostepny") + e.getMessage());
             dispose();
         }
     }

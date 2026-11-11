@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.social;
 
+import pl.fawizja.pixel.i18n.Messages;
 import pl.fawizja.pixel.vocation.Vocation;
 
 /**
@@ -43,8 +44,8 @@ public record PlayerInfo(String name, int level, Vocation vocation, String guild
 
     /** Krotki opis do okna, np. "Druid, poziom 42, gildia Wilki, w grze". */
     public String describe() {
-        if (!known()) return "Nie znamy tej postaci.";
-        return (vocation == null ? "" : vocation.displayName() + ", ") + "poziom " + level
-                + (guild == null ? "" : ", gildia " + guild) + (online ? ", w grze" : ", poza grą");
+        if (!known()) return Messages.get("player_info.nie_znamy_tej_postaci");
+        return (vocation == null ? "" : vocation.displayName() + ", ") + Messages.get("hud.poziom_2") + level
+                + (guild == null ? "" : Messages.get("player_info.gildia") + guild) + (online ? Messages.get("player_info.w_grze") : Messages.get("player_info.poza_gra"));
     }
 }

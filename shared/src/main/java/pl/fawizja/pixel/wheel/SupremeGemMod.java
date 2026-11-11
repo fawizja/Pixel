@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -175,15 +176,15 @@ public enum SupremeGemMod {
         double v = value(grade);
         String n = spell == null ? "" : names == null ? spell : names.apply(spell);
         switch (kind) {
-            case DODGE: return "+" + num(v) + "% uniku";
-            case CRIT_DAMAGE: return "+" + num(v) + "% obrażeń krytycznych";
-            case LIFE_LEECH: return "+" + num(v) + "% kradzieży życia";
-            case MANA_LEECH: return "+" + num(v) + "% kradzieży many";
-            case REVELATION: return "Mistrzostwo objawienia: +" + Math.round(v) + " pkt " + domainGenitive(domain) + " domeny do etapu ("
+            case DODGE: return "+" + num(v) + Messages.get("supreme_gem_mod.uniku");
+            case CRIT_DAMAGE: return "+" + num(v) + Messages.get("spell_augment.obrazen_krytycznych");
+            case LIFE_LEECH: return "+" + num(v) + Messages.get("spell_augment.kradziezy_zycia");
+            case MANA_LEECH: return "+" + num(v) + Messages.get("spell_augment.kradziezy_many");
+            case REVELATION: return Messages.get("supreme_gem_mod.mistrzostwo_objawienia") + Math.round(v) + " pkt " + domainGenitive(domain) + Messages.get("supreme_gem_mod.domeny_do_etapu")
                     + revelationLabel() + ")";
-            case SPELL_DAMAGE: return n + ": +" + num(v) + "% obrażeń";
-            case SPELL_CRIT: return n + ": +" + num(v) + "% obrażeń krytycznych";
-            case SPELL_HEAL: case SPELL_HEAL_FLAT: return n + ": +" + num(v) + "% leczenia";
+            case SPELL_DAMAGE: return n + ": +" + num(v) + Messages.get("critical_hit.obrazen");
+            case SPELL_CRIT: return n + ": +" + num(v) + Messages.get("spell_augment.obrazen_krytycznych");
+            case SPELL_HEAL: case SPELL_HEAL_FLAT: return n + ": +" + num(v) + Messages.get("spell_augment.leczenia");
             default: return n + ": -" + cooldown((long) v) + " odnowienia";
         }
     }
@@ -192,12 +193,12 @@ public enum SupremeGemMod {
     public String shortLabel(java.util.function.Function<String, String> names) {
         String n = spell == null ? "" : names == null ? spell : names.apply(spell);
         switch (kind) {
-            case DODGE: return "Unik";
-            case CRIT_DAMAGE: return "Obrażenia krytyczne";
-            case LIFE_LEECH: return "Kradzież życia";
-            case MANA_LEECH: return "Kradzież many";
-            case REVELATION: return "Mistrzostwo: " + revelationLabel();
-            case SPELL_DAMAGE: return n + " (obrażenia)";
+            case DODGE: return Messages.get("charm.unik");
+            case CRIT_DAMAGE: return Messages.get("supreme_gem_mod.obrazenia_krytyczne");
+            case LIFE_LEECH: return Messages.get("enchantments.kradziez_zycia");
+            case MANA_LEECH: return Messages.get("enchantments.kradziez_many");
+            case REVELATION: return Messages.get("supreme_gem_mod.mistrzostwo") + revelationLabel();
+            case SPELL_DAMAGE: return n + Messages.get("supreme_gem_mod.obrazenia");
             case SPELL_CRIT: return n + " (krytyk)";
             case SPELL_HEAL: case SPELL_HEAL_FLAT: return n + " (leczenie)";
             default: return n + " (odnowienie)";
@@ -218,8 +219,8 @@ public enum SupremeGemMod {
 
     /** Nazwa objawienia domeny modu (Mistrzostwo objawienia): zielona = Dar Zycia, reszta wg profesji modu. */
     private String revelationLabel() {
-        if (domain == WheelDomain.GREEN || vocations == null) return WheelRevelation.GIFT_OF_LIFE.label;
-        return WheelRevelation.of(domain, vocations.iterator().next()).label;
+        if (domain == WheelDomain.GREEN || vocations == null) return WheelRevelation.GIFT_OF_LIFE.label();
+        return WheelRevelation.of(domain, vocations.iterator().next()).label();
     }
 
     private static String domainGenitive(WheelDomain d) {
@@ -234,7 +235,7 @@ public enum SupremeGemMod {
     static String num(double v) { return SpellAugment.num(Math.round(v * 100) / 100.0); }
 
     static String cooldown(long ms) {
-        if (ms >= 60_000 && ms % 60_000 == 0) return ms / 60_000 + " min";
+        if (ms >= 60_000 && ms % 60_000 == 0) return ms / 60_000 + Messages.get("hud.min");
         return SpellAugment.num(ms / 1000.0) + " s";
     }
 

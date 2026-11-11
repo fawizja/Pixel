@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.net;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -101,7 +102,7 @@ public final class NetClient implements AutoCloseable {
                 if (chain == null || chain.length == 0) throw new java.security.cert.CertificateException("brak certyfikatu");
                 String fp = fingerprint(chain[0].getEncoded());
                 serverFingerprint = fp;
-                if (!pinning.accept(fp)) throw new java.security.cert.CertificateException("odcisk certyfikatu się nie zgadza");
+                if (!pinning.accept(fp)) throw new java.security.cert.CertificateException(Messages.get("net_client.odcisk_certyfikatu_sie_nie"));
             }
 
             @Override
@@ -201,7 +202,7 @@ public final class NetClient implements AutoCloseable {
                 }
             }
         } catch (IOException | RuntimeException e) {
-            if (!closed) error = "Połączenie przerwane: " + e.getMessage();
+            if (!closed) error = Messages.get("net_client.polaczenie_przerwane") + e.getMessage();
         } finally {
             closed = true;
         }
@@ -218,20 +219,27 @@ public final class NetClient implements AutoCloseable {
             out.write('\n');
             out.flush();
         } catch (IOException e) {
-            error = "Nie można wysłać: " + e.getMessage();
+            error = Messages.get("net_client.nie_mozna_wyslac") + e.getMessage();
             closed = true;
         }
     }
 
     /** Logowanie (wersja 2: z haslem). Uwaga: polaczenie nie jest jeszcze szyfrowane. */
     public void hello(String name, String vocation, String password) {
-        send("HELLO", String.valueOf(Protocol.VERSION), name, vocation, password);
+        hello(name, vocation, password, null);
     }
 
-    /** Logowanie z miastem startowym (uzywanym tylko przy zakladaniu konta; null = miasto domyslne serwera). */
+    /**
+     * Logowanie z miastem startowym (uzywanym tylko przy zakladaniu konta; null = miasto domyslne serwera) i jezykiem
+     * klienta (siodme pole HELLO: en|pl|es; serwer odpowiada w tym jezyku).
+     */
     public void hello(String name, String vocation, String password, String town) {
-        if (town == null || town.isBlank()) hello(name, vocation, password);
-        else send("HELLO", String.valueOf(Protocol.VERSION), name, vocation, password, town);
+        hello(name, vocation, password, town, pl.fawizja.pixel.i18n.Messages.globalLanguage());
+    }
+
+    public void hello(String name, String vocation, String password, String town, pl.fawizja.pixel.i18n.Language language) {
+        send("HELLO", String.valueOf(Protocol.VERSION), name, vocation, password,
+                town == null || town.isBlank() ? "-" : town, language.code);
     }
 
     public int playerId() { return playerId; }

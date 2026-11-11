@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.screen;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -51,6 +52,7 @@ public final class LoginScreen extends ScreenAdapter {
     private final Rectangle townPrev = new Rectangle();
     private final Rectangle townNext = new Rectangle();
     private final Rectangle townBox = new Rectangle();
+    private final pl.fawizja.pixel.client.ui.LanguageBar languageBar = new pl.fawizja.pixel.client.ui.LanguageBar();
 
     public LoginScreen(PixelGame game) {
         this.game = game;
@@ -83,6 +85,11 @@ public final class LoginScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int sx, int sy, int pointer, int button) {
                 Vector2 p = viewport.unproject(tmp.set(sx, sy));
+                pl.fawizja.pixel.i18n.Language picked = languageBar.hit(p);
+                if (picked != null) {
+                    game.setLanguage(picked);
+                    return true;
+                }
                 for (int i = 0; i < fields.length; i++) {
                     if (fields[i].contains(p)) {
                         focus = i;
@@ -99,7 +106,7 @@ public final class LoginScreen extends ScreenAdapter {
                     prefs.remove("pin." + values[SERVER].toString().trim());
                     prefs.flush();
                     certificateChanged = false;
-                    message = "Zapomniano certyfikat - następne połączenie zapamięta nowy.";
+                    message = Messages.get("login_screen.zapomniano_certyfikat_nastepne");
                     return true;
                 }
                 if (connect.contains(p)) connect();
@@ -138,17 +145,17 @@ public final class LoginScreen extends ScreenAdapter {
         String name = values[NAME].toString().trim();
         String password = values[PASSWORD].toString();
         if (name.length() < 3) {
-            message = "Podaj imię (3-20 liter).";
+            message = Messages.get("login_screen.podaj_imie_3_20");
             focus = NAME;
             return;
         }
         if (password.length() < 6) {
-            message = "Hasło musi mieć co najmniej 6 znaków.";
+            message = Messages.get("login_screen.haslo_musi_miec_co");
             focus = PASSWORD;
             return;
         }
         connecting = true;
-        message = "Łączenie z " + server + "...";
+        message = Messages.get("login_screen.laczenie_z") + server + "...";
         Gdx.input.setOnscreenKeyboardVisible(false);
         Vocation voc = vocation;
         String startTown = townKey();
@@ -165,7 +172,7 @@ public final class LoginScreen extends ScreenAdapter {
                 }
                 if (pinned == null && login.fingerprint() != null) {
                     prefs.putString(pinKey, login.fingerprint()); // pierwsze polaczenie: zapamietaj certyfikat
-                    Gdx.app.log("Pixel", "Zapamiętano certyfikat serwera " + server + ": " + login.fingerprint());
+                    Gdx.app.log("Pixel", Messages.get("login_screen.zapamietano_certyfikat_serwera") + server + ": " + login.fingerprint());
                 }
                 prefs.putString("server", server);
                 prefs.putString("name", login.character().name());
@@ -188,14 +195,15 @@ public final class LoginScreen extends ScreenAdapter {
         boolean twoColumns = h < 470 && w >= 640;
         float fw = twoColumns ? Math.min(380, (w - 48) / 2f) : Math.min(360, w - 32), fh = twoColumns ? 36 : 30;
         float x = twoColumns ? w / 2f - 8 - fw : (w - fw) / 2f;
-        float y = h - 70;
+        languageBar.layout(w / 2f, h - 52, Math.min(360, w - 32));
+        float y = h - 98;
         for (int i = 0; i < fields.length; i++) {
             fields[i].set(x, y - fh, fw, fh);
             y -= fh + 26;
         }
         if (twoColumns) {
             x = w / 2f + 8;
-            y = h - 70;
+            y = h - 98;
         }
         float vw = (fw - (vocations.length - 1) * 8) / vocations.length;
         for (int i = 0; i < vocations.length; i++) vocations[i].set(x + i * (vw + 8), y - 40, vw, 40);
@@ -221,6 +229,7 @@ public final class LoginScreen extends ScreenAdapter {
         ShapeRenderer shapes = game.shapes();
         shapes.setProjectionMatrix(viewport.getCamera().combined);
         shapes.begin(ShapeRenderer.ShapeType.Filled);
+        languageBar.drawShapes(shapes, Messages.language());
         for (int i = 0; i < fields.length; i++) {
             Rectangle r = fields[i];
             shapes.setColor(i == focus ? 0.3f : 0.18f, i == focus ? 0.28f : 0.17f, i == focus ? 0.38f : 0.22f, 1f);
@@ -253,10 +262,11 @@ public final class LoginScreen extends ScreenAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
         centered(batch, "PIXEL - gra online", w / 2f, h - 24, Color.GOLD);
+        languageBar.drawText(batch, game.font(), Messages.language());
         for (int i = 0; i < fields.length; i++) {
             Rectangle r = fields[i];
             game.font().setColor(Color.LIGHT_GRAY);
-            game.font().draw(batch, LABELS[i], r.x, r.y + r.height + 16);
+            game.font().draw(batch, Messages.tr(LABELS[i]), r.x, r.y + r.height + 16);
             String text = i == PASSWORD ? "*".repeat(values[i].length()) : values[i].toString();
             if (i == focus && caret) text += "_";
             game.font().setColor(Color.WHITE);
@@ -265,7 +275,7 @@ public final class LoginScreen extends ScreenAdapter {
         Rectangle first = vocations[0];
         game.font().setColor(Color.LIGHT_GRAY);
         boolean compact = first.width < 110; // waskie przyciski (telefon): sama postac, nazwa w podpisie
-        game.font().draw(batch, "Profesja (tylko dla nowego konta)" + (compact ? ": " + vocation.displayName() : ""),
+        game.font().draw(batch, Messages.get("login_screen.profesja_tylko_dla_nowego") + (compact ? ": " + vocation.displayName() : ""),
                 first.x, first.y + first.height + 16);
         for (int i = 0; i < vocations.length; i++) {
             Rectangle r = vocations[i];
@@ -281,7 +291,7 @@ public final class LoginScreen extends ScreenAdapter {
         if (!towns.isEmpty()) {
             pl.fawizja.pixel.character.StartingTowns.Info t = towns.get(town);
             game.font().setColor(Color.LIGHT_GRAY);
-            game.font().draw(batch, "Miasto startowe (tylko dla nowego konta)", townPrev.x, townPrev.y + townPrev.height + 16);
+            game.font().draw(batch, Messages.get("login_screen.miasto_startowe_tylko_dla"), townPrev.x, townPrev.y + townPrev.height + 16);
             centered(batch, "<", townPrev.x + townPrev.width / 2f, townPrev.y + townPrev.height / 2f, Color.WHITE);
             centered(batch, ">", townNext.x + townNext.width / 2f, townNext.y + townNext.height / 2f, Color.WHITE);
             centered(batch, t.name(), townBox.x + townBox.width / 2f, townBox.y + townBox.height - 13, Color.GOLD);
@@ -291,14 +301,14 @@ public final class LoginScreen extends ScreenAdapter {
                     com.badlogic.gdx.utils.Align.left, true);
             game.font().setColor(Color.WHITE);
         }
-        centered(batch, connecting ? "Łączenie..." : "Połącz", connect.x + connect.width / 2f, connect.y + connect.height / 2f, Color.WHITE);
-        centered(batch, "Wstecz", back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);
+        centered(batch, connecting ? Messages.get("login_screen.laczenie") : Messages.get("login_screen.polacz"), connect.x + connect.width / 2f, connect.y + connect.height / 2f, Color.WHITE);
+        centered(batch, Messages.get("game_screen.wstecz"), back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);
         if (!message.isEmpty()) centered(batch, message, w / 2f, back.y - 20, Color.SALMON);
         if (certificateChanged) {
-            centered(batch, "Zapomnij certyfikat (gdy serwer przeinstalowano)",
+            centered(batch, Messages.get("login_screen.zapomnij_certyfikat_gdy_serwer"),
                     forget.x + forget.width / 2f, forget.y + forget.height / 2f, Color.WHITE);
         }
-        centered(batch, "Pierwsze logowanie nowym imieniem zakłada konto. Połączenie jest szyfrowane (TLS).",
+        centered(batch, Messages.get("login_screen.pierwsze_logowanie_nowym_imien"),
                 w / 2f, 14, Color.GRAY);
         batch.end();
     }
