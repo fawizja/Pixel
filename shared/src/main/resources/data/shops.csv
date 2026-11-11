@@ -835,3 +835,27 @@ frost_magic;rooster_rod;1200;150
 frost_magic;rooster_spellbook;720;90
 frost_magic;rooster_amulet;600;75
 frost_magic;wolf_spellbook;300;37
+# 2026-11-11: Elandor, osada elfow - luczarz (luki, skora, skup skor) i zielarka (mikstury, rozdzki, ziola)
+elandor_bows;short_bow;60;15
+elandor_bows;hunting_bow;350;90
+elandor_bows;crossbow;1100;280
+elandor_bows;elven_bow;3200;800
+elandor_bows;serpent_bow;8000;2000
+elandor_bows;leather_helmet;20;6
+elandor_bows;leather_armor;40;12
+elandor_bows;leather_legs;18;5
+elandor_bows;leather_boots;14;4
+elandor_bows;rope;60;0
+elandor_bows;torch;8;0
+elandor_bows;wolf_pelt;0;12
+elandor_bows;spider_silk;0;25
+elandor_bows;boar_tusk;0;20
+elandor_herbs;health_potion;50;0
+elandor_herbs;mana_potion;55;0
+elandor_herbs;great_health_potion;200;0
+elandor_herbs;great_mana_potion;130;0
+elandor_herbs;thornroot_rod;150;40
+elandor_herbs;wand_of_embers;150;40
+elandor_herbs;bread;4;0
+elandor_herbs;meat;6;0
+elandor_herbs;healing_herb;0;5

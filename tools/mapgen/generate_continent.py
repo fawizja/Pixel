@@ -42,6 +42,7 @@ import wilds  # noqa: E402
 import homes  # noqa: E402
 import route_levels  # noqa: E402
 import town_npcs  # noqa: E402
+import strongholds  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -988,6 +989,8 @@ def build(ctx):
               monsters_csv=os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'monsters.csv'))
     print('lochy w dziczy:', wilds.wild_dungeons(ctx, cost, wh))
     print('spawny w lasach i na lakach:', wilds.surface_spawns(ctx, wh))
+    # 2026-11-11: Twierdza Krwawego Kla (orki, -3..+3, drzwi poziomu 50) i Elandor, osada elfow (-2..+3)
+    print('twierdza orkow i osada elfow:', strongholds.build(ctx, cost, wh))
 
 
 def monster_levels():

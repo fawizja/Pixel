@@ -119,6 +119,11 @@ isle13_ferryman;Przewoźniczka Sława;CAPTAIN;Wyspa Burz;856;901;0;-;#4a6a8a;Prz
 isle14_ferryman;Przewoźnik Ciechosław;CAPTAIN;Wyspa Lisów;872;427;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
 isle15_ferryman;Przewoźniczka Grzymisława;CAPTAIN;Wyspa Starej Latarni;762;866;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
 isle16_ferryman;Przewoźnik Mirogniew;CAPTAIN;Wyspa Wilcza;729;883;0;-;#4a6a8a;Przewożę łodzią na stały ląd i z powrotem. Tylko posiadacze konta premium.
+elandor_priestess;Kapłanka Liriel;GUIDE;Elandor;360;516;0;-;#5aa04a;Niech Wielkie Drzewo cię chroni. Opowiem ci o lesie i o łowach na wygnańców.
+elandor_banker;Skarbnik Faelar;BANKER;Elandor;402;516;0;-;#5aa04a;Złoto i depozyt są tu bezpieczne jak korzenie drzew.
+elandor_bowyer;Łuczarz Thalion;MERCHANT;Elandor;362;536;0;elandor_bows;#5aa04a;Łuki z cisu i jesionu, strzelają bez amunicji. Skupuję też drewno i skóry.
+elandor_herbalist;Zielarka Ilyana;MERCHANT;Elandor;401;536;0;elandor_herbs;#5aa04a;Mikstury, zioła i różdżki dla wędrowców lasu.
+elandor_elder;Starszy Aelindor;GUIDE;Elandor;381;515;3;-;#5aa04a;Witaj na szczycie Wielkiego Drzewa. Widać stąd cały las... i wygnańców, którzy w nim krążą.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

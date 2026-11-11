@@ -350,3 +350,4 @@
 390;crystal_shortsword;Kryształowy krótki miecz;WEAPON;1;940;WEAPON;36;9;0;30;KNIGHT;0;1;PHYSICAL;SWORD;-;#80e0f0;Krótki miecz z jednego kryształu.
 391;crystal_sword;Kryształowy miecz;WEAPON;1;1800;WEAPON;41;10;0;45;KNIGHT;0;1;PHYSICAL;SWORD;-;#80e0f0;Szeroki miecz z kryształu z kopalni. Dźwięczy przy każdym ciosie.
 392;emerald_amulet;Szmaragdowy amulet;ARMOR;1;730;AMULET;0;0;0;40;*;0;0;PHYSICAL;-;EARTH:4;#40c040;Srebrny łańcuszek ze szmaragdem. Chroni przed ziemią.
+202;warlord_helmet;Hełm Pana Twierdzy;ARMOR;1;6000;HEAD;0;0;7;50;*;0;0;PHYSICAL;-;PHYSICAL:3,FIRE:2;#5a7a3a;Rogaty hełm Urgotha ze skarbca Twierdzy Krwawego Kła. Jeden na każdego śmiałka.

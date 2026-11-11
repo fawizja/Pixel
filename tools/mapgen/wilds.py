@@ -20,6 +20,7 @@ from collections import deque
 
 import features as F
 import town as tk
+from structures import HAND_PLACED
 
 NONE = '-'
 SEED_DUNGEONS = 20261103
@@ -203,10 +204,11 @@ class Wilds:
     def pool(self, level, biome):
         allowed = BIOME_MONSTERS.get(biome, {'temperate', 'underground'})
         cand = [(k, m['level']) for k, m in self.mon.items()
-                if not m['boss'] and k not in NOT_UNDERGROUND and m['biome'] in allowed
+                if not m['boss'] and k not in NOT_UNDERGROUND and k not in HAND_PLACED and m['biome'] in allowed
                 and level * 0.55 <= m['level'] <= level * 1.6 + 4]
         if len(cand) < 3:
-            ranked = sorted(((k, m['level']) for k, m in self.mon.items() if not m['boss'] and k not in NOT_UNDERGROUND),
+            ranked = sorted(((k, m['level']) for k, m in self.mon.items()
+                             if not m['boss'] and k not in NOT_UNDERGROUND and k not in HAND_PLACED),
                             key=lambda km: abs(km[1] - level))
             cand = ranked[:4]
         return [k for k, _l in cand]

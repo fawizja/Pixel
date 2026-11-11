@@ -250,6 +250,8 @@ MORE_ITEMS = {
     "strong_mana_potion": (2131, (110, 150, 255)), "supreme_mana_potion": (2131, (90, 90, 230)),
     "ultimate_mana_potion": (2131, (150, 90, 255)), "great_spirit_potion": 2128,
     "ultimate_spirit_potion": (2128, (230, 120, 255)),
+    # 2026-11-11: nagroda ze skarbca Twierdzy Krwawego Kla
+    "warlord_helmet": 1976,
     "fists_of_the_abyss": 2709, "frostbound_fists": 2710, "umbral_grips": 2711, "molten_knuckles": (2159, (255, 120, 50)),
 }
 # Efekty czarow i pociskow (Darek, 23.10: "skile i spele nie maja grafik, paladyn rzuca kulka").
@@ -338,6 +340,10 @@ MONSTERS = {
     "snare_setter": (44, ((150, 110, 60), (85, 135, 60), (115, 90, 55), (75, 55, 35))),
     "quarry_brute": (45, ((175, 175, 170), (200, 125, 60), (125, 105, 85), (85, 65, 45))),
     "dune_zealot": (18, ((245, 235, 205), (250, 245, 225), (230, 195, 100), (160, 125, 70))),
+    # 2026-11-11: elfy-wygnancy z lasow Elandoru (zielone stroje z maska kolorow)
+    "elf": (16, ((230, 210, 140), (70, 140, 60), (90, 120, 60), (80, 60, 40))),
+    "elf_scout": (44, ((220, 200, 120), (60, 110, 50), (70, 90, 50), (70, 50, 30))),
+    "elf_arcanist": (20, ((240, 230, 180), (40, 120, 100), (30, 90, 80), (60, 50, 40))),
 }
 # Potwory bez wlasnego stroju w paczce: podobny stroj przebarwiony (barwa mnozona przez jasnosc piksela).
 TINTED = {
@@ -370,6 +376,10 @@ TINTED = {
     # bossowie
     "wroniec": (9, (60, 45, 85)), "szlamiara": (42, (70, 120, 55)), "velmira": (43, (165, 25, 45)),
     "suweren": (27, (230, 190, 90)),
+    # 2026-11-11: orki Twierdzy Krwawego Kla (paczka nie ma orkow - przebarwione stroje, kazdy inny ksztalt)
+    "orc": (7, (150, 175, 110)), "orc_spearman": (19, (130, 165, 90)), "orc_rider": (11, (115, 100, 70)),
+    "orc_marauder": (44, (140, 160, 95)), "orc_leader": (3, (115, 145, 75)), "orc_cult_priest": (10, (150, 95, 135)),
+    "orc_cult_fanatic": (2, (180, 75, 60)), "urgoth": (46, (150, 75, 50)),
 }
 CHARACTERS = {
     "paladin": (19, None),

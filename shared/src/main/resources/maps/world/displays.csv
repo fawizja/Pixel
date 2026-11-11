@@ -159,6 +159,12 @@
 679;262;0;rope
 602;797;0;torch
 603;797;0;rope
+362;537;0;short_bow
+358;536;0;hunting_bow
+358;534;0;crossbow
+401;537;0;health_potion
+400;537;0;mana_potion
+402;537;0;great_health_potion
 260;327;-3;hunting_bow
 261;346;-3;hunting_bow
 263;327;-3;wand_of_embers
