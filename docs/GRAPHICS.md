@@ -21,11 +21,13 @@ po kawałku.
   `assets/ui/wst/`, ramki OTClientV8). Ramka rzadkości wg ceny (`Rarity`): zwykły szary, niepospolity zielony,
   rzadki niebieski, epicki fioletowy, legendarny złoty; przedmiot tylko z bossów o stopień wyżej (legendarny z bossa -
   mityczny czerwony).
-- Przedmioty o id 256 i wyżej (zestawy Kogucie, Cukrowe, Zarazy, Zamieci, Smocze, Białego Słońca, Feniksa,
+- Przedmioty o id 256-399 (zestawy Kogucie, Cukrowe, Zarazy, Zamieci, Smocze, Białego Słońca, Feniksa,
   Odmętów, Księżycowe, Anielskie, Piekielne i kilka pojedynczych) narysował **Hinas (OTLand) – przedmioty**:
   grafiki udostępnione publicznie bez licencji, użyte z podaniem autora (docs/CREDITS.md, `tools/art/hinas_import.py`).
+- Runy 0.240 (id 400-423: pola, ściany, bomby, odtrutka, paraliż, przekonanie, ożywienie zwłok i inne) to przebarwione
+  runy OTSP (leczenia, wybuchu ognia, lawiny, nagłej śmierci) - `tools/art/rune_tints.py`.
 
-Razem: 144 kafelków, 349 przedmiotów, 96 potworów, 137 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 698.
+Razem: 144 kafelków, 373 przedmiotów, 96 potworów, 137 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 722.
 
 Lista jest generowana: `python3 tools/art/list_graphics.py`.
 
@@ -321,6 +323,8 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/angel_spellbook.png` | Anielska księga (shield) | tak |
 | `items/angel_sword.png` | Anielski miecz (weapon) | tak |
 | `items/angel_wand.png` | Anielska różdżka (weapon) | tak |
+| `items/animate_dead_rune.png` | Runa ożywienia zwłok (rune) | tak |
+| `items/antidote_rune.png` | Runa odtrutki (rune) | tak |
 | `items/avalanche_rune.png` | Runa lawiny (rune) | tak |
 | `items/backpack.png` | Plecak (tool) | tak |
 | `items/barbarian_axe.png` | Topór barbarzyńcy (weapon) | tak |
@@ -343,7 +347,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/boar_tusk.png` | Kieł dzika (material) | tak |
 | `items/bone.png` | Kość (material) | tak |
 | `items/bone_shield.png` | Kościana tarcza (shield) | tak |
-| `items/boulder_rune.png` | Runa głazu (rune) | tak |
+| `items/boulder_rune.png` | Runa stalagmitu (rune) | tak |
 | `items/bread.png` | Chleb (food) | tak |
 | `items/candy_amulet.png` | Cukierkowy naszyjnik (armor) | tak |
 | `items/candy_armor.png` | Czekoladowa zbroja (armor) | tak |
@@ -360,6 +364,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/cloth_wraps.png` | Płócienne owijki (weapon) | tak |
 | `items/colossus_core.png` | Rdzeń kolosa (material) | tak |
 | `items/composite_bow.png` | Łuk kompozytowy (weapon) | tak |
+| `items/convince_creature_rune.png` | Runa przekonania (rune) | tak |
 | `items/coral_armor.png` | Koralowa zbroja (armor) | tak |
 | `items/coral_boots.png` | Koralowe buty (armor) |  |
 | `items/coral_helmet.png` | Hełm głębin (armor) | tak |
@@ -393,6 +398,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/deep_wand.png` | Różdżka odmętów (weapon) | tak |
 | `items/desert_knuckles.png` | Pustynne kastety (weapon) | tak |
 | `items/desert_scimitar.png` | Pustynny sejmitar (weapon) | tak |
+| `items/destroy_field_rune.png` | Runa niszczenia pól (rune) | tak |
 | `items/dragon_amulet.png` | Smoczy talizman (armor) | tak |
 | `items/dragon_armor.png` | Smocza zbroja (armor) | tak |
 | `items/dragon_axe.png` | Smoczy topór (weapon) | tak |
@@ -410,9 +416,16 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/ectoplasm.png` | Ektoplazma (material) | tak |
 | `items/elven_bow.png` | Elfi łuk (weapon) | tak |
 | `items/emerald_amulet.png` | Szmaragdowy amulet (armor) | tak |
+| `items/energy_bomb_rune.png` | Runa bomby energii (rune) | tak |
+| `items/energy_field_rune.png` | Runa pola energii (rune) | tak |
+| `items/energy_wall_rune.png` | Runa ściany energii (rune) | tak |
 | `items/exalted_core.png` | Wzniosły rdzeń (material) |  |
 | `items/exp_scroll.png` | Zwój nauki (tool) | tak |
-| `items/fireburst_rune.png` | Runa wybuchu ognia (rune) | tak |
+| `items/explosion_rune.png` | Runa eksplozji (rune) | tak |
+| `items/fire_bomb_rune.png` | Runa bomby ognia (rune) | tak |
+| `items/fire_field_rune.png` | Runa pola ognia (rune) | tak |
+| `items/fire_wall_rune.png` | Runa ściany ognia (rune) | tak |
+| `items/fireburst_rune.png` | Runa kuli ognia (rune) | tak |
 | `items/fish.png` | Ryba (food) |  |
 | `items/fishing_rod.png` | Wędka (tool) | tak |
 | `items/fists_of_the_abyss.png` | Pięści Otchłani (weapon) | tak |
@@ -453,14 +466,17 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/guardian_gem.png` | Klejnot strażnika (material) | tak |
 | `items/hand_axe.png` | Toporek (weapon) | tak |
 | `items/healing_herb.png` | Ziele lecznicze (material) | tak |
-| `items/healing_rune.png` | Runa leczenia (rune) | tak |
+| `items/healing_rune.png` | Runa silnego leczenia (rune) | tak |
 | `items/health_potion.png` | Mikstura zdrowia (potion) | tak |
 | `items/heavy_crossbow.png` | Ciężka kusza (weapon) | tak |
+| `items/heavy_magic_missile_rune.png` | Runa ciężkiego pocisku (rune) | tak |
+| `items/holy_missile_rune.png` | Runa świętego pocisku (rune) | tak |
 | `items/horned_helmet.png` | Rogaty hełm (armor) | tak |
 | `items/hunting_bow.png` | Łuk myśliwski (weapon) | tak |
 | `items/hunting_spear.png` | Włócznia myśliwska (weapon) | tak |
 | `items/hyena_fang.png` | Kieł hieny (material) | tak |
 | `items/ice_cod.png` | Lodowy dorsz (food) |  |
+| `items/icicle_rune.png` | Runa sopla (rune) | tak |
 | `items/infernal_amulet.png` | Piekielny amulet (armor) | tak |
 | `items/infernal_armor.png` | Piekielna zbroja (armor) | tak |
 | `items/infernal_axe.png` | Piekielny topór (weapon) | tak |
@@ -488,8 +504,10 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/lesser_mystic_gem.png` | Mniejszy klejnot mistyka (material) | tak |
 | `items/lesser_sage_gem.png` | Mniejszy klejnot mędrca (material) | tak |
 | `items/lesser_spiritualist_gem.png` | Mniejszy klejnot spirytualisty (material) | tak |
+| `items/light_magic_missile_rune.png` | Runa lekkiego pocisku (rune) | tak |
 | `items/luck_potion.png` | Mikstura szczęścia (potion) | tak |
 | `items/mace.png` | Buzdygan (weapon) | tak |
+| `items/magic_wall_rune.png` | Runa magicznej ściany (rune) | tak |
 | `items/magma_bow.png` | Magmowy łuk (weapon) | tak |
 | `items/magma_cleaver.png` | Magmowy tasak (weapon) | tak |
 | `items/magma_spear.png` | Magmowa włócznia (weapon) | tak |
@@ -522,6 +540,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/obsidian_shard.png` | Odłamek obsydianu (material) | tak |
 | `items/obsidian_shield.png` | Obsydianowa tarcza (shield) | tak |
 | `items/obsidian_wand.png` | Obsydianowa różdżka (weapon) | tak |
+| `items/paralyse_rune.png` | Runa paraliżu (rune) | tak |
 | `items/pearl.png` | Perła (material) | tak |
 | `items/pet_cat.png` | Kocię (tool) | tak |
 | `items/pet_dog.png` | Szczenię (tool) | tak |
@@ -556,6 +575,9 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/plague_sword.png` | Ostrze zarazy (weapon) | tak |
 | `items/plague_wand.png` | Różdżka zarazy (weapon) | tak |
 | `items/platinum_coin.png` | Platynowa moneta (currency) | tak |
+| `items/poison_bomb_rune.png` | Runa bomby trucizny (rune) | tak |
+| `items/poison_field_rune.png` | Runa pola trucizny (rune) | tak |
+| `items/poison_wall_rune.png` | Runa ściany trucizny (rune) | tak |
 | `items/powder_horn.png` | Róg z prochem (material) | tak |
 | `items/raspberry.png` | Maliny (food) |  |
 | `items/reef_gauntlets.png` | Rękawice rafy (weapon) | tak |
@@ -600,11 +622,13 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/shovel.png` | Łopata (tool) | tak |
 | `items/skull_axe.png` | Topór czaszek (weapon) | tak |
 | `items/snake_skin.png` | Wężowa skóra (material) | tak |
+| `items/soulfire_rune.png` | Runa ognia duszy (rune) | tak |
 | `items/spear.png` | Włócznia (ammunition) | tak |
 | `items/spider_silk.png` | Pajęcza nić (material) | tak |
 | `items/spiritualist_gem.png` | Klejnot spirytualisty (material) | tak |
 | `items/starfall_wand.png` | Różdżka spadających gwiazd (weapon) | tak |
 | `items/steel_spear.png` | Stalowa włócznia (weapon) | tak |
+| `items/stone_shower_rune.png` | Runa deszczu kamieni (rune) | tak |
 | `items/stoneskin_potion.png` | Mikstura kamiennej skóry (potion) | tak |
 | `items/stormcaller_wand.png` | Różdżka wołająca burzę (weapon) | tak |
 | `items/strength_potion.png` | Mikstura siły (potion) | tak |
@@ -629,6 +653,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/swamp_eel.png` | Bagienny węgorz (food) |  |
 | `items/swiftness_potion.png` | Mikstura szybkości (potion) | tak |
 | `items/thornroot_rod.png` | Laska cierniowego korzenia (weapon) | tak |
+| `items/thunderstorm_rune.png` | Runa burzy (rune) | tak |
 | `items/tidal_bow.png` | Łuk przypływu (weapon) | tak |
 | `items/tidal_harpoon.png` | Harpun przypływu (weapon) | tak |
 | `items/torch.png` | Pochodnia (light) | tak |
@@ -647,6 +672,7 @@ postać po ponownym uruchomieniu narzędzia. Poniższa tabela (stroje OTSP) dzia
 | `items/wand_of_storms.png` | Różdżka burz (weapon) | tak |
 | `items/wand_of_the_deep.png` | Różdżka głębin (weapon) | tak |
 | `items/war_hammer.png` | Młot bojowy (weapon) | tak |
+| `items/wild_growth_rune.png` | Runa dzikiego wzrostu (rune) | tak |
 | `items/wolf_pelt.png` | Wilcze futro (material) | tak |
 | `items/wolf_spellbook.png` | Księga wilka (shield) | tak |
 | `items/wooden_shield.png` | Drewniana tarcza (shield) | tak |

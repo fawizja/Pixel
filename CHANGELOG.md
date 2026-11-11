@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Czary jak w Tibii dla każdej profesji: słowa, poziomy, mana i czasy odnowienia z Tibii. Druid ma 64 czary, czarodziej
+  57, mnich 27, paladyn 24, rycerz 23, a 38 jest wspólnych. Są wśród nich fale, promienie, leczenie innego gracza
+  (exura sio "imię"), tarcza many, niewidzialność, iluzja, wyzwanie, regeneracja i magiczna lina.
+- Przywoływanie stworzeń: utevo res "wilk" i inne (najwyżej 2 sługi). Runa przekonania zamienia stworzenie w sługę,
+  a runa ożywienia zwłok robi szkieleta z ciała. Słudzy chodzą za tobą i atakują twój cel.
+- Stany jak w Tibii: zatrucie, podpalenie, porażenie, krwawienie, zamrożenie, oślepienie, klątwa i tonięcie.
+  Zadają obrażenia co kilka sekund i mają ikonę przy pasku. W opisie ikony jest czar, który leczy stan.
+- Leczenie stanów zależy od profesji: exana pox może rzucić każdy (jest też runa odtrutki). Druid leczy porażenie
+  (exana vis) i podpalenie (exana flam). Druid i rycerz tamują krwawienie (exana kor). Paladyn zdejmuje klątwę
+  (exana mort).
+- 61 potworów nakłada stany: pająki, skorpiony i węże zatruwają, ogniste stwory podpalają, nieumarli przeklinają,
+  a wilki i krokodyle ranią do krwi.
+- Runy jak w Tibii, do kupienia u magów w każdym mieście i w obozie, albo do zrobienia czarem:
+  - pola: ognia, trucizny i energii, z czasem trwania jak w Tibii
+  - ściany i bomby
+  - lawina i wielka kula ognia
+  - sopel, stalagmit, burza, deszcz kamieni i ogień duszy
+  - magiczna ściana, dziki wzrost i niszczenie pól
+  - paraliż
+- Pola leżą na ziemi i podpalają, trują albo rażą każdego, kto w nie wejdzie, także potwory.
+- Exani hur up i exani hur down działają tylko tam, gdzie w Tibii: w górę spod dziury albo otwartego nieba nad tobą,
+  w dół nad dziurą albo krawędzią przed tobą.
+
+### Zmieniono
+- Kratki ściekowe w miastach: do kanału schodzisz, dotykając kratki. Samo wejście na kratkę nic nie robi.
+- Czary Koła Przeznaczenia odnoszą się do nowych czarów z Tibii.
+
 ## [0.241.0] - 2026-11-10
 
 ### Dodano

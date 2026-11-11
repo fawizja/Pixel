@@ -156,7 +156,7 @@ class GemSessionTest {
         java.util.List<String[]> q = WheelView.quadrant(pc, WheelDomain.RED, k -> k);
         assertEquals("wheel:rev:R", q.get(0)[3]);
         assertTrue(q.stream().anyMatch(r -> r[1].equals("+3 HP, +1 many/pkt; pełne: czar front_sweep")), join(q));
-        assertTrue(q.stream().anyMatch(r -> r[1].equals("+1 many/pkt; pełne: chivalrous_challenge I: -20 many")), join(q));
+        assertTrue(q.stream().anyMatch(r -> r[1].equals("+1 many/pkt; pełne: czar chivalrous_challenge")), join(q));
         assertTrue(q.stream().anyMatch(r -> r[0].equals("Zewnętrzne 200: 200/200, pełne")), join(q));
         pl.fawizja.pixel.magic.SpellRegistry spells = pl.fawizja.pixel.magic.SpellRegistry.loadDefault(TestData.ITEMS);
         java.util.function.Function<String, String> names = k -> spells.find(k) == null ? k : spells.find(k).name();

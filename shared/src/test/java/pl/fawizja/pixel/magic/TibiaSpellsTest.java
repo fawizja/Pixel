@@ -71,9 +71,7 @@ class TibiaSpellsTest {
         MonsterConditions.Entry e = MonsterConditions.defaults().of(MagicTest.MONSTERS.get("forest_spider"));
         assertNotNull(e);
         assertEquals(ConditionType.POISON, e.type());
-        for (MonsterConditions.Entry x : MonsterConditions.defaults().all()) {
-            assertNotNull(x, "entries");
-        }
+
         PlayerCharacter pc = at(Vocation.SORCERER, 8);
         GameSession s = MagicTest.session(pc, null, null);
         pc.damage(pc.health() - 5);
@@ -85,7 +83,7 @@ class TibiaSpellsTest {
     @Test
     void summonTableAndMonsterConditionKeysExist() {
         for (String k : SummonTable.defaults().all().keySet()) assertTrue(MagicTest.MONSTERS.contains(k), "summon " + k);
-        for (MonsterConditions.Entry e : MonsterConditions.defaults().all()) assertNotNull(e.type());
+        for (String k : MonsterConditions.defaults().all().keySet()) assertTrue(MagicTest.MONSTERS.contains(k), "condition " + k);
     }
 
     @Test
@@ -179,10 +177,10 @@ class TibiaSpellsTest {
         assertEquals(1, s.spells().tibia().summons().size());
         assertTrue(s.spells().tibia().summons().get(0).isSummon());
         pc.restoreMana(pc.maxMana());
+        assertEquals(CastResult.NOT_POSSIBLE, s.castSpell("summon_creature", "smok", 3000), "only creatures from summons.csv");
         assertEquals(CastResult.OK, s.castSpell("summon_creature", "Szczur kanałowy", 4000));
         pc.restoreMana(pc.maxMana());
         assertEquals(CastResult.TOO_MANY_SUMMONS, s.castSpell("summon_creature", "wilk", 8000));
-        assertEquals(CastResult.NOT_POSSIBLE, s.castSpell("summon_creature", "smok", 12_000));
         assertFalse(s.targetAt(s.spells().tibia().summons().get(0).position()), "own summon cannot be targeted");
     }
 

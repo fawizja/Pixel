@@ -32,9 +32,13 @@ class HighLevelMagicTest {
                     .filter(s -> s.minLevel() >= 150 && (s.kind().isOffensive() || monk
                             && (s.kind() == SpellKind.FOCUS_HARMONY || s.kind() == SpellKind.FOCUS_SERENITY || s.kind() == SpellKind.HEAL_PARTY)))
                     .count();
-            // Tibia 15.x: paladyn po 150 dostaje tylko Boski granat (objawienie Kola); pozostali co najmniej 3
-            assertTrue(attacks >= (v == Vocation.PALADIN ? 1 : 3), v + " has " + attacks + " attack spells at 150+");
-            assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() >= 120
+            // Tibia 15.x: po 150 nowe ataki to glownie objawienia Kola (paladyn Boski granat, czarodziej Wielki
+            // promien smierci, rycerz Rzut kata, druid Wybuch lodu i ziemi) - kazda profesja ma co najmniej jeden
+            int need = v == Vocation.DRUID ? 2 : 1;
+            assertTrue(attacks >= need, v + " has " + attacks + " attack spells at 150+");
+            // Tibia 15.x: najsilniejsze leczenie paladyna (exura gran san) jest od 60
+            int strongHeal = v == Vocation.PALADIN ? 60 : 120;
+            assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() >= strongHeal
                             && (s.kind() == SpellKind.HEAL_SELF || monk && s.kind() == SpellKind.HEAL_PARTY)),
                     v + " has a strong heal");
             assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() == 300), v + " has a level 300 spell");

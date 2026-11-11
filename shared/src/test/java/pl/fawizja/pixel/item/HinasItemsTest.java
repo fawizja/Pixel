@@ -40,7 +40,7 @@ class HinasItemsTest {
         for (Shop s : ShopRegistry.loadDefault(TestData.ITEMS).all()) for (ShopOffer o : s.offers()) if (o.sold()) sources.add(o.itemId());
         int n = 0;
         for (ItemType t : TestData.ITEMS.all()) {
-            if (t.id() < 256) continue;
+            if (t.id() < 256 || t.category() == ItemCategory.RUNE) continue; // runy 0.240 (id 400+) to nie przedmioty Hinasa
             n++;
             assertTrue(Files.exists(dir.resolve(t.key() + ".png")), "grafika " + t.key());
             assertTrue(sources.contains(t.id()), t.key() + ": ani lup, ani sklep");

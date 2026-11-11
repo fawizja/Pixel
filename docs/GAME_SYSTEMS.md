@@ -428,6 +428,11 @@ Obiekt obok postaci (albo pod nia) - uzycie od razu; dalej - marsz na pole obok 
 - Uzywalne: skrzynie, schowki, drzwi i okna, dzwignie, pochodnie na murach, drabiny i miejsca na line (wejscie pietro
   wyzej, lina potrzebna), krzaki z owocami i ziolami, drogowskazy (kraina i droga do najblizszego miasta), studnie,
   lozka, pulpity. Schody i dziury jak dotad - wejscie na pole. Przedmioty na ziemi: podglad/podnoszenie bez zmian.
+- Kratki sciekowe w miastach (0.240, `TransitionType.GRATE`): jak w Tibii schodzi sie do kanalu dotknieciem kratki,
+  nie wejsciem na nia (wejscie na kratke nic nie robi, mozna po niej chodzic). Uzycie idzie ta sama droga co drabina:
+  `GameSession.usableAt` / `useWorldObject` -> `MovementSystem.use`. W `maps/world/transitions.csv` 53 wejscia STAIRS
+  na polach kratek (z=0) zmienione na GRATE; generator (`tools/mapgen/generate_continent.py`) zapisuje je juz jako
+  GRATE. Opis po spojrzeniu: "kratka sciekowa (dotknij, by zejsc do kanalu)".
 - Drzwi jak w Tibii: wejscie w zamkniete drzwi tylko zatrzymuje (`MoveResult.DOOR_CLOSED`, podpowiedz
   "Dotknij drzwi, aby je otworzyć." najwyzej raz na 30 s); otwiera i zamyka je dotkniecie (zamkniecie nie, gdy ktos
   stoi w drzwiach). Marsz po dotknieciu mapy omija zamkniete drzwi, a gdy trasa przez nie prowadzi - staje przed
@@ -1174,6 +1179,48 @@ Wejscie i wyjscie gracza: wiadomosc SYSTEM do znajomych online (`tellFriends`).
 - Mikstury etapu 13: silna i ostateczna mikstura ducha (paladyn, zdrowie i mana naraz, poz. 80 / 130),
   ostateczna mikstura many (magowie, poz. 250), ostateczna mikstura zdrowia (paladyn i mnich, poz. 250).
   Przyciski HP/MP biora najsilniejsza dozwolona miksture z plecaka (`GameSession.HP_TIERS` / `MP_TIERS`).
+
+## Czary jak w Tibii (0.240, Z logika `magic/TibiaSpells`, C rysowanie i HUD)
+
+Dane czarow z Canary (Tibia 15.x): slowa, profesje, poziom, mana i odnowienie sa jak w Tibii (`spells.csv`,
+`incantations.csv`); obrazenia przeliczone na formuly gry (srednia z Tibii: poziom/5 + magia*a + b, rozrzut 15%).
+Analiza luk wzgledem Tibii: `/mnt/project-files/analizy/czary-tibia.md`.
+
+- Profesje: druid 64 czary (z runami), czarodziej 57, mnich 27, paladyn 24, rycerz 23 oraz 38 wspolnych
+  (swiatla, lina, lewitacja, exana pox, wszystkie runy). Ksiega pokazuje slowa, mane i poziom.
+- Drugie grupy odnowienia jak w Tibii (`SpellSystem.SECONDARY`): silne uderzenia i blyskawica 8 s, ostateczne 30 s,
+  czary "focus" (piekielny rdzen, gniew niebios, wieczna zima, gniew natury) 40 s, wielkie promienie 6 s.
+- Fale (`TibiaSpells.waveTiles`): stozek przed postacia, polszerokosc max(min, min(2, d/2)); dlugosc + promien z Kola.
+- Czary z parametrem: `utevo res "wilk"` (przywolanie), `exura sio "imie"` (leczenie innego; bez imienia -
+  najslabszy sojusznik albo ty), iluzja (`utevo res ina "szkielet"` albo cel). Akcja `cast:klucz:parametr`.
+- Slugi (`summons.csv`, `SummonTable`): najwyzej 2, mana z Tibii; ida za wlascicielem (teleport z innego pietra albo
+  dalej niz 10 pol), atakuja jego cel i bronia sie (`CombatSystem.creatureHit`), znikaja po smierci postaci.
+  Przekonanie stworzenia (runa) i ozywienie zwlok (runa na cialo -> szkielet) tez daja slugi.
+- Inne: tarcza many (utamo vita, obrazenia z many), niewidzialnosc (potwory nie widza postaci; atak ja zdejmuje),
+  regeneracja, wyzwanie (prowokacja do 5 potworow, nie uciekaja), lewitacja (exani hur up/down), magiczna lina.
+- Exani hur up/down tylko tam, gdzie w Tibii: up - nad postacia otwarte powietrze (brak podloza albo dziura), cel to pole
+  przed postacia pietro wyzej; down - pole przed postacia jest otwarte (dziura, krawedz), cel pod nim. Cel musi byc
+  wolny i dostepny (bez przejsc, drzwi poziomu, domow, potworow, NPC, pokojow zadan); blokada PZ jak w Tibii
+  (`GameSession.levitationDestination`).
+- Stany (`combat/Conditions`, `ConditionType`): zatrucie, podpalenie, porazenie, krwawienie, zamrozenie, oslepienie,
+  klatwa, toniecie. Tiki jak w Canary (`damageList` - malejace od ceil(suma/20) do 1; pola - stale tiki). Pasek stanu
+  pokazuje ikone, opis podaje czar leczacy. Liczby tikow w kolorze zywiolu.
+- Leczenie stanow wg profesji (jak w Tibii): exana pox - wszyscy (runa odtrutki tez), exana vis i exana flam - druid,
+  exana kor - druid i rycerz, exana mort - paladyn. Zly czar dla profesji = "nie twoja profesja".
+- Potwory nakladaja stany (`monster_conditions.csv`, 61 potworow, wartosci jak w Canary condition totalDamage/interval):
+  pajaki i skorpiony zatruwaja, zywiolaki ognia podpalaja, nieumarli przeklinaja, wilki i bestie powoduja krwawienie...
+- Pola (`world/Fields`): ogien 7x20 co 10 s przez 200 s (potem slabszy 7x10), trucizna jak `damageList(100, 5)` co 5 s
+  przez 248 s, energia 25 raz, 98 s; magiczna sciana i dziki wzrost 20 s, blokuja ruch (a sciana takze wzrok).
+  Pola nie powstaja w strefie ochronnej ani na polach zablokowanych; wejscie w pole naklada stan od razu (gracz -
+  ostrzezenie z nazwa czaru leczacego; potwor - tylko pola wlasciciela). Runa niszczenia pol usuwa pole.
+- Runy (id 400-423): pola (ognia, trucizny, energii), sciany (5 pol w poprzek kierunku), bomby (3x3), lawina i wielka kula
+  ognia (promien 3), kula ognia, sopel, stalagmit, burza, deszcz kamieni, ogien duszy, pociski, swiety pocisk,
+  odtrutka, paraliz, przekonanie, ozywienie zwlok, magiczna sciana, dziki wzrost. Zaklinane czarami jak w Tibii
+  (poziom, mana, ilosc) i sprzedawane u magow wszystkich miast i w obozie (`shops.csv`). Runa celuje w cel, a bez celu -
+  w pole przed postacia.
+- Rysowanie (`GameScreen.drawFields`): pola to petla klatek efektow OTSP (plomien, energia, kaluza szlamu, magia, ziemia).
+- Online: serwer liczy stany i pola w `GameSession.update` kazdego gracza; klient ich nie dostaje (brak synchronizacji
+  pol i stanow do innych graczy - do zrobienia).
 
 ## Harmonia mnicha (Z logika, S serwer, C HUD)
 
