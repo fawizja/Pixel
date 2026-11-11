@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.party;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -62,7 +63,7 @@ public record PartyView(List<Member> members, int bonusPercent, boolean sharing)
 
     /** Wiersz do okna druzyny / zakladki Druzyna, np. "Premia doświadczenia: +200% (5 osób, 5 profesji)". */
     public String bonusLine() {
-        if (!inParty()) return "Nie jesteś w drużynie.";
+        if (!inParty()) return Messages.get("party_view.nie_jestes_w_druzynie");
         int online = 0;
         int maxLevel = 0;
         for (Member m : members) {
@@ -71,15 +72,15 @@ public record PartyView(List<Member> members, int bonusPercent, boolean sharing)
             maxLevel = Math.max(maxLevel, m.level());
         }
         if (!sharing) {
-            return "Wspólne doświadczenie wyłączone: za duża różnica poziomów (najniższy poz. "
+            return Messages.get("party_view.wspolne_doswiadczenie_wylaczon")
                     + PartyRules.minSharingLevel(maxLevel) + ").";
         }
         int voc = distinctVocations();
-        return "Premia doświadczenia: +" + bonusPercent + "% (" + online + " " + osob(online) + ", "
+        return Messages.get("party_view.premia_doswiadczenia") + bonusPercent + "% (" + online + " " + osob(online) + ", "
                 + voc + " " + profesji(voc) + ")";
     }
 
-    private static String osob(int n) { return n == 1 ? "osoba" : n >= 2 && n <= 4 ? "osoby" : "osób"; }
+    private static String osob(int n) { return n == 1 ? "osoba" : n >= 2 && n <= 4 ? "osoby" : Messages.get("party_view.osob"); }
 
     private static String profesji(int n) { return n == 1 ? "profesja" : n >= 2 && n <= 4 ? "profesje" : "profesji"; }
 

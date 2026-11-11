@@ -62,12 +62,12 @@ class FishingTest {
         assertNull(pc.equipment().get(EquipSlot.AMMO), "nothing is equipped for fishing");
         pc.backpack().remove(id("worm"), pc.backpack().count(id("worm")));
         assertEquals(FishingResult.NO_BAIT, fs.fish(pc, 0));
-        assertTrue(FishingResult.NO_BAIT.message.contains("robak") && FishingResult.NO_BAIT.message.contains("plecak"));
-        assertFalse(FishingResult.NO_BAIT.message.contains("amunicji"), "no ammo slot hint any more");
+        assertTrue(FishingResult.NO_BAIT.message().contains("robak") && FishingResult.NO_BAIT.message().contains("plecak"));
+        assertFalse(FishingResult.NO_BAIT.message().contains("amunicji"), "no ammo slot hint any more");
         pc.backpack().add(new ItemStack(id("worm"), 10));
         pc.backpack().remove(id("fishing_rod"), 1);
         assertEquals(FishingResult.NO_ROD, fs.fish(pc, 0));
-        assertTrue(FishingResult.NO_ROD.message.contains("wędk"));
+        assertTrue(FishingResult.NO_ROD.message().contains("wędk"));
         assertEquals(10, worms(pc), "failed attempts use no worms");
     }
 

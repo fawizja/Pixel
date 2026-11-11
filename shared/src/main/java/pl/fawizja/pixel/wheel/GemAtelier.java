@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,7 +45,7 @@ public final class GemAtelier {
         NOT_ELIGIBLE("Klejnoty działają z Kołem Przeznaczenia: promocja, konto premium i poziom 51."),
         NO_GEM("Nie masz takiego klejnotu do odkrycia."),
         NO_GOLD("Za mało złota (plecak albo konto)."),
-        FULL("Masz już " + MAX_GEMS + " odkrytych klejnotów - rozbij któryś."),
+        FULL("Masz już {0} odkrytych klejnotów - rozbij któryś."),
         UNKNOWN("Nie ma takiego klejnotu."),
         LOCKED("Klejnot jest zablokowany - najpierw go odblokuj."),
         WRONG_DOMAIN("Klejnot pasuje tylko do naczynia swojej domeny."),
@@ -55,7 +56,9 @@ public final class GemAtelier {
         NO_ROOM("Brak miejsca w plecaku na okruchy."),
         NOT_IN_TEMPLE("Klejnoty w naczyniach zmienisz tylko w świątyni (przy kapłanie).");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message).replace("{0}", String.valueOf(MAX_GEMS)); }
 
         Result(String m) { message = m; }
     }
@@ -124,13 +127,13 @@ public final class GemAtelier {
     public static String gemName(Vocation v, GemQuality q) {
         String who;
         switch (v) {
-            case KNIGHT: who = "strażnika"; break;
+            case KNIGHT: who = Messages.get("gem_atelier.straznika"); break;
             case PALADIN: who = "strzelca"; break;
-            case SORCERER: who = "mędrca"; break;
+            case SORCERER: who = Messages.get("gem_atelier.medrca"); break;
             case DRUID: who = "mistyka"; break;
             default: who = "spirytualisty";
         }
-        return q.title + " " + who;
+        return q.title() + " " + who;
     }
 
     public static String fragmentKey(boolean greater) { return greater ? GREATER_FRAGMENT_KEY : LESSER_FRAGMENT_KEY; }

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.net;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Polecenia wpisywane w okno czatu, zamieniane na komunikaty protokolu (zamiast wysylania tekstu innym):
  * "/haslo stare nowe" -> PASSWD, "/usun-konto haslo" -> DELETE. Zwykly tekst -> CHAT.
@@ -326,27 +327,27 @@ public final class ChatCommands {
     public static java.util.List<String[]> helpRows() {
         java.util.List<String[]> rows = new java.util.ArrayList<>();
         String[][] runnable = {
-            {"/gracze", "kto jest teraz w grze (znajomi: /znajomi)"},
-            {"/bossowie", "którzy bossowie żyją i kiedy wrócą"},
-            {"/analiza", "exp i złoto na godzinę; łupy: /łupy"},
-            {"/wydarzenia", "inwazja, potwór dnia, zadanie dnia, nagrody"},
-            {"/śmierć", "kto i czym zadał ostatnie obrażenia"},
-            {"/statystyki", "czas gry, zabicia; /szukaj nazwa, /cena nazwa"},
-            {"/osiągnięcia", "osiągnięcia, tytuły, bestiariusz; Koło Przeznaczenia: /koło"},
-            {"/ranking", "najlepsi gracze; /ranking gildie, magia, miecz..."},
-            {"/nowości", "co nowego w grze; autorzy grafik: /autorzy"},
-            {"/znaczniki", "miejsca na mapie; /idź bank, /idź łowisko"},
-            {"/emotki", "taniec, ukłon, machanie nad głową; strój: /strój"},
+            {"/gracze", Messages.get("chat_commands.kto_jest_teraz_w")},
+            {"/bossowie", Messages.get("chat_commands.ktorzy_bossowie_zyja_i")},
+            {"/analiza", Messages.get("chat_commands.exp_i_zloto_na")},
+            {"/wydarzenia", Messages.get("chat_commands.inwazja_potwor_dnia_zadanie")},
+            {Messages.get("chat_commands.smierc"), Messages.get("chat_commands.kto_i_czym_zadal")},
+            {"/statystyki", Messages.get("chat_commands.czas_gry_zabicia_szukaj")},
+            {Messages.get("chat_commands.osiagniecia"), Messages.get("chat_commands.osiagniecia_tytuly_bestiariusz")},
+            {"/ranking", Messages.get("chat_commands.najlepsi_gracze_ranking_gildie")},
+            {Messages.get("chat_commands.nowosci"), Messages.get("chat_commands.co_nowego_w_grze")},
+            {"/znaczniki", Messages.get("chat_commands.miejsca_na_mapie_idz")},
+            {"/emotki", Messages.get("chat_commands.taniec_uklon_machanie_nad")},
         };
-        for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
+        for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + Messages.get("chat.dotknij_nawias"), "", "cmd:" + r[0]});
         String[][] typed = {
-            {"/w Imię, tekst", "wiadomość prywatna (/ignoruj Imię ukrywa gracza)"},
-            {"/zaproś Imię", "drużyna: /przyjmij, /opuść, /d; /drużyna (premia), /drużyna wyrzuć Imię; /szukam"},
-            {"/pojedynek Imię", "pojedynek; /pvp tryb PvP (czaszka); /nagroda Imię, 5000"},
-            {"/gildia załóż Nazwa", "zaproś, przyjmij, wyrzuć, wpłać; czat /g"},
-            {"/wyślij Imię, 5 futro", "poczta; /przelew Imię, 5000; /kupię u bankiera"},
-            {"/dom wpuść Imię", "gość z pełnym dostępem; /dom wstęp Imię (tylko wejście), /dom wyrzuć, /dom sprzedaj Imię, cena"},
-            {"/hasło stare nowe", "zmiana hasła konta"},
+            {Messages.get("chat_commands.w_imie_tekst"), Messages.get("chat_commands.wiadomosc_prywatna_ignoruj_imi")},
+            {Messages.get("chat_commands.zapros_imie"), Messages.get("chat_commands.druzyna_przyjmij_opusc_d")},
+            {Messages.get("chat_commands.pojedynek_imie"), Messages.get("chat_commands.pojedynek_pvp_tryb_pvp")},
+            {Messages.get("chat_commands.gildia_zaloz_nazwa"), Messages.get("chat_commands.zapros_przyjmij_wyrzuc_wplac")},
+            {Messages.get("chat_commands.wyslij_imie_5_futro"), Messages.get("chat_commands.poczta_przelew_imie_5000")},
+            {Messages.get("chat_commands.dom_wpusc_imie"), Messages.get("chat_commands.gosc_z_pelnym_dostepem")},
+            {Messages.get("chat_commands.haslo_stare_nowe"), Messages.get("chat_commands.zmiana_hasla_konta")},
         };
         for (String[] r : typed) rows.add(new String[] {r[0], r[1]});
         return rows;

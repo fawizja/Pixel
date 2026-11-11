@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.social;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,12 +77,12 @@ public final class SocialClient {
 
     private boolean blank(String name) {
         if (name != null && !name.isBlank()) return false;
-        log.add(now(), EventLog.Kind.WARNING, "Podaj imię gracza.");
+        log.add(now(), EventLog.Kind.WARNING, Messages.get("social_client.podaj_imie_gracza"));
         return true;
     }
 
     private boolean offlineParty() {
-        log.add(now(), EventLog.Kind.INFO, PartyManager.Result.ONLINE_ONLY.message);
+        log.add(now(), EventLog.Kind.INFO, PartyManager.Result.ONLINE_ONLY.message());
         return false;
     }
 
@@ -91,12 +92,12 @@ public final class SocialClient {
     public boolean invitePlayerToParty(String name) {
         if (blank(name)) return false;
         if (key(name).equals(key(pc.name()))) {
-            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.SELF.message);
+            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.SELF.message());
             return false;
         }
         if (link == null) return offlineParty();
         if (party.inParty() && !party.isLeader(pc.name())) {
-            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.NOT_LEADER.message);
+            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.NOT_LEADER.message());
             return false;
         }
         link.send("PARTY", "INVITE", name.trim());
@@ -115,7 +116,7 @@ public final class SocialClient {
     public boolean acceptPartyInvite() {
         List<String> pending = partyInvites();
         if (pending.isEmpty()) {
-            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.NO_INVITE.message);
+            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.NO_INVITE.message());
             return false;
         }
         return acceptPartyInvite(pending.get(pending.size() - 1));
@@ -124,7 +125,7 @@ public final class SocialClient {
     public boolean leaveParty() {
         if (link == null) return offlineParty();
         if (!party.inParty()) {
-            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.NOT_IN_PARTY.message);
+            log.add(now(), EventLog.Kind.WARNING, PartyManager.Result.NOT_IN_PARTY.message());
             return false;
         }
         link.send("PARTY", "LEAVE");
@@ -136,7 +137,7 @@ public final class SocialClient {
         if (blank(name)) return false;
         if (link == null) return offlineParty();
         if (party.inParty() && !party.isLeader(pc.name())) {
-            log.add(now(), EventLog.Kind.WARNING, "Tylko lider drużyny może wyrzucać.");
+            log.add(now(), EventLog.Kind.WARNING, Messages.get("social_client.tylko_lider_druzyny_moze"));
             return false;
         }
         link.send("PARTY", "KICK", name.trim());
@@ -196,10 +197,10 @@ public final class SocialClient {
         }
         FriendList.Result r = pc.friends().add(pc.name(), name.trim());
         if (r != FriendList.Result.OK) {
-            log.add(now(), EventLog.Kind.WARNING, r.message);
+            log.add(now(), EventLog.Kind.WARNING, r.message());
             return false;
         }
-        log.add(now(), EventLog.Kind.INFO, name.trim() + " dodany do znajomych.");
+        log.add(now(), EventLog.Kind.INFO, name.trim() + Messages.get("server_world.dodany_do_znajomych"));
         changed();
         return true;
     }
@@ -212,10 +213,10 @@ public final class SocialClient {
         }
         FriendList.Result r = pc.friends().remove(name);
         if (r != FriendList.Result.OK) {
-            log.add(now(), EventLog.Kind.WARNING, r.message);
+            log.add(now(), EventLog.Kind.WARNING, r.message());
             return false;
         }
-        log.add(now(), EventLog.Kind.INFO, name.trim() + " usunięty ze znajomych.");
+        log.add(now(), EventLog.Kind.INFO, name.trim() + Messages.get("social_client.usuniety_ze_znajomych"));
         changed();
         return true;
     }

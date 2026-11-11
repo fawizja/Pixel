@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 
@@ -49,9 +50,9 @@ public final class ForgeEffects {
     public static String describe(PlayerCharacter pc) {
         java.util.List<String> parts = new java.util.ArrayList<>();
         double[] v = {onslaughtChance(pc), ruseChance(pc), momentumChance(pc), transcendenceChance(pc)};
-        for (int i = 0; i < v.length; i++) if (v[i] > 0) parts.add(Forge.EFFECT_NAMES[i] + " " + ItemBonus.number(Math.round(v[i] * 100) / 100.0) + "%");
+        for (int i = 0; i < v.length; i++) if (v[i] > 0) parts.add(Messages.tr(Forge.EFFECT_NAMES[i]) + " " + ItemBonus.number(Math.round(v[i] * 100) / 100.0) + "%");
         int boots = pc.equipment().tier(EquipSlot.FEET);
-        if (boots > 0) parts.add(Forge.EFFECT_NAMES[4] + " +" + ItemBonus.number(Math.round(Forge.amplification(boots) * 10) / 10.0) + "%");
+        if (boots > 0) parts.add(Messages.tr(Forge.EFFECT_NAMES[4]) + " +" + ItemBonus.number(Math.round(Forge.amplification(boots) * 10) / 10.0) + "%");
         return String.join(", ", parts);
     }
 }

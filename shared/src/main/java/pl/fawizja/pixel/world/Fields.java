@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.world;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,8 @@ public final class Fields {
         MAGIC_WALL("Magiczna ściana", 20_000L, true),
         WILD_GROWTH("Dziki wzrost", 20_000L, true);
 
-        public final String label;
+        private final String label;
+        public String label() { return Messages.tr(label); }
         public final long durationMs;
         public final boolean blocking;
 

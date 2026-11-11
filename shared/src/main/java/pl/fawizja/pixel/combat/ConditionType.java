@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.combat;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Stany zadajace obrazenia co tik, jak w Tibii: zatrucie (ziemia), podpalenie (ogien), porazenie (energia),
  * krwawienie (fizyczne), zamrozenie (lod), oslepienie (swietosc), klatwa (smierc) i tonięcie (woda).
@@ -16,10 +17,13 @@ public enum ConditionType {
     DROWNING(DamageType.DROWN, "Tonięcie", "tonie", null);
 
     public final DamageType damage;
-    public final String label;
-    public final String state;
+    private final String label;
+    public String label() { return Messages.tr(label); }
+    private final String state;
+    public String state() { return Messages.tr(state); }
     /** Slowa czaru leczacego stan albo null (jak w Tibii zamrozenia, oslepienia i toniecia nie leczy zaden czar). */
-    public final String cure;
+    private final String cure;
+    public String cure() { return Messages.tr(cure); }
 
     ConditionType(DamageType damage, String label, String state, String cure) {
         this.damage = damage;
@@ -37,6 +41,6 @@ public enum ConditionType {
 
     /** Opis stanu na ikonie HUD. */
     public String describe() {
-        return label + ": tracisz życie co kilka sekund" + (cure != null ? " (leczy " + cure + ")" : "") + ".";
+        return label + Messages.get("condition_type.tracisz_zycie_co_kilka") + (cure != null ? " (leczy " + cure + ")" : "") + ".";
     }
 }

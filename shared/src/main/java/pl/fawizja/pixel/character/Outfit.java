@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Kolor stroju postaci: 0 = kolor profesji, pozostale to stale kolory do wyboru (bez oplat).
  * Indeks jest zapisywany w postaci i wysylany innym graczom w klatce stanu.
@@ -17,7 +18,7 @@ public final class Outfit {
     /** Bledny indeks wraca do koloru profesji. */
     public static int clamp(int i) { return i >= 0 && i < NAMES.length ? i : 0; }
 
-    public static String name(int i) { return NAMES[clamp(i)]; }
+    public static String name(int i) { return Messages.tr(NAMES[clamp(i)]); }
 
     /** "czerwony", "bialy", "3" -> indeks; -1, gdy nie ma takiego koloru. */
     public static int parse(String s) {

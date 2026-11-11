@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.event;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,13 +21,16 @@ import pl.fawizja.pixel.world.WorldMap;
 public final class Invasion {
 
     /** Plan inwazji dla miasta: potwor, ilu, herszt (jeden, silniejszy) i nazwa w ogloszeniu. */
-    public record Plan(String town, String monster, int count, String leader, String name) {}
+    public record Plan(String town, String monster, int count, String leader, String nameKey) {
+        /** Nazwa najazdu w biezacym jezyku. */
+        public String name() { return Messages.get(nameKey); }
+    }
 
     public static final List<Plan> PLANS = List.of(
-            new Plan("Varden", "bandit", 24, "cave_troll", "Bandyci"),
-            new Plan("Frostholm", "snow_wolf", 24, "yeti", "Śnieżne wilki"),
-            new Plan("Qasirah", "hyena", 24, "scorpion", "Hieny pustyni"),
-            new Plan("Selvaran", "crocodile", 20, "jungle_serpent", "Krokodyle z bagien"));
+            new Plan("Varden", "bandit", 24, "cave_troll", "invasion.bandyci"),
+            new Plan("Frostholm", "snow_wolf", 24, "yeti", "invasion.sniezne_wilki"),
+            new Plan("Qasirah", "hyena", 24, "scorpion", "invasion.hieny_pustyni"),
+            new Plan("Selvaran", "crocodile", 20, "jungle_serpent", "invasion.krokodyle_z_bagien"));
 
     /** Zloto na konto za kazdego pokonanego najezdzce (po udanej obronie albo po czasie). */
     public static final long REWARD_PER_KILL = 100;
@@ -113,7 +117,7 @@ public final class Invasion {
     /** "od północy", "od wschodu"... wzgledem swiatyni miasta. */
     public static String direction(Position temple, Position p) {
         int dx = p.x() - temple.x(), dy = p.y() - temple.y();
-        if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? "od wschodu" : "od zachodu";
-        return dy >= 0 ? "od południa" : "od północy";
+        if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? Messages.get("invasion.od_wschodu") : Messages.get("invasion.od_zachodu");
+        return dy >= 0 ? Messages.get("invasion.od_poludnia") : Messages.get("invasion.od_polnocy");
     }
 }

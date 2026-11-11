@@ -57,7 +57,7 @@ public final class WheelGem {
 
     /** Nazwa do list: "Większy klejnot (fioletowy) #12". */
     public String title() {
-        return quality.title + " (" + adjective(domain) + ") #" + id;
+        return quality.title() + " (" + adjective(domain) + ") #" + id;
     }
 
     /** Przymiotnik domeny w rodzaju meskim: "zielony", "czerwony". */

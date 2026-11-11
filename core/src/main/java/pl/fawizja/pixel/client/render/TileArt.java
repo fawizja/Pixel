@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.render;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -161,7 +162,7 @@ public final class TileArt implements Disposable {
                 try {
                     return new Pixmap(f);
                 } catch (RuntimeException e) {
-                    Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+                    Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
                     return null;
                 }
             }
@@ -286,7 +287,7 @@ public final class TileArt implements Disposable {
             com.badlogic.gdx.graphics.PixmapIO.writePNG(Gdx.files.absolute(exportDir + "/" + e.getKey() + ".png"), one);
             one.dispose();
         }
-        Gdx.app.log("TileArt", "Zapisano " + namedCells.size() + " obrazków do " + exportDir);
+        Gdx.app.log("TileArt", Messages.get("tile_art.zapisano") + namedCells.size() + Messages.get("tile_art.obrazkow_do") + exportDir);
     }
 
     private void overrideAll(Pixmap pm, TileRegistry tileRegistry, ItemRegistry itemRegistry, List<MonsterType> mtypes,
@@ -354,7 +355,7 @@ public final class TileArt implements Disposable {
             overrides++;
             return true;
         } catch (RuntimeException e) {
-            Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+            Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
             return false;
         }
     }
@@ -492,7 +493,7 @@ public final class TileArt implements Disposable {
             }
             if (!alts.isEmpty()) wallAltSlots.put(t.id(), alts);
         } catch (RuntimeException e) {
-            Gdx.app.error("TileArt", "Nie można wczytać murów " + t.key() + ": " + e.getMessage());
+            Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac_murow") + t.key() + ": " + e.getMessage());
         }
     }
 
@@ -523,7 +524,7 @@ public final class TileArt implements Disposable {
                 src.dispose();
                 cells.add(cell);
             } catch (RuntimeException e) {
-                Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+                Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
             }
         }
         if (!cells.isEmpty()) variantCells.put(t.id(), cells.stream().mapToInt(Integer::intValue).toArray());
@@ -625,7 +626,7 @@ public final class TileArt implements Disposable {
             }
             walkCells.put(name, cells[0]);
         } catch (RuntimeException e) {
-            Gdx.app.error("TileArt", "Nie można wczytać klatek kroku " + name + ": " + e.getMessage());
+            Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac_klatek") + name + ": " + e.getMessage());
         }
     }
 
@@ -689,7 +690,7 @@ public final class TileArt implements Disposable {
                 sheets.add(new Pixmap(f));
                 found.add(t);
             } catch (RuntimeException e) {
-                Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+                Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
             }
         }
         autotiles = new TextureRegion[registry.maxId() + 1][];
@@ -898,7 +899,7 @@ public final class TileArt implements Disposable {
         try {
             return new Pixmap(f);
         } catch (RuntimeException e) {
-            Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+            Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
             return null;
         }
     }
@@ -1158,7 +1159,7 @@ public final class TileArt implements Disposable {
                     putHi(ROOF_BASE + k * 3 + p, src);
                     src.dispose();
                 } catch (RuntimeException e) {
-                    Gdx.app.error("TileArt", "Nie można wczytać " + f.path() + ": " + e.getMessage());
+                    Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
                 }
             }
         }

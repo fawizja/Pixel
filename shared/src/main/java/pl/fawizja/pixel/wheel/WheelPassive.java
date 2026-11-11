@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import pl.fawizja.pixel.vocation.Vocation;
 
 /**
@@ -39,8 +40,11 @@ public enum WheelPassive {
     /** Mnich, fioletowe 200: wydanie harmonii daje na 5 s +2% obrazen i leczenia za kazdy wydany punkt. */
     SANCTUARY("Sanktuarium", "wydanie harmonii: +2% obrażeń i leczenia za punkt na 5 s");
 
-    public final String label;
-    public final String description;
+    private final String label;
+
+    public String label() { return Messages.tr(label); }
+    private final String description;
+    public String description() { return Messages.tr(description); }
 
     WheelPassive(String label, String description) {
         this.label = label;

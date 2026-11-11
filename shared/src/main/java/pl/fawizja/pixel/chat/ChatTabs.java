@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.chat;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,9 @@ public final class ChatTabs {
     public enum Channel {
         LOCAL("Lokalny"), SERVER("Serwer"), TRADE("Handel"), GUILD("Gildia"), PARTY("Drużyna"), PRIVATE(null);
 
-        public final String title;
+        private final String title;
+
+        public String title() { return Messages.tr(title); }
 
         Channel(String title) { this.title = title; }
     }
@@ -48,7 +51,7 @@ public final class ChatTabs {
 
         public Channel channel() { return channel; }
         public String peer() { return peer; }
-        public String title() { return channel == Channel.PRIVATE ? peer : channel.title; }
+        public String title() { return channel == Channel.PRIVATE ? peer : channel.title(); }
         public boolean unread() { return unread; }
         public List<Line> lines() { return new ArrayList<>(lines); }
         public int size() { return lines.size(); }
@@ -183,7 +186,7 @@ public final class ChatTabs {
             return new Route(Channel.PRIVATE, sender, sender + " (list): " + text, Style.PRIVATE_IN, false);
         }
         if (ch.equals("broadcast") || ch.isEmpty() && f.equals("[Ogłoszenie]")) {
-            return new Route(Channel.SERVER, null, "Ogłoszenie: " + text, Style.BROADCAST, false);
+            return new Route(Channel.SERVER, null, Messages.get("chat_tabs.ogloszenie") + text, Style.BROADCAST, false);
         }
         boolean own = sender != null && self != null && sender.equalsIgnoreCase(self);
         if (ch.equals("party") || ch.isEmpty() && f.startsWith("[Drużyna] ")) {

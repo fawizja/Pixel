@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.friends;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,11 +14,13 @@ public final class FriendList {
         OK(null),
         SELF("Nie możesz dodać siebie do znajomych."),
         ALREADY("Ta postać już jest na liście znajomych."),
-        FULL("Lista znajomych jest pełna (" + MAX + ")."),
+        FULL("Lista znajomych jest pełna ({0})."),
         UNKNOWN("Nie ma takiej postaci."),
         NOT_FRIEND("Tej postaci nie ma na liście znajomych.");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message).replace("{0}", String.valueOf(MAX)); }
 
         Result(String message) { this.message = message; }
     }

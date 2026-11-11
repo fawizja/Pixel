@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.server;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -158,14 +159,17 @@ public final class PixelServer implements AutoCloseable {
                 return;
             }
             if (!String.valueOf(Protocol.VERSION).equals(f[1])) {
-                c.send("ERR", "Niezgodna wersja protokołu (serwer " + Protocol.VERSION + ").");
+                c.send("ERR", Messages.get("pixel_server.niezgodna_wersja_protokolu_ser") + Protocol.VERSION + ").");
                 return;
             }
             if (f.length < 5) {
-                c.send("ERR", "Podaj imię, profesję i hasło.");
+                c.send("ERR", Messages.get("pixel_server.podaj_imie_profesje_i"));
                 return;
             }
-            c.player = world.join(c, f[2], f[3], f[4], f.length > 5 ? f[5] : null, now);
+            pl.fawizja.pixel.i18n.Language lang = f.length > 6
+                    ? pl.fawizja.pixel.i18n.Language.byCode(f[6], pl.fawizja.pixel.i18n.Language.PL) : pl.fawizja.pixel.i18n.Language.PL;
+            String town = f.length > 5 ? f[5] : null;
+            c.player = Messages.callAs(lang, () -> world.join(c, f[2], f[3], f[4], town, lang, now));
             return;
         }
         world.command(c.player, f, now);

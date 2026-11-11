@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -64,6 +65,7 @@ public class PixelGame extends Game {
 
     @Override
     public void create() {
+        initLanguage();
         items = ItemRegistry.loadDefault();
         tiles = TileRegistry.loadDefault();
         startingConfig = StartingConfig.loadDefault();
@@ -77,7 +79,7 @@ public class PixelGame extends Game {
             quests = pl.fawizja.pixel.quest.QuestRegistry.loadDefault(items, monsters);
             chests = pl.fawizja.pixel.treasure.TreasureChests.generate(world);
         } catch (IOException e) {
-            throw new IllegalStateException("Nie można wczytać mapy", e);
+            throw new IllegalStateException(Messages.get("pixel_game.nie_mozna_wczytac_mapy"), e);
         }
         art = new TileArt(tiles, items, monsters, npcs.all());
         batch = new SpriteBatch();
@@ -85,7 +87,7 @@ public class PixelGame extends Game {
         try {
             font = pl.fawizja.pixel.client.ui.PolishFont.create();
         } catch (RuntimeException e) {
-            Gdx.app.error("Pixel", "Czcionka bez polskich liter: " + e.getMessage());
+            Gdx.app.error("Pixel", Messages.get("pixel_game.czcionka_bez_polskich_liter") + e.getMessage());
             font = new BitmapFont();
         }
         sound = new pl.fawizja.pixel.client.audio.SoundPlayer();
@@ -95,6 +97,22 @@ public class PixelGame extends Game {
         saveStore = new SaveStore(platform.saveDirectory());
 
         setScreen(new pl.fawizja.pixel.client.screen.MenuScreen(this, null));
+    }
+
+    /** Jezyk gry: z ustawien na urzadzeniu (domyslnie angielski), -Dpixel.lang=en|pl|es dla zrzutow ekranu. */
+    private void initLanguage() {
+        pl.fawizja.pixel.i18n.Language l = pl.fawizja.pixel.settings.GameSettings.languageOf(Gdx.app.getPreferences("pixel-settings").get());
+        String forced = System.getProperty("pixel.lang");
+        if (forced != null) l = pl.fawizja.pixel.i18n.Language.byCode(forced, l);
+        Messages.setLanguage(l);
+    }
+
+    /** Wybor jezyka (menu, logowanie, ustawienia): od razu dla calej gry i zapisany na urzadzeniu. */
+    public void setLanguage(pl.fawizja.pixel.i18n.Language l) {
+        Messages.setLanguage(l);
+        com.badlogic.gdx.Preferences p = Gdx.app.getPreferences("pixel-settings");
+        p.putString("lang", Messages.globalLanguage().code);
+        p.flush();
     }
 
     /** Gra lokalna: kontynuacja zapisanej postaci albo wybor profesji nowej. */
@@ -122,7 +140,7 @@ public class PixelGame extends Game {
     /** Krotki opis zapisanej postaci lokalnej (do menu) albo null. */
     public String localSaveSummary() {
         PlayerCharacter pc = loadCharacter();
-        return pc == null ? null : pc.name() + ", " + pc.vocation().displayName() + ", poziom " + pc.level();
+        return pc == null ? null : pc.name() + ", " + pc.vocation().displayName() + Messages.get("pixel_game.poziom") + pc.level();
     }
 
     /** Powrot do menu (np. po rozlaczeniu z serwerem); poprzedni ekran jest zwalniany. */
@@ -135,10 +153,10 @@ public class PixelGame extends Game {
     private PlayerCharacter loadCharacter() {
         try {
             SaveStore.LoadResult<PlayerCharacter> r = saveStore.read(SAVE_SLOT, codec::decode);
-            if (r.problem() != null) Gdx.app.error(TAG, "Problem z zapisem: " + r.problem());
+            if (r.problem() != null) Gdx.app.error(TAG, Messages.get("pixel_game.problem_z_zapisem") + r.problem());
             return r.value();
         } catch (IOException e) {
-            Gdx.app.error(TAG, "Nie można odczytać zapisu", e);
+            Gdx.app.error(TAG, Messages.get("pixel_game.nie_mozna_odczytac_zapisu"), e);
             return null;
         }
     }
@@ -198,7 +216,7 @@ public class PixelGame extends Game {
     }
 
     public void startGame(PlayerCharacter pc) {
-        Gdx.app.log(TAG, "Start: " + pc.name() + " (" + pc.vocation() + ", lvl " + pc.level() + ")");
+        Gdx.app.log(TAG, Messages.get("pixel_game.start") + pc.name() + " (" + pc.vocation() + Messages.get("pixel_game.lvl") + pc.level() + ")");
         setScreen(new GameScreen(this, pc));
     }
 
@@ -232,9 +250,9 @@ public class PixelGame extends Game {
         try {
             if (colon > 0) port = Integer.parseInt(address.substring(colon + 1).trim());
         } catch (NumberFormatException e) {
-            return OnlineLogin.failed("Zły port w adresie serwera.");
+            return OnlineLogin.failed(Messages.get("pixel_game.zly_port_w_adresie"));
         }
-        if (host.isEmpty()) return OnlineLogin.failed("Podaj adres serwera.");
+        if (host.isEmpty()) return OnlineLogin.failed(Messages.get("pixel_game.podaj_adres_serwera"));
         pl.fawizja.pixel.net.NetClient net;
         boolean[] changed = new boolean[1];
         try {
@@ -244,10 +262,10 @@ public class PixelGame extends Game {
             });
         } catch (IOException e) {
             if (changed[0]) {
-                return new OnlineLogin(null, null, "Certyfikat serwera się zmienił - możliwe podszycie! Hasło nie zostało wysłane.",
+                return new OnlineLogin(null, null, Messages.get("pixel_game.certyfikat_serwera_sie_zmienil"),
                         null, true);
             }
-            return OnlineLogin.failed("Brak połączenia z " + host + ":" + port + " (szyfrowane TLS).");
+            return OnlineLogin.failed(Messages.get("pixel_game.brak_polaczenia_z") + host + ":" + port + Messages.get("pixel_game.szyfrowane_tls"));
         }
         net.hello(name.trim(), vocation, password, town);
         long deadline = System.currentTimeMillis() + 6000;
@@ -260,7 +278,7 @@ public class PixelGame extends Game {
             }
         }
         if (net.selfSave() == null) {
-            String err = net.error() != null ? net.error() : "Serwer nie odpowiada.";
+            String err = net.error() != null ? net.error() : Messages.get("pixel_game.serwer_nie_odpowiada");
             net.close();
             return OnlineLogin.failed(err);
         }
@@ -268,7 +286,7 @@ public class PixelGame extends Game {
             return new OnlineLogin(net, codec.decode(net.selfSave()), null, net.serverFingerprint(), false);
         } catch (Exception e) {
             net.close();
-            return OnlineLogin.failed("Nieczytelny stan postaci z serwera.");
+            return OnlineLogin.failed(Messages.get("pixel_game.nieczytelny_stan_postaci_z"));
         }
     }
 
@@ -286,7 +304,7 @@ public class PixelGame extends Game {
             saveStore.write(SAVE_SLOT, codec.encode(pc));
             return true;
         } catch (IOException e) {
-            Gdx.app.error(TAG, "Zapis nie powiódł się", e);
+            Gdx.app.error(TAG, Messages.get("pixel_game.zapis_nie_powiodl_sie"), e);
             return false;
         }
     }

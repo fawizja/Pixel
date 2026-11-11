@@ -39,7 +39,7 @@ class GemSessionTest {
         String key = GemAtelier.gemKey(Vocation.SORCERER, GemQuality.GREATER);
         GameSession s = WheelSessionTest.session(pc, FIELD);
         assertTrue(Actions.apply(s, "wheel:gem:reveal:G", 1000));
-        assertEquals(GemAtelier.Result.NO_GEM.message, WheelSessionTest.lastLog(s));
+        assertEquals(GemAtelier.Result.NO_GEM.message(), WheelSessionTest.lastLog(s));
         pc.backpack().add(new ItemStack(id(key), 1));
         long bank = pc.bank().balance();
         Actions.apply(s, "wheel:gem:reveal:G", 1000);
@@ -58,13 +58,13 @@ class GemSessionTest {
         pc.wheel().gems().decode("n=3;g=1,L,G,HEALTH,-,-,0/2,R,B,MANA,FIRE_RES,-,1");
         GameSession field = WheelSessionTest.session(pc, FIELD);
         Actions.apply(field, "wheel:gem:socket:1", 1000);
-        assertEquals(GemAtelier.Result.NOT_IN_TEMPLE.message, WheelSessionTest.lastLog(field));
+        assertEquals(GemAtelier.Result.NOT_IN_TEMPLE.message(), WheelSessionTest.lastLog(field));
         assertNull(pc.wheel().gems().socketed(WheelDomain.GREEN));
         GameSession temple = WheelSessionTest.session(pc, WheelSessionTest.TEMPLE);
         Actions.apply(temple, "wheel:gem:socket:1", 1000);
         assertNotNull(pc.wheel().gems().socketed(WheelDomain.GREEN));
         Actions.apply(temple, "wheel:gem:destroy:2", 1000);
-        assertEquals(GemAtelier.Result.LOCKED.message, WheelSessionTest.lastLog(temple), "locked gem is safe");
+        assertEquals(GemAtelier.Result.LOCKED.message(), WheelSessionTest.lastLog(temple), "locked gem is safe");
         Actions.apply(temple, "wheel:gem:destroy:1", 1000);
         assertNull(pc.wheel().gems().gem(1));
         assertNull(pc.wheel().gems().socketed(WheelDomain.GREEN));
@@ -77,7 +77,7 @@ class GemSessionTest {
         PlayerCharacter pc = rich(Vocation.DRUID);
         GameSession s = WheelSessionTest.session(pc, FIELD);
         Actions.apply(s, "wheel:grade:b:ICE_RES", 1000);
-        assertEquals(GemAtelier.Result.NO_FRAGMENTS.message, WheelSessionTest.lastLog(s));
+        assertEquals(GemAtelier.Result.NO_FRAGMENTS.message(), WheelSessionTest.lastLog(s));
         pc.backpack().add(new ItemStack(id(GemAtelier.LESSER_FRAGMENT_KEY), 7));
         long bank = pc.bank().balance();
         Actions.apply(s, "wheel:grade:b:ICE_RES", 1000);
@@ -85,7 +85,7 @@ class GemSessionTest {
         assertEquals(2, pc.backpack().count(id(GemAtelier.LESSER_FRAGMENT_KEY)));
         assertEquals(bank - 500_000, pc.bank().balance());
         Actions.apply(s, "wheel:grade:s:KNIGHT_MASTERY_AVATAR", 1000);
-        assertEquals(GemAtelier.Result.WRONG_VOCATION.message, WheelSessionTest.lastLog(s));
+        assertEquals(GemAtelier.Result.WRONG_VOCATION.message(), WheelSessionTest.lastLog(s));
     }
 
     @Test

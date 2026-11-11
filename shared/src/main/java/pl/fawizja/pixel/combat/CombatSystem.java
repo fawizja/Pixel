@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.combat;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,8 +137,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
      */
     public static String staminaNote(PlayerCharacter pc, boolean killer) {
         switch (pc.stamina().zone()) {
-            case EMPTY: return killer ? ", brak staminy - bez expa i łupu" : ", brak staminy - bez expa";
-            case LOW: return ", niska stamina (50% exp)";
+            case EMPTY: return killer ? ", brak staminy - bez expa i łupu" : Messages.get("combat_system.brak_staminy_bez_expa");
+            case LOW: return Messages.get("combat_system.niska_stamina_50_exp");
             case BONUS: return pc.isPremium() ? ", premia staminy (150% exp)" : "";
             default: return "";
         }
@@ -149,7 +150,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         log.add(now, EventLog.Kind.INFO, what + " (+" + exp + " exp)");
         if (exp > 0) push(new CombatEvent(now, pc.position(), (int) Math.min(Integer.MAX_VALUE, exp), CombatEvent.Kind.EXP));
         if (levels > 0) {
-            log.add(now, EventLog.Kind.SYSTEM, "Awans na poziom " + pc.level() + "!");
+            log.add(now, EventLog.Kind.SYSTEM, Messages.get("combat_system.awans_na_poziom") + pc.level() + "!");
             push(new CombatEvent(now, pc.position(), pc.level(), CombatEvent.Kind.LEVEL_UP));
         }
     }
@@ -213,7 +214,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         // cel wybiera tylko gracz (Darek, 23.10): poza zasiegiem po prostu nie atakujemy, bez przelaczania na innego
         if (!inReach(target, ap.range())) return;
         nextPlayerAttackMs = now + ap.intervalMs();
-        if (pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
+        if (pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, Messages.get("combat_system.atakujesz_niewidzialnosc_znika"));
         // jak w Tibii: jeden rzut na krytyk na cios (baza 5% / +10%, przedmioty, zaklecie kowala)
         boolean crit = rollCritical(target.type());
         int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng), crit, target.type());
@@ -308,9 +309,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int spare = Math.min(pc.backpack().countPlain(a.itemId()), items.get(a.itemId()).maxStack());
         if (spare > 0 && pc.backpack().remove(a.itemId(), spare).ok()) {
             pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.AMMO, new ItemStack(a.itemId(), spare));
-            log.add(now, EventLog.Kind.INFO, "Amunicja uzupełniona z plecaka (" + spare + ").");
+            log.add(now, EventLog.Kind.INFO, Messages.get("combat_system.amunicja_uzupelniona_z_plecaka") + spare + ").");
         } else {
-            log.add(now, EventLog.Kind.SYSTEM, "Skończyła się amunicja: " + items.get(a.itemId()).name() + ".");
+            log.add(now, EventLog.Kind.SYSTEM, Messages.get("combat_system.skonczyla_sie_amunicja") + items.get(a.itemId()).name() + ".");
         }
     }
 
@@ -379,10 +380,10 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int amount = pl.fawizja.pixel.item.Forge.rollDust(t.forgeStack(), rng);
         int added = pc.addDust(amount);
         if (added > 0) {
-            log.add(now, EventLog.Kind.LOOT, "Pył kuźni: +" + added + " (" + pc.forgeDust() + "/" + pc.dustLimit() + ").");
+            log.add(now, EventLog.Kind.LOOT, Messages.get("combat_system.pyl_kuzni") + added + " (" + pc.forgeDust() + "/" + pc.dustLimit() + ").");
         } else {
-            log.add(now, EventLog.Kind.INFO, "Nie otrzymano " + amount + " pyłu kuźni - masz już limit " + pc.dustLimit()
-                    + " (podnieś go u kowala).");
+            log.add(now, EventLog.Kind.INFO, Messages.get("combat_system.nie_otrzymano") + amount + Messages.get("combat_system.pylu_kuzni_masz_juz") + pc.dustLimit()
+                    + Messages.get("combat_system.podnies_go_u_kowala"));
         }
         return added;
     }
@@ -430,7 +431,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             }
             String note = staminaNote(pc); // strefa sprzed zuzycia minuty za to zabicie
             exp = pc.stamina().hunt(exp, pc.isPremium(), now);
-            awardExperience(exp, "Pokonano: " + t.name() + (t.isElite() ? " " + t.forgeLabel() : "") + (isBoosted(t) ? ", potwór dnia" : "") + (rested ? ", wypoczęty" : "")
+            awardExperience(exp, Messages.get("server_world.pokonano") + t.name() + (t.isElite() ? " " + t.forgeLabel() : "") + (isBoosted(t) ? Messages.get("combat_system.potwor_dnia") : "") + (rested ? Messages.get("combat_system.wypoczety") : "")
                     + note, now);
         }
         Position corpse = m.position();
@@ -450,14 +451,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                 if (!items.containsKey(g.getKey())) continue;
                 ItemStack gem = new ItemStack(items.byKey(g.getKey()).id(), g.getValue());
                 drop.add(gem);
-                log.add(now, EventLog.Kind.LOOT, "Klejnot w łupie: " + describe(gem) + "!");
+                log.add(now, EventLog.Kind.LOOT, Messages.get("combat_system.klejnot_w_lupie") + describe(gem) + "!");
             }
         }
         List<String> dropped = new ArrayList<>();
         for (ItemStack s : drop) dropped.add(describe(s));
         lootLog.record(now, t.name(), dropped, !rareRolled.isEmpty());
         for (ItemStack r : rareRolled) {
-            log.add(now, EventLog.Kind.LOOT, "Rzadki łup: " + describe(r) + "!");
+            log.add(now, EventLog.Kind.LOOT, Messages.get("combat_system.rzadki_lup") + describe(r) + "!");
             pc.stats().recordRareDrop();
             if (rareDropListener != null) rareDropListener.rareDrop(t, r, now);
         }
@@ -473,9 +474,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
         // cialo zostaje zawsze (wyglad), a w nim lup, ktorego nie zabral autoloot
         ground.addCorpse(corpse, t.key(), left, now);
-        if (!looted.isEmpty()) log.add(now, EventLog.Kind.LOOT, "Łup: " + String.join(", ", looted));
+        if (!looted.isEmpty()) log.add(now, EventLog.Kind.LOOT, Messages.get("combat_system.lup") + String.join(", ", looted));
         if (!left.isEmpty()) {
-            log.add(now, EventLog.Kind.LOOT, "Część łupu została w ciele - przeszukaj je (UŻYJ albo PODNIEŚ obok).");
+            log.add(now, EventLog.Kind.LOOT, Messages.get("combat_system.czesc_lupu_zostala_w"));
         }
         monsters.kill(m, now);
         if (target == m) target = null;
@@ -594,8 +595,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         boolean had = pc.conditions().has(e.type());
         int total = e.rollTotal(rng, m.type().isElite() ? 1.3 : 1.0);
         if (pc.conditions().addTotal(e.type(), total, e.intervalMs(), now, m.type().name()) && !had) {
-            log.add(now, EventLog.Kind.WARNING, e.type().label + " (" + m.type().name() + ")"
-                    + (e.type().cure != null ? " - wylecz czarem " + e.type().cure + "." : "."));
+            log.add(now, EventLog.Kind.WARNING, e.type().label() + " (" + m.type().name() + ")"
+                    + (e.type().cure() != null ? Messages.get("combat_system.wylecz_czarem") + e.type().cure() + "." : "."));
         }
     }
 
@@ -608,7 +609,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dmg = CombatFormulas.conditionOnPlayer(pc, tick.amount(), tick.type().damage);
         int dealt = pc.damage(dmg);
         showShield(now);
-        String source = (tick.source() == null ? "" : tick.source() + ": ") + tick.type().label.toLowerCase(java.util.Locale.ROOT);
+        String source = (tick.source() == null ? "" : tick.source() + ": ") + tick.type().label().toLowerCase(java.util.Locale.ROOT);
         recap.record(source, dealt, now);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 null, CONDITION_EFFECT_PREFIX + tick.type().name()));
@@ -645,7 +646,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                 attacker.type().range() > 1 ? null : attacker.position(), null));
         if (victim.isDead()) {
             if (victim.isSummon()) {
-                log.add(now, EventLog.Kind.WARNING, "Twój sługa " + victim.type().name() + " ginie.");
+                log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.twoj_sluga") + victim.type().name() + " ginie.");
                 monsters.dismiss(victim);
             } else {
                 lastMonsterAttackMs = now;
@@ -688,9 +689,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
         lastDeath = recap.build(killerName, before - pc.experience(), blessed, now);
-        log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killerName + "). Strata: "
+        log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zginales") + killerName + Messages.get("combat_system.strata")
                 + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed)
-                + ". Odrodzenie w świątyni.");
+                + Messages.get("combat_system.odrodzenie_w_swiatyni"));
     }
 
     /**
@@ -726,10 +727,10 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
-        lastDeath = recap.build(killer + " (gracz)", before - pc.experience(), blessed, now);
-        log.add(now, EventLog.Kind.WARNING, "Zginąłeś z ręki gracza " + killer + ". Strata: "
-                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + (dropped > 0 ? ", plecak i ekwipunek zostały na ziemi" : "")
-                + ". Odrodzenie w świątyni.");
+        lastDeath = recap.build(killer + Messages.get("combat_system.gracz"), before - pc.experience(), blessed, now);
+        log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zginales_z_reki_gracza") + killer + Messages.get("combat_system.strata_2")
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + (dropped > 0 ? Messages.get("combat_system.plecak_i_ekwipunek_zostaly") : "")
+                + Messages.get("combat_system.odrodzenie_w_swiatyni"));
         return dropped;
     }
 

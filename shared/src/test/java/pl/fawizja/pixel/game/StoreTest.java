@@ -95,13 +95,13 @@ class StoreTest {
             // najpierw trzy zakladki, wybrana oznaczona
             for (int i = 0; i < Store.Tab.values().length; i++) {
                 Store.Tab t = Store.Tab.values()[i];
-                assertEquals(t.label, rows.get(i)[0]);
+                assertEquals(t.label(), rows.get(i)[0]);
                 assertEquals(Store.TAB_ACTION + t.key, rows.get(i)[3]);
                 assertEquals(t == tab ? "tab_on" : "tab", rows.get(i)[4]);
             }
             assertEquals(tab, Store.Tab.byKey(tab.key));
         }
-        assertEquals(List.of("Usługi", "Premium", "Outfity"), java.util.Arrays.stream(Store.Tab.values()).map(t -> t.label).toList());
+        assertEquals(List.of("Usługi", "Premium", "Outfity"), java.util.Arrays.stream(Store.Tab.values()).map(t -> t.label()).toList());
         assertEquals(Store.Tab.SERVICES, Store.Tab.byKey("cos"));
 
         List<String[]> prem = Store.rows(s, Store.Tab.PREMIUM);

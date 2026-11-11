@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.vocation;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Harmonia mnicha jak w Tibii (liczby z serwera Canary, src/creatures/players/player.cpp):
  * <ul>
@@ -33,8 +34,10 @@ public final class Harmony {
         SUSTAIN("virtue_of_sustain", "Cnota wytrwałości", "leczenie czarami mnicha +35% (w spokoju +70%)");
 
         public final String spellKey;
-        public final String label;
-        public final String effect;
+        private final String label;
+        public String label() { return Messages.tr(label); }
+        private final String effect;
+        public String effect() { return Messages.tr(effect); }
 
         Virtue(String spellKey, String label, String effect) {
             this.spellKey = spellKey;

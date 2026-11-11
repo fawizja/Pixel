@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.movement;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Warianty sterowania ruchem na ekranie dotykowym (2026-11-05, wlasciciel: "joystick za czuly" - kilka wariantow
  * do wyboru w ustawieniach). Klawiatura dziala zawsze, niezaleznie od wariantu.
@@ -17,9 +18,11 @@ public enum ControlScheme {
     public static final ControlScheme DEFAULT = DPAD;
 
     public final String key;
-    public final String label;
+    private final String label;
+    public String label() { return Messages.tr(label); }
     /** Krotsza nazwa do waskich przyciskow. */
-    public final String shortLabel;
+    private final String shortLabel;
+    public String shortLabel() { return Messages.tr(shortLabel); }
 
     ControlScheme(String key, String label, String shortLabel) {
         this.key = key;

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -128,33 +129,33 @@ public final class BossQuestRuntime {
         Arena a = arenas.get(q.id());
         if (a == null) return false;
         if (puller.completed(q.id())) {
-            puller.message(EventLog.Kind.WARNING, "Dźwignia ani drgnie. Ta postać już ukończyła wyprawę " + q.name()
-                    + " - każdą wyprawę na bossa można przejść tylko raz.", nowMs);
+            puller.message(EventLog.Kind.WARNING, Messages.get("boss_quest_runtime.dzwignia_ani_drgnie_ta") + q.name()
+                    + Messages.get("boss_quest_runtime.kazda_wyprawe_na_bossa"), nowMs);
             return false;
         }
         if (a.phase != Phase.IDLE) {
             puller.message(EventLog.Kind.WARNING, a.phase == Phase.FIGHT
-                    ? "Dźwignia jest zablokowana - na arenie trwa walka innej drużyny. Spróbuj później."
-                    : "Dźwignia jest zablokowana - drużyna jeszcze nie opuściła areny po walce.", nowMs);
+                    ? Messages.get("boss_quest_runtime.dzwignia_jest_zablokowana_na")
+                    : Messages.get("boss_quest_runtime.dzwignia_jest_zablokowana_druz"), nowMs);
             return false;
         }
         List<Hero> standing = onSquares(q, everyone);
         int missing = BossQuest.PARTY - standing.size();
         if (missing > 0) {
-            puller.message(EventLog.Kind.WARNING, "Dźwignia ani drgnie. Na oznaczonych polach stoi " + standing.size()
-                    + " z " + BossQuest.PARTY + " postaci - brakuje jeszcze " + missing + ".", nowMs);
+            puller.message(EventLog.Kind.WARNING, Messages.get("boss_quest_runtime.dzwignia_ani_drgnie_na") + standing.size()
+                    + Messages.get("common.z") + BossQuest.PARTY + Messages.get("boss_quest_runtime.postaci_brakuje_jeszcze") + missing + ".", nowMs);
             return false;
         }
         List<String> done = new ArrayList<>();
         for (Hero h : standing) if (h.completed(q.id())) done.add(h.id());
         if (!done.isEmpty()) {
-            puller.message(EventLog.Kind.WARNING, "Dźwignia ani drgnie. Wyprawę " + q.name() + " już ukończył(a): "
-                    + String.join(", ", done) + ". Na polach mogą stanąć tylko postacie, które jej jeszcze nie przeszły.", nowMs);
+            puller.message(EventLog.Kind.WARNING, Messages.get("boss_quest_runtime.dzwignia_ani_drgnie_wyprawe") + q.name() + Messages.get("boss_quest_runtime.juz_ukonczyl_a")
+                    + String.join(", ", done) + Messages.get("boss_quest_runtime.na_polach_moga_stanac"), nowMs);
             return false;
         }
         List<Monster> boss = monsters.spawnEvent(q.bossKey(), q.bossSpawn(), 1, 1, nowMs);
         if (boss.isEmpty()) {
-            puller.message(EventLog.Kind.WARNING, "Dźwignia zgrzyta, ale arena jest zablokowana. Spróbuj za chwilę.", nowMs);
+            puller.message(EventLog.Kind.WARNING, Messages.get("boss_quest_runtime.dzwignia_zgrzyta_ale_arena"), nowMs);
             return false;
         }
         a.phase = Phase.FIGHT;
@@ -169,11 +170,11 @@ public final class BossQuestRuntime {
         }
         String who = String.join(", ", a.party);
         for (Hero h : standing) {
-            h.message(EventLog.Kind.SYSTEM, (h.id().equals(puller.id()) ? "Przeciągasz dźwignię" : puller.id() + " przeciąga dźwignię")
-                    + ". Arena " + q.name() + " zamyka się za wami - " + boss.get(0).type().name() + " się budzi! Drużyna: " + who + ".", nowMs);
+            h.message(EventLog.Kind.SYSTEM, (h.id().equals(puller.id()) ? Messages.get("boss_quest_runtime.przeciagasz_dzwignie") : puller.id() + Messages.get("boss_quest_runtime.przeciaga_dzwignie"))
+                    + Messages.get("boss_quest_runtime.arena") + q.name() + Messages.get("boss_quest_runtime.zamyka_sie_za_wami") + boss.get(0).type().name() + Messages.get("boss_quest_runtime.sie_budzi_druzyna") + who + ".", nowMs);
         }
         if (!a.party.contains(puller.id())) {
-            puller.message(EventLog.Kind.SYSTEM, "Przeciągasz dźwignię - drużyna (" + who + ") trafia na arenę.", nowMs);
+            puller.message(EventLog.Kind.SYSTEM, Messages.get("boss_quest_runtime.przeciagasz_dzwignie_druzyna") + who + Messages.get("boss_quest_runtime.trafia_na_arene"), nowMs);
         }
         return true;
     }
@@ -196,7 +197,7 @@ public final class BossQuestRuntime {
             if (out.size() >= n) break;
             boolean taken = false;
             for (Hero h : real) if (!h.dead() && s.stand().equals(h.position())) taken = true;
-            if (!taken) out.add(new Ghost("Duch " + (out.size() + 1), s.stand()));
+            if (!taken) out.add(new Ghost(Messages.get("boss_quest_runtime.duch") + (out.size() + 1), s.stand()));
         }
         return out;
     }
@@ -252,10 +253,10 @@ public final class BossQuestRuntime {
             Map<String, List<ItemStack>> loot = LootRules.rollBossLootPerPlayer(boss, items, ids, rng);
             for (Hero h : winners) {
                 h.markCompleted(q.id());
-                h.message(EventLog.Kind.SYSTEM, "Wyprawa " + q.name() + " ukończona! W rogu areny otworzył się portal"
-                        + " z powrotem do przedsionka.", nowMs);
+                h.message(EventLog.Kind.SYSTEM, Messages.get("boss_quest_runtime.wyprawa") + q.name() + Messages.get("boss_quest_runtime.ukonczona_w_rogu_areny")
+                        + Messages.get("boss_quest_runtime.z_powrotem_do_przedsionka"), nowMs);
                 if (h.noStamina()) {
-                    h.message(EventLog.Kind.LOOT, "Łup z bossa " + boss.name() + ": brak staminy - bez łupu.", nowMs);
+                    h.message(EventLog.Kind.LOOT, Messages.get("boss_quest_runtime.lup_z_bossa") + boss.name() + Messages.get("boss_quest_runtime.brak_staminy_bez_lupu"), nowMs);
                 } else {
                     give(h, boss, loot.get(h.id()), nowMs);
                 }
@@ -276,25 +277,25 @@ public final class BossQuestRuntime {
             ItemType t = items.get(s.itemId());
             String d = (s.count() > 1 ? s.count() + "x " : "") + t.name();
             if (LootRules.isBossOnly(t)) {
-                d = "*" + d + "* (tylko z bossa!)";   // czcionka gry nie ma znakow << >>
+                d = "*" + d + Messages.get("boss_quest_runtime.tylko_z_bossa");   // czcionka gry nie ma znakow << >>
                 rare.add(t.name());
             }
             if (h.toBackpack(s)) {
                 parts.add(d);
             } else if (h.toDepot(s)) {
-                parts.add(d + " (do depozytu - plecak pełny)");
+                parts.add(d + Messages.get("boss_quest_runtime.do_depozytu_plecak_pelny"));
             } else {
                 h.drop(s, nowMs);
-                parts.add(d + " (na ziemi - brak miejsca)");
+                parts.add(d + Messages.get("boss_quest_runtime.na_ziemi_brak_miejsca"));
             }
         }
         if (parts.isEmpty()) {
-            h.message(EventLog.Kind.LOOT, "Łup z bossa " + boss.name() + ": tym razem nic dla ciebie - tylko chwała.", nowMs);
+            h.message(EventLog.Kind.LOOT, Messages.get("boss_quest_runtime.lup_z_bossa") + boss.name() + Messages.get("boss_quest_runtime.tym_razem_nic_dla"), nowMs);
         } else {
-            h.message(EventLog.Kind.LOOT, "Twój łup z bossa " + boss.name() + ": " + String.join(", ", parts) + ".", nowMs);
+            h.message(EventLog.Kind.LOOT, Messages.get("boss_quest_runtime.twoj_lup_z_bossa") + boss.name() + ": " + String.join(", ", parts) + ".", nowMs);
         }
         if (!rare.isEmpty()) {
-            h.message(EventLog.Kind.LOOT, "Rzadki łup tylko z bossa: *" + String.join("*, *", rare) + "*!", nowMs);
+            h.message(EventLog.Kind.LOOT, Messages.get("boss_quest_runtime.rzadki_lup_tylko_z") + String.join("*, *", rare) + "*!", nowMs);
         }
     }
 
@@ -320,8 +321,8 @@ public final class BossQuestRuntime {
             for (Hero h : inside) {
                 if (timeout || h.position().equals(q.exitPortal())) {
                     h.teleport(q.exitTarget(), nowMs);
-                    h.message(EventLog.Kind.INFO, timeout ? "Portal areny gaśnie i wynosi cię do przedsionka."
-                            : "Portal przenosi cię z powrotem do przedsionka.", nowMs);
+                    h.message(EventLog.Kind.INFO, timeout ? Messages.get("boss_quest_runtime.portal_areny_gasnie_i")
+                            : Messages.get("boss_quest_runtime.portal_przenosi_cie_z"), nowMs);
                 }
             }
             boolean anyone = false;
@@ -337,8 +338,8 @@ public final class BossQuestRuntime {
         if (!bossGone) monsters.clearEvent(List.of(a.bossId));
         for (Hero h : everyone) {
             if (!a.party.contains(h.id())) continue;
-            h.message(EventLog.Kind.WARNING, "Arena " + a.quest.name() + " się zamyka - drużyna poległa albo opuściła walkę."
-                    + " Dźwignia znów działa dla postaci, które nie ukończyły wyprawy.", nowMs);
+            h.message(EventLog.Kind.WARNING, Messages.get("boss_quest_runtime.arena_2") + a.quest.name() + Messages.get("boss_quest_runtime.sie_zamyka_druzyna_polegla")
+                    + Messages.get("boss_quest_runtime.dzwignia_znow_dziala_dla"), nowMs);
         }
         a.phase = Phase.IDLE;
         a.bossId = -1;

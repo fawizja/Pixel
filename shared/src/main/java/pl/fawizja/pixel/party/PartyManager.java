@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.party;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,14 +23,16 @@ public final class PartyManager {
         SELF("Nie możesz zaprosić samego siebie."),
         NOT_LEADER("Tylko lider drużyny może zapraszać."),
         TARGET_IN_PARTY("Ten gracz jest już w drużynie."),
-        FULL("Drużyna jest pełna (maks. " + MAX_MEMBERS + ")."),
+        FULL("Drużyna jest pełna (maks. {0})."),
         NO_INVITE("Nie masz zaproszenia od tego gracza (albo wygasło)."),
         ALREADY_IN_PARTY("Najpierw opuść obecną drużynę (/opuść)."),
         NOT_IN_PARTY("Nie jesteś w drużynie."),
         NOT_MEMBER("Tego gracza nie ma w twojej drużynie."),
         ONLINE_ONLY("Drużyna działa w grze online (z innymi graczami).");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message).replace("{0}", String.valueOf(MAX_MEMBERS)); }
 
         Result(String message) { this.message = message; }
     }

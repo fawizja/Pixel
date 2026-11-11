@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.market;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -32,14 +33,20 @@ public final class Market {
 
     public enum Result {
         OK(null),
-        TOO_MANY("Masz już " + MAX_PER_SELLER + " ofert na rynku. Wycofaj którąś albo poczekaj na sprzedaż."),
+        TOO_MANY("Masz już {0} ofert na rynku. Wycofaj którąś albo poczekaj na sprzedaż."),
         FULL("Rynek jest pełny, spróbuj później."),
-        BAD_PRICE("Cena musi wynosić od 1 do " + String.format("%,d", MAX_PRICE) + " gp."),
+        BAD_PRICE("Cena musi wynosić od 1 do {0} gp."),
         NOT_FOUND("Tej oferty już nie ma."),
         OWN("To Twoja oferta - możesz ją wycofać."),
         NOT_OWNER("To nie jest Twoja oferta.");
 
-        public final String message;
+        private final String message;
+
+        public String message() {
+            String t = Messages.tr(message);
+            return this == TOO_MANY ? t.replace("{0}", String.valueOf(MAX_PER_SELLER))
+                    : this == BAD_PRICE ? t.replace("{0}", Messages.number(MAX_PRICE)) : t;
+        }
 
         Result(String message) { this.message = message; }
     }

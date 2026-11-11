@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,30 +33,30 @@ public final class Credits {
         boolean first = true;
         for (String name : names.split(", ")) {
             if (line.length() > 0 && line.length() + name.length() > 48) {
-                rows.add(new String[] {first ? "Autorzy" : "", line.toString()});
+                rows.add(new String[] {first ? Messages.get("credits.autorzy") : "", line.toString()});
                 first = false;
                 line.setLength(0);
             }
             if (line.length() > 0) line.append(", ");
             line.append(name);
         }
-        if (line.length() > 0) rows.add(new String[] {first ? "Autorzy" : "", line.toString()});
+        if (line.length() > 0) rows.add(new String[] {first ? Messages.get("credits.autorzy") : "", line.toString()});
     }
 
     public static List<String[]> rows() {
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"Grafiki", PACK + " (" + LICENSE + ")"});
-        rows.add(new String[] {"Źródło", URL});
-        rows.add(new String[] {"Zmiany", "wycięte, przycięte i pokolorowane do gry Pixel"});
+        rows.add(new String[] {Messages.get("credits.grafiki"), PACK + " (" + LICENSE + ")"});
+        rows.add(new String[] {Messages.get("credits.zrodlo"), URL});
+        rows.add(new String[] {Messages.get("credits.zmiany"), Messages.get("credits.wyciete_przyciete_i_pokolorowa")});
         authors(rows, AUTHORS);
-        rows.add(new String[] {"Przedmioty", HINAS});
-        rows.add(new String[] {"", HINAS_NOTE});
-        rows.add(new String[] {"", "zestawy i ich bronie, księgi, amulety"});
-        rows.add(new String[] {"Interfejs", UI_PACK + " (" + UI_LICENSE + "): ramki okien, pola, przyciski"});
-        rows.add(new String[] {"Źródło", UI_URL});
-        rows.add(new String[] {"Wygląd nowy", "Pixel RPG UI Kit - Zidane42 (itch.io)"});
-        rows.add(new String[] {"", "paski, okna, przyciski, pola; kupiony do gry"});
-        rows.add(new String[] {"Reszta", "grafiki rysowane przez kod gry"});
+        rows.add(new String[] {Messages.get("credits.przedmioty"), Messages.tr(HINAS)});
+        rows.add(new String[] {"", Messages.tr(HINAS_NOTE)});
+        rows.add(new String[] {"", Messages.get("credits.zestawy_i_ich_bronie")});
+        rows.add(new String[] {Messages.get("credits.interfejs"), UI_PACK + " (" + UI_LICENSE + Messages.get("credits.ramki_okien_pola_przyciski")});
+        rows.add(new String[] {Messages.get("credits.zrodlo"), UI_URL});
+        rows.add(new String[] {Messages.get("credits.wyglad_nowy"), "Pixel RPG UI Kit - Zidane42 (itch.io)"});
+        rows.add(new String[] {"", Messages.get("credits.paski_okna_przyciski_pola")});
+        rows.add(new String[] {Messages.get("credits.reszta"), Messages.get("credits.grafiki_rysowane_przez_kod")});
         return rows;
     }
 }

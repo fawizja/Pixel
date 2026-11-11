@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.quest;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.character.PlayerCharacter;
@@ -23,19 +24,19 @@ public final class QuestTracker {
                 if (out.size() >= MAX_LINES - 1) break;
                 QuestType q = quests.registry().get(key);
                 if (q == null) continue;
-                out.add(quests.ready(pc, q) ? "Zadanie: " + q.name() + " - gotowe, wróć po nagrodę"
-                        : "Zadanie: " + q.name() + " " + quests.progress(pc, q) + "/" + q.amount());
+                out.add(quests.ready(pc, q) ? Messages.get("quest_tracker.zadanie") + q.name() + Messages.get("quest_tracker.gotowe_wroc_po_nagrode")
+                        : Messages.get("quest_tracker.zadanie") + q.name() + " " + quests.progress(pc, q) + "/" + q.amount());
             }
         }
         DailyTask d = pc.daily();
         if (d.activeOn(today) && !d.claimed() && out.size() < MAX_LINES) {
-            out.add(d.doneOn(today) ? "Zadanie dnia: gotowe, wróć do przewodnika"
-                    : "Zadanie dnia: " + dailyName + " " + d.progress() + "/" + d.target());
+            out.add(d.doneOn(today) ? Messages.get("quest_tracker.zadanie_dnia_gotowe_wroc")
+                    : Messages.get("hud.zadanie_dnia_2") + dailyName + " " + d.progress() + "/" + d.target());
         }
         HuntTask h = pc.hunt();
         if (h.active() && out.size() < MAX_LINES) {
-            out.add(h.done() ? "Zlecenie łowcy: gotowe, wróć do przewodnika"
-                    : "Zlecenie: " + huntName + " " + h.progress() + "/" + h.target());
+            out.add(h.done() ? Messages.get("quest_tracker.zlecenie_lowcy_gotowe_wroc")
+                    : Messages.get("hud.zlecenie") + huntName + " " + h.progress() + "/" + h.target());
         }
         return out;
     }

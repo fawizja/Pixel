@@ -1,5 +1,7 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,27 +18,27 @@ public final class BlessingStatus {
     /** Krotki opis do okna postaci: "3 z 7 (-24% straty)", "Poszukiwacza (-40%)" albo "brak". */
     public static String summary(PlayerCharacter pc) {
         int n = pc.blessingCount();
-        if (n == 0) return "brak";
-        String base = pc.adventurerBlessing() && pc.blessingMask() == 0 ? "Poszukiwacza" : n + " z 7";
-        return base + " (-" + reductionPercent(pc) + "% straty)";
+        if (n == 0) return Messages.get("bless.none");
+        String base = pc.adventurerBlessing() && pc.blessingMask() == 0 ? Messages.get("bless.adv_short") : Messages.get("bless.n_of_7", n);
+        return base + Messages.get("bless.summary_loss", reductionPercent(pc));
     }
 
     /** Wiersze okna {etykieta, stan}. */
     public static List<String[]> rows(PlayerCharacter pc) {
         List<String[]> out = new ArrayList<>();
-        out.add(new String[] {"Strata po śmierci", pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level())});
+        out.add(new String[] {Messages.get("bless.loss_title"), pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level())});
         if (pc.adventurerBlessing()) {
-            out.add(new String[] {"Poszukiwacza", "do poziomu " + Blessing.ADVENTURER_LEVEL + " za darmo, nie znika"});
+            out.add(new String[] {Messages.get("bless.adventurer"), Messages.get("bless.adv_free", Blessing.ADVENTURER_LEVEL)});
         }
         for (Blessing b : Blessing.values()) {
             String state;
-            if (pc.boughtBlessing(b)) state = "masz";
-            else if (pc.hasBlessing(b)) state = "z Poszukiwacza";
-            else state = "brak";
+            if (pc.boughtBlessing(b)) state = Messages.get("bless.have");
+            else if (pc.hasBlessing(b)) state = Messages.get("bless.from_adv");
+            else state = Messages.get("bless.none");
             out.add(new String[] {b.label(), state + (b.kind() == Blessing.Kind.PVP ? " (PvP)" : "")});
         }
-        out.add(new String[] {"Zrządzenie losu", "chroni inne przy śmierci z ręki gracza"});
-        out.add(new String[] {"Kupno", "kapłan w świątyni; górskie tylko w " + Blessing.MOUNTAIN_TOWN});
+        out.add(new String[] {Messages.get("bless.n_twist"), Messages.get("bless.twist_desc")});
+        out.add(new String[] {Messages.get("bless.buy_label"), Messages.get("bless.buy_desc", Blessing.MOUNTAIN_TOWN)});
         return out;
     }
 }

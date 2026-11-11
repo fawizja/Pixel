@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -169,9 +170,9 @@ public final class CharacterFactory {
                     new Entry("fishing_rod", 1), new Entry("worm", 10), new Entry("bread", 5));
             switch (v) {
                 case PALADIN: return concat(common, new Entry("spear", 20), new Entry("great_spirit_potion", 30),
-                        new Entry("strong_mana_potion", 10));
+                        new Entry(Messages.get("character_factory.strong_mana_potion"), 10));
                 case DRUID:
-                case SORCERER: return concat(common, new Entry("health_potion", 10), new Entry("ultimate_mana_potion", 30),
+                case SORCERER: return concat(common, new Entry("health_potion", 10), new Entry(Messages.get("character_factory.ultimate_mana_potion"), 30),
                         new Entry("blank_rune", 10), new Entry("ultimate_healing_rune", 5), new Entry("great_fireball_rune", 20));
                 case MONK: return concat(common, new Entry("ultimate_health_potion", 30), new Entry("mana_potion", 10));
                 case KNIGHT: return concat(common, new Entry("ultimate_health_potion", 40), new Entry("mana_potion", 10));

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Umiejetnosci postaci w kolejnosci okna Skills z Tibii: piesci, maczuga, miecz, topor, dystans, tarcza,
  * wedkarstwo, a na koncu magia. Kolejnosc stalych = kolejnosc wierszy w oknie umiejetnosci.
@@ -13,7 +14,7 @@ public enum Skill {
     Skill(String label) { this.label = label; }
 
     /** Nazwa w grze. */
-    public String label() { return label; }
+    public String label() { return Messages.tr(label); }
 
     /** Umiejetnosci walki wrecz bronia (miecz, topor, maczuga) - rycerz zaczyna z kazda na tym samym poziomie. */
     public boolean isMeleeWeapon() { return this == SWORD || this == AXE || this == CLUB; }

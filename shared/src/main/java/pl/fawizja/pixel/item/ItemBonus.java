@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -100,15 +101,15 @@ public final class ItemBonus {
         if (!prot.isEmpty()) parts.add("ochrona " + prot);
         if (critChance > 0 || critDamage > 0) {
             List<String> c = new ArrayList<>();
-            if (critChance > 0) c.add("+" + number(critChance) + "% szansy");
-            if (critDamage > 0) c.add("+" + number(critDamage) + "% obrażeń");
+            if (critChance > 0) c.add("+" + number(critChance) + Messages.get("charm.szansy"));
+            if (critDamage > 0) c.add("+" + number(critDamage) + Messages.get("critical_hit.obrazen"));
             parts.add("krytyk " + String.join(", ", c));
         }
         if (lifeLeech > 0 || manaLeech > 0) {
             List<String> l = new ArrayList<>();
-            if (lifeLeech > 0) l.add("życia " + number(lifeLeech) + "%");
+            if (lifeLeech > 0) l.add(Messages.get("item_bonus.zycia") + number(lifeLeech) + "%");
             if (manaLeech > 0) l.add("many " + number(manaLeech) + "%");
-            parts.add("kradzież " + String.join(", ", l));
+            parts.add(Messages.get("item_bonus.kradziez") + String.join(", ", l));
         }
         return String.join("; ", parts);
     }

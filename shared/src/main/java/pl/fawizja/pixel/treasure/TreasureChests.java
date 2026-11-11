@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.treasure;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -98,7 +99,7 @@ public final class TreasureChests {
             case 1: return new Chest(id, p, gold, "health_potion", 5);
             case 2: return new Chest(id, p, gold, "mana_potion", 8);
             case 3: return new Chest(id, p, gold, "great_health_potion", 4);
-            case 4: return new Chest(id, p, gold, "great_mana_potion", 6);
+            case 4: return new Chest(id, p, gold, Messages.get("game_session.great_mana_potion"), 6);
             default: return new Chest(id, p, gold, "supreme_health_potion", 3);
         }
     }

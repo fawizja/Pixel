@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.screen;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -25,6 +26,7 @@ public final class MenuScreen extends ScreenAdapter {
     private final Rectangle online = new Rectangle();
     private final String message;
     private final String saveSummary;
+    private final pl.fawizja.pixel.client.ui.LanguageBar languageBar = new pl.fawizja.pixel.client.ui.LanguageBar();
 
     public MenuScreen(PixelGame game, String message) {
         this.game = game;
@@ -38,7 +40,9 @@ public final class MenuScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int sx, int sy, int pointer, int button) {
                 Vector2 p = viewport.unproject(tmp.set(sx, sy));
-                if (local.contains(p)) game.playLocal();
+                pl.fawizja.pixel.i18n.Language picked = languageBar.hit(p);
+                if (picked != null) game.setLanguage(picked);
+                else if (local.contains(p)) game.playLocal();
                 else if (online.contains(p)) game.setScreen(new LoginScreen(game));
                 return true;
             }
@@ -62,6 +66,7 @@ public final class MenuScreen extends ScreenAdapter {
         float bw = Math.min(400, w - 32), bh = 54;
         local.set((w - bw) / 2f, h / 2f + 6, bw, bh);
         online.set((w - bw) / 2f, h / 2f - 6 - bh, bw, bh);
+        languageBar.layout(w / 2f, h - 68, Math.min(400, w - 32));
     }
 
     @Override
@@ -76,17 +81,19 @@ public final class MenuScreen extends ScreenAdapter {
         shapes.rect(local.x, local.y, local.width, local.height);
         shapes.setColor(0.16f, 0.24f, 0.22f, 1f);
         shapes.rect(online.x, online.y, online.width, online.height);
+        languageBar.drawShapes(shapes, pl.fawizja.pixel.i18n.Messages.language());
         shapes.end();
 
         SpriteBatch batch = game.batch();
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
         centered(batch, "PIXEL", w / 2f, h - 30, Color.GOLD);
-        centered(batch, "1. Graj lokalnie", w / 2f, local.y + local.height - 18, Color.WHITE);
-        centered(batch, saveSummary != null ? "Kontynuuj: " + saveSummary : "Nowa postać na tym urządzeniu",
+        languageBar.drawText(batch, game.font(), pl.fawizja.pixel.i18n.Messages.language());
+        centered(batch, Messages.get("menu_screen.1_graj_lokalnie"), w / 2f, local.y + local.height - 18, Color.WHITE);
+        centered(batch, saveSummary != null ? Messages.get("menu_screen.kontynuuj") + saveSummary : Messages.get("menu_screen.nowa_postac_na_tym"),
                 w / 2f, local.y + 16, Color.LIGHT_GRAY);
-        centered(batch, "2. Graj online", w / 2f, online.y + online.height - 18, Color.WHITE);
-        centered(batch, "Wspólny świat z innymi graczami (serwer, imię, hasło)", w / 2f, online.y + 16, Color.LIGHT_GRAY);
+        centered(batch, Messages.get("menu_screen.2_graj_online"), w / 2f, online.y + online.height - 18, Color.WHITE);
+        centered(batch, Messages.get("menu_screen.wspolny_swiat_z_innymi"), w / 2f, online.y + 16, Color.LIGHT_GRAY);
         if (message != null) centered(batch, message, w / 2f, online.y - 24, Color.SALMON);
         batch.end();
     }

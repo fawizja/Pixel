@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.inventory;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,8 +34,8 @@ public final class ItemSearch {
             if (out.size() >= MAX_ROWS) break;
             int[] c = e.getValue();
             List<String> where = new ArrayList<>();
-            if (c[0] > 0) where.add("plecak " + c[0]);
-            if (c[1] > 0) where.add("założone");
+            if (c[0] > 0) where.add(Messages.get("item_search.plecak") + c[0]);
+            if (c[1] > 0) where.add(Messages.get("item_search.zalozone"));
             if (c[2] > 0) where.add("depozyt " + c[2]);
             out.add(new String[] {items.get(e.getKey()).name(), String.join(", ", where)});
         }

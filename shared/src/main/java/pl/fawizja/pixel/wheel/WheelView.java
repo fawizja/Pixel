@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -18,7 +19,7 @@ public final class WheelView {
 
     private WheelView() {}
 
-    public static String quadrantTitle(WheelDomain d) { return TITLE + ": " + d.label.toLowerCase(java.util.Locale.ROOT) + " ćwiartka"; }
+    public static String quadrantTitle(WheelDomain d) { return TITLE + ": " + d.label().toLowerCase(java.util.Locale.ROOT) + Messages.get("wheel_windows.cwiartka"); }
 
     public static String sliceTitle(WheelSlice s) { return TITLE + ": " + s.label(); }
 
@@ -26,15 +27,15 @@ public final class WheelView {
     public static String revelationProgress(int points) {
         int st = WheelDomain.stage(points);
         int next = WheelDomain.nextStagePoints(points);
-        if (st == 0) return points + "/" + next + " do 1. etapu objawienia";
-        if (next <= 0) return "objawienie: etap 3 (" + points + " pkt, maks.)";
-        return "objawienie: etap " + st + " (" + points + "/" + next + " do etapu " + (st + 1) + ")";
+        if (st == 0) return points + "/" + next + Messages.get("wheel_view.do_1_etapu_objawienia");
+        if (next <= 0) return Messages.get("wheel_view.objawienie_etap_3") + points + Messages.get("wheel_view.pkt_maks");
+        return Messages.get("wheel_view.objawienie_etap") + st + " (" + points + "/" + next + Messages.get("wheel_view.do_etapu") + (st + 1) + ")";
     }
 
     private static String head(PlayerCharacter pc) {
         int av = pc.wheelPoints();
         int used = pc.wheel().spent();
-        return String.format("%,d użyte z %,d, wolne: %,d", used, av, Math.max(0, av - used));
+        return String.format(Messages.get("wheel_view.d_uzyte_z_d"), used, av, Math.max(0, av - used));
     }
 
     /** Okno glowne: punkty, miejsce, 4 cwiartki (kafle), premie, zestawy, reset. */
@@ -45,27 +46,27 @@ public final class WheelView {
         List<String[]> rows = new ArrayList<>();
         boolean eligible = pc.wheelPoints() > 0;
         // swiatynia jako stan wiersza punktow (okno miesci 9 wierszy obok rysunku kola)
-        String temple = inTemple ? "w świątyni" : "zmiany tylko w świątyni";
+        String temple = inTemple ? Messages.get("wheel_view.w_swiatyni") : Messages.get("wheel_view.zmiany_tylko_w_swiatyni");
         if (!eligible) {
-            rows.add(new String[] {"Niedostępne", "wymaga promocji, konta premium i poziomu " + DestinyWheel.MIN_LEVEL
-                    + " (1 punkt za każdy poziom od " + DestinyWheel.MIN_LEVEL + ")", "", "ach:none"});
+            rows.add(new String[] {Messages.get("wheel_view.niedostepne"), Messages.get("wheel_view.wymaga_promocji_konta_premium") + DestinyWheel.MIN_LEVEL
+                    + Messages.get("wheel_view.1_punkt_za_kazdy") + DestinyWheel.MIN_LEVEL + ")", "", "ach:none"});
         } else {
-            rows.add(new String[] {"Punkty promocji", head(pc), temple, "ach:none"});
+            rows.add(new String[] {Messages.get("wheel_view.punkty_promocji"), head(pc), temple, "ach:none"});
         }
         Vocation v = pc.vocation();
         for (WheelDomain d : WheelDomain.values()) {
             int pts = pc.wheel().domainPoints(d);
             WheelRevelation r = WheelRevelation.of(d, v);
             int bonus = pc.wheelBonus().gems().revelation(d);
-            rows.add(new String[] {d.label + " ćwiartka: " + pts + " pkt" + (bonus > 0 ? " +" + bonus : ""), r.label + " - "
+            rows.add(new String[] {d.label() + Messages.get("wheel_view.cwiartka") + pts + " pkt" + (bonus > 0 ? " +" + bonus : ""), r.label() + " - "
                     + revelationProgress(pts + bonus), "", "wheel:q:" + d.code});
         }
         String av = avatarLine(pc);
-        if (av != null) rows.add(new String[] {"Awatar", av, "", "ach:none"});
-        rows.add(new String[] {"Aktywne premie", "oddanie, przekonanie, objawienia i klejnoty", "", "wheel:perks"});
+        if (av != null) rows.add(new String[] {Messages.get("wheel_view.awatar"), av, "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.aktywne_premie"), Messages.get("wheel_view.oddanie_przekonanie_objawienia"), "", "wheel:perks"});
         GemView.overviewRows(rows, pc, have);
-        rows.add(new String[] {"Zestawy", DestinyWheel.PRESETS + " zapisane ustawienia koła", "", "wheel:presets"});
-        rows.add(new String[] {"Wyczyść koło", "wszystkie punkty wracają do puli (bez opłaty)", "", "wheel:resetask",
+        rows.add(new String[] {Messages.get("wheel_panel.zestawy"), DestinyWheel.PRESETS + Messages.get("wheel_view.zapisane_ustawienia_kola"), "", "wheel:presets"});
+        rows.add(new String[] {Messages.get("wheel_view.wyczysc_kolo"), Messages.get("wheel_view.wszystkie_punkty_wracaja_do"), "", "wheel:resetask",
                 pc.wheel().isEmpty() ? "off" : ""});
         return rows;
     }
@@ -74,23 +75,23 @@ public final class WheelView {
     public static String requirementsMessage(PlayerCharacter pc) {
         if (pc.wheelPoints() > 0) return null;
         List<String> miss = new ArrayList<>();
-        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add("poziomu " + DestinyWheel.MIN_LEVEL + " (masz " + pc.level() + ")");
+        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add(Messages.get("wheel_view.poziomu") + DestinyWheel.MIN_LEVEL + Messages.get("game_session.masz") + pc.level() + ")");
         if (!pc.isPromoted()) miss.add("promocji");
-        if (!pc.isPremium()) miss.add("konta premium");
+        if (!pc.isPremium()) miss.add(Messages.get("wheel_view.konta_premium"));
         return TITLE + " wymaga " + String.join(", ", miss) + ".";
     }
 
     /** Wiersze wymagan nieaktywnego kola: poziom, promocja, premium (stan: spelnione / brak). */
     public static List<String[]> requirements(PlayerCharacter pc) {
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"Koło nieaktywne", "punkty promocji: 1 za każdy poziom od " + DestinyWheel.MIN_LEVEL
-                + " (z promocją i kontem premium)", "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_panel.kolo_nieaktywne"), Messages.get("wheel_view.punkty_promocji_1_za") + DestinyWheel.MIN_LEVEL
+                + Messages.get("wheel_view.z_promocja_i_kontem"), "", "ach:none"});
         boolean lv = pc.level() >= DestinyWheel.MIN_LEVEL;
-        rows.add(new String[] {"Poziom " + DestinyWheel.MIN_LEVEL, "masz poziom " + pc.level(), lv ? "spełnione" : "brak", "ach:none"});
-        rows.add(new String[] {"Promocja", pc.isPromoted() ? "masz promocję" : "kup w Sklepie albo u króla", pc.isPromoted() ? "spełnione" : "brak",
+        rows.add(new String[] {Messages.get("wheel_view.poziom") + DestinyWheel.MIN_LEVEL, Messages.get("wheel_view.masz_poziom") + pc.level(), lv ? Messages.get("wheel_view.spelnione") : Messages.get("server_world.brak"), "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.promocja"), pc.isPromoted() ? Messages.get("wheel_view.masz_promocje") : Messages.get("wheel_view.kup_w_sklepie_albo"), pc.isPromoted() ? Messages.get("wheel_view.spelnione") : Messages.get("server_world.brak"),
                 "ach:none"});
-        rows.add(new String[] {"Konto premium", pc.isPremium() ? "aktywne" : "kup w Sklepie", pc.isPremium() ? "spełnione" : "brak", "ach:none"});
-        rows.add(new String[] {"Podgląd", "dotknij pola koła, aby zobaczyć, co daje", "", "ach:none"});
+        rows.add(new String[] {Messages.get("store.konto_premium"), pc.isPremium() ? Messages.tr("aktywne") : Messages.get("wheel_view.kup_w_sklepie"), pc.isPremium() ? Messages.get("wheel_view.spelnione") : Messages.get("server_world.brak"), "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.podglad"), Messages.get("wheel_view.dotknij_pola_kola_aby"), "", "ach:none"});
         return rows;
     }
 
@@ -101,28 +102,28 @@ public final class WheelView {
     public static List<String[]> summary(PlayerCharacter pc, boolean inTemple, java.util.function.ToIntFunction<String> have) {
         if (pc.wheelPoints() <= 0) return requirements(pc);
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"Punkty promocji", head(pc), "", "ach:none"});
-        rows.add(new String[] {"Świątynia", inTemple ? "jesteś w świątyni - możesz rozdawać punkty" : "punkty rozdasz tylko w świątyni",
-                inTemple ? "tak" : "nie", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.punkty_promocji"), head(pc), "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_windows.swiatynia"), inTemple ? Messages.get("wheel_view.jestes_w_swiatyni_mozesz") : Messages.get("wheel_windows.punkty_rozdasz_tylko_w"),
+                inTemple ? Messages.tr("tak") : Messages.tr("nie"), "ach:none"});
         Vocation v = pc.vocation();
         for (WheelDomain d : WheelDomain.values()) {
             int pts = pc.wheel().domainPoints(d);
             int bonus = pc.wheelBonus().gems().revelation(d);
             int st = WheelDomain.stage(pts + bonus);
             WheelRevelation r = WheelRevelation.of(d, v);
-            rows.add(new String[] {d.label + ": " + r.label, revelationProgress(pts + bonus), st > 0 ? "etap " + st : "", "wheel:rev:" + d.code});
+            rows.add(new String[] {d.label() + ": " + r.label(), revelationProgress(pts + bonus), st > 0 ? Messages.tr("etap ") + st : "", "wheel:rev:" + d.code});
         }
         String av = avatarLine(pc);
-        if (av != null) rows.add(new String[] {"Awatar", av, "", "ach:none"});
+        if (av != null) rows.add(new String[] {Messages.get("wheel_view.awatar"), av, "", "ach:none"});
         GemView.overviewRows(rows, pc, have);
-        rows.add(new String[] {"Wskazówka", "dotknij pola koła, aby zobaczyć jego kartę i rozdać punkty", "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.wskazowka"), Messages.get("wheel_view.dotknij_pola_kola_aby_2"), "", "ach:none"});
         return rows;
     }
 
     /** Stan awatara (aktywny / odnowienie) albo null. */
     public static String avatarLine(PlayerCharacter pc) {
         DestinyWheel w = pc.wheel();
-        if (w.avatarActive()) return "aktywny jeszcze " + secs(w.avatarMs()) + " (etap " + w.avatarStage() + ")";
+        if (w.avatarActive()) return Messages.get("wheel_view.aktywny_jeszcze") + secs(w.avatarMs()) + " (etap " + w.avatarStage() + ")";
         if (w.avatarCooldownMs() > 0) return "odnowienie: " + minutes(w.avatarCooldownMs());
         return null;
     }
@@ -140,25 +141,25 @@ public final class WheelView {
         int bonus = pc.wheelBonus().gems().revelation(d); // Mistrzostwo objawienia z klejnotu
         int pts = w.domainPoints(d) + bonus;
         int st = WheelDomain.stage(pts);
-        rows.add(new String[] {"Objawienie: " + r.label, revelationProgress(pts) + (bonus > 0 ? " (w tym +" + bonus + " z klejnotu)" : ""),
-                st > 0 ? "etap " + st : "", "wheel:rev:" + d.code});
+        rows.add(new String[] {Messages.get("wheel_windows.objawienie") + r.label(), revelationProgress(pts) + (bonus > 0 ? Messages.get("wheel_view.w_tym") + bonus + Messages.get("wheel_view.z_klejnotu") : ""),
+                st > 0 ? Messages.tr("etap ") + st : "", "wheel:rev:" + d.code});
         for (WheelSlice s : WheelSlice.of(d)) {
             int p = w.points(s);
             // stan w etykiecie: opis efektu ma caly wiersz (okno przycina dlugi tekst)
-            rows.add(new String[] {cap(s.pos.label) + ": " + p + "/" + s.capacity() + ", " + state(w, s, av), shortEffect(s, v, names), "",
+            rows.add(new String[] {cap(s.pos.label()) + ": " + p + "/" + s.capacity() + ", " + state(w, s, av), shortEffect(s, v, names), "",
                     "wheel:sel:" + s.code()});
         }
         rows.add(GemView.vesselRow(pc, d));
-        rows.add(new String[] {"Wróć", TITLE, "", OPEN});
+        rows.add(new String[] {Messages.get("bestiary_windows.wroc"), TITLE, "", OPEN});
         return rows;
     }
 
     private static String state(DestinyWheel w, WheelSlice s, int av) {
         int p = w.points(s);
-        if (p >= s.capacity()) return "pełne";
-        if (w.open(s, av)) return "otwarte";
-        if (av < s.pos.threshold) return "od " + s.pos.threshold + " pkt promocji";
-        return "zamknięte";
+        if (p >= s.capacity()) return Messages.get("wheel_view.pelne");
+        if (w.open(s, av)) return Messages.tr("otwarte");
+        if (av < s.pos.threshold) return "od " + s.pos.threshold + Messages.get("wheel_view.pkt_promocji");
+        return Messages.get("wheel_view.zamkniete");
     }
 
     /** Najdluzszy krotki opis pola w wierszu cwiartki. */
@@ -166,21 +167,21 @@ public final class WheelView {
 
     /** Krotki efekt pola z danych: "+3 HP/pkt; pełne: +1 walka wręcz", przy czarze premia stopnia I. */
     public static String shortEffect(WheelSlice s, Vocation v, Function<String, String> names) {
-        String head = WheelPerks.perPoint(s, v) + "/pkt; pełne: ";
+        String head = WheelPerks.perPoint(s, v) + Messages.get("wheel_view.pkt_pelne");
         String conv;
         switch (s.conviction) {
             case SKILL: conv = "+1 " + WheelPerks.skillShort(v); break;
-            case LIFE_LEECH: conv = "+" + SpellAugment.num(WheelPerks.LIFE_LEECH) + "% kradzieży życia"; break;
-            case MANA_LEECH: conv = "+" + SpellAugment.num(WheelPerks.MANA_LEECH) + "% kradzieży many"; break;
-            case PASSIVE_A: conv = WheelPassive.of(v, true).label; break;
-            case PASSIVE_B: conv = WheelPassive.of(v, false).label; break;
-            case VESSEL: conv = "naczynie klejnotu"; break;
+            case LIFE_LEECH: conv = "+" + SpellAugment.num(WheelPerks.LIFE_LEECH) + Messages.get("spell_augment.kradziezy_zycia"); break;
+            case MANA_LEECH: conv = "+" + SpellAugment.num(WheelPerks.MANA_LEECH) + Messages.get("spell_augment.kradziezy_many"); break;
+            case PASSIVE_A: conv = WheelPassive.of(v, true).label(); break;
+            case PASSIVE_B: conv = WheelPassive.of(v, false).label(); break;
+            case VESSEL: conv = Messages.get("wheel_view.naczynie_klejnotu"); break;
             default: {
                 WheelPerks.Upgrade u = WheelPerks.upgrade(v, s.conviction.spellGroup());
                 String n = plain(spellNames(u, names));
                 conv = n + " I: " + u.grade1.describe();
-                if (head.length() + conv.length() > SHORT_MAX) conv = "czar " + n;
-                if (head.length() + conv.length() > SHORT_MAX) conv = u.spells.size() > 1 ? "ulepszenie " + u.spells.size() + " czarów" : "ulepszenie czaru";
+                if (head.length() + conv.length() > SHORT_MAX) conv = Messages.get("wheel_view.czar") + n;
+                if (head.length() + conv.length() > SHORT_MAX) conv = u.spells.size() > 1 ? "ulepszenie " + u.spells.size() + Messages.get("wheel_view.czarow") : Messages.get("wheel_view.ulepszenie_czaru");
             }
         }
         String out = head + conv;
@@ -196,7 +197,7 @@ public final class WheelView {
     /** Nazwa czaru po polsku z nazwa z Tibii, gdy inna: "Szał (Tibia: Front Sweep)". */
     static String spellLabel(WheelPerks.Upgrade u, Function<String, String> names) {
         String pl = spellNames(u, names);
-        return pl.equalsIgnoreCase(u.tibia) ? pl : pl + " (Tibia: " + u.tibia + ")";
+        return pl.equalsIgnoreCase(u.tibia) ? pl : pl + Messages.get("wheel_view.tibia") + u.tibia + ")";
     }
 
     /** Karta pola jak dymek w Tibii: oddanie (punkt / teraz / pelne), przekonanie, stopnie czaru, wymagania, przyciski. */
@@ -208,27 +209,27 @@ public final class WheelView {
         int p = w.points(s);
         int free = Math.max(0, av - w.spent());
         boolean full = p >= s.capacity();
-        rows.add(new String[] {"Punkty w polu", p + "/" + s.capacity() + ", wolne: " + free, state(w, s, av), "ach:none"});
-        rows.add(new String[] {"Oddanie", WheelPerks.perPoint(s, v) + " za punkt", "", "ach:none"});
-        rows.add(new String[] {"Oddanie teraz", WheelPerks.dedicationAt(s, v, p) + " (pełne pole: " + WheelPerks.dedicationAt(s, v, s.capacity()) + ")",
+        rows.add(new String[] {Messages.get("wheel_view.punkty_w_polu"), p + "/" + s.capacity() + Messages.get("wheel_view.wolne") + free, state(w, s, av), "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.oddanie"), WheelPerks.perPoint(s, v) + Messages.get("wheel_view.za_punkt"), "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.oddanie_teraz"), WheelPerks.dedicationAt(s, v, p) + Messages.get("wheel_view.pelne_pole") + WheelPerks.dedicationAt(s, v, s.capacity()) + ")",
                 "", "ach:none"});
         if (!full) {
-            rows.add(new String[] {"Następny punkt", WheelPerks.perPoint(s, v) + (p + 1 == s.capacity() ? " i przekonanie" : "")
-                    + "; do pełna " + (s.capacity() - p) + " pkt", "", "ach:none"});
+            rows.add(new String[] {Messages.get("wheel_view.nastepny_punkt"), WheelPerks.perPoint(s, v) + (p + 1 == s.capacity() ? Messages.get("wheel_view.i_przekonanie") : "")
+                    + Messages.get("wheel_view.do_pelna") + (s.capacity() - p) + " pkt", "", "ach:none"});
         }
-        String convState = full ? "aktywne" : "gdy pole pełne";
+        String convState = full ? Messages.tr("aktywne") : Messages.get("wheel_view.gdy_pole_pelne");
         int g = s.conviction.spellGroup();
         switch (s.conviction) {
             case PASSIVE_A: case PASSIVE_B: {
                 WheelPassive wp = WheelPassive.of(v, s.conviction == WheelSlice.Conv.PASSIVE_A);
-                rows.add(new String[] {"Przekonanie", wp.label + " (Tibia: " + wp.tibia() + ")", convState, "ach:none"});
-                wrapped(rows, "Działanie", wp.description);
+                rows.add(new String[] {Messages.get("wheel_view.przekonanie"), wp.label() + Messages.get("wheel_view.tibia") + wp.tibia() + ")", convState, "ach:none"});
+                wrapped(rows, Messages.get("wheel_view.dzialanie"), wp.description());
                 break;
             }
             case VESSEL: {
-                rows.add(new String[] {"Przekonanie", "naczynie klejnotu: +1 rezonansu domeny", convState, "ach:none"});
+                rows.add(new String[] {Messages.get("wheel_view.przekonanie"), Messages.get("wheel_perks.naczynie_klejnotu_1_rezonansu"), convState, "ach:none"});
                 int res = pc.wheel().resonance(s.domain);
-                rows.add(new String[] {"Rezonans", res + " z " + countVessels(s.domain) + " naczyń; 1: mod 1, 2: mod 2, 3: mod najwyższy",
+                rows.add(new String[] {Messages.get("wheel_view.rezonans"), res + Messages.get("common.z") + countVessels(s.domain) + Messages.get("wheel_view.naczyn_1_mod_1"),
                         "", "ach:none"});
                 rows.add(GemView.vesselRow(pc, s.domain));
                 break;
@@ -237,40 +238,40 @@ public final class WheelView {
                 if (g >= 0) {
                     WheelPerks.Upgrade u = WheelPerks.upgrade(v, g);
                     int grade = pc.wheelBonus().grade(g);
-                    wrappedState(rows, "Przekonanie: czar", spellLabel(u, names), convState);
-                    wrappedState(rows, "Stopień I", u.grade1.describe(), grade >= 1 ? "aktywny" : "1 pełne pole");
-                    wrappedState(rows, "Stopień II", "razem " + u.at(2).describe(), grade >= 2 ? "aktywny" : "oba pola");
+                    wrappedState(rows, Messages.get("wheel_view.przekonanie_czar"), spellLabel(u, names), convState);
+                    wrappedState(rows, Messages.get("wheel_view.stopien_i"), u.grade1.describe(), grade >= 1 ? Messages.tr("aktywny") : Messages.get("wheel_view.1_pelne_pole"));
+                    wrappedState(rows, Messages.get("wheel_view.stopien_ii"), Messages.get("wheel_view.razem") + u.at(2).describe(), grade >= 2 ? Messages.tr("aktywny") : Messages.get("wheel_view.oba_pola"));
                     WheelSlice other = otherOfGroup(s, g);
                     if (other != null) {
-                        rows.add(new String[] {"Drugie pole", other.label() + ": " + w.points(other) + "/" + other.capacity(),
-                                w.points(other) >= other.capacity() ? "pełne" : "", "wheel:sel:" + other.code()});
+                        rows.add(new String[] {Messages.get("wheel_view.drugie_pole"), other.label() + ": " + w.points(other) + "/" + other.capacity(),
+                                w.points(other) >= other.capacity() ? Messages.get("wheel_view.pelne") : "", "wheel:sel:" + other.code()});
                     }
-                    if (!u.note.isEmpty()) wrapped(rows, "Uwaga", u.note);
+                    if (!u.note.isEmpty()) wrapped(rows, Messages.get("wheel_view.uwaga"), u.note);
                 } else {
-                    rows.add(new String[] {"Przekonanie", WheelPerks.conviction(s, v), convState, "ach:none"});
+                    rows.add(new String[] {Messages.get("wheel_view.przekonanie"), WheelPerks.conviction(s, v), convState, "ach:none"});
                 }
         }
         WheelRevelation r = WheelRevelation.of(s.domain, v);
-        rows.add(new String[] {"Objawienie domeny", r.label + ": " + revelationProgress(w.domainPoints(s.domain)
+        rows.add(new String[] {Messages.get("wheel_view.objawienie_domeny"), r.label() + ": " + revelationProgress(w.domainPoints(s.domain)
                 + pc.wheelBonus().gems().revelation(s.domain)), "", "wheel:rev:" + s.domain.code});
         if (s.pos.threshold > 0) {
-            rows.add(new String[] {"Wymaga", "pełne pole bliżej środka i " + s.pos.threshold + " pkt promocji",
-                    w.open(s, av) || p > 0 ? "spełnione" : "niespełnione", "ach:none"});
+            rows.add(new String[] {Messages.get("wheel_view.wymaga"), Messages.get("wheel_view.pelne_pole_blizej_srodka") + s.pos.threshold + Messages.get("wheel_view.pkt_promocji"),
+                    w.open(s, av) || p > 0 ? Messages.get("wheel_view.spelnione") : Messages.get("wheel_view.niespelnione"), "ach:none"});
         }
         boolean canAdd = inTemple && av > 0 && p < s.capacity() && free > 0 && w.open(s, av);
         boolean canRemove = inTemple && p > 0;
         String c = s.code();
         int toFull = Math.min(free, s.capacity() - p);
-        rows.add(new String[] {"Dodaj 1", "", "", "wheel:add:" + c + ":1", canAdd ? "" : "off"});
-        rows.add(new String[] {"Dodaj 10", "", "", "wheel:add:" + c + ":10", canAdd ? "" : "off"});
-        rows.add(new String[] {"Dodaj do pełna", "+" + Math.max(0, toFull), "", "wheel:add:" + c + ":" + Math.max(1, toFull), canAdd ? "" : "off"});
-        rows.add(new String[] {"Odejmij 1", "", "", "wheel:remove:" + c + ":1", canRemove ? "" : "off"});
-        rows.add(new String[] {"Opróżnij pole", "", "", "wheel:remove:" + c + ":" + Math.max(1, p), canRemove ? "" : "off"});
-        rows.add(new String[] {"Wróć", s.domain.label + " ćwiartka", "", "wheel:q:" + s.domain.code});
+        rows.add(new String[] {Messages.get("wheel_view.dodaj_1"), "", "", "wheel:add:" + c + ":1", canAdd ? "" : "off"});
+        rows.add(new String[] {Messages.get("wheel_view.dodaj_10"), "", "", "wheel:add:" + c + ":10", canAdd ? "" : "off"});
+        rows.add(new String[] {Messages.get("wheel_view.dodaj_do_pelna"), "+" + Math.max(0, toFull), "", "wheel:add:" + c + ":" + Math.max(1, toFull), canAdd ? "" : "off"});
+        rows.add(new String[] {Messages.get("wheel_view.odejmij_1"), "", "", "wheel:remove:" + c + ":1", canRemove ? "" : "off"});
+        rows.add(new String[] {Messages.get("wheel_view.oproznij_pole"), "", "", "wheel:remove:" + c + ":" + Math.max(1, p), canRemove ? "" : "off"});
+        rows.add(new String[] {Messages.get("bestiary_windows.wroc"), s.domain.label() + Messages.get("wheel_windows.cwiartka"), "", "wheel:q:" + s.domain.code});
         return rows;
     }
 
-    public static String revelationTitle(WheelDomain d) { return TITLE + ": objawienie (" + d.label.toLowerCase(java.util.Locale.ROOT) + ")"; }
+    public static String revelationTitle(WheelDomain d) { return TITLE + Messages.get("wheel_view.objawienie") + d.label().toLowerCase(java.util.Locale.ROOT) + ")"; }
 
     /** Karta objawienia domeny: nazwa (i z Tibii), czar, etapy 1-3 z progami, moc objawien, mistrzostwo z klejnotu. */
     public static List<String[]> revelation(PlayerCharacter pc, WheelDomain d, Function<String, String> names) {
@@ -280,20 +281,20 @@ public final class WheelView {
         int bonus = pc.wheelBonus().gems().revelation(d);
         int pts = pc.wheel().domainPoints(d) + bonus;
         int st = WheelDomain.stage(pts);
-        rows.add(new String[] {"Objawienie", r.label + (r.label.equalsIgnoreCase(r.tibia()) ? "" : " (Tibia: " + r.tibia() + ")"),
-                st > 0 ? "etap " + st : "nieaktywne", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.objawienie_2"), r.label() + (r.label().equalsIgnoreCase(r.tibia()) ? "" : Messages.get("wheel_view.tibia") + r.tibia() + ")"),
+                st > 0 ? Messages.tr("etap ") + st : Messages.tr("nieaktywne"), "ach:none"});
         String spell = r.spell == null ? null : names == null ? r.spell : plain(names.apply(r.spell));
-        if (spell != null && !spell.equalsIgnoreCase(r.label)) rows.add(new String[] {"Czar", names == null ? r.spell : names.apply(r.spell), "", "ach:none"});
-        rows.add(new String[] {"Punkty domeny", revelationProgress(pts), "", "ach:none"});
+        if (spell != null && !spell.equalsIgnoreCase(r.label())) rows.add(new String[] {Messages.get("wheel_view.czar_2"), names == null ? r.spell : names.apply(r.spell), "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.punkty_domeny"), revelationProgress(pts), "", "ach:none"});
         for (int i = 1; i <= 3; i++) {
-            wrappedState(rows, "Etap " + i, r.stage(i), st >= i ? "aktywny" : "od " + WheelDomain.STAGE_POINTS[i - 1] + " pkt");
+            wrappedState(rows, Messages.get("bestiary_card.etap") + i, r.stage(i), st >= i ? Messages.tr("aktywny") : "od " + WheelDomain.STAGE_POINTS[i - 1] + " pkt");
         }
         int[] f = WheelDomain.STAGE_FLAT;
-        rows.add(new String[] {"Moc objawień", "+" + f[0] + " / +" + f[1] + " / +" + f[2] + " obrażeń i leczenia (etap 1/2/3)",
+        rows.add(new String[] {Messages.get("wheel_view.moc_objawien"), "+" + f[0] + " / +" + f[1] + " / +" + f[2] + Messages.get("wheel_view.obrazen_i_leczenia_etap"),
                 st > 0 ? "+" + f[st - 1] : "", "ach:none"});
-        rows.add(new String[] {"Mistrzostwo objawienia", bonus > 0 ? "+" + bonus + " pkt z klejnotu w naczyniu" : "brak (mod najwyższy klejnotu)",
+        rows.add(new String[] {Messages.get("wheel_view.mistrzostwo_objawienia"), bonus > 0 ? "+" + bonus + Messages.get("wheel_view.pkt_z_klejnotu_w") : Messages.get("wheel_view.brak_mod_najwyzszy_klejnotu"),
                 "", "ach:none"});
-        rows.add(new String[] {"Wróć", d.label + " ćwiartka", "", "wheel:q:" + d.code});
+        rows.add(new String[] {Messages.get("bestiary_windows.wroc"), d.label() + Messages.get("wheel_windows.cwiartka"), "", "wheel:q:" + d.code});
         return rows;
     }
 
@@ -319,39 +320,39 @@ public final class WheelView {
         WheelBonus b = pc.wheelBonus();
         Vocation v = pc.vocation();
         if (b == WheelBonus.NONE) {
-            rows.add(new String[] {"Brak premii", pc.wheelPoints() > 0 ? "rozdaj punkty w świątyni" : "koło nieaktywne", "", "ach:none"});
+            rows.add(new String[] {Messages.get("wheel_view.brak_premii"), pc.wheelPoints() > 0 ? Messages.get("wheel_view.rozdaj_punkty_w_swiatyni") : Messages.get("wheel_view.kolo_nieaktywne"), "", "ach:none"});
         } else {
-            rows.add(new String[] {"Oddanie", String.format("+%d HP, +%d many, +%d udźwigu, +%s%% mitygacji", b.health, b.mana, b.capacity,
+            rows.add(new String[] {Messages.get("wheel_view.oddanie"), String.format(Messages.get("wheel_view.d_hp_d_many"), b.health, b.mana, b.capacity,
                     SpellAugment.num(b.mitigation)), "", "ach:none"});
             StringBuilder conv = new StringBuilder();
             if (b.skill > 0) conv.append("+").append(b.skill).append(" ").append(WheelPerks.skillLabel(v));
-            if (b.lifeLeech > 0) append(conv, "+" + SpellAugment.num(b.lifeLeech) + "% kradzieży życia");
-            if (b.manaLeech > 0) append(conv, "+" + SpellAugment.num(b.manaLeech) + "% kradzieży many");
-            rows.add(new String[] {"Przekonanie", conv.length() == 0 ? "brak pełnych pól" : conv.toString(), "", "ach:none"});
+            if (b.lifeLeech > 0) append(conv, "+" + SpellAugment.num(b.lifeLeech) + Messages.get("spell_augment.kradziezy_zycia"));
+            if (b.manaLeech > 0) append(conv, "+" + SpellAugment.num(b.manaLeech) + Messages.get("spell_augment.kradziezy_many"));
+            rows.add(new String[] {Messages.get("wheel_view.przekonanie"), conv.length() == 0 ? Messages.get("wheel_view.brak_pelnych_pol") : conv.toString(), "", "ach:none"});
             for (int g = 0; g < 5; g++) {
                 int grade = b.grade(g);
                 if (grade <= 0) continue;
                 WheelPerks.Upgrade u = WheelPerks.upgrade(v, g);
                 wrapped(rows, spellNames(u, names) + " (st. " + grade + ")", u.at(grade).describe());
             }
-            for (WheelPassive p : b.passives()) wrapped(rows, p.label, p.description);
+            for (WheelPassive p : b.passives()) wrapped(rows, p.label(), p.description());
             for (WheelDomain d : WheelDomain.values()) {
                 int st = b.stage(d);
                 if (st <= 0) continue;
                 WheelRevelation r = WheelRevelation.of(d, v);
-                wrapped(rows, r.label + " (etap " + st + ")", r.stage(st));
+                wrapped(rows, r.label() + " (etap " + st + ")", r.stage(st));
             }
             if (b.flatDamage > 0) {
-                rows.add(new String[] {"Moc objawień", "+" + b.flatDamage + " obrażeń i +" + b.flatHealing + " leczenia", "", "ach:none"});
+                rows.add(new String[] {Messages.get("wheel_view.moc_objawien"), "+" + b.flatDamage + Messages.get("wheel_view.obrazen_i") + b.flatHealing + " leczenia", "", "ach:none"});
             }
             if (pc.wheel().giftCooldownMs() > 0) {
-                rows.add(new String[] {"Dar Życia", "odnowienie: " + minutes(pc.wheel().giftCooldownMs()), "", "ach:none"});
+                rows.add(new String[] {Messages.get("wheel_view.dar_zycia"), "odnowienie: " + minutes(pc.wheel().giftCooldownMs()), "", "ach:none"});
             }
             String av = avatarLine(pc);
-            if (av != null) rows.add(new String[] {"Awatar teraz", av, "", "ach:none"});
+            if (av != null) rows.add(new String[] {Messages.get("wheel_view.awatar_teraz"), av, "", "ach:none"});
             GemView.perkRows(rows, pc, names);
         }
-        rows.add(new String[] {"Wróć", TITLE, "", OPEN});
+        rows.add(new String[] {Messages.get("bestiary_windows.wroc"), TITLE, "", OPEN});
         return rows;
     }
 
@@ -362,20 +363,20 @@ public final class WheelView {
         int av = pc.wheelPoints();
         for (int i = 0; i < DestinyWheel.PRESETS; i++) {
             boolean has = w.hasPreset(i);
-            rows.add(new String[] {"Zapisz w zestawie " + (i + 1), has ? "nadpisze (" + w.presetPoints(i) + " pkt)" : "pusty",
+            rows.add(new String[] {Messages.get("wheel_view.zapisz_w_zestawie") + (i + 1), has ? Messages.get("wheel_view.nadpisze") + w.presetPoints(i) + " pkt)" : "pusty",
                     "", "wheel:save:" + i, av > 0 ? "" : "off"});
-            rows.add(new String[] {"Wczytaj zestaw " + (i + 1), has ? w.presetPoints(i) + " pkt" : "pusty", "",
+            rows.add(new String[] {Messages.get("wheel_view.wczytaj_zestaw") + (i + 1), has ? w.presetPoints(i) + " pkt" : "pusty", "",
                     "wheel:load:" + i, has && inTemple && w.presetPoints(i) <= av ? "" : "off"});
         }
-        rows.add(new String[] {"Wróć", TITLE, "", OPEN});
+        rows.add(new String[] {Messages.get("bestiary_windows.wroc"), TITLE, "", OPEN});
         return rows;
     }
 
     public static List<String[]> resetConfirm(PlayerCharacter pc, boolean inTemple) {
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"Na pewno?", "zwrot " + pc.wheel().spent() + " pkt; zestawy zostają", "", "ach:none"});
-        rows.add(new String[] {"Tak, wyczyść koło", inTemple ? "" : "tylko w świątyni", "", "wheel:reset", inTemple ? "" : "off"});
-        rows.add(new String[] {"Wróć", TITLE, "", OPEN});
+        rows.add(new String[] {Messages.get("gem_view.na_pewno"), "zwrot " + pc.wheel().spent() + Messages.get("wheel_view.pkt_zestawy_zostaja"), "", "ach:none"});
+        rows.add(new String[] {Messages.get("wheel_view.tak_wyczysc_kolo"), inTemple ? "" : Messages.get("wheel_view.tylko_w_swiatyni"), "", "wheel:reset", inTemple ? "" : "off"});
+        rows.add(new String[] {Messages.get("bestiary_windows.wroc"), TITLE, "", OPEN});
         return rows;
     }
 
@@ -413,6 +414,6 @@ public final class WheelView {
 
     static String minutes(long ms) {
         long m = (ms + 59_999) / 60_000;
-        return m >= 60 ? m / 60 + " h " + m % 60 + " min" : m + " min";
+        return m >= 60 ? m / 60 + " h " + m % 60 + Messages.get("hud.min") : m + Messages.get("hud.min");
     }
 }

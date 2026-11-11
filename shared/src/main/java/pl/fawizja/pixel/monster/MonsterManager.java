@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.monster;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -305,13 +306,13 @@ public final class MonsterManager {
     /** {imie, miejsce, stan} do okna bossow (i komunikatu BOSS). */
     public static String[] row(BossStatus b, long now) {
         int z = b.where().z();
-        String place = (b.region() == null ? "" : b.region() + ", ") + (z == 0 ? "powierzchnia" : "piętro " + (z > 0 ? "+" + z : String.valueOf(z)));
+        String place = (b.region() == null ? "" : b.region() + ", ") + (z == 0 ? "powierzchnia" : Messages.get("monster_manager.pietro") + (z > 0 ? "+" + z : String.valueOf(z)));
         String state;
-        if (b.alive()) state = "żyje";
-        else if (b.respawnAt() == Long.MAX_VALUE || b.respawnAt() <= now) state = "odradza się lada chwila";
+        if (b.alive()) state = Messages.get("monster_manager.zyje");
+        else if (b.respawnAt() == Long.MAX_VALUE || b.respawnAt() <= now) state = Messages.get("monster_manager.odradza_sie_lada_chwila");
         else {
             long min = (b.respawnAt() - now + 59_999) / 60_000;
-            state = "odrodzi się za " + (min >= 60 ? min / 60 + " h " + min % 60 + " min" : min + " min");
+            state = Messages.get("monster_manager.odrodzi_sie_za") + (min >= 60 ? min / 60 + " h " + min % 60 + Messages.get("hud.min") : min + Messages.get("hud.min"));
         }
         return new String[] {b.name(), place, state};
     }

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.vocation;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Piec profesji. Kazda ma inny styl gry, a wszystkie liczby sa w jednym miejscu,
  * zeby balans korygowac w danych, a nie wyjatkami w kodzie.
@@ -12,9 +13,9 @@ public enum Vocation {
             2, 3,
             0.85, 1.25, 0.60, 0.85, 1.00,
             2000,
-            "Walczy z dystansu włóczniami i strzałami, wspiera się świętą magią.",
-            "Bezpieczny dystans, dobra przeżywalność, uniwersalne runy.",
-            "Słabsza magia obszarowa niż magowie, zużywa amunicję."),
+            Messages.get("vocation.walczy_z_dystansu_wloczniami"),
+            Messages.get("vocation.bezpieczny_dystans_dobra_przez"),
+            Messages.get("vocation.slabsza_magia_obszarowa_niz")),
 
     /** Leczenie, lod i ziemia; najlepsze wsparcie druzyny. */
     DRUID("Druid",
@@ -22,9 +23,9 @@ public enum Vocation {
             1, 4,
             0.50, 0.50, 1.00, 1.30, 0.80,
             2000,
-            "Mag natury: lód i ziemia, najsilniejsze leczenie siebie i innych.",
-            "Leczenie, kontrola tłumu, duża mana.",
-            "Niskie HP i słaba walka wręcz."),
+            Messages.get("vocation.mag_natury_lod_i"),
+            Messages.get("vocation.leczenie_kontrola_tlumu_duza"),
+            Messages.get("vocation.niskie_hp_i_slaba")),
 
     /** Ogien i energia; najwyzsze obrazenia magiczne, najmniejsza wytrzymalosc. */
     SORCERER("Sorcerer",
@@ -32,9 +33,9 @@ public enum Vocation {
             1, 4,
             0.50, 0.50, 1.25, 0.70, 0.75,
             2000,
-            "Mag zniszczenia: ogień, energia i śmierć.",
-            "Najwyższe obrażenia obszarowe i pojedyncze.",
-            "Najniższa obrona i słabe leczenie."),
+            Messages.get("vocation.mag_zniszczenia_ogien_energia"),
+            Messages.get("vocation.najwyzsze_obrazenia_obszarowe"),
+            Messages.get("vocation.najnizsza_obrona_i_slabe")),
 
     /** Walka wrecz piesciami, szybkie ataki i kombinacje; wysoka wytrzymalosc. */
     MONK("Monk",
@@ -42,9 +43,9 @@ public enum Vocation {
             3, 2,
             1.25, 0.40, 0.50, 0.90, 1.15,
             1400,
-            "Mistrz walki wręcz: szybkie ciosy, kombinacje i samoleczenie skupieniem.",
-            "Najwięcej HP, najszybsze ataki, dobra obrona.",
-            "Musi stać przy celu, mało many, prawie brak magii dystansowej."),
+            Messages.get("vocation.mistrz_walki_wrecz_szybkie"),
+            Messages.get("vocation.najwiecej_hp_najszybsze_ataki"),
+            Messages.get("vocation.musi_stac_przy_celu")),
 
     /** Miecze, topory i mloty z tarcza; najwyzsza obrona i najwiecej HP (jak rycerz w Tibii). */
     KNIGHT("Knight",
@@ -52,9 +53,9 @@ public enum Vocation {
             3, 1,
             1.35, 0.40, 0.35, 0.80, 1.30,
             1700,
-            "Rycerz w ciężkiej zbroi: miecze, topory i młoty, tarcza i ciosy wręcz.",
-            "Najwięcej HP i najlepsza obrona, mocne ciosy obszarowe wokół siebie.",
-            "Mało many, słabe leczenie, prawie brak magii i walki na dystans.");
+            Messages.get("vocation.rycerz_w_ciezkiej_zbroi"),
+            Messages.get("vocation.najwiecej_hp_i_najlepsza"),
+            Messages.get("vocation.malo_many_slabe_leczenie"));
 
     private final String displayName;
     private final int hpPerLevel;

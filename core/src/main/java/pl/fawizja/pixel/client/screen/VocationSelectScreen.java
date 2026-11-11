@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.screen;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
@@ -36,6 +37,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
     private final Rectangle create = new Rectangle();
     private final Rectangle back = new Rectangle();
     private final TownPicker towns;
+    private final pl.fawizja.pixel.client.ui.LanguageBar languageBar = new pl.fawizja.pixel.client.ui.LanguageBar();
     private Vocation vocation = Vocation.values()[0];
     private float vocLabelY, townLabelY, playstyleY, contentX, contentW;
     private boolean playstyleInCard;
@@ -66,6 +68,11 @@ public final class VocationSelectScreen extends ScreenAdapter {
                         vocation = Vocation.values()[i];
                         return true;
                     }
+                }
+                pl.fawizja.pixel.i18n.Language picked = languageBar.hit(p);
+                if (picked != null) {
+                    game.setLanguage(picked);
+                    return true;
                 }
                 if (towns.touch(p.x, p.y)) return true;
                 if (create.contains(p)) askName();
@@ -109,7 +116,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
             public void canceled() {
                 waitingForName = false;
             }
-        }, "Imię postaci (" + v.displayName() + townName + ")", "", "3-20 liter");
+        }, Messages.get("vocation_select_screen.imie_postaci") + v.displayName() + townName + ")", "", Messages.get("vocation_select_screen.3_20_liter"));
     }
 
     private void create(String name, Vocation v, String town) {
@@ -117,7 +124,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
         try {
             PlayerCharacter.validateName(name);
         } catch (IllegalArgumentException e) {
-            message = "Niepoprawne imię: 3-20 liter, spacje i apostrof.";
+            message = Messages.get("vocation_select_screen.niepoprawne_imie_3_20");
             return;
         }
         game.createCharacter(name.trim(), v, town);
@@ -144,7 +151,8 @@ public final class VocationSelectScreen extends ScreenAdapter {
         float w = viewport.getWorldWidth(), h = viewport.getWorldHeight();
         contentW = Math.min(1100, w - 2 * 16);
         contentX = (w - contentW) / 2f;
-        float label = 18, line = 20, title = 30, buttonH = 44;
+        float label = 18, line = 20, title = 60, buttonH = 44;
+        languageBar.layout(w / 2f, h - 54, contentW);
         // przyciski na dole (cele dotyku >= 44 dp)
         float bw = Math.min(260, contentW / 2f - GAP);
         create.set(contentX + contentW - bw, GAP, bw, buttonH);
@@ -196,6 +204,7 @@ public final class VocationSelectScreen extends ScreenAdapter {
             shapes.setColor(sel ? 0.3f : 0.16f, sel ? 0.25f : 0.15f, sel ? 0.14f : 0.2f, 1f);
             shapes.rect(r.x, r.y, r.width, r.height);
         }
+        languageBar.drawShapes(shapes, Messages.language());
         towns.drawShapes(shapes);
         shapes.setColor(0.15f, 0.4f, 0.25f, 1f);
         shapes.rect(create.x, create.y, create.width, create.height);
@@ -205,8 +214,9 @@ public final class VocationSelectScreen extends ScreenAdapter {
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
-        centered(batch, "PIXEL - nowa postać", w / 2f, h - 15, Color.WHITE);
-        label(batch, "Profesja", vocLabelY);
+        centered(batch, Messages.get("vocation_select_screen.pixel_nowa_postac"), w / 2f, h - 15, Color.WHITE);
+        languageBar.drawText(batch, game.font(), Messages.language());
+        label(batch, Messages.get("vocation_select_screen.profesja"), vocLabelY);
         for (int i = 0; i < all.length; i++) {
             Vocation v = all[i];
             Rectangle r = vocationCards[i];
@@ -227,12 +237,12 @@ public final class VocationSelectScreen extends ScreenAdapter {
             game.font().draw(batch, vocation.displayName() + ": " + vocation.playstyle(), contentX, playstyleY + 6, contentW, Align.center, false);
             game.font().setColor(Color.WHITE);
         }
-        label(batch, "Miasto startowe - tu zamieszkasz i zaczniesz w świątyni", townLabelY);
+        label(batch, Messages.get("vocation_select_screen.miasto_startowe_tu_zamieszkasz"), townLabelY);
         towns.drawText(batch, game.font(), contentX, contentW);
-        centered(batch, "Utwórz postać", create.x + create.width / 2f, create.y + create.height / 2f, Color.WHITE);
-        centered(batch, "Wstecz", back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);
+        centered(batch, Messages.get("vocation_select_screen.utworz_postac"), create.x + create.width / 2f, create.y + create.height / 2f, Color.WHITE);
+        centered(batch, Messages.get("game_screen.wstecz"), back.x + back.width / 2f, back.y + back.height / 2f, Color.WHITE);
         String info = !message.isEmpty() ? message
-                : "Start: poziom " + Integer.getInteger("pixel.startLevel", game.startingConfig().offlineStartLevel())
+                : Messages.get("vocation_select_screen.start_poziom") + Integer.getInteger("pixel.startLevel", game.startingConfig().offlineStartLevel())
                 + (towns.selected() != null ? ", " + towns.selected().name() : "");
         float mid = back.x + back.width + GAP, midW = create.x - GAP - mid;
         game.font().setColor(message.isEmpty() ? Color.GRAY : Color.SALMON);

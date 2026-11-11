@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.character.PlayerCharacter;
@@ -27,7 +28,9 @@ public final class Store {
     public enum Tab {
         SERVICES("uslugi", "Usługi"), PREMIUM("premium", "Premium"), OUTFITS("outfity", "Outfity");
 
-        public final String key, label;
+        public final String key;
+        private final String label;
+        public String label() { return Messages.tr(label); }
 
         Tab(String key, String label) {
             this.key = key;
@@ -52,23 +55,23 @@ public final class Store {
     public static List<Offer> offers(GameSession s) {
         PlayerCharacter pc = s.character();
         List<Offer> out = new ArrayList<>();
-        out.add(new Offer("premium", "Konto premium", "rejsy statkami między portami", GameSession.PREMIUM_PRICE,
-                pc.isPremium() ? "masz już konto premium" : null, "pearl"));
-        String promo = pc.isPromoted() ? "już jesteś " + pc.vocationTitle()
-                : !pc.isPremium() ? "najpierw konto premium"
-                : pc.level() < GameSession.PROMOTION_LEVEL ? "od poziomu " + GameSession.PROMOTION_LEVEL : null;
-        out.add(new Offer("promote", "Promocja: " + pc.vocation().promotedName(), "znak przy postaci, regeneracja o połowę szybsza",
+        out.add(new Offer("premium", Messages.get("store.konto_premium"), Messages.get("store.rejsy_statkami_miedzy_portami"), GameSession.PREMIUM_PRICE,
+                pc.isPremium() ? Messages.get("store.masz_juz_konto_premium") : null, "pearl"));
+        String promo = pc.isPromoted() ? Messages.get("store.juz_jestes") + pc.vocationTitle()
+                : !pc.isPremium() ? Messages.get("store.najpierw_konto_premium")
+                : pc.level() < GameSession.PROMOTION_LEVEL ? Messages.get("hud.od_poziomu") + GameSession.PROMOTION_LEVEL : null;
+        out.add(new Offer("promote", Messages.get("hud.promocja") + pc.vocation().promotedName(), Messages.get("store.znak_przy_postaci_regeneracja"),
                 GameSession.PROMOTION_PRICE, promo, "grimtooth_crown"));
-        out.add(new Offer("bless", "Błogosławieństwa (pięć zwykłych)", "każde: -8% straty doświadczenia po śmierci",
-                s.bulkBlessingPrice(), pc.adventurerBlessing() ? "chroni cię Błogosławieństwo Poszukiwacza (do poz. "
-                        + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL + ")" : s.bulkBlessingPrice() == 0 ? "masz już wszystkie" : null, "healing_herb"));
+        out.add(new Offer("bless", Messages.get("bless.store_title"), Messages.get("bless.store_desc"),
+                s.bulkBlessingPrice(), pc.adventurerBlessing() ? Messages.get("bless.store_adventurer", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL)
+                        : s.bulkBlessingPrice() == 0 ? Messages.get("bless.store_all") : null, "healing_herb"));
         for (Enchantments.Kind k : Enchantments.Kind.values()) {
             if (!k.smith()) continue;
             Enchantments e = pc.enchantments();
-            out.add(new Offer("enchant_" + k.name().toLowerCase(java.util.Locale.ROOT), k.label() + " (1 h)", k.effect() + " przez godzinę polowania",
-                    Enchantments.price(k, pc.level()), e.canExtend(k) ? null : "zapas na " + Enchantments.describe(e.remainingMs(k)), null));
+            out.add(new Offer("enchant_" + k.name().toLowerCase(java.util.Locale.ROOT), k.label() + " (1 h)", k.effect() + Messages.get("store.przez_godzine_polowania"),
+                    Enchantments.price(k, pc.level()), e.canExtend(k) ? null : Messages.get("store.zapas_na") + Enchantments.describe(e.remainingMs(k)), null));
         }
-        addItem(s, out, "saddle", "Wierzchowiec: koń", "koń na zawsze, +60 szybkości (użyj siodła)", pc.hasMount() ? "masz już konia" : null);
+        addItem(s, out, "saddle", Messages.get("store.wierzchowiec_kon"), Messages.get("store.kon_na_zawsze_60"), pc.hasMount() ? Messages.get("store.masz_juz_konia") : null);
         for (String pet : PETS) addItem(s, out, pet, null, null, null);
         return out;
     }
@@ -93,18 +96,18 @@ public final class Store {
      */
     public static List<String[]> rows(GameSession s, Tab tab) {
         List<String[]> rows = new ArrayList<>();
-        for (Tab t : Tab.values()) rows.add(new String[] {t.label, "", "", TAB_ACTION + t.key, t == tab ? "tab_on" : "tab"});
+        for (Tab t : Tab.values()) rows.add(new String[] {t.label(), "", "", TAB_ACTION + t.key, t == tab ? "tab_on" : "tab"});
         PlayerCharacter pc = s.character();
         if (tab == Tab.OUTFITS) {
             int now = pc.outfit();
             for (int i = 0; i < pl.fawizja.pixel.character.Outfit.count(); i++) {
-                rows.add(new String[] {"Kolor stroju: " + pl.fawizja.pixel.character.Outfit.name(i),
-                        i == now ? "noszony teraz" : "za darmo - dotknij, aby założyć", "", "outfit:" + i});
+                rows.add(new String[] {Messages.get("store.kolor_stroju") + pl.fawizja.pixel.character.Outfit.name(i),
+                        i == now ? Messages.get("game_screen.noszony_teraz") : Messages.get("store.za_darmo_dotknij_aby"), "", "outfit:" + i});
             }
             for (StoreOutfits.Entry e : StoreOutfits.all()) {
-                String price = e.price() > 0 ? String.format("%,d gp", e.price()) : "za darmo";
+                String price = e.price() > 0 ? String.format("%,d gp", e.price()) : Messages.get("store.za_darmo");
                 // "wkrotce": zwykly (czytelny) wiersz z dopiskiem; dotkniecie mowi tylko, ze stroj bedzie pozniej
-                rows.add(new String[] {"Strój: " + e.name() + (e.soon() ? " (wkrótce)" : ""), (e.soon() ? "" : price + " - ") + e.desc(), "",
+                rows.add(new String[] {Messages.get("game_session.stroj") + e.name() + (e.soon() ? Messages.get("store.wkrotce") : ""), (e.soon() ? "" : price + " - ") + e.desc(), "",
                         "store:soon:" + e.key()});
             }
             return rows;
@@ -121,14 +124,14 @@ public final class Store {
     /** Co daje konto premium (wiersze tylko z tekstem: akcja "ach:none", znacznik "info"): to, co gra naprawde sprawdza. */
     public static List<String[]> premiumInfo(PlayerCharacter pc) {
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"Twoje konto: " + (pc.isPremium() ? "premium" : "darmowe"),
-                pc.isPremium() ? "premium bez limitu czasu" : String.format("premium raz na zawsze za %,d gp z banku", GameSession.PREMIUM_PRICE), "", "ach:none", "info"});
-        rows.add(new String[] {"Rejsy statkami", "kapitanowie zabiorą cię do innych portów i na Wulkan Pożogi (wystarczy też promocja)", "", "ach:none", "info"});
-        rows.add(new String[] {"Premia staminy", "150% doświadczenia przy zielonej staminie", "", "ach:none", "info"});
-        rows.add(new String[] {"Charmy", pl.fawizja.pixel.charm.Charms.PREMIUM_SLOTS + " miejsc zamiast "
+        rows.add(new String[] {Messages.get("store.twoje_konto") + (pc.isPremium() ? "premium" : "darmowe"),
+                pc.isPremium() ? Messages.get("store.premium_bez_limitu_czasu") : String.format(Messages.get("store.premium_raz_na_zawsze"), GameSession.PREMIUM_PRICE), "", "ach:none", "info"});
+        rows.add(new String[] {Messages.get("store.rejsy_statkami"), Messages.get("store.kapitanowie_zabiora_cie_do"), "", "ach:none", "info"});
+        rows.add(new String[] {Messages.get("store.premia_staminy"), Messages.get("store.150_doswiadczenia_przy_zielone"), "", "ach:none", "info"});
+        rows.add(new String[] {Messages.get("bestiary_card.charmy"), pl.fawizja.pixel.charm.Charms.PREMIUM_SLOTS + Messages.get("store.miejsc_zamiast")
                 + pl.fawizja.pixel.charm.Charms.FREE_SLOTS, "", "ach:none", "info"});
-        rows.add(new String[] {"Promocja profesji", "od poziomu " + GameSession.PROMOTION_LEVEL + ", szybsza regeneracja", "", "ach:none", "info"});
-        rows.add(new String[] {"Koło Przeznaczenia", "od poziomu " + pl.fawizja.pixel.wheel.DestinyWheel.MIN_LEVEL + " z promocją", "", "ach:none", "info"});
+        rows.add(new String[] {Messages.get("store.promocja_profesji"), Messages.get("hud.od_poziomu") + GameSession.PROMOTION_LEVEL + Messages.get("store.szybsza_regeneracja"), "", "ach:none", "info"});
+        rows.add(new String[] {Messages.get("store.kolo_przeznaczenia"), Messages.get("hud.od_poziomu") + pl.fawizja.pixel.wheel.DestinyWheel.MIN_LEVEL + Messages.get("store.z_promocja"), "", "ach:none", "info"});
         return rows;
     }
 
@@ -138,7 +141,7 @@ public final class Store {
         long price = itemPrice(s, key);
         if (price <= 0) return;
         pl.fawizja.pixel.item.ItemType t = s.items().byKey(key);
-        if (blocked == null && s.character().backpack().count(t.id()) > 0) blocked = "masz w plecaku";
+        if (blocked == null && s.character().backpack().count(t.id()) > 0) blocked = Messages.get("store.masz_w_plecaku");
         if (desc == null) {
             // pierwsze zdanie opisu przedmiotu ("Wierny piesek z Varden")
             desc = t.description() == null ? "" : t.description();

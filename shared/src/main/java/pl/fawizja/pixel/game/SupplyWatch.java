@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +34,8 @@ public final class SupplyWatch {
             int now = backpack.count(t.id());
             Integer before = last.put(t.id(), now);
             if (!hunting || before == null || now >= before) continue;
-            if (now == 0) out.add("Skończyło się: " + t.name() + ".");
-            else if (before > LOW && now <= LOW) out.add("Zostało tylko " + now + ": " + t.name() + ".");
+            if (now == 0) out.add(Messages.get("supply_watch.skonczylo_sie") + t.name() + ".");
+            else if (before > LOW && now <= LOW) out.add(Messages.get("supply_watch.zostalo_tylko") + now + ": " + t.name() + ".");
         }
         return out;
     }

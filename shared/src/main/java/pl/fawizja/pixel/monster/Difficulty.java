@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.monster;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Trudnosc potwora wzgledem poziomu postaci (kolor i opis imienia celu). */
 public enum Difficulty {
     TRIVIAL("bardzo łatwy", 0.6f, 0.6f, 0.6f),
@@ -8,7 +9,9 @@ public enum Difficulty {
     HARD("trudny", 1f, 0.8f, 0.25f),
     DEADLY("śmiertelny", 1f, 0.3f, 0.25f);
 
-    public final String label;
+    private final String label;
+
+    public String label() { return Messages.tr(label); }
     public final float r, g, b;
 
     Difficulty(String label, float r, float g, float b) {

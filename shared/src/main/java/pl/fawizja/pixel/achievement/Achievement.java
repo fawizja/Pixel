@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.achievement;
 
+import pl.fawizja.pixel.i18n.Messages;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.character.Skill;
 
@@ -50,8 +51,8 @@ public enum Achievement {
         this.target = target;
     }
 
-    public String title() { return title; }
-    public String goal() { return goal; }
+    public String title() { return Messages.tr(title); }
+    public String goal() { return Messages.tr(goal); }
     public Kind kind() { return kind; }
     public long target() { return target; }
 

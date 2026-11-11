@@ -1,6 +1,8 @@
 package pl.fawizja.pixel.settings;
 
 import java.util.HashMap;
+import pl.fawizja.pixel.i18n.Language;
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Map;
 
 /**
@@ -23,6 +25,8 @@ public final class GameSettings {
     /** Rozmiar joysticka w procentach domyslnego (etap 17: sterowanie mobilne). */
     public static final int[] JOY_SIZE_CHOICES = {80, 100, 125, 150};
 
+    /** Jezyk interfejsu (angielski dla nowych instalacji); zmiana dziala od razu ({@link Messages#setLanguage}). */
+    private Language language = Language.DEFAULT;
     private int fpsCap = 60;
     private boolean batterySaver;
     private boolean highLighting = true;
@@ -57,6 +61,22 @@ public final class GameSettings {
     private int page;
     /** Wierszy ustawien na stronie panelu (ostatni wiersz strony przelacza strone). */
     public static final int PAGE_SIZE = 8;
+
+    public Language language() { return language; }
+
+    /** Ustawia jezyk ustawien i od razu cala gre (teksty biora jezyk z {@link Messages}). */
+    public void setLanguage(Language l) {
+        language = l == null ? Language.DEFAULT : l;
+        Messages.setLanguage(language);
+    }
+
+    public void cycleLanguage() { setLanguage(language.next()); }
+
+    /** Jezyk z zapisanych ustawien (przed zaladowaniem calosci, np. w menu); brak zapisu = angielski. */
+    public static Language languageOf(Map<String, ?> m) {
+        Object v = m == null ? null : m.get("lang");
+        return Language.byCode(v == null ? null : v.toString(), Language.DEFAULT);
+    }
 
     public int fpsCap() { return fpsCap; }
     public boolean batterySaver() { return batterySaver; }
@@ -155,6 +175,7 @@ public final class GameSettings {
     /** Obsluga przycisku z panelu ustawien ("settings:fps" itd.); false dla nieznanej akcji. */
     public boolean apply(String action) {
         switch (action) {
+            case "settings:lang": cycleLanguage(); return true;
             case "settings:fps": cycleFps(); return true;
             case "settings:battery": toggleBatterySaver(); return true;
             case "settings:light": toggleHighLighting(); return true;
@@ -177,6 +198,12 @@ public final class GameSettings {
             case "settings:mmzoom-": setMinimapZoom(minimapZoom - 1); return true;
             default:
                 // suwak czulosci: "settings:sens:N" ustawia wartosc wprost
+                if (action.startsWith("settings:lang:")) {
+                    Language l = Language.byCode(action.substring(14), null);
+                    if (l == null) return false;
+                    setLanguage(l);
+                    return true;
+                }
                 if (action.startsWith("settings:mmzoom:")) {
                     try {
                         setMinimapZoom(Integer.parseInt(action.substring(16).trim()));
@@ -219,6 +246,7 @@ public final class GameSettings {
 
     public Map<String, String> toMap() {
         Map<String, String> m = new HashMap<>();
+        m.put("lang", language.code);
         m.put("fps", String.valueOf(fpsCap));
         m.put("battery", String.valueOf(batterySaver));
         m.put("light", String.valueOf(highLighting));
@@ -243,6 +271,7 @@ public final class GameSettings {
     public static GameSettings fromMap(Map<String, ?> m) {
         GameSettings s = new GameSettings();
         if (m == null) return s;
+        s.language = languageOf(m);
         s.fpsCap = choice(m.get("fps"), FPS_CHOICES, s.fpsCap);
         // nowy klucz "sound": zapisany wczesniej "volume" (domyslnie 60%) nie wlacza dzwieku z powrotem
         s.volume = choice(m.get("sound"), VOLUME_CHOICES, s.volume);
@@ -294,7 +323,7 @@ public final class GameSettings {
         int from = page * PAGE_SIZE, to = Math.min(all.length, from + PAGE_SIZE);
         String[][] out = new String[to - from + 1][];
         System.arraycopy(all, from, out, 0, to - from);
-        out[to - from] = new String[] {"settings:page", "Więcej ustawień (strona " + (page + 1) + " z " + pages() + ")"};
+        out[to - from] = new String[] {"settings:page", Messages.get("game_settings.wiecej_ustawien_strona") + (page + 1) + Messages.get("common.z") + pages() + ")"};
         return out;
     }
 
@@ -304,32 +333,33 @@ public final class GameSettings {
         String[][] base = baseRows();
         // sterowanie na koncu: "pod kciukiem" tylko dla klasycznego joysticka, rozmiar - gdy jest co rysowac
         java.util.List<String[]> out = new java.util.ArrayList<>(java.util.Arrays.asList(base));
-        out.add(new String[] {"settings:controls", "Sterowanie: " + c.label});
-        out.add(new String[] {"settings:sens", "Czułość: " + sensitivity + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
+        out.add(new String[] {"settings:controls", Messages.get("game_screen.sterowanie") + c.label()});
+        out.add(new String[] {"settings:sens", Messages.get("game_settings.czulosc") + sensitivity + Messages.get("common.z") + pl.fawizja.pixel.movement.ControlTuning.MAX});
         if (c == pl.fawizja.pixel.movement.ControlScheme.CLASSIC) {
-            out.add(new String[] {"settings:joyfloat", "Joystick: " + (floatingJoystick ? "pod kciukiem (przeciągnij po mapie)" : "tylko w rogu ekranu")});
+            out.add(new String[] {"settings:joyfloat", Messages.get("game_settings.joystick") + (floatingJoystick ? Messages.get("game_settings.pod_kciukiem_przeciagnij_po") : Messages.get("game_settings.tylko_w_rogu_ekranu"))});
         }
         if (c != pl.fawizja.pixel.movement.ControlScheme.HOLD) {
-            out.add(new String[] {"settings:joysize", "Rozmiar " + (c == pl.fawizja.pixel.movement.ControlScheme.DPAD ? "krzyżyka" : "joysticka") + ": " + joystickSize + "%"});
+            out.add(new String[] {"settings:joysize", Messages.get("game_settings.rozmiar") + (c == pl.fawizja.pixel.movement.ControlScheme.DPAD ? Messages.get("game_settings.krzyzyka") : "joysticka") + ": " + joystickSize + "%"});
         }
         return out.toArray(new String[0][]);
     }
 
     private String[][] baseRows() {
         return new String[][] {
-            {"settings:fps", "Limit FPS: " + fpsCap + (batterySaver ? " (bateria: " + effectiveFpsCap() + ")" : "")},
-            {"settings:battery", "Oszczędzanie baterii: " + (batterySaver ? "włączone" : "wyłączone")},
-            {"settings:light", "Światło: " + (highLighting ? "wysoka jakość" : "niska jakość")},
-            {"settings:numbers", "Liczby obrażeń: " + (damageNumbers ? "pokazuj" : "ukryj")},
-            {"settings:sound", "Dźwięk: " + (volume == 0 ? "wyłączony" : volume + "%")},
-            {"settings:loot", "Łupy z ciał: " + (autoLoot ? "automatycznie" : "dotknięciem")},
-            {"settings:weather", "Pogoda: " + (weather ? "pokazuj" : "ukryj")},
-            {"settings:heal", "Leczenie samo: " + (autoHeal == 0 ? "wyłączone" : "poniżej " + autoHeal + "% HP")},
-            {"settings:mana", "Mikstura many sama: " + (autoMana == 0 ? "wyłączona" : "poniżej " + autoMana + "% MP")},
-            {"settings:eat", "Jedzenie samo: " + (autoEat ? "gdy kończy się sytość" : "wyłączone")},
-            {"settings:target", "Cel sam: " + (autoTarget ? "najbliższy potwór obok" : "wyłączony")},
-            {"settings:vibrate", "Wibracje: " + (vibrate ? "przy niskim zdrowiu" : "wyłączone")},
-            {"settings:ui", "Wygląd interfejsu: " + (newUi ? "nowy" : "klasyczny")},
+            {"settings:lang", Messages.get("settings.language") + ": " + language.label},
+            {"settings:fps", Messages.get("settings.limit_fps") + fpsCap + (batterySaver ? "" + Messages.get("settings.bateria_prefix") + effectiveFpsCap() + ")" : "")},
+            {"settings:battery", Messages.get("game_settings.oszczedzanie_baterii") + (batterySaver ? Messages.get("hud.wlaczone") : Messages.get("hud.wylaczone"))},
+            {"settings:light", Messages.get("game_settings.swiatlo") + (highLighting ? Messages.get("game_settings.wysoka_jakosc") : Messages.get("game_settings.niska_jakosc"))},
+            {"settings:numbers", Messages.get("game_settings.liczby_obrazen") + (damageNumbers ? Messages.get("settings.pokazuj") : Messages.get("settings.ukryj"))},
+            {"settings:sound", Messages.get("game_settings.dzwiek") + (volume == 0 ? Messages.get("game_settings.wylaczony") : volume + "%")},
+            {"settings:loot", Messages.get("game_settings.lupy_z_cial") + (autoLoot ? Messages.get("settings.automatycznie") : Messages.get("game_settings.dotknieciem"))},
+            {"settings:weather", Messages.get("game_settings.pogoda") + (weather ? Messages.get("settings.pokazuj") : Messages.get("settings.ukryj"))},
+            {"settings:heal", Messages.get("game_settings.leczenie_samo") + (autoHeal == 0 ? Messages.get("hud.wylaczone") : Messages.get("game_settings.ponizej") + autoHeal + "% HP")},
+            {"settings:mana", Messages.get("game_settings.mikstura_many_sama") + (autoMana == 0 ? Messages.get("game_settings.wylaczona") : Messages.get("game_settings.ponizej") + autoMana + "% MP")},
+            {"settings:eat", Messages.get("game_settings.jedzenie_samo") + (autoEat ? Messages.get("game_settings.gdy_konczy_sie_sytosc") : Messages.get("hud.wylaczone"))},
+            {"settings:target", Messages.get("game_settings.cel_sam") + (autoTarget ? Messages.get("game_settings.najblizszy_potwor_obok") : Messages.get("game_settings.wylaczony"))},
+            {"settings:vibrate", Messages.get("game_settings.wibracje") + (vibrate ? Messages.get("game_settings.przy_niskim_zdrowiu") : Messages.get("hud.wylaczone"))},
+            {"settings:ui", Messages.get("game_settings.wyglad_interfejsu") + (newUi ? Messages.get("hud.ui_nowy") : Messages.get("hud.ui_klasyczny"))},
         };
     }
 }

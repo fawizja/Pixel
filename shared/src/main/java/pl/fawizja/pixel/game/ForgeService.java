@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.economy.Money;
@@ -16,11 +17,11 @@ import pl.fawizja.pixel.item.ItemType;
  * Kuznia i nasycenia u kowala ({@link Forge}, {@link Imbuement}): fuzja, transfer, wymiana pylu i odlamkow, limit pylu,
  * nasycanie zalozonego sprzetu oraz efekty w czasie gry (Rozped, Transcendencja, uplyw czasu nasycen). Kazda operacja
  * jest atomowa (kopia plecaka, potem zatwierdzenie) i liczona tam, gdzie gra jest zrodlem prawdy (serwer albo offline).
- * Komunikaty zaczynaja sie od {@link #PREFIX} - okno kowala pokazuje ostatni wynik.
+ * Komunikaty zaczynaja sie od {@link #prefix()} - okno kowala pokazuje ostatni wynik.
  */
 public final class ForgeService {
 
-    public static final String PREFIX = "Kuźnia: ";
+    public static String prefix() { return Messages.tr(Messages.get("forge_service.kuznia")); }
 
     private final GameSession session;
     private final Random rng;
@@ -36,7 +37,7 @@ public final class ForgeService {
     private EventLog log() { return session.log(); }
 
     private boolean fail(long now, String msg) {
-        log().add(now, EventLog.Kind.WARNING, PREFIX + msg);
+        log().add(now, EventLog.Kind.WARNING, prefix() + msg);
         return false;
     }
 
@@ -67,21 +68,21 @@ public final class ForgeService {
     public boolean fuse(int slotA, int slotB, boolean coreChance, boolean coreProtect, long now) {
         PlayerCharacter pc = pc();
         Container bp = pc.backpack();
-        if (slotA == slotB || slotA < 0 || slotB < 0 || slotA >= bp.size() || slotB >= bp.size()) return fail(now, "wybierz dwa przedmioty z plecaka.");
+        if (slotA == slotB || slotA < 0 || slotB < 0 || slotA >= bp.size() || slotB >= bp.size()) return fail(now, Messages.get("forge_service.wybierz_dwa_przedmioty_z"));
         ItemStack a = bp.get(slotA);
         ItemStack b = bp.get(slotB);
         if (a == null || b == null || a.itemId() != b.itemId() || a.tier() != b.tier()) {
-            return fail(now, "do fuzji potrzeba dwóch takich samych przedmiotów o tym samym tierze.");
+            return fail(now, Messages.get("forge_service.do_fuzji_potrzeba_dwoch"));
         }
         ItemType t = items().get(a.itemId());
         int max = Forge.maxTier(t);
-        if (max == 0) return fail(now, t.name() + " nie ma klasy kuźni (broń, hełm, zbroja, spodnie i buty od niepospolitych).");
-        if (a.tier() >= max) return fail(now, Forge.name(t, a) + " ma już najwyższy tier klasy " + Forge.classOf(t) + ".");
+        if (max == 0) return fail(now, t.name() + Messages.get("forge_service.nie_ma_klasy_kuzni"));
+        if (a.tier() >= max) return fail(now, Forge.name(t, a) + Messages.get("forge_service.ma_juz_najwyzszy_tier") + Forge.classOf(t) + ".");
         int cores = (coreChance ? 1 : 0) + (coreProtect ? 1 : 0);
-        if (bp.countPlain(coreId()) < cores) return fail(now, "brakuje rdzeni (" + cores + ").");
-        if (pc.forgeDust() < Forge.FUSION_DUST) return fail(now, "fuzja kosztuje " + Forge.FUSION_DUST + " pyłu (masz " + pc.forgeDust() + ").");
+        if (bp.countPlain(coreId()) < cores) return fail(now, Messages.get("forge_service.brakuje_rdzeni") + cores + ").");
+        if (pc.forgeDust() < Forge.FUSION_DUST) return fail(now, Messages.get("forge_service.fuzja_kosztuje") + Forge.FUSION_DUST + Messages.get("forge_service.pylu_masz") + pc.forgeDust() + ").");
         long gold = Forge.fusionGold(t, a.tier() + 1);
-        if (funds() < gold) return fail(now, "fuzja kosztuje " + gp(gold) + " (plecak i konto).");
+        if (funds() < gold) return fail(now, Messages.get("forge_service.fuzja_kosztuje") + gp(gold) + Messages.get("forge_service.plecak_i_konto"));
         // pierwszy (zostaje) to ten z wyzszym ulepszeniem albo nasyceniami; drugi moze przepasc
         boolean swap = b.upgrade() > a.upgrade() || (b.upgrade() == a.upgrade() && b.imbuements().size() > a.imbuements().size());
         int firstSlot = swap ? slotB : slotA;
@@ -94,22 +95,22 @@ public final class ForgeService {
         tx.takeFromSlot(secondSlot, 1);
         tx.putInSlot(firstSlot, first.withTier(f.firstTier()));
         if (f.secondTier() >= 0) tx.putInSlot(secondSlot, second.withTier(f.secondTier()));
-        if (f.payCores() && cores > 0 && !tx.remove(coreId(), cores).ok()) return fail(now, "brakuje rdzeni.");
+        if (f.payCores() && cores > 0 && !tx.remove(coreId(), cores).ok()) return fail(now, Messages.get("forge_service.brakuje_rdzeni_2"));
         long fromBank = f.payGold() ? payFrom(tx, gold) : 0;
-        if (fromBank < 0) return fail(now, "za mało złota.");
-        if (f.payDust() && !pc.spendDust(Forge.FUSION_DUST)) return fail(now, "za mało pyłu.");
+        if (fromBank < 0) return fail(now, Messages.get("forge_service.za_malo_zlota"));
+        if (f.payDust() && !pc.spendDust(Forge.FUSION_DUST)) return fail(now, Messages.get("forge_service.za_malo_pylu"));
         bp.commitFrom(tx);
         if (fromBank > 0) pc.bank().debit(fromBank);
-        String paid = (f.payDust() ? Forge.FUSION_DUST + " pyłu" : "bez pyłu") + ", " + (f.payGold() ? gp(gold) : "bez złota")
-                + (cores > 0 ? ", " + (f.payCores() ? cores + " rdz." : "rdzenie zostały") : "");
+        String paid = (f.payDust() ? Forge.FUSION_DUST + Messages.get("hud.pylu_3") : Messages.get("forge_service.bez_pylu")) + ", " + (f.payGold() ? gp(gold) : Messages.get("forge_service.bez_zlota"))
+                + (cores > 0 ? ", " + (f.payCores() ? cores + " rdz." : Messages.get("forge_service.rdzenie_zostaly")) : "");
         if (f.success()) {
             String bonus = Forge.bonusText(f.bonus());
-            log().add(now, EventLog.Kind.SYSTEM, PREFIX + "fuzja udana! " + Forge.name(t, first.withTier(f.firstTier()))
-                    + (bonus.isEmpty() ? "" : "; premia: " + bonus) + " (" + paid + ").");
+            log().add(now, EventLog.Kind.SYSTEM, prefix() + Messages.get("forge_service.fuzja_udana") + Forge.name(t, first.withTier(f.firstTier()))
+                    + (bonus.isEmpty() ? "" : Messages.get("forge_service.premia") + bonus) + " (" + paid + ").");
         } else {
-            String second2 = f.secondTier() < 0 ? "drugi przedmiot przepadł" : f.secondTier() == a.tier()
-                    ? "drugi przedmiot ocalał bez zmian" : "drugi przedmiot stracił tier (T" + f.secondTier() + ")";
-            log().add(now, EventLog.Kind.WARNING, PREFIX + "fuzja nieudana - " + second2 + " (" + paid + ").");
+            String second2 = f.secondTier() < 0 ? Messages.get("forge_service.drugi_przedmiot_przepadl") : f.secondTier() == a.tier()
+                    ? Messages.get("forge_service.drugi_przedmiot_ocalal_bez") : Messages.get("forge_service.drugi_przedmiot_stracil_tier") + f.secondTier() + ")";
+            log().add(now, EventLog.Kind.WARNING, prefix() + Messages.get("forge_service.fuzja_nieudana") + second2 + " (" + paid + ").");
         }
         return f.success();
     }
@@ -119,36 +120,36 @@ public final class ForgeService {
         PlayerCharacter pc = pc();
         Container bp = pc.backpack();
         if (donorSlot == receiverSlot || donorSlot < 0 || receiverSlot < 0 || donorSlot >= bp.size() || receiverSlot >= bp.size()) {
-            return fail(now, "wybierz dawcę i biorcę z plecaka.");
+            return fail(now, Messages.get("forge_service.wybierz_dawce_i_biorce"));
         }
         ItemStack d = bp.get(donorSlot);
         ItemStack r = bp.get(receiverSlot);
-        if (d == null || r == null) return fail(now, "wybierz dawcę i biorcę z plecaka.");
+        if (d == null || r == null) return fail(now, Messages.get("forge_service.wybierz_dawce_i_biorce"));
         ItemType dt = items().get(d.itemId());
         ItemType rt = items().get(r.itemId());
-        if (d.tier() < 2) return fail(now, "dawca musi mieć co najmniej tier 2.");
-        if (r.tier() != 0) return fail(now, "biorca musi mieć tier 0.");
+        if (d.tier() < 2) return fail(now, Messages.get("forge_service.dawca_musi_miec_co"));
+        if (r.tier() != 0) return fail(now, Messages.get("forge_service.biorca_musi_miec_tier"));
         if (Forge.classOf(dt) == 0 || Forge.classOf(dt) != Forge.classOf(rt) || dt.slot() != rt.slot()) {
-            return fail(now, "transfer tylko na przedmiot tej samej klasy i rodzaju.");
+            return fail(now, Messages.get("forge_service.transfer_tylko_na_przedmiot"));
         }
         int result = d.tier() - 1;
         int cores = Forge.transferCores(dt, result);
         long gold = Forge.transferGold(dt, d.tier());
-        if (bp.countPlain(coreId()) < cores) return fail(now, "transfer na T" + result + " wymaga " + cores + " rdz.");
-        if (pc.forgeDust() < Forge.TRANSFER_DUST) return fail(now, "transfer kosztuje " + Forge.TRANSFER_DUST + " pyłu.");
-        if (funds() < gold) return fail(now, "transfer kosztuje " + gp(gold) + " (plecak i konto).");
+        if (bp.countPlain(coreId()) < cores) return fail(now, Messages.get("forge_service.transfer_na_t") + result + " wymaga " + cores + " rdz.");
+        if (pc.forgeDust() < Forge.TRANSFER_DUST) return fail(now, Messages.get("forge_service.transfer_kosztuje") + Forge.TRANSFER_DUST + Messages.get("forge_service.pylu"));
+        if (funds() < gold) return fail(now, Messages.get("forge_service.transfer_kosztuje") + gp(gold) + Messages.get("forge_service.plecak_i_konto"));
         Container tx = bp.copy();
         tx.takeFromSlot(donorSlot, 1);
         tx.takeFromSlot(receiverSlot, 1);
         tx.putInSlot(receiverSlot, r.withTier(result));
-        if (cores > 0 && !tx.remove(coreId(), cores).ok()) return fail(now, "brakuje rdzeni.");
+        if (cores > 0 && !tx.remove(coreId(), cores).ok()) return fail(now, Messages.get("forge_service.brakuje_rdzeni_2"));
         long fromBank = payFrom(tx, gold);
-        if (fromBank < 0) return fail(now, "za mało złota.");
-        if (!pc.spendDust(Forge.TRANSFER_DUST)) return fail(now, "za mało pyłu.");
+        if (fromBank < 0) return fail(now, Messages.get("forge_service.za_malo_zlota"));
+        if (!pc.spendDust(Forge.TRANSFER_DUST)) return fail(now, Messages.get("forge_service.za_malo_pylu"));
         bp.commitFrom(tx);
         if (fromBank > 0) pc.bank().debit(fromBank);
-        log().add(now, EventLog.Kind.SYSTEM, PREFIX + "transfer udany: " + Forge.name(rt, r.withTier(result)) + "; "
-                + Forge.name(dt, d) + " przepada (" + Forge.TRANSFER_DUST + " pyłu, " + cores + " rdz., " + gp(gold) + ").");
+        log().add(now, EventLog.Kind.SYSTEM, prefix() + Messages.get("forge_service.transfer_udany") + Forge.name(rt, r.withTier(result)) + "; "
+                + Forge.name(dt, d) + Messages.get("forge_service.przepada") + Forge.TRANSFER_DUST + Messages.get("hud.pylu") + cores + " rdz., " + gp(gold) + ").");
         return true;
     }
 
@@ -159,22 +160,22 @@ public final class ForgeService {
         PlayerCharacter pc = pc();
         Container bp = pc.backpack();
         if ("slivers".equals(kind)) {
-            if (pc.forgeDust() < Forge.SLIVER_DUST) return fail(now, "wymiana kosztuje " + Forge.SLIVER_DUST + " pyłu (masz " + pc.forgeDust() + ").");
+            if (pc.forgeDust() < Forge.SLIVER_DUST) return fail(now, Messages.get("forge_service.wymiana_kosztuje") + Forge.SLIVER_DUST + Messages.get("forge_service.pylu_masz") + pc.forgeDust() + ").");
             ItemStack add = new ItemStack(sliverId(), Forge.SLIVERS_PER_CONVERSION);
-            if (!bp.canAdd(add.itemId(), add.count())) return fail(now, "brak miejsca w plecaku.");
+            if (!bp.canAdd(add.itemId(), add.count())) return fail(now, Messages.get("forge_service.brak_miejsca_w_plecaku"));
             bp.add(add);
             pc.spendDust(Forge.SLIVER_DUST);
-            log().add(now, EventLog.Kind.SYSTEM, PREFIX + Forge.SLIVER_DUST + " pyłu na " + Forge.SLIVERS_PER_CONVERSION
-                    + " odłamki (pył " + pc.forgeDust() + "/" + pc.dustLimit() + ").");
+            log().add(now, EventLog.Kind.SYSTEM, prefix() + Forge.SLIVER_DUST + Messages.get("forge_service.pylu_na") + Forge.SLIVERS_PER_CONVERSION
+                    + Messages.get("forge_service.odlamki_pyl") + pc.forgeDust() + "/" + pc.dustLimit() + ").");
             return true;
         }
         if ("core".equals(kind)) {
-            if (bp.countPlain(sliverId()) < Forge.CORE_SLIVERS) return fail(now, "rdzeń kosztuje " + Forge.CORE_SLIVERS + " odłamków.");
+            if (bp.countPlain(sliverId()) < Forge.CORE_SLIVERS) return fail(now, Messages.get("forge_service.rdzen_kosztuje") + Forge.CORE_SLIVERS + Messages.get("forge_service.odlamkow"));
             Container tx = bp.copy();
             tx.remove(sliverId(), Forge.CORE_SLIVERS);
-            if (!tx.add(ItemStack.of(coreId())).ok()) return fail(now, "brak miejsca w plecaku.");
+            if (!tx.add(ItemStack.of(coreId())).ok()) return fail(now, Messages.get("forge_service.brak_miejsca_w_plecaku"));
             bp.commitFrom(tx);
-            log().add(now, EventLog.Kind.SYSTEM, PREFIX + Forge.CORE_SLIVERS + " odłamków na wzniosły rdzeń.");
+            log().add(now, EventLog.Kind.SYSTEM, prefix() + Forge.CORE_SLIVERS + Messages.get("forge_service.odlamkow_na_wzniosly_rdzen"));
             return true;
         }
         return false;
@@ -184,10 +185,10 @@ public final class ForgeService {
     public boolean raiseLimit(long now) {
         PlayerCharacter pc = pc();
         int cost = Forge.raiseLimitCost(pc.dustLimit());
-        if (cost == 0) return fail(now, "limit pyłu jest już najwyższy (" + Forge.DUST_MAX_LIMIT + ").");
-        if (!pc.spendDust(cost)) return fail(now, "podniesienie limitu kosztuje " + cost + " pyłu (masz " + pc.forgeDust() + ").");
+        if (cost == 0) return fail(now, Messages.get("forge_service.limit_pylu_jest_juz") + Forge.DUST_MAX_LIMIT + ").");
+        if (!pc.spendDust(cost)) return fail(now, Messages.get("forge_service.podniesienie_limitu_kosztuje") + cost + Messages.get("forge_service.pylu_masz") + pc.forgeDust() + ").");
         pc.raiseDustLimit();
-        log().add(now, EventLog.Kind.SYSTEM, PREFIX + "limit pyłu " + pc.dustLimit() + " (" + cost + " pyłu).");
+        log().add(now, EventLog.Kind.SYSTEM, prefix() + Messages.get("forge_service.limit_pylu") + pc.dustLimit() + " (" + cost + Messages.get("forge_service.pylu_2"));
         return true;
     }
 
@@ -197,31 +198,31 @@ public final class ForgeService {
     public boolean imbue(EquipSlot slot, Imbuement kind, int level, long now) {
         PlayerCharacter pc = pc();
         ItemStack worn = pc.equipment().get(slot);
-        if (worn == null) return fail(now, "załóż przedmiot, który chcesz nasycić.");
+        if (worn == null) return fail(now, Messages.get("forge_service.zaloz_przedmiot_ktory_chcesz"));
         ItemType t = items().get(worn.itemId());
         int slots = Imbuement.slots(t);
-        if (slots == 0) return fail(now, t.name() + " nie ma miejsc na nasycenia.");
-        if (!kind.fits(t)) return fail(now, kind.label() + " nie pasuje do: " + t.name() + ".");
-        if (worn.imbuements().size() >= slots) return fail(now, t.name() + ": wszystkie miejsca zajęte (" + slots + ").");
-        if (worn.imbuements().conflicts(kind)) return fail(now, t.name() + " ma już nasycenie tego rodzaju.");
+        if (slots == 0) return fail(now, t.name() + Messages.get("forge_service.nie_ma_miejsc_na"));
+        if (!kind.fits(t)) return fail(now, kind.label() + Messages.get("forge_service.nie_pasuje_do") + t.name() + ".");
+        if (worn.imbuements().size() >= slots) return fail(now, t.name() + Messages.get("forge_service.wszystkie_miejsca_zajete") + slots + ").");
+        if (worn.imbuements().conflicts(kind)) return fail(now, t.name() + Messages.get("forge_service.ma_juz_nasycenie_tego"));
         if (level < 1 || level > 3) return false;
         Container tx = pc.backpack().copy();
         for (Imbuement.Ingredient in : kind.ingredients(level)) {
             ItemType it = items().byKeyOrNull(in.itemKey());
             if (it == null || tx.countPlain(it.id()) < in.count()) {
-                return fail(now, "brakuje składników: " + in.count() + "x " + (it == null ? in.itemKey() : it.name()) + ".");
+                return fail(now, Messages.get("forge_service.brakuje_skladnikow") + in.count() + "x " + (it == null ? in.itemKey() : it.name()) + ".");
             }
             tx.remove(it.id(), in.count());
         }
         long gold = Imbuement.GOLD[level];
-        if (Money.totalValue(tx) + pc.bank().balance() < gold) return fail(now, "nasycenie kosztuje " + gp(gold) + ".");
+        if (Money.totalValue(tx) + pc.bank().balance() < gold) return fail(now, Messages.get("forge_service.nasycenie_kosztuje") + gp(gold) + ".");
         long fromBank = payFrom(tx, gold);
-        if (fromBank < 0) return fail(now, "za mało złota.");
+        if (fromBank < 0) return fail(now, Messages.get("forge_service.za_malo_zlota"));
         pc.backpack().commitFrom(tx);
         if (fromBank > 0) pc.bank().debit(fromBank);
         pc.equipment().setDirect(slot, worn.withImbuements(worn.imbuements().with(kind, level)));
-        log().add(now, EventLog.Kind.SYSTEM, PREFIX + t.name() + ": " + kind.label() + " (" + Imbuement.LEVELS[level] + ") - "
-                + kind.effect(level) + " na 20 h walki (" + gp(gold) + ").");
+        log().add(now, EventLog.Kind.SYSTEM, prefix() + t.name() + ": " + kind.label() + " (" + Messages.tr(Imbuement.LEVELS[level]) + ") - "
+                + kind.effect(level) + Messages.get("forge_service.na_20_h_walki") + gp(gold) + ").");
         return true;
     }
 
@@ -229,15 +230,15 @@ public final class ForgeService {
     public boolean clearImbuement(EquipSlot slot, int index, long now) {
         PlayerCharacter pc = pc();
         ItemStack worn = pc.equipment().get(slot);
-        if (worn == null || index < 0 || index >= worn.imbuements().size()) return fail(now, "nie ma takiego nasycenia.");
+        if (worn == null || index < 0 || index >= worn.imbuements().size()) return fail(now, Messages.get("forge_service.nie_ma_takiego_nasycenia"));
         Container tx = pc.backpack().copy();
         long fromBank = payFrom(tx, Imbuement.CLEAR_COST);
-        if (fromBank < 0) return fail(now, "usunięcie nasycenia kosztuje " + gp(Imbuement.CLEAR_COST) + ".");
+        if (fromBank < 0) return fail(now, Messages.get("forge_service.usuniecie_nasycenia_kosztuje") + gp(Imbuement.CLEAR_COST) + ".");
         pc.backpack().commitFrom(tx);
         if (fromBank > 0) pc.bank().debit(fromBank);
         Imbuement k = worn.imbuements().slots().get(index).kind();
         pc.equipment().setDirect(slot, worn.withImbuements(worn.imbuements().without(index)));
-        log().add(now, EventLog.Kind.INFO, PREFIX + "usunięto " + k.label() + " (" + gp(Imbuement.CLEAR_COST) + ").");
+        log().add(now, EventLog.Kind.INFO, prefix() + Messages.get("forge_service.usunieto") + k.label() + " (" + gp(Imbuement.CLEAR_COST) + ").");
         return true;
     }
 
@@ -254,19 +255,19 @@ public final class ForgeService {
         boolean battle = session.combat().inBattle(now);
         if (battle) {
             for (String gone : pc.equipment().tickImbuements(dt)) {
-                log().add(now, EventLog.Kind.WARNING, "Nasycenie wygasło: " + gone + ".");
+                log().add(now, EventLog.Kind.WARNING, Messages.get("forge_service.nasycenie_wygaslo") + gone + ".");
             }
         }
         if (effectsCheckedMs != Long.MIN_VALUE && now >= effectsCheckedMs && now - effectsCheckedMs < Forge.EFFECT_CHECK_MS) return;
         effectsCheckedMs = now;
         if (battle && ForgeEffects.roll(ForgeEffects.momentumChance(pc), rng)) {
             session.spells().cooldowns().cutAll(Forge.MOMENTUM_CUT_MS, now);
-            log().add(now, EventLog.Kind.INFO, "Rozpęd! Odnowienia czarów krótsze o 2 s.");
+            log().add(now, EventLog.Kind.INFO, Messages.get("forge_service.rozped_odnowienia_czarow_krots"));
         }
         if (!pc.avatarActive() && session.combat().aggressiveWithin(now, Forge.EFFECT_CHECK_MS)
                 && ForgeEffects.roll(ForgeEffects.transcendenceChance(pc), rng)) {
             pc.startAvatar(Forge.AVATAR_MS);
-            log().add(now, EventLog.Kind.SYSTEM, "Transcendencja! Awatar na 7 s: 100% krytyka, -15% obrażeń.");
+            log().add(now, EventLog.Kind.SYSTEM, Messages.get("forge_service.transcendencja_awatar_na_7"));
         }
     }
 

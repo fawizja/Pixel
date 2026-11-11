@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.combat;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,10 +50,10 @@ public final class DeathRecap {
     /** Wiersze okna informacyjnego {etykieta, opis}. */
     public static List<String[]> rows(Report r) {
         List<String[]> out = new ArrayList<>();
-        out.add(new String[] {"Zabójca", r.killer()});
-        out.add(new String[] {"Strata", r.expLost() + " exp" + blessingNote(r.blessings())});
+        out.add(new String[] {Messages.get("death_recap.zabojca"), r.killer()});
+        out.add(new String[] {Messages.get("death_recap.strata"), r.expLost() + " exp" + blessingNote(r.blessings())});
         for (Row row : r.rows()) {
-            out.add(new String[] {row.source(), row.total() + " obrażeń w " + row.hits() + " " + hitsWord(row.hits())
+            out.add(new String[] {row.source(), row.total() + Messages.get("death_recap.obrazen_w") + row.hits() + " " + hitsWord(row.hits())
                     + " (ostatnie " + WINDOW_MS / 1000 + " s)"});
         }
         return out;
@@ -62,8 +63,7 @@ public final class DeathRecap {
     public static String blessingNote(int blessings) {
         if (blessings <= 0) return "";
         int pct = Math.min(100, blessings * pl.fawizja.pixel.character.Blessing.REDUCTION_EACH_PERCENT);
-        return " (" + blessings + " " + (blessings == 1 ? "błogosławieństwo" : blessings < 5 ? "błogosławieństwa" : "błogosławieństw")
-                + ": -" + pct + "%)";
+        return Messages.get(blessings == 1 ? "bless.note_1" : blessings < 5 ? "bless.note_2_4" : "bless.note_5", blessings, pct);
     }
 
     static String hitsWord(int n) {

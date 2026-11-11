@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.magic;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Wynik proby rzucenia czaru, uzycia runy, mikstury lub craftingu - z komunikatem dla gracza. */
 public enum CastResult {
     OK("OK"),
@@ -28,7 +29,9 @@ public enum CastResult {
     ONLY_CREATURES("Tej runy możesz użyć tylko na stworzeniu."),
     ONLY_SELF("Tej runy możesz użyć tylko na sobie.");
 
-    public final String message;
+    private final String message;
+
+    public String message() { return Messages.tr(message); }
 
     CastResult(String message) { this.message = message; }
 }

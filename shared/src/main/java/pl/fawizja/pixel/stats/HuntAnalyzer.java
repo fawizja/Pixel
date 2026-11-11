@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.stats;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,15 +105,15 @@ public final class HuntAnalyzer {
     /** Wiersze do okna informacyjnego {etykieta, wartosc}. */
     public static List<String[]> rows(Report r) {
         List<String[]> rows = new ArrayList<>();
-        rows.add(new String[] {"Czas polowania", duration(r.elapsedMs())});
-        rows.add(new String[] {"Doświadczenie", signed(r.experience()) + rate(r.expPerHour(), r.elapsedMs())});
-        rows.add(new String[] {"Zabite potwory", r.kills() + rate(r.killsPerHour(), r.elapsedMs())});
-        rows.add(new String[] {"Bilans złota", signed(r.gold()) + " gp" + rate(r.goldPerHour(), r.elapsedMs())});
-        rows.add(new String[] {"Wartość przedmiotów", signed(r.loot()) + " gp" + rate(r.lootPerHour(), r.elapsedMs())});
-        rows.add(new String[] {"Zużyte zapasy", r.suppliesUsed() + " szt. (" + r.suppliesValue() + " gp)"});
-        rows.add(new String[] {"Bilans polowania", signed(r.profit()) + " gp" + rate(perHour(r.profit(), r.elapsedMs()), r.elapsedMs())});
-        rows.add(new String[] {"Do następnego poziomu", r.expToLevel() == 0 ? "maksymalny poziom" : r.expToLevel() + " exp"});
-        rows.add(new String[] {"Następny poziom za", r.etaMs() < 0 ? "brak danych (poluj dalej)" : duration(r.etaMs())});
+        rows.add(new String[] {Messages.get("hunt_analyzer.czas_polowania"), duration(r.elapsedMs())});
+        rows.add(new String[] {Messages.get("hud.doswiadczenie"), signed(r.experience()) + rate(r.expPerHour(), r.elapsedMs())});
+        rows.add(new String[] {Messages.get("hunt_analyzer.zabite_potwory"), r.kills() + rate(r.killsPerHour(), r.elapsedMs())});
+        rows.add(new String[] {Messages.get("hunt_analyzer.bilans_zlota"), signed(r.gold()) + " gp" + rate(r.goldPerHour(), r.elapsedMs())});
+        rows.add(new String[] {Messages.get("hunt_analyzer.wartosc_przedmiotow"), signed(r.loot()) + " gp" + rate(r.lootPerHour(), r.elapsedMs())});
+        rows.add(new String[] {Messages.get("hunt_analyzer.zuzyte_zapasy"), r.suppliesUsed() + Messages.get("hunt_analyzer.szt") + r.suppliesValue() + " gp)"});
+        rows.add(new String[] {Messages.get("hunt_analyzer.bilans_polowania"), signed(r.profit()) + " gp" + rate(perHour(r.profit(), r.elapsedMs()), r.elapsedMs())});
+        rows.add(new String[] {Messages.get("hunt_analyzer.do_nastepnego_poziomu"), r.expToLevel() == 0 ? Messages.get("hunt_analyzer.maksymalny_poziom") : r.expToLevel() + " exp"});
+        rows.add(new String[] {Messages.get("hunt_analyzer.nastepny_poziom_za"), r.etaMs() < 0 ? Messages.get("hunt_analyzer.brak_danych_poluj_dalej") : duration(r.etaMs())});
         return rows;
     }
 
@@ -127,7 +128,7 @@ public final class HuntAnalyzer {
         long s = ms / 1000;
         if (s < 60) return s + " s";
         long min = s / 60;
-        if (min < 60) return min + " min";
-        return (min / 60) + " h " + (min % 60) + " min";
+        if (min < 60) return min + Messages.get("hud.min");
+        return (min / 60) + " h " + (min % 60) + Messages.get("hud.min");
     }
 }

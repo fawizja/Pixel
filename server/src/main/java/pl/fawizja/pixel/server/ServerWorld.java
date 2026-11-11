@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.server;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -347,31 +348,31 @@ final class ServerWorld {
     String expEvent(String[] c, long now) {
         List<String> a = new ArrayList<>();
         for (int i = 1; i < c.length; i++) for (String t : c[i].trim().split("\\s+")) if (!t.isEmpty()) a.add(t);
-        if (a.isEmpty()) return expEventPercent > 0 ? expEventLine(now) : "Brak wydarzenia. EXPEVENT procent [minuty] je zaczyna.";
+        if (a.isEmpty()) return expEventPercent > 0 ? expEventLine(now) : Messages.get("server_world.brak_wydarzenia_expevent_proce");
         int pct;
         int minutes = 60;
         try {
             pct = Integer.parseInt(a.get(0));
             if (a.size() > 1) minutes = Integer.parseInt(a.get(1));
         } catch (NumberFormatException e) {
-            return "Użycie: EXPEVENT procent [minuty], np. EXPEVENT 50 60; EXPEVENT 0 kończy.";
+            return Messages.get("server_world.uzycie_expevent_procent_minuty");
         }
         if (pct <= 0) {
-            if (expEventPercent == 0) return "Brak wydarzenia.";
+            if (expEventPercent == 0) return Messages.get("server_world.brak_wydarzenia");
             endExpEvent(now);
-            return "Wydarzenie zakończone.";
+            return Messages.get("server_world.wydarzenie_zakonczone");
         }
-        if (pct > EXP_EVENT_MAX || minutes <= 0 || minutes > 24 * 60) return "Procent 1-" + EXP_EVENT_MAX + ", czas 1-1440 minut.";
+        if (pct > EXP_EVENT_MAX || minutes <= 0 || minutes > 24 * 60) return Messages.get("server_world.procent_1") + EXP_EVENT_MAX + Messages.get("server_world.czas_1_1440_minut");
         expEventPercent = pct;
         expEventUntil = now + minutes * 60_000L;
         for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, expEventLine(now));
-        LOG.info("exp event +" + pct + "% for " + minutes + " min");
+        LOG.info("exp event +" + pct + Messages.get("server_world.for") + minutes + Messages.get("hud.min"));
         return expEventLine(now);
     }
 
     private String expEventLine(long now) {
         long min = Math.max(1, (expEventUntil - now + 59_999) / 60_000);
-        return "Wydarzenie: +" + expEventPercent + "% doświadczenia za potwory jeszcze przez " + min + " min!";
+        return Messages.get("server_world.wydarzenie") + expEventPercent + Messages.get("server_world.doswiadczenia_za_potwory_jeszc") + min + Messages.get("server_world.min");
     }
 
     private void updateExpEvent(long now) {
@@ -381,7 +382,7 @@ final class ServerWorld {
             if (now < e.getValue()) continue;
             it.remove();
             pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.byName(e.getKey());
-            if (g != null) toGuild(g, "Sztandar gildii opadł: premia doświadczenia minęła.", now);
+            if (g != null) toGuild(g, Messages.get("server_world.sztandar_gildii_opadl_premia"), now);
         }
         for (ServerPlayer p : players.values()) {
             p.session.combat().setBonusExpPercent(expEventPercent + (bannerUntil(p.name(), now) > now ? BANNER_PERCENT : 0));
@@ -399,10 +400,10 @@ final class ServerWorld {
     private String expBonusLine(ServerPlayer p, long now) {
         List<String> parts = new ArrayList<>();
         if (expEventPercent > 0) {
-            parts.add("+" + expEventPercent + "% za potwory, jeszcze " + Math.max(1, (expEventUntil - now + 59_999) / 60_000) + " min");
+            parts.add("+" + expEventPercent + Messages.get("server_world.za_potwory_jeszcze") + Math.max(1, (expEventUntil - now + 59_999) / 60_000) + Messages.get("hud.min"));
         }
         long banner = bannerUntil(p.name(), now);
-        if (banner > now) parts.add("sztandar gildii +" + BANNER_PERCENT + "%, " + Math.max(1, (banner - now + 59_999) / 60_000) + " min");
+        if (banner > now) parts.add(Messages.get("server_world.sztandar_gildii") + BANNER_PERCENT + "%, " + Math.max(1, (banner - now + 59_999) / 60_000) + Messages.get("hud.min"));
         return parts.isEmpty() ? "-" : String.join("; ", parts);
     }
 
@@ -413,7 +414,7 @@ final class ServerWorld {
 
     private void endExpEvent(long now) {
         expEventPercent = 0;
-        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, "Wydarzenie premii doświadczenia dobiegło końca.");
+        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.wydarzenie_premii_doswiadczeni"));
         LOG.info("exp event ended");
     }
 
@@ -421,7 +422,7 @@ final class ServerWorld {
     String setMotd(String text) throws IOException {
         motd = text == null || text.trim().equals("-") ? "" : cleanMotd(text);
         java.nio.file.Files.write(motdFile.toPath(), motd.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        return motd.isEmpty() ? "Wiadomość dnia usunięta." : "Wiadomość dnia: " + motd;
+        return motd.isEmpty() ? Messages.get("server_world.wiadomosc_dnia_usunieta") : Messages.get("server_world.wiadomosc_dnia") + motd;
     }
 
     /** Ranking z zapisow postaci (player_*.save); uszkodzony zapis jest pomijany. */
@@ -486,14 +487,14 @@ final class ServerWorld {
                 return;
             }
             if (filter == null) {
-                warn(p, "Nie znam profesji ani umiejętności \"" + arg.trim() + "\". Wpisz: /ranking, /ranking druid, paladin, mag, mnich, "
-                        + "magia, miecz, dystans, pięści, tarcza, wędkarstwo albo gildie.", now);
+                warn(p, Messages.get("server_world.nie_znam_profesji_ani") + arg.trim() + Messages.get("server_world.wpisz_ranking_ranking_druid")
+                        + Messages.get("server_world.magia_miecz_dystans_piesci"), now);
                 return;
             }
         }
         // gracze online: biezacy stan, nie z ostatniego zapisu
         for (ServerPlayer o : players.values()) ranking.put(rankEntry(o.session.character()));
-        String title = filter == null ? "Ranking serwera" : "Ranking: " + filter.displayName();
+        String title = filter == null ? Messages.get("desktop_launcher.ranking_serwera") : Messages.get("server_world.ranking") + filter.displayName();
         java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
         int i = 1;
         for (pl.fawizja.pixel.ranking.Ranking.Entry e : ranking.top(pl.fawizja.pixel.ranking.Ranking.SHOWN, filter)) {
@@ -512,14 +513,14 @@ final class ServerWorld {
 
     /** Ostatnie zgloszenia graczy (najnowsze na koncu) dla REPORTS. */
     String recentReports(int n) throws IOException {
-        if (!reportsFile.isFile()) return "Brak zgłoszeń.";
+        if (!reportsFile.isFile()) return Messages.get("server_world.brak_zgloszen");
         List<String> lines = java.nio.file.Files.readAllLines(reportsFile.toPath(), java.nio.charset.StandardCharsets.UTF_8);
         List<String> out = new ArrayList<>();
         for (String l : lines.subList(Math.max(0, lines.size() - n), lines.size())) {
             String[] f = l.split(";", 4);
             if (f.length == 4) out.add(f[0].replace('T', ' ').replaceAll("\\.\\d+Z$|Z$", "") + " " + f[1] + " -> " + f[2] + ": " + f[3]);
         }
-        return "Zgłoszenia (" + lines.size() + ", ostatnie " + out.size() + "): " + String.join(" | ", out);
+        return Messages.get("server_world.zgloszenia") + lines.size() + Messages.get("server_world.ostatnie") + out.size() + "): " + String.join(" | ", out);
     }
 
     /** REPORT imie powod: zapis w reports.txt i ostrzezenie dla administratorow w grze. */
@@ -527,15 +528,15 @@ final class ServerWorld {
         String who = f.length > 1 ? f[1].trim() : "";
         String why = f.length > 2 ? f[2].replace('\n', ' ').trim() : "";
         if (who.isEmpty() || why.isEmpty()) {
-            warn(p, "Napisz: /zgłoś Imię, co się stało.", now);
+            warn(p, Messages.get("server_world.napisz_zglos_imie_co"), now);
             return;
         }
         if (!saved(who) && find(who) == null) {
-            warn(p, "Nie ma takiej postaci.", now);
+            warn(p, Messages.get("server_world.nie_ma_takiej_postaci"), now);
             return;
         }
         if (now - p.lastReportMs < REPORT_EVERY_MS) {
-            warn(p, "Kolejne zgłoszenie możesz wysłać za minutę.", now);
+            warn(p, Messages.get("server_world.kolejne_zgloszenie_mozesz_wysl"), now);
             return;
         }
         p.lastReportMs = now;
@@ -551,11 +552,11 @@ final class ServerWorld {
         int admins = 0;
         for (ServerPlayer o : players.values()) {
             if (moderation.isAdmin(o.name())) {
-                warn(o, "[Zgłoszenie] " + p.name() + " zgłasza " + who + ": " + why, now);
+                warn(o, Messages.get("server_world.zgloszenie") + p.name() + Messages.get("server_world.zglasza") + who + ": " + why, now);
                 admins++;
             }
         }
-        info(p, "Zgłoszenie wysłane do administracji" + (admins > 0 ? " (w grze: " + admins + ")." : ". Przeczytają je po powrocie."), now);
+        info(p, Messages.get("server_world.zgloszenie_wyslane_do_administ") + (admins > 0 ? Messages.get("server_world.w_grze") + admins + ")." : Messages.get("server_world.przeczytaja_je_po_powrocie")), now);
     }
 
     /** Opis gracza dla /obejrzyj: profesja, poziom, gildia, tytul i zalozony sprzet z ulepszeniami. */
@@ -564,8 +565,8 @@ final class ServerWorld {
         String tag = guildTag(c.name());
         String title = pl.fawizja.pixel.achievement.Achievement.titleOf(c.title());
         List<String> out = new ArrayList<>();
-        out.add(c.name() + ": " + c.vocation().displayName() + ", poziom " + c.level()
-                + (tag == null || tag.equals("-") ? "" : ", gildia <" + tag + ">") + (title == null ? "" : ", " + title) + ".");
+        out.add(c.name() + ": " + c.vocation().displayName() + Messages.get("pixel_game.poziom") + c.level()
+                + (tag == null || tag.equals("-") ? "" : Messages.get("server_world.gildia") + tag + ">") + (title == null ? "" : ", " + title) + ".");
         List<String> worn = new ArrayList<>();
         for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
             pl.fawizja.pixel.item.ItemStack st = c.equipment().get(slot);
@@ -574,7 +575,7 @@ final class ServerWorld {
             if (t == null) continue;
             worn.add(t.name() + (st.upgrade() > 0 ? " +" + st.upgrade() : "") + (st.count() > 1 ? " x" + st.count() : ""));
         }
-        out.add(worn.isEmpty() ? "Nic nie ma na sobie." : "Założone: " + String.join(", ", worn) + ".");
+        out.add(worn.isEmpty() ? Messages.get("server_world.nic_nie_ma_na") : Messages.get("server_world.zalozone") + String.join(", ", worn) + ".");
         return out;
     }
 
@@ -597,7 +598,7 @@ final class ServerWorld {
         List<String> out = new ArrayList<>();
         int online = 0;
         for (M m : all) if (m.online()) online++;
-        StringBuilder sb = new StringBuilder("Członkowie " + g.name() + " (" + all.size() + ", w grze " + online + "): ");
+        StringBuilder sb = new StringBuilder(Messages.get("server_world.czlonkowie") + g.name() + " (" + all.size() + Messages.get("server_world.w_grze_2") + online + "): ");
         for (int i = 0; i < all.size(); i++) {
             M m = all.get(i);
             String ago = pl.fawizja.pixel.friends.FriendsView.describeAgo(m.ago());
@@ -609,7 +610,7 @@ final class ServerWorld {
             }
             sb.append(m.name()).append(m.name().equalsIgnoreCase(g.leader()) ? " [lider]" : "")
                     .append(" (").append(m.level() > 0 ? "poz. " + m.level() + ", " : "")
-                    .append(m.online() ? "w grze" : ago.isEmpty() ? "poza grą" : ago).append(')');
+                    .append(m.online() ? Messages.get("server_world.w_grze_3") : ago.isEmpty() ? Messages.get("server_world.poza_gra") : ago).append(')');
         }
         out.add(sb.toString());
         return out;
@@ -626,20 +627,20 @@ final class ServerWorld {
                 pl.fawizja.pixel.friends.FriendList.Result r = name == null
                         ? pl.fawizja.pixel.friends.FriendList.Result.UNKNOWN : list.add(p.name(), name);
                 if (r != pl.fawizja.pixel.friends.FriendList.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
-                info(p, name + " dodany do znajomych.", now);
+                info(p, name + Messages.get("server_world.dodany_do_znajomych"), now);
                 break;
             }
             case "REMOVE": {
                 if (f.length < 3) return;
                 pl.fawizja.pixel.friends.FriendList.Result r = list.remove(f[2]);
                 if (r != pl.fawizja.pixel.friends.FriendList.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
-                info(p, f[2].trim() + " usunięty ze znajomych.", now);
+                info(p, f[2].trim() + Messages.get("social_client.usuniety_ze_znajomych"), now);
                 break;
             }
             case "LIST": break;
@@ -682,7 +683,7 @@ final class ServerWorld {
     private void tellFriends(ServerPlayer p, String text, long now) {
         for (ServerPlayer o : players.values()) {
             if (o != p && o.session.character().friends().contains(p.name())) {
-                o.session.log().add(now, EventLog.Kind.SYSTEM, "Znajomy " + p.name() + " " + text);
+                Messages.runAs(o.language, () -> o.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.znajomy") + p.name() + " " + text));
             }
         }
     }
@@ -699,10 +700,10 @@ final class ServerWorld {
         java.time.ZonedDateTime t = java.time.Instant.ofEpochMilli(wall).atZone(java.time.ZoneOffset.UTC);
         long hours = java.time.Duration.between(t, t.toLocalDate()
                 .with(java.time.temporal.TemporalAdjusters.next(java.time.DayOfWeek.MONDAY)).atStartOfDay(java.time.ZoneOffset.UTC)).toHours();
-        String left = hours >= 48 ? hours / 24 + " dni" : Math.max(1, hours) + " h";
+        String left = hours >= 48 ? hours / 24 + Messages.get("server_world.dni") : Math.max(1, hours) + " h";
         long gained = weekly.gained(p.name(), p.session.character().experience(), wall);
-        return (v.mine() > 0 ? v.mine() + ". miejsce z " + v.total() + String.format(" (+%,d exp)", gained) : "zdobądź doświadczenie, by wejść")
-                + ", nagrody za " + left;
+        return (v.mine() > 0 ? v.mine() + Messages.get("hud.miejsce_z") + v.total() + String.format(Messages.get("server_world.d_exp"), gained) : Messages.get("server_world.zdobadz_doswiadczenie_by_wejsc"))
+                + Messages.get("server_world.nagrody_za") + left;
     }
 
     /** Koniec tygodnia: nagrody na konta (offline - przy wejsciu) i ogloszenie podium. */
@@ -715,18 +716,18 @@ final class ServerWorld {
             long prize = pl.fawizja.pixel.ranking.WeeklyRanking.PRIZES[r.place() - 1];
             ServerPlayer o = find(r.name());
             if (o != null && o.session.character().bank().credit(prize).ok()) {
-                o.session.log().add(now, EventLog.Kind.SYSTEM, "Ranking tygodnia: " + r.place() + ". miejsce, "
-                        + String.format("%,d gp", prize) + " na Twoje konto.");
+                o.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.ranking_tygodnia") + r.place() + Messages.get("server_world.miejsce")
+                        + String.format("%,d gp", prize) + Messages.get("server_world.na_twoje_konto"));
             } else {
                 market.addEarnings(r.name(), prize);
             }
-            names.add(r.place() + ". " + r.name() + String.format(" (+%,d exp)", r.level()));
+            names.add(r.place() + ". " + r.name() + String.format(Messages.get("server_world.d_exp"), r.level()));
         }
         saveMarket();
         saveWeekly();
         LOG.info("weekly podium: " + names);
         for (ServerPlayer o : players.values()) {
-            o.client.send("CHAT", "[Ogłoszenie]", "Koniec tygodnia! Najwięcej doświadczenia: " + String.join(", ", names) + ". Nagrody trafiły na konta.", "broadcast");
+            o.client.send("CHAT", Messages.get("server_world.ogloszenie"), Messages.get("server_world.koniec_tygodnia_najwiecej_dosw") + String.join(", ", names) + Messages.get("server_world.nagrody_trafily_na_konta"), "broadcast");
         }
     }
 
@@ -788,27 +789,27 @@ final class ServerWorld {
         if (!atBanker(p, now)) return;
         String to = knownName(f[2].trim());
         if (to == null) {
-            warn(p, "Nie ma takiej postaci.", now);
+            warn(p, Messages.get("server_world.nie_ma_takiej_postaci"), now);
             return;
         }
         if (to.equalsIgnoreCase(p.name())) {
-            warn(p, "Własne rzeczy odłóż do depozytu u bankiera.", now);
+            warn(p, Messages.get("server_world.wlasne_rzeczy_odloz_do"), now);
             return;
         }
         pl.fawizja.pixel.trade.PlayerTrade.Parsed what = pl.fawizja.pixel.trade.PlayerTrade.parse(f[3], items);
         if (what == null || what.itemId() < 0 || pl.fawizja.pixel.economy.Currency.isCoin(what.itemId())) {
-            warn(p, "Nie wiem, co wysłać. Złoto przekaż przez /handel albo rynek.", now);
+            warn(p, Messages.get("server_world.nie_wiem_co_wyslac"), now);
             return;
         }
         PlayerCharacter pc = p.session.character();
         int count = (int) what.count();
         String label = count + "x " + items.get(what.itemId()).name();
         if (pc.backpack().countPlain(what.itemId()) < count) {
-            warn(p, "Nie masz w plecaku " + label + " (ulepszonych przedmiotów nie można wysłać).", now);
+            warn(p, Messages.get("server_world.nie_masz_w_plecaku") + label + Messages.get("server_world.ulepszonych_przedmiotow_nie_mo"), now);
             return;
         }
         if (!mail.canAccept(to)) {
-            warn(p, to + " ma za dużo nieodebranych przesyłek.", now);
+            warn(p, to + Messages.get("server_world.ma_za_duzo_nieodebranych"), now);
             return;
         }
         if (!pc.backpack().remove(what.itemId(), count).ok()) return;
@@ -817,7 +818,7 @@ final class ServerWorld {
         if (r != null) deliverMail(r, now);
         saveMail();
         save(p);
-        info(p, "Wysłano " + label + " do " + to + (r == null ? " (odbierze po wejściu do gry)." : "."), now);
+        info(p, Messages.get("server_world.wyslano") + label + " do " + to + (r == null ? Messages.get("server_world.odbierze_po_wejsciu_do") : "."), now);
     }
 
     /** TRANSFER imie kwota: zloto z konta na konto innej postaci (takze offline), tylko przy bankierze. */
@@ -833,22 +834,22 @@ final class ServerWorld {
         if (!atBanker(p, now)) return;
         String to = knownName(f[1].trim());
         if (to == null) {
-            warn(p, "Nie ma takiej postaci.", now);
+            warn(p, Messages.get("server_world.nie_ma_takiej_postaci"), now);
             return;
         }
         if (to.equalsIgnoreCase(p.name())) {
-            warn(p, "Nie możesz przelać złota samemu sobie.", now);
+            warn(p, Messages.get("server_world.nie_mozesz_przelac_zlota"), now);
             return;
         }
         PlayerCharacter pc = p.session.character();
         if (!pc.bank().debit(amount).ok()) {
-            warn(p, "Na koncie masz tylko " + String.format("%,d gp", pc.bank().balance()) + ". Wpłać monety u bankiera.", now);
+            warn(p, Messages.get("server_world.na_koncie_masz_tylko") + String.format("%,d gp", pc.bank().balance()) + Messages.get("server_world.wplac_monety_u_bankiera"), now);
             return;
         }
         String label = String.format("%,d gp", amount);
         ServerPlayer r = find(to);
         if (r != null && r.session.character().bank().credit(amount).ok()) {
-            r.session.log().add(now, EventLog.Kind.SYSTEM, "Przelew: " + p.name() + " przesyła " + label + " na Twoje konto.");
+            Messages.runAs(r.language, () -> r.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.przelew") + p.name() + Messages.get("server_world.przesyla") + label + Messages.get("server_world.na_twoje_konto")));
             save(r);
         } else {
             market.addEarnings(to, amount);
@@ -856,7 +857,7 @@ final class ServerWorld {
         }
         save(p);
         LOG.info("transfer " + p.name() + " -> " + to + " " + amount);
-        info(p, "Przelano " + label + " do " + to + (r == null ? " (wpłynie po wejściu do gry)." : "."), now);
+        info(p, Messages.get("server_world.przelano") + label + " do " + to + (r == null ? Messages.get("server_world.wplynie_po_wejsciu_do") : "."), now);
     }
 
     static final long RENT_SWEEP_MS = 60_000;
@@ -962,7 +963,7 @@ final class ServerWorld {
                 info(p, s.houseInfo(), now);
                 HouseOffer o = houseOffers.get(p.name().toLowerCase(java.util.Locale.ROOT));
                 if (o != null && o.until() > now && houses.get(o.houseId()) != null) {
-                    info(p, String.format("%s oferuje ci dom %s za %,d gp: /dom kup albo /dom anuluj.", o.seller(),
+                    info(p, String.format(Messages.get("server_world.s_oferuje_ci_dom"), o.seller(),
                             houses.get(o.houseId()).name(), o.price()), now);
                 }
                 break;
@@ -971,7 +972,7 @@ final class ServerWorld {
                 if (f.length < 3) return;
                 String name = knownName(f[2].trim());
                 if (name == null) {
-                    warn(p, "Nie ma takiej postaci.", now);
+                    warn(p, Messages.get("server_world.nie_ma_takiej_postaci"), now);
                     return;
                 }
                 pl.fawizja.pixel.house.HouseAccess level = f.length > 3 && f[3].equalsIgnoreCase("entry")
@@ -979,7 +980,7 @@ final class ServerWorld {
                 if (s.addHouseGuest(name, level, now)) {
                     ServerPlayer g = find(name);
                     if (g != null) g.session.log().add(now, EventLog.Kind.SYSTEM,
-                            p.name() + " wpuszcza cię do domu " + houses.get(own).name() + " (" + level.label() + ").");
+                            p.name() + Messages.get("server_world.wpuszcza_cie_do_domu") + houses.get(own).name() + " (" + level.label() + ").");
                 }
                 if (houses.get(own) != null) p.client.send(s.houseView(houses.get(own)).toMessage());
                 break;
@@ -1004,11 +1005,11 @@ final class ServerWorld {
                 pl.fawizja.pixel.house.House h = houses.get(own);
                 ServerPlayer b = find(f[2].trim());
                 String msg = null;
-                if (h == null || !p.name().equals(houseOwners.ownerOf(h.id()))) msg = "Nie masz domu.";
-                else if (price <= 0 || price > 10_000_000_000L) msg = "Podaj cenę, np. /dom sprzedaj Imię, 100000.";
-                else if (b == null) msg = "Kupujący musi być w grze.";
-                else if (b == p) msg = "Nie sprzedasz domu samemu sobie.";
-                else if (b.session.character().house() != null) msg = b.name() + " ma już dom.";
+                if (h == null || !p.name().equals(houseOwners.ownerOf(h.id()))) msg = Messages.get("server_world.nie_masz_domu");
+                else if (price <= 0 || price > 10_000_000_000L) msg = Messages.get("server_world.podaj_cene_np_dom");
+                else if (b == null) msg = Messages.get("server_world.kupujacy_musi_byc_w");
+                else if (b == p) msg = Messages.get("server_world.nie_sprzedasz_domu_samemu");
+                else if (b.session.character().house() != null) msg = b.name() + Messages.get("server_world.ma_juz_dom");
                 if (msg != null) {
                     warn(p, msg, now);
                     return;
@@ -1016,9 +1017,9 @@ final class ServerWorld {
                 houseOffers.put(b.name().toLowerCase(java.util.Locale.ROOT),
                         new HouseOffer(h.id(), p.name(), b.name(), price, now + HOUSE_OFFER_MS));
                 String label = String.format("%,d gp", price);
-                info(p, "Oferta wysłana: " + h.name() + " dla " + b.name() + " za " + label + " (ważna 5 minut).", now);
-                b.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " oferuje ci dom " + h.name() + " (" + h.town()
-                        + ", " + h.size() + " pól) za " + label + " z banku. Wpisz /dom kup albo /dom anuluj.");
+                info(p, Messages.get("server_world.oferta_wyslana") + h.name() + Messages.get("server_world.dla") + b.name() + " za " + label + Messages.get("server_world.wazna_5_minut"), now);
+                b.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.oferuje_ci_dom") + h.name() + " (" + h.town()
+                        + ", " + h.size() + Messages.get("server_world.pol_za") + label + Messages.get("server_world.z_banku_wpisz_dom"));
                 break;
             }
             case "ACCEPT": {
@@ -1026,26 +1027,26 @@ final class ServerWorld {
                 pl.fawizja.pixel.house.House h = o == null ? null : houses.get(o.houseId());
                 PlayerCharacter pc = s.character();
                 String msg = null;
-                if (o == null || o.until() < now || h == null) msg = "Nikt nie oferuje ci teraz domu.";
-                else if (!o.seller().equals(houseOwners.ownerOf(h.id()))) msg = "Ten dom nie należy już do " + o.seller() + ".";
-                else if (pc.house() != null) msg = "Masz już dom. Najpierw go sprzedaj.";
+                if (o == null || o.until() < now || h == null) msg = Messages.get("server_world.nikt_nie_oferuje_ci");
+                else if (!o.seller().equals(houseOwners.ownerOf(h.id()))) msg = Messages.get("server_world.ten_dom_nie_nalezy") + o.seller() + ".";
+                else if (pc.house() != null) msg = Messages.get("server_world.masz_juz_dom_najpierw");
                 else if (pc.bank().balance() < o.price()) {
-                    msg = String.format("Dom kosztuje %,d gp, a na koncie masz %,d gp.", o.price(), pc.bank().balance());
+                    msg = String.format(Messages.get("server_world.dom_kosztuje_d_gp"), o.price(), pc.bank().balance());
                 }
                 if (msg != null) {
                     warn(p, msg, now);
                     return;
                 }
                 if (!pc.bank().debit(o.price()).ok() || !savedHouseOwners.transfer(h.id(), p.name())) {
-                    warn(p, "Nie udało się kupić domu.", now);
+                    warn(p, Messages.get("server_world.nie_udalo_sie_kupic"), now);
                     return;
                 }
                 String label = String.format("%,d gp", o.price());
                 ServerPlayer seller = find(o.seller());
                 if (seller != null && seller.session.character().bank().credit(o.price()).ok()) {
                     seller.session.setOwnHouse(null);
-                    seller.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " kupuje twój dom " + h.name() + ". "
-                            + label + " wpływa na twoje konto.");
+                    seller.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.kupuje_twoj_dom") + h.name() + ". "
+                            + label + Messages.get("server_world.wplywa_na_twoje_konto"));
                     save(seller);
                 } else {
                     market.addEarnings(o.seller(), o.price());
@@ -1055,14 +1056,14 @@ final class ServerWorld {
                 for (ServerPlayer o2 : players.values()) o2.session.checkHouseAccess();   // dawni goscie wychodza
                 save(p);
                 LOG.info("house " + h.id() + " sold " + o.seller() + " -> " + p.name() + " " + o.price());
-                info(p, "Kupiono dom " + h.name() + " od " + o.seller() + " za " + label + ".", now);
+                info(p, Messages.get("server_world.kupiono_dom") + h.name() + " od " + o.seller() + " za " + label + ".", now);
                 break;
             }
             case "CANCEL": {
                 String me = p.name().toLowerCase(java.util.Locale.ROOT);
                 boolean any = houseOffers.remove(me) != null;
                 any |= houseOffers.values().removeIf(o -> o.seller().equals(p.name()));
-                info(p, any ? "Oferta domu anulowana." : "Nie masz ofert domu.", now);
+                info(p, any ? Messages.get("server_world.oferta_domu_anulowana") : Messages.get("server_world.nie_masz_ofert_domu"), now);
                 break;
             }
             default: return;
@@ -1079,11 +1080,11 @@ final class ServerWorld {
     private void lookingForParty(ServerPlayer p, long now) {
         if (p.lookingForParty) {
             p.lookingForParty = false;
-            info(p, "Nie szukasz już drużyny.", now);
+            info(p, Messages.get("server_world.nie_szukasz_juz_druzyny"), now);
             return;
         }
         if (!parties.members(p.name()).isEmpty()) {
-            warn(p, "Jesteś już w drużynie.", now);
+            warn(p, Messages.get("server_world.jestes_juz_w_druzynie"), now);
             return;
         }
         if (!chatAllowed(p, now)) return;
@@ -1094,28 +1095,28 @@ final class ServerWorld {
             if (o == p || !parties.members(o.name()).isEmpty()) continue;
             int lvl = o.session.character().level();
             if (lvl * 3 < pc.level() * 2 || lvl * 2 > pc.level() * 3) continue; // poziom w granicach 2/3 .. 3/2
-            o.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " (" + pc.vocation().displayName() + ", poziom " + pc.level()
-                    + ") szuka drużyny: /zaproś " + p.name());
+            o.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " (" + pc.vocation().displayName() + Messages.get("pixel_game.poziom") + pc.level()
+                    + Messages.get("server_world.szuka_druzyny_zapros") + p.name());
             told++;
         }
-        info(p, "Szukasz drużyny (widać to w /gracze). Powiadomieni gracze o podobnym poziomie: " + told
-                + ". Ponowne /szukam wyłącza.", now);
+        info(p, Messages.get("server_world.szukasz_druzyny_widac_to") + told
+                + Messages.get("server_world.ponowne_szukam_wylacza"), now);
     }
 
     /** ", nagroda 5,000 gp" do listy graczy, gdy ktos wyznaczyl nagrode za postac. */
     private String bountyNote(String name) {
         long amount = bounties.amount(name);
-        return amount > 0 ? String.format(", nagroda %,d gp", amount) : "";
+        return amount > 0 ? String.format(Messages.get("server_world.nagroda_d_gp"), amount) : "";
     }
 
     private void bountyCommand(ServerPlayer p, String[] f, long now) {
         if (f.length < 3) {
             List<pl.fawizja.pixel.pvp.Bounties.Bounty> top = bounties.top(pl.fawizja.pixel.pvp.Bounties.SHOWN);
             if (top.isEmpty()) {
-                info(p, "Nie ma nagród za głowy. /nagroda imię, kwota wyznacza nagrodę.", now);
+                info(p, Messages.get("server_world.nie_ma_nagrod_za"), now);
                 return;
             }
-            StringBuilder sb = new StringBuilder("Nagrody za głowy:");
+            StringBuilder sb = new StringBuilder(Messages.get("server_world.nagrody_za_glowy"));
             for (pl.fawizja.pixel.pvp.Bounties.Bounty b : top) sb.append(' ').append(b.name()).append(String.format(" %,d gp;", b.amount()));
             info(p, sb.substring(0, sb.length() - 1), now);
             return;
@@ -1127,28 +1128,28 @@ final class ServerWorld {
             return;
         }
         if (amount < pl.fawizja.pixel.pvp.Bounties.MIN) {
-            warn(p, String.format("Najmniejsza nagroda to %,d gp.", pl.fawizja.pixel.pvp.Bounties.MIN), now);
+            warn(p, String.format(Messages.get("server_world.najmniejsza_nagroda_to_d"), pl.fawizja.pixel.pvp.Bounties.MIN), now);
             return;
         }
         String to = knownName(f[1].trim());
         if (to == null) {
-            warn(p, "Nie ma takiej postaci.", now);
+            warn(p, Messages.get("server_world.nie_ma_takiej_postaci"), now);
             return;
         }
         if (to.equalsIgnoreCase(p.name())) {
-            warn(p, "Nie możesz wyznaczyć nagrody za własną głowę.", now);
+            warn(p, Messages.get("server_world.nie_mozesz_wyznaczyc_nagrody"), now);
             return;
         }
         PlayerCharacter pc = p.session.character();
         if (!pc.bank().debit(amount).ok()) {
-            warn(p, "Na koncie masz tylko " + String.format("%,d gp", pc.bank().balance()) + ". Wpłać monety u bankiera.", now);
+            warn(p, Messages.get("server_world.na_koncie_masz_tylko") + String.format("%,d gp", pc.bank().balance()) + Messages.get("server_world.wplac_monety_u_bankiera"), now);
             return;
         }
         long total = bounties.add(to, amount);
         saveBounties();
         save(p);
         LOG.info("bounty " + p.name() + " -> " + to + " " + amount);
-        String msg = "Nagroda za głowę " + to + String.format(" wynosi teraz %,d gp", total) + " (dołożył " + p.name() + ").";
+        String msg = Messages.get("server_world.nagroda_za_glowe") + to + String.format(Messages.get("server_world.wynosi_teraz_d_gp"), total) + Messages.get("server_world.dolozyl") + p.name() + ").";
         for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, msg);
     }
 
@@ -1165,7 +1166,7 @@ final class ServerWorld {
         saveBounties();
         save(killer);
         LOG.info("bounty claimed " + killer.name() + " <- " + victim.name() + " " + amount);
-        String msg = killer.name() + " odbiera nagrodę za głowę " + victim.name() + String.format(" (%,d gp na konto).", amount);
+        String msg = killer.name() + Messages.get("server_world.odbiera_nagrode_za_glowe") + victim.name() + String.format(Messages.get("server_world.d_gp_na_konto"), amount);
         for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, msg);
     }
 
@@ -1190,15 +1191,15 @@ final class ServerWorld {
             if (pc.depot().canAdd(parcel.itemId(), parcel.count())
                     && pc.depot().add(new pl.fawizja.pixel.item.ItemStack(parcel.itemId(), parcel.count())).ok()) {
                 delivered++;
-                r.session.log().add(now, EventLog.Kind.SYSTEM, "Poczta: " + parcel.from() + " przysyła "
-                        + parcel.count() + "x " + items.get(parcel.itemId()).name() + " - czeka w depozycie u bankiera.");
+                r.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.poczta") + parcel.from() + Messages.get("server_world.przysyla")
+                        + parcel.count() + "x " + items.get(parcel.itemId()).name() + Messages.get("server_world.czeka_w_depozycie_u"));
             } else {
                 mail.add(parcel);
             }
         }
         if (delivered < parcels.size()) {
-            r.session.log().add(now, EventLog.Kind.WARNING, "Poczta: depozyt jest pełny, " + (parcels.size() - delivered)
-                    + " przesyłek czeka. Zrób miejsce i wejdź ponownie do gry.");
+            r.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.poczta_depozyt_jest_pelny") + (parcels.size() - delivered)
+                    + Messages.get("server_world.przesylek_czeka_zrob_miejsce"));
         }
         if (delivered > 0) save(r);
         saveMail();
@@ -1219,7 +1220,7 @@ final class ServerWorld {
     private boolean atBanker(ServerPlayer p, long now) {
         pl.fawizja.pixel.npc.Npc n = p.session.npcNearby();
         if (n != null && n.role() == pl.fawizja.pixel.npc.NpcRole.BANKER) return true;
-        warn(p, "Rynek obsługuje bankier - podejdź do niego.", now);
+        warn(p, Messages.get("server_world.rynek_obsluguje_bankier_podejd"), now);
         return false;
     }
 
@@ -1240,12 +1241,12 @@ final class ServerWorld {
                 try {
                     price = Long.parseLong(priceText);
                 } catch (NumberFormatException e) {
-                    warn(p, "Wpisz: /rynek wystaw 5 wilcze futro 300 (ilość, przedmiot, cena za wszystko w gp).", now);
+                    warn(p, Messages.get("server_world.wpisz_rynek_wystaw_5"), now);
                     return;
                 }
                 pl.fawizja.pixel.trade.PlayerTrade.Parsed what = pl.fawizja.pixel.trade.PlayerTrade.parse(arg.substring(0, sp), items);
                 if (what == null || what.itemId() < 0 || pl.fawizja.pixel.economy.Currency.isCoin(what.itemId())) {
-                    warn(p, "Nie wiem, jaki przedmiot wystawić. Monet nie wystawia się na rynku.", now);
+                    warn(p, Messages.get("server_world.nie_wiem_jaki_przedmiot"), now);
                     return;
                 }
                 int count = (int) what.count();
@@ -1259,13 +1260,13 @@ final class ServerWorld {
                     }
                 }
                 if (special < 0 && pc.backpack().countPlain(what.itemId()) < count) {
-                    warn(p, "Nie masz w plecaku " + count + "x " + items.get(what.itemId()).name()
-                            + " (przedmiotów z nasyceniem nie można wystawić).", now);
+                    warn(p, Messages.get("server_world.nie_masz_w_plecaku") + count + "x " + items.get(what.itemId()).name()
+                            + Messages.get("server_world.przedmiotow_z_nasyceniem_nie"), now);
                     return;
                 }
                 pl.fawizja.pixel.market.Market.Result r = market.canList(p.name(), price);
                 if (r != pl.fawizja.pixel.market.Market.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 pl.fawizja.pixel.item.ItemStack listed;
@@ -1279,8 +1280,8 @@ final class ServerWorld {
                 pl.fawizja.pixel.market.Market.Listing l = market.add(p.name(), listed, price);
                 saveMarket();
                 save(p);
-                info(p, "Wystawiono na rynku: " + count + "x " + listingName(l) + " za "
-                        + String.format("%,d gp", price) + " (oferta #" + l.id() + ").", now);
+                info(p, Messages.get("server_world.wystawiono_na_rynku") + count + "x " + listingName(l) + " za "
+                        + String.format("%,d gp", price) + Messages.get("server_world.oferta") + l.id() + ").", now);
                 break;
             }
             case "BUY": {
@@ -1288,19 +1289,19 @@ final class ServerWorld {
                 int id = parseInt(arg);
                 pl.fawizja.pixel.market.Market.Result r = market.checkBuy(id, p.name());
                 if (r != pl.fawizja.pixel.market.Market.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     break;
                 }
                 pl.fawizja.pixel.market.Market.Listing l = market.get(id);
                 if (!pc.backpack().canAdd(l.itemId(), l.count())) {
-                    warn(p, "Brak miejsca w plecaku.", now);
+                    warn(p, Messages.get("server_world.brak_miejsca_w_plecaku"), now);
                     return;
                 }
                 // najpierw konto, potem monety z plecaka
                 boolean paid = pc.bank().debit(l.price()).ok()
                         || pl.fawizja.pixel.economy.Money.pay(pc.backpack(), l.price()).ok();
                 if (!paid) {
-                    warn(p, "Za mało złota: oferta kosztuje " + String.format("%,d gp", l.price()) + " (konto albo plecak).", now);
+                    warn(p, Messages.get("server_world.za_malo_zlota_oferta") + String.format("%,d gp", l.price()) + Messages.get("server_world.konto_albo_plecak"), now);
                     return;
                 }
                 market.sold(id);
@@ -1310,15 +1311,15 @@ final class ServerWorld {
                 String what = l.count() + "x " + listingName(l);
                 ServerPlayer seller = find(l.seller());
                 if (seller != null && seller.session.character().bank().credit(earned).ok()) {
-                    seller.session.log().add(now, EventLog.Kind.SYSTEM, "Rynek: " + p.name() + " kupił " + what
-                            + ". Na konto wpłynęło " + String.format("%,d gp", earned) + ".");
+                    seller.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.rynek") + p.name() + Messages.get("server_world.kupil") + what
+                            + Messages.get("server_world.na_konto_wplynelo") + String.format("%,d gp", earned) + ".");
                     save(seller);
                 } else {
                     market.addEarnings(l.seller(), earned);
                 }
                 saveMarket();
                 save(p);
-                info(p, "Kupiono " + what + " za " + String.format("%,d gp", l.price()) + ".", now);
+                info(p, Messages.get("server_world.kupiono") + what + " za " + String.format("%,d gp", l.price()) + ".", now);
                 break;
             }
             case "CANCEL": {
@@ -1326,19 +1327,19 @@ final class ServerWorld {
                 int id = parseInt(arg);
                 pl.fawizja.pixel.market.Market.Result r = market.checkCancel(id, p.name());
                 if (r != pl.fawizja.pixel.market.Market.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     break;
                 }
                 pl.fawizja.pixel.market.Market.Listing l = market.get(id);
                 if (!pc.backpack().canAdd(l.itemId(), l.count())) {
-                    warn(p, "Brak miejsca w plecaku.", now);
+                    warn(p, Messages.get("server_world.brak_miejsca_w_plecaku"), now);
                     return;
                 }
                 market.cancel(id);
                 pc.backpack().add(l.stack());
                 saveMarket();
                 save(p);
-                info(p, "Wycofano ofertę: " + l.count() + "x " + listingName(l) + " wraca do plecaka.", now);
+                info(p, Messages.get("server_world.wycofano_oferte") + l.count() + "x " + listingName(l) + Messages.get("server_world.wraca_do_plecaka"), now);
                 break;
             }
             default:
@@ -1357,9 +1358,9 @@ final class ServerWorld {
         for (pl.fawizja.pixel.market.BuyOrders.Order o : orders.newestFirst()) {
             if (o.itemId() == t.id()) bid = Math.max(bid, Math.max(1, o.price() / o.count()));
         }
-        info(p, "Rynek graczy, " + t.name() + ": ostatnia sprzedaż " + (last < 0 ? "brak" : String.format("%,d gp/szt.", last))
-                + ", najtańsza oferta " + (cheap == null ? "brak" : String.format("%,d gp/szt. (#%d)", Math.max(1, cheap.price() / cheap.count()), cheap.id()))
-                + ", kupujący płacą " + (bid < 0 ? "brak zamówień" : String.format("%,d gp/szt.", bid)) + ".", now);
+        info(p, Messages.get("server_world.rynek_graczy") + t.name() + Messages.get("server_world.ostatnia_sprzedaz") + (last < 0 ? Messages.get("server_world.brak") : String.format(Messages.get("server_world.d_gp_szt"), last))
+                + Messages.get("server_world.najtansza_oferta") + (cheap == null ? Messages.get("server_world.brak") : String.format(Messages.get("server_world.d_gp_szt_d"), Math.max(1, cheap.price() / cheap.count()), cheap.id()))
+                + Messages.get("server_world.kupujacy_placa") + (bid < 0 ? Messages.get("server_world.brak_zamowien") : String.format(Messages.get("server_world.d_gp_szt"), bid)) + ".", now);
     }
 
     /** Zamowienia kupna: LIST, ADD "ilosc przedmiot cena", FILL id, CANCEL id (trzy ostatnie u bankiera). */
@@ -1377,24 +1378,24 @@ final class ServerWorld {
                 pl.fawizja.pixel.trade.PlayerTrade.Parsed what = price <= 0 ? null
                         : pl.fawizja.pixel.trade.PlayerTrade.parse(arg.substring(0, sp), items);
                 if (what == null || what.itemId() < 0 || pl.fawizja.pixel.economy.Currency.isCoin(what.itemId())) {
-                    warn(p, "Wpisz: /kupię 20 wilcze futro 2000 (ilość, przedmiot, cena za wszystko w gp).", now);
+                    warn(p, Messages.get("server_world.wpisz_kupie_20_wilcze"), now);
                     return;
                 }
                 int count = (int) Math.min(Integer.MAX_VALUE, what.count());
                 pl.fawizja.pixel.market.BuyOrders.Result r = orders.canPlace(p.name(), count, price);
                 if (r != pl.fawizja.pixel.market.BuyOrders.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 if (!pc.bank().debit(price).ok()) {
-                    warn(p, "Na koncie brakuje złota: zamówienie blokuje " + String.format("%,d gp", price) + " do realizacji.", now);
+                    warn(p, Messages.get("server_world.na_koncie_brakuje_zlota") + String.format("%,d gp", price) + Messages.get("server_world.do_realizacji"), now);
                     return;
                 }
                 pl.fawizja.pixel.market.BuyOrders.Order o = orders.place(p.name(), what.itemId(), count, price, wallClock.getAsLong());
                 saveOrders();
                 save(p);
-                info(p, "Zamówienie #" + o.id() + ": kupisz " + count + "x " + items.get(o.itemId()).name() + " za "
-                        + String.format("%,d gp", price) + ". Złoto czeka zablokowane, przedmioty przyjdą do depozytu.", now);
+                info(p, Messages.get("server_world.zamowienie") + o.id() + Messages.get("server_world.kupisz") + count + "x " + items.get(o.itemId()).name() + " za "
+                        + String.format("%,d gp", price) + Messages.get("server_world.zloto_czeka_zablokowane_przedm"), now);
                 break;
             }
             case "FILL": {
@@ -1402,17 +1403,17 @@ final class ServerWorld {
                 int id = parseInt(arg);
                 pl.fawizja.pixel.market.BuyOrders.Result r = orders.checkFill(id, p.name());
                 if (r != pl.fawizja.pixel.market.BuyOrders.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 pl.fawizja.pixel.market.BuyOrders.Order o = orders.get(id);
                 String what = o.count() + "x " + items.get(o.itemId()).name();
                 if (pc.backpack().countPlain(o.itemId()) < o.count()) {
-                    warn(p, "Zamówienie wymaga " + what + " w plecaku (bez ulepszeń).", now);
+                    warn(p, Messages.get("server_world.zamowienie_wymaga") + what + Messages.get("server_world.w_plecaku_bez_ulepszen"), now);
                     return;
                 }
                 if (!mail.canAccept(o.buyer())) {
-                    warn(p, "Skrzynka zamawiającego jest pełna. Spróbuj później.", now);
+                    warn(p, Messages.get("server_world.skrzynka_zamawiajacego_jest_pe"), now);
                     return;
                 }
                 if (!pc.backpack().remove(o.itemId(), o.count()).ok() || !pc.bank().credit(o.price()).ok()) return;
@@ -1423,7 +1424,7 @@ final class ServerWorld {
                 saveOrders();
                 saveMail();
                 save(p);
-                info(p, "Zrealizowano zamówienie #" + id + ": " + what + " dla " + o.buyer() + ". Na konto wpłynęło "
+                info(p, Messages.get("server_world.zrealizowano_zamowienie") + id + ": " + what + Messages.get("server_world.dla") + o.buyer() + Messages.get("server_world.na_konto_wplynelo")
                         + String.format("%,d gp", o.price()) + ".", now);
                 ServerPlayer buyer = find(o.buyer());
                 if (buyer != null) deliverMail(buyer, now);
@@ -1434,14 +1435,14 @@ final class ServerWorld {
                 int id = parseInt(arg);
                 pl.fawizja.pixel.market.BuyOrders.Result r = orders.checkCancel(id, p.name());
                 if (r != pl.fawizja.pixel.market.BuyOrders.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 pl.fawizja.pixel.market.BuyOrders.Order o = orders.remove(id);
                 pc.bank().credit(o.price());
                 saveOrders();
                 save(p);
-                info(p, "Wycofano zamówienie #" + id + ". " + String.format("%,d gp", o.price()) + " wraca na konto.", now);
+                info(p, Messages.get("server_world.wycofano_zamowienie") + id + ". " + String.format("%,d gp", o.price()) + Messages.get("server_world.wraca_na_konto"), now);
                 break;
             }
             default:
@@ -1456,14 +1457,14 @@ final class ServerWorld {
         out.add("WANT");
         for (pl.fawizja.pixel.market.BuyOrders.Order o : orders.byBuyer(p.name())) {
             out.add("#" + o.id() + " " + o.count() + "x " + items.get(o.itemId()).name() + ";"
-                    + String.format("%,d gp", o.price()) + ", Twoje (/kupię anuluj " + o.id() + ")");
+                    + String.format("%,d gp", o.price()) + Messages.get("server_world.twoje_kupie_anuluj") + o.id() + ")");
         }
         int shown = 0;
         for (pl.fawizja.pixel.market.BuyOrders.Order o : orders.newestFirst()) {
             if (o.buyer().equalsIgnoreCase(p.name())) continue;
             if (shown++ >= pl.fawizja.pixel.market.BuyOrders.SHOWN) break;
             out.add("#" + o.id() + " " + o.count() + "x " + items.get(o.itemId()).name() + ";"
-                    + String.format("%,d gp", o.price()) + ", " + o.buyer() + " (/sprzedaj " + o.id() + ")");
+                    + String.format("%,d gp", o.price()) + ", " + o.buyer() + Messages.get("server_world.sprzedaj") + o.id() + ")");
         }
         p.client.send(out.toArray(new String[0]));
     }
@@ -1478,8 +1479,8 @@ final class ServerWorld {
         for (pl.fawizja.pixel.market.BuyOrders.Order o : gone) {
             ServerPlayer b = find(o.buyer());
             if (b != null && b.session.character().bank().credit(o.price()).ok()) {
-                b.session.log().add(now, EventLog.Kind.SYSTEM, "Zamówienie #" + o.id() + " (" + o.count() + "x "
-                        + items.get(o.itemId()).name() + ") wygasło po 7 dniach. " + String.format("%,d gp", o.price()) + " wraca na konto.");
+                b.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.zamowienie") + o.id() + " (" + o.count() + "x "
+                        + items.get(o.itemId()).name() + Messages.get("server_world.wygaslo_po_7_dniach") + String.format("%,d gp", o.price()) + Messages.get("server_world.wraca_na_konto"));
                 save(b);
             } else {
                 market.addEarnings(o.buyer(), o.price());
@@ -1570,19 +1571,19 @@ final class ServerWorld {
                 if (r == pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
                     if (!pl.fawizja.pixel.economy.Money.pay(p.session.character().backpack(),
                             pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST).ok()) {
-                        warn(p, "Założenie gildii kosztuje " + String.format("%,d gp", pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST)
-                                + " (monety w plecaku).", now);
+                        warn(p, Messages.get("server_world.zalozenie_gildii_kosztuje") + String.format("%,d gp", pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST)
+                                + Messages.get("server_world.monety_w_plecaku"), now);
                         return;
                     }
                     r = guilds.create(p.name(), f[2]);
                 }
                 if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 saveGuilds();
                 save(p);
-                p.session.log().add(now, EventLog.Kind.SYSTEM, "Założono gildię " + f[2].trim() + ". Zapraszaj: /gildia zaproś Imię");
+                Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.zalozono_gildie") + f[2].trim() + Messages.get("server_world.zapraszaj_gildia_zapros_imie")));
                 LOG.info("guild created " + f[2].trim() + " by " + p.name());
                 return;
             }
@@ -1590,39 +1591,39 @@ final class ServerWorld {
                 if (f.length < 3) return;
                 ServerPlayer other = find(f[2]);
                 if (other == null) {
-                    warn(p, "Gracz " + f[2] + " nie jest w grze.", now);
+                    warn(p, Messages.get("server_world.gracz") + f[2] + Messages.get("server_world.nie_jest_w_grze_2"), now);
                     return;
                 }
                 r = guilds.invite(p.name(), other.name(), now);
                 if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
-                info(p, "Zaproszono " + other.name() + " do gildii " + mine.name() + ".", now);
-                other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cię do gildii " + mine.name()
-                        + ": /gildia przyjmij " + mine.name());
+                info(p, Messages.get("server_world.zaproszono") + other.name() + Messages.get("server_world.do_gildii") + mine.name() + ".", now);
+                other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.zaprasza_cie_do_gildii") + mine.name()
+                        + Messages.get("server_world.gildia_przyjmij") + mine.name());
                 return;
             }
             case "ACCEPT": {
                 if (f.length < 3) return;
                 r = guilds.accept(p.name(), f[2], now);
                 if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 saveGuilds();
-                toGuild(guilds.guildOf(p.name()), p.name() + " dołącza do gildii.", now);
+                toGuild(guilds.guildOf(p.name()), p.name() + Messages.get("server_world.dolacza_do_gildii"), now);
                 return;
             }
             case "LEAVE": {
                 if (mine == null) {
-                    warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                    warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message(), now);
                     return;
                 }
                 guilds.leave(p.name());
                 saveGuilds();
-                info(p, "Opuściłeś gildię " + mine.name() + ".", now);
-                if (!mine.members().isEmpty()) toGuild(mine, p.name() + " opuszcza gildię. Lider: " + mine.leader(), now);
+                info(p, Messages.get("server_world.opusciles_gildie") + mine.name() + ".", now);
+                if (!mine.members().isEmpty()) toGuild(mine, p.name() + Messages.get("server_world.opuszcza_gildie_lider") + mine.leader(), now);
                 return;
             }
             case "KICK": {
@@ -1631,23 +1632,23 @@ final class ServerWorld {
                 String target = f[2].trim();
                 r = guilds.kick(p.name(), target);
                 if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 saveGuilds();
-                toGuild(g, target + " zostaje usunięty z gildii.", now);
+                toGuild(g, target + Messages.get("server_world.zostaje_usuniety_z_gildii"), now);
                 ServerPlayer t = find(target);
-                if (t != null) warn(t, "Usunięto cię z gildii " + g.name() + ".", now);
+                if (t != null) warn(t, Messages.get("server_world.usunieto_cie_z_gildii") + g.name() + ".", now);
                 return;
             }
             case "MOTD": {
                 r = guilds.setMotd(p.name(), f.length > 2 ? f[2] : "");
                 if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
-                    warn(p, r.message, now);
+                    warn(p, r.message(), now);
                     return;
                 }
                 saveGuilds();
-                toGuild(mine, mine.motd() == null ? "Lider usunął wiadomość gildii." : "Wiadomość gildii: " + mine.motd(), now);
+                toGuild(mine, mine.motd() == null ? Messages.get("server_world.lider_usunal_wiadomosc_gildii") : Messages.get("server_world.wiadomosc_gildii") + mine.motd(), now);
                 return;
             }
             case "DEPOSIT":
@@ -1662,47 +1663,47 @@ final class ServerWorld {
                 boolean in = f[1].equals("DEPOSIT");
                 if (in) {
                     if (mine == null) {
-                        warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                        warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message(), now);
                         return;
                     }
                     if (amount <= 0 || !pc.bank().debit(amount).ok()) {
-                        warn(p, "Na koncie masz tylko " + String.format("%,d gp", pc.bank().balance()) + ". Wpłać monety u bankiera.", now);
+                        warn(p, Messages.get("server_world.na_koncie_masz_tylko") + String.format("%,d gp", pc.bank().balance()) + Messages.get("server_world.wplac_monety_u_bankiera"), now);
                         return;
                     }
                     r = guilds.deposit(p.name(), amount);
                     if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
                         pc.bank().credit(amount);
-                        warn(p, r.message, now);
+                        warn(p, r.message(), now);
                         return;
                     }
                 } else {
                     r = guilds.withdraw(p.name(), amount);
                     if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
-                        warn(p, r.message, now);
+                        warn(p, r.message(), now);
                         return;
                     }
                     if (!pc.bank().credit(amount).ok()) {
                         guilds.deposit(p.name(), amount);
-                        warn(p, "Konto jest pełne.", now);
+                        warn(p, Messages.get("server_world.konto_jest_pelne"), now);
                         return;
                     }
                 }
                 saveGuilds();
                 save(p);
                 LOG.info("guild " + (in ? "deposit " : "withdraw ") + p.name() + " " + mine.name() + " " + amount);
-                toGuild(mine, p.name() + (in ? " wpłaca " : " wypłaca ") + String.format("%,d gp", amount)
-                        + (in ? " do skarbca" : " ze skarbca") + String.format(" (w skarbcu: %,d gp).", mine.treasury()), now);
+                toGuild(mine, p.name() + (in ? Messages.get("server_world.wplaca") : Messages.get("server_world.wyplaca")) + String.format("%,d gp", amount)
+                        + (in ? Messages.get("server_world.do_skarbca") : Messages.get("server_world.ze_skarbca")) + String.format(Messages.get("server_world.w_skarbcu_d_gp"), mine.treasury()), now);
                 return;
             }
             case "BANNER": {
                 if (mine == null) {
-                    warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                    warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message(), now);
                     return;
                 }
                 r = guilds.withdraw(p.name(), BANNER_COST);
                 if (r != pl.fawizja.pixel.guild.GuildRegistry.Result.OK) {
                     warn(p, r == pl.fawizja.pixel.guild.GuildRegistry.Result.TREASURY_LOW
-                            ? "Sztandar kosztuje " + String.format("%,d gp", BANNER_COST) + " ze skarbca gildii." : r.message, now);
+                            ? Messages.get("server_world.sztandar_kosztuje") + String.format("%,d gp", BANNER_COST) + Messages.get("server_world.ze_skarbca_gildii") : r.message(), now);
                     return;
                 }
                 String gk = mine.name().toLowerCase(java.util.Locale.ROOT);
@@ -1710,14 +1711,14 @@ final class ServerWorld {
                 guildBanners.put(gk, until);
                 saveGuilds();
                 LOG.info("guild banner " + mine.name() + " by " + p.name());
-                toGuild(mine, p.name() + " wznosi sztandar gildii: +" + BANNER_PERCENT + "% doświadczenia za potwory przez "
-                        + (until - now) / 60_000 + " min" + String.format(" (w skarbcu: %,d gp).", mine.treasury()), now);
+                toGuild(mine, p.name() + Messages.get("server_world.wznosi_sztandar_gildii") + BANNER_PERCENT + Messages.get("game_session.doswiadczenia_za_potwory_przez")
+                        + (until - now) / 60_000 + Messages.get("hud.min") + String.format(Messages.get("server_world.w_skarbcu_d_gp"), mine.treasury()), now);
                 updateExpEvent(now);
                 return;
             }
             case "MEMBERS": {
                 if (mine == null) {
-                    warn(p, "Nie należysz do gildii.", now);
+                    warn(p, Messages.get("server_world.nie_nalezysz_do_gildii"), now);
                     return;
                 }
                 for (String line : guildMemberLines(mine)) info(p, line, now);
@@ -1725,19 +1726,19 @@ final class ServerWorld {
             }
             default: // INFO
                 if (mine == null) {
-                    info(p, "Nie należysz do gildii. Załóż: /gildia załóż Nazwa (" + String.format("%,d gp",
+                    info(p, Messages.get("server_world.nie_nalezysz_do_gildii_2") + String.format("%,d gp",
                             pl.fawizja.pixel.guild.GuildRegistry.FOUNDING_COST) + ")", now);
                     return;
                 }
                 List<String> online = new ArrayList<>();
                 for (String n : mine.members()) if (find(n) != null) online.add(n);
-                info(p, "Gildia " + mine.name() + ": lider " + mine.leader() + ", członków " + mine.members().size()
-                        + ", w grze: " + String.join(", ", online) + String.format(", skarbiec: %,d gp", mine.treasury()), now);
-                if (mine.motd() != null) info(p, "Wiadomość gildii: " + mine.motd(), now);
+                info(p, Messages.get("server_world.gildia_2") + mine.name() + Messages.get("server_world.lider") + mine.leader() + Messages.get("server_world.czlonkow") + mine.members().size()
+                        + Messages.get("server_world.w_grze_4") + String.join(", ", online) + String.format(Messages.get("server_world.skarbiec_d_gp"), mine.treasury()), now);
+                if (mine.motd() != null) info(p, Messages.get("server_world.wiadomosc_gildii") + mine.motd(), now);
                 long banner = bannerUntil(p.name(), now);
-                info(p, banner > now ? "Sztandar gildii: +" + BANNER_PERCENT + "% exp jeszcze " + Math.max(1, (banner - now + 59_999) / 60_000) + " min."
-                        : "Sztandar gildii (lider, /gildia sztandar): +" + BANNER_PERCENT + "% exp na godzinę za "
-                        + String.format("%,d gp", BANNER_COST) + " ze skarbca.", now);
+                info(p, banner > now ? Messages.get("server_world.sztandar_gildii_2") + BANNER_PERCENT + Messages.get("server_world.exp_jeszcze") + Math.max(1, (banner - now + 59_999) / 60_000) + Messages.get("server_world.min_2")
+                        : Messages.get("server_world.sztandar_gildii_lider_gildia") + BANNER_PERCENT + Messages.get("server_world.exp_na_godzine_za")
+                        + String.format("%,d gp", BANNER_COST) + Messages.get("server_world.ze_skarbca_2"), now);
         }
     }
 
@@ -1802,14 +1803,20 @@ final class ServerWorld {
      * start.town). Nieznane miasto przy zakladaniu konta = odmowa; dla istniejacej postaci pole jest pomijane.
      */
     ServerPlayer join(ClientHandler client, String name, String vocation, String password, String town, long now) {
+        return join(client, name, vocation, password, town, pl.fawizja.pixel.i18n.Language.PL, now);
+    }
+
+    /** Jak wyzej, z jezykiem klienta (siodme pole HELLO): wiadomosci dla tego gracza powstaja w jego jezyku. */
+    ServerPlayer join(ClientHandler client, String name, String vocation, String password, String town,
+            pl.fawizja.pixel.i18n.Language language, long now) {
         if (shutdownDone) {
-            client.send("ERR", "Serwer jest wyłączany. Spróbuj za chwilę.");
+            client.send("ERR", Messages.get("server_world.serwer_jest_wylaczany_sprobuj"));
             return null;
         }
         try {
             PlayerCharacter.validateName(name);
         } catch (IllegalArgumentException e) {
-            client.send("ERR", "Niepoprawne imię: 3-20 liter, spacje i apostrof.");
+            client.send("ERR", Messages.get("vocation_select_screen.niepoprawne_imie_3_20"));
             return null;
         }
         boolean newAccount = !saved(name) && !accounts.exists(name);
@@ -1817,30 +1824,30 @@ final class ServerWorld {
             try {
                 Vocation.valueOf(vocation);
             } catch (IllegalArgumentException e) {
-                client.send("ERR", "Nieznana profesja.");
+                client.send("ERR", Messages.get("server_world.nieznana_profesja"));
                 return null;
             }
             if (town != null && !town.isBlank() && !town.equals("-")
                     && !pl.fawizja.pixel.character.StartingTowns.isValid(world, town)) {
-                client.send("ERR", "Nieznane miasto startowe: " + town + ".");
+                client.send("ERR", Messages.get("server_world.nieznane_miasto_startowe") + town + ".");
                 return null;
             }
             java.util.ArrayDeque<Long> made = newAccounts.computeIfAbsent(client.address(), k -> new java.util.ArrayDeque<>());
             while (!made.isEmpty() && now - made.peekFirst() > NEW_ACCOUNT_WINDOW_MS) made.pollFirst();
             if (made.size() >= maxNewAccountsPerAddress) {
-                client.send("ERR", "Za dużo nowych kont z tego adresu - spróbuj jutro.");
+                client.send("ERR", Messages.get("server_world.za_duzo_nowych_kont"));
                 return null;
             }
         }
         switch (accounts.login(name, password, now)) {
             case WRONG_PASSWORD:
-                client.send("ERR", "Złe hasło.");
+                client.send("ERR", Messages.get("server_world.zle_haslo"));
                 return null;
             case LOCKED:
-                client.send("ERR", "Za dużo błędnych prób - spróbuj za minutę.");
+                client.send("ERR", Messages.get("server_world.za_duzo_blednych_prob"));
                 return null;
             case BAD_PASSWORD:
-                client.send("ERR", "Hasło musi mieć " + AccountStore.MIN_PASSWORD + "-" + AccountStore.MAX_PASSWORD + " znaków.");
+                client.send("ERR", Messages.get("server_world.haslo_musi_miec") + AccountStore.MIN_PASSWORD + "-" + AccountStore.MAX_PASSWORD + Messages.get("server_world.znakow"));
                 return null;
             case CREATED:
                 LOG.info("new account " + name);
@@ -1850,17 +1857,17 @@ final class ServerWorld {
         }
         Long banned = moderation.bannedUntil(name, wallClock.getAsLong());
         if (banned != null) {
-            client.send("ERR", "Konto zablokowane " + Moderation.describeUntil(banned) + ".");
+            client.send("ERR", Messages.get("server_world.konto_zablokowane") + Moderation.describeUntil(banned) + ".");
             return null;
         }
         ServerPlayer already = find(name);
         if (already != null) {
             if (already.lingering) {
                 long left = (already.pvp.logoutBlockedMs(now) + 999) / 1000;
-                client.send("ERR", "Postać " + name + " jest jeszcze w świecie po walce z graczem (blokada wylogowania, "
-                        + (left >= 60 ? left / 60 + " min " + left % 60 + " s" : left + " s") + ").");
+                client.send("ERR", Messages.get("server_world.postac") + name + Messages.get("server_world.jest_jeszcze_w_swiecie")
+                        + (left >= 60 ? left / 60 + Messages.get("server_world.min_3") + left % 60 + " s" : left + " s") + ").");
             } else {
-                client.send("ERR", "Postać " + name + " jest już w grze.");
+                client.send("ERR", Messages.get("server_world.postac") + name + Messages.get("server_world.jest_juz_w_grze"));
             }
             return null;
         }
@@ -1874,7 +1881,7 @@ final class ServerWorld {
                 pc.stamina().onLogin(wallClock.getAsLong()); // stamina odnowiona za czas offline (zasady Tibii)
             }
         } catch (IllegalArgumentException e) {
-            client.send("ERR", "Nieprawidłowe dane postaci: " + e.getMessage());
+            client.send("ERR", Messages.get("server_world.nieprawidlowe_dane_postaci") + e.getMessage());
             return null;
         }
         pc.setPosition(freeSpotNear(pc.position()));
@@ -1886,6 +1893,7 @@ final class ServerWorld {
         s.setChests(chests);
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
                 pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));
+        p.language = language;
         if (p.pvp.fightUntil() > now) s.lockProtectionZonesUntil(p.pvp.fightUntil());
         s.setOtherPlayers(pos -> {
             for (ServerPlayer o : players.values()) {
@@ -1900,7 +1908,7 @@ final class ServerWorld {
         if (evict != null) {
             // wylogowanie na arenie: walka sie skonczyla albo to inna druzyna - powrot do przedsionka
             s.teleport(freeSpotNear(evict), now);
-            s.log().add(now, EventLog.Kind.INFO, "Arena jest zamknięta - wracasz do przedsionka.");
+            s.log().add(now, EventLog.Kind.INFO, Messages.get("server_world.arena_jest_zamknieta_wracasz"));
         }
         s.setPvpStatus(p.pvp);
         // czary i runy na graczy: cel-gracz i (obszar) wszyscy gracze w zasiegu - zasady w PvpRules.check
@@ -1937,7 +1945,7 @@ final class ServerWorld {
         s.combat().setRareDropListener((type, item, t) -> {
             String what = items.get(item.itemId()).name() + " (" + type.name() + ")";
             for (ServerPlayer o : players.values()) {
-                if (o != p) o.session.log().add(t, EventLog.Kind.SYSTEM, p.name() + " zdobywa rzadki łup: " + what + "!");
+                if (o != p) o.session.log().add(t, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.zdobywa_rzadki_lup") + what + "!");
             }
         });
         players.put(p.id, p);
@@ -1946,28 +1954,28 @@ final class ServerWorld {
         sendHouseAccess(p);
         String wake = pl.fawizja.pixel.house.BedRest.wakeUp(pc, wallClock.getAsLong()); // sen w lozku: zycie i mana
         if (wake != null) s.log().add(lastNow, EventLog.Kind.SYSTEM, wake);
-        broadcast(p, "LOG", "INFO", pc.name() + " wchodzi do gry.");
-        tellFriends(p, "jest teraz w grze.", lastNow);
+        broadcastInfo(p, () -> p.name() + Messages.get("server_world.wchodzi_do_gry"));
+        tellFriends(p, Messages.get("server_world.jest_teraz_w_grze"), lastNow);
         List<String> on = new ArrayList<>();
         for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
-        if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Znajomi w grze: " + String.join(", ", on));
-        if (!motd.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość dnia: " + motd);
+        if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.znajomi_w_grze") + String.join(", ", on));
+        if (!motd.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.wiadomosc_dnia") + motd);
         if (expEventPercent > 0) s.log().add(lastNow, EventLog.Kind.SYSTEM, expEventLine(lastNow));
         pl.fawizja.pixel.guild.GuildRegistry.Guild guild = guilds.guildOf(pc.name());
         if (guild != null && guild.motd() != null) {
-            s.log().add(lastNow, EventLog.Kind.SYSTEM, "Wiadomość gildii " + guild.name() + ": " + guild.motd());
+            s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.wiadomosc_gildii_2") + guild.name() + ": " + guild.motd());
         }
         if (invasion != null) {
-            s.log().add(lastNow, EventLog.Kind.SYSTEM, "Trwa inwazja: " + invasion.plan().name() + " atakują "
-                    + invasion.plan().town() + " (zostało " + invasion.remaining() + " wrogów).");
+            s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.trwa_inwazja") + invasion.plan().name() + Messages.get("server_world.atakuja")
+                    + invasion.plan().town() + Messages.get("server_world.zostalo") + invasion.remaining() + Messages.get("server_world.wrogow"));
         }
         deliverMail(p, lastNow);
         deliverLetters(p);
         long earned = market.takeEarnings(pc.name());
         if (earned > 0) {
             if (pc.bank().credit(earned).ok()) {
-                s.log().add(lastNow, EventLog.Kind.SYSTEM, "Pod Twoją nieobecność na konto wpłynęło "
-                        + String.format("%,d gp", earned) + " (rynek i przelewy).");
+                s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.pod_twoja_nieobecnosc_na")
+                        + String.format("%,d gp", earned) + Messages.get("server_world.rynek_i_przelewy"));
                 save(p);
             } else {
                 market.addEarnings(pc.name(), earned);
@@ -2019,8 +2027,8 @@ final class ServerWorld {
             String note = pl.fawizja.pixel.combat.CombatSystem.staminaNote(c, m == killer); // strefa sprzed zuzycia
             share = c.stamina().hunt(share, c.isPremium(), now); // stamina jak w Tibii: po podziale, osobno dla kazdego
             m.session.combat().awardForgeDust(type, now); // pyl Kuzni: kazdy z druzyny wlasny rzut (Canary ForgeMonster:onDeath)
-            m.session.combat().awardExperience(share, (m == killer ? "Pokonano: " : "Drużyna pokonała: ") + type.name()
-                    + (rested ? ", wypoczęty" : "") + note, now);
+            m.session.combat().awardExperience(share, (m == killer ? Messages.get("server_world.pokonano") : Messages.get("server_world.druzyna_pokonala")) + type.name()
+                    + (rested ? Messages.get("combat_system.wypoczety") : "") + note, now);
             if (m != killer) m.session.partyKill(type); // zadania dnia, zlecenia i zadania licza sie calej druzynie obok
         }
         return true;
@@ -2033,12 +2041,12 @@ final class ServerWorld {
         if (sub.equals("INFO")) {
             pl.fawizja.pixel.party.PartyView v = partyView(p.name());
             if (!v.inParty()) {
-                info(p, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message, now);
+                info(p, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message(), now);
                 return;
             }
             p.lastPartyInfo = "";
             sendPartyInfo(p);
-            info(p, "Drużyna: " + String.join(", ", v.names()) + ". " + v.bonusLine(), now);
+            info(p, Messages.get("server_world.druzyna") + String.join(", ", v.names()) + ". " + v.bonusLine(), now);
             return;
         }
         if (sub.equals("KICK")) {
@@ -2049,12 +2057,12 @@ final class ServerWorld {
             for (String n : parties.members(p.name())) if (n.equalsIgnoreCase(target)) exact = n;
             pl.fawizja.pixel.party.PartyManager.Result r = parties.kick(p.name(), target);
             if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
-                warn(p, r == pl.fawizja.pixel.party.PartyManager.Result.NOT_LEADER ? "Tylko lider drużyny może wyrzucać." : r.message, now);
+                warn(p, r == pl.fawizja.pixel.party.PartyManager.Result.NOT_LEADER ? Messages.get("social_client.tylko_lider_druzyny_moze") : r.message(), now);
                 return;
             }
             ServerPlayer gone = find(exact);
             if (gone != null) {
-                gone.session.log().add(now, EventLog.Kind.WARNING, leader + " usuwa cię z drużyny.");
+                Messages.runAs(gone.language, () -> gone.session.log().add(now, EventLog.Kind.WARNING, leader + Messages.get("server_world.usuwa_cie_z_druzyny")));
                 gone.lastPartyInfo = "";
                 gone.client.send("PARTY", "-");
             }
@@ -2062,45 +2070,45 @@ final class ServerWorld {
             if (rest.isEmpty()) rest = List.of(p.name());
             for (String n : rest) {
                 ServerPlayer m = find(n);
-                if (m != null) m.session.log().add(now, EventLog.Kind.INFO, exact + " usunięty z drużyny.");
+                if (m != null) m.session.log().add(now, EventLog.Kind.INFO, exact + Messages.get("server_world.usuniety_z_druzyny"));
             }
             sendParty(rest);
             return;
         }
         if (sub.equals("LEAVE")) {
             if (parties.members(p.name()).isEmpty()) {
-                p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message);
+                Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message()));
                 return;
             }
             partyLeft(p, now);
-            p.session.log().add(now, EventLog.Kind.INFO, "Opuściłeś drużynę.");
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.INFO, Messages.get("server_world.opusciles_druzyne")));
             return;
         }
         if (f.length < 3) return;
         ServerPlayer other = find(f[2]);
         if (other == null) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Gracz " + f[2] + " nie jest w grze.");
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.gracz") + f[2] + Messages.get("server_world.nie_jest_w_grze_2")));
             return;
         }
         if (sub.equals("INVITE")) {
             pl.fawizja.pixel.party.PartyManager.Result r = parties.invite(p.name(), other.name(), now);
             if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
-                p.session.log().add(now, EventLog.Kind.WARNING, r.message);
+                Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, r.message()));
                 return;
             }
-            p.session.log().add(now, EventLog.Kind.INFO, "Zaproszono " + other.name() + " do drużyny.");
-            other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " zaprasza cię do drużyny: /przyjmij " + p.name());
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.INFO, Messages.get("server_world.zaproszono") + other.name() + Messages.get("server_world.do_druzyny")));
+            Messages.runAs(other.language, () -> other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.zaprasza_cie_do_druzyny") + p.name()));
             other.client.send("PARTYINV", p.name());
         } else if (sub.equals("ACCEPT")) {
             pl.fawizja.pixel.party.PartyManager.Result r = parties.accept(p.name(), other.name(), now);
             if (r != pl.fawizja.pixel.party.PartyManager.Result.OK) {
-                p.session.log().add(now, EventLog.Kind.WARNING, r.message);
+                Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, r.message()));
                 return;
             }
             for (String n : parties.members(p.name())) {
                 ServerPlayer m = find(n);
                 if (m == null) continue;
-                m.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " dołącza do drużyny.");
+                Messages.runAs(m.language, () -> m.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.dolacza_do_druzyny")));
             }
             sendParty(parties.members(p.name()));
         }
@@ -2118,35 +2126,35 @@ final class ServerWorld {
         if (f.length >= 2 && f[1].equals("SURRENDER")) {
             ServerPlayer o = p.pvp.duelPartner() == null ? null : find(p.pvp.duelPartner());
             if (o == null) {
-                warn(p, "Nie walczysz w pojedynku.", now);
+                warn(p, Messages.get("server_world.nie_walczysz_w_pojedynku"), now);
                 return;
             }
             PvpRules.endDuel(p.pvp, o.pvp);
-            info(p, "Poddajesz pojedynek z " + o.name() + ".", now);
-            info(o, p.name() + " poddaje się - wygrywasz pojedynek!", now);
+            info(p, Messages.get("server_world.poddajesz_pojedynek_z") + o.name() + ".", now);
+            info(o, p.name() + Messages.get("server_world.poddaje_sie_wygrywasz_pojedyne"), now);
             duelOver(o, p, now);
             return;
         }
         if (f.length < 3 || !f[1].equals("REQUEST")) {
-            info(p, "Pojedynek: /pojedynek Imię (wyzwanie albo przyjęcie wyzwania), /pojedynek poddaj.", now);
+            info(p, Messages.get("server_world.pojedynek_pojedynek_imie_wyzwa"), now);
             return;
         }
         ServerPlayer t = find(f[2]);
         if (t == null) {
-            warn(p, "Nie ma w grze gracza " + f[2] + ".", now);
+            warn(p, Messages.get("server_world.nie_ma_w_grze") + f[2] + ".", now);
             return;
         }
         if (t == p) {
-            warn(p, "Nie możesz walczyć sam ze sobą.", now);
+            warn(p, Messages.get("server_world.nie_mozesz_walczyc_sam"), now);
             return;
         }
         if (p.pvp.duelPartner() != null || t.pvp.duelPartner() != null) {
-            warn(p, (p.pvp.duelPartner() != null ? "Już walczysz" : t.name() + " już walczy") + " w pojedynku.", now);
+            warn(p, (p.pvp.duelPartner() != null ? Messages.get("server_world.juz_walczysz") : t.name() + Messages.get("server_world.juz_walczy")) + Messages.get("server_world.w_pojedynku"), now);
             return;
         }
         if (p.session.character().position().distanceTo(t.session.character().position()) > 8
                 || p.session.character().position().z() != t.session.character().position().z()) {
-            warn(p, t.name() + " jest za daleko - podejdź bliżej.", now);
+            warn(p, t.name() + Messages.get("server_world.jest_za_daleko_podejdz"), now);
             return;
         }
         String them = t.name().toLowerCase(java.util.Locale.ROOT);
@@ -2155,14 +2163,14 @@ final class ServerWorld {
             duelInvites.remove(them);
             duelInvites.remove(me);
             PvpRules.startDuel(p.name(), p.pvp, t.name(), t.pvp, now);
-            String rules = " Do pierwszej krwi (przegrany zostaje z 1 HP), bez czaszek, najwyżej 5 min. Wyjdźcie ze strefy ochronnej i zaatakujcie się.";
-            p.session.log().add(now, EventLog.Kind.SYSTEM, "Pojedynek z " + t.name() + "!" + rules);
-            t.session.log().add(now, EventLog.Kind.SYSTEM, "Pojedynek z " + p.name() + "!" + rules);
+            String rules = Messages.get("server_world.do_pierwszej_krwi_przegrany");
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.pojedynek_z") + t.name() + "!" + rules));
+            Messages.runAs(t.language, () -> t.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.pojedynek_z") + p.name() + "!" + rules));
             return;
         }
         duelInvites.put(me, new Object[] {them, now});
-        info(p, "Wyzywasz " + t.name() + " na pojedynek (czeka minutę).", now);
-        info(t, p.name() + " wyzywa cię na pojedynek. Przyjmij: /pojedynek " + p.name(), now);
+        info(p, Messages.get("server_world.wyzywasz") + t.name() + Messages.get("server_world.na_pojedynek_czeka_minute"), now);
+        info(t, p.name() + Messages.get("server_world.wyzywa_cie_na_pojedynek") + p.name(), now);
     }
 
     /** Wyjscie z gry w trakcie pojedynku: walkower dla przeciwnika. */
@@ -2176,7 +2184,7 @@ final class ServerWorld {
             return;
         }
         PvpRules.endDuel(p.pvp, o.pvp);
-        info(o, p.name() + " opuścił grę - wygrywasz pojedynek walkowerem.", lastNow);
+        info(o, p.name() + Messages.get("server_world.opuscil_gre_wygrywasz_pojedyne"), lastNow);
         duelOver(o, p, lastNow);
     }
 
@@ -2188,7 +2196,7 @@ final class ServerWorld {
         save(winner);
         for (ServerPlayer o : players.values()) {
             if (o != winner && o != loser && o.session.character().position().distanceTo(winner.session.character().position()) <= Protocol.VIEW_RADIUS) {
-                info(o, winner.name() + " wygrywa pojedynek z " + loser.name() + ".", now);
+                info(o, winner.name() + Messages.get("server_world.wygrywa_pojedynek_z") + loser.name() + ".", now);
             }
         }
     }
@@ -2206,7 +2214,7 @@ final class ServerWorld {
             boolean dead = p.session.character().isDead() || o.session.character().isDead();
             if (now >= p.pvp.duelUntil() || dead) {
                 PvpRules.endDuel(p.pvp, o.pvp);
-                String why = dead ? "Pojedynek przerwany." : "Czas minął - pojedynek kończy się remisem.";
+                String why = dead ? Messages.get("server_world.pojedynek_przerwany") : Messages.get("server_world.czas_minal_pojedynek_konczy");
                 info(p, why, now);
                 info(o, why, now);
                 if (p.pvpTarget == o.id) p.pvpTarget = -1;
@@ -2224,7 +2232,7 @@ final class ServerWorld {
         if (f.length < 2) return;
         PlayerTrade open = trades.get(lower(p.name()));
         if (open != null && tradeBroken(open, now)) {
-            cancelTrade(open, "Wymiana anulowana (za daleko albo upłynął czas).", now);
+            cancelTrade(open, Messages.get("server_world.wymiana_anulowana_za_daleko"), now);
             open = null;
         }
         switch (f[1]) {
@@ -2232,20 +2240,20 @@ final class ServerWorld {
                 if (f.length < 3) return;
                 ServerPlayer other = find(f[2]);
                 if (other == null || other == p) {
-                    warn(p, other == p ? "Nie możesz handlować z samym sobą." : "Gracz " + f[2] + " nie jest w grze.", now);
+                    warn(p, other == p ? Messages.get("server_world.nie_mozesz_handlowac_z") : Messages.get("server_world.gracz") + f[2] + Messages.get("server_world.nie_jest_w_grze_2"), now);
                     return;
                 }
                 if (open != null) {
-                    warn(p, "Najpierw zakończ obecną wymianę (/anuluj).", now);
+                    warn(p, Messages.get("server_world.najpierw_zakoncz_obecna_wymian"), now);
                     return;
                 }
                 PlayerTrade theirs = trades.get(lower(other.name()));
                 if (theirs != null && !tradeBroken(theirs, now)) {
-                    warn(p, other.name() + " już z kimś handluje.", now);
+                    warn(p, other.name() + Messages.get("server_world.juz_z_kims_handluje"), now);
                     return;
                 }
                 if (!PlayerTrade.closeEnough(p.session.character().position(), other.session.character().position())) {
-                    warn(p, PlayerTrade.Result.TOO_FAR.message, now);
+                    warn(p, PlayerTrade.Result.TOO_FAR.message(), now);
                     return;
                 }
                 Map<String, Long> mine = tradeRequests.get(lower(p.name()));
@@ -2255,59 +2263,59 @@ final class ServerWorld {
                     PlayerTrade t = new PlayerTrade(other.name(), p.name(), now);
                     trades.put(lower(p.name()), t);
                     trades.put(lower(other.name()), t);
-                    String how = "Dodaj ofertę: /oferuj 5 mikstura zdrowia albo /oferuj 1000 gp; potem /akceptuj (albo /anuluj).";
-                    info(p, "Wymiana z " + other.name() + " otwarta. " + how, now);
-                    info(other, "Wymiana z " + p.name() + " otwarta. " + how, now);
+                    String how = Messages.get("server_world.dodaj_oferte_oferuj_5");
+                    info(p, Messages.get("server_world.wymiana_z") + other.name() + " otwarta. " + how, now);
+                    info(other, Messages.get("server_world.wymiana_z") + p.name() + " otwarta. " + how, now);
                     sendTradeState(t);
                 } else {
                     tradeRequests.computeIfAbsent(lower(other.name()), k -> new java.util.HashMap<>())
                             .put(lower(p.name()), now + TRADE_REQUEST_MS);
-                    info(p, "Zaproponowano handel graczowi " + other.name() + ".", now);
-                    other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " chce handlować: /handel " + p.name());
+                    info(p, Messages.get("server_world.zaproponowano_handel_graczowi") + other.name() + ".", now);
+                    Messages.runAs(other.language, () -> other.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.chce_handlowac_handel") + p.name()));
                 }
                 return;
             }
             case "CANCEL":
                 if (open == null) {
-                    warn(p, "Nie masz otwartej wymiany.", now);
+                    warn(p, Messages.get("server_world.nie_masz_otwartej_wymiany_2"), now);
                     return;
                 }
-                cancelTrade(open, p.name() + " anuluje wymianę.", now);
+                cancelTrade(open, p.name() + Messages.get("server_world.anuluje_wymiane"), now);
                 return;
             default:
         }
         if (open == null) {
-            warn(p, "Nie masz otwartej wymiany. Zacznij od /handel Imię.", now);
+            warn(p, Messages.get("server_world.nie_masz_otwartej_wymiany"), now);
             return;
         }
         ServerPlayer partner = find(open.partnerOf(p.name()));
         if (partner == null) {
-            cancelTrade(open, "Wymiana anulowana - drugi gracz wyszedł.", now);
+            cancelTrade(open, Messages.get("server_world.wymiana_anulowana_drugi_gracz"), now);
             return;
         }
         if (f[1].equals("OFFER") && f.length >= 3) {
             PlayerTrade.Result r = open.offer(p.name(), p.session.character().backpack(), items, f[2], now);
             if (r != PlayerTrade.Result.OK) {
-                warn(p, r.message, now);
+                warn(p, r.message(), now);
                 return;
             }
-            String status = "Oferta " + p.name() + ": " + open.offerOf(p.name()).describe(items)
-                    + " | Oferta " + partner.name() + ": " + open.offerOf(partner.name()).describe(items) + ". /akceptuj";
+            String status = Messages.get("server_world.oferta_2") + p.name() + ": " + open.offerOf(p.name()).describe(items)
+                    + Messages.get("server_world.oferta_3") + partner.name() + ": " + open.offerOf(partner.name()).describe(items) + Messages.get("server_world.akceptuj");
             info(p, status, now);
             info(partner, status, now);
             sendTradeState(open);
         } else if (f[1].equals("ACCEPT")) {
             PlayerTrade.Result r = open.accept(p.name());
             if (r == PlayerTrade.Result.WAITING) {
-                info(p, r.message, now);
+                info(p, r.message(), now);
                 sendTradeState(open);
-                partner.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " akceptuje wymianę: "
+                partner.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.akceptuje_wymiane")
                         + open.offerOf(p.name()).describe(items) + " za " + open.offerOf(partner.name()).describe(items)
-                        + ". /akceptuj albo /anuluj");
+                        + Messages.get("server_world.akceptuj_albo_anuluj"));
                 return;
             }
             if (r != PlayerTrade.Result.DONE) {
-                warn(p, r.message, now);
+                warn(p, r.message(), now);
                 return;
             }
             ServerPlayer first = find(open.first());
@@ -2318,9 +2326,9 @@ final class ServerWorld {
             first.client.send("TS", "-");
             second.client.send("TS", "-");
             for (ServerPlayer x : new ServerPlayer[] {first, second}) {
-                if (done == PlayerTrade.Result.DONE) info(x, "Wymiana zakończona: oddano " + open.offerOf(x.name()).describe(items)
-                        + ", otrzymano " + open.offerOf(open.partnerOf(x.name())).describe(items) + ".", now);
-                else warn(x, done.message, now);
+                if (done == PlayerTrade.Result.DONE) info(x, Messages.get("server_world.wymiana_zakonczona_oddano") + open.offerOf(x.name()).describe(items)
+                        + Messages.get("server_world.otrzymano") + open.offerOf(open.partnerOf(x.name())).describe(items) + ".", now);
+                else warn(x, done.message(), now);
             }
             if (done == PlayerTrade.Result.DONE) {
                 LOG.info("trade " + first.name() + " <-> " + second.name() + ": " + open.offerOf(first.name()).describe(items)
@@ -2335,7 +2343,7 @@ final class ServerWorld {
     private void leftTrade(ServerPlayer p) {
         tradeRequests.remove(lower(p.name()));
         PlayerTrade t = trades.get(lower(p.name()));
-        if (t != null) cancelTrade(t, "Wymiana anulowana - " + p.name() + " wychodzi z gry.", lastNow);
+        if (t != null) cancelTrade(t, Messages.get("server_world.wymiana_anulowana") + p.name() + Messages.get("server_world.wychodzi_z_gry"), lastNow);
     }
 
     private boolean tradeBroken(PlayerTrade t, long now) {
@@ -2376,7 +2384,7 @@ final class ServerWorld {
         p.lastPartyInfo = "";
         for (String n : rest) {
             ServerPlayer m = find(n);
-            if (m != null) m.session.log().add(now, EventLog.Kind.INFO, p.name() + " opuszcza drużynę.");
+            if (m != null) m.session.log().add(now, EventLog.Kind.INFO, p.name() + Messages.get("server_world.opuszcza_druzyne"));
         }
         sendParty(rest);
     }
@@ -2473,7 +2481,7 @@ final class ServerWorld {
         try {
             return saves.read(slot, codec::decode).value();
         } catch (IOException e) {
-            throw new IllegalArgumentException("zapis uszkodzony");
+            throw new IllegalArgumentException(Messages.get("server_world.zapis_uszkodzony"));
         }
     }
 
@@ -2518,9 +2526,9 @@ final class ServerWorld {
             LOG.warning("delete failed for " + p.name() + ": " + e.getMessage());
         }
         p.client.player = null;
-        p.client.send("ERR", "Konto usunięte.");
+        p.client.send("ERR", Messages.get("server_world.konto_usuniete"));
         p.client.close();
-        broadcast(p, "LOG", "INFO", p.name() + " opuszcza grę.");
+        broadcastInfo(p, () -> p.name() + Messages.get("server_world.opuszcza_gre"));
         LOG.info("account deleted " + p.name());
     }
 
@@ -2561,13 +2569,17 @@ final class ServerWorld {
         if (world.levelDoorAt(at) > 0 && players.values().stream().noneMatch(o -> o.session.character().position().equals(at))) {
             world.openings().set(at, false);
         }
-        tellFriends(p, "wyszedł z gry.", lastNow);
-        broadcast(p, "LOG", "INFO", p.name() + " wychodzi z gry.");
+        tellFriends(p, Messages.get("server_world.wyszedl_z_gry"), lastNow);
+        broadcastInfo(p, () -> p.name() + Messages.get("server_world.wychodzi_z_gry"));
         LOG.info("leave " + p.name() + " (" + players.size() + " online)");
     }
 
     /** Komenda od klienta (juz zalogowanego). */
     void command(ServerPlayer p, String[] f, long now) {
+        Messages.runAs(p.language, () -> commandIn(p, f, now));
+    }
+
+    private void commandIn(ServerPlayer p, String[] f, long now) {
         switch (f[0]) {
             case "MOVE": p.move = f.length > 1 && !f[1].equals("-") ? parseDir(f[1]) : null; break;
             case "ACT":
@@ -2595,19 +2607,19 @@ final class ServerWorld {
             case "PASSWD":
                 if (f.length < 3) break;
                 switch (accounts.changePassword(p.name(), f[1], f[2], now)) {
-                    case OK: p.session.log().add(now, EventLog.Kind.SYSTEM, "Hasło zmienione."); break;
-                    case LOCKED: p.session.log().add(now, EventLog.Kind.WARNING, "Za dużo błędnych prób - spróbuj za minutę."); break;
+                    case OK: p.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.haslo_zmienione")); break;
+                    case LOCKED: p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.za_duzo_blednych_prob")); break;
                     case BAD_PASSWORD:
-                        p.session.log().add(now, EventLog.Kind.WARNING, "Nowe hasło musi mieć " + AccountStore.MIN_PASSWORD
-                                + "-" + AccountStore.MAX_PASSWORD + " znaków.");
+                        p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.nowe_haslo_musi_miec") + AccountStore.MIN_PASSWORD
+                                + "-" + AccountStore.MAX_PASSWORD + Messages.get("server_world.znakow"));
                         break;
-                    default: p.session.log().add(now, EventLog.Kind.WARNING, "Złe obecne hasło.");
+                    default: p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.zle_obecne_haslo"));
                 }
                 break;
             case "DELETE":
                 if (f.length < 2) break;
                 if (accounts.delete(p.name(), f[1], now) != AccountStore.Result.OK) {
-                    p.session.log().add(now, EventLog.Kind.WARNING, "Konto nie zostało usunięte - złe hasło.");
+                    Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.konto_nie_zostalo_usuniete")));
                     break;
                 }
                 deleteCharacter(p);
@@ -2663,11 +2675,11 @@ final class ServerWorld {
             case "INSPECT": {
                 ServerPlayer o = f.length < 2 ? null : find(f[1].trim());
                 if (o == null) {
-                    warn(p, "Nie ma takiego gracza w grze.", now);
+                    warn(p, Messages.get("server_world.nie_ma_takiego_gracza"), now);
                     break;
                 }
                 for (String line : inspectLines(o)) info(p, line, now);
-                if (o != p) o.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + " ogląda twój ekwipunek.");
+                if (o != p) o.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.oglada_twoj_ekwipunek"));
                 break;
             }
             case "WHO": {
@@ -2684,9 +2696,9 @@ final class ServerWorld {
                     PlayerCharacter oc = o.session.character();
                     String tag = guildTag(oc.name());
                     String title = pl.fawizja.pixel.achievement.Achievement.titleOf(oc.title());
-                    out.add(oc.name() + ";" + oc.vocation().displayName() + ", poziom " + oc.level()
+                    out.add(oc.name() + ";" + oc.vocation().displayName() + Messages.get("pixel_game.poziom") + oc.level()
                             + (tag == null || tag.equals("-") ? "" : " <" + tag + ">") + (title == null ? "" : ", " + title)
-                            + bountyNote(oc.name()) + (seeksParty(o) ? ", szuka drużyny" : ""));
+                            + bountyNote(oc.name()) + (seeksParty(o) ? Messages.get("server_world.szuka_druzyny") : ""));
                 }
                 p.client.send(out.toArray(new String[0]));
                 break;
@@ -2701,17 +2713,17 @@ final class ServerWorld {
                     // offline: list czeka do wejscia, jesli taka postac istnieje
                     String who = f[1].trim();
                     if (!saved(who)) {
-                        warn(p, "Nie ma postaci " + who + ".", now);
+                        warn(p, Messages.get("server_world.nie_ma_postaci") + who + ".", now);
                         break;
                     }
                     if (!chatAllowed(p, now)) break;
                     if (!letters.canAccept(who)) {
-                        warn(p, who + " ma już za dużo nieprzeczytanych listów.", now);
+                        warn(p, who + Messages.get("server_world.ma_juz_za_duzo"), now);
                         break;
                     }
                     letters.add(who, p.name(), f[2]);
                     saveLetters();
-                    info(p, who + " nie jest w grze - wiadomość czeka i pokaże się po wejściu.", now);
+                    info(p, who + Messages.get("server_world.nie_jest_w_grze"), now);
                     break;
                 }
                 if (!chatAllowed(p, now)) break;
@@ -2725,7 +2737,7 @@ final class ServerWorld {
                 break;
             case "ADMIN":
                 if (!moderation.isAdmin(p.name())) {
-                    warn(p, "Brak uprawnień administratora.", now);
+                    warn(p, Messages.get("server_world.brak_uprawnien_administratora"), now);
                     break;
                 }
                 String[] cmd = new String[f.length - 1];
@@ -2738,7 +2750,7 @@ final class ServerWorld {
                 if (f.length > 1 && !f[1].isBlank()) {
                     pl.fawizja.pixel.guild.GuildRegistry.Guild g = guilds.guildOf(p.name());
                     if (g == null) {
-                        warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message, now);
+                        warn(p, pl.fawizja.pixel.guild.GuildRegistry.Result.NOT_MEMBER.message(), now);
                         break;
                     }
                     if (!chatAllowed(p, now)) break;
@@ -2753,14 +2765,14 @@ final class ServerWorld {
                 if (f.length > 1 && !f[1].isBlank()) {
                     List<String> team = parties.members(p.name());
                     if (team.isEmpty()) {
-                        p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message);
+                        Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, pl.fawizja.pixel.party.PartyManager.Result.NOT_IN_PARTY.message()));
                         break;
                     }
                     if (!chatAllowed(p, now)) break;
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
                     for (String n : team) {
                         ServerPlayer m = find(n);
-                        if (m != null) m.client.send("CHAT", "[Drużyna] " + p.name(), text, "party");
+                        if (m != null) m.client.send("CHAT", Messages.get("server_world.druzyna_2") + p.name(), text, "party");
                     }
                 }
                 break;
@@ -2789,7 +2801,7 @@ final class ServerWorld {
                 if (f.length > 1 && !f[1].isBlank()) {
                     if (!chatAllowed(p, now)) break;
                     String text = f[1].length() > 200 ? f[1].substring(0, 200) : f[1];
-                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Handel] " + p.name(), text, "trade");
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", Messages.get("server_world.handel") + p.name(), text, "trade");
                 }
                 break;
             default:
@@ -2816,28 +2828,28 @@ final class ServerWorld {
 
     /** SHUTDOWN [minuty | Ns] (domyslnie 5 min), SHUTDOWN - odwoluje. */
     private String shutdown(String[] c, String by, long now) {
-        if (!by.equals("konsola")) return "Wyłączenie serwera planuje tylko konsola serwera.";
+        if (!by.equals("konsola")) return Messages.get("server_world.wylaczenie_serwera_planuje_tyl");
         String arg = c.length > 1 ? c[1].trim().toLowerCase(java.util.Locale.ROOT) : "5";
         if (arg.equals("-")) {
-            if (shutdownAt < 0) return "Nie zaplanowano wyłączenia.";
+            if (shutdownAt < 0) return Messages.get("server_world.nie_zaplanowano_wylaczenia");
             shutdownAt = -1;
-            announce("Wyłączenie serwera odwołane.");
-            return "Odwołano wyłączenie.";
+            announce(() -> Messages.get("server_world.wylaczenie_serwera_odwolane"));
+            return Messages.get("server_world.odwolano_wylaczenie");
         }
         long ms = arg.endsWith("s") ? Long.parseLong(arg.substring(0, arg.length() - 1)) * 1000L : Long.parseLong(arg) * 60_000L;
-        if (ms < 0 || ms > 24 * 3600_000L) return "Podaj od 0 do 1440 minut.";
+        if (ms < 0 || ms > 24 * 3600_000L) return Messages.get("server_world.podaj_od_0_do");
         shutdownAt = now + ms;
         shutdownAnnounced = ms;
-        announce("Serwer zostanie wyłączony za " + describeLeft(ms) + ". Zakończ walkę w bezpiecznym miejscu.");
+        announce(() -> Messages.get("server_world.serwer_zostanie_wylaczony_za") + describeLeft(ms) + Messages.get("server_world.zakoncz_walke_w_bezpiecznym"));
         LOG.info("shutdown in " + ms / 1000 + " s");
-        return "Wyłączenie za " + describeLeft(ms) + ". SHUTDOWN - odwołuje.";
+        return Messages.get("server_world.wylaczenie_za") + describeLeft(ms) + Messages.get("server_world.shutdown_odwoluje");
     }
 
     private void updateShutdown(long now) {
         if (shutdownAt < 0 || shutdownDone) return;
         long left = shutdownAt - now;
         if (left <= 0) {
-            for (ServerPlayer p : new ArrayList<>(players.values())) kick(p, "Serwer jest wyłączany. Postać zapisana, wróć za chwilę.");
+            for (ServerPlayer p : new ArrayList<>(players.values())) kick(p, Messages.get("server_world.serwer_jest_wylaczany_postac"));
             saveAll();
             shutdownDone = true;
             LOG.info("shutdown: players saved");
@@ -2846,7 +2858,7 @@ final class ServerWorld {
         for (long w : SHUTDOWN_WARN) {
             if (w < shutdownAnnounced && left <= w) {
                 shutdownAnnounced = w;
-                announce("Serwer zostanie wyłączony za " + describeLeft(w) + ".");
+                announce(() -> Messages.get("server_world.serwer_zostanie_wylaczony_za") + describeLeft(w) + ".");
                 break;
             }
         }
@@ -2854,11 +2866,13 @@ final class ServerWorld {
 
     static String describeLeft(long ms) {
         long s = (ms + 999) / 1000;
-        return s >= 60 && s % 60 == 0 ? s / 60 + " min" : s >= 60 ? s / 60 + " min " + s % 60 + " s" : s + " s";
+        return s >= 60 && s % 60 == 0 ? s / 60 + Messages.get("hud.min") : s >= 60 ? s / 60 + Messages.get("server_world.min_3") + s % 60 + " s" : s + " s";
     }
 
-    private void announce(String text) {
-        for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", text, "broadcast");
+    private void announce(java.util.function.Supplier<String> text) {
+        for (ServerPlayer o : players.values()) {
+            Messages.runAs(o.language, () -> o.client.send("CHAT", Messages.get("server_world.ogloszenie"), text.get(), "broadcast"));
+        }
     }
     /** Czas pierwszego taktu swiata (do czasu dzialania w STATUS); -1 przed pierwszym taktem. */
     private long firstTick = -1;
@@ -2868,59 +2882,59 @@ final class ServerWorld {
         Runtime rt = Runtime.getRuntime();
         long usedMb = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
         long up = firstTick < 0 ? 0 : Math.max(0, now - firstTick) / 1000;
-        return String.format(java.util.Locale.ROOT, "Działa %d h %02d min, graczy: %d, potworów: %d, inwazja: %s, pamięć: %d / %d MB%s.",
+        return String.format(java.util.Locale.ROOT, Messages.get("server_world.dziala_d_h_02d"),
                 up / 3600, up / 60 % 60, players.size(), monsters.monsters().size(),
-                invasion == null ? "brak" : invasion.plan().town() + " (" + invasion.remaining() + " z " + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024),
-                shutdownAt < 0 ? "" : ", wyłączenie za " + describeLeft(Math.max(0, shutdownAt - now)));
+                invasion == null ? Messages.get("server_world.brak") : invasion.plan().town() + " (" + invasion.remaining() + Messages.get("common.z") + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024),
+                shutdownAt < 0 ? "" : Messages.get("server_world.wylaczenie_za_2") + describeLeft(Math.max(0, shutdownAt - now)));
     }
 
     String moderate(String[] c, String by, long now) {
-        if (c.length == 0) return "Polecenia: " + COMMANDS;
+        if (c.length == 0) return Messages.get("server_world.polecenia") + COMMANDS;
         long wall = wallClock.getAsLong();
         try {
             switch (c[0].toUpperCase(java.util.Locale.ROOT)) {
                 case "SAY": {
-                    if (c.length < 2 || c[1].isBlank()) return "Podaj tekst ogłoszenia.";
-                    for (ServerPlayer o : players.values()) o.client.send("CHAT", "[Ogłoszenie]", c[1], "broadcast");
-                    return "Wysłano ogłoszenie do " + players.size() + " graczy.";
+                    if (c.length < 2 || c[1].isBlank()) return Messages.get("server_world.podaj_tekst_ogloszenia");
+                    for (ServerPlayer o : players.values()) o.client.send("CHAT", Messages.get("server_world.ogloszenie"), c[1], "broadcast");
+                    return Messages.get("server_world.wyslano_ogloszenie_do") + players.size() + Messages.get("server_world.graczy_dot");
                 }
                 case "KICK": {
                     ServerPlayer t = c.length < 2 ? null : find(c[1].trim());
-                    if (t == null) return "Nie ma takiego gracza w grze.";
-                    kick(t, "Wyrzucono z serwera (" + by + ").");
-                    return "Wyrzucono " + t.name() + ".";
+                    if (t == null) return Messages.get("server_world.nie_ma_takiego_gracza");
+                    kick(t, Messages.get("server_world.wyrzucono_z_serwera") + by + ").");
+                    return Messages.get("server_world.wyrzucono") + t.name() + ".";
                 }
                 case "BAN": {
-                    if (c.length < 2 || !saved(c[1].trim()) && find(c[1].trim()) == null) return "Nie ma takiej postaci.";
+                    if (c.length < 2 || !saved(c[1].trim()) && find(c[1].trim()) == null) return Messages.get("server_world.nie_ma_takiej_postaci");
                     long hours = c.length > 2 ? Long.parseLong(c[2].trim()) : 0;
                     moderation.ban(c[1].trim(), hours, wall);
                     ServerPlayer t = find(c[1].trim());
                     String until = Moderation.describeUntil(moderation.bannedUntil(c[1].trim(), wall));
-                    if (t != null) kick(t, "Konto zablokowane " + until + ".");
-                    return "Zbanowano " + c[1].trim() + " " + until + ".";
+                    if (t != null) kick(t, Messages.get("server_world.konto_zablokowane") + until + ".");
+                    return Messages.get("server_world.zbanowano") + c[1].trim() + " " + until + ".";
                 }
                 case "UNBAN":
-                    if (c.length < 2) return "Podaj imię.";
-                    return moderation.unban(c[1].trim()) ? "Zdjęto bana: " + c[1].trim() + "." : "Ta postać nie ma bana.";
+                    if (c.length < 2) return Messages.get("server_world.podaj_imie");
+                    return moderation.unban(c[1].trim()) ? Messages.get("server_world.zdjeto_bana") + c[1].trim() + "." : Messages.get("server_world.ta_postac_nie_ma");
                 case "MUTE": {
-                    if (c.length < 2) return "Podaj imię.";
+                    if (c.length < 2) return Messages.get("server_world.podaj_imie");
                     long minutes = c.length > 2 ? Long.parseLong(c[2].trim()) : 60;
                     moderation.mute(c[1].trim(), minutes, wall);
                     ServerPlayer t = find(c[1].trim());
-                    if (t != null) warn(t, minutes > 0 ? "Wyciszono cię na " + minutes + " min." : "Wyciszenie zdjęte.", now);
-                    return minutes > 0 ? "Wyciszono " + c[1].trim() + " na " + minutes + " min." : "Zdjęto wyciszenie: " + c[1].trim() + ".";
+                    if (t != null) warn(t, minutes > 0 ? Messages.get("server_world.wyciszono_cie_na") + minutes + Messages.get("server_world.min_2") : Messages.get("server_world.wyciszenie_zdjete"), now);
+                    return minutes > 0 ? Messages.get("server_world.wyciszono") + c[1].trim() + " na " + minutes + Messages.get("server_world.min_2") : Messages.get("server_world.zdjeto_wyciszenie") + c[1].trim() + ".";
                 }
                 case "ADMIN":
-                    if (!by.equals("konsola")) return "Administratorów dodaje tylko konsola serwera albo plik admins.txt.";
-                    if (c.length < 2) return "Podaj imię.";
+                    if (!by.equals("konsola")) return Messages.get("server_world.administratorow_dodaje_tylko_k");
+                    if (c.length < 2) return Messages.get("server_world.podaj_imie");
                     moderation.addAdmin(c[1].trim());
-                    return "Dodano administratora: " + c[1].trim() + ".";
+                    return Messages.get("server_world.dodano_administratora") + c[1].trim() + ".";
                 case "INVASION":
                     return startInvasion(c.length > 1 ? c[1] : null, now);
                 case "STATUS":
                     return status(now);
                 case "MOTD":
-                    if (c.length < 2 || c[1].isBlank()) return motd.isEmpty() ? "Brak wiadomości dnia. MOTD tekst ustawia, MOTD - usuwa." : "Wiadomość dnia: " + motd;
+                    if (c.length < 2 || c[1].isBlank()) return motd.isEmpty() ? Messages.get("server_world.brak_wiadomosci_dnia_motd") : Messages.get("server_world.wiadomosc_dnia") + motd;
                     return setMotd(c[1]);
                 case "EXPEVENT":
                     return expEvent(c, now);
@@ -2930,19 +2944,19 @@ final class ServerWorld {
                     return recentReports(5);
                 case "SAVE":
                     saveAll();
-                    return "Zapisano " + players.size() + " postaci.";
+                    return Messages.get("tile_art.zapisano") + players.size() + Messages.get("server_world.postaci_dot");
                 case "WHO": {
                     List<String> names = new ArrayList<>();
                     for (ServerPlayer o : players.values()) names.add(o.name() + " (" + o.session.character().level() + ")");
-                    return players.size() + " w grze: " + String.join(", ", names);
+                    return players.size() + Messages.get("server_world.w_grze_5") + String.join(", ", names);
                 }
                 default:
-                    return "Nieznane polecenie. Polecenia: " + COMMANDS;
+                    return Messages.get("server_world.nieznane_polecenie_polecenia") + COMMANDS;
             }
         } catch (NumberFormatException e) {
-            return "Czas musi być liczbą.";
+            return Messages.get("server_world.czas_musi_byc_liczba");
         } catch (IOException e) {
-            return "Błąd zapisu: " + e.getMessage();
+            return Messages.get("server_world.blad_zapisu") + e.getMessage();
         }
     }
 
@@ -2957,12 +2971,12 @@ final class ServerWorld {
     /** Limit spamu wspolny dla czatu ogolnego i druzyny. */
     private boolean chatAllowed(ServerPlayer p, long now) {
         if (moderation.isMuted(p.name(), wallClock.getAsLong())) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Jesteś wyciszony przez administratora.");
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.jestes_wyciszony_przez_adminis")));
             return false;
         }
         while (!p.chatTimes.isEmpty() && now - p.chatTimes.peekFirst() > CHAT_WINDOW_MS) p.chatTimes.pollFirst();
         if (p.chatTimes.size() >= CHAT_MAX) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Zwolnij - za dużo wiadomości na czacie.");
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.zwolnij_za_duzo_wiadomosci")));
             return false;
         }
         p.chatTimes.addLast(now);
@@ -2982,13 +2996,13 @@ final class ServerWorld {
             return;
         }
         if (sameParty(p, t) && !p.pvp.duelling(t.name())) {
-            p.session.log().add(now, EventLog.Kind.WARNING, "Nie atakujesz członka własnej drużyny.");
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, Messages.get("server_world.nie_atakujesz_czlonka_wlasnej")));
             p.pvpTarget = -1;
             return;
         }
         PvpRules.Verdict v = PvpRules.check(p.session.character(), p.pvp, t.session.character(), t.pvp, world, now);
         if (v != PvpRules.Verdict.OK) {
-            p.session.log().add(now, EventLog.Kind.WARNING, v.message);
+            Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.WARNING, v.message()));
             p.pvpTarget = -1;
             return;
         }
@@ -3009,6 +3023,13 @@ final class ServerWorld {
             return Integer.parseInt(s);
         } catch (NumberFormatException e) {
             return -1;
+        }
+    }
+
+    /** Wiersz INFO dla wszystkich poza {@code except}, kazdemu w jego jezyku. */
+    private void broadcastInfo(ServerPlayer except, java.util.function.Supplier<String> text) {
+        for (ServerPlayer o : players.values()) {
+            if (o != except) Messages.runAs(o.language, () -> o.client.send("LOG", "INFO", text.get()));
         }
     }
 
@@ -3039,7 +3060,7 @@ final class ServerWorld {
             expireOrders(now);
             weeklyRollover(now);
         }
-        for (ServerPlayer p : players.values()) p.session.update(now, p.move);
+        for (ServerPlayer p : players.values()) Messages.runAs(p.language, () -> p.session.update(now, p.move));
         bossQuests.update(bossHeroes(), now);
         long wall = wallClock.getAsLong();
         if (wall - rentSweptMs >= RENT_SWEEP_MS || wall < rentSweptMs) {
@@ -3070,14 +3091,14 @@ final class ServerWorld {
             @Override
             public void monsterAttacks(Monster m, long t) {
                 ServerPlayer p = byTarget.get(m.target());
-                if (p != null) p.session.combat().monsterAttacks(m, t);
+                if (p != null) Messages.runAs(p.language, () -> p.session.combat().monsterAttacks(m, t));
             }
 
             @Override
             public void monsterHeals(Monster healer, Monster healed, int amount, long t) {
                 for (ServerPlayer p : players.values()) {
                     if (p.session.character().position().distanceTo(healed.position()) <= Protocol.VIEW_RADIUS) {
-                        p.session.combat().monsterHeals(healer, healed, amount, t);
+                        Messages.runAs(p.language, () -> p.session.combat().monsterHeals(healer, healed, amount, t));
                     }
                 }
             }
@@ -3092,7 +3113,7 @@ final class ServerWorld {
             }
             PvpRules.Verdict v = PvpRules.check(p.session.character(), p.pvp, t.session.character(), t.pvp, world, now);
             if (v != PvpRules.Verdict.OK) {
-                p.session.log().add(now, EventLog.Kind.INFO, "Koniec walki z " + t.name() + ": " + v.message);
+                Messages.runAs(p.language, () -> p.session.log().add(now, EventLog.Kind.INFO, Messages.get("server_world.koniec_walki_z") + t.name() + ": " + v.message()));
                 p.pvpTarget = -1;
                 continue;
             }
@@ -3156,7 +3177,7 @@ final class ServerWorld {
                     if (c.isDead() || c.vocation() != v || !from.equals(c.position())) continue;
                     o.session.teleport(to, t);
                     if (o != puller) {
-                        o.session.log().add(t, EventLog.Kind.SYSTEM, puller.name() + " przeciąga dźwignię - jesteście w skarbcu!");
+                        Messages.runAs(o.language, () -> o.session.log().add(t, EventLog.Kind.SYSTEM, puller.name() + Messages.get("server_world.przeciaga_dzwignie_jestescie_w")));
                     }
                     return;
                 }
@@ -3186,23 +3207,23 @@ final class ServerWorld {
             ServerPlayer o = find(n);
             if (o != null) save(o);
         }
-        announce("Drużyna " + String.join(", ", party) + " pokonuje " + m.type().name() + " (" + q.name() + ")!", now);
-        LOG.info("boss quest " + q.id() + " cleared by " + party);
+        announce(() -> Messages.get("server_world.druzyna_3") + String.join(", ", party) + " pokonuje " + m.type().name() + " (" + q.name() + ")!", now);
+        LOG.info("boss quest " + q.id() + Messages.get("server_world.cleared_by") + party);
     }
 
     /** Ogloszenie wydarzenia dla wszystkich graczy w grze. */
-    private void announce(String text, long now) {
-        for (ServerPlayer o : players.values()) o.session.log().add(now, EventLog.Kind.SYSTEM, text);
+    private void announce(java.util.function.Supplier<String> text, long now) {
+        for (ServerPlayer o : players.values()) Messages.runAs(o.language, () -> o.session.log().add(now, EventLog.Kind.SYSTEM, text.get()));
     }
 
     /** Opis inwazji do okna wydarzen: trwajaca albo czas do nastepnej. */
     String invasionStatus(long now) {
         if (invasion != null) {
-            return "trwa: " + invasion.plan().name() + " atakują " + invasion.plan().town() + " (zostało " + invasion.remaining() + ")";
+            return "trwa: " + invasion.plan().name() + Messages.get("server_world.atakuja") + invasion.plan().town() + Messages.get("server_world.zostalo") + invasion.remaining() + ")";
         }
         long at = nextInvasionAt == 0 ? now + invasionEveryMs : nextInvasionAt;
         long min = Math.max(0, (at - now + 59_999) / 60_000);
-        return "następna za " + (min >= 60 ? min / 60 + " h " + String.format("%02d", min % 60) + " min" : min + " min") + " (gdy ktoś jest w grze)";
+        return Messages.get("server_world.nastepna_za") + (min >= 60 ? min / 60 + " h " + String.format("%02d", min % 60) + Messages.get("hud.min") : min + Messages.get("hud.min")) + Messages.get("server_world.gdy_ktos_jest_w");
     }
 
     /** Harmonogram inwazji: co pixel.invasionMinutes (domyslnie 120) minut, gdy ktos jest w grze. */
@@ -3220,12 +3241,12 @@ final class ServerWorld {
 
     /** Start inwazji (town = null: kolejne miasto z listy). Zwraca opis dla administratora. */
     String startInvasion(String town, long now) {
-        if (invasion != null) return "Trwa już inwazja na " + invasion.plan().town() + ".";
+        if (invasion != null) return Messages.get("server_world.trwa_juz_inwazja_na") + invasion.plan().town() + ".";
         List<pl.fawizja.pixel.event.Invasion.Plan> plans = pl.fawizja.pixel.event.Invasion.PLANS;
         pl.fawizja.pixel.event.Invasion.Plan plan = null;
         if (town != null && !town.isBlank()) {
             for (pl.fawizja.pixel.event.Invasion.Plan pl0 : plans) if (pl0.town().equalsIgnoreCase(town.trim())) plan = pl0;
-            if (plan == null) return "Nie ma planu inwazji dla miasta " + town.trim() + ".";
+            if (plan == null) return Messages.get("server_world.nie_ma_planu_inwazji") + town.trim() + ".";
         } else {
             if (nextInvasionPlan < 0) nextInvasionPlan = rng.nextInt(plans.size());
             plan = plans.get(nextInvasionPlan);
@@ -3233,30 +3254,31 @@ final class ServerWorld {
         }
         pl.fawizja.pixel.world.Town t = world.town(plan.town());
         Position center = t == null ? null : pl.fawizja.pixel.event.Invasion.gatherPoint(world, t, rng);
-        if (center == null) return "Nie znaleziono miejsca na inwazję przy " + plan.town() + ".";
+        if (center == null) return Messages.get("server_world.nie_znaleziono_miejsca_na") + plan.town() + ".";
         List<Monster> spawned = new ArrayList<>(monsters.spawnEvent(plan.monster(), center, 6, plan.count(), now));
         List<Monster> leader = monsters.spawnEvent(plan.leader(), center, 2, 1, now);
         spawned.addAll(leader);
-        if (spawned.isEmpty()) return "Potwory nie zmieściły się przy " + plan.town() + ".";
+        if (spawned.isEmpty()) return Messages.get("server_world.potwory_nie_zmiescily_sie") + plan.town() + ".";
         List<Integer> ids = new ArrayList<>();
         for (Monster m : spawned) ids.add(m.id());
         invasion = new pl.fawizja.pixel.event.Invasion(plan, center, ids, leader.isEmpty() ? -1 : leader.get(0).id(), now,
                 pl.fawizja.pixel.event.Invasion.DURATION_MS);
-        String leaderName = leader.isEmpty() ? "" : ", herszt: " + leader.get(0).type().name();
-        announce("Inwazja! " + plan.name() + " atakują " + plan.town() + " " + pl.fawizja.pixel.event.Invasion.direction(t.temple(), center)
-                + " (" + spawned.size() + " wrogów" + leaderName + "). Za każdego pokonanego "
-                + pl.fawizja.pixel.event.Invasion.REWARD_PER_KILL + " gp na konto po obronie.", now);
+        String leaderName = leader.isEmpty() ? "" : Messages.get("server_world.herszt") + leader.get(0).type().name();
+        final pl.fawizja.pixel.event.Invasion.Plan fplan = plan;
+        announce(() -> Messages.get("server_world.inwazja") + fplan.name() + Messages.get("server_world.atakuja") + fplan.town() + " " + pl.fawizja.pixel.event.Invasion.direction(t.temple(), center)
+                + " (" + spawned.size() + Messages.get("server_world.wrogow_2") + leaderName + Messages.get("server_world.za_kazdego_pokonanego")
+                + pl.fawizja.pixel.event.Invasion.REWARD_PER_KILL + Messages.get("server_world.gp_na_konto_po"), now);
         LOG.info("invasion " + plan.town() + " at " + center + " (" + spawned.size() + ")");
-        return "Inwazja na " + plan.town() + " rozpoczęta (" + spawned.size() + " wrogów przy " + center.x() + "," + center.y() + ").";
+        return Messages.get("server_world.inwazja_na") + plan.town() + Messages.get("server_world.rozpoczeta") + spawned.size() + Messages.get("server_world.wrogow_przy") + center.x() + "," + center.y() + ").";
     }
 
     private void invasionKill(ServerPlayer p, Monster m) {
         if (invasion == null || !invasion.onKill(p.name(), m.id())) return;
         long now = lastNow;
         if (p.name().equals(invasion.leaderSlayer()) && invasion.remaining() > 0 && m.type().key().equals(invasion.plan().leader())) {
-            announce(p.name() + " pokonuje herszta najeźdźców! Zostało " + invasion.remaining() + " wrogów.", now);
+            announce(() -> p.name() + Messages.get("server_world.pokonuje_herszta_najezdzcow_zo") + invasion.remaining() + Messages.get("server_world.wrogow_3"), now);
         } else if (invasion.remaining() == invasion.total() / 2) {
-            announce("Inwazja na " + invasion.plan().town() + ": połowa wrogów pokonana, zostało " + invasion.remaining() + ".", now);
+            announce(() -> Messages.get("server_world.inwazja_na") + invasion.plan().town() + Messages.get("server_world.polowa_wrogow_pokonana_zostalo") + invasion.remaining() + ".", now);
         }
     }
 
@@ -3265,17 +3287,17 @@ final class ServerWorld {
         invasion = null;
         monsters.clearEvent(inv.aliveIds());
         List<Map.Entry<String, Integer>> top = inv.ranking();
-        String best = top.isEmpty() ? "" : " Najwięcej pokonał(a): " + top.get(0).getKey() + " (" + top.get(0).getValue() + ").";
-        if (inv.defended()) announce(inv.plan().town() + " obronione!" + best + " Nagrody trafiły na konta.", now);
-        else announce("Najeźdźcy odchodzą od " + inv.plan().town() + " (zostało " + inv.remaining() + ")." + best
-                + (top.isEmpty() ? "" : " Za pokonanych są nagrody."), now);
+        String best = top.isEmpty() ? "" : Messages.get("server_world.najwiecej_pokonal_a") + top.get(0).getKey() + " (" + top.get(0).getValue() + ").";
+        if (inv.defended()) announce(() -> inv.plan().town() + Messages.get("server_world.obronione") + best + Messages.get("server_world.nagrody_trafily_na_konta_2"), now);
+        else announce(() -> Messages.get("server_world.najezdzcy_odchodza_od") + inv.plan().town() + Messages.get("server_world.zostalo") + inv.remaining() + ")." + best
+                + (top.isEmpty() ? "" : Messages.get("server_world.za_pokonanych_sa_nagrody")), now);
         for (Map.Entry<String, Integer> e : top) {
             ServerPlayer o = find(e.getKey());
             long reward = inv.reward(e.getKey());
             if (o == null || reward <= 0) continue;
             if (o.session.character().bank().credit(reward).ok()) {
-                o.session.log().add(now, EventLog.Kind.SYSTEM, "Nagroda za obronę " + inv.plan().town() + ": "
-                        + String.format("%,d gp", reward) + " na koncie (" + e.getValue() + " pokonanych).");
+                o.session.log().add(now, EventLog.Kind.SYSTEM, Messages.get("server_world.nagroda_za_obrone") + inv.plan().town() + ": "
+                        + String.format("%,d gp", reward) + Messages.get("server_world.na_koncie") + e.getValue() + " pokonanych).");
                 save(o);
             }
         }

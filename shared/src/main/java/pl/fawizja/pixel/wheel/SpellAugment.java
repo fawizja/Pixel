@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Warstwa modyfikatorow czaru z Kola Przeznaczenia (Canary WheelSpellBoost_t): mniej many, krotsze odnowienie,
  * wiecej obrazen lub leczenia (procent), kradziez zycia/many czaru, szansa i obrazenia krytyczne, dodatkowe cele
@@ -61,15 +62,15 @@ public final class SpellAugment {
     public String describe() {
         StringBuilder b = new StringBuilder();
         if (manaCut != 0) part(b, "-" + manaCut + " many");
-        if (cooldownCutMs != 0) part(b, "-" + num(cooldownCutMs / 1000.0) + " s odnowienia");
-        if (damagePercent != 0) part(b, "+" + num(damagePercent) + "% obrażeń");
-        if (healPercent != 0) part(b, "+" + num(healPercent) + "% leczenia");
-        if (lifeLeech != 0) part(b, num(lifeLeech) + "% kradzieży życia");
-        if (manaLeech != 0) part(b, num(manaLeech) + "% kradzieży many");
-        if (critChance != 0) part(b, "+" + num(critChance) + "% szansy na krytyk");
-        if (critDamage != 0) part(b, "+" + num(critDamage) + "% obrażeń krytycznych");
-        if (extraTargets != 0) part(b, "+" + extraTargets + (extraTargets == 1 ? " cel" : " cele"));
-        if (extraRadius != 0) part(b, "+" + extraRadius + " pole zasięgu");
+        if (cooldownCutMs != 0) part(b, "-" + num(cooldownCutMs / 1000.0) + Messages.get("spell_augment.s_odnowienia"));
+        if (damagePercent != 0) part(b, "+" + num(damagePercent) + Messages.get("critical_hit.obrazen"));
+        if (healPercent != 0) part(b, "+" + num(healPercent) + Messages.get("spell_augment.leczenia"));
+        if (lifeLeech != 0) part(b, num(lifeLeech) + Messages.get("spell_augment.kradziezy_zycia"));
+        if (manaLeech != 0) part(b, num(manaLeech) + Messages.get("spell_augment.kradziezy_many"));
+        if (critChance != 0) part(b, "+" + num(critChance) + Messages.get("charm.szansy_na_krytyk"));
+        if (critDamage != 0) part(b, "+" + num(critDamage) + Messages.get("spell_augment.obrazen_krytycznych"));
+        if (extraTargets != 0) part(b, "+" + extraTargets + (extraTargets == 1 ? Messages.get("spell_augment.cel") : " cele"));
+        if (extraRadius != 0) part(b, "+" + extraRadius + Messages.get("spell_augment.pole_zasiegu"));
         return b.toString();
     }
 

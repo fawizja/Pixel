@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -51,27 +52,27 @@ public final class Hud {
     private float holdX, holdY, holdProgress;
     private pl.fawizja.pixel.world.Direction holdDir;
     private final List<HudButton> buttons = new ArrayList<>();
-    private final HudButton use = new HudButton("use", "Użyj");
+    private final HudButton use = new HudButton("use", Messages.get("hud.uzyj"));
     private final HudButton run = new HudButton("run", "");
     private final HudButton torch = new HudButton("torch", "");
-    private final HudButton bag = new HudButton("bag", "Plecak");
-    private final HudButton pick = new HudButton("pick", "Weź");
+    private final HudButton bag = new HudButton("bag", Messages.get("hud.plecak"));
+    private final HudButton pick = new HudButton("pick", Messages.get("hud.wez"));
     private final HudButton diag = new HudButton("diag", "");
-    private final HudButton target = new HudButton("target", "Atak");
+    private final HudButton target = new HudButton("target", Messages.get("hud.atak_3"));
     /** Tryb walki jak w Tibii: miecz (ofensywny), miecz i tarcza (zbalansowany), tarcza (defensywny). */
     private final HudButton fightMode = new HudButton("fightmode", "");
-    private final HudButton book = new HudButton("book", "KSIĘGA");
-    private final HudButton fish = new HudButton("fish", "Łów");
-    private final HudButton talk = new HudButton("talk", "Mów");
-    private final HudButton mount = new HudButton("mount", "Koń");
+    private final HudButton book = new HudButton("book", Messages.get("hud.ksiega"));
+    private final HudButton fish = new HudButton("fish", Messages.get("hud.low"));
+    private final HudButton talk = new HudButton("talk", Messages.get("hud.mow"));
+    private final HudButton mount = new HudButton("mount", Messages.get("hud.kon"));
     /** Przelacznik trybu PvP: biala czaszka = wylaczony, czerwona = wlaczony. */
     private final HudButton pvp = new HudButton("pvp", "");
     /** Dziennik zadan (dawny przycisk KSIEGA; ksiega czarow: klawisz K albo wybor pola paska). */
-    private final HudButton quest = new HudButton("quest", "Zadania");
+    private final HudButton quest = new HudButton("quest", Messages.get("hud.zadania"));
     /** Wylogowanie z potwierdzeniem (nie w trakcie walki - blokada PZ). */
-    private final HudButton logout = new HudButton("logout", "Wyjdź");
+    private final HudButton logout = new HudButton("logout", Messages.get("hud.wyjdz"));
     /** Sklep (konto premium, promocja, blogoslawienstwo...) za zloto z banku. */
-    private final HudButton store = new HudButton("store", "Sklep");
+    private final HudButton store = new HudButton("store", Messages.get("hud.sklep"));
     /** Uklad HUD-u jak w Tibii: kolumny, gorny pasek, widok gry, konsola. */
     private final HudLayout lay = new HudLayout();
     /**
@@ -211,8 +212,8 @@ public final class Hud {
 
             @Override
             public void canceled() { }
-        }, win.inviteLevel == pl.fawizja.pixel.house.HouseAccess.FULL ? "Zaproś (pełny dostęp)" : "Zaproś (wejście)",
-                win.name.toString(), "Imię postaci");
+        }, win.inviteLevel == pl.fawizja.pixel.house.HouseAccess.FULL ? Messages.get("house_window.zapros_pelny_dostep") : Messages.get("house_window.zapros_wejscie"),
+                win.name.toString(), Messages.get("hud.imie_postaci"));
     }
 
     /** Wymiary okna z liczby wierszy (przyciski po dwa w rzedzie, "Usuń" przy gosciach). */
@@ -302,8 +303,8 @@ public final class Hud {
         font.getData().setScale(0.85f);
         float y = hwY + hwH - HW_TITLE - 12;
         for (String line : win.lines()) {
-            boolean warn = line.startsWith("Zaległe") || line.contains("za mało") || line.startsWith("Masz już");
-            font.setColor(warn ? new Color(1f, 0.55f, 0.45f, 1f) : line.startsWith("Stan: wolny") ? new Color(0.6f, 1f, 0.6f, 1f) : Color.WHITE);
+            boolean warn = Messages.startsWithAny(line, Messages.get("ref.zalegle")) || Messages.containsAny(line, Messages.get("ref.za_malo")) || Messages.startsWithAny(line, Messages.get("ref.masz_juz"));
+            font.setColor(warn ? new Color(1f, 0.55f, 0.45f, 1f) : Messages.startsWithAny(line, Messages.get("ref.stan_wolny")) ? new Color(0.6f, 1f, 0.6f, 1f) : Color.WHITE);
             text(batch, line, hwX + 15, y);
             y -= HW_LINE;
         }
@@ -446,9 +447,9 @@ public final class Hud {
         HudLayout.Rect t = wheelTab;
         font.getData().setScale(lay.compact ? 0.7f : 0.8f);
         font.setColor(hex(0xf1e6d2, 1f));
-        layout.setText(font, "Koło");
+        layout.setText(font, Messages.get("hud.kolo"));
         float gx = t.x + 4 + (t.h - 8);
-        font.draw(batch, "Koło", gx + (t.right() - gx - layout.width) / 2f, t.cy() + layout.height / 2f);
+        font.draw(batch, Messages.get("hud.kolo"), gx + (t.right() - gx - layout.width) / 2f, t.cy() + layout.height / 2f);
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
     }
@@ -472,7 +473,7 @@ public final class Hud {
     public static final String STORE_TITLE = "Sklep";
 
     /** Okno sklepu (lista albo potwierdzenie zakupu) jest otwarte. */
-    public boolean storeOpen() { return infoOpen(STORE_TITLE); }
+    public boolean storeOpen() { return infoOpen(Messages.tr(STORE_TITLE)); }
 
     /** Nowa tresc otwartego okna informacyjnego bez zamykania go. */
     public void updateInfo(String title, List<String[]> rows) {
@@ -589,14 +590,14 @@ public final class Hud {
     private float dragX, dragY, dragStartX, dragStartY;
     private Actions dragActions;
     private GameSession dragSession;
-    private final HudButton bagDetach = new HudButton("bag_detach", "ODEPNIJ");
+    private final HudButton bagDetach = new HudButton("bag_detach", Messages.get("hud.odepnij"));
     private float bagX, bagY, slotSize;
-    private final HudButton bagEquip = new HudButton("bag_equip", "ZAŁÓŻ");
-    private final HudButton bagDrop = new HudButton("bag_drop", "WYRZUĆ");
-    private final HudButton bagUse = new HudButton("bag_use", "UŻYJ");
+    private final HudButton bagEquip = new HudButton("bag_equip", Messages.get("hud.zaloz"));
+    private final HudButton bagDrop = new HudButton("bag_drop", Messages.get("hud.wyrzuc"));
+    private final HudButton bagUse = new HudButton("bag_use", Messages.get("hud.uzyj_2"));
     private final HudButton bagClose = new HudButton("bag_close", "X");
-    private final HudButton bagSort = new HudButton("bag_sort", "SORTUJ");
-    private final HudButton bagKeep = new HudButton("bag_keep", "ZACHOWAJ");
+    private final HudButton bagSort = new HudButton("bag_sort", Messages.get("hud.sortuj"));
+    private final HudButton bagKeep = new HudButton("bag_keep", Messages.get("hud.zachowaj"));
     private boolean diagnosticsOpen;
     /** Minimapa w prawym gornym rogu i duza mapa calego pietra (dotkniecie minimapy / klawisz J). */
     private final Minimap minimap = new Minimap();
@@ -622,10 +623,10 @@ public final class Hud {
         List<pl.fawizja.pixel.settings.MapMarkers.Marker> out = new ArrayList<>(markers.all());
         pl.fawizja.pixel.world.Position boss = session.weeklyBossPlace();
         if (boss != null && session.weeklyBoss() != null) {
-            out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Boss tygodnia: " + session.weeklyBoss().name(), boss));
+            out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker(Messages.get("hud.boss_tygodnia") + session.weeklyBoss().name(), boss));
         }
         pl.fawizja.pixel.world.Position died = session.combat().lastDeathPlace();
-        if (died != null) out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Miejsce śmierci", died));
+        if (died != null) out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker(Messages.get("hud.miejsce_smierci"), died));
         long t = session.lastUpdateMs();
         if (t - huntGroundCheckedMs >= 1000 || t < huntGroundCheckedMs) {
             huntGroundCheckedMs = t; // szukanie po wszystkich spawnach - najwyzej raz na sekunde
@@ -641,9 +642,9 @@ public final class Hud {
                 }
             }
         }
-        if (turnIn != null) out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Oddaj zadanie: " + turnIn.name(), turnIn.position()));
+        if (turnIn != null) out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker(Messages.get("hud.oddaj_zadanie") + turnIn.name(), turnIn.position()));
         if (huntGround != null) {
-            out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker("Łowisko: " + monsterNames.apply(huntGround.monsterKey()), huntGround.center()));
+            out.add(new pl.fawizja.pixel.settings.MapMarkers.Marker(Messages.get("hud.lowisko") + monsterNames.apply(huntGround.monsterKey()), huntGround.center()));
         }
         return out;
     }
@@ -931,12 +932,12 @@ public final class Hud {
     /** Polska nazwa czaszki ("Czerwona czaszka"). */
     public static String skullName(pl.fawizja.pixel.pvp.PvpRules.Skull skull) {
         switch (skull) {
-            case RED: return "Czerwona czaszka";
-            case BLACK: return "Czarna czaszka";
-            case ORANGE: return "Pomarańczowa czaszka";
-            case YELLOW: return "Żółta czaszka";
-            case WHITE: return "Biała czaszka";
-            default: return "Brak czaszki";
+            case RED: return Messages.get("hud.czerwona_czaszka");
+            case BLACK: return Messages.get("hud.czarna_czaszka");
+            case ORANGE: return Messages.get("hud.pomaranczowa_czaszka");
+            case YELLOW: return Messages.get("hud.zolta_czaszka");
+            case WHITE: return Messages.get("hud.biala_czaszka");
+            default: return Messages.get("hud.brak_czaszki");
         }
     }
 
@@ -952,7 +953,7 @@ public final class Hud {
             pvpOffIcon = pvpIcon("pvp_off");
             pvpOnIcon = pvpIcon("pvp_on");
         } catch (RuntimeException e) {
-            Gdx.app.error("Hud", "Brak ikon czaszek: " + e.getMessage());
+            Gdx.app.error("Hud", Messages.get("hud.brak_ikon_czaszek") + e.getMessage());
         }
         loadWstPanels();
         zSkin = ZidaneSkin.load();
@@ -988,7 +989,7 @@ public final class Hud {
                 minimizeImg = new TextureRegion(mb, 0, 0, 14, 14);
             }
         } catch (RuntimeException e) {
-            Gdx.app.error("Hud", "Brak grafik interfejsu, rysuje ksztaltami: " + e.getMessage());
+            Gdx.app.error("Hud", Messages.get("hud.brak_grafik_interfejsu_rysuje") + e.getMessage());
         }
     }
 
@@ -1075,7 +1076,7 @@ public final class Hud {
         if (n > 0) return n;
         float lw = (h < 420 ? 150 : 200) - 2 * HudLayout.PAD - 14;
         font.getData().setScale(conScale());
-        layout.setText(font, VIP_EMPTY, Color.WHITE, Math.max(40, lw), com.badlogic.gdx.utils.Align.left, true);
+        layout.setText(font, Messages.tr(VIP_EMPTY), Color.WHITE, Math.max(40, lw), com.badlogic.gdx.utils.Align.left, true);
         int lines = 1 + Math.max(0, Math.round((layout.height - font.getCapHeight()) / font.getLineHeight()));
         font.getData().setScale(1f);
         return Math.min(3, lines);
@@ -1282,7 +1283,7 @@ public final class Hud {
     /** Umiejetnosci w lewej kolumnie (jak okno Skills w Tibii): naglowek zwija okno, wiersze z paskiem postepu. */
     private void drawPanelSkills(SpriteBatch batch, PlayerCharacter pc) {
         if (!panelSkillsVisible()) return;
-        headerText(batch, "Umiejętności", pskX + 18, pskY + pskH);
+        headerText(batch, Messages.get("hud.umiejetnosci"), pskX + 18, pskY + pskH);
         if (!skillsExpanded()) return;
         float row = lay.skillRow;
         font.getData().setScale(conScale());
@@ -1374,7 +1375,7 @@ public final class Hud {
         float yy = v.top() - lay.header - 3;
         if (all == 0) {
             font.setColor(0.7f, 0.7f, 0.65f, 1f);
-            font.draw(batch, VIP_EMPTY, v.x + 8, yy, v.w - 14, com.badlogic.gdx.utils.Align.left, true);
+            font.draw(batch, Messages.tr(VIP_EMPTY), v.x + 8, yy, v.w - 14, com.badlogic.gdx.utils.Align.left, true);
         }
         for (pl.fawizja.pixel.friends.FriendsView.Row r : vipRows()) {
             if (yy - row < v.y + 2) break;
@@ -1982,21 +1983,21 @@ public final class Hud {
         if (optionsMenu) {
             // waski telefon: "Opcje" zbiera ustawienia i wyjscie z gry
             List<MenuRow> rows = new ArrayList<>();
-            rows.add(new MenuRow("opt:diag", "Ustawienia", "", true));
-            rows.add(new MenuRow("opt:wheel", pl.fawizja.pixel.wheel.WheelView.TITLE, "punkty promocji od poziomu 51", true));
-            if (lay.folded[HudLayout.STORE_TOGGLE]) rows.add(new MenuRow("opt:store", "Sklep", "premium, promocja, błogosławieństwo", true));
+            rows.add(new MenuRow("opt:diag", Messages.get("hud.ustawienia"), "", true));
+            rows.add(new MenuRow("opt:wheel", pl.fawizja.pixel.wheel.WheelView.TITLE, Messages.get("hud.punkty_promocji_od_poziomu"), true));
+            if (lay.folded[HudLayout.STORE_TOGGLE]) rows.add(new MenuRow("opt:store", Messages.get("hud.sklep"), Messages.get("hud.premium_promocja_blogoslawiens"), true));
             if (lay.folded[HudLayout.TORCH_TOGGLE]) {
-                rows.add(new MenuRow("opt:torch", session.character().isTorchLit() ? "Zgaś pochodnię" : "Zapal pochodnię", "", true));
+                rows.add(new MenuRow("opt:torch", session.character().isTorchLit() ? Messages.get("hud.zgas_pochodnie") : Messages.get("hud.zapal_pochodnie"), "", true));
             }
-            rows.add(new MenuRow("opt:logout", "Wyjdź z gry", "", true));
+            rows.add(new MenuRow("opt:logout", Messages.get("hud.wyjdz_z_gry"), "", true));
             layoutPopupRows(rows);
             return;
         }
         if (logoutConfirm && mobile) {
             // telefon (makieta): "Na pewno chcesz sie wylogowac?" i dwa przyciski obok siebie
             float bw = 110, bh = 36, by = menuY + 14;
-            MenuRow yes = new MenuRow("logout:yes", "Wyloguj", "", true);
-            MenuRow no = new MenuRow("logout:no", "Zostań", "", true);
+            MenuRow yes = new MenuRow("logout:yes", Messages.get("hud.wyloguj"), "", true);
+            MenuRow no = new MenuRow("logout:no", Messages.get("hud.zostan"), "", true);
             yes.x = menuX + menuW / 2f - 10 - bw; no.x = menuX + menuW / 2f + 10;
             yes.y = no.y = by;
             yes.w = no.w = bw;
@@ -2007,8 +2008,8 @@ public final class Hud {
         }
         if (logoutConfirm) {
             List<MenuRow> rows = new ArrayList<>();
-            rows.add(new MenuRow("logout:yes", "Wyloguj", "", true));
-            rows.add(new MenuRow("logout:no", "Zostań w grze", "", true));
+            rows.add(new MenuRow("logout:yes", Messages.get("hud.wyloguj"), "", true));
+            rows.add(new MenuRow("logout:no", Messages.get("hud.zostan_w_grze"), "", true));
             layoutPopupRows(rows);
             return;
         }
@@ -2072,19 +2073,19 @@ public final class Hud {
         for (SpellType sp : spells) {
             boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
             String words = session.spells().registry().words(sp.key());
-            String detail = (words != null ? words + ", " : "") + sp.mana() + " many, poz. " + sp.minLevel()
-                    + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : "");
+            String detail = (words != null ? words + ", " : "") + sp.mana() + Messages.get("hud.many_poz") + sp.minLevel()
+                    + (sp.minMagic() > 0 ? Messages.get("hud.magia") + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
-        if (spellPages > 1) menuRows.add(new MenuRow("book:spells", "Kolejne czary", "czary " + (spellPage + 1) + "-"
-                + (spellPage + spells.size()) + " z " + all.size(), true));
+        if (spellPages > 1) menuRows.add(new MenuRow("book:spells", Messages.get("hud.kolejne_czary"), Messages.get("hud.czary_prefix") + (spellPage + 1) + "-"
+                + (spellPage + spells.size()) + Messages.get("common.z") + all.size(), true));
         // ustawianie paska: wybierz przycisk, potem dotknij czaru (ten sam czar drugi raz = automat)
-        String assignLabel = assignSlot < 0 ? "Ustaw pasek czarów" : "Przycisk " + (assignSlot + 1) + ": dotknij czaru";
-        String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? "własny układ; dotknij, aby zmienić" : "pasek automatyczny; dotknij, aby zmienić")
-                : "teraz: " + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + "; dotknij, by wybrać następny";
+        String assignLabel = assignSlot < 0 ? Messages.get("hud.ustaw_pasek_czarow") : Messages.get("hud.przycisk") + (assignSlot + 1) + Messages.get("hud.dotknij_czaru");
+        String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? Messages.get("hud.wlasny_uklad_dotknij_aby") : Messages.get("hud.pasek_automatyczny_dotknij_aby"))
+                : Messages.get("hud.teraz") + (customBar.custom(assignSlot) == null ? "automat" : customBar.custom(assignSlot)) + Messages.get("hud.dotknij_by_wybrac_nastepny");
         menuRows.add(new MenuRow("book:assign", assignLabel, assignDetail, true));
-        menuRows.add(new MenuRow("book:journal", "Dziennik zadań", "postęp zadań i drogi do zleceniodawców (Z)", true));
-        menuRows.add(new MenuRow("book:hunt", "Analiza polowania", "doświadczenie, zabicia i złoto na godzinę (H)", true));
+        menuRows.add(new MenuRow("book:journal", Messages.get("hud.dziennik_zadan"), Messages.get("hud.postep_zadan_i_drogi"), true));
+        menuRows.add(new MenuRow("book:hunt", Messages.get("game_screen.analiza_polowania"), Messages.get("hud.doswiadczenie_zabicia_i_zloto"), true));
         // receptury: tylko na poziom postaci (+100 jako zapowiedz), stronami
         List<Recipe> shown = new ArrayList<>();
         for (Recipe rc : session.recipes().all()) if (rc.minLevel() <= pc.level() + 100) shown.add(rc);
@@ -2102,7 +2103,7 @@ public final class Hud {
             menuRows.add(new MenuRow("craft:" + rc.key(),
                     rc.resultCount() + "x " + session.items().get(rc.resultItemId()).name(), d.toString(), ok));
         }
-        if (bookPages > 1) menuRows.add(new MenuRow("book:page", "Następna strona receptur", (bookPage + 1) + " / " + bookPages, true));
+        if (bookPages > 1) menuRows.add(new MenuRow("book:page", Messages.get("hud.nastepna_strona_receptur"), (bookPage + 1) + " / " + bookPages, true));
         // dwie kolumny: czary po lewej, receptury po prawej
         float colW = (menuW - 30) / 2f;
         int spellsCount = 0;
@@ -2156,12 +2157,12 @@ public final class Hud {
 
     private static String pickTitle(String cat) {
         switch (cat) {
-            case "heal": return "czar leczący";
-            case "attack": return "czar atakujący";
-            case "support": return "inny czar";
+            case "heal": return Messages.get("hud.czar_leczacy_2");
+            case "attack": return Messages.get("hud.czar_atakujacy_2");
+            case "support": return Messages.get("hud.inny_czar");
             case "potion": return "mikstura";
-            case "combo": return "combo - dotknij czarów po kolei";
-            default: return "runa";
+            case "combo": return Messages.get("hud.combo_dotknij_czarow_po");
+            default: return Messages.get("hud.runa_kind");
         }
     }
 
@@ -2239,9 +2240,9 @@ public final class Hud {
         String mode = pl.fawizja.pixel.settings.SpellBar.mode(barActions[pickSlot]);
         String name = session.items().byKey(rune).name();
         String[][] modes = {
-                {pl.fawizja.pixel.settings.SpellBar.MODE_TARGET, "Użyj na cel", "w wybrany cel"},
-                {pl.fawizja.pixel.settings.SpellBar.MODE_SELF, "Użyj na siebie", "na własne pole"},
-                {pl.fawizja.pixel.settings.SpellBar.MODE_AIM, "Użyj z celownikiem", "wskaż pole na mapie"}};
+                {pl.fawizja.pixel.settings.SpellBar.MODE_TARGET, Messages.get("hud.uzyj_na_cel"), Messages.get("hud.w_wybrany_cel")},
+                {pl.fawizja.pixel.settings.SpellBar.MODE_SELF, Messages.get("hud.uzyj_na_siebie"), Messages.get("hud.na_wlasne_pole")},
+                {pl.fawizja.pixel.settings.SpellBar.MODE_AIM, Messages.get("hud.uzyj_z_celownikiem"), Messages.get("hud.wskaz_pole_na_mapie")}};
         for (String[] m : modes) {
             MenuRow r = new MenuRow("pick:mode:" + m[0], m[1], (m[0].equals(mode) ? "wybrane: " : "") + m[2]
                     + (mobile ? "" : " (" + name + ")"), true);
@@ -2254,8 +2255,8 @@ public final class Hud {
     /** Wiersze edycji combo: znane czary (numer kolejnosci przy wybranych), zapis i wyczyszczenie. */
     private List<MenuRow> comboRows(GameSession session) {
         List<MenuRow> rows = new ArrayList<>();
-        String draft = comboDraft.isEmpty() ? "dotknij czarów w kolejności" : comboLabel(session, comboDraft);
-        rows.add(new MenuRow(comboDraft.isEmpty() ? "pick:none" : "pick:combo_save", "Zapisz combo", draft, !comboDraft.isEmpty()));
+        String draft = comboDraft.isEmpty() ? Messages.get("hud.dotknij_czarow_w_kolejnosci") : comboLabel(session, comboDraft);
+        rows.add(new MenuRow(comboDraft.isEmpty() ? "pick:none" : "pick:combo_save", Messages.get("hud.zapisz_combo"), draft, !comboDraft.isEmpty()));
         // czary combo na poczatku (w kolejnosci), potem pozostale znane
         List<SpellType> spells = new ArrayList<>();
         for (String k : comboDraft) if (session.spells().registry().find(k) != null) spells.add(session.spells().registry().find(k));
@@ -2264,11 +2265,11 @@ public final class Hud {
             if (sp.kind() == pl.fawizja.pixel.magic.SpellKind.CONJURE) continue;
             int at = comboDraft.indexOf(sp.key());
             MenuRow r = new MenuRow("pick:combo:" + sp.key(), (at >= 0 ? (at + 1) + ". " : "") + sp.name(),
-                    sp.mana() + " many, odnowienie " + (sp.cooldownMs() / 1000.0 + " s").replace(".0 s", " s").replace('.', ','), true);
+                    sp.mana() + Messages.get("hud.many_odnowienie") + (sp.cooldownMs() / 1000.0 + " s").replace(".0 s", " s").replace('.', ','), true);
             r.selected = at >= 0;
             rows.add(r);
         }
-        if (!comboDraft.isEmpty()) rows.add(new MenuRow("pick:combo_clear", "Wyczyść combo", "zacznij od nowa", true));
+        if (!comboDraft.isEmpty()) rows.add(new MenuRow("pick:combo_clear", Messages.get("hud.wyczysc_combo"), Messages.get("hud.zacznij_od_nowa"), true));
         return rows;
     }
 
@@ -2289,22 +2290,22 @@ public final class Hud {
         if (pickCat == null) {
             // runa w polu: tryb uzycia jak w Tibii (na cel / na siebie / celownik)
             rows.addAll(modeRows(session));
-            rows.add(new MenuRow("pick:cat:heal", "Czar leczący", "leczenie siebie", true));
-            rows.add(new MenuRow("pick:cat:attack", "Czar atakujący", "na cel albo obszarowy", true));
-            rows.add(new MenuRow("pick:cat:potion", "Mikstura", "zdrowie albo mana z plecaka", true));
-            rows.add(new MenuRow("pick:cat:rune", "Runa", "z plecaka, bez many", true));
-            rows.add(new MenuRow("pick:cat:support", "Inny czar", "światło, tworzenie run i strzał", true));
-            rows.add(new MenuRow("pick:cat:combo", "Combo (kilka czarów)", "jeden przycisk: pierwszy gotowy czar", true));
-            rows.add(new MenuRow("pick:auto", "Automat", "gra sama dobiera akcję pola", true));
-            rows.add(new MenuRow("pick:clear", "Wyczyść pole", "pole zostaje puste", true));
-            rows.add(new MenuRow("pick:book", "Księga czarów", "wszystkie czary i rzemiosło (klawisz K)", true));
+            rows.add(new MenuRow("pick:cat:heal", Messages.get("hud.czar_leczacy"), Messages.get("hud.leczenie_siebie"), true));
+            rows.add(new MenuRow("pick:cat:attack", Messages.get("hud.czar_atakujacy"), Messages.get("hud.na_cel_albo_obszarowy"), true));
+            rows.add(new MenuRow("pick:cat:potion", Messages.get("hud.mikstura"), Messages.get("hud.zdrowie_albo_mana_z"), true));
+            rows.add(new MenuRow("pick:cat:rune", Messages.get("hud.runa"), Messages.get("hud.z_plecaka_bez_many"), true));
+            rows.add(new MenuRow("pick:cat:support", Messages.get("hud.inny_czar_2"), Messages.get("hud.swiatlo_tworzenie_run_i"), true));
+            rows.add(new MenuRow("pick:cat:combo", Messages.get("hud.combo_kilka_czarow"), Messages.get("hud.jeden_przycisk_pierwszy_gotowy"), true));
+            rows.add(new MenuRow("pick:auto", Messages.get("hud.automat"), Messages.get("hud.gra_sama_dobiera_akcje"), true));
+            rows.add(new MenuRow("pick:clear", Messages.get("hud.wyczysc_pole"), Messages.get("hud.pole_zostaje_puste"), true));
+            rows.add(new MenuRow("pick:book", Messages.get("hud.ksiega_czarow"), Messages.get("hud.wszystkie_czary_i_rzemioslo"), true));
         } else if (pickCat.equals("combo")) {
             rows.addAll(comboRows(session));
         } else if (pickCat.equals("potion") || pickCat.equals("rune")) {
             boolean potion = pickCat.equals("potion");
             if (potion) {
-                rows.add(new MenuRow("pick:set:potion_hp", "Najlepsza mikstura zdrowia", "najsilniejsza dozwolona z plecaka", true));
-                rows.add(new MenuRow("pick:set:potion_mp", "Najlepsza mikstura many", "najsilniejsza dozwolona z plecaka", true));
+                rows.add(new MenuRow("pick:set:potion_hp", Messages.get("hud.najlepsza_mikstura_zdrowia"), Messages.get("hud.najsilniejsza_dozwolona_z_plec"), true));
+                rows.add(new MenuRow("pick:set:potion_mp", Messages.get("hud.najlepsza_mikstura_many"), Messages.get("hud.najsilniejsza_dozwolona_z_plec"), true));
             }
             List<ItemType> list = new ArrayList<>();
             for (ItemType it : session.items().all()) {
@@ -2316,7 +2317,7 @@ public final class Hud {
             for (ItemType it : list) {
                 int n = pc.backpack().count(it.id());
                 rows.add(new MenuRow("pick:set:item:" + it.key(), it.name(),
-                        "w plecaku: " + n + (it.minLevel() > 0 ? ", poz. " + it.minLevel() : ""), pc.level() >= it.minLevel()));
+                        Messages.get("hud.w_plecaku") + n + (it.minLevel() > 0 ? Messages.get("hud.poz") + it.minLevel() : ""), pc.level() >= it.minLevel()));
             }
         } else {
             for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
@@ -2329,11 +2330,11 @@ public final class Hud {
                 if (!match) continue;
                 boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
                 rows.add(new MenuRow(ok ? "pick:set:cast:" + sp.key() : "pick:none", sp.name(),
-                        sp.mana() + " many, poz. " + sp.minLevel() + (sp.minMagic() > 0 ? ", magia " + sp.minMagic() : ""), ok));
+                        sp.mana() + Messages.get("hud.many_poz") + sp.minLevel() + (sp.minMagic() > 0 ? Messages.get("hud.magia") + sp.minMagic() : ""), ok));
             }
-            if (rows.isEmpty()) rows.add(new MenuRow("pick:none", "Brak czarów tego rodzaju", "dla tej profesji", false));
+            if (rows.isEmpty()) rows.add(new MenuRow("pick:none", Messages.get("hud.brak_czarow_tego_rodzaju"), Messages.get("hud.dla_tej_profesji"), false));
         }
-        if (pickCat != null) rows.add(new MenuRow("pick:back", "Wstecz", "inny rodzaj akcji", true));
+        if (pickCat != null) rows.add(new MenuRow("pick:back", Messages.get("game_screen.wstecz"), Messages.get("hud.inny_rodzaj_akcji"), true));
         int perCol = Math.max(3, (int) ((menuH - 50) / rowH));
         int max = perCol * 2;
         if (rows.size() > max) rows.subList(max - (pickCat != null ? 1 : 0), rows.size() - (pickCat != null ? 1 : 0)).clear();
@@ -2369,16 +2370,16 @@ public final class Hud {
         for (String n : session.character().friends().names()) friend |= n.equalsIgnoreCase(pm.name());
         if (vipView != null) for (pl.fawizja.pixel.friends.FriendsView.Row r : vipView.rows()) friend |= r.name().equalsIgnoreCase(pm.name());
         List<MenuRow> rows = new ArrayList<>();
-        rows.add(new MenuRow("player:pm:" + pm.name(), "Wiadomość", "", true));
-        rows.add(friend ? new MenuRow("player:unfriend:" + pm.name(), "Usuń ze znajomych", "", true)
-                : new MenuRow("player:friend:" + pm.name(), "Dodaj do znajomych", "", true));
-        if (session.social().canInvite(pm.name())) rows.add(new MenuRow("player:party:" + pm.name(), "Zaproś do drużyny", "", true));
-        rows.add(new MenuRow("player:trade:" + pm.name(), "Handel", "", true));
-        rows.add(new MenuRow("player:guild:" + pm.name(), "Zaproś do gildii", "", true));
-        rows.add(new MenuRow("player:duel:" + pm.name(), "Pojedynek", "", true));
-        rows.add(new MenuRow("player:inspect:" + pm.name(), "Obejrzyj", "", true));
+        rows.add(new MenuRow("player:pm:" + pm.name(), Messages.get("hud.wiadomosc"), "", true));
+        rows.add(friend ? new MenuRow("player:unfriend:" + pm.name(), Messages.get("hud.usun_ze_znajomych"), "", true)
+                : new MenuRow("player:friend:" + pm.name(), Messages.get("hud.dodaj_do_znajomych"), "", true));
+        if (session.social().canInvite(pm.name())) rows.add(new MenuRow("player:party:" + pm.name(), Messages.get("hud.zapros_do_druzyny"), "", true));
+        rows.add(new MenuRow("player:trade:" + pm.name(), Messages.get("hud.handel"), "", true));
+        rows.add(new MenuRow("player:guild:" + pm.name(), Messages.get("hud.zapros_do_gildii"), "", true));
+        rows.add(new MenuRow("player:duel:" + pm.name(), Messages.get("hud.pojedynek"), "", true));
+        rows.add(new MenuRow("player:inspect:" + pm.name(), Messages.get("hud.obejrzyj"), "", true));
         if (pm.id() >= 0) {
-            rows.add(new MenuRow(pm.ally() ? "player:none" : "player:attack:" + pm.id(), pm.attacking() ? "Przerwij atak" : "Atakuj", "", !pm.ally()));
+            rows.add(new MenuRow(pm.ally() ? "player:none" : "player:attack:" + pm.id(), pm.attacking() ? Messages.get("hud.przerwij_atak") : Messages.get("hud.atakuj"), "", !pm.ally()));
         }
         if (rows.size() != playerRowsCount) {
             playerRowsCount = rows.size();
@@ -2409,7 +2410,7 @@ public final class Hud {
     private String playerInfoLine(GameSession session) {
         if (pmInfo == null) return "";
         if (pmInfo.known()) return pmInfo.describe();
-        return session.social().online() ? "Wczytywanie..." : "Poziom i profesja widoczne online.";
+        return session.social().online() ? Messages.get("hud.wczytywanie") : Messages.get("hud.poziom_i_profesja_widoczne");
     }
 
     /** Potwierdzenie wylogowania (przycisk WYJDZ). */
@@ -2482,7 +2483,7 @@ public final class Hud {
             row.info = mark.equals("info");
             rows.add(row);
         }
-        if (rows.isEmpty()) rows.add(new MenuRow("ach:none", "Brak danych", "", false));
+        if (rows.isEmpty()) rows.add(new MenuRow("ach:none", Messages.get("hud.brak_danych"), "", false));
         if (!tabs.isEmpty()) {
             float tw = (menuW - 20 - 6 * (tabs.size() - 1)) / tabs.size();
             float th = Math.min(rowH - 3, mobile ? 26 : 24);
@@ -2514,16 +2515,16 @@ public final class Hud {
         pl.fawizja.pixel.daily.DailyTask d = pc.daily();
         long day = session.today();
         String dd;
-        if (!d.activeOn(day)) dd = "do wzięcia u przewodnika w mieście";
-        else if (d.claimed()) dd = "wykonane - następne jutro";
-        else if (d.doneOn(day)) dd = "ODDAJ u przewodnika";
+        if (!d.activeOn(day)) dd = Messages.get("hud.do_wziecia_u_przewodnika");
+        else if (d.claimed()) dd = Messages.get("hud.wykonane_nastepne_jutro");
+        else if (d.doneOn(day)) dd = Messages.get("hud.oddaj_u_przewodnika");
         else dd = monsterNames.apply(d.monster()) + ": " + d.progress() + " / " + d.target();
         boolean dailyHunting = d.activeOn(day) && !d.claimed() && !d.doneOn(day);
-        rows.add(new MenuRow(dailyHunting ? "journal:hunt" : "journal:guide", "Zadanie dnia", dd, true));
+        rows.add(new MenuRow(dailyHunting ? "journal:hunt" : "journal:guide", Messages.get("hud.zadanie_dnia"), dd, true));
         pl.fawizja.pixel.quest.HuntTask h = pc.hunt();
         if (h.active()) {
-            rows.add(new MenuRow(h.done() ? "journal:guide" : "journal:hunt", "Zlecenie łowcy", h.done() ? "ODDAJ u przewodnika"
-                    : monsterNames.apply(h.monster()) + ": " + h.progress() + " / " + h.target() + " - dotknij, aby iść", true));
+            rows.add(new MenuRow(h.done() ? "journal:guide" : "journal:hunt", Messages.get("hud.zlecenie_lowcy"), h.done() ? Messages.get("hud.oddaj_u_przewodnika")
+                    : monsterNames.apply(h.monster()) + ": " + h.progress() + " / " + h.target() + Messages.get("hud.dotknij_aby_isc"), true));
         }
         pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
         List<MenuRow> available = new ArrayList<>();
@@ -2534,14 +2535,14 @@ public final class Hud {
                 String who = giver == null ? q.giver() : giver.name() + " (" + giver.town() + ")";
                 if (st == pl.fawizja.pixel.quest.QuestLog.State.ACTIVE) {
                     boolean ready = qs.ready(pc, q);
-                    rows.add(new MenuRow("journal:goto:" + q.giver(), q.name(), ready ? "ODDAJ: " + who
+                    rows.add(new MenuRow("journal:goto:" + q.giver(), q.name(), ready ? Messages.get("hud.oddaj") + who
                             : qs.progress(pc, q) + " / " + q.amount() + " - " + who, true));
                 } else if (st == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && qs.unlocked(pc, q) && pc.level() >= q.minLevel()) {
-                    available.add(new MenuRow("journal:goto:" + q.giver(), "Nowe: " + q.name(), "u " + who + " - " + qs.rewardText(q, pc), true));
+                    available.add(new MenuRow("journal:goto:" + q.giver(), Messages.get("hud.nowe") + q.name(), "u " + who + " - " + qs.rewardText(q, pc), true));
                 }
             }
         }
-        if (rows.size() == (h.active() ? 2 : 1)) rows.add(new MenuRow("ach:none", "Brak zadań w toku", "przewodnicy w miastach mają zlecenia", false));
+        if (rows.size() == (h.active() ? 2 : 1)) rows.add(new MenuRow("ach:none", Messages.get("hud.brak_zadan_w_toku"), Messages.get("hud.przewodnicy_w_miastach_maja"), false));
         rows.addAll(available);
         if (mobile) {
             // telefon: okno kategorii 336 dp, dwie kolumny wierszy pod paskiem tytulu
@@ -2574,14 +2575,14 @@ public final class Hud {
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         pl.fawizja.pixel.achievement.Bestiary b = pc.bestiary();
         if (!bestiaryMode) {
-            rows.add(new MenuRow("ach:toggle", "Pokaż bestiariusz", String.format("%,d pokonanych, %d rodzajów", b.total(), b.species()), true));
+            rows.add(new MenuRow("ach:toggle", Messages.get("hud.pokaz_bestiariusz"), String.format(Messages.get("hud.d_pokonanych_d_rodzajow"), b.total(), b.species()), true));
             List<MenuRow> all = new ArrayList<>();
             for (pl.fawizja.pixel.achievement.Achievement a : pl.fawizja.pixel.achievement.Achievement.values()) {
                 boolean has = pc.achievements().has(a);
                 long p = Math.min(a.progress(pc), a.target());
                 boolean worn = a.name().equals(pc.title());
-                String detail = worn ? "twój tytuł (dotknij, aby zdjąć)"
-                        : has ? "zdobyte: " + a.goal() + "; dotknij = tytuł" : a.goal() + String.format(" (%,d / %,d)", p, a.target());
+                String detail = worn ? Messages.get("hud.twoj_tytul_dotknij_aby")
+                        : has ? "zdobyte: " + a.goal() + Messages.get("hud.dotknij_tytul") : a.goal() + String.format(" (%,d / %,d)", p, a.target());
                 all.add(new MenuRow(has ? "ach:title:" + a.name() : "ach:none", (worn ? "> " : has ? "* " : "") + a.title(), detail, has));
             }
             int room = perCol * 2 - 1;
@@ -2593,10 +2594,10 @@ public final class Hud {
                 int pages = (all.size() + per - 1) / per;
                 if (achPage >= pages) achPage = 0;
                 rows.addAll(all.subList(achPage * per, Math.min(all.size(), (achPage + 1) * per)));
-                rows.add(new MenuRow("ach:page", "Strona " + (achPage + 1) + " / " + pages, "dotknij, aby zobaczyć następną", true));
+                rows.add(new MenuRow("ach:page", Messages.get("hud.strona") + (achPage + 1) + " / " + pages, Messages.get("hud.dotknij_aby_zobaczyc_nastepna"), true));
             }
         } else {
-            rows.add(new MenuRow("ach:toggle", "Pokaż osiągnięcia", String.format("%,d pokonanych, %d rodzajów, %d bossów",
+            rows.add(new MenuRow("ach:toggle", Messages.get("hud.pokaz_osiagniecia"), String.format(Messages.get("hud.d_pokonanych_d_rodzajow_2"),
                     b.total(), b.species(), b.bossesDefeated()), true));
             // jak w Tibii: klasy potworow (dotkniecie = lista potworow klasy), na gorze charmy
             List<String[]> list = new ArrayList<>();
@@ -2623,10 +2624,10 @@ public final class Hud {
         List<MenuRow> right = new ArrayList<>();
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
         long money = session.gold() + session.character().bank().balance();
-        String found = marketView.search() == null ? "najnowsze oferty" : "szukano: " + marketView.search();
-        left.add(new MenuRow("market:none", "Kup (dotknij oferty)", found + "; płacisz z konta albo plecaka", false));
-        right.add(new MenuRow("market:none", "Twoje oferty (dotknij, aby wycofać)",
-                "/rynek wystaw 5 wilcze futro 300", false));
+        String found = marketView.search() == null ? Messages.get("hud.najnowsze_oferty") : "szukano: " + marketView.search();
+        left.add(new MenuRow("market:none", Messages.get("hud.kup_dotknij_oferty"), found + Messages.get("hud.placisz_z_konta_albo"), false));
+        right.add(new MenuRow("market:none", Messages.get("hud.twoje_oferty_dotknij_aby"),
+                Messages.get("hud.rynek_wystaw_5_wilcze"), false));
         for (pl.fawizja.pixel.market.MarketView.Row r : marketView.rows()) {
             String label = r.count() + "x " + r.item();
             String price = String.format("%,d gp", r.price());
@@ -2636,9 +2637,9 @@ public final class Hud {
                 left.add(new MenuRow("market:buy:" + r.id(), label, price + " - " + r.seller() + " (#" + r.id() + ")", money >= r.price()));
             }
         }
-        if (left.size() == 1) left.add(new MenuRow("market:none", "Brak ofert", "/rynek nazwa - szukanie przedmiotu", false));
-        if (right.size() == 1) right.add(new MenuRow("market:none", "Nic nie wystawiasz",
-                "prowizja rynku " + pl.fawizja.pixel.market.Market.FEE_PERCENT + "%", false));
+        if (left.size() == 1) left.add(new MenuRow("market:none", Messages.get("hud.brak_ofert"), Messages.get("hud.rynek_nazwa_szukanie_przedmiot"), false));
+        if (right.size() == 1) right.add(new MenuRow("market:none", Messages.get("hud.nic_nie_wystawiasz"),
+                Messages.get("hud.prowizja_rynku") + pl.fawizja.pixel.market.Market.FEE_PERCENT + "%", false));
         float colW = (menuW - 30) / 2f;
         for (int c = 0; c < 2; c++) {
             List<MenuRow> col = c == 0 ? left : right;
@@ -2658,18 +2659,18 @@ public final class Hud {
         List<MenuRow> left = new ArrayList<>();
         List<MenuRow> right = new ArrayList<>();
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
-        left.add(new MenuRow("friend:none", "W grze (" + friendsView.online() + ")", "dotknij, aby napisać prywatnie", false));
-        right.add(new MenuRow("friend:none", "Poza grą (" + (friendsView.rows().size() - friendsView.online()) + ")",
-                "/znajomi usuń Imię - usuwa z listy", false));
+        left.add(new MenuRow("friend:none", Messages.get("game_screen.w_grze") + friendsView.online() + ")", Messages.get("hud.dotknij_aby_napisac_prywatnie"), false));
+        right.add(new MenuRow("friend:none", Messages.get("hud.poza_gra") + (friendsView.rows().size() - friendsView.online()) + ")",
+                Messages.get("hud.znajomi_usun_imie_usuwa"), false));
         for (pl.fawizja.pixel.friends.FriendsView.Row r : friendsView.rows()) {
-            String detail = r.level() > 0 ? r.vocation() + ", poziom " + r.level() : "postać nieznana";
+            String detail = r.level() > 0 ? r.vocation() + Messages.get("pixel_game.poziom") + r.level() : Messages.get("hud.postac_nieznana");
             String ago = r.online() ? "" : pl.fawizja.pixel.friends.FriendsView.describeAgo(r.minutesAgo());
             if (!ago.isEmpty()) detail += ", " + ago;
             if (r.online() && left.size() < perCol) left.add(new MenuRow("friend:pm:" + r.name(), r.name(), detail, true));
             else if (!r.online() && right.size() < perCol) right.add(new MenuRow("friend:none", r.name(), detail, false));
         }
-        if (friendsView.rows().isEmpty()) left.add(new MenuRow("friend:none", "Lista jest pusta",
-                "/znajomi dodaj Imię albo dotknij gracza", false));
+        if (friendsView.rows().isEmpty()) left.add(new MenuRow("friend:none", Messages.get("hud.lista_jest_pusta"),
+                Messages.get("hud.znajomi_dodaj_imie_albo"), false));
         float colW = (menuW - 30) / 2f;
         for (int c = 0; c < 2; c++) {
             List<MenuRow> col = c == 0 ? left : right;
@@ -2696,8 +2697,8 @@ public final class Hud {
         for (int i = 0; i < rows.size(); i++) {
             pl.fawizja.pixel.ranking.RankingView.Row r = rows.get(i);
             MenuRow row = new MenuRow("ranking:none", r.place() + ". " + r.name() + (r.place() == v.mine() ? (guilds ? "  (twoja)" : "  (ty)") : ""),
-                    weeklyRank ? r.vocation() + String.format(", +%,d exp", r.level())
-                            : r.vocation() + (guilds ? ", suma poziomów " : skillRank ? ", umiejętność " : ", poziom ") + r.level(),
+                    weeklyRank ? r.vocation() + String.format(Messages.get("hud.d_exp"), r.level())
+                            : r.vocation() + (guilds ? Messages.get("hud.suma_poziomow") : skillRank ? Messages.get("hud.umiejetnosc") : Messages.get("pixel_game.poziom")) + r.level(),
                     true);
             row.x = menuX + 10 + (i / perCol) * (colW + 10);
             row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
@@ -2705,11 +2706,11 @@ public final class Hud {
             row.h = rowH - 3;
             menuRows.add(row);
         }
-        String mine = guilds ? (v.mine() > 0 ? "Twoja gildia: " + v.mine() + ". miejsce z " + v.total() : "Nie należysz do gildii z rankingu")
-                : v.mine() > 0 ? "Twoje miejsce: " + v.mine() + " z " + v.total() : "Nie ma cię w tym rankingu";
+        String mine = guilds ? (v.mine() > 0 ? Messages.get("hud.twoja_gildia") + v.mine() + Messages.get("hud.miejsce_z") + v.total() : Messages.get("hud.nie_nalezysz_do_gildii"))
+                : v.mine() > 0 ? Messages.get("hud.twoje_miejsce") + v.mine() + Messages.get("common.z") + v.total() : Messages.get("hud.nie_ma_cie_w");
         MenuRow me = new MenuRow("ranking:none", mine, weeklyRank
-                ? "w poniedziałek nagrody: 100 000 / 50 000 / 25 000 gp za miejsca 1-3"
-                : "/ranking druid, paladin, mag, mnich, gildie, tydzień", true);
+                ? Messages.get("hud.w_poniedzialek_nagrody_100")
+                : Messages.get("hud.ranking_druid_paladin_mag"), true);
         me.x = menuX + 10;
         me.y = menuY + menuH - 40 - (perCol + 1) * rowH - 6;
         me.w = menuW - 20;
@@ -2722,15 +2723,15 @@ public final class Hud {
         List<MenuRow> left = new ArrayList<>();
         List<MenuRow> right = new ArrayList<>();
         int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
-        left.add(new MenuRow("trade:none", "Ty dajesz" + (trade.mineAccepted() ? " (zaakceptowano)" : ""), trade.mine(), false));
-        left.add(new MenuRow("trade:none", trade.partner() + " daje" + (trade.theirsAccepted() ? " (zaakceptował)" : ""),
+        left.add(new MenuRow("trade:none", Messages.get("hud.ty_dajesz") + (trade.mineAccepted() ? " (zaakceptowano)" : ""), trade.mine(), false));
+        left.add(new MenuRow("trade:none", trade.partner() + " daje" + (trade.theirsAccepted() ? Messages.get("hud.zaakceptowal") : ""),
                 trade.theirs(), false));
-        left.add(new MenuRow("trade:accept", trade.mineAccepted() ? "Czekam na drugą stronę" : "AKCEPTUJ",
-                "zmiana oferty kasuje akceptacje obu stron", !trade.mineAccepted()));
-        left.add(new MenuRow("trade:cancel", "ANULUJ", "nic nie zostanie wymienione", true));
+        left.add(new MenuRow("trade:accept", trade.mineAccepted() ? Messages.get("hud.czekam_na_druga_strone") : "AKCEPTUJ",
+                Messages.get("hud.zmiana_oferty_kasuje_akceptacj"), !trade.mineAccepted()));
+        left.add(new MenuRow("trade:cancel", Messages.get("hud.anuluj"), Messages.get("hud.nic_nie_zostanie_wymienione"), true));
         long gold = session.gold();
         for (long g : new long[] {100, 1_000, 10_000}) {
-            left.add(new MenuRow("trade:offer:" + g + " gp", "+" + String.format("%,d gp", g), "dodaj złoto do oferty", gold >= g));
+            left.add(new MenuRow("trade:offer:" + g + " gp", "+" + String.format("%,d gp", g), Messages.get("hud.dodaj_zloto_do_oferty"), gold >= g));
         }
         java.util.Map<Integer, Integer> counts = new java.util.LinkedHashMap<>();
         for (pl.fawizja.pixel.item.ItemStack st : session.character().backpack().contents()) {
@@ -2741,9 +2742,9 @@ public final class Hud {
             if (right.size() >= perCol) break;
             pl.fawizja.pixel.item.ItemType it = session.items().get(e.getKey());
             int n = Math.min(e.getValue(), 10_000);
-            right.add(new MenuRow("trade:offer:" + n + " " + it.key(), "Oferuj " + n + "x " + it.name(), "cała ilość z plecaka", true));
+            right.add(new MenuRow("trade:offer:" + n + " " + it.key(), Messages.get("hud.oferuj") + n + "x " + it.name(), Messages.get("hud.cala_ilosc_z_plecaka"), true));
         }
-        if (right.isEmpty()) right.add(new MenuRow("trade:none", "Plecak bez przedmiotów", "możesz oferować złoto", false));
+        if (right.isEmpty()) right.add(new MenuRow("trade:none", Messages.get("hud.plecak_bez_przedmiotow"), Messages.get("hud.mozesz_oferowac_zloto"), false));
         float colW = (menuW - 30) / 2f;
         for (int c = 0; c < 2; c++) {
             List<MenuRow> col = c == 0 ? left : right;
@@ -2767,8 +2768,8 @@ public final class Hud {
     /** Okno kowala: nawigacja stron w prawej kolumnie, potem strona (ulepszenia / Kuznia / nasycenia). */
     private void smithRows(GameSession session, List<MenuRow> left, List<MenuRow> right, int perCol) {
         PlayerCharacter pc = session.character();
-        String[] names = {"Ulepszenia i zaklęcia", "Kuźnia Wyniesienia", "Nasycenia (imbuementy)"};
-        String[] details = {"+1..+5 i zaklęcia na godzinę", "fuzja, transfer, pył, odłamki, rdzenie", "wampiryzm, pustka, cios, żywioły, ochrony"};
+        String[] names = {Messages.get("hud.ulepszenia_i_zaklecia"), Messages.get("hud.kuznia_wyniesienia"), Messages.get("hud.nasycenia_imbuementy")};
+        String[] details = {Messages.get("hud.1_5_i_zaklecia"), Messages.get("hud.fuzja_transfer_pyl_odlamki"), Messages.get("hud.wampiryzm_pustka_cios_zywioly")};
         for (int i = 0; i < 3; i++) {
             right.add(new MenuRow(smithPage == i ? "npc:none" : "npc:ui:page:" + i, (smithPage == i ? "> " : "") + names[i], details[i], smithPage != i));
         }
@@ -2780,7 +2781,7 @@ public final class Hud {
             imbueRows(session, left, right, perCol);
             return;
         }
-        left.add(new MenuRow("npc:smith", "Wróć do sklepu", "ulepszanie zakładanego wyposażenia", true));
+        left.add(new MenuRow("npc:smith", Messages.get("hud.wroc_do_sklepu"), Messages.get("hud.ulepszanie_zakladanego_wyposaz"), true));
         long money = session.gold();
         for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
             ItemStack worn = slot == pl.fawizja.pixel.item.EquipSlot.NONE ? null : pc.equipment().get(slot);
@@ -2788,26 +2789,26 @@ public final class Hud {
             pl.fawizja.pixel.item.ItemType t = session.items().get(worn.itemId());
             if (!pl.fawizja.pixel.item.Upgrade.upgradable(t)) continue;
             int next = worn.upgrade() + 1;
-            String label = "Ulepsz: " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade());
+            String label = Messages.get("hud.ulepsz") + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade());
             if (next > pl.fawizja.pixel.item.Upgrade.MAX) {
-                left.add(new MenuRow("npc:none", label, "ulepszone do końca", false));
+                left.add(new MenuRow("npc:none", label, Messages.get("hud.ulepszone_do_konca"), false));
                 continue;
             }
             long price = pl.fawizja.pixel.item.Upgrade.price(t, next);
-            left.add(new MenuRow("npc:upgrade:" + slot.name(), label, "do +" + next + ": " + price + " gp, szansa "
+            left.add(new MenuRow("npc:upgrade:" + slot.name(), label, Messages.get("hud.do") + next + ": " + price + Messages.get("hud.gp_szansa")
                     + pl.fawizja.pixel.item.Upgrade.chancePercent(next) + "%", money >= price));
         }
-        if (left.size() == 1) left.add(new MenuRow("npc:none", "Nic do ulepszenia", "załóż broń, tarczę albo zbroję", false));
-        right.add(new MenuRow("npc:none", "Kowalstwo", "do +5; nieudana próba zabiera tylko złoto", false));
+        if (left.size() == 1) left.add(new MenuRow("npc:none", Messages.get("hud.nic_do_ulepszenia"), Messages.get("hud.zaloz_bron_tarcze_albo"), false));
+        right.add(new MenuRow("npc:none", Messages.get("hud.kowalstwo"), Messages.get("hud.do_5_nieudana_proba"), false));
         pl.fawizja.pixel.item.Enchantments ench = pc.enchantments();
         for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
             if (!k.smith()) continue;
             long price = pl.fawizja.pixel.item.Enchantments.price(k, pc.level());
-            String left0 = ench.active(k) ? ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k)) : "";
+            String left0 = ench.active(k) ? Messages.get("hud.zostalo") + pl.fawizja.pixel.item.Enchantments.describe(ench.remainingMs(k)) : "";
             right.add(new MenuRow("npc:enchant:" + k.name(), k.label() + " (1 h)", k.effect() + "; " + price + " gp" + left0,
                     money >= price && ench.canExtend(k)));
         }
-        right.add(new MenuRow("npc:none", "Czas zaklęć", "płynie tylko poza strefą ochronną, do 3 h zapasu", false));
+        right.add(new MenuRow("npc:none", Messages.get("hud.czas_zaklec"), Messages.get("hud.plynie_tylko_poza_strefa"), false));
     }
 
     /** Ostatni wynik Kuzni z dziennika (wiersz "Wynik"), albo null. */
@@ -2815,7 +2816,7 @@ public final class Hud {
         java.util.List<EventLog.Entry> l = session.log().latest(40);
         for (int i = l.size() - 1; i >= 0; i--) {
             String t = l.get(i).text();
-            if (t.startsWith(pl.fawizja.pixel.game.ForgeService.PREFIX)) return t.substring(pl.fawizja.pixel.game.ForgeService.PREFIX.length());
+            if (t.startsWith(pl.fawizja.pixel.game.ForgeService.prefix())) return t.substring(pl.fawizja.pixel.game.ForgeService.prefix().length());
         }
         return null;
     }
@@ -2844,12 +2845,12 @@ public final class Hud {
         int coreId = reg.byKey(pl.fawizja.pixel.item.Forge.CORE_KEY).id();
         int slivers = bp.countPlain(sliverId), cores = bp.countPlain(coreId);
         long funds = session.forge().funds();
-        left.add(new MenuRow("npc:smith", "Wróć do sklepu", "pył " + pc.forgeDust() + "/" + pc.dustLimit() + ", odłamki " + slivers
-                + ", rdzenie " + cores, true));
+        left.add(new MenuRow("npc:smith", Messages.get("hud.wroc_do_sklepu"), Messages.get("hud.pyl") + pc.forgeDust() + "/" + pc.dustLimit() + Messages.get("hud.odlamki") + slivers
+                + Messages.get("hud.rdzenie") + cores, true));
         String res = lastForgeResult(session);
         if (res != null) left.add(resultRow(res));
-        left.add(new MenuRow("npc:ui:fcore", "Rdzeń na szansę: " + (fuseCoreChance ? "TAK" : "NIE"), "szansa fuzji 50% -> 65% (1 rdzeń)", true));
-        left.add(new MenuRow("npc:ui:fprot", "Rdzeń na ochronę: " + (fuseCoreProtect ? "TAK" : "NIE"), "porażka: utrata tieru 100% -> 50% (1 rdzeń)", true));
+        left.add(new MenuRow("npc:ui:fcore", Messages.get("hud.rdzen_na_szanse") + (fuseCoreChance ? "TAK" : Messages.get("hud.nie")), Messages.get("hud.szansa_fuzji_50_65"), true));
+        left.add(new MenuRow("npc:ui:fprot", Messages.get("hud.rdzen_na_ochrone") + (fuseCoreProtect ? "TAK" : Messages.get("hud.nie")), Messages.get("hud.porazka_utrata_tieru_100"), true));
         int needCores = (fuseCoreChance ? 1 : 0) + (fuseCoreProtect ? 1 : 0);
         java.util.List<int[]> pairs = session.forge().fusionPairs();
         for (int[] pr : pairs) {
@@ -2859,35 +2860,35 @@ public final class Hud {
             long gold = pl.fawizja.pixel.item.Forge.fusionGold(t, a.tier() + 1);
             boolean ok = pc.forgeDust() >= pl.fawizja.pixel.item.Forge.FUSION_DUST && funds >= gold && cores >= needCores;
             left.add(new MenuRow("npc:forge:fuse:" + pr[0] + ":" + pr[1] + ":" + (fuseCoreChance ? 1 : 0) + ":" + (fuseCoreProtect ? 1 : 0),
-                    "Fuzja: " + t.name() + " T" + a.tier() + " -> T" + (a.tier() + 1),
-                    pl.fawizja.pixel.item.Forge.FUSION_DUST + " pyłu, " + gp(gold) + ", szansa "
+                    Messages.get("hud.fuzja") + t.name() + " T" + a.tier() + " -> T" + (a.tier() + 1),
+                    pl.fawizja.pixel.item.Forge.FUSION_DUST + Messages.get("hud.pylu") + gp(gold) + Messages.get("hud.szansa")
                             + pl.fawizja.pixel.item.Forge.fusionChance(fuseCoreChance) + "%", ok));
         }
         if (pairs.isEmpty() && left.size() < perCol) {
-            left.add(new MenuRow("npc:none", "Brak par do fuzji", "dwa takie same przedmioty z klasą w plecaku", false));
+            left.add(new MenuRow("npc:none", Messages.get("hud.brak_par_do_fuzji"), Messages.get("hud.dwa_takie_same_przedmioty"), false));
         }
-        right.add(new MenuRow("npc:forge:slivers", pl.fawizja.pixel.item.Forge.SLIVER_DUST + " pyłu -> "
-                + pl.fawizja.pixel.item.Forge.SLIVERS_PER_CONVERSION + " odłamki", "masz " + pc.forgeDust() + " pyłu",
+        right.add(new MenuRow("npc:forge:slivers", pl.fawizja.pixel.item.Forge.SLIVER_DUST + Messages.get("hud.pylu_2")
+                + pl.fawizja.pixel.item.Forge.SLIVERS_PER_CONVERSION + Messages.get("hud.odlamki_2"), Messages.get("hud.masz") + pc.forgeDust() + Messages.get("hud.pylu_3"),
                 pc.forgeDust() >= pl.fawizja.pixel.item.Forge.SLIVER_DUST));
-        right.add(new MenuRow("npc:forge:core", pl.fawizja.pixel.item.Forge.CORE_SLIVERS + " odłamków -> 1 rdzeń", "masz " + slivers + " odłamków",
+        right.add(new MenuRow("npc:forge:core", pl.fawizja.pixel.item.Forge.CORE_SLIVERS + Messages.get("hud.odlamkow_1_rdzen"), Messages.get("hud.masz") + slivers + Messages.get("hud.odlamkow"),
                 slivers >= pl.fawizja.pixel.item.Forge.CORE_SLIVERS));
         int cost = pl.fawizja.pixel.item.Forge.raiseLimitCost(pc.dustLimit());
-        right.add(new MenuRow("npc:forge:limit", "Limit pyłu " + pc.dustLimit() + "/" + pl.fawizja.pixel.item.Forge.DUST_MAX_LIMIT + " -> +1",
-                cost == 0 ? "najwyższy" : "koszt " + cost + " pyłu", cost > 0 && pc.forgeDust() >= cost));
+        right.add(new MenuRow("npc:forge:limit", Messages.get("hud.limit_pylu") + pc.dustLimit() + "/" + pl.fawizja.pixel.item.Forge.DUST_MAX_LIMIT + " -> +1",
+                cost == 0 ? Messages.get("hud.najwyzszy") : "koszt " + cost + Messages.get("hud.pylu_3"), cost > 0 && pc.forgeDust() >= cost));
         ItemStack donor = transferDonor >= 0 && transferDonor < bp.size() ? bp.get(transferDonor) : null;
         if (donor == null || donor.tier() < 2) {
             transferDonor = -1;
             for (int i = 0; i < bp.size() && right.size() < perCol; i++) {
                 ItemStack st = bp.get(i);
                 if (st == null || st.tier() < 2) continue;
-                right.add(new MenuRow("npc:ui:donor:" + i, "Transfer z: " + pl.fawizja.pixel.item.Forge.name(reg.get(st.itemId()), st),
-                        "wybierz dawcę (przepada), potem biorcę z tierem 0", true));
+                right.add(new MenuRow("npc:ui:donor:" + i, Messages.get("hud.transfer_z") + pl.fawizja.pixel.item.Forge.name(reg.get(st.itemId()), st),
+                        Messages.get("hud.wybierz_dawce_przepada_potem"), true));
             }
-            if (right.size() < perCol) right.add(new MenuRow("npc:none", "Transfer tieru", "dawca z tierem 2+ w plecaku", false));
+            if (right.size() < perCol) right.add(new MenuRow("npc:none", Messages.get("hud.transfer_tieru"), Messages.get("hud.dawca_z_tierem_2"), false));
             return;
         }
         pl.fawizja.pixel.item.ItemType dt = reg.get(donor.itemId());
-        right.add(new MenuRow("npc:ui:donor:-1", "Dawca: " + pl.fawizja.pixel.item.Forge.name(dt, donor), "dotknij, aby anulować", true));
+        right.add(new MenuRow("npc:ui:donor:-1", Messages.get("hud.dawca") + pl.fawizja.pixel.item.Forge.name(dt, donor), Messages.get("hud.dotknij_aby_anulowac"), true));
         int result = donor.tier() - 1;
         int needed = pl.fawizja.pixel.item.Forge.transferCores(dt, result);
         long gold = pl.fawizja.pixel.item.Forge.transferGold(dt, donor.tier());
@@ -2897,7 +2898,7 @@ public final class Hud {
             pl.fawizja.pixel.item.ItemType rt = reg.get(st.itemId());
             if (pl.fawizja.pixel.item.Forge.classOf(rt) != pl.fawizja.pixel.item.Forge.classOf(dt) || rt.slot() != dt.slot()) continue;
             right.add(new MenuRow("npc:forge:transfer:" + transferDonor + ":" + i, "na: " + rt.name() + " -> T" + result,
-                    pl.fawizja.pixel.item.Forge.TRANSFER_DUST + " pyłu, " + needed + " rdz., " + gp(gold),
+                    pl.fawizja.pixel.item.Forge.TRANSFER_DUST + Messages.get("hud.pylu") + needed + " rdz., " + gp(gold),
                     pc.forgeDust() >= pl.fawizja.pixel.item.Forge.TRANSFER_DUST && cores >= needed && funds >= gold));
         }
     }
@@ -2907,9 +2908,9 @@ public final class Hud {
         PlayerCharacter pc = session.character();
         pl.fawizja.pixel.item.ItemRegistry reg = session.items();
         if (npc.role() == pl.fawizja.pixel.npc.NpcRole.IMBUER) {
-            left.add(new MenuRow("npc:none", "Nasycenia (imbuementy)", "działają 20 h walki na założonym przedmiocie; kowal robi to samo", false));
+            left.add(new MenuRow("npc:none", Messages.get("hud.nasycenia_imbuementy"), Messages.get("hud.dzialaja_20_h_walki"), false));
         } else {
-            left.add(new MenuRow("npc:smith", "Wróć do sklepu", "nasycenia działają 20 h walki na założonym przedmiocie", true));
+            left.add(new MenuRow("npc:smith", Messages.get("hud.wroc_do_sklepu"), Messages.get("hud.nasycenia_dzialaja_20_h"), true));
         }
         String res = lastForgeResult(session);
         if (res != null) left.add(resultRow(res));
@@ -2923,24 +2924,24 @@ public final class Hud {
             if (n == 0) continue;
             if (imbueSlot == null) imbueSlot = slot;
             left.add(new MenuRow("npc:ui:islot:" + slot.name(), (slot == imbueSlot ? "> " : "") + t.name() + " (" + worn.imbuements().size() + "/" + n + ")",
-                    worn.imbuements().isEmpty() ? "wolne miejsca na nasycenia" : "dotknij, aby wybrać", slot != imbueSlot));
+                    worn.imbuements().isEmpty() ? Messages.get("hud.wolne_miejsca_na_nasycenia") : Messages.get("hud.dotknij_aby_wybrac"), slot != imbueSlot));
             for (int i = 0; i < worn.imbuements().size() && left.size() < perCol; i++) {
                 pl.fawizja.pixel.item.Imbuements.Slot sl = worn.imbuements().slots().get(i);
-                left.add(new MenuRow("npc:unimbue:" + slot.name() + ":" + i, "  Usuń: " + sl.kind().label() + " (" + pl.fawizja.pixel.item.Imbuement.LEVELS[sl.level()] + ")",
-                        sl.kind().effect(sl.level()) + ", zostało " + pl.fawizja.pixel.item.Enchantments.describe(sl.msLeft()) + "; "
+                left.add(new MenuRow("npc:unimbue:" + slot.name() + ":" + i, Messages.get("hud.usun") + sl.kind().label() + " (" + Messages.tr(pl.fawizja.pixel.item.Imbuement.LEVELS[sl.level()]) + ")",
+                        sl.kind().effect(sl.level()) + Messages.get("hud.zostalo") + pl.fawizja.pixel.item.Enchantments.describe(sl.msLeft()) + "; "
                                 + gp(pl.fawizja.pixel.item.Imbuement.CLEAR_COST), true));
             }
         }
         if (imbueSlot == null) {
-            left.add(new MenuRow("npc:none", "Nic do nasycenia", "załóż broń, zbroję, hełm albo tarczę (od niepospolitych)", false));
+            left.add(new MenuRow("npc:none", Messages.get("hud.nic_do_nasycenia"), Messages.get("hud.zaloz_bron_zbroje_helm"), false));
             return;
         }
         ItemStack worn = pc.equipment().get(imbueSlot);
         pl.fawizja.pixel.item.ItemType t = reg.get(worn.itemId());
         boolean full = worn.imbuements().size() >= pl.fawizja.pixel.item.Imbuement.slots(t);
-        right.add(new MenuRow("npc:ui:ilevel", "Stopień: " + pl.fawizja.pixel.item.Imbuement.LEVELS[imbueLevel] + " ("
+        right.add(new MenuRow("npc:ui:ilevel", Messages.get("hud.stopien") + Messages.tr(pl.fawizja.pixel.item.Imbuement.LEVELS[imbueLevel]) + " ("
                 + pl.fawizja.pixel.item.Imbuement.LEVELS_TIBIA[imbueLevel] + ")", gp(pl.fawizja.pixel.item.Imbuement.GOLD[imbueLevel])
-                + " + składniki; dotknij, aby zmienić", true));
+                + Messages.get("hud.skladniki_dotknij_aby_zmienic"), true));
         java.util.List<pl.fawizja.pixel.item.Imbuement> kinds = new java.util.ArrayList<>();
         for (pl.fawizja.pixel.item.Imbuement k : pl.fawizja.pixel.item.Imbuement.values()) if (k.fits(t)) kinds.add(k);
         int per = Math.max(1, perCol - right.size() - 1);
@@ -2962,7 +2963,7 @@ public final class Hud {
             right.add(new MenuRow("npc:imbue:" + imbueSlot.name() + ":" + k.name() + ":" + imbueLevel,
                     k.label() + ": " + k.effect(imbueLevel), need.toString(), ok));
         }
-        if (pages > 1) right.add(new MenuRow("npc:ui:ipage", "Następne nasycenia", (imbuePage + 1) + " / " + pages, true));
+        if (pages > 1) right.add(new MenuRow("npc:ui:ipage", Messages.get("hud.nastepne_nasycenia"), (imbuePage + 1) + " / " + pages, true));
     }
 
     private void rebuildNpcMenu(GameSession session) {
@@ -2979,7 +2980,7 @@ public final class Hud {
                 pl.fawizja.pixel.npc.Shop shop = session.shopOf(npc);
                 List<pl.fawizja.pixel.npc.ShopOffer> sold = new ArrayList<>();
                 for (pl.fawizja.pixel.npc.ShopOffer o : shop.offers()) if (o.sold()) sold.add(o);
-                left.add(new MenuRow("npc:qty", "Ilość: " + npcQty + " (zmień)", "dotknij towaru, aby kupić", true));
+                left.add(new MenuRow("npc:qty", Messages.get("hud.ilosc") + npcQty + Messages.get("hud.zmien"), Messages.get("hud.dotknij_towaru_aby_kupic"), true));
                 int per = perCol - 2;
                 int pages = Math.max(1, (sold.size() + per - 1) / per);
                 if (npcPage >= pages) npcPage = 0;
@@ -2992,33 +2993,33 @@ public final class Hud {
                     String delta = pl.fawizja.pixel.item.ItemCompare.shopDelta(it, worn == null ? null : session.items().get(worn.itemId()),
                             worn == null ? 0 : worn.upgrade(), pc);
                     left.add(new MenuRow("npc:buy:" + o.itemId() + ":" + npcQty, it.name(),
-                            o.buyPrice() + " gp" + (npcQty > 1 ? ", razem " + cost + " gp" : "") + (delta.isEmpty() ? "" : "; " + delta), gold >= cost));
+                            o.buyPrice() + " gp" + (npcQty > 1 ? Messages.get("hud.razem") + cost + " gp" : "") + (delta.isEmpty() ? "" : "; " + delta), gold >= cost));
                 }
-                if (pages > 1) left.add(new MenuRow("npc:page", "Następna strona", (npcPage + 1) + " / " + pages, true));
+                if (pages > 1) left.add(new MenuRow("npc:page", Messages.get("hud.nastepna_strona"), (npcPage + 1) + " / " + pages, true));
                 if (npc.isPetKeeper()) {
                     // opiekun zwierzat: tylko pupil miasta, bez skupu i zapasow
-                    right.add(new MenuRow("npc:none", "Pupil u boku: +" + PlayerCharacter.PET_EXP_PERCENT + "% doświadczenia",
-                            "z potworów, gdy chodzi za tobą (po etapach serwera)", false));
-                    right.add(new MenuRow("npc:none", "Przywołanie: użyj pupila w plecaku", "jeszcze raz - odpoczywa; bez niego w plecaku odchodzi", false));
+                    right.add(new MenuRow("npc:none", Messages.get("hud.pupil_u_boku") + PlayerCharacter.PET_EXP_PERCENT + Messages.get("hud.doswiadczenia"),
+                            Messages.get("hud.z_potworow_gdy_chodzi"), false));
+                    right.add(new MenuRow("npc:none", Messages.get("hud.przywolanie_uzyj_pupila_w"), Messages.get("hud.jeszcze_raz_odpoczywa_bez"), false));
                     String now = pc.pet() == null ? "nikt" : session.items().containsKey(pc.pet()) ? session.items().byKey(pc.pet()).name() : pc.pet();
-                    right.add(new MenuRow("npc:none", "Teraz za tobą chodzi: " + now, "każde miasto ma swojego pupila", false));
+                    right.add(new MenuRow("npc:none", Messages.get("hud.teraz_za_toba_chodzi") + now, Messages.get("hud.kazde_miasto_ma_swojego"), false));
                     break;
                 }
                 if (npc.isSmith()) {
-                    right.add(new MenuRow("npc:smith", "Kowal: ulepszenia, Kuźnia, nasycenia", "+1..+5, fuzja tierów, wampiryzm, ochrony", true));
+                    right.add(new MenuRow("npc:smith", Messages.get("hud.kowal_ulepszenia_kuznia_nasyce"), Messages.get("hud.1_5_fuzja_tierow"), true));
                 }
-                right.add(new MenuRow("npc:refill", "Uzupełnij zapasy", "mikstury i runy do " + pl.fawizja.pixel.game.GameSession.REFILL_TO
-                        + ", amunicja do " + pl.fawizja.pixel.game.GameSession.REFILL_AMMO_TO, true));
-                right.add(new MenuRow("npc:sellloot", "Sprzedaj cały łup", "materiały bez przedmiotów do zadań; pojedynczo: dotknij", true));
+                right.add(new MenuRow("npc:refill", Messages.get("hud.uzupelnij_zapasy"), Messages.get("hud.mikstury_i_runy_do") + pl.fawizja.pixel.game.GameSession.REFILL_TO
+                        + Messages.get("hud.amunicja_do") + pl.fawizja.pixel.game.GameSession.REFILL_AMMO_TO, true));
+                right.add(new MenuRow("npc:sellloot", Messages.get("hud.sprzedaj_caly_lup"), Messages.get("hud.materialy_bez_przedmiotow_do"), true));
                 java.util.Set<Integer> seen = new java.util.LinkedHashSet<>();
                 for (ItemStack s : pc.backpack().contents()) if (s != null) seen.add(s.itemId());
                 for (int id : seen) {
                     long value = pl.fawizja.pixel.npc.TradeSystem.sellValue(pc.backpack(), shop, id);
                     if (value <= 0 || right.size() >= perCol) continue;
                     right.add(new MenuRow("npc:sell:" + id, pc.backpack().countPlain(id) + "x " + session.items().get(id).name(),
-                            "sprzedaj za " + value + " gp", true));
+                            Messages.get("hud.sprzedaj_za") + value + " gp", true));
                 }
-                if (right.size() == 2) right.add(new MenuRow("npc:none", "Nic do sprzedania", "kupiec skupuje łupy z potworów", false));
+                if (right.size() == 2) right.add(new MenuRow("npc:none", Messages.get("hud.nic_do_sprzedania"), Messages.get("hud.kupiec_skupuje_lupy_z"), false));
                 break;
             }
             case BANKER: {
@@ -3027,66 +3028,66 @@ public final class Hud {
                     java.util.List<ItemStack> inside = session.crateContents();
                     int used = inside.size();
                     left.add(new MenuRow("npc:none", npc.name() + ": " + used + " / " + pl.fawizja.pixel.world.Crates.SLOTS
-                            + " miejsc", "dotknij, aby wyjąć do plecaka", false));
+                            + " miejsc", Messages.get("hud.dotknij_aby_wyjac_do"), false));
                     java.util.Map<Integer, Integer> counts = new java.util.LinkedHashMap<>();
                     for (ItemStack st : inside) counts.merge(st.itemId(), st.count(), Integer::sum);
                     for (java.util.Map.Entry<Integer, Integer> e : counts.entrySet()) {
                         if (left.size() >= perCol) break;
-                        left.add(new MenuRow("npc:cratetake:" + e.getKey(), "Wyjmij " + e.getValue() + "x "
-                                + session.items().get(e.getKey()).name(), "do plecaka", pc.backpack().spaceFor(e.getKey()) > 0));
+                        left.add(new MenuRow("npc:cratetake:" + e.getKey(), Messages.get("hud.wyjmij") + e.getValue() + "x "
+                                + session.items().get(e.getKey()).name(), Messages.get("hud.do_plecaka"), pc.backpack().spaceFor(e.getKey()) > 0));
                     }
-                    if (left.size() == 1) left.add(new MenuRow("npc:none", "Pusto", "schowaj coś z plecaka", false));
-                    right.add(new MenuRow("npc:none", "Plecak", "dotknij, aby schować", false));
+                    if (left.size() == 1) left.add(new MenuRow("npc:none", Messages.get("hud.pusto"), Messages.get("hud.schowaj_cos_z_plecaka"), false));
+                    right.add(new MenuRow("npc:none", Messages.get("hud.plecak"), Messages.get("hud.dotknij_aby_schowac"), false));
                     for (int id : distinctIds(pc.backpack())) {
                         if (pl.fawizja.pixel.economy.Currency.isCoin(id) || right.size() >= perCol) continue;
-                        right.add(new MenuRow("npc:crateput:" + id, "Schowaj " + pc.backpack().count(id) + "x "
-                                + session.items().get(id).name(), "do schowka", session.crateSpaceFor(id) > 0));
+                        right.add(new MenuRow("npc:crateput:" + id, Messages.get("hud.schowaj") + pc.backpack().count(id) + "x "
+                                + session.items().get(id).name(), Messages.get("hud.do_schowka"), session.crateSpaceFor(id) > 0));
                     }
-                    if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do schowania", "monety trzymaj w banku", false));
+                    if (right.size() == 1) right.add(new MenuRow("npc:none", Messages.get("hud.nic_do_schowania"), Messages.get("hud.monety_trzymaj_w_banku"), false));
                     break;
                 }
                 pl.fawizja.pixel.inventory.Container depot = pc.depot();
                 if (depotView) {
-                    left.add(new MenuRow("npc:depot", "Wróć do konta", "depozyt: " + (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc", true));
+                    left.add(new MenuRow("npc:depot", Messages.get("hud.wroc_do_konta"), "depozyt: " + (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc", true));
                     for (int id : distinctIds(depot)) {
                         if (left.size() >= perCol) break;
-                        left.add(new MenuRow("npc:take:" + id, "Wyjmij " + depot.count(id) + "x " + session.items().get(id).name(),
-                                "do plecaka", pc.backpack().spaceFor(id) > 0));
+                        left.add(new MenuRow("npc:take:" + id, Messages.get("hud.wyjmij") + depot.count(id) + "x " + session.items().get(id).name(),
+                                Messages.get("hud.do_plecaka"), pc.backpack().spaceFor(id) > 0));
                     }
-                    if (left.size() == 1) left.add(new MenuRow("npc:none", "Depozyt jest pusty", "odłóż coś z plecaka", false));
-                    right.add(new MenuRow("npc:storeloot", "Odłóż cały łup", "materiały bez przedmiotów do zadań", true));
+                    if (left.size() == 1) left.add(new MenuRow("npc:none", Messages.get("hud.depozyt_jest_pusty"), Messages.get("hud.odloz_cos_z_plecaka"), false));
+                    right.add(new MenuRow("npc:storeloot", Messages.get("hud.odloz_caly_lup"), Messages.get("hud.materialy_bez_przedmiotow_do_2"), true));
                     for (int id : distinctIds(pc.backpack())) {
                         if (pl.fawizja.pixel.economy.Currency.isCoin(id) || right.size() >= perCol) continue;
-                        right.add(new MenuRow("npc:store:" + id, "Odłóż " + pc.backpack().count(id) + "x " + session.items().get(id).name(),
-                                "do depozytu", depot.spaceFor(id) > 0));
+                        right.add(new MenuRow("npc:store:" + id, Messages.get("hud.odloz") + pc.backpack().count(id) + "x " + session.items().get(id).name(),
+                                Messages.get("hud.do_depozytu"), depot.spaceFor(id) > 0));
                     }
-                    if (right.size() == 1) right.add(new MenuRow("npc:none", "Nic do odłożenia", "monety wpłać na konto", false));
+                    if (right.size() == 1) right.add(new MenuRow("npc:none", Messages.get("hud.nic_do_odlozenia"), Messages.get("hud.monety_wplac_na_konto"), false));
                     break;
                 }
-                left.add(new MenuRow("npc:market", "Rynek graczy", "kupno i sprzedaż, także gdy sprzedawca jest offline", true));
-                right.add(new MenuRow("npc:orders", "Zamówienia kupna", "/kupię 20 wilcze futro 2000, /sprzedaj numer", true));
-                left.add(new MenuRow("npc:depot", "Depozyt przedmiotów", (depot.size() - depot.freeSlots()) + " / " + depot.size() + " miejsc, wspólny dla miast", true));
+                left.add(new MenuRow("npc:market", Messages.get("hud.rynek_graczy"), Messages.get("hud.kupno_i_sprzedaz_takze"), true));
+                right.add(new MenuRow("npc:orders", Messages.get("hud.zamowienia_kupna"), Messages.get("hud.kupie_20_wilcze_futro"), true));
+                left.add(new MenuRow("npc:depot", Messages.get("hud.depozyt_przedmiotow"), (depot.size() - depot.freeSlots()) + " / " + depot.size() + Messages.get("hud.miejsc_wspolny_dla_miast"), true));
                 long bal = pc.bank().balance();
-                left.add(new MenuRow("npc:none", "Saldo: " + String.format("%,d gp", bal), "konto wspólne dla wszystkich miast", false));
-                left.add(new MenuRow("npc:deposit", "Wpłać wszystkie monety", String.format("w plecaku: %,d gp", session.gold()), session.gold() > 0));
+                left.add(new MenuRow("npc:none", Messages.get("hud.saldo") + String.format("%,d gp", bal), Messages.get("hud.konto_wspolne_dla_wszystkich"), false));
+                left.add(new MenuRow("npc:deposit", Messages.get("hud.wplac_wszystkie_monety"), String.format(Messages.get("hud.w_plecaku_d_gp"), session.gold()), session.gold() > 0));
                 for (long a : new long[] {1_000, 10_000, 100_000, 1_000_000}) {
-                    left.add(new MenuRow("npc:withdraw:" + a, String.format("Wypłać %,d gp", a), "monety trafią do plecaka", bal >= a));
+                    left.add(new MenuRow("npc:withdraw:" + a, String.format(Messages.get("hud.wyplac_d_gp"), a), Messages.get("hud.monety_trafia_do_plecaka"), bal >= a));
                 }
                 break;
             }
             case KING: {
                 long bal = pc.bank().balance();
                 long prem = pl.fawizja.pixel.game.GameSession.PREMIUM_PRICE, promo = pl.fawizja.pixel.game.GameSession.PROMOTION_PRICE;
-                left.add(new MenuRow("npc:premium", pc.isPremium() ? "Konto premium: masz" : "Kup konto premium",
-                        pc.isPremium() ? "kapitanowie zabiorą cię na rejs" : String.format("%,d gp z banku - rejsy statkami między portami", prem),
+                left.add(new MenuRow("npc:premium", pc.isPremium() ? Messages.get("hud.konto_premium_masz") : Messages.get("hud.kup_konto_premium"),
+                        pc.isPremium() ? Messages.get("hud.kapitanowie_zabiora_cie_na") : String.format(Messages.get("hud.d_gp_z_banku"), prem),
                         !pc.isPremium() && bal >= prem));
                 boolean canPromo = pc.isPremium() && !pc.isPromoted() && pc.level() >= pl.fawizja.pixel.game.GameSession.PROMOTION_LEVEL && bal >= promo;
-                left.add(new MenuRow("npc:promote", pc.isPromoted() ? "Promocja: " + pc.vocationTitle() : "Promocja: " + pc.vocation().promotedName(),
-                        pc.isPromoted() ? "znak promocji i szybsza regeneracja"
-                                : String.format("%,d gp z banku, premium i poziom %d - znak przy postaci, regeneracja +50%%", promo,
+                left.add(new MenuRow("npc:promote", pc.isPromoted() ? Messages.get("hud.promocja") + pc.vocationTitle() : Messages.get("hud.promocja") + pc.vocation().promotedName(),
+                        pc.isPromoted() ? Messages.get("hud.znak_promocji_i_szybsza")
+                                : String.format(Messages.get("hud.d_gp_z_banku_2"), promo,
                                         pl.fawizja.pixel.game.GameSession.PROMOTION_LEVEL), canPromo));
-                left.add(new MenuRow("npc:none", String.format("Saldo: %,d gp", bal), "opłaty pobiera władca z konta w banku", false));
-                right.add(new MenuRow("npc:none", "Władca " + npc.town(), "te same ceny u każdego władcy (król, królowa, lord)", false));
+                left.add(new MenuRow("npc:none", String.format(Messages.get("hud.saldo_d_gp"), bal), Messages.get("hud.oplaty_pobiera_wladca_z"), false));
+                right.add(new MenuRow("npc:none", Messages.get("hud.wladca") + npc.town(), Messages.get("hud.te_same_ceny_u"), false));
                 break;
             }
             case IMBUER: {
@@ -3094,70 +3095,70 @@ public final class Hud {
                 break;
             }
             case PRIEST: {
-                left.add(new MenuRow("npc:heal", "Ulecz mnie", "pełne zdrowie i mana", pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
+                left.add(new MenuRow("npc:heal", Messages.get("hud.ulecz_mnie"), Messages.get("hud.pelne_zdrowie_i_mana"), pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
                 boolean home = npc.town().equalsIgnoreCase(pc.homeTown());
                 if (blessView) {
-                    left.add(new MenuRow("npc:blessview", "Wróć", "strata po śmierci: " + pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level()), true));
+                    left.add(new MenuRow("npc:blessview", Messages.get("bless.back"), Messages.get("bless.loss_after", pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level())), true));
                     long bulk = session.bulkBlessingPrice();
                     boolean bulkOk = bulk > 0 && !pc.adventurerBlessing();
-                    left.add(new MenuRow("npc:bless:all", "Kup wszystkie zwykłe",
-                            pc.adventurerBlessing() ? "do poz. " + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL + " chroni Poszukiwacza - za darmo"
-                                    : bulk == 0 ? "masz już wszystkie zwykłe" : String.format("%,d gp (+10%%), monety w plecaku", bulk),
+                    left.add(new MenuRow("npc:bless:all", Messages.get("bless.buy_all"),
+                            pc.adventurerBlessing() ? Messages.get("bless.adv_short_free", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL)
+                                    : bulk == 0 ? Messages.get("bless.have_all_short") : Messages.get("bless.bulk_price", bulk),
                             bulkOk && session.gold() >= bulk));
                     for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
                         if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.ENHANCED
                                 && !pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN.equalsIgnoreCase(npc.town())) continue;
                         String why = session.blessingBlocked(b, npc.town());
                         long price = b.price(pc.level());
-                        MenuRow row = new MenuRow("npc:bless:" + b.key(), b.label() + (pc.boughtBlessing(b) ? ": masz" : pc.hasBlessing(b) ? ": z Poszukiwacza" : ""),
-                                why != null ? why : String.format("%,d gp%s", price, b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP ? " - chroni inne przy śmierci z ręki gracza" : " - strata -8%"),
+                        MenuRow row = new MenuRow("npc:bless:" + b.key(), b.label() + (pc.boughtBlessing(b) ? Messages.get("bless.owned_suffix") : pc.hasBlessing(b) ? Messages.get("bless.from_adv_suffix") : ""),
+                                why != null ? why : Messages.get(b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP ? "bless.row_pvp" : "bless.row_reg", price),
                                 why == null && session.gold() >= price);
                         if (left.size() < perCol) left.add(row);
                         else right.add(row);
                     }
                     break;
                 }
-                left.add(new MenuRow("npc:blessview", "Błogosławieństwa: " + pl.fawizja.pixel.character.BlessingStatus.summary(pc),
-                        "kup i sprawdź - strata po śmierci " + pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level()), true));
-                left.add(new MenuRow("npc:settle", "Zamieszkaj w " + npc.town(),
-                        home ? "już tu mieszkasz" : "teraz: " + pc.homeTown() + " - tu będziesz się odradzać", !home));
+                left.add(new MenuRow("npc:blessview", Messages.get("bless.row_title", pl.fawizja.pixel.character.BlessingStatus.summary(pc)),
+                        Messages.get("bless.row_desc", pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level())), true));
+                left.add(new MenuRow("npc:settle", Messages.get("hud.zamieszkaj_w") + npc.town(),
+                        home ? Messages.get("hud.juz_tu_mieszkasz") : Messages.get("hud.teraz") + pc.homeTown() + Messages.get("hud.tu_bedziesz_sie_odradzac"), !home));
                 left.add(new MenuRow("wheel:open", pl.fawizja.pixel.wheel.WheelView.TITLE, pc.wheelPoints() > 0
-                        ? "w świątyni rozdasz punkty promocji" : "od poziomu 51, z promocją i premium", true));
+                        ? Messages.get("hud.w_swiatyni_rozdasz_punkty") : Messages.get("hud.od_poziomu_51_z"), true));
                 break;
             }
             case CARRIER:
             case CAPTAIN: {
                 long gold = session.gold();
-                String verb = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN ? "Płyń: " : "Jedź do ";
+                String verb = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN ? Messages.get("hud.plyn") : Messages.get("hud.jedz_do");
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
                     boolean locked = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN && !pc.canSail();
                     left.add(new MenuRow("npc:travel:" + r.to().town(), verb + r.to().town(),
-                            String.format("%,d gp", r.price()) + (locked ? " - wymaga premium lub promocji"
-                                    : gold < r.price() ? " - za mało monet w plecaku" : ""), !locked && gold >= r.price()));
+                            String.format("%,d gp", r.price()) + (locked ? Messages.get("hud.wymaga_premium_lub_promocji")
+                                    : gold < r.price() ? Messages.get("hud.za_malo_monet_w") : ""), !locked && gold >= r.price()));
                 }
                 break;
             }
             case HOUSING: {
                 pl.fawizja.pixel.house.House own = session.houses().get(pc.house());
                 long bal = pc.bank().balance();
-                left.add(new MenuRow("npc:none", own == null ? "Nie masz domu" : "Twój dom: " + own.name(),
-                        own == null ? String.format("konto: %,d gp - dom kupisz za złoto z banku", bal) : own.town() + ", wchodzisz ty i goście", false));
+                left.add(new MenuRow("npc:none", own == null ? Messages.get("hud.nie_masz_domu") : Messages.get("hud.twoj_dom") + own.name(),
+                        own == null ? String.format(Messages.get("hud.konto_d_gp_dom"), bal) : own.town() + Messages.get("hud.wchodzisz_ty_i_goscie"), false));
                 if (own != null) {
                     java.util.List<String> guests = session.houseGuests(own);
-                    right.add(new MenuRow("npc:none", "Goście: " + (guests.isEmpty() ? "nikt" : String.join(", ", guests)),
-                            "/dom wpuść Imię, /dom wyrzuć Imię (czat)", false));
-                    right.add(new MenuRow("npc:none", "Sprzedaż graczowi", "/dom sprzedaj Imię, cena - kupujący wpisuje /dom kup", false));
-                    right.add(new MenuRow("npc:houseleave", "Sprzedaj miastu", String.format("%,d gp na konto (%d%% ceny)",
+                    right.add(new MenuRow("npc:none", Messages.get("hud.goscie") + (guests.isEmpty() ? "nikt" : String.join(", ", guests)),
+                            Messages.get("hud.dom_wpusc_imie_dom"), false));
+                    right.add(new MenuRow("npc:none", Messages.get("hud.sprzedaz_graczowi"), Messages.get("hud.dom_sprzedaj_imie_cena"), false));
+                    right.add(new MenuRow("npc:houseleave", Messages.get("hud.sprzedaj_miastu"), String.format(Messages.get("hud.d_gp_na_konto"),
                             own.price() * pl.fawizja.pixel.game.GameSession.HOUSE_SELLBACK_PERCENT / 100,
                             pl.fawizja.pixel.game.GameSession.HOUSE_SELLBACK_PERCENT), true));
                 }
                 for (pl.fawizja.pixel.house.House h : session.houses().inTown(npc.town())) {
                     if (left.size() >= perCol) break;
                     String owner = session.houseOwner(h);
-                    String desc = owner != null ? "właściciel: " + owner
-                            : String.format("%,d gp, %d pól, drzwi %d,%d%s", h.price(), h.size(), h.door().x(), h.door().y(),
-                                    h.z() != 0 ? " (piętro " + h.z() + ")" : "");
-                    left.add(new MenuRow("npc:housebuy:" + h.id(), (owner == null ? "Kup: " : "Zajęty: ") + h.name(), desc,
+                    String desc = owner != null ? Messages.get("hud.wlasciciel") + owner
+                            : String.format(Messages.get("hud.d_gp_d_pol"), h.price(), h.size(), h.door().x(), h.door().y(),
+                                    h.z() != 0 ? Messages.get("hud.pietro") + h.z() + ")" : "");
+                    left.add(new MenuRow("npc:housebuy:" + h.id(), (owner == null ? Messages.get("hud.kup") : Messages.get("hud.zajety")) + h.name(), desc,
                             owner == null && own == null && bal >= h.price()));
                 }
                 break;
@@ -3167,34 +3168,34 @@ public final class Hud {
                 long day = session.today();
                 String dl, dd;
                 if (!d.activeOn(day)) {
-                    dl = "Zadanie dnia";
-                    dd = "dotknij, aby wziąć zadanie na dziś";
+                    dl = Messages.get("hud.zadanie_dnia");
+                    dd = Messages.get("hud.dotknij_aby_wziac_zadanie");
                 } else if (d.claimed()) {
-                    dl = "Zadanie dnia: wykonane";
-                    dd = "następne jutro";
+                    dl = Messages.get("hud.zadanie_dnia_wykonane");
+                    dd = Messages.get("hud.nastepne_jutro");
                 } else if (d.doneOn(day)) {
-                    dl = "Zadanie dnia: ODDAJ";
-                    dd = d.target() + "x " + monsterNames.apply(d.monster()) + " - odbierz nagrodę";
+                    dl = Messages.get("hud.zadanie_dnia_oddaj");
+                    dd = d.target() + "x " + monsterNames.apply(d.monster()) + Messages.get("hud.odbierz_nagrode");
                 } else {
-                    dl = "Zadanie dnia: " + monsterNames.apply(d.monster());
+                    dl = Messages.get("hud.zadanie_dnia_2") + monsterNames.apply(d.monster());
                     dd = "pokonano " + d.progress() + " / " + d.target();
                 }
                 left.add(new MenuRow("npc:daily", dl, dd, !d.activeOn(day) || d.doneOn(day) && !d.claimed()));
                 if (d.canReroll(day) && !d.doneOn(day)) {
                     long price = pl.fawizja.pixel.daily.DailyTask.rerollPrice(pc.level());
-                    left.add(new MenuRow("npc:dailyreroll", "Zmień zadanie dnia", String.format("inny potwór za %,d gp, raz dziennie", price),
+                    left.add(new MenuRow("npc:dailyreroll", Messages.get("hud.zmien_zadanie_dnia"), String.format(Messages.get("hud.inny_potwor_za_d"), price),
                             session.gold() >= price));
                 }
                 pl.fawizja.pixel.quest.HuntTask hunt = pc.hunt();
                 if (!hunt.active()) {
-                    left.add(new MenuRow("npc:hunt", "Zlecenie łowcy", "50 potworów dla twojego poziomu, bez limitu dziennego", true));
+                    left.add(new MenuRow("npc:hunt", Messages.get("hud.zlecenie_lowcy"), Messages.get("hud.50_potworow_dla_twojego"), true));
                 } else {
-                    left.add(new MenuRow("npc:hunt", hunt.done() ? "Zlecenie łowcy: ODDAJ" : "Zlecenie: " + monsterNames.apply(hunt.monster()),
-                            hunt.done() ? "odbierz nagrodę" : "pokonano " + hunt.progress() + " / " + hunt.target(), hunt.done()));
-                    if (!hunt.done()) left.add(new MenuRow("npc:huntdrop", "Porzuć zlecenie", "możesz wziąć nowe", true));
+                    left.add(new MenuRow("npc:hunt", hunt.done() ? Messages.get("hud.zlecenie_lowcy_oddaj") : Messages.get("hud.zlecenie") + monsterNames.apply(hunt.monster()),
+                            hunt.done() ? Messages.get("hud.odbierz_nagrode_2") : "pokonano " + hunt.progress() + " / " + hunt.target(), hunt.done()));
+                    if (!hunt.done()) left.add(new MenuRow("npc:huntdrop", Messages.get("hud.porzuc_zlecenie"), Messages.get("hud.mozesz_wziac_nowe"), true));
                 }
-                left.add(new MenuRow("npc:bosses", "Bossowie", "kto żyje, kto odrodzi się i kiedy (/bossowie)", true));
-                left.add(new MenuRow("npc:hunting", "Gdzie polować?", "potwory dla twojego poziomu (/łowiska)", true));
+                left.add(new MenuRow("npc:bosses", Messages.get("bestiary_windows.bossowie"), Messages.get("hud.kto_zyje_kto_odrodzi"), true));
+                left.add(new MenuRow("npc:hunting", Messages.get("hud.gdzie_polowac"), Messages.get("hud.potwory_dla_twojego_poziomu"), true));
                 pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
                 if (qs == null) break;
                 // kolejnosc: do oddania, w toku, dostepne; z przyszlych tylko najblizsze, ukonczone jednym wierszem
@@ -3208,12 +3209,12 @@ public final class Hud {
                     switch (pc.quests().state(q.key())) {
                         case DONE: done++; break;
                         case ACTIVE:
-                            if (qs.ready(pc, q)) ready.add(new MenuRow("npc:quest:" + q.key(), q.name(), "ODDAJ - nagroda: " + reward, true));
-                            else active.add(new MenuRow("npc:quest:" + q.key(), q.name(), "w toku: " + qs.progress(pc, q) + " / " + q.amount(), false));
+                            if (qs.ready(pc, q)) ready.add(new MenuRow("npc:quest:" + q.key(), q.name(), Messages.get("hud.oddaj_nagroda") + reward, true));
+                            else active.add(new MenuRow("npc:quest:" + q.key(), q.name(), Messages.get("hud.w_toku") + qs.progress(pc, q) + " / " + q.amount(), false));
                             break;
                         default:
                             if (pc.level() >= q.minLevel()) {
-                                avail.add(new MenuRow("npc:quest:" + q.key(), q.name(), "przyjmij (poz. " + q.minLevel() + "): " + reward, true));
+                                avail.add(new MenuRow("npc:quest:" + q.key(), q.name(), Messages.get("hud.przyjmij_poz") + q.minLevel() + "): " + reward, true));
                             } else if (next == null || q.minLevel() < next.minLevel()) {
                                 next = q;
                             }
@@ -3223,9 +3224,9 @@ public final class Hud {
                 questRows.addAll(active);
                 questRows.addAll(avail);
                 if (next != null) {
-                    questRows.add(new MenuRow("npc:quest:" + next.key(), next.name(), "od poziomu " + next.minLevel() + ": " + qs.rewardText(next, pc), false));
+                    questRows.add(new MenuRow("npc:quest:" + next.key(), next.name(), Messages.get("hud.od_poziomu") + next.minLevel() + ": " + qs.rewardText(next, pc), false));
                 }
-                if (done > 0) questRows.add(new MenuRow("npc:none", "Ukończone zadania: " + done, "dziennik zadań: klawisz Z", false));
+                if (done > 0) questRows.add(new MenuRow("npc:none", Messages.get("hud.ukonczone_zadania") + done, Messages.get("hud.dziennik_zadan_klawisz_z"), false));
                 for (MenuRow row : questRows) {
                     if (left.size() < perCol) left.add(row);
                     else right.add(row);
@@ -3241,7 +3242,7 @@ public final class Hud {
                 || smithView && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT
                 || npc.role() == pl.fawizja.pixel.npc.NpcRole.IMBUER;
         for (String topic : depotRows ? java.util.List.<String>of() : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
-            MenuRow row = new MenuRow("npc:ask:" + topic, "Zapytaj: " + topic, "rozmowa", true);
+            MenuRow row = new MenuRow("npc:ask:" + topic, Messages.get("hud.zapytaj") + topic, "rozmowa", true);
             if (right.size() < perCol) right.add(row);
             else if (left.size() < perCol) left.add(row);
         }
@@ -3762,15 +3763,31 @@ public final class Hud {
         fish.icon = itemIcon(session, "fishing_rod");
         mount.icon = itemIcon(session, "saddle");
         // podpisy przyciskow obok ekwipunku: rysowane, gdy mieszcza sie przy progu 7 dp (inaczej sama ikona)
-        run.label = "Podąż";
-        store.label = "Sklep";
+        run.label = Messages.get("hud.podaz");
+        // etykiety zalezne od jezyka odswiezane co klatke (zmiana jezyka w ustawieniach dziala od razu)
+        use.label = Messages.get("hud.uzyj");
+        bag.label = Messages.get("hud.plecak");
+        pick.label = Messages.get("hud.wez");
+        target.label = Messages.get("hud.atak_3");
+        book.label = Messages.get("hud.ksiega");
+        fish.label = Messages.get("hud.low");
+        talk.label = Messages.get("hud.mow");
+        mount.label = Messages.get("hud.kon");
+        logout.label = Messages.get("hud.wyjdz");
+        bagEquip.label = Messages.get("hud.zaloz");
+        bagDrop.label = Messages.get("hud.wyrzuc");
+        bagUse.label = Messages.get("hud.uzyj_2");
+        bagSort.label = Messages.get("hud.sortuj");
+        bagKeep.label = Messages.get("hud.zachowaj");
+        bagDetach.label = Messages.get("hud.odepnij");
+        store.label = Messages.get("hud.sklep");
         store.icon = itemIcon(session, "crystal_coin");
         fightMode.label = fightModeLabel(pc.fightMode());
-        quest.label = "Zadania";
-        torch.label = "Poch.";
+        quest.label = Messages.get("hud.zadania");
+        torch.label = Messages.get("hud.poch");
         pvp.label = pc.pvpMode() ? "PvP!" : "PvP";
-        diag.label = diag.icon == null ? "i" : "Opcje";
-        logout.label = "Wyjdź";
+        diag.label = diag.icon == null ? "i" : Messages.get("hud.opcje");
+        logout.label = Messages.get("hud.wyjdz");
         logout.labelBottom = true;
         bag.icon = art.backpack();
         buffs(session, serverTimeMs);
@@ -4112,12 +4129,12 @@ public final class Hud {
         if (bagOpen) drawBagContents(batch, session);
         if (menuOpen) {
             if (trade == null && optionsMenu) {
-                text(batch, virtueMenu ? "Cnota mnicha" : "Opcje", menuX + 10, menuY + menuH - 7);
+                text(batch, virtueMenu ? Messages.get("hud.cnota_mnicha") : Messages.get("hud.opcje"), menuX + 10, menuY + menuH - 7);
             } else if (trade == null && logoutConfirm) {
-                text(batch, "Wylogować się?", menuX + 10, menuY + menuH - 7);
+                text(batch, Messages.get("hud.wylogowac_sie"), menuX + 10, menuY + menuH - 7);
                 font.getData().setScale(0.8f);
                 font.setColor(0.85f, 0.85f, 0.7f, 1f);
-                text(batch, "Postać zostanie zapisana.", menuX + 10, menuY + menuH - 30);
+                text(batch, Messages.get("hud.postac_zostanie_zapisana"), menuX + 10, menuY + menuH - 30);
                 font.setColor(Color.WHITE);
                 font.getData().setScale(1f);
             } else if (trade == null && playerMenu != null) {
@@ -4134,26 +4151,26 @@ public final class Hud {
             } else if (trade == null && achievementsView && infoTitle != null && !journalMode) {
                 text(batch, infoTitle, menuX + 10, menuY + menuH - 14);
             } else if (trade == null && achievementsView && journalMode) {
-                text(batch, "Dziennik zadań - ukończone: " + session.character().quests().done().size()
-                        + " (dotknij zadania, aby iść do zleceniodawcy)", menuX + 10, menuY + menuH - 14);
+                text(batch, Messages.get("hud.dziennik_zadan_ukonczone") + session.character().quests().done().size()
+                        + Messages.get("hud.dotknij_zadania_aby_isc"), menuX + 10, menuY + menuH - 14);
             } else if (trade == null && achievementsView) {
                 PlayerCharacter me = session.character();
-                text(batch, bestiaryMode ? "Bestiariusz - " + me.name() + (monsterSpecies > 0
-                                ? " (poznane gatunki: " + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
-                        : "Osiągnięcia " + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length,
+                text(batch, bestiaryMode ? Messages.get("hud.bestiariusz") + me.name() + (monsterSpecies > 0
+                                ? Messages.get("hud.poznane_gatunki") + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
+                        : Messages.get("hud.osiagniecia") + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length,
                         menuX + 10, menuY + menuH - 14);
             } else if (trade == null && pickSlot >= 0) {
-                text(batch, "Pole " + (pickSlot + 1) + " paska: " + (pickCat == null ? "co ma robić?" : pickTitle(pickCat)),
+                text(batch, Messages.get("hud.pole") + (pickSlot + 1) + " paska: " + (pickCat == null ? Messages.get("hud.co_ma_robic") : pickTitle(pickCat)),
                         menuX + 10, menuY + menuH - 14);
             } else if (trade == null && marketView != null) {
-                text(batch, "Rynek graczy (" + marketView.total() + " ofert)", menuX + 10, menuY + menuH - 14);
+                text(batch, Messages.get("hud.rynek_graczy_2") + marketView.total() + " ofert)", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && friendsView != null) {
-                text(batch, "Znajomi (" + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")", menuX + 10, menuY + menuH - 14);
+                text(batch, Messages.get("hud.znajomi") + friendsView.rows().size() + Messages.get("common.z") + pl.fawizja.pixel.friends.FriendList.MAX + ")", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && rankingView != null) {
-                text(batch, rankingView.title() + " (wg doświadczenia, " + rankingView.total() + " postaci)", menuX + 10, menuY + menuH - 14);
+                text(batch, rankingView.title() + Messages.get("hud.wg_doswiadczenia") + rankingView.total() + Messages.get("hud.postaci_suffix"), menuX + 10, menuY + menuH - 14);
             } else if (trade != null) {
-                text(batch, "Handel z " + trade.partner(), menuX + 10, menuY + menuH - 14);
-                text(batch, "Twój plecak (dotknij, aby dodać do oferty)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+                text(batch, Messages.get("hud.handel_z") + trade.partner(), menuX + 10, menuY + menuH - 14);
+                text(batch, Messages.get("hud.twoj_plecak_dotknij_aby"), menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
             } else if (npcMode) {
                 text(batch, npc.name() + " (" + npc.town() + ")", menuX + 10, menuY + menuH - 14);
                 font.getData().setScale(0.85f);
@@ -4162,8 +4179,8 @@ public final class Hud {
                 font.setColor(Color.WHITE);
                 font.getData().setScale(1f);
             } else {
-                text(batch, "Czary (dotknij, aby rzucić)", menuX + 10, menuY + menuH - 14);
-                text(batch, "Rzemiosło (dotknij, aby wytworzyć)", menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
+                text(batch, Messages.get("hud.czary_dotknij_aby_rzucic"), menuX + 10, menuY + menuH - 14);
+                text(batch, Messages.get("hud.rzemioslo_dotknij_aby_wytworzy"), menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
             }
             centered(batch, "X", menuClose.x, menuClose.y);
             for (MenuRow row : menuRows) {
@@ -4292,7 +4309,8 @@ public final class Hud {
             }
         }
 
-        final String desc;
+        private final String desc;
+        String desc() { return Messages.tr(desc); }
         final Color color;
 
         Status(String desc, Color color) {
@@ -4384,7 +4402,7 @@ public final class Hud {
         layout.setText(font, pct);
         font.draw(batch, pct, x, ty + layout.height / 2f);
         x += layout.width + 14;
-        String info = String.format("%02d:%02d   Piętro %s   %,d gp", minute / 60, minute % 60, floor, session.gold());
+        String info = String.format(Messages.get("hud.02d_02d_pietro_s"), minute / 60, minute % 60, floor, session.gold());
         layout.setText(font, info);
         if (x + layout.width >= topRowEnd(pc) - 6) {
             info = String.format("%,d gp", session.gold()); // waski pasek (telefon): samo zloto
@@ -4402,7 +4420,7 @@ public final class Hud {
     private pl.fawizja.pixel.pvp.PvpRules.Skull ownSkull = pl.fawizja.pixel.pvp.PvpRules.Skull.NONE;
     private long ownSkullMs;
 
-    private static String minutes(long ms) { return Math.max(1, (ms + 59_999) / 60_000) + " min"; }
+    private static String minutes(long ms) { return Math.max(1, (ms + 59_999) / 60_000) + Messages.get("hud.min"); }
 
     /** Aktywne wzmocnienia i wlasna czaszka (co klatke, przed rysowaniem). */
     private void buffs(GameSession session, long nowMs) {
@@ -4410,22 +4428,22 @@ public final class Hud {
         buffs.clear();
         ownSkull = pc.skull(nowMs);
         ownSkullMs = Math.max(pc.skullMs(nowMs), pc.pzBlockedMs(nowMs));
-        if (pc.hasteMs() > 0) buffs.add(new Buff(Status.HASTE, null, "Przyspieszenie: szybszy krok (" + minutes(pc.hasteMs()) + ")"));
+        if (pc.hasteMs() > 0) buffs.add(new Buff(Status.HASTE, null, Messages.get("hud.przyspieszenie_szybszy_krok") + minutes(pc.hasteMs()) + ")"));
         for (pl.fawizja.pixel.item.Enchantments.Kind k : pl.fawizja.pixel.item.Enchantments.Kind.values()) {
             if (!pc.enchantments().active(k)) continue;
             TextureRegion icon = k.potion() != null ? itemIcon(session, k.potion())
                     : k == pl.fawizja.pixel.item.Enchantments.Kind.EXP ? itemIcon(session, "exp_scroll") : null;
             buffs.add(new Buff(Status.ENCHANT, icon, k.label() + ": " + k.effect() + " (" + minutes(pc.enchantments().remainingMs(k)) + ")"));
         }
-        if (pc.lightBuffMs() > 0) buffs.add(new Buff(Status.LIGHT, null, "Światło z czaru (" + minutes(pc.lightBuffMs()) + ")"));
-        else if (pc.isTorchLit()) buffs.add(new Buff(Status.LIGHT, itemIcon(session, "torch"), "Światło: pochodnia"));
-        if (pc.fedMs() > 0) buffs.add(new Buff(Status.FED, itemIcon(session, "bread"), "Najedzony: szybsza regeneracja (" + minutes(pc.fedMs()) + ")"));
-        if (pc.isBlessed()) buffs.add(new Buff(Status.BLESSED, null, "Błogosławieństwa: " + pl.fawizja.pixel.character.BlessingStatus.summary(pc)));
+        if (pc.lightBuffMs() > 0) buffs.add(new Buff(Status.LIGHT, null, Messages.get("hud.swiatlo_z_czaru") + minutes(pc.lightBuffMs()) + ")"));
+        else if (pc.isTorchLit()) buffs.add(new Buff(Status.LIGHT, itemIcon(session, "torch"), Messages.get("hud.swiatlo_pochodnia")));
+        if (pc.fedMs() > 0) buffs.add(new Buff(Status.FED, itemIcon(session, "bread"), Messages.get("hud.najedzony_szybsza_regeneracja_2") + minutes(pc.fedMs()) + ")"));
+        if (pc.isBlessed()) buffs.add(new Buff(Status.BLESSED, null, Messages.get("bless.row_title", pl.fawizja.pixel.character.BlessingStatus.summary(pc))));
         // 0.240: czary z Tibii
-        if (pc.magicShieldMs() > 0) buffs.add(new Buff(Status.SHIELD, null, "Tarcza many: " + pc.magicShield() + " pkt (" + minutes(pc.magicShieldMs()) + ")"));
-        if (pc.isInvisible()) buffs.add(new Buff(Status.INVISIBLE, null, Status.INVISIBLE.desc + " (" + minutes(pc.invisibleMs()) + ")"));
-        if (pc.illusion() != null) buffs.add(new Buff(Status.ILLUSION, null, Status.ILLUSION.desc + " (" + minutes(pc.illusionMs()) + ")"));
-        if (pc.spellRegenMs() > 0) buffs.add(new Buff(Status.REGEN, null, Status.REGEN.desc + " (" + minutes(pc.spellRegenMs()) + ")"));
+        if (pc.magicShieldMs() > 0) buffs.add(new Buff(Status.SHIELD, null, Messages.get("hud.tarcza_many") + pc.magicShield() + Messages.get("hud.pkt") + minutes(pc.magicShieldMs()) + ")"));
+        if (pc.isInvisible()) buffs.add(new Buff(Status.INVISIBLE, null, Status.INVISIBLE.desc() + " (" + minutes(pc.invisibleMs()) + ")"));
+        if (pc.illusion() != null) buffs.add(new Buff(Status.ILLUSION, null, Status.ILLUSION.desc() + " (" + minutes(pc.illusionMs()) + ")"));
+        if (pc.spellRegenMs() > 0) buffs.add(new Buff(Status.REGEN, null, Status.REGEN.desc() + " (" + minutes(pc.spellRegenMs()) + ")"));
         for (java.util.Map.Entry<String, Long> e : pc.spellBuffs().entrySet()) {
             pl.fawizja.pixel.magic.SpellType sp = session.spells().registry().find(e.getKey());
             buffs.add(new Buff(Status.SPELL_BUFF, null, (sp == null ? e.getKey() : sp.name() + ": " + sp.description())
@@ -4443,7 +4461,7 @@ public final class Hud {
         long sec = (ms + 999) / 1000;
         if (sec >= 2 * 86_400) return (sec + 86_399) / 86_400 + " d"; // czerwona 30 dni, czarna 45 dni
         if (sec >= 2 * 3_600) return (sec + 3_599) / 3_600 + " h";
-        return sec >= 600 ? (sec + 59) / 60 + " min" : (sec / 60) + ":" + String.format("%02d", sec % 60);
+        return sec >= 600 ? (sec + 59) / 60 + Messages.get("hud.min") : (sec / 60) + ":" + String.format("%02d", sec % 60);
     }
 
     /**
@@ -4509,12 +4527,12 @@ public final class Hud {
         if (px < c[0] || px > c[0] + epCell || py < c[1] || py > c[1] + epCell) return false;
         long now = session.lastUpdateMs();
         if (ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE) {
-            session.log().add(now, EventLog.Kind.INFO, skullName(ownSkull) + ": jeszcze " + skullTime(ownSkullMs) + ".");
+            session.log().add(now, EventLog.Kind.INFO, skullName(ownSkull) + Messages.get("hud.jeszcze") + skullTime(ownSkullMs) + ".");
         } else if (ownSkullMs > 0) {
-            session.log().add(now, EventLog.Kind.INFO, "Blokada strefy ochronnej po walce: jeszcze " + skullTime(ownSkullMs) + ".");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("hud.blokada_strefy_ochronnej_po") + skullTime(ownSkullMs) + ".");
         }
         for (Buff b : buffs) session.log().add(now, EventLog.Kind.INFO, b.desc());
-        if (buffs.isEmpty() && ownSkullMs <= 0) session.log().add(now, EventLog.Kind.INFO, "Brak aktywnych wzmocnień.");
+        if (buffs.isEmpty() && ownSkullMs <= 0) session.log().add(now, EventLog.Kind.INFO, Messages.get("hud.brak_aktywnych_wzmocnien"));
         return true;
     }
 
@@ -4563,9 +4581,9 @@ public final class Hud {
             if (v.spellKey == null) continue;
             SpellType sp = session.spells().registry().find(v.spellKey);
             boolean ok = sp != null && pc.level() >= sp.minLevel();
-            String sub = v.effect
-                    + (ok ? "" : " (od poziomu " + (sp == null ? 20 : sp.minLevel()) + ")");
-            rows.add(new MenuRow("opt:cast:" + v.spellKey, v.label + (pc.harmony().virtue() == v ? " (aktywna)" : ""), sub, ok));
+            String sub = v.effect()
+                    + (ok ? "" : Messages.get("hud.od_poziomu_2") + (sp == null ? 20 : sp.minLevel()) + ")");
+            rows.add(new MenuRow("opt:cast:" + v.spellKey, v.label() + (pc.harmony().virtue() == v ? " (aktywna)" : ""), sub, ok));
         }
     }
 
@@ -4734,7 +4752,7 @@ public final class Hud {
         // pole dotyku: cala wysokosc gornego paska (32 dp na telefonie) i co najmniej 36 dp szerokosci
         float x0 = Math.min(statusX() - 4, lay.topBar.right() - 36);
         if (statuses.isEmpty() || py < lay.topBar.y - HudLayout.BORDER || py > lay.topBar.top() || px < x0 || px > lay.topBar.right() + HudLayout.PAD) return false;
-        for (Status st : statuses) session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, st.desc);
+        for (Status st : statuses) session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, st.desc());
         return true;
     }
 
@@ -4931,7 +4949,7 @@ public final class Hud {
             if (tx >= 0 && tx < session.world().width() && ty >= 0 && ty < session.world().height()) {
                 if (!session.character().explored().isExplored(tx, ty, session.character().position().z())) {
                     // mgla: marsz tylko w znane miejsca
-                    session.log().add(session.lastUpdateMs(), pl.fawizja.pixel.game.EventLog.Kind.WARNING, UNKNOWN_AREA);
+                    session.log().add(session.lastUpdateMs(), pl.fawizja.pixel.game.EventLog.Kind.WARNING, Messages.tr(UNKNOWN_AREA));
                     return;
                 }
                 actions.onButton("map:goto:" + tx + "," + ty);
@@ -4950,7 +4968,7 @@ public final class Hud {
 
     private void drawBigMap(SpriteBatch batch, GameSession session, String floor) {
         pl.fawizja.pixel.world.Position p = session.character().position();
-        text(batch, "Mapa - piętro " + floor + (bigMapZoom > 1 ? " x" + bigMapZoom : "") + " (dotknij miejsca, aby tam iść)", menuX + 10, menuY + menuH - 8);
+        text(batch, Messages.get("hud.mapa_pietro") + floor + (bigMapZoom > 1 ? " x" + bigMapZoom : "") + Messages.get("hud.dotknij_miejsca_aby_tam"), menuX + 10, menuY + menuH - 8);
         HudLayout.Rect zr = new HudLayout.Rect();
         centered(batch, "-", mapZoomButton(false, zr).cx(), zr.cy());
         centered(batch, "+", mapZoomButton(true, zr).cx(), zr.cy());
@@ -5232,12 +5250,12 @@ public final class Hud {
             pl.fawizja.pixel.chat.ChatTabs.Tab t = chatTabs.active();
             String hint;
             switch (t.channel()) {
-                case SERVER: hint = "Serwer: wiadomości gry i serwera."; break;
-                case TRADE: hint = "Handel: kupno i sprzedaż. Dotknij, aby pisać."; break;
-                case GUILD: hint = "Gildia: dotknij, aby pisać do gildii."; break;
-                case PARTY: hint = partyLine != null ? partyLine + " Dotknij, aby pisać." : "Drużyna: dotknij, aby pisać do drużyny."; break;
-                case PRIVATE: hint = "Rozmowa z " + t.peer() + ": dotknij, aby pisać."; break;
-                default: hint = "Czat: dotknij, aby pisać";
+                case SERVER: hint = Messages.get("hud.serwer_wiadomosci_gry_i"); break;
+                case TRADE: hint = Messages.get("hud.handel_kupno_i_sprzedaz"); break;
+                case GUILD: hint = Messages.get("hud.gildia_dotknij_aby_pisac"); break;
+                case PARTY: hint = partyLine != null ? partyLine + Messages.get("hud.dotknij_aby_pisac_3") : Messages.get("hud.druzyna_dotknij_aby_pisac"); break;
+                case PRIVATE: hint = Messages.get("hud.rozmowa_z") + t.peer() + Messages.get("hud.dotknij_aby_pisac_2"); break;
+                default: hint = Messages.get("hud.czat_dotknij_aby_pisac");
             }
             text(batch, hint, conX + 7, yy);
         }
@@ -5281,14 +5299,14 @@ public final class Hud {
     /** Lista walki w panelu (jak battle list w Tibii): gracze, potem potwory - imie, pasek zycia, ramka celu. */
     private void drawBattle(SpriteBatch batch) {
         if (!battleVisible()) return;
-        headerText(batch, "Walka (" + (battle.size() + battlePlayers.size()) + ")", blX + 6, blY + blH);
+        headerText(batch, Messages.get("hud.walka") + (battle.size() + battlePlayers.size()) + ")", blX + 6, blY + blH);
         Monster tgt = currentTarget;
         float row = lay.battleRow;
         float yy = blY + blH - lay.header - 4;
         font.getData().setScale(conScale());
         if (battle.isEmpty() && battlePlayers.isEmpty()) {
             font.setColor(0.75f, 0.75f, 0.7f, 1f);
-            text(batch, "Brak potworów w pobliżu.", blX + 8, yy - 2);
+            text(batch, Messages.get("hud.brak_potworow_w_poblizu"), blX + 8, yy - 2);
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
             return;
@@ -5375,7 +5393,7 @@ public final class Hud {
             // pole pochodni: dotkniecie zapala i gasi (bez pochodni - podpowiedz)
             if (st == null) {
                 session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO,
-                        "Pole pochodni. Dotknij pochodni w plecaku i wybierz \"Załóż\".");
+                        Messages.get("hud.pole_pochodni_dotknij_pochodni"));
             } else {
                 actions.onButton("torch");
             }
@@ -5393,12 +5411,12 @@ public final class Hud {
         eqTapMs = now;
         ItemType it = session.items().get(st.itemId());
         StringBuilder d = new StringBuilder(pl.fawizja.pixel.item.Forge.name(it, st));
-        if (it.attack() > 0) d.append(", atak ").append(it.attack());
-        if (it.defense() > 0) d.append(", obrona ").append(it.defense());
-        if (it.armor() > 0) d.append(", pancerz ").append(it.armor());
+        if (it.attack() > 0) d.append(Messages.get("hud.atak")).append(it.attack());
+        if (it.defense() > 0) d.append(Messages.get("hud.obrona")).append(it.defense());
+        if (it.armor() > 0) d.append(Messages.get("hud.pancerz")).append(it.armor());
         String forgeLine = pl.fawizja.pixel.item.ItemCompare.forgeLine(it, st);
         if (!forgeLine.isEmpty()) d.append(" (").append(forgeLine).append(")");
-        d.append(". Dotknij ponownie, aby zdjąć.");
+        d.append(Messages.get("hud.dotknij_ponownie_aby_zdjac"));
         session.log().add(session.lastUpdateMs(), EventLog.Kind.INFO, d.toString());
     }
 
@@ -5421,10 +5439,10 @@ public final class Hud {
     }
 
     private void drawEquipPanel(SpriteBatch batch, GameSession session) {
-        if (epTibia && lay.eqHeader > 0) headerText(batch, "Ekwipunek", epX + 6, epY + epH);
+        if (epTibia && lay.eqHeader > 0) headerText(batch, Messages.get("hud.ekwipunek"), epX + 6, epY + epH);
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = epCellPos(i);
-            drawEquipSlot(batch, session.character().equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], epCell);
+            drawEquipSlot(batch, session.character().equipment().get(EQ_SLOTS[i]), Messages.tr(EQ_NAMES[i]), c[0], c[1], epCell);
             if (EQ_SLOTS[i] == EquipSlot.LIGHT) drawTorchState(batch, session, c[0], c[1], epCell);
         }
         float[] bp = epBackpackPos();
@@ -5532,9 +5550,10 @@ public final class Hud {
         } else {
             // nazwa pustego gniazda tylko, gdy miesci sie przy progu 7 dp
             float sc = fitScale(name, cell - 4, 0.66f);
-            font.getData().setScale(sc);
+            // dluzsza nazwa (np. po hiszpansku) nie miesci sie przy progu 7 dp: skrocona z ".." zamiast wypadniecia
+            font.getData().setScale(sc > 0 ? sc : HudLayout.MIN_FONT);
             font.setColor(0.6f, 0.6f, 0.6f, 1f);
-            if (sc > 0) centered(batch, name, x + cell / 2f, y + cell / 2f);
+            centered(batch, sc > 0 ? name : clip(name, cell - 4), x + cell / 2f, y + cell / 2f);
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
         }
@@ -5602,36 +5621,36 @@ public final class Hud {
     private void drawCharacterSheet(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
         // ekwipunek
-        text(batch, "Ekwipunek", eqX + 8, eqY + eqH - 6);
+        text(batch, Messages.get("hud.ekwipunek"), eqX + 8, eqY + eqH - 6);
         closeButton(batch, eqX + eqW - 12, eqY + eqH - 12);
         for (int i = 0; i < EQ_SLOTS.length; i++) {
             float[] c = eqCellPos(i);
-            drawEquipSlot(batch, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], eqCell);
+            drawEquipSlot(batch, pc.equipment().get(EQ_SLOTS[i]), Messages.tr(EQ_NAMES[i]), c[0], c[1], eqCell);
             if (EQ_SLOTS[i] == EquipSlot.LIGHT) drawTorchState(batch, session, c[0], c[1], eqCell);
         }
         float[] bp = eqBackpackPos();
         drawBackpackSlot(batch, bp[0], bp[1], eqCell);
         font.getData().setScale(0.7f);
         font.setColor(0.8f, 0.8f, 0.75f, 1f);
-        text(batch, "Dotknij, aby zdjąć", eqX + 8, eqY + 14);
+        text(batch, Messages.get("hud.dotknij_aby_zdjac"), eqX + 8, eqY + 14);
         font.setColor(Color.WHITE);
         font.getData().setScale(1f);
 
         // umiejetnosci (jak okno Skills): stan postaci, potem umiejetnosci z paskiem postepu
-        text(batch, "Umiejętności", skX + 8, skY + skH - 6);
+        text(batch, Messages.get("hud.umiejetnosci"), skX + 8, skY + skH - 6);
         closeButton(batch, skX + skW - 12, skY + skH - 12);
         long next = pl.fawizja.pixel.balance.Balance.experienceForLevel(Math.min(1000, pc.level() + 1));
         pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
         String[][] info = {
-                {"Poziom", pc.level() + "  (" + pl.fawizja.pixel.character.SkillSheet.expRateLabel(pc) + ")"},
-                {"Doświadczenie", String.format("%,d", pc.experience())},
-                {"Do poziomu", pl.fawizja.pixel.balance.Balance.percentToNextLevel(pc.experience(), pc.level()) + "% (" + String.format("%,d", Math.max(0, next - pc.experience())) + ")"},
-                {"Zdrowie", pc.health() + " / " + pc.maxHealth()},
-                {"Mana", pc.mana() + " / " + pc.maxMana()},
-                {"Szybkość", String.valueOf(pc.speed())},
-                {"Udźwig", String.valueOf(pc.capacity())},
-                {"Atak", "do " + ap.maxDamage() + " (" + ap.skill().label().toLowerCase(java.util.Locale.ROOT) + ")"},
-                {"Sytość", (pc.fedMs() / 60_000) + " min" + (pc.restedKills() > 0 ? ", wypoczęty " + pc.restedKills() : "")},
+                {Messages.get("hud.poziom"), pc.level() + "  (" + pl.fawizja.pixel.character.SkillSheet.expRateLabel(pc) + ")"},
+                {Messages.get("hud.doswiadczenie"), String.format("%,d", pc.experience())},
+                {Messages.get("hud.do_poziomu"), pl.fawizja.pixel.balance.Balance.percentToNextLevel(pc.experience(), pc.level()) + "% (" + String.format("%,d", Math.max(0, next - pc.experience())) + ")"},
+                {Messages.get("hud.zdrowie_2"), pc.health() + " / " + pc.maxHealth()},
+                {Messages.get("hud.mana"), pc.mana() + " / " + pc.maxMana()},
+                {Messages.get("hud.szybkosc"), String.valueOf(pc.speed())},
+                {Messages.get("hud.udzwig"), String.valueOf(pc.capacity())},
+                {Messages.get("hud.atak_3"), "do " + ap.maxDamage() + " (" + ap.skill().label().toLowerCase(java.util.Locale.ROOT) + ")"},
+                {Messages.get("hud.sytosc"), (pc.fedMs() / 60_000) + Messages.get("hud.min") + (pc.restedKills() > 0 ? Messages.get("hud.wypoczety") + pc.restedKills() : "")},
                 {"Stamina", pl.fawizja.pixel.character.SkillSheet.staminaDetail(pc)},
         };
         float yy = skY + skH - 23 - 3;
@@ -5775,7 +5794,7 @@ public final class Hud {
         int base = bagPage * PAGE_SLOTS;
         int used = 0;
         for (int i = 0; i < PAGE_SLOTS; i++) if (pc.backpack().get(base + i) != null) used++;
-        text(batch, (bagPages > 1 ? "Plecak " + (bagPage + 1) + "/" + bagPages : "Plecak") + " (" + used + "/20)", bagX, bagY + slotSize * 4 + 22);
+        text(batch, (bagPages > 1 ? Messages.get("hud.plecak_2") + (bagPage + 1) + "/" + bagPages : Messages.get("hud.plecak")) + " (" + used + "/20)", bagX, bagY + slotSize * 4 + 22);
         for (int k = 0; k < bagPages && bagPages > 1; k++) centered(batch, String.valueOf(k + 1), bagTabX() + TAB / 2f, bagTabY(k) + TAB / 2f);
         closeButton(batch, bagClose.x, bagClose.y);
         if (slotImg != null) {
@@ -5889,11 +5908,11 @@ public final class Hud {
     /** Polska nazwa profesji (tytul okna wyboru: "Rycerz, poz. 42"). */
     private static String vocationName(pl.fawizja.pixel.vocation.Vocation v) {
         switch (v) {
-            case KNIGHT: return "Rycerz";
-            case PALADIN: return "Paladyn";
-            case DRUID: return "Druid";
-            case SORCERER: return "Czarodziej";
-            case MONK: return "Mnich";
+            case KNIGHT: return Messages.get("hud.rycerz");
+            case PALADIN: return Messages.get("hud.paladyn");
+            case DRUID: return Messages.get("hud.druid");
+            case SORCERER: return Messages.get("hud.czarodziej");
+            case MONK: return Messages.get("hud.mnich");
             default: return capitalized(v.name().toLowerCase(java.util.Locale.ROOT));
         }
     }
@@ -6267,11 +6286,11 @@ public final class Hud {
         float x0 = mlay.statusRow.x, x1 = x0 + Math.max(MobileHudLayout.MIN_TOUCH, n * (STATUS_SIZE + 3) + 4);
         if (px < x0 - 4 || px > x1 || py > mlay.frame.y || py < mlay.frame.y - MobileHudLayout.MIN_TOUCH) return false;
         long now = session.lastUpdateMs();
-        for (Status st : statuses) session.log().add(now, EventLog.Kind.INFO, st.desc);
+        for (Status st : statuses) session.log().add(now, EventLog.Kind.INFO, st.desc());
         if (ownSkull != pl.fawizja.pixel.pvp.PvpRules.Skull.NONE) {
-            session.log().add(now, EventLog.Kind.INFO, skullName(ownSkull) + ": jeszcze " + skullTime(ownSkullMs) + ".");
+            session.log().add(now, EventLog.Kind.INFO, skullName(ownSkull) + Messages.get("hud.jeszcze") + skullTime(ownSkullMs) + ".");
         } else if (ownSkullMs > 0) {
-            session.log().add(now, EventLog.Kind.INFO, "Blokada strefy ochronnej po walce: jeszcze " + skullTime(ownSkullMs) + ".");
+            session.log().add(now, EventLog.Kind.INFO, Messages.get("hud.blokada_strefy_ochronnej_po") + skullTime(ownSkullMs) + ".");
         }
         for (Buff b : buffs) session.log().add(now, EventLog.Kind.INFO, b.desc());
         return true;
@@ -6302,20 +6321,20 @@ public final class Hud {
         if (sel != null) {
             ItemType t = session.items().get(sel.itemId());
             float bw = (win.w - 16 - 3 * 6) / 4f;
-            if (t.slot() != EquipSlot.NONE) out.add(new MBtn("bag_equip", "Załóż", x, by, bw, bh));
-            out.add(new MBtn("bag_use", "Użyj", x + (bw + 6), by, bw, bh));
-            out.add(new MBtn("bag_drop", "Wyrzuć", x + 2 * (bw + 6), by, bw, bh));
-            out.add(new MBtn("bag_keep", pc.isKept(sel.itemId()) ? "Odblokuj" : "Zachowaj", x + 3 * (bw + 6), by, bw, bh));
+            if (t.slot() != EquipSlot.NONE) out.add(new MBtn("bag_equip", Messages.get("hud.zaloz_2"), x, by, bw, bh));
+            out.add(new MBtn("bag_use", Messages.get("hud.uzyj"), x + (bw + 6), by, bw, bh));
+            out.add(new MBtn("bag_drop", Messages.get("hud.wyrzuc_2"), x + 2 * (bw + 6), by, bw, bh));
+            out.add(new MBtn("bag_keep", pc.isKept(sel.itemId()) ? Messages.get("hud.odblokuj") : Messages.get("hud.zachowaj"), x + 3 * (bw + 6), by, bw, bh));
             return out;
         }
-        out.add(new MBtn("bag_sort", "Sortuj", x, by, 76, bh));
+        out.add(new MBtn("bag_sort", Messages.get("hud.sortuj"), x, by, 76, bh));
         bagPages = pc.bagPages();
         float px = x + 82;
         for (int k = 0; k < bagPages && bagPages > 1; k++) {
             out.add(new MBtn("mbag:page:" + k, String.valueOf(k + 1), px, by, 36, bh));
             px += 40;
         }
-        if (bagPages > 1 && bagPage == bagPages - 1) out.add(new MBtn("bag_detach", "Odepnij", win.right() - 8 - 80, by, 80, bh));
+        if (bagPages > 1 && bagPage == bagPages - 1) out.add(new MBtn("bag_detach", Messages.get("hud.odepnij"), win.right() - 8 - 80, by, 80, bh));
         return out;
     }
 
@@ -6329,21 +6348,21 @@ public final class Hud {
     private List<String[]> mSettingsEntries(GameSession session) {
         PlayerCharacter pc = session.character();
         List<String[]> out = new ArrayList<>();
-        out.add(new String[] {"run", "Podążaj za celem", pc.isRunning() ? "włączone" : "wyłączone"});
+        out.add(new String[] {"run", Messages.get("hud.podazaj_za_celem"), pc.isRunning() ? Messages.get("hud.wlaczone") : Messages.get("hud.wylaczone")});
         int torchId = session.items().byKey("torch").id();
-        String torchState = !pc.hasTorchEquipped(torchId) ? "nie założona"
-                : (pc.isTorchLit() ? "zapalona, " : "zgaszona, ") + GameSession.torchTime(pc.torchRemainingMs(torchId));
-        out.add(new String[] {"torch", "Pochodnia", torchState});
-        out.add(new String[] {"book", "Księga czarów", "czary i rzemiosło (K)"});
-        out.add(new String[] {"diag", "Diagnostyka", diagnosticsOpen ? "pokazana" : "ukryta"});
+        String torchState = !pc.hasTorchEquipped(torchId) ? Messages.get("hud.nie_zalozona")
+                : (pc.isTorchLit() ? Messages.get("hud.torch_lit") : Messages.get("hud.torch_out")) + GameSession.torchTime(pc.torchRemainingMs(torchId));
+        out.add(new String[] {"torch", Messages.get("hud.pochodnia"), torchState});
+        out.add(new String[] {"book", Messages.get("hud.ksiega_czarow"), Messages.get("hud.czary_i_rzemioslo_k")});
+        out.add(new String[] {"diag", Messages.get("hud.diagnostyka"), diagnosticsOpen ? Messages.get("hud.pokazana") : Messages.get("hud.ukryta")});
         if (settings != null) {
             // wyglad interfejsu na pierwszej stronie (porownanie nowego i klasycznego)
-            out.add(new String[] {"settings:ui", "Wygląd interfejsu", settings.newUi() ? "nowy" : "klasyczny"});
+            out.add(new String[] {"settings:ui", Messages.get("hud.wyglad_interfejsu"), settings.newUi() ? Messages.get("hud.ui_nowy") : Messages.get("hud.ui_klasyczny")});
             // sterowanie na pierwszej stronie, zaraz po przyciskach postaci (wariant i suwak czulosci)
             pl.fawizja.pixel.movement.ControlScheme cs = settings.controlScheme();
-            out.add(new String[] {"settings:controls", "Sterowanie", cs.shortLabel + " (" + (cs.ordinal() + 1) + " z "
+            out.add(new String[] {"settings:controls", Messages.get("hud.sterowanie"), cs.shortLabel() + " (" + (cs.ordinal() + 1) + Messages.get("common.z")
                     + pl.fawizja.pixel.movement.ControlScheme.values().length + ")"});
-            out.add(new String[] {"settings:sens", "Czułość", settings.sensitivity() + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
+            out.add(new String[] {"settings:sens", Messages.get("hud.czulosc"), settings.sensitivity() + Messages.get("common.z") + pl.fawizja.pixel.movement.ControlTuning.MAX});
             for (String[] r : settings.allRows()) {
                 if (r[0].equals("settings:controls") || r[0].equals("settings:sens") || r[0].equals("settings:ui")) continue;
                 int c = r[1].indexOf(": ");
@@ -6407,7 +6426,7 @@ public final class Hud {
         }
         if (pages > 1) {
             k = per - 1;
-            out.add(new MBtn("set:page", "Dalej (" + (mSettingsPage + 1) + " z " + pages + ")",
+            out.add(new MBtn("set:page", Messages.get("hud.dalej") + (mSettingsPage + 1) + Messages.get("common.z") + pages + ")",
                     win.x + 8 + (k % 2) * (cw + 6), win.top() - 26 - 2 - (k / 2 + 1) * rh - (k / 2) * gap, cw, rh));
         }
         return out;
@@ -6416,7 +6435,7 @@ public final class Hud {
     /** Wiersze okna VIP (22 dp) i przycisk dodawania. */
     private static final float M_VIP_ROW = 22;
 
-    private MBtn mVipAdd(HudLayout.Rect win) { return new MBtn("vip:add", "+ Dodaj znajomego", win.right() - 8 - 150, win.y + 6, 150, 36); }
+    private MBtn mVipAdd(HudLayout.Rect win) { return new MBtn("vip:add", Messages.get("hud.dodaj_znajomego"), win.right() - 8 - 150, win.y + 6, 150, 36); }
 
     private void mobileWinTouch(HudLayout.Rect win, float px, float py, GameSession session, Actions actions) {
         PlayerCharacter pc = session.character();
@@ -6467,7 +6486,7 @@ public final class Hud {
                 if (px >= bc[0] && px <= bc[0] + bc[2] && py >= bc[1] && py <= bc[1] + bc[2]) {
                     long now = session.lastUpdateMs();
                     for (Buff b : buffs) session.log().add(now, EventLog.Kind.INFO, b.desc());
-                    if (buffs.isEmpty()) session.log().add(now, EventLog.Kind.INFO, "Brak aktywnych wzmocnień.");
+                    if (buffs.isEmpty()) session.log().add(now, EventLog.Kind.INFO, Messages.get("hud.brak_aktywnych_wzmocnien"));
                 }
                 return;
             }
@@ -6517,18 +6536,18 @@ public final class Hud {
         if ("combo".equals(pickCat)) {
             // edycja combo: czary po kolei, zapis, wstecz
             ok.addAll(comboRows(session));
-            ok.add(new MenuRow("pick:back", "Wstecz", "", true));
+            ok.add(new MenuRow("pick:back", Messages.get("game_screen.wstecz"), "", true));
             layoutMobilePick(ok);
             return;
         }
         // runa w polu: trzy tryby uzycia na poczatku listy, potem combo
         ok.addAll(modeRows(session));
-        ok.add(new MenuRow("pick:cat:combo", "Combo czarów", "kilka czarów, 1 przycisk", true));
+        ok.add(new MenuRow("pick:cat:combo", Messages.get("hud.combo_czarow"), Messages.get("hud.kilka_czarow_1_przycisk"), true));
         for (SpellType sp : reg.forVocation(pc.vocation())) {
             boolean lv = pc.level() >= sp.minLevel(), mg = magic >= sp.minMagic();
-            if (lv && mg) ok.add(new MenuRow("pick:set:cast:" + sp.key(), sp.name(), "poziom " + sp.minLevel(), true));
+            if (lv && mg) ok.add(new MenuRow("pick:set:cast:" + sp.key(), sp.name(), Messages.get("hud.poziom_2") + sp.minLevel(), true));
             else if (sp.minLevel() <= pc.level() + 100) {
-                locked.add(new MenuRow("pick:none", sp.name(), lv ? "od magii " + sp.minMagic() : "od poziomu " + sp.minLevel(), false));
+                locked.add(new MenuRow("pick:none", sp.name(), lv ? Messages.get("hud.od_magii") + sp.minMagic() : Messages.get("hud.od_poziomu") + sp.minLevel(), false));
             }
         }
         List<ItemType> runes = new ArrayList<>(), potions = new ArrayList<>();
@@ -6542,18 +6561,18 @@ public final class Hud {
             SpellType rs = reg.find(it.key());
             int lvl = Math.max(it.minLevel(), rs.minLevel());
             boolean lv = pc.level() >= lvl, mg = magic >= rs.minMagic();
-            if (lv && mg) ok.add(new MenuRow("pick:set:item:" + it.key(), rs.name(), "poziom " + lvl, true));
-            else if (lvl <= pc.level() + 100) locked.add(new MenuRow("pick:none", rs.name(), lv ? "od magii " + rs.minMagic() : "od poziomu " + lvl, false));
+            if (lv && mg) ok.add(new MenuRow("pick:set:item:" + it.key(), rs.name(), Messages.get("hud.poziom_2") + lvl, true));
+            else if (lvl <= pc.level() + 100) locked.add(new MenuRow("pick:none", rs.name(), lv ? Messages.get("hud.od_magii") + rs.minMagic() : Messages.get("hud.od_poziomu") + lvl, false));
         }
         potions.sort(java.util.Comparator.comparingInt(ItemType::minLevel).thenComparing(ItemType::name));
         for (ItemType it : potions) {
             boolean lv = pc.level() >= it.minLevel();
             (lv ? ok : locked).add(new MenuRow(lv ? "pick:set:item:" + it.key() : "pick:none", it.name(),
-                    lv ? "z plecaka (" + pc.backpack().count(it.id()) + ")" : "od poziomu " + it.minLevel(), lv));
+                    lv ? Messages.get("hud.z_plecaka") + pc.backpack().count(it.id()) + ")" : Messages.get("hud.od_poziomu") + it.minLevel(), lv));
         }
         // najlepsza mikstura z plecaka (automat) - dziala tez, gdy plecak jest pusty
-        ok.add(new MenuRow("pick:set:potion_hp", "Najlepsza mikstura zdrowia", "z plecaka", true));
-        ok.add(new MenuRow("pick:set:potion_mp", "Najlepsza mikstura many", "z plecaka", true));
+        ok.add(new MenuRow("pick:set:potion_hp", Messages.get("hud.najlepsza_mikstura_zdrowia"), Messages.get("hud.z_plecaka_2"), true));
+        ok.add(new MenuRow("pick:set:potion_mp", Messages.get("hud.najlepsza_mikstura_many"), Messages.get("hud.z_plecaka_2"), true));
         List<MenuRow> all = new ArrayList<>(ok);
         all.addAll(locked);
         layoutMobilePick(all);
@@ -6568,7 +6587,7 @@ public final class Hud {
         if (mPickPage >= pages) mPickPage = 0;
         int shown = pages == 1 ? per : per - 1;
         List<MenuRow> page = new ArrayList<>(all.subList(mPickPage * shown, Math.min(all.size(), (mPickPage + 1) * shown)));
-        if (pages > 1) page.add(new MenuRow("pick:page", "Dalej", "strona " + (mPickPage + 1) + " z " + pages, true));
+        if (pages > 1) page.add(new MenuRow("pick:page", Messages.get("hud.dalej_2"), Messages.get("hud.strona_2") + (mPickPage + 1) + Messages.get("common.z") + pages, true));
         for (int i = 0; i < page.size(); i++) {
             MenuRow row = page.get(i);
             row.w = 144;
@@ -7033,13 +7052,13 @@ public final class Hud {
         mText(batch, lv, 12, mlay.frame.cy() - 4f, 0.72f, M_TEXT, false);
         float hpCy = zid() ? mZBar(true)[1] + mZBar(true)[3] / 2f : mlay.hpBar.cy(), mpCy = zid() ? mZBar(false)[1] + mZBar(false)[3] / 2f : mlay.mpBar.cy();
         mCentered(batch, "HP " + pc.health() + " / " + pc.maxHealth(), mlay.hpBar.cx(), hpCy, HudLayout.MIN_FONT, Color.WHITE, true);
-        mCentered(batch, "Mana " + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mpCy, HudLayout.MIN_FONT, Color.WHITE, true);
+        mCentered(batch, Messages.get("hud.mana_2") + pc.mana() + " / " + pc.maxMana(), mlay.mpBar.cx(), mpCy, HudLayout.MIN_FONT, Color.WHITE, true);
         TextureRegion[] iconImg = {art.backpack(), helmetIcon(session), itemIcon(session, "exp_scroll"), null, itemIcon(session, "challenge_scroll"), null,
                 null, itemIcon(session, "crystal_coin"), null};
         for (int i = 0; i < MobileHudLayout.ICONS; i++) {
             HudLayout.Rect r = mlay.icons[i];
             if (iconImg[i] != null) batch.draw(iconImg[i], r.x + 5, r.y + 8, 22, 22);
-            String label = M_ICON_LABELS[i];
+            String label = Messages.tr(M_ICON_LABELS[i]);
             float sc = Math.min(0.42f, 0.42f * 30f / Math.max(1f, mWidth(label, 0.42f)));
             mCentered(batch, label, r.cx(), r.y + 4.5f, Math.max(0.3f, sc), M_TEXT, zid());
         }
@@ -7072,8 +7091,8 @@ public final class Hud {
             HudButton b = spellButtons[pressSlot];
             mText(batch, "przytrzymaj", b.x - b.r - 8 - mWidth("przytrzymaj", 0.6f), b.y - 3.3f, 0.6f, M_GOOD, true);
         }
-        mRoundLabel(batch, target, itemIcon(session, "iron_sword"), "Atak");
-        mRoundLabel(batch, run, itemIcon(session, "leather_boots"), "Podążaj");
+        mRoundLabel(batch, target, itemIcon(session, "iron_sword"), Messages.get("hud.atak_3"));
+        mRoundLabel(batch, run, itemIcon(session, "leather_boots"), Messages.get("hud.podazaj"));
         mRoundLabel(batch, fightMode, fightMode.icon, fightMode.label);
         mRoundLabel(batch, pvp, pvp.icon, "PvP");
         for (HudButton b : mobileContext()) if (b.visible && b.x > -999) mRoundLabel(batch, b, b.icon, b.label);
@@ -7089,12 +7108,12 @@ public final class Hud {
             }
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
-            mText(batch, "dotknij, aby pisać...", conX + 10, 11.4f, 0.66f, hex(0x8a7660, 1f), false);
-            mCentered(batch, "Czat", mlay.chatHandle.cx() - 6, mlay.chatHandle.cy(), 0.7f, M_TEXT, false);
+            mText(batch, Messages.get("hud.dotknij_aby_pisac"), conX + 10, 11.4f, 0.66f, hex(0x8a7660, 1f), false);
+            mCentered(batch, Messages.get("hud.czat"), mlay.chatHandle.cx() - 6, mlay.chatHandle.cy(), 0.7f, M_TEXT, false);
         } else {
             boolean unread = false;
             for (pl.fawizja.pixel.chat.ChatTabs.Tab t : chatTabs.tabs()) unread |= t.unread();
-            mCentered(batch, "Czat", mlay.chatTab.cx() - 6, mlay.chatTab.cy(), 0.72f, unread ? hex(0xff8a7a, 1f) : M_TEXT, false);
+            mCentered(batch, Messages.get("hud.czat"), mlay.chatTab.cx() - 6, mlay.chatTab.cy(), 0.72f, unread ? hex(0xff8a7a, 1f) : M_TEXT, false);
         }
         drawMobileStatus(batch);
         if (tgt != null && mWin == null && !menuOpen) {
@@ -7362,9 +7381,9 @@ public final class Hud {
     /** Krotki podpis przycisku trybu walki (pelna nazwa w dzienniku: {@link pl.fawizja.pixel.combat.FightMode#label()}). */
     static String fightModeLabel(pl.fawizja.pixel.combat.FightMode m) {
         switch (m) {
-            case OFFENSIVE: return "Ofensywa";
-            case DEFENSIVE: return "Obrona";
-            default: return "Balans";
+            case OFFENSIVE: return Messages.get("hud.ofensywa");
+            case DEFENSIVE: return Messages.get("hud.obrona_3");
+            default: return Messages.get("hud.balans");
         }
     }
 
@@ -7412,14 +7431,14 @@ public final class Hud {
         HudLayout.Rect bl = mlay.battle;
         if (bl.h <= 0) return;
         int nb = mobileBattleCount();
-        mText(batch, "Walka (" + nb + ")", bl.x + 5, bl.top() - 11, 0.66f, M_TEXT, false);
+        mText(batch, Messages.get("hud.walka") + nb + ")", bl.x + 5, bl.top() - 11, 0.66f, M_TEXT, false);
         int more = nb - rowsVis - mBattleScroll;
         if (more > 0) {
             String m = String.valueOf(more);
             mText(batch, m, bl.right() - 5 - mWidth(m, 0.64f), bl.top() - 11, 0.64f, M_MUTED, false);
         }
         if (nb == 0) {
-            mText(batch, "Brak potworów.", bl.x + 5, bl.top() - MobileHudLayout.BATTLE_HEAD - 12, 0.66f, M_MUTED, false);
+            mText(batch, Messages.get("hud.brak_potworow"), bl.x + 5, bl.top() - MobileHudLayout.BATTLE_HEAD - 12, 0.66f, M_MUTED, false);
             return;
         }
         float row = MobileHudLayout.BATTLE_ROW;
@@ -7480,11 +7499,11 @@ public final class Hud {
 
     private String mWinTitle() {
         switch (mWin) {
-            case BAG: return "Plecak";
-            case EQUIP: return "Ekwipunek";
-            case SKILLS: return "Umiejętności";
-            case VIP: return "VIP - znajomi";
-            default: return "Ustawienia";
+            case BAG: return Messages.get("hud.plecak");
+            case EQUIP: return Messages.get("hud.ekwipunek");
+            case SKILLS: return Messages.get("hud.umiejetnosci");
+            case VIP: return Messages.get("hud.vip_znajomi");
+            default: return Messages.get("hud.ustawienia");
         }
     }
 
@@ -7587,8 +7606,8 @@ public final class Hud {
                     mText(b, rows[i][1], win.right() - 12 - vw, yy, 0.72f, M_TEXT, false);
                 }
                 pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
-                String info = "Zdrowie " + pc.health() + "/" + pc.maxHealth() + "  Mana " + pc.mana() + "/" + pc.maxMana()
-                        + "  Szybkość " + pc.speed() + "  Udźwig " + pc.capacity() + "  Atak do " + ap.maxDamage();
+                String info = Messages.get("hud.zdrowie") + pc.health() + "/" + pc.maxHealth() + Messages.get("hud.mana_3") + pc.mana() + "/" + pc.maxMana()
+                        + Messages.get("hud.szybkosc_2") + pc.speed() + Messages.get("hud.udzwig_2") + pc.capacity() + Messages.get("hud.atak_do") + ap.maxDamage();
                 mText(b, mClip(info, win.w - 24, 0.56f), win.x + 12, win.y + (zid() ? 9 : 6), 0.56f, M_MUTED, false);
                 break;
             }
@@ -7615,7 +7634,7 @@ public final class Hud {
                     if (pc.isKept(st.itemId())) bFill(b, c.right() - 6, c.top() - 6, 4, 4, hex(0xf2cc40, 1f));
                 }
                 float ty = c.y - 12;
-                String head = (bagPages > 1 ? "Plecak " + (bagPage + 1) + "/" + bagPages + ": " : "Pojemność: ") + used + " / " + PAGE_SLOTS
+                String head = (bagPages > 1 ? Messages.get("hud.plecak_2") + (bagPage + 1) + "/" + bagPages + ": " : Messages.get("hud.pojemnosc")) + used + " / " + PAGE_SLOTS
                         + "  ·  " + String.format("%,d", session.gold()) + " gp";
                 ItemStack sel = selectedSlot >= 0 && selectedSlot < pc.backpack().size() ? pc.backpack().get(selectedSlot) : null;
                 if (sel != null) {
@@ -7630,7 +7649,7 @@ public final class Hud {
                     if (!req.isEmpty()) mText(b, mClip(req, win.w - 24, 0.56f), win.x + 12, ty - 13, 0.56f, hex(0xff8a7a, 1f), false);
                 } else {
                     mText(b, head, win.x + 12, ty, 0.62f, M_MUTED, false);
-                    mText(b, "Dotknij przedmiotu, potem pola, aby przenieść.", win.x + 12, ty - 13, 0.56f, M_MUTED, false);
+                    mText(b, Messages.get("hud.dotknij_przedmiotu_potem_pola"), win.x + 12, ty - 13, 0.56f, M_MUTED, false);
                 }
                 for (MBtn bt : mBagButtons(win, session)) {
                     boolean dark = zid() && bt.id().equals("mbag:page:" + bagPage);
@@ -7641,7 +7660,7 @@ public final class Hud {
             case EQUIP: {
                 for (int i = 0; i < EQ_SLOTS.length; i++) {
                     float[] c = mEqCell(win, EQ_CELLS[i][0], EQ_CELLS[i][1]);
-                    drawEquipSlot(b, pc.equipment().get(EQ_SLOTS[i]), EQ_NAMES[i], c[0], c[1], c[2]);
+                    drawEquipSlot(b, pc.equipment().get(EQ_SLOTS[i]), Messages.tr(EQ_NAMES[i]), c[0], c[1], c[2]);
                     if (EQ_SLOTS[i] == EquipSlot.LIGHT) drawTorchState(b, session, c[0], c[1], c[2]);
                 }
                 float[] bp = mEqCell(win, 2, 0);
@@ -7664,7 +7683,7 @@ public final class Hud {
                 }
                 pl.fawizja.pixel.combat.AttackProfile ap = pl.fawizja.pixel.combat.CombatFormulas.attackProfile(pc, session.items());
                 float tx = win.x + 70 + 3 * 42 + 14, ty = win.top() - 26 - 18;
-                String[] lines = {"Atak " + atk, "Obrona " + def, "Pancerz " + arm, "Obrażenia do " + ap.maxDamage(), "Udźwig " + pc.capacity()};
+                String[] lines = {Messages.get("hud.atak_2") + atk, Messages.get("hud.obrona_2") + def, Messages.get("hud.pancerz_2") + arm, Messages.get("hud.obrazenia_do") + ap.maxDamage(), Messages.get("hud.udzwig_3") + pc.capacity()};
                 for (String l : lines) {
                     mText(b, l, tx, ty, 0.66f, M_TEXT, false);
                     ty -= 16;
@@ -7679,8 +7698,8 @@ public final class Hud {
                     mText(b, l, tx, ty, Math.max(HudLayout.MIN_FONT, sc), M_TEXT, false);
                     ty -= 15;
                 }
-                mText(b, "Pochodnię dotknij, aby zapalić.", tx, win.y + 24, 0.52f, M_MUTED, false);
-                mText(b, "Dotknij dwa razy, aby zdjąć.", tx, win.y + 10, 0.52f, M_MUTED, false);
+                mText(b, Messages.get("hud.pochodnie_dotknij_aby_zapalic"), tx, win.y + 24, 0.52f, M_MUTED, false);
+                mText(b, Messages.get("hud.dotknij_dwa_razy_aby"), tx, win.y + 10, 0.52f, M_MUTED, false);
                 break;
             }
             case VIP: {
@@ -7689,7 +7708,7 @@ public final class Hud {
                 if (rows.isEmpty()) {
                     font.getData().setScale(0.66f);
                     font.setColor(M_MUTED);
-                    font.draw(b, VIP_EMPTY, win.x + 12, yy - 6, win.w - 24, com.badlogic.gdx.utils.Align.left, true);
+                    font.draw(b, Messages.tr(VIP_EMPTY), win.x + 12, yy - 6, win.w - 24, com.badlogic.gdx.utils.Align.left, true);
                     font.setColor(Color.WHITE);
                     font.getData().setScale(1f);
                 }
@@ -7704,7 +7723,7 @@ public final class Hud {
                 MBtn add = mVipAdd(win);
                 mCentered(b, add.label(), add.x() + add.w() / 2f, add.y() + add.h() / 2f, 0.66f, M_TEXT, false);
                 int online = vipView == null ? 0 : vipView.online();
-                mText(b, "W grze: " + online + " z " + rows.size(), win.x + 12, win.y + 20, 0.6f, M_MUTED, false);
+                mText(b, Messages.get("hud.w_grze") + online + Messages.get("common.z") + rows.size(), win.x + 12, win.y + 20, 0.6f, M_MUTED, false);
                 break;
             }
             case SETTINGS: {
@@ -7734,41 +7753,41 @@ public final class Hud {
     private void drawMobileMenuText(SpriteBatch batch, GameSession session) {
         String title, sub = null;
         if (trade != null) {
-            title = "Handel z " + trade.partner();
-            sub = "Twój plecak po prawej: dotknij, aby dodać do oferty";
+            title = Messages.get("hud.handel_z") + trade.partner();
+            sub = Messages.get("hud.twoj_plecak_po_prawej");
         } else if (logoutConfirm) {
-            title = "Wylogować się?";
+            title = Messages.get("hud.wylogowac_sie");
         } else if (pickSlot >= 0) {
             PlayerCharacter pc = session.character();
-            title = "Przycisk " + arcNumber(pickSlot) + ": wybierz (" + vocationName(pc.vocation()) + ", poz. " + pc.level() + ")";
+            title = Messages.get("hud.przycisk") + arcNumber(pickSlot) + Messages.get("hud.wybierz") + vocationName(pc.vocation()) + Messages.get("hud.poz") + pc.level() + ")";
         } else if (playerMenu != null) {
             title = playerMenu.name();
             sub = playerInfoLine(session);
         } else if (achievementsView && journalMode) {
-            title = "Zadania (ukończone: " + session.character().quests().done().size() + ")";
+            title = Messages.get("hud.zadania_ukonczone") + session.character().quests().done().size() + ")";
         } else if (achievementsView && infoTitle != null) {
             title = infoTitle;
         } else if (achievementsView) {
             PlayerCharacter me = session.character();
-            title = bestiaryMode ? "Bestiariusz" + (monsterSpecies > 0 ? " (" + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
-                    : "Osiągnięcia " + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length;
+            title = bestiaryMode ? Messages.get("hud.bestiariusz_2") + (monsterSpecies > 0 ? " (" + me.bestiary().species() + " / " + monsterSpecies + ")" : "")
+                    : Messages.get("hud.osiagniecia") + me.achievements().count() + " / " + pl.fawizja.pixel.achievement.Achievement.values().length;
         } else if (marketView != null) {
-            title = "Rynek graczy (" + marketView.total() + " ofert)";
+            title = Messages.get("hud.rynek_graczy_2") + marketView.total() + " ofert)";
         } else if (friendsView != null) {
-            title = "Znajomi (" + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")";
+            title = Messages.get("hud.znajomi") + friendsView.rows().size() + Messages.get("common.z") + pl.fawizja.pixel.friends.FriendList.MAX + ")";
         } else if (rankingView != null) {
-            title = rankingView.title() + " (" + rankingView.total() + " postaci)";
+            title = rankingView.title() + " (" + rankingView.total() + Messages.get("hud.postaci_suffix");
         } else if (npcMode) {
             title = npc.name() + " (" + npc.town() + ")";
             sub = npc.greeting();
         } else if (optionsMenu) {
-            title = virtueMenu ? "Cnota mnicha (jedna aktywna)" : "Opcje";
+            title = virtueMenu ? Messages.get("hud.cnota_mnicha_jedna_aktywna") : Messages.get("hud.opcje");
         } else {
-            title = "Księga: czary (dotknij, aby rzucić) i rzemiosło";
+            title = Messages.get("hud.ksiega_czary_dotknij_aby");
         }
         mText(batch, mClip(title, menuW - 44, 0.76f), menuX + 10, menuY + menuH - (zid() ? 19 : 17), 0.76f, Color.WHITE, false);
         if (sub != null && !sub.isEmpty()) mText(batch, mClip(sub, menuW - 20, 0.62f), menuX + 10, menuY + menuH - 36, 0.62f, M_MUTED, false);
-        if (logoutConfirm) mCentered(batch, "Na pewno chcesz się wylogować?", menuX + menuW / 2f, menuY + menuH - 50, 0.8f, M_TEXT, false);
+        if (logoutConfirm) mCentered(batch, Messages.get("hud.na_pewno_chcesz_sie"), menuX + menuW / 2f, menuY + menuH - 50, 0.8f, M_TEXT, false);
         boolean pick = pickSlot >= 0;
         for (MenuRow row : menuRows) {
             Color lc = row.enabled ? M_TEXT : zid() ? Z_OFF_TEXT : hex(0xefe4d4, 0.45f);

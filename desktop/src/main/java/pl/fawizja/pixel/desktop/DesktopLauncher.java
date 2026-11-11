@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.desktop;
 
+import pl.fawizja.pixel.i18n.Messages;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
@@ -135,12 +136,12 @@ public final class DesktopLauncher {
             String town = p.length > 2 ? p[2] : null;
             String server = platform().serverAddress();
             if (server != null) {
-                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", "hasło-dev"), null, town);
+                OnlineLogin login = connectOnline(server, p[0], v.name(), System.getProperty("pixel.password", Messages.get("desktop_launcher.haslo_dev")), null, town);
                 if (login.problem() == null) {
                     startOnline(login);
                     return;
                 }
-                Gdx.app.error("Pixel", "Online niedostępne: " + login.problem());
+                Gdx.app.error("Pixel", Messages.get("desktop_launcher.online_niedostepne") + login.problem());
             }
             if (localSaveSummary() != null) playLocal();
             else createCharacter(p[0], v, town);
@@ -200,7 +201,7 @@ public final class DesktopLauncher {
                 String open = System.getProperty("pixel.open");
                 if ("virtues".equals(open)) ((GameScreen) getScreen()).hud().openVirtues();
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();
-                if ("credits".equals(open)) ((GameScreen) getScreen()).hud().openInfo("Autorzy grafik", pl.fawizja.pixel.game.Credits.rows());
+                if ("credits".equals(open)) ((GameScreen) getScreen()).hud().openInfo(Messages.get("game_screen.autorzy_grafik"), pl.fawizja.pixel.game.Credits.rows());
                 if ("bag".equals(open)) ((GameScreen) getScreen()).hud().toggleBag();
                 if ("bagitem".equals(open)) {
                     // podglad opisu przedmiotu: pierwszy przedmiot z miejscem na ciele
@@ -359,11 +360,11 @@ public final class DesktopLauncher {
                             pl.fawizja.pixel.item.ItemType it = reg.get(s.getKey());
                             boolean bossOnly = pl.fawizja.pixel.monster.LootRules.isBossOnly(it);
                             rare |= bossOnly;
-                            parts.add((s.getValue() > 1 ? s.getValue() + "x " : "") + it.name() + (bossOnly ? " (tylko z bossa!)" : ""));
+                            parts.add((s.getValue() > 1 ? s.getValue() + "x " : "") + it.name() + (bossOnly ? Messages.get("desktop_launcher.tylko_z_bossa") : ""));
                         }
-                        rows.add(new String[] {e.getKey() + (rare ? " - rzadki łup!" : ""), parts.isEmpty() ? "nic" : String.join(", ", parts)});
+                        rows.add(new String[] {e.getKey() + (rare ? Messages.get("desktop_launcher.rzadki_lup") : ""), parts.isEmpty() ? "nic" : String.join(", ", parts)});
                     }
-                    gs.hud().openInfo("Łup: " + boss.name() + " (osobny rzut na gracza)", rows);
+                    gs.hud().openInfo(Messages.get("combat_system.lup") + boss.name() + Messages.get("desktop_launcher.osobny_rzut_na_gracza"), rows);
                 }
                 if ("character".equals(open)) ((GameScreen) getScreen()).hud().toggleCharacter();
                 if ("combatgear".equals(open)) {
@@ -402,7 +403,7 @@ public final class DesktopLauncher {
                 if ("vip".equals(open)) {
                     // podglad listy VIP (bez serwera): znajomi w grze (zieloni) i poza gra (czerwoni)
                     ((GameScreen) getScreen()).previewVip(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
-                            new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Druid", 212),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, Messages.get("hud.druid"), 212),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175, 3 * 60 + 20),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", true, "Paladin", 98),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160, 5 * 24 * 60),
@@ -428,20 +429,20 @@ public final class DesktopLauncher {
                 if ("ranking".equals(open)) {
                     // podglad okna rankingu (bez serwera): przykladowe miejsca
                     java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
-                    String[][] sample = {{"Ula", "Druid", "212"}, {"Kuba", "Paladin", "198"}, {"Stary Wilk", "Monk", "175"},
-                            {"Mira", "Sorcerer", "160"}, {"Olaf", "Paladin", "142"}, {"Lena", "Druid", "120"},
-                            {"Test", "Paladin", "98"}, {"Kora", "Monk", "77"}, {"Petra", "Sorcerer", "61"}, {"Quin", "Druid", "40"}};
+                    String[][] sample = {{"Ula", Messages.get("hud.druid"), "212"}, {"Kuba", "Paladin", "198"}, {"Stary Wilk", "Monk", "175"},
+                            {"Mira", "Sorcerer", "160"}, {"Olaf", "Paladin", "142"}, {"Lena", Messages.get("hud.druid"), "120"},
+                            {"Test", "Paladin", "98"}, {"Kora", "Monk", "77"}, {"Petra", "Sorcerer", "61"}, {"Quin", Messages.get("hud.druid"), "40"}};
                     for (int i = 0; i < sample.length; i++) {
                         rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i + 1, sample[i][0], sample[i][1],
                                 Integer.parseInt(sample[i][2])));
                     }
                     ((GameScreen) getScreen()).hud().openRanking(
-                            new pl.fawizja.pixel.ranking.RankingView("Ranking serwera", 7, 23, rows));
+                            new pl.fawizja.pixel.ranking.RankingView(Messages.get("desktop_launcher.ranking_serwera"), 7, 23, rows));
                 }
                 if ("weekly".equals(open)) {
                     // podglad rankingu tygodnia: zdobyte doswiadczenie
                     java.util.List<pl.fawizja.pixel.ranking.RankingView.Row> rows = new java.util.ArrayList<>();
-                    String[][] sample = {{"Kuba", "Paladin", "4820000"}, {"Ula", "Druid", "3915000"}, {"Mira", "Sorcerer", "2210500"},
+                    String[][] sample = {{"Kuba", "Paladin", "4820000"}, {"Ula", Messages.get("hud.druid"), "3915000"}, {"Mira", "Sorcerer", "2210500"},
                             {"Test", "Paladin", "1840000"}, {"Olaf", "Paladin", "960000"}, {"Kora", "Monk", "412300"}};
                     for (int i = 0; i < sample.length; i++) {
                         rows.add(new pl.fawizja.pixel.ranking.RankingView.Row(i + 1, sample[i][0], sample[i][1],
@@ -666,7 +667,7 @@ public final class DesktopLauncher {
                         if (o.equals("mobile_win_vip")) {
                             gs.previewVip(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
                                     new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Knight", 38),
-                                    new pl.fawizja.pixel.friends.FriendsView.Row("Mira", true, "Druid", 27),
+                                    new pl.fawizja.pixel.friends.FriendsView.Row("Mira", true, Messages.get("hud.druid"), 27),
                                     new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", false, "Paladin", 51, 3 * 60),
                                     new pl.fawizja.pixel.friends.FriendsView.Row("Olek", false, "Sorcerer", 19, 2 * 24 * 60))));
                         }
@@ -696,19 +697,19 @@ public final class DesktopLauncher {
                 if ("chat".equals(open)) {
                     // podglad dymka czatu nad wlasna postacia
                     GameScreen gs = (GameScreen) getScreen();
-                    gs.say(gs.session().character().name(), "Witajcie w Varden! Ktoś idzie ze mną do kopalni goblinów?");
+                    gs.say(gs.session().character().name(), Messages.get("desktop_launcher.witajcie_w_varden_ktos"));
                 }
                 if ("chattabs".equals(open) || open != null && open.startsWith("chattabs,")) {
                     // podglad zakladek czatu: wiadomosci z kilku kanalow (jak z serwera), czesc nieprzeczytana
                     GameScreen gs = (GameScreen) getScreen();
                     long t = gs.session().lastUpdateMs();
                     String self = gs.session().character().name();
-                    gs.receiveChat("Ula", "Ktoś idzie ze mną na wilki pod Varden?", "local", t);
-                    gs.receiveChat(self, "Ja idę, poczekaj przy świątyni.", "local", t);
-                    gs.receiveChat("[Handel] Kuba", "Sprzedam 20 wilczych futer, 300 gp za sztukę.", "trade", t);
-                    gs.receiveChat("[Handel] Mira", "Kupię łopatę i linę, płacę od ręki.", "trade", t);
-                    gs.receiveChat("[Drużyna] Ola", "Zbieramy się przy wejściu do kopalni.", "party", t);
-                    gs.receiveChat("[od Mira]", "Hej, masz jeszcze tę łopatę?", "pm", t);
+                    gs.receiveChat("Ula", Messages.get("desktop_launcher.ktos_idzie_ze_mna"), "local", t);
+                    gs.receiveChat(self, Messages.get("desktop_launcher.ja_ide_poczekaj_przy"), "local", t);
+                    gs.receiveChat("[Handel] Kuba", Messages.get("desktop_launcher.sprzedam_20_wilczych_futer"), "trade", t);
+                    gs.receiveChat("[Handel] Mira", Messages.get("desktop_launcher.kupie_lopate_i_line"), "trade", t);
+                    gs.receiveChat(Messages.get("desktop_launcher.druzyna_ola"), Messages.get("desktop_launcher.zbieramy_sie_przy_wejsciu"), "party", t);
+                    gs.receiveChat("[od Mira]", Messages.get("desktop_launcher.hej_masz_jeszcze_te"), "pm", t);
                 }
                 Integer conTab = Integer.getInteger("pixel.conTab");
                 if (conTab != null) ((GameScreen) getScreen()).hud().showConsoleTab(conTab);
@@ -765,14 +766,14 @@ public final class DesktopLauncher {
                             new pl.fawizja.pixel.market.MarketView.Row(41, "Mikstura zdrowia", 20, 1_200, "Ula", false),
                             new pl.fawizja.pixel.market.MarketView.Row(40, "Wilcze futro", 15, 300, "Kuba", false),
                             new pl.fawizja.pixel.market.MarketView.Row(37, "Lina", 1, 80, "Stary Wilk", false),
-                            new pl.fawizja.pixel.market.MarketView.Row(35, "Wędka", 1, 250, "Mira", false),
+                            new pl.fawizja.pixel.market.MarketView.Row(35, Messages.get("desktop_launcher.wedka"), 1, 250, "Mira", false),
                             new pl.fawizja.pixel.market.MarketView.Row(12, "Robak", 50, 500, "Test", true)};
                     ((GameScreen) getScreen()).hud().openMarket(new pl.fawizja.pixel.market.MarketView(64, null, java.util.List.of(r)));
                 }
                 if ("friends".equals(open)) {
                     // podglad listy znajomych (bez serwera)
                     ((GameScreen) getScreen()).hud().openFriends(new pl.fawizja.pixel.friends.FriendsView(java.util.List.of(
-                            new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, "Druid", 212),
+                            new pl.fawizja.pixel.friends.FriendsView.Row("Ula", true, Messages.get("hud.druid"), 212),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Stary Wilk", false, "Monk", 175, 3 * 60 + 20),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Kuba", true, "Paladin", 98),
                             new pl.fawizja.pixel.friends.FriendsView.Row("Mira", false, "Sorcerer", 160, 5 * 24 * 60))));
@@ -863,7 +864,7 @@ public final class DesktopLauncher {
                         gs.session().combat().diedFromPlayer("Kuba", false, t);
                     } else if (open.equals("bless_status")) {
                         pc.addBlessing(all[1]); pc.addBlessing(all[3]); pc.addBlessing(all[5]); pc.addBlessing(all[0]);
-                        gs.hud().openInfo("Błogosławieństwa", pl.fawizja.pixel.character.BlessingStatus.rows(pc));
+                        gs.hud().openInfo(pl.fawizja.pixel.i18n.Messages.get("skill_sheet.blogoslawienstwa"), pl.fawizja.pixel.character.BlessingStatus.rows(pc));
                     } else {
                         pc.addBlessing(all[2]);
                         gs.hud().openBlessings(gs.session());
@@ -1025,7 +1026,7 @@ public final class DesktopLauncher {
                     }
                 }
                 if (demo.startsWith("poison")) {
-                    pc.conditions().addTotal(pl.fawizja.pixel.combat.ConditionType.POISON, 400, 4000, now, "Pająk leśny");
+                    pc.conditions().addTotal(pl.fawizja.pixel.combat.ConditionType.POISON, 400, 4000, now, Messages.get("desktop_launcher.pajak_lesny"));
                     pc.damage(pc.maxHealth() / 3);
                 }
             }
@@ -1109,7 +1110,7 @@ public final class DesktopLauncher {
                 gs.press("spell:1");
             }
             if (demo.equals("poison_cure") && frame == frames - 6) {
-                gs.say(pc.name(), "exana pox");
+                gs.say(pc.name(), Messages.get("desktop_launcher.exana_pox"));
                 s.castSpell("cure_poison", now);
             }
             if (demo.equals("exani") && frame == frames - 12) {

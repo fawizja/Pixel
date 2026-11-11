@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Random;
 
 /**
@@ -150,13 +151,13 @@ public final class Forge {
 
     public static String bonusText(int bonus) {
         switch (bonus) {
-            case BONUS_DUST: return "pył nie został zużyty";
-            case BONUS_CORES: return "rdzenie nie zostały zużyte";
-            case BONUS_GOLD: return "złoto nie zostało zużyte";
-            case BONUS_SECOND_MINUS: return "drugi przedmiot ocalał z tierem niższym o 1";
-            case BONUS_SECOND_KEPT: return "drugi przedmiot ocalał bez zmian";
-            case BONUS_SECOND_PLUS: return "drugi przedmiot zyskał tier";
-            case BONUS_TWO_TIERS: return "przedmiot zyskał dwa tiery";
+            case BONUS_DUST: return Messages.get("forge.pyl_nie_zostal_zuzyty");
+            case BONUS_CORES: return Messages.get("forge.rdzenie_nie_zostaly_zuzyte");
+            case BONUS_GOLD: return Messages.get("forge.zloto_nie_zostalo_zuzyte");
+            case BONUS_SECOND_MINUS: return Messages.get("forge.drugi_przedmiot_ocalal_z");
+            case BONUS_SECOND_KEPT: return Messages.get("forge_service.drugi_przedmiot_ocalal_bez");
+            case BONUS_SECOND_PLUS: return Messages.get("forge.drugi_przedmiot_zyskal_tier");
+            case BONUS_TWO_TIERS: return Messages.get("forge.przedmiot_zyskal_dwa_tiery");
             default: return "";
         }
     }
@@ -252,16 +253,16 @@ public final class Forge {
     public static String describe(ItemType t, int tier) {
         int c = classOf(t);
         if (c == 0) return "";
-        StringBuilder b = new StringBuilder("klasa ").append(c).append(", tier ").append(tier).append('/').append(MAX_TIER_BY_CLASS[c]);
+        StringBuilder b = new StringBuilder("klasa ").append(c).append(Messages.get("forge.tier")).append(tier).append('/').append(MAX_TIER_BY_CLASS[c]);
         int e = effectIndex(t);
         if (tier > 0 && e >= 0) {
-            b.append("; ").append(EFFECT_NAMES[e]).append(' ').append(ItemBonus.number(Math.round(effectChance(t, tier) * 100) / 100.0)).append('%');
+            b.append("; ").append(Messages.tr(EFFECT_NAMES[e])).append(' ').append(ItemBonus.number(Math.round(effectChance(t, tier) * 100) / 100.0)).append('%');
             switch (e) {
-                case 0: b.append(" (+60% obrażeń)"); break;
-                case 1: b.append(" (unik ciosu)"); break;
-                case 2: b.append(" (-2 s odnowień)"); break;
-                case 3: b.append(" (awatar 7 s)"); break;
-                case 4: b.append(" szans tierów"); break;
+                case 0: b.append(Messages.get("forge.60_obrazen")); break;
+                case 1: b.append(Messages.get("forge.unik_ciosu")); break;
+                case 2: b.append(Messages.get("forge.2_s_odnowien")); break;
+                case 3: b.append(Messages.get("forge.awatar_7_s")); break;
+                case 4: b.append(Messages.get("forge.szans_tierow")); break;
                 default:
             }
         }

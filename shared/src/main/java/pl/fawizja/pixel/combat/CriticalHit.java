@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.combat;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Random;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.item.Enchantments;
@@ -69,7 +70,7 @@ public final class CriticalHit {
 
     /** Opis do okna postaci: "5% szansy, +10% obrażeń". */
     public static String describe(PlayerCharacter pc) {
-        return pl.fawizja.pixel.item.ItemBonus.number(chance(pc)) + "% szansy, +"
-                + pl.fawizja.pixel.item.ItemBonus.number(extraDamage(pc)) + "% obrażeń";
+        return pl.fawizja.pixel.item.ItemBonus.number(chance(pc)) + Messages.get("critical_hit.szansy")
+                + pl.fawizja.pixel.item.ItemBonus.number(extraDamage(pc)) + Messages.get("critical_hit.obrazen");
     }
 }

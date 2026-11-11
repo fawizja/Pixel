@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.net;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,13 +16,13 @@ public final class Emotes {
     private static final Map<String, String> ACTIONS = new LinkedHashMap<>();
 
     static {
-        ACTIONS.put("/taniec", "tańczy");
+        ACTIONS.put("/taniec", Messages.get("emotes.tanczy"));
         ACTIONS.put("/machaj", "macha");
-        ACTIONS.put("/uklon", "kłania się");
-        ACTIONS.put("/smiech", "śmieje się");
+        ACTIONS.put("/uklon", Messages.get("emotes.klania_sie"));
+        ACTIONS.put("/smiech", Messages.get("emotes.smieje_sie"));
         ACTIONS.put("/brawo", "klaszcze");
         ACTIONS.put("/hura", "wiwatuje");
-        ACTIONS.put("/placz", "płacze");
+        ACTIONS.put("/placz", Messages.get("emotes.placze"));
         ACTIONS.put("/siad", "siada");
         ACTIONS.put("/zzz", "drzemie");
     }
@@ -48,16 +49,16 @@ public final class Emotes {
 
     /** Tekst rzutu w dymku: "* rzuca kostką k6: 4 *". */
     public static String diceText(int sides, int result) {
-        return "* rzuca kostką k" + sides + ": " + result + " *";
+        return Messages.get("emotes.rzuca_kostka_k") + sides + ": " + result + " *";
     }
 
     /** Wiersze okna /emotki: polecenie, czynnosc, "", akcja "cmd:/polecenie" (dotkniecie wysyla emotke). */
     public static java.util.List<String[]> rows() {
-        String[] shown = {"/taniec", "/machaj", "/ukłon", "/śmiech", "/brawo", "/hura", "/płacz", "/siad", "/zzz"};
+        String[] shown = {"/taniec", "/machaj", Messages.get("emotes.uklon"), Messages.get("emotes.smiech"), "/brawo", "/hura", Messages.get("emotes.placz"), "/siad", "/zzz"};
         java.util.List<String[]> rows = new java.util.ArrayList<>();
-        for (String c : shown) rows.add(new String[] {c, ACTIONS.get(ChatCommands.key(c)) + " (dotknij)", "", "cmd:" + c});
-        rows.add(new String[] {"/kostka", "rzut kostką k6 widoczny dla innych (dotknij); /kostka 20", "", "cmd:/kostka"});
-        rows.add(new String[] {"/ja tekst", "własna czynność, np. /ja ostrzy miecz"});
+        for (String c : shown) rows.add(new String[] {c, ACTIONS.get(ChatCommands.key(c)) + Messages.get("chat.dotknij_nawias"), "", "cmd:" + c});
+        rows.add(new String[] {"/kostka", Messages.get("emotes.rzut_kostka_k6_widoczny"), "", "cmd:/kostka"});
+        rows.add(new String[] {"/ja tekst", Messages.get("emotes.wlasna_czynnosc_np_ja")});
         return rows;
     }
 

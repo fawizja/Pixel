@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.npc;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.List;
 import pl.fawizja.pixel.inventory.ItemSearch;
@@ -20,9 +21,10 @@ public final class PriceCheck {
         ItemType starts = null, contains = null;
         for (ItemType t : items.all()) {
             String n = ItemSearch.fold(t.name());
-            if (n.equals(q) || t.key().equals(q)) return t;
-            if (starts == null && n.startsWith(q)) starts = t;
-            if (contains == null && (n.contains(q) || t.key().contains(q))) contains = t;
+            String pn = ItemSearch.fold(t.polishName());
+            if (n.equals(q) || pn.equals(q) || t.key().equals(q)) return t;
+            if (starts == null && (n.startsWith(q) || pn.startsWith(q))) starts = t;
+            if (contains == null && (n.contains(q) || pn.contains(q) || t.key().contains(q))) contains = t;
         }
         return starts != null ? starts : contains;
     }
@@ -35,19 +37,19 @@ public final class PriceCheck {
             Shop s = n.shopKey() == null || shops == null ? null : shops.get(n.shopKey());
             ShopOffer o = s == null ? null : s.offer(t.id());
             if (o == null || !o.sold() && !o.bought()) continue;
-            String what = (o.bought() ? "skupuje za " + o.sellPrice() + " gp" : "nie skupuje")
-                    + (o.sold() ? ", sprzedaje za " + o.buyPrice() + " gp" : "");
+            String what = (o.bought() ? Messages.get("price_check.skupuje_za") + o.sellPrice() + " gp" : Messages.get("price_check.nie_skupuje"))
+                    + (o.sold() ? Messages.get("price_check.sprzedaje_za") + o.buyPrice() + " gp" : "");
             order.add(new long[] {o.bought() ? o.sellPrice() : -1, buyers.size()});
             buyers.add(new String[] {n.name() + " (" + n.town() + ")", what});
         }
         order.sort((a, b) -> Long.compare(b[0], a[0]));
         List<String[]> out = new ArrayList<>();
-        out.add(new String[] {"Wartość", t.value() + " gp za sztukę"});
+        out.add(new String[] {Messages.get("price_check.wartosc"), t.value() + Messages.get("price_check.gp_za_sztuke")});
         for (long[] o : order) {
             if (out.size() >= MAX_ROWS) break;
             out.add(buyers.get((int) o[1]));
         }
-        if (out.size() == 1) out.add(new String[] {"Kupcy", "żaden kupiec nie handluje tym przedmiotem (rynek graczy u bankiera)"});
+        if (out.size() == 1) out.add(new String[] {Messages.get("price_check.kupcy"), Messages.get("price_check.zaden_kupiec_nie_handluje")});
         return out;
     }
 }

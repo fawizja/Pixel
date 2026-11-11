@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Cwiartka (domena) Kola Przeznaczenia jak w Tibii: zielona (lewa gora), czerwona (prawa gora), fioletowa (prawy dol),
  * niebieska (lewy dol). Kazda ma 9 pol (razem 1000 punktow) i wlasne objawienie (Revelation) w 3 stopniach.
@@ -15,7 +16,8 @@ public enum WheelDomain {
     /** Plaska premia do obrazen i leczenia za stopien objawienia (Canary io_wheel.hpp Revelation.stats). */
     public static final int[] STAGE_FLAT = {4, 9, 20};
 
-    public final String label;
+    private final String label;
+    public String label() { return Messages.tr(label); }
     public final char code;
     /** Kolor domeny (RGB) do okna kola. */
     public final int rgb;

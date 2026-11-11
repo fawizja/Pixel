@@ -1,5 +1,7 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.i18n.Messages;
+
 /**
  * Blogoslawienstwa jak w Tibii (i w Canary): piec zwyklych, Los Przeznaczenia (tylko PvP) i dwa gorskie.
  * Kazde zwykle i gorskie zmniejsza strate doswiadczenia o 8%; Zrzadzenie losu chroni inne blogoslawienstwa przy
@@ -34,7 +36,7 @@ public enum Blessing {
         this.kind = kind;
     }
 
-    public String label() { return label; }
+    public String label() { return Messages.get("bless.n_" + key()); }
     public Kind kind() { return kind; }
     public int bit() { return 1 << ordinal(); }
     public boolean countsForLoss() { return kind != Kind.PVP; }

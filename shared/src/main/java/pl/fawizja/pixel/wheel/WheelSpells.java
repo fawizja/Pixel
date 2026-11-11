@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.wheel;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Collections;
 import java.util.List;
 import pl.fawizja.pixel.character.PlayerCharacter;
@@ -211,10 +212,10 @@ public final class WheelSpells {
         if (st <= 0) return null;
         if (r.isAvatar()) {
             pc.wheel().startAvatar(st, cooldownMs(pc, s));
-            return s.name() + ": 15 s, -" + 5 * st + "% otrzymanych obrażeń, każdy cios krytyczny (+" + 5 * st + "%).";
+            return s.name() + ": 15 s, -" + 5 * st + Messages.get("wheel_spells.otrzymanych_obrazen_kazdy_cios") + 5 * st + "%).";
         }
         int pct = st >= 3 ? 12 : st == 2 ? 10 : 8;
         pc.wheel().startEmpowerment(pc.position(), pct, EMPOWERMENT_MS);
-        return s.name() + ": pole 3x3 na 5 s, +" + pct + "% obrażeń, gdy na nim stoisz.";
+        return s.name() + Messages.get("wheel_spells.pole_3x3_na_5") + pct + Messages.get("wheel_spells.obrazen_gdy_na_nim");
     }
 }

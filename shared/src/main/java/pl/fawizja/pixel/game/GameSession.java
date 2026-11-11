@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.game;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -209,18 +210,18 @@ public final class GameSession {
         if (!d.activeOn(day)) {
             d.assign(pc.name(), day, pc.level(), monsters.spawnedTypes());
             if (d.monster() == null) {
-                log.add(nowMs, EventLog.Kind.WARNING, "Dziś nie mam dla ciebie zadania.");
+                log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.dzis_nie_mam_dla"));
                 return;
             }
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Zadanie dnia: pokonaj " + d.target() + "x " + monsterName(d.monster()) + whereToHunt(d.monster()) + ".");
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zadanie_dnia_pokonaj") + d.target() + "x " + monsterName(d.monster()) + whereToHunt(d.monster()) + ".");
             return;
         }
         if (d.claimed()) {
-            log.add(nowMs, EventLog.Kind.INFO, "Dzisiejsze zadanie już wykonane. Wróć jutro.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.dzisiejsze_zadanie_juz_wykonan"));
             return;
         }
         if (!d.doneOn(day)) {
-            log.add(nowMs, EventLog.Kind.INFO, "Zadanie dnia: " + monsterName(d.monster()) + " " + d.progress() + " / " + d.target() + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("hud.zadanie_dnia_2") + monsterName(d.monster()) + " " + d.progress() + " / " + d.target() + ".");
             return;
         }
         pl.fawizja.pixel.monster.MonsterType t = monsterType(d.monster());
@@ -228,10 +229,10 @@ public final class GameSession {
         long exp = t == null ? 0 : pl.fawizja.pixel.daily.DailyTask.rewardExp(t, d.target());
         if (gold > 0 && !pc.bank().credit(gold).ok()) return;
         d.claim();
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zadanie dnia: " + String.format("%,d gp", gold) + " na konto.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.nagroda_za_zadanie_dnia") + String.format("%,d gp", gold) + Messages.get("game_session.na_konto"));
         // nagroda liczona z doswiadczenia potwora, wiec dostaje ten sam mnoznik etapu co zabicie (Balance.expRate)
         exp = pl.fawizja.pixel.balance.Balance.applyRate(exp, pl.fawizja.pixel.balance.Balance.expRate(pc.level()));
-        if (exp > 0) combat.awardExperience(exp, "Zadanie dnia", nowMs);
+        if (exp > 0) combat.awardExperience(exp, Messages.get("hud.zadanie_dnia"), nowMs);
     }
 
     /** Zmiana zadania dnia u przewodnika (raz dziennie, za monety z plecaka). */
@@ -240,22 +241,22 @@ public final class GameSession {
         pl.fawizja.pixel.daily.DailyTask d = pc.daily();
         long day = today();
         if (!d.canReroll(day)) {
-            log.add(nowMs, EventLog.Kind.INFO, d.activeOn(day) && !d.claimed() ? "Zadanie dnia można zmienić tylko raz dziennie."
-                    : "Najpierw weź zadanie dnia.");
+            log.add(nowMs, EventLog.Kind.INFO, d.activeOn(day) && !d.claimed() ? Messages.get("game_session.zadanie_dnia_mozna_zmienic")
+                    : Messages.get("game_session.najpierw_wez_zadanie_dnia"));
             return false;
         }
         long price = pl.fawizja.pixel.daily.DailyTask.rerollPrice(pc.level());
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Zmiana zadania dnia kosztuje " + String.format("%,d gp", price) + " (monety w plecaku).");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.zmiana_zadania_dnia_kosztuje") + String.format("%,d gp", price) + Messages.get("server_world.monety_w_plecaku"));
             return false;
         }
         if (!d.reroll(pc.name(), day, pc.level(), monsters.spawnedTypes())) {
-            log.add(nowMs, EventLog.Kind.INFO, "Nie mam dziś dla ciebie innego zadania.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.nie_mam_dzis_dla"));
             return false;
         }
         pc.backpack().commitFrom(tx);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Nowe zadanie dnia: pokonaj " + d.target() + "x " + monsterName(d.monster())
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.nowe_zadanie_dnia_pokonaj") + d.target() + "x " + monsterName(d.monster())
                 + whereToHunt(d.monster()) + " (" + String.format("%,d gp", price) + ").");
         return true;
     }
@@ -263,14 +264,14 @@ public final class GameSession {
     /** Zabicie liczone do zadan: zadanie dnia, zlecenie lowcy i zadania na potwory. */
     private void taskKill(pl.fawizja.pixel.monster.MonsterType t) {
         if (pc.daily().onKill(t.key(), today())) {
-            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie dnia wykonane! Wróć do przewodnika po nagrodę.");
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zadanie_dnia_wykonane_wroc"));
         }
         if (pc.hunt().onKill(t.key())) {
-            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy wykonane! Wróć do przewodnika po nagrodę.");
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zlecenie_lowcy_wykonane_wroc"));
         }
         QuestType done = quests == null ? null : quests.onKill(pc, t.key());
         if (done != null) {
-            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, "Zadanie \"" + done.name() + "\": cel osiągnięty, wróć po nagrodę.");
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zadanie") + done.name() + Messages.get("game_session.cel_osiagniety_wroc_po"));
         }
     }
 
@@ -285,15 +286,15 @@ public final class GameSession {
         pl.fawizja.pixel.quest.HuntTask h = pc.hunt();
         if (!h.active()) {
             if (!h.assign(pc.level(), monsters.spawnedTypes(), rng)) {
-                log.add(nowMs, EventLog.Kind.WARNING, "Nie mam teraz dla ciebie zlecenia.");
+                log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_mam_teraz_dla"));
                 return;
             }
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Zlecenie łowcy: pokonaj " + h.target() + "x " + monsterName(h.monster()) + whereToHunt(h.monster()) + ". Droga: /idź łowisko");
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zlecenie_lowcy_pokonaj") + h.target() + "x " + monsterName(h.monster()) + whereToHunt(h.monster()) + Messages.get("game_session.droga_idz_lowisko"));
             return;
         }
         if (!h.done()) {
-            log.add(nowMs, EventLog.Kind.INFO, "Zlecenie łowcy: " + monsterName(h.monster()) + " " + h.progress() + " / " + h.target()
-                    + ". Porzucić możesz u przewodnika.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zlecenie_lowcy") + monsterName(h.monster()) + " " + h.progress() + " / " + h.target()
+                    + Messages.get("game_session.porzucic_mozesz_u_przewodnika"));
             return;
         }
         pl.fawizja.pixel.monster.MonsterType t = monsterType(h.monster());
@@ -301,15 +302,15 @@ public final class GameSession {
         long exp = t == null ? 0 : pl.fawizja.pixel.quest.HuntTask.rewardExp(t);
         if (gold > 0 && !pc.bank().credit(gold).ok()) return;
         h.complete();
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za zlecenie łowcy: " + String.format("%,d gp", gold) + " na konto ("
-                + h.completed() + ". oddane zlecenie).");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.nagroda_za_zlecenie_lowcy") + String.format("%,d gp", gold) + Messages.get("game_session.na_konto_2")
+                + h.completed() + Messages.get("game_session.oddane_zlecenie"));
         exp = pl.fawizja.pixel.balance.Balance.applyRate(exp, pl.fawizja.pixel.balance.Balance.expRate(pc.level())); // jak przy zadaniu dnia
-        if (exp > 0) combat.awardExperience(exp, "Zlecenie łowcy", nowMs);
+        if (exp > 0) combat.awardExperience(exp, Messages.get("hud.zlecenie_lowcy"), nowMs);
     }
 
     public void huntDrop(long nowMs) {
         if (talkTo(NpcRole.GUIDE, nowMs) == null || !pc.hunt().active()) return;
-        log.add(nowMs, EventLog.Kind.INFO, "Porzucono zlecenie: " + monsterName(pc.hunt().monster()) + ".");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.porzucono_zlecenie") + monsterName(pc.hunt().monster()) + ".");
         pc.hunt().drop();
     }
 
@@ -370,7 +371,7 @@ public final class GameSession {
         long gold = pl.fawizja.pixel.daily.WeeklyBoss.rewardGold(boss);
         if (!pc.bank().credit(gold).ok()) return;
         pc.setWeeklyBossWeek(week);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Pokonano bossa tygodnia! Nagroda: " + String.format("%,d gp", gold) + " na konto.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.pokonano_bossa_tygodnia_nagrod") + String.format("%,d gp", gold) + Messages.get("game_session.na_konto"));
     }
 
     public pl.fawizja.pixel.monster.MonsterType boostedCreature() {
@@ -391,7 +392,7 @@ public final class GameSession {
         String key = b == null ? null : b.key();
         if (key == null || key.equals(announcedBoost)) return;
         announcedBoost = key;
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Potwór dnia: " + pl.fawizja.pixel.daily.BoostedCreature.describe(b) + ".");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_screen.potwor_dnia") + pl.fawizja.pixel.daily.BoostedCreature.describe(b) + ".");
     }
 
     private long achievementsCheckedMs;
@@ -416,7 +417,7 @@ public final class GameSession {
     /** Wylaczenie podpowiedzi (wszystkie oznaczone jako pokazane). */
     public void disableTips(long nowMs) {
         for (Tips.Tip t : Tips.Tip.values()) pc.markTip(t.ordinal());
-        log.add(nowMs, EventLog.Kind.INFO, "Podpowiedzi wyłączone.");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.podpowiedzi_wylaczone"));
     }
 
     private void checkTips(long nowMs) {
@@ -493,9 +494,9 @@ public final class GameSession {
             s.restoreState(prevDay, prevStreak); // pelne konto - sprobujemy pozniej
             return;
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za wejście do gry (dzień " + day + " z " + pl.fawizja.pixel.daily.LoginStreak.DAYS
-                + "): " + String.format("%,d gp", gold) + " na konto." + (day < pl.fawizja.pixel.daily.LoginStreak.DAYS
-                ? " Wróć jutro po większą." : " Pełny tydzień!"));
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.nagroda_za_wejscie_do") + day + Messages.get("common.z") + pl.fawizja.pixel.daily.LoginStreak.DAYS
+                + "): " + String.format("%,d gp", gold) + Messages.get("game_session.na_konto") + (day < pl.fawizja.pixel.daily.LoginStreak.DAYS
+                ? Messages.get("game_session.wroc_jutro_po_wieksza") : Messages.get("game_session.pelny_tydzien")));
     }
 
     /** Nagrody za progi poziomu: zloto na konto, zwoje nauki do plecaka (albo do depozytu, gdy brak miejsca). */
@@ -511,9 +512,9 @@ public final class GameSession {
             if (n > 0) {
                 pl.fawizja.pixel.item.ItemStack st = new pl.fawizja.pixel.item.ItemStack(items.byKey("exp_scroll").id(), n);
                 boolean bag = pc.backpack().canAdd(st.itemId(), n) && pc.backpack().add(st).ok();
-                if (bag || pc.depot().add(st).ok()) extra = " i " + n + "x " + items.get(st.itemId()).name() + (bag ? "" : " (w depozycie)");
+                if (bag || pc.depot().add(st).ok()) extra = " i " + n + "x " + items.get(st.itemId()).name() + (bag ? "" : Messages.get("game_session.w_depozycie"));
             }
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Nagroda za poziom " + m + ": " + String.format("%,d gp", gold) + " na konto" + extra + ".");
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("events_report.nagroda_za_poziom") + m + ": " + String.format("%,d gp", gold) + Messages.get("game_session.na_konto_3") + extra + ".");
         }
         pc.setRewardedLevel(pc.level());
     }
@@ -523,7 +524,7 @@ public final class GameSession {
         achievementsCheckedMs = nowMs;
         achievementsChecked = true;
         for (pl.fawizja.pixel.achievement.Achievement a : pc.achievements().check(pc)) {
-            log.add(nowMs, EventLog.Kind.SYSTEM, "Osiągnięcie zdobyte: " + a.title() + " (" + a.goal() + ")!");
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.osiagniecie_zdobyte") + a.title() + " (" + a.goal() + ")!");
         }
     }
 
@@ -563,7 +564,7 @@ public final class GameSession {
         Position d = dummies.near(pc.position());
         if (d == null) return false;
         if (trainingAt != null) {
-            stopTraining(nowMs, "Kończysz trening.");
+            stopTraining(nowMs, Messages.get("game_session.konczysz_trening"));
             return true;
         }
         trainingAt = d;
@@ -579,15 +580,15 @@ public final class GameSession {
     String trainingMessage() {
         Skill sk = CombatFormulas.attackProfile(pc, items).skill();
         long perMin = 60_000 / TRAIN_MS;
-        StringBuilder sb = new StringBuilder("Trenujesz przy manekinie: ").append(sk.label()).append(" ")
-                .append(perMin * pl.fawizja.pixel.balance.Balance.DUMMY_TRY_FACTOR).append(" prób/min");
+        StringBuilder sb = new StringBuilder(Messages.get("game_session.trenujesz_przy_manekinie")).append(sk.label()).append(" ")
+                .append(perMin * pl.fawizja.pixel.balance.Balance.DUMMY_TRY_FACTOR).append(Messages.get("game_session.prob_min"));
         if (pl.fawizja.pixel.combat.CombatSystem.trainsShielding(pc)) {
             sb.append(", ").append(Skill.SHIELDING.label()).append(" ")
-                    .append(perMin * pl.fawizja.pixel.balance.Balance.DUMMY_BLOCK_TRY_FACTOR).append(" prób/min");
+                    .append(perMin * pl.fawizja.pixel.balance.Balance.DUMMY_BLOCK_TRY_FACTOR).append(Messages.get("game_session.prob_min"));
         }
-        sb.append(" (x etap serwera; ok. 2/3 tempa polowania, bez doświadczenia).");
-        if (sk == Skill.MAGIC) sb.append(" Magię szybciej trenujesz czarami: każdy punkt many liczy się jak na polowaniu.");
-        return sb.append(" Ruch albo ponowne dotknięcie manekina kończy trening.").toString();
+        sb.append(Messages.get("game_session.x_etap_serwera_ok"));
+        if (sk == Skill.MAGIC) sb.append(Messages.get("game_session.magie_szybciej_trenujesz_czara"));
+        return sb.append(Messages.get("game_session.ruch_albo_ponowne_dotkniecie")).toString();
     }
 
     private void stopTraining(long nowMs, String why) {
@@ -598,7 +599,7 @@ public final class GameSession {
     private void updateTraining(long nowMs) {
         if (trainingAt == null) return;
         if (!pc.position().equals(trainingFrom) || pc.isDead()) {
-            stopTraining(nowMs, "Trening przerwany.");
+            stopTraining(nowMs, Messages.get("game_session.trening_przerwany"));
             return;
         }
         while (nowMs >= trainNextMs && trainingAt != null) {
@@ -613,7 +614,7 @@ public final class GameSession {
 
     private void trainSkill(long nowMs, Skill sk, int tries) {
         if (pc.skills().train(sk, tries) > 0) {
-            log.add(nowMs, EventLog.Kind.SYSTEM, sk.label() + ": poziom " + pc.skills().level(sk) + ".");
+            log.add(nowMs, EventLog.Kind.SYSTEM, sk.label() + Messages.get("game_session.poziom") + pc.skills().level(sk) + ".");
         }
     }
 
@@ -640,8 +641,8 @@ public final class GameSession {
             for (int dx = -1; dx <= 1; dx++) {
                 if (f.get(pl.fawizja.pixel.world.Layer.OBJECT, p.x() + dx, p.y() + dy) != lockerTile) continue;
                 // ta sama instancja dla tej samej skrzyni: okno rozmowy porownuje NPC przez ==
-                return lockers.computeIfAbsent(p.translate(dx, dy), q -> new Npc(Npc.DEPOT_LOCKER, "Skrzynia depozytu",
-                        NpcRole.BANKER, nearestTown(q), q, null, "Twój depozyt jest wspólny dla wszystkich miast.", "#7a5230"));
+                return lockers.computeIfAbsent(p.translate(dx, dy), q -> new Npc(Npc.DEPOT_LOCKER, Messages.get("game_session.skrzynia_depozytu"),
+                        NpcRole.BANKER, nearestTown(q), q, null, Messages.get("game_session.twoj_depozyt_jest_wspolny"), "#7a5230"));
             }
         }
         return null;
@@ -770,22 +771,22 @@ public final class GameSession {
         String who = name == null ? "" : name.trim();
         String msg = null;
         pl.fawizja.pixel.house.HouseAccess now = h == null ? null : owners().guestAccess(h.id(), who);
-        if (h == null) msg = "Nie masz domu.";
-        else if (who.isEmpty()) msg = "Podaj imię: /dom wpuść Imię.";
-        else if (who.equalsIgnoreCase(pc.name())) msg = "To twój dom.";
-        else if (now == level) msg = who + " już ma " + level.label() + " do domu.";
+        if (h == null) msg = Messages.get("server_world.nie_masz_domu");
+        else if (who.isEmpty()) msg = Messages.get("game_session.podaj_imie_dom_wpusc");
+        else if (who.equalsIgnoreCase(pc.name())) msg = Messages.get("game_session.to_twoj_dom");
+        else if (now == level) msg = who + Messages.get("game_session.juz_ma") + level.label() + Messages.get("game_session.do_domu");
         else if (now == pl.fawizja.pixel.house.HouseAccess.NONE
                 && owners().guests(h.id()).size() >= pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS) {
-            msg = "Dom może mieć najwyżej " + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + " gości.";
+            msg = Messages.get("game_session.dom_moze_miec_najwyzej") + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + Messages.get("game_session.gosci");
         }
-        if (msg == null && !owners().addGuest(h.id(), who, level)) msg = "Nie udało się dodać gościa.";
+        if (msg == null && !owners().addGuest(h.id(), who, level)) msg = Messages.get("game_session.nie_udalo_sie_dodac");
         if (msg != null) {
             log.add(nowMs, EventLog.Kind.WARNING, msg);
             return false;
         }
         log.add(nowMs, EventLog.Kind.SYSTEM, level == pl.fawizja.pixel.house.HouseAccess.FULL
-                ? who + " może teraz wchodzić do domu " + h.name() + " i korzystać ze skrzyń, drzwi i przedmiotów (pełny dostęp)."
-                : who + " może teraz wchodzić do domu " + h.name() + " (tylko wejście: bez skrzyń, drzwi i przedmiotów).");
+                ? who + Messages.get("game_session.moze_teraz_wchodzic_do") + h.name() + Messages.get("game_session.i_korzystac_ze_skrzyn")
+                : who + Messages.get("game_session.moze_teraz_wchodzic_do") + h.name() + Messages.get("game_session.tylko_wejscie_bez_skrzyn"));
         return true;
     }
 
@@ -793,26 +794,26 @@ public final class GameSession {
     public boolean removeHouseGuest(String name, long nowMs) {
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
         if (h == null || !owners().removeGuest(h.id(), name)) {
-            log.add(nowMs, EventLog.Kind.WARNING, h == null ? "Nie masz domu." : name + " nie jest gościem twojego domu.");
+            log.add(nowMs, EventLog.Kind.WARNING, h == null ? Messages.get("server_world.nie_masz_domu") : name + Messages.get("game_session.nie_jest_gosciem_twojego"));
             return false;
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, name.trim() + " nie może już wchodzić do domu " + h.name() + ".");
+        log.add(nowMs, EventLog.Kind.SYSTEM, name.trim() + Messages.get("game_session.nie_moze_juz_wchodzic") + h.name() + ".");
         return true;
     }
 
     /** Opis domu postaci: nazwa, miasto, czynsz, goscie. */
     public String houseInfo() {
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
-        if (h == null) return "Nie masz domu. Kupisz go przy drzwiach wolnego domu albo u zarządcy domów (za złoto z banku).";
+        if (h == null) return Messages.get("game_session.nie_masz_domu_kupisz");
         java.util.List<String> g = new java.util.ArrayList<>();
         for (java.util.Map.Entry<String, pl.fawizja.pixel.house.HouseAccess> e : owners().guestLevels(h.id()).entrySet()) {
-            g.add(e.getKey() + (e.getValue() == pl.fawizja.pixel.house.HouseAccess.ENTRY ? " (wejście)" : " (pełny)"));
+            g.add(e.getKey() + (e.getValue() == pl.fawizja.pixel.house.HouseAccess.ENTRY ? Messages.get("game_session.wejscie") : Messages.get("game_session.pelny")));
         }
         long until = owners().rentPaidUntil(h.id());
-        String due = until > 0 ? ", następna płatność za " + pl.fawizja.pixel.house.HouseRent.describeIn(until - wallClock.getAsLong()) : "";
-        return String.format("Twój dom: %s (%s, %d pól, cena %,d gp, czynsz %,d gp tygodniowo%s). Goście: %s.", h.name(), h.town(),
+        String due = until > 0 ? Messages.get("game_session.nastepna_platnosc_za") + pl.fawizja.pixel.house.HouseRent.describeIn(until - wallClock.getAsLong()) : "";
+        return String.format(Messages.get("game_session.twoj_dom_s_s"), h.name(), h.town(),
                 h.size(), h.price(), pl.fawizja.pixel.house.HouseRent.rent(h), due,
-                g.isEmpty() ? "nikt (/dom wpuść Imię)" : String.join(", ", g));
+                g.isEmpty() ? Messages.get("game_session.nikt_dom_wpusc_imie") : String.join(", ", g));
     }
 
     /** Ponowne sprawdzenie wstepu (po wyrzuceniu goscia albo zmianie wlasciciela): kto nie moze, wychodzi przez drzwi. */
@@ -848,7 +849,7 @@ public final class GameSession {
         if (n == null) return false;
         pl.fawizja.pixel.house.House h = houses.get(id);
         if (h == null || !h.town().equalsIgnoreCase(n.town())) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Ten zarządca nie sprzedaje takiego domu.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.ten_zarzadca_nie_sprzedaje"));
             return false;
         }
         return claimHouse(h, nowMs);
@@ -859,7 +860,7 @@ public final class GameSession {
         pl.fawizja.pixel.house.House h = houses.get(id);
         if (h == null) return false;
         if (pc.position().z() != h.z() || pc.position().distanceTo(h.door()) > 1) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do drzwi domu " + h.name() + ".");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.podejdz_do_drzwi_domu") + h.name() + ".");
             return false;
         }
         return claimHouse(h, nowMs);
@@ -878,10 +879,10 @@ public final class GameSession {
         String msg = null;
         long bank = pc.bank().balance();
         long cash = Money.totalValue(pc.backpack());
-        if (pc.house() != null) msg = "Masz już dom. Najpierw go opuść.";
-        else if (owners().ownerOf(h.id()) != null || takenHouses.contains(h.id())) msg = "Ten dom ma już właściciela.";
+        if (pc.house() != null) msg = Messages.get("game_session.masz_juz_dom_najpierw");
+        else if (owners().ownerOf(h.id()) != null || takenHouses.contains(h.id())) msg = Messages.get("game_session.ten_dom_ma_juz");
         else if (bank + cash < h.price()) {
-            msg = String.format("Dom kosztuje %,d gp, a masz %,d gp (konto %,d gp, plecak %,d gp).", h.price(), bank + cash, bank, cash);
+            msg = String.format(Messages.get("game_session.dom_kosztuje_d_gp"), h.price(), bank + cash, bank, cash);
         }
         if (msg != null) {
             log.add(nowMs, EventLog.Kind.WARNING, msg);
@@ -891,11 +892,11 @@ public final class GameSession {
         long fromPack = h.price() - fromBank;
         pl.fawizja.pixel.inventory.Container pack = pc.backpack().copy();
         if (fromPack > 0 && !Money.pay(pack, fromPack).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie udało się odliczyć monet z plecaka (brak miejsca na resztę).");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_udalo_sie_odliczyc"));
             return false;
         }
         if (!owners().claim(h.id(), pc.name())) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Ten dom ma już właściciela.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.ten_dom_ma_juz"));
             return false;
         }
         if (fromBank > 0) pc.bank().debit(fromBank);
@@ -903,10 +904,10 @@ public final class GameSession {
         pc.setHouse(h.id());
         owners().setRent(h.id(), wallClock.getAsLong() + pl.fawizja.pixel.house.HouseRent.period(), 0);   // pierwszy tydzien w cenie
         rentLowWarned = false;
-        String paid = fromPack == 0 ? "z konta" : fromBank == 0 ? "z plecaka"
-                : String.format("%,d gp z konta i %,d gp z plecaka", fromBank, fromPack);
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Kupiono dom %s za %,d gp (%s). Czynsz %,d gp tygodniowo pobierany "
-                + "automatycznie z banku. Gości zaprosisz przy drzwiach od środka, a w łóżku możesz się położyć i wylogować.",
+        String paid = fromPack == 0 ? Messages.get("game_session.z_konta") : fromBank == 0 ? Messages.get("hud.z_plecaka_2")
+                : String.format(Messages.get("game_session.d_gp_z_konta"), fromBank, fromPack);
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.kupiono_dom_s_za")
+                + Messages.get("game_session.automatycznie_z_banku_gosci"),
                 h.name(), h.price(), paid, pl.fawizja.pixel.house.HouseRent.rent(h)));
         return true;
     }
@@ -970,7 +971,7 @@ public final class GameSession {
         if (o == null || !o.key().equals("bed")) return false;
         pl.fawizja.pixel.house.House h = houses.at(p);
         if (h == null || houseAccess(h).mayEnter()) return false;
-        log.add(nowMs, EventLog.Kind.WARNING, "To nie twoje łóżko.");
+        log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.to_nie_twoje_lozko"));
         return true;
     }
 
@@ -985,24 +986,24 @@ public final class GameSession {
     private boolean useBed(Position p, long nowMs) {
         pl.fawizja.pixel.house.House h = houses.at(p);
         if (h == null) {
-            log.add(nowMs, EventLog.Kind.INFO, "Wygodne łóżko, ale nie twoje. Własne łóżko będziesz mieć we własnym domu.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wygodne_lozko_ale_nie"));
             return true;
         }
         if (!houseAccess(h).mayEnter()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "To nie twoje łóżko.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.to_nie_twoje_lozko"));
             return true;
         }
         long block = pc.logoutBlockedMs(nowMs);
         if (block > 0) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie możesz zasnąć w trakcie walki. Poczekaj " + (block + 999) / 1000 + " s.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_mozesz_zasnac_w") + (block + 999) / 1000 + " s.");
             return true;
         }
         if (pc.isDead() || sleepBed != null) return true;
         sleepBed = p;
         pc.setSleptAt(wallClock.getAsLong());
         moving = false;
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Kładziesz się do łóżka w domu " + h.name()
-                + " i zasypiasz. Postać wypocznie, zanim wrócisz (życie, mana i stamina).");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.kladziesz_sie_do_lozka") + h.name()
+                + Messages.get("game_session.i_zasypiasz_postac_wypocznie"));
         return true;
     }
 
@@ -1014,7 +1015,7 @@ public final class GameSession {
         if (talkTo(NpcRole.HOUSING, nowMs) == null) return false;
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
         if (h == null) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz domu.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("server_world.nie_masz_domu"));
             return false;
         }
         return abandonHouse(h, nowMs);
@@ -1024,11 +1025,11 @@ public final class GameSession {
     public boolean leaveHouseAtDoor(long nowMs) {
         pl.fawizja.pixel.house.House h = houses.get(pc.house());
         if (h == null) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz domu.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("server_world.nie_masz_domu"));
             return false;
         }
         if (!h.contains(pc.position()) && (pc.position().z() != h.z() || pc.position().distanceTo(h.door()) > 1)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do drzwi swojego domu.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.podejdz_do_drzwi_swojego"));
             return false;
         }
         return abandonHouse(h, nowMs);
@@ -1041,8 +1042,8 @@ public final class GameSession {
         leaveForeignHouse();
         long refund = h.price() * HOUSE_SELLBACK_PERCENT / 100;
         pc.bank().credit(refund);
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Sprzedano dom %s miastu za %,d gp (na konto).", h.name(), refund)
-                + (moved > 0 ? " Rzeczy z domu (" + moved + ") są w depozycie u bankiera." : ""));
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.sprzedano_dom_s_miastu"), h.name(), refund)
+                + (moved > 0 ? Messages.get("game_session.rzeczy_z_domu") + moved + Messages.get("game_session.sa_w_depozycie_u") : ""));
         return true;
     }
 
@@ -1073,19 +1074,19 @@ public final class GameSession {
             owners().release(h.id());
             pc.setHouse(null);
             leaveForeignHouse();
-            log.add(nowMs, EventLog.Kind.WARNING, "Czynsz za dom " + h.name() + " nie był płacony " + pl.fawizja.pixel.house.HouseRent.MAX_MISSED
-                    + " razy - dom wrócił do miasta." + (moved > 0 ? " Rzeczy z domu (" + moved + ") są w depozycie u bankiera." : ""));
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.czynsz_za_dom") + h.name() + Messages.get("game_session.nie_byl_placony") + pl.fawizja.pixel.house.HouseRent.MAX_MISSED
+                    + Messages.get("game_session.razy_dom_wrocil_do") + (moved > 0 ? Messages.get("game_session.rzeczy_z_domu") + moved + Messages.get("game_session.sa_w_depozycie_u") : ""));
             return;
         }
         if (r != null) {
             if (r.changed(until, missed)) owners().setRent(h.id(), r.paidUntil(), r.missed());
             if (r.charged() > 0) {
-                log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Pobrano czynsz za dom %s: %,d gp z konta. Saldo: %,d gp.",
+                log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.pobrano_czynsz_za_dom"),
                         h.name(), r.charged(), pc.bank().balance()));
             }
             if (r.newlyMissed() > 0) {
-                log.add(nowMs, EventLog.Kind.WARNING, String.format("Brak złota na czynsz za dom %s (%,d gp, na koncie %,d gp)! Wpłać złoto do "
-                        + "banku - kolejna nieopłacona płatność i dom wróci do miasta, a rzeczy trafią do depozytu.", h.name(),
+                log.add(nowMs, EventLog.Kind.WARNING, String.format(Messages.get("game_session.brak_zlota_na_czynsz")
+                        + Messages.get("game_session.banku_kolejna_nieoplacona_plat"), h.name(),
                         rent * (r.missed() + 1), pc.bank().balance()));
                 rentLowWarned = true;
             }
@@ -1094,7 +1095,7 @@ public final class GameSession {
             rentLowWarned = false;
         } else if (!rentLowWarned) {
             rentLowWarned = true;
-            log.add(nowMs, EventLog.Kind.WARNING, String.format("Na koncie masz %,d gp, a czynsz za dom %s to %,d gp (termin za %s). Wpłać złoto do banku.",
+            log.add(nowMs, EventLog.Kind.WARNING, String.format(Messages.get("game_session.na_koncie_masz_d"),
                     pc.bank().balance(), h.name(), rent, pl.fawizja.pixel.house.HouseRent.describeIn(owners().rentPaidUntil(h.id()) - now)));
         }
     }
@@ -1117,7 +1118,7 @@ public final class GameSession {
         if (n == null) return TradeResult.TOO_FAR;
         TradeResult r = TradeSystem.buy(pc.backpack(), items, shopOf(n), itemId, count);
         log.add(nowMs, r.ok() ? EventLog.Kind.LOOT : EventLog.Kind.WARNING,
-                r.ok() ? "Kupiono: " + count + "x " + items.get(itemId).name() : r.message());
+                r.ok() ? Messages.get("game_session.kupiono") + count + "x " + items.get(itemId).name() : r.message());
         return r;
     }
 
@@ -1182,11 +1183,11 @@ public final class GameSession {
             }
         }
         if (total > 0) {
-            log.add(nowMs, EventLog.Kind.LOOT, "Kupiono: " + String.join(", ", bought) + (poor ? " (zabrakło monet na resztę)." : "."));
+            log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.kupiono") + String.join(", ", bought) + (poor ? Messages.get("game_session.zabraklo_monet_na_reszte") : "."));
         } else {
             log.add(nowMs, poor ? EventLog.Kind.WARNING : EventLog.Kind.INFO,
-                    poor ? "Za mało monet w plecaku na zapasy." : "Masz już pełne zapasy (" + REFILL_TO + " mikstur i run, "
-                            + REFILL_AMMO_TO + " sztuk amunicji).");
+                    poor ? Messages.get("game_session.za_malo_monet_w") : Messages.get("game_session.masz_juz_pelne_zapasy") + REFILL_TO + Messages.get("game_session.mikstur_i_run")
+                            + REFILL_AMMO_TO + Messages.get("game_session.sztuk_amunicji"));
         }
         return total;
     }
@@ -1198,7 +1199,7 @@ public final class GameSession {
         int count = pc.backpack().countPlain(itemId);
         TradeResult r = TradeSystem.sellAll(pc.backpack(), shopOf(n), itemId);
         log.add(nowMs, r.ok() ? EventLog.Kind.LOOT : EventLog.Kind.WARNING,
-                r.ok() ? "Sprzedano: " + count + "x " + items.get(itemId).name() + " za " + value + " gp" : r.message());
+                r.ok() ? Messages.get("game_session.sprzedano") + count + "x " + items.get(itemId).name() + " za " + value + " gp" : r.message());
         return r;
     }
 
@@ -1231,10 +1232,10 @@ public final class GameSession {
             }
         }
         if (sold == 0) {
-            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": nie masz łupu, który skupuję" + (kept ? " (przedmioty do zadań i zachowane zostają)." : "."));
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + Messages.get("game_session.nie_masz_lupu_ktory") + (kept ? Messages.get("game_session.przedmioty_do_zadan_i") : "."));
         } else {
-            log.add(nowMs, EventLog.Kind.LOOT, "Sprzedano łup: " + sold + " szt. za " + String.format("%,d gp", total)
-                    + (kept ? ". Przedmioty do zadań i zachowane zostają w plecaku." : "."));
+            log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.sprzedano_lup") + sold + Messages.get("game_session.szt_za") + String.format("%,d gp", total)
+                    + (kept ? Messages.get("game_session.przedmioty_do_zadan_i_2") : "."));
         }
         return sold;
     }
@@ -1244,7 +1245,7 @@ public final class GameSession {
         long before = gold();
         InventoryResult r = pc.bank().depositAll(pc.backpack());
         log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
-                r.ok() ? "Wpłacono " + before + " gp. Saldo: " + pc.bank().balance() + " gp." : "Nie masz monet do wpłacenia.");
+                r.ok() ? Messages.get("game_session.wplacono") + before + Messages.get("game_session.gp_saldo") + pc.bank().balance() + " gp." : Messages.get("game_session.nie_masz_monet_do"));
         return r;
     }
 
@@ -1252,8 +1253,8 @@ public final class GameSession {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return InventoryResult.INVALID_AMOUNT;
         InventoryResult r = pc.bank().withdraw(pc.backpack(), amount);
         log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
-                r.ok() ? "Wypłacono " + amount + " gp. Saldo: " + pc.bank().balance() + " gp."
-                        : r == InventoryResult.INSUFFICIENT_FUNDS ? "Za mało pieniędzy na koncie." : "Brak miejsca w plecaku.");
+                r.ok() ? Messages.get("game_session.wyplacono") + amount + Messages.get("game_session.gp_saldo") + pc.bank().balance() + " gp."
+                        : r == InventoryResult.INSUFFICIENT_FUNDS ? Messages.get("game_session.za_malo_pieniedzy_na") : Messages.get("server_world.brak_miejsca_w_plecaku"));
         return r;
     }
 
@@ -1285,27 +1286,27 @@ public final class GameSession {
             }
         }
         if (ids.isEmpty()) {
-            log.add(nowMs, EventLog.Kind.INFO, "Nie masz łupu do odłożenia" + (keep.isEmpty() ? "." : " (przedmioty do zadań i zachowane zostają)."));
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.nie_masz_lupu_do") + (keep.isEmpty() ? "." : Messages.get("game_session.przedmioty_do_zadan_i")));
             return 0;
         }
         int moved = 0;
-        for (int id : ids) moved += moveAll(pc.backpack(), pc.depot(), id, nowMs, "Odłożono do depozytu", "Depozyt jest pełny.");
+        for (int id : ids) moved += moveAll(pc.backpack(), pc.depot(), id, nowMs, Messages.get("game_session.odlozono_do_depozytu"), Messages.get("game_session.depozyt_jest_pelny"));
         return moved;
     }
 
     public int depotStore(int itemId, long nowMs) {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
         if (pl.fawizja.pixel.economy.Currency.isCoin(itemId)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Monety wpłać na konto, nie do depozytu.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.monety_wplac_na_konto"));
             return 0;
         }
-        return moveAll(pc.backpack(), pc.depot(), itemId, nowMs, "Odłożono do depozytu", "Depozyt jest pełny.");
+        return moveAll(pc.backpack(), pc.depot(), itemId, nowMs, Messages.get("game_session.odlozono_do_depozytu"), Messages.get("game_session.depozyt_jest_pelny"));
     }
 
     /** Depozyt: wyjmuje do plecaka wszystkie sztuki przedmiotu (ile sie zmiesci). */
     public int depotTake(int itemId, long nowMs) {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
-        return moveAll(pc.depot(), pc.backpack(), itemId, nowMs, "Wyjęto z depozytu", "Brak miejsca w plecaku.");
+        return moveAll(pc.depot(), pc.backpack(), itemId, nowMs, Messages.get("game_session.wyjeto_z_depozytu"), Messages.get("server_world.brak_miejsca_w_plecaku"));
     }
 
     private int moveAll(pl.fawizja.pixel.inventory.Container from, pl.fawizja.pixel.inventory.Container to, int itemId,
@@ -1332,7 +1333,7 @@ public final class GameSession {
         if (moved <= 0) return 0;
         n = moved;
         String name = items.get(itemId).name();
-        log.add(nowMs, EventLog.Kind.INFO, done + ": " + n + "x " + name + (n < have ? " (reszta się nie zmieściła)" : "") + ".");
+        log.add(nowMs, EventLog.Kind.INFO, done + ": " + n + "x " + name + (n < have ? Messages.get("game_session.reszta_sie_nie_zmiescila") : "") + ".");
         return n;
     }
 
@@ -1343,7 +1344,7 @@ public final class GameSession {
         if (talkTo(NpcRole.PRIEST, nowMs) == null) return;
         pc.heal(pc.maxHealth());
         pc.restoreMana(pc.maxMana());
-        log.add(nowMs, EventLog.Kind.INFO, "Kapłan cię uleczył.");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.kaplan_cie_uleczyl"));
     }
 
     /**
@@ -1358,7 +1359,7 @@ public final class GameSession {
         }
         boolean ship = n.role() == NpcRole.CAPTAIN;
         if (ship && !pc.canSail()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": rejsy tylko dla kont premium albo postaci z promocją. "
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.rejsy_tylko_dla_kont")
                     + premiumHint(n.town()));
             return false;
         }
@@ -1367,11 +1368,11 @@ public final class GameSession {
             if (r.to().town().equalsIgnoreCase(town)) route = r;
         }
         if (route == null) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? ": tam nie pływam." : ": tam nie jeżdżę."));
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? Messages.get("game_session.tam_nie_plywam") : Messages.get("game_session.tam_nie_jezdze")));
             return false;
         }
         if (nowMs < pc.pzBlockedUntil()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": po walce z graczem nie zabiorę cię jeszcze przez "
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.po_walce_z_graczem")
                     + ((pc.pzBlockedUntil() - nowMs + 999) / 1000) + " s.");
             return false;
         }
@@ -1385,19 +1386,19 @@ public final class GameSession {
         }
         if (dest == null) return false;
         if (world.requiredLevelAt(dest) > pc.level()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + route.to().town() + " jest dla postaci od poziomu "
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + route.to().town() + Messages.get("game_session.jest_dla_postaci_od")
                     + world.requiredLevelAt(dest) + ".");
             return false;
         }
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < route.price() || !Money.pay(tx, route.price()).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? ": rejs do " : ": przejazd do ") + route.to().town() + " kosztuje "
-                    + route.price() + " gp (monety w plecaku).");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? Messages.get("game_session.rejs_do") : Messages.get("game_session.przejazd_do")) + route.to().town() + " kosztuje "
+                    + route.price() + Messages.get("game_session.gp_monety_w_plecaku"));
             return false;
         }
         pc.backpack().commitFrom(tx);
         teleport(dest, nowMs);
-        log.add(nowMs, EventLog.Kind.SYSTEM, (ship ? "Po rejsie (" : "Po podróży (") + route.price() + " gp) jesteś: "
+        log.add(nowMs, EventLog.Kind.SYSTEM, (ship ? Messages.get("game_session.po_rejsie") : Messages.get("game_session.po_podrozy")) + route.price() + Messages.get("game_session.gp_jestes")
                 + route.to().town() + ".");
         return true;
     }
@@ -1421,10 +1422,10 @@ public final class GameSession {
         if (stage == e.stage(kills - 1)) return;
         if (stage == pl.fawizja.pixel.achievement.BestiaryEntry.STAGES) {
             pc.charms().addPoints(e.charmPoints());
-            log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Bestiariusz: ukończono wpis \"%s\" (+%,d pkt charmów, masz %,d).",
+            log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.bestiariusz_ukonczono_wpis_s"),
                     t.name(), e.charmPoints(), pc.charms().points()));
         } else {
-            log.add(nowMs, EventLog.Kind.INFO, "Bestiariusz: odblokowano szczegóły potwora \"" + t.name() + "\" (etap " + stage + "/"
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.bestiariusz_odblokowano_szczeg") + t.name() + Messages.get("game_session.etap") + stage + "/"
                     + pl.fawizja.pixel.achievement.BestiaryEntry.STAGES + ").");
         }
     }
@@ -1451,11 +1452,11 @@ public final class GameSession {
         long fee = pl.fawizja.pixel.charm.CharmPrices.removal(pc.level());
         String from = monsterName(pc.charms().assignedTo(c));
         if (!payGold(fee)) {
-            log.add(nowMs, EventLog.Kind.WARNING, String.format("Zdjęcie charmu kosztuje %,d gp (plecak albo konto).", fee));
+            log.add(nowMs, EventLog.Kind.WARNING, String.format(Messages.get("game_session.zdjecie_charmu_kosztuje_d"), fee));
             return false;
         }
         pc.charms().remove(c);
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("%s zdjęty z: %s (%,d gp).", c.label(), from, fee));
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.s_zdjety_z_s"), c.label(), from, fee));
         return true;
     }
 
@@ -1463,11 +1464,11 @@ public final class GameSession {
     public boolean resetCharms(long nowMs) {
         long fee = pl.fawizja.pixel.charm.CharmPrices.resetAll(pc.level());
         if (!payGold(fee)) {
-            log.add(nowMs, EventLog.Kind.WARNING, String.format("Reset charmów kosztuje %,d gp (plecak albo konto).", fee));
+            log.add(nowMs, EventLog.Kind.WARNING, String.format(Messages.get("game_session.reset_charmow_kosztuje_d"), fee));
             return false;
         }
         pc.charms().resetAll(pc.isPromoted());
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Charmy zresetowane (%,d gp): masz z powrotem %,d pkt charmów i %,d ech.",
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.charmy_zresetowane_d_gp"),
                 fee, pc.charms().points(), pc.charms().echoes()));
         return true;
     }
@@ -1503,7 +1504,7 @@ public final class GameSession {
             if (okText != null) log.add(nowMs, EventLog.Kind.SYSTEM, okText);
             return true;
         }
-        log.add(nowMs, EventLog.Kind.WARNING, r.message);
+        log.add(nowMs, EventLog.Kind.WARNING, r.message());
         return false;
     }
 
@@ -1529,7 +1530,7 @@ public final class GameSession {
     public boolean wheelReset(long nowMs) {
         pl.fawizja.pixel.wheel.DestinyWheel.Result r = wheelGate();
         if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) r = pc.wheel().reset();
-        return wheelDone(r, "Koło Przeznaczenia wyczyszczone - punkty wróciły do puli.", nowMs);
+        return wheelDone(r, Messages.get("game_session.kolo_przeznaczenia_wyczyszczon"), nowMs);
     }
 
     /** Kolo: zapis biezacego ustawienia do zestawu i (akcja "wheel:save:i"); zapis dziala wszedzie. */
@@ -1537,7 +1538,7 @@ public final class GameSession {
         if (i < 0 || i >= pl.fawizja.pixel.wheel.DestinyWheel.PRESETS) return false;
         pl.fawizja.pixel.wheel.DestinyWheel.Result r = pc.wheelPoints() <= 0
                 ? pl.fawizja.pixel.wheel.DestinyWheel.Result.NOT_ELIGIBLE : pc.wheel().savePreset(i);
-        return wheelDone(r, "Zapisano zestaw koła " + (i + 1) + ".", nowMs);
+        return wheelDone(r, Messages.get("game_session.zapisano_zestaw_kola") + (i + 1) + ".", nowMs);
     }
 
     /** Kolo: wczytanie zestawu i (akcja "wheel:load:i"), tylko w swiatyni. */
@@ -1545,7 +1546,7 @@ public final class GameSession {
         if (i < 0 || i >= pl.fawizja.pixel.wheel.DestinyWheel.PRESETS) return false;
         pl.fawizja.pixel.wheel.DestinyWheel.Result r = wheelGate();
         if (r == pl.fawizja.pixel.wheel.DestinyWheel.Result.OK) r = pc.wheel().loadPreset(i, pc.wheelPoints());
-        return wheelDone(r, "Wczytano zestaw koła " + (i + 1) + ".", nowMs);
+        return wheelDone(r, Messages.get("game_session.wczytano_zestaw_kola") + (i + 1) + ".", nowMs);
     }
 
     // ------------------------------------------------------------------ Klejnoty Kola Przeznaczenia
@@ -1556,7 +1557,7 @@ public final class GameSession {
             if (okText != null) log.add(nowMs, EventLog.Kind.SYSTEM, okText);
             return true;
         }
-        log.add(nowMs, EventLog.Kind.WARNING, r.message);
+        log.add(nowMs, EventLog.Kind.WARNING, r.message());
         return false;
     }
 
@@ -1576,7 +1577,7 @@ public final class GameSession {
         if (!payGold(q.revealCost)) return gemDone(pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD, null, nowMs);
         pc.backpack().remove(gemId, 1);
         pl.fawizja.pixel.wheel.WheelGem g = a.reveal(q, pc.vocation(), rng);
-        return gemDone(r, String.format("Pracownia klejnotów: odkryto %s (%,d gp).", g.title(), q.revealCost), nowMs);
+        return gemDone(r, String.format(Messages.get("game_session.pracownia_klejnotow_odkryto_s"), g.title(), q.revealCost), nowMs);
     }
 
     /** Pracownia: blokada / odblokowanie klejnotu (akcja "wheel:gem:lock:ID"). */
@@ -1584,7 +1585,7 @@ public final class GameSession {
         pl.fawizja.pixel.wheel.GemAtelier a = pc.wheel().gems();
         pl.fawizja.pixel.wheel.GemAtelier.Result r = a.toggleLock(id);
         pl.fawizja.pixel.wheel.WheelGem g = a.gem(id);
-        return gemDone(r, g == null ? null : g.title() + (g.locked() ? ": zablokowany." : ": odblokowany."), nowMs);
+        return gemDone(r, g == null ? null : g.title() + (g.locked() ? Messages.get("game_session.zablokowany") : Messages.get("game_session.odblokowany")), nowMs);
     }
 
     /** Pracownia: rozbicie klejnotu na okruchy (akcja "wheel:gem:destroy:ID"); okruchy trafiaja do plecaka. */
@@ -1600,7 +1601,7 @@ public final class GameSession {
         if (fragId < 0 || !tx.add(new ItemStack(fragId, n)).ok()) return gemDone(pl.fawizja.pixel.wheel.GemAtelier.Result.NO_ROOM, null, nowMs);
         pc.backpack().commitFrom(tx);
         a.destroy(id);
-        return gemDone(r, String.format("Rozbito %s: +%d %s.", g.title(), n, items.byKey(key).name().toLowerCase(java.util.Locale.ROOT)), nowMs);
+        return gemDone(r, String.format(Messages.get("game_session.rozbito_s_d_s"), g.title(), n, items.byKey(key).name().toLowerCase(java.util.Locale.ROOT)), nowMs);
     }
 
     /** Pracownia: zmiana domeny klejnotu na nastepna za zloto (akcja "wheel:gem:switch:ID"). */
@@ -1612,7 +1613,7 @@ public final class GameSession {
         if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK && !payGold(g.quality.switchCost)) r = pl.fawizja.pixel.wheel.GemAtelier.Result.NO_GOLD;
         if (r != pl.fawizja.pixel.wheel.GemAtelier.Result.OK) return gemDone(r, null, nowMs);
         a.switchDomain(id);
-        return gemDone(r, String.format("%s: nowa domena - %s (%,d gp).", "Klejnot #" + id, g.domain().label.toLowerCase(java.util.Locale.ROOT),
+        return gemDone(r, String.format(Messages.get("game_session.s_nowa_domena_s"), Messages.get("game_session.klejnot") + id, g.domain().label().toLowerCase(java.util.Locale.ROOT),
                 g.quality.switchCost), nowMs);
     }
 
@@ -1622,7 +1623,7 @@ public final class GameSession {
         pl.fawizja.pixel.wheel.GemAtelier.Result r = gemTempleGate();
         if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK) r = a.socket(id);
         pl.fawizja.pixel.wheel.WheelGem g = a.gem(id);
-        return gemDone(r, g == null ? null : g.title() + " w naczyniu: " + g.domain().label.toLowerCase(java.util.Locale.ROOT) + " domena (rezonans "
+        return gemDone(r, g == null ? null : g.title() + Messages.get("game_session.w_naczyniu") + g.domain().label().toLowerCase(java.util.Locale.ROOT) + Messages.get("game_session.domena_rezonans")
                 + pc.wheel().resonance(g.domain()) + "/3).", nowMs);
     }
 
@@ -1631,7 +1632,7 @@ public final class GameSession {
         if (d == null) return false;
         pl.fawizja.pixel.wheel.GemAtelier.Result r = gemTempleGate();
         if (r == pl.fawizja.pixel.wheel.GemAtelier.Result.OK) r = pc.wheel().gems().unsocket(d);
-        return gemDone(r, "Naczynie opróżnione: " + d.label.toLowerCase(java.util.Locale.ROOT) + " domena.", nowMs);
+        return gemDone(r, Messages.get("game_session.naczynie_oproznione") + d.label().toLowerCase(java.util.Locale.ROOT) + " domena.", nowMs);
     }
 
     private pl.fawizja.pixel.wheel.GemAtelier.Result gemTempleGate() {
@@ -1674,7 +1675,7 @@ public final class GameSession {
         if (r != pl.fawizja.pixel.wheel.GemAtelier.Result.OK) return gemDone(r, null, nowMs);
         pc.backpack().remove(fragId, (int) cost[1]);
         r = apply.get();
-        return gemDone(r, String.format("Warsztat okruchów: %s - stopień %s (%,d gp, %d okruchów).", label,
+        return gemDone(r, String.format(Messages.get("game_session.warsztat_okruchow_s_stopien"), label,
                 pl.fawizja.pixel.wheel.GemAtelier.roman(newGrade), cost[0], cost[1]), nowMs);
     }
 
@@ -1698,7 +1699,7 @@ public final class GameSession {
         pc.wheel().setAdjacentMonsters(monsters == null ? 0 : adjacentMonsters());
         if (pc.wheel().consumeGift()) {
             spells.cooldowns().cutAll(60_000, nowMs);
-            log.add(nowMs, EventLog.Kind.WARNING, "Dar Życia cię uratował! Odnowienie: "
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.dar_zycia_cie_uratowal")
                     + pl.fawizja.pixel.house.HouseRent.describeIn(pc.wheel().giftCooldownMs()) + ".");
         }
     }
@@ -1724,8 +1725,8 @@ public final class GameSession {
     /** Podpowiedz, gdzie kupic premium: wladca tego miasta albo kazdego miasta. */
     public String premiumHint(String town) {
         Npc r = rulerOf(town);
-        return r != null ? "Premium sprzedaje " + r.name() + " (władca " + r.town() + ")."
-                : "Premium sprzedaje władca każdego miasta (król, królowa albo lord).";
+        return r != null ? Messages.get("game_session.premium_sprzedaje") + r.name() + Messages.get("game_session.wladca") + r.town() + ")."
+                : Messages.get("game_session.premium_sprzedaje_wladca_kazde");
     }
 
     /** Wladca miasta (krol, krolowa, lord): konto premium za zloto z banku - rejsy duzymi statkami miedzy portami. */
@@ -1733,15 +1734,15 @@ public final class GameSession {
         Npc n = talkTo(NpcRole.KING, nowMs);
         if (n == null) return false;
         if (pc.isPremium()) {
-            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": masz już konto premium.");
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + Messages.get("game_session.masz_juz_konto_premium"));
             return false;
         }
         if (!pc.bank().debit(PREMIUM_PRICE).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(": konto premium kosztuje %,d gp z banku.", PREMIUM_PRICE));
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(Messages.get("game_session.konto_premium_kosztuje_d"), PREMIUM_PRICE));
             return false;
         }
         pc.setPremium(true);
-        log.add(nowMs, EventLog.Kind.SYSTEM, n.name() + String.format(": od dziś masz konto premium (%,d gp z banku). Kapitanowie zabiorą cię na rejs.", PREMIUM_PRICE));
+        log.add(nowMs, EventLog.Kind.SYSTEM, n.name() + String.format(Messages.get("game_session.od_dzis_masz_konto"), PREMIUM_PRICE));
         return true;
     }
 
@@ -1750,24 +1751,24 @@ public final class GameSession {
         Npc n = talkTo(NpcRole.KING, nowMs);
         if (n == null) return false;
         if (pc.isPromoted()) {
-            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": już jesteś " + pc.vocationTitle() + ".");
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + Messages.get("game_session.juz_jestes") + pc.vocationTitle() + ".");
             return false;
         }
         if (!pc.isPremium()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": promocję daję tylko posiadaczom konta premium.");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.promocje_daje_tylko_posiadaczo"));
             return false;
         }
         if (pc.level() < PROMOTION_LEVEL) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": wróć od poziomu " + PROMOTION_LEVEL + ".");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.wroc_od_poziomu") + PROMOTION_LEVEL + ".");
             return false;
         }
         if (!pc.bank().debit(PROMOTION_PRICE).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(": promocja kosztuje %,d gp z banku.", PROMOTION_PRICE));
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(Messages.get("game_session.promocja_kosztuje_d_gp"), PROMOTION_PRICE));
             return false;
         }
         pc.setPromoted(true);
-        log.add(nowMs, EventLog.Kind.SYSTEM, n.name() + ": mianuję cię " + pc.vocationTitle()
-                + String.format("! (%,d gp z banku) Regenerujesz się o połowę szybciej.", PROMOTION_PRICE));
+        log.add(nowMs, EventLog.Kind.SYSTEM, n.name() + Messages.get("game_session.mianuje_cie") + pc.vocationTitle()
+                + String.format(Messages.get("game_session.d_gp_z_banku"), PROMOTION_PRICE));
         return true;
     }
 
@@ -1783,18 +1784,18 @@ public final class GameSession {
 
     /** Powod, dla ktorego blogoslawienstwa nie da sie teraz kupic u kaplana w miescie town (null = mozna). */
     public String blessingBlocked(pl.fawizja.pixel.character.Blessing b, String town) {
-        if (pc.boughtBlessing(b)) return "już je masz";
+        if (pc.boughtBlessing(b)) return Messages.get("bless.already");
         if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.ENHANCED) {
             return pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN.equalsIgnoreCase(town) ? null
-                    : "tylko u kapłana w " + pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN + "ze";
+                    : Messages.get("bless.only_town", pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN);
         }
-        if (pc.adventurerBlessing()) return "do poziomu " + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL + " chroni cię Błogosławieństwo Poszukiwacza";
+        if (pc.adventurerBlessing()) return Messages.get("bless.adv_protects", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL);
         if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP) {
             boolean other = false;
             for (pl.fawizja.pixel.character.Blessing o : pl.fawizja.pixel.character.Blessing.values()) {
                 if (o.countsForLoss() && pc.boughtBlessing(o)) other = true;
             }
-            if (!other) return "najpierw kup inne błogosławieństwo";
+            if (!other) return Messages.get("bless.buy_other_first");
         }
         return null;
     }
@@ -1813,15 +1814,14 @@ public final class GameSession {
         long price;
         if (which.equals("all")) {
             if (pc.adventurerBlessing()) {
-                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": do poziomu " + pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL
-                        + " chroni cię Błogosławieństwo Poszukiwacza - nic nie płacisz.");
+                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + Messages.get("bless.adv_protects_free", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL));
                 return false;
             }
             for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
                 if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR && !pc.boughtBlessing(b)) buy.add(b);
             }
             if (buy.isEmpty()) {
-                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": masz już wszystkie zwykłe błogosławieństwa.");
+                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + Messages.get("bless.have_all_regular"));
                 return false;
             }
             price = bulkBlessingPrice();
@@ -1838,7 +1838,7 @@ public final class GameSession {
         }
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + String.format(": to kosztuje %,d gp (monety w plecaku).", price));
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + Messages.get("bless.costs", price));
             return false;
         }
         pc.backpack().commitFrom(tx);
@@ -1848,7 +1848,7 @@ public final class GameSession {
             if (names.length() > 0) names.append(", ");
             names.append(b.label());
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Otrzymujesz: %s (%,d gp). Zmniejszają stratę po śmierci.", names, price));
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("bless.received", names.toString(), price));
         return true;
     }
 
@@ -1860,11 +1860,11 @@ public final class GameSession {
         Store.Offer o = Store.find(this, key);
         if (o == null) return false;
         if (!o.available()) {
-            log.add(nowMs, EventLog.Kind.INFO, "Sklep: " + o.name() + " - " + o.blocked() + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_screen.sklep") + o.name() + " - " + o.blocked() + ".");
             return false;
         }
         if (pc.bank().balance() < o.price()) {
-            log.add(nowMs, EventLog.Kind.WARNING, String.format("Sklep: %s kosztuje %,d gp, a na koncie w banku masz %,d gp. Wpłać złoto u bankiera.",
+            log.add(nowMs, EventLog.Kind.WARNING, String.format(Messages.get("game_session.sklep_s_kosztuje_d"),
                     o.name(), o.price(), pc.bank().balance()));
             return false;
         }
@@ -1872,7 +1872,7 @@ public final class GameSession {
         if (items.containsKey(key)) {
             tx = pc.backpack().copy();
             if (!tx.add(new pl.fawizja.pixel.item.ItemStack(items.byKey(key).id(), 1)).ok()) {
-                log.add(nowMs, EventLog.Kind.WARNING, "Sklep: plecak jest pełny. Zrób miejsce i spróbuj znowu.");
+                log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.sklep_plecak_jest_pelny"));
                 return false;
             }
         }
@@ -1881,17 +1881,17 @@ public final class GameSession {
         switch (key) {
             case "premium":
                 pc.setPremium(true);
-                done = "Masz konto premium. Kapitanowie zabiorą cię na rejs.";
+                done = Messages.get("game_session.masz_konto_premium_kapitanowie");
                 break;
             case "promote":
                 pc.setPromoted(true);
-                done = "Jesteś teraz " + pc.vocationTitle() + ". Regenerujesz się o połowę szybciej.";
+                done = Messages.get("game_session.jestes_teraz") + pc.vocationTitle() + Messages.get("game_session.regenerujesz_sie_o_polowe");
                 break;
             case "bless":
                 for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
                     if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR) pc.addBlessing(b);
                 }
-                done = "Masz pięć błogosławieństw. Zmniejszają stratę doświadczenia po śmierci.";
+                done = Messages.get("bless.five");
                 break;
             default:
                 if (key.startsWith("enchant_")) {
@@ -1900,10 +1900,10 @@ public final class GameSession {
                     done = k.label() + " na " + pl.fawizja.pixel.item.Enchantments.describe(pc.enchantments().remainingMs(k)) + " polowania.";
                 } else {
                     pc.backpack().commitFrom(tx);
-                    done = o.name() + " jest w plecaku. Dotknij go i wybierz \"Użyj\".";
+                    done = o.name() + Messages.get("game_session.jest_w_plecaku_dotknij");
                 }
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, String.format("Sklep: kupiono %s za %,d gp z banku (zostało %,d gp). ", o.name(), o.price(), pc.bank().balance()) + done);
+        log.add(nowMs, EventLog.Kind.SYSTEM, String.format(Messages.get("game_session.sklep_kupiono_s_za"), o.name(), o.price(), pc.bank().balance()) + done);
         return true;
     }
 
@@ -1912,7 +1912,7 @@ public final class GameSession {
         Npc n = talkTo(NpcRole.PRIEST, nowMs);
         if (n == null) return;
         pc.setHomeTown(n.town().toLowerCase(java.util.Locale.ROOT));
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Mieszkasz teraz w " + n.town() + ". Tu będziesz się odradzać.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.mieszkasz_teraz_w") + n.town() + Messages.get("game_session.tu_bedziesz_sie_odradzac"));
     }
 
     /**
@@ -1927,7 +1927,7 @@ public final class GameSession {
         }
         if (n.role() == NpcRole.PRIEST && HEAL_WORDS.contains(text.trim().toLowerCase(java.util.Locale.ROOT))) {
             // jak w Tibii: "help" (albo "heal", "ulecz", "pomocy") do kaplana leczy i odnawia mane
-            String line = n.name() + ": Niech światło cię uleczy.";
+            String line = n.name() + Messages.get("game_session.niech_swiatlo_cie_uleczy");
             log.add(nowMs, EventLog.Kind.CHAT, line);
             priestHeal(nowMs);
             return line;
@@ -1944,7 +1944,7 @@ public final class GameSession {
             // bez pogawedek: na powitanie i kazde inne slowo NPC mowi tylko swoje powitanie (i tematy, jesli ma)
             java.util.List<String> topics = d.topics(n);
             answer = topics.isEmpty() ? n.greeting()
-                    : n.greeting() + " Zapytaj o: " + String.join(", ", topics.subList(0, Math.min(4, topics.size()))) + ".";
+                    : n.greeting() + Messages.get("game_session.zapytaj_o") + String.join(", ", topics.subList(0, Math.min(4, topics.size()))) + ".";
         }
         String line = n.name() + ": " + answer;
         log.add(nowMs, EventLog.Kind.CHAT, line);
@@ -1958,11 +1958,11 @@ public final class GameSession {
         QuestResult r = quests.interact(pc, q);
         String text = r.message();
         if (r == QuestResult.COMPLETED) {
-            text = "Ukończono \"" + q.name() + "\". Nagroda: " + quests.rewardText(q, quests.lastRewardExp()) + ".";
+            text = Messages.get("game_session.ukonczono") + q.name() + Messages.get("game_session.nagroda") + quests.rewardText(q, quests.lastRewardExp()) + ".";
         } else if (r == QuestResult.ACCEPTED) {
-            text = "Przyjęto zadanie \"" + q.name() + "\".";
+            text = Messages.get("game_session.przyjeto_zadanie") + q.name() + "\".";
         } else if (r == QuestResult.LOCKED) {
-            text = "Najpierw ukończ \"" + quests.registry().get(q.requires()).name() + "\".";
+            text = Messages.get("game_session.najpierw_ukoncz") + quests.registry().get(q.requires()).name() + "\".";
         }
         log.add(nowMs, r == QuestResult.COMPLETED || r == QuestResult.ACCEPTED ? EventLog.Kind.SYSTEM : EventLog.Kind.WARNING, text);
         return r;
@@ -1987,20 +1987,20 @@ public final class GameSession {
         FishingResult r = fishing.fish(pc, nowMs);
         switch (r) {
             case CAUGHT:
-                log.add(nowMs, EventLog.Kind.LOOT, "Złowiono: " + items.get(fishing.lastCatchId()).name());
+                log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.zlowiono") + items.get(fishing.lastCatchId()).name());
                 break;
             case NOTHING:
-                log.add(nowMs, EventLog.Kind.INFO, r.message);
+                log.add(nowMs, EventLog.Kind.INFO, r.message());
                 break;
             case COOLDOWN:
                 break;
             default:
-                log.add(nowMs, EventLog.Kind.WARNING, r.message);
+                log.add(nowMs, EventLog.Kind.WARNING, r.message());
         }
         if (r == FishingResult.CAUGHT || r == FishingResult.NOTHING) {
             int left = fishing.bait(pc);
-            if (left == 0) log.add(nowMs, EventLog.Kind.SYSTEM, "Skończyły się robaki na przynętę w plecaku.");
-            else if (left == 5) log.add(nowMs, EventLog.Kind.INFO, "Zostało 5 robaków w plecaku.");
+            if (left == 0) log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.skonczyly_sie_robaki_na"));
+            else if (left == 5) log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zostalo_5_robakow_w"));
         }
         return r;
     }
@@ -2023,7 +2023,7 @@ public final class GameSession {
         pl.fawizja.pixel.item.ItemType t = items.byKey(itemKey);
         if (t.category() != pl.fawizja.pixel.item.ItemCategory.RUNE) {
             if (!tile.equals(pc.position())) {
-                log.add(nowMs, EventLog.Kind.WARNING, CastResult.NOT_USABLE.message);
+                log.add(nowMs, EventLog.Kind.WARNING, CastResult.NOT_USABLE.message());
                 return CastResult.NOT_USABLE;
             }
             return usePotion(itemKey, nowMs);
@@ -2039,7 +2039,7 @@ public final class GameSession {
             return spells.useItemAt(slot, tile, nowMs);
         }
         if (!tile.equals(pc.position())) {
-            log.add(nowMs, EventLog.Kind.WARNING, CastResult.NOT_USABLE.message);
+            log.add(nowMs, EventLog.Kind.WARNING, CastResult.NOT_USABLE.message());
             return CastResult.NOT_USABLE;
         }
         return useSlot(slot, nowMs);
@@ -2143,9 +2143,9 @@ public final class GameSession {
                 if (type != null && !world.isProtectionZone(pc.position())) {
                     boolean had = pc.conditions().has(type);
                     pc.conditions().add(type, pl.fawizja.pixel.world.Fields.ticks(f.kind()), pl.fawizja.pixel.world.Fields.intervalMs(f.kind()),
-                            false, nowMs, f.kind().label);
-                    if (!had) log.add(nowMs, EventLog.Kind.WARNING, f.kind().label + ": " + type.label.toLowerCase(java.util.Locale.ROOT)
-                            + (type.cure != null ? " - wylecz czarem " + type.cure + "." : "."));
+                            false, nowMs, f.kind().label());
+                    if (!had) log.add(nowMs, EventLog.Kind.WARNING, f.kind().label() + ": " + type.label().toLowerCase(java.util.Locale.ROOT)
+                            + (type.cure() != null ? Messages.get("combat_system.wylecz_czarem") + type.cure() + "." : "."));
                 }
             }
         }
@@ -2176,12 +2176,12 @@ public final class GameSession {
     /** Uzycie plecaka z plecaka: staje sie kolejna strona (+20 slotow), jak plecak w plecaku w Tibii. */
     private CastResult attachBag(int slot, long nowMs) {
         if (pc.extraBags() >= PlayerCharacter.MAX_EXTRA_BAGS) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Masz już " + PlayerCharacter.MAX_EXTRA_BAGS + " dodatkowe plecaki.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_juz") + PlayerCharacter.MAX_EXTRA_BAGS + Messages.get("game_session.dodatkowe_plecaki"));
             return CastResult.NOT_USABLE;
         }
         pc.backpack().takeFromSlot(slot, 1);
         pc.attachBag();
-        log.add(nowMs, EventLog.Kind.INFO, "Plecak dołączony: " + pc.backpack().size() + " miejsc (strony " + pc.bagPages() + ").");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.plecak_dolaczony") + pc.backpack().size() + Messages.get("game_session.miejsc_strony") + pc.bagPages() + ").");
         return CastResult.OK;
     }
 
@@ -2189,22 +2189,22 @@ public final class GameSession {
     public boolean detachBag(long nowMs) {
         if (pc.extraBags() == 0) return false;
         if (!pc.detachBag()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Najpierw opróżnij ostatni plecak.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.najpierw_oproznij_ostatni_plec"));
             return false;
         }
         if (!pc.backpack().add(ItemStack.of(items.byKey("backpack").id())).ok()) {
             pc.attachBag();
-            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca na odpięty plecak.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_na_odpiety"));
             return false;
         }
-        log.add(nowMs, EventLog.Kind.INFO, "Plecak odpięty: " + pc.backpack().size() + " miejsc.");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.plecak_odpiety") + pc.backpack().size() + " miejsc.");
         return true;
     }
 
     /** Uzycie monet: monety lacza sie i wymieniaja same, wiec tylko opis wartosci. */
     private CastResult exchangeCoins(int slot, long nowMs) {
         pc.backpack().normalizeCoins();
-        log.add(nowMs, EventLog.Kind.INFO, "Monety wymieniają się same: 100 złotych = 1 platynowa, 100 platynowych = 1 kryształowa. Masz "
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.monety_wymieniaja_sie_same")
                 + String.format("%,d", Money.totalValue(pc.backpack())) + " gp.");
         return CastResult.OK;
     }
@@ -2219,7 +2219,7 @@ public final class GameSession {
 
     private CastResult startRecall(long nowMs) {
         if (nowMs < pc.pzBlockedUntil()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Po walce z graczem zwój nie działa jeszcze przez "
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.po_walce_z_graczem_2")
                     + ((pc.pzBlockedUntil() - nowMs + 999) / 1000) + " s.");
             return CastResult.OK;
         }
@@ -2227,7 +2227,7 @@ public final class GameSession {
         recallAtMs = nowMs + RECALL_MS;
         recallFrom = pc.position();
         recallHealth = pc.health();
-        log.add(nowMs, EventLog.Kind.INFO, "Czytasz zwój powrotu... nie ruszaj się przez 3 s.");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.czytasz_zwoj_powrotu_nie"));
         return CastResult.OK;
     }
 
@@ -2235,7 +2235,7 @@ public final class GameSession {
         if (recallAtMs < 0) return;
         if (!pc.position().equals(recallFrom) || pc.health() < recallHealth || pc.isDead() || nowMs < pc.pzBlockedUntil()) {
             recallAtMs = -1;
-            log.add(nowMs, EventLog.Kind.WARNING, "Skupienie przerwane - zwój nie zadziałał.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.skupienie_przerwane_zwoj_nie"));
             return;
         }
         recallHealth = Math.max(recallHealth, pc.health());
@@ -2248,7 +2248,7 @@ public final class GameSession {
         }
         if (slot < 0 || pc.backpack().takeFromSlot(slot, 1) == null) return;
         teleport(world.templeOf(pc.homeTown()), nowMs);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Zwój rozsypuje się w pył. Jesteś w świątyni " + pc.homeTown() + ".");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zwoj_rozsypuje_sie_w") + pc.homeTown() + ".");
     }
 
     /** Wyzwanie ze zwoju (Challenge); null, gdy nie trwa. */
@@ -2258,22 +2258,22 @@ public final class GameSession {
 
     private CastResult startChallenge(int slot, long nowMs) {
         if (challenge != null) {
-            log.add(nowMs, EventLog.Kind.INFO, "Wyzwanie już trwa: fala " + (challenge.wave + 1) + " z " + Challenge.WAVES.length + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wyzwanie_juz_trwa_fala") + (challenge.wave + 1) + Messages.get("common.z") + Challenge.WAVES.length + ".");
             return CastResult.OK;
         }
         if (world.isProtectionZone(pc.position())) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Zwoju wyzwania nie da się odczytać w strefie ochronnej.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.zwoju_wyzwania_nie_da"));
             return CastResult.OK;
         }
         pl.fawizja.pixel.monster.MonsterType t = pl.fawizja.pixel.quest.HuntTask.pick(pc.level(), monsters.spawnedTypes(), rng);
         if (t == null) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Zwój milczy: w tej krainie nie ma z kim walczyć.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.zwoj_milczy_w_tej"));
             return CastResult.OK;
         }
         if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
         challenge = new Challenge(t, pc.position(), nowMs + Challenge.TIME_MS);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Wyzwanie: " + Challenge.WAVES.length + " fale - " + t.name()
-                + ". Pokonaj je w " + (Challenge.TIME_MS / 60_000) + " min i nie oddalaj się.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.wyzwanie") + Challenge.WAVES.length + Messages.get("game_session.fale") + t.name()
+                + Messages.get("game_session.pokonaj_je_w") + (Challenge.TIME_MS / 60_000) + Messages.get("game_session.min_i_nie_oddalaj"));
         spawnWave(nowMs);
         return CastResult.OK;
     }
@@ -2284,7 +2284,7 @@ public final class GameSession {
         for (pl.fawizja.pixel.monster.Monster m : monsters.spawnEvent(c.type.key(), c.center, Challenge.RADIUS, Challenge.WAVES[c.wave], nowMs)) {
             c.ids.add(m.id());
         }
-        log.add(nowMs, EventLog.Kind.WARNING, "Fala " + (c.wave + 1) + " z " + Challenge.WAVES.length + ": " + c.ids.size() + "x " + c.type.name() + "!");
+        log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.fala") + (c.wave + 1) + Messages.get("common.z") + Challenge.WAVES.length + ": " + c.ids.size() + "x " + c.type.name() + "!");
     }
 
     private void updateChallenge(long nowMs) {
@@ -2295,7 +2295,7 @@ public final class GameSession {
         if (pc.isDead() || left || nowMs >= c.untilMs) {
             monsters.clearEvent(c.ids);
             challenge = null;
-            log.add(nowMs, EventLog.Kind.WARNING, "Wyzwanie przepadło" + (left ? " (za daleko od miejsca zwoju)." : nowMs >= c.untilMs ? " (koniec czasu)." : "."));
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.wyzwanie_przepadlo") + (left ? Messages.get("game_session.za_daleko_od_miejsca") : nowMs >= c.untilMs ? Messages.get("game_session.koniec_czasu") : "."));
             return;
         }
         for (pl.fawizja.pixel.monster.Monster m : monsters.monsters()) {
@@ -2310,8 +2310,8 @@ public final class GameSession {
         pc.stats().recordChallenge();
         long gold = Challenge.rewardGold(c.type);
         pc.bank().credit(gold);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Wyzwanie ukończone! " + String.format("%,d gp", gold) + " na konto.");
-        combat.awardExperience(pl.fawizja.pixel.balance.Balance.applyRate(Challenge.rewardExp(c.type), pl.fawizja.pixel.balance.Balance.expRate(pc.level())), "Wyzwanie", nowMs);
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.wyzwanie_ukonczone") + String.format("%,d gp", gold) + Messages.get("game_session.na_konto"));
+        combat.awardExperience(pl.fawizja.pixel.balance.Balance.applyRate(Challenge.rewardExp(c.type), pl.fawizja.pixel.balance.Balance.expRate(pc.level())), Messages.get("game_session.wyzwanie_2"), nowMs);
     }
 
     /** Siodlo: oswaja konia na stale (przedmiot znika). */
@@ -2320,13 +2320,13 @@ public final class GameSession {
         pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
         pl.fawizja.pixel.item.Enchantments.Kind k = pl.fawizja.pixel.item.Enchantments.Kind.EXP;
         if (!e.canExtend(k)) {
-            log.add(nowMs, EventLog.Kind.INFO, "Wiedzy ze zwojów starczy jeszcze na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wiedzy_ze_zwojow_starczy") + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + ".");
             return CastResult.OK;
         }
         if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
         e.extend(k);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Zwój nauki: +" + pl.fawizja.pixel.item.Enchantments.EXP_BONUS_PERCENT
-                + "% doświadczenia za potwory przez " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zwoj_nauki") + pl.fawizja.pixel.item.Enchantments.EXP_BONUS_PERCENT
+                + Messages.get("game_session.doswiadczenia_za_potwory_przez") + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
         return CastResult.OK;
     }
 
@@ -2336,29 +2336,29 @@ public final class GameSession {
         pl.fawizja.pixel.item.ItemType potion = items.get(pc.backpack().get(slot).itemId());
         pl.fawizja.pixel.item.Enchantments.Kind k = pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(potion.key());
         if (pc.level() < potion.minLevel()) {
-            log.add(nowMs, EventLog.Kind.WARNING, potion.name() + ": od poziomu " + potion.minLevel() + ".");
+            log.add(nowMs, EventLog.Kind.WARNING, potion.name() + Messages.get("game_session.od_poziomu") + potion.minLevel() + ".");
             return CastResult.LEVEL_TOO_LOW;
         }
         if (!e.canExtend(k)) {
-            log.add(nowMs, EventLog.Kind.INFO, k.label() + " działa jeszcze " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + ".");
+            log.add(nowMs, EventLog.Kind.INFO, k.label() + Messages.get("game_session.dziala_jeszcze") + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + ".");
             return CastResult.OK;
         }
         if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
         e.extend(k);
-        log.add(nowMs, EventLog.Kind.SYSTEM, k.label() + ": " + k.effect() + " przez "
+        log.add(nowMs, EventLog.Kind.SYSTEM, k.label() + ": " + k.effect() + Messages.get("game_session.przez")
                 + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
         return CastResult.OK;
     }
 
     private CastResult useSaddle(int slot, long nowMs) {
         if (pc.hasMount()) {
-            log.add(nowMs, EventLog.Kind.INFO, "Masz już wierzchowca. Wsiadasz przyciskiem KOŃ (klawisz M).");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.masz_juz_wierzchowca_wsiadasz"));
             return CastResult.OK;
         }
         if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
         pc.setHasMount(true);
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Oswojono konia! Wsiadaj przyciskiem KOŃ (klawisz M): +"
-                + PlayerCharacter.MOUNT_SPEED + " szybkości.");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.oswojono_konia_wsiadaj_przycis")
+                + PlayerCharacter.MOUNT_SPEED + Messages.get("game_session.szybkosci"));
         return CastResult.OK;
     }
 
@@ -2373,34 +2373,34 @@ public final class GameSession {
         if (n == null) return false;
         ItemStack worn = pc.equipment().get(slot);
         if (worn == null) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": nic tam nie nosisz.");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.nic_tam_nie_nosisz"));
             return false;
         }
         pl.fawizja.pixel.item.ItemType t = items.get(worn.itemId());
         if (!pl.fawizja.pixel.item.Upgrade.upgradable(t)) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": tego nie da się ulepszyć.");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.tego_nie_da_sie"));
             return false;
         }
         int next = worn.upgrade() + 1;
         if (next > pl.fawizja.pixel.item.Upgrade.MAX) {
             log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade())
-                    + " jest już ulepszony do końca.");
+                    + Messages.get("game_session.jest_juz_ulepszony_do"));
             return false;
         }
         long price = pl.fawizja.pixel.item.Upgrade.price(t, next);
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": ulepszenie do +" + next + " kosztuje " + price + " gp (monety w plecaku).");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.ulepszenie_do") + next + " kosztuje " + price + Messages.get("game_session.gp_monety_w_plecaku"));
             return false;
         }
         pc.backpack().commitFrom(tx);
         if (rng.nextInt(100) >= pl.fawizja.pixel.item.Upgrade.chancePercent(next)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie udało się (" + price + " gp). " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade())
-                    + " zostaje bez zmian.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_udalo_sie") + price + " gp). " + pl.fawizja.pixel.item.Upgrade.name(t, worn.upgrade())
+                    + Messages.get("game_session.zostaje_bez_zmian"));
             return false;
         }
         pc.equipment().setDirect(slot, worn.withUpgrade(next));
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Udało się! " + pl.fawizja.pixel.item.Upgrade.name(t, next) + " (" + price + " gp).");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.udalo_sie") + pl.fawizja.pixel.item.Upgrade.name(t, next) + " (" + price + " gp).");
         return true;
     }
 
@@ -2411,19 +2411,19 @@ public final class GameSession {
         pl.fawizja.pixel.item.Enchantments e = pc.enchantments();
         if (!e.canExtend(kind)) {
             log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + kind.label().toLowerCase(java.util.Locale.ROOT)
-                    + " starczy jeszcze na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(kind)) + ". Wróć później.");
+                    + Messages.get("game_session.starczy_jeszcze_na") + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(kind)) + Messages.get("game_session.wroc_pozniej"));
             return false;
         }
         long price = pl.fawizja.pixel.item.Enchantments.price(kind, pc.level());
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": zaklęcie kosztuje " + price + " gp (monety w plecaku).");
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.zaklecie_kosztuje") + price + Messages.get("game_session.gp_monety_w_plecaku"));
             return false;
         }
         pc.backpack().commitFrom(tx);
         e.extend(kind);
         log.add(nowMs, EventLog.Kind.SYSTEM, kind.label() + " na " + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(kind))
-                + " polowania (" + price + " gp).");
+                + Messages.get("game_session.polowania") + price + " gp).");
         return true;
     }
 
@@ -2432,7 +2432,7 @@ public final class GameSession {
         Npc n = npcNearby();
         if (n == null || !n.isSmith()) {
             log.add(nowMs, EventLog.Kind.WARNING, n != null && n.role() == NpcRole.MERCHANT
-                    ? n.name() + ": tym zajmuje się kowal (kuźnia w mieście)." : TradeResult.TOO_FAR.message());
+                    ? n.name() + Messages.get("game_session.tym_zajmuje_sie_kowal") : TradeResult.TOO_FAR.message());
             return null;
         }
         return n;
@@ -2466,7 +2466,7 @@ public final class GameSession {
     public Npc imbuerNearby(long nowMs) {
         Npc n = npcNearby();
         if (n == null || !n.imbues()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n != null ? n.name() + ": nasycenia robi zaklinacz albo kowal (w każdym mieście)."
+            log.add(nowMs, EventLog.Kind.WARNING, n != null ? n.name() + Messages.get("game_session.nasycenia_robi_zaklinacz_albo")
                     : TradeResult.TOO_FAR.message());
             return null;
         }
@@ -2497,18 +2497,18 @@ public final class GameSession {
     /** Tytul z osiagniecia: key null albo "-" zdejmuje tytul; tylko zdobyte osiagniecia. */
     public boolean chooseTitle(String key, long nowMs) {
         if (key == null || key.equals("-")) {
-            if (pc.title() != null) log.add(nowMs, EventLog.Kind.INFO, "Zdejmujesz tytuł.");
+            if (pc.title() != null) log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zdejmujesz_tytul"));
             pc.setTitle(null);
             return true;
         }
         pl.fawizja.pixel.achievement.Achievement a = null;
         for (pl.fawizja.pixel.achievement.Achievement x : pl.fawizja.pixel.achievement.Achievement.values()) if (x.name().equals(key)) a = x;
         if (a == null || !pc.achievements().has(a)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Ten tytuł trzeba najpierw zdobyć (osiągnięcia, klawisz O).");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.ten_tytul_trzeba_najpierw"));
             return false;
         }
         pc.setTitle(a.name());
-        log.add(nowMs, EventLog.Kind.INFO, "Twój tytuł: " + a.title() + ".");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.twoj_tytul") + a.title() + ".");
         return true;
     }
 
@@ -2516,11 +2516,11 @@ public final class GameSession {
     public boolean chooseOutfit(String color, long nowMs) {
         int i = pl.fawizja.pixel.character.Outfit.parse(color);
         if (i < 0) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie ma takiego koloru stroju. Kolory: " + String.join(", ", pl.fawizja.pixel.character.Outfit.NAMES) + ".");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_ma_takiego_koloru") + String.join(", ", pl.fawizja.pixel.character.Outfit.NAMES) + ".");
             return false;
         }
         pc.setOutfit(i);
-        log.add(nowMs, EventLog.Kind.INFO, i == 0 ? "Strój w kolorze profesji." : "Strój: " + pl.fawizja.pixel.character.Outfit.name(i) + ".");
+        log.add(nowMs, EventLog.Kind.INFO, i == 0 ? Messages.get("game_session.stroj_w_kolorze_profesji") : Messages.get("game_session.stroj") + pl.fawizja.pixel.character.Outfit.name(i) + ".");
         return true;
     }
 
@@ -2528,11 +2528,11 @@ public final class GameSession {
     private CastResult togglePet(pl.fawizja.pixel.item.ItemType pet, long nowMs) {
         if (pet.key().equals(pc.pet())) {
             pc.setPet(null);
-            log.add(nowMs, EventLog.Kind.INFO, pet.name() + " odpoczywa w plecaku.");
+            log.add(nowMs, EventLog.Kind.INFO, pet.name() + Messages.get("game_session.odpoczywa_w_plecaku"));
         } else {
             pc.setPet(pet.key());
-            log.add(nowMs, EventLog.Kind.INFO, pet.name() + " chodzi teraz za tobą: +" + PlayerCharacter.PET_EXP_PERCENT
-                    + "% doświadczenia z potworów.");
+            log.add(nowMs, EventLog.Kind.INFO, pet.name() + Messages.get("game_session.chodzi_teraz_za_toba") + PlayerCharacter.PET_EXP_PERCENT
+                    + Messages.get("game_session.doswiadczenia_z_potworow"));
         }
         return CastResult.OK;
     }
@@ -2549,26 +2549,26 @@ public final class GameSession {
         }
         if (t != null && pc.backpack().count(t.id()) > 0) return;
         pc.setPet(null);
-        if (t != null) log.add(nowMs, EventLog.Kind.INFO, t.name() + " odchodzi, bo nie masz go już w plecaku.");
+        if (t != null) log.add(nowMs, EventLog.Kind.INFO, t.name() + Messages.get("game_session.odchodzi_bo_nie_masz"));
     }
 
     /** Wsiadanie i zsiadanie z wierzchowca (pod ziemia nie mozna jechac). */
     public void toggleMount(long nowMs) {
         if (!pc.hasMount()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Nie masz wierzchowca - kup siodło u kupca i użyj go.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_masz_wierzchowca_kup"));
             return;
         }
         if (pc.isMounted()) {
             pc.setMounted(false);
-            log.add(nowMs, EventLog.Kind.INFO, "Zsiadasz z konia.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zsiadasz_z_konia"));
             return;
         }
         if (pc.position().z() < 0) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Pod ziemią koń się nie zmieści.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.pod_ziemia_kon_sie"));
             return;
         }
         pc.setMounted(true);
-        log.add(nowMs, EventLog.Kind.INFO, "Wsiadasz na konia (+" + PlayerCharacter.MOUNT_SPEED + " szybkości).");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wsiadasz_na_konia") + PlayerCharacter.MOUNT_SPEED + Messages.get("game_session.szybkosci_2"));
     }
 
     /** Mikstury szybkich przyciskow od najsilniejszej; przycisk HP/MP uzywa najsilniejszej dozwolonej, ktora masz. */
@@ -2576,7 +2576,7 @@ public final class GameSession {
     static final String[] HP_TIERS = {"ultimate_health_potion", "supreme_health_potion", "ultimate_spirit_potion",
             "strong_health_potion", "great_spirit_potion", "great_health_potion", "health_potion"};
     static final String[] MP_TIERS = {"ultimate_mana_potion", "supreme_mana_potion", "ultimate_spirit_potion",
-            "great_spirit_potion", "strong_mana_potion", "great_mana_potion", "mana_potion"};
+            "great_spirit_potion", Messages.get("character_factory.strong_mana_potion"), Messages.get("game_session.great_mana_potion"), "mana_potion"};
 
     /** Klucz mikstury dla przycisku HP (mana = false) albo MP; bez zadnej w plecaku - zwykla. */
     public String quickPotion(boolean mana) {
@@ -2608,9 +2608,9 @@ public final class GameSession {
         Recipe r = recipes.get(recipeKey);
         CastResult res = CraftingSystem.craft(pc, r);
         if (res == CastResult.OK) {
-            log.add(nowMs, EventLog.Kind.LOOT, "Wytworzono: " + r.resultCount() + "x " + items.get(r.resultItemId()).name());
+            log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.wytworzono") + r.resultCount() + "x " + items.get(r.resultItemId()).name());
         } else {
-            log.add(nowMs, EventLog.Kind.WARNING, res.message);
+            log.add(nowMs, EventLog.Kind.WARNING, res.message());
         }
         return res;
     }
@@ -2690,7 +2690,7 @@ public final class GameSession {
         updateChallenge(nowMs);
         if (pc.isMounted() && pc.position().z() < 0) {
             pc.setMounted(false);
-            log.add(nowMs, EventLog.Kind.INFO, "Zostawiasz konia przy zejściu pod ziemię.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zostawiasz_konia_przy_zejsciu"));
         }
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
@@ -2700,10 +2700,10 @@ public final class GameSession {
             forge().tick(nowMs, dt, world.isProtectionZone(pc.position()));
             if (!world.isProtectionZone(pc.position())) {
                 pl.fawizja.pixel.item.Enchantments.Kind gone = pc.enchantments().tick(dt);
-                if (gone != null) log.add(nowMs, EventLog.Kind.WARNING, "Zaklęcie wygasło: " + gone.label().toLowerCase(java.util.Locale.ROOT) + ".");
+                if (gone != null) log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.zaklecie_wygaslo") + gone.label().toLowerCase(java.util.Locale.ROOT) + ".");
             }
             if (pc.tickTorch(dt, torchId) == pl.fawizja.pixel.character.PlayerCharacter.TorchTick.BURNED_OUT) {
-                log.add(nowMs, EventLog.Kind.WARNING, "Pochodnia się wypaliła.");
+                log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.pochodnia_sie_wypalila"));
             }
         }
         lastUpdateMs = nowMs;
@@ -2742,14 +2742,14 @@ public final class GameSession {
                 onFloorChanged(nowMs);
             } else if (r == MoveResult.DOOR_CLOSED && nowMs - lastDoorHintMs > DOOR_HINT_MS) {
                 lastDoorHintMs = nowMs;
-                log.add(nowMs, EventLog.Kind.INFO, DOOR_HINT);
+                log.add(nowMs, EventLog.Kind.INFO, Messages.tr(DOOR_HINT));
             } else if (r == MoveResult.LEVEL_TOO_LOW && nowMs - lastGateWarningMs > 3000) {
                 lastGateWarningMs = nowMs;
                 Position gate = pc.position().translate(requested.dx, requested.dy);
                 if (world.levelDoorAt(gate) > 0) {
                     log.add(nowMs, EventLog.Kind.WARNING, levelDoorRefusal(world.levelDoorAt(gate)));
                 } else {
-                    log.add(nowMs, EventLog.Kind.WARNING, "Strażnik: dalej wpuszczamy tylko od poziomu "
+                    log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.straznik_dalej_wpuszczamy_tylk")
                             + world.requiredLevelAt(gate) + ".");
                 }
             }
@@ -2759,8 +2759,8 @@ public final class GameSession {
         if (!sharedWorld && altarsLocal) updateAltarTorches();
         boolean night = isNight(nowMs);
         if (wasNight != null && night != wasNight) {
-            log.add(nowMs, EventLog.Kind.INFO, night ? "Zapada noc. Nocne drapieżniki są groźniejsze."
-                    : "Wstaje dzień.");
+            log.add(nowMs, EventLog.Kind.INFO, night ? Messages.get("game_session.zapada_noc_nocne_drapiezniki")
+                    : Messages.get("game_session.wstaje_dzien"));
         }
         wasNight = night;
         monsters.setNight(night);
@@ -2782,9 +2782,9 @@ public final class GameSession {
         if (r == currentRegion) return;
         currentRegion = r;
         if (r == null) return;
-        log.add(nowMs, EventLog.Kind.INFO, r.name() + " (zalecany poziom " + r.levelMin() + "-" + r.levelMax() + ")");
+        log.add(nowMs, EventLog.Kind.INFO, r.name() + Messages.get("game_session.zalecany_poziom") + r.levelMin() + "-" + r.levelMax() + ")");
         if (r.levelMin() > pc.level() + 15) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Uwaga: ten region jest zbyt niebezpieczny dla poziomu " + pc.level() + ".");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.uwaga_ten_region_jest") + pc.level() + ".");
         }
     }
 
@@ -2797,7 +2797,7 @@ public final class GameSession {
         log.add(nowMs, EventLog.Kind.INFO, floorMessage(pc.position().z()));
         int danger = monsters.maxMonsterLevelNear(pc.position(), DANGER_RADIUS);
         if (danger > pc.level() * 2 + 10) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Uwaga: niebezpieczny obszar (potwory do poziomu " + danger + ").");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.uwaga_niebezpieczny_obszar_pot") + danger + ").");
         }
     }
 
@@ -2821,12 +2821,12 @@ public final class GameSession {
     public void setFightMode(pl.fawizja.pixel.combat.FightMode m, long nowMs) {
         if (m == null) return;
         pc.setFightMode(m);
-        log.add(nowMs, EventLog.Kind.INFO, "Tryb walki: " + m.label().toLowerCase(java.util.Locale.ROOT) + ".");
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.tryb_walki") + m.label().toLowerCase(java.util.Locale.ROOT) + ".");
     }
 
     public void cycleTarget(long nowMs) {
         Monster m = combat.cycleTarget();
-        if (m == null) log.add(nowMs, EventLog.Kind.INFO, "Brak celu w pobliżu.");
+        if (m == null) log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.brak_celu_w_poblizu"));
     }
 
     /** Wybor celu dotknieciem kafelka. Zwraca true, jesli trafiono potwora. */
@@ -2872,8 +2872,8 @@ public final class GameSession {
     public boolean togglePvpMode(long nowMs) {
         boolean on = togglePvpMode();
         log.add(nowMs, on ? EventLog.Kind.WARNING : EventLog.Kind.INFO, on
-                ? "Tryb PvP włączony (tryb bezpieczny wyłączony): możesz atakować graczy bez czaszki - dostaniesz białą czaszkę."
-                : "Tryb PvP wyłączony (tryb bezpieczny): atakujesz tylko graczy z czaszką. Uwaga: jak w Tibii czary i runy obszarowe ranią każdego gracza w zasięgu.");
+                ? Messages.get("game_session.tryb_pvp_wlaczony_tryb")
+                : Messages.get("game_session.tryb_pvp_wylaczony_tryb"));
         return on;
     }
 
@@ -2888,8 +2888,8 @@ public final class GameSession {
     /** Komunikat przy probie wejscia do PZ z blokada (czaszka po ataku na gracza). */
     public String pzBlockedMessage(long nowMs) {
         long left = (pc.pzBlockedUntil() - nowMs + 999) / 1000;
-        String time = left >= 60 ? (left / 60) + " min " + (left % 60) + " s" : left + " s";
-        return "Walczysz z graczem - nie wejdziesz do strefy ochronnej jeszcze przez " + time + ".";
+        String time = left >= 60 ? (left / 60) + Messages.get("server_world.min_3") + (left % 60) + " s" : left + " s";
+        return Messages.get("game_session.walczysz_z_graczem_nie") + time + ".";
     }
 
     private boolean pzLocked(Position from, Direction d, long nowMs) {
@@ -2960,8 +2960,8 @@ public final class GameSession {
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
     public static String floorMessage(int z) {
-        if (z == 0) return "Jesteś na powierzchni.";
-        return z > 0 ? "Piętro +" + z + "." : "Podziemia, poziom " + z + ".";
+        if (z == 0) return Messages.get("game_session.jestes_na_powierzchni");
+        return z > 0 ? Messages.get("game_session.pietro") + z + "." : Messages.get("game_session.podziemia_poziom") + z + ".";
     }
 
     // ------------------------------------------------------------------ zwykle skrzynie (2026-10-28)
@@ -2975,11 +2975,11 @@ public final class GameSession {
 
     private static String crateName(String key, boolean accusative) {
         switch (key) {
-            case "barrel": return accusative ? "beczkę" : "Beczka";
-            case "sack": return accusative ? "worek" : "Worek";
-            case "chest": return accusative ? "kufer" : "Kufer";
-            case "wardrobe": return accusative ? "szafę" : "Szafa";
-            default: return accusative ? "skrzynię" : "Skrzynia";
+            case "barrel": return accusative ? "beczkę" : Messages.get("game_session.beczka");
+            case "sack": return accusative ? "worek" : Messages.get("game_session.worek");
+            case "chest": return accusative ? "kufer" : Messages.get("game_session.kufer");
+            case "wardrobe": return accusative ? "szafę" : Messages.get("game_session.szafa");
+            default: return accusative ? Messages.get("game_session.skrzynie") : Messages.get("game_session.skrzynia");
         }
     }
 
@@ -2997,21 +2997,21 @@ public final class GameSession {
     public boolean useCrate(Position p, long nowMs) {
         if (p.z() != pc.position().z() || pc.position().distanceTo(p) > 1 || !world.crates().isStorage(p)) return false;
         if (!mayHandle(p)) {
-            log.add(nowMs, EventLog.Kind.WARNING, mayEnter(p) ? "Masz w tym domu tylko wstęp - schowków nie otworzysz."
-                    : "To schowek w cudzym domu.");
+            log.add(nowMs, EventLog.Kind.WARNING, mayEnter(p) ? Messages.get("game_session.masz_w_tym_domu")
+                    : Messages.get("game_session.to_schowek_w_cudzym"));
             return true;
         }
         String key = objectKey(p);
         if (p.equals(openCrate)) {
             openCrate = null;
-            log.add(nowMs, EventLog.Kind.INFO, "Zamykasz " + crateName(key, true) + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zamykasz") + crateName(key, true) + ".");
             return true;
         }
         openCrate = p;
         world.crates().open(p, items);
         int n = world.crates().peek(p).size();
-        log.add(nowMs, EventLog.Kind.INFO, "Otwierasz " + crateName(key, true) + (n == 0 ? ". Pusto - możesz tu coś schować."
-                : ". W środku: " + n + " " + (n == 1 ? "rzecz" : n < 5 ? "rzeczy" : "rzeczy") + "."));
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.otwierasz") + crateName(key, true) + (n == 0 ? Messages.get("game_session.pusto_mozesz_tu_cos")
+                : Messages.get("game_session.w_srodku") + n + " " + (n == 1 ? "rzecz" : n < 5 ? "rzeczy" : "rzeczy") + "."));
         return true;
     }
 
@@ -3044,7 +3044,7 @@ public final class GameSession {
         }
         String key = objectKey(p);
         return crateWindows.computeIfAbsent(p, q -> new Npc(Npc.CRATE, crateName(key, false), NpcRole.BANKER,
-                nearestTown(q), q, null, "Schowek na " + pl.fawizja.pixel.world.Crates.SLOTS + " rzeczy.", "#8a6a3a"));
+                nearestTown(q), q, null, Messages.get("game_session.schowek_na") + pl.fawizja.pixel.world.Crates.SLOTS + " rzeczy.", "#8a6a3a"));
     }
 
     /** Zawartosc otwartej skrzyni (do okna); pusta lista, gdy nic nie jest otwarte. */
@@ -3064,10 +3064,10 @@ public final class GameSession {
         pl.fawizja.pixel.inventory.Container c = openCrateContainer(nowMs);
         if (c == null) return 0;
         if (pl.fawizja.pixel.economy.Currency.isCoin(itemId)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Monety trzymaj w banku, nie w skrzyni.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.monety_trzymaj_w_banku"));
             return 0;
         }
-        int n = moveAll(pc.backpack(), c, itemId, nowMs, "Schowano", "Skrzynia jest pełna.");
+        int n = moveAll(pc.backpack(), c, itemId, nowMs, Messages.get("game_session.schowano"), Messages.get("game_session.skrzynia_jest_pelna"));
         if (n > 0) cratesChanged(openCrate);
         return n;
     }
@@ -3076,14 +3076,14 @@ public final class GameSession {
     public int crateTake(int itemId, long nowMs) {
         pl.fawizja.pixel.inventory.Container c = openCrateContainer(nowMs);
         if (c == null) return 0;
-        int n = moveAll(c, pc.backpack(), itemId, nowMs, "Wyjęto", "Brak miejsca w plecaku.");
+        int n = moveAll(c, pc.backpack(), itemId, nowMs, Messages.get("game_session.wyjeto"), Messages.get("server_world.brak_miejsca_w_plecaku"));
         if (n > 0) cratesChanged(openCrate);
         return n;
     }
 
     private pl.fawizja.pixel.inventory.Container openCrateContainer(long nowMs) {
         if (crateNearby() == null || !mayHandle(openCrate)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Podejdź do skrzyni i otwórz ją.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.podejdz_do_skrzyni_i"));
             return null;
         }
         return world.crates().open(openCrate, items);
@@ -3102,7 +3102,7 @@ public final class GameSession {
         if (!mayHandle(at)) {
             if (nowMs - lastPushNoteMs > 4000) {
                 lastPushNoteMs = nowMs;
-                log.add(nowMs, EventLog.Kind.INFO, "Masz w tym domu tylko wstęp - nie przesuniesz mebli.");
+                log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.masz_w_tym_domu_2"));
             }
             return false;
         }
@@ -3112,7 +3112,7 @@ public final class GameSession {
         if (!c.canPush(at, d, blocked)) {
             if (nowMs - lastPushNoteMs > 4000) {
                 lastPushNoteMs = nowMs;
-                log.add(nowMs, EventLog.Kind.INFO, crateName(objectKey(at), false) + " nie przesunie się dalej.");
+                log.add(nowMs, EventLog.Kind.INFO, crateName(objectKey(at), false) + Messages.get("game_session.nie_przesunie_sie_dalej"));
             }
             return false;
         }
@@ -3130,7 +3130,7 @@ public final class GameSession {
                 onFloorChanged(nowMs);
                 break;
             case NEEDS_ROPE:
-                log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
+                log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.potrzebujesz_liny"));
                 break;
             default:
                 if (toggleTraining(nowMs)) break;
@@ -3138,7 +3138,7 @@ public final class GameSession {
                 if (searchCorpse(nowMs)) break;
                 if (useCrateNearby(nowMs)) break;
                 if (pickBerriesNearby(nowMs)) break;
-                if (!gatherHerbs(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, "Nie ma tu nic do użycia.");
+                if (!gatherHerbs(nowMs)) log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_ma_tu_nic"));
         }
     }
 
@@ -3151,8 +3151,8 @@ public final class GameSession {
         if (chests == null || !chests.trapAt(pc.position()) || nowMs - lastTrapMs < 1500) return;
         lastTrapMs = nowMs;
         int dmg = pl.fawizja.pixel.treasure.TreasureChests.trapDamage(pc.maxHealth(), pc.health(), pc.position().z());
-        int dealt = combat.environmentHit("Pułapka z kolcami", dmg, nowMs);
-        log.add(nowMs, EventLog.Kind.WARNING, "Pułapka z kolcami! -" + dealt + " HP. Omijaj metalowe płyty w lochach.");
+        int dealt = combat.environmentHit(Messages.get("game_session.pulapka_z_kolcami"), dmg, nowMs);
+        log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.pulapka_z_kolcami_2") + dealt + Messages.get("game_session.hp_omijaj_metalowe_plyty"));
     }
 
     /** Krzak obok: ziela lecznicze do plecaka (krzak odrasta 10 min). false = nie ma krzaka obok. */
@@ -3160,7 +3160,7 @@ public final class GameSession {
         if (!items.containsKey("healing_herb")) return false;
         int herbId = items.byKey("healing_herb").id();
         if (herbs.readyNear(pc.position(), nowMs) && !pc.backpack().canAdd(herbId, 2)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_w_plecaku"));
             return true;
         }
         return herbResult(herbs.gather(pc.position(), rng, nowMs), nowMs);
@@ -3170,7 +3170,7 @@ public final class GameSession {
     private boolean gatherHerbsAt(Position b, long nowMs) {
         if (!items.containsKey("healing_herb") || !herbs.isHerbBush(b)) return false;
         if (!pc.backpack().canAdd(items.byKey("healing_herb").id(), 2)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_w_plecaku"));
             return true;
         }
         return herbResult(herbs.gatherAt(b, rng, nowMs), nowMs);
@@ -3181,17 +3181,17 @@ public final class GameSession {
             case NO_BUSH:
                 return false;
             case REGROWING:
-                log.add(nowMs, EventLog.Kind.INFO, "Ten krzak jest już obrany. Ziele odrośnie za " + Math.max(1, (r.readyInMs() + 59_999) / 60_000) + " min.");
+                log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.ten_krzak_jest_juz") + Math.max(1, (r.readyInMs() + 59_999) / 60_000) + Messages.get("server_world.min_2"));
                 return true;
             default:
                 int id = items.byKey("healing_herb").id();
                 if (!pc.backpack().add(new ItemStack(id, r.count())).ok()) {
-                    log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na zioła.");
+                    log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_w_plecaku"));
                     return true;
                 }
                 pc.stats().recordHerbs(r.count());
-                log.add(nowMs, EventLog.Kind.LOOT, "Zebrano: " + r.count() + "x " + items.get(id).name()
-                        + " (masz " + pc.backpack().count(id) + "; 4 ziela = mikstura zdrowia w księdze).");
+                log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.zebrano") + r.count() + "x " + items.get(id).name()
+                        + Messages.get("game_session.masz") + pc.backpack().count(id) + Messages.get("game_session.4_ziela_mikstura_zdrowia"));
                 return true;
         }
     }
@@ -3203,28 +3203,28 @@ public final class GameSession {
         pl.fawizja.pixel.gathering.BerryBushes.Kind kind = berries.kindAt(b);
         if (kind == null || !items.containsKey(kind.itemKey)) return false;
         pl.fawizja.pixel.item.ItemType fruit = items.byKey(kind.itemKey);
-        String bush = kind == pl.fawizja.pixel.gathering.BerryBushes.Kind.BLUEBERRY ? "Krzak jagód" : "Krzak malin";
+        String bush = kind == pl.fawizja.pixel.gathering.BerryBushes.Kind.BLUEBERRY ? Messages.get("game_session.krzak_jagod") : Messages.get("game_session.krzak_malin");
         if (berries.isEmpty(b, nowMs)) {
             pl.fawizja.pixel.gathering.BerryBushes.Result r = berries.pick(b, nowMs);
-            log.add(nowMs, EventLog.Kind.INFO, bush + " jest pusty. Owoce odrosną za "
-                    + Math.max(1, (r.readyInMs() + 59_999) / 60_000) + " min.");
+            log.add(nowMs, EventLog.Kind.INFO, bush + Messages.get("game_session.jest_pusty_owoce_odrosna")
+                    + Math.max(1, (r.readyInMs() + 59_999) / 60_000) + Messages.get("server_world.min_2"));
             return true;
         }
         if (!pc.backpack().canAdd(fruit.id(), pl.fawizja.pixel.gathering.BerryBushes.PER_PICK)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na owoce.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_w_plecaku_2"));
             return true;
         }
         pl.fawizja.pixel.gathering.BerryBushes.Result r = berries.pick(b, nowMs);
         if (!pc.backpack().add(new ItemStack(fruit.id(), r.count())).ok()) {
             berries.undo(b);
-            log.add(nowMs, EventLog.Kind.WARNING, "Brak miejsca w plecaku na owoce.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_w_plecaku_2"));
             return true;
         }
         pl.fawizja.pixel.magic.Consumable c = consumables == null ? null : consumables.get(fruit.id());
         int food = c == null ? 0 : c.foodSeconds();
-        log.add(nowMs, EventLog.Kind.LOOT, "Zrywasz " + r.count() + "x " + fruit.name() + " (masz " + pc.backpack().count(fruit.id())
-                + (food > 0 ? "; każda syci " + food + " s" : "") + "). "
-                + (r.left() > 0 ? "Na krzaku zostało jeszcze trochę owoców." : bush + " jest teraz pusty - odrośnie za godzinę."));
+        log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.zrywasz") + r.count() + "x " + fruit.name() + Messages.get("game_session.masz") + pc.backpack().count(fruit.id())
+                + (food > 0 ? Messages.get("game_session.kazda_syci") + food + " s" : "") + "). "
+                + (r.left() > 0 ? Messages.get("game_session.na_krzaku_zostalo_jeszcze") : bush + Messages.get("game_session.jest_teraz_pusty_odrosnie")));
         return true;
     }
 
@@ -3244,7 +3244,7 @@ public final class GameSession {
 
     /** Drogowskaz: kraina i droga do najblizszego miasta (strona swiata i liczba pol). */
     private String signText(Position p) {
-        StringBuilder b = new StringBuilder("Na drogowskazie napisano: ");
+        StringBuilder b = new StringBuilder(Messages.get("game_session.na_drogowskazie_napisano"));
         Region r = world.regionAt(p);
         if (r != null) b.append('"').append(r.name()).append('"');
         pl.fawizja.pixel.world.Town best = null;
@@ -3256,11 +3256,11 @@ public final class GameSession {
         }
         if (best != null) {
             if (r != null) b.append(". ");
-            if (bestD <= 12) b.append("Witamy w mieście ").append(best.name()).append('!');
+            if (bestD <= 12) b.append(Messages.get("game_session.witamy_w_miescie")).append(best.name()).append('!');
             else b.append(best.name()).append(" - ").append(compass(best.temple().x() - p.x(), best.temple().y() - p.y()))
-                    .append(", ").append(bestD).append(" pól.");
+                    .append(", ").append(bestD).append(Messages.get("game_session.pol"));
         } else if (r == null) {
-            b.append("napis jest zatarty.");
+            b.append(Messages.get("game_session.napis_jest_zatarty"));
         }
         return b.toString();
     }
@@ -3268,8 +3268,8 @@ public final class GameSession {
     /** Strona swiata po polsku (y rosnie na poludnie). */
     static String compass(int dx, int dy) {
         double a = Math.toDegrees(Math.atan2(-dy, dx));        // 0 = wschod, 90 = polnoc
-        String[] names = {"na wschód", "na północny wschód", "na północ", "na północny zachód", "na zachód",
-                "na południowy zachód", "na południe", "na południowy wschód"};
+        String[] names = {Messages.get("game_session.na_wschod"), Messages.get("game_session.na_polnocny_wschod"), Messages.get("game_session.na_polnoc"), Messages.get("game_session.na_polnocny_zachod"), Messages.get("game_session.na_zachod"),
+                Messages.get("game_session.na_poludniowy_zachod"), Messages.get("game_session.na_poludnie"), Messages.get("game_session.na_poludniowy_wschod")};
         int k = (int) Math.round(a / 45.0);
         return names[Math.floorMod(k, 8)];
     }
@@ -3282,7 +3282,7 @@ public final class GameSession {
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null && !tr.type().triggeredByWalking()) {
             if (tr.type().requiresRope() && pc.backpack().count(items.byKey("rope").id()) == 0) {
-                log.add(nowMs, EventLog.Kind.WARNING, "Potrzebujesz liny.");
+                log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.potrzebujesz_liny"));
                 return true;
             }
             if (pc.isDead()) return true;
@@ -3300,12 +3300,12 @@ public final class GameSession {
                 log.add(nowMs, EventLog.Kind.INFO, signText(p));
                 return true;
             case "well":
-                log.add(nowMs, EventLog.Kind.INFO, "Zaglądasz do studni. Woda jest zimna i czysta - pijesz kilka łyków.");
+                log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zagladasz_do_studni_woda"));
                 return true;
             case "bed":
                 return useBed(p, nowMs);
             case "lectern":
-                log.add(nowMs, EventLog.Kind.INFO, "Na pulpicie leży otwarta księga. Pismo jest zbyt wyblakłe, by je odczytać.");
+                log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.na_pulpicie_lezy_otwarta"));
                 return true;
             default:
                 return false;
@@ -3426,7 +3426,7 @@ public final class GameSession {
 
     private boolean pullBossLever(pl.fawizja.pixel.world.BossQuest q, long nowMs) {
         if (bossRuntime == null) {
-            log.add(nowMs, EventLog.Kind.INFO, "Dźwignia wyprawy " + q.name() + " - o wszystkim rozstrzyga serwer.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.dzwignia_wyprawy") + q.name() + Messages.get("game_session.o_wszystkim_rozstrzyga_serwer"));
             return true;
         }
         java.util.List<BossQuestRuntime.Hero> everyone = new java.util.ArrayList<>(bossHeroes.get());
@@ -3518,19 +3518,19 @@ public final class GameSession {
     }
 
     static String levelDoorRefusal(int level) {
-        return "Na drzwiach napis: " + WorldMap.levelDoorSign(level) + ". Drzwi nie ustępują - wejdziesz od poziomu " + level + ".";
+        return Messages.get("game_session.na_drzwiach_napis") + WorldMap.levelDoorSign(level) + Messages.get("game_session.drzwi_nie_ustepuja_wejdziesz") + level + ".";
     }
 
     /** Dzwignia sali oltarzy: z piecioma profesjami na miejscach przenosi je do skarbca, inaczej mowi, kogo brakuje. */
     private boolean pullLever(pl.fawizja.pixel.world.AltarQuest q, long nowMs) {
         java.util.List<pl.fawizja.pixel.world.AltarQuest.Slot> missing = q.missing(altarParty);
         if (!missing.isEmpty()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Dźwignia ani drgnie. Przed ołtarzami brakuje: "
-                    + pl.fawizja.pixel.world.AltarQuest.names(missing) + " (pali się " + (q.slots().size() - missing.size())
-                    + " z " + q.slots().size() + " pochodni).");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.dzwignia_ani_drgnie_przed")
+                    + pl.fawizja.pixel.world.AltarQuest.names(missing) + Messages.get("game_session.pali_sie") + (q.slots().size() - missing.size())
+                    + Messages.get("common.z") + q.slots().size() + Messages.get("game_session.pochodni_nawias"));
             return true;
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, "Przeciągasz dźwignię. Ołtarze rozbłyskują - " + q.name() + " otwiera skarbiec!");
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.przeciagasz_dzwignie_oltarze_r") + q.name() + Messages.get("game_session.otwiera_skarbiec"));
         for (pl.fawizja.pixel.world.AltarQuest.Slot s : q.slots()) altarParty.teleport(s.stand(), s.vocation(), s.target(), nowMs);
         if (!sharedWorld && altarsLocal) updateAltarTorches();
         return true;
@@ -3555,14 +3555,14 @@ public final class GameSession {
         pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
         if (altar != null) {
             // przedmiot na oltarzu jest tylko do ogladania: nie trafia do plecaka i nie da sie go przesunac
-            log.add(nowMs, EventLog.Kind.INFO, "Na ołtarzu leży " + itemName(altar.itemKey()) + " - jest przytwierdzony"
-                    + " i nie da się go podnieść. Przed ołtarzem ma stanąć " + altar.vocation().displayName() + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.na_oltarzu_lezy") + itemName(altar.itemKey()) + Messages.get("game_session.jest_przytwierdzony")
+                    + Messages.get("game_session.i_nie_da_sie") + altar.vocation().displayName() + ".");
             return true;
         }
         pl.fawizja.pixel.world.WallLights wl = world.wallLights();
         if (wl.isWallLight(p) && world.isQuestTorch(p)) {
-            log.add(nowMs, EventLog.Kind.INFO, wl.isLit(p) ? "Pochodnia płonie, bo przed ołtarzem stoi właściwa profesja."
-                    : "Pochodnia zapali się sama, gdy przed ołtarzem stanie właściwa profesja.");
+            log.add(nowMs, EventLog.Kind.INFO, wl.isLit(p) ? Messages.get("game_session.pochodnia_plonie_bo_przed")
+                    : Messages.get("game_session.pochodnia_zapali_sie_sama"));
             return true;
         }
         int doorLevel = world.levelDoorAt(p);
@@ -3573,16 +3573,16 @@ public final class GameSession {
         if (doorLevel > 0) {
             // jak w Tibii: uzycie drzwi poziomu wprowadza postac w drzwi, po zejsciu zamykaja sie za nia
             if (p.equals(me)) {
-                log.add(nowMs, EventLog.Kind.INFO, "Stoisz w drzwiach. Zamkną się za tobą, gdy przejdziesz dalej.");
+                log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.stoisz_w_drzwiach_zamkna"));
                 return true;
             }
             if (occupiedByOther(p)) {
-                log.add(nowMs, EventLog.Kind.INFO, "Ktoś stoi w drzwiach.");
+                log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.ktos_stoi_w_drzwiach"));
                 return true;
             }
             if (pc.isDead() || isStepping(nowMs)) return true;
-            log.add(nowMs, EventLog.Kind.INFO, "Na drzwiach napis: " + WorldMap.levelDoorSign(doorLevel)
-                    + ". Masz poziom " + pc.level() + " - drzwi się otwierają.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.na_drzwiach_napis") + WorldMap.levelDoorSign(doorLevel)
+                    + Messages.get("game_session.masz_poziom") + pc.level() + Messages.get("game_session.drzwi_sie_otwieraja"));
             world.openings().set(p, true);
             pc.setPosition(p);
             stepFrom = me;
@@ -3598,8 +3598,8 @@ public final class GameSession {
             // pochodnia albo latarnia na murze: zapala sie i gasi na miejscu, nie trafia do plecaka
             boolean lit = wl.toggle(p);
             boolean torch = wl.isTorch(p);
-            log.add(nowMs, EventLog.Kind.INFO, torch ? (lit ? "Zapalasz pochodnię." : "Gasisz pochodnię.")
-                    : (lit ? "Zapalasz latarnię." : "Gasisz latarnię."));
+            log.add(nowMs, EventLog.Kind.INFO, torch ? (lit ? Messages.get("game_session.zapalasz_pochodnie") : Messages.get("game_session.gasisz_pochodnie"))
+                    : (lit ? Messages.get("game_session.zapalasz_latarnie") : Messages.get("game_session.gasisz_latarnie")));
             if (!sharedWorld) pc.setWallLights(wl.encode());
             return true;
         }
@@ -3609,17 +3609,17 @@ public final class GameSession {
         if (!mayUseOpening(p)) {
             pl.fawizja.pixel.house.House h = houses.ofOpening(p);
             log.add(nowMs, EventLog.Kind.WARNING, houseAccess(h) == pl.fawizja.pixel.house.HouseAccess.ENTRY
-                    ? "Masz w domu " + h.name() + " tylko wstęp - " + (door ? "drzwi" : "okna") + " otwiera właściciel albo gość z pełnym dostępem."
-                    : (door ? "To drzwi" : "To okno") + " domu " + h.name() + ". Otwiera je właściciel albo gość z pełnym dostępem.");
+                    ? Messages.get("game_session.masz_w_domu") + h.name() + Messages.get("game_session.tylko_wstep") + (door ? Messages.get("game_session.drzwi") : Messages.get("game_session.okna")) + Messages.get("game_session.otwiera_wlasciciel_albo_gosc")
+                    : (door ? Messages.get("game_session.to_drzwi") : Messages.get("game_session.to_okno")) + Messages.get("game_session.domu") + h.name() + Messages.get("game_session.otwiera_je_wlasciciel_albo"));
             return true;
         }
         if (door && o.isOpen(p) && (p.equals(me) || occupiedByOther(p))) {
-            log.add(nowMs, EventLog.Kind.INFO, "Ktoś stoi w drzwiach.");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.ktos_stoi_w_drzwiach"));
             return true;
         }
         boolean opened = o.toggle(p);
-        log.add(nowMs, EventLog.Kind.INFO, door ? (opened ? "Otwierasz drzwi." : "Zamykasz drzwi.")
-                : (opened ? "Otwierasz okno." : "Zamykasz okno."));
+        log.add(nowMs, EventLog.Kind.INFO, door ? (opened ? Messages.get("game_session.otwierasz_drzwi") : Messages.get("game_session.zamykasz_drzwi"))
+                : (opened ? Messages.get("game_session.otwierasz_okno") : Messages.get("game_session.zamykasz_okno")));
         return true;
     }
 
@@ -3632,13 +3632,13 @@ public final class GameSession {
 
     private boolean openChestAt(pl.fawizja.pixel.treasure.TreasureChests.Chest c, long nowMs) {
         if (c.vocation() != null && c.vocation() != pc.vocation()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Ta skrzynia należy do profesji " + c.vocation().displayName()
-                    + ". Nie możesz z niej nic wziąć.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.ta_skrzynia_nalezy_do") + c.vocation().displayName()
+                    + Messages.get("game_session.nie_mozesz_z_niej"));
             return true;
         }
         if (pc.openedChests().contains(c.id())) {
             log.add(nowMs, EventLog.Kind.INFO, c.vocation() != null
-                    ? "Ta skrzynia jest pusta. Ta postać już odebrała nagrodę za to zadanie." : "Ta skrzynia jest już pusta.");
+                    ? Messages.get("game_session.ta_skrzynia_jest_pusta") : Messages.get("game_session.ta_skrzynia_jest_juz"));
             return true;
         }
         // nagroda wg trudnosci miejsca (ChestRewards): zloto, przedmiot dla profesji i mikstury
@@ -3647,7 +3647,7 @@ public final class GameSession {
         boolean ok = pl.fawizja.pixel.economy.Money.add(tx, r.gold()).ok();
         for (pl.fawizja.pixel.item.ItemStack st : r.items()) ok = ok && tx.add(st).ok();
         if (!ok) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Skrzynia pełna skarbów, ale plecak nie ma miejsca. Zrób miejsce i spróbuj znowu.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.skrzynia_pelna_skarbow_ale"));
             return true;
         }
         pc.backpack().commitFrom(tx);
@@ -3663,25 +3663,25 @@ public final class GameSession {
 
     public void toggleRun(long nowMs) {
         pc.setRunning(!pc.isRunning());
-        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? "Podążanie włączone: postać idzie za zaznaczonym celem." : "Podążanie wyłączone.");
+        log.add(nowMs, EventLog.Kind.INFO, pc.isRunning() ? Messages.get("game_session.podazanie_wlaczone_postac_idzi") : Messages.get("game_session.podazanie_wylaczone"));
     }
 
     public void toggleTorch(long nowMs) {
         boolean want = !pc.isTorchLit();
         if (!pc.setTorchLit(want, torchId)) {
             log.add(nowMs, EventLog.Kind.WARNING, pc.backpack().count(torchId) > 0
-                    ? "Nie masz założonej pochodni. Dotknij pochodni w plecaku i wybierz \"Załóż\"."
-                    : "Nie masz założonej pochodni.");
+                    ? Messages.get("game_session.nie_masz_zalozonej_pochodni")
+                    : Messages.get("game_session.nie_masz_zalozonej_pochodni_2"));
         } else {
             long left = pc.torchRemainingMs(torchId);
-            log.add(nowMs, EventLog.Kind.INFO, want ? "Zapalasz pochodnię (zostało " + torchTime(left) + ")." : "Gasisz pochodnię.");
+            log.add(nowMs, EventLog.Kind.INFO, want ? Messages.get("game_session.zapalasz_pochodnie_zostalo") + torchTime(left) + ")." : Messages.get("game_session.gasisz_pochodnie"));
         }
     }
 
     /** Pozostaly czas pochodni do opisu: "18 min" albo "45 s". */
     public static String torchTime(long ms) {
         long sec = (ms + 999) / 1000;
-        return sec >= 60 ? (sec + 59) / 60 + " min" : sec + " s";
+        return sec >= 60 ? (sec + 59) / 60 + Messages.get("hud.min") : sec + " s";
     }
 
     public boolean itemsAtFeet() {
@@ -3714,10 +3714,10 @@ public final class GameSession {
                 if (b.length() > 0) b.append(", ");
                 b.append(describe(s));
             }
-            log.add(nowMs, EventLog.Kind.LOOT, "Z ciała: " + b);
+            log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.z_ciala") + b);
         }
         if (ground.corpseAt(p) != null && ground.corpseAt(p).hasLoot()) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pełny - reszta zostaje w ciele.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.plecak_jest_pelny_reszta"));
         }
         return true;
     }
@@ -3729,15 +3729,15 @@ public final class GameSession {
             return;
         }
         if (!mayHandle(p)) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Masz w tym domu tylko wstęp - nie możesz tu podnosić przedmiotów.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_w_tym_domu_3"));
             return;
         }
         ItemStack top = ground.at(p).get(ground.at(p).size() - 1);
         InventoryResult r = ground.pickUp(p, ground.at(p).size() - 1, pc.backpack());
         if (r.ok()) {
-            log.add(nowMs, EventLog.Kind.LOOT, "Podniesiono: " + describe(top));
+            log.add(nowMs, EventLog.Kind.LOOT, Messages.get("game_session.podniesiono") + describe(top));
         } else {
-            log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pełny.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.plecak_jest_pelny"));
         }
     }
 
@@ -3745,15 +3745,15 @@ public final class GameSession {
         ItemStack s = pc.backpack().get(slot);
         if (s == null) return;
         if (pc.isKept(s.itemId())) {
-            log.add(nowMs, EventLog.Kind.WARNING, items.get(s.itemId()).name() + " jest oznaczony jako zachowany. Najpierw go odblokuj.");
+            log.add(nowMs, EventLog.Kind.WARNING, items.get(s.itemId()).name() + Messages.get("game_session.jest_oznaczony_jako_zachowany"));
             return;
         }
         if (!mayHandle(pc.position())) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Masz w tym domu tylko wstęp - nie możesz tu wyrzucać przedmiotów.");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_w_tym_domu_4"));
             return;
         }
         InventoryResult r = ground.dropFrom(pc.backpack(), slot, s.count(), pc.position(), world);
-        if (r.ok()) log.add(nowMs, EventLog.Kind.INFO, "Wyrzucono: " + describe(s));
+        if (r.ok()) log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wyrzucono") + describe(s));
     }
 
     /** Przelacza "Zachowaj" dla rodzaju przedmiotu w slocie plecaka. */
@@ -3763,8 +3763,8 @@ public final class GameSession {
         boolean on = pc.toggleKept(s.itemId());
         String name = items.get(s.itemId()).name();
         log.add(nowMs, EventLog.Kind.INFO, on
-                ? "Zachowany: " + name + ". Nie sprzedasz go hurtem, nie odłożysz hurtem do depozytu i nie wyrzucisz przypadkiem."
-                : "Odblokowano: " + name + ".");
+                ? Messages.get("game_session.zachowany") + name + Messages.get("game_session.nie_sprzedasz_go_hurtem")
+                : Messages.get("game_session.odblokowano") + name + ".");
         return on;
     }
 
@@ -3772,17 +3772,17 @@ public final class GameSession {
         ItemStack st = slot >= 0 && slot < pc.backpack().size() ? pc.backpack().get(slot) : null;
         boolean torch = st != null && st.itemId() == torchId;
         if (torch && pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.LIGHT) != null) {
-            log.add(nowMs, EventLog.Kind.WARNING, "Masz już założoną pochodnię (pole obok butów).");
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_juz_zalozona_pochodnie"));
             return;
         }
         InventoryResult r = pc.equipment().equipFromBackpack(pc.backpack(), slot, pc.vocation(), pc.level());
         switch (r) {
             case OK: log.add(nowMs, EventLog.Kind.INFO, torch
-                    ? "Założono pochodnię. Dotknij jej w polu obok butów, aby zapalić." : "Założono przedmiot."); break;
-            case WRONG_VOCATION: log.add(nowMs, EventLog.Kind.WARNING, "Twoja profesja nie może tego używać."); break;
-            case LEVEL_TOO_LOW: log.add(nowMs, EventLog.Kind.WARNING, "Za niski poziom."); break;
-            case WRONG_SLOT_TYPE: log.add(nowMs, EventLog.Kind.WARNING, "Tego nie da się założyć."); break;
-            default: log.add(nowMs, EventLog.Kind.WARNING, "Nie udało się: " + r);
+                    ? Messages.get("game_session.zalozono_pochodnie_dotknij_jej") : Messages.get("game_session.zalozono_przedmiot")); break;
+            case WRONG_VOCATION: log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.twoja_profesja_nie_moze")); break;
+            case LEVEL_TOO_LOW: log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.za_niski_poziom")); break;
+            case WRONG_SLOT_TYPE: log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.tego_nie_da_sie_2")); break;
+            default: log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.nie_udalo_sie_2") + r);
         }
     }
 
@@ -3792,9 +3792,9 @@ public final class GameSession {
         InventoryResult r = pc.equipment().unequipToBackpack(slot, pc.backpack());
         if (r.ok() && slot == pl.fawizja.pixel.item.EquipSlot.LIGHT && pc.isTorchLit()) pc.setTorchLit(false, torchId);
         switch (r) {
-            case OK: log.add(nowMs, EventLog.Kind.INFO, "Zdjęto przedmiot do plecaka."); break;
+            case OK: log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.zdjeto_przedmiot_do_plecaka")); break;
             case EMPTY_SLOT: break;
-            default: log.add(nowMs, EventLog.Kind.WARNING, "Plecak jest pełny - nie da się zdjąć przedmiotu.");
+            default: log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.plecak_jest_pelny_nie"));
         }
         return r;
     }
@@ -3809,7 +3809,7 @@ public final class GameSession {
         // porzadkowanie wymienia tez pelne setki monet na wyzszy nominal (mniej zajetych pol)
         boolean exchanged = pc.backpack().normalizeCoins();
         boolean moved = pc.backpack().sort() || exchanged;
-        log.add(nowMs, EventLog.Kind.INFO, moved ? "Plecak uporządkowany." : "Plecak jest już uporządkowany.");
+        log.add(nowMs, EventLog.Kind.INFO, moved ? Messages.get("game_session.plecak_uporzadkowany") : Messages.get("game_session.plecak_jest_juz_uporzadkowany"));
         return moved;
     }
 
@@ -3820,13 +3820,13 @@ public final class GameSession {
         switch (r) {
             case MERCHANT: return "kupiec";
             case BANKER: return "bankier";
-            case PRIEST: return "kapłan";
+            case PRIEST: return Messages.get("game_session.kaplan");
             case GUIDE: return "przewodnik";
-            case CARRIER: return "woźnica";
-            case CAPTAIN: return "kapitan statku";
-            case KING: return "władca miasta";
+            case CARRIER: return Messages.get("game_session.woznica");
+            case CAPTAIN: return Messages.get("game_session.kapitan_statku");
+            case KING: return Messages.get("game_session.wladca_miasta");
             case IMBUER: return "zaklinacz";
-            case GUARD: return "strażnik";
+            case GUARD: return Messages.get("game_session.straznik");
             default: return r.name().toLowerCase(java.util.Locale.ROOT);
         }
     }
@@ -3838,54 +3838,54 @@ public final class GameSession {
      */
     public String lookAt(Position p, long nowMs) {
         java.util.List<String> parts = new java.util.ArrayList<>();
-        if (p.equals(pc.position())) parts.add("siebie (" + pc.name() + ", poziom " + pc.level() + ")");
+        if (p.equals(pc.position())) parts.add(Messages.get("game_session.siebie") + pc.name() + Messages.get("pixel_game.poziom") + pc.level() + ")");
         Monster m = monsters == null ? null : monsters.monsterAt(p);
         if (m != null && !m.isDead()) {
-            parts.add(m.type().name() + " (poziom " + m.type().level() + ", zdrowie " + Math.round(m.healthFraction() * 100) + "%)");
+            parts.add(m.type().name() + Messages.get("game_session.poziom_2") + m.type().level() + Messages.get("game_session.zdrowie") + Math.round(m.healthFraction() * 100) + "%)");
         }
         pl.fawizja.pixel.npc.Npc npc = npcs == null ? null : npcs.at(p);
         if (npc != null) parts.add(npc.name() + " (" + roleLabel(npc.role()) + ")");
-        if (dummies != null && dummies.at(p)) parts.add("manekin treningowy");
+        if (dummies != null && dummies.at(p)) parts.add(Messages.get("game_session.manekin_treningowy"));
         GroundItems.Corpse c = ground.corpseAt(p);
         if (c != null) {
             String who = monsters != null && monsters.registry() != null && monsters.registry().contains(c.monsterKey())
                     ? monsters.registry().get(c.monsterKey()).name() : c.monsterKey();
-            parts.add("ciało: " + who + (c.hasLoot() ? " (jest łup)" : " (puste)"));
+            parts.add(Messages.get("game_session.cialo") + who + (c.hasLoot() ? Messages.get("game_session.jest_lup") : Messages.get("game_session.puste_nawias")));
         }
         java.util.List<ItemStack> lying = ground.at(p);
         for (int i = lying.size() - 1, shown = 0; i >= 0 && shown < 3; i--, shown++) parts.add(describe(lying.get(i)));
         pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
-        if (altar != null) parts.add("ołtarz profesji " + altar.vocation().displayName() + " (" + itemName(altar.itemKey()) + ")");
-        if (world.altarQuestByLever(p) != null) parts.add("dźwignia");
+        if (altar != null) parts.add(Messages.get("game_session.oltarz_profesji") + altar.vocation().displayName() + " (" + itemName(altar.itemKey()) + ")");
+        if (world.altarQuestByLever(p) != null) parts.add(Messages.get("game_session.dzwignia"));
         pl.fawizja.pixel.world.BossQuest bq = world.bossQuestByLever(p);
-        if (bq != null) parts.add("dźwignia wyprawy " + bq.name() + " (5 postaci na polach, od poziomu " + bq.minLevel() + ")");
+        if (bq != null) parts.add(Messages.get("game_session.dzwignia_wyprawy_2") + bq.name() + Messages.get("game_session.5_postaci_na_polach") + bq.minLevel() + ")");
         bq = world.bossQuestBySquare(p);
-        if (bq != null) parts.add("oznaczone pole wyprawy " + bq.name() + " - tu staje jedna z pięciu postaci");
+        if (bq != null) parts.add(Messages.get("game_session.oznaczone_pole_wyprawy") + bq.name() + Messages.get("game_session.tu_staje_jedna_z"));
         bq = world.bossQuestByPortal(p);
-        if (bq != null) parts.add("portal wyjścia z areny (otwiera się po pokonaniu bossa)");
-        if (world.levelDoorAt(p) > 0) parts.add("drzwi z napisem " + WorldMap.levelDoorSign(world.levelDoorAt(p)));
+        if (bq != null) parts.add(Messages.get("game_session.portal_wyjscia_z_areny"));
+        if (world.levelDoorAt(p) > 0) parts.add(Messages.get("game_session.drzwi_z_napisem") + WorldMap.levelDoorSign(world.levelDoorAt(p)));
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null) {
             switch (tr.type()) {
                 case STAIRS: parts.add("schody"); break;
-                case HOLE: parts.add("dziura w ziemi"); break;
-                case TUNNEL: parts.add("przejście"); break;
+                case HOLE: parts.add(Messages.get("game_session.dziura_w_ziemi")); break;
+                case TUNNEL: parts.add(Messages.get("game_session.przejscie")); break;
                 case LADDER: parts.add("drabina"); break;
-                case ROPE_SPOT: parts.add("miejsce na linę"); break;
-                case GRATE: parts.add("kratka ściekowa (dotknij, by zejść do kanału)"); break;
+                case ROPE_SPOT: parts.add(Messages.get("game_session.miejsce_na_line")); break;
+                case GRATE: parts.add(Messages.get("game_session.kratka_sciekowa_dotknij_by")); break;
                 default: break;
             }
         }
-        if (parts.isEmpty()) parts.add(world.isWalkable(p) ? "wolne pole" : "przeszkoda");
-        StringBuilder b = new StringBuilder("Widzisz: ").append(String.join(", ", parts)).append('.');
+        if (parts.isEmpty()) parts.add(world.isWalkable(p) ? Messages.get("game_session.wolne_pole") : "przeszkoda");
+        StringBuilder b = new StringBuilder(Messages.get("game_session.widzisz")).append(String.join(", ", parts)).append('.');
         int dist = p.z() == pc.position().z() ? p.distanceTo(pc.position()) : -1;
         if (dist > 1) {
             boolean few = dist % 10 >= 2 && dist % 10 <= 4 && (dist % 100 < 12 || dist % 100 > 14);
-            b.append(" Odległość: ").append(dist).append(few ? " pola." : " pól.");
+            b.append(Messages.get("game_session.odleglosc")).append(dist).append(few ? " pola." : Messages.get("game_session.pol"));
         }
-        if (world.isProtectionZone(p)) b.append(" Strefa ochronna.");
+        if (world.isProtectionZone(p)) b.append(Messages.get("game_session.strefa_ochronna"));
         int req = world.requiredLevelAt(p);
-        if (req > 0) b.append(" Wymagany poziom: ").append(req).append('.');
+        if (req > 0) b.append(Messages.get("game_session.wymagany_poziom")).append(req).append('.');
         log.add(nowMs, EventLog.Kind.INFO, b.toString());
         return b.toString();
     }

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.daily;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +35,6 @@ public final class BoostedCreature {
     public static int boostChance(int permille) { return Math.min(1000, permille * (100 + LOOT_PERCENT) / 100); }
 
     public static String describe(MonsterType t) {
-        return t == null ? "brak" : t.name() + " (+" + EXP_PERCENT + "% exp, +" + LOOT_PERCENT + "% szansy na łup)";
+        return t == null ? Messages.get("server_world.brak") : t.name() + " (+" + EXP_PERCENT + Messages.get("boosted_creature.exp") + LOOT_PERCENT + Messages.get("boosted_creature.szansy_na_lup");
     }
 }

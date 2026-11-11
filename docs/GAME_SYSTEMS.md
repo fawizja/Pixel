@@ -131,6 +131,27 @@ jako `serverTimeMs`.
 - Umiejetnosci (`Skills`): piesci, bron, dystans, tarcza, magia, wedkarstwo; rosna z uzyciem wg krzywych Tibii dla profesji (sekcja umiejetnosci nizej).
 - Walidacja imienia (3-20 liter, spacje, apostrof).
 
+## Jezyki: angielski, polski, hiszpanski (Z, S serwer, C UI)
+
+- `Language` (EN domyslny dla nowych instalacji, PL, ES) i `Messages` (shared, `pl.fawizja.pixel.i18n`): teksty w
+  `shared/src/main/resources/i18n/messages_{en,pl,es}.properties`, klucz `obszar.hasz`, argumenty `{0}`, `{1}`;
+  brak klucza w jezyku = polski. Liczby: `Messages.number` (en `1,234`, pl `1 234`, es `1.234`). Teksty zrodlowe w
+  enumach i stalych zostaja polskie i sa tlumaczone przy odczycie (`Messages.tr`), a porownania niezalezne od jezyka
+  robia `Messages.is / startsWithAny / containsAny`. Znaczniki protokolu (`[Gildia] `, `[Drużyna] `, `[od X]`) i polecenia
+  czatu (`/dom wpuść`...) pozostaja polskie we wszystkich jezykach (aliasy `/idz`: role w `NpcFinder` maja tez en/es).
+- Nazwy danych (przedmioty, potwory, czary, zadania, NPC z powitaniami): `i18n/data_{en,es}.csv`, wiersz
+  `rodzaj;klucz;pole;tekst` (`DataNames`, `Messages.data`), brak wiersza = polski z CSV z danymi. Zaklecia (slowa
+  `exura`...) zostaja po tibijsku. Nie tlumaczone: opisy przedmiotow i potworow, dialogi `dialogues.csv`, nazwy miast i miejsc
+  (nazwy wlasne), nazwy na mapie.
+- Wybor: pasek 3 przyciskow (`LanguageBar`) w menu glownym, logowaniu i tworzeniu postaci oraz pierwszy wiersz ustawien
+  (`settings:lang`); zapis w `GameSettings` (klucz `lang`), dziala od razu. `-Dpixel.lang=en|pl|es` wymusza jezyk (zrzuty).
+- Online: siodme, opcjonalne pole `HELLO` to jezyk (`en|pl|es`, brak = `pl`, jak starzy klienci). Serwer trzyma jezyk w
+  `ServerPlayer.language` i formatuje kazdy komunikat per odbiorca (`Messages.runAs`), wiec gracze w roznych jezykach widza
+  to samo zdarzenie w swoim jezyku; wiadomosci rozgloszeniowe sa tlumaczone osobno dla kazdego odbiorcy.
+- Testy: komplet kluczy i argumentow w 3 paczkach (`MessagesTest`), nazwy danych i NPC (`DataNamesTest`), trwalosc
+  jezyka (`GameSettingsTest`), brak polskich literalow w UI klienta (`NoPolishLiteralsTest`), glify czcionki dla
+  ñ á é í ó ú ü ¿ ¡ i polskich liter (`FontCoverageTest`).
+
 ## Profesje (C)
 
 Paladin, Druid, Sorcerer, Monk - rozne przyrosty, regeneracja, wspolczynniki walki, obrona,

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.client.ui;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.List;
 import java.util.function.BiConsumer;
 import pl.fawizja.pixel.game.GameSession;
@@ -59,13 +60,13 @@ public final class WheelWindows {
             title = cap(s.label()) + "  (" + s.capacity() + ")";
             rows = new java.util.ArrayList<>(WheelView.slice(session.character(), s, temple, this::spellName));
             if (!temple && session.character().wheelPoints() > 0) {
-                rows.add(1, new String[] {"Świątynia", "punkty rozdasz tylko w świątyni", "nie", "ach:none"});
+                rows.add(1, new String[] {Messages.get("wheel_windows.swiatynia"), Messages.get("wheel_windows.punkty_rozdasz_tylko_w"), "nie", "ach:none"});
             }
         } else if (d != null) {
-            title = "Objawienie: " + d.label.toLowerCase(java.util.Locale.ROOT) + " ćwiartka";
+            title = Messages.get("wheel_windows.objawienie") + d.label().toLowerCase(java.util.Locale.ROOT) + Messages.get("wheel_windows.cwiartka");
             rows = WheelView.revelation(session.character(), d, this::spellName);
         } else {
-            title = session.character().wheelPoints() > 0 ? "Podsumowanie" : "Wymagania";
+            title = session.character().wheelPoints() > 0 ? Messages.get("wheel_windows.podsumowanie") : Messages.get("wheel_windows.wymagania");
             rows = WheelView.summary(session.character(), temple, this::have);
         }
         hud.setWheelCard(title, rows);
@@ -183,7 +184,7 @@ public final class WheelWindows {
                 rows = WheelView.slice(session.character(), s, temple, this::spellName);
                 break;
             }
-            case "perks": title += ": premie"; rows = WheelView.perks(session.character(), this::spellName); break;
+            case "perks": title += Messages.get("wheel_windows.premie"); rows = WheelView.perks(session.character(), this::spellName); break;
             case "gems":
                 title = pl.fawizja.pixel.wheel.GemView.atelierTitle();
                 rows = pl.fawizja.pixel.wheel.GemView.atelier(session.character(), num(f, 2), this::have, this::spellName);
@@ -193,7 +194,7 @@ public final class WheelWindows {
                 rows = pl.fawizja.pixel.wheel.GemView.card(session.character(), num(f, 2), temple, this::spellName);
                 break;
             case "gemask":
-                title = pl.fawizja.pixel.wheel.GemView.atelierTitle() + " - rozbicie";
+                title = pl.fawizja.pixel.wheel.GemView.atelierTitle() + Messages.get("wheel_windows.rozbicie");
                 rows = pl.fawizja.pixel.wheel.GemView.destroyConfirm(session.character(), num(f, 2));
                 break;
             case "vessel": {
@@ -208,8 +209,8 @@ public final class WheelWindows {
                 rows = pl.fawizja.pixel.wheel.GemView.fragments(session.character(), f.length > 2 && "s".equals(f[2]), num(f, 3), this::have,
                         this::spellName);
                 break;
-            case "presets": title += ": zestawy"; rows = WheelView.presets(session.character(), temple); break;
-            case "resetask": title += ": czyszczenie"; rows = WheelView.resetConfirm(session.character(), temple); break;
+            case "presets": title += Messages.get("wheel_windows.zestawy"); rows = WheelView.presets(session.character(), temple); break;
+            case "resetask": title += Messages.get("wheel_windows.czyszczenie"); rows = WheelView.resetConfirm(session.character(), temple); break;
             default: rows = WheelView.overview(session.character(), temple, this::have);
         }
         view = id;

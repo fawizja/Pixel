@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.world;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.Locale;
 
 /**
@@ -50,11 +51,11 @@ public final class Weather {
         boolean snow = region != null && kindFor(region.name()) == Kind.SNOW;
         boolean sand = region != null && kindFor(region.name()) == Kind.SANDSTORM;
         switch (climate) {
-            case SUNNY: return snow ? "Pogoda na dziś: mroźno i bezchmurnie." : sand ? "Pogoda na dziś: upał, bez wiatru."
-                    : "Pogoda na dziś: słonecznie.";
-            case WET: return snow ? "Pogoda na dziś: śnieżyce." : sand ? "Pogoda na dziś: wichury i burze piaskowe."
-                    : "Pogoda na dziś: deszczowo.";
-            default: return "Pogoda na dziś: zmiennie, możliwe przelotne opady.";
+            case SUNNY: return snow ? "Pogoda na dziś: mroźno i bezchmurnie." : sand ? Messages.get("weather.pogoda_na_dzis_upal")
+                    : Messages.get("weather.pogoda_na_dzis_slonecznie");
+            case WET: return snow ? "Pogoda na dziś: śnieżyce." : sand ? Messages.get("weather.pogoda_na_dzis_wichury")
+                    : Messages.get("weather.pogoda_na_dzis_deszczowo");
+            default: return Messages.get("weather.pogoda_na_dzis_zmiennie");
         }
     }
 
@@ -94,10 +95,10 @@ public final class Weather {
     /** Nazwa do komunikatu, np. przy zmianie pogody. */
     public static String describe(Kind kind) {
         switch (kind) {
-            case RAIN: return "Zaczyna padać deszcz.";
-            case SNOW: return "Zaczyna padać śnieg.";
-            case SANDSTORM: return "Nadciąga burza piaskowa.";
-            default: return "Rozpogadza się.";
+            case RAIN: return Messages.get("weather.zaczyna_padac_deszcz");
+            case SNOW: return Messages.get("weather.zaczyna_padac_snieg");
+            case SANDSTORM: return Messages.get("weather.nadciaga_burza_piaskowa");
+            default: return Messages.get("weather.rozpogadza_sie");
         }
     }
 

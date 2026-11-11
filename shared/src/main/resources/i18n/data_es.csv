@@ -1,0 +1,1071 @@
+# kind;key;field;text - nazwy danych (zrodlo: polski w CSV z danymi); brak wiersza = polski
+item;gold_coin;name;Moneda de oro
+item;platinum_coin;name;Moneda de platino
+item;crystal_coin;name;Moneda de cristal
+item;leather_helmet;name;Yelmo de cuero
+item;leather_armor;name;Armadura de cuero
+item;leather_legs;name;Pantalones de cuero
+item;leather_boots;name;Botas de cuero
+item;hunting_spear;name;Lanza de caza
+item;wooden_shield;name;Escudo de madera
+item;wand_of_embers;name;Varita de brasas
+item;thornroot_rod;name;Vara de raíz espinosa
+item;cloth_wraps;name;Vendas de tela
+item;training_sword;name;Espada de entrenamiento
+item;health_potion;name;Poción de vida
+item;mana_potion;name;Poción de maná
+item;torch;name;Antorcha
+item;rope;name;Cuerda
+item;shovel;name;Pala
+item;fishing_rod;name;Caña de pescar
+item;worm;name;Gusano
+item;blank_rune;name;Runa en blanco
+item;bread;name;Pan
+item;spear;name;Lanza
+item;meat;name;Carne
+item;wolf_pelt;name;Piel de lobo
+item;boar_tusk;name;Colmillo de jabalí
+item;spider_silk;name;Seda de araña
+item;goblin_ear;name;Oreja de goblin
+item;bone;name;Hueso
+item;troll_hide;name;Cuero de troll
+item;crystal_shard;name;Fragmento de cristal
+item;iron_ore;name;Mineral de hierro
+item;iron_sword;name;Espada de hierro
+item;studded_armor;name;Armadura de tachuelas
+item;bone_shield;name;Escudo de hueso
+item;wand_of_sparks;name;Varita de chispas
+item;rod_of_frost;name;Vara de escarcha
+item;iron_knuckles;name;Nudilleras de hierro
+item;miner_helmet;name;Casco de minero
+item;grimtooth_crown;name;Corona de Grimtooth
+item;steel_spear;name;Lanza de acero
+item;great_health_potion;name;Poción de vida grande
+item;great_mana_potion;name;Poción de maná grande
+item;fireburst_rune;name;Runa de estallido de fuego
+item;boulder_rune;name;Runa de estalagmita
+item;healing_rune;name;Runa de curación fuerte
+item;fish;name;Pez
+item;pearl;name;Perla
+item;frost_pelt;name;Piel helada
+item;yeti_fur;name;Pelaje de yeti
+item;frozen_heart;name;Corazón congelado
+item;croc_leather;name;Cuero de cocodrilo
+item;snake_skin;name;Piel de serpiente
+item;jungle_idol;name;Ídolo de la jungla
+item;scorpion_tail;name;Cola de escorpión
+item;hyena_fang;name;Colmillo de hiena
+item;mummy_wrap;name;Venda de momia
+item;scarab_gem;name;Gema de escarabajo
+item;frost_blade;name;Hoja helada
+item;fur_armor;name;Armadura de pieles
+item;serpent_spear;name;Lanza de serpiente
+item;wand_of_storms;name;Varita de tormentas
+item;rod_of_vines;name;Vara de enredaderas
+item;desert_knuckles;name;Nudilleras del desierto
+item;sandstone_shield;name;Escudo de arenisca
+item;scarab_helmet;name;Yelmo de escarabajo
+item;croc_legs;name;Pantalones de cocodrilo
+item;frost_tiara;name;Tiara de escarcha
+item;colossus_core;name;Núcleo de coloso
+item;pharaoh_scepter;name;Cetro del faraón
+item;obsidian_shard;name;Fragmento de obsidiana
+item;glacial_core;name;Núcleo glacial
+item;shadow_essence;name;Esencia de sombra
+item;abyssal_ember;name;Brasa abisal
+item;magma_spear;name;Lanza de magma
+item;obsidian_wand;name;Varita de obsidiana
+item;rod_of_hoarfrost;name;Vara de escarcha densa
+item;molten_knuckles;name;Nudilleras fundidas
+item;frostfang_spear;name;Lanza de colmillo helado
+item;wand_of_inferno;name;Varita del infierno
+item;rod_of_stoneroot;name;Vara de raíz de piedra
+item;frostbound_fists;name;Puños ligados al hielo
+item;shadowpiercer;name;Perforasombras
+item;stormcaller_wand;name;Varita del invocatormentas
+item;rod_of_twilight;name;Vara del crepúsculo
+item;umbral_grips;name;Guanteletes umbrales
+item;obsidian_armor;name;Armadura de obsidiana
+item;obsidian_helmet;name;Yelmo de obsidiana
+item;obsidian_legs;name;Grebas de obsidiana
+item;obsidian_shield;name;Escudo de obsidiana
+item;glacial_plate;name;Coraza glacial
+item;glacial_helm;name;Yelmo glacial
+item;glacial_legs;name;Grebas glaciales
+item;glacial_shield;name;Escudo glacial
+item;shadowweave_armor;name;Armadura de tejido de sombra
+item;shadow_hood;name;Capucha de sombra
+item;shadow_legs;name;Pantalones de sombra
+item;shadow_aegis;name;Égida de sombra
+item;crown_of_the_abyss;name;Corona del Abismo
+item;dawnspear;name;Lanza del alba
+item;starfall_wand;name;Varita de la lluvia de estrellas
+item;rod_of_eternal_winter;name;Vara del invierno eterno
+item;fists_of_the_abyss;name;Puños del Abismo
+item;supreme_health_potion;name;Poción de vida suprema
+item;supreme_mana_potion;name;Poción de maná suprema
+item;ice_cod;name;Bacalao de hielo
+item;swamp_eel;name;Anguila del pantano
+item;oasis_carp;name;Carpa del oasis
+item;saddle;name;Silla de montar
+item;return_scroll;name;Pergamino de regreso
+item;pet_dog;name;Cachorro
+item;pet_cat;name;Gatito
+item;pet_raven;name;Cuervo
+item;pet_fennec;name;Fénec
+item;pet_gull;name;Gaviota
+item;pet_parrot;name;Loro
+item;exp_scroll;name;Pergamino de estudio
+item;challenge_scroll;name;Pergamino de desafío
+item;strong_health_potion;name;Poción de vida fuerte
+item;strong_mana_potion;name;Poción de maná fuerte
+item;healing_herb;name;Hierba curativa
+item;tidal_harpoon;name;Arpón de las mareas
+item;wand_of_the_deep;name;Varita de las profundidades
+item;rod_of_tides;name;Vara de las mareas
+item;reef_gauntlets;name;Guanteletes del arrecife
+item;coral_helmet;name;Yelmo de las profundidades
+item;coral_armor;name;Armadura de coral
+item;coral_legs;name;Grebas de coral
+item;coral_shield;name;Escudo de concha
+item;great_fireball_rune;name;Runa de gran bola de fuego
+item;avalanche_rune;name;Runa de avalancha
+item;sudden_death_rune;name;Runa de muerte súbita
+item;ultimate_healing_rune;name;Runa de curación suprema
+item;great_spirit_potion;name;Poción de espíritu grande
+item;ultimate_spirit_potion;name;Poción de espíritu suprema
+item;ultimate_mana_potion;name;Poción de maná suprema
+item;ultimate_health_potion;name;Poción de vida suprema
+item;backpack;name;Mochila
+item;wyvern_scale;name;Escama de wyvern
+item;crab_pincer;name;Pinza de cangrejo de coral
+item;pirate_hook;name;Garfio de pirata
+item;powder_horn;name;Cuerno de pólvora
+item;drowned_ring;name;Anillo del ahogado
+item;mist_essence;name;Esencia de niebla
+item;drake_horn;name;Cuerno de draco de magma
+item;hand_axe;name;Hacha de mano
+item;battle_axe;name;Hacha de batalla
+item;mace;name;Maza
+item;desert_scimitar;name;Cimitarra del desierto
+item;barbarian_axe;name;Hacha de bárbaro
+item;knight_sword;name;Espada de caballero
+item;war_hammer;name;Martillo de guerra
+item;crusader_axe;name;Hacha de cruzado
+item;magma_cleaver;name;Cuchilla de magma
+item;obsidian_axe;name;Hacha de obsidiana
+item;coral_warhammer;name;Martillo de coral
+item;glacier_axe;name;Hacha de glaciar
+item;frost_longsword;name;Espada larga helada
+item;umbral_blade;name;Hoja umbral
+item;skull_axe;name;Hacha de calaveras
+item;abyssal_greatsword;name;Gran espada abisal
+item;abyss_hammer;name;Martillo del Abismo
+item;short_bow;name;Arco corto
+item;hunting_bow;name;Arco de caza
+item;crossbow;name;Ballesta
+item;elven_bow;name;Arco élfico
+item;serpent_bow;name;Arco de serpiente
+item;composite_bow;name;Arco compuesto
+item;heavy_crossbow;name;Ballesta pesada
+item;magma_bow;name;Arco de magma
+item;tidal_bow;name;Arco de las mareas
+item;frost_bow;name;Arco de colmillo helado
+item;glacier_crossbow;name;Ballesta de glaciar
+item;shadow_bow;name;Arco de sombra
+item;dawn_bow;name;Arco del alba
+item;strength_potion;name;Poción de fuerza
+item;stoneskin_potion;name;Poción de piel de piedra
+item;swiftness_potion;name;Poción de rapidez
+item;luck_potion;name;Poción de suerte
+item;black_feather;name;Pluma negra
+item;worm_slime;name;Baba de gusano
+item;chitin_plate;name;Placa de quitina
+item;ectoplasm;name;Ectoplasma
+item;gargoyle_shard;name;Fragmento de gárgola
+item;crow_feather_hood;name;Capucha de plumas de cuervo
+item;mirewood_rod;name;Vara del cenagal
+item;blueberry;name;Arándanos
+item;raspberry;name;Frambuesas
+item;forge_sliver;name;Esquirla de fragua
+item;exalted_core;name;Núcleo exaltado
+item;obsidian_boots;name;Botas de obsidiana
+item;coral_boots;name;Botas de coral
+item;glacial_boots;name;Botas glaciales
+item;shadow_boots;name;Botas de sombra
+item;abyssal_treads;name;Pisadas abisales
+item;lesser_guardian_gem;name;Gema de guardián menor
+item;guardian_gem;name;Gema de guardián
+item;greater_guardian_gem;name;Gema de guardián mayor
+item;lesser_marksman_gem;name;Gema de tirador menor
+item;marksman_gem;name;Gema de tirador
+item;greater_marksman_gem;name;Gema de tirador mayor
+item;lesser_sage_gem;name;Gema de sabio menor
+item;sage_gem;name;Gema de sabio
+item;greater_sage_gem;name;Gema de sabio mayor
+item;lesser_mystic_gem;name;Gema de místico menor
+item;mystic_gem;name;Gema de místico
+item;greater_mystic_gem;name;Gema de místico mayor
+item;lesser_spiritualist_gem;name;Gema de espiritualista menor
+item;spiritualist_gem;name;Gema de espiritualista
+item;greater_spiritualist_gem;name;Gema de espiritualista mayor
+item;lesser_gem_fragment;name;Fragmento de gema menor
+item;greater_gem_fragment;name;Fragmento de gema mayor
+item;rooster_helmet;name;Yelmo de gallo
+item;rooster_armor;name;Armadura de gallo
+item;rooster_legs;name;Grebas de gallo
+item;rooster_boots;name;Botas de gallo
+item;rooster_shield;name;Escudo de gallo
+item;rooster_sword;name;Espada de gallo
+item;rooster_club;name;Garrote de gallo
+item;rooster_bow;name;Arco de gallo
+item;rooster_wand;name;Varita de gallo
+item;rooster_rod;name;Vara de gallo
+item;rooster_spellbook;name;Libro de hechizos de gallo
+item;rooster_amulet;name;Amuleto de gallo
+item;candy_helmet;name;Yelmo de caramelo
+item;candy_armor;name;Armadura de caramelo
+item;candy_legs;name;Grebas de caramelo
+item;candy_boots;name;Botas de caramelo
+item;candy_shield;name;Escudo de caramelo
+item;candy_sword;name;Espada de caramelo
+item;candy_bow;name;Arco de caramelo
+item;candy_wand;name;Varita de caramelo
+item;candy_spellbook;name;Libro de hechizos de caramelo
+item;candy_amulet;name;Collar de caramelo
+item;plague_helmet;name;Yelmo de la peste
+item;plague_mask;name;Máscara de la peste
+item;plague_armor;name;Armadura de la peste
+item;plague_legs;name;Grebas de la peste
+item;plague_boots;name;Botas de la peste
+item;plague_shield;name;Escudo de la peste
+item;plague_sword;name;Espada de la peste
+item;plague_axe;name;Hacha de la peste
+item;plague_bow;name;Arco de la peste
+item;plague_wand;name;Varita de la peste
+item;plague_rod;name;Vara de la peste
+item;plague_spellbook;name;Libro de hechizos de la peste
+item;blizzard_helmet;name;Yelmo de la ventisca
+item;blizzard_armor;name;Armadura de la ventisca
+item;blizzard_legs;name;Grebas de la ventisca
+item;blizzard_boots;name;Botas de la ventisca
+item;blizzard_shield;name;Escudo de la ventisca
+item;blizzard_sword;name;Espada de la ventisca
+item;blizzard_axe;name;Hacha de la ventisca
+item;blizzard_bow;name;Arco de la ventisca
+item;blizzard_wand;name;Varita de la ventisca
+item;blizzard_rod;name;Vara de la ventisca
+item;blizzard_spellbook;name;Libro de hechizos de la ventisca
+item;blizzard_amulet;name;Amuleto de la ventisca
+item;dragon_helmet;name;Yelmo de dragón
+item;dragon_armor;name;Armadura de dragón
+item;dragon_legs;name;Grebas de dragón
+item;dragon_boots;name;Botas de dragón
+item;dragon_shield;name;Escudo de dragón
+item;dragon_sword;name;Espada de dragón
+item;dragon_axe;name;Hacha de dragón
+item;dragon_bow;name;Arco de dragón
+item;dragon_wand;name;Varita de dragón
+item;dragon_rod;name;Vara de dragón
+item;dragon_spellbook;name;Libro del bosquecillo
+item;dragon_amulet;name;Amuleto de dragón
+item;sun_helmet;name;Yelmo de cobra
+item;sun_armor;name;Armadura de sol
+item;sun_legs;name;Grebas de sol
+item;sun_boots;name;Botas de sol
+item;sun_shield;name;Escudo de sol
+item;sun_sword;name;Espada de sol
+item;sun_axe;name;Hacha de sol
+item;sun_bow;name;Arco de sol
+item;sun_wand;name;Varita de sol
+item;sun_rod;name;Vara de sol
+item;sun_spellbook;name;Libro de anchu
+item;sun_amulet;name;Amuleto de sol
+item;phoenix_helmet;name;Yelmo de fénix
+item;phoenix_armor;name;Armadura de fénix
+item;phoenix_legs;name;Grebas de fénix
+item;phoenix_boots;name;Botas de fénix
+item;phoenix_shield;name;Escudo de fénix
+item;phoenix_sword;name;Espada de fénix
+item;phoenix_axe;name;Hacha de fénix
+item;phoenix_mace;name;Maza de fénix
+item;phoenix_bow;name;Arco de fénix
+item;phoenix_wand;name;Varita de fénix
+item;phoenix_spellbook;name;Libro de hechizos de fénix
+item;phoenix_amulet;name;Amuleto de fénix
+item;deep_helmet;name;Yelmo de las profundidades
+item;deep_armor;name;Armadura de las profundidades
+item;deep_legs;name;Grebas de las profundidades
+item;deep_boots;name;Botas de las profundidades
+item;deep_shield;name;Escudo de las profundidades
+item;deep_trident;name;Tridente de las profundidades
+item;deep_hammer;name;Martillo de las profundidades
+item;deep_bow;name;Arco de las profundidades
+item;deep_wand;name;Varita de las profundidades
+item;deep_rod;name;Vara de las profundidades
+item;deep_spellbook;name;Libro de hechizos de las profundidades
+item;deep_amulet;name;Amuleto de las profundidades
+item;moon_helmet;name;Yelmo de la luna
+item;moon_armor;name;Armadura de la luna
+item;moon_legs;name;Grebas de la luna
+item;moon_boots;name;Botas de la luna
+item;moon_shield;name;Escudo de la luna
+item;moon_sword;name;Espada de la luna
+item;moon_axe;name;Hacha de la luna
+item;moon_bow;name;Arco de la luna
+item;moon_wand;name;Varita de la luna
+item;moon_spellbook;name;Libro de hechizos de la luna
+item;moon_amulet;name;Amuleto de la luna
+item;angel_helmet;name;Yelmo de ángel
+item;angel_armor;name;Armadura de ángel
+item;angel_legs;name;Grebas de ángel
+item;angel_boots;name;Botas de ángel
+item;angel_shield;name;Escudo de ángel
+item;angel_sword;name;Espada de ángel
+item;angel_axe;name;Hacha de ángel
+item;angel_bow;name;Arco de ángel
+item;angel_wand;name;Varita de ángel
+item;angel_rod;name;Vara de ángel
+item;angel_spellbook;name;Libro de hechizos de ángel
+item;angel_amulet;name;Amuleto de ángel
+item;infernal_helmet;name;Yelmo de infierno
+item;infernal_armor;name;Armadura de infierno
+item;infernal_legs;name;Grebas de infierno
+item;infernal_boots;name;Botas de infierno
+item;infernal_shield;name;Escudo de infierno
+item;infernal_sword;name;Espada de infierno
+item;infernal_axe;name;Hacha de infierno
+item;infernal_bow;name;Arco de infierno
+item;infernal_wand;name;Varita de infierno
+item;infernal_rod;name;Vara de infierno
+item;infernal_spellbook;name;Libro de hechizos de infierno
+item;infernal_amulet;name;Amuleto de infierno
+item;forest_hood;name;Capucha del bosque
+item;traveler_boots;name;Botas de viajero
+item;wolf_spellbook;name;Libro del lobo
+item;horned_helmet;name;Yelmo con cuernos
+item;gem_shield;name;Escudo con gema
+item;crystal_shortsword;name;Espada corta de cristal
+item;crystal_sword;name;Espada de cristal
+item;emerald_amulet;name;Amuleto de esmeralda
+item;light_magic_missile_rune;name;Runa de proyectil mágico ligero
+item;heavy_magic_missile_rune;name;Runa de proyectil mágico pesado
+item;icicle_rune;name;Runa de carámbano
+item;holy_missile_rune;name;Runa de proyectil sagrado
+item;thunderstorm_rune;name;Runa de tormenta eléctrica
+item;stone_shower_rune;name;Runa de lluvia de piedras
+item;explosion_rune;name;Runa de explosión
+item;antidote_rune;name;Runa de antídoto
+item;poison_field_rune;name;Runa de campo de veneno
+item;fire_field_rune;name;Runa de campo de fuego
+item;energy_field_rune;name;Runa de campo de energía
+item;poison_bomb_rune;name;Runa de bomba de veneno
+item;fire_bomb_rune;name;Runa de bomba de fuego
+item;energy_bomb_rune;name;Runa de bomba de energía
+item;poison_wall_rune;name;Runa de muro de veneno
+item;fire_wall_rune;name;Runa de muro de fuego
+item;energy_wall_rune;name;Runa de muro de energía
+item;magic_wall_rune;name;Runa de muro mágico
+item;wild_growth_rune;name;Runa de crecimiento salvaje
+item;destroy_field_rune;name;Runa de destruir campo
+item;soulfire_rune;name;Runa de fuego del alma
+item;paralyse_rune;name;Runa de paralizar
+item;convince_creature_rune;name;Runa de convencer criatura
+item;animate_dead_rune;name;Runa de animar muertos
+item;warlord_helmet;name;Yelmo del Señor de la Fortaleza
+monster;sewer_rat;name;Rata de alcantarilla
+monster;giant_rat;name;Rata gigante
+monster;wolf;name;Lobo
+monster;boar;name;Jabalí
+monster;forest_spider;name;Araña del bosque
+monster;bandit;name;Bandido
+monster;goblin;name;Goblin
+monster;goblin_shaman;name;Chamán goblin
+monster;skeleton;name;Esqueleto
+monster;cave_troll;name;Troll de las cuevas
+monster;crystal_golem;name;Gólem de cristal
+monster;grimtooth;name;Grimtooth
+monster;snow_wolf;name;Lobo de las nieves
+monster;yeti;name;Yeti
+monster;frost_witch;name;Bruja de escarcha
+monster;ice_golem;name;Gólem de hielo
+monster;crocodile;name;Cocodrilo
+monster;jungle_serpent;name;Serpiente de la jungla
+monster;jungle_hunter;name;Cazador de la jungla
+monster;temple_guardian;name;Guardián del templo
+monster;hyena;name;Hiena
+monster;scorpion;name;Escorpión
+monster;sand_wraith;name;Espectro de arena
+monster;mummy;name;Momia
+monster;frost_queen;name;Reina de escarcha
+monster;ruin_colossus;name;Coloso de las ruinas
+monster;pharaoh;name;Faraón
+monster;cursed_treant;name;Ent maldito
+monster;wraith_knight;name;Caballero espectral
+monster;fire_elemental;name;Elemental de fuego
+monster;lava_golem;name;Gólem de lava
+monster;ignaroth;name;Ignaroth
+monster;frost_giant;name;Gigante de escarcha
+monster;storm_harpy;name;Arpía de la tormenta
+monster;ice_dragon;name;Dragón de hielo
+monster;hrimgar;name;Hrimgar
+monster;shadow_stalker;name;Acechador de sombras
+monster;sand_titan;name;Titán de arena
+monster;void_priest;name;Sacerdote del vacío
+monster;khazuul;name;Khazuul
+monster;abyssal_demon;name;Demonio abisal
+monster;bone_dragon;name;Dragón de huesos
+monster;abyss_lord;name;Señor del Abismo
+monster;morgath;name;Morgath
+monster;wyvern;name;Wyvern
+monster;coral_crab;name;Cangrejo de coral
+monster;drowned_sailor;name;Marinero ahogado
+monster;pirate_cutthroat;name;Pirata degollador
+monster;pirate_gunner;name;Pirata artillero
+monster;mist_wraith;name;Espectro de la niebla
+monster;magma_drake;name;Draco de magma
+monster;wyvern_matriarch;name;Matriarca de las wyvern
+monster;bloodbeard;name;Barbasangre
+monster;skaldra;name;Skaldra
+monster;morvena;name;Morvena
+monster;pyrrax;name;Pyrrax
+monster;orc_warrior;name;Guerrero orco
+monster;orc_shaman;name;Chamán orco
+monster;orc_berserker;name;Berserker orco
+monster;orc_warlord;name;Señor de la guerra orco
+monster;burrow_larva;name;Larva de madriguera
+monster;carrion_crow;name;Cuervo carroñero
+monster;snare_setter;name;Tendedor de trampas
+monster;cave_centipede;name;Ciempiés de las cuevas
+monster;quarry_brute;name;Bruto de la cantera
+monster;spark_wisp;name;Fuego fatuo de chispas
+monster;candle_acolyte;name;Acólito de las velas
+monster;tunnel_fence;name;Cercador del túnel
+monster;barrow_lantern;name;Farol del túmulo
+monster;frost_boar;name;Jabalí de escarcha
+monster;swamp_hornet;name;Avispón del pantano
+monster;sand_devourer;name;Devorador de arena
+monster;striped_prowler;name;Merodeador rayado
+monster;bog_wraith;name;Espectro del cenagal
+monster;rime_crawler;name;Reptador de escarcha
+monster;gilded_beetle;name;Escarabajo dorado
+monster;frost_centipede;name;Ciempiés de escarcha
+monster;dune_zealot;name;Fanático de las dunas
+monster;stone_sentinel;name;Centinela de piedra
+monster;sand_gargoyle;name;Gárgola de arena
+monster;blade_warden;name;Guardián de la hoja
+monster;crimson_shade;name;Sombra carmesí
+monster;ember_beetle;name;Escarabajo de brasas
+monster;ash_magus;name;Mago de ceniza
+monster;dune_drake;name;Draco de las dunas
+monster;storm_wisp;name;Fuego fatuo de tormenta
+monster;rime_gargoyle;name;Gárgola de escarcha
+monster;dusk_gargoyle;name;Gárgola del crepúsculo
+monster;shadow_centipede;name;Ciempiés de sombras
+monster;abyss_crawler;name;Reptador del Abismo
+monster;winged_spawn;name;Engendro alado
+monster;obsidian_sentinel;name;Centinela de obsidiana
+monster;wroniec;name;Cuervo
+monster;szlamiara;name;Babosa de cieno
+monster;velmira;name;Velmira
+monster;suweren;name;Soberano
+monster;orc;name;Orco
+monster;orc_spearman;name;Lancero orco
+monster;orc_rider;name;Jinete orco
+monster;orc_marauder;name;Merodeador orco
+monster;orc_leader;name;Líder orco
+monster;orc_cult_priest;name;Sacerdote del culto orco
+monster;orc_cult_fanatic;name;Fanático del culto orco
+monster;urgoth;name;Urgoth
+monster;elf;name;Elfo
+monster;elf_scout;name;Explorador elfo
+monster;elf_arcanist;name;Arcanista elfo
+monster;mine_grub;name;Larva de la mina
+monster;dwarf;name;Enano
+monster;dwarf_miner;name;Minero enano
+monster;dwarf_soldier;name;Soldado enano
+monster;deep_worm;name;Gusano de las profundidades
+monster;dwarf_warden;name;Guardián enano
+monster;rock_golem;name;Gólem de roca
+monster;dwarf_earthcaller;name;Invocador de tierra enano
+monster;earth_spirit;name;Espíritu de la tierra
+monster;deep_behemot;name;Behemot de las profundidades
+monster;cinder_salamander;name;Salamandra de cenizas
+monster;ember_hound;name;Sabueso de brasas
+monster;magma_colossus;name;Coloso de magma
+monster;grove_huntress;name;Cazadora del bosquecillo
+monster;grove_shieldmaiden;name;Doncella escudera del bosquecillo
+monster;grove_crone;name;Vieja del bosquecillo
+monster;grove_matriarch;name;Matriarca del bosquecillo
+monster;oneeye_brute;name;Bruto tuerto
+monster;oneeye_hauler;name;Cargador tuerto
+monster;oneeye_smith;name;Herrero tuerto
+spell;magic_patch;name;Parche mágico
+spell;light_healing;name;Curación ligera
+spell;intense_healing;name;Curación intensa
+spell;ultimate_healing;name;Curación suprema
+spell;restoration;name;Restauración
+spell;heal_friend;name;Curar amigo
+spell;mass_healing;name;Curación masiva
+spell;natures_embrace;name;Abrazo de la naturaleza
+spell;divine_healing;name;Curación divina
+spell;salvation;name;Salvación
+spell;bruise_bane;name;Azote de moretones
+spell;wound_cleansing;name;Limpieza de heridas
+spell;intense_wound_cleansing;name;Limpieza intensa de heridas
+spell;fair_wound_cleansing;name;Limpieza justa de heridas
+spell;recovery;name;Recuperación
+spell;intense_recovery;name;Recuperación intensa
+spell;spirit_mend;name;Reparación espiritual
+spell;restore_balance;name;Restaurar el equilibrio
+spell;mass_spirit_mend;name;Reparación espiritual masiva
+spell;cure_poison;name;Curar veneno
+spell;cure_electrification;name;Curar electrocución
+spell;cure_burning;name;Curar quemaduras
+spell;cure_bleeding;name;Curar hemorragia
+spell;cure_curse;name;Curar maldición
+spell;swift_jab;name;Golpe veloz
+spell;tiger_strike;name;Golpe de tigre
+spell;double_jab;name;Golpe doble
+spell;greater_tiger_clash;name;Gran choque del tigre
+spell;mystic_repulse;name;Repulsión mística
+spell;flurry_of_blows;name;Ráfaga de golpes
+spell;sweeping_takedown;name;Derribo barredor
+spell;chained_penance;name;Penitencia encadenada
+spell;greater_flurry_of_blows;name;Gran ráfaga de golpes
+spell;forceful_uppercut;name;Gancho potente
+spell;devastating_knockout;name;Nocaut devastador
+spell;spiritual_outburst;name;Estallido espiritual
+spell;virtue_of_harmony;name;Virtud de la armonía
+spell;virtue_of_justice;name;Virtud de la justicia
+spell;virtue_of_sustain;name;Virtud del sustento
+spell;focus_serenity;name;Enfocar serenidad
+spell;focus_harmony;name;Enfocar armonía
+spell;buzz;name;Zumbido
+spell;scorch;name;Chamuscar
+spell;apprentices_strike;name;Golpe de aprendiz
+spell;energy_strike;name;Golpe de energía
+spell;flame_strike;name;Golpe de llamas
+spell;death_strike;name;Golpe de muerte
+spell;fire_wave;name;Ola de fuego
+spell;energy_beam;name;Rayo de energía
+spell;ignite;name;Prender fuego
+spell;great_energy_beam;name;Gran rayo de energía
+spell;electrify;name;Electrizar
+spell;great_fire_wave;name;Gran ola de fuego
+spell;energy_wave;name;Ola de energía
+spell;lightning;name;Relámpago
+spell;rage_of_the_skies;name;Ira de los cielos
+spell;hells_core;name;Núcleo del infierno
+spell;strong_flame_strike;name;Golpe de llamas fuerte
+spell;curse;name;Maldición
+spell;strong_energy_strike;name;Golpe de energía fuerte
+spell;ultimate_flame_strike;name;Golpe de llamas supremo
+spell;ultimate_energy_strike;name;Golpe de energía supremo
+spell;mud_attack;name;Ataque de barro
+spell;chill_out;name;Enfriar
+spell;terra_strike;name;Golpe de tierra
+spell;ice_strike;name;Golpe de hielo
+spell;physical_strike;name;Golpe físico
+spell;ice_wave;name;Ola de hielo
+spell;terra_wave;name;Ola de tierra
+spell;strong_ice_wave;name;Ola de hielo fuerte
+spell;envenom;name;Envenenar
+spell;wrath_of_nature;name;Ira de la naturaleza
+spell;eternal_winter;name;Invierno eterno
+spell;strong_terra_strike;name;Golpe de tierra fuerte
+spell;strong_ice_strike;name;Golpe de hielo fuerte
+spell;ultimate_terra_strike;name;Golpe de tierra supremo
+spell;ultimate_ice_strike;name;Golpe de hielo supremo
+spell;lesser_ethereal_spear;name;Lanza etérea menor
+spell;ethereal_spear;name;Lanza etérea
+spell;divine_missile;name;Proyectil divino
+spell;divine_caldera;name;Caldera divina
+spell;holy_flash;name;Destello sagrado
+spell;strong_ethereal_spear;name;Lanza etérea fuerte
+spell;divine_dazzle;name;Deslumbramiento divino
+spell;lesser_front_sweep;name;Barrido frontal menor
+spell;brutal_strike;name;Golpe brutal
+spell;whirlwind_throw;name;Lanzamiento torbellino
+spell;groundshaker;name;Sacudetierra
+spell;berserk;name;Berserk
+spell;inflict_wound;name;Infligir herida
+spell;front_sweep;name;Barrido frontal
+spell;fierce_berserk;name;Berserk feroz
+spell;annihilation;name;Aniquilación
+spell;executioners_throw;name;Lanzamiento del verdugo
+spell;light;name;Luz
+spell;magic_rope;name;Cuerda mágica
+spell;levitate_up;name;Levitar arriba
+spell;levitate_down;name;Levitar abajo
+spell;great_light;name;Gran luz
+spell;haste;name;Prisa
+spell;strong_haste;name;Prisa fuerte
+spell;magic_shield;name;Escudo mágico
+spell;food;name;Comida
+spell;creature_illusion;name;Ilusión de criatura
+spell;summon_creature;name;Invocar criatura
+spell;charge;name;Carga
+spell;challenge;name;Desafío
+spell;invisibility;name;Invisibilidad
+spell;ultimate_light;name;Luz suprema
+spell;protector;name;Protector
+spell;swift_foot;name;Pie veloz
+spell;blood_rage;name;Furia de sangre
+spell;sharpshooter;name;Tirador certero
+spell;chivalrous_challenge;name;Desafío caballeresco
+spell;conjure_spears;name;Conjurar lanzas
+spell;blank_rune_spell;name;Runa en blanco
+spell;enchant_poison_field;name;Runa de campo de veneno
+spell;enchant_fire_field;name;Runa de campo de fuego
+spell;enchant_healing;name;Runa de curación fuerte
+spell;enchant_antidote;name;Runa de antídoto
+spell;enchant_light_missile;name;Runa de proyectil mágico ligero
+spell;enchant_convince;name;Runa de convencer criatura
+spell;enchant_destroy_field;name;Runa de destruir campo
+spell;enchant_energy_field;name;Runa de campo de energía
+spell;enchant_boulder;name;Runa de estalagmita
+spell;enchant_ultimate_healing;name;Runa de curación suprema
+spell;enchant_heavy_missile;name;Runa de proyectil mágico pesado
+spell;enchant_poison_bomb;name;Runa de bomba de veneno
+spell;enchant_fireburst;name;Runa de estallido de fuego
+spell;enchant_fire_bomb;name;Runa de bomba de fuego
+spell;enchant_soulfire;name;Runa de fuego del alma
+spell;enchant_wild_growth;name;Runa de crecimiento salvaje
+spell;enchant_animate_dead;name;Runa de animar muertos
+spell;enchant_holy_missile;name;Runa de proyectil sagrado
+spell;enchant_icicle;name;Runa de carámbano
+spell;enchant_stone_shower;name;Runa de lluvia de piedras
+spell;enchant_thunderstorm;name;Runa de tormenta eléctrica
+spell;enchant_poison_wall;name;Runa de muro de veneno
+spell;enchant_great_fireball;name;Runa de gran bola de fuego
+spell;enchant_avalanche;name;Runa de avalancha
+spell;enchant_explosion;name;Runa de explosión
+spell;enchant_magic_wall;name;Runa de muro mágico
+spell;enchant_fire_wall;name;Runa de muro de fuego
+spell;enchant_energy_bomb;name;Runa de bomba de energía
+spell;enchant_energy_wall;name;Runa de muro de energía
+spell;enchant_sudden_death;name;Runa de muerte súbita
+spell;enchant_paralyse;name;Runa de paralizar
+spell;light_magic_missile_rune;name;Proyectil mágico ligero (runa)
+spell;boulder_rune;name;Estalagmita (runa)
+spell;heavy_magic_missile_rune;name;Proyectil mágico pesado (runa)
+spell;fireburst_rune;name;Estallido de fuego (runa)
+spell;icicle_rune;name;Carámbano (runa)
+spell;holy_missile_rune;name;Proyectil sagrado (runa)
+spell;sudden_death_rune;name;Muerte súbita (runa)
+spell;great_fireball_rune;name;Gran bola de fuego (runa)
+spell;avalanche_rune;name;Avalancha (runa)
+spell;thunderstorm_rune;name;Tormenta eléctrica (runa)
+spell;stone_shower_rune;name;Lluvia de piedras (runa)
+spell;explosion_rune;name;Explosión (runa)
+spell;healing_rune;name;Curación fuerte (runa)
+spell;ultimate_healing_rune;name;Curación suprema (runa)
+spell;antidote_rune;name;Antídoto (runa)
+spell;poison_field_rune;name;Campo de veneno (runa)
+spell;fire_field_rune;name;Campo de fuego (runa)
+spell;energy_field_rune;name;Campo de energía (runa)
+spell;poison_bomb_rune;name;Bomba de veneno (runa)
+spell;fire_bomb_rune;name;Bomba de fuego (runa)
+spell;energy_bomb_rune;name;Bomba de energía (runa)
+spell;poison_wall_rune;name;Muro de veneno (runa)
+spell;fire_wall_rune;name;Muro de fuego (runa)
+spell;energy_wall_rune;name;Muro de energía (runa)
+spell;magic_wall_rune;name;Muro mágico (runa)
+spell;wild_growth_rune;name;Crecimiento salvaje (runa)
+spell;destroy_field_rune;name;Destruir campo (runa)
+spell;soulfire_rune;name;Fuego del alma (runa)
+spell;paralyse_rune;name;Paralizar (runa)
+spell;convince_creature_rune;name;Convencer criatura (runa)
+spell;animate_dead_rune;name;Animar muertos (runa)
+spell;avatar_of_steel;name;Avatar de acero
+spell;avatar_of_light;name;Avatar de luz
+spell;avatar_of_storm;name;Avatar de tormenta
+spell;avatar_of_nature;name;Avatar de naturaleza
+spell;avatar_of_balance;name;Avatar de equilibrio
+spell;divine_empowerment;name;Potenciación divina
+spell;divine_grenade;name;Granada divina
+spell;great_death_beam;name;Gran rayo de muerte
+spell;terra_burst;name;Estallido de tierra
+spell;ice_burst;name;Estallido de hielo
+quest;varden_wolves;name;Plaga de lobos
+quest;varden_ears;name;Orejas de goblin
+quest;varden_trolls;name;Trolls en las profundidades
+quest;varden_king;name;Rey de la mina
+quest;frost_pelts;name;Pieles para el invierno
+quest;frost_yeti;name;Caza del yeti
+quest;frost_queen;name;La corona helada
+quest;selv_crocs;name;Cocodrilos en los canales
+quest;selv_idols;name;Ídolos perdidos
+quest;selv_colossus;name;Corazón de las ruinas
+quest;qas_scorpions;name;Aguijones de escorpión
+quest;qas_mummies;name;Paz para los muertos
+quest;qas_pharaoh;name;La maldición del faraón
+quest;camp_treants;name;El bosque maldito
+quest;camp_knights;name;La guardia fantasmal
+quest;camp_golems;name;Río de lava
+quest;camp_ignaroth;name;Señor del volcán
+quest;camp_giants;name;Gigantes de escarcha
+quest;camp_dragons;name;Alas heladas
+quest;camp_hrimgar;name;Rey del hielo
+quest;camp_stalkers;name;Caza en las sombras
+quest;camp_essence;name;Esencia de sombra
+quest;camp_khazuul;name;El rey vacío
+quest;camp_priests;name;Sacerdotes del vacío
+quest;camp_demons;name;Demonios a las puertas
+quest;camp_lords;name;Señores del Abismo
+quest;camp_morgath;name;Corazón del Abismo
+quest;varden_smug1;name;Rastros de contrabandistas
+quest;varden_smug2;name;Chamanes y runas
+quest;varden_smug3;name;El último cargamento
+quest;selv_exp1;name;La expedición perdida
+quest;selv_exp2;name;Tras el rastro de las serpientes
+quest;frost_storm;name;Ventisca
+quest;qas_caravan1;name;La caravana asaltada
+quest;qas_caravan2;name;Susurros en la arena
+quest;qas_caravan3;name;El ladrón de gemas
+quest;selv_skins;name;Pieles de serpiente
+quest;selv_temple;name;Guardianes del templo
+quest;frost_hearts;name;Corazón de escarcha
+quest;varden_boars;name;Jabalíes en el trigal
+quest;varden_spiders;name;Nidos de arañas
+quest;varden_crystals;name;Corazones de cristal
+quest;camp_elementals;name;Campos en llamas
+quest;camp_harpies;name;Tormenta sobre el paso
+quest;camp_titans;name;Colosos de arena
+quest;camp_bones;name;Alas de hueso
+quest;isle_wyverns;name;Alas sobre el valle
+quest;isle_scales;name;Escamas para escudos
+quest;isle_matriarch;name;Madre de las wyvern
+quest;isle_crabs;name;Pinzas del arrecife
+quest;isle_pirates;name;La bandera negra
+quest;isle_hooks;name;Prueba de la victoria
+quest;isle_gunners;name;Cañones silenciosos
+quest;isle_bloodbeard;name;Barbasangre
+quest;isle_drowned;name;Los ahogados
+quest;isle_mist;name;Niebla sobre la isla
+quest;isle_morvena;name;Señora de las Nieblas
+quest;isle_skaldra;name;La bruja del hielo
+quest;isle_drakes;name;Fuego de las profundidades
+quest;isle_horns;name;Cuernos de dragón
+quest;isle_pyrrax;name;Señor del volcán
+npc;varden_banker;name;Banquero Aldric
+npc;varden_banker;greeting;Bienvenido al banco de Varden. Tu oro está seguro aquí.
+npc;varden_merchant;name;Comerciante Tomas
+npc;varden_merchant;greeting;Antorchas, cuerda, provisiones y equipo para principiantes. También compra botín.
+npc;varden_mage;name;Hechicera Mirela
+npc;varden_mage;greeting;Pociones, runas y varitas. También compra cristales y perlas.
+npc;varden_priest;name;Sacerdote Benedykt
+npc;varden_priest;greeting;Que la luz te guíe. Puedo curarte.
+npc;varden_guide;name;Guardia Oren
+npc;varden_guide;greeting;La zona necesita ayuda. Tengo tareas para ti.
+npc;varden_carrier;name;Cochero Jarek
+npc;varden_carrier;greeting;El carro a otras ciudades sale cuando quieras. Pagas con monedas.
+npc;camp_merchant;name;Intendente Bren
+npc;camp_merchant;greeting;Pociones para los duros y compro todo lo que traigas del otro lado del puente.
+npc;camp_banker;name;Tesorera Wena
+npc;camp_banker;greeting;La cuenta es común a todos los bancos de las ciudades.
+npc;camp_guide;name;Exploradora Ilka
+npc;camp_guide;greeting;Más allá del campamento empieza el verdadero peligro. Tengo tareas para los más fuertes.
+npc;selv_captain;name;Capitán Bartosz
+npc;selv_captain;greeting;Mi barco navega a Qasirah, las islas del sur y Puerto Este. Pagas con monedas.
+npc;coral_captain;name;Timonel Lucjan
+npc;coral_captain;greeting;Los arrecifes de la isla son traicioneros, pero conozco el camino a los puertos. Pagas con monedas.
+npc;pirate_captain;name;Capitán Gaviota Negra
+npc;pirate_captain;greeting;En esta isla nadie pregunta de dónde eres. Zarparás si pagas.
+npc;mist_captain;name;Barquero Gniewko
+npc;mist_captain;greeting;Es fácil perderse en la niebla. Te llevaré de vuelta al puerto.
+npc;ice_captain;name;Capitán Torvald
+npc;ice_captain;greeting;El hielo aplasta los cascos, pero mi barco resistirá la travesía a Puerto Este.
+npc;volcano_captain;name;Capitán Ognik
+npc;volcano_captain;greeting;Ceniza en las velas, pero seguimos navegando. Vuelvo a Puerto Este.
+npc;valmir_priest;name;Sacerdotisa Mirosława
+npc;valmir_priest;greeting;El templo de Valmir da la bienvenida a marineros y caminantes.
+npc;valmir_banker;name;Banquero Ludomir
+npc;valmir_banker;greeting;El Banco de Valmir lleva cuentas en todas las ciudades.
+npc;valmir_innkeeper;name;Posadero Bogdan
+npc;valmir_innkeeper;greeting;Pescado, provisiones y cuerda para quien baje a las alcantarillas.
+npc;valmir_housing;name;Administradora Grażyna
+npc;valmir_housing;greeting;Casas junto al puerto. Pagas desde tu cuenta del banco.
+npc;valmir_smith;name;Herrera Dobrawa
+npc;valmir_smith;greeting;Armas y armaduras forjadas en el puerto.
+npc;valmir_mage;name;Hechicero Wiesław
+npc;valmir_mage;greeting;Runas y pociones directamente de la academia.
+npc;valmir_merchant;name;Comerciante Zbyszko
+npc;valmir_merchant;greeting;Compro botín de las alcantarillas y alrededores.
+npc;valmir_carrier;name;Cochero Valmiru
+npc;valmir_carrier;greeting;El carro a otras ciudades espera. Pagas con monedas.
+npc;valmir_guide;name;Guía Valmiru
+npc;valmir_guide;greeting;Bajo Valmir hay alcantarillas llenas de ratas. Buenas para una primera caza.
+npc;nerys_priest;name;Sacerdote Nerysa
+npc;nerys_priest;greeting;El templo de las Islas Esmeralda da la bienvenida a los viajeros.
+npc;nerys_banker;name;Banquera Selma
+npc;nerys_banker;greeting;El Banco de Nerys lleva cuentas en todas las ciudades.
+npc;nerys_innkeeper;name;Posadera Lirena
+npc;nerys_innkeeper;greeting;Fruta, provisiones y antorchas para las islas.
+npc;nerys_housing;name;Administrador Ilian
+npc;nerys_housing;greeting;Villas entre las palmeras. Pagas desde tu cuenta del banco.
+npc;nerys_smith;name;Armero Corvin
+npc;nerys_smith;greeting;Armas y armaduras de todo el mundo.
+npc;nerys_mage;name;Hechicera Ysolde
+npc;nerys_mage;greeting;Runas y pociones para los exploradores de las islas.
+npc;nerys_merchant;name;Comerciante Nerys
+npc;nerys_merchant;greeting;Compro botín de las islas y la jungla.
+npc;nerys_carrier;name;Cochero Nerys
+npc;nerys_carrier;greeting;En transbordador y carro a otras ciudades. Pagas con monedas.
+npc;nerys_guide;name;Guía Nerys
+npc;nerys_guide;greeting;Las Islas Esmeralda esconden muchos secretos. ¿Ayudarás?
+npc;qas_priest;name;Sacerdote Qasirah
+npc;qas_priest;greeting;El templo de Qasirah da la bienvenida al caminante.
+npc;qas_banker;name;Banquero Qasirah
+npc;qas_banker;greeting;El Banco de Qasirah lleva cuentas en todas las ciudades.
+npc;qas_innkeeper;name;Comerciante Omar
+npc;qas_innkeeper;greeting;Dátiles, agua y cuerda para el camino por el desierto.
+npc;qas_merchant;name;Comerciante Qasirah
+npc;qas_merchant;greeting;Mercancías de Qasirah y compra de botín de la zona.
+npc;qas_guide;name;Guía Qasirah
+npc;qas_guide;greeting;Los alrededores de Qasirah son peligrosos. ¿Ayudarás?
+npc;qas_carrier;name;Cochero Qasirah
+npc;qas_carrier;greeting;La caravana a otras ciudades espera. Pagas con monedas.
+npc;qas_smith;name;Armero Hamid
+npc;qas_smith;greeting;Sables y armaduras del mejor acero del bazar.
+npc;qas_mage;name;Adivina Leila
+npc;qas_mage;greeting;Runas, pociones y varitas de tierras lejanas.
+npc;qas_housing;name;Administrador Karim
+npc;qas_housing;greeting;Casas de Qasirah en el callejón de palmeras. Pagas desde tu cuenta del banco.
+npc;frost_priest;name;Sacerdote Frostholm
+npc;frost_priest;greeting;El templo de Frostholm da la bienvenida al caminante.
+npc;frost_banker;name;Banquero Frostholm
+npc;frost_banker;greeting;El Banco de Frostholm lleva cuentas en todas las ciudades.
+npc;frost_innkeeper;name;Posadera Sigrun
+npc;frost_innkeeper;greeting;Cerveza caliente, provisiones y cuerda para el frío.
+npc;frost_merchant;name;Comerciante Frostholm
+npc;frost_merchant;greeting;Mercancías de Frostholm y compra de botín de la zona.
+npc;frost_guide;name;Guía Frostholm
+npc;frost_guide;greeting;Los alrededores de Frostholm son peligrosos. ¿Ayudarás?
+npc;frost_carrier;name;Cochero Frostholm
+npc;frost_carrier;greeting;Los trineos a otras ciudades esperan. Pagas con monedas.
+npc;frost_smith;name;Herrero Hrodgar
+npc;frost_smith;greeting;Acero de mineral de montaña. Aquí puedes comprar armas y armaduras.
+npc;frost_mage;name;Mago Runolf
+npc;frost_mage;greeting;Runas y pociones de la biblioteca de la terraza.
+npc;frost_housing;name;Administrador Bjorn
+npc;frost_housing;greeting;Casas en la ciudad baja y en las terrazas. Pagas desde tu cuenta del banco.
+npc;selv_priest;name;Sacerdote Selvaran
+npc;selv_priest;greeting;El templo de Selvaran da la bienvenida al caminante.
+npc;selv_banker;name;Banquero Selvaran
+npc;selv_banker;greeting;El banco y el depósito de Selvaran llevan cuentas en todas las ciudades.
+npc;selv_merchant;name;Comerciante Selvaran
+npc;selv_merchant;greeting;Mercancías de Selvaran y compra de botín de la zona.
+npc;selv_smith;name;Armero Selvaran
+npc;selv_smith;greeting;Armas y armaduras de todo el mundo. También compro equipo usado.
+npc;selv_mage;name;Herbolaria Selvaran
+npc;selv_mage;greeting;Pociones, runas y varitas. Compro cristales y perlas.
+npc;selv_guide;name;Guía Selvaran
+npc;selv_guide;greeting;Los alrededores de Selvaran son peligrosos. ¿Ayudarás?
+npc;selv_carrier;name;Cochero Selvaran
+npc;selv_carrier;greeting;El carro a otras ciudades espera. Pagas con monedas.
+npc;selv_fishmonger;name;Pescadora Mara
+npc;selv_fishmonger;greeting;Pescado fresco y suministros para la travesía.
+npc;selv_housing;name;Administrador Tomasz
+npc;selv_housing;greeting;Casas de dos plantas en Selvaran. Pagas desde tu cuenta del banco.
+npc;varden_king;name;Rey Aurelian
+npc;varden_king;greeting;Bienvenido a mi reino. Aquí arreglas cuentas premium y promociones: escribe premium o promocja.
+npc;varden_innkeeper;name;Posadero Wit
+npc;varden_innkeeper;greeting;Comida caliente, antorchas y cuerda. Siéntate, caminante.
+npc;varden_smith;name;Herrero Bogdan
+npc;varden_smith;greeting;La fragua real. Armas y armaduras para caballeros y cazadores.
+npc;varden_archmage;name;Archimago Eldrin
+npc;varden_archmage;greeting;El gremio de magos te da la bienvenida. Runas, pociones y varitas.
+npc;varden_housing;name;Administrador Leopold
+npc;varden_housing;greeting;Casas en el barrio real. Pagas desde tu cuenta del banco.
+npc;pozoga_captain;name;Capitán Ignacy Smolarz
+npc;pozoga_captain;greeting;Llevo cuentas premium y personajes con promoción al volcán Pożoga. Allí abundan los monstruos: navegad en grupo.
+npc;varden_captain;name;Capitán Edmund
+npc;varden_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;qas_captain;name;Capitán Rahim
+npc;qas_captain;greeting;Desde la bahía de Qasirah navego a Selvaran y a las islas del sur. Pagas con monedas.
+npc;east_captain;name;Capitán Wiesław
+npc;east_captain;greeting;Desde aquí navego a las islas del este y de vuelta a Selvaran. Pagas con monedas.
+npc;frost_captain;name;Capitán Ulf
+npc;frost_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;isle_guide;name;Almirante Wenda
+npc;isle_guide;greeting;Las islas del este rebosan de monstruos y piratas. Busco valientes desde el nivel 300: tengo encargos para ti.
+npc;isle_merchant;name;Intendente Olaf
+npc;isle_merchant;greeting;Compro escamas, cuernos y todo lo que traigas de las islas. También tengo pociones para el camino.
+npc;valmir_captain;name;Capitán Radomir
+npc;valmir_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;nerys_captain;name;Capitana Maren
+npc;nerys_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;gull_ferryman;name;Barquero Bolko
+npc;gull_ferryman;greeting;Llevo gente en barca al continente. Solo titulares de cuenta premium.
+npc;lighthouse_ferryman;name;Farera Wanda
+npc;lighthouse_ferryman;greeting;Llevo gente en barca al continente. Solo titulares de cuenta premium.
+npc;wierzbowo_merchant;name;Alcalde Bogumił
+npc;wierzbowo_merchant;greeting;Bienvenido a Wierzbowo. Pan, carne y antorchas para caminantes.
+npc;osada_merchant;name;Comerciante Jagna
+npc;osada_merchant;greeting;Comida caliente y cuerda para el camino a las montañas.
+npc;wola_merchant;name;Pescadora Halina
+npc;wola_merchant;greeting;Pescado fresco, pan y antorchas para caminantes.
+npc;oaza_merchant;name;Comerciante Karim
+npc;oaza_merchant;greeting;Agua, dátiles y cuerda para el camino por el desierto.
+npc;guard_1;name;Guardia Wiesława
+npc;guard_1;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_2;name;Ballestero Budzisław
+npc;guard_2;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_3;name;Guardia Jaromira
+npc;guard_3;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_4;name;Guardia Unisław
+npc;guard_4;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_5;name;Alabardero Świętopełk
+npc;guard_5;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_6;name;Arquera Bolesława
+npc;guard_6;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_7;name;Guardia Dobrosława
+npc;guard_7;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_8;name;Guardia Sławomira
+npc;guard_8;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_9;name;Guardia Gniewomir
+npc;guard_9;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_10;name;Ballestero Jarogniew
+npc;guard_10;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_11;name;Guardia Sobiesław
+npc;guard_11;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_12;name;Ballestero Ziemowit
+npc;guard_12;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_13;name;Ballestero Mirosław
+npc;guard_13;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_14;name;Alabardero Siemowit
+npc;guard_14;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_15;name;Ballestero Wszebor
+npc;guard_15;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_16;name;Ballestero Chwalibóg
+npc;guard_16;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_17;name;Ballestero Przemysław
+npc;guard_17;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_18;name;Ballestero Mścisław
+npc;guard_18;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_19;name;Ballestero Domarad
+npc;guard_19;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_20;name;Alabardero Dobromir
+npc;guard_20;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_21;name;Guardia Wielisław
+npc;guard_21;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_22;name;Guardia Bolesław
+npc;guard_22;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_23;name;Guardia Bronisław
+npc;guard_23;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_24;name;Alabardero Jaromir
+npc;guard_24;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;isle0_ferryman;name;Barquero Gniewko
+npc;isle0_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle1_ferryman;name;Barquera Jagna
+npc;isle1_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle2_ferryman;name;Barquero Wojsław
+npc;isle2_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle3_ferryman;name;Barquera Dobrawa
+npc;isle3_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle4_ferryman;name;Barquero Sambor
+npc;isle4_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle5_ferryman;name;Barquera Mila
+npc;isle5_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle6_ferryman;name;Barquero Bratumił
+npc;isle6_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle7_ferryman;name;Barquera Ludmiła
+npc;isle7_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle8_ferryman;name;Barquero Zbysław
+npc;isle8_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle9_ferryman;name;Barquera Wiesna
+npc;isle9_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle10_ferryman;name;Barquero Racibor
+npc;isle10_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle11_ferryman;name;Barquera Bogumiła
+npc;isle11_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle12_ferryman;name;Barquero Dobromir
+npc;isle12_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle13_ferryman;name;Barquera Sława
+npc;isle13_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle14_ferryman;name;Barquero Ciechosław
+npc;isle14_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle15_ferryman;name;Barquera Grzymisława
+npc;isle15_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle16_ferryman;name;Barquero Mirogniew
+npc;isle16_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle17_ferryman;name;Barquera Wanda
+npc;isle17_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;elandor_priestess;name;Sacerdotisa Liriel
+npc;elandor_priestess;greeting;Que el Gran Árbol te proteja. Te hablaré del bosque y de la caza de los proscritos.
+npc;elandor_banker;name;Tesorero Faelar
+npc;elandor_banker;greeting;El oro y el depósito están aquí a salvo como las raíces de los árboles.
+npc;elandor_bowyer;name;Arquero artesano Thalion
+npc;elandor_bowyer;greeting;Arcos de tejo y fresno, disparan sin munición. También compro madera y pieles.
+npc;elandor_herbalist;name;Herbolaria Ilyana
+npc;elandor_herbalist;greeting;Pociones, hierbas y varitas para los caminantes del bosque.
+npc;elandor_elder;name;Anciano Aelindor
+npc;elandor_elder;greeting;Bienvenido a la cima del Gran Árbol. Desde aquí se ve todo el bosque... y los proscritos que lo recorren.
+npc;durn_priest;name;Sacerdote Thorvin
+npc;durn_priest;greeting;Bienvenido al templo de Durnkar, hijo e hija de la piedra. Puedo curarte o aceptarte en la ciudad.
+npc;durn_banker;name;Banquero Grimbald
+npc;durn_banker;greeting;El oro de la tesorería de Durnkar yace bajo mil brazas de roca. El banco lleva cuentas en todas las ciudades.
+npc;durn_housing;name;Administrador Durgan
+npc;durn_housing;greeting;Casas en la gruta de Durnkar, calientes por la lava. Pagas desde tu cuenta del banco.
+npc;durn_ruler;name;Rey Thorgrim
+npc;durn_ruler;greeting;Durnkar recuerda los días en que no había ciudades sobre las montañas. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;durn_innkeeper;name;Posadero Ulfrik
+npc;durn_innkeeper;greeting;Cerveza de hongos de cueva, pan, carne y cuerda para el camino. Siéntate, forastero.
+npc;durn_smith;name;Herrero Brokk
+npc;durn_smith;greeting;Hachas, martillos y ballestas de la fragua de Durnkar. También compro armas y mineral.
+npc;durn_armorer;name;Armero Hagar
+npc;durn_armorer;greeting;Armaduras forjadas al calor de la lava: yelmos, cotas y escudos para todo guerrero.
+npc;durn_imbuer;name;Encantador Runnar
+npc;durn_imbuer;greeting;Las runas grabadas en piedra guardan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;durn_mage;name;Maestro de runas Odvar
+npc;durn_mage;greeting;Pociones, runas y varitas. Las runas enanas no se rompen ni en batalla.
+npc;durn_tools;name;Herramentista Skagi
+npc;durn_tools;greeting;Cuerda, palas, antorchas y cascos de minero: todo lo necesario en la mina.
+npc;durn_merchant;name;Comerciante Gunnar
+npc;durn_merchant;greeting;Compraré botín de las minas y venderé lo que te falte en el camino.
+npc;durn_petkeeper;name;Cuidador de mascotas Bodvar
+npc;durn_petkeeper;greeting;Los cuervos de los riscos siguen al enano hasta el fondo de la mina. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;durn_guide;name;Guía Dvalin
+npc;durn_guide;greeting;Las minas alrededor de Durnkar rebosan de renegados y monstruos de las profundidades. Cada piso más abajo es más peligroso.
+npc;durn_carrier;name;Vagonero Brodrik
+npc;durn_carrier;greeting;En vagoneta por las viejas vías bajo las montañas a otras ciudades. Pagas con monedas, mete la barba dentro.
+npc;durn_guard_west;name;Guardia de la puerta Hroald
+npc;durn_guard_west;greeting;¡Alto! Pocos llegan a Durnkar por el desfiladero. Entra, ya que estás aquí, y no pierdas el camino de vuelta.
+npc;durn_guard_east;name;Guardia de la puerta Sigvald
+npc;durn_guard_east;greeting;Tras esta puerta está la Mina de la Barba de Hierro. Las puertas solo dejan pasar a quienes sobreviven en las profundidades.
+npc;varden_petkeeper;name;Cuidador de mascotas Maciej
+npc;varden_petkeeper;greeting;Cachorros de Varden: fieles y alegres. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;varden_imbuer;name;Encantador Teodor
+npc;varden_imbuer;greeting;Saturo armas y armaduras: robo de vida, robo de maná, crítico, elementos y protecciones. El herrero hace lo mismo.
+npc;frost_petkeeper;name;Cuidadora de mascotas Halszka
+npc;frost_petkeeper;greeting;Los cuervos de la montaña no temen al frío. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;frost_ruler;name;Reina Świętosława
+npc;frost_ruler;greeting;Bienvenido a Frostholm. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;frost_imbuer;name;Encantadora Ludwika
+npc;frost_imbuer;greeting;El hielo guarda el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones: elige un objeto.
+npc;selv_petkeeper;name;Cuidador de mascotas Florian
+npc;selv_petkeeper;greeting;Los gatitos pelirrojos del puerto cazan ratas y suerte. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;selv_ruler;name;Lord Radosław
+npc;selv_ruler;greeting;Selvaran da la bienvenida a los visitantes. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;selv_imbuer;name;Encantador Ignacy
+npc;selv_imbuer;greeting;La savia de la jungla refuerza las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;qas_petkeeper;name;Cuidador de mascotas Kasper
+npc;qas_petkeeper;greeting;Los fénecs del desierto oyen al enemigo desde lejos. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;qas_ruler;name;Rey Mieszko
+npc;qas_ruler;greeting;El desierto pertenece a Qasirah. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;qas_imbuer;name;Encantadora Zofia
+npc;qas_imbuer;greeting;La arena y el sol afianzan las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;valmir_petkeeper;name;Cuidadora de mascotas Marianna
+npc;valmir_petkeeper;greeting;Las gaviotas del puerto encuentran todos los peces. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;valmir_ruler;name;Lord Bogumir
+npc;valmir_ruler;greeting;El Puerto de Valmir da la bienvenida a los marineros. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;valmir_imbuer;name;Encantador Hieronim
+npc;valmir_imbuer;greeting;La sal marina no daña mis saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;nerys_petkeeper;name;Cuidadora de mascotas Lilia
+npc;nerys_petkeeper;greeting;Los loros de las islas repiten cada palabra. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;nerys_ruler;name;Reina Jadwiga
+npc;nerys_ruler;greeting;Bienvenido a las Islas Esmeralda. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;nerys_imbuer;name;Encantadora Aniela
+npc;nerys_imbuer;greeting;Las perlas de las islas llevan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.

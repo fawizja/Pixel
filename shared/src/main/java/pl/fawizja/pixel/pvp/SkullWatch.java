@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.pvp;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +23,7 @@ public final class SkullWatch {
             boolean black = "BLACK".equals(e.getValue());
             boolean red = black || "RED".equals(e.getValue());
             if (red && warned.add(e.getKey())) {
-                out.add("Uwaga: " + e.getKey() + (black ? " z czarną" : " z czerwoną") + " czaszką w pobliżu!");
+                out.add(Messages.get("skull_watch.uwaga") + e.getKey() + (black ? Messages.get("skull_watch.z_czarna") : Messages.get("skull_watch.z_czerwona")) + Messages.get("skull_watch.czaszka_w_poblizu"));
             }
             if (!red) warned.remove(e.getKey());
         }

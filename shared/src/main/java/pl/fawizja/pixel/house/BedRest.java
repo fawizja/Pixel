@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.house;
 
+import pl.fawizja.pixel.i18n.Messages;
 import pl.fawizja.pixel.character.PlayerCharacter;
 
 /**
@@ -32,8 +33,8 @@ public final class BedRest {
         int hp = pc.heal((int) ((long) pc.maxHealth() * percent / 100));
         int mana = pc.restoreMana((int) ((long) pc.maxMana() * percent / 100));
         if (hp == 0 && mana == 0) {
-            return minutes < 1 ? "Budzisz się w łóżku po krótkiej drzemce." : "Budzisz się w łóżku po " + minutes + " min snu.";
+            return minutes < 1 ? Messages.get("bed_rest.budzisz_sie_w_lozku") : Messages.get("bed_rest.budzisz_sie_w_lozku_2") + minutes + Messages.get("bed_rest.min_snu");
         }
-        return "Budzisz się wypoczęty po " + Math.max(1, minutes) + " min snu w łóżku: +" + hp + " życia, +" + mana + " many.";
+        return Messages.get("bed_rest.budzisz_sie_wypoczety_po") + Math.max(1, minutes) + Messages.get("bed_rest.min_snu_w_lozku") + hp + Messages.get("bed_rest.zycia") + mana + " many.";
     }
 }

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.magic;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Rola czaru mnicha wobec harmonii (Canary MonkSpell_t, kolumna "mnich" w spells.csv): B buduje (+1 punkt),
  * S wydaje (zuzywa wszystkie punkty i mnozy efekt przez premie harmonii), puste pole = bez wplywu.
@@ -19,8 +20,8 @@ public enum MonkRole {
     /** Polska nazwa roli do ksiegi czarow. */
     public String label() {
         switch (this) {
-            case BUILDER: return "buduje harmonię";
-            case SPENDER: return "wydaje harmonię";
+            case BUILDER: return Messages.get("monk_role.buduje_harmonie");
+            case SPENDER: return Messages.get("monk_role.wydaje_harmonie");
             default: return "";
         }
     }

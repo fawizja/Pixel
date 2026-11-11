@@ -9,6 +9,8 @@ final class ServerPlayer {
     final GameSession session;
     final ClientHandler client;
     Direction move;
+    /** Jezyk klienta (z HELLO; starsi klienci: polski) - serwer formatuje wiadomosci dla tego gracza w jego jezyku. */
+    pl.fawizja.pixel.i18n.Language language = pl.fawizja.pixel.i18n.Language.PL;
     /** Gracz atakowany w PvP (id) albo -1. */
     int pvpTarget = -1;
     final pl.fawizja.pixel.pvp.PvpRules.Status pvp;

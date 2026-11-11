@@ -1,5 +1,7 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
+
 import java.util.EnumSet;
 import java.util.Set;
 import pl.fawizja.pixel.combat.DamageType;
@@ -77,7 +79,10 @@ public final class ItemType {
 
     public int id() { return id; }
     public String key() { return key; }
-    public String name() { return name; }
+    public String name() { return Messages.data("item", key, name); }
+
+    /** Nazwa zrodlowa (polska) z danych, niezalezna od jezyka. */
+    public String polishName() { return name; }
     public ItemCategory category() { return category; }
     public boolean stackable() { return stackable; }
     public int maxStack() { return maxStack; }

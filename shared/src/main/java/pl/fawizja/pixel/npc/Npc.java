@@ -1,11 +1,20 @@
 package pl.fawizja.pixel.npc;
 
 import java.util.Objects;
+import pl.fawizja.pixel.i18n.Messages;
 import pl.fawizja.pixel.world.Position;
 
 /** Postac niezalezna stojaca w miescie. shopKey tylko dla kupcow. */
 public record Npc(String key, String name, NpcRole role, String town, Position position, String shopKey,
                   String greeting, String color) {
+
+    /** Imie (z tytulem) w biezacym jezyku. */
+    @Override
+    public String name() { return Messages.data("npc", key, name); }
+
+    /** Powitanie w biezacym jezyku. */
+    @Override
+    public String greeting() { return Messages.data("npc", key, "greeting", greeting); }
 
     /** Maksymalna odleglosc rozmowy (w kafelkach, przez lade). */
     public static final int TALK_RANGE = 2;

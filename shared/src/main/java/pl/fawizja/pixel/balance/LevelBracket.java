@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.balance;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Orientacyjne przedzialy rozwoju (nie sa sztywnymi blokadami). */
 public enum LevelBracket {
     BEGINNER(8, 20, "Początkujący"),
@@ -22,7 +23,7 @@ public enum LevelBracket {
 
     public int fromLevel() { return fromLevel; }
     public int toLevel() { return toLevel; }
-    public String label() { return label; }
+    public String label() { return Messages.tr(label); }
 
     /** Przedzial dla poziomu; granice naleza do nizszego przedzialu, ponizej 8 = BEGINNER. */
     public static LevelBracket of(int level) {

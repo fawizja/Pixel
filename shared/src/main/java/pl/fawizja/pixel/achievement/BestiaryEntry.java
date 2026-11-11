@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.achievement;
 
+import pl.fawizja.pixel.i18n.Messages;
 /**
  * Wpis bestiariusza potwora (data/bestiary.csv): odpowiednik w Tibii, trudnosc (gwiazdki) i wystepowanie przepisane
  * z jego pliku Canary. Progi zabic i punkty charmow jak w Tibii: zwykle z {@link BestiaryDifficulty}, a potwory
@@ -15,7 +16,7 @@ public record BestiaryEntry(String key, String tibiaName, BestiaryDifficulty dif
     public static final int STAGES = 4;
 
     public BestiaryEntry {
-        if (occurrence < 0 || occurrence > VERY_RARE) throw new IllegalArgumentException("occurrence 0..3: " + key);
+        if (occurrence < 0 || occurrence > VERY_RARE) throw new IllegalArgumentException(Messages.get("bestiary_entry.occurrence_0_3") + key);
     }
 
     public boolean veryRare() { return occurrence == VERY_RARE; }
@@ -53,7 +54,7 @@ public record BestiaryEntry(String key, String tibiaName, BestiaryDifficulty dif
         switch (occurrence) {
             case 1: return "niepospolity";
             case 2: return "rzadki";
-            case 3: return "bardzo rzadki";
+            case 3: return Messages.get("bestiary_entry.bardzo_rzadki");
             default: return "pospolity";
         }
     }

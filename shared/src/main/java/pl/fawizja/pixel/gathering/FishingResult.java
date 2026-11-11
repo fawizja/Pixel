@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.gathering;
 
+import pl.fawizja.pixel.i18n.Messages;
 /** Wynik proby lowienia (z komunikatem dla gracza). */
 public enum FishingResult {
     CAUGHT("Złowiono!"),
@@ -11,7 +12,9 @@ public enum FishingResult {
     COOLDOWN(""),
     BACKPACK_FULL("Plecak jest pełny.");
 
-    public final String message;
+    private final String message;
+
+    public String message() { return Messages.tr(message); }
 
     FishingResult(String message) { this.message = message; }
 }

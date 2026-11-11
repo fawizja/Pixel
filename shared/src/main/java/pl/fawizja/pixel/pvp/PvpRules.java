@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.pvp;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,14 +92,16 @@ public final class PvpRules {
         OK(null),
         SELF("Nie możesz atakować samego siebie."),
         DEAD("Cel nie żyje."),
-        ATTACKER_PROTECTED("Do poziomu " + PROTECTION_LEVEL + " nie możesz atakować graczy."),
-        TARGET_PROTECTED("Ten gracz jest chroniony (poniżej poziomu " + PROTECTION_LEVEL + ")."),
+        ATTACKER_PROTECTED("Do poziomu {0} nie możesz atakować graczy."),
+        TARGET_PROTECTED("Ten gracz jest chroniony (poniżej poziomu {0})."),
         PROTECTION_ZONE("W strefie ochronnej nie ma walki."),
         BLACK_SKULL("Z czarną czaszką nie możesz atakować graczy bez czaszki."),
         PVP_OFF("Włącz tryb PvP (czaszka obok ekwipunku albo /pvp), aby atakować graczy bez czaszki."),
         OTHER_FLOOR("Cel jest na innym piętrze.");
 
-        public final String message;
+        private final String message;
+
+        public String message() { return Messages.tr(message).replace("{0}", String.valueOf(PROTECTION_LEVEL)); }
 
         Verdict(String message) { this.message = message; }
     }
@@ -416,8 +419,8 @@ public final class PvpRules {
         vs.logoutUntil = Math.max(vs.logoutUntil, now + LOGOUT_BLOCK_MS);
         if (!justified) {
             if (as.skull(now) == Skull.NONE) {
-                attacker.log().add(now, EventLog.Kind.WARNING, "Zaatakowałeś gracza " + b.name()
-                        + " - biała czaszka, strefa ochronna i wylogowanie zablokowane na " + WHITE_SKULL_MS / 1000 + " s.");
+                attacker.log().add(now, EventLog.Kind.WARNING, Messages.get("pvp_rules.zaatakowales_gracza") + b.name()
+                        + Messages.get("pvp_rules.biala_czaszka_strefa_ochronna") + WHITE_SKULL_MS / 1000 + " s.");
             }
             as.whiteUntil = Math.max(as.whiteUntil, now + WHITE_SKULL_MS);
         } else if (as.skull(now) == Skull.NONE) {
@@ -428,7 +431,7 @@ public final class PvpRules {
         raw = (int) Math.round(raw * (victimSkull == Skull.BLACK ? BLACK_SKULL_DAMAGE : PVP_DAMAGE));
         int dmg = CombatFormulas.mitigateOnPlayer(b, raw, type, now < vs.nextAttackMs || victim.combat().attackedRecently(now), rng);
         int dealt = b.damage(dmg);
-        victim.combat().recordDamage(a.name() + " (gracz)", dealt, now);
+        victim.combat().recordDamage(a.name() + Messages.get("combat_system.gracz"), dealt, now);
         // kradziez zycia i many dziala tez na graczy (Canary applyLifeLeech/applyManaLeech)
         Leech.apply(a, dealt, targets);
         String fx = critical && dealt > 0 ? CriticalHit.EVENT_EFFECT : null;
@@ -450,7 +453,7 @@ public final class PvpRules {
         vs.logoutUntil = 0;
         vs.yellow.clear();
         b.setPzBlockedUntil(0);
-        attacker.log().add(now, EventLog.Kind.WARNING, "Zabiłeś gracza " + b.name() + ".");
+        attacker.log().add(now, EventLog.Kind.WARNING, Messages.get("pvp_rules.zabiles_gracza") + b.name() + ".");
         if (justified) {
             // zemsta wykonana: jedna pomaranczowa czaszka mniej
             ArrayDeque<Long> r = as.revenge.get(key(b.name()));
@@ -475,17 +478,17 @@ public final class PvpRules {
         Skull after = applyThresholds(as, now);
         String msg;
         if (after == Skull.BLACK && before != Skull.BLACK) {
-            msg = "Czarna czaszka na 45 dni: nie zaatakujesz graczy bez czaszki ani czarem obszarowym, gracze zadają ci "
-                    + "pełne obrażenia, przy śmierci tracisz wszystko i odradzasz się z 40 HP.";
+            msg = Messages.get("pvp_rules.czarna_czaszka_na_45")
+                    + Messages.get("pvp_rules.pelne_obrazenia_przy_smierci");
         } else if (after == Skull.RED && before != Skull.RED) {
-            msg = "Czerwona czaszka na 30 dni: przy śmierci stracisz cały plecak i ekwipunek.";
+            msg = Messages.get("pvp_rules.czerwona_czaszka_na_30");
         } else {
-            msg = "Nieusprawiedliwione zabójstwo: biała czaszka, strefa ochronna i wylogowanie zablokowane na "
-                    + KILL_BLOCK_MS / 60_000 + " min.";
+            msg = Messages.get("pvp_rules.nieusprawiedliwione_zabojstwo")
+                    + KILL_BLOCK_MS / 60_000 + Messages.get("server_world.min_2");
         }
-        attacker.log().add(now, EventLog.Kind.WARNING, msg + " Zabójstwa: " + as.unjustKills(now, KILL_WINDOWS_MS[0])
-                + "/24 h, " + as.unjustKills(now, KILL_WINDOWS_MS[1]) + "/7 dni, "
-                + as.unjustKills(now, KILL_WINDOWS_MS[2]) + "/30 dni.");
+        attacker.log().add(now, EventLog.Kind.WARNING, msg + Messages.get("pvp_rules.zabojstwa") + as.unjustKills(now, KILL_WINDOWS_MS[0])
+                + "/24 h, " + as.unjustKills(now, KILL_WINDOWS_MS[1]) + Messages.get("pvp_rules.7_dni")
+                + as.unjustKills(now, KILL_WINDOWS_MS[2]) + Messages.get("pvp_rules.30_dni"));
     }
 
     /**
@@ -549,8 +552,8 @@ public final class PvpRules {
                 dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED, null, fx));
         if (!won) return Outcome.HIT;
         endDuel(as, vs);
-        attacker.log().add(now, EventLog.Kind.SYSTEM, "Wygrywasz pojedynek z " + b.name() + "!");
-        victim.log().add(now, EventLog.Kind.SYSTEM, "Przegrywasz pojedynek z " + a.name() + ".");
+        attacker.log().add(now, EventLog.Kind.SYSTEM, Messages.get("pvp_rules.wygrywasz_pojedynek_z") + b.name() + "!");
+        victim.log().add(now, EventLog.Kind.SYSTEM, Messages.get("pvp_rules.przegrywasz_pojedynek_z") + a.name() + ".");
         return Outcome.DUEL_WON;
     }
 }

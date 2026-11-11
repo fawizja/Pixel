@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.item;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.util.List;
 import pl.fawizja.pixel.combat.DamageType;
 
@@ -87,7 +88,7 @@ public enum Imbuement {
 
     private static Ingredient ing(String key, int count) { return new Ingredient(key, count); }
 
-    public String label() { return label; }
+    public String label() { return Messages.tr(label); }
     public String tibiaName() { return tibiaName; }
     public Category category() { return category; }
     /** Zywiol zamiany obrazen albo ochrony (null dla kradziezy i krytyka). */
@@ -119,10 +120,10 @@ public enum Imbuement {
     public String effect(int level) {
         String v = ItemBonus.number(value(level));
         switch (category) {
-            case LIFE_LEECH: return "kradzież życia " + v + "%";
-            case MANA_LEECH: return "kradzież many " + v + "%";
-            case CRITICAL: return "krytyk +" + ItemBonus.number(STRIKE_CHANCE) + "% szansy, +" + v + "% obrażeń";
-            case ELEMENT_DAMAGE: return v + "% obrażeń fizycznych jako " + element.label();
+            case LIFE_LEECH: return Messages.get("imbuement.kradziez_zycia") + v + "%";
+            case MANA_LEECH: return Messages.get("imbuement.kradziez_many") + v + "%";
+            case CRITICAL: return Messages.get("imbuement.krytyk") + ItemBonus.number(STRIKE_CHANCE) + Messages.get("critical_hit.szansy") + v + Messages.get("critical_hit.obrazen");
+            case ELEMENT_DAMAGE: return v + Messages.get("imbuement.obrazen_fizycznych_jako") + element.label();
             case PROTECTION: return "ochrona " + element.label() + " +" + v + "%";
             default: return "";
         }

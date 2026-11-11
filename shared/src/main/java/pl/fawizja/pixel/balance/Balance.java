@@ -1,5 +1,7 @@
 package pl.fawizja.pixel.balance;
 
+import pl.fawizja.pixel.i18n.Messages;
+
 import pl.fawizja.pixel.vocation.Vocation;
 
 /**
@@ -244,8 +246,8 @@ public final class Balance {
     public static String deathLossLabel(int blessings, int level) {
         int reductionPct = Math.min(100, blessings * 8);
         if (level < 24 && reductionPct >= 40) reductionPct = 50;
-        String pct = String.format(java.util.Locale.ROOT, "%.1f", 5 * (100 - reductionPct) / 100.0).replace('.', ',');
-        return blessings == 0 ? "5% doświadczenia" : pct + "% (bez błogosławieństw 5%)";
+        String pct = pl.fawizja.pixel.i18n.Messages.decimal(5 * (100 - reductionPct) / 100.0, 1);
+        return blessings == 0 ? pl.fawizja.pixel.i18n.Messages.get("bless.loss_zero") : pl.fawizja.pixel.i18n.Messages.get("bless.loss_fmt", pct);
     }
 
     /** Cena zwyklego blogoslawienstwa u kaplana (patrz {@link pl.fawizja.pixel.character.Blessing#price}). */

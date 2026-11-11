@@ -257,3 +257,7 @@ chest_reward_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.telepo
 bless_priest|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless
 bless_status|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_status
 bless_death|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_death
+# jezyki (angielski i hiszpanski): wybor jezyka w menu, okno kupca i ksiega czarow; wzorce do dopisania (--update)
+lang_menu_es|-Dpixel.lang=es
+lang_shop_en|-Dpixel.lang=en -Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
+lang_spellbook_es|-Dpixel.lang=es -Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=book

@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.server;
 
+import pl.fawizja.pixel.i18n.Messages;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -75,7 +76,7 @@ final class ClientHandler {
                 tokens = Math.min(RATE_BURST, tokens + (now - last) / 1e9 * RATE_PER_SECOND);
                 last = now;
                 if (--tokens < 0) {
-                    send("ERR", "Za dużo wiadomości - rozłączono.");
+                    send("ERR", Messages.get("client_handler.za_duzo_wiadomosci_rozlaczono"));
                     break;
                 }
                 String[] f = Protocol.parse(l);
@@ -83,7 +84,7 @@ final class ClientHandler {
                 if (f[0].equals("BYE")) break;
             }
         } catch (SocketTimeoutException e) {
-            send("ERR", "Brak logowania - rozłączono.");
+            send("ERR", Messages.get("client_handler.brak_logowania_rozlaczono"));
         } catch (IOException | RuntimeException e) {
             // klient zniknal albo przyslal smieci
         } finally {
