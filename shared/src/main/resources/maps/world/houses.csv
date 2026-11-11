@@ -64,21 +64,21 @@ valmir_p1;Valmir - Przedmieście 1;Valmir;542;756;545;758;0;544;759;9600
 valmir_p2;Valmir - Przedmieście 2;Valmir;487;795;491;797;0;486;796;12000
 varden_p1;Varden - Przedmieście 1;Varden;582;525;585;527;0;584;528;9600
 varden_p2;Varden - Przedmieście 2;Varden;485;471;488;473;0;487;474;9600
-wild_1;Chata Drwala;Varden;518;417;522;419;0;517;418;12000
-wild_2;Leśniczówka;Varden;456;574;460;576;0;455;575;12000
-wild_3;Chata Pustelnika;Varden;385;472;388;475;0;387;476;12800
-wild_4;Dom przy Trakcie;Frostholm;652;309;655;311;0;651;310;9600
-wild_5;Zagroda nad Strumieniem;Selvaran;641;737;645;739;0;643;736;12000
-wild_6;Chata Myśliwego;Frostholm;718;255;722;257;0;720;258;12000
-durn_71;Kowadłowa 1;Durnkar;490;316;494;320;-5;492;321;25000
-durn_72;Kowadłowa 2;Durnkar;498;316;502;320;-5;500;321;25000
-durn_73;Kowadłowa 3;Durnkar;544;316;548;320;-5;546;321;25000
-durn_74;Kowadłowa 4;Durnkar;552;316;556;320;-5;554;321;25000
-durn_75;Kowadłowa 5;Durnkar;490;346;494;350;-5;492;345;25000
-durn_76;Kowadłowa 6;Durnkar;498;346;502;350;-5;500;345;25000
-durn_77;Kowadłowa 7;Durnkar;506;346;510;350;-5;508;345;25000
-durn_78;Kowadłowa 8;Durnkar;514;346;518;350;-5;516;345;25000
-durn_79;Głębinowa 1;Durnkar;528;346;532;350;-5;530;345;25000
-durn_80;Głębinowa 2;Durnkar;536;346;540;350;-5;538;345;25000
-durn_81;Głębinowa 3;Durnkar;544;346;548;350;-5;546;345;25000
-durn_82;Głębinowa 4;Durnkar;552;346;556;350;-5;554;345;25000
+wild_1;Chata Drwala;Varden;590;393;594;396;0;592;392;16000
+wild_2;Leśniczówka;Selvaran;641;737;644;739;0;643;736;9600
+wild_3;Chata Pustelnika;Qasirah;150;551;155;554;0;149;553;19200
+wild_4;Dom przy Trakcie;Varden;518;417;522;419;0;517;418;12000
+wild_5;Zagroda nad Strumieniem;Frostholm;684;221;687;224;0;686;225;12800
+wild_6;Chata Myśliwego;Valmir;383;763;386;765;0;385;762;9600
+durn_71;Kowadłowa 1;Durnkar;488;312;492;316;-5;490;317;25000
+durn_72;Kowadłowa 2;Durnkar;496;312;500;316;-5;498;317;25000
+durn_73;Kowadłowa 3;Durnkar;542;312;546;316;-5;544;317;25000
+durn_74;Kowadłowa 4;Durnkar;550;312;554;316;-5;552;317;25000
+durn_75;Kowadłowa 5;Durnkar;488;342;492;346;-5;490;341;25000
+durn_76;Kowadłowa 6;Durnkar;496;342;500;346;-5;498;341;25000
+durn_77;Kowadłowa 7;Durnkar;504;342;508;346;-5;506;341;25000
+durn_78;Kowadłowa 8;Durnkar;512;342;516;346;-5;514;341;25000
+durn_79;Głębinowa 1;Durnkar;526;342;530;346;-5;528;341;25000
+durn_80;Głębinowa 2;Durnkar;534;342;538;346;-5;536;341;25000
+durn_81;Głębinowa 3;Durnkar;542;342;546;346;-5;544;341;25000
+durn_82;Głębinowa 4;Durnkar;550;342;554;346;-5;552;341;25000

@@ -39,6 +39,10 @@ F.CAVE_STYLES.setdefault('orc_hall', ('stone_floor', 'stone_wall', ['bones', 'de
 WOOD, WWALL = 'wood_floor', 'wood_wall'
 
 
+# srodki miejsc twierdzy i osady (find_site szuka najblizej nich): loch dziczy (wilds) nie zajmuje okolicy - inaczej
+# losowe zejscie do lochu potrafi zablokowac cala okolice osady po zmianach terenu gdzie indziej (2026-11-11)
+RESERVED = [(685 - 50, 510 - 45, 685 + 50, 510 + 45), (385 - 50, 535 - 45, 385 + 50, 535 + 45)]
+
 def _safe_props(plan, z, cells, objs, rng, chance, reserved):
     """Blokujace ozdoby tylko na polach, ktorych 8 sasiadow jest wolnych (nie zamykaja przejsc)."""
     n = 0

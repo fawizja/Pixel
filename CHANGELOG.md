@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.247.0] - 2026-11-11
+
+### Dodano
+- Srebrna Rzeka spod Varden jest teraz szeroka i przy ujściu rozlewa się w deltę: cztery koryta do morza, wyspy,
+  łachy piasku, trzciny i pomosty rybackie. W delcie łowi się węgorze. Drogi przechodzą przez odnogi po mostach.
+- Wulkan Pożogi: wulkaniczny cypel za deltą, odcięty od lądu pierścieniem lawy - pieszo się tam nie dojdzie.
+  Statek Kapitana Ignacego Smolarza pływa na wulkan z Varden, Valmir, Selvaran, Qasirah, Frostholm, Nerys
+  i Przystani Wschodniej.
+- Pod wulkanem Trzewia Pożogi: 7 pięter w dół, coraz większych, ze ślepymi komorami i skrzyniami, pełnych silnych
+  potworów ognia - im głębiej, tym silniejsze i liczniejsze stada. Stożek ma 7 pięter w górę z mieszanymi
+  potworami i kraterem lawy na szczycie. To łowisko dla drużyn, nie dla samotnych postaci.
+- Nowe potwory: Popielna salamandra, Ogar Pożogi i Magmowy kolos (łup i bestiariusz).
+
+### Zmieniono
+- Na rejsy statkami wystarczy teraz konto premium albo promocja (wcześniej tylko premium). Kapitan bez jednego
+  i drugiego odmawia i mówi, u kogo je kupić.
+- Świat ma piętra od -7 do +7.
+
 ## [0.246.0] - 2026-11-11
 
 ### Dodano

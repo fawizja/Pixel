@@ -136,6 +136,9 @@ class Wilds:
             return True
         if any(a - margin <= x <= c + margin and b - margin <= y <= d + margin for (a, b, c, d, z) in self.ctx['pz'] if z == 0):
             return True
+        # miejsca zarezerwowane dla budowli stawianych pozniej (twierdza orkow, osada elfow - strongholds.RESERVED)
+        if any(a - margin <= x <= c + margin and b - margin <= y <= d + margin for (a, b, c, d) in self.ctx.get('reserved', ())):
+            return True
         return any(abs(x - a) < 14 and abs(y - b) < 14 for a, b in ANCHORS)
 
     def zone(self, x, y):

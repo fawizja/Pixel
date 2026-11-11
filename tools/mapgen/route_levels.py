@@ -34,7 +34,7 @@ import town as tk  # noqa: E402
 from structures import HAND_PLACED  # noqa: E402
 
 RES = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources')
-FLOORS = list(range(-7, 6))   # 2026-11-11: kopalnie krasnoludow do -7
+FLOORS = list(range(-7, 8))   # 2026-11-11: kopalnie krasnoludow do -7, stozek wulkanu do +7
 Z0 = -FLOORS[0]               # przesuniecie indeksu pietra
 INF = 1 << 30
 

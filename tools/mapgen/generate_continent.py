@@ -44,12 +44,13 @@ import route_levels  # noqa: E402
 import town_npcs  # noqa: E402
 import strongholds  # noqa: E402
 import dwarves  # noqa: E402
+import delta_volcano as DV  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
 LEGACY = os.path.join(HERE, 'build', 'legacy')
 S = C.S
-FLOORS = list(range(-7, 6))   # -6 i -7: kopalnie krasnoludow (2026-11-11)
+FLOORS = list(range(-7, 8))   # -6 i -7: kopalnie krasnoludow, +6 i +7: stozek Wulkanu Pozogi (2026-11-11)
 NONE = '-'
 WATER = ('water', NONE, NONE, NONE)
 
@@ -674,7 +675,7 @@ def main():
         new_towns.append(t)
     ctx = dict(legacy=legacy, blocks=blocks, T=T, world=world, remap=remap, transitions=transitions, npcs=npcs,
                unplaced=unplaced, spawns=spawns, dropped=dropped, houses=houses, pz=pz, gates=gates, towns=towns,
-               regions=regions, routes=routes, footprint=footprint, new_towns=new_towns, fresh=fresh)
+               regions=regions, routes=routes, footprint=footprint, new_towns=new_towns, fresh=fresh, protect=protect)
     rebuild_towns(ctx, random.Random(20261030))
     return ctx
 
@@ -850,6 +851,11 @@ def build(ctx):
     ctx['varden_core'] = {p: world.get(*p) for p in varden_core_cells(ctx)}
     ctx['pond_avoid'] = [p for r in ROADS for p in r if not isinstance(p[0], str)] + [h[3] for h in HARBOURS]
     print('stawy i jeziorka:', nature.ponds(ctx))
+    # 2026-11-11: szeroka Srebrna Rzeka z delta pod Varden i Wulkan Pozogi (stozek, pierscien lawy, przystan
+    # z kapitanem) - po stawach (ich losowanie bez zmian), przed drogami (mosty przez odnogi delty)
+    print('delta i cypel wulkanu:', DV.delta_terrain(T, ctx['protect'], world))
+    print('wulkan pozogi - powierzchnia:', DV.volcano_surface(ctx))
+    print('delta - brzegi i trzciny:', DV.delta_dress(ctx))
     cost = F.road_cost(world, T, footprint)
     for b in ctx['blocks']:
         if b.kind == 'entrance':
@@ -872,7 +878,7 @@ def build(ctx):
             ctx['npcs'].append([n[0], n[1], n[2], n[3], captain[0], captain[1], 0, *n[7:10]])
         else:
             ctx['npcs'].append([key, name, 'CAPTAIN', town, captain[0], captain[1], 0, '-', '#4a6a8a',
-                                'Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium.'])
+                                'Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium albo postaci z promocją.'])
     # Admiral i kwatermistrz zostaja na nabrzezu Przystani Wschodniej
     ex, ey = harbours['east_captain']
     for key in ('isle_guide', 'isle_merchant'):
@@ -887,7 +893,7 @@ def build(ctx):
         captain, rect = F.harbour_with_ship(world, quay, F.S_)
         ctx['pz'].append((*rect, 0))
         ctx['npcs'].append([key, cname, 'CAPTAIN', t['name'], captain[0], captain[1], 0, '-', '#4a6a8a',
-                            'Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium.'])
+                            'Mój statek pływa do portów całego świata. Rejsy tylko dla kont premium albo postaci z promocją.'])
         for y in range(rect[1], rect[3] + 1):
             for x in range(rect[0], rect[2] + 1):
                 if world.floors[0][y][x][0] in ('bridge', 'ship_deck'):
@@ -991,12 +997,16 @@ def build(ctx):
               reach_varden=reach_surface(world, temple[:2]),
               regions=lambda: all_regions(ctx),
               monsters_csv=os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'monsters.csv'))
+    ctx['reserved'] = list(strongholds.RESERVED)
     print('lochy w dziczy:', wilds.wild_dungeons(ctx, cost, wh))
     print('spawny w lasach i na lakach:', wilds.surface_spawns(ctx, wh))
     # 2026-11-11: Twierdza Krwawego Kla (orki, -3..+3, drzwi poziomu 50) i Elandor, osada elfow (-2..+3)
     print('twierdza orkow i osada elfow:', strongholds.build(ctx, cost, wh))
     # 2026-11-11: Durnkar, miasto krasnoludow na -5 pod gorami (ukryte wejscie) i trzy kopalnie do -7
     print('durnkar i kopalnie krasnoludow:', dwarves.build(ctx, cost, wh))
+    # 2026-11-11: Wulkan Pozogi: Trzewia -1..-7 i Stozek +1..+7 (lowisko dla druzyn), pomosty rybackie w delcie
+    print('wulkan pozogi - pietra:', DV.volcano_depths(ctx, cost, wh))
+    print('delta - pomosty:', DV.delta_docks(ctx, reach_surface(world, temple[:2], [p[:2] for _n, p in ctx['towns'] if p[2] == 0])))
 
 
 def monster_levels():

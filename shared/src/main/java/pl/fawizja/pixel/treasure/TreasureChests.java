@@ -171,12 +171,18 @@ public final class TreasureChests {
 
     /** Kafelki osiagalne z miejsca startu: ruch w 4 kierunkach i kazde przejscie (schody, liny, tunele). */
     public static Map<Integer, BitSet> reachable(WorldMap world) {
+        return reachable(world, List.of());
+    }
+
+    /** Jak {@link #reachable(WorldMap)}, ale takze od dodatkowych pol (np. przystanie osiagalne tylko statkiem). */
+    public static Map<Integer, BitSet> reachable(WorldMap world, java.util.Collection<Position> extraStarts) {
         int w = world.width(), h = world.height();
         Map<Integer, BitSet> seen = new HashMap<>();
         ArrayDeque<Position> q = new ArrayDeque<>();
         Position start = world.spawn();
         mark(seen, start, w);
         q.add(start);
+        for (Position p : extraStarts) if (mark(seen, p, w)) q.add(p);
         int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         while (!q.isEmpty()) {
             Position p = q.poll();

@@ -881,6 +881,45 @@ wyprawy na bossa ok. 450 pol (17 komor 150 x 82).
   `check()` zglasza przejscie bez schodow. Test: `world/DwarvesTest` (ukryte wejscie, miasto, kopalnie, drzwi
   poziomu, potwory).
 
+## Srebrna Rzeka z delta i Wulkan Pozogi (generator `tools/mapgen/delta_volcano.py`) - 2026-11-11
+
+Darek: "obok miasta Garden [Varden] niech plynie szeroka rzeka z delta ujscia do morza; miejsce polowania wulkan
+odgrodz lawa, zeby nie mozna bylo przejsc, i daj tam statek; plywac moga tylko premium i promocja; pod wulkanem az -7
+pieter i bardzo duzo silnych potworow i +7 bardzo duzo potworow mieszanych - exp dla party, nie solo".
+- Srebrna Rzeka: rzeka z jeziora pod Varden na poludniowy wschod jest poszerzona o 3 pola z kazdej strony (koryto
+  14-25 pol) i przy ujsciu (rozwidlenie ok. 601,698) rozdziela sie na cztery koryta do zatoki pod Selvaran i do
+  laguny za mierzeja: wachlarz delty z wyspami, lachami piasku, piaszczystymi brzegami i trzcinami. Drogi (Valmir -
+  Selvaran) przechodza po mostach (`features.connect`, koszt wody rzeki). Trzy pomosty rybackie z sieciami i lodka;
+  region "Delta Srebrnej Rzeki" (560..662 x 680..818) - w `data/fishing.csv` wegorze. Teren zmieniany w `build` po
+  stawach (`nature.ponds` - ich losowanie bez zmian), przed drogami.
+- Wulkan Pozogi (srodek krateru 652,850): wulkaniczny cypel na poludnie od delty. Lawa splywa do morza: pas lawy na
+  calym brzegu cypla (od 31 pol od srodka), od strony ladu szeroki do 42 pol, odcina go od reszty ladu - pieszo nie da sie wejsc, drogi omijaja strefe (`footprint`).
+  Popiol z obsydianem, zweglone drzewa, strugi i oczka lawy, stozek (gora, promien 24). Przystan z duzym statkiem
+  na wschodnim brzegu: Kapitan Ignacy Smolarz (`pozoga_captain`, 692,851, miasto podrozy "Wulkan Pożogi", strefa
+  ochronna). Rejsy w obie strony z Varden, Valmir, Selvaran, Qasirah, Frostholm, Nerys i Przystani Wschodniej.
+- Stozek Pozogi +1..+6: lawowe korytarze z komorami we wnetrzu gory, w kole coraz mniejszym (promien 23..13), +7
+  krater z jeziorem lawy i krawedzia. Wejscie: wneka w poludniowym zboczu (schody 652,871). Bardzo duzo potworow
+  mieszanych (ogien, powietrze, mroz, cienie: wiwerny, harpie, mrozne olbrzymy, gargulce, upiory, smoki), wyzej
+  silniejsze: ok. 50 potworow na +1 do ok. 30 na +6/+7.
+- Trzewia Pozogi -1..-7: wejscie we wnece zachodniego zbocza (631,850). Kazde pietro wieksze (do 72 x 55), pien
+  komor od schodow do schodow i boczne slepe komory (najdalsze ze skrzynia lupu). Bardzo duzo silnych potworow
+  ognia, glebiej silniejsze i liczniejsze (ok. 50 na -1, ok. 95 na -7): zywiolaki ognia, chrzaszcze, magowie
+  popiolu, lawowe golemy, salamandry, ogary, kolosy, smoki magmy, czerwie i demony otchlani, skrzydlate pomioty.
+- Wszystkie spawny wulkanu sa stadami (`stado`, zwykle 5-6 potworow, poziomy 300-1000) - lowisko dla druzyn (premia
+  druzyny). Regiony: "Wulkan Pożogi" (0, pasy wewnatrz pierscienia), "Stożek Pożogi" (+1..+7), "Trzewia Pożogi"
+  (-1..-7), po jednym na pietro. `route_levels` nie zmienia wulkanu (osiagalny tylko statkiem).
+- Nowe potwory (OTSP przebarwione, `TINTED`): Popielna salamandra 420, Ogar Pozogi 520, Magmowy kolos 620 (lup,
+  bestiariusz).
+- Pietra do +7: `Position.MAX_FLOOR` = 7, `WorldRenderer` rysuje wyzsze pietra do MAX_FLOOR, generator i
+  `route_levels` licza pietra -7..+7 (`floor_+6.txt`, `floor_+7.txt`).
+- Rejsy (wszyscy kapitanowie, takze przewoznicy na wyspy): wczesniej tylko konto premium, teraz premium ALBO
+  promocja (`PlayerCharacter.canSail`, `GameSession.travel`, menu kapitana w `Hud`). Odmowa: "rejsy tylko dla kont
+  premium albo postaci z promocją" i podpowiedz wladcy miasta. Woznice (CARRIER) bez zmian - bez wymagan.
+- Generator: `strongholds.RESERVED` - lochy dziczy (`wilds`) nie zajmuja okolicy, w ktorej pozniej staje twierdza
+  orkow i Elandor (po zmianach terenu losowe zejscie do lochu potrafilo zablokowac miejsce osady).
+- Test: `world/VolcanoDeltaTest` (odciecie lawa, rejsy, kazde pietro -7..+7 od przystani, liczba i sila potworow,
+  premium/promocja, szerokosc rzeki, koryta delty, mosty, droga Valmir - Selvaran).
+
 ## Wyprawy na bossa w piec postaci (Z logika, S serwer, C rysowanie)
 
 - Dane: plik mapy `boss_quests.csv` (generator `tools/mapgen/boss_quests.py`), wiersz `quest;id;nazwa;poziom;boss;

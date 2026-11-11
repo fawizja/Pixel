@@ -245,3 +245,6 @@ bar_combo_mobile|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.telepor
 dwarves_ravine|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=479,274,0
 durnkar_plaza|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=512,324,-5
 dwarves_mine_bottom|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=577,318,-7 -Dpixel.level=200
+delta_map|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=610,750,0 -Dpixel.open=map
+volcano_captain|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=693,852,0 -Dpixel.open=npc
+volcano_crater|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -Dpixel.teleport=648,853,7
