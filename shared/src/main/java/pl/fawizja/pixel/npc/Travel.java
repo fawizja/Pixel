@@ -35,6 +35,8 @@ public final class Travel {
         }
         for (Npc n : npcs.all()) {
             if (n.role() != NpcRole.CARRIER || n.town().equalsIgnoreCase(from.town())) continue;
+            // woznica jedzie tylko po ladzie: nie na ziemie premium (po wodzie plywa kapitan) ani z niej na kontynent
+            if (npcs.landmassOf(from) != npcs.landmassOf(n)) continue;
             out.add(new Route(n, price(from.position(), n.position())));
         }
         return out;

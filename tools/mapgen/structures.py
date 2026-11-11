@@ -35,7 +35,10 @@ HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader',
                'rock_golem', 'earth_spirit', 'deep_behemot',
                # 2026-11-11: oboz lowczyn i Cyklopolis (isles.py)
                'grove_huntress', 'grove_shieldmaiden', 'grove_crone', 'grove_matriarch',
-               'oneeye_brute', 'oneeye_hauler', 'oneeye_smith'}
+               'oneeye_brute', 'oneeye_hauler', 'oneeye_smith',
+               # 2026-11-11: Warownia Gorvalda i podziemne chodniki (castle.py)
+               'horn_raider', 'horn_bowman', 'horn_guard', 'horn_mystic', 'keep_hound', 'keep_crossbow', 'keep_sentry',
+               'keep_chaplain', 'castellan_gorvald'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 
@@ -435,7 +438,7 @@ def clear_surface(ctx, x0, y0, x1, y1):
     ctx['spawns'] = keep
 
 
-def find_site(ctx, helpers, cost, near, w, h, core=None, radius=110, biomes=None, max_water=0.05, why=None, min_temple=70):
+def find_site(ctx, helpers, cost, near, w, h, core=None, radius=110, biomes=None, max_water=0.05, why=None, min_temple=70, bounds=None):
     """Lewy gorny rog miejsca w x h (z pasem dookola) najblizej near: dziki lad bez budynkow, przejsc, miast i wiosek,
     malo wody i gor, osiagalny pieszo z miast. core = (dx0, dy0, dx1, dy1) - srodek, w ktorym nie moze byc drogi
     (pas dookola moze ja przecinac - zostaje przechodni). biomes - pozadane biomy (T.biome)."""
@@ -457,7 +460,8 @@ def find_site(ctx, helpers, cost, near, w, h, core=None, radius=110, biomes=None
                     continue
                 X0, Y0 = near[0] + dx - w // 2, near[1] + dy - h // 2
                 X1, Y1 = X0 + w - 1, Y0 + h - 1
-                if X0 < 8 or Y0 < 8 or X1 > S - 8 or Y1 > S - 8:
+                if X0 < 8 or Y0 < 8 or X1 > S - 8 or Y1 > S - 8 or (
+                        bounds and (X0 < bounds[0] or Y0 < bounds[1] or X1 > bounds[2] or Y1 > bounds[3])):
                     why['edge'] = why.get('edge', 0) + 1
                     continue
                 if any(max(abs(t[0] - (X0 + X1) // 2) - w // 2, abs(t[1] - (Y0 + Y1) // 2) - h // 2) < min_temple

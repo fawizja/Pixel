@@ -22,15 +22,23 @@ public final class NpcRegistry {
     private final List<Npc> npcs;
     /** Rejsy: klucz kapitana -> klucze kapitanow docelowych (trasy dwukierunkowe z ships.csv). */
     private final Map<String, List<String>> sea;
+    /** Miasto (male litery) -> numer ladu ({@link pl.fawizja.pixel.world.Town#landmass()}); brak = kontynent glowny. */
+    private final Map<String, Integer> landmass;
 
-    private NpcRegistry(List<Npc> npcs, Map<String, List<String>> sea) {
+    private NpcRegistry(List<Npc> npcs, Map<String, List<String>> sea, Map<String, Integer> landmass) {
         this.npcs = Collections.unmodifiableList(npcs);
         this.sea = sea;
+        this.landmass = landmass;
     }
 
-    private NpcRegistry(List<Npc> npcs) { this(npcs, Map.of()); }
+    private NpcRegistry(List<Npc> npcs, Map<String, Integer> landmass) { this(npcs, Map.of(), landmass); }
 
-    public static NpcRegistry empty() { return new NpcRegistry(new ArrayList<>()); }
+    /** Numer ladu miasta NPC: 0 kontynent glowny, 1+ ziemie premium (woznice nie jezdza miedzy ladami). */
+    public int landmassOf(Npc n) {
+        return landmass.getOrDefault(n.town().toLowerCase(java.util.Locale.ROOT), 0);
+    }
+
+    public static NpcRegistry empty() { return new NpcRegistry(new ArrayList<>(), Map.of()); }
 
     public static NpcRegistry load(String mapName, WorldMap world, ShopRegistry shops) throws IOException {
         NpcRegistry r = parse(SpellRegistry.readLines("/maps/" + mapName + "/npcs.csv"), world, shops);
@@ -63,7 +71,7 @@ public final class NpcRegistry {
             map.computeIfAbsent(a.key(), k -> new ArrayList<>()).add(b.key());
             map.computeIfAbsent(b.key(), k -> new ArrayList<>()).add(a.key());
         }
-        return new NpcRegistry(new ArrayList<>(npcs), map);
+        return new NpcRegistry(new ArrayList<>(npcs), map, landmass);
     }
 
     /** Kapitanowie, do ktorych plynie statek kapitana {@code from} (w kolejnosci z ships.csv). */
@@ -106,7 +114,11 @@ public final class NpcRegistry {
                 throw new IOException("npcs.csv line " + n + ": " + e.getMessage(), e);
             }
         }
-        return new NpcRegistry(list);
+        Map<String, Integer> land = new java.util.HashMap<>();
+        for (pl.fawizja.pixel.world.Town town : world.towns()) {
+            if (town.landmass() > 0) land.put(town.name().toLowerCase(java.util.Locale.ROOT), town.landmass());
+        }
+        return new NpcRegistry(list, land);
     }
 
     public List<Npc> all() { return npcs; }

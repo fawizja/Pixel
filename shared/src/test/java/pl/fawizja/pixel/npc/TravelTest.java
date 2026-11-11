@@ -47,7 +47,7 @@ class TravelTest {
         assertEquals(300, Travel.price(new Position(0, 0, 0), new Position(60, 40, 0)));
         Npc varden = npcs.get("varden_carrier");
         List<Travel.Route> routes = Travel.routes(npcs, varden);
-        assertEquals(6, routes.size(), "the other six towns");
+        assertEquals(3, routes.size(), "the other towns of the main continent (Frostholm, Qasirah, Durnkar); premium lands only by ship");
         for (Travel.Route r : routes) assertNotEquals("Varden", r.to().town());
     }
 

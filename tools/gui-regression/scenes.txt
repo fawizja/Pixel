@@ -261,3 +261,6 @@ bless_death|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340
 lang_menu_es|-Dpixel.lang=es
 lang_shop_en|-Dpixel.lang=en -Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
 lang_spellbook_es|-Dpixel.lang=es -Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=book
+castle_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=822,490,-1
+castle_keep_top|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=781,357,3
+durnkar_market|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=500,322,-5

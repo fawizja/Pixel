@@ -60,7 +60,12 @@ class TreasureChestsTest {
         java.util.List<TreasureChests.Chest> loot = c.all().stream().filter(x -> x.id().startsWith(TreasureChests.LOOT_PREFIX)).toList();
         assertFalse(loot.isEmpty(), "loot chests in wild dungeons (chests.csv)");
         assertEquals(loot.size(), loot.stream().map(TreasureChests.Chest::id).distinct().count(), "loot chest ids unique");
-        for (TreasureChests.Chest x : loot) assertTrue(x.position().z() < 0 && x.gold() > 0 && x.gold() < 5_000, x.id());
+        for (TreasureChests.Chest x : loot) {
+            // skrzynie w dziczy leza pod ziemia i sa skromne; nagroda zadania za drzwiami poziomu (Warownia Gorvalda, +3) moze byc wyzej
+            boolean quest = x.doorLevel() >= 20;
+            assertTrue(x.gold() > 0 && (quest ? x.gold() <= 10_000 : x.position().z() < 0 && x.gold() < 5_000), x.id());
+        }
+        assertTrue(loot.stream().anyMatch(x -> x.position().z() == 3 && x.doorLevel() == 55), "the castle quest chest behind the level door");
         long g1 = c.all().stream().filter(x -> x.position().z() == -1).findFirst().get().gold();
         long g5 = c.all().stream().filter(x -> x.position().z() == -5).findFirst().get().gold();
         assertEquals(500, g1);

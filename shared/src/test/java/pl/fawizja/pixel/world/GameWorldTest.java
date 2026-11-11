@@ -91,10 +91,10 @@ class GameWorldTest {
 
     @Test
     void sevenTownsWithProtectedTemples() {
-        // szesc miast startowych i Durnkar - miasto krasnoludow na -5 (swiatynia, tylko do zamieszkania)
+        // trzy miasta startowe kontynentu glownego, trzy premium (tylko statkiem) i Durnkar - miasto krasnoludow na -4 (swiatynia, tylko do zamieszkania)
         assertEquals(7, world.towns().size());
         assertTrue(world.towns().size() <= Town.MAX_TOWNS);
-        assertEquals(-5, world.town("Durnkar").temple().z());
+        assertEquals(-4, world.town("Durnkar").temple().z());
         for (String name : new String[] {"Varden", "Frostholm", "Selvaran", "Qasirah", "Valmir", "Nerys", "Durnkar"}) {
             Town t = world.town(name);
             assertNotNull(t, name);

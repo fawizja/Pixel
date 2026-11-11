@@ -21,7 +21,8 @@ import structures as St
 NONE = '-'
 SEED = 20261112
 CITY = 'Durnkar'
-CW, CH = 76, 56                  # grota miasta (z obramowaniem skaly)
+import dwarf_city  # noqa: E402
+CW, CH = dwarf_city.CW, dwarf_city.CH      # obrys jaskin miasta (3 pietra: -4, -5, -6)
 GATE_LEVEL = 25                  # drzwi miedzy kopalnia a miastem (nikt slabszy nie przejdzie z miasta w glebie)
 CITY_LEVELS = (30, 60)           # region miasta (odleglosc startowa w route_levels)
 STONE, MARBLE, WOOD = 'stone_floor', 'marble_floor', 'wood_floor'
@@ -240,210 +241,9 @@ def _house(p, z, x, y, w, h, door_side, floor, rng):
 
 
 def city_plan(p, ox, oy, rng):
-    """Grota Durnkaru w planie p na pietrze -5 z lewym gornym rogiem (ox, oy). Zwraca slownik miejsc."""
-    z = -5
-    reserved = set()
-    for y in range(CH):
-        for x in range(CW):
-            p.put(ox + x, oy + y, z, ('cave_floor', NONE, NONE, ROCK))
-    # grota: posadzka z bruku, kilka skalnych filarow
-    for y in range(2, CH - 2):
-        for x in range(2, CW - 2):
-            p.put(ox + x, oy + y, z, (STREET, NONE, NONE, NONE))
-    # nierowne sciany groty (zaokraglone rogi)
-    for (cx, cy) in ((2, 2), (CW - 3, 2), (2, CH - 3), (CW - 3, CH - 3)):
-        for dx in range(-1, 3):
-            for dy in range(-1, 3):
-                X = cx + (dx if cx < 10 else -dx)
-                Y = cy + (dy if cy < 10 else -dy)
-                if abs(X - cx) + abs(Y - cy) <= 2:
-                    p.put(ox + X, oy + Y, z, ('cave_floor', NONE, NONE, ROCK))
-    # rzeka lawy przez srodek z mostami (glowna aleja i poludniowy most)
-    for y in range(2, CH - 2):
-        for x in (36, 37, 38, 39):
-            p.put(ox + x, oy + y, z, ('lava', NONE, NONE, NONE))
-    for (y0, y1) in ((25, 29), (44, 45), (14, 15)):
-        for y in range(y0, y1 + 1):
-            for x in (36, 37, 38, 39):
-                p.put(ox + x, oy + y, z, ('bridge', NONE, NONE, NONE))
-    for y in range(13, 31):
-        _keep_free(reserved, (ox + 35, oy + y), (ox + 40, oy + y))
-    # glowna aleja: plyty
-    for y in range(25, 30):
-        for x in range(2, CW - 2):
-            if p.get(ox + x, oy + y, z)[0] != 'bridge':
-                p.put(ox + x, oy + y, z, (STONE, NONE, NONE, NONE))
-    for x in range(2, CW - 2):
-        _keep_free(reserved, (ox + x, oy + 27))
-    spots = {}
-    npcs = []
-    color = '#a0703a'
-    # ---------------------------------------------------------------- polnoc: swiatynia, bank, sala tronowa, karczma
-    p.box(z, ox + 4, oy + 3, 16, 11, MARBLE, SWALL, doors=[(ox + 11, oy + 13)])
-    _keep_free(reserved, (ox + 11, oy + 14), (ox + 11, oy + 12))
-    p.obj(ox + 11, oy + 4, z, 'altar')
-    for (x, y) in ((ox + 8, oy + 4), (ox + 14, oy + 4)):
-        p.obj(x, y, z, 'candle')
-    for (x, y) in ((ox + 6, oy + 7), (ox + 6, oy + 9), (ox + 16, oy + 7), (ox + 16, oy + 9), (ox + 7, oy + 7), (ox + 7, oy + 9),
-                   (ox + 15, oy + 7), (ox + 15, oy + 9)):
-        p.obj(x, y, z, 'bench')
-    for y in range(5, 13):
-        p.deco(ox + 11, oy + y, z, 'carpet')
-    for (x, y) in ((ox + 5, oy + 4), (ox + 18, oy + 4)):
-        p.obj(x, y, z, 'statue')
-    spots['temple'] = (ox + 11, oy + 9)
-    npcs.append(['durn_priest', 'Kapłan Thorvin', 'PRIEST', CITY, ox + 13, oy + 5, z, '-', '#f0f0f0',
-                 'Witaj w świątyni Durnkaru, synu i córko kamienia. Mogę cię uleczyć albo przyjąć do miasta.'])
-    # bank i depozyt
-    p.box(z, ox + 22, oy + 3, 13, 10, STONE, SWALL, doors=[(ox + 28, oy + 12)])
-    _keep_free(reserved, (ox + 28, oy + 13), (ox + 28, oy + 11))
-    for x in range(24, 33, 2):
-        p.obj(ox + x, oy + 4, z, 'depot_locker')
-    for x in (23, 33):
-        p.obj(ox + x, oy + 8, z, 'chest')
-    p.obj(ox + 31, oy + 9, z, 'counter')
-    npcs.append(['durn_banker', 'Bankier Grimbald', 'BANKER', CITY, ox + 25, oy + 8, z, '-', '#d8c070',
-                 'Złoto w skarbcu Durnkaru leży pod tysiącem sążni skały. Bank prowadzi konta we wszystkich miastach.'])
-    npcs.append(['durn_housing', 'Zarządca Durgan', 'HOUSING', CITY, ox + 31, oy + 10, z, '-', '#6a5a8a',
-                 'Domy w grocie Durnkaru, ciepłe od lawy. Płacisz z konta w banku.'])
-    # sala tronowa
-    p.box(z, ox + 41, oy + 3, 16, 11, MARBLE, SWALL, doors=[(ox + 48, oy + 13)])
-    _keep_free(reserved, (ox + 48, oy + 14), (ox + 48, oy + 12))
-    p.obj(ox + 48, oy + 4, z, 'throne')
-    for y in range(5, 13):
-        p.deco(ox + 48, oy + y, z, 'carpet')
-    for (x, y) in ((ox + 44, oy + 4), (ox + 52, oy + 4)):
-        p.obj(x, y, z, 'banner')
-    for (x, y) in ((ox + 43, oy + 7), (ox + 53, oy + 7), (ox + 43, oy + 10), (ox + 53, oy + 10)):
-        p.obj(x, y, z, 'statue')
-    for (x, y) in ((ox + 42, oy + 4), (ox + 55, oy + 4)):
-        p.obj(x, y, z, 'campfire')
-    npcs.append(['durn_ruler', 'Król Thorgrim', 'KING', CITY, ox + 48, oy + 6, z, '-', '#c8a040',
-                 'Durnkar pamięta czasy, gdy nad górami nie było jeszcze miast. Konto premium i promocję dam ci tak jak '
-                 'król w Varden: napisz premium albo promocja.'])
-    # karczma
-    p.box(z, ox + 59, oy + 3, 14, 10, WOOD, SWALL, doors=[(ox + 65, oy + 12)])
-    _keep_free(reserved, (ox + 65, oy + 13), (ox + 65, oy + 11))
-    for (x, y, o) in ((61, 6, 'table'), (61, 9, 'table'), (68, 6, 'table'), (68, 9, 'table'), (62, 6, 'chair'), (62, 9, 'chair'),
-                      (69, 6, 'chair'), (69, 9, 'chair'), (71, 4, 'barrel'), (71, 5, 'barrel'), (60, 4, 'barrel'), (64, 4, 'counter'),
-                      (66, 4, 'counter'), (71, 10, 'firewood')):
-        p.obj(ox + x, oy + y, z, o)
-    npcs.append(['durn_innkeeper', 'Karczmarz Ulfrik', 'MERCHANT', CITY, ox + 65, oy + 5, z, 'durn_supplies', '#a07040',
-                 'Piwo z grzybów jaskiniowych, chleb, mięso i lina na drogę. Siadaj, przybyszu.'])
-    # ---------------------------------------------------------------- domy przy alei (rzad polnocny)
-    houses = []
-    names = iter([f'Kowadłowa {i}' for i in range(1, 9)] + [f'Głębinowa {i}' for i in range(1, 9)])
-    for (x, y, side) in ((4, 16, 'S'), (12, 16, 'S'), (58, 16, 'S'), (66, 16, 'S')):
-        h = _house(p, z, ox + x, oy + y, 7, 7, side, STONE, rng)
-        houses.append((next(names), h))
-        _keep_free(reserved, (h[4][0], h[4][1] + 1))
-    # place: paleniska (ogien w kamiennym kregu), posag, filary
-    for (x, y) in ((24, 18), (31, 18), (44, 18), (52, 18), (24, 22), (31, 22), (44, 22), (52, 22)):
-        p.obj(ox + x, oy + y, z, 'campfire')
-    p.obj(ox + 27, oy + 20, z, 'statue')
-    p.obj(ox + 48, oy + 20, z, 'well')
-    for (x, y) in ((20, 19), (33, 21), (56, 19), (42, 21)):
-        for dx in (0, 1):
-            for dy in (0, 1):
-                p.put(ox + x + dx, oy + y + dy, z, ('cave_floor', NONE, NONE, ROCK))
-    # ---------------------------------------------------------------- poludnie: sklepy
-    shops = [  # x, szer., klucz, imie, sklep, powitanie, wnetrze
-        (4, 12, 'durn_smith', 'Kowal Brokk', 'durn_arms',
-         'Topory, młoty i kusze z kuźni Durnkaru. Skupuję też broń i rudę.', 'forge'),
-        (17, 10, 'durn_armorer', 'Płatnerz Hagar', 'durn_armor',
-         'Zbroje kute w żarze lawy: hełmy, kolczugi i tarcze dla każdego wojownika.', 'armour'),
-        (28, 7, 'durn_imbuer', 'Zaklinacz Runnar', None,
-         'Runy wyryte w kamieniu trzymają moc nasyceń. Kradzież życia, many, krytyk, żywioły i ochrony.', 'runes'),
-        (41, 11, 'durn_mage', 'Runiarz Odvar', 'durn_magic',
-         'Mikstury, runy i różdżki. Krasnoludzkie runy nie pękają nawet w bitwie.', 'magic'),
-        (53, 10, 'durn_tools', 'Narzędziownik Skagi', 'durn_tools',
-         'Liny, łopaty, pochodnie i hełmy górnicze - wszystko, czego trzeba w kopalni.', 'tools'),
-        (64, 9, 'durn_merchant', 'Kupiec Gunnar', 'durn_shop',
-         'Kupię łupy z kopalń i sprzedam to, czego brakuje w drodze.', 'general'),
-    ]
-    for (x, w, key, name, shop, greet, kind) in shops:
-        door = (ox + x + w // 2, oy + 31)
-        p.box(z, ox + x, oy + 31, w, 9, STONE if kind != 'general' else WOOD, SWALL, doors=[door])
-        _keep_free(reserved, (door[0], door[1] - 1), (door[0], door[1] + 1))
-        ix0, ix1 = ox + x + 1, ox + x + w - 2
-        if kind == 'forge':
-            for (a, o) in ((ix0, 'forge'), (ix0 + 2, 'anvil'), (ix1, 'forge'), (ix1 - 2, 'anvil')):
-                p.obj(a, oy + 38, z, o)
-            p.obj(ix0, oy + 33, z, 'lumber')
-            p.obj(ix1, oy + 33, z, 'barrel')
-        elif kind == 'armour':
-            for a in range(ix0, ix1 + 1, 2):
-                p.obj(a, oy + 38, z, 'showcase')
-        elif kind == 'runes':
-            p.obj(ix0, oy + 38, z, 'bookcase')
-            p.obj(ix1, oy + 38, z, 'candle')
-            p.obj(ix0 + 2, oy + 38, z, 'altar')
-        elif kind == 'magic':
-            for a in range(ix0, ix1 + 1, 2):
-                p.obj(a, oy + 38, z, 'bookcase' if a % 4 else 'clay_pot')
-        elif kind == 'tools':
-            for (a, o) in ((ix0, 'crate'), (ix0 + 1, 'lumber'), (ix1, 'barrel'), (ix1 - 2, 'sack'), (ix0 + 3, 'crate')):
-                p.obj(a, oy + 38, z, o)
-        else:
-            for a in range(ix0, ix1 + 1, 2):
-                p.obj(a, oy + 38, z, 'crate' if a % 4 else 'sack')
-        cx = ox + x + w // 2
-        p.obj(cx - 1 if cx - 1 >= ix0 else cx + 1, oy + 35, z, 'counter')
-        role = 'IMBUER' if key == 'durn_imbuer' else 'MERCHANT'
-        npcs.append([key, name, role, CITY, cx, oy + 36, z, shop or '-', '#7050b0' if role == 'IMBUER' else color, greet])
-    # opiekun zwierzat w zagrodzie przy karczmie (bez lady), przewodnik przy placu
-    npcs.append(['durn_petkeeper', 'Opiekun zwierząt Bodvar', 'MERCHANT', CITY, ox + 70, oy + 20, z, 'durn_pets', '#6a8a3a',
-                 'Kruki z górskich turni lecą za krasnoludem i w głąb kopalni. Pupil u boku daje +5% doświadczenia z potworów.'])
-    for (x, y) in ((68, 19), (72, 19), (68, 22), (72, 22)):
-        p.obj(ox + x, oy + y, z, 'fence')
-    p.obj(ox + 72, oy + 21, z, 'hay_bale')
-    npcs.append(['durn_guide', 'Przewodnik Dvalin', 'GUIDE', CITY, ox + 27, oy + 23, z, '-', '#8a6a3a',
-                 'Kopalnie wokół Durnkaru roją się od odszczepieńców i potworów z głębin. Każde piętro niżej jest groźniejsze.'])
-    # ---------------------------------------------------------------- domy na poludniu
-    for (x, side) in ((4, 'N'), (12, 'N'), (20, 'N'), (28, 'N'), (42, 'N'), (50, 'N'), (58, 'N'), (66, 'N')):
-        h = _house(p, z, ox + x, oy + 46, 7, 7, side, STONE if x < 36 else WOOD, rng)
-        houses.append((next(names), h))
-        _keep_free(reserved, (h[4][0], h[4][1] - 1))
-    # ---------------------------------------------------------------- swiatla: pochodnie na murach budynkow, braziery
-    for (x, y) in ((4, 8), (19, 8), (22, 7), (34, 7), (41, 8), (56, 8), (59, 7), (72, 7), (6, 31), (15, 31), (22, 31),
-                   (45, 31), (57, 31), (68, 31), (7, 46), (23, 46), (45, 46), (61, 46)):
-        _torch(p, ox + x, oy + y, z)
-    for (x, y) in ((8, 24), (20, 24), (30, 24), (46, 24), (58, 24), (70, 24), (8, 30), (30, 30), (46, 30), (70, 30),
-                   (16, 43), (30, 43), (46, 43), (62, 43)):
-        c = p.get(ox + x, oy + y, z)
-        if c is not None and St.walk(c) and c[2] == NONE and (ox + x, oy + y) not in reserved:
-            p.obj(ox + x, oy + y, z, 'campfire')
-    # ---------------------------------------------------------------- bramy: zachodnia (przedsionek) i wschodnia
-    for y in (26, 27, 28):
-        for x in (0, 1):
-            p.put(ox + x, oy + y, z, (STONE, NONE, NONE, NONE))
-            p.put(ox + CW - 1 - x, oy + y, z, (STONE, NONE, NONE, NONE))
-    # przedsionek zachodni: hala ze schodami z gory (sztolnie -4)
-    hall = (ox - 12, oy + 22, ox - 1, oy + 32)
-    for y in range(hall[1], hall[3] + 1):
-        for x in range(hall[0], hall[2] + 1):
-            edge = x in (hall[0], hall[2]) or y in (hall[1], hall[3])
-            p.put(x, y, z, (STONE, NONE, NONE, ROCK) if edge else (STONE, NONE, NONE, NONE))
-    for y in (26, 27, 28):
-        p.put(hall[2], oy + y, z, (STONE, NONE, NONE, NONE))
-    for (x, y) in ((hall[0] + 2, hall[1] + 2), (hall[2] - 2, hall[1] + 2), (hall[0] + 2, hall[3] - 2), (hall[2] - 2, hall[3] - 2)):
-        p.obj(x, y, z, 'statue')
-    for (x, y) in ((hall[0] + 5, hall[1]), (hall[0] + 5, hall[3])):
-        _torch(p, x, y, z)
-    spots['west_stairs'] = (hall[0] + 3, oy + 27)
-    # wozkarz: wagoniki podziemnymi torami do innych miast (miasto bez wozow na powierzchni)
-    npcs.append(['durn_carrier', 'Wózkarz Brodrik', 'CARRIER', CITY, hall[0] + 7, hall[1] + 2, z, '-', '#8a6a4a',
-                 'Wagonikiem starymi torami pod górami do innych miast. Płacisz monetami, trzymaj brodę w środku.'])
-    for (x, y, o) in ((hall[0] + 6, hall[1] + 1, 'crate'), (hall[0] + 8, hall[1] + 1, 'barrel'), (hall[0] + 9, hall[1] + 1, 'crate')):
-        p.obj(x, y, z, o)
-    npcs.append(['durn_guard_west', 'Strażnik bramy Hroald', 'GUARD', CITY, ox + 3, oy + 25, z, '-', '#8a8a9a',
-                 'Stój! Mało kto trafia do Durnkaru przez wąwóz. Wejdź, skoro już tu jesteś, i nie zgub drogi powrotnej.'])
-    npcs.append(['durn_guard_east', 'Strażnik bramy Sigvald', 'GUARD', CITY, ox + CW - 4, oy + 25, z, '-', '#8a8a9a',
-                 'Za tą bramą Kopalnia Żelaznej Brody. Drzwi przepuszczą tylko tych, którzy przeżyją w głębinach.'])
-    spots['east_gate'] = (ox + CW, oy + 27)
-    p.pz.append((hall[0], hall[1], ox + CW - 1, oy + CH - 1, z))
-    p.pz.append((ox, oy, ox + CW - 1, oy + CH - 1, z))
-    return spots, npcs, houses
+    """Miasto na trzech pietrach (-4 Wysokie Hale, -5 Rynek, -6 Kuznie) z lewym gornym rogiem (ox, oy);
+    szczegoly w dwarf_city.py. Zwraca (miejsca, NPC, domy [(nazwa, wnetrze, pietro)])."""
+    return dwarf_city.build(p, ox, oy, rng, _house, _keep_free, None)
 
 
 # ====================================================================== kopalnie
@@ -649,14 +449,14 @@ def build(ctx, cost, helpers):
     west = spots['west_stairs']
     # ---------------------------------------------------------------- sztolnie -1..-4 od pieczary do przedsionka
     P = [(0, 0)]
-    for k in range(1, 4):
-        t = k / 4
+    for k in range(1, 3):
+        t = k / 3
         bx = int(round(west[0] * t)) + rng.randint(-6, 6)
         by = int(round(west[1] * t)) + rng.randint(-6, 6)
         P.append((bx, by))
     P.append(west)
     route_cells = {}
-    for k in range(1, 5):
+    for k in range(1, 4):
         z = -k
         a, b = P[k - 1], P[k]
         # kilka zakretow miedzy a i b, slepa odnoga
@@ -684,18 +484,18 @@ def build(ctx, cost, helpers):
                     if c is None or not St.walk(c):
                         plan.put(q[0] + dx, q[1] + dy, z, ('cave_floor', NONE, NONE, NONE))
         route_cells[z] = {xy for xy, c in plan.f[z].items() if St.walk(c)}
-    for k in range(1, 6):
+    for k in range(1, 5):
         plan.stairs(-k, P[k - 1], P[k - 1])
     # ---------------------------------------------------------------- kopalnia polaczona z miastem (ten sam plan)
     name, d, shift, conn, cells, outside = adits[0]
     a_end, a_out = adit_cells(plan, world, ox, oy, cells, outside, name)
     plan.entries.append(a_out)
-    city_rect = (cox - 13, coy - 1, cox + CW, coy + CH)
+    city_rect = (cox - 14, coy - 1, cox + CW, coy + CH)
 
     gate = spots['east_gate']
 
     def forbid(x, y, z):
-        if z == -5 and city_rect[0] - 8 <= x <= city_rect[2] + 2 and city_rect[1] - 6 <= y <= city_rect[3] + 6:
+        if z in (-4, -5, -6) and city_rect[0] - 8 <= x <= city_rect[2] + 2 and city_rect[1] - 6 <= y <= city_rect[3] + 6:
             return True
         if z == -5 and gate[0] - 2 <= x <= gate[0] + 14 and abs(y - gate[1]) <= 6:
             return True                                   # korytarz bramy z drzwiami poziomu
@@ -706,9 +506,9 @@ def build(ctx, cost, helpers):
         near_route[z] = {(x + dx, y + dy) for (x, y) in cs for dx in range(-4, 5) for dy in range(-4, 5)}
 
     def keep_cell(x, y, z):
-        if z == -5:
-            if gate[0] - 1 <= x <= gate[0] + 8 and abs(y - gate[1]) <= 1:
-                return True                               # miejsce na korytarz bramy - kopalnia go nie przecina
+        if z == -5 and gate[0] - 1 <= x <= gate[0] + 8 and abs(y - gate[1]) <= 1:
+            return True                                   # miejsce na korytarz bramy - kopalnia go nie przecina
+        if z in (-4, -5, -6):
             return city_rect[0] - 1 <= x <= city_rect[2] and city_rect[1] - 1 <= y <= city_rect[3] + 1
         return (x, y) in near_route.get(z, ())
     gate = spots['east_gate']
@@ -719,19 +519,19 @@ def build(ctx, cost, helpers):
     # regiony: przejscie, miasto (ostatnie = pierwsze na liscie swiata - wazniejsze od prostokata kopalni)
     floor_regions(plan, 'Sztolnie do Durnkaru', {z: {xy for xy in plan.f[z] if (xy in route_cells[z] or
                                                   any((xy[0] + a, xy[1] + b) in route_cells[z] for a, b in F.DIRS4))}
-                                              for z in range(-4, 0)}, CITY_LEVELS)
-    plan.regions.append((CITY, cox - 13, coy, cox + CW - 1, coy + CH - 1, -5, -5) + CITY_LEVELS)
+                                              for z in range(-3, 0)}, CITY_LEVELS)
+    plan.regions.append((CITY, cox - 14, coy, cox + CW - 1, coy + CH - 1, -6, -4) + CITY_LEVELS)
     plan.check()
     W = St.stamp(ctx, plan, (ox, oy), helpers['mark'], per_floor=True)
-    temple = W(*spots['temple'], -5) + (-5,)
+    temple = W(*spots['temple'], -4) + (-4,)
     ctx['towns'].append((CITY, temple))
     ctx.setdefault('residence_only', []).append(CITY)
-    for (hname, (x0, y0, x1, y1, door)) in houses:
-        a, b, dd = W(x0, y0, -5), W(x1, y1, -5), W(door[0], door[1], -5)
+    for (hname, (x0, y0, x1, y1, door), hz) in houses:
+        a, b, dd = W(x0, y0, hz), W(x1, y1, hz), W(door[0], door[1], hz)
         n = len(ctx['houses'])
         size = (x1 - x0 + 1) * (y1 - y0 + 1)
-        ctx['houses'].append([f'durn_{n}', hname, CITY, a[0], a[1], b[0], b[1], -5, dd[0], dd[1], size * CITY_HOUSE_PRICE])
-    out['city'] = dict(temple=temple, hidden=(ox, oy), ravine=out_cell, west=W(*west, -5) + (-5,),
+        ctx['houses'].append([f'durn_{n}', hname, CITY, a[0], a[1], b[0], b[1], hz, dd[0], dd[1], size * CITY_HOUSE_PRICE])
+    out['city'] = dict(temple=temple, hidden=(ox, oy), ravine=out_cell, west=W(*west, -4) + (-4,),
                        east_gate=W(*gate, -5) + (-5,), city=W(cox, coy, -5) + (-5,))
     out['mines'] = [dict(name=name, adit=(a_out[0] + ox, a_out[1] + oy), city=True)]
     # ---------------------------------------------------------------- dwie pozostale kopalnie (osobne plany)

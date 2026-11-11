@@ -912,7 +912,7 @@ w `generate_continent`, `structures.stamp` czyta `ctx['under_pin']`), wiec nowe 
   (`ctx['area_caps']` -> `route_levels`).
 - Test: `world/StrongholdsTest` (wszystkie pietra osiagalne pieszo z Varden, skarbiec dopiero od poziomu 50).
 
-## Durnkar, krasnoludzkie miasto pod gorami, i kopalnie do -7 (generator `tools/mapgen/dwarves.py`) - 2026-11-11
+## Durnkar, krasnoludzkie miasto pod gorami, i kopalnie do -7 (generator `tools/mapgen/dwarves.py`, `dwarf_city.py`) - 2026-11-11
 
 - Masyw gorski na polnoc od Varden (najglebsze pole gory ok. 483,299). Ukryte wejscie: waski kretty wawoz od
   zbocza (ok. 483,263) w glab gory, bez drogi i bez znaku, konczy sie grota ze schodami w dol (478,275,0).
@@ -926,6 +926,18 @@ w `generate_continent`, `structures.stamp` czyta `ctx['under_pin']`), wiec nowe 
 - Miasto tylko do zamieszkania: `map.properties` `residence_only=Durnkar` -> `Town.starting() == false`. Nie ma go
   w wyborze miasta startowego (`StartingTowns.list/isValid`, takze na serwerze), ale kaplan pozwala tu zamieszkac
   (`homeTown`, odrodzenie w swiatyni na -5). `Town.MAX_TOWNS` = 8.
+  "Sztolnie do Durnkaru" (-1..-3) to krete tunele ze slepymi odnogami, bez potworow, do Wysokich Hal na -4.
+- Durnkar (0.250) to organiczne, trzypietrowe miasto (`dwarf_city.py`, ok. 462..566 x 290..355): Wysokie Hale (-4:
+  swiatynia z kaplanem, bank z depozytem - 5 skrzynek, zarzadca domow, sala tronowa krola), Rynek (-5: karczma, kowal
+  z kuznia, platnerz, zaklinacz, runiarz, narzedziownik, kupiec, opiekun zwierzat, przewodnik, wozkarz) i Glebiny (-6:
+  domy, kanal lawy z mostami). Ulice to krzywe Catmulla-Roma, jaskinie z szumu, budynki stoja wzdluz ulic i maja
+  chodniki do ulicy; pietra laczy kilka kamiennych schodow. Dwie bramy: zachodnia (wejscie) i wschodnia z drzwiami
+  poziomu 25 do Kopalni Zelaznej Brody (-5). 16 domow na sprzedaz (systemem domow, `houses.csv`, pietra -4..-6). Cale
+  miasto i przedsionek sa strefa ochronna. NPC to krepi, brodaci krasnoludowie z LPC (`tools/art/lpc_compose.py`,
+  `DWARF_TOWNS`, autorzy w `CREDITS-LPC.csv`).
+- Miasto tylko do zamieszkania: `map.properties` `residence_only=` -> `Town.starting() == false`. Nie ma go w wyborze
+  miasta startowego, ale kaplan pozwala tu zamieszkac (`homeTown`, odrodzenie w swiatyni na -4). Durnkar stoi na
+  kontynencie glownym (osiagalny pieszo z Varden; wozkarze jezdza do miast kontynentu glownego). `Town.MAX_TOWNS` = 8.
 - Trzy kopalnie, kazda z wlasna sztolnia w zboczu (wschod 520,299; zachod 464,299; poludnie 483,318) i sciezka do
   najblizszej drogi: Kopalnia Zelaznej Brody (pod miastem na wschodzie), Kopalnia Glebokiego Kilofa i Stara Sztolnia
   Granitowa. Kazda ma pietra -1..-7, kazde wieksze od poprzedniego, z komorami polaczonymi korytarzami i slepymi
@@ -933,8 +945,8 @@ w `generate_continent`, `structures.stamp` czyta `ctx['under_pin']`), wiec nowe 
   silniejszych (`route_levels`): -1 czerw gnilny i krasnolud, -2 krasnolud gornik, -3 krasnolud zolnierz i czerw
   padlinozerny, -4 krasnolud straznik, -5 krasnolud geomanta i kamienny golem, -6 zywiolak ziemi i krysztalowy
   golem, -7 Behemot i kamienny wartownik (z lawa).
-- Kopalnia Zelaznej Brody laczy sie z miastem: korytarz od wschodniej bramy (561,326,-5) z drzwiami poziomu 25
-  (564,326,-5).
+- Kopalnia Zelaznej Brody laczy sie z miastem: korytarz od wschodniej bramy na -5 z drzwiami poziomu 25
+  (570,321,-5).
 - Nowe potwory (`monsters.csv`, lup, bestiariusz): Czerw gnilny 8, Krasnolud 10, Krasnolud gornik 12, Krasnolud
   zolnierz 16 (kusza), Czerw padlinozerny 20, Krasnolud straznik 26, Kamienny golem 32, Krasnolud geomanta 34
   (ziemia, leczy), Zywiolak ziemi 55, Behemot 120. Klucze nie sa nazwami z Tibii (`mine_grub`, `deep_worm`,
@@ -943,6 +955,37 @@ w `generate_continent`, `structures.stamp` czyta `ctx['under_pin']`), wiec nowe 
 - `structures.Plan.cave(..., lava=)`, `free_under/stamp(per_floor=True)` (kazde pietro szuka miejsca osobno),
   `check()` zglasza przejscie bez schodow. Test: `world/DwarvesTest` (ukryte wejscie, miasto, kopalnie, drzwi
   poziomu, potwory).
+
+## Kontynent glowny i ziemie premium (generator `tools/mapgen/realms.py`, 0.250)
+
+- Przy tworzeniu postaci mozna wybrac tylko 3 miasta kontynentu glownego: Varden, Frostholm i Qasirah
+  (`StartingTowns.list`, walidacja takze na serwerze, `ServerWorld.isValid`). Valmir, Selvaran i Nerys to ziemie
+  premium (`Town.landmass() > 0`, `map.properties` `premium_towns=Miasto:numer`, tez `residence_only`): nie sa do
+  wyboru, a istniejace postacie z domem tam zachowuja dom (odrodzenie w ich swiatyni). Durnkar: kontynent glowny,
+  tylko zamieszkanie.
+- Ziemie premium: 1 - poludnie (Valmir, Selvaran), 2 - Szmaragdowe Wyspy z Nerys. Od kontynentu glownego dzieli je
+  woda: `realms.split` kopie kanaly (Zielona Odnoga od Srebrnej Rzeki na wschod i krotkie odnogi, miejsca wyznaczone
+  offline minimalnym przekrojem grafu ladu), a petla naprawcza tak dlugo przecina najkrotsza droga pieszo z Varden do
+  swiatyni premium (most znika w calosci, schody sa zamurowane, korytarz podziemny dostaje mur), az nie ma zadnej.
+  Do ziem premium plyna tylko statki (kapitanowie, `ships.csv`): konto premium albo promocja (`canSail`).
+- Wozkarze (`Travel.routes`, `NpcRegistry.landmassOf`) jezdza tylko w obrebie jednego ladu: nigdy na ziemie premium.
+- Testy: `world/RealmsTest` (brak drogi pieszo, 3 miasta startowe, wozy, statek i premium), `StartingTownTest`,
+  `StartingTownNetworkTest`.
+
+## Warownia Gorvalda (generator `tools/mapgen/castle.py`, 0.250)
+
+- Zamek dla poziomow 20-70 na kontynencie glownym (ok. 750..814 x 336..390, daleko od miast), w fosie, z zamknietym
+  murem bez bram, czterema wiezami narozniami, dziedzincem (koszary, psiarnia, kuznia, kaplica, stajnia), twierdza
+  (sala glowna, zbrojownia, kuchnia), koroną murow (+1), komnatami kasztelana (+2) i sala tronowa (+3).
+- Wejscie tylko przez podziemia: jaskinia w skale przed fosa (740,397,0) -> -1 posterunek orkow -> -2 orcze chodniki i
+  rogacze -> -3 glebokie tunele rogaczy -> krotki chodnik w gore (-2) -> piwnica pod twierdza (-1, straz zamku) ->
+  schody do sali schodow zamku. Z powierzchni nie ma innego wejscia (`CastleTest`).
+- Drzwi poziomu 55 (780,360,+2) do sali tronowej: boss Gorvald, Kasztelan Warowni (poziom 70) i skrzynia zadania
+  (783,349,+3, nagroda skalowana trudnoscia `ChestRewards`, raz na postac).
+- Nowe potwory (oryginalne nazwy, grafika z OTSP): Rogaty rozbojnik/lucznik/straznik/mistyk (24-38), Ogar/Kusznik/
+  Wartownik/Kapelan warowni (40-56) i Gorvald (70); orki i trolle jaskiniowe z istniejacych danych.
+- Klocki: `structures.find_site(..., bounds=)` ogranicza szukanie miejsca (zamek tylko na polnocy kontynentu).
+
 
 ## Srebrna Rzeka z delta i Wulkan Pozogi (generator `tools/mapgen/delta_volcano.py`) - 2026-11-11
 

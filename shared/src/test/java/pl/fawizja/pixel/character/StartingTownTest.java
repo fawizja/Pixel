@@ -11,7 +11,10 @@ import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Town;
 import pl.fawizja.pixel.world.WorldMap;
 
-/** Wybor miasta startowego przy tworzeniu postaci (jak w Tibii): kazde miasto swiata, zle = miasto domyslne. */
+/**
+ * Wybor miasta startowego przy tworzeniu postaci (jak w Tibii): tylko trzy miasta kontynentu glownego (Varden, Frostholm,
+ * Qasirah); miasta premium (Valmir, Selvaran, Nerys) i Durnkar nie sa do wyboru, zle = miasto domyslne.
+ */
 class StartingTownTest {
 
     private final WorldMap world = TestData.world();
@@ -19,15 +22,19 @@ class StartingTownTest {
     private final CharacterFactory factory = new CharacterFactory(cfg, TestData.ITEMS);
 
     @Test
-    void everyTownOfTheWorldIsAStartingTownWithAPolishDescription() {
+    void exactlyTheThreeTownsOfTheMainContinentAreStartingTownsWithAPolishDescription() {
         List<StartingTowns.Info> towns = StartingTowns.list(world);
-        // ukryte miasto krasnoludow (jak Kazordoon) ma swiatynie, ale gry sie w nim nie zaczyna
-        assertEquals(world.towns().size() - 1, towns.size());
-        assertFalse(world.town("Durnkar").starting());
-        assertNull(StartingTowns.find(world, "durnkar"));
-        assertFalse(StartingTowns.isValid(world, "Durnkar"));
-        assertEquals("varden", StartingTowns.resolve(world, "Durnkar", "varden"));
-        for (String k : new String[] {"varden", "frostholm", "selvaran", "qasirah", "valmir", "nerys"}) {
+        assertEquals(3, towns.size());
+        assertEquals(java.util.Set.of("varden", "frostholm", "qasirah"),
+                towns.stream().map(i -> i.name().toLowerCase(Locale.ROOT)).collect(java.util.stream.Collectors.toSet()));
+        // ukryte miasto krasnoludow (jak Kazordoon) ma swiatynie, ale gry sie w nim nie zaczyna; miasta premium tez nie
+        for (String no : new String[] {"Durnkar", "Valmir", "Selvaran", "Nerys"}) {
+            assertFalse(world.town(no).starting(), no);
+            assertNull(StartingTowns.find(world, no.toLowerCase(Locale.ROOT)), no);
+            assertFalse(StartingTowns.isValid(world, no), no);
+            assertEquals("varden", StartingTowns.resolve(world, no, "varden"), no);
+        }
+        for (String k : new String[] {"varden", "frostholm", "qasirah"}) {
             StartingTowns.Info i = StartingTowns.find(world, k);
             assertNotNull(i, k);
             assertFalse(i.climate().isBlank(), k);
@@ -62,7 +69,8 @@ class StartingTownTest {
             assertFalse(StartingTowns.isValid(world, bad));
         }
         assertEquals("varden", StartingTowns.resolve(world, "Atlantyda", "varden"));
-        assertEquals("nerys", StartingTowns.resolve(world, "Nerys", "varden"));
+        assertEquals("qasirah", StartingTowns.resolve(world, "Qasirah", "varden"));
+        assertEquals("varden", StartingTowns.resolve(world, "Nerys", "varden"), "premium towns are not for new characters");
     }
 
     @Test
@@ -70,10 +78,14 @@ class StartingTownTest {
         PlayerCharacter old = factory.create("Stary", Vocation.MONK, world.templeOf("varden"));
         assertEquals("varden", old.homeTown());
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
-        PlayerCharacter nerys = factory.createIn(world, "Wyspiarz", Vocation.MONK, "Nerys", 8);
-        PlayerCharacter back = codec.decode(codec.encode(nerys));
-        assertEquals("nerys", back.homeTown());
-        assertEquals(world.town("Nerys").temple(), back.position());
+        PlayerCharacter qasirah = factory.createIn(world, "Pustynnik", Vocation.MONK, "Qasirah", 8);
+        PlayerCharacter back = codec.decode(codec.encode(qasirah));
+        assertEquals("qasirah", back.homeTown());
+        assertEquals(world.town("Qasirah").temple(), back.position());
+        // postac mieszkajaca w miescie premium (wykupiony dom) zachowuje dom po zapisie
+        PlayerCharacter islander = factory.create("Wyspiarz", Vocation.MONK, world.templeOf("varden"));
+        islander.setHomeTown("nerys");
+        assertEquals("nerys", codec.decode(codec.encode(islander)).homeTown());
         // zapis sprzed wyboru miasta (bez linii hometown) -> varden: SaveTest
     }
 }
