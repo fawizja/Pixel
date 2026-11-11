@@ -51,6 +51,10 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.exploreRoute=x,y,z;x,y,z;...  z teleport: odkrywa mape wzdluz odcinkow trasy, jakby postac nia przeszla
  *   -Dpixel.taps=x,y@N;x,y@M  dotkniecia pol swiata w klatkach N, M (np. drzwi poziomu, potem pole za nimi)
  *   -Dpixel.spellDemo=field|gfb|poison|poison_cure|exani|summon  podglad czarow, run, pol i stanow (zrzuty 0.240)
+ *   -Dpixel.spellDemo=aim|aimthrow|aimbag|pickermode|combo|pickercombo  paski akcji jak w Tibii: celownik runy (pole 7
+ *                        paska: wielka kula ognia z celownikiem; aimthrow rzuca ja na pole -Dpixel.aimHover), "Uzyj z..."
+ *                        z plecaka, menu trybu runy (cel / siebie / celownik), pole combo i jego edycja
+ *   -Dpixel.aimHover=x,y pole pod kursorem celownika (Xvfb nie ma myszy)
  *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet(+ -Dpixel.petCard=1)|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=wheel[=id]  podglad Kola Przeznaczenia (np. wheel=wheel:q:P, wheel=wheel:perks, wheel=wheel:gems:0); -Dpixel.wheelOrder=PRBG,
  *                           -Dpixel.wheelAvatar=true, -Dpixel.wheelGems=true (klejnoty, naczynia i okruchy do podgladu)
@@ -949,7 +953,33 @@ public final class DesktopLauncher {
                 pc.skills().set(pl.fawizja.pixel.character.Skill.MAGIC, Math.max(pc.skills().level(pl.fawizja.pixel.character.Skill.MAGIC), 20), 0);
                 pc.restoreMana(pc.maxMana());
                 for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
-                if (demo.equals("field") || demo.equals("gfb")) {
+                boolean bar = demo.startsWith("aim") || demo.equals("pickermode");
+                if (bar) {
+                    // pole 7 paska: wielka kula ognia; tryb wg podgladu (menu trybu - na cel, reszta - celownik)
+                    pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(s.items().byKey("great_fireball_rune").id(), 12));
+                    gs.hud().spellBar().set(6, demo.equals("pickermode") ? "item:great_fireball_rune" : "item:great_fireball_rune:aim");
+                    gs.press("bar_saved");
+                }
+                if (demo.equals("combo") || demo.equals("pickercombo")) {
+                    // pole 1 paska: combo leczenie + atak (pierwszy gotowy czar)
+                    java.util.List<String> keys = new java.util.ArrayList<>();
+                    for (pl.fawizja.pixel.magic.SpellType sp : s.spells().knownSpells()) {
+                        if (sp.kind() == pl.fawizja.pixel.magic.SpellKind.ATTACK_TARGET && sp.range() >= 3) { // najsilniejszy atak na cel
+                            keys.clear();
+                            keys.add(sp.key());
+                        }
+                    }
+                    for (pl.fawizja.pixel.magic.SpellType sp : s.spells().knownSpells()) {
+                        if (sp.kind() == pl.fawizja.pixel.magic.SpellKind.HEAL_SELF) {
+                            if (keys.size() > 1) keys.remove(1);
+                            keys.add(sp.key());
+                        }
+                    }
+                    String combo = pl.fawizja.pixel.settings.SpellBar.combo(keys);
+                    if (combo != null) gs.hud().spellBar().set(1, combo);
+                    gs.press("bar_saved");
+                }
+                if (demo.equals("field") || demo.equals("gfb") || bar || demo.equals("combo")) {
                     pc.setInvisible(600_000); // potwory stoja w miejscu (nie widza postaci); zdjete przed zrzutem
                     String key = demo.equals("field") ? "wolf" : "boar";
                     int[][] spots = demo.equals("field") ? new int[][] {{0, -2}} : new int[][] {{0, -2}, {1, -2}, {-1, -2}, {0, -3}, {1, -3}, {-1, -3}};
@@ -978,6 +1008,41 @@ public final class DesktopLauncher {
                 s.spells().useFirst("great_fireball_rune", now);
             }
             if ((demo.equals("field") || demo.equals("gfb")) && frame == frames - 2) pc.breakInvisibility();
+            String hover = System.getProperty("pixel.aimHover");
+            if (hover != null && frame == 2) {
+                String[] w = hover.split(",");
+                gs.setAimHover(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()), me.z()));
+            }
+            if (demo.startsWith("aim") && frame == frames - 8) {
+                if (demo.equals("aimbag")) {
+                    // "Uzyj z..." z plecaka: zaznaczona runa, UZYJ wlacza celownik
+                    gs.hud().toggleBag();
+                    int rune = s.items().byKey("great_fireball_rune").id();
+                    for (int i = 0; i < pc.backpack().size(); i++) {
+                        if (pc.backpack().get(i) != null && pc.backpack().get(i).itemId() == rune) {
+                            gs.hud().selectSlot(i);
+                            break;
+                        }
+                    }
+                    gs.press("bag_use");
+                } else {
+                    gs.press("spell:6");
+                }
+            }
+            if (demo.equals("aimthrow") && frame == frames - 4 && hover != null) {
+                String[] w = hover.split(",");
+                gs.tapTile(new Position(Integer.parseInt(w[0].trim()), Integer.parseInt(w[1].trim()), me.z()));
+            }
+            if (demo.equals("pickermode") && frame == frames - 6) gs.hud().openPicker(6);
+            if (demo.equals("pickercombo") && frame == frames - 6) {
+                gs.hud().openPicker(1);
+                gs.hud().pickCategory("combo");
+            }
+            if (demo.equals("combo") && frame == frames - 6) {
+                pl.fawizja.pixel.monster.Monster m = s.monsters().monsterAt(me.translate(0, -2));
+                if (m != null) s.combat().setTarget(m);
+                gs.press("spell:1");
+            }
             if (demo.equals("poison_cure") && frame == frames - 6) {
                 gs.say(pc.name(), "exana pox");
                 s.castSpell("cure_poison", now);

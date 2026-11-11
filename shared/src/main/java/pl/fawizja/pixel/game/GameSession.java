@@ -1946,6 +1946,42 @@ public final class GameSession {
         return spells.cast(key, nowMs);
     }
 
+    /** Pole combo paska: pierwszy z czarow, ktory mozna teraz rzucic (odnowienia i grupy jak przy osobnych klawiszach). */
+    public CastResult castCombo(java.util.List<String> keys, long nowMs) {
+        return spells.castCombo(keys, nowMs);
+    }
+
+    /**
+     * Runa (albo inny przedmiot) z paska na wskazane pole: celownik albo "na siebie" (pole postaci). Pole paska
+     * z mikstura: tylko na siebie, jak zwykle uzycie.
+     */
+    public CastResult useItemAt(String itemKey, Position tile, long nowMs) {
+        if (!items.containsKey(itemKey)) return CastResult.NOT_USABLE;
+        pl.fawizja.pixel.item.ItemType t = items.byKey(itemKey);
+        if (t.category() != pl.fawizja.pixel.item.ItemCategory.RUNE) {
+            if (!tile.equals(pc.position())) {
+                log.add(nowMs, EventLog.Kind.WARNING, CastResult.NOT_USABLE.message);
+                return CastResult.NOT_USABLE;
+            }
+            return usePotion(itemKey, nowMs);
+        }
+        return spells.useFirstAt(itemKey, tile, nowMs);
+    }
+
+    /** "Uzyj z..." z plecaka: runa na pole (celownik); inny przedmiot tylko na siebie, jak UZYJ. */
+    public CastResult useSlotAt(int slot, Position tile, long nowMs) {
+        if (slot < 0 || slot >= pc.backpack().size()) return CastResult.MISSING_ITEM;
+        pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(slot);
+        if (st != null && items.get(st.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.RUNE) {
+            return spells.useItemAt(slot, tile, nowMs);
+        }
+        if (!tile.equals(pc.position())) {
+            log.add(nowMs, EventLog.Kind.WARNING, CastResult.NOT_USABLE.message);
+            return CastResult.NOT_USABLE;
+        }
+        return useSlot(slot, nowMs);
+    }
+
     /** Czar z dopiskiem: utevo res "wilk", utevo res ina "szkielet", exura sio "imie". */
     public CastResult castSpell(String key, String param, long nowMs) {
         return spells.cast(key, param, nowMs);

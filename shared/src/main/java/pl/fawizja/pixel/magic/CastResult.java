@@ -24,7 +24,9 @@ public enum CastResult {
     NO_CONDITION("Nie masz stanu, który leczy ten czar."),
     NO_ROOM("Nie ma tu miejsca."),
     TOO_MANY_SUMMONS("Nie możesz przywołać więcej stworzeń."),
-    NOT_POSSIBLE("To niemożliwe.");
+    NOT_POSSIBLE("To niemożliwe."),
+    ONLY_CREATURES("Tej runy możesz użyć tylko na stworzeniu."),
+    ONLY_SELF("Tej runy możesz użyć tylko na sobie.");
 
     public final String message;
 

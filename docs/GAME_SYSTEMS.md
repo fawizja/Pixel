@@ -524,6 +524,22 @@ Obiekt obok postaci (albo pod nia) - uzycie od razu; dalej - marsz na pole obok 
   stary zapis 4 kluczy czarow jest czytany jako czary. Klawisze 1-9 i 0.
 - Telefon: luk 5 czarow (pola 1, 2, 6, 0, 3), wewnetrzny luk 3 pol (4, 7, 5 - stare mikstury na koncach, nowe pole 7
   w srodku) i pole 8 w rogu ekranu (srodek obu lukow); kazde przyjmie czar albo miksture (przytrzymanie = wybor).
+- Paski akcji jak w Tibii 12+ (`settings/SpellBar`, `SpellSystem.useItemAt/castCombo`):
+  - Runa ma tryb: `item:klucz` na cel (domyslnie), `item:klucz:self` na siebie, `item:klucz:aim` celownik. Tryb
+    w menu pola (wiersze "Uzyj na cel / na siebie / z celownikiem", wybrany zolty), znaczek w lewym gornym rogu pola.
+  - Celownik (`GameScreen.startAim`): nastepne dotkniecie pola mapy wysyla `item:klucz:at:x:y:z`; z plecaka (UZYJ na
+    runie = "Use with...") `slot_at:pole:x:y:z`. Anulowanie: Esc, Wstecz, prawy przycisk, to samo pole paska.
+    Podglad: pola w zasiegu i wzroku runy, kursor zielony/czerwony, obszar runy obszarowej (odleglosc Czebyszewa jak
+    w obrazeniach).
+  - Zasady (jak "Use with" w Tibii): zasieg runy (7), to samo pietro, linia wzroku (poza wlasnym polem); runa na
+    stworzenie wymaga stworzenia na polu (`ONLY_CREATURES`), runa obszarowa trafia tez puste pole, runa lecznicza
+    i odtrutka tylko na siebie (`ONLY_SELF`). Celownik nie zmienia celu walki. PvP: gracz na polu jest trafiany tylko,
+    gdy jest wybranym celem-graczem.
+  - Combo `combo:a+b+c` (do 4 czarow): kazde nacisniecie rzuca pierwszy czar, ktory przechodzi pelne sprawdzenie
+    (mana, odnowienie czaru i grupy, drugie grupy, cel); nic gotowego = komunikat pierwszego czaru bez kosztu.
+    Tibia nie ma makr - jedno nacisniecie to najwyzej jeden czar. Edycja: rodzaj "Combo" w menu pola.
+  - Zapis: klucz `bar` w zapisie postaci v9 (`PlayerCharacter.actionBar`); online akcja `bar:<uklad>` do serwera,
+    pasek wraca w SELF. Dawny uklad z Preferences `pixel-bar` przenoszony raz do postaci (klucz usuwany).
 
 ## Uklad ekranu (C UI)
 
@@ -592,7 +608,7 @@ Obiekt obok postaci (albo pod nia) - uzycie od razu; dalej - marsz na pole obok 
 
 Tekstowy format z wersja i CRC32, migracja v1 -> v2, odrzucanie uszkodzonych plikow,
 zapis atomowy (tmp + fsync + kopia .bak), odczyt z kopii przy uszkodzeniu. v8: tier i nasycenia stosow oraz pyl
-Kuzni (patrz "Kuznia Wyniesienia"). Autozapis co 60 s,
+Kuzni (patrz "Kuznia Wyniesienia"). v9: uklad paska akcji (`bar`, patrz "Pasek akcji"). Autozapis co 60 s,
 przy pauzie, utracie fokusu i zamknieciu.
 
 ## Potwory i AI (Z logika, C grafika)

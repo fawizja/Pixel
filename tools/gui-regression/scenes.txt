@@ -235,3 +235,6 @@ mobile_store_outfits|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.telep
 spell_fire_field|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=field -Dpixel.frames=30
 spell_poison_cure_mobile|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=20 -Dpixel.spellDemo=poison_cure -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
 grate_tap|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=538,512,0 -Dpixel.taps=539,512@15 -Dpixel.frames=40
+bar_rune_modes|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=pickermode -Dpixel.frames=30
+bar_crosshair|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=aim -Dpixel.aimHover=525,521 -Dpixel.frames=30
+bar_combo_mobile|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=40 -Dpixel.spellDemo=pickercombo -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2

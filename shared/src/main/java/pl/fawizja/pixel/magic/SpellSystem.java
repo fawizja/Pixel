@@ -122,9 +122,83 @@ public final class SpellSystem {
 
     /** Cel-gracz, gdy brak celu-potwora (inaczej null). */
     private Position playerTargetPosition() {
-        Monster m = combat.target();
+        if (aimTile != null) return aimPlayer ? aimTile : null; // celownik: gracz tylko na wskazanym polu
+        Monster m = target();
         if (m != null && !m.isDead()) return null;
         return playerTarget == null ? null : playerTarget.position();
+    }
+
+    // ------------------------------------------------------------------ celownik run (jak "Use with..." w Tibii)
+
+    /** Pole wskazane celownikiem albo "na siebie" (null = zwykly cel), potwor na nim i czy stoi tam cel-gracz. */
+    private Position aimTile;
+    private Monster aimMonster;
+    private boolean aimPlayer;
+
+    /**
+     * Cel czaru albo runy: przy celowniku potwor na wskazanym polu (moze byc null - wtedy runa na cel odmowi),
+     * inaczej wybrany cel walki. Uzycie celownika nie zmienia celu walki (jak w Tibii).
+     */
+    Monster target() { return aimTile != null ? aimMonster : combat.target(); }
+
+    /**
+     * Runa z pola plecaka na wskazane pole (celownik) albo na siebie (pole postaci). Jak w Tibii: zasieg runy
+     * i linia wzroku do pola; runa na stworzenie (nagla smierc, paraliz...) wymaga stworzenia na tym polu, runa obszarowa
+     * moze trafic w puste pole, runa leczaca tylko na siebie. Inne przedmioty: na siebie jak zwykle uzycie.
+     */
+    public CastResult useItemAt(int slot, Position tile, long now) {
+        ItemStack st = pc.backpack().get(slot);
+        if (st == null) return report(CastResult.MISSING_ITEM, now);
+        if (tile == null) return useItem(slot, now);
+        ItemType it = items.get(st.itemId());
+        if (it.category() != ItemCategory.RUNE) {
+            if (!tile.equals(pc.position())) return report(CastResult.NOT_USABLE, now);
+            return useItem(slot, now);
+        }
+        aimTile = tile;
+        Monster on = monsters.monsterAt(tile);
+        aimMonster = on != null && !on.isDead() ? on : null;
+        aimPlayer = aimMonster == null && playerTarget != null && tile.equals(playerTarget.position());
+        try {
+            return useRune(slot, it, now);
+        } finally {
+            aimTile = null;
+            aimMonster = null;
+            aimPlayer = false;
+        }
+    }
+
+    /** Pierwsza sztuka przedmiotu z plecaka na pole (celownik) albo na siebie (pole postaci). */
+    public CastResult useFirstAt(String itemKey, Position tile, long now) {
+        if (!items.containsKey(itemKey)) return report(CastResult.NOT_USABLE, now);
+        int id = items.byKey(itemKey).id();
+        for (int i = 0; i < pc.backpack().size(); i++) {
+            ItemStack st = pc.backpack().get(i);
+            if (st != null && st.itemId() == id) return useItemAt(i, tile, now);
+        }
+        return report(CastResult.MISSING_ITEM, now);
+    }
+
+    /** Sprawdzenie celownika (zasieg, pietro, wzrok, rodzaj runy); OK, gdy celownik nie jest uzywany. */
+    private CastResult checkAim(SpellType s) {
+        if (aimTile == null) return CastResult.OK;
+        Position me = pc.position();
+        boolean self = aimTile.equals(me);
+        if (s.kind() == SpellKind.RUNE_HEAL || s.kind() == SpellKind.RUNE_CURE) return self ? CastResult.OK : CastResult.ONLY_SELF;
+        if (aimTile.z() != me.z() || me.distanceTo(aimTile) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
+        if (!self && !world.hasLineOfSight(me, aimTile)) return CastResult.NOT_VISIBLE;
+        if (s.kind().needsTarget() && s.kind() != SpellKind.RUNE_AREA) {
+            if (monsterOnly(s.kind()) ? aimMonster == null : aimMonster == null && !aimPlayer) return CastResult.ONLY_CREATURES;
+        }
+        return CastResult.OK;
+    }
+
+    /** Czy pole jest w zasiegu i polu widzenia runy (podswietlenie celownika na kliencie). */
+    public boolean aimReachable(SpellType s, Position tile) {
+        Position me = pc.position();
+        if (tile == null || tile.z() != me.z()) return false;
+        if (s.kind() == SpellKind.RUNE_HEAL || s.kind() == SpellKind.RUNE_CURE) return tile.equals(me);
+        return me.distanceTo(tile) <= Math.max(1, s.range()) && (tile.equals(me) || world.hasLineOfSight(me, tile));
     }
 
     public SpellSystem(PlayerCharacter pc, WorldMap world, ItemRegistry items, SpellRegistry spells,
@@ -304,6 +378,29 @@ public final class SpellSystem {
         return best == null ? null : best.key();
     }
 
+    /**
+     * Kilka czarow z jednego pola paska (combo): rzuca pierwszy z listy, ktory mozna rzucic teraz (profesja, poziom,
+     * mana, odnowienie czaru i jego grupy, cel w zasiegu). Jedno nacisniecie = najwyzej jeden czar, wiec odnowienia
+     * i grupy z Tibii obowiazuja jak przy osobnych klawiszach. Gdy zaden nie jest gotowy, pierwszy czar podaje powod
+     * (bez kosztow). Runy nie wchodza do combo.
+     */
+    public CastResult castCombo(List<String> keys, long now) {
+        SpellType first = null;
+        for (String k : keys) {
+            SpellType s = spells.find(k);
+            if (s == null || s.kind().isRune()) continue;
+            if (first == null) first = s;
+            if (check(s, now, true) == CastResult.OK) return cast(k, now);
+        }
+        return first == null ? report(CastResult.NOT_USABLE, now) : cast(first.key(), now);
+    }
+
+    /** Czy czar mozna rzucic teraz (bez rzucania i bez komunikatow) - podglad combo na pasku. */
+    public boolean ready(String key, long now) {
+        SpellType s = spells.find(key);
+        return s != null && !s.kind().isRune() && check(s, now, true) == CastResult.OK;
+    }
+
     public CastResult cast(String key, long now) { return cast(key, null, now); }
 
     /** Dopisek biezacego rzutu (nazwa stworzenia, imie) albo null. */
@@ -400,8 +497,10 @@ public final class SpellSystem {
         if (!cooldowns.ready(s, now) || pl.fawizja.pixel.wheel.WheelSpells.avatarCoolingDown(pc, s)) return CastResult.COOLDOWN;
         if (s.kind().isOffensive() && world.isProtectionZone(pc.position())) return CastResult.PROTECTION_ZONE;
         if (s.kind().isArea() && playerTarget != null && playerTarget.areaForbidden(now)) return CastResult.BLACK_SKULL;
-        if (s.kind().needsTarget()) {
-            Monster t = combat.target();
+        CastResult aimed = checkAim(s);
+        if (aimed != CastResult.OK) return aimed;
+        if (s.kind().needsTarget() && !(aimTile != null && s.kind() == SpellKind.RUNE_AREA)) {
+            Monster t = target();
             Position tp = t != null && !t.isDead() ? t.position() : monsterOnly(s.kind()) ? null : playerTargetPosition();
             if (tp == null || tp.z() != pc.position().z()) return CastResult.NO_TARGET;
             if (pc.position().distanceTo(tp) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
@@ -411,7 +510,7 @@ public final class SpellSystem {
         if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), area).isEmpty()
                 && !playerInArea(pc.position(), area)) return CastResult.NO_TARGET;
         if (s.kind() == SpellKind.ATTACK_WAVE && waveTargets(s).isEmpty() && !playerInWave(s)) return CastResult.NO_TARGET;
-        if (s.kind().targetsTile()) {
+        if (s.kind().targetsTile() && aimTile == null) {
             Position aim = aim(s);
             if (aim == null) return CastResult.NO_TARGET;
             if (pc.position().distanceTo(aim) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
@@ -437,10 +536,10 @@ public final class SpellSystem {
             case ATTACK_TARGET:
             case RUNE_TARGET:
                 combat.addEvent(CombatEvent.projectile(now, pc.position(),
-                        playerTargetPosition() != null ? playerTargetPosition() : combat.target().position(), s.damageType().name()));
+                        playerTargetPosition() != null ? playerTargetPosition() : target().position(), s.damageType().name()));
                 if (s.kind() == SpellKind.ATTACK_TARGET && s.radius() > 0) {
                     // Boski granat: wybuch wokol celu
-                    Position c = playerTargetPosition() != null ? playerTargetPosition() : combat.target().position();
+                    Position c = playerTargetPosition() != null ? playerTargetPosition() : target().position();
                     combat.addEvent(CombatEvent.area(now, c, s.radius(), s.damageType().name()));
                     areaStrike(c, s, now);
                     return CastResult.OK;
@@ -449,7 +548,7 @@ public final class SpellSystem {
                     boolean crit = combat.rollCritical();
                     return playerTarget.strike(critAmount(roll(s), crit), s.damageType(), crit, 1, now) ? CastResult.OK : CastResult.NOT_ALLOWED;
                 }
-                combat.damageMonster(combat.target(), pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, combat.target(), roll(s)), s.damageType(), now, combat.rollCritical(), 1);
+                combat.damageMonster(target(), pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc, s, target(), roll(s)), s.damageType(), now, combat.rollCritical(), 1);
                 return CastResult.OK;
             case ATTACK_AREA: {
                 combat.addEvent(CombatEvent.area(now, pc.position(), radius(s), s.damageType().name()));
@@ -469,7 +568,7 @@ public final class SpellSystem {
             }
             case ATTACK_BEAM: {
                 // Wielki promien smierci: pola w linii od postaci w strone celu, dlugosc = promien (+1 za stopien 2 i 3)
-                Position tp = playerTargetPosition() != null ? playerTargetPosition() : combat.target().position();
+                Position tp = playerTargetPosition() != null ? playerTargetPosition() : target().position();
                 List<Position> line = beam(pc.position(), tp, radius(s));
                 for (Position p : line) combat.addEvent(CombatEvent.area(now, p, 0, s.damageType().name()));
                 List<Monster> hit = new ArrayList<>();
@@ -521,7 +620,7 @@ public final class SpellSystem {
                 return CastResult.OK;
             case RUNE_AREA: {
                 Position pvp = playerTargetPosition();
-                Position center = pvp != null ? pvp : combat.target().position();
+                Position center = aimTile != null ? aimTile : pvp != null ? pvp : target().position();
                 combat.addEvent(CombatEvent.projectile(now, pc.position(), center, s.damageType().name()));
                 combat.addEvent(CombatEvent.area(now, center, s.radius(), s.damageType().name()));
                 areaStrike(center, s, now);
@@ -675,7 +774,8 @@ public final class SpellSystem {
 
     /** Pole celu runy na pole: wybrany cel albo pole przed postacia (bez osobnego celownika). */
     Position aim(SpellType s) {
-        Monster t = combat.target();
+        if (aimTile != null) return aimTile;
+        Monster t = target();
         if (t != null && !t.isDead() && t.position().z() == pc.position().z()) return t.position();
         Position pp = playerTargetPosition();
         if (pp != null) return pp;

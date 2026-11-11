@@ -338,7 +338,9 @@ public final class GameScreen extends ScreenAdapter {
         hud.setSettings(settings);
         // wlasny uklad paska czarow, osobno dla kazdej postaci
         this.barPrefs = Gdx.app.getPreferences("pixel-bar");
-        hud.setSpellBar(pl.fawizja.pixel.settings.SpellBar.decode(barPrefs.getString(barKey(pc), null)));
+        // pasek akcji w postaci (zapis v9; online z serwera w SELF) - dawny uklad z Preferences przenosi syncBar()
+        hud.setSpellBar(pl.fawizja.pixel.settings.SpellBar.decode(pc.actionBar()));
+        barSeen = pc.actionBar();
         this.markerPrefs = Gdx.app.getPreferences("pixel-markers");
         this.markers = pl.fawizja.pixel.settings.MapMarkers.decode(markerPrefs.getString(barKey(pc), System.getProperty("pixel.markers")));
         this.ignored = pl.fawizja.pixel.settings.IgnoreList.decode(markerPrefs.getString("ignore:" + barKey(pc), ""));
@@ -389,7 +391,13 @@ public final class GameScreen extends ScreenAdapter {
             @Override
             public boolean touchDown(int sx, int sy, int pointer, int button) {
                 if (hud.touchDown(sx, sy, pointer, session, GameScreen.this::onButton)) return true;
-                if (button == Input.Buttons.RIGHT) return lookWorld(sx, sy); // mysz: prawy przycisk = podglad pola
+                if (button == Input.Buttons.RIGHT) {
+                    if (aimAction != null) { // prawy przycisk anuluje celownik (jak w Tibii)
+                        cancelAim();
+                        return true;
+                    }
+                    return lookWorld(sx, sy); // mysz: prawy przycisk = podglad pola
+                }
                 if (worldPointer >= 0) return tapWorld(sx, sy); // drugi palec na mapie: od razu dotkniecie
                 // dotkniecie mapy rozstrzyga sie pozniej: puszczenie = dotkniecie pola, przytrzymanie = podglad,
                 // przeciagniecie = joystick pod kciukiem
@@ -518,9 +526,14 @@ public final class GameScreen extends ScreenAdapter {
                     case Input.Keys.H: openHunt(); return true;
                     case Input.Keys.U: wheelWindows.toggle(); return true;
                     case Input.Keys.ESCAPE:
-                        hud.closeTop(session);
+                        if (aimAction != null) cancelAim();
+                        else hud.closeTop(session);
                         return true;
                     case Input.Keys.BACK: {
+                        if (aimAction != null) {
+                            cancelAim();
+                            return true;
+                        }
                         // Android: Wstecz zamyka okna; gdy nic nie jest otwarte - dwa razy w ciagu 2 s wychodzi z gry
                         if (hud.closeTop(session)) return true;
                         long t = System.currentTimeMillis();
@@ -570,8 +583,7 @@ public final class GameScreen extends ScreenAdapter {
             case "fightmode": act("fightmode:" + session.character().fightMode().next().name(), t); break;
             case "diag": hud.toggleDiagnostics(); break;
             case "bar_saved":
-                barPrefs.putString(barKey(session.character()), hud.spellBar().encode());
-                barPrefs.flush();
+                storeBar(hud.spellBar().encode());
                 break;
             case "book": hud.toggleBook(); break;
             case "quest": hud.openJournal(); break;
@@ -614,10 +626,20 @@ public final class GameScreen extends ScreenAdapter {
                     net.send("TARGET", m == null ? "-" : String.valueOf(m.id()));
                 }
                 break;
-            case "bag_use":
-                act("slot_use:" + hud.selectedSlot(), t);
+            case "bag_use": {
+                // runa z plecaka: "Uzyj z..." jak w Tibii - celownik, nastepne dotkniecie pola mapy ja rzuca
+                int sel = hud.selectedSlot();
+                ItemStack st = sel >= 0 ? session.character().backpack().get(sel) : null;
+                pl.fawizja.pixel.item.ItemType it = st == null ? null : session.items().get(st.itemId());
+                if (it != null && it.category() == pl.fawizja.pixel.item.ItemCategory.RUNE && session.spells().registry().find(it.key()) != null) {
+                    hud.closeBag();
+                    startAim("slot_at:" + sel, it.key(), -1);
+                } else {
+                    act("slot_use:" + sel, t);
+                }
                 hud.clearSelection();
                 break;
+            }
             case "bag_equip":
                 act("slot_equip:" + hud.selectedSlot(), t);
                 hud.clearSelection();
@@ -761,9 +783,8 @@ public final class GameScreen extends ScreenAdapter {
                         if (net != null) net.send("TARGET", String.valueOf(m.id()));
                     }
                 } else if (id.startsWith("spell:")) {
-                    // pole paska: czar, mikstura albo runa - akcja gotowa do wyslania
-                    String entry = hud.barEntry(Integer.parseInt(id.substring(6)));
-                    if (entry != null) act(entry, t);
+                    // pole paska: czar, combo, mikstura albo runa (na cel / na siebie / celownik)
+                    useBarSlot(Integer.parseInt(id.substring(6)), t);
                 } else {
                     // use, run, torch, pick, fish, potion_*, cast:, craft:, slot_move:, npc:*
                     act(id, t);
@@ -1085,6 +1106,7 @@ public final class GameScreen extends ScreenAdapter {
     /** Dotkniecie pola swiata (desktop: -Dpixel.tap=x,y). */
     public boolean tapTile(Position p) {
         if (sleepBed != null) return true;                      // postac juz spi
+        if (aimAction != null) return aimAt(p);                 // celownik runy: to pole jest celem
         if (p.z() == session.character().position().z() && session.refuseBed(p, now())) return true;
         if (net != null) {
             for (Map.Entry<Integer, RemotePlayer> e : remotePlayers.entrySet()) {
@@ -1615,6 +1637,180 @@ public final class GameScreen extends ScreenAdapter {
         return best;
     }
 
+    // ------------------------------------------------------------------ pasek akcji: celownik, combo, zapis
+
+    /** Celownik runy: akcja bez pola ("item:klucz:at" z paska albo "slot_at:N" z plecaka) albo null. */
+    private String aimAction;
+    /** Efekt runy celownika (zasieg, promien do podgladu) i pole paska, ktore go wlaczylo (-1 = plecak). */
+    private pl.fawizja.pixel.magic.SpellType aimRune;
+    private int aimSlot = -1;
+    /** Pola w zasiegu i polu widzenia runy (podglad celownika), liczone dla pozycji aimFrom. */
+    private final java.util.Set<Position> aimReach = new java.util.HashSet<>();
+    private Position aimFrom;
+    /** Zrzuty ekranu: pole pod kursorem celownika (-Dpixel.aimHover=x,y), bo Xvfb nie ma myszy. */
+    private Position aimHoverOverride;
+
+    /** Pole paska: czar, combo, mikstura albo runa wg trybu (celownik czeka na dotkniecie pola mapy). */
+    private void useBarSlot(int slot, long t) {
+        String entry = hud.barEntry(slot);
+        if (entry == null) return;
+        if (aimAction != null && aimSlot == slot) { // drugie nacisniecie tego samego pola anuluje celownik
+            cancelAim();
+            return;
+        }
+        if (entry.startsWith("item:") && pl.fawizja.pixel.settings.SpellBar.MODE_AIM.equals(pl.fawizja.pixel.settings.SpellBar.mode(entry))) {
+            String key = pl.fawizja.pixel.settings.SpellBar.base(entry).substring(5);
+            if (!session.items().containsKey(key)) return;
+            if (session.character().backpack().count(session.items().byKey(key).id()) == 0) {
+                session.log().add(t, EventLog.Kind.WARNING, "Nie masz w plecaku: " + session.items().byKey(key).name() + ".");
+                return;
+            }
+            startAim("item:" + key + ":at", key, slot);
+            return;
+        }
+        if (aimAction != null) cancelAim();
+        act(entry, t);
+    }
+
+    /** Wlacza celownik runy (jak "Use with..." w Tibii): nastepne dotkniecie pola mapy uzyje jej na tym polu. */
+    public void startAim(String action, String runeKey, int slot) {
+        pl.fawizja.pixel.magic.SpellType sp = session.spells().registry().find(runeKey);
+        if (sp == null || !session.items().containsKey(runeKey)) return;
+        aimAction = action;
+        aimRune = sp;
+        aimSlot = slot;
+        aimFrom = null;
+        boolean phone = hud.mobile();
+        hud.setAim("Celownik: " + session.items().byKey(runeKey).name() + " - " + (phone ? "dotknij pola" : "kliknij pole")
+                + " (anuluj: " + (phone ? "Wstecz" : "Esc") + (slot >= 0 ? " albo to samo pole paska" : "") + ")", slot);
+    }
+
+    public void cancelAim() {
+        aimAction = null;
+        aimRune = null;
+        aimSlot = -1;
+        hud.setAim(null, -1);
+    }
+
+    public boolean aiming() { return aimAction != null; }
+
+    /** Uzycie runy z celownika na polu p (zasieg i wzrok sprawdza sesja, offline i na serwerze). */
+    private boolean aimAt(Position p) {
+        String a = aimAction + ":" + p.x() + ":" + p.y() + ":" + p.z();
+        boolean ok = session.spells().aimReachable(aimRune, p);
+        cancelAim();
+        act(a, now());
+        tapPulse(p, !ok);
+        return true;
+    }
+
+    /** Pole pod kursorem myszy dla celownika (telefon: brak - nie ma najechania). */
+    private Position aimHover() {
+        if (aimHoverOverride != null) return aimHoverOverride;
+        if (hud.mobile() || Gdx.app.getType() == Application.ApplicationType.Android) return null;
+        return worldTile(Gdx.input.getX(), Gdx.input.getY());
+    }
+
+    public void setAimHover(Position p) { aimHoverOverride = p; }
+
+    /**
+     * Podglad celownika w rzedzie mapy: lekko rozjasnione pola w zasiegu runy, pod kursorem ramka z krzyzem (zielona
+     * w zasiegu, czerwona poza) i obszar runy obszarowej (np. promien 3 wielkiej kuli ognia).
+     */
+    private void drawAim(SpriteBatch b, int row, int z) {
+        if (aimAction == null || aimRune == null) return;
+        Position me = session.character().position();
+        if (!me.equals(aimFrom)) {
+            aimFrom = me;
+            aimReach.clear();
+            int r = Math.max(1, aimRune.range());
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    Position p = me.translate(dx, dy);
+                    if (session.spells().aimReachable(aimRune, p)) aimReach.add(p);
+                }
+            }
+        }
+        TextureRegion w = game.art().white();
+        float wy = worldRenderer.worldY(row);
+        for (Position p : aimReach) {
+            if (p.y() != row || p.z() != z) continue;
+            b.setColor(1f, 1f, 1f, 0.1f);
+            b.draw(w, p.x(), wy, 1f, 1f);
+        }
+        Position h = aimHover();
+        if (h == null || h.z() != z) {
+            b.setColor(Color.WHITE);
+            return;
+        }
+        boolean ok = aimReach.contains(h);
+        int rad = aimRune.kind() == pl.fawizja.pixel.magic.SpellKind.RUNE_AREA ? aimRune.radius() : 0;
+        if (ok && rad > 0 && Math.abs(row - h.y()) <= rad) {
+            for (int x = h.x() - rad; x <= h.x() + rad; x++) {
+                Position p = new Position(x, row, z);
+                if (h.distanceTo(p) > rad) continue;
+                b.setColor(1f, 0.55f, 0.15f, 0.22f);
+                b.draw(w, x, wy, 1f, 1f);
+            }
+        }
+        if (row == h.y()) {
+            float t = 0.07f, x = h.x();
+            if (ok) b.setColor(0.45f, 1f, 0.45f, 0.95f);
+            else b.setColor(1f, 0.3f, 0.25f, 0.95f);
+            b.draw(w, x, wy, 1f, t);
+            b.draw(w, x, wy + 1f - t, 1f, t);
+            b.draw(w, x, wy, t, 1f);
+            b.draw(w, x + 1f - t, wy, t, 1f);
+            // krzyz celownika
+            b.draw(w, x + 0.5f - t / 2f, wy + 0.18f, t, 0.24f);
+            b.draw(w, x + 0.5f - t / 2f, wy + 0.58f, t, 0.24f);
+            b.draw(w, x + 0.18f, wy + 0.5f - t / 2f, 0.24f, t);
+            b.draw(w, x + 0.58f, wy + 0.5f - t / 2f, 0.24f, t);
+        }
+        b.setColor(Color.WHITE);
+    }
+
+    /** Uklad paska widziany ostatnio w postaci (zmiana z serwera albo zapisu odswieza pasek w HUD). */
+    private String barSeen;
+    /** Chwila wlasnej zmiany paska (przez 2 s stary SELF z serwera jej nie cofa) i czy przeniesiono stary uklad. */
+    private long barEditedMs = Long.MIN_VALUE / 2;
+    private boolean barMigrated;
+
+    /**
+     * Co klatke: jednorazowo przenosi dawny uklad paska z Preferences "pixel-bar" do postaci (zapis v9; online po
+     * pierwszym SELF i wysyla go na serwer), potem pilnuje, by HUD pokazywal pasek zapisany w postaci.
+     */
+    private void syncBar() {
+        PlayerCharacter pc = session.character();
+        if (!barMigrated && (net == null || lastSelf != null)) {
+            barMigrated = true;
+            String legacy = barPrefs.getString(barKey(pc), null);
+            if (legacy != null) {
+                pl.fawizja.pixel.settings.SpellBar old = pl.fawizja.pixel.settings.SpellBar.decode(legacy);
+                if (pc.actionBar().isEmpty() && old.isCustom()) {
+                    storeBar(old.encode());
+                    hud.setSpellBar(old);
+                }
+                barPrefs.remove(barKey(pc));
+                barPrefs.flush();
+            }
+        }
+        String cur = pc.actionBar();
+        if (!cur.equals(barSeen) && TimeUtils.millis() - barEditedMs > 2000) {
+            barSeen = cur;
+            hud.setSpellBar(pl.fawizja.pixel.settings.SpellBar.decode(cur));
+        }
+    }
+
+    /** Zapis ukladu paska w postaci (offline: plik zapisu przy autozapisie; online: akcja "bar:" do serwera). */
+    private void storeBar(String encoded) {
+        session.character().setActionBar(encoded);
+        barSeen = session.character().actionBar();
+        barEditedMs = TimeUtils.millis();
+        if (net != null) net.send("ACT", "bar:" + barSeen);
+        else game.saveCharacter(session.character());
+    }
+
     /** Rozbłysk kropki na dotknietym polu (blocked: nie ma tam drogi). */
     private void tapPulse(Position p, boolean blocked) {
         tapMarker.pulse(p, blocked, uiMs());
@@ -1838,6 +2034,7 @@ public final class GameScreen extends ScreenAdapter {
             // mgla mapy online: klient odkrywa sam z pozycji (serwer liczy to samo i zapisuje)
             session.character().explored().revealView(session.character().position());
         }
+        syncBar();
         final long t = now();
         if (net == null) session.update(t, dir);
         if (net == null && sleepBed == null) {
@@ -1907,6 +2104,7 @@ public final class GameScreen extends ScreenAdapter {
             drawChests(b, row, z);
             footprints.drawRow(b, game.art().white(), worldRenderer, row, z, t);
             tapMarker.drawRow(b, worldRenderer, row, z, uiMs(), walkGoal());
+            drawAim(b, row, z);
             shopDisplays.drawRow(b, game.art(), worldRenderer, row, z);
             for (int i = 0; i < visibleMonsters.size(); i++) {
                 Monster m = visibleMonsters.get(i);

@@ -1,5 +1,27 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Runy na pasku akcji mają tryb użycia jak w Tibii: na cel, na siebie albo z celownikiem. Tryb zmieniasz w menu pola
+  (przytrzymaj pole paska). Runa obszarowa domyślnie leci w cel. Mały znaczek w rogu pola pokazuje wybrany tryb.
+- Celownik: naciśnij pole z runą, a potem dotknij albo kliknij pole na mapie, i runa poleci właśnie tam. Wielka kula
+  ognia może trafić puste pole obok stada, a cel walki się nie zmienia. Pola w zasięgu runy są lekko podświetlone.
+  Na komputerze kursor pokazuje zielone pole (w zasięgu) albo czerwone, a przy runie obszarowej także jej obszar.
+  Celownik anulujesz klawiszem Esc, przyciskiem Wstecz, prawym przyciskiem myszy albo tym samym polem paska.
+  Zasięg runy to 7 pól, a pole musi być w zasięgu wzroku, jak w Tibii.
+- Runa w plecaku ma "Użyj z...": po UŻYJ plecak się zamyka i włącza się celownik.
+- Combo: jedno pole paska może trzymać do 4 czarów, np. atak i leczenie. Każde naciśnięcie rzuca pierwszy czar,
+  którego można teraz użyć. Jedno naciśnięcie to zawsze najwyżej jeden czar, więc czasy odnowienia i grupy z Tibii
+  działają jak przy osobnych klawiszach. Pole combo pokazuje czar, który poleci teraz, i żółte kropki (ile czarów
+  ma combo).
+
+### Zmieniono
+- Układ paska akcji zapisuje się w postaci (zapis w wersji 9), a nie tylko na urządzeniu. W grze online trafia na
+  serwer, więc wraca na każdym urządzeniu. Dawny układ z urządzenia przenosi się sam przy pierwszym wejściu do gry.
+- Runa na stworzenie (np. nagła śmierć) użyta celownikiem na puste pole mówi "Tej runy możesz użyć tylko na
+  stworzeniu.", a runa lecząca na cudze pole: "Tej runy możesz użyć tylko na sobie." Nieudana próba nic nie zużywa.
+
 ## [0.243.0] - 2026-11-11
 
 ### Dodano

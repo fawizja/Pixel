@@ -519,6 +519,20 @@ public final class Hud {
     private final HudButton[] spellButtons = new HudButton[pl.fawizja.pixel.settings.SpellBar.SLOTS];
     /** Akcja kazdego pola ("cast:...", "item:...", "potion_hp"...) albo null dla pustego. */
     private final String[] barEntries = new String[pl.fawizja.pixel.settings.SpellBar.SLOTS];
+    /**
+     * Pelna akcja pola (runa z trybem "item:klucz:self|aim", combo "combo:a+b"); {@link #barEntries} trzyma to, co pole
+     * pokazuje (sama runa, czar combo gotowy teraz do rzucenia).
+     */
+    private final String[] barActions = new String[pl.fawizja.pixel.settings.SpellBar.SLOTS];
+    /** Pole trzyma runa (ma tryb uzycia: cel / siebie / celownik). */
+    private final boolean[] barRune = new boolean[pl.fawizja.pixel.settings.SpellBar.SLOTS];
+    /** Edytowane combo w wyborze akcji (rodzaj "combo"): klucze czarow w kolejnosci. */
+    private final List<String> comboDraft = new ArrayList<>();
+    /** Celownik runy: opis u gory widoku gry (null = nieaktywny) i pole paska, ktore go wlaczylo (-1 = plecak). */
+    private String aimHint;
+    private int aimSlot = -1;
+    /** Czas do podgladu combo (ktory czar jest gotowy) - z renderHud. */
+    private long barNowMs;
     /** Dlugie przytrzymanie pola paska otwiera wybor akcji; krotkie dotkniecie uzywa jej po puszczeniu. */
     private static final long LONG_PRESS_MS = 450;
     private int pressSlot = -1, pressPointer = -1;
@@ -1479,6 +1493,13 @@ public final class Hud {
         return joystick.floatAt(p.x, p.y, pointer);
     }
     public boolean bagOpen() { return bagOpen || mobile && mWin == MobileWin.BAG; }
+    /** Zamyka plecak (desktop i telefon) - "Uzyj z..." odslania mape dla celownika. */
+    public void closeBag() {
+        bagOpen = false;
+        selectedSlot = -1;
+        if (mobile && mWin == MobileWin.BAG) mWin = null;
+    }
+
     public void toggleBag() {
         if (mobile) {
             openMobileWin(MobileWin.BAG);
@@ -1798,7 +1819,16 @@ public final class Hud {
 
     /** Klucz czaru na pasku (0..3) albo null. */
     /** Akcja pola paska (do wyslania jak przycisk) albo null dla pustego pola. */
-    public String barEntry(int i) { return i >= 0 && i < barEntries.length ? barEntries[i] : null; }
+    /** Akcja pola paska do wykonania (z trybem runy albo combo) albo null dla pustego pola. */
+    public String barEntry(int i) { return i >= 0 && i < barActions.length ? barActions[i] : null; }
+
+    /** Celownik runy: opis u gory widoku gry i podswietlone pole paska (slot -1 = z plecaka); null wylacza. */
+    public void setAim(String hint, int slot) {
+        aimHint = hint;
+        aimSlot = hint == null ? -1 : slot;
+    }
+
+    public boolean aiming() { return aimHint != null; }
 
     /**
      * Automatyczny pasek: najlepsze leczenie, najlepszy atak na cel, atak obszarowy (lub drugi atak),
@@ -1870,17 +1900,40 @@ public final class Hud {
             b.icon = null;
             b.labelBottom = false;
             barEntries[i] = null;
-            if (e != null && e.startsWith("cast:")) {
+            barActions[i] = null;
+            barRune[i] = false;
+            if (e != null && e.startsWith("combo:")) {
+                // combo: pole pokazuje czar, ktory poleci przy nastepnym nacisnieciu (pierwszy gotowy)
+                java.util.List<String> keys = pl.fawizja.pixel.settings.SpellBar.comboSpells(e);
+                String now = keys.get(0);
+                for (String k : keys) {
+                    if (session.spells().ready(k, barNowMs)) {
+                        now = k;
+                        break;
+                    }
+                }
+                SpellType sp = session.spells().registry().find(now);
+                if (sp != null) {
+                    barEntries[i] = "cast:" + now;
+                    barActions[i] = e;
+                    b.label = shortName(sp.name());
+                    b.labelBottom = true;
+                }
+            } else if (e != null && e.startsWith("cast:")) {
                 SpellType sp = session.spells().registry().find(e.substring(5));
                 if (sp != null) {
                     barEntries[i] = e;
+                    barActions[i] = e;
                     b.label = shortName(sp.name());
                     b.labelBottom = true;
                 }
             } else if (e != null) {
-                String key = e.equals("potion_hp") ? session.quickPotion(false) : e.equals("potion_mp") ? session.quickPotion(true) : e.substring(5);
+                String shown = pl.fawizja.pixel.settings.SpellBar.base(e);
+                String key = e.equals("potion_hp") ? session.quickPotion(false) : e.equals("potion_mp") ? session.quickPotion(true) : shown.substring(5);
                 if (session.items().containsKey(key)) {
-                    barEntries[i] = e;
+                    barEntries[i] = shown;
+                    barActions[i] = e;
+                    barRune[i] = session.items().byKey(key).category() == pl.fawizja.pixel.item.ItemCategory.RUNE;
                     b.icon = itemIcon(session, key);
                     b.label = String.valueOf(pc.backpack().count(session.items().byKey(key).id()));
                 }
@@ -2083,7 +2136,14 @@ public final class Hud {
     }
 
     /** Rodzaj w otwartym wyborze akcji (heal, attack, potion, rune, support). */
-    public void pickCategory(String cat) { if (pickSlot >= 0) pickCat = cat; }
+    public void pickCategory(String cat) {
+        if (pickSlot < 0) return;
+        pickCat = cat;
+        if ("combo".equals(cat)) {
+            comboDraft.clear();
+            comboDraft.addAll(pl.fawizja.pixel.settings.SpellBar.comboSpells(barActions[pickSlot]));
+        }
+    }
 
     private static String pickTitle(String cat) {
         switch (cat) {
@@ -2091,6 +2151,7 @@ public final class Hud {
             case "attack": return "czar atakujący";
             case "support": return "inny czar";
             case "potion": return "mikstura";
+            case "combo": return "combo - dotknij czarów po kolei";
             default: return "runa";
         }
     }
@@ -2098,6 +2159,11 @@ public final class Hud {
     private void pickRow(String a, GameSession session, Actions actions) {
         if (a.startsWith("cat:")) {
             pickCat = a.substring(4);
+            mPickPage = 0;
+            if (pickCat.equals("combo")) {
+                comboDraft.clear();
+                comboDraft.addAll(pl.fawizja.pixel.settings.SpellBar.comboSpells(barActions[pickSlot]));
+            }
             return;
         }
         if (a.equals("back")) {
@@ -2105,6 +2171,25 @@ public final class Hud {
             return;
         }
         if (a.equals("none")) return; // wiersz tylko informuje
+        if (a.startsWith("combo:")) {
+            // combo: dotkniecie dodaje czar na koniec albo go usuwa (najwyzej COMBO_MAX)
+            String k = a.substring(6);
+            if (!comboDraft.remove(k) && comboDraft.size() < pl.fawizja.pixel.settings.SpellBar.COMBO_MAX) comboDraft.add(k);
+            return;
+        }
+        if (a.equals("combo_clear")) {
+            comboDraft.clear();
+            return;
+        }
+        if (a.equals("combo_save")) {
+            String c = pl.fawizja.pixel.settings.SpellBar.combo(comboDraft);
+            if (c == null) return;
+            a = "set:" + c;
+        }
+        if (a.startsWith("mode:")) {
+            // tryb runy w polu: ta sama runa, inny sposob uzycia
+            a = "set:" + pl.fawizja.pixel.settings.SpellBar.withMode(barActions[pickSlot], a.substring(5));
+        }
         if (a.equals("page")) {
             mPickPage++; // telefon: nastepna strona wyboru (po ostatniej od poczatku)
             return;
@@ -2125,18 +2210,87 @@ public final class Hud {
         pickCat = null;
     }
 
+    /** Klucz runy w polu wybieranym teraz albo null (pole bez runy). */
+    private String pickRune(GameSession session) {
+        String e = pickSlot >= 0 ? barActions[pickSlot] : null;
+        if (e == null || !e.startsWith("item:")) return null;
+        String key = pl.fawizja.pixel.settings.SpellBar.base(e).substring(5);
+        if (!session.items().containsKey(key)) return null;
+        return session.items().byKey(key).category() == pl.fawizja.pixel.item.ItemCategory.RUNE ? key : null;
+    }
+
+    /**
+     * Wiersze trybu runy (jak menu pola paska akcji w Tibii 12+): na cel (domyslnie), na siebie, celownik.
+     * Wybrany tryb jest podswietlony; puste, gdy w polu nie ma runy.
+     */
+    private List<MenuRow> modeRows(GameSession session) {
+        List<MenuRow> rows = new ArrayList<>();
+        String rune = pickRune(session);
+        if (rune == null) return rows;
+        String mode = pl.fawizja.pixel.settings.SpellBar.mode(barActions[pickSlot]);
+        String name = session.items().byKey(rune).name();
+        String[][] modes = {
+                {pl.fawizja.pixel.settings.SpellBar.MODE_TARGET, "Użyj na cel", "w wybrany cel"},
+                {pl.fawizja.pixel.settings.SpellBar.MODE_SELF, "Użyj na siebie", "na własne pole"},
+                {pl.fawizja.pixel.settings.SpellBar.MODE_AIM, "Użyj z celownikiem", "wskaż pole na mapie"}};
+        for (String[] m : modes) {
+            MenuRow r = new MenuRow("pick:mode:" + m[0], m[1], (m[0].equals(mode) ? "wybrane: " : "") + m[2]
+                    + (mobile ? "" : " (" + name + ")"), true);
+            r.selected = m[0].equals(mode);
+            rows.add(r);
+        }
+        return rows;
+    }
+
+    /** Wiersze edycji combo: znane czary (numer kolejnosci przy wybranych), zapis i wyczyszczenie. */
+    private List<MenuRow> comboRows(GameSession session) {
+        List<MenuRow> rows = new ArrayList<>();
+        String draft = comboDraft.isEmpty() ? "dotknij czarów w kolejności" : comboLabel(session, comboDraft);
+        rows.add(new MenuRow(comboDraft.isEmpty() ? "pick:none" : "pick:combo_save", "Zapisz combo", draft, !comboDraft.isEmpty()));
+        // czary combo na poczatku (w kolejnosci), potem pozostale znane
+        List<SpellType> spells = new ArrayList<>();
+        for (String k : comboDraft) if (session.spells().registry().find(k) != null) spells.add(session.spells().registry().find(k));
+        for (SpellType sp : session.spells().knownSpells()) if (!comboDraft.contains(sp.key())) spells.add(sp);
+        for (SpellType sp : spells) {
+            if (sp.kind() == pl.fawizja.pixel.magic.SpellKind.CONJURE) continue;
+            int at = comboDraft.indexOf(sp.key());
+            MenuRow r = new MenuRow("pick:combo:" + sp.key(), (at >= 0 ? (at + 1) + ". " : "") + sp.name(),
+                    sp.mana() + " many, odnowienie " + (sp.cooldownMs() / 1000.0 + " s").replace(".0 s", " s").replace('.', ','), true);
+            r.selected = at >= 0;
+            rows.add(r);
+        }
+        if (!comboDraft.isEmpty()) rows.add(new MenuRow("pick:combo_clear", "Wyczyść combo", "zacznij od nowa", true));
+        return rows;
+    }
+
+    /** "Uleczenie > Uderzenie energii" - kolejnosc czarow combo. */
+    private static String comboLabel(GameSession session, List<String> keys) {
+        StringBuilder b = new StringBuilder();
+        for (String k : keys) {
+            SpellType sp = session.spells().registry().find(k);
+            if (b.length() > 0) b.append(" > ");
+            b.append(sp == null ? k : shortName(sp.name()));
+        }
+        return b.toString();
+    }
+
     private void rebuildPickMenu(GameSession session) {
         PlayerCharacter pc = session.character();
         List<MenuRow> rows = new ArrayList<>();
         if (pickCat == null) {
+            // runa w polu: tryb uzycia jak w Tibii (na cel / na siebie / celownik)
+            rows.addAll(modeRows(session));
             rows.add(new MenuRow("pick:cat:heal", "Czar leczący", "leczenie siebie", true));
             rows.add(new MenuRow("pick:cat:attack", "Czar atakujący", "na cel albo obszarowy", true));
             rows.add(new MenuRow("pick:cat:potion", "Mikstura", "zdrowie albo mana z plecaka", true));
             rows.add(new MenuRow("pick:cat:rune", "Runa", "z plecaka, bez many", true));
             rows.add(new MenuRow("pick:cat:support", "Inny czar", "światło, tworzenie run i strzał", true));
+            rows.add(new MenuRow("pick:cat:combo", "Combo (kilka czarów)", "jeden przycisk: pierwszy gotowy czar", true));
             rows.add(new MenuRow("pick:auto", "Automat", "gra sama dobiera akcję pola", true));
             rows.add(new MenuRow("pick:clear", "Wyczyść pole", "pole zostaje puste", true));
             rows.add(new MenuRow("pick:book", "Księga czarów", "wszystkie czary i rzemiosło (klawisz K)", true));
+        } else if (pickCat.equals("combo")) {
+            rows.addAll(comboRows(session));
         } else if (pickCat.equals("potion") || pickCat.equals("rune")) {
             boolean potion = pickCat.equals("potion");
             if (potion) {
@@ -3496,6 +3650,7 @@ public final class Hud {
         font.setUseIntegerPositions(uiScale == 1f);
         try {
             renderHud(batch, shapes, session, clock, serverTimeMs, diagInfo);
+            if (aimHint != null) drawAimBanner(batch, shapes);
         } finally {
             font.setUseIntegerPositions(intPos);
         }
@@ -3545,6 +3700,7 @@ public final class Hud {
             menuOpen = false;
             npcMode = false;
         }
+        barNowMs = serverTimeMs;
         // pasek akcji (czary, mikstury, liczniki) co 150 ms, nie co klatke: przeglad czarow i plecaka kosztuje
         long barNow = com.badlogic.gdx.utils.TimeUtils.millis();
         if (barNow - barUpdatedMs >= BAR_REFRESH_MS || barNow < barUpdatedMs) {
@@ -3700,6 +3856,18 @@ public final class Hud {
                 shapes.rect(b.x - in, b.y - in, in * 2, in * 2);
             }
         }
+        for (int i = 0; i < spellButtons.length; i++) {
+            HudButton b = spellButtons[i];
+            if (!b.visible) continue;
+            // combo: tyle zoltych kropek w rogu, ile czarow (pole pokazuje czar gotowy teraz)
+            int n = pl.fawizja.pixel.settings.SpellBar.comboSpells(barActions[i]).size();
+            for (int k = 0; k < n; k++) {
+                shapes.setColor(0.1f, 0.08f, 0.05f, 0.9f);
+                shapes.rect(b.x + b.hw - 9 - k * 7, b.y + b.r - 9, 6, 6);
+                shapes.setColor(1f, 0.85f, 0.25f, 1f);
+                shapes.rect(b.x + b.hw - 8 - k * 7, b.y + b.r - 8, 4, 4);
+            }
+        }
         // mikstury i runy: ta sama opadajaca zaslona odnowienia
         java.util.Arrays.fill(itemCd, 0f);
         for (int i = 0; i < spellButtons.length; i++) {
@@ -3779,6 +3947,10 @@ public final class Hud {
                         continue;
                     }
                     if (row.info) continue;
+                    if (row.selected) { // wybrany tryb runy, czar w combo
+                        zQ(b -> zSkin.button(b, ZidaneSkin.Btn.YELLOW, row.x, row.y, row.w, row.h));
+                        continue;
+                    }
                     ZidaneSkin.Btn c = row.action.equals("logout:yes") ? ZidaneSkin.Btn.RED : row.enabled ? ZidaneSkin.Btn.GREEN : ZidaneSkin.Btn.DISABLED;
                     zQ(b -> zSkin.listButton(b, c, row.x, row.y, row.w, row.h));
                     continue;
@@ -3789,7 +3961,7 @@ public final class Hud {
                     continue;
                 }
                 if (row.info) continue;
-                shapes.setColor(row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
+                shapes.setColor(row.selected ? new Color(0.55f, 0.45f, 0.18f, 1f) : row.enabled ? new Color(0.22f, 0.3f, 0.25f, 1f) : new Color(0.2f, 0.18f, 0.18f, 1f));
                 shapes.rect(row.x, row.y, row.w, row.h);
             }
             if (zid()) {
@@ -3866,6 +4038,9 @@ public final class Hud {
                 // pole paska z mikstura albo runa: duza ikona, liczba sztuk w prawym dolnym rogu
                 float is = zid() ? b.r * 2f - 2 * slotPad(b.r * 2f) : wstSlot != null ? b.r * 2f * 16f / 22f : b.r * 1.7f;
                 batch.draw(b.icon, b.x - is / 2f, b.y - is / 2f, is, is);
+                int bs = Integer.parseInt(b.id.substring(6));
+                modeBadge(batch, bs, b.x - b.hw + 3, b.y + b.r - 3, Math.max(9f, b.r * 0.62f));
+
                 float cd = itemCd[Integer.parseInt(b.id.substring(6))];
                 if (cd > 0) {
                     float in = b.r - 3;
@@ -6309,6 +6484,16 @@ public final class Hud {
         pl.fawizja.pixel.magic.SpellRegistry reg = session.spells().registry();
         int magic = pc.skills().level(Skill.MAGIC);
         List<MenuRow> ok = new ArrayList<>(), locked = new ArrayList<>();
+        if ("combo".equals(pickCat)) {
+            // edycja combo: czary po kolei, zapis, wstecz
+            ok.addAll(comboRows(session));
+            ok.add(new MenuRow("pick:back", "Wstecz", "", true));
+            layoutMobilePick(ok);
+            return;
+        }
+        // runa w polu: trzy tryby uzycia na poczatku listy, potem combo
+        ok.addAll(modeRows(session));
+        ok.add(new MenuRow("pick:cat:combo", "Combo czarów", "kilka czarów, 1 przycisk", true));
         for (SpellType sp : reg.forVocation(pc.vocation())) {
             boolean lv = pc.level() >= sp.minLevel(), mg = magic >= sp.minMagic();
             if (lv && mg) ok.add(new MenuRow("pick:set:cast:" + sp.key(), sp.name(), "poziom " + sp.minLevel(), true));
@@ -6341,6 +6526,11 @@ public final class Hud {
         ok.add(new MenuRow("pick:set:potion_mp", "Najlepsza mikstura many", "z plecaka", true));
         List<MenuRow> all = new ArrayList<>(ok);
         all.addAll(locked);
+        layoutMobilePick(all);
+    }
+
+    /** Wiersze wyboru na telefonie: dwie kolumny, stronami (ostatni wiersz strony to "Dalej"). */
+    private void layoutMobilePick(List<MenuRow> all) {
         HudLayout.Rect pr = new HudLayout.Rect();
         pr.set(menuX, menuY, menuW, menuH);
         int per = mlay.pickerRows(pr) * 2;
@@ -6906,7 +7096,11 @@ public final class Hud {
             if (zid()) {
                 // wiersze menu jako przyciski z paczki (wybrany jasniejszy, niedostepny szary, wylogowanie czerwone)
                 for (MenuRow row : menuRows) {
-                    boolean sel = cur != null && row.action.equals("pick:set:" + cur);
+                    boolean sel = cur != null && row.action.equals("pick:set:" + cur) || row.selected && !row.tab;
+                    if (row.selected && !row.tab && pickSlot >= 0) { // wybrany tryb runy, czar w combo
+                        zQ(b -> zSkin.button(b, ZidaneSkin.Btn.YELLOW, row.x, row.y, row.w, row.h));
+                        continue;
+                    }
                     if (row.tab && row.selected) {
                         zQ(b -> zSkin.button(b, ZidaneSkin.Btn.YELLOW, row.x, row.y, row.w, row.h));
                         continue;
@@ -7011,6 +7205,75 @@ public final class Hud {
         return null;
     }
 
+    /**
+     * Znaczek trybu runy w rogu pola (jak na paskach akcji Tibii 12+): czerwony cel = na cel, zielona postac = na siebie,
+     * bialy celownik = celownik. Rysowany w batchu (nad ikona); (x, y) = lewy gorny rog, sz = bok.
+     */
+    private void modeBadge(SpriteBatch b, int slot, float x, float y, float sz) {
+        String e = slot >= 0 && slot < barActions.length ? barActions[slot] : null;
+        if (e == null || !barRune[slot]) return;
+        String mode = pl.fawizja.pixel.settings.SpellBar.mode(e);
+        TextureRegion w = art.white();
+        float t = Math.max(1.5f, sz / 7f), cx = x + sz / 2f, cy = y - sz / 2f;
+        b.setColor(0.06f, 0.05f, 0.04f, 0.85f);
+        b.draw(w, x, y - sz, sz, sz);
+        if (pl.fawizja.pixel.settings.SpellBar.MODE_AIM.equals(mode)) {
+            b.setColor(1f, 1f, 1f, 1f);
+            float arm = sz * 0.36f, gap = sz * 0.12f;
+            b.draw(w, cx - t / 2f, cy + gap, t, arm - gap);
+            b.draw(w, cx - t / 2f, cy - arm, t, arm - gap);
+            b.draw(w, cx + gap, cy - t / 2f, arm - gap, t);
+            b.draw(w, cx - arm, cy - t / 2f, arm - gap, t);
+            b.setColor(1f, 0.3f, 0.25f, 1f);
+            b.draw(w, cx - t / 2f, cy - t / 2f, t, t);
+        } else if (pl.fawizja.pixel.settings.SpellBar.MODE_SELF.equals(mode)) {
+            // glowa i tulow
+            b.setColor(0.45f, 0.95f, 0.45f, 1f);
+            float hd = sz * 0.26f;
+            b.draw(w, cx - hd / 2f, cy + sz * 0.06f, hd, hd);
+            b.draw(w, cx - sz * 0.22f, cy - sz * 0.34f, sz * 0.44f, sz * 0.32f);
+        } else {
+            // tarcza strzelnicza: czerwona ramka i srodek
+            b.setColor(1f, 0.3f, 0.25f, 1f);
+            float o = sz * 0.3f;
+            b.draw(w, cx - o, cy + o - t, 2 * o, t);
+            b.draw(w, cx - o, cy - o, 2 * o, t);
+            b.draw(w, cx - o, cy - o, t, 2 * o);
+            b.draw(w, cx + o - t, cy - o, t, 2 * o);
+            b.draw(w, cx - t, cy - t, 2 * t, 2 * t);
+        }
+        b.setColor(Color.WHITE);
+    }
+
+
+    /** Pasek celownika u gory widoku gry: co rzucamy i jak anulowac. */
+    private void drawAimBanner(SpriteBatch batch, ShapeRenderer shapes) {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        shapes.setProjectionMatrix(viewport.getCamera().combined);
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        font.getData().setScale(mobile ? 0.8f : 0.85f);
+        layout.setText(font, aimHint);
+        float tw = layout.width + 24, th = layout.height + 14;
+        float x = gx + gw / 2f - tw / 2f, y = gy + gh - (mobile ? 120 : 92);
+        shapes.begin(ShapeRenderer.ShapeType.Filled);
+        shapes.setColor(0.05f, 0.04f, 0.03f, 0.82f);
+        shapes.rect(x, y, tw, th);
+        strokeRect(shapes, x, y, tw, th, 1.5f, new Color(1f, 0.85f, 0.3f, 1f));
+        if (!mobile && aimSlot >= 0 && spellButtons[aimSlot].visible) {
+            // pole paska, ktore wlaczylo celownik: pulsujaca zolta ramka (nad wszystkim)
+            HudButton b = spellButtons[aimSlot];
+            float a = 0.6f + 0.4f * (float) Math.sin(com.badlogic.gdx.utils.TimeUtils.millis() / 160.0);
+            strokeRect(shapes, b.x - b.hw, b.y - b.r, b.hw * 2, b.r * 2, 3f, new Color(1f, 0.85f, 0.25f, a));
+        }
+        shapes.end();
+        batch.begin();
+        font.setColor(1f, 0.93f, 0.7f, 1f);
+        font.draw(batch, aimHint, x + 12, y + th - 7);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+        batch.end();
+    }
+
     /** Tlo i pierscien przycisku luku oraz okragly znak czaru (w przebiegu ksztaltow). */
     private void mSlotShapes(ShapeRenderer s, GameSession session, PlayerCharacter pc, int slot, MobileHudLayout.Circle c, boolean potion, long now) {
         String e = barEntries[slot];
@@ -7020,7 +7283,22 @@ public final class Hud {
         roundButton(s, c.x, c.y, c.r, hot ? M_GOOD : ring, hot);
         SpellType sp = actionSpell(session, e);
         if (sp != null) spellDisc(s, sp, c.x, c.y, c.r - 4, slotCooldown(session, slot, now), pc.mana() < sp.mana());
-        else if (e == null) {
+        int combo = pl.fawizja.pixel.settings.SpellBar.comboSpells(barActions[slot]).size();
+        for (int k = 0; k < combo; k++) {
+            // combo: zolte kropki nad przyciskiem (ile czarow)
+            float dx = c.x + (k - (combo - 1) / 2f) * 7f, dy = c.y + c.r - 2;
+            s.setColor(0.1f, 0.08f, 0.05f, 0.9f);
+            s.circle(dx, dy, 3.4f, 10);
+            s.setColor(1f, 0.85f, 0.25f, 1f);
+            s.circle(dx, dy, 2.3f, 10);
+        }
+        if (slot == aimSlot) {
+            float a = 0.55f + 0.45f * (float) Math.sin(com.badlogic.gdx.utils.TimeUtils.millis() / 160.0);
+            ring(s, c.x, c.y, c.r + 3f, 3f, 0, 360, new Color(1f, 1f, 1f, a));
+        }
+        if (sp != null) {
+            // nic wiecej
+        } else if (e == null) {
             s.setColor(M_MUTED);
             s.rect(c.x - 6, c.y - 1, 12, 2);
             s.rect(c.x - 1, c.y - 6, 2, 12);
@@ -7034,6 +7312,7 @@ public final class Hud {
         if (icon == null) return;
         float is = potion ? 24 : 28;
         b.draw(icon, c.x - is / 2f, c.y - is / 2f + (potion ? 1 : 0), is, is);
+        modeBadge(b, slot, c.x - c.r * 0.95f, c.y + c.r * 0.95f, Math.max(10f, c.r * 0.6f));
         float cd = slotCooldown(session, slot, now);
         if (cd > 0) bFill(b, c.x - c.r * 0.7f, c.y + c.r * 0.7f - c.r * 1.4f * cd, c.r * 1.4f, c.r * 1.4f * cd, new Color(0, 0, 0, 0.6f));
         String n = spellButtons[slot].label;
@@ -7464,6 +7743,10 @@ public final class Hud {
         for (MenuRow row : menuRows) {
             Color lc = row.enabled ? M_TEXT : zid() ? Z_OFF_TEXT : hex(0xefe4d4, 0.45f);
             Color dc = row.enabled ? (zid() ? Z_DETAIL_TEXT : M_MUTED) : zid() ? Z_OFF_TEXT : hex(0xb8a48c, 0.45f);
+            if (row.selected && !row.tab && pickSlot >= 0 && zid()) { // ciemny napis na zoltym przycisku
+                lc = hex(0x2a1606, 1f);
+                dc = hex(0x4a2c10, 1f);
+            }
             if (logoutConfirm) {
                 mCentered(batch, row.label, row.x + row.w / 2f, row.y + row.h / 2f, 0.76f,
                         row.action.equals("logout:yes") ? hex(0xff8a7a, 1f) : M_TEXT, false);

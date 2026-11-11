@@ -118,7 +118,7 @@ public final class TibiaSpells {
                 return CastResult.OK;
             }
             case RUNE_PARALYSE: {
-                Monster m = combat().target();
+                Monster m = sys.target();
                 if (m == null || m.isDead()) return CastResult.NO_TARGET;
                 m.paralyze(now + s.radius() * 1000L);
                 combat().addEvent(CombatEvent.projectile(now, pc().position(), m.position(), "MAGIC"));
@@ -150,7 +150,7 @@ public final class TibiaSpells {
     Direction waveDirection(SpellType s) {
         Position me = pc().position();
         Position t = null;
-        Monster m = combat().target();
+        Monster m = sys.target();
         if (m != null && !m.isDead()) t = m.position();
         else if (sys.playerTargetPos() != null) t = sys.playerTargetPos();
         if (t != null && t.z() == me.z() && me.distanceTo(t) <= s.radius() && !t.equals(me)) {
@@ -217,7 +217,7 @@ public final class TibiaSpells {
 
     /** Utori flam/vis/pox/kor/mort/san i runa ognia duszy: baza = obrazenia tiku, promien = liczba tikow, ilosc = odstep (s). */
     private CastResult conditionTarget(SpellType s, long now) {
-        Monster m = combat().target();
+        Monster m = sys.target();
         if (m == null || m.isDead()) return CastResult.NO_TARGET;
         ConditionType type = ConditionType.of(s.damageType());
         int perTick = (int) Math.max(1, Math.round(s.base() * pc().outgoingFactor()));
@@ -296,7 +296,7 @@ public final class TibiaSpells {
     private CastResult illusion(SpellType s, long now) {
         MonsterType t = byName(sys.param(), false);
         if (t == null && sys.param() == null) {
-            Monster m = combat().target();
+            Monster m = sys.target();
             if (m != null && !m.isDead() && !m.type().boss()) t = m.type().base() != null ? m.type().base() : m.type();
         }
         if (t == null) {
@@ -344,7 +344,7 @@ public final class TibiaSpells {
     }
 
     private CastResult convince(SpellType s, long now) {
-        Monster m = combat().target();
+        Monster m = sys.target();
         if (m == null || m.isDead()) return CastResult.NO_TARGET;
         int cost = SummonTable.defaults().mana(m.type().key());
         if (cost < 0 || m.type().boss() || m.isSummon() || m.type().isElite()) {
@@ -550,7 +550,7 @@ public final class TibiaSpells {
         }
         lastDeathSeen = death;
         Position me = pc().position();
-        Monster target = combat().target();
+        Monster target = sys.target();
         if (target != null && (target.isDead() || target.isSummon())) target = null;
         for (Monster s : summons()) {
             Position sp = s.position();

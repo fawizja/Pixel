@@ -20,7 +20,7 @@ import pl.fawizja.pixel.world.WorldLayout;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 8;
+    public static final int CURRENT_VERSION = 9;
 
     private final ItemRegistry items;
     /** Zegar scienny do znacznika czasu zapisu staminy (testy podmieniaja). */
@@ -110,6 +110,8 @@ public final class CharacterCodec {
         if (!pc.completedBossQuests().isEmpty()) m.put("bossq", String.join(",", pc.completedBossQuests()));
         if (!pc.crates().isEmpty()) m.put("crates", pc.crates());
         if (!pc.wallLights().isEmpty()) m.put("walllights", pc.wallLights());
+        // v9: pasek akcji (czary, runy z trybem cel/siebie/celownik, combo) zapisany w postaci
+        if (!pc.actionBar().isEmpty()) m.put("bar", pc.actionBar());
         for (Map.Entry<EquipSlot, ItemStack> e : pc.equipment().all().entrySet()) {
             m.put("eq." + e.getKey().name(), stackText(e.getValue()));
         }
@@ -178,6 +180,8 @@ public final class CharacterCodec {
      * v3 to swiat 352x320, v4 kontynent 448x448 - od v5 swiat 1000x1000, starsze pozycje wracaja do swiatyni.
      * v8 (Kuznia): stosy moga miec tier "*t" i nasycenia "#..." ({@link ItemStack#encode()}), nowy klucz
      * "forge=pyl,limit"; zapis v7 i starszy czyta sie bez zmian (tier 0, bez nasycen, pyl 0, limit 100).
+     * v9 (paski akcji jak w Tibii): klucz "bar" z ukladem paska postaci. Zapis v8 i starszy nie ma paska w pliku -
+     * dostaje "bar" puste, a klient przenosi do postaci dawny uklad z Preferences "pixel-bar" (jednorazowo).
      */
     static void migrate(int version, Map<String, String> m) {
         if (version < 2) {
@@ -194,6 +198,7 @@ public final class CharacterCodec {
             }
             m.put("map", WorldLayout.WORLD_MAP);
         }
+        if (version < 9) m.remove("bar"); // klucz zarezerwowany od v9 (pasek byl tylko w Preferences klienta)
         if (version < 5) {
             // v4 (kontynent 448x448) i starsze: swiat 1000x1000 z mapy Darka ma miasta w innych miejscach -
             // pole spoza mapy, sesja postawi postac w swiatyni jej miasta (decyzja Darka 2026-10-27)
@@ -349,6 +354,7 @@ public final class CharacterCodec {
         else pc.charms().migrateFrom(pc.bestiary());
         pc.setCrates(m.getOrDefault("crates", ""));
         pc.setWallLights(m.getOrDefault("walllights", ""));
+        pc.setActionBar(m.get("bar"));
         String chests = m.get("chests");
         if (chests != null && !chests.isBlank()) for (String c : chests.split(",")) pc.openedChests().add(c.trim());
         String bossq = m.get("bossq");

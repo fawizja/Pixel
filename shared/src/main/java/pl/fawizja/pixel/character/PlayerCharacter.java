@@ -138,6 +138,7 @@ public final class PlayerCharacter {
         completedBossQuests.addAll(o.completedBossQuests);
         crates = o.crates;
         wallLights = o.wallLights;
+        actionBar = o.actionBar;
         depot.clear();
         for (int i = 0; i < o.depot.size(); i++) {
             if (o.depot.get(i) != null) depot.putInSlot(i, o.depot.get(i));
@@ -579,6 +580,24 @@ public final class PlayerCharacter {
     public String wallLights() { return wallLights; }
 
     public void setWallLights(String state) { wallLights = state == null ? "" : state; }
+
+    /**
+     * Uklad paska akcji ({@link pl.fawizja.pixel.settings.SpellBar#encode()}), "" = pasek automatyczny. Od zapisu v9
+     * w postaci (offline w pliku zapisu, online na serwerze - klient wysyla akcje "bar:..." i dostaje go w SELF).
+     */
+    private String actionBar = "";
+
+    public String actionBar() { return actionBar; }
+
+    /** Ustawia uklad paska; smieci i nieznane wpisy sa odrzucane (wpis od klienta przechodzi przez SpellBar). */
+    public void setActionBar(String encoded) {
+        if (encoded == null || encoded.isBlank() || encoded.length() > 2000) {
+            actionBar = "";
+            return;
+        }
+        pl.fawizja.pixel.settings.SpellBar bar = pl.fawizja.pixel.settings.SpellBar.decode(encoded);
+        actionBar = bar.isCustom() ? bar.encode() : "";
+    }
     public Skills skills() { return skills; }
     public AutoLootFilter autoLootFilter() { return autoLootFilter; }
     public java.util.Set<Integer> keptItems() { return keptItems; }
