@@ -32,7 +32,10 @@ public final class Actions {
         String[] p = action.split(":");
         try {
             switch (p[0]) {
-                case "cast": s.castSpell(p[1], now); return true;
+                case "cast": // cast:klucz albo cast:klucz:dopisek (utevo res "wilk", exura sio "imie")
+                    if (p.length > 2) s.castSpell(p[1], String.join(" ", java.util.Arrays.copyOfRange(p, 2, p.length)), now);
+                    else s.castSpell(p[1], now);
+                    return true;
                 case "open": // open:x:y:z - drzwi, okno albo skrzynia obok postaci
                     s.useAt(new pl.fawizja.pixel.world.Position(Integer.parseInt(p[1]), Integer.parseInt(p[2]), Integer.parseInt(p[3])), now);
                     return true;

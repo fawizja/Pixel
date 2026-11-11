@@ -261,7 +261,10 @@ public final class PlayerCharacter {
     /** Szybkosc z poziomu, wierzchowca i czaru przyspieszenia (premia procentowa liczona od calosci). */
     public int speed() {
         int base = Balance.speed(level) + (mounted ? MOUNT_SPEED : 0);
-        return hasteMs > 0 ? base + base * hastePercent / 100 : base;
+        int v = hasteMs > 0 ? base + base * hastePercent / 100 : base;
+        // Snajper (utito tempo san) spowalnia jak paraliz w Tibii, zamrozenie tez
+        if (spellBuffMs(BUFF_SHARPSHOOTER) > 0) v = v * 70 / 100;
+        return v;
     }
 
     /** Najwiecej dodatkowych plecakow: plecak glowny + 3 = 80 slotow. */
@@ -425,8 +428,140 @@ public final class PlayerCharacter {
      */
     public int effectiveSkill(Skill s) {
         int lvl = skills.level(s) + pl.fawizja.pixel.wheel.WheelEffects.skillBonus(this, s); // Kolo Przeznaczenia
+        lvl = (int) Math.round(lvl * spellSkillFactor(s));
         if (s != Skill.FIST || vocation != Vocation.MONK) return lvl;
         return (int) Math.round(lvl * harmony.fistFactor());
+    }
+
+    // ------------------------------------------------------------------ stany i wzmocnienia z czarow (0.240)
+
+    /** Wzmocnienia czarow jak w Canary: Krwawy szal, Obronca, Snajper, Szybka stopa (klucze czarow). */
+    public static final String BUFF_BLOOD_RAGE = "blood_rage";
+    public static final String BUFF_PROTECTOR = "protector";
+    public static final String BUFF_SHARPSHOOTER = "sharpshooter";
+    public static final String BUFF_SWIFT_FOOT = "swift_foot";
+
+    private final pl.fawizja.pixel.combat.Conditions conditions = new pl.fawizja.pixel.combat.Conditions();
+    private final java.util.Map<String, Long> spellBuffs = new java.util.HashMap<>();
+    private int magicShield;
+    private long magicShieldMs;
+    private int lastShieldAbsorbed;
+    private long invisibleMs;
+    private String illusion;
+    private long illusionMs;
+    private int regenAmount;
+    private long regenIntervalMs;
+    private long regenLeftMs;
+    private long regenAccMs;
+
+    /** Stany z obrazeniami co tik (zatrucie, podpalenie...); ulotne jak w Tibii po smierci. */
+    public pl.fawizja.pixel.combat.Conditions conditions() { return conditions; }
+
+    /** Mnoznik umiejetnosci z wzmocnien: Krwawy szal walka wrecz x1,35, Obronca tarcza x2,2, Snajper dystans x1,4. */
+    public double spellSkillFactor(Skill s) {
+        if (spellBuffs.isEmpty()) return 1.0;
+        if (s.isMeleeWeapon() || s == Skill.FIST) return spellBuffMs(BUFF_BLOOD_RAGE) > 0 ? 1.35 : 1.0;
+        if (s == Skill.SHIELDING) return spellBuffMs(BUFF_PROTECTOR) > 0 ? 2.2 : 1.0;
+        if (s == Skill.DISTANCE) return spellBuffMs(BUFF_SHARPSHOOTER) > 0 ? 1.4 : 1.0;
+        return 1.0;
+    }
+
+    /** Mnoznik zadawanych obrazen: Obronca 65%, Szybka stopa 50% (Canary BUFF_DAMAGEDEALT). */
+    public double outgoingFactor() {
+        if (spellBuffs.isEmpty()) return 1.0;
+        double f = 1.0;
+        if (spellBuffMs(BUFF_PROTECTOR) > 0) f *= 0.65;
+        if (spellBuffMs(BUFF_SWIFT_FOOT) > 0) f *= 0.5;
+        return f;
+    }
+
+    /** Mnoznik otrzymywanych obrazen: Krwawy szal 115% (Canary BUFF_DAMAGERECEIVED). */
+    public double incomingFactor() {
+        return !spellBuffs.isEmpty() && spellBuffMs(BUFF_BLOOD_RAGE) > 0 ? 1.15 : 1.0;
+    }
+
+    /** Wlacza wzmocnienie czaru na ms (Krwawy szal i Obronca wykluczaja sie jak w Canary - wspolny SUBID). */
+    public void addSpellBuff(String key, long ms) {
+        if (BUFF_BLOOD_RAGE.equals(key)) spellBuffs.remove(BUFF_PROTECTOR);
+        if (BUFF_PROTECTOR.equals(key)) spellBuffs.remove(BUFF_BLOOD_RAGE);
+        spellBuffs.put(key, Math.max(0, ms));
+    }
+
+    public long spellBuffMs(String key) { return spellBuffs.getOrDefault(key, 0L); }
+
+    /** Aktywne wzmocnienia czarow (klucz -> pozostale ms). */
+    public java.util.Map<String, Long> spellBuffs() { return java.util.Collections.unmodifiableMap(spellBuffs); }
+
+    /** Tarcza many (utamo vita): pojemnosc i czas; obrazenia najpierw zabieraja mane, do wyczerpania tarczy. */
+    public void setMagicShield(int capacity, long ms) {
+        magicShield = Math.max(0, capacity);
+        magicShieldMs = Math.max(0, ms);
+    }
+
+    public int magicShield() { return magicShieldMs > 0 ? magicShield : 0; }
+    public long magicShieldMs() { return magicShield > 0 ? magicShieldMs : 0; }
+    /** Ile many zabral ostatni cios zamiast zdrowia (tarcza many). */
+    public int lastShieldAbsorbed() { return lastShieldAbsorbed; }
+
+    /** Niewidzialnosc (utana vid): potwory nie widza postaci. */
+    public void setInvisible(long ms) { invisibleMs = Math.max(0, ms); }
+    public boolean isInvisible() { return invisibleMs > 0; }
+    public long invisibleMs() { return invisibleMs; }
+    /** Atak konczy niewidzialnosc; true, gdy byla. */
+    public boolean breakInvisibility() {
+        boolean was = invisibleMs > 0;
+        invisibleMs = 0;
+        return was;
+    }
+
+    /** Iluzja stworzenia (utevo res ina): klucz potwora, ktorego wyglad ma postac, albo null. */
+    public void setIllusion(String monsterKey, long ms) {
+        illusion = monsterKey;
+        illusionMs = monsterKey == null ? 0 : Math.max(0, ms);
+    }
+
+    public String illusion() { return illusionMs > 0 ? illusion : null; }
+    public long illusionMs() { return illusion == null ? 0 : illusionMs; }
+
+    /** Regeneracja z czaru (utura, utura gran): amount HP co intervalMs przez durationMs. */
+    public void startRegeneration(int amount, long intervalMs, long durationMs) {
+        regenAmount = Math.max(0, amount);
+        regenIntervalMs = Math.max(250, intervalMs);
+        regenLeftMs = Math.max(0, durationMs);
+        regenAccMs = 0;
+    }
+
+    public long spellRegenMs() { return regenLeftMs; }
+
+    /** Uplyw czasu wzmocnien z czarow (wolane z tickRegeneration). */
+    private void tickSpellEffects(long deltaMs) {
+        if (!spellBuffs.isEmpty()) {
+            spellBuffs.replaceAll((k, v) -> v - deltaMs);
+            spellBuffs.values().removeIf(v -> v <= 0);
+        }
+        magicShieldMs = Math.max(0, magicShieldMs - deltaMs);
+        invisibleMs = Math.max(0, invisibleMs - deltaMs);
+        illusionMs = Math.max(0, illusionMs - deltaMs);
+        if (regenLeftMs > 0) {
+            long step = Math.min(deltaMs, regenLeftMs);
+            regenLeftMs -= step;
+            regenAccMs += step;
+            while (regenAccMs >= regenIntervalMs) {
+                regenAccMs -= regenIntervalMs;
+                heal(regenAmount);
+            }
+        }
+    }
+
+    /** Smierc i odrodzenie: stany i wzmocnienia z czarow znikaja. */
+    private void clearSpellEffects() {
+        conditions.clear();
+        spellBuffs.clear();
+        magicShield = 0;
+        magicShieldMs = 0;
+        invisibleMs = 0;
+        illusionMs = 0;
+        regenLeftMs = 0;
     }
     public java.util.Set<String> openedChests() { return openedChests; }
     public java.util.Set<String> completedBossQuests() { return completedBossQuests; }
@@ -594,7 +729,17 @@ public final class PlayerCharacter {
 
     /** Zadaje obrazenia; zwraca faktycznie odjete HP. */
     public int damage(int amount) {
+        lastShieldAbsorbed = 0;
         if (amount <= 0 || isDead()) return 0;
+        if (magicShieldMs > 0 && magicShield > 0 && mana > 0) {
+            // tarcza many jak w Tibii 12+: obrazenia zabieraja mane, az wyczerpie sie pojemnosc tarczy
+            int absorbed = Math.min(amount, Math.min(magicShield, mana));
+            mana -= absorbed;
+            magicShield -= absorbed;
+            lastShieldAbsorbed = absorbed;
+            amount -= absorbed;
+            if (amount <= 0) return 0;
+        }
         int saved = pl.fawizja.pixel.wheel.WheelEffects.giftOfLife(this, health, amount); // Dar Zycia (Kolo Przeznaczenia)
         if (saved > 0) {
             int dealt = Math.max(0, health - saved);
@@ -637,6 +782,7 @@ public final class PlayerCharacter {
         if (isDead() || deltaMs <= 0) return;
         lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
         hasteMs = Math.max(0, hasteMs - deltaMs);
+        tickSpellEffects(deltaMs);
         wheel.tick(deltaMs);
         if (resting) restedMs = Math.min(MAX_RESTED_MS, restedMs + deltaMs);
         regenAccumulatorMs += deltaMs;
@@ -718,6 +864,7 @@ public final class PlayerCharacter {
         health = maxHealth();
         mana = maxMana();
         regenAccumulatorMs = 0;
+        clearSpellEffects();
         harmony.empty(); // jak w Canary: smierc zeruje harmonie mnicha (cnota zostaje)
     }
 

@@ -814,6 +814,8 @@ public final class DesktopLauncher {
                 GameScreen gs = (GameScreen) getScreen();
                 gs.session().debugDefeatQuestBoss(gs.worldTime());
             }
+            String spellDemo = System.getProperty("pixel.spellDemo");
+            if (spellDemo != null && getScreen() instanceof GameScreen) spellDemo((GameScreen) getScreen(), spellDemo, frame, frames);
             if (Boolean.getBoolean("pixel.fx") && frame == frames - 8 && getScreen() instanceof GameScreen) {
                 GameScreen gs = (GameScreen) getScreen();
                 long now = gs.worldTime();
@@ -869,7 +871,65 @@ public final class DesktopLauncher {
         }
 
         /** Kierunek z -Dpixel.dpad: skrot (N, NE, E, SE, S, SW, W, NW) albo nazwa (NORTH_EAST). */
-        private static pl.fawizja.pixel.world.Direction direction(String s) {
+        /**
+     * Podglad czarow i run z 0.240 (-Dpixel.spellDemo=...): field (pole ognia pod paralizowanym potworem, potwor sie pali),
+     * gfb (wielka kula ognia w stado), poison (zatrucie), poison_cure (zatrucie i exana pox), exani (exani hur up spod
+     * dziury), summon (utevo res "wilk").
+     */
+    private static void spellDemo(GameScreen gs, String demo, int frame, int frames) {
+        pl.fawizja.pixel.game.GameSession s = gs.session();
+        pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
+        long now = gs.worldTime();
+        Position me = pc.position();
+        if (frame == 2) {
+            pc.skills().set(pl.fawizja.pixel.character.Skill.MAGIC, Math.max(pc.skills().level(pl.fawizja.pixel.character.Skill.MAGIC), 20), 0);
+            pc.restoreMana(pc.maxMana());
+            for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
+            if (demo.equals("field") || demo.equals("gfb")) {
+                pc.setInvisible(600_000); // potwory stoja w miejscu (nie widza postaci); zdjete przed zrzutem
+                String key = demo.equals("field") ? "wolf" : "boar";
+                int[][] spots = demo.equals("field") ? new int[][] {{0, -3}} : new int[][] {{0, -3}, {1, -3}, {-1, -3}, {0, -4}, {1, -2}, {-1, -4}};
+                for (int[] d : spots) {
+                    for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(d[0], d[1]), 0, 1, now)) {
+                        m.paralyze(now + 600_000);
+                    }
+                }
+            }
+            if (demo.startsWith("poison")) {
+                pc.conditions().addTotal(pl.fawizja.pixel.combat.ConditionType.POISON, 400, 4000, now, "Pająk leśny");
+                pc.damage(pc.maxHealth() / 3);
+            }
+        }
+        if (demo.equals("field") && frame == 4) {
+            pl.fawizja.pixel.monster.Monster m = s.monsters().monsterAt(me.translate(0, -3));
+            if (m != null) s.combat().setTarget(m);
+            pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(s.items().byKey("fire_field_rune").id(), 3));
+            s.spells().useFirst("fire_field_rune", now);
+            s.combat().setTarget(null);
+            pc.setInvisible(600_000); // runa zdjela niewidzialnosc - potwor ma stac w ogniu do zrzutu
+        }
+        if (demo.equals("gfb") && frame == frames - 4) {
+            pl.fawizja.pixel.monster.Monster m = s.monsters().monsterAt(me.translate(0, -3));
+            if (m != null) s.combat().setTarget(m);
+            pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(s.items().byKey("great_fireball_rune").id(), 3));
+            s.spells().useFirst("great_fireball_rune", now);
+        }
+        if ((demo.equals("field") || demo.equals("gfb")) && frame == frames - 2) pc.breakInvisibility();
+        if (demo.equals("poison_cure") && frame == frames - 6) {
+            gs.say(pc.name(), "exana pox");
+            s.castSpell("cure_poison", now);
+        }
+        if (demo.equals("exani") && frame == frames - 12) {
+            gs.say(pc.name(), "exani hur up");
+            s.castSpell("levitate_up", now);
+        }
+        if (demo.equals("summon") && frame == frames - 12) {
+            gs.say(pc.name(), "utevo res \"wilk\"");
+            s.castSpell("summon_creature", "wilk", now);
+        }
+    }
+
+    private static pl.fawizja.pixel.world.Direction direction(String s) {
             String k = s.trim().toUpperCase(java.util.Locale.ROOT)
                     .replace("N", "NORTH_").replace("S", "SOUTH_").replace("E", "EAST_").replace("W", "WEST_");
             if (s.trim().length() > 2) return pl.fawizja.pixel.world.Direction.valueOf(s.trim().toUpperCase(java.util.Locale.ROOT));

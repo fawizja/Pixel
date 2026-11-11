@@ -1584,7 +1584,8 @@ def town_undergrounds(ctx, rng):
         cells = [c for c in cells if c in reach]
         t = ctx['transitions']
         for (g, ladder, up, down) in gr:
-            t.append((g[0], g[1], 0, 'STAIRS', down[0], down[1], z))
+            # 0.240: kratka jak w Tibii - zejscie po uzyciu (dotknieciu), nie po wejsciu
+            t.append((g[0], g[1], 0, 'GRATE', down[0], down[1], z))
             t.append((ladder[0], ladder[1], z, 'LADDER', up[0], up[1], 0))
         far = [c for c in cells if all(abs(c[0] - g[0][0]) + abs(c[1] - g[0][1]) > 5 for g in gr)] or cells
         n_sp = max(3, len(far) // 70)

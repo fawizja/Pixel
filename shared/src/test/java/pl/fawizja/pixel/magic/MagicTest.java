@@ -45,7 +45,8 @@ class MagicTest {
     void dataIsConsistent() {
         for (Vocation v : Vocation.values()) {
             List<SpellType> known = SPELLS.forVocation(v);
-            assertTrue(known.stream().anyMatch(s -> s.minLevel() <= 8 && s.kind() == SpellKind.ATTACK_TARGET), v + " has a starting attack spell");
+            assertTrue(known.stream().anyMatch(s -> s.minLevel() <= 8 && (s.kind() == SpellKind.ATTACK_TARGET || s.kind() == SpellKind.ATTACK_WAVE)),
+                    v + " has a starting attack spell");
             assertTrue(known.stream().anyMatch(s -> s.minLevel() <= 8 && s.kind() == SpellKind.HEAL_SELF), v + " can heal at start");
             assertTrue(known.stream().anyMatch(s -> s.kind() == SpellKind.ATTACK_AREA), v + " gets an area attack");
         }
@@ -79,14 +80,15 @@ class MagicTest {
     void autoHealPicksTheStrongestHealingSpellThatCanBeCastNow() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = session(pc, null, null);
-        assertEquals("mend", s.spells().bestHeal(0), "greater mend needs level 20");
-        assertEquals(CastResult.OK, s.castSpell("mend", 1000));
+        pc.skills().set(Skill.MAGIC, 3, 0); // Tibia: exura infir (Magiczny opatrunek) prawie nie rosnie z magia
+        assertEquals("light_healing", s.spells().bestHeal(0), "intense healing needs level 20");
+        assertEquals(CastResult.OK, s.castSpell("light_healing", 1000));
         assertNull(s.spells().bestHeal(1500), "on cooldown");
         pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(20) - pc.experience());
         pc.restoreMana(pc.maxMana());
-        assertEquals("greater_mend", s.spells().bestHeal(5000));
+        assertEquals("intense_healing", s.spells().bestHeal(5000));
         pc.spendMana(pc.mana() - 30);
-        assertEquals("mend", s.spells().bestHeal(5000), "not enough mana for greater mend");
+        assertEquals("light_healing", s.spells().bestHeal(5000), "not enough mana for intense healing");
         pc.spendMana(pc.mana());
         assertNull(s.spells().bestHeal(5000), "no mana - the potion is used instead");
     }
@@ -103,14 +105,14 @@ class MagicTest {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
         GameSession s = session(pc, null, null);
         int mana = pc.mana();
-        assertEquals(CastResult.WRONG_VOCATION, s.castSpell("frost_bolt", 0));
-        assertEquals(CastResult.LEVEL_TOO_LOW, s.castSpell("flame_ring", 0));
-        assertEquals(CastResult.NO_TARGET, s.castSpell("ember_bolt", 0));
+        assertEquals(CastResult.WRONG_VOCATION, s.castSpell("mud_attack", 0));
+        assertEquals(CastResult.LEVEL_TOO_LOW, s.castSpell("great_fire_wave", 0));
+        assertEquals(CastResult.NO_TARGET, s.castSpell("buzz", 0));
         pc.spendMana(pc.mana() - 5);
-        assertEquals(CastResult.NOT_ENOUGH_MANA, s.castSpell("mend", 0));
+        assertEquals(CastResult.NOT_ENOUGH_MANA, s.castSpell("light_healing", 0));
         assertEquals(5, pc.mana());
         assertTrue(mana > 5);
-        assertTrue(s.spells().knownSpells().stream().noneMatch(x -> x.key().equals("flame_ring")));
+        assertTrue(s.spells().knownSpells().stream().noneMatch(x -> x.key().equals("great_fire_wave")));
     }
 
     @Test
@@ -119,19 +121,19 @@ class MagicTest {
         GameSession s = session(pc, "bandit", new Position(12, 12, 0));
         Monster m = s.monsters().monsters().get(0);
         s.combat().setTarget(m);
-        assertEquals(CastResult.OK, s.castSpell("ember_bolt", 0));
+        assertEquals(CastResult.OK, s.castSpell("buzz", 0));
         assertTrue(m.health() < m.type().maxHealth());
         pl.fawizja.pixel.combat.CombatEvent bolt = s.combat().latestEvents(64).stream()
                 .filter(e -> e.kind() == pl.fawizja.pixel.combat.CombatEvent.Kind.PROJECTILE).findFirst().orElseThrow();
         assertEquals(pc.position(), bolt.from(), "the bolt flies from the caster");
         assertEquals(m.position(), bolt.position());
-        assertEquals("FIRE", bolt.effect());
+        assertEquals("ENERGY", bolt.effect());
         PlayerCharacter far = TestData.newCharacter(Vocation.SORCERER);
-        GameSession s2 = session(far, "bandit", new Position(17, 12, 0));
-        s2.teleport(new Position(9, 12, 0), 0);   // 8 pol: poza zasiegiem 7
+        GameSession s2 = session(far, "bandit", new Position(14, 12, 0));
+        s2.teleport(new Position(9, 12, 0), 0);   // 5 pol: poza zasiegiem 3 (uderzenia jak w Tibii)
         s2.combat().setTarget(s2.monsters().monsters().get(0));
         int mana = far.mana();
-        assertEquals(CastResult.OUT_OF_RANGE, s2.castSpell("ember_bolt", 0));
+        assertEquals(CastResult.OUT_OF_RANGE, s2.castSpell("buzz", 0));
         assertEquals(mana, far.mana());
     }
 
@@ -168,7 +170,8 @@ class MagicTest {
     @Test
     void enchantingRunesIsAtomic() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        pc.addExperience(100_000);
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(30) - pc.experience());
+        pc.restoreMana(pc.maxMana());
         GameSession s = session(pc, null, null);
         assertEquals(CastResult.MAGIC_TOO_LOW, s.castSpell("enchant_fireburst", 0));
         pc.skills().set(Skill.MAGIC, 4, 0);
@@ -177,13 +180,14 @@ class MagicTest {
         pc.backpack().add(new ItemStack(id("blank_rune"), 2));
         int mana = pc.mana();
         assertEquals(CastResult.OK, s.castSpell("enchant_fireburst", 0));
-        assertEquals(3, pc.backpack().count(id("fireburst_rune")));
+        assertEquals(5, pc.backpack().count(id("fireburst_rune")), "Tibia: 5 run kuli ognia z jednej pustej");
         assertEquals(1, pc.backpack().count(id("blank_rune")));
-        assertEquals(mana - 80, pc.mana());
+        assertEquals(mana - 460, pc.mana());
+        pc.restoreMana(pc.maxMana());
         // pelny plecak: nic nie znika, mana zostaje
         pc.backpack().add(new ItemStack(id("blank_rune"), 1)); // stos 2 - zuzycie jednej nie zwolni slotu
         for (int i = 0; pc.backpack().freeSlots() > 0; i++) pc.backpack().add(new ItemStack(id("leather_helmet"), 1));
-        pc.backpack().add(new ItemStack(id("fireburst_rune"), 97)); // stos runy pelny (100)
+        pc.backpack().add(new ItemStack(id("fireburst_rune"), 95)); // stos runy pelny (100)
         int manaBefore = pc.mana();
         assertEquals(CastResult.BACKPACK_FULL, s.castSpell("enchant_fireburst", 5000));
         assertEquals(2, pc.backpack().count(id("blank_rune")));
@@ -193,6 +197,7 @@ class MagicTest {
     @Test
     void runesNeedMagicLevelAndAreConsumed() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
+        pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(27) - pc.experience()); // runa kuli ognia od 27
         GameSession s = session(pc, "boar", new Position(12, 12, 0));
         Monster boar = s.monsters().monsters().get(0);
         s.combat().setTarget(boar);
@@ -281,13 +286,15 @@ class MagicTest {
     }
 
     @Test
-    void lightSpellLastsFiveMinutes() {
+    void lightSpellLastsItsTibiaDuration() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = session(pc, null, null);
         float before = Lighting.playerLightRadius(pc, TestData.ITEMS);
-        assertEquals(CastResult.OK, s.castSpell("glow", 0));
+        assertEquals(CastResult.OK, s.castSpell("light", 0));
         assertTrue(Lighting.playerLightRadius(pc, TestData.ITEMS) >= 4);
-        pc.tickRegeneration(SpellSystem.LIGHT_SPELL_MS + 1);
+        pc.tickRegeneration(369_000);
+        assertTrue(Lighting.playerLightRadius(pc, TestData.ITEMS) >= 4, "utevo lux: 370 s");
+        pc.tickRegeneration(1_001);
         assertEquals(before, Lighting.playerLightRadius(pc, TestData.ITEMS));
     }
 

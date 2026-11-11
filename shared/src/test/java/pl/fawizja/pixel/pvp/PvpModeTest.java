@@ -154,7 +154,7 @@ class PvpModeTest {
         PlayerCharacter pc = TestData.newCharacterNamed("Runiarz");
         pc.addExperience(Balance.experienceForLevel(40) - pc.experience());
         pc.skills().set(Skill.MAGIC, 10, 0);
-        pc.backpack().add(new ItemStack(TestData.ITEMS.byKey("fireburst_rune").id(), 5));
+        pc.backpack().add(new ItemStack(TestData.ITEMS.byKey("great_fireball_rune").id(), 5));
         MonsterManager mm = new MonsterManager(W, pl.fawizja.pixel.monster.MonsterRegistry.loadDefault(TestData.ITEMS),
                 List.of(new SpawnPoint("boar", new Position(12, 12, 0), 0, 1, 600)), new Random(3));
         mm.populate(null);
@@ -173,7 +173,7 @@ class PvpModeTest {
         caster.combat().setTarget(boar);
         int hp = bystander.character().health();
         assertFalse(PvpRules.SECURE_MODE_BLOCKS_AREA);
-        assertEquals(CastResult.OK, caster.spells().useFirst("fireburst_rune", 1000));
+        assertEquals(CastResult.OK, caster.spells().useFirst("great_fireball_rune", 1000));
         assertTrue(boar.health() < boar.type().maxHealth());
         assertTrue(bystander.character().health() < hp, "secure mode does not protect from area damage (Tibia)");
         assertEquals(Skull.WHITE, caster.pvpStatus().skull(1000));

@@ -15,7 +15,7 @@ import pl.fawizja.pixel.vocation.Vocation;
  */
 public final class WheelSpells {
     /** Czary skupienia sorcerera (Canary m_focusSpells): Piekielny rdzen i Gniew niebios. */
-    public static final List<String> FOCUS_SPELLS = List.of("hells_core", "rage_of_skies");
+    public static final List<String> FOCUS_SPELLS = List.of("hells_core", "rage_of_the_skies");
     public static final long FOCUS_MASTERY_MS = 12_000;
     public static final double FOCUS_MASTERY_PERCENT = 35;
     public static final long SANCTUARY_MS = 5_000;

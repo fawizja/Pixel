@@ -58,6 +58,14 @@ public final class Monster {
     public void holdFromFleeing(long untilMs) { fleeBlockedUntilMs = Math.max(fleeBlockedUntilMs, untilMs); }
     public boolean fleeBlocked(long now) { return now < fleeBlockedUntilMs; }
 
+    /** Wlasciciel przywolanego/przekonanego stworzenia (imie gracza) albo null dla dzikiego potwora. */
+    private String owner;
+
+    /** Sluga gracza (utevo res, runa przekonania, ozywienie zwlok): nie poluje na graczy, idzie za wlascicielem. */
+    public boolean isSummon() { return owner != null; }
+    public String owner() { return owner; }
+    void setOwner(String o) { owner = o; }
+
     /** Gracz, na ktorego potwor teraz poluje (wielu graczy: serwer kieruje atak do jego sesji). */
     public MonsterManager.Target target() { return target; }
     void setTarget(MonsterManager.Target t) { target = t; }

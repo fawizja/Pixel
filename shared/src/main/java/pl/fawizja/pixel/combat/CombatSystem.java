@@ -54,6 +54,9 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     }
 
     public Monster target() { return target; }
+
+    /** Przedmioty i ciala na ziemi (runa ozywienia zwlok). */
+    public GroundItems ground() { return ground; }
     public int kills() { return kills; }
 
     private java.util.function.Consumer<MonsterType> killListener;
@@ -154,14 +157,14 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public void setAutoLoot(boolean v) { autoLoot = v; }
 
     public void setTarget(Monster m) {
-        target = m != null && !m.isDead() && m.position().z() == pc.position().z() ? m : null;
+        target = m != null && !m.isDead() && !m.isSummon() && m.position().z() == pc.position().z() ? m : null;
     }
 
     /** Wybiera nastepny najblizszy widoczny cel (przycisk CEL). */
     /** Czy zywy potwor stoi najwyzej radius pol od postaci, na tym samym pietrze i w zasiegu wzroku (automatyczny cel). */
     public boolean threatNear(int radius) {
         for (Monster m : monsters.near(pc.position(), radius)) {
-            if (!m.isDead() && m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= radius
+            if (!m.isDead() && !m.isSummon() && m.position().z() == pc.position().z() && pc.position().distanceTo(m.position()) <= radius
                     && world.hasLineOfSight(pc.position(), m.position())) return true;
         }
         return false;
@@ -169,7 +172,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
 
     public Monster cycleTarget() {
         List<Monster> near = monsters.near(pc.position(), 8);
-        near.removeIf(m -> m.isDead() || !world.hasLineOfSight(pc.position(), m.position()));
+        near.removeIf(m -> m.isDead() || m.isSummon() || !world.hasLineOfSight(pc.position(), m.position()));
         near.sort((a, b) -> {
             int c = Integer.compare(a.position().distanceTo(pc.position()), b.position().distanceTo(pc.position()));
             return c != 0 ? c : Integer.compare(a.id(), b.id());
@@ -210,6 +213,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         // cel wybiera tylko gracz (Darek, 23.10): poza zasiegiem po prostu nie atakujemy, bez przelaczania na innego
         if (!inReach(target, ap.range())) return;
         nextPlayerAttackMs = now + ap.intervalMs();
+        if (pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
         // jak w Tibii: jeden rzut na krytyk na cios (baza 5% / +10%, przedmioty, zaklecie kowala)
         boolean crit = rollCritical(target.type());
         int raw = critical(CombatFormulas.roll(ap.maxDamage(), rng), crit, target.type());
@@ -317,6 +321,8 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private int critical(int raw, boolean crit, MonsterType t) {
         int v = CriticalHit.apply(pc, pc.enchantments().outgoing(pl.fawizja.pixel.wheel.WheelEffects.outgoing(pc, raw)), crit,
                 pl.fawizja.pixel.charm.CharmEffects.critDamageBonus(pc, t)); // Kolo Przeznaczenia: premie i plaskie obrazenia
+        double spell = pc.outgoingFactor(); // Obronca, Szybka stopa: slabsze ciosy (Canary BUFF_DAMAGEDEALT)
+        if (spell != 1.0) v = (int) Math.round(v * spell);
         lastOnslaught = v > 0 && rollOnslaught();
         if (lastOnslaught) v += (int) Math.round(v * pl.fawizja.pixel.item.Forge.ONSLAUGHT_BONUS);
         return v;
@@ -553,9 +559,12 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
                     t.range() > 1 ? null : m.position(), drained > 0 ? MANA_EFFECT : null));
             return;
         }
+        if (pc.incomingFactor() != 1.0) dmg = (int) Math.round(dmg * pc.incomingFactor()); // Krwawy szal: +15%
         int dealt = pc.damage(dmg);
+        showShield(now);
         pl.fawizja.pixel.wheel.WheelEffects.onMonsterStrike(pc); // Kolo Przeznaczenia: Leczenie w boju
         recap.record(t.name(), dealt, now);
+        if (dealt > 0) applyMonsterCondition(m, now);
         if (blockable(t) && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
                 t.range() > 1 ? null : m.position(), null));
@@ -567,6 +576,85 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             if (m.isDead()) onMonsterDeath(m, now);
         }
         if (pc.isDead()) onPlayerDeath(m, now);
+    }
+
+    /** Tarcza many zabrala mane zamiast zdrowia: niebieska liczba nad postacia. */
+    private void showShield(long now) {
+        int a = pc.lastShieldAbsorbed();
+        if (a > 0) push(new CombatEvent(now, pc.position(), a, CombatEvent.Kind.HIT_PLAYER, null, MANA_EFFECT));
+    }
+
+    /**
+     * Stan od ciosu potwora (data/monster_conditions.csv): pajaki zatruwaja, zywiolaki ognia podpalaja... Jak w Tibii
+     * kazde trafienie z obrazeniami moze odnowic stan; odmiana elitarna zadaje wiecej.
+     */
+    private void applyMonsterCondition(Monster m, long now) {
+        pl.fawizja.pixel.monster.MonsterConditions.Entry e = pl.fawizja.pixel.monster.MonsterConditions.defaults().of(m.type());
+        if (e == null || pc.isDead() || rng.nextInt(100) >= e.chance()) return;
+        boolean had = pc.conditions().has(e.type());
+        int total = e.rollTotal(rng, m.type().isElite() ? 1.3 : 1.0);
+        if (pc.conditions().addTotal(e.type(), total, e.intervalMs(), now, m.type().name()) && !had) {
+            log.add(now, EventLog.Kind.WARNING, e.type().label + " (" + m.type().name() + ")"
+                    + (e.type().cure != null ? " - wylecz czarem " + e.type().cure + "." : "."));
+        }
+    }
+
+    /**
+     * Tik stanu w postac (zatrucie, podpalenie...): ochrona przed zywiolem, tarcza many, liczba nad postacia, wpis
+     * w podsumowaniu smierci; stan moze zabic jak w Tibii. Zwraca odjete HP.
+     */
+    public int conditionHit(Conditions.Tick tick, long now) {
+        if (pc.isDead() || tick.amount() <= 0) return 0;
+        int dmg = CombatFormulas.conditionOnPlayer(pc, tick.amount(), tick.type().damage);
+        int dealt = pc.damage(dmg);
+        showShield(now);
+        String source = (tick.source() == null ? "" : tick.source() + ": ") + tick.type().label.toLowerCase(java.util.Locale.ROOT);
+        recap.record(source, dealt, now);
+        push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
+                null, CONDITION_EFFECT_PREFIX + tick.type().name()));
+        if (pc.isDead()) onPlayerDeath(source, null, now);
+        return dealt;
+    }
+
+    /** Efekt zdarzenia tiku stanu: "COND_" + nazwa stanu (klient: kolor liczby i efekt). */
+    public static final String CONDITION_EFFECT_PREFIX = "COND_";
+
+    /** Tik stanu albo pola w potwora (utori, runa ognia duszy, pola): odpornosci bez pancerza, smierc z lupem. */
+    public int conditionHitMonster(Monster m, int raw, ConditionType type, long now) {
+        if (m.isDead() || raw <= 0) return 0;
+        lastMonsterAttackMs = now;
+        int dealt = m.damage(CombatFormulas.conditionOnMonster(m.type(), raw, type.damage));
+        push(new CombatEvent(now, m.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
+                null, CONDITION_EFFECT_PREFIX + type.name()));
+        if (!m.isSummon()) monsters.provoke(m);
+        if (m.isDead()) onMonsterDeath(m, now);
+        return dealt;
+    }
+
+    /**
+     * Cios slugi gracza w potwora (albo odwet potwora na sludze): rzut ataku napastnika, pancerz i odpornosci celu.
+     * Zabity przez sluge potwor daje doswiadczenie i lup wlascicielowi, jak w Tibii.
+     */
+    public int creatureHit(Monster attacker, Monster victim, long now) {
+        if (attacker.isDead() || victim.isDead()) return 0;
+        MonsterType.Strike st = attacker.type().rollStrike(rng);
+        if (st.type() == DamageType.MANA_DRAIN) st = new MonsterType.Strike(DamageType.DEATH, st.raw());
+        int dealt = victim.damage(CombatFormulas.mitigateOnMonster(victim.type(), st.raw(), st.type(), rng));
+        if (attacker.type().range() > 1) push(CombatEvent.projectile(now, attacker.position(), victim.position(), st.type().name()));
+        push(new CombatEvent(now, victim.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_MONSTER : CombatEvent.Kind.BLOCKED,
+                attacker.type().range() > 1 ? null : attacker.position(), null));
+        if (victim.isDead()) {
+            if (victim.isSummon()) {
+                log.add(now, EventLog.Kind.WARNING, "Twój sługa " + victim.type().name() + " ginie.");
+                monsters.dismiss(victim);
+            } else {
+                lastMonsterAttackMs = now;
+                onMonsterDeath(victim, now);
+            }
+        } else if (!victim.isSummon()) {
+            monsters.provoke(victim);
+        }
+        return dealt;
     }
 
     /** Efekt zdarzenia HIT_PLAYER: liczba to utracona mana (wyssanie many), nie zdrowie. */
@@ -587,15 +675,20 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     }
 
     private void onPlayerDeath(Monster killer, long now) {
+        onPlayerDeath(killer.type().name(), killer.type(), now);
+    }
+
+    /** Smierc od potwora albo od stanu (killerType = null: zatrucie, podpalenie...). */
+    private void onPlayerDeath(String killerName, MonsterType killerType, long now) {
         long before = pc.experience();
         lastDeathPlace = pc.position();
-        boolean blessed = pc.applyDeathPenalty(minLevel, pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killer.type()));
+        boolean blessed = pc.applyDeathPenalty(minLevel, killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType));
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
-        lastDeath = recap.build(killer.type().name(), before - pc.experience(), blessed, now);
-        log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killer.type().name() + "). Strata: "
+        lastDeath = recap.build(killerName, before - pc.experience(), blessed, now);
+        log.add(now, EventLog.Kind.WARNING, "Zginąłeś (" + killerName + "). Strata: "
                 + (before - pc.experience()) + " exp" + (blessed ? " (połowa dzięki błogosławieństwu)" : "")
                 + ". Odrodzenie w świątyni.");
     }

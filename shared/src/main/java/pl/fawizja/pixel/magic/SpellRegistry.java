@@ -94,23 +94,78 @@ public final class SpellRegistry {
 
     /** Klucz czaru dla wypowiedzianych slow (np. "Utani  Gran Hur") albo null, gdy to nie inkantacja. */
     public String byWords(String said) {
-        return said == null ? null : byWords.get(normalizeWords(said));
+        if (said == null) return null;
+        String exact = byWords.get(normalizeWords(said));
+        if (exact != null) return exact;
+        Incantation i = incantation(said);
+        return i == null ? null : i.key();
     }
 
+    /** Inkantacja z parametrem: klucz czaru i dopisek (np. utevo res "wilk" -> summon_creature, "wilk"). */
+    public record Incantation(String key, String param) {}
+
+    /** Czary przyjmujace dopisek po slowach (imie, nazwa stworzenia). */
+    public static boolean takesParam(SpellType s) {
+        return s.kind() == SpellKind.SUMMON || s.kind() == SpellKind.ILLUSION || s.kind() == SpellKind.HEAL_OTHER;
+    }
+
+    /** Rozpoznaje inkantacje, takze z dopiskiem w cudzyslowie albo bez; null, gdy to nie czar. */
+    public Incantation incantation(String said) {
+        if (said == null) return null;
+        String n = normalizeWords(said);
+        String exact = byWords.get(n);
+        if (exact != null) return new Incantation(exact, null);
+        String best = null;
+        for (Map.Entry<String, String> e : byWords.entrySet()) {
+            String w = e.getKey();
+            if (!n.startsWith(w + " ") && !n.startsWith(w + "\"")) continue;
+            SpellType s = byKey.get(e.getValue());
+            if (s == null || !takesParam(s)) continue;
+            if (best == null || w.length() > best.length()) best = w;
+        }
+        if (best == null) return null;
+        String param = n.substring(best.length()).trim().replace("\"", "").trim();
+        return new Incantation(byWords.get(best), param.isEmpty() ? null : param);
+    }
+
+    /**
+     * Stare klucze czarow sprzed 0.240 (zapisane paski czarow): czar z Tibii, ktory je zastapil.
+     */
+    private static final Map<String, String> LEGACY = Map.ofEntries(
+            Map.entry("mend", "light_healing"), Map.entry("greater_mend", "intense_healing"),
+            Map.entry("vital_surge", "ultimate_healing"), Map.entry("ultimate_mend", "restoration"),
+            Map.entry("holy_mend", "salvation"), Map.entry("inner_calm", "light_healing"),
+            Map.entry("deep_meditation", "intense_healing"), Map.entry("iron_will", "fair_wound_cleansing"),
+            Map.entry("ember_bolt", "flame_strike"), Map.entry("spark_bolt", "energy_strike"),
+            Map.entry("flame_ring", "great_fire_wave"), Map.entry("inferno_bolt", "strong_flame_strike"),
+            Map.entry("storm_ring", "energy_wave"), Map.entry("meteor_bolt", "ultimate_flame_strike"),
+            Map.entry("energy_strike_max", "ultimate_energy_strike"), Map.entry("rage_of_skies", "rage_of_the_skies"),
+            Map.entry("frost_bolt", "ice_strike"), Map.entry("thorn_burst", "terra_strike"),
+            Map.entry("frost_nova", "strong_ice_wave"), Map.entry("glacier_spike", "strong_ice_strike"),
+            Map.entry("earth_quake", "terra_wave"), Map.entry("blizzard_spike", "ultimate_ice_strike"),
+            Map.entry("earth_strike_max", "ultimate_terra_strike"), Map.entry("holy_bolt", "divine_missile"),
+            Map.entry("sacred_nova", "divine_caldera"), Map.entry("piercing_throw", "ethereal_spear"),
+            Map.entry("divine_spear", "holy_flash"), Map.entry("divine_wrath", "divine_dazzle"),
+            Map.entry("light_blade", "divine_missile"), Map.entry("divine_judgement", "sharpshooter"),
+            Map.entry("blade_storm", "front_sweep"), Map.entry("glow", "light"));
+
+    /** Aktualny klucz dla starego (albo ten sam). */
+    public static String current(String key) { return key == null ? null : LEGACY.getOrDefault(key, key); }
+
     /** Slowa czaru albo null, gdy czar nie ma inkantacji. */
-    public String words(String key) { return wordsOf.get(key); }
+    public String words(String key) { return wordsOf.get(current(key)); }
 
     static String normalizeWords(String s) {
         return s.trim().toLowerCase(java.util.Locale.ROOT).replaceAll("\\s+", " ");
     }
 
     public SpellType get(String key) {
-        SpellType s = byKey.get(key);
+        SpellType s = byKey.get(current(key));
         if (s == null) throw new IllegalArgumentException("Unknown spell " + key);
         return s;
     }
 
-    public SpellType find(String key) { return byKey.get(key); }
+    public SpellType find(String key) { return key == null ? null : byKey.get(current(key)); }
 
     public Collection<SpellType> all() { return byKey.values(); }
 

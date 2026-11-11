@@ -1715,6 +1715,7 @@ public final class Hud {
                 case HEAL_SELF: heal = sp; break;
                 case ATTACK_TARGET: attack2 = attack; attack = sp; break;
                 case ATTACK_AREA: area = sp; break;
+                case ATTACK_WAVE: if (area == null || area.kind() == SpellKind.ATTACK_WAVE) area = sp; break; // fala, gdy brak obszaru
                 case LIGHT: if (extra == null || extra.kind() == SpellKind.LIGHT) extra = sp; break;
                 case HASTE: extra = sp; break; // na 300+ przyspieszenie przydaje sie bardziej niz swiatlo
                 default:
@@ -2057,8 +2058,11 @@ public final class Hud {
         } else {
             for (SpellType sp : session.spells().registry().forVocation(pc.vocation())) {
                 pl.fawizja.pixel.magic.SpellKind k = sp.kind();
-                boolean match = pickCat.equals("heal") ? k == pl.fawizja.pixel.magic.SpellKind.HEAL_SELF
-                        : pickCat.equals("attack") ? k.isOffensive() : !k.isHeal() && !k.isOffensive();
+                boolean healing = k == pl.fawizja.pixel.magic.SpellKind.HEAL_SELF || k == pl.fawizja.pixel.magic.SpellKind.HEAL_OTHER
+                        || k == pl.fawizja.pixel.magic.SpellKind.HEAL_PARTY || k == pl.fawizja.pixel.magic.SpellKind.CURE
+                        || k == pl.fawizja.pixel.magic.SpellKind.REGENERATION;
+                boolean match = pickCat.equals("heal") ? healing
+                        : pickCat.equals("attack") ? k.isOffensive() : !healing && !k.isOffensive();
                 if (!match) continue;
                 boolean ok = pc.level() >= sp.minLevel() && pc.skills().level(Skill.MAGIC) >= sp.minMagic();
                 rows.add(new MenuRow(ok ? "pick:set:cast:" + sp.key() : "pick:none", sp.name(),
@@ -3787,7 +3791,35 @@ public final class Hud {
         LIGHT("Światło: pochodnia albo czar", new Color(0.7f, 0.6f, 0.15f, 1f)),
         ENCHANT("Zaklęcie broni od kowala aktywne", new Color(0.45f, 0.25f, 0.7f, 1f)),
         PREMIUM("Konto premium: rejsy statkami między portami", new Color(0.55f, 0.2f, 0.45f, 1f)),
-        PROMOTED("Promocja od króla: szybsza regeneracja", new Color(0.62f, 0.48f, 0.08f, 1f));
+        PROMOTED("Promocja od króla: szybsza regeneracja", new Color(0.62f, 0.48f, 0.08f, 1f)),
+        // 0.240: stany jak w Tibii (ikony w gornym pasku) i wzmocnienia z czarow (pole obok butow)
+        POISONED("Zatrucie: obrażenia co kilka sekund - exana pox", new Color(0.25f, 0.55f, 0.12f, 1f)),
+        BURNING("Podpalenie: obrażenia od ognia - exana flam (druid)", new Color(0.8f, 0.35f, 0.08f, 1f)),
+        ELECTRIFIED("Porażenie: obrażenia od energii - exana vis (druid)", new Color(0.5f, 0.25f, 0.8f, 1f)),
+        BLEEDING("Krwawienie: obrażenia fizyczne - exana kor (druid, rycerz)", new Color(0.6f, 0.08f, 0.1f, 1f)),
+        FREEZING("Wychłodzenie: obrażenia od lodu", new Color(0.3f, 0.6f, 0.85f, 1f)),
+        DAZZLED("Oślepienie: obrażenia od świętości", new Color(0.75f, 0.68f, 0.25f, 1f)),
+        CURSED("Klątwa: obrażenia od śmierci - exana mort (paladyn)", new Color(0.3f, 0.12f, 0.35f, 1f)),
+        DROWNING("Tonięcie: obrażenia od wody", new Color(0.15f, 0.3f, 0.65f, 1f)),
+        SHIELD("Tarcza many: obrażenia zabierają manę", new Color(0.2f, 0.3f, 0.75f, 1f)),
+        INVISIBLE("Niewidzialność: potwory cię nie widzą", new Color(0.4f, 0.4f, 0.5f, 1f)),
+        ILLUSION("Iluzja stworzenia", new Color(0.45f, 0.35f, 0.25f, 1f)),
+        SPELL_BUFF("Wzmocnienie z czaru", new Color(0.65f, 0.2f, 0.15f, 1f)),
+        REGEN("Regeneracja z czaru", new Color(0.2f, 0.5f, 0.3f, 1f));
+
+        /** Ikona stanu (zatrucie...) dla stanu postaci. */
+        static Status of(pl.fawizja.pixel.combat.ConditionType t) {
+            switch (t) {
+                case POISON: return POISONED;
+                case BURNING: return BURNING;
+                case ELECTRIFIED: return ELECTRIFIED;
+                case BLEEDING: return BLEEDING;
+                case FREEZING: return FREEZING;
+                case DAZZLED: return DAZZLED;
+                case CURSED: return CURSED;
+                default: return DROWNING;
+            }
+        }
 
         final String desc;
         final Color color;
@@ -3812,6 +3844,10 @@ public final class Hud {
         if (pc.isPremium()) statuses.add(Status.PREMIUM);
         if (pc.isPromoted()) statuses.add(Status.PROMOTED);
         if (pc.isRunning()) statuses.add(Status.RUNNING);
+        // stany z obrazeniami (zatrucie, podpalenie...) jak ikony stanu w Tibii
+        for (pl.fawizja.pixel.combat.ConditionType t : pl.fawizja.pixel.combat.ConditionType.values()) {
+            if (pc.conditions().has(t)) statuses.add(0, Status.of(t));
+        }
     }
 
     // ------------------------------------------------------------------ gorny pasek
@@ -3898,6 +3934,16 @@ public final class Hud {
         else if (pc.isTorchLit()) buffs.add(new Buff(Status.LIGHT, itemIcon(session, "torch"), "Światło: pochodnia"));
         if (pc.fedMs() > 0) buffs.add(new Buff(Status.FED, itemIcon(session, "bread"), "Najedzony: szybsza regeneracja (" + minutes(pc.fedMs()) + ")"));
         if (pc.isBlessed()) buffs.add(new Buff(Status.BLESSED, null, Status.BLESSED.desc));
+        // 0.240: czary z Tibii
+        if (pc.magicShieldMs() > 0) buffs.add(new Buff(Status.SHIELD, null, "Tarcza many: " + pc.magicShield() + " pkt (" + minutes(pc.magicShieldMs()) + ")"));
+        if (pc.isInvisible()) buffs.add(new Buff(Status.INVISIBLE, null, Status.INVISIBLE.desc + " (" + minutes(pc.invisibleMs()) + ")"));
+        if (pc.illusion() != null) buffs.add(new Buff(Status.ILLUSION, null, Status.ILLUSION.desc + " (" + minutes(pc.illusionMs()) + ")"));
+        if (pc.spellRegenMs() > 0) buffs.add(new Buff(Status.REGEN, null, Status.REGEN.desc + " (" + minutes(pc.spellRegenMs()) + ")"));
+        for (java.util.Map.Entry<String, Long> e : pc.spellBuffs().entrySet()) {
+            pl.fawizja.pixel.magic.SpellType sp = session.spells().registry().find(e.getKey());
+            buffs.add(new Buff(Status.SPELL_BUFF, null, (sp == null ? e.getKey() : sp.name() + ": " + sp.description())
+                    + " (" + Math.max(1, e.getValue() / 1000) + " s)"));
+        }
     }
 
     /** Pole na lewo od butow (wiersz 4, kolumna 1 lalki): {x, y}. */
@@ -4114,6 +4160,66 @@ public final class Hud {
                     break;
                 case PROMOTED: // gwiazda promocji
                     star(s, cx, cy, 6f);
+                    break;
+                case POISONED: // kropla trucizny
+                case BLEEDING: // kropla krwi
+                    s.circle(cx, cy - 1.5f, 3.6f, 12);
+                    s.triangle(cx - 3.4f, cy - 0.5f, cx + 3.4f, cy - 0.5f, cx, cy + 5.5f);
+                    break;
+                case BURNING: // plomien
+                    s.triangle(cx - 4, cy - 2, cx + 4, cy - 2, cx, cy + 6);
+                    s.circle(cx, cy - 2.5f, 4, 12);
+                    break;
+                case ELECTRIFIED: // blyskawica
+                    s.rectLine(cx + 3, cy + 6, cx - 2, cy, 1.8f);
+                    s.rectLine(cx - 2, cy, cx + 2, cy, 1.8f);
+                    s.rectLine(cx + 2, cy, cx - 3, cy - 6, 1.8f);
+                    break;
+                case FREEZING: // sniezynka
+                    s.rectLine(cx - 5, cy, cx + 5, cy, 1.4f);
+                    s.rectLine(cx - 3.5f, cy - 4.5f, cx + 3.5f, cy + 4.5f, 1.4f);
+                    s.rectLine(cx - 3.5f, cy + 4.5f, cx + 3.5f, cy - 4.5f, 1.4f);
+                    break;
+                case DAZZLED: // slonce
+                    s.circle(cx, cy, 3, 10);
+                    s.rectLine(cx - 6, cy, cx + 6, cy, 1.2f);
+                    s.rectLine(cx, cy - 6, cx, cy + 6, 1.2f);
+                    break;
+                case CURSED: // czaszka
+                    s.circle(cx, cy + 1, 4.5f, 12);
+                    s.rect(cx - 2.5f, cy - 5, 5, 3);
+                    s.setColor(st.color);
+                    s.circle(cx - 1.8f, cy + 1, 1.2f, 6);
+                    s.circle(cx + 1.8f, cy + 1, 1.2f, 6);
+                    break;
+                case DROWNING: // fale
+                    s.rectLine(cx - 5, cy + 2, cx + 5, cy + 2, 1.5f);
+                    s.rectLine(cx - 5, cy - 2, cx + 5, cy - 2, 1.5f);
+                    break;
+                case SHIELD: // kolo tarczy
+                    s.circle(cx, cy, 5, 14);
+                    s.setColor(st.color);
+                    s.circle(cx, cy, 3, 12);
+                    break;
+                case INVISIBLE: // oko
+                    s.ellipse(cx - 5, cy - 2.5f, 10, 5);
+                    s.setColor(st.color);
+                    s.circle(cx, cy, 1.6f, 8);
+                    break;
+                case ILLUSION: // maska
+                    s.ellipse(cx - 4.5f, cy - 4, 9, 8);
+                    s.setColor(st.color);
+                    s.circle(cx - 1.8f, cy + 0.5f, 1.2f, 6);
+                    s.circle(cx + 1.8f, cy + 0.5f, 1.2f, 6);
+                    break;
+                case REGEN: // krzyz
+                    s.rect(cx - 1.5f, cy - 5, 3, 10);
+                    s.rect(cx - 5, cy - 1.5f, 10, 3);
+                    break;
+                case SPELL_BUFF: // miecz w gore
+                    s.rect(cx - 1, cy - 3, 2, 9);
+                    s.rect(cx - 4, cy - 3, 8, 1.6f);
+                    s.rect(cx - 1, cy - 6, 2, 3);
                     break;
                 default: // blysk zaklecia
                     s.rectLine(cx - 4, cy - 5, cx + 1, cy + 1, 1.6f);

@@ -94,6 +94,8 @@ public final class SpellSystem {
     public interface Ally {
         Position position();
         int health();
+        /** Imie (exura sio "imie"); domyslnie puste. */
+        default String name() { return ""; }
         /** Leczy i zwraca, ile faktycznie przybylo. */
         int heal(int amount);
     }
@@ -302,9 +304,27 @@ public final class SpellSystem {
         return best == null ? null : best.key();
     }
 
-    public CastResult cast(String key, long now) {
+    public CastResult cast(String key, long now) { return cast(key, null, now); }
+
+    /** Dopisek biezacego rzutu (nazwa stworzenia, imie) albo null. */
+    private String castParam;
+
+    /**
+     * Czar z dopiskiem jak w Tibii: utevo res "wilk", utevo res ina "szkielet", exura sio "imie".
+     * Bez dopisku czar wybiera sam (najsilniejszy sluga na ktorego starczy many, wyglad celu, najbardziej ranny).
+     */
+    public CastResult cast(String key, String param, long now) {
         SpellType s = spells.find(key);
         if (s == null || s.kind().isRune()) return CastResult.NOT_USABLE;
+        castParam = param == null || param.isBlank() ? null : param.trim();
+        try {
+            return castChecked(s, now);
+        } finally {
+            castParam = null;
+        }
+    }
+
+    private CastResult castChecked(SpellType s, long now) {
         CastResult r = check(s, now, true);
         if (r != CastResult.OK) return report(r, now);
         // Kolo Przeznaczenia: premie czaru na czas rzutu (mana, odnowienie, wartosc, krytyk, kradziez)
@@ -318,14 +338,50 @@ public final class SpellSystem {
             wheelFactor = 1;
         }
         if (r != CastResult.OK) return report(r, now);
-        int mana = pl.fawizja.pixel.wheel.WheelSpells.mana(pc, s);
-        pc.spendMana(mana);
+        int mana = pl.fawizja.pixel.wheel.WheelSpells.mana(pc, s) + extraMana;
+        extraMana = 0;
+        pc.spendMana(Math.min(mana, pc.mana()));
         trainMagic(mana, now);
         if (s.monkRole() != MonkRole.NONE) afterMonkCast(s, now);
         long cd = pl.fawizja.pixel.wheel.WheelSpells.cooldownMs(pc, s);
         cooldowns.trigger(s, now, cd);
         for (String k : pl.fawizja.pixel.wheel.WheelSpells.linked(s.key())) if (spells.find(k) != null) cooldowns.trigger(spells.find(k), now, cd);
+        triggerSecondaryGroup(s, now);
+        if (s.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
         return CastResult.OK;
+    }
+
+    /** Dodatkowa mana rzutu (przywolanie: koszt stworzenia jak w Tibii). */
+    private int extraMana;
+
+    /**
+     * Drugie wspolne odnowienia z Tibii (Canary spell:group("attack", "special")): silne uderzenia i Blyskawica 8 s,
+     * ostateczne uderzenia 30 s, czary skupienia 40 s, wielkie promienie 6 s.
+     */
+    private static final java.util.Map<String, String> SECONDARY = java.util.Map.ofEntries(
+            java.util.Map.entry("strong_flame_strike", "special"), java.util.Map.entry("strong_energy_strike", "special"),
+            java.util.Map.entry("strong_ice_strike", "special"), java.util.Map.entry("strong_terra_strike", "special"),
+            java.util.Map.entry("lightning", "special"),
+            java.util.Map.entry("ultimate_flame_strike", "ultimate"), java.util.Map.entry("ultimate_energy_strike", "ultimate"),
+            java.util.Map.entry("ultimate_ice_strike", "ultimate"), java.util.Map.entry("ultimate_terra_strike", "ultimate"),
+            java.util.Map.entry("hells_core", "focus"), java.util.Map.entry("rage_of_the_skies", "focus"),
+            java.util.Map.entry("eternal_winter", "focus"), java.util.Map.entry("wrath_of_nature", "focus"),
+            java.util.Map.entry("great_energy_beam", "beams"), java.util.Map.entry("great_death_beam", "beams"));
+    private static final java.util.Map<String, Long> SECONDARY_MS = java.util.Map.of("special", 8000L, "ultimate", 30000L,
+            "focus", 40000L, "beams", 6000L);
+
+    /** Nazwa drugiej grupy odnowienia czaru (np. "special") albo null. */
+    public static String secondaryGroup(String key) { return SECONDARY.get(key); }
+
+    private void triggerSecondaryGroup(SpellType s, long now) {
+        String g = SECONDARY.get(s.key());
+        if (g == null) return;
+        long ms = SECONDARY_MS.get(g);
+        for (java.util.Map.Entry<String, String> e : SECONDARY.entrySet()) {
+            SpellType o = spells.find(e.getKey());
+            if (o == null || o == s || !e.getValue().equals(g)) continue;
+            if (cooldowns.remaining(o, now) < ms) cooldowns.extend(o, now + ms);
+        }
     }
 
     /** Mnoznik wartosci biezacego rzutu z Kola Przeznaczenia (1 poza rzutem). */
@@ -343,11 +399,10 @@ public final class SpellSystem {
         if (spell && pc.mana() < pl.fawizja.pixel.wheel.WheelSpells.mana(pc, s)) return CastResult.NOT_ENOUGH_MANA;
         if (!cooldowns.ready(s, now) || pl.fawizja.pixel.wheel.WheelSpells.avatarCoolingDown(pc, s)) return CastResult.COOLDOWN;
         if (s.kind().isOffensive() && world.isProtectionZone(pc.position())) return CastResult.PROTECTION_ZONE;
-        if ((s.kind() == SpellKind.ATTACK_AREA || s.kind() == SpellKind.RUNE_AREA) && playerTarget != null
-                && playerTarget.areaForbidden(now)) return CastResult.BLACK_SKULL;
+        if (s.kind().isArea() && playerTarget != null && playerTarget.areaForbidden(now)) return CastResult.BLACK_SKULL;
         if (s.kind().needsTarget()) {
             Monster t = combat.target();
-            Position tp = t != null && !t.isDead() ? t.position() : playerTargetPosition();
+            Position tp = t != null && !t.isDead() ? t.position() : monsterOnly(s.kind()) ? null : playerTargetPosition();
             if (tp == null || tp.z() != pc.position().z()) return CastResult.NO_TARGET;
             if (pc.position().distanceTo(tp) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
             if (!world.hasLineOfSight(pc.position(), tp)) return CastResult.NOT_VISIBLE;
@@ -355,6 +410,15 @@ public final class SpellSystem {
         int area = s.radius() + pl.fawizja.pixel.wheel.WheelSpells.augment(pc, s).extraRadius;
         if (s.kind() == SpellKind.ATTACK_AREA && targetsAround(pc.position(), area).isEmpty()
                 && !playerInArea(pc.position(), area)) return CastResult.NO_TARGET;
+        if (s.kind() == SpellKind.ATTACK_WAVE && waveTargets(s).isEmpty() && !playerInWave(s)) return CastResult.NO_TARGET;
+        if (s.kind().targetsTile()) {
+            Position aim = aim(s);
+            if (aim == null) return CastResult.NO_TARGET;
+            if (pc.position().distanceTo(aim) > Math.max(1, s.range())) return CastResult.OUT_OF_RANGE;
+            if (!aim.equals(pc.position()) && !world.hasLineOfSight(pc.position(), aim)) return CastResult.NOT_VISIBLE;
+        }
+        if ((s.kind() == SpellKind.CURE || s.kind() == SpellKind.RUNE_CURE)
+                && !pc.conditions().has(pl.fawizja.pixel.combat.ConditionType.of(s.damageType()))) return CastResult.NO_CONDITION;
         if (s.kind() == SpellKind.CONJURE && s.consumesItem() != null
                 && pc.backpack().count(items.byKey(s.consumesItem()).id()) < 1) return CastResult.MISSING_ITEM;
         return CastResult.OK;
@@ -464,8 +528,9 @@ public final class SpellSystem {
                 return CastResult.OK;
             }
             case LIGHT:
-                pc.addLightBuff(s.radius(), LIGHT_SPELL_MS);
-                log.add(now, EventLog.Kind.INFO, "Światło otacza postać.");
+                pc.addLightBuff(s.radius(), s.range() > 0 ? s.range() * 1000L : LIGHT_SPELL_MS);
+                combat.addEvent(CombatEvent.area(now, pc.position(), 0, "HASTE"));
+                log.add(now, EventLog.Kind.INFO, "Światło otacza postać (" + Math.max(1, (s.range() > 0 ? s.range() : LIGHT_SPELL_MS / 1000) / 60) + " min).");
                 return CastResult.OK;
             case HASTE: {
                 int before = pc.speed();
@@ -486,7 +551,7 @@ public final class SpellSystem {
                 return CastResult.OK;
             }
             default:
-                return CastResult.NOT_USABLE;
+                return tibia.apply(s, now);
         }
     }
 
@@ -552,13 +617,81 @@ public final class SpellSystem {
         return new ArrayList<>(all.subList(0, max));
     }
 
-    private List<Monster> targetsAround(Position center, int radius) {
+    List<Monster> targetsAround(Position center, int radius) {
         List<Monster> out = new ArrayList<>();
         for (Monster m : monsters.near(center, radius)) {
-            if (!m.isDead() && m.position().z() == center.z() && world.hasLineOfSight(center, m.position())) out.add(m);
+            if (!m.isDead() && !m.isSummon() && m.position().z() == center.z() && world.hasLineOfSight(center, m.position())) out.add(m);
         }
         return out;
     }
+
+    // ------------------------------------------------------------------ czary jak w Tibii (0.240): TibiaSpells
+
+    private final TibiaSpells tibia = new TibiaSpells(this);
+
+    /** Efekty czarow i run z Tibii: fale, stany, pola, sludzy, lewitacja ({@link TibiaSpells}). */
+    public TibiaSpells tibia() { return tibia; }
+
+    PlayerCharacter pc() { return pc; }
+    WorldMap world() { return world; }
+    ItemRegistry items() { return items; }
+    CombatSystem combat() { return combat; }
+    MonsterManager monsters() { return monsters; }
+    EventLog log() { return log; }
+    Random rng() { return rng; }
+    String param() { return castParam; }
+    void addExtraMana(int m) { extraMana += m; }
+    int rollValue(SpellType s) { return roll(s); }
+    Position playerTargetPos() { return playerTargetPosition(); }
+    PlayerTargeting playerTargeting() { return playerTarget; }
+    List<Ally> allies() { return visibleAllies(); }
+    void strikeArea(Position center, SpellType s, List<Monster> hit, long now) { areaStrike(center, s, hit, now); }
+
+    private static boolean monsterOnly(SpellKind k) {
+        return k == SpellKind.CONDITION_TARGET || k == SpellKind.RUNE_CONDITION || k == SpellKind.RUNE_PARALYSE
+                || k == SpellKind.RUNE_CONVINCE;
+    }
+
+    /** Kierunek patrzenia postaci (fale, sciany z run, lewitacja); ustawia sesja. */
+    private java.util.function.Supplier<pl.fawizja.pixel.world.Direction> facing = () -> pl.fawizja.pixel.world.Direction.SOUTH;
+
+    public void setFacing(java.util.function.Supplier<pl.fawizja.pixel.world.Direction> f) { if (f != null) facing = f; }
+
+    pl.fawizja.pixel.world.Direction facing() { return facing.get(); }
+
+    /** Lewitacja i magiczna lina (exani hur, exani tera) - wykonuje sesja, ktora zna mape przejsc i domy. */
+    public interface Mover {
+        /** Exani hur: true = wykonano; false = brak miejsca (komunikat wypisuje sesja). */
+        boolean levitate(boolean up, long now);
+        /** Exani tera: true = wyciagnieto. */
+        boolean magicRope(long now);
+    }
+
+    private Mover mover;
+
+    public void setMover(Mover m) { mover = m; }
+
+    Mover mover() { return mover; }
+
+    /** Pole celu runy na pole: wybrany cel albo pole przed postacia (bez osobnego celownika). */
+    Position aim(SpellType s) {
+        Monster t = combat.target();
+        if (t != null && !t.isDead() && t.position().z() == pc.position().z()) return t.position();
+        Position pp = playerTargetPosition();
+        if (pp != null) return pp;
+        pl.fawizja.pixel.world.Direction d = facing();
+        return pc.position().translate(d.dx, d.dy);
+    }
+
+    List<Monster> waveTargets(SpellType s) { return tibia.waveTargets(s); }
+
+    private boolean playerInWave(SpellType s) { return tibia.playerInWave(s); }
+
+    /**
+     * Krok efektow czarow w czasie (co klatke gry): stany na potworach (utori, ogien duszy, pola), sludzy (utevo res),
+     * pola pod potworami wlasciciela.
+     */
+    public void updateEffects(long now) { tibia.update(now); }
 
     private void trainMagic(int mana, long now) {
         if (mana <= 0) return;
@@ -617,9 +750,19 @@ public final class SpellSystem {
         CastResult r = check(effect, now, false);
         if (r != CastResult.OK) return report(r, now);
         r = apply(effect, now);
-        if (r != CastResult.OK) return report(r, now);
+        if (r != CastResult.OK) {
+            extraMana = 0;
+            return report(r, now);
+        }
+        if (extraMana > 0) {
+            // runa przekonania: koszt many stworzenia jak w Tibii
+            pc.spendMana(Math.min(extraMana, pc.mana()));
+            trainMagic(extraMana, now);
+            extraMana = 0;
+        }
         pc.backpack().takeFromSlot(slot, 1);
         cooldowns.trigger(effect, now);
+        if (effect.kind().isOffensive() && pc.breakInvisibility()) log.add(now, EventLog.Kind.INFO, "Atakujesz - niewidzialność znika.");
         return CastResult.OK;
     }
 

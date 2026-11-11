@@ -382,7 +382,7 @@ class NetworkSyncTest {
                 for (int i = 0; i < order.length; i++) {
                     ServerPlayer p = server.world().find(order[i]);
                     PlayerCharacter pc = p.session.character();
-                    pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(40) - pc.experience());
+                    pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(60) - pc.experience());
                     pc.heal(pc.maxHealth());
                     pc.restoreMana(pc.maxMana());
                     p.session.teleport(field.translate(i, 0), server.now());
@@ -390,9 +390,9 @@ class NetworkSyncTest {
                 ready.set(true);
             });
             await("ready", ready::get);
-            await("all level 40", () -> {
+            await("all level 60", () -> {
                 try {
-                    return self(a).level() >= 40 && self(b).level() >= 40 && self(c).level() >= 40
+                    return self(a).level() >= 60 && self(b).level() >= 60 && self(c).level() >= 60
                             && seen(b, "Ivo") != null && seen(c, "Ivo") != null;
                 } catch (Exception e) {
                     return false;
@@ -406,7 +406,7 @@ class NetworkSyncTest {
             assertEquals("NONE", seen(b, "Ivo").mark());
 
             // ale krag ognia rani Jana i Ole takze bez trybu PvP: Ivo dostaje biala czaszke i blokade PZ
-            a.send("ACT", "cast:flame_ring");
+            a.send("ACT", "cast:rage_of_the_skies"); // 0.240: czar obszarowy z Tibii (poziom 55)
             awaitMessage(a, "white skull and pz block", m -> m[0].equals("PVP") && m[2].equals("WHITE")
                     && Long.parseLong(m[4]) > 0);
             await("both hurt, everyone sees the skull", () -> {

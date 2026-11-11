@@ -418,6 +418,98 @@ public final class MonsterManager {
         respawnQueue.computeIfAbsent(m.spawn(), k -> new ArrayList<>()).add(now + m.spawn().respawnSeconds() * 1000L);
     }
 
+    // ------------------------------------------------------------------ slugi graczy (utevo res, przekonanie)
+
+    /**
+     * Przywoluje sluge gracza na wolnym polu obok near (jak w Tibii obok rzucajacego). Sluga nie odradza sie i nie
+     * poluje na graczy. Zwraca stworzenie albo null, gdy nie ma miejsca.
+     */
+    public Monster spawnSummon(String monsterKey, Position near, String owner, long now) {
+        MonsterType t = registry.get(monsterKey);
+        Position spot = freeSpotNear(near, 2);
+        if (spot == null) return null;
+        SpawnPoint sp = new SpawnPoint(monsterKey, spot, 0, 1, 1);
+        eventSpawns.add(sp);
+        Monster m = new Monster(nextId++, t, sp, spot);
+        m.setOwner(owner);
+        m.setState(MonsterState.CHASE);
+        m.setNextAttackMs(now + 1000);
+        monsters.add(m);
+        grid.add(m);
+        return m;
+    }
+
+    /** Runa przekonania: dziki potwor staje sie sluga gracza (jego spawn odrodzi nowego, gdy sluga zginie). */
+    public void convert(Monster m, String owner) {
+        m.setOwner(owner);
+        m.setTarget(null);
+        m.setState(MonsterState.CHASE);
+    }
+
+    /** Wolne pole najblizej p (najpierw sasiednie), na ktorym moze stanac potwor; null, gdy brak. */
+    public Position freeSpotNear(Position p, int radius) {
+        for (int r = 1; r <= radius; r++) {
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) != r) continue;
+                    Position q = p.translate(dx, dy);
+                    if (canOccupy(q, p) && world.hasLineOfSight(p, q)) return q;
+                }
+            }
+        }
+        return null;
+    }
+
+    /** Przenosi sluge obok wlasciciela (zmiana pietra, teleport), jak w Tibii slugi ida za graczem. */
+    public boolean teleportSummon(Monster m, Position near) {
+        Position spot = freeSpotNear(near, 2);
+        if (spot == null) return false;
+        Position from = m.position();
+        m.placeAt(spot);
+        grid.moved(m, from);
+        return true;
+    }
+
+    /** Krok slugi w strone celu (prosta heurystyka: sasiednie pole najblizej celu). true, gdy ruszyl. */
+    public boolean stepToward(Monster m, Position goal, Position owner, long now) {
+        if (m.isMoving(now) || now < m.nextActionMs()) return false;
+        Position from = m.position();
+        Direction best = null;
+        int bestD = from.distanceTo(goal);
+        double bestE = Double.MAX_VALUE;
+        for (Direction d : Direction.values()) {
+            Position to = from.translate(d.dx, d.dy);
+            if (to.equals(goal) || !canOccupy(to, owner) || !cornerFree(from, d)) continue;
+            int dd = to.distanceTo(goal);
+            double e = Math.hypot(to.x() - goal.x(), to.y() - goal.y()) + (d.diagonal() ? 0.3 : 0);
+            if (dd < bestD || dd == bestD && e < bestE && best != null) {
+                best = d;
+                bestD = dd;
+                bestE = e;
+            }
+        }
+        if (best == null) return false;
+        long ms = Balance.stepDurationMs(m.type().speed(), false)
+                * (best.diagonal() ? pl.fawizja.pixel.movement.MovementSystem.DIAGONAL_STEP_FACTOR : 1);
+        Position to = from.translate(best.dx, best.dy);
+        m.moveTo(to, best, now, ms);
+        m.setNextActionMs(now + ms);
+        grid.moved(m, from);
+        return true;
+    }
+
+    /** Czy potwor (sluga albo dziki przy odwecie na sludze) moze juz zaatakowac. */
+    public boolean attackReady(Monster m, long now) { return now >= m.nextAttackMs(); }
+
+    /** Zaznacza atak potwora (nastepny po jego odstepie ataku). */
+    public void markAttacked(Monster m, long now) { m.setNextAttackMs(now + m.type().attackIntervalMs()); }
+
+    /** Odwolanie slugi (smierc wlasciciela, wylogowanie): znika bez ciala i lupu. */
+    public void dismiss(Monster m) {
+        monsters.remove(m);
+        grid.remove(m, m.position());
+    }
+
     /** Potwor trafiony z daleka (czar, runa) przestaje stac bezczynnie i rusza na gracza. */
     public void provoke(Monster m) {
         if (!m.isDead() && m.state() == MonsterState.IDLE) m.setState(MonsterState.CHASE);
@@ -476,7 +568,7 @@ public final class MonsterManager {
         java.util.LinkedHashSet<Monster> active = new java.util.LinkedHashSet<>();
         for (Target tg : targets) active.addAll(grid.query(tg.position(), ACTIVE_RADIUS, scratch));
         for (Monster m : new ArrayList<>(active)) {
-            if (m.isDead()) continue;
+            if (m.isDead() || m.isSummon()) continue; // slugi prowadzi sesja wlasciciela (SpellSystem)
             Target tg = chooseTarget(m, targets);
             if (tg != null) think(m, now, tg, handler);
         }

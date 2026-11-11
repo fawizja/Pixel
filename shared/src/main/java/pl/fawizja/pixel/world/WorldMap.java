@@ -65,6 +65,11 @@ public final class WorldMap {
         return wallLights;
     }
 
+    private final Fields fields = new Fields();
+
+    /** Pola magiczne z run (ogien, trucizna, energia, magiczna sciana, dziki wzrost). */
+    public Fields fields() { return fields; }
+
     public List<Town> towns() { return Collections.unmodifiableList(towns); }
     public List<Region> regions() { return Collections.unmodifiableList(regions); }
 
@@ -113,7 +118,19 @@ public final class WorldMap {
 
     public boolean isWalkable(Position p) {
         FloorMap f = fl(p.z());
+        return f != null && f.isWalkable(p.x(), p.y()) && !fields.blocks(p);
+    }
+
+    /** Przechodniosc samego kafelka mapy (bez magicznej sciany i dzikiego wzrostu). */
+    public boolean floorWalkable(Position p) {
+        FloorMap f = fl(p.z());
         return f != null && f.isWalkable(p.x(), p.y());
+    }
+
+    /** Czy na kafelku jest podloze (pietro wyzej bez podloza = pustka, przez ktora dziala exani hur). */
+    public boolean hasGround(Position p) {
+        FloorMap f = fl(p.z());
+        return f != null && f.get(Layer.GROUND, p.x(), p.y()) != TileType.EMPTY;
     }
 
     /** Zob. {@link FloorMap#isSqueezable(int, int)}. */
@@ -309,7 +326,7 @@ public final class WorldMap {
             int e2 = 2 * err;
             if (e2 >= dy) { err += dy; x0 += sx; }
             if (e2 <= dx) { err += dx; y0 += sy; }
-            if ((x0 != x1 || y0 != y1) && f.blocksSight(x0, y0)) return false;
+            if ((x0 != x1 || y0 != y1) && (f.blocksSight(x0, y0) || fields.size() > 0 && fields.blocks(new Position(x0, y0, a.z())))) return false;
         }
     }
 

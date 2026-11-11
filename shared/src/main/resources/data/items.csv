@@ -42,9 +42,9 @@
 58;steel_spear;Stalowa włócznia;WEAPON;1;800;WEAPON;34;0;0;25;PALADIN;0;7;PHYSICAL;DISTANCE;-;#d8d8e0;Wyważona stalowa włócznia, wraca do ręki.
 59;great_health_potion;Silna mikstura zdrowia;POTION;100;190;NONE;0;0;0;50;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;-;#a8102a;Silna mikstura zdrowia dla wojowników od poziomu 50.
 60;great_mana_potion;Silna mikstura many;POTION;100;120;NONE;0;0;0;50;DRUID,SORCERER,PALADIN;0;0;PHYSICAL;-;-;#2a2aa8;Silna mikstura many od poziomu 50.
-61;fireburst_rune;Runa wybuchu ognia;RUNE;100;45;NONE;0;0;0;0;*;0;0;FIRE;-;-;#ff5a20;Runa: wybuch ognia wokół celu (promień 1).
-62;boulder_rune;Runa głazu;RUNE;100;30;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#9a8a70;Runa: ciska głazem w cel.
-63;healing_rune;Runa leczenia;RUNE;100;80;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#60e080;Runa: leczy użytkownika.
+61;fireburst_rune;Runa kuli ognia;RUNE;100;60;NONE;0;0;0;27;*;0;0;FIRE;-;-;#ff5a20;Runa kuli ognia (Fireball): pocisk ognia w cel. Poziom 27, magia 4.
+62;boulder_rune;Runa stalagmitu;RUNE;100;24;NONE;0;0;0;24;*;0;0;EARTH;-;-;#9a8a70;Runa stalagmitu (Stalagmite): kolec ziemi w cel. Poziom 24, magia 3.
+63;healing_rune;Runa silnego leczenia;RUNE;100;190;NONE;0;0;0;15;*;0;0;PHYSICAL;-;-;#60e080;Runa silnego leczenia (Intense Healing): leczy użytkownika. Poziom 15, magia 1.
 64;fish;Ryba;FOOD;100;5;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#7aa8c8;Świeża ryba z jeziora.
 65;pearl;Perła;MATERIAL;100;100;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#f0eef8;Rzadka perła z jeziora - cenna u jubilerów.
 66;frost_pelt;Mroźne futro;MATERIAL;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#dce8f0;Futro śnieżnego wilka.
@@ -128,8 +128,8 @@
 142;coral_armor;Koralowa zbroja;ARMOR;1;60000;ARMOR;0;0;13;350;*;0;0;PHYSICAL;-;ICE:5,ENERGY:-5;#c07050;Zbroja z płyt koralu, lekka i twarda.
 143;coral_legs;Koralowe nagolenniki;ARMOR;1;36000;LEGS;0;0;8;350;*;0;0;PHYSICAL;-;MANA_DRAIN:15;#c07050;Nagolenniki z koralu raf.
 144;coral_shield;Tarcza z muszli;SHIELD;1;52000;SHIELD;0;33;0;350;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;ICE:4;#e09080;Tarcza z muszli olbrzymiego kraba.
-145;great_fireball_rune;Runa wielkiej kuli ognia;RUNE;100;120;NONE;0;0;0;30;*;0;0;FIRE;-;-;#ff7a10;Runa: wielka kula ognia wokół celu (promień 2).
-146;avalanche_rune;Runa lawiny;RUNE;100;120;NONE;0;0;0;30;*;0;0;ICE;-;-;#7ad0ff;Runa: lawina lodu wokół celu (promień 2).
+145;great_fireball_rune;Runa wielkiej kuli ognia;RUNE;100;120;NONE;0;0;0;30;*;0;0;FIRE;-;-;#ff7a10;Runa wielkiej kuli ognia (Great Fireball): ogień w promieniu 3 wokół celu. Poziom 30, magia 4.
+146;avalanche_rune;Runa lawiny;RUNE;100;120;NONE;0;0;0;30;*;0;0;ICE;-;-;#7ad0ff;Runa lawiny (Avalanche): lód w promieniu 3 wokół celu. Poziom 30, magia 4.
 147;sudden_death_rune;Runa nagłej śmierci;RUNE;100;270;NONE;0;0;0;45;*;0;0;DEATH;-;-;#4a3050;Runa: potężny cios śmierci w jeden cel.
 148;ultimate_healing_rune;Runa ostatecznego leczenia;RUNE;100;350;NONE;0;0;0;24;*;0;0;PHYSICAL;-;-;#f0f0f0;Runa: bardzo silne leczenie użytkownika.
 149;great_spirit_potion;Silna mikstura ducha;POTION;100;460;NONE;0;0;0;80;PALADIN;0;0;PHYSICAL;-;-;#8a3aa8;Przywraca zdrowie i manę paladyna od poziomu 80.
@@ -212,3 +212,28 @@
 234;greater_spiritualist_gem;Większy klejnot spirytualisty;MATERIAL;100;200000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e8b840;Lśni mocą mnichów. Odkryj jego modyfikatory w Pracowni klejnotów (Koło Przeznaczenia).
 235;lesser_gem_fragment;Mniejszy okruch klejnotu;MATERIAL;100;5000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#c8b8a0;Z rozbitego mniejszego albo zwykłego klejnotu. Podnosi stopień modyfikatorów podstawowych.
 236;greater_gem_fragment;Większy okruch klejnotu;MATERIAL;100;20000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#f0a0d0;Z rozbitego większego klejnotu. Podnosi stopień modyfikatorów najwyższych.
+# 0.240: runy jak w Tibii (pola, bomby, sciany, magiczna sciana, paraliz, przekonanie, ozywienie zwlok)
+251;light_magic_missile_rune;Runa lekkiego pocisku;RUNE;100;9;NONE;0;0;0;15;*;0;0;ENERGY;-;-;#a0c8ff;Runa lekkiego magicznego pocisku (Light Magic Missile): słaby pocisk energii. Poziom 15.
+252;heavy_magic_missile_rune;Runa ciężkiego pocisku;RUNE;100;24;NONE;0;0;0;25;*;0;0;ENERGY;-;-;#5080ff;Runa ciężkiego magicznego pocisku (Heavy Magic Missile): pocisk energii. Poziom 25, magia 3.
+253;icicle_rune;Runa sopla;RUNE;100;60;NONE;0;0;0;28;*;0;0;ICE;-;-;#a8e8ff;Runa sopla (Icicle): lodowy pocisk w cel. Poziom 28, magia 4.
+254;holy_missile_rune;Runa świętego pocisku;RUNE;100;32;NONE;0;0;0;27;*;0;0;HOLY;-;-;#fff090;Runa świętego pocisku (Holy Missile): święte światło w cel. Poziom 27, magia 4.
+255;thunderstorm_rune;Runa burzy;RUNE;100;95;NONE;0;0;0;28;*;0;0;ENERGY;-;-;#9070ff;Runa burzy (Thunderstorm): pioruny w promieniu 3 wokół celu. Poziom 28, magia 4.
+256;stone_shower_rune;Runa deszczu kamieni;RUNE;100;76;NONE;0;0;0;28;*;0;0;EARTH;-;-;#a08050;Runa deszczu kamieni (Stone Shower): kamienie w promieniu 3 wokół celu. Poziom 28, magia 4.
+257;explosion_rune;Runa eksplozji;RUNE;100;63;NONE;0;0;0;31;*;0;0;PHYSICAL;-;-;#e08040;Runa eksplozji (Explosion): wybuch w krzyż wokół celu. Poziom 31, magia 6.
+258;antidote_rune;Runa odtrutki;RUNE;100;130;NONE;0;0;0;15;*;0;0;EARTH;-;-;#60c040;Runa odtrutki (Cure Poison Rune): leczy zatrucie. Poziom 15.
+259;poison_field_rune;Runa pola trucizny;RUNE;100;42;NONE;0;0;0;14;*;0;0;EARTH;-;-;#40a030;Runa pola trucizny (Poison Field): pole trucizny na 4 minuty. Poziom 14.
+260;fire_field_rune;Runa pola ognia;RUNE;100;56;NONE;0;0;0;15;*;0;0;FIRE;-;-;#ff7030;Runa pola ognia (Fire Field): płonące pole na kilka minut. Poziom 15, magia 1.
+261;energy_field_rune;Runa pola energii;RUNE;100;76;NONE;0;0;0;18;*;0;0;ENERGY;-;-;#80a0ff;Runa pola energii (Energy Field): pole energii na 98 s. Poziom 18, magia 3.
+262;poison_bomb_rune;Runa bomby trucizny;RUNE;100;170;NONE;0;0;0;25;*;0;0;EARTH;-;-;#309020;Runa bomby trucizny (Poison Bomb): pola trucizny 3x3. Poziom 25, magia 4.
+263;fire_bomb_rune;Runa bomby ognia;RUNE;100;295;NONE;0;0;0;27;*;0;0;FIRE;-;-;#e05020;Runa bomby ognia (Fire Bomb): pola ognia 3x3. Poziom 27, magia 5.
+264;energy_bomb_rune;Runa bomby energii;RUNE;100;410;NONE;0;0;0;37;*;0;0;ENERGY;-;-;#6080ff;Runa bomby energii (Energy Bomb): pola energii 3x3. Poziom 37, magia 10.
+265;poison_wall_rune;Runa ściany trucizny;RUNE;100;105;NONE;0;0;0;29;*;0;0;EARTH;-;-;#50b040;Runa ściany trucizny (Poison Wall): 5 pól trucizny w poprzek. Poziom 29, magia 5.
+266;fire_wall_rune;Runa ściany ognia;RUNE;100;123;NONE;0;0;0;33;*;0;0;FIRE;-;-;#ff8040;Runa ściany ognia (Fire Wall): 5 pól ognia w poprzek. Poziom 33, magia 6.
+267;energy_wall_rune;Runa ściany energii;RUNE;100;170;NONE;0;0;0;41;*;0;0;ENERGY;-;-;#70b0ff;Runa ściany energii (Energy Wall): 5 pól energii w poprzek. Poziom 41, magia 9.
+268;magic_wall_rune;Runa magicznej ściany;RUNE;100;234;NONE;0;0;0;32;*;0;0;ENERGY;-;-;#40d0e0;Runa magicznej ściany (Magic Wall): niezniszczalna ściana na 20 s. Poziom 32, magia 9.
+269;wild_growth_rune;Runa dzikiego wzrostu;RUNE;100;324;NONE;0;0;0;27;*;0;0;EARTH;-;-;#30a050;Runa dzikiego wzrostu (Wild Growth): gąszcz blokuje przejście na 20 s. Poziom 27, magia 8.
+270;destroy_field_rune;Runa niszczenia pól;RUNE;100;30;NONE;0;0;0;17;*;0;0;PHYSICAL;-;-;#c0c0c0;Runa niszczenia pól (Destroy Field): usuwa pole ognia, trucizny albo energii. Poziom 17, magia 3.
+271;soulfire_rune;Runa ognia duszy;RUNE;100;94;NONE;0;0;0;27;*;0;0;FIRE;-;-;#ff4080;Runa ognia duszy (Soulfire): podpala cel. Poziom 27, magia 7.
+272;paralyse_rune;Runa paraliżu;RUNE;100;1420;NONE;0;0;0;54;*;0;0;PHYSICAL;-;-;#c040c0;Runa paraliżu (Paralyse): spowalnia cel na 6 s. Poziom 54, magia 18.
+273;convince_creature_rune;Runa przekonania;RUNE;100;162;NONE;0;0;0;16;*;0;0;PHYSICAL;-;-;#e0b040;Runa przekonania stworzenia (Convince Creature): oswaja słabe stworzenie. Poziom 16, magia 5.
+274;animate_dead_rune;Runa ożywienia zwłok;RUNE;100;760;NONE;0;0;0;27;*;0;0;DEATH;-;-;#808080;Runa ożywienia zwłok (Animate Dead): zwłoki wstają jako szkielet-sługa. Poziom 27, magia 4.

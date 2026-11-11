@@ -221,8 +221,8 @@ class TibiaSkullsTest {
         // czary obszarowe zablokowane (takze na potwory)
         bk.spells().setPlayerTargeting(new PvpTargeting(bk, () -> null, java.util.List::of, null, W, new Random(1), null));
         bk.character().skills().set(pl.fawizja.pixel.character.Skill.MAGIC, 30, 0);
-        bk.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(TestData.ITEMS.byKey("fireburst_rune").id(), 1));
-        assertEquals(CastResult.BLACK_SKULL, bk.spells().useFirst("fireburst_rune", 1000));
+        bk.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(TestData.ITEMS.byKey("great_fireball_rune").id(), 1));
+        assertEquals(CastResult.BLACK_SKULL, bk.spells().useFirst("great_fireball_rune", 1000));
 
         // smierc z czarna czaszka: wszystko na ziemi, odrodzenie z 40 HP i 0 many
         int worn = bk.character().equipment().all().size();
