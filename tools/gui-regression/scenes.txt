@@ -254,3 +254,7 @@ cyclopolis_forge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=80 
 spell_gfb_circle|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=gfb -Dpixel.frames=30
 spell_wave_cone|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=wave -Dpixel.frames=30
 chest_reward_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=80 -Dpixel.spellDemo=chest -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
+# jezyki (angielski i hiszpanski): wybor jezyka w menu, okno kupca i ksiega czarow; wzorce do dopisania (--update)
+lang_menu_es|-Dpixel.lang=es
+lang_shop_en|-Dpixel.lang=en -Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc
+lang_spellbook_es|-Dpixel.lang=es -Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=book

@@ -323,7 +323,7 @@ public final class GameSettings {
         int from = page * PAGE_SIZE, to = Math.min(all.length, from + PAGE_SIZE);
         String[][] out = new String[to - from + 1][];
         System.arraycopy(all, from, out, 0, to - from);
-        out[to - from] = new String[] {"settings:page", Messages.get("game_settings.wiecej_ustawien_strona") + (page + 1) + " z " + pages() + ")"};
+        out[to - from] = new String[] {"settings:page", Messages.get("game_settings.wiecej_ustawien_strona") + (page + 1) + Messages.get("common.z") + pages() + ")"};
         return out;
     }
 
@@ -334,7 +334,7 @@ public final class GameSettings {
         // sterowanie na koncu: "pod kciukiem" tylko dla klasycznego joysticka, rozmiar - gdy jest co rysowac
         java.util.List<String[]> out = new java.util.ArrayList<>(java.util.Arrays.asList(base));
         out.add(new String[] {"settings:controls", Messages.get("game_screen.sterowanie") + c.label()});
-        out.add(new String[] {"settings:sens", Messages.get("game_settings.czulosc") + sensitivity + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
+        out.add(new String[] {"settings:sens", Messages.get("game_settings.czulosc") + sensitivity + Messages.get("common.z") + pl.fawizja.pixel.movement.ControlTuning.MAX});
         if (c == pl.fawizja.pixel.movement.ControlScheme.CLASSIC) {
             out.add(new String[] {"settings:joyfloat", Messages.get("game_settings.joystick") + (floatingJoystick ? Messages.get("game_settings.pod_kciukiem_przeciagnij_po") : Messages.get("game_settings.tylko_w_rogu_ekranu"))});
         }
@@ -347,19 +347,19 @@ public final class GameSettings {
     private String[][] baseRows() {
         return new String[][] {
             {"settings:lang", Messages.get("settings.language") + ": " + language.label},
-            {"settings:fps", "Limit FPS: " + fpsCap + (batterySaver ? " (bateria: " + effectiveFpsCap() + ")" : "")},
+            {"settings:fps", Messages.get("settings.limit_fps") + fpsCap + (batterySaver ? "" + Messages.get("settings.bateria_prefix") + effectiveFpsCap() + ")" : "")},
             {"settings:battery", Messages.get("game_settings.oszczedzanie_baterii") + (batterySaver ? Messages.get("hud.wlaczone") : Messages.get("hud.wylaczone"))},
             {"settings:light", Messages.get("game_settings.swiatlo") + (highLighting ? Messages.get("game_settings.wysoka_jakosc") : Messages.get("game_settings.niska_jakosc"))},
-            {"settings:numbers", Messages.get("game_settings.liczby_obrazen") + (damageNumbers ? "pokazuj" : "ukryj")},
+            {"settings:numbers", Messages.get("game_settings.liczby_obrazen") + (damageNumbers ? Messages.get("settings.pokazuj") : Messages.get("settings.ukryj"))},
             {"settings:sound", Messages.get("game_settings.dzwiek") + (volume == 0 ? Messages.get("game_settings.wylaczony") : volume + "%")},
-            {"settings:loot", Messages.get("game_settings.lupy_z_cial") + (autoLoot ? "automatycznie" : Messages.get("game_settings.dotknieciem"))},
-            {"settings:weather", Messages.get("game_settings.pogoda") + (weather ? "pokazuj" : "ukryj")},
+            {"settings:loot", Messages.get("game_settings.lupy_z_cial") + (autoLoot ? Messages.get("settings.automatycznie") : Messages.get("game_settings.dotknieciem"))},
+            {"settings:weather", Messages.get("game_settings.pogoda") + (weather ? Messages.get("settings.pokazuj") : Messages.get("settings.ukryj"))},
             {"settings:heal", Messages.get("game_settings.leczenie_samo") + (autoHeal == 0 ? Messages.get("hud.wylaczone") : Messages.get("game_settings.ponizej") + autoHeal + "% HP")},
             {"settings:mana", Messages.get("game_settings.mikstura_many_sama") + (autoMana == 0 ? Messages.get("game_settings.wylaczona") : Messages.get("game_settings.ponizej") + autoMana + "% MP")},
             {"settings:eat", Messages.get("game_settings.jedzenie_samo") + (autoEat ? Messages.get("game_settings.gdy_konczy_sie_sytosc") : Messages.get("hud.wylaczone"))},
             {"settings:target", Messages.get("game_settings.cel_sam") + (autoTarget ? Messages.get("game_settings.najblizszy_potwor_obok") : Messages.get("game_settings.wylaczony"))},
             {"settings:vibrate", Messages.get("game_settings.wibracje") + (vibrate ? Messages.get("game_settings.przy_niskim_zdrowiu") : Messages.get("hud.wylaczone"))},
-            {"settings:ui", Messages.get("game_settings.wyglad_interfejsu") + (newUi ? "nowy" : "klasyczny")},
+            {"settings:ui", Messages.get("game_settings.wyglad_interfejsu") + (newUi ? Messages.get("hud.ui_nowy") : Messages.get("hud.ui_klasyczny"))},
         };
     }
 }

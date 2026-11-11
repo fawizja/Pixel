@@ -75,7 +75,7 @@ public final class WheelView {
     public static String requirementsMessage(PlayerCharacter pc) {
         if (pc.wheelPoints() > 0) return null;
         List<String> miss = new ArrayList<>();
-        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add("poziomu " + DestinyWheel.MIN_LEVEL + Messages.get("game_session.masz") + pc.level() + ")");
+        if (pc.level() < DestinyWheel.MIN_LEVEL) miss.add(Messages.get("wheel_view.poziomu") + DestinyWheel.MIN_LEVEL + Messages.get("game_session.masz") + pc.level() + ")");
         if (!pc.isPromoted()) miss.add("promocji");
         if (!pc.isPremium()) miss.add(Messages.get("wheel_view.konta_premium"));
         return TITLE + " wymaga " + String.join(", ", miss) + ".";
@@ -229,7 +229,7 @@ public final class WheelView {
             case VESSEL: {
                 rows.add(new String[] {Messages.get("wheel_view.przekonanie"), Messages.get("wheel_perks.naczynie_klejnotu_1_rezonansu"), convState, "ach:none"});
                 int res = pc.wheel().resonance(s.domain);
-                rows.add(new String[] {Messages.get("wheel_view.rezonans"), res + " z " + countVessels(s.domain) + Messages.get("wheel_view.naczyn_1_mod_1"),
+                rows.add(new String[] {Messages.get("wheel_view.rezonans"), res + Messages.get("common.z") + countVessels(s.domain) + Messages.get("wheel_view.naczyn_1_mod_1"),
                         "", "ach:none"});
                 rows.add(GemView.vesselRow(pc, s.domain));
                 break;
@@ -240,7 +240,7 @@ public final class WheelView {
                     int grade = pc.wheelBonus().grade(g);
                     wrappedState(rows, Messages.get("wheel_view.przekonanie_czar"), spellLabel(u, names), convState);
                     wrappedState(rows, Messages.get("wheel_view.stopien_i"), u.grade1.describe(), grade >= 1 ? Messages.tr("aktywny") : Messages.get("wheel_view.1_pelne_pole"));
-                    wrappedState(rows, Messages.get("wheel_view.stopien_ii"), "razem " + u.at(2).describe(), grade >= 2 ? Messages.tr("aktywny") : Messages.get("wheel_view.oba_pola"));
+                    wrappedState(rows, Messages.get("wheel_view.stopien_ii"), Messages.get("wheel_view.razem") + u.at(2).describe(), grade >= 2 ? Messages.tr("aktywny") : Messages.get("wheel_view.oba_pola"));
                     WheelSlice other = otherOfGroup(s, g);
                     if (other != null) {
                         rows.add(new String[] {Messages.get("wheel_view.drugie_pole"), other.label() + ": " + w.points(other) + "/" + other.capacity(),

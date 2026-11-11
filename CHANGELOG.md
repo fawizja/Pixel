@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Trzy języki: angielski (domyślny dla nowych instalacji), polski i hiszpański. Wybór jest na pierwszym ekranie
+  (menu główne), przy logowaniu, przy tworzeniu postaci i w ustawieniach; zapisuje się w ustawieniach i działa od razu.
+- Wspólna klasa `Messages` i paczki `messages_en/pl/es.properties` (klient i serwer): cały interfejs (HUD, okna, menu,
+  ustawienia, komunikaty systemowe i czatu, podpowiedzi, opisy), ponad 2800 tekstów w trzech językach.
+- Nazwy danych po angielsku i hiszpańsku (`data_en.csv`, `data_es.csv`): przedmioty, potwory, czary, zadania, imiona i
+  powitania NPC. Zaklęcia (słowa) zostają po tibijsku, nazwy miast i miejsc to nazwy własne.
+- Online: klient wysyła język w `HELLO` (siódme, opcjonalne pole), a serwer formatuje komunikaty w języku każdego
+  gracza. Stary klient bez pola dostaje polski.
+- Polecenia czatu `/idź` (rola NPC) mają angielskie i hiszpańskie nazwy ról; polecenia czatu poza tym zostają polskie.
+- Testy: komplet kluczy w trzech językach, nazwy danych, trwałość języka, brak polskich tekstów w interfejsie klienta,
+  glify czcionki dla ñ á é í ó ú ü ¿ ¡ i polskich liter.
+
+### Zmieniono
+- Regresja GUI domyślnie uruchamia sceny po polsku (`-Dpixel.lang=pl`), bo wzorce są polskie; nowe sceny
+  `lang_*` pokazują angielski i hiszpański.
+
 ## [0.249.0] - 2026-11-11
 
 ### Zmieniono

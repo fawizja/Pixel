@@ -88,16 +88,20 @@ public final class WheelPerks {
         return new Upgrade(Collections.singletonList(spell), tibia, g1, g2, note);
     }
 
-    private static final Upgrade[] KNIGHT = {
+    /** Budowana przy kazdym odczycie: teksty zaleza od jezyka. */
+    private static Upgrade[] knight() {
+        return new Upgrade[] {
             up("front_sweep", "Front Sweep", SpellAugment.lifeLeech(5), SpellAugment.damage(14), ""),
             up("groundshaker", "Groundshaker", SpellAugment.damage(12.5), SpellAugment.cooldown(2000), ""),
             up("chivalrous_challenge", "Chivalrous Challenge", SpellAugment.mana(20), SpellAugment.cooldown(2000),
                     Messages.get("wheel_perks.st_2_2_s")),
             up("intense_wound_cleansing", "Intense Wound Cleansing", SpellAugment.heal(125), SpellAugment.mana(10),
                     Messages.get("wheel_perks.st_2_10_many")),
-            up("fierce_berserk", "Fierce Berserk", SpellAugment.mana(30), SpellAugment.damage(10), "")};
+            up("fierce_berserk", "Fierce Berserk", SpellAugment.mana(30), SpellAugment.damage(10), "")}; }
 
-    private static final Upgrade[] PALADIN = {
+    /** Budowana przy kazdym odczycie: teksty zaleza od jezyka. */
+    private static Upgrade[] paladin() {
+        return new Upgrade[] {
             up("sharpshooter", "Sharpshooter", SpellAugment.cooldown(2000), SpellAugment.cooldown(2000),
                     Messages.get("wheel_perks.2_s_zamiast_8")),
             up("strong_ethereal_spear", "Strong Ethereal Spear", SpellAugment.cooldown(2000), SpellAugment.damage(38),
@@ -105,9 +109,11 @@ public final class WheelPerks {
             up("divine_dazzle", "Divine Dazzle", SpellAugment.mana(20), SpellAugment.cooldown(1000), ""),
             up("swift_foot", "Swift Foot", SpellAugment.mana(10), SpellAugment.cooldown(2000),
                     Messages.get("wheel_perks.przyblizenie_10_many_i")),
-            up("divine_caldera", "Divine Caldera", SpellAugment.mana(20), SpellAugment.damage(8.5), "")};
+            up("divine_caldera", "Divine Caldera", SpellAugment.mana(20), SpellAugment.damage(8.5), "")}; }
 
-    private static final Upgrade[] SORCERER = {
+    /** Budowana przy kazdym odczycie: teksty zaleza od jezyka. */
+    private static Upgrade[] sorcerer() {
+        return new Upgrade[] {
             new Upgrade(List.of("hells_core", "rage_of_the_skies"), Messages.get("wheel_perks.dowolny_czar_skupienia"), SpellAugment.damage(5),
                     SpellAugment.cooldown(4000), ""),
             up("magic_shield", "Magic Shield", SpellAugment.mana(10), SpellAugment.cooldown(2000),
@@ -115,23 +121,27 @@ public final class WheelPerks {
             up("ultimate_energy_strike", "Sap Strength", SpellAugment.mana(20), SpellAugment.damage(5),
                     Messages.get("wheel_perks.zamiennik_ostateczne_uderzenie")),
             up("energy_wave", "Energy Wave", SpellAugment.damage(5), SpellAugment.radius(1), ""),
-            up("great_fire_wave", "Great Fire Wave", SpellAugment.crit(10, 15), SpellAugment.damage(5), "")};
+            up("great_fire_wave", "Great Fire Wave", SpellAugment.crit(10, 15), SpellAugment.damage(5), "")}; }
 
-    private static final Upgrade[] DRUID = {
+    /** Budowana przy kazdym odczycie: teksty zaleza od jezyka. */
+    private static Upgrade[] druid() {
+        return new Upgrade[] {
             up("strong_ice_wave", "Strong Ice Wave", SpellAugment.manaLeech(3), SpellAugment.damage(10), ""),
             up("mass_healing", "Mass Healing", SpellAugment.heal(4), SpellAugment.heal(4),
                     Messages.get("wheel_perks.st_2_4_zamiast")),
             up("natures_embrace", Messages.get("supreme_gem_mod.nature_s_embrace"), SpellAugment.heal(11), SpellAugment.mana(10),
                     Messages.get("wheel_perks.st_2_10_many_2")),
             up("terra_wave", "Terra Wave", SpellAugment.damage(6.5), SpellAugment.lifeLeech(5), ""),
-            up("heal_friend", "Heal Friend", SpellAugment.mana(10), SpellAugment.heal(5.5), "")};
+            up("heal_friend", "Heal Friend", SpellAugment.mana(10), SpellAugment.heal(5.5), "")}; }
 
-    private static final Upgrade[] MONK = {
+    /** Budowana przy kazdym odczycie: teksty zaleza od jezyka. */
+    private static Upgrade[] monk() {
+        return new Upgrade[] {
             up("sweeping_takedown", "Sweeping Takedown", SpellAugment.manaLeech(3), SpellAugment.crit(10, 25), ""),
             up("mass_spirit_mend", "Mass Spirit Mend", SpellAugment.heal(8), SpellAugment.radius(1), ""),
             up("mystic_repulse", "Mystic Repulse", SpellAugment.cooldown(4000), SpellAugment.damage(40), ""),
             up("chained_penance", "Chained Penance", SpellAugment.targets(1), SpellAugment.targets(1), ""),
-            up("flurry_of_blows", "Flurry of Blows", SpellAugment.lifeLeech(5), SpellAugment.damage(12), "")};
+            up("flurry_of_blows", "Flurry of Blows", SpellAugment.lifeLeech(5), SpellAugment.damage(12), "")}; }
 
     /** Ulepszenie czaru grupy 0..4 (pola SPELL_1..SPELL_5) dla profesji. */
     public static Upgrade upgrade(Vocation v, int group) {
@@ -140,11 +150,11 @@ public final class WheelPerks {
 
     private static Upgrade[] table(Vocation v) {
         switch (v) {
-            case KNIGHT: return KNIGHT;
-            case PALADIN: return PALADIN;
-            case SORCERER: return SORCERER;
-            case DRUID: return DRUID;
-            default: return MONK;
+            case KNIGHT: return knight();
+            case PALADIN: return paladin();
+            case SORCERER: return sorcerer();
+            case DRUID: return druid();
+            default: return monk();
         }
     }
 

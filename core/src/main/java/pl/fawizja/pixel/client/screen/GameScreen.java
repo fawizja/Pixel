@@ -3572,20 +3572,20 @@ public final class GameScreen extends ScreenAdapter {
     private List<String> diagnosticsLines() {
         List<String> l = new ArrayList<>();
         l.add("FPS: " + Gdx.graphics.getFramesPerSecond() + String.format("  (%.1f ms)", frameTimeAvg * 1000));
-        l.add("Rysowanie: " + lastDrawCalls + Messages.get("game_screen.tekstury") + lastTextureBinds);
+        l.add(Messages.get("game_screen.rysowanie") + lastDrawCalls + Messages.get("game_screen.tekstury") + lastTextureBinds);
         Runtime rt = Runtime.getRuntime();
         long used = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
         l.add(Messages.get("game_screen.pamiec_aplikacji") + used + " / " + rt.maxMemory() / (1024 * 1024) + " MB");
         Map<Resource, Float> last = guard.lastSample();
         for (Resource r : new Resource[] {Resource.SYSTEM_MEMORY, Resource.CPU, Resource.THERMAL, Resource.FRAME_TIME}) {
             Float v = last.get(r);
-            l.add(r.label() + ": " + (v == null ? "niedostepne" : Math.round(v * 100) + "%"));
+            l.add(r.label() + ": " + (v == null ? Messages.get("game_screen.niedostepne") : Math.round(v * 100) + "%"));
         }
         String battery = game.platform().batteryInfo();
-        l.add("Bateria: " + (battery == null ? "niedostepne" : battery));
+        l.add(Messages.get("game_screen.bateria") + (battery == null ? Messages.get("game_screen.niedostepne") : battery));
         String thermal = game.platform().thermalInfo();
-        if (thermal != null) l.add("Termika: " + thermal);
-        l.add("Tryb: " + guard.describe());
+        if (thermal != null) l.add(Messages.get("game_screen.termika") + thermal);
+        l.add(Messages.get("game_screen.tryb") + guard.describe());
         if (net != null) l.add(Messages.get("game_screen.siec_online_poprawki_ruchu") + predictor.corrections() + (net.isClosed() ? Messages.get("game_screen.rozlaczono") : ""));
         l.add("Limit FPS: " + guard.fpsCap(settings.effectiveFpsCap()));
         return l;

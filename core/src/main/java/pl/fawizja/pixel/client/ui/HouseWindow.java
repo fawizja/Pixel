@@ -94,7 +94,7 @@ final class HouseWindow {
                 out.add(view.dueInMs() >= 0 ? Messages.get("house_window.nastepna_platnosc_za") + HouseRent.describeIn(view.dueInMs()) + Messages.get("house_window.z_konta")
                         : Messages.get("house_window.czynsz_pobierany_co_tydzien"));
                 if (view.missed() > 0) {
-                    out.add(Messages.get("house_window.zalegle_platnosci") + view.missed() + " z " + HouseRent.MAX_MISSED + Messages.get("house_window.wplac_zloto_do_banku"));
+                    out.add(Messages.get("house_window.zalegle_platnosci") + view.missed() + Messages.get("common.z") + HouseRent.MAX_MISSED + Messages.get("house_window.wplac_zloto_do_banku"));
                 }
                 out.add(Messages.get("house_window.goscie") + view.guests().size() + "/" + pl.fawizja.pixel.house.HouseOwners.MAX_GUESTS + ")"
                         + (view.guests().isEmpty() ? Messages.get("house_window.nikt") : ":"));

@@ -22,19 +22,22 @@ public final class StartingTowns {
     public record Info(String key, String name, Position temple, String climate, String description) { }
 
     /** Klimat i jednozdaniowy opis miasta (po kluczu); miasta spoza tabeli dostaja opis ogolny. */
-    private static final Map<String, String[]> DESCRIPTIONS = Map.of(
-            "varden", new String[] {"umiarkowany",
+    /** Budowana przy kazdym odczycie: teksty zaleza od jezyka. */
+    private static Map<String, String[]> descriptions() {
+        return Map.of(
+            "varden", new String[] {Messages.get("starting_towns.umiarkowany"),
                     Messages.get("starting_towns.stolica_z_zamkiem_krola")},
             "frostholm", new String[] {Messages.get("starting_towns.mroz_i_snieg"),
                     Messages.get("starting_towns.surowe_miasto_na_polnocy")},
             "selvaran", new String[] {Messages.get("starting_towns.dzungla"),
                     Messages.get("starting_towns.parne_miasto_z_portem")},
-            "qasirah", new String[] {"pustynia",
+            "qasirah", new String[] {Messages.get("starting_towns.pustynia"),
                     Messages.get("starting_towns.miasto_z_piaskowca_na")},
             "valmir", new String[] {Messages.get("starting_towns.wybrzeze"),
                     Messages.get("starting_towns.port_zeglarzy_na_poludniowym")},
             "nerys", new String[] {Messages.get("starting_towns.tropikalne_wyspy"),
                     Messages.get("starting_towns.biale_wille_wsrod_palm")});
+    }
 
     private StartingTowns() { }
 
@@ -44,7 +47,7 @@ public final class StartingTowns {
         for (Town t : world.towns()) {
             if (!t.starting()) continue;
             String key = key(t.name());
-            String[] d = DESCRIPTIONS.getOrDefault(key, new String[] {"", Messages.get("starting_towns.miasto_ze_swiatynia_bankiem")});
+            String[] d = descriptions().getOrDefault(key, new String[] {"", Messages.get("starting_towns.miasto_ze_swiatynia_bankiem")});
             out.add(new Info(key, t.name(), t.temple(), d[0], d[1]));
         }
         return out;

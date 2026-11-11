@@ -45,7 +45,7 @@ public final class GemView {
     static String[] vesselRow(PlayerCharacter pc, WheelDomain d) {
         WheelGem g = pc.wheel().gems().socketed(d);
         int res = pc.wheel().resonance(d);
-        String what = g == null ? "puste" : g.quality.title() + " #" + g.id + Messages.get("gem_view.dziala") + GemAtelier.activeMods(g, res) + "/" + (g.quality.basicMods()
+        String what = g == null ? Messages.get("gem_view.puste") : g.quality.title() + " #" + g.id + Messages.get("gem_view.dziala") + GemAtelier.activeMods(g, res) + "/" + (g.quality.basicMods()
                 + (g.supreme != null ? 1 : 0)) + " mod.";
         return new String[] {Messages.get("gem_view.naczynie_klejnotu"), what + " (rezonans " + res + "/3)", "", "wheel:vessel:" + d.code};
     }

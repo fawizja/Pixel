@@ -749,3 +749,323 @@ quest;isle_skaldra;name;La bruja del hielo
 quest;isle_drakes;name;Fuego de las profundidades
 quest;isle_horns;name;Cuernos de dragón
 quest;isle_pyrrax;name;Señor del volcán
+npc;varden_banker;name;Banquero Aldric
+npc;varden_banker;greeting;Bienvenido al banco de Varden. Tu oro está seguro aquí.
+npc;varden_merchant;name;Comerciante Tomas
+npc;varden_merchant;greeting;Antorchas, cuerda, provisiones y equipo para principiantes. También compra botín.
+npc;varden_mage;name;Hechicera Mirela
+npc;varden_mage;greeting;Pociones, runas y varitas. También compra cristales y perlas.
+npc;varden_priest;name;Sacerdote Benedykt
+npc;varden_priest;greeting;Que la luz te guíe. Puedo curarte.
+npc;varden_guide;name;Guardia Oren
+npc;varden_guide;greeting;La zona necesita ayuda. Tengo tareas para ti.
+npc;varden_carrier;name;Cochero Jarek
+npc;varden_carrier;greeting;El carro a otras ciudades sale cuando quieras. Pagas con monedas.
+npc;camp_merchant;name;Intendente Bren
+npc;camp_merchant;greeting;Pociones para los duros y compro todo lo que traigas del otro lado del puente.
+npc;camp_banker;name;Tesorera Wena
+npc;camp_banker;greeting;La cuenta es común a todos los bancos de las ciudades.
+npc;camp_guide;name;Exploradora Ilka
+npc;camp_guide;greeting;Más allá del campamento empieza el verdadero peligro. Tengo tareas para los más fuertes.
+npc;selv_captain;name;Capitán Bartosz
+npc;selv_captain;greeting;Mi barco navega a Qasirah, las islas del sur y Puerto Este. Pagas con monedas.
+npc;coral_captain;name;Timonel Lucjan
+npc;coral_captain;greeting;Los arrecifes de la isla son traicioneros, pero conozco el camino a los puertos. Pagas con monedas.
+npc;pirate_captain;name;Capitán Gaviota Negra
+npc;pirate_captain;greeting;En esta isla nadie pregunta de dónde eres. Zarparás si pagas.
+npc;mist_captain;name;Barquero Gniewko
+npc;mist_captain;greeting;Es fácil perderse en la niebla. Te llevaré de vuelta al puerto.
+npc;ice_captain;name;Capitán Torvald
+npc;ice_captain;greeting;El hielo aplasta los cascos, pero mi barco resistirá la travesía a Puerto Este.
+npc;volcano_captain;name;Capitán Ognik
+npc;volcano_captain;greeting;Ceniza en las velas, pero seguimos navegando. Vuelvo a Puerto Este.
+npc;valmir_priest;name;Sacerdotisa Mirosława
+npc;valmir_priest;greeting;El templo de Valmir da la bienvenida a marineros y caminantes.
+npc;valmir_banker;name;Banquero Ludomir
+npc;valmir_banker;greeting;El Banco de Valmir lleva cuentas en todas las ciudades.
+npc;valmir_innkeeper;name;Posadero Bogdan
+npc;valmir_innkeeper;greeting;Pescado, provisiones y cuerda para quien baje a las alcantarillas.
+npc;valmir_housing;name;Administradora Grażyna
+npc;valmir_housing;greeting;Casas junto al puerto. Pagas desde tu cuenta del banco.
+npc;valmir_smith;name;Herrera Dobrawa
+npc;valmir_smith;greeting;Armas y armaduras forjadas en el puerto.
+npc;valmir_mage;name;Hechicero Wiesław
+npc;valmir_mage;greeting;Runas y pociones directamente de la academia.
+npc;valmir_merchant;name;Comerciante Zbyszko
+npc;valmir_merchant;greeting;Compro botín de las alcantarillas y alrededores.
+npc;valmir_carrier;name;Cochero Valmiru
+npc;valmir_carrier;greeting;El carro a otras ciudades espera. Pagas con monedas.
+npc;valmir_guide;name;Guía Valmiru
+npc;valmir_guide;greeting;Bajo Valmir hay alcantarillas llenas de ratas. Buenas para una primera caza.
+npc;nerys_priest;name;Sacerdote Nerysa
+npc;nerys_priest;greeting;El templo de las Islas Esmeralda da la bienvenida a los viajeros.
+npc;nerys_banker;name;Banquera Selma
+npc;nerys_banker;greeting;El Banco de Nerys lleva cuentas en todas las ciudades.
+npc;nerys_innkeeper;name;Posadera Lirena
+npc;nerys_innkeeper;greeting;Fruta, provisiones y antorchas para las islas.
+npc;nerys_housing;name;Administrador Ilian
+npc;nerys_housing;greeting;Villas entre las palmeras. Pagas desde tu cuenta del banco.
+npc;nerys_smith;name;Armero Corvin
+npc;nerys_smith;greeting;Armas y armaduras de todo el mundo.
+npc;nerys_mage;name;Hechicera Ysolde
+npc;nerys_mage;greeting;Runas y pociones para los exploradores de las islas.
+npc;nerys_merchant;name;Comerciante Nerys
+npc;nerys_merchant;greeting;Compro botín de las islas y la jungla.
+npc;nerys_carrier;name;Cochero Nerys
+npc;nerys_carrier;greeting;En transbordador y carro a otras ciudades. Pagas con monedas.
+npc;nerys_guide;name;Guía Nerys
+npc;nerys_guide;greeting;Las Islas Esmeralda esconden muchos secretos. ¿Ayudarás?
+npc;qas_priest;name;Sacerdote Qasirah
+npc;qas_priest;greeting;El templo de Qasirah da la bienvenida al caminante.
+npc;qas_banker;name;Banquero Qasirah
+npc;qas_banker;greeting;El Banco de Qasirah lleva cuentas en todas las ciudades.
+npc;qas_innkeeper;name;Comerciante Omar
+npc;qas_innkeeper;greeting;Dátiles, agua y cuerda para el camino por el desierto.
+npc;qas_merchant;name;Comerciante Qasirah
+npc;qas_merchant;greeting;Mercancías de Qasirah y compra de botín de la zona.
+npc;qas_guide;name;Guía Qasirah
+npc;qas_guide;greeting;Los alrededores de Qasirah son peligrosos. ¿Ayudarás?
+npc;qas_carrier;name;Cochero Qasirah
+npc;qas_carrier;greeting;La caravana a otras ciudades espera. Pagas con monedas.
+npc;qas_smith;name;Armero Hamid
+npc;qas_smith;greeting;Sables y armaduras del mejor acero del bazar.
+npc;qas_mage;name;Adivina Leila
+npc;qas_mage;greeting;Runas, pociones y varitas de tierras lejanas.
+npc;qas_housing;name;Administrador Karim
+npc;qas_housing;greeting;Casas de Qasirah en el callejón de palmeras. Pagas desde tu cuenta del banco.
+npc;frost_priest;name;Sacerdote Frostholm
+npc;frost_priest;greeting;El templo de Frostholm da la bienvenida al caminante.
+npc;frost_banker;name;Banquero Frostholm
+npc;frost_banker;greeting;El Banco de Frostholm lleva cuentas en todas las ciudades.
+npc;frost_innkeeper;name;Posadera Sigrun
+npc;frost_innkeeper;greeting;Cerveza caliente, provisiones y cuerda para el frío.
+npc;frost_merchant;name;Comerciante Frostholm
+npc;frost_merchant;greeting;Mercancías de Frostholm y compra de botín de la zona.
+npc;frost_guide;name;Guía Frostholm
+npc;frost_guide;greeting;Los alrededores de Frostholm son peligrosos. ¿Ayudarás?
+npc;frost_carrier;name;Cochero Frostholm
+npc;frost_carrier;greeting;Los trineos a otras ciudades esperan. Pagas con monedas.
+npc;frost_smith;name;Herrero Hrodgar
+npc;frost_smith;greeting;Acero de mineral de montaña. Aquí puedes comprar armas y armaduras.
+npc;frost_mage;name;Mago Runolf
+npc;frost_mage;greeting;Runas y pociones de la biblioteca de la terraza.
+npc;frost_housing;name;Administrador Bjorn
+npc;frost_housing;greeting;Casas en la ciudad baja y en las terrazas. Pagas desde tu cuenta del banco.
+npc;selv_priest;name;Sacerdote Selvaran
+npc;selv_priest;greeting;El templo de Selvaran da la bienvenida al caminante.
+npc;selv_banker;name;Banquero Selvaran
+npc;selv_banker;greeting;El banco y el depósito de Selvaran llevan cuentas en todas las ciudades.
+npc;selv_merchant;name;Comerciante Selvaran
+npc;selv_merchant;greeting;Mercancías de Selvaran y compra de botín de la zona.
+npc;selv_smith;name;Armero Selvaran
+npc;selv_smith;greeting;Armas y armaduras de todo el mundo. También compro equipo usado.
+npc;selv_mage;name;Herbolaria Selvaran
+npc;selv_mage;greeting;Pociones, runas y varitas. Compro cristales y perlas.
+npc;selv_guide;name;Guía Selvaran
+npc;selv_guide;greeting;Los alrededores de Selvaran son peligrosos. ¿Ayudarás?
+npc;selv_carrier;name;Cochero Selvaran
+npc;selv_carrier;greeting;El carro a otras ciudades espera. Pagas con monedas.
+npc;selv_fishmonger;name;Pescadora Mara
+npc;selv_fishmonger;greeting;Pescado fresco y suministros para la travesía.
+npc;selv_housing;name;Administrador Tomasz
+npc;selv_housing;greeting;Casas de dos plantas en Selvaran. Pagas desde tu cuenta del banco.
+npc;varden_king;name;Rey Aurelian
+npc;varden_king;greeting;Bienvenido a mi reino. Aquí arreglas cuentas premium y promociones: escribe premium o promocja.
+npc;varden_innkeeper;name;Posadero Wit
+npc;varden_innkeeper;greeting;Comida caliente, antorchas y cuerda. Siéntate, caminante.
+npc;varden_smith;name;Herrero Bogdan
+npc;varden_smith;greeting;La fragua real. Armas y armaduras para caballeros y cazadores.
+npc;varden_archmage;name;Archimago Eldrin
+npc;varden_archmage;greeting;El gremio de magos te da la bienvenida. Runas, pociones y varitas.
+npc;varden_housing;name;Administrador Leopold
+npc;varden_housing;greeting;Casas en el barrio real. Pagas desde tu cuenta del banco.
+npc;pozoga_captain;name;Capitán Ignacy Smolarz
+npc;pozoga_captain;greeting;Llevo cuentas premium y personajes con promoción al volcán Pożoga. Allí abundan los monstruos: navegad en grupo.
+npc;varden_captain;name;Capitán Edmund
+npc;varden_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;qas_captain;name;Capitán Rahim
+npc;qas_captain;greeting;Desde la bahía de Qasirah navego a Selvaran y a las islas del sur. Pagas con monedas.
+npc;east_captain;name;Capitán Wiesław
+npc;east_captain;greeting;Desde aquí navego a las islas del este y de vuelta a Selvaran. Pagas con monedas.
+npc;frost_captain;name;Capitán Ulf
+npc;frost_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;isle_guide;name;Almirante Wenda
+npc;isle_guide;greeting;Las islas del este rebosan de monstruos y piratas. Busco valientes desde el nivel 300: tengo encargos para ti.
+npc;isle_merchant;name;Intendente Olaf
+npc;isle_merchant;greeting;Compro escamas, cuernos y todo lo que traigas de las islas. También tengo pociones para el camino.
+npc;valmir_captain;name;Capitán Radomir
+npc;valmir_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;nerys_captain;name;Capitana Maren
+npc;nerys_captain;greeting;Mi barco navega a puertos de todo el mundo. Travesías solo para cuentas premium o personajes con promoción.
+npc;gull_ferryman;name;Barquero Bolko
+npc;gull_ferryman;greeting;Llevo gente en barca al continente. Solo titulares de cuenta premium.
+npc;lighthouse_ferryman;name;Farera Wanda
+npc;lighthouse_ferryman;greeting;Llevo gente en barca al continente. Solo titulares de cuenta premium.
+npc;wierzbowo_merchant;name;Alcalde Bogumił
+npc;wierzbowo_merchant;greeting;Bienvenido a Wierzbowo. Pan, carne y antorchas para caminantes.
+npc;osada_merchant;name;Comerciante Jagna
+npc;osada_merchant;greeting;Comida caliente y cuerda para el camino a las montañas.
+npc;wola_merchant;name;Pescadora Halina
+npc;wola_merchant;greeting;Pescado fresco, pan y antorchas para caminantes.
+npc;oaza_merchant;name;Comerciante Karim
+npc;oaza_merchant;greeting;Agua, dátiles y cuerda para el camino por el desierto.
+npc;guard_1;name;Guardia Wiesława
+npc;guard_1;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_2;name;Ballestero Budzisław
+npc;guard_2;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_3;name;Guardia Jaromira
+npc;guard_3;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_4;name;Guardia Unisław
+npc;guard_4;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_5;name;Alabardero Świętopełk
+npc;guard_5;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_6;name;Arquera Bolesława
+npc;guard_6;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_7;name;Guardia Dobrosława
+npc;guard_7;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_8;name;Guardia Sławomira
+npc;guard_8;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_9;name;Guardia Gniewomir
+npc;guard_9;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_10;name;Ballestero Jarogniew
+npc;guard_10;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_11;name;Guardia Sobiesław
+npc;guard_11;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_12;name;Ballestero Ziemowit
+npc;guard_12;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_13;name;Ballestero Mirosław
+npc;guard_13;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_14;name;Alabardero Siemowit
+npc;guard_14;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_15;name;Ballestero Wszebor
+npc;guard_15;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_16;name;Ballestero Chwalibóg
+npc;guard_16;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_17;name;Ballestero Przemysław
+npc;guard_17;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_18;name;Ballestero Mścisław
+npc;guard_18;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_19;name;Ballestero Domarad
+npc;guard_19;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_20;name;Alabardero Dobromir
+npc;guard_20;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_21;name;Guardia Wielisław
+npc;guard_21;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_22;name;Guardia Bolesław
+npc;guard_22;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_23;name;Guardia Bronisław
+npc;guard_23;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;guard_24;name;Alabardero Jaromir
+npc;guard_24;greeting;Tranquilo, caminante. Bajo mi vigilancia nada te amenaza en la ciudad.
+npc;isle0_ferryman;name;Barquero Gniewko
+npc;isle0_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle1_ferryman;name;Barquera Jagna
+npc;isle1_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle2_ferryman;name;Barquero Wojsław
+npc;isle2_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle3_ferryman;name;Barquera Dobrawa
+npc;isle3_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle4_ferryman;name;Barquero Sambor
+npc;isle4_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle5_ferryman;name;Barquera Mila
+npc;isle5_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle6_ferryman;name;Barquero Bratumił
+npc;isle6_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle7_ferryman;name;Barquera Ludmiła
+npc;isle7_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle8_ferryman;name;Barquero Zbysław
+npc;isle8_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle9_ferryman;name;Barquera Wiesna
+npc;isle9_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle10_ferryman;name;Barquero Racibor
+npc;isle10_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle11_ferryman;name;Barquera Bogumiła
+npc;isle11_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle12_ferryman;name;Barquero Dobromir
+npc;isle12_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle13_ferryman;name;Barquera Sława
+npc;isle13_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle14_ferryman;name;Barquero Ciechosław
+npc;isle14_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle15_ferryman;name;Barquera Grzymisława
+npc;isle15_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle16_ferryman;name;Barquero Mirogniew
+npc;isle16_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;isle17_ferryman;name;Barquera Wanda
+npc;isle17_ferryman;greeting;Llevo gente en barca al continente y de vuelta. Solo titulares de cuenta premium.
+npc;elandor_priestess;name;Sacerdotisa Liriel
+npc;elandor_priestess;greeting;Que el Gran Árbol te proteja. Te hablaré del bosque y de la caza de los proscritos.
+npc;elandor_banker;name;Tesorero Faelar
+npc;elandor_banker;greeting;El oro y el depósito están aquí a salvo como las raíces de los árboles.
+npc;elandor_bowyer;name;Arquero artesano Thalion
+npc;elandor_bowyer;greeting;Arcos de tejo y fresno, disparan sin munición. También compro madera y pieles.
+npc;elandor_herbalist;name;Herbolaria Ilyana
+npc;elandor_herbalist;greeting;Pociones, hierbas y varitas para los caminantes del bosque.
+npc;elandor_elder;name;Anciano Aelindor
+npc;elandor_elder;greeting;Bienvenido a la cima del Gran Árbol. Desde aquí se ve todo el bosque... y los proscritos que lo recorren.
+npc;durn_priest;name;Sacerdote Thorvin
+npc;durn_priest;greeting;Bienvenido al templo de Durnkar, hijo e hija de la piedra. Puedo curarte o aceptarte en la ciudad.
+npc;durn_banker;name;Banquero Grimbald
+npc;durn_banker;greeting;El oro de la tesorería de Durnkar yace bajo mil brazas de roca. El banco lleva cuentas en todas las ciudades.
+npc;durn_housing;name;Administrador Durgan
+npc;durn_housing;greeting;Casas en la gruta de Durnkar, calientes por la lava. Pagas desde tu cuenta del banco.
+npc;durn_ruler;name;Rey Thorgrim
+npc;durn_ruler;greeting;Durnkar recuerda los días en que no había ciudades sobre las montañas. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;durn_innkeeper;name;Posadero Ulfrik
+npc;durn_innkeeper;greeting;Cerveza de hongos de cueva, pan, carne y cuerda para el camino. Siéntate, forastero.
+npc;durn_smith;name;Herrero Brokk
+npc;durn_smith;greeting;Hachas, martillos y ballestas de la fragua de Durnkar. También compro armas y mineral.
+npc;durn_armorer;name;Armero Hagar
+npc;durn_armorer;greeting;Armaduras forjadas al calor de la lava: yelmos, cotas y escudos para todo guerrero.
+npc;durn_imbuer;name;Encantador Runnar
+npc;durn_imbuer;greeting;Las runas grabadas en piedra guardan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;durn_mage;name;Maestro de runas Odvar
+npc;durn_mage;greeting;Pociones, runas y varitas. Las runas enanas no se rompen ni en batalla.
+npc;durn_tools;name;Herramentista Skagi
+npc;durn_tools;greeting;Cuerda, palas, antorchas y cascos de minero: todo lo necesario en la mina.
+npc;durn_merchant;name;Comerciante Gunnar
+npc;durn_merchant;greeting;Compraré botín de las minas y venderé lo que te falte en el camino.
+npc;durn_petkeeper;name;Cuidador de mascotas Bodvar
+npc;durn_petkeeper;greeting;Los cuervos de los riscos siguen al enano hasta el fondo de la mina. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;durn_guide;name;Guía Dvalin
+npc;durn_guide;greeting;Las minas alrededor de Durnkar rebosan de renegados y monstruos de las profundidades. Cada piso más abajo es más peligroso.
+npc;durn_carrier;name;Vagonero Brodrik
+npc;durn_carrier;greeting;En vagoneta por las viejas vías bajo las montañas a otras ciudades. Pagas con monedas, mete la barba dentro.
+npc;durn_guard_west;name;Guardia de la puerta Hroald
+npc;durn_guard_west;greeting;¡Alto! Pocos llegan a Durnkar por el desfiladero. Entra, ya que estás aquí, y no pierdas el camino de vuelta.
+npc;durn_guard_east;name;Guardia de la puerta Sigvald
+npc;durn_guard_east;greeting;Tras esta puerta está la Mina de la Barba de Hierro. Las puertas solo dejan pasar a quienes sobreviven en las profundidades.
+npc;varden_petkeeper;name;Cuidador de mascotas Maciej
+npc;varden_petkeeper;greeting;Cachorros de Varden: fieles y alegres. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;varden_imbuer;name;Encantador Teodor
+npc;varden_imbuer;greeting;Saturo armas y armaduras: robo de vida, robo de maná, crítico, elementos y protecciones. El herrero hace lo mismo.
+npc;frost_petkeeper;name;Cuidadora de mascotas Halszka
+npc;frost_petkeeper;greeting;Los cuervos de la montaña no temen al frío. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;frost_ruler;name;Reina Świętosława
+npc;frost_ruler;greeting;Bienvenido a Frostholm. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;frost_imbuer;name;Encantadora Ludwika
+npc;frost_imbuer;greeting;El hielo guarda el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones: elige un objeto.
+npc;selv_petkeeper;name;Cuidador de mascotas Florian
+npc;selv_petkeeper;greeting;Los gatitos pelirrojos del puerto cazan ratas y suerte. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;selv_ruler;name;Lord Radosław
+npc;selv_ruler;greeting;Selvaran da la bienvenida a los visitantes. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;selv_imbuer;name;Encantador Ignacy
+npc;selv_imbuer;greeting;La savia de la jungla refuerza las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;qas_petkeeper;name;Cuidador de mascotas Kasper
+npc;qas_petkeeper;greeting;Los fénecs del desierto oyen al enemigo desde lejos. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;qas_ruler;name;Rey Mieszko
+npc;qas_ruler;greeting;El desierto pertenece a Qasirah. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;qas_imbuer;name;Encantadora Zofia
+npc;qas_imbuer;greeting;La arena y el sol afianzan las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;valmir_petkeeper;name;Cuidadora de mascotas Marianna
+npc;valmir_petkeeper;greeting;Las gaviotas del puerto encuentran todos los peces. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;valmir_ruler;name;Lord Bogumir
+npc;valmir_ruler;greeting;El Puerto de Valmir da la bienvenida a los marineros. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;valmir_imbuer;name;Encantador Hieronim
+npc;valmir_imbuer;greeting;La sal marina no daña mis saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;nerys_petkeeper;name;Cuidadora de mascotas Lilia
+npc;nerys_petkeeper;greeting;Los loros de las islas repiten cada palabra. Una mascota a tu lado da +5 % de experiencia de monstruos.
+npc;nerys_ruler;name;Reina Jadwiga
+npc;nerys_ruler;greeting;Bienvenido a las Islas Esmeralda. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
+npc;nerys_imbuer;name;Encantadora Aniela
+npc;nerys_imbuer;greeting;Las perlas de las islas llevan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.

@@ -1017,7 +1017,7 @@ final class ServerWorld {
                 houseOffers.put(b.name().toLowerCase(java.util.Locale.ROOT),
                         new HouseOffer(h.id(), p.name(), b.name(), price, now + HOUSE_OFFER_MS));
                 String label = String.format("%,d gp", price);
-                info(p, Messages.get("server_world.oferta_wyslana") + h.name() + " dla " + b.name() + " za " + label + Messages.get("server_world.wazna_5_minut"), now);
+                info(p, Messages.get("server_world.oferta_wyslana") + h.name() + Messages.get("server_world.dla") + b.name() + " za " + label + Messages.get("server_world.wazna_5_minut"), now);
                 b.session.log().add(now, EventLog.Kind.SYSTEM, p.name() + Messages.get("server_world.oferuje_ci_dom") + h.name() + " (" + h.town()
                         + ", " + h.size() + Messages.get("server_world.pol_za") + label + Messages.get("server_world.z_banku_wpisz_dom"));
                 break;
@@ -1424,7 +1424,7 @@ final class ServerWorld {
                 saveOrders();
                 saveMail();
                 save(p);
-                info(p, Messages.get("server_world.zrealizowano_zamowienie") + id + ": " + what + " dla " + o.buyer() + Messages.get("server_world.na_konto_wplynelo")
+                info(p, Messages.get("server_world.zrealizowano_zamowienie") + id + ": " + what + Messages.get("server_world.dla") + o.buyer() + Messages.get("server_world.na_konto_wplynelo")
                         + String.format("%,d gp", o.price()) + ".", now);
                 ServerPlayer buyer = find(o.buyer());
                 if (buyer != null) deliverMail(buyer, now);
@@ -2884,7 +2884,7 @@ final class ServerWorld {
         long up = firstTick < 0 ? 0 : Math.max(0, now - firstTick) / 1000;
         return String.format(java.util.Locale.ROOT, Messages.get("server_world.dziala_d_h_02d"),
                 up / 3600, up / 60 % 60, players.size(), monsters.monsters().size(),
-                invasion == null ? Messages.get("server_world.brak") : invasion.plan().town() + " (" + invasion.remaining() + " z " + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024),
+                invasion == null ? Messages.get("server_world.brak") : invasion.plan().town() + " (" + invasion.remaining() + Messages.get("common.z") + invasion.total() + ")", usedMb, rt.maxMemory() / (1024 * 1024),
                 shutdownAt < 0 ? "" : Messages.get("server_world.wylaczenie_za_2") + describeLeft(Math.max(0, shutdownAt - now)));
     }
 
@@ -2896,7 +2896,7 @@ final class ServerWorld {
                 case "SAY": {
                     if (c.length < 2 || c[1].isBlank()) return Messages.get("server_world.podaj_tekst_ogloszenia");
                     for (ServerPlayer o : players.values()) o.client.send("CHAT", Messages.get("server_world.ogloszenie"), c[1], "broadcast");
-                    return Messages.get("server_world.wyslano_ogloszenie_do") + players.size() + " graczy.";
+                    return Messages.get("server_world.wyslano_ogloszenie_do") + players.size() + Messages.get("server_world.graczy_dot");
                 }
                 case "KICK": {
                     ServerPlayer t = c.length < 2 ? null : find(c[1].trim());
@@ -2944,7 +2944,7 @@ final class ServerWorld {
                     return recentReports(5);
                 case "SAVE":
                     saveAll();
-                    return Messages.get("tile_art.zapisano") + players.size() + " postaci.";
+                    return Messages.get("tile_art.zapisano") + players.size() + Messages.get("server_world.postaci_dot");
                 case "WHO": {
                     List<String> names = new ArrayList<>();
                     for (ServerPlayer o : players.values()) names.add(o.name() + " (" + o.session.character().level() + ")");

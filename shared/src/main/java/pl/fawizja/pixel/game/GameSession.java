@@ -494,7 +494,7 @@ public final class GameSession {
             s.restoreState(prevDay, prevStreak); // pelne konto - sprobujemy pozniej
             return;
         }
-        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.nagroda_za_wejscie_do") + day + " z " + pl.fawizja.pixel.daily.LoginStreak.DAYS
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.nagroda_za_wejscie_do") + day + Messages.get("common.z") + pl.fawizja.pixel.daily.LoginStreak.DAYS
                 + "): " + String.format("%,d gp", gold) + Messages.get("game_session.na_konto") + (day < pl.fawizja.pixel.daily.LoginStreak.DAYS
                 ? Messages.get("game_session.wroc_jutro_po_wieksza") : Messages.get("game_session.pelny_tydzien")));
     }
@@ -2197,7 +2197,7 @@ public final class GameSession {
 
     private CastResult startChallenge(int slot, long nowMs) {
         if (challenge != null) {
-            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wyzwanie_juz_trwa_fala") + (challenge.wave + 1) + " z " + Challenge.WAVES.length + ".");
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wyzwanie_juz_trwa_fala") + (challenge.wave + 1) + Messages.get("common.z") + Challenge.WAVES.length + ".");
             return CastResult.OK;
         }
         if (world.isProtectionZone(pc.position())) {
@@ -2223,7 +2223,7 @@ public final class GameSession {
         for (pl.fawizja.pixel.monster.Monster m : monsters.spawnEvent(c.type.key(), c.center, Challenge.RADIUS, Challenge.WAVES[c.wave], nowMs)) {
             c.ids.add(m.id());
         }
-        log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.fala") + (c.wave + 1) + " z " + Challenge.WAVES.length + ": " + c.ids.size() + "x " + c.type.name() + "!");
+        log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.fala") + (c.wave + 1) + Messages.get("common.z") + Challenge.WAVES.length + ": " + c.ids.size() + "x " + c.type.name() + "!");
     }
 
     private void updateChallenge(long nowMs) {
@@ -2284,7 +2284,7 @@ public final class GameSession {
         }
         if (pc.backpack().takeFromSlot(slot, 1) == null) return CastResult.MISSING_ITEM;
         e.extend(k);
-        log.add(nowMs, EventLog.Kind.SYSTEM, k.label() + ": " + k.effect() + " przez "
+        log.add(nowMs, EventLog.Kind.SYSTEM, k.label() + ": " + k.effect() + Messages.get("game_session.przez")
                 + pl.fawizja.pixel.item.Enchantments.describe(e.remainingMs(k)) + " polowania.");
         return CastResult.OK;
     }
@@ -3466,7 +3466,7 @@ public final class GameSession {
         if (!missing.isEmpty()) {
             log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.dzwignia_ani_drgnie_przed")
                     + pl.fawizja.pixel.world.AltarQuest.names(missing) + Messages.get("game_session.pali_sie") + (q.slots().size() - missing.size())
-                    + " z " + q.slots().size() + " pochodni).");
+                    + Messages.get("common.z") + q.slots().size() + Messages.get("game_session.pochodni_nawias"));
             return true;
         }
         log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.przeciagasz_dzwignie_oltarze_r") + q.name() + Messages.get("game_session.otwiera_skarbiec"));
@@ -3548,7 +3548,7 @@ public final class GameSession {
         if (!mayUseOpening(p)) {
             pl.fawizja.pixel.house.House h = houses.ofOpening(p);
             log.add(nowMs, EventLog.Kind.WARNING, houseAccess(h) == pl.fawizja.pixel.house.HouseAccess.ENTRY
-                    ? Messages.get("game_session.masz_w_domu") + h.name() + Messages.get("game_session.tylko_wstep") + (door ? "drzwi" : "okna") + Messages.get("game_session.otwiera_wlasciciel_albo_gosc")
+                    ? Messages.get("game_session.masz_w_domu") + h.name() + Messages.get("game_session.tylko_wstep") + (door ? Messages.get("game_session.drzwi") : Messages.get("game_session.okna")) + Messages.get("game_session.otwiera_wlasciciel_albo_gosc")
                     : (door ? Messages.get("game_session.to_drzwi") : Messages.get("game_session.to_okno")) + Messages.get("game_session.domu") + h.name() + Messages.get("game_session.otwiera_je_wlasciciel_albo"));
             return true;
         }
@@ -3789,7 +3789,7 @@ public final class GameSession {
         if (c != null) {
             String who = monsters != null && monsters.registry() != null && monsters.registry().contains(c.monsterKey())
                     ? monsters.registry().get(c.monsterKey()).name() : c.monsterKey();
-            parts.add(Messages.get("game_session.cialo") + who + (c.hasLoot() ? Messages.get("game_session.jest_lup") : " (puste)"));
+            parts.add(Messages.get("game_session.cialo") + who + (c.hasLoot() ? Messages.get("game_session.jest_lup") : Messages.get("game_session.puste_nawias")));
         }
         java.util.List<ItemStack> lying = ground.at(p);
         for (int i = lying.size() - 1, shown = 0; i >= 0 && shown < 3; i--, shown++) parts.add(describe(lying.get(i)));

@@ -36,6 +36,23 @@ class DataNamesTest {
     }
 
     @Test
+    void npcNamesAndGreetingsAreTranslated() throws Exception {
+        List<String> npcs = new ArrayList<>();
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(
+                DataNamesTest.class.getResourceAsStream("/maps/world/npcs.csv"), StandardCharsets.UTF_8))) {
+            String l;
+            while ((l = r.readLine()) != null) if (!l.isBlank() && !l.startsWith("#")) npcs.add(l.split(";", -1)[0]);
+        }
+        assertTrue(npcs.size() > 100);
+        for (String key : npcs)
+            for (Language lang : new Language[] {Language.EN, Language.ES})
+                for (String f : new String[] {"name", "greeting"})
+                    assertTrue(DataNames.has(lang, "npc", key, f), lang + " npc " + key + " " + f);
+        Messages.setLanguage(Language.EN);
+        assertEquals("Merchant Tomas", Messages.data("npc", "varden_merchant", "name", "Kupiec Tomas"));
+    }
+
+    @Test
     void unknownKeyFallsBackToSourceName() {
         Messages.setLanguage(Language.ES);
         assertEquals("Nieznany", Messages.data("item", "no_such_item", "Nieznany"));

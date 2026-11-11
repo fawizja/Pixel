@@ -56,7 +56,7 @@ public final class Emotes {
     public static java.util.List<String[]> rows() {
         String[] shown = {"/taniec", "/machaj", Messages.get("emotes.uklon"), Messages.get("emotes.smiech"), "/brawo", "/hura", Messages.get("emotes.placz"), "/siad", "/zzz"};
         java.util.List<String[]> rows = new java.util.ArrayList<>();
-        for (String c : shown) rows.add(new String[] {c, ACTIONS.get(ChatCommands.key(c)) + " (dotknij)", "", "cmd:" + c});
+        for (String c : shown) rows.add(new String[] {c, ACTIONS.get(ChatCommands.key(c)) + Messages.get("chat.dotknij_nawias"), "", "cmd:" + c});
         rows.add(new String[] {"/kostka", Messages.get("emotes.rzut_kostka_k6_widoczny"), "", "cmd:/kostka"});
         rows.add(new String[] {"/ja tekst", Messages.get("emotes.wlasna_czynnosc_np_ja")});
         return rows;

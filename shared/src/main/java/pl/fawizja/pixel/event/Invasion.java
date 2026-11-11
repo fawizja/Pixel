@@ -21,13 +21,16 @@ import pl.fawizja.pixel.world.WorldMap;
 public final class Invasion {
 
     /** Plan inwazji dla miasta: potwor, ilu, herszt (jeden, silniejszy) i nazwa w ogloszeniu. */
-    public record Plan(String town, String monster, int count, String leader, String name) {}
+    public record Plan(String town, String monster, int count, String leader, String nameKey) {
+        /** Nazwa najazdu w biezacym jezyku. */
+        public String name() { return Messages.get(nameKey); }
+    }
 
     public static final List<Plan> PLANS = List.of(
-            new Plan("Varden", "bandit", 24, "cave_troll", Messages.get("invasion.bandyci")),
-            new Plan("Frostholm", "snow_wolf", 24, "yeti", Messages.get("invasion.sniezne_wilki")),
-            new Plan("Qasirah", "hyena", 24, "scorpion", Messages.get("invasion.hieny_pustyni")),
-            new Plan("Selvaran", "crocodile", 20, "jungle_serpent", Messages.get("invasion.krokodyle_z_bagien")));
+            new Plan("Varden", "bandit", 24, "cave_troll", "invasion.bandyci"),
+            new Plan("Frostholm", "snow_wolf", 24, "yeti", "invasion.sniezne_wilki"),
+            new Plan("Qasirah", "hyena", 24, "scorpion", "invasion.hieny_pustyni"),
+            new Plan("Selvaran", "crocodile", 20, "jungle_serpent", "invasion.krokodyle_z_bagien"));
 
     /** Zloto na konto za kazdego pokonanego najezdzce (po udanej obronie albo po czasie). */
     public static final long REWARD_PER_KILL = 100;

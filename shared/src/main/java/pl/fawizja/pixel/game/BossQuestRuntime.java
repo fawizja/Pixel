@@ -143,7 +143,7 @@ public final class BossQuestRuntime {
         int missing = BossQuest.PARTY - standing.size();
         if (missing > 0) {
             puller.message(EventLog.Kind.WARNING, Messages.get("boss_quest_runtime.dzwignia_ani_drgnie_na") + standing.size()
-                    + " z " + BossQuest.PARTY + Messages.get("boss_quest_runtime.postaci_brakuje_jeszcze") + missing + ".", nowMs);
+                    + Messages.get("common.z") + BossQuest.PARTY + Messages.get("boss_quest_runtime.postaci_brakuje_jeszcze") + missing + ".", nowMs);
             return false;
         }
         List<String> done = new ArrayList<>();

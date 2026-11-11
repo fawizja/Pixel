@@ -73,7 +73,7 @@ public final class ItemCompare {
         delta(b, "obrona", t.defense(), equipped == null ? 0 : Upgrade.defense(equipped, eu));
         delta(b, "pancerz", t.armor(), equipped == null ? 0 : Upgrade.armor(equipped, eu));
         String prot = ItemBonus.describeProtections(t.bonus().protections());
-        if (!prot.isEmpty() && equipped != t) b.append(b.length() > 0 ? ", " : "").append("ochrona ").append(prot);
+        if (!prot.isEmpty() && equipped != t) b.append(b.length() > 0 ? ", " : "").append(Messages.tr("ochrona ")).append(prot);
         String out = b.length() == 0 ? Messages.get("item_compare.jak_zalozone") : b.toString();
         return pc.level() < t.minLevel() ? out + Messages.get("item_compare.od_poz") + t.minLevel() : out;
     }
@@ -81,12 +81,12 @@ public final class ItemCompare {
     private static void delta(StringBuilder b, String label, int value, int current) {
         if (value == current) return;
         if (b.length() > 0) b.append(", ");
-        b.append(label).append(' ').append(value > current ? "+" : "").append(value - current);
+        b.append(Messages.tr(label)).append(' ').append(value > current ? "+" : "").append(value - current);
     }
 
     private static void stat(StringBuilder b, String label, int value, int current, boolean compare) {
         if (value <= 0 && current <= 0) return;
-        b.append("  ").append(label).append(' ').append(value);
+        b.append("  ").append(Messages.tr(label)).append(' ').append(value);
         if (compare && value != current) b.append(" (").append(value > current ? "+" : "").append(value - current).append(')');
     }
 

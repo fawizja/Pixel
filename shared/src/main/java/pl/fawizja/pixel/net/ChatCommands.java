@@ -339,7 +339,7 @@ public final class ChatCommands {
             {"/znaczniki", Messages.get("chat_commands.miejsca_na_mapie_idz")},
             {"/emotki", Messages.get("chat_commands.taniec_uklon_machanie_nad")},
         };
-        for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + " (dotknij)", "", "cmd:" + r[0]});
+        for (String[] r : runnable) rows.add(new String[] {r[0], r[1] + Messages.get("chat.dotknij_nawias"), "", "cmd:" + r[0]});
         String[][] typed = {
             {Messages.get("chat_commands.w_imie_tekst"), Messages.get("chat_commands.wiadomosc_prywatna_ignoruj_imi")},
             {Messages.get("chat_commands.zapros_imie"), Messages.get("chat_commands.druzyna_przyjmij_opusc_d")},

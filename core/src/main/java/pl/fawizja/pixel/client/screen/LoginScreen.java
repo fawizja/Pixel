@@ -261,7 +261,7 @@ public final class LoginScreen extends ScreenAdapter {
         SpriteBatch batch = game.batch();
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
-        centered(batch, "PIXEL - gra online", w / 2f, h - 24, Color.GOLD);
+        centered(batch, Messages.get("login.tytul"), w / 2f, h - 12, Color.GOLD);
         languageBar.drawText(batch, game.font(), Messages.language());
         for (int i = 0; i < fields.length; i++) {
             Rectangle r = fields[i];

@@ -588,14 +588,14 @@ public final class Hud {
     private float dragX, dragY, dragStartX, dragStartY;
     private Actions dragActions;
     private GameSession dragSession;
-    private final HudButton bagDetach = new HudButton("bag_detach", "ODEPNIJ");
+    private final HudButton bagDetach = new HudButton("bag_detach", Messages.get("hud.odepnij"));
     private float bagX, bagY, slotSize;
     private final HudButton bagEquip = new HudButton("bag_equip", Messages.get("hud.zaloz"));
     private final HudButton bagDrop = new HudButton("bag_drop", Messages.get("hud.wyrzuc"));
     private final HudButton bagUse = new HudButton("bag_use", Messages.get("hud.uzyj_2"));
     private final HudButton bagClose = new HudButton("bag_close", "X");
-    private final HudButton bagSort = new HudButton("bag_sort", "SORTUJ");
-    private final HudButton bagKeep = new HudButton("bag_keep", "ZACHOWAJ");
+    private final HudButton bagSort = new HudButton("bag_sort", Messages.get("hud.sortuj"));
+    private final HudButton bagKeep = new HudButton("bag_keep", Messages.get("hud.zachowaj"));
     private boolean diagnosticsOpen;
     /** Minimapa w prawym gornym rogu i duza mapa calego pietra (dotkniecie minimapy / klawisz J). */
     private final Minimap minimap = new Minimap();
@@ -2068,8 +2068,8 @@ public final class Hud {
                     + (sp.minMagic() > 0 ? Messages.get("hud.magia") + sp.minMagic() : "");
             menuRows.add(new MenuRow("cast:" + sp.key(), sp.name(), detail, ok));
         }
-        if (spellPages > 1) menuRows.add(new MenuRow("book:spells", Messages.get("hud.kolejne_czary"), "czary " + (spellPage + 1) + "-"
-                + (spellPage + spells.size()) + " z " + all.size(), true));
+        if (spellPages > 1) menuRows.add(new MenuRow("book:spells", Messages.get("hud.kolejne_czary"), Messages.get("hud.czary_prefix") + (spellPage + 1) + "-"
+                + (spellPage + spells.size()) + Messages.get("common.z") + all.size(), true));
         // ustawianie paska: wybierz przycisk, potem dotknij czaru (ten sam czar drugi raz = automat)
         String assignLabel = assignSlot < 0 ? Messages.get("hud.ustaw_pasek_czarow") : Messages.get("hud.przycisk") + (assignSlot + 1) + Messages.get("hud.dotknij_czaru");
         String assignDetail = assignSlot < 0 ? (customBar.isCustom() ? Messages.get("hud.wlasny_uklad_dotknij_aby") : Messages.get("hud.pasek_automatyczny_dotknij_aby"))
@@ -2153,7 +2153,7 @@ public final class Hud {
             case "support": return Messages.get("hud.inny_czar");
             case "potion": return "mikstura";
             case "combo": return Messages.get("hud.combo_dotknij_czarow_po");
-            default: return "runa";
+            default: return Messages.get("hud.runa_kind");
         }
     }
 
@@ -2698,7 +2698,7 @@ public final class Hud {
             menuRows.add(row);
         }
         String mine = guilds ? (v.mine() > 0 ? Messages.get("hud.twoja_gildia") + v.mine() + Messages.get("hud.miejsce_z") + v.total() : Messages.get("hud.nie_nalezysz_do_gildii"))
-                : v.mine() > 0 ? Messages.get("hud.twoje_miejsce") + v.mine() + " z " + v.total() : Messages.get("hud.nie_ma_cie_w");
+                : v.mine() > 0 ? Messages.get("hud.twoje_miejsce") + v.mine() + Messages.get("common.z") + v.total() : Messages.get("hud.nie_ma_cie_w");
         MenuRow me = new MenuRow("ranking:none", mine, weeklyRank
                 ? Messages.get("hud.w_poniedzialek_nagrody_100")
                 : Messages.get("hud.ranking_druid_paladin_mag"), true);
@@ -3734,6 +3734,22 @@ public final class Hud {
         mount.icon = itemIcon(session, "saddle");
         // podpisy przyciskow obok ekwipunku: rysowane, gdy mieszcza sie przy progu 7 dp (inaczej sama ikona)
         run.label = Messages.get("hud.podaz");
+        // etykiety zalezne od jezyka odswiezane co klatke (zmiana jezyka w ustawieniach dziala od razu)
+        use.label = Messages.get("hud.uzyj");
+        bag.label = Messages.get("hud.plecak");
+        pick.label = Messages.get("hud.wez");
+        target.label = Messages.get("hud.atak_3");
+        book.label = Messages.get("hud.ksiega");
+        fish.label = Messages.get("hud.low");
+        talk.label = Messages.get("hud.mow");
+        mount.label = Messages.get("hud.kon");
+        logout.label = Messages.get("hud.wyjdz");
+        bagEquip.label = Messages.get("hud.zaloz");
+        bagDrop.label = Messages.get("hud.wyrzuc");
+        bagUse.label = Messages.get("hud.uzyj_2");
+        bagSort.label = Messages.get("hud.sortuj");
+        bagKeep.label = Messages.get("hud.zachowaj");
+        bagDetach.label = Messages.get("hud.odepnij");
         store.label = Messages.get("hud.sklep");
         store.icon = itemIcon(session, "crystal_coin");
         fightMode.label = fightModeLabel(pc.fightMode());
@@ -4119,9 +4135,9 @@ public final class Hud {
             } else if (trade == null && marketView != null) {
                 text(batch, Messages.get("hud.rynek_graczy_2") + marketView.total() + " ofert)", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && friendsView != null) {
-                text(batch, Messages.get("hud.znajomi") + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")", menuX + 10, menuY + menuH - 14);
+                text(batch, Messages.get("hud.znajomi") + friendsView.rows().size() + Messages.get("common.z") + pl.fawizja.pixel.friends.FriendList.MAX + ")", menuX + 10, menuY + menuH - 14);
             } else if (trade == null && rankingView != null) {
-                text(batch, rankingView.title() + Messages.get("hud.wg_doswiadczenia") + rankingView.total() + " postaci)", menuX + 10, menuY + menuH - 14);
+                text(batch, rankingView.title() + Messages.get("hud.wg_doswiadczenia") + rankingView.total() + Messages.get("hud.postaci_suffix"), menuX + 10, menuY + menuH - 14);
             } else if (trade != null) {
                 text(batch, Messages.get("hud.handel_z") + trade.partner(), menuX + 10, menuY + menuH - 14);
                 text(batch, Messages.get("hud.twoj_plecak_dotknij_aby"), menuX + 20 + (menuW - 30) / 2f, menuY + menuH - 14);
@@ -5504,9 +5520,10 @@ public final class Hud {
         } else {
             // nazwa pustego gniazda tylko, gdy miesci sie przy progu 7 dp
             float sc = fitScale(name, cell - 4, 0.66f);
-            font.getData().setScale(sc);
+            // dluzsza nazwa (np. po hiszpansku) nie miesci sie przy progu 7 dp: skrocona z ".." zamiast wypadniecia
+            font.getData().setScale(sc > 0 ? sc : HudLayout.MIN_FONT);
             font.setColor(0.6f, 0.6f, 0.6f, 1f);
-            if (sc > 0) centered(batch, name, x + cell / 2f, y + cell / 2f);
+            centered(batch, sc > 0 ? name : clip(name, cell - 4), x + cell / 2f, y + cell / 2f);
             font.setColor(Color.WHITE);
             font.getData().setScale(1f);
         }
@@ -6304,18 +6321,18 @@ public final class Hud {
         out.add(new String[] {"run", Messages.get("hud.podazaj_za_celem"), pc.isRunning() ? Messages.get("hud.wlaczone") : Messages.get("hud.wylaczone")});
         int torchId = session.items().byKey("torch").id();
         String torchState = !pc.hasTorchEquipped(torchId) ? Messages.get("hud.nie_zalozona")
-                : (pc.isTorchLit() ? "zapalona, " : "zgaszona, ") + GameSession.torchTime(pc.torchRemainingMs(torchId));
+                : (pc.isTorchLit() ? Messages.get("hud.torch_lit") : Messages.get("hud.torch_out")) + GameSession.torchTime(pc.torchRemainingMs(torchId));
         out.add(new String[] {"torch", Messages.get("hud.pochodnia"), torchState});
         out.add(new String[] {"book", Messages.get("hud.ksiega_czarow"), Messages.get("hud.czary_i_rzemioslo_k")});
-        out.add(new String[] {"diag", Messages.get("hud.diagnostyka"), diagnosticsOpen ? "pokazana" : "ukryta"});
+        out.add(new String[] {"diag", Messages.get("hud.diagnostyka"), diagnosticsOpen ? Messages.get("hud.pokazana") : Messages.get("hud.ukryta")});
         if (settings != null) {
             // wyglad interfejsu na pierwszej stronie (porownanie nowego i klasycznego)
-            out.add(new String[] {"settings:ui", Messages.get("hud.wyglad_interfejsu"), settings.newUi() ? "nowy" : "klasyczny"});
+            out.add(new String[] {"settings:ui", Messages.get("hud.wyglad_interfejsu"), settings.newUi() ? Messages.get("hud.ui_nowy") : Messages.get("hud.ui_klasyczny")});
             // sterowanie na pierwszej stronie, zaraz po przyciskach postaci (wariant i suwak czulosci)
             pl.fawizja.pixel.movement.ControlScheme cs = settings.controlScheme();
-            out.add(new String[] {"settings:controls", Messages.get("hud.sterowanie"), cs.shortLabel() + " (" + (cs.ordinal() + 1) + " z "
+            out.add(new String[] {"settings:controls", Messages.get("hud.sterowanie"), cs.shortLabel() + " (" + (cs.ordinal() + 1) + Messages.get("common.z")
                     + pl.fawizja.pixel.movement.ControlScheme.values().length + ")"});
-            out.add(new String[] {"settings:sens", Messages.get("hud.czulosc"), settings.sensitivity() + " z " + pl.fawizja.pixel.movement.ControlTuning.MAX});
+            out.add(new String[] {"settings:sens", Messages.get("hud.czulosc"), settings.sensitivity() + Messages.get("common.z") + pl.fawizja.pixel.movement.ControlTuning.MAX});
             for (String[] r : settings.allRows()) {
                 if (r[0].equals("settings:controls") || r[0].equals("settings:sens") || r[0].equals("settings:ui")) continue;
                 int c = r[1].indexOf(": ");
@@ -6379,7 +6396,7 @@ public final class Hud {
         }
         if (pages > 1) {
             k = per - 1;
-            out.add(new MBtn("set:page", Messages.get("hud.dalej") + (mSettingsPage + 1) + " z " + pages + ")",
+            out.add(new MBtn("set:page", Messages.get("hud.dalej") + (mSettingsPage + 1) + Messages.get("common.z") + pages + ")",
                     win.x + 8 + (k % 2) * (cw + 6), win.top() - 26 - 2 - (k / 2 + 1) * rh - (k / 2) * gap, cw, rh));
         }
         return out;
@@ -6540,7 +6557,7 @@ public final class Hud {
         if (mPickPage >= pages) mPickPage = 0;
         int shown = pages == 1 ? per : per - 1;
         List<MenuRow> page = new ArrayList<>(all.subList(mPickPage * shown, Math.min(all.size(), (mPickPage + 1) * shown)));
-        if (pages > 1) page.add(new MenuRow("pick:page", Messages.get("hud.dalej_2"), Messages.get("hud.strona_2") + (mPickPage + 1) + " z " + pages, true));
+        if (pages > 1) page.add(new MenuRow("pick:page", Messages.get("hud.dalej_2"), Messages.get("hud.strona_2") + (mPickPage + 1) + Messages.get("common.z") + pages, true));
         for (int i = 0; i < page.size(); i++) {
             MenuRow row = page.get(i);
             row.w = 144;
@@ -7676,7 +7693,7 @@ public final class Hud {
                 MBtn add = mVipAdd(win);
                 mCentered(b, add.label(), add.x() + add.w() / 2f, add.y() + add.h() / 2f, 0.66f, M_TEXT, false);
                 int online = vipView == null ? 0 : vipView.online();
-                mText(b, Messages.get("hud.w_grze") + online + " z " + rows.size(), win.x + 12, win.y + 20, 0.6f, M_MUTED, false);
+                mText(b, Messages.get("hud.w_grze") + online + Messages.get("common.z") + rows.size(), win.x + 12, win.y + 20, 0.6f, M_MUTED, false);
                 break;
             }
             case SETTINGS: {
@@ -7727,9 +7744,9 @@ public final class Hud {
         } else if (marketView != null) {
             title = Messages.get("hud.rynek_graczy_2") + marketView.total() + " ofert)";
         } else if (friendsView != null) {
-            title = Messages.get("hud.znajomi") + friendsView.rows().size() + " z " + pl.fawizja.pixel.friends.FriendList.MAX + ")";
+            title = Messages.get("hud.znajomi") + friendsView.rows().size() + Messages.get("common.z") + pl.fawizja.pixel.friends.FriendList.MAX + ")";
         } else if (rankingView != null) {
-            title = rankingView.title() + " (" + rankingView.total() + " postaci)";
+            title = rankingView.title() + " (" + rankingView.total() + Messages.get("hud.postaci_suffix");
         } else if (npcMode) {
             title = npc.name() + " (" + npc.town() + ")";
             sub = npc.greeting();

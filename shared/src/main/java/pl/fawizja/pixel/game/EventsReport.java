@@ -43,7 +43,7 @@ public final class EventsReport {
                     + (hunt.done() ? Messages.get("events_report.oddaj_u_przewodnika") : "")});
         }
         int streak = pc.loginStreak().lastDay() == today ? pc.loginStreak().streak() : 0;
-        rows.add(new String[] {Messages.get("events_report.seria_logowania"), streak > 0 ? Messages.get("events_report.dzien") + streak + " z " + pl.fawizja.pixel.daily.LoginStreak.DAYS
+        rows.add(new String[] {Messages.get("events_report.seria_logowania"), streak > 0 ? Messages.get("events_report.dzien") + streak + Messages.get("common.z") + pl.fawizja.pixel.daily.LoginStreak.DAYS
                 + (streak < pl.fawizja.pixel.daily.LoginStreak.DAYS ? Messages.get("events_report.jutro_wieksza_nagroda") : Messages.get("events_report.pelny_tydzien")) : Messages.get("events_report.nagroda_czeka_po_wejsciu")});
         int next = LevelRewards.next(Math.max(pc.level(), pc.rewardedLevel()), Integer.MAX_VALUE);
         if (next > 0) {
