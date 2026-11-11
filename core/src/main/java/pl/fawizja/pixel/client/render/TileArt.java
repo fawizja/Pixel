@@ -213,6 +213,21 @@ public final class TileArt implements Disposable {
                 wallAlts.put(e.getKey(), v);
             }
         }
+        if (dirPm != null) {
+            dirAtlas = new Texture(dirPm);
+            dirAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            dirPm.dispose();
+            dirPm = null;
+            for (Map.Entry<String, int[]> e : dirSlots.entrySet()) {
+                TextureRegion[] r = new TextureRegion[e.getValue().length];
+                for (int k = 0; k < r.length; k++) {
+                    int sl = e.getValue()[k];
+                    r[k] = sl < 0 ? null : new TextureRegion(dirAtlas, (sl % HI_COLS) * HI_SIZE, (sl / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
+                }
+                dirRegions.put(e.getKey(), r);
+            }
+            Gdx.app.log("TileArt", "Potwory z kierunkami: " + dirRegions.size());
+        }
         if (hiPm != null) {
             hiAtlas = new Texture(hiPm);
             hiAtlas.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -310,6 +325,7 @@ public final class TileArt implements Disposable {
             for (String d : DIRS) loadWalk("characters/" + v.name().toLowerCase(java.util.Locale.ROOT) + "_" + d);
         }
         for (MonsterType m : mtypes) loadWalk("monsters/" + m.key());
+        for (MonsterType m : mtypes) loadMonsterDirs(m.key());
         for (TileType t : tileRegistry.all()) loadWallPieces(t);
         for (TileType t : tileRegistry.all()) loadVariants(t);
         override(pm, HORSE_CELL, "objects/horse_right");
@@ -638,6 +654,76 @@ public final class TileArt implements Disposable {
         float progress = Math.max(Math.abs(renderX - tileX), Math.abs(renderY - tileY));
         if (progress < 0.02f) return 0;
         return 1 + ((tileX + tileY + (progress < 0.5f ? 0 : 1)) & 1);
+    }
+
+    /**
+     * Strony potworow poza przodem: pliki monsters/klucz_up|left|right[_walk1|_walk2].png (tools/art/otsp_import.py).
+     * Osobny atlas 32 px (sloty po 3 klatki: postoj, krok 1, krok 2); strona bez kompletu plikow nie ma wpisu.
+     */
+    private static final String[] SIDE_NAMES = {"up", "left", "right"};
+    private static final int MAX_DIR_SLOTS = 32 * 64;
+    private final Map<String, int[]> dirSlots = new HashMap<>();
+    private final Map<String, TextureRegion[]> dirRegions = new HashMap<>();
+    private Pixmap dirPm;
+    private Texture dirAtlas;
+    private int dirUsed;
+
+    private void loadMonsterDirs(String key) {
+        int[] slots = new int[9];
+        java.util.Arrays.fill(slots, -1);
+        boolean any = false;
+        for (int s = 0; s < 3; s++) {
+            Pixmap[] frames = new Pixmap[3];
+            boolean ok = dirUsed + 3 <= MAX_DIR_SLOTS;
+            for (int k = 0; k < 3 && ok; k++) {
+                String rel = "monsters/" + key + "_" + SIDE_NAMES[s] + (k == 0 ? "" : "_walk" + k) + ".png";
+                com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + rel);
+                if (!f.exists()) f = Gdx.files.internal("assets/art/" + rel);
+                if (!f.exists()) { ok = false; break; }
+                try {
+                    frames[k] = new Pixmap(f);
+                } catch (RuntimeException e) {
+                    Gdx.app.error("TileArt", Messages.get("tile_art.nie_mozna_wczytac") + f.path() + ": " + e.getMessage());
+                    ok = false;
+                }
+            }
+            if (ok) {
+                if (dirPm == null) {
+                    dirPm = new Pixmap(HI_COLS * HI_SIZE, HI_ROWS * HI_SIZE, Pixmap.Format.RGBA8888);
+                    dirPm.setBlending(Pixmap.Blending.None);
+                    dirPm.setFilter(Pixmap.Filter.NearestNeighbour);
+                }
+                for (int k = 0; k < 3; k++) {
+                    int slot = dirUsed++;
+                    slots[s * 3 + k] = slot;
+                    dirPm.drawPixmap(frames[k], 0, 0, frames[k].getWidth(), frames[k].getHeight(),
+                            (slot % HI_COLS) * HI_SIZE, (slot / HI_COLS) * HI_SIZE, HI_SIZE, HI_SIZE);
+                }
+                any = true;
+            }
+            for (Pixmap p : frames) if (p != null) p.dispose();
+        }
+        if (any) dirSlots.put(key, slots);
+    }
+
+    private boolean[] sidesOf(String key) {
+        TextureRegion[] r = dirRegions.get(key);
+        if (r == null) return null;
+        return new boolean[] {true, r[0] != null, r[3] != null, r[6] != null};
+    }
+
+    /**
+     * Potwor zwrocony w strone ruchu albo ataku, w klatce chodu ({@link #walkFrame}). Bez grafiki danej strony
+     * zastepstwo wg {@link CreatureFrames#pick}; zwraca tez, czy trzeba odbic w poziomie (flip[0]).
+     */
+    public TextureRegion monster(String key, Direction facing, int frame, boolean[] flip) {
+        boolean[] has = sidesOf(key);
+        CreatureFrames.Pick p = CreatureFrames.pick(has, facing);
+        if (flip != null) flip[0] = p.flip();
+        if (p.dir() == CreatureFrames.DOWN) return monster(key, frame);
+        TextureRegion[] r = dirRegions.get(key);
+        int base = (p.dir() - 1) * 3;
+        return r[base + Math.max(0, Math.min(frame, 2))];
     }
 
     private TextureRegion walkOr(String name, TextureRegion idle, int frame) {
@@ -2011,6 +2097,7 @@ public final class TileArt implements Disposable {
         if (dummyNativeTexture != null) dummyNativeTexture.dispose();
         if (fxAtlas != null) fxAtlas.dispose();
         if (hiAtlas != null) hiAtlas.dispose();
+        if (dirAtlas != null) dirAtlas.dispose();
         if (wallAtlas != null) wallAtlas.dispose();
         lightTexture.dispose();
     }

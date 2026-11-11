@@ -13,7 +13,7 @@ class MonsterAiTest {
     static final MonsterRegistry REG = MonsterRegistry.loadDefault(TestData.ITEMS);
 
     /** Gracz-atrapa i licznik atakow. */
-    static final class Dummy implements MonsterManager.Target, MonsterManager.AttackHandler {
+    static class Dummy implements MonsterManager.Target, MonsterManager.AttackHandler {
         Position pos;
         int attacks;
         int heals;

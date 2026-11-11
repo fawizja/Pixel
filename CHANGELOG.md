@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Potwory chodzą i obracają się jak w Tibii: każdy z 136 potworów ma grafiki na cztery strony (N, E, S, W) z paczki OTSP,
+  po trzy klatki (postój i dwa kroki). W marszu pokazuje klatki kroku (lewa i prawa noga na przemian) i patrzy w stronę
+  ruchu, a stojąc - klatkę postoju. Przy ataku (zwarcie i dystans) odwraca się twarzą do celu, ruch po skosie patrzy na
+  wschód albo zachód. Działa offline i online: klient wylicza kierunek z przesunięć pozycji z klatek serwera, a stojący
+  potwór obok gracza patrzy na niego. Grafiki generuje `tools/art/otsp_import.py` (pliki `potwor_up|left|right[_walk1|2].png`).
+- Scena podglądu `-Dpixel.facingDemo=dirs|walk|attack` i dwie sceny gui-regression (`monster_facing_dirs`, `monster_facing_attack`).
+
 ## [0.252.0] - 2026-11-11
 
 ### Dodano

@@ -411,6 +411,17 @@ public final class MonsterManager {
         }
     }
 
+    /**
+     * Klient online: serwer nie wysyla kierunku potworow (wynika z ruchu, patrz {@link #syncRemote}), a stojacy
+     * potwor w zwarciu bije gracza, wiec taki odwraca sie twarza do niego. Potwory w ruchu zostaja przy kierunku marszu.
+     */
+    public void faceAdjacent(Position player, long now) {
+        for (Monster m : monsters) {
+            if (m.isDead() || m.isSummon() || m.isMoving(now)) continue;
+            if (m.position().z() == player.z() && m.position().distanceTo(player) <= 1) m.lookAt(player);
+        }
+    }
+
     /** Usuwa zabitego potwora i planuje odrodzenie. */
     public void kill(Monster m, long now) {
         monsters.remove(m);
@@ -737,6 +748,7 @@ public final class MonsterManager {
                     }
                 }
                 if (!acted && dist <= t.range() && (dist <= 1 || los) && m.state() == MonsterState.CHASE) {
+                    if (!m.isMoving(now)) m.lookAt(tp);   // atak: potwor patrzy na cel
                     handler.monsterAttacks(m, now);
                     acted = true;
                 }

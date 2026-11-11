@@ -45,6 +45,13 @@ public final class Monster {
     public Position position() { return position; }
     public MonsterState state() { return state; }
     public Direction facing() { return facing; }
+    /** Strona, w ktora patrzy potwor na ekranie (N, E, S, W): skos patrzy na wschod albo zachod. */
+    public Direction facing4() { return facing.cardinal(); }
+    /** Zwrot twarza do celu (atak, rozgladanie sie); w tym samym polu zostaje poprzedni kierunek. */
+    public void lookAt(Position target) {
+        if (target == null || target.z() != position.z()) return;
+        facing = Direction.toward(position.x(), position.y(), target.x(), target.y(), facing);
+    }
     public float healthFraction() { return health / (float) type.maxHealth(); }
     public boolean healedOnce() { return healedOnce; }
     void markHealed() { healedOnce = true; }

@@ -15,6 +15,26 @@ public enum Direction {
 
     public boolean diagonal() { return dx != 0 && dy != 0; }
 
+    /**
+     * Strona, w ktora patrzy postac w 4 kierunkach (N, E, S, W) jak w Tibii: kierunki proste bez zmian, skos
+     * patrzy na wschod albo zachod (poziomo).
+     */
+    public Direction cardinal() {
+        if (!diagonal()) return this;
+        return dx > 0 ? EAST : WEST;
+    }
+
+    /**
+     * Kierunek (4 strony) z punktu (fromX, fromY) na (toX, toY): przewaga osi o wiekszej odleglosci, przy remisie
+     * poziomo. Bez przesuniecia zwraca {@code fallback}.
+     */
+    public static Direction toward(int fromX, int fromY, int toX, int toY, Direction fallback) {
+        int dx = toX - fromX, dy = toY - fromY;
+        if (dx == 0 && dy == 0) return fallback;
+        if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? EAST : WEST;
+        return dy > 0 ? SOUTH : NORTH;
+    }
+
     /** Kierunek o danym przesunieciu (-1..1) albo null dla (0,0). */
     public static Direction fromDelta(int dx, int dy) {
         for (Direction d : values()) if (d.dx == dx && d.dy == dy) return d;
