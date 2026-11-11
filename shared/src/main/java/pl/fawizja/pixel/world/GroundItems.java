@@ -86,6 +86,13 @@ public final class GroundItems {
 
     public Corpse corpseAt(Position p) { return corpses.get(p); }
 
+    /** Usuwa cialo (runa ozywienia zwlok); lup zostaje na ziemi. Zwraca usuniete cialo albo null. */
+    public Corpse removeCorpse(Position p) {
+        Corpse c = corpses.remove(p);
+        if (c != null) for (ItemStack s : c.loot) place(p, s);
+        return c;
+    }
+
     public void forEachCorpseNear(Position c, int radius, java.util.function.BiConsumer<Position, Corpse> out) {
         for (Map.Entry<Position, Corpse> e : corpses.entrySet()) {
             Position p = e.getKey();

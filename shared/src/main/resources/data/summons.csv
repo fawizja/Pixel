@@ -1,0 +1,18 @@
+# Stworzenia do przywolania (utevo res "nazwa") i przekonania runa - jak w Tibii: mana = koszt stworzenia z Tibii,
+# najwyzej 2 slugi naraz. Odpowiedniki: szczur kanalowy = Rat, wielki szczur = Cave Rat, pajak lesny = Spider,
+# snieżny wilk = Winter Wolf, troll jaskiniowy = Troll, jaskiniowa wij = Centipede, ork wojownik = Orc Warrior.
+# potwor;mana
+sewer_rat;200
+forest_spider;210
+giant_rat;250
+wolf;255
+snow_wolf;260
+hyena;275
+cave_troll;290
+skeleton;300
+scorpion;310
+cave_centipede;335
+crocodile;350
+orc_warrior;360
+boar;465
+fire_elemental;690

@@ -153,16 +153,27 @@ class HuntBalanceSimulationTest {
             boolean usable = s.kind() == SpellKind.ATTACK_TARGET || s.kind() == SpellKind.ATTACK_AREA
                     ? s.allowedFor(pc.vocation()) : s.kind() == SpellKind.RUNE_TARGET || s.kind() == SpellKind.RUNE_AREA;
             if (!usable || pc.level() < s.minLevel() || pc.skills().level(Skill.MAGIC) < s.minMagic()) continue;
+            // czary skupienia (Gniew niebios, Piekielny rdzen, Wieczna zima, Gniew natury - 40 s, setki many) sa na
+            // stada potworow; pojedynek jeden na jeden ich nie uzywa, jak gracz w Tibii
+            if ("focus".equals(SpellSystem.secondaryGroup(s.key()))) continue;
             out.add(s);
         }
         return out;
     }
 
-    /** Mana za jedna rune: czar zaklinajacy runy / liczba run (runa nie kosztuje many przy uzyciu). */
+    /**
+     * Mana, ktora trenuje magie: czar - jego mana, runa - czesc kosztu zaklinania. Od 0.240 koszty zaklinania sa jak
+     * w Tibii (np. 985 many za 3 runy naglej smierci, 4x wiecej niz wczesniej), a kazdy sklep magiczny sprzedaje runy:
+     * polujacy sam zaklina tylko czesc zuzytych run (RUNES_SELF_MADE_PERCENT), reszte kupuje u NPC.
+     */
+    static final int RUNES_SELF_MADE_PERCENT = 20;
+
     static int manaCost(SpellType s) {
         if (!s.kind().isRune()) return s.mana();
         for (SpellType c : SPELLS.all()) {
-            if (c.kind() == SpellKind.CONJURE && s.key().equals(c.producesItem())) return c.mana() / Math.max(1, c.produceCount());
+            if (c.kind() == SpellKind.CONJURE && s.key().equals(c.producesItem())) {
+                return c.mana() * RUNES_SELF_MADE_PERCENT / 100 / Math.max(1, c.produceCount());
+            }
         }
         return 0;
     }

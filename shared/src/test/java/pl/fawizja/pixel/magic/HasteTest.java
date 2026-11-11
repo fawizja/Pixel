@@ -30,8 +30,8 @@ class HasteTest {
         assertEquals(CastResult.OK, s.castSpell("haste", 1000));
         assertEquals(base + base * 30 / 100, pc.speed());
         assertTrue(MovementSystem.stepDurationMs(pc, Direction.EAST) < baseStep, "hasted steps are shorter");
-        pc.tickRegeneration(32_000);
-        assertTrue(pc.hasteMs() > 0, "still hasted before 33 s");
+        pc.tickRegeneration(29_000);
+        assertTrue(pc.hasteMs() > 0, "still hasted before 30 s (Tibia: utani hur 30 s)");
         pc.tickRegeneration(1_000);
         assertEquals(0, pc.hasteMs());
         assertEquals(base, pc.speed(), "speed back to normal");

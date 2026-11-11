@@ -20,7 +20,11 @@ public enum CastResult {
     NOT_USABLE("Tego nie można użyć."),
     FULL("Nie potrzebujesz tego teraz."),
     DEAD("Postać nie żyje."),
-    WHEEL_LOCKED("Ten czar odblokujesz objawieniem Koła Przeznaczenia.");
+    WHEEL_LOCKED("Ten czar odblokujesz objawieniem Koła Przeznaczenia."),
+    NO_CONDITION("Nie masz stanu, który leczy ten czar."),
+    NO_ROOM("Nie ma tu miejsca."),
+    TOO_MANY_SUMMONS("Nie możesz przywołać więcej stworzeń."),
+    NOT_POSSIBLE("To niemożliwe.");
 
     public final String message;
 

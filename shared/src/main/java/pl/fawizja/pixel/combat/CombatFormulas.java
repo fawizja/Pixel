@@ -118,6 +118,24 @@ public final class CombatFormulas {
         return (int) Math.max(0, Math.min(Integer.MAX_VALUE, d));
     }
 
+    /**
+     * Obrazenia tiku stanu (zatrucie, podpalenie...) w postac: jak w Tibii tylko ochrona przed zywiolem ze sprzetu
+     * i klejnotow, bez pancerza i obrony.
+     */
+    public static int conditionOnPlayer(PlayerCharacter pc, int damage, DamageType type) {
+        if (damage <= 0) return 0;
+        double d = protect(damage, pc.equipment().protection(type));
+        d = pl.fawizja.pixel.wheel.WheelEffects.gemResist(pc, type, d);
+        return (int) Math.max(0, Math.round(d));
+    }
+
+    /** Obrazenia tiku stanu w potwora: tylko odpornosc na zywiol (bez pancerza). */
+    public static int conditionOnMonster(MonsterType m, int damage, DamageType type) {
+        if (damage <= 0) return 0;
+        long d = (long) damage * (100 - m.resistance(type)) / 100;
+        return (int) Math.max(0, Math.min(Integer.MAX_VALUE, d));
+    }
+
     /** Obrazenia po pancerzu, tarczy i trybie walki postaci (tryb wg {@link PlayerCharacter#fightMode()}). */
     public static int mitigateOnPlayer(PlayerCharacter pc, int damage, DamageType type, boolean attackedRecently, Random rng) {
         return mitigateOnPlayer(pc, damage, type, pc.fightMode(), attackedRecently, rng);

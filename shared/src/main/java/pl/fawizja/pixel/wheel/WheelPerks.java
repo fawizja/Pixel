@@ -88,43 +88,42 @@ public final class WheelPerks {
     }
 
     private static final Upgrade[] KNIGHT = {
-            up("berserk", "Front Sweep", SpellAugment.lifeLeech(5), SpellAugment.damage(14), "zamiennik: Szał"),
+            up("front_sweep", "Front Sweep", SpellAugment.lifeLeech(5), SpellAugment.damage(14), ""),
             up("groundshaker", "Groundshaker", SpellAugment.damage(12.5), SpellAugment.cooldown(2000), ""),
-            up("annihilation", "Chivalrous Challenge", SpellAugment.mana(20), SpellAugment.cooldown(2000),
-                    "zamiennik: Unicestwienie (brak prowokacji); st. 2 -2 s zamiast +1 celu"),
+            up("chivalrous_challenge", "Chivalrous Challenge", SpellAugment.mana(20), SpellAugment.cooldown(2000),
+                    "st. 2: -2 s zamiast +1 celu"),
             up("intense_wound_cleansing", "Intense Wound Cleansing", SpellAugment.heal(125), SpellAugment.mana(10),
                     "st. 2: -10 many zamiast -5 min (u nas odnowienie 1 s)"),
             up("fierce_berserk", "Fierce Berserk", SpellAugment.mana(30), SpellAugment.damage(10), "")};
 
     private static final Upgrade[] PALADIN = {
-            up("divine_judgement", "Sharpshooter", SpellAugment.cooldown(2000), SpellAugment.cooldown(2000),
-                    "zamiennik: Boski sąd; -2 s zamiast -8 s / -6 s"),
+            up("sharpshooter", "Sharpshooter", SpellAugment.cooldown(2000), SpellAugment.cooldown(2000),
+                    "-2 s zamiast -8 s / -6 s"),
             up("strong_ethereal_spear", "Strong Ethereal Spear", SpellAugment.cooldown(2000), SpellAugment.damage(38),
                     "st. 2: +38% zamiast +380% z Canary (u nas czar ma już pełną moc)"),
-            up("divine_wrath", "Divine Dazzle", SpellAugment.mana(20), SpellAugment.cooldown(1000),
-                    "zamiennik: Boski gniew (brak oślepienia)"),
-            up("holy_mend", "Swift Foot", SpellAugment.mana(10), SpellAugment.heal(10),
-                    "zamiennik: Wielkie święte uzdrowienie (brak Swift Foot)"),
+            up("divine_dazzle", "Divine Dazzle", SpellAugment.mana(20), SpellAugment.cooldown(1000), ""),
+            up("swift_foot", "Swift Foot", SpellAugment.mana(10), SpellAugment.cooldown(2000),
+                    "przybliżenie: -10 many i -2 s odnowienia"),
             up("divine_caldera", "Divine Caldera", SpellAugment.mana(20), SpellAugment.damage(8.5), "")};
 
     private static final Upgrade[] SORCERER = {
-            new Upgrade(List.of("hells_core", "rage_of_skies"), "dowolny czar skupienia", SpellAugment.damage(5),
+            new Upgrade(List.of("hells_core", "rage_of_the_skies"), "dowolny czar skupienia", SpellAugment.damage(5),
                     SpellAugment.cooldown(4000), ""),
-            up("ultimate_mend", "Magic Shield", SpellAugment.heal(10), SpellAugment.mana(10),
-                    "zamiennik: Wielkie uzdrowienie (brak tarczy many)"),
-            up("energy_strike_max", "Sap Strength", SpellAugment.mana(20), SpellAugment.damage(5),
-                    "zamiennik: Ostateczny grom (brak osłabienia)"),
-            up("storm_ring", "Energy Wave", SpellAugment.damage(5), SpellAugment.radius(1), "zamiennik: Burza energii"),
-            up("flame_ring", "Great Fire Wave", SpellAugment.crit(10, 15), SpellAugment.damage(5), "zamiennik: Krąg ognia")};
+            up("magic_shield", "Magic Shield", SpellAugment.mana(10), SpellAugment.cooldown(2000),
+                    "przybliżenie: -10 many i -2 s zamiast większej tarczy"),
+            up("ultimate_energy_strike", "Sap Strength", SpellAugment.mana(20), SpellAugment.damage(5),
+                    "zamiennik: Ostateczne uderzenie energii (brak Sap Strength)"),
+            up("energy_wave", "Energy Wave", SpellAugment.damage(5), SpellAugment.radius(1), ""),
+            up("great_fire_wave", "Great Fire Wave", SpellAugment.crit(10, 15), SpellAugment.damage(5), "")};
 
     private static final Upgrade[] DRUID = {
-            up("frost_nova", "Strong Ice Wave", SpellAugment.manaLeech(3), SpellAugment.damage(10), "zamiennik: Mroźna fala"),
-            up("vital_surge", "Mass Healing", SpellAugment.heal(4), SpellAugment.heal(4),
-                    "zamiennik: Przypływ życia; st. 2 +4% zamiast obszaru"),
-            up("ultimate_mend", "Nature's Embrace", SpellAugment.heal(11), SpellAugment.mana(10),
-                    "zamiennik: Wielkie uzdrowienie; st. 2 -10 many zamiast -10 s"),
-            up("earth_quake", "Terra Wave", SpellAugment.damage(6.5), SpellAugment.lifeLeech(5), "zamiennik: Gniew ziemi"),
-            up("greater_mend", "Heal Friend", SpellAugment.mana(10), SpellAugment.heal(5.5), "zamiennik: Uzdrowienie")};
+            up("strong_ice_wave", "Strong Ice Wave", SpellAugment.manaLeech(3), SpellAugment.damage(10), ""),
+            up("mass_healing", "Mass Healing", SpellAugment.heal(4), SpellAugment.heal(4),
+                    "st. 2: +4% zamiast obszaru"),
+            up("natures_embrace", "Nature's Embrace", SpellAugment.heal(11), SpellAugment.mana(10),
+                    "st. 2: -10 many zamiast -10 s"),
+            up("terra_wave", "Terra Wave", SpellAugment.damage(6.5), SpellAugment.lifeLeech(5), ""),
+            up("heal_friend", "Heal Friend", SpellAugment.mana(10), SpellAugment.heal(5.5), "")};
 
     private static final Upgrade[] MONK = {
             up("sweeping_takedown", "Sweeping Takedown", SpellAugment.manaLeech(3), SpellAugment.crit(10, 25), ""),

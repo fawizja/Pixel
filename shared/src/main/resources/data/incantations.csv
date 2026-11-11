@@ -1,14 +1,30 @@
-# Etap 13: inkantacje w stylu Tibii - wpisanie slow w czacie rzuca czar (wielkosc liter i odstepy bez znaczenia)
+# Inkantacje jak w Tibii - wpisanie slow w czacie rzuca czar (wielkosc liter i odstepy bez znaczenia).
+# Czary z parametrem (utevo res "wilk", utevo res ina "szkielet", exura sio "imie") przyjmuja dopisek po slowach.
 # czar;slowa
-mend;exura
-greater_mend;exura gran
-vital_surge;exura vita
-ultimate_mend;exura max vito
-holy_mend;exura gran san
-inner_calm;exura med
-deep_meditation;exura gran med
+magic_patch;exura infir
+light_healing;exura
+intense_healing;exura gran
+ultimate_healing;exura vita
+restoration;exura max vita
+heal_friend;exura sio
+mass_healing;exura gran mas res
+natures_embrace;exura gran sio
+divine_healing;exura san
+salvation;exura gran san
+bruise_bane;exura infir ico
+wound_cleansing;exura ico
+intense_wound_cleansing;exura gran ico
+fair_wound_cleansing;exura med ico
+recovery;utura
+intense_recovery;utura gran
 spirit_mend;exura gran tio
+restore_balance;exura tio sio
 mass_spirit_mend;exura mas nia
+cure_poison;exana pox
+cure_electrification;exana vis
+cure_burning;exana flam
+cure_bleeding;exana kor
+cure_curse;exana mort
 swift_jab;exori infir pug
 tiger_strike;exori infir nia
 double_jab;exori pug
@@ -26,55 +42,112 @@ virtue_of_justice;utito virtu
 virtue_of_sustain;utura tio
 focus_serenity;utamo tio
 focus_harmony;utevo nia
-ember_bolt;exori flam
-spark_bolt;exori vis
-flame_ring;exevo mas flam
-inferno_bolt;exori gran flam
-storm_ring;exevo mas vis
-meteor_bolt;exori max flam
-energy_strike_max;exori max vis
+buzz;exori infir vis
+scorch;exevo infir flam hur
+apprentices_strike;exori min flam
+energy_strike;exori vis
+flame_strike;exori flam
+death_strike;exori mort
+fire_wave;exevo flam hur
+energy_beam;exevo vis lux
+ignite;utori flam
+great_energy_beam;exevo gran vis lux
+electrify;utori vis
+great_fire_wave;exevo gran flam hur
+energy_wave;exevo vis hur
+lightning;exori amp vis
+rage_of_the_skies;exevo gran mas vis
 hells_core;exevo gran mas flam
-rage_of_skies;exevo gran mas vis
-frost_bolt;exori frigo
-thorn_burst;exori tera
-frost_nova;exevo mas frigo
-glacier_spike;exori gran frigo
-earth_quake;exevo mas tera
-blizzard_spike;exori max frigo
-earth_strike_max;exori max tera
-eternal_winter;exevo gran mas frigo
+strong_flame_strike;exori gran flam
+curse;utori mort
+strong_energy_strike;exori gran vis
+ultimate_flame_strike;exori max flam
+ultimate_energy_strike;exori max vis
+mud_attack;exori infir tera
+chill_out;exevo infir frigo hur
+terra_strike;exori tera
+ice_strike;exori frigo
+physical_strike;exori moe ico
+ice_wave;exevo frigo hur
+terra_wave;exevo tera hur
+strong_ice_wave;exevo gran frigo hur
+envenom;utori pox
 wrath_of_nature;exevo gran mas tera
-holy_bolt;exori san
-sacred_nova;exevo san
-piercing_throw;exori con
-divine_spear;exori gran san
-divine_wrath;exevo gran san
-light_blade;exori max san
+eternal_winter;exevo gran mas frigo
+strong_terra_strike;exori gran tera
+strong_ice_strike;exori gran frigo
+ultimate_terra_strike;exori max tera
+ultimate_ice_strike;exori max frigo
+lesser_ethereal_spear;exori infir con
+ethereal_spear;exori con
+divine_missile;exori san
 divine_caldera;exevo mas san
+holy_flash;utori san
 strong_ethereal_spear;exori gran con
-divine_judgement;exori ultima san
-glow;utevo lux
-haste;utani hur
-strong_haste;utani gran hur
-conjure_spears;exevo con
-enchant_boulder;adori tera
-enchant_fireburst;adevo flam
-enchant_healing;adura gran
-enchant_great_fireball;adori mas flam
-enchant_avalanche;adori mas frigo
-enchant_sudden_death;adori gran mort
-enchant_ultimate_healing;adura vita
-wound_cleansing;exura ico
+divine_dazzle;exana amp res
+lesser_front_sweep;exori infir min
 brutal_strike;exori ico
 whirlwind_throw;exori hur
+groundshaker;exori mas
 berserk;exori
-intense_wound_cleansing;exura gran ico
+inflict_wound;utori kor
+front_sweep;exori min
 fierce_berserk;exori gran
 annihilation;exori gran ico
 executioners_throw;exori amp kor
-groundshaker;exori mas
-blade_storm;exori max
-iron_will;exura med ico
+light;utevo lux
+magic_rope;exani tera
+levitate_up;exani hur up
+levitate_down;exani hur down
+great_light;utevo gran lux
+haste;utani hur
+strong_haste;utani gran hur
+magic_shield;utamo vita
+food;exevo pan
+creature_illusion;utevo res ina
+summon_creature;utevo res
+charge;utani tempo hur
+challenge;exeta res
+invisibility;utana vid
+ultimate_light;utevo vis lux
+protector;utamo tempo
+swift_foot;utamo tempo san
+blood_rage;utito tempo
+sharpshooter;utito tempo san
+chivalrous_challenge;exeta amp res
+conjure_spears;exevo con
+blank_rune_spell;adori blank
+enchant_poison_field;adevo grav pox
+enchant_fire_field;adevo grav flam
+enchant_healing;adura gran
+enchant_antidote;adana pox
+enchant_light_missile;adori min vis
+enchant_convince;adeta sio
+enchant_destroy_field;adito grav
+enchant_energy_field;adevo grav vis
+enchant_boulder;adori tera
+enchant_ultimate_healing;adura vita
+enchant_heavy_missile;adori vis
+enchant_poison_bomb;adevo mas pox
+enchant_fireburst;adori flam
+enchant_fire_bomb;adevo mas flam
+enchant_soulfire;adevo res flam
+enchant_wild_growth;adevo grav vita
+enchant_animate_dead;adana mort
+enchant_holy_missile;adori san
+enchant_icicle;adori frigo
+enchant_stone_shower;adori mas tera
+enchant_thunderstorm;adori mas vis
+enchant_poison_wall;adevo mas grav pox
+enchant_great_fireball;adori mas flam
+enchant_avalanche;adori mas frigo
+enchant_explosion;adevo mas hur
+enchant_magic_wall;adevo grav tera
+enchant_fire_wall;adevo mas grav flam
+enchant_energy_bomb;adevo mas vis
+enchant_energy_wall;adevo mas grav vis
+enchant_sudden_death;adori gran mort
+enchant_paralyse;adana ani
 avatar_of_steel;uteta res eq
 avatar_of_light;uteta res sac
 avatar_of_storm;uteta res ven

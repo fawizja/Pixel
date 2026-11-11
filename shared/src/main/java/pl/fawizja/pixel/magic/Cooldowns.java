@@ -36,6 +36,11 @@ public final class Cooldowns {
         groups.put(s.group(), now + s.group().groupCooldownMs);
     }
 
+    /** Przedluza odnowienie czaru do chwili until (drugie wspolne grupy z Tibii). */
+    public void extend(SpellType s, long until) {
+        spells.merge(s.key(), until, Math::max);
+    }
+
     public void triggerGroup(SpellGroup g, long now, long ms) {
         groups.put(g, now + ms);
     }

@@ -48,7 +48,10 @@ class EndgameSimulationTest {
         int[] gear = (v == Vocation.PALADIN || v == Vocation.MONK || v == Vocation.KNIGHT)
                 ? new int[] {t.armor()[0], t.armor()[1], t.armor()[2], t.shield()} : t.armor();
         int weaponSkill = (v == Vocation.DRUID || v == Vocation.SORCERER) ? 30 : t.skill();
-        int magic = (v == Vocation.DRUID || v == Vocation.SORCERER) ? t.magic() : t.magic() / 4;
+        // paladyn i mnich maja magie jak w tabeli CharacterFactory (paladyn ok. polowa maga, mnich 0,6) - od 0.240 ich
+        // leczenie jest jak w Tibii (exura gran san, Uleczenie ducha) i rosnie z magia
+        int magic = (v == Vocation.DRUID || v == Vocation.SORCERER) ? t.magic()
+                : v == Vocation.PALADIN ? t.magic() / 2 : v == Vocation.MONK ? t.magic() * 6 / 10 : t.magic() / 4;
         return CombatSimulationTest.build(v, t.level(), weaponSkill, magic, t.shielding(), w, gear);
     }
 
@@ -56,6 +59,8 @@ class EndgameSimulationTest {
         SpellType best = null;
         for (SpellType s : SPELLS.forVocation(pc.vocation())) {
             if (s.kind() != SpellKind.HEAL_SELF || pc.level() < s.minLevel()) continue;
+            // leczenie co sekunde; czary z dlugim odnowieniem z Tibii (Odnowa 6 s, Silne oczyszczenie ran 10 min) sa awaryjne
+            if (s.cooldownMs() > 2000) continue;
             if (best == null || SpellSystem.baseValue(s, pc) > SpellSystem.baseValue(best, pc)) best = s;
         }
         return best;
@@ -73,10 +78,16 @@ class EndgameSimulationTest {
             int hp = pc.maxHealth(), mana = pc.maxMana(), mhp = m.maxHealth();
             boolean bossHealed = false;
             long tPlayer = 0, tMonster = 500, tHeal = 0, now = 0;
+            // mnich jak w grze: czar budujacy harmonie co 2 s leczy z harmonii (SpellSystem.harmonyHeal, bez many)
+            long tHarmony = pc.vocation() == Vocation.MONK ? 2000 : Long.MAX_VALUE;
             while (hp > 0 && mhp > 0 && now < 600_000) {
-                long next = Math.min(tPlayer, Math.min(tMonster, tHeal));
+                long next = Math.min(Math.min(tPlayer, tHarmony), Math.min(tMonster, tHeal));
                 now = next;
-                if (next == tHeal) {
+                if (next == tHarmony) {
+                    hp = Math.min(pc.maxHealth(), hp + CombatFormulas.rollBetween(pl.fawizja.pixel.vocation.Harmony.healMin(pc.level(), 1),
+                            pl.fawizja.pixel.vocation.Harmony.healMax(pc.level(), 1), rng));
+                    tHarmony += 2000;
+                } else if (next == tHeal) {
                     if (heal != null && hp < pc.maxHealth() * 0.55 && mana >= heal.mana()) {
                         hp = Math.min(pc.maxHealth(), hp + (int) (healBase * (SpellSystem.MIN_ROLL
                                 + rng.nextDouble() * (SpellSystem.MAX_ROLL - SpellSystem.MIN_ROLL))));
@@ -125,7 +136,9 @@ class EndgameSimulationTest {
                             t.level(), v, key, r.winRate() * 100, r.avgSeconds(), r.manaShare() * 100));
                     assertTrue(r.winRate() >= 0.95, t.name() + ": " + v + " vs " + key + " " + r);
                     assertTrue(r.avgSeconds() <= 90, t.name() + ": " + v + " vs " + key + " too slow " + r);
-                    assertTrue(r.manaShare() <= 0.6, t.name() + ": " + v + " vs " + key + " mana " + r);
+                    // 0.240: koszty leczenia jak w Tibii (Uleczenie ducha 210, exura gran san 210 many) - do jednego paska
+                    // many na potwora (reszte daja mikstury, ktorych ta symulacja nie liczy)
+                    assertTrue(r.manaShare() <= 1.0, t.name() + ": " + v + " vs " + key + " mana " + r);
                 }
             }
         }
@@ -150,7 +163,9 @@ class EndgameSimulationTest {
             for (String k : upper.monsters()) if (hardest == null || REG.get(k).level() > hardest.level()) hardest = REG.get(k);
             for (Vocation v : Vocation.values()) {
                 Result r = fight(build(v, lower), hardest, 7);
-                assertTrue(r.winRate() <= 0.5 || r.avgSeconds() > 120,
+                // farma = pewne wygrane (90%+) w rozsadnym czasie (do 80 s); od 0.240 leczenie jak w Tibii (exura vita, exura
+                // gran san) pozwala przetrwac dluzej, wiec sama przezywalnosc nie jest juz miara
+                assertTrue(r.winRate() < 0.9 || r.avgSeconds() > 80,
                         lower.name() + " " + v + " already farms " + hardest.key() + " " + r);
             }
         }

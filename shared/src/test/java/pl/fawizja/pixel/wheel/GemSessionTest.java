@@ -130,9 +130,9 @@ class GemSessionTest {
         WheelFixtures.path(pc, WheelDomain.RED);
         // pole czaru: nazwy, stopnie I i II z danych WheelPerks
         WheelPerks.Upgrade u = WheelPerks.upgrade(Vocation.KNIGHT, WheelSlice.RED_200.conviction.spellGroup());
-        java.util.List<String[]> card = WheelView.slice(pc, WheelSlice.RED_200, true, k -> k.equals("berserk") ? "Szał" : k);
+        java.util.List<String[]> card = WheelView.slice(pc, WheelSlice.RED_200, true, k -> k.equals("front_sweep") ? "Cięcie przed sobą" : k);
         String all = join(card);
-        assertTrue(all.contains("Szał (Tibia: Front Sweep)"), all);
+        assertTrue(all.contains("Cięcie przed sobą (Tibia: Front Sweep)"), all);
         assertTrue(all.contains(u.grade1.describe()));
         assertTrue(all.contains("razem " + u.at(2).describe()));
         assertTrue(card.stream().anyMatch(r -> r[0].equals("Stopień I (aktywny)")), "RED_200 is full");
@@ -155,8 +155,8 @@ class GemSessionTest {
         // cwiartka: krotki efekt i link do karty objawienia
         java.util.List<String[]> q = WheelView.quadrant(pc, WheelDomain.RED, k -> k);
         assertEquals("wheel:rev:R", q.get(0)[3]);
-        assertTrue(q.stream().anyMatch(r -> r[1].equals("+3 HP, +1 many/pkt; pełne: czar berserk")), join(q));
-        assertTrue(q.stream().anyMatch(r -> r[1].equals("+1 many/pkt; pełne: annihilation I: -20 many")), join(q));
+        assertTrue(q.stream().anyMatch(r -> r[1].equals("+3 HP, +1 many/pkt; pełne: czar front_sweep")), join(q));
+        assertTrue(q.stream().anyMatch(r -> r[1].equals("+1 many/pkt; pełne: czar chivalrous_challenge")), join(q));
         assertTrue(q.stream().anyMatch(r -> r[0].equals("Zewnętrzne 200: 200/200, pełne")), join(q));
         pl.fawizja.pixel.magic.SpellRegistry spells = pl.fawizja.pixel.magic.SpellRegistry.loadDefault(TestData.ITEMS);
         java.util.function.Function<String, String> names = k -> spells.find(k) == null ? k : spells.find(k).name();

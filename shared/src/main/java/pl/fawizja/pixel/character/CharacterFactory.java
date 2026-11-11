@@ -79,13 +79,14 @@ public final class CharacterFactory {
      * HuntBalanceSimulationTest#skillsFollowTheLevel z Balance.HUNT_TRY_FACTOR i etapami serwera, polowanie od
      * poziomu 1 na potwory swojego poziomu). Kolumny: poziom, glowna umiejetnosc walki (rycerz: bron wrecz - miecz,
      * topor i maczuga; paladyn: dystans; mnich: piesci; magowie: brak), tarcza, magia. Miedzy wierszami liniowo,
-     * powyzej ostatniego wiersza tak jak miedzy dwoma ostatnimi (do {@link Skills#MAX_SKILL}).
+     * powyzej ostatniego wiersza tak jak miedzy dwoma ostatnimi (do {@link Skills#MAX_SKILL}). 0.240: przeliczone po
+     * czarach i runach z Tibii (wiersze do 200 z symulacji, wyzsze przesuniete o roznice na 200).
      */
-    static final int[][] KNIGHT_SKILLS = {{8, 10, 10, 0}, {20, 47, 43, 5}, {35, 58, 54, 6}, {50, 64, 59, 7},
-            {75, 77, 76, 9}, {100, 82, 77, 9}, {150, 90, 86, 11}, {200, 96, 94, 12}, {250, 103, 103, 12},
+    static final int[][] KNIGHT_SKILLS = {{8, 10, 10, 0}, {20, 52, 48, 4}, {35, 60, 56, 6}, {50, 65, 60, 8},
+            {75, 77, 75, 9}, {100, 81, 76, 9}, {150, 89, 84, 11}, {200, 97, 96, 12}, {250, 103, 103, 12},
             {300, 106, 105, 13}, {400, 114, 113, 14}, {500, 120, 114, 14}, {600, 124, 119, 15}};
-    static final int[][] PALADIN_SKILLS = {{8, 10, 10, 0}, {20, 54, 39, 12}, {35, 63, 52, 17}, {50, 68, 58, 20},
-            {75, 81, 74, 25}, {100, 83, 75, 27}, {150, 93, 85, 30}, {200, 101, 96, 33}, {250, 106, 102, 35},
+    static final int[][] PALADIN_SKILLS = {{8, 10, 10, 0}, {20, 53, 39, 9}, {35, 65, 54, 16}, {50, 71, 61, 19},
+            {75, 82, 77, 25}, {100, 85, 77, 27}, {150, 94, 86, 30}, {200, 102, 97, 32}, {250, 106, 102, 35},
             {300, 110, 105, 37}, {400, 117, 112, 40}, {500, 122, 113, 42}, {600, 127, 118, 44}};
     static final int[][] MONK_SKILLS = {{8, 10, 10, 0}, {20, 48, 31, 13}, {35, 59, 36, 20}, {50, 65, 40, 23},
             {75, 78, 48, 30}, {100, 82, 48, 33}, {150, 92, 54, 38}, {200, 100, 61, 41}, {250, 105, 65, 44},
@@ -94,9 +95,9 @@ public final class CharacterFactory {
      * Czarodziej i druid (srednia obu; od odpornosci jak w Tibii druid poluje wiecej czarami - potwory odporne na
      * ziemie - i ma w symulacji do 3 poziomow magii wiecej): tarcza zostaje 10.
      */
-    static final int[][] MAGE_SKILLS = {{8, 10, 10, 0}, {20, 10, 10, 33}, {35, 10, 10, 46}, {50, 10, 10, 54},
-            {75, 10, 10, 70}, {100, 10, 10, 74}, {150, 10, 10, 88}, {200, 10, 10, 98}, {250, 10, 10, 107},
-            {300, 10, 10, 114}, {400, 10, 10, 124}, {500, 10, 10, 130}, {600, 10, 10, 136}};
+    static final int[][] MAGE_SKILLS = {{8, 10, 10, 0}, {20, 10, 10, 33}, {35, 10, 10, 43}, {50, 10, 10, 50},
+            {75, 10, 10, 67}, {100, 10, 10, 73}, {150, 10, 10, 84}, {200, 10, 10, 92}, {250, 10, 10, 101},
+            {300, 10, 10, 108}, {400, 10, 10, 118}, {500, 10, 10, 124}, {600, 10, 10, 130}};
 
     static int[][] skillTable(Vocation v) {
         switch (v) {

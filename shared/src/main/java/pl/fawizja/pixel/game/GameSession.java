@@ -165,6 +165,8 @@ public final class GameSession {
         this.berries = new pl.fawizja.pixel.gathering.BerryBushes(world);
         this.spells = new SpellSystem(pc, world, items, spellRegistry, consumables, combat, this.monsters, log, rng);
         this.consumables = consumables;
+        spells.setFacing(() -> facing);
+        spells.setMover(new SpellMover());
         this.movement.setOccupancy(p -> this.monsters.monsterAt(p) != null || npcs.at(p) != null || dummies.at(p) || !mayEnter(p)
                 || (!world.isProtectionZone(p) && otherPlayers.test(p)));
         this.combat.setKillListener(t -> {
@@ -188,7 +190,7 @@ public final class GameSession {
             public Position position() { return pc.position(); }
 
             @Override
-            public boolean attackable() { return !pc.isDead(); }
+            public boolean attackable() { return !pc.isDead() && !pc.isInvisible(); }
         };
     }
 
@@ -1944,6 +1946,119 @@ public final class GameSession {
         return spells.cast(key, nowMs);
     }
 
+    /** Czar z dopiskiem: utevo res "wilk", utevo res ina "szkielet", exura sio "imie". */
+    public CastResult castSpell(String key, String param, long nowMs) {
+        return spells.cast(key, param, nowMs);
+    }
+
+    // ------------------------------------------------------------------ 0.240: lewitacja, stany, pola
+
+    /** Pole (id), na ktorym ostatnio stala postac - pole rani przy wejsciu albo gdy powstanie pod postacia. */
+    private long lastFieldId;
+
+    /** Kierunek prosty do lewitacji (skos = poziomo, jak patrzenie postaci w Tibii). */
+    private Direction straightFacing() {
+        return facing.diagonal() ? (facing.dx > 0 ? Direction.EAST : Direction.WEST) : facing;
+    }
+
+    /** Pole, na ktore postac moze sie przeniesc czarem: przechodnie, wolne, bez przejscia, poziomu, domu i wypraw. */
+    private boolean levitationTarget(Position p) {
+        return world.isWalkable(p) && world.transitionAt(p) == null && world.requiredLevelAt(p) <= pc.level()
+                && world.levelDoorAt(p) <= pc.level() && mayEnter(p) && houses.at(p) == null
+                && monsters.monsterAt(p) == null && npcs.at(p) == null && !dummies.at(p)
+                && !world.inAltarQuestRooms(p) && !world.inBossQuestRooms(p) && !world.openings().isClosedDoor(p);
+    }
+
+    /** Pustka nad/przed postacia: brak podloza albo dziura (przejscie HOLE). */
+    private boolean openAir(Position p) {
+        pl.fawizja.pixel.world.Transition t = world.transitionAt(p);
+        return !world.hasGround(p) || t != null && t.type() == pl.fawizja.pixel.world.TransitionType.HOLE;
+    }
+
+    /**
+     * Gdzie exani hur zabierze postac (null = nie tutaj). W gore: nad postacia pustka (brak podloza albo dziura),
+     * a pietro wyzej przed postacia pole do stania. W dol: przed postacia pustka (krawedz, dziura), pod nia pole.
+     */
+    public Position levitationDestination(boolean up) {
+        Position me = pc.position();
+        Direction d = straightFacing();
+        if (up) {
+            if (me.z() >= Position.MAX_FLOOR) return null;
+            Position above = me.withFloor(me.z() + 1);
+            Position dest = above.translate(d.dx, d.dy);
+            return openAir(above) && levitationTarget(dest) ? dest : null;
+        }
+        if (me.z() <= Position.MIN_FLOOR) return null;
+        Position front = me.translate(d.dx, d.dy);
+        Position dest = front.withFloor(me.z() - 1);
+        return openAir(front) && levitationTarget(dest) ? dest : null;
+    }
+
+    private final class SpellMover implements pl.fawizja.pixel.magic.SpellSystem.Mover {
+        @Override
+        public boolean levitate(boolean up, long now) {
+            Position dest = levitationDestination(up);
+            if (dest == null) return false;
+            if (now < pc.pzBlockedUntil() && !world.isProtectionZone(pc.position()) && world.isProtectionZone(dest)) {
+                log.add(now, EventLog.Kind.WARNING, pzBlockedMessage(now));
+                return false;
+            }
+            combat.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now, pc.position(), 0, "MAGIC"));
+            pc.setPosition(dest);
+            onFloorChanged(now);
+            checkRegion(now);
+            combat.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now, dest, 0, "MAGIC"));
+            return true;
+        }
+
+        @Override
+        public boolean magicRope(long now) {
+            Position me = pc.position();
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    pl.fawizja.pixel.world.Transition t = world.transitionAt(me.translate(dx, dy));
+                    if (t == null || t.type() != pl.fawizja.pixel.world.TransitionType.ROPE_SPOT) continue;
+                    pc.setPosition(t.to());
+                    onFloorChanged(now);
+                    checkRegion(now);
+                    combat.addEvent(pl.fawizja.pixel.combat.CombatEvent.area(now, t.to(), 0, "MAGIC"));
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Stany i pola co klatke: tiki zatrucia/podpalenia... w postac, pole pod postacia (wejscie albo nowe pole),
+     * efekty czarow w czasie (stany na potworach, sludzy).
+     */
+    private void updateConditionsAndFields(long nowMs) {
+        if (!pc.isDead()) {
+            pl.fawizja.pixel.world.Fields.Field f = world.fields().at(pc.position());
+            if (f == null) {
+                lastFieldId = 0;
+            } else if (f.id() != lastFieldId) {
+                lastFieldId = f.id();
+                pl.fawizja.pixel.combat.ConditionType type = pl.fawizja.pixel.world.Fields.condition(f.kind());
+                if (type != null && !world.isProtectionZone(pc.position())) {
+                    boolean had = pc.conditions().has(type);
+                    pc.conditions().add(type, pl.fawizja.pixel.world.Fields.ticks(f.kind()), pl.fawizja.pixel.world.Fields.intervalMs(f.kind()),
+                            false, nowMs, f.kind().label);
+                    if (!had) log.add(nowMs, EventLog.Kind.WARNING, f.kind().label + ": " + type.label.toLowerCase(java.util.Locale.ROOT)
+                            + (type.cure != null ? " - wylecz czarem " + type.cure + "." : "."));
+                }
+            }
+        }
+        if (pc.conditions().any()) {
+            for (pl.fawizja.pixel.combat.Conditions.Tick t : pc.conditions().tick(nowMs)) {
+                combat.conditionHit(t, nowMs);
+                if (pc.conditions().types().isEmpty()) break;
+            }
+        }
+        spells.updateEffects(nowMs);
+    }
+
     /** Uzycie przedmiotu z plecaka (mikstura, jedzenie, runa). */
     public CastResult useSlot(int slot, long nowMs) {
         if (slot < 0 || slot >= pc.backpack().size()) return CastResult.MISSING_ITEM;
@@ -2553,6 +2668,7 @@ public final class GameSession {
         Position before = pc.position();
         if (!sharedWorld) monsters.update(nowMs, playerTarget, combat);
         combat.update(nowMs);
+        updateConditionsAndFields(nowMs);
         if (!sharedWorld && bossRuntime != null) bossRuntime.update(bossHeroes.get(), nowMs);
         if (!pc.position().equals(before)) {
             // smierc i odrodzenie w swiatyni
@@ -2617,7 +2733,7 @@ public final class GameSession {
     /** Wybor celu dotknieciem kafelka. Zwraca true, jesli trafiono potwora. */
     public boolean targetAt(Position p) {
         Monster m = monsters.monsterAt(p);
-        if (m == null) return false;
+        if (m == null || m.isSummon()) return false;
         combat.setTarget(m);
         return true;
     }
@@ -3664,6 +3780,7 @@ public final class GameSession {
                 case TUNNEL: parts.add("przejście"); break;
                 case LADDER: parts.add("drabina"); break;
                 case ROPE_SPOT: parts.add("miejsce na linę"); break;
+                case GRATE: parts.add("kratka ściekowa (dotknij, by zejść do kanału)"); break;
                 default: break;
             }
         }

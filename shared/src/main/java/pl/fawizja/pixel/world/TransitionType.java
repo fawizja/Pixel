@@ -11,7 +11,12 @@ public enum TransitionType {
     /** Drabina: trzeba jej uzyc stojac na niej lub obok. */
     LADDER(false, false),
     /** Miejsce na line: wyjscie z dziury wymaga liny w plecaku. */
-    ROPE_SPOT(false, true);
+    ROPE_SPOT(false, true),
+    /**
+     * Kratka sciekowa w miescie (0.240, jak w Tibii): zejscie do kanalu dopiero po uzyciu (dotknieciu) kratki,
+     * stojac na niej albo obok - samo wejscie na kratke nic nie robi.
+     */
+    GRATE(false, false);
 
     private final boolean triggeredByWalking;
     private final boolean requiresRope;

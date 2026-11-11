@@ -821,10 +821,13 @@ public final class GameScreen extends ScreenAdapter {
         // okna z danymi wlasnej postaci - dzialaja tez bez serwera
         String cmd = java.text.Normalizer.normalize(text.trim().toLowerCase(java.util.Locale.ROOT).replace('ł', 'l'),
                 java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-        String spell = session.spells().registry().byWords(text);
+        pl.fawizja.pixel.magic.SpellRegistry.Incantation inc = session.spells().registry().incantation(text);
+        String spell = inc == null ? null : inc.key();
         if (spell != null) {
-            // inkantacja jak w Tibii: slowa nad postacia i czar (online inni gracze widza slowa w czacie)
-            act("cast:" + spell, now());
+            // inkantacja jak w Tibii: slowa nad postacia i czar (online inni gracze widza slowa w czacie);
+            // dopisek (utevo res "wilk", exura sio "imie") idzie za dwukropkiem
+            String param = inc.param() == null ? "" : inc.param().replaceAll("[:\\t\\n]", " ").trim();
+            act("cast:" + spell + (param.isEmpty() ? "" : ":" + param), now());
             if (net != null) {
                 net.send("CHAT", text.trim()); // serwer odsyla slowa wszystkim, takze nam (zakladka Lokalny)
             } else {
@@ -1899,6 +1902,7 @@ public final class GameScreen extends ScreenAdapter {
         worldRenderer.setBerries(session.berries(), t);
         worldRenderer.render(batch, camera, z, session.ground(), (b, row) -> {
             drawSplats(b, row, z, t);
+            drawFields(b, row, z, t);
             drawCorpses(b, row, z);
             drawChests(b, row, z);
             footprints.drawRow(b, game.art().white(), worldRenderer, row, z, t);
@@ -1958,7 +1962,12 @@ public final class GameScreen extends ScreenAdapter {
                     rise = 0.35f;
                 }
                 int pf = pc.isMounted() ? 0 : TileArt.walkFrame(px, py, pc.position().x(), pc.position().y());
-                b.draw(game.art().character(pc.vocation(), session.facing(), pc.outfit(), pf), px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
+                // iluzja stworzenia (utevo res ina): postac wyglada jak potwor; niewidzialnosc - polprzezroczysta (dla siebie)
+                TextureRegion look = pc.illusion() != null ? game.art().monster(pc.illusion(), pf) : null;
+                if (pc.isInvisible()) b.setColor(1f, 1f, 1f, 0.4f);
+                b.draw(look != null ? look : game.art().character(pc.vocation(), session.facing(), pc.outfit(), pf),
+                        px + lx, worldRenderer.worldY(py + ly - rise), 1f, 1f);
+                b.setColor(Color.WHITE);
             }
         });
         worldRenderer.renderAbove(batch, camera, pc.position(), roofs);
@@ -2198,6 +2207,37 @@ public final class GameScreen extends ScreenAdapter {
 
     private static final String[] SPLAT_NAMES = {"blood_splash", "blood_small", "blood_drops", "slime_splash", "slime_splash", "slime_splash"};
 
+    /**
+     * Pola magiczne z run (0.240) z klatek efektow OTSP: ogien - plomien, energia - iskry energii, trucizna - kaluza
+     * sluzu, magiczna sciana - magiczna poswiata, dziki wzrost - efekt ziemi (OTSP nie ma tu osobnych grafik pol). Animacja w petli, dogasajace pole bledsze.
+     */
+    private void drawFields(SpriteBatch b, int row, int z, long t) {
+        pl.fawizja.pixel.world.Fields fields = session.world().fields();
+        if (fields.size() == 0) return;
+        Position me = session.character().position();
+        for (pl.fawizja.pixel.world.Fields.Field f : fields.near(me, 16)) {
+            Position p = f.position();
+            if (p.y() != row || p.z() != z) continue;
+            float wy = worldRenderer.worldY(p.y());
+            String name;
+            float alpha = 1f;
+            switch (f.kind()) {
+                case FIRE: name = "flame"; break;
+                case FIRE_WEAK: name = "flame"; alpha = 0.6f; break;
+                case ENERGY: name = "energy"; break;
+                case POISON: name = "slime_pool"; break;
+                case MAGIC_WALL: name = "magic"; break;
+                case WILD_GROWTH: name = "earth"; break;
+                default: name = null;
+            }
+            if (name == null || game.art().effect(name) == null) continue;
+            long period = 900L;
+            b.setColor(1f, 1f, 1f, alpha);
+            drawEffectFrame(b, name, (t + p.x() * 131L + p.y() * 71L) % period, period, p.x(), wy);
+            b.setColor(Color.WHITE);
+        }
+    }
+
     private void drawSplats(SpriteBatch b, int row, int z, long t) {
         for (long[] s : splats) {
             if (s[1] != row || s[2] != z) continue;
@@ -2214,6 +2254,16 @@ public final class GameScreen extends ScreenAdapter {
         b.setColor(Color.WHITE);
     }
 
+    /** Zywiol stanu ze zdarzenia "COND_POISON" (kolor liczby i efekt tiku). */
+    static String conditionElement(String effect) {
+        try {
+            return pl.fawizja.pixel.combat.ConditionType.valueOf(effect.substring(
+                    pl.fawizja.pixel.combat.CombatSystem.CONDITION_EFFECT_PREFIX.length())).damage.name();
+        } catch (IllegalArgumentException | IndexOutOfBoundsException ex) {
+            return null;
+        }
+    }
+
     private static Color effectColor(String effect) {
         if (effect == null) return new Color(0.9f, 0.85f, 0.75f, 1f);
         switch (effect) {
@@ -2228,6 +2278,8 @@ public final class GameScreen extends ScreenAdapter {
             case "MANA_DRAIN": return new Color(0.35f, 0.4f, 1f, 1f);
             case "HEAL": return new Color(0.55f, 1f, 0.65f, 1f);
             case "HASTE": return new Color(0.5f, 0.8f, 1f, 1f);
+            case "MAGIC": return new Color(0.55f, 0.75f, 1f, 1f);
+            case "PHYSICAL": return new Color(1f, 0.3f, 0.3f, 1f);
             default: return new Color(0.9f, 0.85f, 0.75f, 1f);
         }
     }
@@ -2290,6 +2342,9 @@ public final class GameScreen extends ScreenAdapter {
             case "MANA_DRAIN": return "ice";
             case "HEAL": return "heal";
             case "HASTE": return "sparkle";
+            case "MAGIC": return "magic";
+            case "POOF": return "poof";
+            case "SPARKS": return "sparks";
             case "PHYSICAL": return area ? "stones" : null;
             default: return null;
         }
@@ -2348,6 +2403,13 @@ public final class GameScreen extends ScreenAdapter {
                 }
                 case HIT_MONSTER:
                 case HIT_PLAYER:
+                    if (e.effect() != null && e.effect().startsWith(pl.fawizja.pixel.combat.CombatSystem.CONDITION_EFFECT_PREFIX)) {
+                        // tik stanu: maly efekt zywiolu zamiast krwi (krwawienie - krew)
+                        String el = conditionElement(e.effect());
+                        String fx = "PHYSICAL".equals(el) ? "blood" : impactFor(el, false);
+                        if (fx != null && e.amount() > 0) drawEffectFrame(b, fx, age, 300L, x, wy);
+                        break;
+                    }
                     if (e.amount() > 0) drawEffectFrame(b, "blood", age, 300L, x, wy);
                     break;
                 case BLOCKED:
@@ -2804,6 +2866,10 @@ public final class GameScreen extends ScreenAdapter {
                     if (pl.fawizja.pixel.combat.CombatSystem.MANA_EFFECT.equals(e.effect())) {
                         // wyssanie many: niebieska liczba (utracona mana)
                         font.setColor(0.35f, 0.55f, 1f, 1f - age);
+                    } else if (e.effect() != null && e.effect().startsWith(pl.fawizja.pixel.combat.CombatSystem.CONDITION_EFFECT_PREFIX)) {
+                        // tik stanu (0.240): kolor zywiolu jak w Tibii - zielona trucizna, pomaranczowy ogien...
+                        Color cc = effectColor(conditionElement(e.effect()));
+                        font.setColor(cc.r, cc.g, cc.b, 1f - age);
                     } else if (e.kind() == CombatEvent.Kind.HIT_MONSTER) {
                         font.setColor(1f, 1f, 1f, 1f - age);
                     } else {

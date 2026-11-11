@@ -56,6 +56,7 @@ Część grafik w `assets/art/` (podłoże, drzewa i kamienie, potwory, NPC, pos
 - Orki (2026-10-23) to przebarwione stroje OTSP (goblin, okultysta, jaszczuroczłek), król i strażnicy - stroje OTSP z maską kolorów.
 - Kratka ściekowa (2026-10-27) to grafika OTSP; szczur kanałowy i wielki szczur to przebarwiony szczur OTSP, a NPC Valmir, Nerys i nowi strażnicy - stroje OTSP z maską kolorów.
 - Roślinność wg klimatu, zwęglone drzewa i belki, gruz, krew i ciała w napadniętych wioskach (2026-10-28) to grafiki OTSP, część przebarwiona (szron, susza, zwęglenie).
+- Runy czarów jak w Tibii (0.240: pola, ściany, bomby, odtrutka, paraliż i inne) to przebarwione runy OTSP (`tools/art/rune_tints.py`); pola na ziemi rysujemy klatkami efektów OTSP (płomień, energia, kałuża szlamu, magia, ziemia).
 
 Autorzy paczki (plik AUTHORS.md paczki, bez zmian):
 

@@ -32,8 +32,13 @@ class HighLevelMagicTest {
                     .filter(s -> s.minLevel() >= 150 && (s.kind().isOffensive() || monk
                             && (s.kind() == SpellKind.FOCUS_HARMONY || s.kind() == SpellKind.FOCUS_SERENITY || s.kind() == SpellKind.HEAL_PARTY)))
                     .count();
-            assertTrue(attacks >= 3, v + " has " + attacks + " attack spells at 150+");
-            assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() >= 120
+            // Tibia 15.x: po 150 nowe ataki to glownie objawienia Kola (paladyn Boski granat, czarodziej Wielki
+            // promien smierci, rycerz Rzut kata, druid Wybuch lodu i ziemi) - kazda profesja ma co najmniej jeden
+            int need = v == Vocation.DRUID ? 2 : 1;
+            assertTrue(attacks >= need, v + " has " + attacks + " attack spells at 150+");
+            // Tibia 15.x: najsilniejsze leczenie paladyna (exura gran san) jest od 60
+            int strongHeal = v == Vocation.PALADIN ? 60 : 120;
+            assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() >= strongHeal
                             && (s.kind() == SpellKind.HEAL_SELF || monk && s.kind() == SpellKind.HEAL_PARTY)),
                     v + " has a strong heal");
             assertTrue(SPELLS.forVocation(v).stream().anyMatch(s -> s.minLevel() == 300), v + " has a level 300 spell");
@@ -43,10 +48,10 @@ class HighLevelMagicTest {
     @Test
     void newTopSpellsHitHarderThanTheLevel100OnesButCoolDownLonger() {
         PlayerCharacter sorc = veteran(Vocation.SORCERER);
-        SpellType meteor = SPELLS.get("meteor_bolt"), strike = SPELLS.get("energy_strike_max");
-        assertTrue(SpellSystem.baseValue(strike, sorc) > 1.5 * SpellSystem.baseValue(meteor, sorc));
-        assertTrue(strike.cooldownMs() > meteor.cooldownMs());
-        assertTrue(SPELLS.get("rage_of_skies").cooldownMs() >= 30_000);
+        SpellType strong = SPELLS.get("strong_flame_strike"), ultimate = SPELLS.get("ultimate_flame_strike");
+        assertTrue(SpellSystem.baseValue(ultimate, sorc) > 1.3 * SpellSystem.baseValue(strong, sorc));
+        assertTrue(ultimate.cooldownMs() > strong.cooldownMs());
+        assertTrue(SPELLS.get("rage_of_the_skies").cooldownMs() >= 30_000);
     }
 
     @Test
@@ -62,7 +67,11 @@ class HighLevelMagicTest {
         }
         assertEquals("haste", SPELLS.byWords("utani hur"));
         assertEquals("strong_haste", SPELLS.byWords("  Utani   GRAN hur "));
-        assertEquals("mend", SPELLS.byWords("exura"));
+        assertEquals("light_healing", SPELLS.byWords("exura"));
+        assertEquals("summon_creature", SPELLS.byWords("utevo res \"wilk\""));
+        assertEquals("wilk", SPELLS.incantation("Utevo Res \"Wilk\"").param());
+        assertEquals("levitate_up", SPELLS.byWords("exani hur up"));
+        assertEquals("cure_poison", SPELLS.byWords("exana pox"));
         assertNull(SPELLS.byWords("utani"));
         assertNull(SPELLS.byWords("cześć wszystkim"));
     }
