@@ -1744,13 +1744,15 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         boolean ok = aimReach.contains(h);
-        int rad = aimRune.kind() == pl.fawizja.pixel.magic.SpellKind.RUNE_AREA ? aimRune.radius() : 0;
-        if (ok && rad > 0 && Math.abs(row - h.y()) <= rad) {
-            for (int x = h.x() - rad; x <= h.x() + rad; x++) {
-                Position p = new Position(x, row, z);
-                if (h.distanceTo(p) > rad) continue;
-                b.setColor(1f, 0.55f, 0.15f, 0.22f);
-                b.draw(w, x, wy, 1f, 1f);
+        if (ok && (aimRune.kind() == pl.fawizja.pixel.magic.SpellKind.RUNE_AREA || aimRune.kind().targetsTile())) {
+            // podglad obszaru runy: te same pola co przy rzucie (okrag wielkiej kuli ognia, krzyz eksplozji, sciana)
+            pl.fawizja.pixel.magic.SpellSystem.AreaCast ac = session.spells().areaCast(aimRune, h, 0);
+            if (ac != null && ac.tiles().size() > 1) {
+                for (Position p : ac.tiles()) {
+                    if (p.y() != row || p.z() != z) continue;
+                    b.setColor(1f, 0.55f, 0.15f, 0.22f);
+                    b.draw(w, p.x(), wy, 1f, 1f);
+                }
             }
         }
         if (row == h.y()) {
@@ -2548,6 +2550,15 @@ public final class GameScreen extends ScreenAdapter {
         }
     }
 
+    /** Pola efektu obszaru z ksztaltem czaru (pamietane na zdarzeniu - linia wzroku liczona raz). */
+    private final java.util.Map<CombatEvent, List<Position>> shapedCache = new java.util.IdentityHashMap<>();
+
+    private List<Position> shapedTiles(CombatEvent e) {
+        if (shapedCache.size() > 256) shapedCache.clear();
+        return shapedCache.computeIfAbsent(e, k -> pl.fawizja.pixel.magic.SpellArea.eventTiles(k.position(), k.amount(),
+                k.from(), session.world()));
+    }
+
     private void drawEffectFrame(SpriteBatch b, String name, long age, long duration, float x, float wy) {
         TextureRegion[] frames = name == null ? null : game.art().effect(name);
         if (frames == null || age < 0 || age >= duration) return;
@@ -2586,6 +2597,15 @@ public final class GameScreen extends ScreenAdapter {
                 case AREA: {
                     int r = e.amount();
                     String name = impactFor(e.effect(), true);
+                    if (e.isShapedArea()) {
+                        // ksztalt czaru z Canary: dokladnie trafione pola, dalsze od rzucajacego zaczynaja pozniej
+                        Position o = e.from() != null ? e.from() : e.position();
+                        for (Position q : shapedTiles(e)) {
+                            if (q.z() != z) continue;
+                            drawEffectFrame(b, name, age - o.distanceTo(q) * 60L, SPRITE_EFFECT_MS, q.x(), worldRenderer.worldY(q.y()));
+                        }
+                        break;
+                    }
                     if (r <= 0) {
                         drawEffectFrame(b, name, age, SPRITE_EFFECT_MS, x, wy);
                         break;
@@ -2666,6 +2686,27 @@ public final class GameScreen extends ScreenAdapter {
                 float p = age / (float) CombatEvent.AREA_MS;
                 if (p < 0f || p > 1f) continue;
                 int r = e.amount();
+                if (e.isShapedArea()) {
+                    // ksztalt czaru z Canary: pierscien biegnie od rzucajacego po trafionych polach
+                    Position o = e.from() != null ? e.from() : e.position();
+                    List<Position> tiles = shapedTiles(e);
+                    int far = 1;
+                    for (Position q : tiles) far = Math.max(far, o.distanceTo(q));
+                    float wave = p * (far + 0.5f);
+                    for (Position q : tiles) {
+                        float near = 1f - Math.min(1f, Math.abs(o.distanceTo(q) - wave));
+                        float a = (0.15f + 0.55f * near) * (1f - p);
+                        if (a <= 0.02f) continue;
+                        float tx = q.x(), ty = worldRenderer.worldY(q.y());
+                        shapes.setColor(c.r, c.g, c.b, a);
+                        shapes.rect(tx + 0.08f, ty + 0.08f, 0.84f, 0.84f);
+                        if (rich && near > 0.6f) {
+                            shapes.setColor(1f, 1f, 1f, a * 0.6f);
+                            shapes.rect(tx + 0.4f, ty + 0.4f, 0.2f, 0.2f);
+                        }
+                    }
+                    continue;
+                }
                 if (r <= 0) {
                     // leczenie: iskry wznoszace sie nad postacia
                     int sparks = rich ? 6 : 3;

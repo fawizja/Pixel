@@ -166,6 +166,13 @@ public final class WorldMap {
         levelGates.add(new int[] {Math.min(x0, x1), Math.min(y0, y1), Math.max(x0, x1), Math.max(y0, y1), z, minLevel});
     }
 
+    /** Przejscia strzezone (kopie): x0, y0, x1, y1, z, minimalny poziom. */
+    public List<int[]> levelGates() {
+        List<int[]> out = new ArrayList<>();
+        for (int[] r : levelGates) out.add(r.clone());
+        return out;
+    }
+
     /** Wymagany poziom, aby wejsc na kafelek (0 = brak wymagan). */
     public int requiredLevelAt(Position p) {
         int need = 0;

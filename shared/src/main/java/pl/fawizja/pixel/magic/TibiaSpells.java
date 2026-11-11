@@ -146,70 +146,28 @@ public final class TibiaSpells {
 
     // ------------------------------------------------------------------ fale
 
-    /** Kierunek fali: wybrany cel (gdy lezy w zasiegu fali), inaczej kierunek patrzenia; zawsze prosty (N/E/S/W). */
+    /** Kierunek fali: patrzenie postaci, a gdy cel stoi w fali w innym prostym kierunku - w jego strone. */
     Direction waveDirection(SpellType s) {
-        Position me = pc().position();
-        Position t = null;
-        Monster m = sys.target();
-        if (m != null && !m.isDead()) t = m.position();
-        else if (sys.playerTargetPos() != null) t = sys.playerTargetPos();
-        if (t != null && t.z() == me.z() && me.distanceTo(t) <= s.radius() && !t.equals(me)) {
-            int dx = t.x() - me.x(), dy = t.y() - me.y();
-            if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? Direction.EAST : Direction.WEST;
-            return dy > 0 ? Direction.SOUTH : Direction.NORTH;
-        }
-        Direction d = sys.facing();
-        if (d.diagonal()) return d.dx > 0 ? Direction.EAST : Direction.WEST;
-        return d;
+        SpellSystem.AreaCast c = waveCast(s);
+        return c == null ? sys.straightFacing() : c.dir();
     }
 
-    /**
-     * Pola fali (stozek jak w Tibii): w odleglosci d od postaci polszerokosc max(ilosc, min(2, d/2)); dlugosc = promien.
-     * Tylko pola w zasiegu wzroku.
-     */
+    /** Obszar fali jak w Canary (AREA_WAVE4, AREA_WAVE7, AREA_SQUAREWAVE5, AREA_SHORTWAVE3, AREA_WAVE6). */
+    SpellSystem.AreaCast waveCast(SpellType s) {
+        return sys.areaCast(s, pc().position(), pc().wheel().castAugment().extraRadius);
+    }
+
+    /** Pola fali (tylko w zasiegu wzroku od rzucajacego). */
     public List<Position> waveTiles(SpellType s) {
-        return waveTiles(pc().position(), waveDirection(s), s.radius() + pc().wheel().castAugment().extraRadius, s.produceCount(), world());
-    }
-
-    public static List<Position> waveTiles(Position me, Direction d, int length, int minHalf, WorldMap world) {
-        List<Position> out = new ArrayList<>();
-        int sx = -d.dy, sy = d.dx; // prostopadle
-        for (int i = 1; i <= length; i++) {
-            int half = Math.max(minHalf, Math.min(2, i / 2));
-            for (int w = -half; w <= half; w++) {
-                Position p = new Position(me.x() + d.dx * i + sx * w, me.y() + d.dy * i + sy * w, me.z());
-                if (world == null || world.hasLineOfSight(me, p)) out.add(p);
-            }
-        }
-        return out;
-    }
-
-    List<Monster> waveTargets(SpellType s) {
-        List<Position> tiles = waveTiles(s);
-        List<Monster> out = new ArrayList<>();
-        for (Monster m : sys.targetsAround(pc().position(), s.radius() + 2)) if (tiles.contains(m.position())) out.add(m);
-        return out;
-    }
-
-    boolean playerInWave(SpellType s) {
-        if (sys.playerTargeting() == null) return false;
-        Position p = sys.playerTargeting().position();
-        return p != null && waveTiles(s).contains(p);
+        SpellSystem.AreaCast c = waveCast(s);
+        return c == null ? java.util.Collections.emptyList() : c.tiles();
     }
 
     private CastResult wave(SpellType s, long now) {
-        List<Position> tiles = waveTiles(s);
-        for (Position p : tiles) combat().addEvent(CombatEvent.area(now, p, 0, s.damageType().name()));
-        List<Monster> hit = waveTargets(s);
-        boolean player = playerInWave(s);
-        boolean crit = combat().rollCritical();
-        int targets = Math.max(1, hit.size() + (player ? 1 : 0));
-        for (Monster m : hit) {
-            combat().damageMonster(m, pl.fawizja.pixel.wheel.WheelSpells.vsTarget(pc(), s, m, sys.rollValue(s)), s.damageType(), now, crit, targets);
-        }
-        if (player) {
-            sys.playerTargeting().strike(pl.fawizja.pixel.combat.CriticalHit.apply(pc(), sys.rollValue(s), crit), s.damageType(), crit, targets, now);
-        }
+        SpellSystem.AreaCast c = waveCast(s);
+        if (c == null) return CastResult.NOT_USABLE;
+        sys.effect(c, s.damageType().name(), now);
+        sys.strikeArea(c, s, sys.monstersIn(c), now);
         return CastResult.OK;
     }
 
@@ -419,31 +377,13 @@ public final class TibiaSpells {
 
     // ------------------------------------------------------------------ runy pol
 
-    /** Kierunek od postaci do pola (prosty, dominujaca os); przy tym samym polu - patrzenie. */
-    private Direction towards(Position to) {
-        Position me = pc().position();
-        int dx = to.x() - me.x(), dy = to.y() - me.y();
-        if (dx == 0 && dy == 0) {
-            Direction d = sys.facing();
-            return d.diagonal() ? (d.dx > 0 ? Direction.EAST : Direction.WEST) : d;
-        }
-        if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? Direction.EAST : Direction.WEST;
-        return dy > 0 ? Direction.SOUTH : Direction.NORTH;
-    }
-
-    /** Pola runy: pole (1), bomba 3x3 (promien 1), sciana 5 pol w poprzek kierunku rzutu (promien 2). */
+    /**
+     * Pola runy: pole (1), bomba 3x3 (Canary AREA_SQUARE1X1), sciana 5 pol (AREA_WALLFIELD) albo 7 pol energii
+     * (AREA_WALLFIELD_ENERGY) w poprzek kierunku rzutu, po skosie - sciana ukosna. Tylko pola widoczne ze srodka.
+     */
     public List<Position> fieldTiles(SpellType s, Position center) {
-        List<Position> out = new ArrayList<>();
-        if (s.kind() == SpellKind.RUNE_WALL) {
-            Direction d = towards(center);
-            int sx = -d.dy, sy = d.dx;
-            for (int w = -s.radius(); w <= s.radius(); w++) out.add(center.translate(sx * w, sy * w));
-        } else {
-            for (int dy = -s.radius(); dy <= s.radius(); dy++)
-                for (int dx = -s.radius(); dx <= s.radius(); dx++) out.add(center.translate(dx, dy));
-        }
-        out.removeIf(p -> !p.equals(center) && !world().hasLineOfSight(center, p));
-        return out;
+        SpellSystem.AreaCast c = sys.areaCast(s, center, 0);
+        return c == null ? new ArrayList<>(List.of(center)) : new ArrayList<>(c.tiles());
     }
 
     private CastResult fieldRune(SpellType s, long now) {

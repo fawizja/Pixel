@@ -1,0 +1,53 @@
+# Obszary czarow i run jak w Canary (data/scripts/spells i data/scripts/runes: combat:setArea(createCombatArea(...))).
+# klucz czaru;obszar (nazwa z register_spells.lua bez AREA_; macierze w magic/SpellArea.java)
+# Czary bez wpisu: ATTACK_AREA/RUNE_AREA/HEAL_PARTY - okrag Canary o promieniu z spells.csv, fale - WAVE4/WAVE7,
+# promienie - linia o dlugosci promienia. Czary lancuchowe (ilosc > 0) przeskakuja miedzy celami w promieniu.
+# runy
+great_fireball_rune;CIRCLE3X3
+avalanche_rune;CIRCLE3X3
+thunderstorm_rune;CIRCLE3X3
+stone_shower_rune;CIRCLE3X3
+explosion_rune;CIRCLE1X1
+poison_field_rune;POINT
+fire_field_rune;POINT
+energy_field_rune;POINT
+poison_bomb_rune;SQUARE1X1
+fire_bomb_rune;SQUARE1X1
+energy_bomb_rune;SQUARE1X1
+poison_wall_rune;WALLFIELD
+fire_wall_rune;WALLFIELD
+energy_wall_rune;WALLFIELD_ENERGY
+# wokol rzucajacego
+berserk;SQUARE1X1
+fierce_berserk;SQUARE1X1
+challenge;SQUARE1X1
+groundshaker;CIRCLE3X3
+divine_caldera;CIRCLE3X3
+mass_healing;CIRCLE3X3
+mass_spirit_mend;MASS_SPIRIT_MEND
+hells_core;CIRCLE5X5
+eternal_winter;CIRCLE5X5
+rage_of_the_skies;CIRCLE6X6
+wrath_of_nature;CIRCLE6X6
+terra_burst;RING1_BURST3
+ice_burst;RING1_BURST3
+# wokol celu
+divine_grenade;CIRCLE2X2
+# fale i ciosy przed soba (srodek = pole przed rzucajacym)
+scorch;WAVE4
+chill_out;WAVE4
+fire_wave;WAVE4
+ice_wave;WAVE4
+great_fire_wave;WAVE7
+energy_wave;SQUAREWAVE5
+terra_wave;SQUAREWAVE5
+strong_ice_wave;SHORTWAVE3
+lesser_front_sweep;WAVE6
+front_sweep;WAVE6
+flurry_of_blows;FLURRY_OF_BLOWS
+greater_flurry_of_blows;GREATER_FLURRY_OF_BLOWS
+sweeping_takedown;SWEEPING_TAKEDOWN
+# promienie (dlugosc liczona od pola przed rzucajacym)
+energy_beam;BEAM5
+great_energy_beam;BEAM8
+great_death_beam;BEAM6

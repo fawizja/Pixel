@@ -251,3 +251,6 @@ volcano_crater|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -
 amber_deep|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -Dpixel.teleport=714,912,-3
 amazon_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=757,622,0
 cyclopolis_forge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=80 -Dpixel.teleport=571,889,0
+spell_gfb_circle|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=gfb -Dpixel.frames=30
+spell_wave_cone|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=wave -Dpixel.frames=30
+chest_reward_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=80 -Dpixel.spellDemo=chest -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2

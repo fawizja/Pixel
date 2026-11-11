@@ -79,13 +79,20 @@ class TreasureChestsTest {
         assertFalse(s.openChest(0), "no chest next to the temple");
         s.teleport(chest.position(), 0);
         long gold = s.gold();
-        int potions = pc.backpack().count(TestData.ITEMS.byKey(chest.itemKey()).id());
+        ChestRewards.Reward r = s.chestReward(chest);
+        assertTrue(r.gold() >= chest.gold(), "the map content is the minimum");
+        int first = r.items().get(0).itemId();
+        int had = pc.backpack().count(first);
         s.useNearby(0);
-        assertEquals(gold + chest.gold(), s.gold());
-        assertEquals(potions + chest.count(), pc.backpack().count(TestData.ITEMS.byKey(chest.itemKey()).id()));
+        assertEquals(gold + r.gold(), s.gold());
+        assertEquals(had + r.items().get(0).count(), pc.backpack().count(first));
         assertTrue(pc.openedChests().contains(chest.id()));
+        // dwa wiersze: zloto, potem przedmioty
+        String head = s.log().latest(2).get(0).text(), list = s.log().latest(2).get(1).text();
+        assertTrue(head.contains(String.format(java.util.Locale.ROOT, "%,d gp", r.gold()).replace(',', ' ')), "the gold is named: " + head);
+        assertTrue(list.contains(TestData.ITEMS.get(first).name()), "the item is named: " + list);
         s.useNearby(0);
-        assertEquals(gold + chest.gold(), s.gold(), "only once");
+        assertEquals(gold + r.gold(), s.gold(), "only once");
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         assertTrue(codec.decode(codec.encode(pc)).openedChests().contains(chest.id()));
     }

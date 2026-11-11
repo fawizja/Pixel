@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Zmieniono
+- Obszary czarów i run są jak w Tibii: wielka kula ognia, lawina, burza i deszcz kamieni trafiają okrąg (37 pól),
+  a nie kwadrat 7x7; eksplozja - krzyż; czary ostateczne (exevo gran mas flam/frigo/vis/tera) - duże okręgi;
+  fale (exevo flam hur, exevo gran flam hur, exevo vis hur, exevo tera hur, exevo gran frigo hur) to stożki przed
+  postacią; promienie energii to proste linie (5 i 8 pól); ściana energii ma 7 pól, a ściany rzucone po skosie leżą
+  ukośnie. Efekt na ekranie i podgląd celownika pokazują dokładnie trafione pola.
+- Odnowienia jak w Tibii: czary skupienia blokują inne ataki na 4 s, utito tempo / utamo tempo i czary skupienia mają
+  wspólną grupę, cnoty mnicha zajmują też grupę wsparcia. Runy i mikstury dzielą 1 s użycia przedmiotu. Czar ataku
+  i czar leczenia nadal można rzucić w tej samej chwili, a combo na pasku rzuca jeden czar na jedno naciśnięcie.
+- Skrzynie dają nagrody zależne od trudności miejsca: skrzynie zadań (za drzwiami poziomu, przy bossie, w skarbcach
+  zadań) - dużo złota, wybrany dobry przedmiot dla profesji i mikstury; skrzynie w ślepych komorach - mniej złota,
+  mikstury i czasem przedmiot. Wiadomość podaje całą nagrodę.
+
 ## [0.248.0] - 2026-11-11
 
 ### Dodano

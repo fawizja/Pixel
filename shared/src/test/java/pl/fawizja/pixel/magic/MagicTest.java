@@ -164,7 +164,7 @@ class MagicTest {
         for (Monster m : mm.monsters()) if (m.health() < m.type().maxHealth()) hurt++;
         assertEquals(2, hurt, "only the two adjacent boars");
         assertTrue(s.combat().latestEvents(64).stream().anyMatch(e -> e.kind() == pl.fawizja.pixel.combat.CombatEvent.Kind.AREA
-                && e.position().equals(pc.position()) && e.amount() == 1), "area effect around the monk");
+                && e.isShapedArea() && SpellArea.decodeArea(e.amount()) == SpellArea.FLURRY_OF_BLOWS), "Canary flurry area effect");
     }
 
     @Test

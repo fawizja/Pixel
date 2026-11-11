@@ -109,7 +109,7 @@ public final class WheelSpells {
     /** Odnowienie z premia (nie krocej niz wspolne odnowienie grupy). */
     public static long cooldownMs(PlayerCharacter pc, SpellType s) {
         long cut = augment(pc, s).cooldownCutMs;
-        return Math.max(Math.min(s.cooldownMs(), s.group().groupCooldownMs), s.cooldownMs() - cut);
+        return Math.max(Math.min(s.cooldownMs(), pl.fawizja.pixel.magic.SpellGroups.primaryMs(s)), s.cooldownMs() - cut);
     }
 
     /**

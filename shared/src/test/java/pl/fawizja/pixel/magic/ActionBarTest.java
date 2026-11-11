@@ -105,7 +105,7 @@ class ActionBarTest {
         assertTrue(Actions.apply(s, "item:great_fireball_rune:self", 1000));
         assertTrue(hurt(boar), "GFB on yourself hits monsters around you");
         assertTrue(s.combat().latestEvents(64).stream().anyMatch(e -> e.kind() == pl.fawizja.pixel.combat.CombatEvent.Kind.AREA
-                && e.position().equals(pc.position()) && e.amount() == 3));
+                && e.position().equals(pc.position()) && SpellArea.decodeArea(e.amount()) == SpellArea.CIRCLE3X3));
         pc.damage(pc.health() / 2);
         int hp = pc.health();
         assertTrue(Actions.apply(s, "item:ultimate_healing_rune:self", 2000));
