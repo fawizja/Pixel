@@ -20,10 +20,10 @@ class DepotLockerTest {
 
     static Position lockerNear(WorldMap world, Position temple, int radius) {
         int locker = world.tiles().byKey("depot_locker").id();
-        FloorMap f = world.floor(0);
+        FloorMap f = world.floor(temple.z());
         for (int y = temple.y() - radius; y <= temple.y() + radius; y++) {
             for (int x = temple.x() - radius; x <= temple.x() + radius; x++) {
-                if (f.get(Layer.OBJECT, x, y) == locker) return new Position(x, y, 0);
+                if (f.get(Layer.OBJECT, x, y) == locker) return new Position(x, y, temple.z());
             }
         }
         return null;

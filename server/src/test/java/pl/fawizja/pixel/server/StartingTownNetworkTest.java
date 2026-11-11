@@ -57,6 +57,7 @@ class StartingTownNetworkTest {
         String[] names = {"Alfa", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta"};
         int i = 0;
         for (Town t : server.world().world.towns()) {
+            if (!t.starting()) continue;                  // Durnkar: tylko do zamieszkania
             PlayerCharacter pc = login(names[i++], t.name(), null);
             assertNotNull(pc, t.name());
             assertEquals(t.name().toLowerCase(Locale.ROOT), pc.homeTown());

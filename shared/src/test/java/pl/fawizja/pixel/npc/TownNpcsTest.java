@@ -25,7 +25,7 @@ class TownNpcsTest {
     static void load() throws Exception { TownServicesTest.load(); }
 
     static final String[][] TOWNS = {{"Varden", "varden"}, {"Frostholm", "frost"}, {"Selvaran", "selv"}, {"Qasirah", "qas"},
-            {"Valmir", "valmir"}, {"Nerys", "nerys"}};
+            {"Valmir", "valmir"}, {"Nerys", "nerys"}, {"Durnkar", "durn"}};
 
     GameSession at(PlayerCharacter pc, String npcKey) {
         GameSession s = new TownServicesTest().session(pc, List.of());

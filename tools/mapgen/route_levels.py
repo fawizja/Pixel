@@ -34,7 +34,8 @@ import town as tk  # noqa: E402
 from structures import HAND_PLACED  # noqa: E402
 
 RES = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources')
-FLOORS = list(range(-5, 6))
+FLOORS = list(range(-7, 6))   # 2026-11-11: kopalnie krasnoludow do -7
+Z0 = -FLOORS[0]               # przesuniecie indeksu pietra
 INF = 1 << 30
 
 # pas: (droga od swiatyni w polach, maks. poziom potwora); miedzy punktami liniowo po logarytmie poziomu
@@ -111,12 +112,12 @@ class Grid:
             self.trans[(z, y * S + x)] = (tz, ty * S + tx)
 
     def idx(self, x, y, z):
-        return (z + 5) * self.S * self.S + y * self.S + x
+        return (z + Z0) * self.S * self.S + y * self.S + x
 
     def xyz(self, i):
         z, r = divmod(i, self.S * self.S)
         y, x = divmod(r, self.S)
-        return x, y, z - 5
+        return x, y, z - Z0
 
 
 def bfs(grid, starts, blocked=None):
@@ -142,7 +143,7 @@ def bfs(grid, starts, blocked=None):
             if dist[i] != d:
                 continue
             zi, r = divmod(i, S2)
-            z = zi - 5
+            z = zi - Z0
             y, x = divmod(r, S)
             wz = walk[z]
             for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
@@ -151,7 +152,7 @@ def bfs(grid, starts, blocked=None):
                 nr = ny * S + nx
                 t = trans.get((z, nr))
                 if t is not None:
-                    j = (t[0] + 5) * S2 + t[1]
+                    j = (t[0] + Z0) * S2 + t[1]
                 elif wz[nr]:
                     j = zi * S2 + nr
                 else:
@@ -284,7 +285,7 @@ class Model:
         # spawn za brama/drzwiami poziomu: drogi slabszych celow tuz za murem (poza brama) go nie dotycza
         if self.dist_open[self.grid.idx(s['x'], s['y'], s['z'])] >= INF:
             best = getattr(self, 'marks_gated', {})
-        base = (s['z'] + 5) * S * S
+        base = (s['z'] + Z0) * S * S
         m = INF
         x, y = s['x'], s['y']
         for yy in range(max(0, y - near), min(S, y + near + 1)):
@@ -304,7 +305,7 @@ def _candidates(monsters, orig, z, night, cap):
         # potwory twierdzy orkow i osady elfow: zamiennik z tej samej rodziny (ork -> slabszy ork, elf -> elf)
         fam = orig.split('_')[0]
         out = [k for k, m in monsters.items() if not m['boss'] and m['level'] <= cap and k.split('_')[0] == fam
-               and not k.endswith('_elite')]
+               and not k.endswith('_elite') and (z >= 0 or k not in NOT_UNDERGROUND)]
         if out:
             return out
     biomes = {m0['biome']} | ({'underground'} if z < 0 else set())

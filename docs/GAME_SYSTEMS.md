@@ -243,7 +243,7 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
 ## Uslugi w kazdym miescie: pupile, wladcy, zaklinacze (Z logika, S serwer, C okna, generator) - 2026-11-06
 
 Darek: "w kazdym miescie npc odpowiedni za kupno danego pupila, premium u krola, krolowej lub lorda, kradziez zycia,
-krytyk itp. u NPC w miastach". Kazde z 6 miast (map.properties `towns=`) ma trzech nowych NPC; stawia ich generator
+krytyk itp. u NPC w miastach". Kazde z 6 miast na powierzchni (map.properties `towns=`) ma trzech nowych NPC; stawia ich generator
 (`tools/mapgen/town_npcs.py`, wywolany na poczatku `generate_continent.finish`, wspolrzedne stale przy kazdym uruchomieniu):
 wewnatrz zamknietego budynku miasta (nie w domu na sprzedaz), na wolnym polu podlogi przy scianie, nie przy drzwiach
 ani schodach, bez zamykania przejscia, osiagalni ze swiatyni i co najmniej 5 pol (Chebyshev) od innych NPC - rozmowa
@@ -392,7 +392,8 @@ Wzorowane na Tibii (zrodla Canary: `config.lua.dist`, `forge` w `game.cpp`/`play
 ## Mapa, kolizje, pietra (Z)
 
 - Warstwy: podloze, dekoracje, obiekty (przeszkody), sciany, swiatlo, przejscia.
-- Pietra -5..+5 o wspolnym ukladzie wspolrzednych, mapy z plikow tekstowych + legenda.
+- Pietra -7..+5 o wspolnym ukladzie wspolrzednych, mapy z plikow tekstowych + legenda (-6 i -7 tylko pod kopalniami
+  krasnoludow).
 - Kolizje z cache (`boolean[]`), ruch w 8 kierunkach. Skos nie scina rogu muru ani wody, ale miedzy drzewami,
   krzakami, palmami, kaktusami i glazami mozna sie przecisnac po skosie jak w Tibii (`TileType.squeezable`,
   `WorldMap.diagonalCornersOpen`; gracz i potwory).
@@ -831,6 +832,38 @@ wyprawy na bossa ok. 450 pol (17 komor 150 x 82).
   Elfi arkanista) w lesie dookola i na czatowniach +1. Las w promieniu 30 pol ma limit poziomu 45
   (`ctx['area_caps']` -> `route_levels`).
 - Test: `world/StrongholdsTest` (wszystkie pietra osiagalne pieszo z Varden, skarbiec dopiero od poziomu 50).
+
+## Durnkar, krasnoludzkie miasto pod gorami, i kopalnie do -7 (generator `tools/mapgen/dwarves.py`) - 2026-11-11
+
+- Masyw gorski na polnoc od Varden (najglebsze pole gory ok. 483,299). Ukryte wejscie: waski kretty wawoz od
+  zbocza (ok. 483,263) w glab gory, bez drogi i bez znaku, konczy sie grota ze schodami w dol (478,275,0).
+  "Sztolnie do Durnkaru" (-1..-4) to krete tunele ze slepymi odnogami, bez potworow, do przedsionka miasta na -5.
+- Durnkar (-5, ok. 472..560 x 299..354, swiatynia 496,308,-5): jaskinia z kanalem lawy i mostami, aleja,
+  swiatynia z kaplanem, bank z depozytem (5 skrzynek) i zarzadca domow, sala tronowa krola, karczma (zaopatrzenie,
+  robaki i wedka), kowal z kuznia (bron), platnerz, zaklinacz, runiarz (runy i mikstury), narzedziownik, kupiec,
+  opiekun zwierzat, przewodnik, dwoch straznikow bram i wozkarz (podroze do innych miast). 12 domow na sprzedaz
+  (systemem domow, `houses.csv`, pietro -5). Cale miasto i przedsionek sa strefa ochronna. NPC to krepi, brodaci
+  krasnoludowie z LPC (`tools/art/lpc_compose.py`, `DWARF_TOWNS`, autorzy w `CREDITS-LPC.csv`).
+- Miasto tylko do zamieszkania: `map.properties` `residence_only=Durnkar` -> `Town.starting() == false`. Nie ma go
+  w wyborze miasta startowego (`StartingTowns.list/isValid`, takze na serwerze), ale kaplan pozwala tu zamieszkac
+  (`homeTown`, odrodzenie w swiatyni na -5). `Town.MAX_TOWNS` = 8.
+- Trzy kopalnie, kazda z wlasna sztolnia w zboczu (wschod 520,299; zachod 464,299; poludnie 483,318) i sciezka do
+  najblizszej drogi: Kopalnia Zelaznej Brody (pod miastem na wschodzie), Kopalnia Glebokiego Kilofa i Stara Sztolnia
+  Granitowa. Kazda ma pietra -1..-7, kazde wieksze od poprzedniego, z komorami polaczonymi korytarzami i slepymi
+  odnogami. Glebiej silniejsze i liczniejsze potwory, a na kazdym pietrze komory od schodow od slabszych do
+  silniejszych (`route_levels`): -1 czerw gnilny i krasnolud, -2 krasnolud gornik, -3 krasnolud zolnierz i czerw
+  padlinozerny, -4 krasnolud straznik, -5 krasnolud geomanta i kamienny golem, -6 zywiolak ziemi i krysztalowy
+  golem, -7 Behemot i kamienny wartownik (z lawa).
+- Kopalnia Zelaznej Brody laczy sie z miastem: korytarz od wschodniej bramy (561,326,-5) z drzwiami poziomu 25
+  (564,326,-5).
+- Nowe potwory (`monsters.csv`, lup, bestiariusz): Czerw gnilny 8, Krasnolud 10, Krasnolud gornik 12, Krasnolud
+  zolnierz 16 (kusza), Czerw padlinozerny 20, Krasnolud straznik 26, Kamienny golem 32, Krasnolud geomanta 34
+  (ziemia, leczy), Zywiolak ziemi 55, Behemot 120. Klucze nie sa nazwami z Tibii (`mine_grub`, `deep_worm`,
+  `dwarf_warden`, `rock_golem`, `dwarf_earthcaller`, `earth_spirit`, `deep_behemot`). Grafika z OTSP
+  (`tools/art/otsp_import.py`, `STOCKY` - krepe, przysadziste sylwetki).
+- `structures.Plan.cave(..., lava=)`, `free_under/stamp(per_floor=True)` (kazde pietro szuka miejsca osobno),
+  `check()` zglasza przejscie bez schodow. Test: `world/DwarvesTest` (ukryte wejscie, miasto, kopalnie, drzwi
+  poziomu, potwory).
 
 ## Wyprawy na bossa w piec postaci (Z logika, S serwer, C rysowanie)
 

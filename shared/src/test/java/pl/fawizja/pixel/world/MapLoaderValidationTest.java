@@ -36,7 +36,7 @@ class MapLoaderValidationTest {
     @Test
     void positionsOutsideFloorRangeAreRejected() {
         assertThrows(IllegalArgumentException.class, () -> new Position(0, 0, 6));
-        assertThrows(IllegalArgumentException.class, () -> new Position(0, 0, -6));
+        assertThrows(IllegalArgumentException.class, () -> new Position(0, 0, -8));
     }
 
     @Test

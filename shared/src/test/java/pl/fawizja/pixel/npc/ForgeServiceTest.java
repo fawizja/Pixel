@@ -55,7 +55,7 @@ class ForgeServiceTest {
         assertFalse(TownServicesTest.npcs.get("varden_merchant").isSmith());
         int smiths = 0;
         for (Npc n : TownServicesTest.npcs.all()) if (n.isSmith()) smiths++;
-        assertEquals(6, smiths, "the forge is at all six smiths");
+        assertEquals(7, smiths, "the forge is at all seven smiths");
 
         PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
         GameSession s = new TownServicesTest().session(pc, List.of());

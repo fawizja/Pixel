@@ -43,12 +43,13 @@ import homes  # noqa: E402
 import route_levels  # noqa: E402
 import town_npcs  # noqa: E402
 import strongholds  # noqa: E402
+import dwarves  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
 LEGACY = os.path.join(HERE, 'build', 'legacy')
 S = C.S
-FLOORS = list(range(-5, 6))
+FLOORS = list(range(-7, 6))   # -6 i -7: kopalnie krasnoludow (2026-11-11)
 NONE = '-'
 WATER = ('water', NONE, NONE, NONE)
 
@@ -114,9 +115,12 @@ class Legacy:
         self.w, self.h = int(props['width']), int(props['height'])
         self.floors = {}
         for z in FLOORS:
+            g = [[None] * self.w for _ in range(self.h)]
+            self.floors[z] = g
+            if not os.path.exists(os.path.join(d, floor_name(z))):
+                continue                              # stary swiat ma pietra -5..+5
             with open(os.path.join(d, floor_name(z)), encoding='utf-8') as f:
                 rows = f.read().split('\n')
-            g = [[None] * self.w for _ in range(self.h)]
             for y, row in enumerate(rows[:self.h]):
                 for x, ch in enumerate(row[:self.w]):
                     g[y][x] = self.cell_of[ch]
@@ -991,6 +995,8 @@ def build(ctx):
     print('spawny w lasach i na lakach:', wilds.surface_spawns(ctx, wh))
     # 2026-11-11: Twierdza Krwawego Kla (orki, -3..+3, drzwi poziomu 50) i Elandor, osada elfow (-2..+3)
     print('twierdza orkow i osada elfow:', strongholds.build(ctx, cost, wh))
+    # 2026-11-11: Durnkar, miasto krasnoludow na -5 pod gorami (ukryte wejscie) i trzy kopalnie do -7
+    print('durnkar i kopalnie krasnoludow:', dwarves.build(ctx, cost, wh))
 
 
 def monster_levels():
@@ -2786,8 +2792,10 @@ def finish(ctx):
         ('pz', ';'.join(','.join(str(v) for v in r) for r in ctx['pz'])),
         ('# przejscia strzezone: x0,y0,x1,y1,z,minimalny poziom', None),
         ('gates', ';'.join(','.join(str(v) for v in g) for g in ctx['gates'])),
-        ('# miasta: nazwa:x,y,z swiatyni (maks. 6)', None),
+        ('# miasta: nazwa:x,y,z swiatyni (maks. 8)', None),
         ('towns', ';'.join(f'{n}:{p[0]},{p[1]},{p[2]}' for n, p in ctx['towns'])),
+        ('# miasta tylko do zamieszkania (swiatynia, bez wyboru przy tworzeniu postaci)', None),
+        ('residence_only', ';'.join(ctx.get('residence_only', []))),
         ('# regiony: nazwa;x0;y0;x1;y1;z od;z do;zalecany poziom od;do (oddzielone |)', None),
         ('regions', '|'.join(';'.join(str(v) for v in r) for r in regions)),
     ]
