@@ -19,6 +19,31 @@ public final class Store {
         public boolean available() { return blocked == null; }
     }
 
+    /**
+     * Zakladki okna sklepu (2026-11-11, Darek: "dodaj w sklepie zakladke premium" i "pozycje outfity na przyszlosc"):
+     * uslugi (blogoslawienstwo, zaklecia, wierzchowiec, zwierzaki), premium (konto premium i promocja z opisem, co daja)
+     * i stroje (kolory stroju za darmo, nowe stroje z data/store_outfits.csv - na razie "wkrotce").
+     */
+    public enum Tab {
+        SERVICES("uslugi", "Usługi"), PREMIUM("premium", "Premium"), OUTFITS("outfity", "Outfity");
+
+        public final String key, label;
+
+        Tab(String key, String label) {
+            this.key = key;
+            this.label = label;
+        }
+
+        /** Zakladka po kluczu ("premium"); nieznany - uslugi. */
+        public static Tab byKey(String key) {
+            for (Tab t : values()) if (t.key.equals(key)) return t;
+            return SERVICES;
+        }
+    }
+
+    /** Akcja wiersza zakladki ("store:tab:premium"). */
+    public static final String TAB_ACTION = "store:tab:";
+
     /** Pupile od opiekunow zwierzat w miastach (sklepy *_pets w data/shops.csv). */
     static final String[] PETS = {"pet_dog", "pet_cat", "pet_raven", "pet_fennec", "pet_gull", "pet_parrot"};
 
@@ -45,6 +70,65 @@ public final class Store {
         addItem(s, out, "saddle", "Wierzchowiec: koń", "koń na zawsze, +60 szybkości (użyj siodła)", pc.hasMount() ? "masz już konia" : null);
         for (String pet : PETS) addItem(s, out, pet, null, null, null);
         return out;
+    }
+
+    /** Zakladka oferty: konto premium i promocja w Premium, reszta w Uslugach. */
+    public static Tab tabOf(Offer o) {
+        return o.key().equals("premium") || o.key().equals("promote") ? Tab.PREMIUM : Tab.SERVICES;
+    }
+
+    /** Oferty jednej zakladki (stroje nie sa ofertami - patrz {@link #rows}). */
+    public static List<Offer> offers(GameSession s, Tab tab) {
+        List<Offer> out = new ArrayList<>();
+        for (Offer o : offers(s)) if (tabOf(o) == tab) out.add(o);
+        return out;
+    }
+
+    /**
+     * Wiersze okna sklepu {etykieta, opis, stan, akcja[, znacznik]}: najpierw zakladki (znacznik "tab" / "tab_on"),
+     * potem tresc wybranej zakladki - oferty (dotkniecie: "store:ask:klucz", niedostepne "off"), w Premium dodatkowo
+     * co daje konto premium, w Outfitach kolory stroju (akcja "outfit:i") i stroje "wkrotce" ("store:soon:klucz"); opis premium ze
+     * znacznikiem "info" (sam tekst).
+     */
+    public static List<String[]> rows(GameSession s, Tab tab) {
+        List<String[]> rows = new ArrayList<>();
+        for (Tab t : Tab.values()) rows.add(new String[] {t.label, "", "", TAB_ACTION + t.key, t == tab ? "tab_on" : "tab"});
+        PlayerCharacter pc = s.character();
+        if (tab == Tab.OUTFITS) {
+            int now = pc.outfit();
+            for (int i = 0; i < pl.fawizja.pixel.character.Outfit.count(); i++) {
+                rows.add(new String[] {"Kolor stroju: " + pl.fawizja.pixel.character.Outfit.name(i),
+                        i == now ? "noszony teraz" : "za darmo - dotknij, aby założyć", "", "outfit:" + i});
+            }
+            for (StoreOutfits.Entry e : StoreOutfits.all()) {
+                String price = e.price() > 0 ? String.format("%,d gp", e.price()) : "za darmo";
+                // "wkrotce": zwykly (czytelny) wiersz z dopiskiem; dotkniecie mowi tylko, ze stroj bedzie pozniej
+                rows.add(new String[] {"Strój: " + e.name() + (e.soon() ? " (wkrótce)" : ""), (e.soon() ? "" : price + " - ") + e.desc(), "",
+                        "store:soon:" + e.key()});
+            }
+            return rows;
+        }
+        for (Offer o : offers(s, tab)) {
+            String price = String.format("%,d gp", o.price());
+            rows.add(o.available() ? new String[] {o.name(), price, o.desc(), "store:ask:" + o.key()}
+                    : new String[] {o.name(), price + " - " + o.blocked(), "", "store:ask:" + o.key(), "off"});
+        }
+        if (tab == Tab.PREMIUM) rows.addAll(premiumInfo(pc));
+        return rows;
+    }
+
+    /** Co daje konto premium (wiersze tylko z tekstem: akcja "ach:none", znacznik "info"): to, co gra naprawde sprawdza. */
+    public static List<String[]> premiumInfo(PlayerCharacter pc) {
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[] {"Twoje konto: " + (pc.isPremium() ? "premium" : "darmowe"),
+                pc.isPremium() ? "premium bez limitu czasu" : String.format("premium raz na zawsze za %,d gp z banku", GameSession.PREMIUM_PRICE), "", "ach:none", "info"});
+        rows.add(new String[] {"Rejsy statkami", "kapitanowie zabiorą cię do innych portów", "", "ach:none", "info"});
+        rows.add(new String[] {"Premia staminy", "150% doświadczenia przy zielonej staminie", "", "ach:none", "info"});
+        rows.add(new String[] {"Charmy", pl.fawizja.pixel.charm.Charms.PREMIUM_SLOTS + " miejsc zamiast "
+                + pl.fawizja.pixel.charm.Charms.FREE_SLOTS, "", "ach:none", "info"});
+        rows.add(new String[] {"Promocja profesji", "od poziomu " + GameSession.PROMOTION_LEVEL + ", szybsza regeneracja", "", "ach:none", "info"});
+        rows.add(new String[] {"Koło Przeznaczenia", "od poziomu " + pl.fawizja.pixel.wheel.DestinyWheel.MIN_LEVEL + " z promocją", "", "ach:none", "info"});
+        return rows;
     }
 
     /** Przedmiot w najnizszej cenie kupcow (tylko gdy ktos go sprzedaje). */
