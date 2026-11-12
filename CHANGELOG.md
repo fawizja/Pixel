@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Silne potwory rzucają różne czary (analiza: `analizy/potwory-ataki.md`, sekcja 6): każdy potwór od poziomu 100 i każdy boss (poza
+  smokami) ma uderzenie w jeden cel i czar obszarowy dobrane do żywiołu i klasy (demony: kule ognia i wyssanie many, mumie i upiory:
+  uderzenie śmierci i fala klątwy, piraci: strzały i bomby, golemy: rzut kamieniem/lawą i kula, harpie: energia i promień), a od
+  poziomu 300 co najmniej trzy czary ze stanem (podpalenie, zatrucie, zamrożenie, porażenie, klątwa, krwawienie) i większymi obszarami
+  (`WAVE7`, `BEAM6`, `CIRCLE3X3`, `CIRCLE5X5`). Zmieniono 68 potworów (`data/monster_spells.csv`, 18 przeszło z `MELEE` na `MIXED`);
+  oczekiwane obrażenia czarów pozostały w widełkach poprzednich potworów. Test `StrongMonsterSpellsTest`.
+- `-Dpixel.mobDemo=cast:potwor:czar[:klatki]` pokazuje dowolny czar dowolnego potwora; sceny regresji `mob_strong_bolt/ball/beam`.
+
 ## [0.263.0] - 2026-11-12
 
 ### Dodano

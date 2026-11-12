@@ -342,3 +342,6 @@ mob_caster_bolt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel
 mob_area_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=area
 mob_summoner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=summon
 mob_flee|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=30 -Dpixel.mobDemo=flee
+mob_strong_bolt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=cast:mummy:death_strike:2
+mob_strong_ball|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=cast:lava_golem:magma_ball
+mob_strong_beam|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=cast:storm_harpy:energy_beam
