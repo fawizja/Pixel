@@ -201,7 +201,6 @@ wyvern;322;226;-1;5;5;240;stado
 wyvern;317;221;-1;4;4;240;stado
 wyvern;317;219;-2;5;6;240;stado
 wyvern;322;224;-2;4;4;240;stado
-wyvern;305;227;-2;5;5;240;stado
 wyvern;312;227;-2;4;3;240;stado
 wyvern_matriarch;312;225;-2;2;1;3600
 # --- nocne spawny (8. kolumna "noc"): pojawiaja sie o zmroku, znikaja za dnia ---
@@ -2617,7 +2616,6 @@ stone_sentinel;407;177;-1;4;4;180;stado
 stone_sentinel;412;194;-1;5;6;180;stado
 stone_sentinel;412;185;-1;5;5;180;stado
 stone_sentinel;441;168;-2;5;6;180;stado
-stone_sentinel;436;173;-2;4;3;180;stado
 stone_sentinel;429;163;-2;5;6;180;stado
 stone_sentinel;424;168;-2;4;4;180;stado
 stone_sentinel;412;168;-2;5;6;180;stado
@@ -3382,7 +3380,6 @@ orc_leader;685;516;3;2;2;180
 orc_marauder;683;517;3;2;1;180
 orc_shaman;708;475;-1;4;3;200
 orc_rider;709;493;-1;4;4;200
-orc_shaman;706;506;-1;4;3;200
 orc_rider;692;513;-1;4;4;200
 orc_berserker;676;513;-1;4;3;200
 orc_shaman;660;509;-1;4;4;200
@@ -3557,7 +3554,6 @@ dwarf_earthcaller;446;324;-5;5;6;240;stado
 dwarf_earthcaller;446;331;-5;4;3;240;stado
 dwarf_earthcaller;411;333;-5;5;6;240;stado
 crystal_golem;439;333;-6;5;6;240;stado
-crystal_golem;446;333;-6;4;3;240;stado
 crystal_golem;425;334;-6;5;6;240;stado
 crystal_golem;422;325;-6;5;6;240;stado
 earth_spirit;418;318;-6;5;6;240;stado
@@ -4121,15 +4117,12 @@ orc_marauder;859;348;-3;4;4;230;stado
 horn_guard;842;350;-3;5;6;230;stado
 horn_guard;849;350;-3;4;3;230;stado
 horn_mystic;830;356;-3;5;6;230;stado
-orc_leader;828;367;-3;5;6;230;stado
 orc_leader;828;360;-3;4;4;230;stado
 orc_leader;832;362;-2;4;4;230;stado
-horn_mystic;840;357;-2;4;4;230;stado
 keep_hound;848;360;-1;4;3;230
 keep_sentry;856;358;-1;4;3;230
 keep_crossbow;862;366;-1;4;3;230
 keep_hound;852;371;-1;4;3;230
-keep_sentry;839;368;-1;4;3;230
 goblin;589;455;0;4;3;200
 goblin;587;443;0;4;4;200
 goblin;599;458;0;4;3;200

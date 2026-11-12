@@ -30,7 +30,7 @@ public final class GroundBorders implements Disposable {
     private static final Map<String, Integer> PRIORITY = Map.ofEntries(
             Map.entry("water", 0), Map.entry("ice", 1), Map.entry("lava", 1), Map.entry("swamp", 2),
             Map.entry("cave_floor", 3), Map.entry("abyss_floor", 3), Map.entry("ash", 4), Map.entry("dirt", 5),
-            Map.entry("dark_sand", 6), Map.entry("sand", 7), Map.entry("cobblestone", 8), Map.entry("field", 9),
+            Map.entry("dark_sand", 6), Map.entry("sand", 7), Map.entry("cobblestone", 8), Map.entry("paving", 8), Map.entry("brick_paving", 8), Map.entry("field", 9),
             Map.entry("blighted_grass", 9), Map.entry("grass", 10), Map.entry("jungle_grass", 11), Map.entry("snow", 12));
 
     private final int[] priority;

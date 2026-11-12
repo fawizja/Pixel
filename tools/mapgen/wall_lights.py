@@ -15,6 +15,11 @@ TORCH, LANTERN = 'wall_torch', 'wall_lantern'
 SOURCES = {'wall_torch': TORCH, 'street_lamp': LANTERN, 'wall_lantern': LANTERN}
 RADIUS = {TORCH: 4, LANTERN: 5}
 SPACING = {TORCH: 3, LANTERN: 4}
+# Wnetrza budynkow (jak Openings.INDOOR): tylko one dostaja swiatlo z reguly "ciemny pokoj" (light_rooms)
+INDOOR = {'wood_floor', 'stone_floor', 'sandstone_floor', 'frozen_floor', 'marble_floor', 'brick_paving'}
+ROOM_MIN = 14      # pokoje mniejsze niz tyle pol zostaja bez pochodni (szafa, spichlerz)
+ROOM_PER = 36      # jedna pochodnia na tyle pol pokoju (co najmniej jedna)
+ROOM_MAX = 6
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TILES = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'tiles.csv')
@@ -102,6 +107,75 @@ class Mounter:
         return seen
 
 
+def light_rooms(m, g, size):
+    """Pokoje (zwarte wnetrza budynkow) bez zadnej pochodni dostaja ja na scianie widocznej z wnetrza.
+
+    Pokoj to zbior pol z podloga budynku bez muru, polaczonych pieszo (drzwi lacza pokoje). Pochodnia stoi tylko tam,
+    gdzie wisialaby wg Mounter.face (sciana poludniowa albo wschodnia, mur po bokach, bez drzwi i okien), w odleglosci
+    co najmniej SPACING od innych swiatel, najdalej od istniejacych. Zwraca liczbe dolozonych pochodni."""
+    lights = [(x, y) for y in range(size) for x in range(size)
+              if g[y][x] is not None and g[y][x][2] in (TORCH, LANTERN) and g[y][x][3] != NONE]
+    fronts = set()
+    for (x, y) in lights:
+        f = m.face(x, y) if g[y][x][2] == TORCH else None
+        if f is None:   # latarnia albo mur, na ktorym regula juz nie wiesza: pole przed nim to sasiad od poludnia/wschodu
+            f = (x, y + 1) if m.open(x, y + 1) else (x + 1, y)
+        fronts.add(f)
+    seen, added = set(), 0
+    for y0 in range(size):
+        for x0 in range(size):
+            c = g[y0][x0]
+            if (x0, y0) in seen or c is None or c[0] not in INDOOR or not m.walkable(x0, y0):
+                continue
+            room, q = [], deque([(x0, y0)])
+            seen.add((x0, y0))
+            while q:
+                cx, cy = q.popleft()
+                room.append((cx, cy))
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    n = (cx + dx, cy + dy)
+                    nc = m.cell(*n)
+                    if n not in seen and nc is not None and nc[0] in INDOOR and m.walkable(*n):
+                        seen.add(n)
+                        q.append(n)
+            if len(room) < ROOM_MIN:
+                continue
+            rs = set(room)
+            have = sum(1 for f in fronts if f in rs)
+            need = min(ROOM_MAX, max(1, len(room) // ROOM_PER)) - have
+            if need <= 0:
+                continue
+            xs = [p[0] for p in room]
+            ys = [p[1] for p in room]
+            cand = []
+            for wy in range(min(ys) - 1, max(ys) + 2):
+                for wx in range(min(xs) - 1, max(xs) + 2):
+                    f = m.face(wx, wy)
+                    if f is not None and f in rs:
+                        cand.append((wx, wy))
+            for _ in range(need):
+                best = None
+                for (wx, wy) in cand:
+                    if g[wy][wx][2] != NONE:
+                        continue
+                    near = [max(abs(wx - px), abs(wy - py)) for (px, py) in lights]
+                    if near and min(near) < SPACING[TORCH]:
+                        continue
+                    far = min([abs(wx - px) + abs(wy - py) for (px, py) in lights if (px, py) in rs or
+                               max(abs(wx - px), abs(wy - py)) < 12] or [99])
+                    d = (-far, wy, wx)
+                    if best is None or d < best[0]:
+                        best = (d, wx, wy)
+                if best is None:
+                    break
+                _, wx, wy = best
+                cc = g[wy][wx]
+                g[wy][wx] = (cc[0], cc[1], TORCH, cc[3])
+                lights.append((wx, wy))
+                added += 1
+    return added
+
+
 def mount(world, size, floors):
     stats = {'moved': 0, 'dropped': 0}
     for z in floors:
@@ -138,6 +212,7 @@ def mount(world, size, floors):
             g[wy][wx] = (c[0], c[1], kind, c[3])
             placed.append((wx, wy))
             stats['moved'] += 1
+        stats['rooms'] = stats.get('rooms', 0) + light_rooms(m, g, size)
         for y in range(size):
             for x in range(size):
                 c = g[y][x]

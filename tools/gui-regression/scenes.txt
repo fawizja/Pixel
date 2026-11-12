@@ -314,3 +314,10 @@ star_void_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 
 star_void_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=214,949,-3
 rocks_grass|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=422,290,0
 herald_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,495,0 -Dpixel.button=talk
+# 2026-11-12: szlif mapy - ciemne jaskinie (bez pochodni i z pochodnia w rece), schody w ramie z otworem, smok 2x2, pochodnie we wnetrzach, obrzeza kostki z trawa
+cave_dark|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=855,205,-1
+cave_torch|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=855,205,-1 -Dpixel.gear=torch
+stairs_down_pit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=408,170,0
+gold_dragon|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1
+shop_torch_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=546,497,0
+brick_grass_edge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=878,731,0

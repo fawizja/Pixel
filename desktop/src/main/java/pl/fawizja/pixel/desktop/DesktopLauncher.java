@@ -192,6 +192,7 @@ public final class DesktopLauncher {
                         pl.fawizja.pixel.item.ItemType t = reg.byKeyOrNull(k.trim());
                         if (t != null && t.slot() != pl.fawizja.pixel.item.EquipSlot.NONE) {
                             me.equipment().setDirect(t.slot(), new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
+                            if (t.key().equals("torch")) me.setTorchLit(true, t.id()); // zalozona pochodnia od razu sie pali
                         }
                     }
                 }

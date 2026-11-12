@@ -16,9 +16,18 @@ class LightingTest {
             float a = Lighting.ambientForFloor(z, 1f);
             assertTrue(a < prev);
             assertTrue(a >= Lighting.MIN_UNDERGROUND_AMBIENT);
+            assertTrue(a <= 0.12f, "podziemia poza swiatlem sa prawie ciemne (floor " + z + ")");
             prev = a;
         }
         assertEquals(0.5f, Lighting.ambientForFloor(3, 0.5f), 1e-6);
+    }
+
+    @Test
+    void playerAlwaysHasAMinimalLightUnderground() {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
+        assertTrue(Lighting.playerLightRadius(pc, TestData.ITEMS) >= 2f, "minimalna poswiata postaci w ciemnym lochu");
+        assertTrue(Lighting.ambientForFloor(-1, 1f) < 0.2f * Lighting.ambientForFloor(0, 1f) + 0.0001f
+                || Lighting.ambientForFloor(-1, 1f) <= 0.12f);
     }
 
     @Test
