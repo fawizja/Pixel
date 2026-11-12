@@ -3110,6 +3110,16 @@ public final class Hud {
                                 + " - " + Messages.get("bless.hud_info_desc"), true));
                 break;
             }
+            case HERALD: {
+                String why = session.heraldBlocked();
+                long price = session.heraldPrice();
+                left.add(new MenuRow("npc:blessall", Messages.get("star.hud_buy_all"),
+                        why != null ? why : Messages.get("star.hud_price", price), why == null && session.gold() >= price));
+                left.add(new MenuRow("npc:blessview", Messages.get("bless.row_title", pl.fawizja.pixel.character.BlessingStatus.summary(pc)),
+                        Messages.get("bless.loss_title") + ": " + pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level(), pc.experience(), pc.isPromoted())
+                                + " - " + Messages.get("bless.hud_info_desc"), true));
+                break;
+            }
             case CARRIER:
             case CAPTAIN: {
                 long gold = session.gold();

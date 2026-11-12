@@ -1117,3 +1117,71 @@ place;Wzgórza Smoków;name;Colinas de los Dragones
 place;Smocze Pieczary;name;Cavernas de los Dragones
 place;Miasto Rogatych;name;Ciudad de los Astados
 place;Labirynt Rogatych;name;Laberinto de los Astados
+monster;ash_penitent;name;Penitente de ceniza
+monster;cinder_revenant;name;Aparecido de brasas
+monster;rimebound_monk;name;Monje helado
+monster;hoarfrost_warden;name;Guardián de escarcha
+monster;slag_forgehand;name;Herrero de escoria
+monster;molten_cultist;name;Cultista fundido
+monster;thorn_maiden;name;Doncella de espinas
+monster;spore_stalker;name;Acechador de esporas
+monster;mirror_acolyte;name;Acólito del espejo
+monster;glass_phantom;name;Fantasma de cristal
+monster;maw_crawler;name;Reptante del abismo
+monster;gore_harbinger;name;Heraldo de sangre
+monster;dimmed_seraph;name;Serafín apagado
+monster;vorgrim;name;Vorgrim, el Guardián Ceniciento
+monster;ysmera;name;Ysmera, la Matrona de la Escarcha
+monster;kharzul;name;Kharzul, el Maestro de la Fragua
+monster;vessara;name;Vessara, la Madre de las Espinas
+monster;ilmora;name;Ilmora, Señora de los Espejos
+monster;ugrath;name;Ugrath, el Devorador del Abismo
+monster;noctharion;name;Noctharion, el Devorador de Luz
+item;star_blade;name;Hoja de la estrella caída
+item;star_axe;name;Hacha de la estrella caída
+item;star_maul;name;Mazo de la estrella caída
+item;star_bow;name;Arco de la estrella
+item;star_wand;name;Varita de la Estrella Menguante
+item;star_rod;name;Cayado de la Estrella Menguante
+item;star_fists;name;Guanteletes de la estrella caída
+item;star_plate;name;Coraza de la estrella caída
+item;star_aegis;name;Égida de la estrella caída
+item;star_spellbook;name;Tomo de la Estrella Menguante
+item;star_amulet;name;Amuleto de la Estrella Menguante
+item;penitent_cowl;name;Capucha del penitente
+item;rimeheart_legs;name;Grebas del corazón de escarcha
+item;slagforged_boots;name;Botas de escoria
+item;thornmother_amulet;name;Amuleto de la Madre de las Espinas
+item;mirror_crown;name;Corona de espejos
+item;maw_greaves;name;Grebas de colmillos
+item;dimmed_crown;name;Corona de la Estrella Apagada
+item;dimmed_mantle;name;Manto de la Estrella Apagada
+item;ash_relic;name;Reliquia de ceniza
+item;rime_sliver;name;Astilla de escarcha
+item;slag_ingot;name;Lingote de escoria
+item;thorn_seed;name;Semilla de espinas
+item;mirror_shard;name;Fragmento de espejo
+item;maw_fang;name;Colmillo del abismo
+quest;star_m1;name;Penitencia de ceniza
+quest;star_m2;name;Silencio del claustro
+quest;star_m3;name;Fuego de la fragua
+quest;star_m4;name;Jardines cubiertos
+quest;star_m5;name;Reflejos
+quest;star_m6;name;Hambre del abismo
+quest;star_final;name;Sello de la Estrella Menguante
+npc;star_warden;name;Warden Thessaly
+npc;star_warden;greeting;La estrella sobre nosotros se apaga. Guardo el Sello y tengo misiones para quienes son nivel 300 o más.
+npc;varden_herald;name;Herald Matthias
+npc;varden_herald;greeting;Bienvenido al templo. Pregúntame por las bendiciones.
+npc;star_captain;name;Captain Brannoc
+npc;star_captain;greeting;Navego hacia el continente. Solo cuentas premium.
+place;Wyspa Gasnącej Gwiazdy;name;Isla de la Estrella Menguante
+place;Świątynia Pieczęci;name;Templo del Sello
+place;Cytadela Popiołu;name;Ciudadela de Ceniza
+place;Klasztor Szronu;name;Claustro de Escarcha
+place;Kuźnia Żużlu;name;Fragua de Escoria
+place;Ogrody Cierni;name;Jardines de Espinas
+place;Sale Zwierciadeł;name;Salas de Espejos
+place;Paszcza Głodu;name;Fauces del Hambre
+place;Komnata Pożeracza Światła;name;Cámara del Devorador de Luz
+place;Komnata Nagród Gwiazdy;name;Cámara de Recompensas de la Estrella

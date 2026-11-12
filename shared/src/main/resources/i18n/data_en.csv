@@ -1117,3 +1117,71 @@ place;Wzgórza Smoków;name;Dragon Hills
 place;Smocze Pieczary;name;Dragon Caverns
 place;Miasto Rogatych;name;City of the Horned
 place;Labirynt Rogatych;name;Maze of the Horned
+monster;ash_penitent;name;Ash Penitent
+monster;cinder_revenant;name;Cinder Revenant
+monster;rimebound_monk;name;Rimebound Monk
+monster;hoarfrost_warden;name;Hoarfrost Warden
+monster;slag_forgehand;name;Slag Forgehand
+monster;molten_cultist;name;Molten Cultist
+monster;thorn_maiden;name;Thorn Maiden
+monster;spore_stalker;name;Spore Stalker
+monster;mirror_acolyte;name;Mirror Acolyte
+monster;glass_phantom;name;Glass Phantom
+monster;maw_crawler;name;Maw Crawler
+monster;gore_harbinger;name;Gore Harbinger
+monster;dimmed_seraph;name;Dimmed Seraph
+monster;vorgrim;name;Vorgrim, the Ashen Warden
+monster;ysmera;name;Ysmera, the Rime Matron
+monster;kharzul;name;Kharzul, the Foundry Master
+monster;vessara;name;Vessara, the Thorn Mother
+monster;ilmora;name;Ilmora, Lady of Mirrors
+monster;ugrath;name;Ugrath, the Maw Devourer
+monster;noctharion;name;Noctharion, the Light-Eater
+item;star_blade;name;Starfall Blade
+item;star_axe;name;Starfall Axe
+item;star_maul;name;Starfall Maul
+item;star_bow;name;Starbound Bow
+item;star_wand;name;Wand of the Fading Star
+item;star_rod;name;Rod of the Fading Star
+item;star_fists;name;Starfall Gauntlets
+item;star_plate;name;Starfall Plate
+item;star_aegis;name;Starfall Aegis
+item;star_spellbook;name;Tome of the Fading Star
+item;star_amulet;name;Amulet of the Fading Star
+item;penitent_cowl;name;Penitent Cowl
+item;rimeheart_legs;name;Rimeheart Legs
+item;slagforged_boots;name;Slagforged Boots
+item;thornmother_amulet;name;Thornmother Amulet
+item;mirror_crown;name;Mirror Crown
+item;maw_greaves;name;Maw Greaves
+item;dimmed_crown;name;Crown of the Dimmed Star
+item;dimmed_mantle;name;Mantle of the Dimmed Star
+item;ash_relic;name;Ash Relic
+item;rime_sliver;name;Rime Sliver
+item;slag_ingot;name;Slag Ingot
+item;thorn_seed;name;Thorn Seed
+item;mirror_shard;name;Mirror Shard
+item;maw_fang;name;Maw Fang
+quest;star_m1;name;Ashen Penance
+quest;star_m2;name;Silence of the Cloister
+quest;star_m3;name;Fire of the Foundry
+quest;star_m4;name;Overgrown Gardens
+quest;star_m5;name;Reflections
+quest;star_m6;name;Hunger of the Maw
+quest;star_final;name;Seal of the Fading Star
+npc;star_warden;name;Warden Thessaly
+npc;star_warden;greeting;The star above us is dying. I keep the Seal, and I have missions for those of level 300 and up.
+npc;varden_herald;name;Herald Matthias
+npc;varden_herald;greeting;Welcome to the temple. Ask me about blessings.
+npc;star_captain;name;Captain Brannoc
+npc;star_captain;greeting;I sail to the mainland. Premium accounts only.
+place;Wyspa Gasnącej Gwiazdy;name;Isle of the Fading Star
+place;Świątynia Pieczęci;name;Temple of the Seal
+place;Cytadela Popiołu;name;Ashen Citadel
+place;Klasztor Szronu;name;Rime Cloister
+place;Kuźnia Żużlu;name;Slag Foundry
+place;Ogrody Cierni;name;Thorn Gardens
+place;Sale Zwierciadeł;name;Mirror Halls
+place;Paszcza Głodu;name;Maw of Hunger
+place;Komnata Pożeracza Światła;name;Chamber of the Light-Eater
+place;Komnata Nagród Gwiazdy;name;Star Reward Chamber

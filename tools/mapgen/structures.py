@@ -43,7 +43,11 @@ HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader',
                'goblin_scrounger', 'goblin_knifer', 'goblin_warchief', 'marsh_lizard', 'lizard_hexer', 'bog_hydra',
                'bog_naga', 'venom_hydra', 'stone_gorgon', 'dragon_whelp', 'scale_dragon', 'crag_dragon',
                # 2026-11-12: Miasto Rogatych (minotaur.py)
-               'horn_scout', 'horn_sapper', 'horn_gladiator', 'horn_oracle', 'horn_champion', 'horn_overlord'}
+               'horn_scout', 'horn_sapper', 'horn_gladiator', 'horn_oracle', 'horn_champion', 'horn_overlord',
+               # 2026-11-12: Wyspa Gasnacej Gwiazdy (citadel.py)
+               'ash_penitent', 'cinder_revenant', 'rimebound_monk', 'hoarfrost_warden', 'slag_forgehand', 'molten_cultist',
+               'thorn_maiden', 'spore_stalker', 'mirror_acolyte', 'glass_phantom', 'maw_crawler', 'gore_harbinger',
+               'dimmed_seraph', 'vorgrim', 'ysmera', 'kharzul', 'vessara', 'ilmora', 'ugrath', 'noctharion'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 

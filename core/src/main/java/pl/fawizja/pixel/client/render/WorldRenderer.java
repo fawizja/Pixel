@@ -412,7 +412,7 @@ public final class WorldRenderer {
             float k = openness(p, openings.isOpen(p));
             drawOpening(batch, art.wallPiece(wall, vert ? TileArt.DOOR_V : TileArt.DOOR_H),
                     art.wallPiece(wall, vert ? TileArt.DOOR_V_OPEN : TileArt.DOOR_H_OPEN), k, sx, wy);
-            if (k < 0.5f && world.levelDoorAt(p) > 0) drawLevelPlaque(batch, vert, sx, wy);
+            if (k < 0.5f && world.levelDoorAt(p) > 0) drawLevelPlaque(batch, vert, sx, wy, world.questGateAt(p) != null);
             return;
         }
         drawWallBody(batch, f, id, x, y, sx, wy);
@@ -420,17 +420,18 @@ public final class WorldRenderer {
     }
 
     /** Zlota tabliczka z napisem na zamknietych drzwiach poziomu (napis pokazuje dotkniecie). */
-    private void drawLevelPlaque(SpriteBatch batch, boolean vertical, float sx, float wy) {
+    private void drawLevelPlaque(SpriteBatch batch, boolean vertical, float sx, float wy, boolean seal) {
         TextureRegion w = art.white();
         if (w == null) return;
         tmp.set(batch.getColor());
         // na skrzydle drzwi, z dala od boku muru z prawej (rysowanego pozniej, zaslonilby tabliczke)
         float x = vertical ? sx + 0.08f : sx - 0.12f, y = wy + 0.45f, bw = vertical ? 0.22f : 0.42f, bh = 0.2f;
-        batch.setColor(0.25f * tmp.r, 0.18f * tmp.g, 0.05f * tmp.b, tmp.a);
+        // pieczec zadania (Gasnaca Gwiazda): fioletowa tabliczka zamiast zlotej
+        batch.setColor((seal ? 0.14f : 0.25f) * tmp.r, (seal ? 0.06f : 0.18f) * tmp.g, (seal ? 0.28f : 0.05f) * tmp.b, tmp.a);
         batch.draw(w, x - 0.03f, y - 0.03f, bw + 0.06f, bh + 0.06f);
-        batch.setColor(0.95f * tmp.r, 0.78f * tmp.g, 0.25f * tmp.b, tmp.a);
+        batch.setColor((seal ? 0.62f : 0.95f) * tmp.r, (seal ? 0.38f : 0.78f) * tmp.g, (seal ? 0.95f : 0.25f) * tmp.b, tmp.a);
         batch.draw(w, x, y, bw, bh);
-        batch.setColor(0.45f * tmp.r, 0.32f * tmp.g, 0.08f * tmp.b, tmp.a);
+        batch.setColor((seal ? 0.25f : 0.45f) * tmp.r, (seal ? 0.1f : 0.32f) * tmp.g, (seal ? 0.45f : 0.08f) * tmp.b, tmp.a);
         for (int i = 0; i < 2; i++) batch.draw(w, x + bw * 0.18f, y + bh * (0.3f + 0.35f * i), bw * 0.64f, bh * 0.12f);
         batch.setColor(tmp);
     }

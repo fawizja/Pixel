@@ -284,3 +284,31 @@ minotaur_cave_descent|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.leve
 minotaur_city_entrance|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=100 -Dpixel.teleport=561,394,-7
 minotaur_city_arena|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=100 -Dpixel.teleport=521,396,-7
 minotaur_city_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=100 -Dpixel.teleport=521,385,-7
+# Wyspa Gasnacej Gwiazdy (citadel.py): dziedziniec, swiatynia, sala nagrod, Herold w Varden i po sekcji (start, brama, boss); wzorce do dopisania (--update)
+star_warden|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=129,797,0 -Dpixel.open=npc
+star_warden_talk|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=129,797,0 -Dpixel.ask=zadanie
+star_dock|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=90,797,0
+star_temple|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=125,786,0
+star_reward_room|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.flags=star_sealed -Dpixel.teleport=150,784,-1
+star_herald_locked|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=500,498,0 -Dpixel.open=npc
+star_herald_sealed|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.flags=star_sealed -Dpixel.teleport=500,498,0 -Dpixel.open=npc
+star_ash_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=21,879,-1
+star_ash_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=50,879,-1
+star_ash_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=58,879,-3
+star_rime_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=99,879,-1
+star_rime_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=128,879,-1
+star_rime_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=136,879,-3
+star_slag_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=177,879,-1
+star_slag_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=206,879,-1
+star_slag_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=214,879,-3
+star_thorn_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=255,879,-1
+star_thorn_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=284,879,-1
+star_thorn_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=292,879,-3
+star_mirror_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=21,949,-1
+star_mirror_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=50,949,-1
+star_mirror_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=58,949,-3
+star_maw_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=99,949,-1
+star_maw_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=128,949,-1
+star_maw_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=136,949,-3
+star_void_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=177,949,-1
+star_void_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=214,949,-3

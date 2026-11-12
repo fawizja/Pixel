@@ -269,6 +269,9 @@ public final class GameSession {
         if (pc.hunt().onKill(t.key())) {
             log.add(lastUpdateMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zlecenie_lowcy_wykonane_wroc"));
         }
+        if (world.gateBosses().contains(t.key()) && pc.setQuestFlag(pl.fawizja.pixel.world.QuestGate.bossFlag(t.key()))) {
+            log.add(lastUpdateMs, EventLog.Kind.SYSTEM, Messages.get("star.boss_seal_broken", t.name()));
+        }
         QuestType done = quests == null ? null : quests.onKill(pc, t.key());
         if (done != null) {
             log.add(lastUpdateMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zadanie") + done.name() + Messages.get("game_session.cel_osiagniety_wroc_po"));
@@ -1816,6 +1819,100 @@ public final class GameSession {
         return true;
     }
 
+    /** Herold Pieczeci: powod, dla ktorego nie sprzeda wszystkich blogoslawienstw (null = moze). */
+    public String heraldBlocked() {
+        if (!pl.fawizja.pixel.quest.StarQuest.completed(pc)) return Messages.get("star.herald_locked");
+        if (pl.fawizja.pixel.quest.StarQuest.missing(pc).isEmpty()) return Messages.get("star.herald_have_all");
+        return null;
+    }
+
+    /** Jedna cena za wszystkie brakujace blogoslawienstwa u Herolda. */
+    public long heraldPrice() { return pl.fawizja.pixel.quest.StarQuest.bundlePrice(pc); }
+
+    /**
+     * Herold w swiatyni Varden: wszystkie blogoslawienstwa (piec zwyklych i Zrzadzenie losu) naraz za jedna cene, ale
+     * dopiero po ukonczeniu wyprawy Gasnacej Gwiazdy (znacznik w postaci). Akcja "npc:blessall". Dziala tak samo
+     * offline i na serwerze (sesja gracza); bez znacznika Herold odmawia i tlumaczy, jak ja zdobyc.
+     */
+    public boolean blessAll(long nowMs) {
+        Npc n = talkTo(NpcRole.HERALD, nowMs);
+        if (n == null) return false;
+        String why = heraldBlocked();
+        if (why != null) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + why);
+            return false;
+        }
+        long price = heraldPrice();
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + Messages.get("bless.costs", price));
+            return false;
+        }
+        pc.backpack().commitFrom(tx);
+        for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.quest.StarQuest.missing(pc)) pc.addBlessing(b);
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("star.herald_received", price));
+        return true;
+    }
+
+    private boolean pendingHerald;
+
+    private static final java.util.Set<String> HERALD_WORDS = java.util.Set.of("blogoslawienstwa", "blogoslawienstwo", "wszystkie",
+            "blessings", "blessing", "all", "bless", "bendiciones", "bendicion", "todas", "cena", "price", "precio", "kup", "buy", "comprar");
+
+    /** Rozmowa z Heroldem ("blogoslawienstwa" - oferta, "tak" - kupno) i ze Straznikiem Pieczeci ("zadanie", "gdzie", "nagroda"). */
+    private String starSays(Npc n, String said, long nowMs) {
+        String w = pl.fawizja.pixel.npc.DialogueRegistry.normalize(said);
+        String line;
+        if (n.role() == NpcRole.HERALD) {
+            boolean pending = pendingHerald;
+            pendingHerald = false;
+            if (pending && YES_WORDS.contains(w)) {
+                line = blessAll(nowMs) ? Messages.get("star.herald_bought") : heraldBlocked() != null ? heraldBlocked() : Messages.get("bless.costs", heraldPrice());
+                // blessAll sam wpisal komunikat do dziennika; zwracamy tez tekst rozmowy
+            } else if (pending && NO_WORDS.contains(w)) {
+                line = Messages.get("bless.npc_no");
+            } else if (HERALD_WORDS.contains(w) || w.contains("blogoslaw") || w.contains("bless")) {
+                String why = heraldBlocked();
+                if (why != null) {
+                    line = why;
+                } else {
+                    pendingHerald = true;
+                    line = Messages.get("star.herald_offer", heraldPrice(), pc.level());
+                }
+            } else {
+                return null;
+            }
+        } else {
+            QuestType next = nextStarMission();
+            if (w.contains("misj") || w.contains("zadani") || w.contains("quest") || w.contains("mission") || w.contains("tarea")) {
+                line = next == null ? Messages.get("star.warden_done") : Messages.get("star.warden_mission", next.name(), questHint(next));
+            } else if (w.contains("pieczec") || w.contains("seal") || w.contains("sello") || w.contains("gwiazd") || w.contains("star") || w.contains("estrella")) {
+                line = Messages.get("star.warden_lore");
+            } else if (w.contains("nagrod") || w.contains("reward") || w.contains("recompensa") || w.contains("blogoslaw") || w.contains("bless") || w.contains("bendic")) {
+                line = Messages.get("star.warden_reward");
+            } else {
+                return null;
+            }
+        }
+        String out = n.name() + ": " + line;
+        log.add(nowMs, EventLog.Kind.CHAT, out);
+        return out;
+    }
+
+    /** Kolejna misja lancucha Strazniczki Pieczeci: pierwsza nieukonczona (albo null, gdy wszystko zrobione). */
+    private QuestType nextStarMission() {
+        if (quests == null) return null;
+        for (QuestType q : quests.registry().byGiver(pl.fawizja.pixel.quest.StarQuest.GIVER)) {
+            if (pc.quests().state(q.key()) != pl.fawizja.pixel.quest.QuestLog.State.DONE) return q;
+        }
+        return null;
+    }
+
+    private String questHint(QuestType q) {
+        return pc.quests().state(q.key()) == pl.fawizja.pixel.quest.QuestLog.State.ACTIVE
+                ? Messages.get("star.hint_active", quests.progress(pc, q), q.amount()) : Messages.get("star.hint_new", q.amount());
+    }
+
     /** Czeka na "tak" po ofercie mnicha (klucz NPC); czyszczone innym tematem albo odejsciem. */
     private String pendingBlessNpc;
 
@@ -1950,6 +2047,10 @@ public final class GameSession {
         if (n.role() == NpcRole.BLESSER) {
             String monk = monkSays(n, text, nowMs);
             if (monk != null) return monk;
+        }
+        if (n.role() == NpcRole.HERALD || n.key().equals(pl.fawizja.pixel.quest.StarQuest.GIVER)) {
+            String star = starSays(n, text, nowMs);
+            if (star != null) return star;
         }
         pl.fawizja.pixel.npc.DialogueRegistry d = pl.fawizja.pixel.npc.DialogueRegistry.defaults();
         String answer = d.answer(n, text);
@@ -2756,6 +2857,9 @@ public final class GameSession {
             } else if (r == MoveResult.DOOR_CLOSED && nowMs - lastDoorHintMs > DOOR_HINT_MS) {
                 lastDoorHintMs = nowMs;
                 log.add(nowMs, EventLog.Kind.INFO, Messages.tr(DOOR_HINT));
+            } else if (r == MoveResult.GATE_SEALED && nowMs - lastGateWarningMs > 3000) {
+                lastGateWarningMs = nowMs;
+                log.add(nowMs, EventLog.Kind.WARNING, gateRefusal(world.questGateAt(pc.position().translate(requested.dx, requested.dy))));
             } else if (r == MoveResult.LEVEL_TOO_LOW && nowMs - lastGateWarningMs > 3000) {
                 lastGateWarningMs = nowMs;
                 Position gate = pc.position().translate(requested.dx, requested.dy);
@@ -3583,6 +3687,11 @@ public final class GameSession {
             log.add(nowMs, EventLog.Kind.WARNING, levelDoorRefusal(doorLevel));
             return true;
         }
+        pl.fawizja.pixel.world.QuestGate questGate = world.questGateAt(p);
+        if (questGate != null && !questGate.passes(pc)) {
+            log.add(nowMs, EventLog.Kind.WARNING, gateRefusal(questGate));
+            return true;
+        }
         if (doorLevel > 0) {
             // jak w Tibii: uzycie drzwi poziomu wprowadza postac w drzwi, po zejsciu zamykaja sie za nia
             if (p.equals(me)) {
@@ -3649,6 +3758,8 @@ public final class GameSession {
                     + Messages.get("game_session.nie_mozesz_z_niej"));
             return true;
         }
+        pl.fawizja.pixel.world.WorldMap.RewardChoice choice = world.rewardChoiceAt(c.position());
+        if (choice != null) return openRewardChoice(choice, nowMs);
         if (pc.openedChests().contains(c.id())) {
             log.add(nowMs, EventLog.Kind.INFO, c.vocation() != null
                     ? Messages.get("game_session.ta_skrzynia_jest_pusta") : Messages.get("game_session.ta_skrzynia_jest_juz"));
@@ -3667,6 +3778,56 @@ public final class GameSession {
         pc.openedChests().add(c.id());
         for (String line : pl.fawizja.pixel.treasure.ChestRewards.lines(r, items)) log.add(nowMs, EventLog.Kind.LOOT, line);
         return true;
+    }
+
+    /**
+     * Sala nagrod Pieczeci Gasnacej Gwiazdy: z grupy skrzyn postac wybiera jeden przedmiot, raz na zawsze. Przedmiot
+     * innej profesji nie zuzywa wyboru. Dziala tylko po ukonczeniu wyprawy ({@link pl.fawizja.pixel.quest.StarQuest#completed}).
+     */
+    private boolean openRewardChoice(pl.fawizja.pixel.world.WorldMap.RewardChoice rc, long nowMs) {
+        if (!pl.fawizja.pixel.quest.StarQuest.completed(pc)) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("star.reward_locked"));
+            return true;
+        }
+        if (pc.openedChests().contains(pl.fawizja.pixel.quest.StarQuest.REWARD_TAKEN)) {
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("star.reward_taken"));
+            return true;
+        }
+        pl.fawizja.pixel.item.ItemType it = items.byKey(rc.itemKey());
+        if (!it.usableBy(pc.vocation())) {
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("star.reward_not_for_you", it.name(), pc.vocation().displayName()));
+            return true;
+        }
+        pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
+        if (!tx.add(new pl.fawizja.pixel.item.ItemStack(it.id(), 1)).ok()) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("star.reward_full"));
+            return true;
+        }
+        pc.backpack().commitFrom(tx);
+        pc.openedChests().add(pl.fawizja.pixel.quest.StarQuest.REWARD_TAKEN);
+        for (pl.fawizja.pixel.world.WorldMap.RewardChoice o : world.rewardChoices()) {
+            if (o.group().equals(rc.group())) pc.openedChests().add(chestIdAt(o.position()));
+        }
+        log.add(nowMs, EventLog.Kind.LOOT, Messages.get("star.reward_chosen", it.name()));
+        return true;
+    }
+
+    private String chestIdAt(Position p) {
+        pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests == null ? null : chests.at(p);
+        return c == null ? "" : c.id();
+    }
+
+    /** Odmowa przejscia strzezonego zadaniem: co trzeba zrobic, zeby pieczec ustapila. */
+    String gateRefusal(pl.fawizja.pixel.world.QuestGate g) {
+        if (g == null) return Messages.get("star.gate_flag");
+        switch (g.kind()) {
+            case QUEST: {
+                QuestType q = quests == null ? null : quests.registry().get(g.target());
+                return Messages.get("star.gate_quest", q == null ? g.target() : q.name());
+            }
+            case BOSS: return Messages.get("star.gate_boss", monsterName(g.target()));
+            default: return Messages.get("star.gate_flag");
+        }
     }
 
     /** Nagroda ze skrzyni dla tej postaci (bez otwierania; podglad i testy). */

@@ -73,6 +73,8 @@ class GameWorldTest {
         MovementSystem ms = new MovementSystem(world, TestData.ITEMS.byKey("rope").id());
         PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
         if (level > pc.level()) pc.addExperience(Balance.experienceForLevel(level) - pc.experience());
+        // bramy zadan Pieczeci Gasnacej Gwiazdy (star_quest.csv) otwiera ukonczona wyprawa: BFS ma isc po calej wyspie
+        pl.fawizja.pixel.quest.StarGatesSupport.openAll(pc, world);
         Set<Position> seen = new HashSet<>();
         ArrayDeque<Position> q = new ArrayDeque<>();
         seen.add(start);

@@ -53,6 +53,7 @@ import camps  # noqa: E402
 import chapels  # noqa: E402
 import structures as St  # noqa: E402
 import minotaur  # noqa: E402
+import citadel  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -1055,6 +1056,8 @@ def build(ctx):
     print('wzgorza goblinow, smokow i hydr:', hills.build(ctx, cost, wh))
     # 2026-11-12: Miasto Rogatych na -7 (dwie jaskinie -1..-6 z kontynentu glownego, miasto, boss i skrzynia zadania)
     print('miasto rogatych:', minotaur.build(ctx, cost, wh))
+    # 2026-11-12: Wyspa Gasnacej Gwiazdy (premium, tylko statkiem): 7 sekcji x 3 pietra, 7 bossow, sala nagrod, Herold w Varden
+    print('wyspa gasnacej gwiazdy:', citadel.build(ctx, cost, wh))
 
 
 def monster_levels():
@@ -2918,6 +2921,14 @@ def finish(ctx):
         f.write('# skrzynie lupu w lochach dziczy (wilds.py, world/WorldMap.LootChest): x;y;z;zloto;przedmiot;ilosc\n')
         for c in ctx.get('loot_chests', []):
             f.write(';'.join(str(v) for v in c) + '\n')
+    with open(os.path.join(OUT, 'star_quest.csv'), 'w', encoding='utf-8') as f:
+        f.write('# Pieczec Gasnacej Gwiazdy (world/QuestGate, WorldMap.RewardChoice; tools/mapgen/citadel.py):\n'
+                '# gate;x;y;z;wymog (quest:<zadanie> | boss:<potwor> | flag:<znacznik>) - pole nieprzechodnie do spelnienia wymogu\n'
+                '# choice;grupa;x;y;z;przedmiot - skrzynie sali nagrod: z grupy mozna otworzyc jedna\n')
+        for (x, y, z, req) in ctx.get('star_gates', []):
+            f.write(f'gate;{x};{y};{z};{req}\n')
+        for (grp, x, y, z, item) in ctx.get('star_choices', []):
+            f.write(f'choice;{grp};{x};{y};{z};{item}\n')
     with open(os.path.join(OUT, 'boss_quests.csv'), 'w', encoding='utf-8') as f:
         f.write('# wyprawy na bossa w piec postaci (world/BossQuest, game/BossQuestRuntime):\n'
                 '# quest;id;nazwa;poziom;boss;dzwignia x,y,z;przedsionek x0,y0,x1,y1,z;arena x0,y0,x1,y1,z;'

@@ -141,6 +141,8 @@ class TownServicesTest {
             for (NpcRole role : NpcRole.values()) {
                 // statki tylko w miastach nad morzem (Frostholm lezy w glebi ladu); wladca (KING) i zaklinacz w kazdym miescie
                 if (role == NpcRole.CAPTAIN && town.equals("Frostholm")) continue;
+                // Herold sprzedajacy wszystkie blogoslawienstwa po Pieczeci Gasnacej Gwiazdy stoi tylko w swiatyni Varden
+                if (role == NpcRole.HERALD && !town.equals("Varden")) continue;
                 assertTrue(npcs.all().stream().anyMatch(n -> n.town().equals(town) && n.role() == role), town + " " + role);
             }
         }

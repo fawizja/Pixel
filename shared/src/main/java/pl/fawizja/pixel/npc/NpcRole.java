@@ -24,5 +24,7 @@ public enum NpcRole {
     /** Zaklinacz (klucz *_imbuer, w kazdym miescie): nasycenia (imbuementy) jak u kowala, bez sklepu. */
     IMBUER,
     /** Mnich z kaplicy poza miastem: sprzedaje jedno blogoslawienstwo (zob. {@code Blessing#sellerKey()}), jak mnisi z oddalonych swiatyn w Tibii. */
-    BLESSER
+    BLESSER,
+    /** Herold Pieczeci w swiatyni Varden: po ukonczeniu wyprawy Gasnacej Gwiazdy sprzedaje wszystkie blogoslawienstwa naraz. */
+    HERALD
 }

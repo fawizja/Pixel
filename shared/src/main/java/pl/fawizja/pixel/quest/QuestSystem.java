@@ -95,6 +95,7 @@ public final class QuestSystem {
         lastRewardExp = rewardExp(pc, q);
         pc.addExperience(lastRewardExp);
         pc.quests().finish(q.key());
+        StarQuest.onCompleted(pc, q.key());
         return QuestResult.COMPLETED;
     }
 
