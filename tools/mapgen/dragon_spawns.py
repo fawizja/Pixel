@@ -5,42 +5,79 @@ Smoki: ``emerald_dragon`` (zielony, najslabszy), ``hoarfrost_dragon`` (lodowy, p
 ``dune_drake`` (zloty), ``pearl_dragon`` (bialy - bez stalych spawnow: pojawia sie rzadko na smoczych lowiskach,
 MonsterManager.rollRare). Smocze wzgorza (hills.py) maja wlasne listy; tu dopasowanie reszty swiata:
 
-* co drugi spawn ``ice_dragon`` (lodowe jaskinie i szczyty polnocy) staje sie ``hoarfrost_dragon`` - slabszym, szronowym
-  smokiem na polnocy (``ice_dragon`` zostaje na samym dnie jak dotad);
+* co trzeci spawn ``ice_golem`` bez stada (lodowe jaskinie i szczyty polnocy) staje sie ``hoarfrost_dragon`` - szronowym
+  smokiem na polnocy (``ice_dragon`` zostaje jak dotad);
 * co drugi spawn ``magma_drake`` na pietrach 0..-2 (wulkan, wyspa i wzgorza) staje sie ``coal_dragon`` (czarny smok z zarem);
 * spawny zlotego (``dune_drake``) zostaja, jak byly (rowniki i pustynie, glebokie pietra wzgorz).
 Zamiana jest deterministyczna (numer wystapienia), bez losowania - mapa wychodzi taka sama. ``apply`` wola
 generate_continent.finish przed route_levels, ktore i tak obnizy kazdy spawn ponad pasem poziomu drogi.
 """
 
-ICE_STEP = 2
 MAGMA_MAX_DEPTH = -2   # pietra 0, -1, -2 (glebiej i w stozku wulkanu zostaja magmowe smoki)
 MAGMA_STEP = 2
 
 
+GOLEM_STEP = 3          # co trzeci spawn ice_golem (poza stadami) w lodowych grotach staje sie szronowym smokiem
+
+
 def apply(ctx):
-    """Zamienia czesc spawnow ice_dragon / magma_drake na szronowe i weglowe smoki; zwraca (lodowe, czarne)."""
-    ice = magma = 0
-    n_ice = n_magma = 0
+    """Zamienia czesc spawnow ice_golem / magma_drake na szronowe i weglowe smoki oraz podmienia smoki na Smoczych
+    Wzgorzach (HILLS_REPLACE); zwraca (lodowe, czarne, wzgorza). Spawny ze stadem (``stado``: lowiska dla druzyn, testy
+    wymagaja tam poziomu >= 260-300) zostaja bez zmian; `fits` pilnuje progu regionu jak GameWorldTest."""
+    regions = list(ctx['regions']) + list(ctx.get('regions_new', []))
+    levels = _monster_levels()
+
+    def fits(key, x, y, z):
+        for r in regions:
+            if len(r) > 8 and r[1] <= x <= r[3] and r[2] <= y <= r[4] and r[5] <= z <= r[6] and levels[key] < 0.8 * r[7]:
+                return False
+        return True
+    hb = [r for r in regions if r[0] in (HILLS_NAME, 'Smocze Pieczary')]
+    box = (min(r[1] for r in hb), min(r[2] for r in hb), max(r[3] for r in hb), max(r[4] for r in hb)) if hb else None
+    ice = magma = hills = 0
+    n_golem = n_magma = 0
+    counts = {}
     out = []
     for line in ctx['spawns']:
-        if line.startswith('#'):
+        if line.startswith('#') or not line.strip():
             out.append(line)
             continue
         f = line.split(';')
-        if f[0] == 'ice_dragon':
-            n_ice += 1
-            if n_ice % ICE_STEP == 0:
+        x, y, z = int(f[1]), int(f[2]), int(f[3])
+        pack = 'stado' in f
+        if f[0] == 'ice_golem' and not pack:
+            n_golem += 1
+            if n_golem % GOLEM_STEP == 0 and fits('hoarfrost_dragon', x, y, z):
                 f[0] = 'hoarfrost_dragon'
                 ice += 1
-        elif f[0] == 'magma_drake' and MAGMA_MAX_DEPTH <= int(f[3]) <= 0:
+        elif f[0] == 'magma_drake' and MAGMA_MAX_DEPTH <= z <= 0 and not pack:
             n_magma += 1
-            if n_magma % MAGMA_STEP == 0:
+            if n_magma % MAGMA_STEP == 0 and fits('coal_dragon', x, y, z):
                 f[0] = 'coal_dragon'
                 magma += 1
+        elif box and box[0] <= x <= box[2] and box[1] <= y <= box[3] and z in HILLS_REPLACE:
+            rule = HILLS_REPLACE[z].get(f[0])
+            if rule:
+                k = (z, f[0])
+                counts[k] = counts.get(k, 0) + 1
+                if counts[k] % rule[1] == 0 and fits(rule[0], x, y, z):
+                    f[0] = rule[0]
+                    hills += 1
         out.append(';'.join(f))
     ctx['spawns'] = out
-    return ice, magma
+    return ice, magma, hills
+
+
+def _monster_levels():
+    import os
+    levels = {}
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'shared', 'src', 'main', 'resources', 'data',
+                           'monsters.csv'), encoding='utf-8') as f:
+        for line in f:
+            p = line.split(';')
+            if len(p) > 3 and not line.startswith('#'):
+                levels[p[0]] = int(p[2])
+    return levels
 
 
 # ---------------------------------------------------------------------------------- smocze wzgorza (gotowy swiat)

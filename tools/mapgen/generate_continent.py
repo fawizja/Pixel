@@ -2706,6 +2706,11 @@ def snap_spawns(ctx):
         # nie w kieszeni zamknietej schodami (wejscie na schody przenosi pietro nizej)
         return open_cell(x, y, z) and not in_pz(ctx, x, y, z) and \
             any(open_cell(x + a, y + b, z) for a, b in F.DIRS4)
+    taken = set()                          # (x, y, z) juz zajetych srodkow spawnow: przesuniety spawn nie ladzie blizej niz 3 pola (Manhattan)
+    for line in ctx['spawns']:             # i nie przy spawnie, ktory dopiero zostanie wczytany (stoi na swoim miejscu)
+        if not line.startswith('#'):
+            g = line.split(';')
+            taken.add((int(g[1]), int(g[2]), int(g[3])))
     for line in ctx['spawns']:
         if line.startswith('#'):
             out.append(line)
@@ -2724,11 +2729,15 @@ def snap_spawns(ctx):
         boxes = [t['rect'] for t in ctx['new_towns'] + list(ctx.get('rebuilt', {}).values())]
         if best is not None and z == 0 and any(r[0] <= best[0] <= r[2] and r[1] <= best[1] <= r[3] for r in boxes):
             best = None                    # pod murami nowych miast (region miasta) nie ma spawnow
+        if best is not None and best != (x, y) and any((best[0] + a, best[1] + b, z) in taken for a in range(-2, 3) for b in range(-2, 3)
+                                                       if abs(a) + abs(b) < 3 and (best[0] + a, best[1] + b) != (x, y)):
+            best = None                    # dwa spawny prawie w tym samym miejscu (po przesunieciu): drugi odpada
         if best is None:
             dropped += 1
             continue
         if best != (x, y):
             moved += 1
+        taken.add((best[0], best[1], z))
         f[1], f[2] = str(best[0]), str(best[1])
         out.append(';'.join(f))
     ctx['spawns'] = out
@@ -2799,6 +2808,7 @@ def party_packs(ctx):
     temples = [p for _n, p in ctx['towns']]
     out = []
     before = after = points = packs = extra = 0
+    occupied = {tuple(int(v) for v in ln.split(';')[1:4]) for ln in ctx['spawns'] if not ln.startswith('#')}   # srodki spawnow
     for line in ctx['spawns']:
         if line.startswith('#'):
             out.append(line)
@@ -2831,8 +2841,12 @@ def party_packs(ctx):
                     if (x + dx, y + dy) in reach and region_of(x + dx, y + dy, z) == region_of(x, y, z)]
             # stado obok tez z dala od miast (lochy dziczy pod okolica miast)
             cand = [p for p in cand if not any(max(abs(p[0] - t[0]), abs(p[1] - t[1])) < PACK_TOWN_RADIUS for t in temples)]
+            # i nie tuz przy innym spawnie (dwa stada z roznych punktow nie sasiaduja o 1-2 pola)
+            cand = [p for p in cand if not any((p[0] + a, p[1] + b, z) in occupied for a in range(-3, 4) for b in range(-3, 4)
+                                               if abs(a) + abs(b) < 4)]
             if cand:
                 sx, sy = rng.choice(cand)
+                occupied.add((sx, sy, z))
                 k2 = rng.choice((3, 4))
                 out.append(f'{key};{sx};{sy};{z};4;{k2};{respawn};stado')
                 after += k2
@@ -2888,7 +2902,7 @@ def finish(ctx):
         vr[0] <= x <= vr[2] and vr[1] <= y <= vr[3]))
     print('towary na ladach:', len(ctx['displays']))
     party_packs(ctx)
-    print('smoki (szronowe, weglowe):', dragon_spawns.apply(ctx))
+    print("smoki (szronowe, weglowe, wzgorza):", dragon_spawns.apply(ctx))
     snap_spawns(ctx)
     fix_transition_targets(ctx)
     # poziomy potworow rosna stopniowo wzdluz drog od swiatyn; silne spawny na drogach do slabszych lowisk obnizone

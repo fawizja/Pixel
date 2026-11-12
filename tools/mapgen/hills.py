@@ -91,14 +91,14 @@ HILLS = {
         stand_in=True),
     DRAGON: dict(
         name='Wzgórza Smoków', under='Smocze Pieczary', near=(130, 288), pin=(119, 283), radius=80, L=52, R=22, n=5, mount=0.34,
-        entrances=3, surface_n=11, surface_levels=(40, 210), min_temple=110, island=False,
-        surface=['dragon_whelp', 'dragon_whelp', 'dragon_whelp', 'scale_dragon', 'scale_dragon', 'scale_dragon',
-                 'scale_dragon', 'emerald_dragon', 'emerald_dragon', 'emerald_dragon', 'emerald_dragon'],
+        entrances=3, surface_n=11, surface_levels=(40, 190), min_temple=110, island=False,
+        surface=['dragon_whelp', 'dragon_whelp', 'dragon_whelp', 'dragon_whelp', 'scale_dragon', 'scale_dragon', 'scale_dragon',
+                 'scale_dragon', 'scale_dragon', 'scale_dragon', 'scale_dragon'],
         floors={
-            -1: ('dragon_den', ['dragon_whelp', 'dragon_whelp', 'scale_dragon', 'scale_dragon'], (2, 3), (50, 190)),
-            -2: ('dragon_den', ['dragon_whelp', 'scale_dragon', 'scale_dragon', 'crag_dragon', 'coal_dragon'], (2, 3), (120, 330)),
-            -3: ('ember_den', ['scale_dragon', 'emerald_dragon', 'coal_dragon', 'dune_drake', 'dune_drake'], (2, 3), (230, 450)),
-            -4: ('dragon_hoard', ['coal_dragon', 'dune_drake', 'dune_drake', 'magma_drake', 'bone_dragon', 'bone_dragon'],
+            -1: ('dragon_den', ['dragon_whelp', 'dragon_whelp', 'scale_dragon', 'scale_dragon'], (2, 3), (50, 170)),
+            -2: ('dragon_den', ['dragon_whelp', 'scale_dragon', 'scale_dragon', 'crag_dragon', 'crag_dragon'], (2, 3), (120, 280)),
+            -3: ('ember_den', ['scale_dragon', 'crag_dragon', 'crag_dragon', 'dune_drake', 'dune_drake'], (2, 3), (230, 450)),
+            -4: ('dragon_hoard', ['crag_dragon', 'dune_drake', 'magma_drake', 'magma_drake', 'bone_dragon', 'bone_dragon'],
                  (2, 3), (400, 900)),
         },
         chests=[('strong_health_potion', 3), ('great_health_potion', 3), ('great_mana_potion', 2),
@@ -277,6 +277,8 @@ def find_origin(ctx, helpers, cfg, inside, cx, cy, reach, masks, taken, why):
     nx, ny = cfg['near']
     best = None
     rad = cfg['radius']
+    # podziemia innych budowli (np. Chodniki pod Warownia) nie moga sasiadowac z krainami: groty nie mogly by sie zlaczyc
+    under = [r[1:5] for r in list(ctx['regions']) + list(ctx.get('regions_new', [])) if len(r) > 8 and r[0] == 'Chodniki pod Warownią']
     for dy in range(-rad, rad + 1, 3):
         for dx in range(-rad, rad + 1, 3):
             ox, oy = nx + dx, ny + dy
@@ -286,6 +288,9 @@ def find_origin(ctx, helpers, cfg, inside, cx, cy, reach, masks, taken, why):
                 continue
             if any(max(abs(t[0] - ox), abs(t[1] - oy)) < cfg['min_temple'] + 20 and t[2] == 0 for t in temples):
                 why['temple'] = why.get('temple', 0) + 1
+                continue
+            if any(x0 - 1 <= u[2] and u[0] <= x0 + W + 1 and y0 - 1 <= u[3] and u[1] <= y0 + H + 1 for u in under):
+                why['under'] = why.get('under', 0) + 1
                 continue
             sl = (slice(y0, y0 + H), slice(x0, x0 + W))
             if (built[sl] & dil).any() or (blocked[sl] & dil).any():

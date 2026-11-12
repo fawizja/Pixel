@@ -256,11 +256,13 @@ class StoryQuestsTest {
         List<SpawnPoint> spawns = SpawnTable.load(WorldLayout.WORLD_MAP, world, monsters);
         for (String k : ALL) {
             QuestType m1 = quests.get(k + "_m1"), m2 = quests.get(k + "_m2"), m3 = quests.get(k + "_m3");
-            Region inner = world.regions().stream().filter(r -> r.name().equals(m1.target())).findFirst().orElseThrow();
+            // wyprawa moze miec kilka prostokatow regionu (np. po jednym na pietro): liczymy potwory we wszystkich
+            List<Region> inner = world.regions().stream().filter(r -> r.name().equals(m1.target())).toList();
+            assertFalse(inner.isEmpty(), k + " inner region");
             Map<String, Integer> found = new HashMap<>();
             for (SpawnPoint sp : spawns) {
                 Position c = sp.center();
-                if (c.z() >= inner.zMin() && c.z() <= inner.zMax() && c.x() >= inner.x0() && c.x() <= inner.x1() && c.y() >= inner.y0() && c.y() <= inner.y1()) {
+                if (inner.stream().anyMatch(r -> c.z() >= r.zMin() && c.z() <= r.zMax() && c.x() >= r.x0() && c.x() <= r.x1() && c.y() >= r.y0() && c.y() <= r.y1())) {
                     found.merge(sp.monsterKey(), sp.count(), Integer::sum);
                 }
             }
