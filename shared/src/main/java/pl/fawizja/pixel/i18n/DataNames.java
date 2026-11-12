@@ -48,6 +48,8 @@ public final class DataNames {
     static String name(Language l, String kind, String key, String polish) { return field(l, kind, key, "name", polish); }
 
     static String field(Language l, String kind, String key, String field, String polish) {
+        // Imiona NPC zawsze po angielsku (decyzja wlasciciela 12.11.2026), niezaleznie od jezyka gry.
+        if ("npc".equals(kind) && "name".equals(field)) l = Language.EN;
         if (l == Language.PL) return polish;
         String s = table(l).get(kind + ";" + key + ";" + field);
         return s != null ? s : polish;

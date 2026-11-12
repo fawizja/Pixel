@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.256.0] - 2026-11-12
+
+### Zmieniono
+- Imiona NPC są zawsze po angielsku, także w polskiej i hiszpańskiej wersji gry (np. "Merchant Tomas", "Pet Keeper Maciej",
+  "Queen Świętosława"). Dialogi zostają w wybranym języku.
+
 ## [0.255.0] - 2026-11-12
 
 ### Dodano

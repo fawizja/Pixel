@@ -53,6 +53,16 @@ class DataNamesTest {
     }
 
     @Test
+    void npcNamesAreEnglishInEveryLanguage() {
+        for (Language l : Language.values()) {
+            Messages.setLanguage(l);
+            assertEquals("Merchant Tomas", Messages.data("npc", "varden_merchant", "name", "Kupiec Tomas"), l.toString());
+        }
+        Messages.setLanguage(Language.PL);
+        assertEquals("Kupiec Tomas", Messages.data("npc", "no_such_npc", "name", "Kupiec Tomas"));
+    }
+
+    @Test
     void unknownKeyFallsBackToSourceName() {
         Messages.setLanguage(Language.ES);
         assertEquals("Nieznany", Messages.data("item", "no_such_item", "Nieznany"));

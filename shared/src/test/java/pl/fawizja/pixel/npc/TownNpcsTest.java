@@ -42,11 +42,11 @@ class TownNpcsTest {
             Town town = TownServicesTest.world.town(t[0]);
             assertNotNull(town, t[0]);
             Npc keeper = TownServicesTest.npcs.get(t[1] + "_petkeeper");
-            assertTrue(keeper.isPetKeeper() && keeper.name().startsWith("Opiekun"), t[0]);
+            assertTrue(keeper.isPetKeeper() && keeper.name().startsWith("Pet Keeper"), t[0]);
             assertTrue(keeper.shopKey().endsWith("_pets"));
             Npc ruler = TownServicesTest.npcs.get(t[0].equals("Varden") ? "varden_king" : t[1] + "_ruler");
             assertEquals(NpcRole.KING, ruler.role(), t[0]);
-            assertTrue(ruler.name().matches("(Król|Królowa|Lord) .+"), ruler.name());
+            assertTrue(ruler.name().matches("(King|Queen|Lord) .+"), ruler.name());
             Npc imbuer = TownServicesTest.npcs.get(t[1] + "_imbuer");
             assertEquals(NpcRole.IMBUER, imbuer.role());
             assertTrue(imbuer.imbues() && !imbuer.isSmith(), "imbuer is not a smith (no forge)");
@@ -69,7 +69,7 @@ class TownNpcsTest {
         pc.addExperience(Balance.experienceForLevel(30) - pc.experience());
         pc.bank().credit(GameSession.PREMIUM_PRICE + GameSession.PROMOTION_PRICE);
         GameSession s = at(pc, "frost_ruler");
-        assertTrue(s.premiumHint("Frostholm").contains("Królowa Świętosława"));
+        assertTrue(s.premiumHint("Frostholm").contains("Queen Świętosława"));
         assertTrue(Actions.apply(s, "npc:premium", 1100));
         assertTrue(pc.isPremium());
         s.askNpc("promocja", 1200);
