@@ -28,6 +28,8 @@ SEED = 20261111
 # ====================================================================== twierdza orkow
 FW, FH = 66, 58          # twierdza z fosa
 FM = 6                   # pas wokol (ziemia orkow)
+PIN_ORC = (652, 505)     # lewy gorny rog planu twierdzy orkow w swiecie (wynik z 0.253)
+PIN_ELF = (352, 507)     # i osady elfow
 CX = 33
 QUEST_LEVEL = 50
 ORC_REWARD = (4000, 'warlord_helmet', 1)
@@ -701,10 +703,23 @@ def _connect(ctx, cost, helpers, start, rect):
     x0, y0, x1, y1 = rect
     saved = cost[y0:y1 + 1, x0:x1 + 1].copy()
     cost[y0:y1 + 1, x0:x1 + 1] = np.inf
-    road = helpers['nearest_road'](world, cost, start, rect, limit=160)
-    if road is not None:
+    # najblizszy trakt moze lezec za woda (np. odnoga obozu po drugiej stronie rzeki): wtedy nastepny
+    skipped = []
+    road = None
+    for _attempt in range(12):
+        road = helpers['nearest_road'](world, cost, start, rect, limit=160)
+        if road is None:
+            break
         cost[start[1], start[0]] = 1.0
-        F.connect(world, T, cost, start, road, width=2)
+        try:
+            F.connect(world, T, cost, start, road, width=2)
+            break
+        except AssertionError:
+            skipped.append((road, cost[road[1], road[0]]))
+            cost[road[1], road[0]] = 1.0
+            road = None
+    for (r, c) in skipped:
+        cost[r[1], r[0]] = c
     cost[y0:y1 + 1, x0:x1 + 1] = saved
     return road
 
@@ -718,7 +733,12 @@ def build(ctx, cost, helpers):
     world = ctx['world']
     # twierdza orkow: na wschod od Varden, w lasach miedzy Varden a Selvaran (Leze Grimtootha na polnoc stad)
     tw, th = FW + 2 * FM, FH + 2 * FM
-    tx, ty = St.find_site(ctx, helpers, cost, (685, 510), tw, th, core=(FM - 1, FM - 1, FM + FW, FM + FH), radius=60)
+    # 2026-11-12: miejsce przypiete (dawny wynik) - zmiany obozow i dziczy nie przesuwaja twierdzy; brak miejsca = stare szukanie
+    try:
+        tx, ty = St.find_site(ctx, helpers, cost, (PIN_ORC[0] - FM + tw // 2, PIN_ORC[1] - FM + th // 2), tw, th,
+                              core=(FM - 1, FM - 1, FM + FW, FM + FH), radius=1)
+    except AssertionError:
+        tx, ty = St.find_site(ctx, helpers, cost, (685, 510), tw, th, core=(FM - 1, FM - 1, FM + FW, FM + FH), radius=60)
     origin = (tx + FM, ty + FM)
     plan = orc_plan(world, origin, rng)
     plan.check()
@@ -730,8 +750,12 @@ def build(ctx, cost, helpers):
                       under=W(0, 0, -1))
     # wioska elfow: w lesie na poludniowy zachod od Varden (pas lasu zageszczony wokol polany)
     vw, vh = EW + 2 * EM, EH + 2 * EM
-    vx, vy = St.find_site(ctx, helpers, cost, (385, 535), vw, vh, core=(EM - 1, EM - 1, EM + EW, EM + EH), radius=60,
-                          max_water=0.06)
+    try:
+        vx, vy = St.find_site(ctx, helpers, cost, (PIN_ELF[0] - EM + vw // 2, PIN_ELF[1] - EM + vh // 2), vw, vh,
+                              core=(EM - 1, EM - 1, EM + EW, EM + EH), radius=1, max_water=0.06)
+    except AssertionError:
+        vx, vy = St.find_site(ctx, helpers, cost, (385, 535), vw, vh, core=(EM - 1, EM - 1, EM + EW, EM + EH), radius=60,
+                              max_water=0.06)
     origin = (vx + EM, vy + EM)
     plan = elf_plan(world, origin, rng)
     plan.check()

@@ -274,3 +274,10 @@ hills_dragon_surface|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level
 hills_dragon_under|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=89,258,-4
 hills_hydra_surface|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=924,406,0
 hills_hydra_under|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=887,399,-5
+camp_kamienny_brod|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=30 -Dpixel.teleport=511,262,0
+camp_wilczy_jar|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=30 -Dpixel.teleport=670,315,0
+minotaur_cave_mouth|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=503,409,0
+minotaur_cave_descent|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=497,391,-1
+minotaur_city_entrance|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=100 -Dpixel.teleport=561,394,-7
+minotaur_city_arena|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=100 -Dpixel.teleport=521,396,-7
+minotaur_city_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=100 -Dpixel.teleport=521,385,-7

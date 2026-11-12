@@ -404,6 +404,9 @@ TINTED = {
     "marsh_lizard": (37, (150, 170, 80)), "lizard_hexer": (33, (130, 170, 70)), "bog_naga": (38, (90, 190, 170)),
     "stone_gorgon": (46, (130, 160, 110)),
     "scale_dragon": (25, (210, 125, 70)), "crag_dragon": (25, (175, 50, 55)),
+    # 2026-11-12: Miasto Rogatych (minotaur.py): saper (stroj maruderow 44, rudy), gladiator (rycerz 3, braz), wyrocznia (mag 33,
+    # fiolet); zwiadowca, mistrz areny i Grozdar sa w STOCKY (rogaty stwor 46 w innym rozmiarze i barwie)
+    "horn_sapper": (44, (190, 115, 60)), "horn_gladiator": (3, (200, 130, 70)), "horn_oracle": (33, (205, 120, 195)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.
@@ -424,6 +427,9 @@ STOCKY = {
     "dragon_whelp": (25, None, (130, 210, 95), 0.62, 0.62),
     "bog_hydra": (29, None, (95, 175, 140), 2.0, 2.0),
     "venom_hydra": (29, None, (150, 105, 205), 2.0, 2.0),
+    "horn_scout": (46, None, (205, 160, 105), 0.86, 0.86),
+    "horn_champion": (46, None, (105, 65, 60), 1.14, 1.14),
+    "horn_overlord": (46, None, (70, 50, 58), 1.45, 1.45),
 }
 CHARACTERS = {
     "paladin": (19, None),

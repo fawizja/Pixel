@@ -126,22 +126,22 @@ elandor_banker;Skarbnik Faelar;BANKER;Elandor;402;516;0;-;#5aa04a;Złoto i depoz
 elandor_bowyer;Łuczarz Thalion;MERCHANT;Elandor;362;536;0;elandor_bows;#5aa04a;Łuki z cisu i jesionu, strzelają bez amunicji. Skupuję też drewno i skóry.
 elandor_herbalist;Zielarka Ilyana;MERCHANT;Elandor;401;536;0;elandor_herbs;#5aa04a;Mikstury, zioła i różdżki dla wędrowców lasu.
 elandor_elder;Starszy Aelindor;GUIDE;Elandor;381;515;3;-;#5aa04a;Witaj na szczycie Wielkiego Drzewa. Widać stąd cały las... i wygnańców, którzy w nim krążą.
-durn_carrier;Wózkarz Brodrik;CARRIER;Durnkar;469;317;-4;-;#8a6a4a;Wagonikiem starymi torami pod górami do innych miast kontynentu. Płacisz monetami, trzymaj brodę w środku.
-durn_guard_west;Strażnik bramy Hroald;GUARD;Durnkar;479;322;-4;-;#8a8a9a;Stój! Mało kto trafia do Durnkaru przez wąwóz. Wejdź, skoro już tu jesteś, i nie zgub drogi powrotnej.
-durn_guard_east;Strażnik bramy Sigvald;GUARD;Durnkar;562;320;-5;-;#8a8a9a;Za tą bramą Kopalnia Żelaznej Brody. Drzwi przepuszczą tylko tych, którzy przeżyją w głębinach.
-durn_priest;Kapłan Thorvin;PRIEST;Durnkar;518;310;-4;-;#f0f0f0;Witaj w świątyni Durnkaru, synu i córko kamienia. Mogę cię uleczyć albo przyjąć do miasta.
-durn_banker;Bankier Grimbald;BANKER;Durnkar;536;313;-4;-;#d8c070;Złoto w skarbcu Durnkaru leży pod tysiącem sążni skały. Bank prowadzi konta we wszystkich miastach.
-durn_housing;Zarządca Durgan;HOUSING;Durnkar;531;316;-4;-;#6a5a8a;Domy w grotach Durnkaru, ciepłe od lawy. Płacisz z konta w banku.
-durn_ruler;Król Thorgrim;KING;Durnkar;530;331;-4;-;#c8a040;Durnkar pamięta czasy, gdy nad górami nie było jeszcze miast. Konto premium i promocję dam ci tak jak król w Varden: napisz premium albo promocja.
-durn_innkeeper;Karczmarz Ulfrik;MERCHANT;Durnkar;535;312;-5;durn_supplies;#a0703a;Piwo z grzybów jaskiniowych, chleb, mięso i lina na drogę. Siadaj, przybyszu.
-durn_merchant;Kupiec Gunnar;MERCHANT;Durnkar;502;318;-5;durn_shop;#a0703a;Kupię łupy z kopalń i sprzedam to, czego brakuje w drodze.
-durn_tools;Narzędziownik Skagi;MERCHANT;Durnkar;483;313;-5;durn_tools;#a0703a;Liny, łopaty, pochodnie i hełmy górnicze - wszystko, czego trzeba w kopalni.
-durn_mage;Runiarz Odvar;MERCHANT;Durnkar;557;333;-5;durn_magic;#a0703a;Mikstury, runy i różdżki. Krasnoludzkie runy nie pękają nawet w bitwie.
-durn_petkeeper;Opiekun zwierząt Bodvar;MERCHANT;Durnkar;521;329;-5;durn_pets;#6a8a3a;Kruki z górskich turni lecą za krasnoludem i w głąb kopalni. Pupil u boku daje +5% doświadczenia z potworów.
-durn_guide;Przewodnik Dvalin;GUIDE;Durnkar;517;323;-5;-;#8a6a3a;Kopalnie wokół Durnkaru roją się od odszczepieńców i potworów z głębin. Każde piętro niżej jest groźniejsze.
-durn_smith;Kowal Brokk;MERCHANT;Durnkar;521;340;-6;durn_arms;#a0703a;Topory, młoty i kusze z kuźni Durnkaru. Skupuję też broń i rudę.
-durn_armorer;Płatnerz Hagar;MERCHANT;Durnkar;553;335;-6;durn_armor;#a0703a;Zbroje kute w żarze lawy: hełmy, kolczugi i tarcze dla każdego wojownika.
-durn_imbuer;Zaklinacz Runnar;IMBUER;Durnkar;488;337;-6;-;#7050b0;Runy wyryte w kamieniu trzymają moc nasyceń. Kradzież życia, many, krytyk, żywioły i ochrony.
+durn_carrier;Wózkarz Brodrik;CARRIER;Durnkar;472;314;-4;-;#8a6a4a;Wagonikiem starymi torami pod górami do innych miast kontynentu. Płacisz monetami, trzymaj brodę w środku.
+durn_guard_west;Strażnik bramy Hroald;GUARD;Durnkar;482;319;-4;-;#8a8a9a;Stój! Mało kto trafia do Durnkaru przez wąwóz. Wejdź, skoro już tu jesteś, i nie zgub drogi powrotnej.
+durn_guard_east;Strażnik bramy Sigvald;GUARD;Durnkar;565;317;-5;-;#8a8a9a;Za tą bramą Kopalnia Żelaznej Brody. Drzwi przepuszczą tylko tych, którzy przeżyją w głębinach.
+durn_priest;Kapłan Thorvin;PRIEST;Durnkar;524;327;-4;-;#f0f0f0;Witaj w świątyni Durnkaru, synu i córko kamienia. Mogę cię uleczyć albo przyjąć do miasta.
+durn_banker;Bankier Grimbald;BANKER;Durnkar;488;329;-4;-;#d8c070;Złoto w skarbcu Durnkaru leży pod tysiącem sążni skały. Bank prowadzi konta we wszystkich miastach.
+durn_housing;Zarządca Durgan;HOUSING;Durnkar;483;325;-4;-;#6a5a8a;Domy w grotach Durnkaru, ciepłe od lawy. Płacisz z konta w banku.
+durn_ruler;Król Thorgrim;KING;Durnkar;536;309;-4;-;#c8a040;Durnkar pamięta czasy, gdy nad górami nie było jeszcze miast. Konto premium i promocję dam ci tak jak król w Varden: napisz premium albo promocja.
+durn_innkeeper;Karczmarz Ulfrik;MERCHANT;Durnkar;538;309;-5;durn_supplies;#a0703a;Piwo z grzybów jaskiniowych, chleb, mięso i lina na drogę. Siadaj, przybyszu.
+durn_merchant;Kupiec Gunnar;MERCHANT;Durnkar;505;315;-5;durn_shop;#a0703a;Kupię łupy z kopalń i sprzedam to, czego brakuje w drodze.
+durn_tools;Narzędziownik Skagi;MERCHANT;Durnkar;486;310;-5;durn_tools;#a0703a;Liny, łopaty, pochodnie i hełmy górnicze - wszystko, czego trzeba w kopalni.
+durn_mage;Runiarz Odvar;MERCHANT;Durnkar;560;311;-5;durn_magic;#a0703a;Mikstury, runy i różdżki. Krasnoludzkie runy nie pękają nawet w bitwie.
+durn_petkeeper;Opiekun zwierząt Bodvar;MERCHANT;Durnkar;524;326;-5;durn_pets;#6a8a3a;Kruki z górskich turni lecą za krasnoludem i w głąb kopalni. Pupil u boku daje +5% doświadczenia z potworów.
+durn_guide;Przewodnik Dvalin;GUIDE;Durnkar;520;320;-5;-;#8a6a3a;Kopalnie wokół Durnkaru roją się od odszczepieńców i potworów z głębin. Każde piętro niżej jest groźniejsze.
+durn_smith;Kowal Brokk;MERCHANT;Durnkar;494;334;-6;durn_arms;#a0703a;Topory, młoty i kusze z kuźni Durnkaru. Skupuję też broń i rudę.
+durn_armorer;Płatnerz Hagar;MERCHANT;Durnkar;534;336;-6;durn_armor;#a0703a;Zbroje kute w żarze lawy: hełmy, kolczugi i tarcze dla każdego wojownika.
+durn_imbuer;Zaklinacz Runnar;IMBUER;Durnkar;556;332;-6;-;#7050b0;Runy wyryte w kamieniu trzymają moc nasyceń. Kradzież życia, many, krytyk, żywioły i ochrony.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

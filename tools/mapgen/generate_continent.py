@@ -49,6 +49,9 @@ import isles  # noqa: E402
 import realms  # noqa: E402
 import castle  # noqa: E402
 import hills  # noqa: E402
+import camps  # noqa: E402
+import structures as St  # noqa: E402
+import minotaur  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -856,7 +859,10 @@ UNDER_RESERVED = [(400, 250, 615, 395), (590, 790, 715, 915), (640, 458, 722, 52
 # zajetosc podziemi, a domy Durnkaru i drzwi poziomu twierdzy maja zostac tam, gdzie byly
 UNDER_PIN = {'Twierdza Krwawego Kla': (652, 463), 'Elandor': (368, 511), 'Durnkar': (516, 299),
              'Kopalnia Głębokiego Kilofa': (451, 317), 'Stara Sztolnia Granitowa': (451, 345),
-             'Wulkan Pożogi': (652, 850)}
+             'Wulkan Pożogi': (652, 850),
+             # 2026-11-12: podziemia zamku i trzech krain wzgorz zostaja na dawnych miejscach mimo ruchu obozow i lochow dziczy
+             'Warownia Gorvalda': (792, 310), 'Wzgórza Goblinów': (584, 458), 'Wzgórza Smoków': (119, 283),
+             'Wzgórza Hydr': (916, 401)}
 
 
 def build(ctx):
@@ -1012,7 +1018,7 @@ def build(ctx):
               reach_varden=reach_surface(world, temple[:2]),
               regions=lambda: all_regions(ctx),
               monsters_csv=os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'monsters.csv'))
-    ctx['reserved'] = list(strongholds.RESERVED) + [isles.CAMP_RESERVED]
+    ctx['reserved'] = list(strongholds.RESERVED) + [isles.CAMP_RESERVED] + camps.HOLD[:3]   # + zamek i wzgorza goblinow i smokow
     ctx['under_pin'] = dict(UNDER_PIN)
     # podziemia budowli stawianych po lochach dziczy zarezerwowane na wszystkich pietrach (glebokie lochy dziczy
     # nie odsuwaja ich od wejsc); po lochach dziczy rezerwacja znika, zostaja tylko pola zajete przez lochy
@@ -1043,7 +1049,11 @@ def build(ctx):
     # 2026-11-11: kontynent glowny (3 miasta startowe) i ziemie premium odciete kanalami - tylko statkiem
     print('kontynent glowny i premium:', realms.split(ctx, S))
     # 2026-11-12: Wzgorza Goblinow (kontynent), Smokow (pustynia) i Hydr (wyspa tylko dla statkow), po 3-5 pieter
+    for r in camps.HOLD[1:3]:           # wokol wzgorz goblinow i smokow zostaje tylko ich wlasna fauna
+        St.clear_surface(ctx, *r)
     print('wzgorza goblinow, smokow i hydr:', hills.build(ctx, cost, wh))
+    # 2026-11-12: Miasto Rogatych na -7 (dwie jaskinie -1..-6 z kontynentu glownego, miasto, boss i skrzynia zadania)
+    print('miasto rogatych:', minotaur.build(ctx, cost, wh))
 
 
 def monster_levels():
@@ -1093,8 +1103,29 @@ def villages(ctx, cost):
     taken = ctx['footprint'].copy()
     rng = random.Random(20261034)
     out = []
+    placed = []          # srodki obozow (camps.py): odstepy miedzy obozami i rodzinami potworow
+    # lad, do ktorego da sie dojsc od swiatyni Varden (obozy maja miec droge do traktu)
+    land = np.zeros((S, S), bool)
+    t0 = dict(ctx['towns'])['Varden'][:2]
+    ys_, xs_ = np.nonzero(np.isfinite(cost[t0[1] - 60:t0[1] + 61, t0[0] - 60:t0[0] + 61]))
+    s0 = min(zip((xs_ + t0[0] - 60).tolist(), (ys_ + t0[1] - 60).tolist()), key=lambda q: (q[0] - t0[0]) ** 2 + (q[1] - t0[1]) ** 2)
+    land[s0[1], s0[0]] = True
+    stack = [s0]
+    while stack:
+        x, y = stack.pop()
+        for dx, dy in F.DIRS4:
+            a, b = x + dx, y + dy
+            if 0 <= a < S and 0 <= b < S and not land[b, a] and np.isfinite(cost[b, a]):
+                land[b, a] = True
+                stack.append((a, b))
     for name, kind, near, monsters in VILLAGES:
-        v = F.village(world, T, taken, near, kind, rng)
+        organic = kind == 'occupied'
+        if organic:
+            # 2026-11-12: oboz potworow to nieregularna plama z palisada, kamiennym pierscieniem albo ruinami, daleko od innych
+            v = camps.build(world, T, taken, near, name, rng, placed, cost, land=land)
+            print('  oboz', name, v['centre'], v['rect'], v['style'])
+        else:
+            v = F.village(world, T, taken, near, kind, rng)
         x0, y0, x1, y1 = v['rect']
         taken[y0 - 6:y1 + 7, x0 - 6:x1 + 7] = True
         v['name'] = name
@@ -1103,7 +1134,7 @@ def villages(ctx, cost):
         for y in range(y0 - 2, y1 + 3):
             for x in range(x0 - 2, x1 + 3):
                 c = world.get(x, y)
-                cost[y, x] = 0.35 if c[0] in F.ROAD_GROUND else (1.0 if F.walk(c) else (np.inf if c[0] == 'water' else 30.0))
+                cost[y, x] = (1.0 if organic and F.walk(c) else 0.35) if c[0] in F.ROAD_GROUND else (1.0 if F.walk(c) else (np.inf if c[0] == 'water' else 30.0))
         free = list(v['free'])
         if kind == 'living':
             key, npc_name, greet = VILLAGE_NPCS[name]
@@ -1111,7 +1142,7 @@ def villages(ctx, cost):
             ctx['npcs'].append([key, npc_name, 'MERCHANT', name, spot[0], spot[1], 0, 'village_shop', '#7a6a3a', greet])
             ctx['pz'].append((x0, y0, x1, y1, 0))
         for i, (monster, radius, count) in enumerate(monsters):
-            sx, sy = free[(i * 7 + 3) % len(free)]
+            sx, sy = v['points'][i % len(v['points'])] if organic else free[(i * 7 + 3) % len(free)]
             ctx['spawns'].append(f'{monster};{sx};{sy};0;{radius};{count};150')
         if monsters:
             levels = [MONSTER_LEVEL[m] for m, _r, _c in monsters]
@@ -1119,9 +1150,13 @@ def villages(ctx, cost):
         # sciezka do najblizszej drogi
         cx, cy = v['centre']
         road = nearest_road(world, cost, (cx, cy), exclude=(x0, y0, x1, y1))
-        if road is not None:
+        if road is not None and organic:
+            gate = min(v['gates'], key=lambda q: abs(q[0] - road[0]) + abs(q[1] - road[1]))
+            _p = F.connect(world, T, cost, gate, road, width=1)
+            print('  droga obozu', name, gate, road, len(_p[1]))
+        elif road is not None:
             F.connect(world, T, cost, (cx, y1 + 1), road, width=1)
-        if kind != 'living':
+        if kind != 'living' and not organic:
             v['keep'] = [tuple(int(t) for t in sp.split(';')[1:3]) for sp in ctx['spawns'][-len(monsters):]] if monsters else []
             nature.ravage(world, v, rng, burnt=True)
     ctx['villages'] = out

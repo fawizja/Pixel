@@ -59,12 +59,12 @@ F.LAVA_STYLES.update({'ember_den', 'dragon_hoard'})
 GOBLIN, HYDRA, DRAGON = 'goblin', 'hydra', 'dragon'
 HILLS = {
     GOBLIN: dict(
-        name='Wzgórza Goblinów', under='Nory Goblinów', near=(608, 446), radius=45, L=46, R=20, n=5, mount=0.36,
+        name='Wzgórza Goblinów', under='Nory Goblinów', near=(608, 446), pin=(608, 446), radius=45, L=46, R=20, n=5, mount=0.36,
         entrances=3, surface_n=9, surface_levels=(8, 40), min_temple=70, island=False,
         surface=['goblin', 'goblin', 'goblin', 'goblin_shaman', 'goblin_scrounger', 'goblin_scrounger', 'goblin_knifer',
                  'goblin_shaman', 'goblin_knifer'],
         floors={
-            -1: ('goblin_den', ['goblin', 'goblin', 'goblin_scrounger', 'goblin_shaman', 'goblin_scrounger'], (3, 4), (8, 30)),
+            -1: ('goblin_den', ['goblin', 'goblin_scrounger', 'goblin_scrounger', 'goblin_shaman', 'goblin_scrounger'], (3, 4), (8, 30)),
             -2: ('goblin_mine', ['goblin_scrounger', 'goblin_shaman', 'goblin_knifer', 'goblin_knifer', 'cave_troll'], (3, 4),
                  (14, 45)),
             -3: ('goblin_hold', ['goblin_knifer', 'goblin_shaman', 'goblin_warchief', 'cave_troll', 'goblin_warchief'], (3, 4),
@@ -73,7 +73,7 @@ HILLS = {
         chests=[('health_potion', 3), ('mana_potion', 3), ('strong_health_potion', 2), ('strong_mana_potion', 2)],
         stand_in=False),
     HYDRA: dict(
-        name='Wzgórza Hydr', under='Legowiska Hydr', near=(922, 390), radius=60, L=52, R=21, n=6, mount=0.32,
+        name='Wzgórza Hydr', under='Legowiska Hydr', near=(922, 390), pin=(922, 411), radius=60, L=52, R=21, n=6, mount=0.32,
         entrances=4, surface_n=13, surface_levels=(80, 230), min_temple=60, island=True,
         surface=['crocodile', 'jungle_serpent', 'marsh_lizard', 'marsh_lizard', 'jungle_serpent', 'marsh_lizard',
                  'lizard_hexer', 'marsh_lizard', 'lizard_hexer', 'bog_hydra', 'marsh_lizard', 'lizard_hexer', 'bog_hydra'],
@@ -90,7 +90,7 @@ HILLS = {
                 ('ultimate_health_potion', 2), ('ultimate_mana_potion', 2)],
         stand_in=True),
     DRAGON: dict(
-        name='Wzgórza Smoków', under='Smocze Pieczary', near=(130, 288), radius=80, L=52, R=22, n=5, mount=0.34,
+        name='Wzgórza Smoków', under='Smocze Pieczary', near=(130, 288), pin=(119, 283), radius=80, L=52, R=22, n=5, mount=0.34,
         entrances=3, surface_n=11, surface_levels=(40, 190), min_temple=110, island=False,
         surface=['dragon_whelp', 'dragon_whelp', 'dragon_whelp', 'dragon_whelp', 'scale_dragon', 'scale_dragon', 'scale_dragon',
                  'scale_dragon', 'scale_dragon', 'scale_dragon', 'scale_dragon'],
@@ -738,7 +738,11 @@ def build_one(ctx, cost, helpers, key, masks, reach, stand, taken, level, refs):
     found = None
     for attempt in range(8):
         inside, cx, cy = make_shape(seed + attempt * 7, cfg)
-        found = find_origin(ctx, helpers, cfg, inside, cx, cy, reach, masks, taken, why)
+        found = None
+        if cfg.get('pin'):      # 2026-11-12: dawne polozenie (zmiany obozow i dziczy nie przesuwaja krain), potem zwykle szukanie
+            found = find_origin(ctx, helpers, dict(cfg, near=cfg['pin'], radius=0), inside, cx, cy, reach, masks, taken, why)
+        if found is None:
+            found = find_origin(ctx, helpers, cfg, inside, cx, cy, reach, masks, taken, why)
         if found is not None:
             break
     assert found is not None, f'{cfg["name"]}: no site near {cfg["near"]}: {why}'

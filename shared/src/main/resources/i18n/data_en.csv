@@ -509,6 +509,12 @@ monster;keep_crossbow;name;Keep Crossbowman
 monster;keep_sentry;name;Keep Sentry
 monster;keep_chaplain;name;Keep Chaplain
 monster;castellan_gorvald;name;Gorvald, Castellan of the Keep
+monster;horn_scout;name;Horned Scout
+monster;horn_sapper;name;Horned Sapper
+monster;horn_gladiator;name;Horned Gladiator
+monster;horn_oracle;name;Horned Oracle
+monster;horn_champion;name;Horned Arena Champion
+monster;horn_overlord;name;Grozdar, Lord of the Labyrinth
 monster;goblin_scrounger;name;Goblin Pilferer
 monster;goblin_knifer;name;Goblin Knifer
 monster;goblin_warchief;name;Goblin Warchief
@@ -1096,3 +1102,5 @@ place;Wzgórza Hydr;name;Hydra Hills
 place;Legowiska Hydr;name;Hydra Lairs
 place;Wzgórza Smoków;name;Dragon Hills
 place;Smocze Pieczary;name;Dragon Caverns
+place;Miasto Rogatych;name;City of the Horned
+place;Labirynt Rogatych;name;Maze of the Horned

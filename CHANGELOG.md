@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Miasto Rogatych (`tools/mapgen/minotaur.py`): wielkie nieregularne miasto na -7 pod wolnym kontynentem (x 477-567,
+  y 333-445), z krętymi ulicami, nieregularnymi kamiennymi budynkami, ślepymi zaułkami, bocznymi jaskiniami, areną
+  w centrum i salą tronową. Potwory na poziomy 20-100: słabsi przy zejściach, silniejsi w centrum i głębi, boss
+  Grozdar, Pan Labiryntu (poziom 100) przy tronie (521,382,-7) i skrzynia zadania obok (526,381,-7).
+- Dwa kręte zejścia z powierzchni (Labirynt Rogatych, piętra -1..-6): wejścia w górach (503,407) i (533,344).
+- Sześć nowych potworów rogatych (łowca, saper, gladiator, wyrocznia, mistrz areny, Grozdar) z łupem, bestiariuszem,
+  nazwami EN/ES i grafiką (4 kierunki, kroki); dotychczasowi rogaci (zwiadowca/rozbójnik/łucznik itd.) wracają w mieście.
+- Testy: `CampsTest`, `MinotaurCityTest`; sceny regresji GUI obozów i miasta (wzorce do wygenerowania osobno).
+
+### Zmieniono
+- Obozy potworów w dziczy (orkowie, gobliny, rabusie, trolle itd.) nie są już kwadratowe: nieregularny obrys
+  (palisada, kamienny pierścień lub ruiny), rozrzucone namioty, chaty i skrzynie (`tools/mapgen/camps.py`).
+  Środki obozów są od siebie co najmniej 50 pól, obozy tego samego rodzaju co najmniej 70.
+- Zamek, wzgórza, twierdze i miasta zostają na swoich miejscach (przypięte pozycje w generatorze). Lochy dziczy
+  dostają pełną liczbę 66 miejsc (wcześniej pętla kończyła się za wcześnie przy zablokowanych polach).
+- Wzgórza Goblinów: poziom maks. regionu 23 -> 35 (adaptacja `route_levels`), Durnkar przesunięty o kilka pól.
+
 ## [0.254.0] - 2026-11-12
 
 ### Dodano

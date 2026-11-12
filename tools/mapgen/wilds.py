@@ -615,6 +615,8 @@ def wild_dungeons(ctx, cost, helpers, target=66, cover=44):
                 break
             failed.add(p)
         if site is None:
+            if tried:
+                continue                     # same 60 nieudanych miejsc wypadlo z kolejki - probuj dalsze
             break
         place(site)
     ctx['wild_dungeons'] = out

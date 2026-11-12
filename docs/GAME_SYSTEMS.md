@@ -1656,6 +1656,15 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   w `i18n/data_en.csv` i `data_es.csv`. Uzywane w `GameSession.checkRegion/signText`, `BestiaryCard.habitats`, `MonsterManager`.
 - Testy: `HillsTest`; sceny gui-regression `hills_goblin_*`, `hills_dragon_*`, `hills_hydra_*` (wzorce dopisze koordynator).
 
+## Obozy potworow i Miasto Rogatych (Z dane, generatory `camps.py` i `minotaur.py`, 2026-11-12)
+- Obozy dziczy (`camps.py`): nieregularna plama z palisada/kamiennym pierscieniem/ruinami, 2-3 bramy, wnetrze z
+  ogniskiem, chatami i namiotami. Odstepy: `MIN_ANY`=50, `MIN_FAMILY`=70, od znanych wejsc `MIN_FIXED`=55; omijaja
+  prostokaty `HOLD` (zamek, wzgorza, twierdze). Test: `CampsTest`.
+- Miasto Rogatych (-7, region `Miasto Rogatych`, poziomy 20-100): arena i sala tronowa w centrum, ulice, domy,
+  zaulki, jaskinie boczne. Zejscia: dwa 6-pietrowe kreta jaskinie `Labirynt Rogatych` (-1..-6) z gor.
+  Potwory: horn_scout/raider/bowman/guard/mystic/sapper/gladiator/oracle/champion, boss horn_overlord (poziom 100).
+  Test: `MinotaurCityTest`. Nic nie tworzy drogi pieszej do ziem premium.
+
 ## Planowane
 
  fishing, NPC, zadania, handel, bank w UI, PvP,
