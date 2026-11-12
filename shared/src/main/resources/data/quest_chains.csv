@@ -24,3 +24,31 @@ star_m4;star_m3;supreme_health_potion:15
 star_m5;star_m4;supreme_mana_potion:15
 star_m6;star_m5;supreme_health_potion:25
 star_final;star_m6;supreme_mana_potion:30
+# BEGIN story_quests (tools/mapgen/story_quests.py data)
+mill_m2;mill_m1;-
+mill_m3;mill_m2;-
+crypt_m2;crypt_m1;-
+crypt_m3;crypt_m2;-
+poacher_m2;poacher_m1;-
+poacher_m3;poacher_m2;-
+oasis_m2;oasis_m1;-
+oasis_m3;oasis_m2;-
+barrow_m2;barrow_m1;-
+barrow_m3;barrow_m2;-
+watch_m2;watch_m1;-
+watch_m3;watch_m2;-
+zig_m2;zig_m1;-
+zig_m3;zig_m2;-
+bog_m2;bog_m1;-
+bog_m3;bog_m2;-
+coil_m2;coil_m1;-
+coil_m3;coil_m2;-
+lantern_m2;lantern_m1;-
+lantern_m3;lantern_m2;-
+stormgate_m2;stormgate_m1;-
+stormgate_m3;stormgate_m2;-
+wyrm_m2;wyrm_m1;-
+wyrm_m3;wyrm_m2;-
+crown_m2;crown_m1;-
+crown_m3;crown_m2;-
+# END story_quests

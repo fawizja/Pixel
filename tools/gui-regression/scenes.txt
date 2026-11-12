@@ -314,3 +314,6 @@ star_void_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 
 star_void_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=214,949,-3
 rocks_grass|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=422,290,0
 herald_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,495,0 -Dpixel.button=talk
+journal_log|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=405,591,0 -Dpixel.open=journal -Dpixel.quests=mill_m1:done,mill_m2:done,mill_m3:done,crypt_m1:done,crypt_m2:active:3,barrow_m1:active:0
+chest_sign_mill|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=414,586,1 -Dpixel.tap=415,585,1
+quest_npc_mill|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=405,591,0

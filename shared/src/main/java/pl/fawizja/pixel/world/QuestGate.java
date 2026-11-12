@@ -9,19 +9,24 @@ import pl.fawizja.pixel.quest.QuestLog;
  * <ul>
  *   <li>{@code quest:klucz} - zadanie z quests.csv ukonczone (oddane przewodnikowi),</li>
  *   <li>{@code boss:klucz} - postac pokonala tego potwora-bossa (znacznik {@code boss.klucz} zapisuje sesja po zabiciu),</li>
+ *   <li>{@code party:N} - w druzynie jest co najmniej N graczy w grze (dzwignia w stylu annihilatora z Canary),</li>
  *   <li>{@code flag:nazwa} - znacznik postaci (np. ukonczenie calej wyprawy).</li>
  * </ul>
  * Drzwi sa przy tym zwyklymi drzwiami poziomu (wejscie od poziomu 300): ta klasa dodaje tylko wymaganie zadania.
  */
 public record QuestGate(Position at, String requirement) {
 
-    public enum Kind { QUEST, BOSS, FLAG }
+    public enum Kind { QUEST, BOSS, FLAG, PARTY }
 
     public QuestGate {
         int c = requirement.indexOf(':');
         if (c <= 0 || c == requirement.length() - 1) throw new IllegalArgumentException("bad gate requirement: " + requirement);
-        Kind.valueOf(requirement.substring(0, c).toUpperCase(java.util.Locale.ROOT));
+        Kind k = Kind.valueOf(requirement.substring(0, c).toUpperCase(java.util.Locale.ROOT));
+        if (k == Kind.PARTY && Integer.parseInt(requirement.substring(c + 1)) < 2) throw new IllegalArgumentException("party size must be >= 2: " + requirement);
     }
+
+    /** Wymagana liczba graczy w druzynie (tylko {@link Kind#PARTY}). */
+    public int partySize() { return Integer.parseInt(target()); }
 
     public Kind kind() { return Kind.valueOf(requirement.substring(0, requirement.indexOf(':')).toUpperCase(java.util.Locale.ROOT)); }
 
@@ -31,11 +36,17 @@ public record QuestGate(Position at, String requirement) {
     /** Nazwa znacznika zapisywana w postaci po pokonaniu bossa. */
     public static String bossFlag(String monsterKey) { return "boss." + monsterKey; }
 
-    public boolean passes(PlayerCharacter pc) {
-        switch (kind()) {
-            case QUEST: return pc.quests().state(target()) == QuestLog.State.DONE;
-            case BOSS: return pc.hasQuestFlag(bossFlag(target()));
-            default: return pc.hasQuestFlag(target());
+    public boolean passes(PlayerCharacter pc) { return passes(requirement, pc); }
+
+    /** Czy postac spelnia wymaganie zapisane tekstem ({@code quest:..}, {@code boss:..}, {@code flag:..}). */
+    public static boolean passes(String requirement, PlayerCharacter pc) {
+        int c = requirement.indexOf(':');
+        String target = requirement.substring(c + 1);
+        switch (Kind.valueOf(requirement.substring(0, c).toUpperCase(java.util.Locale.ROOT))) {
+            case QUEST: return pc.quests().state(target) == QuestLog.State.DONE;
+            case BOSS: return pc.hasQuestFlag(bossFlag(target));
+            case PARTY: return pc.partyOnline() >= Integer.parseInt(target);
+            default: return pc.hasQuestFlag(target);
         }
     }
 }

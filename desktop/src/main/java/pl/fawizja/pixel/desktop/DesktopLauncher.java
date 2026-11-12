@@ -33,6 +33,7 @@ import pl.fawizja.pixel.world.Position;
  *                        -Dpixel.open=virtues okienko wyboru cnoty; -Dpixel.open=monks inni mnisi z harmonia obok
  *   -Dpixel.skills=AXE:82,SHIELDING:77  nowa postac z tymi poziomami umiejetnosci (np. z symulacji polowania)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
+ *   -Dpixel.quests=k:done,k:active:N  stan misji (dziennik zadan: -Dpixel.open=journal)
  *   -Dpixel.flags=a,b    znaczniki postaci (np. star_sealed, boss.vorgrim); -Dpixel.ask=slowo - rozmowa z NPC obok
  *   -Dpixel.partySize=N  przy -Dpixel.open=party: wielkosc podgladanej druzyny (2..5, rozne profesje, premia exp)
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
@@ -178,6 +179,14 @@ public final class DesktopLauncher {
                 // -Dpixel.ask=zadanie (slowo do NPC obok: rozmowa w dzienniku)
                 String flags = System.getProperty("pixel.flags");
                 if (flags != null) for (String f : flags.split(",")) if (!f.isBlank()) me.setQuestFlag(f.trim());
+                // -Dpixel.quests=mill_m1:done,mill_m2:active:3 - stan misji w dzienniku zadan (podglad i zrzuty)
+                String qs = System.getProperty("pixel.quests");
+                if (qs != null) {
+                    for (String q : qs.split(",")) {
+                        String[] qp = q.trim().split(":");
+                        if (qp.length >= 2) me.quests().restore(qp[0], qp[1].equals("done"), qp.length > 2 ? Integer.parseInt(qp[2]) : 0);
+                    }
+                }
                 // podglad harmonii mnicha: -Dpixel.harmony=0..5, -Dpixel.virtue=HARMONY|JUSTICE|SUSTAIN
                 Integer harmony = Integer.getInteger("pixel.harmony");
                 if (harmony != null) me.harmony().build(harmony - me.harmony().points());
@@ -576,7 +585,7 @@ public final class DesktopLauncher {
                 if ("journal".equals(open)) {
                     // podglad dziennika: jedno zadanie w toku
                     GameScreen gs = (GameScreen) getScreen();
-                    gs.session().character().quests().restore("varden_wolves", false, 3);
+                    if (System.getProperty("pixel.quests") == null) gs.session().character().quests().restore("varden_wolves", false, 3);
                     gs.hud().openJournal();
                 }
                 if ("picker".equals(open)) ((GameScreen) getScreen()).hud().openPicker(6);

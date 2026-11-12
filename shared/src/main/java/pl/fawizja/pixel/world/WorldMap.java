@@ -223,6 +223,19 @@ public final class WorldMap {
 
     public void addRewardChoice(RewardChoice c) { rewardChoices.add(c); }
 
+    /** Wymaganie otwarcia grupy skrzyn nagrod do wyboru (wiersz {@code reward;grupa;wymaganie}); brak = wyprawa gwiazdy. */
+    private final Map<String, String> rewardRequirements = new java.util.LinkedHashMap<>();
+
+    public void addRewardRequirement(String group, String requirement) {
+        new QuestGate(new Position(0, 0, 0), requirement); // sprawdza format
+        rewardRequirements.put(group, requirement);
+    }
+
+    /** Wymaganie grupy (np. {@code quest:mill_m3}) albo null, gdy grupa nalezy do Pieczeci Gasnacej Gwiazdy. */
+    public String rewardRequirement(String group) { return rewardRequirements.get(group); }
+
+    public Map<String, String> rewardRequirements() { return Collections.unmodifiableMap(rewardRequirements); }
+
     public List<RewardChoice> rewardChoices() { return Collections.unmodifiableList(rewardChoices); }
 
     public RewardChoice rewardChoiceAt(Position p) {

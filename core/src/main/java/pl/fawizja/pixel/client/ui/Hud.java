@@ -2499,11 +2499,18 @@ public final class Hud {
         }
     }
 
-    /** Dziennik: zadanie dnia, zadania w toku i do oddania, potem dostepne; dotkniecie = marsz do zleceniodawcy. */
+    /** Wybrana linia zadan w dzienniku (klucz pierwszej misji), strona listy i liczba stron z ostatniego budowania. */
+    private String journalLine;
+    private int journalPage;
+
+    /**
+     * Dziennik zadan (jak w Tibii): po lewej zadanie dnia, zlecenie lowcy i lista linii zadan (w toku, nowe, ukonczone;
+     * dotkniecie wybiera linie), po prawej szczegoly wybranej linii: trudnosc i konto, misje ze stanem, opis biezacego
+     * kroku, dokad isc i nagroda. Dotkniecie biezacego kroku = marsz do zleceniodawcy.
+     */
     private void rebuildJournalMenu(GameSession session) {
         PlayerCharacter pc = session.character();
-        List<MenuRow> rows = new ArrayList<>();
-        int perCol = Math.max(3, (int) ((menuH - 70) / rowH));
+        List<MenuRow> left = new ArrayList<>(), right = new ArrayList<>();
         pl.fawizja.pixel.daily.DailyTask d = pc.daily();
         long day = session.today();
         String dd;
@@ -2512,52 +2519,67 @@ public final class Hud {
         else if (d.doneOn(day)) dd = Messages.get("hud.oddaj_u_przewodnika");
         else dd = monsterNames.apply(d.monster()) + ": " + d.progress() + " / " + d.target();
         boolean dailyHunting = d.activeOn(day) && !d.claimed() && !d.doneOn(day);
-        rows.add(new MenuRow(dailyHunting ? "journal:hunt" : "journal:guide", Messages.get("hud.zadanie_dnia"), dd, true));
+        left.add(new MenuRow(dailyHunting ? "journal:hunt" : "journal:guide", Messages.get("hud.zadanie_dnia"), dd, true));
         pl.fawizja.pixel.quest.HuntTask h = pc.hunt();
         if (h.active()) {
-            rows.add(new MenuRow(h.done() ? "journal:guide" : "journal:hunt", Messages.get("hud.zlecenie_lowcy"), h.done() ? Messages.get("hud.oddaj_u_przewodnika")
+            left.add(new MenuRow(h.done() ? "journal:guide" : "journal:hunt", Messages.get("hud.zlecenie_lowcy"), h.done() ? Messages.get("hud.oddaj_u_przewodnika")
                     : monsterNames.apply(h.monster()) + ": " + h.progress() + " / " + h.target() + Messages.get("hud.dotknij_aby_isc"), true));
         }
-        pl.fawizja.pixel.quest.QuestSystem qs = session.quests();
-        List<MenuRow> available = new ArrayList<>();
-        if (qs != null) {
-            for (pl.fawizja.pixel.quest.QuestType q : qs.registry().all()) {
-                pl.fawizja.pixel.quest.QuestLog.State st = pc.quests().state(q.key());
-                pl.fawizja.pixel.npc.Npc giver = session.npcs().get(q.giver());
-                String who = giver == null ? q.giver() : giver.name() + " (" + giver.town() + ")";
-                if (st == pl.fawizja.pixel.quest.QuestLog.State.ACTIVE) {
-                    boolean ready = qs.ready(pc, q);
-                    rows.add(new MenuRow("journal:goto:" + q.giver(), q.name(), ready ? Messages.get("hud.oddaj") + who
-                            : qs.progress(pc, q) + " / " + q.amount() + " - " + who, true));
-                } else if (st == pl.fawizja.pixel.quest.QuestLog.State.AVAILABLE && qs.unlocked(pc, q) && pc.level() >= q.minLevel()) {
-                    available.add(new MenuRow("journal:goto:" + q.giver(), Messages.get("hud.nowe") + q.name(), "u " + who + " - " + qs.rewardText(q, pc), true));
-                }
-            }
+        List<pl.fawizja.pixel.quest.QuestJournal.Entry> entries = session.questJournal();
+        pl.fawizja.pixel.quest.QuestJournal.Entry sel = null;
+        for (pl.fawizja.pixel.quest.QuestJournal.Entry e : entries) if (e.line().key().equals(journalLine)) sel = e;
+        if (sel == null && !entries.isEmpty()) sel = entries.get(0);
+        if (sel != null) journalLine = sel.line().key();
+        float rh = mobile ? 34 : rowH;
+        int perCol = Math.max(3, mobile ? Math.max(1, (int) ((menuH - 30) / rh)) : (int) ((menuH - 70) / rh));
+        int room = Math.max(1, perCol - left.size() - 1);
+        int pages = Math.max(1, (entries.size() + room - 1) / room);
+        journalPage = journalPage >= pages ? 0 : Math.max(0, journalPage);
+        if (entries.isEmpty()) {
+            left.add(new MenuRow("ach:none", Messages.get("hud.brak_zadan_w_toku"), Messages.get("hud.przewodnicy_w_miastach_maja"), false));
         }
-        if (rows.size() == (h.active() ? 2 : 1)) rows.add(new MenuRow("ach:none", Messages.get("hud.brak_zadan_w_toku"), Messages.get("hud.przewodnicy_w_miastach_maja"), false));
-        rows.addAll(available);
-        if (mobile) {
-            // telefon: okno kategorii 336 dp, dwie kolumny wierszy pod paskiem tytulu
-            float rh = 34, cw = (menuW - 20) / 2f;
-            int pc2 = Math.max(1, (int) ((menuH - 30) / rh));
-            for (int i = 0; i < rows.size() && i < pc2 * 2; i++) {
-                MenuRow row = rows.get(i);
-                row.x = menuX + 7 + (i / pc2) * (cw + 6);
-                row.y = menuY + menuH - 28 - (i % pc2 + 1) * rh;
-                row.w = cw;
+        for (int i = journalPage * room; i < Math.min(entries.size(), (journalPage + 1) * room); i++) {
+            pl.fawizja.pixel.quest.QuestJournal.Entry e = entries.get(i);
+            String st = e.status() == pl.fawizja.pixel.quest.QuestJournal.Status.DONE ? Messages.get("questlog.status_done")
+                    : e.status() == pl.fawizja.pixel.quest.QuestJournal.Status.NEW ? Messages.get("questlog.status_new")
+                    : e.doneCount() + "/" + e.steps().size();
+            boolean on = e == sel;
+            left.add(new MenuRow("journal:line:" + e.line().key(), (on ? "> " : "") + e.name(),
+                    st + " | " + Messages.get("questlog.tier_" + e.line().tier().name().toLowerCase(java.util.Locale.ROOT))
+                            + (e.line().premium() ? " | " + Messages.get("questlog.premium") : ""), true));
+        }
+        if (pages > 1) left.add(new MenuRow("journal:page", Messages.get("questlog.page", journalPage + 1, pages), "", true));
+        if (sel != null) {
+            pl.fawizja.pixel.quest.QuestJournal.Entry e = sel;
+            right.add(new MenuRow("ach:none", e.name(), Messages.get("questlog.tier_" + e.line().tier().name().toLowerCase(java.util.Locale.ROOT))
+                    + (e.line().premium() ? " | " + Messages.get("questlog.premium") : " | " + Messages.get("questlog.free"))
+                    + " | " + Messages.get("questlog.from_level", e.line().minLevel()), false));
+            for (pl.fawizja.pixel.quest.QuestJournal.Step s : e.steps()) {
+                String mark = s.state() == pl.fawizja.pixel.quest.QuestJournal.StepState.DONE ? "[x] "
+                        : s.state() == pl.fawizja.pixel.quest.QuestJournal.StepState.CURRENT ? "[>] " : "[ ] ";
+                String detail = s.state() == pl.fawizja.pixel.quest.QuestJournal.StepState.CURRENT && s.quest().kind() != pl.fawizja.pixel.quest.QuestKind.VISIT
+                        ? s.progress() + " / " + s.amount() : s.text();
+                right.add(new MenuRow(s.state() == pl.fawizja.pixel.quest.QuestJournal.StepState.CURRENT ? "journal:goto:" + e.line().giver() : "ach:none",
+                        mark + s.quest().name(), detail, s.state() == pl.fawizja.pixel.quest.QuestJournal.StepState.CURRENT));
+            }
+            String hint = session.questHint(e);
+            if (!hint.isEmpty()) right.add(new MenuRow("ach:none", Messages.get("questlog.now"), hint, false));
+            right.add(new MenuRow("ach:none", Messages.get("questlog.where"), (e.where() == null ? "" : e.where() + " | ") + e.giverName(), false));
+            right.add(new MenuRow("ach:none", Messages.get("questlog.rewards"), e.reward(), false));
+        }
+        float colW = (menuW - (mobile ? 20 : 30)) / 2f;
+        float x0 = menuX + (mobile ? 7 : 10);
+        float top = mobile ? menuY + menuH - 28 : menuY + menuH - 40;
+        for (int c = 0; c < 2; c++) {
+            List<MenuRow> col = c == 0 ? left : right;
+            for (int i = 0; i < col.size() && i < perCol; i++) {
+                MenuRow row = col.get(i);
+                row.x = x0 + c * (colW + (mobile ? 6 : 10));
+                row.y = top - (i + 1) * rh;
+                row.w = colW;
                 row.h = rh - 3;
                 menuRows.add(row);
             }
-            return;
-        }
-        float colW = (menuW - 30) / 2f;
-        for (int i = 0; i < rows.size() && i < perCol * 2; i++) {
-            MenuRow row = rows.get(i);
-            row.x = menuX + 10 + (i / perCol) * (colW + 10);
-            row.y = menuY + menuH - 40 - (i % perCol + 1) * rowH;
-            row.w = colW;
-            row.h = rowH - 3;
-            menuRows.add(row);
         }
     }
 
@@ -3552,6 +3574,10 @@ public final class Hud {
                     bookPage++;
                 } else if (row.action.equals("book:spells")) {
                     spellPage = spellPage + Math.max(1, (int) ((menuH - 40) / rowH) - 1); // nastepna strona, po koncu od poczatku
+                } else if (row.action.startsWith("journal:line:")) {
+                    journalLine = row.action.substring("journal:line:".length());
+                } else if (row.action.equals("journal:page")) {
+                    journalPage++;
                 } else if (row.action.equals("book:journal")) {
                     openJournal();
                 } else if (row.action.startsWith("opt:")) {

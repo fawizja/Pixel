@@ -242,8 +242,8 @@ class StarQuestTest {
         }
         assertTrue(island >= 200, "a long dungeon: " + island + " spawn points");
         assertTrue(missing.isEmpty(), "unreachable after the whole quest: " + missing);
-        assertEquals(11, world.rewardChoices().size());
-        for (WorldMap.RewardChoice rc : world.rewardChoices()) assertTrue(near(c, rc.position()), rc.itemKey());
+        assertEquals(11, world.rewardChoices().stream().filter(r -> r.group().equals(StarQuest.REWARD_GROUP)).count());
+        for (WorldMap.RewardChoice rc : world.rewardChoices()) if (rc.group().equals(StarQuest.REWARD_GROUP)) assertTrue(near(c, rc.position()), rc.itemKey());
     }
 
     @Test
@@ -274,7 +274,7 @@ class StarQuestTest {
 
     @Test
     void theRewardRoomLetsEachCharacterChooseExactlyOneItem() throws Exception {
-        List<WorldMap.RewardChoice> choices = world.rewardChoices();
+        List<WorldMap.RewardChoice> choices = world.rewardChoices().stream().filter(r -> r.group().equals(StarQuest.REWARD_GROUP)).toList();
         assertEquals(11, choices.size());
         for (Vocation v : Vocation.values()) {
             long usable = choices.stream().filter(c -> TestData.ITEMS.byKey(c.itemKey()).usableBy(v)).count();

@@ -10,3 +10,31 @@ selv_guide;świątynia,strażnicy;Za gniazdami węży stoi stara świątynia. Je
 camp_guide;most,strażnik;Strażnik mostu wpuszcza tylko od poziomu 200. Dalej jest kraina, z której wielu nie wróciło.
 camp_guide;otchłań,morgath;Na samym południowym wschodzie leży Otchłań. Mor'gath czeka tam na najsilniejsze drużyny.
 camp_merchant;kuźnia,obsydian;Z obsydianu, lodowych rdzeni i esencji cienia wykujesz najlepszy sprzęt. Receptury masz w księdze.
+# BEGIN story_quests (tools/mapgen/story_quests.py data)
+mill_bram;historia,opuszczony,mill;Młyn stoi pusty od jesieni: pająki zasnuły żarna, a wilki zadomowiły się w spichlerzu na piętrze.
+mill_bram;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Wejście jest otwarte dla każdego. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+crypt_aldric;historia,krypta,crypt;Stary dzwonnik pochowany pod kaplicą nie zaznał spokoju. Jego szkielety krążą po krypcie, a stonogi gnieżdżą się w ścianach.
+crypt_aldric;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Wejście jest otwarte dla każdego. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+poacher_hild;historia,jama,poacher;Banda kłusowników zakopała się w lodowej jamie i obdziera śnieżne wilki ze skór, a rannych zwierząt nie ma kto chronić.
+poacher_hild;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Wejście jest otwarte dla każdego. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+oasis_zahir;historia,studnia,oasis;Strażnik studni uciekł z oazy przed hienami i skorpionami. W zasypanych komnatach pod piaskiem ukryto zapasy karawan.
+oasis_zahir;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Wejście jest otwarte dla każdego. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+barrow_edda;historia,kurhan,barrow;Dwór zmarłych kupców płonie świecami w kurhanie. Akolici trzymają straż, a ich latarnie wabią w mrok wędrowców.
+barrow_edda;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 35. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+watch_rorik;historia,wieża,watch;Strażnicy z Hrimvard osłaniali przełęcz do Frostholm. Teraz po wieży krążą zamarznięte dziki i yeti, a skarbiec garnizonu leży na szczycie.
+watch_rorik;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 50. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+zig_nadira;historia,zigurat,zig;Kapłani spalonego słońca zamknęli się w ziguracie i oddali go żarłokom piasku. W głębi pilnują go pręgowani łowcy.
+zig_nadira;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 55. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+bog_alaric;historia,kaplica,bog;Wierni utonęli w bagnie razem z kaplicą. Ich upiory wędrują po nawie, a jaszczury wypełniły podziemia.
+bog_alaric;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 70. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+coil_itzal;historia,sanktuarium,coil;Dżunglowi kapłani czcili złotego węża, aż złoto obudziło coś głodnego. Teraz węże i dawni łowcy skarbów pilnują sanktuarium.
+coil_itzal;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 90. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+lantern_orsa;historia,latarnia,lantern;Latarnik wzywał statki do portu, aż mgła przyniosła zaklinaczy jaszczurów i kamiennych wartowników. Latarnia czeka na kogoś, kto ją znów zapali.
+lantern_orsa;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 110. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+storm_teodrin;historia,cytadela,stormgate;Marszałek stracił armię, gdy gargulce burzy zrzuciły mury. Straż bramy z kamienia pilnuje skarbca generałów.
+storm_teodrin;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 150. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+wyrm_kaldor;historia,smocze,wyrm;Łowca smoków odkrył, że nagi i smoki skalne dzielą jedno legowisko. Nikt, kto tam wszedł, nie wyszedł bez blizn.
+wyrm_kaldor;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 210. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+crown_isolde;historia,skarbiec,crown;Ostatni król oddał duszę koronie, a jego gwardia stała się upiorami. Magowie popiołu pilnują sali, w której złożono skarbiec królestwa.
+crown_isolde;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 270. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
+# END story_quests

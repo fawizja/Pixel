@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Tabliczki przy skrzyniach questowych (`treasure/ChestSigns`): przy każdej skrzyni z wyborem nagrody i skrzyni questowej stoi nieblokująca
+  tabliczka; użycie jej pokazuje (PL/EN/ES), co jest w środku dla Twojej profesji albo jakie zadanie trzeba ukończyć.
+- 13 nowych questów w stylu Tibii z istniejących potworów i przedmiotów (bez nowych potworów, przedmiotów i grafik): 4 łatwe (poziom 8-22)
+  i 3 średnie (35-55) za darmo na kontynencie głównym, 3 średnio-trudne (70-110), 2 trudne (150, 210) i 1 ekstremalny (270) premium na
+  ziemiach dostępnych statkiem. Każdy ma NPC z angielskim imieniem, dialog, trzy misje (dojdź, zabij, zabij), skrzynie z wyborem nagrody
+  i drzwi poziomu; generator `tools/mapgen/story_quests.py`.
+- Nowy typ misji `VISIT` (dojdź do miejsca) w `quests.csv`.
+- Dziennik questów jak w Tibii: dwukolumnowe okno z listą linii questów (strony), krokami, wskazówką i nagrodą (`QuestLines`, `QuestJournal`).
+- Wymaganie bramy `party:N` (minimalna liczba graczy online w drużynie), wiersz `gate;x;y;z;party:N`; użyte na wejściu questu ekstremalnego (3 graczy).
+- Wymaganie nagrody `reward;grupa;wymaganie` w `star_quest.csv`; właściwość `-Dpixel.quests=klucz:done,klucz:active:N` do zrzutów.
+- Analiza `analizy/questy-nagrody.md`, testy `StoryQuestsTest`, `QuestRewardAuditTest`, sceny gui-regression dla dziennika, tabliczki i NPC.
+
+### Zmieniono
+- Przebalansowane nagrody 20 zadań obozów i wysp (bossy do 0,5 kosztu poziomu, zabicia 0,10-0,12) oraz ścięte nagrody `varden_smug1-3` do 1,2 poziomu.
+
 ## [0.259.0] - 2026-11-12
 
 ### Dodano

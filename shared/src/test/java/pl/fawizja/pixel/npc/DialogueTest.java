@@ -45,7 +45,7 @@ class DialogueTest {
             for (String topic : t) assertNotNull(D.answer(n, topic), n.key() + " topic " + topic);
             assertFalse(n.greeting().isBlank(), n.key() + " keeps its one greeting line");
         }
-        assertEquals(5, withTopics, "quest-location guides and the camp quartermaster");
+        assertEquals(5 + 13, withTopics, "quest-location guides, the camp quartermaster and the 13 story quest wardens");
     }
 
     @Test

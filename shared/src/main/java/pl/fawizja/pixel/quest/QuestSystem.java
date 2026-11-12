@@ -72,7 +72,7 @@ public final class QuestSystem {
     /** Ile celu juz zebrano: zabicia z licznika albo sztuki w plecaku. */
     public int progress(PlayerCharacter pc, QuestType q) {
         if (pc.quests().state(q.key()) == QuestLog.State.DONE) return q.amount();
-        if (q.kind() == QuestKind.KILL) return pc.quests().progress(q.key());
+        if (q.kind() != QuestKind.COLLECT) return pc.quests().progress(q.key());
         return Math.min(q.amount(), pc.backpack().count(items.byKey(q.target()).id()));
     }
 
@@ -108,6 +108,19 @@ public final class QuestSystem {
             int before = pc.quests().progress(key);
             pc.quests().advance(key, 1, q.amount());
             if (before < q.amount() && pc.quests().progress(key) >= q.amount()) completedNow = q;
+        }
+        return completedNow;
+    }
+
+    /** Wejscie do regionu mapy (nazwa z mapy): zalicza aktywne zadania typu VISIT; zwraca pierwsze zaliczone albo null. */
+    public QuestType onEnter(PlayerCharacter pc, String regionName) {
+        QuestType completedNow = null;
+        for (String key : pc.quests().active().keySet().toArray(new String[0])) {
+            QuestType q = registry.get(key);
+            if (q == null || q.kind() != QuestKind.VISIT || !q.target().equals(regionName)) continue;
+            if (pc.quests().progress(key) >= q.amount()) continue;
+            pc.quests().advance(key, 1, q.amount());
+            completedNow = q;
         }
         return completedNow;
     }

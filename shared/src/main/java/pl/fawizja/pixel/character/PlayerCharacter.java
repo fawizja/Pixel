@@ -602,6 +602,10 @@ public final class PlayerCharacter {
     public java.util.Set<String> openedChests() { return openedChests; }
     public java.util.Set<String> completedBossQuests() { return completedBossQuests; }
     public java.util.Set<String> questFlags() { return questFlags; }
+    private transient int partyOnline = 1;
+    /** Ilu graczy z druzyny jest w grze (razem z postacia; 1 bez druzyny). Odswiezane przez sesje, nie zapisywane. */
+    public int partyOnline() { return partyOnline; }
+    public void setPartyOnline(int n) { partyOnline = Math.max(1, n); }
     public boolean hasQuestFlag(String flag) { return questFlags.contains(flag); }
     public boolean setQuestFlag(String flag) { return questFlags.add(flag); }
 

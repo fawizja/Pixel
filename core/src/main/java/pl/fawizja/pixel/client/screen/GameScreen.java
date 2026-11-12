@@ -2317,6 +2317,10 @@ public final class GameScreen extends ScreenAdapter {
         for (Position p : game.chests().traps()) {
             if (p.y() == row && p.z() == z) b.draw(game.art().trap(), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
         }
+        for (pl.fawizja.pixel.treasure.ChestSigns.Sign sg : session.chestSigns().all()) {
+            Position p = sg.at();
+            if (p.y() == row && p.z() == z) b.draw(chestSign(), p.x(), worldRenderer.worldY(p.y()), 1f, 1f);
+        }
         for (pl.fawizja.pixel.treasure.TreasureChests.Chest c : game.chests().all()) {
             Position p = c.position();
             if (p.y() != row || p.z() != z) continue;
@@ -3751,6 +3755,34 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private TextureRegion saleSign;
+    private TextureRegion chestSign;
+
+    /** Tabliczka przy skrzyni zadania (rysowana): palik, jasna deska z liniami napisu i zlotym rogiem skrzyni. */
+    private TextureRegion chestSign() {
+        if (chestSign != null) return chestSign;
+        com.badlogic.gdx.graphics.Pixmap p = new com.badlogic.gdx.graphics.Pixmap(32, 32, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        p.setColor(0.2f, 0.12f, 0.05f, 1f);                      // palik pod deska
+        p.fillRectangle(14, 16, 4, 14);
+        p.setColor(0.36f, 0.22f, 0.1f, 1f);
+        p.fillRectangle(15, 16, 2, 14);
+        p.setColor(0.2f, 0.12f, 0.05f, 1f);                      // deska: ciemna ramka
+        p.fillRectangle(3, 3, 26, 15);
+        p.setColor(0.86f, 0.74f, 0.5f, 1f);
+        p.fillRectangle(4, 4, 24, 13);
+        p.setColor(0.94f, 0.84f, 0.6f, 1f);
+        p.fillRectangle(4, 4, 24, 3);
+        p.setColor(0.35f, 0.22f, 0.1f, 1f);                      // linie napisu
+        p.fillRectangle(12, 8, 14, 1);
+        p.fillRectangle(12, 11, 11, 1);
+        p.fillRectangle(12, 14, 13, 1);
+        p.setColor(0.6f, 0.38f, 0.12f, 1f);                      // znak skrzyni
+        p.fillRectangle(5, 8, 5, 6);
+        p.setColor(1f, 0.82f, 0.2f, 1f);
+        p.fillRectangle(6, 9, 3, 3);
+        chestSign = new TextureRegion(new com.badlogic.gdx.graphics.Texture(p));
+        p.dispose();
+        return chestSign;
+    }
 
     /** Tabliczka "na sprzedaz" (rysowana, bez grafik z gry): deska na dwoch lancuszkach ze zlota moneta. */
     private TextureRegion saleSign() {
@@ -3792,6 +3824,7 @@ public final class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         if (saleSign != null) saleSign.getTexture().dispose();
+        if (chestSign != null) chestSign.getTexture().dispose();
         if (net != null) net.close();
         lightRenderer.dispose();
         tapMarker.dispose();

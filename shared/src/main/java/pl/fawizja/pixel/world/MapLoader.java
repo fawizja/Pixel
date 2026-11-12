@@ -225,6 +225,8 @@ public final class MapLoader {
                     Position p = new Position(i(f[2]), i(f[3]), i(f[4]));
                     if (!world.isWalkable(p)) throw new IOException(path + ": reward chest not walkable at " + p);
                     world.addRewardChoice(new WorldMap.RewardChoice(f[1].trim(), p, f[5].trim()));
+                } else if (f[0].equals("reward") && f.length == 3) {
+                    world.addRewardRequirement(f[1].trim(), f[2].trim());
                 } else {
                     throw new IOException(path + ": bad line '" + line + "'");
                 }
