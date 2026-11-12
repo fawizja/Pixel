@@ -26,8 +26,15 @@ po kawałku.
   grafiki udostępnione publicznie bez licencji, użyte z podaniem autora (docs/CREDITS.md, `tools/art/hinas_import.py`).
 - Runy 0.240 (id 400-423: pola, ściany, bomby, odtrutka, paraliż, przekonanie, ożywienie zwłok i inne) to przebarwione
   runy OTSP (leczenia, wybuchu ognia, lawiny, nagłej śmierci) - `tools/art/rune_tints.py`.
+- Kamienie i zloty smok od wlasciciela (2026-11-12, licencja nieznana, na jego odpowiedzialnosc; `tools/art/darekart_import.py`,
+  wpisy w docs/CREDITS.md): warianty obiektu `rock` (`tiles/rock.png`, `rock_v2`..`v15`: 12 malych kamieni 32x32 szarych, ciemnych
+  popekanych i porosnietych mchem oraz 3 duze glazy 64x64 w `native/rock_v13..v15.png`, rysowane 2x2 pola jak krzaki) i `snow_rock`
+  (`snow_rock.png`, `_v2`..`_v5`, w tym duzy glaz `native/snow_rock_v5.png`), a takze potwor `dune_drake` (Wydmowy smok: zloty smok,
+  cztery kierunki x trzy klatki, 41x41). Podstawowe `rock.png` i `snow_rock.png` rysuja tez szczegol gor, wiec zmienil sie i on.
+  Nie uzyto: chmur (rozmyte, nie pikselart), run-kamieni z JPG (artefakty kompresji, 15-20 px, rozowe tlo), schodow, drabin, dziur
+  i dachow (paczka 238 obrazkow ich nie ma; zostaly tam same przedmioty z Tibii i inne cudze, wykluczone).
 
-Razem: 144 kafelków, 374 przedmiotów, 127 potworów, 160 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 804.
+Razem: 144 kafelków, 400 przedmiotów, 174 potworów, 169 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 886.
 
 Lista jest generowana: `python3 tools/art/list_graphics.py`.
 
@@ -62,26 +69,34 @@ Każda profesja w 4 kierunkach.
 | `monsters/abyss_lord.png` | Pan Otchłani, poziom 950 | tak |
 | `monsters/abyssal_demon.png` | Demon Otchłani, poziom 800 | tak |
 | `monsters/ash_magus.png` | Mag Popiołu, poziom 360 | tak |
+| `monsters/ash_penitent.png` | Skruszony Pokutnik, poziom 310 | tak |
 | `monsters/bandit.png` | Bandyta, poziom 15 | tak |
 | `monsters/barrow_lantern.png` | Latarnik z kurhanu, poziom 38 | tak |
 | `monsters/blade_warden.png` | Wirujący strażnik, poziom 215 | tak |
 | `monsters/bloodbeard.png` | Kapitan Krwawa Broda, poziom 420, boss | tak |
 | `monsters/boar.png` | Dzik, poziom 15 | tak |
+| `monsters/bog_hydra.png` | Hydra bagienna, poziom 190 | tak |
+| `monsters/bog_naga.png` | Wężyca bagienna, poziom 250 | tak |
 | `monsters/bog_wraith.png` | Bagienna zjawa, poziom 80 | tak |
 | `monsters/bone_dragon.png` | Kościany smok, poziom 880 | tak |
 | `monsters/burrow_larva.png` | Ryjąca larwa, poziom 9 | tak |
 | `monsters/candle_acolyte.png` | Akolita Czarnej Świecy, poziom 30 | tak |
 | `monsters/carrion_crow.png` | Padlinożerna wrona, poziom 11 | tak |
+| `monsters/castellan_gorvald.png` | Gorvald, Kasztelan Warowni, poziom 70, boss | tak |
 | `monsters/cave_centipede.png` | Jaskiniowa wij, poziom 16 | tak |
 | `monsters/cave_troll.png` | Troll jaskiniowy, poziom 30 | tak |
+| `monsters/cinder_revenant.png` | Żarzący Upiór, poziom 335 | tak |
 | `monsters/cinder_salamander.png` | Popielna salamandra, poziom 420 | tak |
 | `monsters/coral_crab.png` | Krab koralowy, poziom 310 | tak |
+| `monsters/crag_dragon.png` | Smok skalny, poziom 260 | tak |
 | `monsters/crimson_shade.png` | Krwawa zmora, poziom 265 | tak |
 | `monsters/crocodile.png` | Krokodyl, poziom 22 | tak |
 | `monsters/crystal_golem.png` | Kryształowy golem, poziom 45 | tak |
 | `monsters/cursed_treant.png` | Przeklęty drzewiec, poziom 240 | tak |
 | `monsters/deep_behemot.png` | Behemot, poziom 120 | tak |
 | `monsters/deep_worm.png` | Czerw padlinożerny, poziom 20 | tak |
+| `monsters/dimmed_seraph.png` | Przygaszony Serafin, poziom 600 | tak |
+| `monsters/dragon_whelp.png` | Smocze pisklę, poziom 50 | tak |
 | `monsters/drowned_sailor.png` | Topielec, poziom 330 | tak |
 | `monsters/dune_drake.png` | Wydmowy smok, poziom 410 | tak |
 | `monsters/dune_zealot.png` | Fanatyk Białego Słońca, poziom 125 | tak |
@@ -106,29 +121,57 @@ Każda profesja w 4 kierunkach.
 | `monsters/frost_witch.png` | Mroźna wiedźma, poziom 75 | tak |
 | `monsters/giant_rat.png` | Wielki szczur, poziom 5 | tak |
 | `monsters/gilded_beetle.png` | Złotopancerz, poziom 105 | tak |
+| `monsters/glass_phantom.png` | Szklany Upiór, poziom 515 | tak |
 | `monsters/goblin.png` | Goblin, poziom 10 | tak |
+| `monsters/goblin_knifer.png` | Goblin nożownik, poziom 24 | tak |
+| `monsters/goblin_scrounger.png` | Goblin szabrownik, poziom 14 | tak |
 | `monsters/goblin_shaman.png` | Goblin szaman, poziom 12 | tak |
+| `monsters/goblin_warchief.png` | Goblin herszt, poziom 36 | tak |
+| `monsters/gore_harbinger.png` | Zwiastun Posoki, poziom 575 | tak |
 | `monsters/grimtooth.png` | Grimtooth, Król Kopalni, poziom 60, boss | tak |
 | `monsters/grove_crone.png` | Guślarka Gaju, poziom 22 | tak |
 | `monsters/grove_huntress.png` | Łowczyni Gaju, poziom 18 | tak |
 | `monsters/grove_matriarch.png` | Matrona Gaju, poziom 40 | tak |
 | `monsters/grove_shieldmaiden.png` | Tarczowniczka Gaju, poziom 24 | tak |
+| `monsters/hoarfrost_warden.png` | Szronowy Strażnik, poziom 375 | tak |
+| `monsters/horn_bowman.png` | Rogaty łucznik, poziom 26 | tak |
+| `monsters/horn_champion.png` | Rogaty mistrz areny, poziom 88 | tak |
+| `monsters/horn_gladiator.png` | Rogaty gladiator, poziom 60 | tak |
+| `monsters/horn_guard.png` | Rogaty strażnik, poziom 34 | tak |
+| `monsters/horn_mystic.png` | Rogaty mistyk, poziom 38 | tak |
+| `monsters/horn_oracle.png` | Rogata wyrocznia, poziom 74 | tak |
+| `monsters/horn_overlord.png` | Grozdar, Pan Labiryntu, poziom 100, boss | tak |
+| `monsters/horn_raider.png` | Rogaty rozbójnik, poziom 24 | tak |
+| `monsters/horn_sapper.png` | Rogaty saper, poziom 46 | tak |
+| `monsters/horn_scout.png` | Rogaty zwiadowca, poziom 20 | tak |
 | `monsters/hrimgar.png` | Hrimgar, Król Lodowców, poziom 560, boss | tak |
 | `monsters/hyena.png` | Hiena, poziom 10 | tak |
 | `monsters/ice_dragon.png` | Lodowy smok, poziom 520 | tak |
 | `monsters/ice_golem.png` | Lodowy golem, poziom 120 | tak |
 | `monsters/ignaroth.png` | Ignaroth Roztopiony, poziom 400, boss | tak |
+| `monsters/ilmora.png` | Ilmora, Pani Zwierciadeł, poziom 575, boss | tak |
 | `monsters/jungle_hunter.png` | Łowca z dżungli, poziom 65 | tak |
 | `monsters/jungle_serpent.png` | Wąż z dżungli, poziom 75 | tak |
+| `monsters/keep_chaplain.png` | Kapelan warowni, poziom 56 | tak |
+| `monsters/keep_crossbow.png` | Kusznik warowni, poziom 44 | tak |
+| `monsters/keep_hound.png` | Ogar warowni, poziom 40 | tak |
+| `monsters/keep_sentry.png` | Wartownik warowni, poziom 50 | tak |
+| `monsters/kharzul.png` | Kharzul, Mistrz Kuźni, poziom 470, boss | tak |
 | `monsters/khazuul.png` | Kha'zuul Pusty, poziom 750, boss | tak |
 | `monsters/lava_golem.png` | Lawowy golem, poziom 370 | tak |
+| `monsters/lizard_hexer.png` | Jaszczur guślarz, poziom 120 | tak |
 | `monsters/magma_colossus.png` | Magmowy kolos, poziom 620 | tak |
 | `monsters/magma_drake.png` | Smok magmy, poziom 690 | tak |
+| `monsters/marsh_lizard.png` | Jaszczur bagienny, poziom 88 | tak |
+| `monsters/maw_crawler.png` | Pełzacz z Paszczy, poziom 540 | tak |
 | `monsters/mine_grub.png` | Czerw gnilny, poziom 8 | tak |
+| `monsters/mirror_acolyte.png` | Akolita Zwierciadeł, poziom 490 | tak |
 | `monsters/mist_wraith.png` | Upiór mgły, poziom 540 | tak |
+| `monsters/molten_cultist.png` | Kultysta Stopionej Gwiazdy, poziom 420 | tak |
 | `monsters/morgath.png` | Mor'gath, Serce Otchłani, poziom 1000, boss | tak |
 | `monsters/morvena.png` | Morvena, Pani Mgieł, poziom 640, boss | tak |
 | `monsters/mummy.png` | Mumia, poziom 200 | tak |
+| `monsters/noctharion.png` | Noctharion, Pożeracz Światła, poziom 700, boss | tak |
 | `monsters/obsidian_sentinel.png` | Obsydianowy wartownik, poziom 930 | tak |
 | `monsters/oneeye_brute.png` | Jednooki olbrzym, poziom 30 | tak |
 | `monsters/oneeye_hauler.png` | Jednooki tragarz, poziom 36 | tak |
@@ -151,21 +194,26 @@ Każda profesja w 4 kierunkach.
 | `monsters/quarry_brute.png` | Łamacz kamieni, poziom 24 | tak |
 | `monsters/rime_crawler.png` | Szronowy czerw, poziom 98 | tak |
 | `monsters/rime_gargoyle.png` | Szronowy gargulec, poziom 500 | tak |
+| `monsters/rimebound_monk.png` | Skuty Lodem Mnich, poziom 350 | tak |
 | `monsters/rock_golem.png` | Kamienny golem, poziom 32 | tak |
 | `monsters/ruin_colossus.png` | Kolos z ruin, poziom 200, boss | tak |
 | `monsters/sand_devourer.png` | Piaskowy pożeracz, poziom 64 | tak |
 | `monsters/sand_gargoyle.png` | Piaskowy gargulec, poziom 165 | tak |
 | `monsters/sand_titan.png` | Piaskowy tytan, poziom 650 | tak |
 | `monsters/sand_wraith.png` | Piaskowy upiór, poziom 130 | tak |
+| `monsters/scale_dragon.png` | Smok łuskowy, poziom 140 | tak |
 | `monsters/scorpion.png` | Skorpion, poziom 14 | tak |
 | `monsters/sewer_rat.png` | Szczur kanałowy, poziom 3 | tak |
 | `monsters/shadow_centipede.png` | Cienista wij, poziom 680 | tak |
 | `monsters/shadow_stalker.png` | Łowca cieni, poziom 590 | tak |
 | `monsters/skaldra.png` | Skaldra, Lodowa Matka, poziom 540, boss | tak |
 | `monsters/skeleton.png` | Szkielet, poziom 13 | tak |
+| `monsters/slag_forgehand.png` | Żużlowy Kowalczyk, poziom 395 | tak |
 | `monsters/snare_setter.png` | Sidlarz, poziom 14 | tak |
 | `monsters/snow_wolf.png` | Śnieżny wilk, poziom 10 | tak |
 | `monsters/spark_wisp.png` | Iskrzyk, poziom 26 | tak |
+| `monsters/spore_stalker.png` | Zarodnikowy Tropiciel, poziom 465 | tak |
+| `monsters/stone_gorgon.png` | Gorgona, poziom 400 | tak |
 | `monsters/stone_sentinel.png` | Kamienny wartownik, poziom 140 | tak |
 | `monsters/storm_harpy.png` | Harpia burzy, poziom 470 | tak |
 | `monsters/storm_wisp.png` | Burzowy ognik, poziom 445 | tak |
@@ -174,10 +222,15 @@ Każda profesja w 4 kierunkach.
 | `monsters/swamp_hornet.png` | Bagienny szerszeń, poziom 58 | tak |
 | `monsters/szlamiara.png` | Szlamiara, Matka Topieli, poziom 95, boss | tak |
 | `monsters/temple_guardian.png` | Strażnik świątyni, poziom 180 | tak |
+| `monsters/thorn_maiden.png` | Cierniowa Panna, poziom 440 | tak |
 | `monsters/tunnel_fence.png` | Paser z tuneli, poziom 34 | tak |
+| `monsters/ugrath.png` | Ugrath, Pożeracz z Paszczy, poziom 640, boss | tak |
 | `monsters/urgoth.png` | Urgoth, Pan Twierdzy, poziom 75, boss | tak |
 | `monsters/velmira.png` | Velmira, Szkarłatna Pani, poziom 290, boss | tak |
+| `monsters/venom_hydra.png` | Hydra jadowita, poziom 310 | tak |
+| `monsters/vessara.png` | Vessara, Matka Cierni, poziom 520, boss | tak |
 | `monsters/void_priest.png` | Kapłan pustki, poziom 700 | tak |
+| `monsters/vorgrim.png` | Vorgrim, Popielny Strażnik, poziom 360, boss | tak |
 | `monsters/winged_spawn.png` | Skrzydlaty pomiot, poziom 860 | tak |
 | `monsters/wolf.png` | Wilk, poziom 8 | tak |
 | `monsters/wraith_knight.png` | Upiorny rycerz, poziom 280 | tak |
@@ -185,6 +238,7 @@ Każda profesja w 4 kierunkach.
 | `monsters/wyvern.png` | Wiwerna, poziom 300 | tak |
 | `monsters/wyvern_matriarch.png` | Matka Wiwern, poziom 360, boss | tak |
 | `monsters/yeti.png` | Yeti, poziom 65 | tak |
+| `monsters/ysmera.png` | Ysmera, Lodowa Matrona, poziom 420, boss | tak |
 
 ## NPC (`assets/art/npcs/`)
 
@@ -194,12 +248,6 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 
 | Plik | Co to jest | Jest |
 |---|---|---|
-| `npcs/varden_blesser.png` (+ `_walk1`, `_walk2`) | Brat Anzelm | tak (OTSP, strój 26) |
-| `npcs/frost_blesser.png` (+ `_walk1`, `_walk2`) | Siostra Brygida | tak (OTSP, strój 26) |
-| `npcs/qas_blesser.png` (+ `_walk1`, `_walk2`) | Brat Hamid | tak (OTSP, strój 26) |
-| `npcs/valmir_blesser.png` (+ `_walk1`, `_walk2`) | Siostra Marta | tak (OTSP, strój 26) |
-| `npcs/selv_blesser.png` (+ `_walk1`, `_walk2`) | Brat Cyprian | tak (OTSP, strój 26) |
-| `npcs/nerys_blesser.png` (+ `_walk1`, `_walk2`) | Siostra Fortunata | tak (OTSP, strój 26) |
 | `npcs/camp_banker.png` | Skarbniczka Wena | tak |
 | `npcs/camp_guide.png` | Zwiadowczyni Ilka | tak |
 | `npcs/camp_merchant.png` | Kwatermistrz Bren | tak |
@@ -227,6 +275,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `npcs/elandor_herbalist.png` | Zielarka Ilyana | tak |
 | `npcs/elandor_priestess.png` | Kapłanka Liriel | tak |
 | `npcs/frost_banker.png` | Bankier Frostholm | tak |
+| `npcs/frost_blesser.png` | Siostra Brygida | tak |
 | `npcs/frost_captain.png` | Kapitan Ulf | tak |
 | `npcs/frost_carrier.png` | Woźnica Frostholm | tak |
 | `npcs/frost_guide.png` | Przewodnik Frostholm | tak |
@@ -288,6 +337,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `npcs/lighthouse_ferryman.png` | Latarniczka Wanda | tak |
 | `npcs/mist_captain.png` | Przewoźnik Gniewko | tak |
 | `npcs/nerys_banker.png` | Bankierka Selma | tak |
+| `npcs/nerys_blesser.png` | Siostra Fortunata | tak |
 | `npcs/nerys_captain.png` | Kapitanka Maren | tak |
 | `npcs/nerys_carrier.png` | Woźnica Nerys | tak |
 | `npcs/nerys_guide.png` | Przewodnik Nerys | tak |
@@ -305,6 +355,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `npcs/pirate_captain.png` | Kapitan Czarna Mewa | tak |
 | `npcs/pozoga_captain.png` | Kapitan Ignacy Smolarz | tak |
 | `npcs/qas_banker.png` | Bankier Qasirah | tak |
+| `npcs/qas_blesser.png` | Brat Hamid | tak |
 | `npcs/qas_captain.png` | Kapitan Rahim | tak |
 | `npcs/qas_carrier.png` | Woźnica Qasirah | tak |
 | `npcs/qas_guide.png` | Przewodnik Qasirah | tak |
@@ -318,6 +369,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `npcs/qas_ruler.png` | Król Mieszko | tak |
 | `npcs/qas_smith.png` | Płatnerz Hamid | tak |
 | `npcs/selv_banker.png` | Bankier Selvaran | tak |
+| `npcs/selv_blesser.png` | Brat Cyprian | tak |
 | `npcs/selv_captain.png` | Kapitan Bartosz | tak |
 | `npcs/selv_carrier.png` | Woźnica Selvaran | tak |
 | `npcs/selv_fishmonger.png` | Rybaczka Mara | tak |
@@ -330,7 +382,10 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `npcs/selv_priest.png` | Kapłan Selvaran | tak |
 | `npcs/selv_ruler.png` | Lord Radosław | tak |
 | `npcs/selv_smith.png` | Płatnerz Selvaran | tak |
+| `npcs/star_captain.png` | Captain Brannoc | tak |
+| `npcs/star_warden.png` | Warden Thessaly | tak |
 | `npcs/valmir_banker.png` | Bankier Ludomir | tak |
+| `npcs/valmir_blesser.png` | Siostra Marta | tak |
 | `npcs/valmir_captain.png` | Kapitan Radomir | tak |
 | `npcs/valmir_carrier.png` | Woźnica Valmiru | tak |
 | `npcs/valmir_guide.png` | Przewodniczka Valmiru | tak |
@@ -345,9 +400,11 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `npcs/valmir_smith.png` | Kowalka Dobrawa | tak |
 | `npcs/varden_archmage.png` | Arcymag Eldrin | tak |
 | `npcs/varden_banker.png` | Bankier Aldric | tak |
+| `npcs/varden_blesser.png` | Brat Anzelm | tak |
 | `npcs/varden_captain.png` | Kapitan Edmund | tak |
 | `npcs/varden_carrier.png` | Woźnica Jarek | tak |
 | `npcs/varden_guide.png` | Strażnik Oren | tak |
+| `npcs/varden_herald.png` | Herald Matthias | tak |
 | `npcs/varden_housing.png` | Zarządca Leopold | tak |
 | `npcs/varden_imbuer.png` | Zaklinacz Teodor | tak |
 | `npcs/varden_innkeeper.png` | Karczmarz Wit | tak |
@@ -369,6 +426,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/abyssal_ember.png` | Żar Otchłani (material) | tak |
 | `items/abyssal_greatsword.png` | Wielki miecz Otchłani (weapon) | tak |
 | `items/abyssal_treads.png` | Kroki Otchłani (armor) |  |
+| `items/amulet_of_loss.png` | Amulet Straty (armor) | tak |
 | `items/angel_amulet.png` | Anielski amulet (armor) | tak |
 | `items/angel_armor.png` | Anielska zbroja (armor) | tak |
 | `items/angel_axe.png` | Anielski topór (weapon) | tak |
@@ -383,6 +441,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/angel_wand.png` | Anielska różdżka (weapon) | tak |
 | `items/animate_dead_rune.png` | Runa ożywienia zwłok (rune) | tak |
 | `items/antidote_rune.png` | Runa odtrutki (rune) | tak |
+| `items/ash_relic.png` | Popielna relikwia (material) | tak |
 | `items/avalanche_rune.png` | Runa lawiny (rune) | tak |
 | `items/backpack.png` | Plecak (tool) | tak |
 | `items/barbarian_axe.png` | Topór barbarzyńcy (weapon) | tak |
@@ -457,6 +516,8 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/desert_knuckles.png` | Pustynne kastety (weapon) | tak |
 | `items/desert_scimitar.png` | Pustynny sejmitar (weapon) | tak |
 | `items/destroy_field_rune.png` | Runa niszczenia pól (rune) | tak |
+| `items/dimmed_crown.png` | Korona Przygaszonej Gwiazdy (armor) | tak |
+| `items/dimmed_mantle.png` | Płaszcz Przygaszonej Gwiazdy (armor) | tak |
 | `items/dragon_amulet.png` | Smoczy talizman (armor) | tak |
 | `items/dragon_armor.png` | Smocza zbroja (armor) | tak |
 | `items/dragon_axe.png` | Smoczy topór (weapon) | tak |
@@ -571,9 +632,13 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/magma_spear.png` | Magmowa włócznia (weapon) | tak |
 | `items/mana_potion.png` | Mikstura many (potion) | tak |
 | `items/marksman_gem.png` | Klejnot strzelca (material) | tak |
+| `items/maw_fang.png` | Kieł z paszczy (material) | tak |
+| `items/maw_greaves.png` | Nagolenniki z Paszczy (armor) | tak |
 | `items/meat.png` | Mięso (food) | tak |
 | `items/miner_helmet.png` | Hełm górnika (armor) | tak |
 | `items/mirewood_rod.png` | Laska z Topieli (weapon) | tak |
+| `items/mirror_crown.png` | Zwierciadlana Korona (armor) | tak |
+| `items/mirror_shard.png` | Odłamek zwierciadła (material) | tak |
 | `items/mist_essence.png` | Esencja mgły (material) | tak |
 | `items/molten_knuckles.png` | Stopione kastety (weapon) | tak |
 | `items/moon_amulet.png` | Księżycowy amulet (armor) | tak |
@@ -600,6 +665,7 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/obsidian_wand.png` | Obsydianowa różdżka (weapon) | tak |
 | `items/paralyse_rune.png` | Runa paraliżu (rune) | tak |
 | `items/pearl.png` | Perła (material) | tak |
+| `items/penitent_cowl.png` | Kaptur Pokutnika (armor) | tak |
 | `items/pet_cat.png` | Kocię (tool) | tak |
 | `items/pet_dog.png` | Szczenię (tool) | tak |
 | `items/pet_fennec.png` | Fenek (tool) | tak |
@@ -640,6 +706,8 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/raspberry.png` | Maliny (food) |  |
 | `items/reef_gauntlets.png` | Rękawice rafy (weapon) | tak |
 | `items/return_scroll.png` | Zwój powrotu (tool) | tak |
+| `items/rime_sliver.png` | Odłamek szronu (material) | tak |
+| `items/rimeheart_legs.png` | Nogawice Szronowego Serca (armor) | tak |
 | `items/rod_of_eternal_winter.png` | Laska wiecznej zimy (weapon) | tak |
 | `items/rod_of_frost.png` | Laska mrozu (weapon) | tak |
 | `items/rod_of_hoarfrost.png` | Laska szronu (weapon) | tak |
@@ -679,11 +747,24 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/short_bow.png` | Krótki łuk (weapon) | tak |
 | `items/shovel.png` | Łopata (tool) | tak |
 | `items/skull_axe.png` | Topór czaszek (weapon) | tak |
+| `items/slag_ingot.png` | Sztaba żużlu (material) | tak |
+| `items/slagforged_boots.png` | Buty z Żużla (armor) | tak |
 | `items/snake_skin.png` | Wężowa skóra (material) | tak |
 | `items/soulfire_rune.png` | Runa ognia duszy (rune) | tak |
 | `items/spear.png` | Włócznia (ammunition) | tak |
 | `items/spider_silk.png` | Pajęcza nić (material) | tak |
 | `items/spiritualist_gem.png` | Klejnot spirytualisty (material) | tak |
+| `items/star_aegis.png` | Gwiezdna Tarcza (shield) | tak |
+| `items/star_amulet.png` | Amulet Gasnącej Gwiazdy (armor) | tak |
+| `items/star_axe.png` | Gwiezdny Topór (weapon) | tak |
+| `items/star_blade.png` | Gwiezdne Ostrze (weapon) | tak |
+| `items/star_bow.png` | Gwiezdny Łuk (weapon) | tak |
+| `items/star_fists.png` | Gwiezdne Rękawice (weapon) | tak |
+| `items/star_maul.png` | Gwiezdny Młot (weapon) | tak |
+| `items/star_plate.png` | Gwiezdna Zbroja (armor) | tak |
+| `items/star_rod.png` | Laska Gasnącej Gwiazdy (weapon) | tak |
+| `items/star_spellbook.png` | Księga Gasnącej Gwiazdy (shield) | tak |
+| `items/star_wand.png` | Różdżka Gasnącej Gwiazdy (weapon) | tak |
 | `items/starfall_wand.png` | Różdżka spadających gwiazd (weapon) | tak |
 | `items/steel_spear.png` | Stalowa włócznia (weapon) | tak |
 | `items/stone_shower_rune.png` | Runa deszczu kamieni (rune) | tak |
@@ -710,6 +791,8 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 | `items/supreme_mana_potion.png` | Najwyższa mikstura many (potion) | tak |
 | `items/swamp_eel.png` | Bagienny węgorz (food) |  |
 | `items/swiftness_potion.png` | Mikstura szybkości (potion) | tak |
+| `items/thorn_seed.png` | Cierniowe ziarno (material) | tak |
+| `items/thornmother_amulet.png` | Amulet Matki Cierni (armor) | tak |
 | `items/thornroot_rod.png` | Laska cierniowego korzenia (weapon) | tak |
 | `items/thunderstorm_rune.png` | Runa burzy (rune) | tak |
 | `items/tidal_bow.png` | Łuk przypływu (weapon) | tak |

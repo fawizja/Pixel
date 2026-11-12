@@ -24,6 +24,25 @@ dostępna przy imporcie, więc obowiązuje ta sama zasada co przy paczkach WsT: 
 samej paczki. W repozytorium są tylko wycięte kawałki używane przez grę (narzędzie: `tools/art/zidane_import.py`;
 oryginał poza repozytorium: `tools/art/zidane/`, kopia w plikach projektu `pixel-zidane-ui/pack_ui_1.2.zip`).
 Ikon 24 px z paczki nie używamy (przedmioty mają ikony OTSP 32 px).
+## Grafiki od wlasciciela - LICENCJA NIEZNANA (dodane 2026-11-12)
+
+Wlasciciel projektu przekazal paczki grafik bez informacji o licencji i autorze. Dodane na jego odpowiedzialnosc ("Add them on my
+responsibility"), licence unknown, added on the owner's responsibility 2026-11-12. Jesli pojawi sie problem z licencja, usunac
+wszystkie pliki z ponizszej listy i przywrocic poprzednie wersje z historii git (`git log -- <plik>`); gra dziala bez nich. Surowych archiwow nie ma w repozytorium; do `assets/` trafily tylko wyciete kawalki
+(narzedzie `tools/art/darekart_import.py`).
+
+- Pochodzenie: `07f940a2-Aseprites.rar` (4 arkusze 256x192: kamienie i glazy szare, porosniete mchem, ciemne, sniezne):
+  - `assets/art/tiles/rock.png`, `rock_v2.png` .. `rock_v15.png` (v13-v15 to zapasowe male kopie; ich grafika to pliki natywne)
+  - `assets/art/native/rock_v13.png`, `rock_v14.png`, `rock_v15.png`
+  - `assets/art/tiles/snow_rock.png`, `snow_rock_v2.png` .. `snow_rock_v5.png`
+  - `assets/art/native/snow_rock_v5.png`
+- Pochodzenie: `4c56d725-88613-4471d4c306fdc774dacd5e070db0199c.webp` (zloty smok, 4 kierunki x 3 klatki, 256x192):
+  - `assets/art/monsters/dune_drake.png`, `dune_drake_walk1.png`, `dune_drake_walk2.png`
+  - `assets/art/monsters/dune_drake_up*.png`, `dune_drake_left*.png`, `dune_drake_right*.png` (kazdy: postoj, `_walk1`, `_walk2`)
+- Przejrzane i odrzucone: `49c74bca-Nubes.rar` (chmury: rozmyte, brak miejsca w grze), `c292351d-WebbyImagesDownloader.zip`
+  (rune-kamienie: JPG z artefaktami, male, rozowe tlo), `8de7fbf0-WebbyImagesDownloader.zip` (brak schodow, drabin, dziur ani dachow;
+  przedmioty `item_NNNNN` i inne to grafiki Tibii albo innych gier - wykluczone).
+
 ## Hinas (OTLand) – przedmioty
 
 Od 2026-11-10 zestawy ekwipunku i część pojedynczych przedmiotów (137 obrazków w `assets/art/items/`: hełmy, zbroje,
