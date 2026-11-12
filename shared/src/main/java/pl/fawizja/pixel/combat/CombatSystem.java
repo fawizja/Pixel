@@ -682,56 +682,51 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     /** Smierc od potwora albo od stanu (killerType = null: zatrucie, podpalenie...). */
     private void onPlayerDeath(String killerName, MonsterType killerType, long now) {
         long before = pc.experience();
-        lastDeathPlace = pc.position();
-        int blessed = pc.applyDeathPenalty(minLevel, killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType), false, false);
+        Position at = pc.position();
+        lastDeathPlace = at;
+        pl.fawizja.pixel.character.DeathLoss loss = pc.applyDeath(minLevel,
+                killerType == null ? 0 : pl.fawizja.pixel.charm.CharmEffects.blessReduction(pc, killerType), false, false, rng);
+        int blessed = loss.blessings();
+        ground.addPlayerCorpse(at, loss.dropped(), now);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
-        lastDeath = recap.build(killerName, before - pc.experience(), blessed, now);
+        lastDeath = recap.build(killerName, before - pc.experience(), blessed, now, loss);
         log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zginales") + killerName + Messages.get("combat_system.strata")
-                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed)
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + lossNote(loss)
                 + Messages.get("combat_system.odrodzenie_w_swiatyni"));
     }
 
+    /** Dopisek do komunikatu o smierci: przedmioty w ciele i zniszczony Amulet Straty. */
+    private static String lossNote(pl.fawizja.pixel.character.DeathLoss loss) {
+        StringBuilder sb = new StringBuilder();
+        if (loss.itemCount() > 0) sb.append(Messages.get(loss.backpackDropped() ? "combat_system.plecak_w_ciele" : "combat_system.przedmioty_w_ciele", loss.itemCount()));
+        else if (loss.amuletUsed()) sb.append(Messages.get("combat_system.amulet_ochronil"));
+        return sb.toString();
+    }
+
     /**
-     * Smierc z reki innego gracza (PvP): ta sama kara co od potwora; przy czerwonej czaszce
-     * caly plecak zostaje na miejscu smierci. Zwraca liczbe porzuconych stosow.
+     * Smierc z reki innego gracza (PvP): ta sama kara co od potwora (Zrzadzenie losu zuzywa sie zamiast zwyklych
+     * blogoslawienstw); przy czerwonej albo czarnej czaszce ({@code skulled}) caly plecak i ekwipunek zostaja w ciele.
+     * Zwraca liczbe porzuconych stosow.
      */
-    public int diedFromPlayer(String killer, boolean dropBackpack, long now) {
+    public int diedFromPlayer(String killer, boolean skulled, long now) {
         Position at = pc.position();
         lastDeathPlace = at;
-        int dropped = 0;
-        if (dropBackpack) {
-            for (int i = 0; i < pc.backpack().size(); i++) {
-                ItemStack s = pc.backpack().get(i);
-                if (s == null) continue;
-                ItemStack taken = pc.backpack().takeFromSlot(i, s.count());
-                if (taken != null) {
-                    ground.place(at, taken);
-                    dropped++;
-                }
-            }
-            // czerwona/czarna czaszka: jak w Tibii przepada wszystko, takze ekwipunek
-            for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
-                ItemStack worn = pc.equipment().get(slot);
-                if (worn == null) continue;
-                pc.equipment().setDirect(slot, null);
-                ground.place(at, worn);
-                dropped++;
-            }
-        }
         long before = pc.experience();
-        int blessed = pc.applyDeathPenalty(minLevel, 0, true, dropBackpack);
+        pl.fawizja.pixel.character.DeathLoss loss = pc.applyDeath(minLevel, 0, true, skulled, rng);
+        int blessed = loss.blessings();
+        ground.addPlayerCorpse(at, loss.dropped(), now);
         Position temple = world.templeOf(pc.homeTown());
         pc.revive(temple);
         target = null;
         push(new CombatEvent(now, temple, 0, CombatEvent.Kind.DEATH));
-        lastDeath = recap.build(killer + Messages.get("combat_system.gracz"), before - pc.experience(), blessed, now);
+        lastDeath = recap.build(killer + Messages.get("combat_system.gracz"), before - pc.experience(), blessed, now, loss);
         log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zginales_z_reki_gracza") + killer + Messages.get("combat_system.strata_2")
-                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + (dropped > 0 ? Messages.get("combat_system.plecak_i_ekwipunek_zostaly") : "")
+                + (before - pc.experience()) + " exp" + DeathRecap.blessingNote(blessed) + lossNote(loss)
                 + Messages.get("combat_system.odrodzenie_w_swiatyni"));
-        return dropped;
+        return loss.dropped().size();
     }
 
     private void push(CombatEvent e) {

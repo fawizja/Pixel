@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Sześciu mnichów błogosławieństw w małych kaplicach przy miastach (`tools/mapgen/chapels.py`): Varden (494,458, Duchowa Tarcza),
+  Frostholm (701,235, Objęcia Świata), Qasirah (258,520, Ogień Słońc) dla darmowych kont oraz Valmir (451,718, Iskra Feniksa),
+  Selvaran (711,666, Mądrość Samotności), Nerys (865,696, Zrządzenie losu) tylko dla premium. Rozmowa słowami z ceną zależną od poziomu.
+- Śmierć jak w Tibii (Canary): ten sam ułamek odbiera exp, umiejętności i poziom magiczny; plecak i noszone przedmioty wypadają do ciała
+  gracza z szansą zależną od liczby błogosławieństw (pięć = nic), Amulet Straty chroni ekwipunek, czerwona i czarna czaszka tracą wszystko.
+- Przedmiot Amulet Straty (sklepy magiczne), grafiki mnichów z OTSP, `DeathLoss`, testy `DeathLossTest`, `BlessingChapelsTest`.
+
+### Zmieniono
+- Błogosławieństwa: pięć zwykłych po -8% straty (razem -40%) i Zrządzenie losu w PvP; usunięto Serce/Krew Góry i hurtowy zakup.
+- `/blogoslawienstwa` jest oknem informacyjnym (co masz i gdzie kupić); kapłani w miastach ich nie sprzedają.
+- Mapa świata wygenerowana ponownie (nowe kaplice; numeracja legendy przetasowana, stąd duży diff).
+
+### Usunięto
+- Kupno błogosławieństw ze sklepu (`Store`).
+
 ## [0.255.0] - 2026-11-12
 
 ### Dodano

@@ -498,7 +498,6 @@ public final class Hud {
     /** U bankiera: widok depozytu przedmiotow zamiast konta. */
     private boolean depotView;
     /** Okno kaplana z lista blogoslawienstw (zamiast glownej strony). */
-    private boolean blessView;
     /** Rozmowa z kupcem w widoku kowala (ulepszanie wyposazenia). */
     private boolean smithView;
     /** Strona okna kowala: 0 ulepszenia i zaklecia, 1 Kuznia, 2 nasycenia. */
@@ -1629,12 +1628,6 @@ public final class Hud {
         depotView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER;
     }
 
-    /** Rozmowa z kaplanem od razu na liscie blogoslawienstw (podglad GUI). */
-    public void openBlessings(GameSession session) {
-        openNpc(session);
-        blessView = npc != null && npc.role() == pl.fawizja.pixel.npc.NpcRole.PRIEST;
-    }
-
     /** Rozmowa z kupcem od razu w widoku kowala (podglad GUI). */
     public void openSmith(GameSession session) {
         openNpc(session);
@@ -1673,7 +1666,6 @@ public final class Hud {
             npcPage = 0;
             depotView = false;
             smithView = false;
-            blessView = false;
         }
         npc = n;
         if (pl.fawizja.pixel.npc.Npc.DEPOT_LOCKER.equals(n.key())) depotView = true;   // skrzynia: od razu depozyt
@@ -3097,33 +3089,25 @@ public final class Hud {
             case PRIEST: {
                 left.add(new MenuRow("npc:heal", Messages.get("hud.ulecz_mnie"), Messages.get("hud.pelne_zdrowie_i_mana"), pc.health() < pc.maxHealth() || pc.mana() < pc.maxMana()));
                 boolean home = npc.town().equalsIgnoreCase(pc.homeTown());
-                if (blessView) {
-                    left.add(new MenuRow("npc:blessview", Messages.get("bless.back"), Messages.get("bless.loss_after", pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level())), true));
-                    long bulk = session.bulkBlessingPrice();
-                    boolean bulkOk = bulk > 0 && !pc.adventurerBlessing();
-                    left.add(new MenuRow("npc:bless:all", Messages.get("bless.buy_all"),
-                            pc.adventurerBlessing() ? Messages.get("bless.adv_short_free", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL)
-                                    : bulk == 0 ? Messages.get("bless.have_all_short") : Messages.get("bless.bulk_price", bulk),
-                            bulkOk && session.gold() >= bulk));
-                    for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
-                        if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.ENHANCED
-                                && !pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN.equalsIgnoreCase(npc.town())) continue;
-                        String why = session.blessingBlocked(b, npc.town());
-                        long price = b.price(pc.level());
-                        MenuRow row = new MenuRow("npc:bless:" + b.key(), b.label() + (pc.boughtBlessing(b) ? Messages.get("bless.owned_suffix") : pc.hasBlessing(b) ? Messages.get("bless.from_adv_suffix") : ""),
-                                why != null ? why : Messages.get(b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP ? "bless.row_pvp" : "bless.row_reg", price),
-                                why == null && session.gold() >= price);
-                        if (left.size() < perCol) left.add(row);
-                        else right.add(row);
-                    }
-                    break;
-                }
-                left.add(new MenuRow("npc:blessview", Messages.get("bless.row_title", pl.fawizja.pixel.character.BlessingStatus.summary(pc)),
-                        Messages.get("bless.row_desc", pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level())), true));
+                left.add(new MenuRow("npc:blessview", Messages.get("bless.hud_info"), Messages.get("bless.hud_info_desc"), true));
                 left.add(new MenuRow("npc:settle", Messages.get("hud.zamieszkaj_w") + npc.town(),
                         home ? Messages.get("hud.juz_tu_mieszkasz") : Messages.get("hud.teraz") + pc.homeTown() + Messages.get("hud.tu_bedziesz_sie_odradzac"), !home));
                 left.add(new MenuRow("wheel:open", pl.fawizja.pixel.wheel.WheelView.TITLE, pc.wheelPoints() > 0
                         ? Messages.get("hud.w_swiatyni_rozdasz_punkty") : Messages.get("hud.od_poziomu_51_z"), true));
+                break;
+            }
+            case BLESSER: {
+                pl.fawizja.pixel.character.Blessing b = pl.fawizja.pixel.character.Blessing.soldBy(npc.key());
+                if (b != null) {
+                    String why = session.blessingBlocked(b);
+                    long price = b.price(pc.level());
+                    left.add(new MenuRow("npc:bless:" + b.key(), Messages.get("bless.hud_buy", b.label()),
+                            why != null ? why : Messages.get(b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP ? "bless.hud_price_pvp" : "bless.hud_price", price),
+                            why == null && session.gold() >= price));
+                }
+                left.add(new MenuRow("npc:blessview", Messages.get("bless.row_title", pl.fawizja.pixel.character.BlessingStatus.summary(pc)),
+                        Messages.get("bless.loss_title") + ": " + pl.fawizja.pixel.balance.Balance.deathLossLabel(pc.blessingCount(), pc.level(), pc.experience(), pc.isPromoted())
+                                + " - " + Messages.get("bless.hud_info_desc"), true));
                 break;
             }
             case CARRIER:
@@ -3238,7 +3222,6 @@ public final class Hud {
         // tematy rozmowy (to samo mozna wpisac w czacie obok NPC)
         boolean depotRows = depotView && npc.role() == pl.fawizja.pixel.npc.NpcRole.BANKER
                 || pl.fawizja.pixel.npc.Npc.CRATE.equals(npc.key())
-                || blessView && npc.role() == pl.fawizja.pixel.npc.NpcRole.PRIEST
                 || smithView && npc.role() == pl.fawizja.pixel.npc.NpcRole.MERCHANT
                 || npc.role() == pl.fawizja.pixel.npc.NpcRole.IMBUER;
         for (String topic : depotRows ? java.util.List.<String>of() : pl.fawizja.pixel.npc.DialogueRegistry.defaults().topics(npc)) {
@@ -3539,7 +3522,7 @@ public final class Hud {
                 } else if (row.action.equals("npc:depot")) {
                     depotView = !depotView;
                 } else if (row.action.equals("npc:blessview")) {
-                    blessView = !blessView;
+                    openInfo(Messages.get("skill_sheet.blogoslawienstwa"), pl.fawizja.pixel.character.BlessingStatus.rows(session.character(), session.npcs()));
                 } else if (row.action.equals("npc:smith")) {
                     smithView = !smithView;
                     smithPage = 0;

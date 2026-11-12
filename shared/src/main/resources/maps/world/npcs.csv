@@ -159,3 +159,9 @@ valmir_imbuer;Zaklinacz Hieronim;IMBUER;Valmir;477;778;0;-;#7050b0;Sól morska n
 nerys_petkeeper;Opiekunka zwierząt Lilia;MERCHANT;Nerys;881;740;0;nerys_pets;#6a8a3a;Papużki z wysp powtarzają każde słowo. Pupil u boku daje +5% doświadczenia z potworów.
 nerys_ruler;Królowa Jadwiga;KING;Nerys;873;729;0;-;#c8a040;Witaj na Szmaragdowych Wyspach. Konto premium i promocję dam ci tak jak król w Varden: napisz premium albo promocja.
 nerys_imbuer;Zaklinaczka Aniela;IMBUER;Nerys;886;740;0;-;#7050b0;Perły wysp niosą moc nasyceń. Kradzież życia, many, krytyk, żywioły i ochrony.
+varden_blesser;Brat Anzelm;BLESSER;Varden;494;458;0;-;#8a6a4a;Pokój z tobą, wędrowcze. Jestem Brat Anzelm z kaplicy pod Varden. Dam ci Duchową Tarczę. Powiedz: błogosławieństwo.
+frost_blesser;Siostra Brygida;BLESSER;Frostholm;701;235;0;-;#8a6a4a;Mróz nie ma władzy w tej kaplicy, wędrowcze. Jestem Siostra Brygida i dam ci Objęcia Świata. Powiedz: błogosławieństwo.
+qas_blesser;Brat Hamid;BLESSER;Qasirah;258;520;0;-;#8a6a4a;Niech piasek cię oszczędzi, wędrowcze. Jestem Brat Hamid i dam ci Ogień Słońc. Powiedz: błogosławieństwo.
+valmir_blesser;Siostra Marta;BLESSER;Valmir;451;718;0;-;#8a6a4a;Morze i ogień chronią tych, którzy wierzą. Jestem Siostra Marta i dam ci Iskrę Feniksa (konto premium). Powiedz: błogosławieństwo.
+selv_blesser;Brat Cyprian;BLESSER;Selvaran;711;666;0;-;#8a6a4a;Cisza dżungli uczy mądrości. Jestem Brat Cyprian i dam ci Mądrość Samotności (konto premium). Powiedz: błogosławieństwo.
+nerys_blesser;Siostra Fortunata;BLESSER;Nerys;865;696;0;-;#8a6a4a;Los bywa łaskawy dla ostrożnych. Jestem Siostra Fortunata i dam ci Zrządzenie losu (konto premium). Powiedz: błogosławieństwo.

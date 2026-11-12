@@ -373,6 +373,7 @@ item;paralyse_rune;name;Paralyse Rune
 item;convince_creature_rune;name;Convince Creature Rune
 item;animate_dead_rune;name;Animate Dead Rune
 item;warlord_helmet;name;Warlord Helmet
+item;amulet_of_loss;name;Amulet of Loss
 monster;sewer_rat;name;Sewer Rat
 monster;giant_rat;name;Giant Rat
 monster;wolf;name;Wolf
@@ -1096,6 +1097,18 @@ npc;nerys_ruler;name;Queen Jadwiga
 npc;nerys_ruler;greeting;Welcome to the Emerald Isles. I will give you a premium account and a promotion just like the king in Varden: type premium or promocja.
 npc;nerys_imbuer;name;Enchantress Aniela
 npc;nerys_imbuer;greeting;Island pearls carry the power of saturations. Life leech, mana leech, crit, elements and protections.
+npc;varden_blesser;name;Brother Anselm
+npc;varden_blesser;greeting;Peace be with you, wanderer. I am Brother Anselm of the chapel outside Varden. I can give you Spiritual Shielding. Say: blessing.
+npc;frost_blesser;name;Sister Brigid
+npc;frost_blesser;greeting;The frost has no power in this chapel, wanderer. I am Sister Brigid and I give the Embrace of Tibia. Say: blessing.
+npc;qas_blesser;name;Brother Hamid
+npc;qas_blesser;greeting;May the sand spare you, wanderer. I am Brother Hamid and I give the Fire of the Suns. Say: blessing.
+npc;valmir_blesser;name;Sister Martha
+npc;valmir_blesser;greeting;The sea and the fire protect those who believe. I am Sister Martha and I give the Spark of the Phoenix (premium account). Say: blessing.
+npc;selv_blesser;name;Brother Cyprian
+npc;selv_blesser;greeting;The silence of the jungle teaches wisdom. I am Brother Cyprian and I give the Wisdom of Solitude (premium account). Say: blessing.
+npc;nerys_blesser;name;Sister Fortunata
+npc;nerys_blesser;greeting;Fate is kind to the careful. I am Sister Fortunata and I give the Twist of Fate (premium account). Say: blessing.
 place;Wzgórza Goblinów;name;Goblin Hills
 place;Nory Goblinów;name;Goblin Burrows
 place;Wzgórza Hydr;name;Hydra Hills

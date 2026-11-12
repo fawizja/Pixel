@@ -460,6 +460,8 @@ _ROLE = {
     "petkeeper": (44, ((120, 90, 50), (80, 130, 60), (110, 90, 60), (60, 40, 30))),
     "ruler": (17, ((230, 190, 60), (40, 70, 140), (30, 50, 110), (210, 170, 60))),
     "imbuer": (18, ((60, 40, 90), (110, 60, 170), (80, 50, 130), (40, 30, 40))),
+    # 2026-11-12: mnisi z kaplic blogoslawienstw (tools/mapgen/chapels.py, klucze *_blesser): brazowa szata z kapturem (stroj monk)
+    "blesser": (26, None),
 }
 # wladcy miast: krolewski stroj w barwach miasta (krol Aurelian w Varden ma swoj "king")
 RULER_COLORS = {

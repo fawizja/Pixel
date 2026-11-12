@@ -245,11 +245,17 @@ Lady, gabloty, polki i szafki depozytu stoja w miejscu.
   z mapa; NPC tylko w strefie ochronnej, nie na przejsciach), `ShopRegistry` (data/shops.csv) z kontrola
   arbitrazu przy wczytywaniu, `TradeSystem` (kupno/sprzedaz atomowo na kopii plecaka).
 - Rozmowa w zasiegu 2 kafelkow, przez lade, ale nie przez sciane. NPC blokuja ruch.
-- Kaplan: pelne leczenie, zamieszkanie w miescie (`homeTown` - odrodzenie w jego swiatyni) i blogoslawienstwa jak w Tibii
-  (`Blessing`, `PlayerCharacter.applyDeathPenalty`, `BlessingStatus`): Wiedza Samotnosci, Iskra Feniksa, Ogien Slonc, Duchowa Tarcza,
-  Objecia Swiata (po -8% straty exp, hurtem +10%), Zrzadzenie losu (PvP: przy smierci z reki gracza bez czerwonej czaszki znika tylko ono,
-  wymaga innego blogoslawienstwa) i gorskie Serce/Krew Gory (tylko kaplan w Durnkarze). Przy kazdej innej smierci znikaja zwykle i gorskie.
-  Do poz. 30 darmowe Blogoslawienstwo Poszukiwacza. Stan: okno `/blogoslawienstwa`, wiersz w oknie postaci, ikona przy pasku.
+- Kaplan: pelne leczenie i zamieszkanie w miescie (`homeTown`). Blogoslawienstwa sprzedaje szesciu mnichow (`NpcRole.BLESSER`,
+  `Blessing`, `BlessingStatus`, `DeathLoss`) w malych kaplicach przy miastach (`tools/mapgen/chapels.py`), po jednym na NPC:
+  darmowe konto - Varden (Duchowa Tarcza), Frostholm (Objecia Swiata), Qasirah (Ogien Slonc); premium - Valmir (Iskra Feniksa),
+  Selvaran (Madrosc Samotnosci), Nerys (Zrzadzenie losu, wymaga innego blogoslawienstwa). Cena zalezy od poziomu, rozmowa slowami
+  (blogoslawienstwo / cena / tak / gdzie) albo okno NPC; sklep ich nie sprzedaje. Kazde z pieciu zwyklych zmniejsza strate o 8%
+  (piec = 40%, ponizej poz. 24 = 50%, promocja +30%); Zrzadzenie losu chroni w PvP. Do poz. 30 darmowe Blogoslawienstwo Poszukiwacza.
+  Okno `/blogoslawienstwa` jest informacyjne (co masz i gdzie kupic).
+- Smierc (`PlayerCharacter.applyDeath`): exp, umiejetnosci i poziom magiczny tracone tym samym ulamkiem co w Canary
+  (`Balance.deathLossFraction`); plecak wypada z szansa 100/70/45/25/10/0%, kazdy zalozony przedmiot 10/7/4,5/2,5/1/0% (0-5 blogoslawienstw),
+  do ciala gracza (`GroundItems.addPlayerCorpse`, 10 min, widoczne dla wszystkich). Amulet Straty chroni caly ekwipunek i niszczy sie;
+  czerwona i czarna czaszka traca wszystko. Blogoslawienstwa znikaja przy smierci (w PvP bez czaszki tylko Zrzadzenie losu).
 - `quest/`: `QuestType` (KILL / COLLECT), `QuestRegistry` (data/quests.csv), `QuestLog` w postaci (zapisywany),
   `QuestSystem` (przyjecie, licznik zabic przez `CombatSystem.setKillListener`, oddanie z nagroda).
 - Klient: przycisk ROZMOWA (lub N / dotkniecie NPC), okno z kupnem (ilosc 1/5/25/100, strony), skupem,

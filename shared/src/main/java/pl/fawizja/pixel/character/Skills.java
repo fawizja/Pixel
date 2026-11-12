@@ -162,6 +162,44 @@ public final class Skills {
     }
 
     /**
+     * Strata przy smierci jak w Canary: odbiera {@code fraction} (0..1) wszystkich prob zebranych od poziomu startowego
+     * (dla magii wydanej many), cofajac poziomy, ale nie ponizej poziomu startowego. Zwraca liczbe straconych poziomow.
+     */
+    public int lose(Skill s, double fraction) {
+        if (fraction <= 0) return 0;
+        int floor = offset(s);
+        int lvl = levels.get(s);
+        if (lvl <= floor && tries.get(s) <= 0) return 0;
+        long total = tries.get(s);
+        for (int l = floor; l < lvl; l++) total += triesForNext(vocation, s, l);
+        long lost = (long) Math.floor(total * Math.min(1.0, fraction));
+        long t = tries.get(s);
+        int start = lvl;
+        while (lost > t) {
+            lost -= t;
+            if (lvl <= floor) {
+                lvl = floor;
+                t = 0;
+                lost = 0;
+                break;
+            }
+            lvl--;
+            t = triesForNext(vocation, s, lvl);
+        }
+        t = Math.max(0, t - lost);
+        levels.put(s, lvl);
+        tries.put(s, t);
+        return start - lvl;
+    }
+
+    /** Strata przy smierci dla wszystkich umiejetnosci i magii (patrz {@link #lose}); zwraca sume straconych poziomow. */
+    public int loseAll(double fraction) {
+        int n = 0;
+        for (Skill s : Skill.values()) n += lose(s, fraction);
+        return n;
+    }
+
+    /**
      * Ustawia poziom i proby (wczytanie zapisu, stan z serwera). Poziom nigdy nie jest obnizany; proby moga
      * przekraczac wymog nowej krzywej (stary zapis) - postep w oknie jest wtedy obcinany do 99%.
      */

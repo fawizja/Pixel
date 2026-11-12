@@ -110,7 +110,9 @@ class PvpRulesTest {
         assertEquals(0, hs.unjustKills(1000));
         for (int i = 0; i < red.character().backpack().size(); i++) assertNull(red.character().backpack().get(i));
         assertTrue(red.character().equipment().all().isEmpty(), "red skull: the equipment is lost too");
-        assertEquals(stacks + worn, red.ground().at(FIELD.translate(1, 0)).size(), "everything left at the death spot");
+        pl.fawizja.pixel.world.GroundItems.Corpse body = red.ground().corpseAt(FIELD.translate(1, 0));
+        assertNotNull(body, "a body is left at the death spot");
+        assertEquals(stacks + worn, body.loot().size(), "everything is in the body");
     }
 
     /**

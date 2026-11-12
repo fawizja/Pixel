@@ -373,6 +373,7 @@ item;paralyse_rune;name;Runa de paralizar
 item;convince_creature_rune;name;Runa de convencer criatura
 item;animate_dead_rune;name;Runa de animar muertos
 item;warlord_helmet;name;Yelmo del Señor de la Fortaleza
+item;amulet_of_loss;name;Amuleto de pérdida
 monster;sewer_rat;name;Rata de alcantarilla
 monster;giant_rat;name;Rata gigante
 monster;wolf;name;Lobo
@@ -1096,6 +1097,18 @@ npc;nerys_ruler;name;Reina Jadwiga
 npc;nerys_ruler;greeting;Bienvenido a las Islas Esmeralda. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
 npc;nerys_imbuer;name;Encantadora Aniela
 npc;nerys_imbuer;greeting;Las perlas de las islas llevan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+npc;varden_blesser;name;Hermano Anselmo
+npc;varden_blesser;greeting;La paz sea contigo, caminante. Soy el hermano Anselmo de la capilla junto a Varden. Puedo darte el Escudo espiritual. Di: bendición.
+npc;frost_blesser;name;Hermana Brígida
+npc;frost_blesser;greeting;La escarcha no tiene poder en esta capilla, caminante. Soy la hermana Brígida y doy el Abrazo del mundo. Di: bendición.
+npc;qas_blesser;name;Hermano Hamid
+npc;qas_blesser;greeting;Que la arena te perdone, caminante. Soy el hermano Hamid y doy el Fuego de los soles. Di: bendición.
+npc;valmir_blesser;name;Hermana Marta
+npc;valmir_blesser;greeting;El mar y el fuego protegen a quien cree. Soy la hermana Marta y doy la Chispa del fénix (cuenta premium). Di: bendición.
+npc;selv_blesser;name;Hermano Cipriano
+npc;selv_blesser;greeting;El silencio de la selva enseña sabiduría. Soy el hermano Cipriano y doy la Sabiduría de la soledad (cuenta premium). Di: bendición.
+npc;nerys_blesser;name;Hermana Fortunata
+npc;nerys_blesser;greeting;El destino es amable con los cautelosos. Soy la hermana Fortunata y doy el Giro del destino (cuenta premium). Di: bendición.
 place;Wzgórza Goblinów;name;Colinas de los Goblins
 place;Nory Goblinów;name;Madrigueras de los Goblins
 place;Wzgórza Hydr;name;Colinas de las Hidras

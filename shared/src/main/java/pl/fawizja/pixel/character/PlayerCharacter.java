@@ -1,5 +1,6 @@
 package pl.fawizja.pixel.character;
 
+import pl.fawizja.pixel.item.ItemStack;
 import java.util.Objects;
 import pl.fawizja.pixel.balance.Balance;
 import pl.fawizja.pixel.economy.BankAccount;
@@ -316,7 +317,7 @@ public final class PlayerCharacter {
 
     /** Ma blogoslawienstwo (kupione albo z Blogoslawienstwa Poszukiwacza - ono nie obejmuje gorskich). */
     public boolean hasBlessing(Blessing b) {
-        return (blessings & b.bit()) != 0 || adventurerBlessing() && b.kind() != Blessing.Kind.ENHANCED;
+        return (blessings & b.bit()) != 0 || adventurerBlessing();
     }
 
     /** Czy blogoslawienstwo zostalo kupione (bez Blogoslawienstwa Poszukiwacza). */
@@ -326,9 +327,9 @@ public final class PlayerCharacter {
 
     public int blessingMask() { return blessings; }
 
-    public void setBlessingMask(int mask) { blessings = mask & 0xFF; }
+    public void setBlessingMask(int mask) { blessings = mask & ((1 << Blessing.values().length) - 1); }
 
-    /** Ile blogoslawienstw zmniejsza strate (bez Zrzadzenia losu, 0..7). */
+    /** Ile blogoslawienstw zmniejsza strate (bez Zrzadzenia losu, 0..5). */
     public int blessingCount() {
         int n = 0;
         for (Blessing b : Blessing.values()) if (b.countsForLoss() && hasBlessing(b)) n++;
@@ -886,31 +887,96 @@ public final class PlayerCharacter {
 
     public int lightBuffRadius() { return lightBuffMs > 0 ? lightBuffRadius : 0; }
 
-    /** Kara za smierc od potwora; zwraca, ile blogoslawienstw zmniejszylo strate. */
+    /** Kara za smierc od potwora (doswiadczenie i umiejetnosci, bez przedmiotow); zwraca, ile blogoslawienstw chronilo. */
     public int applyDeathPenalty(int minLevel) { return applyDeathPenalty(minLevel, 0, false, false); }
 
     public int applyDeathPenalty(int minLevel, double reductionPercent) { return applyDeathPenalty(minLevel, reductionPercent, false, false); }
 
-    /**
-     * Kara za smierc (poziom moze spasc, ale nie ponizej minLevel). Kazde blogoslawienstwo zmniejsza strate o 8%;
-     * reductionPercent to dodatkowo talizman Blogoslawienstwo (Canary). Zuzycie jak w Canary: Blogoslawienstwo
-     * Poszukiwacza nic nie zuzywa; smierc z reki gracza bez czerwonej czaszki ({@code skulled} = false) zuzywa tylko
-     * Zrzadzenie losu; kazda inna smierc zabiera piec zwyklych i dwa gorskie (Zrzadzenie losu zostaje).
-     * Zwraca liczbe blogoslawienstw, ktore chronily (0 = brak).
-     */
+    /** Jak {@link #applyDeath}, ale bez utraty przedmiotow (testy i stare wywolania); zwraca liczbe blogoslawienstw. */
     public int applyDeathPenalty(int minLevel, double reductionPercent, boolean pvp, boolean skulled) {
+        return applyDeathLoss(minLevel, reductionPercent, pvp, skulled, null).blessings();
+    }
+
+    /**
+     * Pelna kara za smierc jak w Tibii (Canary {@code Player::death}): strata doswiadczenia, umiejetnosci i poziomu magii
+     * wedlug {@link Balance#deathLossFraction}, zuzycie blogoslawienstw i utrata przedmiotow do ciala.
+     * {@code reductionPercent} to dodatkowo talizman Blogoslawienstwo (Canary); {@code pvp} - smierc z reki gracza;
+     * {@code skulled} - ofiara ma czerwona albo czarna czaszke (traci caly plecak i ekwipunek, Zrzadzenie losu nie chroni).
+     * Zuzycie: Blogoslawienstwo Poszukiwacza nic nie zuzywa; smierc z reki gracza bez czaszki zuzywa tylko Zrzadzenie losu;
+     * kazda inna smierc zabiera piec zwyklych (Zrzadzenie losu zostaje) i Amulet Straty. Wypadle stosy sa w wyniku
+     * (juz zdjete z postaci) - wywolujacy kladzie je do ciala.
+     */
+    public DeathLoss applyDeath(int minLevel, double reductionPercent, boolean pvp, boolean skulled, java.util.Random rng) {
+        return applyDeathLoss(minLevel, reductionPercent, pvp, skulled, rng == null ? new java.util.Random() : rng);
+    }
+
+    private DeathLoss applyDeathLoss(int minLevel, double reductionPercent, boolean pvp, boolean skulled, java.util.Random rng) {
         int held = blessingCount();
         stats.recordDeath();
-        long after = Balance.experienceAfterDeath(experience, minLevel, held, level);
-        if (reductionPercent > 0 && after < experience) after += Math.round((experience - after) * Math.min(100, reductionPercent) / 100.0);
-        if (!adventurerBlessing()) {
-            if (pvp && !skulled && boughtBlessing(Blessing.TWIST)) blessings &= ~Blessing.TWIST.bit();
-            else blessings &= Blessing.TWIST.bit();
-        }
-        experience = after;
+        double fraction = Balance.deathLossFraction(level, experience, held, promoted);
+        if (reductionPercent > 0) fraction *= 1.0 - Math.min(100, reductionPercent) / 100.0;
+        int oldLevel = level;
+        int skillLevels = skills.loseAll(fraction);
+        long before = experience;
+        experience = Balance.experienceAfterDeath(experience, minLevel, fraction);
         level = Balance.levelForExperience(experience);
+        boolean twistUsed = false;
+        if (!adventurerBlessing()) {
+            if (pvp && !skulled && boughtBlessing(Blessing.TWIST)) {
+                blessings &= ~Blessing.TWIST.bit();
+                twistUsed = true;
+            } else {
+                blessings &= Blessing.TWIST.bit();
+            }
+        }
+        boolean aol = false, backpackDropped = false;
+        java.util.List<ItemStack> dropped = new java.util.ArrayList<>();
+        if (rng != null) {
+            ItemStack amulet = equipment.get(pl.fawizja.pixel.item.EquipSlot.AMULET);
+            aol = amulet != null && DeathLoss.AMULET_OF_LOSS.equals(backpack.registry().get(amulet.itemId()).key());
+            boolean consumed = !adventurerBlessing() && !twistUsed;   // zuzycie blogoslawienstw zabiera tez Amulet Straty
+            if (skulled) {
+                // czerwona i czarna czaszka: przepada wszystko (takze Amulet Straty)
+                backpackDropped = dropBackpack(dropped);
+                dropWorn(dropped, 1.0, null);
+                aol = false;
+            } else if (aol) {
+                // amulet chroni caly ekwipunek (plecak tez); ulega zniszczeniu razem ze zwyklymi blogoslawienstwami
+                if (consumed) equipment.setDirect(pl.fawizja.pixel.item.EquipSlot.AMULET, null);
+                aol = consumed;
+            } else {
+                if (rng.nextDouble() < DeathLoss.backpackChance(held)) backpackDropped = dropBackpack(dropped);
+                dropWorn(dropped, DeathLoss.itemChance(held), rng);
+            }
+        }
         refreshWheel(); // utrata poziomu: mniej punktow promocji
-        return held;
+        return new DeathLoss(held, fraction, before - experience, oldLevel - level, skillLevels, pvp, skulled, twistUsed,
+                aol, backpackDropped, java.util.Collections.unmodifiableList(dropped));
+    }
+
+    private boolean dropBackpack(java.util.List<ItemStack> out) {
+        boolean any = false;
+        for (int i = 0; i < backpack.size(); i++) {
+            ItemStack st = backpack.get(i);
+            if (st == null) continue;
+            ItemStack taken = backpack.takeFromSlot(i, st.count());
+            if (taken != null) {
+                out.add(taken);
+                any = true;
+            }
+        }
+        return any;
+    }
+
+    /** Zalozone przedmioty: kazdy wypada z szansa chance (rng == null: wszystkie). */
+    private void dropWorn(java.util.List<ItemStack> out, double chance, java.util.Random rng) {
+        for (pl.fawizja.pixel.item.EquipSlot slot : pl.fawizja.pixel.item.EquipSlot.values()) {
+            ItemStack worn = equipment.get(slot);
+            if (worn == null) continue;
+            if (rng != null && rng.nextDouble() >= chance) continue;
+            equipment.setDirect(slot, null);
+            out.add(worn);
+        }
     }
 
     /** Odrodzenie z pelnym zdrowiem i mana. */

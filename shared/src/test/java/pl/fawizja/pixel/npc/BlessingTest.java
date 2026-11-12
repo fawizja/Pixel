@@ -52,25 +52,29 @@ class BlessingTest {
         assertEquals(16_000, Blessing.WISDOM.price(100));
         assertEquals(20_000, Blessing.WISDOM.price(120));
         assertEquals(20_000 + 75 * 80, Blessing.WISDOM.price(200));
-        assertEquals(260 * 80, Blessing.HEART.price(100));
-        assertEquals(26_000 + 100 * 80, Blessing.BLOOD.price(200));
         assertEquals(200 * 80, Blessing.TWIST.price(100));
         assertEquals(50_000, Blessing.TWIST.price(300));
         assertEquals(Blessing.WISDOM.price(100), Balance.blessingPrice(100));
+        assertEquals(6, Blessing.values().length, "five regular ones and Twist of Fate (no mountain blessings)");
     }
 
     @Test
-    void everyBlessingCutsTheLossByEightPercent() {
+    void everyBlessingCutsTheBaseLossByEightPercentAndFiveGiveFortyPercent() {
         long exp = Balance.experienceForLevel(100);
-        assertEquals(exp - exp * 5 / 100, Balance.experienceAfterDeath(exp, 8, 0, 100));
-        long lost0 = exp - Balance.experienceAfterDeath(exp, 8, 0, 100);
-        for (int n = 1; n <= 7; n++) {
-            long lost = exp - Balance.experienceAfterDeath(exp, 8, n, 100);
-            assertEquals(lost0 * (100 - 8 * n) / 100.0, lost, 1.0, n + " blessings");
+        double base = Balance.deathLossFraction(100, exp, 0, false);
+        assertEquals(4.5, base * 100, 0.2, "Canary formula: about 4.5% at level 100");
+        for (int n = 1; n <= 5; n++) {
+            assertEquals(base * (100 - 8 * n) / 100.0, Balance.deathLossFraction(100, exp, n, false), 1e-12, n + " blessings");
         }
-        long lowExp = Balance.experienceForLevel(20);
-        assertEquals((lowExp - Balance.experienceAfterDeath(lowExp, 8, 0, 20)) / 2.0,
-                lowExp - Balance.experienceAfterDeath(lowExp, 8, 5, 20), 1.0, "below level 24 five blessings halve it");
+        assertEquals(base * 0.6, Balance.deathLossFraction(100, exp, 5, false), 1e-12, "five blessings: -40%");
+        assertEquals(base * 0.7, Balance.deathLossFraction(100, exp, 0, true), 1e-12, "promotion: -30%");
+        assertEquals(base * 0.3, Balance.deathLossFraction(100, exp, 5, true), 1e-12, "five blessings and promotion: -70%");
+        assertEquals(0.10, Balance.deathLossFraction(12, Balance.experienceForLevel(12), 0, false), 1e-12, "below level 24: 10%");
+        assertEquals(0.05, Balance.deathLossFraction(12, Balance.experienceForLevel(12), 5, false), 1e-12, "below level 24 five blessings halve it");
+        assertTrue(Balance.deathLossFraction(300, Balance.experienceForLevel(300), 0, false) < base, "falls with level");
+        long lost0 = exp - Balance.experienceAfterDeath(exp, 8, 0, 100);
+        long lost5 = exp - Balance.experienceAfterDeath(exp, 8, 5, 100);
+        assertEquals(lost0 * 0.6, lost5, 2.0);
     }
 
     @Test
@@ -78,7 +82,6 @@ class BlessingTest {
         PlayerCharacter pc = level(20);
         assertTrue(pc.adventurerBlessing());
         assertEquals(5, pc.blessingCount());
-        assertFalse(pc.hasBlessing(Blessing.HEART), "the mountain ones are not covered");
         int held = pc.applyDeathPenalty(8, 0, false, false);
         assertEquals(5, held);
         assertEquals(5, pc.blessingCount(), "still protected after the death");
@@ -86,13 +89,14 @@ class BlessingTest {
     }
 
     @Test
-    void aPveDeathUsesUpAllBlessingsButTwistOfFate() {
+    void aPveDeathUsesUpAllRegularBlessingsButTwistOfFate() {
         PlayerCharacter pc = level(60);
         for (Blessing b : Blessing.values()) pc.addBlessing(b);
-        assertEquals(7, pc.blessingCount());
+        assertEquals(5, pc.blessingCount());
         long exp = pc.experience();
-        assertEquals(7, pc.applyDeathPenalty(8, 0, false, false));
-        assertEquals(exp - exp * 5 * 44 / 10_000, pc.experience());
+        double f = Balance.deathLossFraction(60, exp, 5, false);
+        assertEquals(5, pc.applyDeathPenalty(8, 0, false, false));
+        assertEquals(exp - (long) Math.ceil(exp * f), pc.experience());
         assertEquals(0, pc.blessingCount());
         assertTrue(pc.boughtBlessing(Blessing.TWIST), "twist of fate is only spent in PvP");
     }
@@ -156,68 +160,108 @@ class BlessingTest {
                 new MonsterManager(TestData.varden(), MonsterRegistry.loadDefault(TestData.ITEMS), Collections.emptyList(), new Random(1)),
                 new GroundItems(), new EventLog(50), new Random(1), 8);
         long before = pc.experience();
+        double f = Balance.deathLossFraction(pc.level(), before, 5, false);
         cs.diedFromPlayer("Kuba", false, 1000);
-        assertEquals(before - before * 5 * 60 / 10_000, pc.experience(), "five blessings: 3% instead of 5%");
+        assertEquals(before - (long) Math.ceil(before * f), pc.experience(), "five blessings: 40% less than without");
         assertEquals(5, pc.blessingCount());
         assertFalse(pc.boughtBlessing(Blessing.TWIST));
     }
 
-    private static GameSession atPriest(PlayerCharacter pc, String key) throws Exception {
+    private static GameSession atMonk(PlayerCharacter pc, String key) throws Exception {
         WorldMap world = TestData.world();
         ShopRegistry shops = ShopRegistry.loadDefault(TestData.ITEMS);
         NpcRegistry npcs = NpcRegistry.load(WorldLayout.WORLD_MAP, world, shops);
         GameSession s = new GameSession(TestData.ITEMS, world, pc,
                 new MonsterManager(world, null, List.of(), new Random(1)), new Random(2), 8);
         s.setTownServices(npcs, shops, QuestRegistry.loadDefault(TestData.ITEMS, MonsterRegistry.loadDefault(TestData.ITEMS)));
-        Npc priest = npcs.get(key);
-        s.teleport(priest.position().translate(0, 1), 0);
-        assertEquals(priest, s.npcNearby());
+        Npc monk = npcs.get(key);
+        assertNotNull(monk, key);
+        assertEquals(NpcRole.BLESSER, monk.role());
+        s.teleport(monk.position().translate(0, 1), 0);
+        if (s.npcNearby() != monk) s.teleport(monk.position().translate(1, 0), 0);
+        assertEquals(monk, s.npcNearby());
         return s;
     }
 
     @Test
-    void thePriestSellsBlessingsOneByOneOrAllAtOnce() throws Exception {
-        PlayerCharacter pc = rich(level(60));
-        GameSession s = atPriest(pc, "varden_priest");
-        long gold = s.gold();
-        long one = Blessing.SPARK.price(60);
-        assertTrue(Actions.apply(s, "npc:bless:spark", 0));
-        assertTrue(pc.boughtBlessing(Blessing.SPARK));
-        assertEquals(gold - one, s.gold());
-        assertFalse(s.priestBless("spark", 0), "no second copy");
-        assertEquals(gold - one, s.gold());
-        long bulk = s.bulkBlessingPrice();
-        assertEquals(Math.round(4 * Blessing.WISDOM.price(60) * 1.1), bulk, "four missing, +10%");
-        assertTrue(Actions.apply(s, "npc:bless", 0));
-        assertEquals(5, pc.blessingCount());
-        assertEquals(gold - one - bulk, s.gold());
-        assertFalse(s.priestBless(0), "nothing left to buy");
+    void everyMonkSellsExactlyOneBlessingAndTownPriestsSellNone() throws Exception {
+        NpcRegistry npcs = NpcRegistry.load(WorldLayout.WORLD_MAP, TestData.world(), ShopRegistry.loadDefault(TestData.ITEMS));
+        for (Blessing b : Blessing.values()) {
+            Npc monk = npcs.get(b.sellerKey());
+            assertNotNull(monk, b.key());
+            assertEquals(NpcRole.BLESSER, monk.role());
+            assertSame(b, Blessing.soldBy(monk.key()));
+        }
+        long monks = npcs.all().stream().filter(n -> n.role() == NpcRole.BLESSER).count();
+        assertEquals(6, monks);
+        assertEquals(3, java.util.Arrays.stream(Blessing.values()).filter(b -> !b.premium()).count(), "three for free accounts");
+        assertEquals(3, java.util.Arrays.stream(Blessing.values()).filter(Blessing::premium).count(), "three for premium accounts");
     }
 
     @Test
-    void twistOfFateNeedsAnotherBlessingAndMountainOnesOnlyInDurnkar() throws Exception {
+    void aMonkSellsHisBlessingForCoinsAndOnlyThatOne() throws Exception {
         PlayerCharacter pc = rich(level(60));
-        GameSession s = atPriest(pc, "varden_priest");
-        assertFalse(s.priestBless("twist", 0), "first any other blessing");
-        assertNotNull(s.blessingBlocked(Blessing.TWIST, "Varden"));
-        assertTrue(s.priestBless("wisdom", 0));
-        assertTrue(s.priestBless("twist", 0));
+        GameSession s = atMonk(pc, "varden_blesser");
+        long gold = s.gold();
+        long price = Blessing.SHIELD.price(60);
+        assertSame(Blessing.SHIELD, s.blessingOfNearbyMonk());
+        Actions.apply(s, "npc:bless:wisdom", 0);
+        assertFalse(pc.boughtBlessing(Blessing.WISDOM), "the Varden monk does not sell wisdom");
+        assertEquals(gold, s.gold());
+        assertTrue(Actions.apply(s, "npc:bless:shield", 0));
+        assertTrue(pc.boughtBlessing(Blessing.SHIELD));
+        assertEquals(gold - price, s.gold());
+        assertFalse(s.blessBuy("shield", 0), "no second copy");
+        assertEquals(gold - price, s.gold());
+    }
+
+    @Test
+    void premiumMonksNeedPremiumAndTwistNeedsAnotherBlessing() throws Exception {
+        PlayerCharacter pc = rich(level(60));
+        GameSession s = atMonk(pc, "valmir_blesser");
+        assertNotNull(s.blessingBlocked(Blessing.SPARK), "free account");
+        assertFalse(s.blessBuy("spark", 0));
+        pc.setPremium(true);
+        assertNull(s.blessingBlocked(Blessing.SPARK));
+        assertTrue(s.blessBuy("spark", 0));
+        GameSession n = atMonk(pc, "nerys_blesser");
+        assertNull(n.blessingBlocked(Blessing.TWIST), "another blessing is already owned");
+        PlayerCharacter fresh = rich(level(60));
+        fresh.setPremium(true);
+        GameSession n2 = atMonk(fresh, "nerys_blesser");
+        assertNotNull(n2.blessingBlocked(Blessing.TWIST));
+        assertFalse(n2.blessBuy("twist", 0), "first any other blessing");
+        assertTrue(n.blessBuy("twist", 0));
         assertTrue(pc.boughtBlessing(Blessing.TWIST));
-        assertFalse(s.priestBless("heart", 0), "not sold in Varden");
-        assertFalse(pc.boughtBlessing(Blessing.HEART));
-        GameSession d = atPriest(pc, "durn_priest");
-        assertTrue(d.priestBless("heart", 0));
-        assertTrue(d.priestBless("blood", 0));
-        assertEquals(3, pc.blessingCount());
+    }
+
+    @Test
+    void theMonkTalksLikeInTibiaBlessingPriceYes() throws Exception {
+        PlayerCharacter pc = rich(level(100));
+        GameSession s = atMonk(pc, "qas_blesser");
+        long gold = s.gold();
+        String offer = s.askNpc("błogosławieństwo", 1);
+        assertTrue(offer.contains(Blessing.FIRE.label()) && offer.matches(".*16.000 gp.*"), offer);
+        assertEquals(gold, s.gold(), "nothing is paid before yes");
+        String no = s.askNpc("nie", 2);
+        assertNotNull(no);
+        assertFalse(pc.boughtBlessing(Blessing.FIRE));
+        s.askNpc("tak", 3);
+        assertFalse(pc.boughtBlessing(Blessing.FIRE), "yes without an offer buys nothing");
+        s.askNpc("blessing", 4);
+        String done = s.askNpc("tak", 5);
+        assertTrue(pc.boughtBlessing(Blessing.FIRE), done);
+        assertEquals(gold - 16_000, s.gold());
+        String where = s.askNpc("gdzie", 6);
+        for (Blessing b : Blessing.values()) if (b != Blessing.FIRE) assertTrue(where.contains(b.label()), b.label() + ": " + where);
     }
 
     @Test
     void lowLevelsAreCoveredAndCannotBuyRegularOnes() throws Exception {
         PlayerCharacter pc = rich(level(10));
-        GameSession s = atPriest(pc, "varden_priest");
+        GameSession s = atMonk(pc, "varden_blesser");
         long gold = s.gold();
-        assertFalse(s.priestBless("fire", 0));
-        assertFalse(s.priestBless(0));
+        assertFalse(s.blessBuy("shield", 0));
         assertEquals(gold, s.gold());
         assertTrue(BlessingStatus.summary(pc).startsWith("Poszukiwacza"));
     }
@@ -226,35 +270,40 @@ class BlessingTest {
     void notEnoughCoinsMeansNoBlessing() throws Exception {
         PlayerCharacter pc = level(200);
         pc.backpack().clear();
-        GameSession s = atPriest(pc, "varden_priest");
-        assertFalse(s.priestBless("wisdom", 0));
+        GameSession s = atMonk(pc, "varden_blesser");
+        assertFalse(s.blessBuy("shield", 0));
         assertEquals(0, pc.blessingCount());
     }
 
     @Test
-    void theSaveKeepsBlessingsAndOldSavesGetTheFiveRegularOnes() throws Exception {
+    void theSaveKeepsBlessingsAndIgnoresUnknownBits() throws Exception {
         PlayerCharacter pc = level(60);
-        pc.addBlessing(Blessing.HEART);
+        pc.addBlessing(Blessing.FIRE);
         pc.addBlessing(Blessing.TWIST);
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         PlayerCharacter back = codec.decode(codec.encode(pc));
-        assertTrue(back.boughtBlessing(Blessing.HEART) && back.boughtBlessing(Blessing.TWIST));
+        assertTrue(back.boughtBlessing(Blessing.FIRE) && back.boughtBlessing(Blessing.TWIST));
         assertFalse(back.boughtBlessing(Blessing.WISDOM));
         assertEquals(pc.blessingMask(), back.blessingMask());
-        String enc = codec.encode(level(60));
-        assertEquals(0, codec.decode(enc).blessingMask());
+        assertEquals(0, codec.decode(codec.encode(level(60))).blessingMask());
+        back.setBlessingMask(0xFF);
+        assertEquals(0x3F, back.blessingMask(), "the two old mountain bits are dropped");
     }
 
     @Test
-    void statusRowsListEveryBlessing() {
+    void statusWindowIsInformationalAndSaysWhereToBuyEachBlessing() throws Exception {
         PlayerCharacter pc = level(60);
         pc.addBlessing(Blessing.FIRE);
-        List<String[]> rows = BlessingStatus.rows(pc);
+        NpcRegistry npcs = NpcRegistry.load(WorldLayout.WORLD_MAP, TestData.world(), ShopRegistry.loadDefault(TestData.ITEMS));
+        List<String[]> rows = BlessingStatus.rows(pc, npcs);
         StringBuilder all = new StringBuilder();
         for (String[] r : rows) all.append(r[0]).append('=').append(r[1]).append('\n');
         for (Blessing b : Blessing.values()) assertTrue(all.toString().contains(b.label()), b.label());
-        assertTrue(all.toString().contains("Ogień Słońc=masz"));
-        assertTrue(all.toString().contains("Mądrość Samotności=brak"));
-        assertEquals("1 z 7 (-8% straty)", BlessingStatus.summary(pc));
+        assertTrue(all.toString().contains("Ogień Słońc (darmowe)=masz"));
+        Npc wisdom = npcs.get("selv_blesser");
+        assertTrue(all.toString().contains("Mądrość Samotności (premium)=brak"));
+        assertTrue(all.toString().contains(wisdom.name()) && all.toString().contains(wisdom.position().x() + ", " + wisdom.position().y()), all.toString());
+        assertTrue(all.toString().contains("premium"));
+        assertEquals("1 z 5 (-8% straty)", BlessingStatus.summary(pc));
     }
 }

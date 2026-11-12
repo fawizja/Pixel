@@ -194,6 +194,12 @@ jak potwory `dwarf*`. Pliki są odtwarzalne: `python3 tools/art/otsp_import.py <
 
 | Plik | Co to jest | Jest |
 |---|---|---|
+| `npcs/varden_blesser.png` (+ `_walk1`, `_walk2`) | Brat Anzelm | tak (OTSP, strój 26) |
+| `npcs/frost_blesser.png` (+ `_walk1`, `_walk2`) | Siostra Brygida | tak (OTSP, strój 26) |
+| `npcs/qas_blesser.png` (+ `_walk1`, `_walk2`) | Brat Hamid | tak (OTSP, strój 26) |
+| `npcs/valmir_blesser.png` (+ `_walk1`, `_walk2`) | Siostra Marta | tak (OTSP, strój 26) |
+| `npcs/selv_blesser.png` (+ `_walk1`, `_walk2`) | Brat Cyprian | tak (OTSP, strój 26) |
+| `npcs/nerys_blesser.png` (+ `_walk1`, `_walk2`) | Siostra Fortunata | tak (OTSP, strój 26) |
 | `npcs/camp_banker.png` | Skarbniczka Wena | tak |
 | `npcs/camp_guide.png` | Zwiadowczyni Ilka | tak |
 | `npcs/camp_merchant.png` | Kwatermistrz Bren | tak |

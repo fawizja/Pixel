@@ -628,7 +628,6 @@ orc_warrior;195;237;0;4;4;90;stado
 striped_prowler;321;239;0;5;5;150;stado
 skeleton;507;237;0;4;3;90
 carrion_crow;660;236;0;5;2;120
-goblin;696;245;0;5;2;90
 snare_setter;749;241;0;4;2;120
 snow_wolf;810;237;0;5;3;150
 sand_devourer;182;255;0;5;3;150;stado
@@ -780,7 +779,6 @@ scorpion;285;471;0;5;3;120
 hyena;302;471;0;4;3;150
 hyena;322;467;0;5;2;90
 scorpion;370;471;0;4;3;120
-forest_spider;490;465;0;4;3;150
 wolf;533;469;0;4;2;150
 jungle_hunter;699;472;0;5;4;120;stado
 orc_warrior;743;466;0;4;3;120;stado
@@ -799,7 +797,6 @@ dune_zealot;70;511;0;4;3;90;stado
 hyena;86;516;0;5;2;150
 scorpion;131;507;0;4;3;150
 hyena;149;516;0;5;3;120
-hyena;264;513;0;4;3;150
 hyena;338;506;0;5;3;150
 wolf;426;507;0;5;3;150
 snare_setter;455;515;0;4;2;120
@@ -939,8 +936,6 @@ swamp_hornet;632;700;0;4;3;150
 crocodile;727;697;0;4;3;150
 jungle_serpent;749;705;0;5;3;120;stado
 forest_spider;827;707;0;5;2;120
-boar;854;699;0;5;3;90
-goblin;866;697;0;5;2;90
 boar;885;699;0;5;3;150
 snare_setter;280;716;0;5;3;90
 skeleton;473;727;0;4;2;120
@@ -3088,7 +3083,6 @@ boar;400;307;0;4;3;120
 barrow_lantern;216;634;0;4;2;90
 boar;456;486;0;4;3;120
 forest_spider;453;584;0;4;2;150
-goblin;703;227;0;4;2;150
 wolf;495;332;0;4;2;150
 bandit;204;369;0;4;3;150
 goblin;455;504;0;4;3;90
@@ -3253,7 +3247,6 @@ orc_berserker;55;510;0;4;2;150
 goblin;290;509;0;4;2;150
 barrow_lantern;50;525;0;4;2;120
 bandit;99;523;0;4;2;150
-hyena;251;521;0;4;3;150
 boar;294;524;0;4;2;150
 burrow_larva;321;522;0;4;2;150
 skeleton;741;517;0;4;2;90

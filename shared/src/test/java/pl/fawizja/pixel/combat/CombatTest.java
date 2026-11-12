@@ -76,8 +76,10 @@ class CombatTest {
         assertEquals(8, pc.level());
         pc.addExperience(10_000_000);
         long before = pc.experience();
+        double loss = Balance.deathLossFraction(pc.level(), before, 0, false);
         pc.applyDeathPenalty(8);
-        assertEquals(before - before / 20, pc.experience());
+        assertEquals(before - (long) Math.ceil(before * loss), pc.experience(), "Canary formula: a few percent at this level");
+        assertTrue(loss > 0.03 && loss < 0.06, "about 4-5% of the experience: " + loss);
     }
 
     @Test

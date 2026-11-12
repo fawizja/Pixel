@@ -10,7 +10,7 @@ import pl.fawizja.pixel.npc.ShopOffer;
 
 /**
  * Sklep z gornej ramki (jak Tibia Store): tylko uslugi i rzeczy, ktore juz sa w grze (konto premium i promocja od
- * krola, blogoslawienstwo kaplana, zaklecia kowala, siodlo i zwierzaki z kupcow), w tych samych cenach, placone
+ * krola, zaklecia kowala, siodlo i zwierzaki z kupcow), w tych samych cenach, placone
  * zlotem z konta w banku - bez chodzenia do NPC. Zakup: {@link GameSession#storeBuy(String, long)} (akcja "store:klucz").
  */
 public final class Store {
@@ -22,7 +22,7 @@ public final class Store {
 
     /**
      * Zakladki okna sklepu (2026-11-11, Darek: "dodaj w sklepie zakladke premium" i "pozycje outfity na przyszlosc"):
-     * uslugi (blogoslawienstwo, zaklecia, wierzchowiec, zwierzaki), premium (konto premium i promocja z opisem, co daja)
+     * uslugi (zaklecia, wierzchowiec, zwierzaki), premium (konto premium i promocja z opisem, co daja)
      * i stroje (kolory stroju za darmo, nowe stroje z data/store_outfits.csv - na razie "wkrotce").
      */
     public enum Tab {
@@ -62,9 +62,6 @@ public final class Store {
                 : pc.level() < GameSession.PROMOTION_LEVEL ? Messages.get("hud.od_poziomu") + GameSession.PROMOTION_LEVEL : null;
         out.add(new Offer("promote", Messages.get("hud.promocja") + pc.vocation().promotedName(), Messages.get("store.znak_przy_postaci_regeneracja"),
                 GameSession.PROMOTION_PRICE, promo, "grimtooth_crown"));
-        out.add(new Offer("bless", Messages.get("bless.store_title"), Messages.get("bless.store_desc"),
-                s.bulkBlessingPrice(), pc.adventurerBlessing() ? Messages.get("bless.store_adventurer", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL)
-                        : s.bulkBlessingPrice() == 0 ? Messages.get("bless.store_all") : null, "healing_herb"));
         for (Enchantments.Kind k : Enchantments.Kind.values()) {
             if (!k.smith()) continue;
             Enchantments e = pc.enchantments();

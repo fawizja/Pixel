@@ -34,10 +34,11 @@ class StoreTest {
     void offersOnlyExistingServicesAtNpcPrices() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.KNIGHT);
         GameSession s = session(pc);
-        Store.Offer premium = Store.find(s, "premium"), promote = Store.find(s, "promote"), bless = Store.find(s, "bless");
+        Store.Offer premium = Store.find(s, "premium"), promote = Store.find(s, "promote");
         assertEquals(GameSession.PREMIUM_PRICE, premium.price());
         assertEquals(GameSession.PROMOTION_PRICE, promote.price());
-        assertEquals(s.bulkBlessingPrice(), bless.price());
+        assertNull(Store.find(s, "bless"), "blessings are sold only by the monks in the chapels");
+        for (Store.Offer o : Store.offers(s)) assertFalse(o.key().contains("bless"), o.key());
         assertEquals("najpierw konto premium", promote.blocked());
         assertEquals(Enchantments.price(Enchantments.Kind.CRIT, pc.level()), Store.find(s, "enchant_crit").price());
         assertEquals(50_000, Store.find(s, "saddle").price(), "price of the merchants (shops.csv)");
@@ -87,7 +88,8 @@ class StoreTest {
         for (Store.Tab t : Store.Tab.values()) total += Store.offers(s, t).size();
         assertEquals(Store.offers(s).size(), total);
         assertEquals(List.of("premium", "promote"), Store.offers(s, Store.Tab.PREMIUM).stream().map(Store.Offer::key).toList());
-        assertTrue(Store.offers(s, Store.Tab.SERVICES).stream().anyMatch(o -> o.key().equals("bless")));
+        assertTrue(Store.offers(s, Store.Tab.SERVICES).stream().noneMatch(o -> o.key().equals("bless")), "no blessing in the shop");
+        assertTrue(Store.offers(s, Store.Tab.SERVICES).stream().anyMatch(o -> o.key().equals("saddle")));
         assertTrue(Store.offers(s, Store.Tab.OUTFITS).isEmpty(), "stroje nie sa ofertami");
 
         for (Store.Tab tab : Store.Tab.values()) {

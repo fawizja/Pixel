@@ -79,6 +79,21 @@ public final class GroundItems {
         return c;
     }
 
+    /** Klucz ciala postaci gracza (wyglad ludzkiego ciala); lup to wszystko, co wypadlo przy smierci. */
+    public static final String PLAYER_CORPSE = "player_corpse";
+    /** Cialo gracza lezy dluzej niz cialo potwora: wlasciciel musi do niego wrocic z swiatyni. */
+    public static final long PLAYER_CORPSE_MS = 10 * 60_000L;
+
+    /** Cialo postaci: wszystkie stosy z lupu zostaja w ciele (bez limitu stosow potwora), znika po {@link #PLAYER_CORPSE_MS}. */
+    public Corpse addPlayerCorpse(Position p, List<ItemStack> dropped, long now) {
+        Corpse old = corpses.get(p);
+        Corpse c = new Corpse(PLAYER_CORPSE, now + PLAYER_CORPSE_MS, null);
+        if (old != null) c.loot.addAll(old.loot);
+        c.loot.addAll(dropped);
+        corpses.put(p, c);
+        return c;
+    }
+
     /** Klient online: znacznik ciala z klatki serwera. */
     public void placeRemoteCorpse(Position p, String monsterKey, boolean hasLoot) {
         corpses.put(p, new Corpse(monsterKey, Long.MAX_VALUE, hasLoot));
