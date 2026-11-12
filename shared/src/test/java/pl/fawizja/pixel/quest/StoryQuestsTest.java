@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
@@ -361,6 +363,44 @@ class StoryQuestsTest {
     }
 
     // ------------------------------------------------------------------ tabliczki
+
+    @Test
+    void signsInOneChestRoomAllSitOnTheSameSideOfTheirChests() {
+        GameSession s = session(hero(Vocation.KNIGHT, 300));
+        List<ChestSigns.Sign> all = s.chestSigns().all();
+        boolean[] used = new boolean[all.size()];
+        int rooms = 0, bad = 0;
+        StringBuilder msg = new StringBuilder();
+        for (int i = 0; i < all.size(); i++) {
+            if (used[i]) continue;
+            List<ChestSigns.Sign> g = new ArrayList<>();
+            List<Integer> stack = new ArrayList<>(List.of(i));
+            used[i] = true;
+            while (!stack.isEmpty()) {
+                int k = stack.remove(stack.size() - 1);
+                g.add(all.get(k));
+                for (int j = 0; j < all.size(); j++) {
+                    Position a = all.get(k).chest().position(), b = all.get(j).chest().position();
+                    if (!used[j] && a.z() == b.z() && Math.abs(a.x() - b.x()) <= 2 && Math.abs(a.y() - b.y()) <= 2) {
+                        used[j] = true;
+                        stack.add(j);
+                    }
+                }
+            }
+            if (g.size() < 2) continue;
+            rooms++;
+            Set<String> offsets = new HashSet<>();
+            for (ChestSigns.Sign sg : g) {
+                offsets.add((sg.at().x() - sg.chest().position().x()) + "," + (sg.at().y() - sg.chest().position().y()));
+            }
+            if (offsets.size() > 1) {
+                bad++;
+                msg.append(g.get(0).chest().position()).append(' ').append(offsets).append("; ");
+            }
+        }
+        assertTrue(rooms >= 5, "rooms with several chests: " + rooms);
+        assertEquals(0, bad, "rooms with mixed sign sides: " + msg);
+    }
 
     @Test
     void everyQuestChestHasAReadableSignNextToItWithTheRightText() {
