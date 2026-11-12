@@ -291,7 +291,7 @@ public final class MonsterManager {
             long next = Long.MAX_VALUE;
             for (long at : respawnQueue.getOrDefault(sp, Collections.emptyList())) next = Math.min(next, at);
             pl.fawizja.pixel.world.Region r = world.regionAt(sp.center());
-            out.add(new BossStatus(t.name(), sp.center(), r == null ? null : r.name(), alive, alive ? 0 : next));
+            out.add(new BossStatus(t.name(), sp.center(), r == null ? null : r.displayName(), alive, alive ? 0 : next));
         }
         out.sort(java.util.Comparator.comparing(BossStatus::name));
         return out;

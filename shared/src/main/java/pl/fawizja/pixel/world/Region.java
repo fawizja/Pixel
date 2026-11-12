@@ -8,6 +8,11 @@ public record Region(String name, int x0, int y0, int x1, int y1, int zMin, int 
         }
     }
 
+    /** Nazwa w biezacym jezyku (EN/ES z i18n/data_*.csv, rodzaj "place"; brak wiersza = nazwa z mapy). */
+    public String displayName() {
+        return pl.fawizja.pixel.i18n.Messages.data("place", name, name);
+    }
+
     public boolean contains(Position p) {
         return p.x() >= x0 && p.x() <= x1 && p.y() >= y0 && p.y() <= y1 && p.z() >= zMin && p.z() <= zMax;
     }

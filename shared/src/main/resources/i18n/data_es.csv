@@ -500,6 +500,27 @@ monster;grove_matriarch;name;Matriarca del bosquecillo
 monster;oneeye_brute;name;Bruto tuerto
 monster;oneeye_hauler;name;Cargador tuerto
 monster;oneeye_smith;name;Herrero tuerto
+monster;horn_raider;name;Saqueador Astado
+monster;horn_bowman;name;Arquero Astado
+monster;horn_guard;name;Guardia Astado
+monster;horn_mystic;name;Místico Astado
+monster;keep_hound;name;Sabueso de la Fortaleza
+monster;keep_crossbow;name;Ballestero de la Fortaleza
+monster;keep_sentry;name;Centinela de la Fortaleza
+monster;keep_chaplain;name;Capellán de la Fortaleza
+monster;castellan_gorvald;name;Gorvald, Castellano de la Fortaleza
+monster;goblin_scrounger;name;Goblin saqueador
+monster;goblin_knifer;name;Goblin cuchillero
+monster;goblin_warchief;name;Jefe de guerra goblin
+monster;marsh_lizard;name;Lagarto del pantano
+monster;lizard_hexer;name;Lagarto hechicero
+monster;bog_hydra;name;Hidra del cenagal
+monster;bog_naga;name;Serpentina del cenagal
+monster;venom_hydra;name;Hidra venenosa
+monster;stone_gorgon;name;Gorgona
+monster;dragon_whelp;name;Cria de dragon
+monster;scale_dragon;name;Dragon de escamas
+monster;crag_dragon;name;Dragon de roca
 spell;magic_patch;name;Parche mágico
 spell;light_healing;name;Curación ligera
 spell;intense_healing;name;Curación intensa
@@ -1069,3 +1090,9 @@ npc;nerys_ruler;name;Reina Jadwiga
 npc;nerys_ruler;greeting;Bienvenido a las Islas Esmeralda. Te daré cuenta premium y promoción igual que el rey de Varden: escribe premium o promocja.
 npc;nerys_imbuer;name;Encantadora Aniela
 npc;nerys_imbuer;greeting;Las perlas de las islas llevan el poder de las saturaciones. Robo de vida, robo de maná, crítico, elementos y protecciones.
+place;Wzgórza Goblinów;name;Colinas de los Goblins
+place;Nory Goblinów;name;Madrigueras de los Goblins
+place;Wzgórza Hydr;name;Colinas de las Hidras
+place;Legowiska Hydr;name;Guaridas de las Hidras
+place;Wzgórza Smoków;name;Colinas de los Dragones
+place;Smocze Pieczary;name;Cavernas de los Dragones

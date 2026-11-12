@@ -48,6 +48,7 @@ import delta_volcano as DV  # noqa: E402
 import isles  # noqa: E402
 import realms  # noqa: E402
 import castle  # noqa: E402
+import hills  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -1015,7 +1016,7 @@ def build(ctx):
     ctx['under_pin'] = dict(UNDER_PIN)
     # podziemia budowli stawianych po lochach dziczy zarezerwowane na wszystkich pietrach (glebokie lochy dziczy
     # nie odsuwaja ich od wejsc); po lochach dziczy rezerwacja znika, zostaja tylko pola zajete przez lochy
-    under_res = list(strongholds.RESERVED) + list(UNDER_RESERVED) + list(isles.UNDER_RESERVED)
+    under_res = list(strongholds.RESERVED) + list(UNDER_RESERVED) + list(isles.UNDER_RESERVED) + list(hills.UNDER_RESERVED)
     occ_before = {z: m.copy() for z, m in world.occ.items()}
     res_mask = np.zeros((S, S), bool)
     for (a, b, c, d) in under_res:
@@ -1041,6 +1042,8 @@ def build(ctx):
     print('warownia gorvalda:', castle.build(ctx, cost, wh))
     # 2026-11-11: kontynent glowny (3 miasta startowe) i ziemie premium odciete kanalami - tylko statkiem
     print('kontynent glowny i premium:', realms.split(ctx, S))
+    # 2026-11-12: Wzgorza Goblinow (kontynent), Smokow (pustynia) i Hydr (wyspa tylko dla statkow), po 3-5 pieter
+    print('wzgorza goblinow, smokow i hydr:', hills.build(ctx, cost, wh))
 
 
 def monster_levels():

@@ -2782,7 +2782,7 @@ public final class GameSession {
         if (r == currentRegion) return;
         currentRegion = r;
         if (r == null) return;
-        log.add(nowMs, EventLog.Kind.INFO, r.name() + Messages.get("game_session.zalecany_poziom") + r.levelMin() + "-" + r.levelMax() + ")");
+        log.add(nowMs, EventLog.Kind.INFO, r.displayName() + Messages.get("game_session.zalecany_poziom") + r.levelMin() + "-" + r.levelMax() + ")");
         if (r.levelMin() > pc.level() + 15) {
             log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.uwaga_ten_region_jest") + pc.level() + ".");
         }
@@ -3246,7 +3246,7 @@ public final class GameSession {
     private String signText(Position p) {
         StringBuilder b = new StringBuilder(Messages.get("game_session.na_drogowskazie_napisano"));
         Region r = world.regionAt(p);
-        if (r != null) b.append('"').append(r.name()).append('"');
+        if (r != null) b.append('"').append(r.displayName()).append('"');
         pl.fawizja.pixel.world.Town best = null;
         int bestD = Integer.MAX_VALUE;
         for (pl.fawizja.pixel.world.Town t : world.towns()) {

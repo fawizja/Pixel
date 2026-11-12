@@ -38,7 +38,10 @@ HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader',
                'oneeye_brute', 'oneeye_hauler', 'oneeye_smith',
                # 2026-11-11: Warownia Gorvalda i podziemne chodniki (castle.py)
                'horn_raider', 'horn_bowman', 'horn_guard', 'horn_mystic', 'keep_hound', 'keep_crossbow', 'keep_sentry',
-               'keep_chaplain', 'castellan_gorvald'}
+               'keep_chaplain', 'castellan_gorvald',
+               # 2026-11-12: Wzgorza Goblinow, Hydr i Smokow (hills.py)
+               'goblin_scrounger', 'goblin_knifer', 'goblin_warchief', 'marsh_lizard', 'lizard_hexer', 'bog_hydra',
+               'bog_naga', 'venom_hydra', 'stone_gorgon', 'dragon_whelp', 'scale_dragon', 'crag_dragon'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 

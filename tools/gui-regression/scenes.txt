@@ -264,3 +264,10 @@ lang_spellbook_es|-Dpixel.lang=es -Dpixel.autostart=Test:SORCERER -Dpixel.hour=1
 castle_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=822,490,-1
 castle_keep_top|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=781,357,3
 durnkar_market|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=500,322,-5
+# wzgorza goblinow, smokow i hydr (powierzchnia i najglebsze pietro); wzorce do dopisania (--update)
+hills_goblin_surface|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=607,446,0
+hills_goblin_under|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=601,470,-3
+hills_dragon_surface|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=143,283,0
+hills_dragon_under|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=89,258,-4
+hills_hydra_surface|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=924,406,0
+hills_hydra_under|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=150 -Dpixel.teleport=887,399,-5

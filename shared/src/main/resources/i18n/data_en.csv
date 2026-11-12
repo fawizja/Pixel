@@ -500,6 +500,27 @@ monster;grove_matriarch;name;Grove Matriarch
 monster;oneeye_brute;name;One-Eye Brute
 monster;oneeye_hauler;name;One-Eye Hauler
 monster;oneeye_smith;name;One-Eye Smith
+monster;horn_raider;name;Horned Raider
+monster;horn_bowman;name;Horned Bowman
+monster;horn_guard;name;Horned Guard
+monster;horn_mystic;name;Horned Mystic
+monster;keep_hound;name;Keep Hound
+monster;keep_crossbow;name;Keep Crossbowman
+monster;keep_sentry;name;Keep Sentry
+monster;keep_chaplain;name;Keep Chaplain
+monster;castellan_gorvald;name;Gorvald, Castellan of the Keep
+monster;goblin_scrounger;name;Goblin Pilferer
+monster;goblin_knifer;name;Goblin Knifer
+monster;goblin_warchief;name;Goblin Warchief
+monster;marsh_lizard;name;Marsh Lizard
+monster;lizard_hexer;name;Lizard Hexer
+monster;bog_hydra;name;Bog Hydra
+monster;bog_naga;name;Bog Serpentess
+monster;venom_hydra;name;Venom Hydra
+monster;stone_gorgon;name;Gorgon
+monster;dragon_whelp;name;Dragon Whelp
+monster;scale_dragon;name;Scale Dragon
+monster;crag_dragon;name;Crag Dragon
 spell;magic_patch;name;Magic Patch
 spell;light_healing;name;Light Healing
 spell;intense_healing;name;Intense Healing
@@ -1069,3 +1090,9 @@ npc;nerys_ruler;name;Queen Jadwiga
 npc;nerys_ruler;greeting;Welcome to the Emerald Isles. I will give you a premium account and a promotion just like the king in Varden: type premium or promocja.
 npc;nerys_imbuer;name;Enchantress Aniela
 npc;nerys_imbuer;greeting;Island pearls carry the power of saturations. Life leech, mana leech, crit, elements and protections.
+place;Wzgórza Goblinów;name;Goblin Hills
+place;Nory Goblinów;name;Goblin Burrows
+place;Wzgórza Hydr;name;Hydra Hills
+place;Legowiska Hydr;name;Hydra Lairs
+place;Wzgórza Smoków;name;Dragon Hills
+place;Smocze Pieczary;name;Dragon Caverns
