@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.259.0] - 2026-11-12
+
+### Dodano
+- Grafiki od właściciela (licencja nieznana, dodane na jego odpowiedzialność 2026-11-12; wpisy w `docs/CREDITS.md`, narzędzie
+  `tools/art/darekart_import.py`): nowe kamienie obiektu `rock` (szare, ciemne popękane i porośnięte mchem; trzy duże głazy rysowane
+  2x2 pola jak krzaki) i `snow_rock` (śnieżne), oraz złoty smok jako grafika potwora Wydmowy smok (`dune_drake`).
+- Kamienie z OTSP zastąpione tylko tam, gdzie nowe są wyraźnie lepsze. Nie użyto: chmur, run-kamieni z JPG, schodów i dachów (w paczkach
+  nie było pasujących), niczego z Tibii ani innych gier.
+- Test `StarQuestTest.theVardenHeraldStandsApartFromEveryOtherNpcAndIsReachable`, sceny gui-regression `rocks_grass` i `herald_talk`.
+
+### Naprawiono
+- Przycisk "Mów" w świątyni Varden otwierał kapłana zamiast Heralda Matthiasa (stali po przekątnej). Herold stoi teraz na kobiercu przed
+  ołtarzem (498,494), co najmniej 4 pola od każdego innego NPC; świat wygenerowany ponownie (zmienił się tylko `npcs.csv`).
+
 ## [0.258.0] - 2026-11-12
 
 ### Dodano

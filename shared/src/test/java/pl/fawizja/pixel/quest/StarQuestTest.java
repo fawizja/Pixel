@@ -316,6 +316,30 @@ class StarQuestTest {
     // ------------------------------------------------------------------ Herold w Varden
 
     @Test
+    void theVardenHeraldStandsApartFromEveryOtherNpcAndIsReachable() throws Exception {
+        Npc herald = npcs.get(StarQuest.HERALD);
+        assertNotNull(herald);
+        for (Npc n : npcs.all()) {
+            if (n == herald || n.position().z() != 0) continue;
+            int cheb = Math.max(Math.abs(n.position().x() - herald.position().x()), Math.abs(n.position().y() - herald.position().y()));
+            assertTrue(cheb >= 4, "the talk button must not pick " + n.key() + " instead of the herald (distance " + cheb + ")");
+        }
+        // stoi w swiatyni Varden i da sie do niego dojsc z miejsca odrodzenia
+        Position temple = world.town("Varden").temple();
+        assertTrue(Math.abs(herald.position().x() - temple.x()) <= 8 && Math.abs(herald.position().y() - temple.y()) <= 8, "inside the temple");
+        Set<Position> reach = explore(hero(Vocation.KNIGHT, 1), temple);
+        assertTrue(near(reach, herald.position()), "a player can walk up to the herald");
+        // przycisk "Mow" (najblizszy NPC) z pola obok herolda wskazuje herolda
+        Position beside = herald.position().translate(0, 1);
+        Npc nearest = null;
+        for (Npc n : npcs.all()) {
+            if (n.position().z() != 0) continue;
+            if (nearest == null || n.position().distanceTo(beside) < nearest.position().distanceTo(beside)) nearest = n;
+        }
+        assertEquals(StarQuest.HERALD, nearest.key());
+    }
+
+    @Test
     void theVardenHeraldSellsEveryBlessingAtOnceOnlyAfterTheSeal() {
         Npc herald = npcs.get(StarQuest.HERALD);
         assertNotNull(herald);

@@ -292,8 +292,12 @@ def build(ctx, cost, helpers):
     # Herold w swiatyni Varden
     herald = None
     taken = {(int(n[4]), int(n[5])) for n in ctx['npcs'] if int(n[6]) == 0}
-    for (x, y) in [(500, 497), (499, 497), (501, 497), (500, 496), (498, 497), (502, 497), (497, 497), (500, 500)]:
+    # Przycisk "Mow" otwiera najblizszego NPC, wiec herold stoi >= 4 pola (Chebyshev) od kazdego innego NPC z z=0:
+    # na kobiercu w apsydzie za oltarzem (kaplan stoi na (501,498), przewodnik na (496,499)).
+    for (x, y) in [(498, 494), (499, 494), (498, 495), (499, 495)]:
         c = world.get(x, y)
+        if min([max(abs(x - tx), abs(y - ty)) for (tx, ty) in taken] or [99]) < 4:
+            continue
         if F.walk(c) and c[2] == NONE and (x, y) not in taken and not any(
                 t[0] == x and t[1] == y and t[2] == 0 for t in ctx['transitions']):
             herald = (x, y)
