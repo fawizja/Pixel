@@ -11,7 +11,13 @@ import pl.fawizja.pixel.world.Position;
  */
 public record RemoteEntity(String kind, int id, String key, String name, Position position, int healthPercent, String mark,
                            String guild, boolean mounted, String pet, String title, int outfit, boolean pvpMode,
-                           int harmony, boolean serene) {
+                           int harmony, boolean serene, String access) {
+
+    public RemoteEntity(String kind, int id, String key, String name, Position position, int healthPercent, String mark,
+                        String guild, boolean mounted, String pet, String title, int outfit, boolean pvpMode,
+                        int harmony, boolean serene) {
+        this(kind, id, key, name, position, healthPercent, mark, guild, mounted, pet, title, outfit, pvpMode, harmony, serene, null);
+    }
 
     public RemoteEntity(String kind, int id, String key, String name, Position position, int healthPercent, String mark,
                         String guild, boolean mounted, String pet, String title, int outfit, boolean pvpMode) {

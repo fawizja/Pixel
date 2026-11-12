@@ -179,6 +179,7 @@ final class ServerWorld {
     private final Map<String, PlayerTrade> trades = new java.util.HashMap<>();
     private final pl.fawizja.pixel.guild.GuildRegistry guilds;
     private final Moderation moderation;
+    private final File adminLogDir;
     /** Zegar scienny dla banow i wyciszen (testy moga go podmienic). */
     volatile java.util.function.LongSupplier wallClock = System::currentTimeMillis;
     private final File guildFile;
@@ -231,6 +232,7 @@ final class ServerWorld {
         saves = new SaveStore(saveDir);
         accounts = new AccountStore(saveDir);
         moderation = new Moderation(saveDir);
+        adminLogDir = saveDir;
         guildFile = new File(saveDir, "guilds.txt");
         guilds = pl.fawizja.pixel.guild.GuildRegistry.decode(guildFile.isFile()
                 ? new String(java.nio.file.Files.readAllBytes(guildFile.toPath()), java.nio.charset.StandardCharsets.UTF_8) : null);
@@ -1957,7 +1959,7 @@ final class ServerWorld {
         broadcastInfo(p, () -> p.name() + Messages.get("server_world.wchodzi_do_gry"));
         tellFriends(p, Messages.get("server_world.jest_teraz_w_grze"), lastNow);
         List<String> on = new ArrayList<>();
-        for (String n : pc.friends().names()) if (find(n) != null) on.add(find(n).name());
+        for (String n : pc.friends().names()) if (find(n) != null && !hiddenFrom(find(n), p)) on.add(find(n).name());
         if (!on.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.znajomi_w_grze") + String.join(", ", on));
         if (!motd.isEmpty()) s.log().add(lastNow, EventLog.Kind.SYSTEM, Messages.get("server_world.wiadomosc_dnia") + motd);
         if (expEventPercent > 0) s.log().add(lastNow, EventLog.Kind.SYSTEM, expEventLine(lastNow));
@@ -2674,7 +2676,7 @@ final class ServerWorld {
             }
             case "INSPECT": {
                 ServerPlayer o = f.length < 2 ? null : find(f[1].trim());
-                if (o == null) {
+                if (o == null || hiddenFrom(o, p)) {
                     warn(p, Messages.get("server_world.nie_ma_takiego_gracza"), now);
                     break;
                 }
@@ -2738,13 +2740,18 @@ final class ServerWorld {
             case "ADMIN":
                 if (!moderation.isAdmin(p.name())) {
                     warn(p, Messages.get("server_world.brak_uprawnien_administratora"), now);
+                    adminLog(p.name() + " [" + moderation.level(p.name()).tag() + "] " + String.join(" ", f) + " -> REFUSED (not staff)");
                     break;
                 }
                 String[] cmd = new String[f.length - 1];
                 System.arraycopy(f, 1, cmd, 0, cmd.length);
-                String answer = moderate(cmd, p.name(), now);
+                String answer = moderate(cmd, p.name(), now, moderation.isGod(p.name()));
                 info(p, answer, now);
-                LOG.info("admin " + p.name() + ": " + String.join(" ", cmd) + " -> " + answer);
+                adminLog(p.name() + " [" + moderation.level(p.name()).tag() + "] " + String.join(" ", f) + " -> " + answer.replace('\n', '|'));
+                break;
+            case "GOD":
+                // polecenia GOD/GM/tutora: poziom liczy serwer z plikow operatora, nigdy z komunikatu klienta
+                pl.fawizja.pixel.admin.GodCommands.execute(new GodHost(p, now), f);
                 break;
             case "GCHAT":
                 if (f.length > 1 && !f[1].isBlank()) {
@@ -2813,7 +2820,7 @@ final class ServerWorld {
      * BAN imie godziny (0 = na stale), UNBAN imie, MUTE imie minuty (0 = zdejmij), ADMIN imie (tylko konsola),
      * WHO. Zwraca odpowiedz dla wydajacego polecenie.
      */
-    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT, SHUTDOWN, REPORTS";
+    static final String COMMANDS = "SAY, KICK, BAN, UNBAN, MUTE, WHO, INVASION, STATUS, SAVE, MOTD, EXPEVENT, SHUTDOWN, REPORTS, ADMIN, GOD, UNGOD, RELOAD";
 
     /** Progi ostrzezen przed wylaczeniem (ms do konca), malejaco. */
     static final long[] SHUTDOWN_WARN = {30 * 60_000L, 15 * 60_000L, 10 * 60_000L, 5 * 60_000L, 3 * 60_000L, 2 * 60_000L, 60_000L, 30_000L, 10_000L};
@@ -2827,8 +2834,8 @@ final class ServerWorld {
     boolean shutdownDone() { return shutdownDone; }
 
     /** SHUTDOWN [minuty | Ns] (domyslnie 5 min), SHUTDOWN - odwoluje. */
-    private String shutdown(String[] c, String by, long now) {
-        if (!by.equals("konsola")) return Messages.get("server_world.wylaczenie_serwera_planuje_tyl");
+    private String shutdown(String[] c, boolean god, long now) {
+        if (!god) return Messages.get("server_world.wylaczenie_serwera_planuje_tyl");
         String arg = c.length > 1 ? c[1].trim().toLowerCase(java.util.Locale.ROOT) : "5";
         if (arg.equals("-")) {
             if (shutdownAt < 0) return Messages.get("server_world.nie_zaplanowano_wylaczenia");
@@ -2888,7 +2895,10 @@ final class ServerWorld {
                 shutdownAt < 0 ? "" : Messages.get("server_world.wylaczenie_za_2") + describeLeft(Math.max(0, shutdownAt - now)));
     }
 
-    String moderate(String[] c, String by, long now) {
+    String moderate(String[] c, String by, long now) { return moderate(c, by, now, by.equals("konsola")); }
+
+    /** god = wydajacy ma poziom GOD albo to konsola operatora (wylaczenie serwera, nadawanie GOD). */
+    String moderate(String[] c, String by, long now, boolean god) {
         if (c.length == 0) return Messages.get("server_world.polecenia") + COMMANDS;
         long wall = wallClock.getAsLong();
         try {
@@ -2929,6 +2939,26 @@ final class ServerWorld {
                     if (c.length < 2) return Messages.get("server_world.podaj_imie");
                     moderation.addAdmin(c[1].trim());
                     return Messages.get("server_world.dodano_administratora") + c[1].trim() + ".";
+                case "GOD": {
+                    // nadanie GOD-a: tylko konsola operatora (albo istniejacy GOD); nic nie jest wpisane na stale w kodzie
+                    if (!god) return Messages.get("god.console_only");
+                    if (c.length < 2) return Messages.get("server_world.podaj_imie");
+                    moderation.addGod(c[1].trim());
+                    LOG.info("GOD granted to " + c[1].trim() + " by " + by);
+                    adminLog(by + " GOD " + c[1].trim() + " -> granted");
+                    return Messages.get("god.granted", c[1].trim());
+                }
+                case "UNGOD": {
+                    if (!god) return Messages.get("god.console_only");
+                    if (c.length < 2) return Messages.get("server_world.podaj_imie");
+                    boolean was = moderation.removeGod(c[1].trim());
+                    adminLog(by + " UNGOD " + c[1].trim() + " -> " + (was ? "removed" : "not a god"));
+                    return Messages.get(was ? "god.revoked" : "god.not_god", c[1].trim());
+                }
+                case "RELOAD":
+                    if (!god) return Messages.get("god.console_only");
+                    moderation.reload();
+                    return Messages.get("god.reloaded");
                 case "INVASION":
                     return startInvasion(c.length > 1 ? c[1] : null, now);
                 case "STATUS":
@@ -2939,7 +2969,7 @@ final class ServerWorld {
                 case "EXPEVENT":
                     return expEvent(c, now);
                 case "SHUTDOWN":
-                    return shutdown(c, by, now);
+                    return shutdown(c, god, now);
                 case "REPORTS":
                     return recentReports(5);
                 case "SAVE":
@@ -2957,6 +2987,70 @@ final class ServerWorld {
             return Messages.get("server_world.czas_musi_byc_liczba");
         } catch (IOException e) {
             return Messages.get("server_world.blad_zapisu") + e.getMessage();
+        }
+    }
+
+    /** Czy {@code target} jest ukryty przed {@code viewer}em: GOD w trybie ducha widzi tylko GOD. */
+    private static boolean hiddenFrom(ServerPlayer target, ServerPlayer viewer) {
+        return target != viewer && target.session.character().isGhost()
+                && !viewer.session.character().accessLevel().atLeast(pl.fawizja.pixel.admin.AccessLevel.GOD);
+    }
+
+    /** Poziom dostepu postaci z plikow operatora (admins.txt, gods.txt); zmiana plikow + RELOAD dziala bez wylogowania. */
+    private void syncAccess(ServerPlayer p) {
+        pl.fawizja.pixel.admin.AccessLevel lv = moderation.level(p.name());
+        PlayerCharacter pc = p.session.character();
+        if (pc.accessLevel() != lv) pc.setAccessLevel(lv);
+    }
+
+    /** Dziennik administratora: kazde polecenie GOD/GM (takze odmowy) z czasem; plik admin.log obok admins.txt. */
+    void adminLog(String line) {
+        LOG.info("admin: " + line);
+        try {
+            String text = java.time.Instant.ofEpochMilli(wallClock.getAsLong()) + " " + line + "\n";
+            java.nio.file.Files.write(new File(adminLogDir, "admin.log").toPath(), text.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            LOG.warning("admin log not written: " + e.getMessage());
+        }
+    }
+
+    /** Polecenia GOD wykonywane na serwerze w imieniu gracza p (jego jezyk, jego poziom z plikow operatora). */
+    private final class GodHost implements pl.fawizja.pixel.admin.GodCommands.Context {
+        private final ServerPlayer p;
+        private final long now;
+
+        GodHost(ServerPlayer p, long now) {
+            this.p = p;
+            this.now = now;
+        }
+
+        @Override public pl.fawizja.pixel.admin.AccessLevel level() { return moderation.level(p.name()); }
+        @Override public GameSession session() { return p.session; }
+        @Override public long now() { return now; }
+        @Override public boolean online() { return true; }
+
+        @Override
+        public GameSession find(String name) {
+            ServerPlayer o = ServerWorld.this.find(name);
+            return o == null || hiddenFrom(o, p) && o != p ? null : o.session;
+        }
+
+        @Override public void audit(String line) { adminLog(line); }
+
+        @Override public void broadcast(String text) { moderate(new String[] {"SAY", text}, p.name(), now, true); }
+
+        @Override public String invasion(String town) { return startInvasion(town, now); }
+
+        @Override public void save() { saveAll(); }
+
+        @Override public String shutdown(String arg) { return ServerWorld.this.shutdown(arg == null ? new String[] {"SHUTDOWN"} : new String[] {"SHUTDOWN", arg}, true, now); }
+
+        @Override
+        public void notify(GameSession to, String key, Object... args) {
+            ServerPlayer o = bySession(to);
+            if (o == null) return;
+            Messages.runAs(o.language, () -> o.session.log().add(now, EventLog.Kind.INFO, Messages.get(key, args)));
         }
     }
 
@@ -2991,7 +3085,7 @@ final class ServerWorld {
     /** Wybor gracza do ataku: zasady sprawdzane od razu, by gracz dostal czytelna odpowiedz. */
     void attackPlayer(ServerPlayer p, int id, long now) {
         ServerPlayer t = players.get(id);
-        if (t == null) {
+        if (t == null || hiddenFrom(t, p)) {
             p.pvpTarget = -1;
             return;
         }
@@ -3060,6 +3154,7 @@ final class ServerWorld {
             expireOrders(now);
             weeklyRollover(now);
         }
+        for (ServerPlayer p : players.values()) syncAccess(p);
         for (ServerPlayer p : players.values()) Messages.runAs(p.language, () -> p.session.update(now, p.move));
         bossQuests.update(bossHeroes(), now);
         long wall = wallClock.getAsLong();
@@ -3355,6 +3450,13 @@ final class ServerWorld {
                 p.client.send("CHAL", chLine); // stan wyzwania ze zwoju (zmienia sie co sekunde)
                 p.lastChallenge = chLine;
             }
+            // poziom dostepu (znacznik GOD, duch, tryb boga) - tylko po zmianie
+            PlayerCharacter me0 = p.session.character();
+            String accessLine = Protocol.line("ACCESS", me0.accessLevel().name(), me0.isGhost() ? "1" : "0", me0.isGodMode() ? "1" : "0");
+            if (!accessLine.equals(p.lastAccess)) {
+                p.client.send(Protocol.parse(accessLine));
+                p.lastAccess = accessLine;
+            }
             // tryb PvP, czaszka i blokada PZ (czas serwera) - tylko po zmianie
             // PVP tryb czaszka czaszkaDo blokadaPzDo blokadaWylogowaniaDo
             String pvpLine = Protocol.line("PVP", p.session.pvpMode() ? "1" : "0", p.pvp.skull(now).name(),
@@ -3374,6 +3476,7 @@ final class ServerWorld {
             for (ServerPlayer o : players.values()) {
                 Position op = o.session.character().position();
                 if (o == p || op.z() != me.z() || op.distanceTo(me) > Protocol.VIEW_RADIUS) continue;
+                if (hiddenFrom(o, p)) continue; // GOD w trybie ducha jest niewidoczny dla graczy
                 PlayerCharacter oc = o.session.character();
                 frame.append(Protocol.line("PL", String.valueOf(o.id), oc.name(), oc.vocation().name(),
                         String.valueOf(op.x()), String.valueOf(op.y()), String.valueOf(op.z()),
@@ -3384,7 +3487,8 @@ final class ServerWorld {
                         o.session.pvpMode() ? "P" : "-",
                         // harmonia mnicha pod paskami nad postacia (jak w Tibii)
                         oc.vocation() == pl.fawizja.pixel.vocation.Vocation.MONK
-                                ? pl.fawizja.pixel.net.RemoteEntity.harmonyField(oc.harmony().points(), oc.harmony().serene()) : "-"))
+                                ? pl.fawizja.pixel.net.RemoteEntity.harmonyField(oc.harmony().points(), oc.harmony().serene()) : "-",
+                        oc.accessLevel().staff() ? oc.accessLevel().tag() : "-")) // znacznik GOD/GM/TUTOR nad imieniem
                         .append('\n');
             }
             for (Monster m : monsters.near(me, Protocol.VIEW_RADIUS)) {

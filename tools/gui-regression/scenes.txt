@@ -314,3 +314,5 @@ star_void_start|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 
 star_void_boss|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.premium=1 -Dpixel.level=300 -Dpixel.teleport=214,949,-3
 rocks_grass|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=422,290,0
 herald_talk|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,495,0 -Dpixel.button=talk
+god_komendy|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.chat=/komendy
+god_tag|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.conTab=1 -Dpixel.chat=/ghost

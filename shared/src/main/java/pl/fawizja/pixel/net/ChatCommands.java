@@ -17,6 +17,9 @@ import pl.fawizja.pixel.i18n.Messages;
  * Rynek: "/rynek [szukaj]" -> MARKET LIST [tekst], "/rynek wystaw 5 wilcze futro 300" -> MARKET SELL,
  * "/rynek kup|wycofaj 12" -> MARKET BUY|CANCEL 12. Zamowienia: "/kupię 20 wilcze futro 2000" -> WANT ADD,
  * "/kupię" -> WANT LIST, "/kupię anuluj 3" -> WANT CANCEL 3, "/sprzedaj 3" -> WANT FILL 3. Poczta: "/wyslij Imie, 5 wilcze futro" -> MAIL SEND imie tekst.
+ * GOD (Canary): "/komendy" -> GOD HELP, "/i miecz 3" -> GOD ITEM "miecz 3", "/m wilk" -> GOD MONSTER, "/goto Imie|x,y,z" -> GOD GOTO,
+ * "/ghost", "/level N", "/flag Imie, flaga" itd. (tabela w {@link pl.fawizja.pixel.admin.GodCommands}); "/broadcast" = "/ogloszenie",
+ * "/raid" = "/inwazja", "/save" = "/zapisz", "/shutdown [min]" -> ADMIN SHUTDOWN.
  * Polecenia mozna pisac z polskimi znakami albo bez ("/zaproś" = "/zapros").
  * Hasla nigdy nie trafiaja na czat - bledne polecenie zwraca null (nic nie jest wysylane).
  */
@@ -161,7 +164,8 @@ public final class ChatCommands {
             case "/d":
                 return w.length >= 2 ? new String[] {"PCHAT", rest(t)} : null;
             default:
-                return null;
+                // polecenia GOD / game mastera (/i, /m, /goto, /ghost, /komendy...): serwer sprawdza poziom dostepu
+                return pl.fawizja.pixel.admin.GodCommands.parse(t);
         }
     }
 

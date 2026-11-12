@@ -541,9 +541,49 @@ public final class PlayerCharacter {
 
     /** Niewidzialnosc (utana vid): potwory nie widza postaci. */
     public void setInvisible(long ms) { invisibleMs = Math.max(0, ms); }
-    public boolean isInvisible() { return invisibleMs > 0; }
+    public boolean isInvisible() { return invisibleMs > 0 || ghost; }
     public long invisibleMs() { return invisibleMs; }
-    /** Atak konczy niewidzialnosc; true, gdy byla. */
+
+    // ---- poziom dostepu (GOD / GM / tutor): stan tylko w pamieci, nie trafia do zapisu postaci
+    private pl.fawizja.pixel.admin.AccessLevel access = pl.fawizja.pixel.admin.AccessLevel.PLAYER;
+    private boolean ghost;
+    private boolean godMode;
+
+    /** Poziom dostepu nadany przez serwer albo wlasciciela gry lokalnej (nie z zapisu postaci). */
+    public pl.fawizja.pixel.admin.AccessLevel accessLevel() { return access; }
+
+    public void setAccessLevel(pl.fawizja.pixel.admin.AccessLevel level) {
+        access = level == null ? pl.fawizja.pixel.admin.AccessLevel.PLAYER : level;
+        if (!access.atLeast(pl.fawizja.pixel.admin.AccessLevel.GOD)) {
+            ghost = false;
+            godMode = false;
+        }
+    }
+
+    /** Duch (/ghost): niewidoczny dla graczy i potworow; tylko GOD. */
+    public boolean isGhost() { return ghost; }
+
+    public void setGhost(boolean on) { ghost = on && access.atLeast(pl.fawizja.pixel.admin.AccessLevel.GOD); }
+
+    /** Tryb boga (/godmode): brak obrazen; tylko GOD. */
+    public boolean isGodMode() { return godMode; }
+
+    public void setGodMode(boolean on) { godMode = on && access.atLeast(pl.fawizja.pixel.admin.AccessLevel.GOD); }
+
+    /** Poziom ustawiony wprost (GOD /level): doswiadczenie na progu poziomu, zdrowie i mana do pelna. */
+    public void godSetLevel(int newLevel) {
+        level = Math.max(1, Math.min(Balance.MAX_LEVEL, newLevel));
+        experience = Balance.experienceForLevel(level);
+        health = maxHealth();
+        mana = maxMana();
+    }
+
+    /** Zdrowie i mana ustawione wprost (GOD /sethp, /setmana). */
+    public void godSetHealth(int hp) { health = Math.max(1, Math.min(maxHealth(), hp)); }
+
+    public void godSetMana(int mp) { mana = Math.max(0, Math.min(maxMana(), mp)); }
+
+    /** Atak konczy niewidzialnosc (ducha GOD-a nie); true, gdy byla. */
     public boolean breakInvisibility() {
         boolean was = invisibleMs > 0;
         invisibleMs = 0;
@@ -793,6 +833,7 @@ public final class PlayerCharacter {
     public int damage(int amount) {
         lastShieldAbsorbed = 0;
         if (amount <= 0 || isDead()) return 0;
+        if (godMode || ghost) return 0; // GOD: tryb boga albo duch nie odnosza obrazen
         if (magicShieldMs > 0 && magicShield > 0 && mana > 0) {
             // tarcza many jak w Tibii 12+: obrazenia zabieraja mane, az wyczerpie sie pojemnosc tarczy
             int absorbed = Math.min(amount, Math.min(magicShield, mana));

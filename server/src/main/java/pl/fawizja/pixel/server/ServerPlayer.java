@@ -32,6 +32,8 @@ final class ServerPlayer {
     String lastChallenge = "-";
     /** Ostatnio wyslany wiersz PVP (tryb, czaszka, blokada PZ). */
     String lastPvp;
+    /** Ostatnio wyslany wiersz ACCESS (poziom dostepu, duch, tryb boga). */
+    String lastAccess;
     /** Gracz oglosil, ze szuka druzyny (/szukam; tylko w pamieci). */
     boolean lookingForParty;
     /** Klient sie rozlaczyl, ale postac zostaje w swiecie do konca blokady wylogowania (walka z graczem). */

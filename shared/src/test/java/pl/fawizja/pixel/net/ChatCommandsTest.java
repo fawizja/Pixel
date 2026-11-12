@@ -91,4 +91,54 @@ class ChatCommandsTest {
             if (r.length > 3) assertEquals("cmd:" + r[0], r[3], "a tap runs the listed command");
         }
     }
+
+    @Test
+    void godCommandsParseToGodMessagesWithCanaryShortFormsAndPolishAliases() {
+        assertArrayEquals(new String[] {"GOD", "ITEM", "miecz 3"}, ChatCommands.toMessage("/i miecz 3"));
+        assertArrayEquals(new String[] {"GOD", "ITEM", "gold coin 100"}, ChatCommands.toMessage("/item gold coin 100"));
+        assertArrayEquals(new String[] {"GOD", "ITEM", "miecz"}, ChatCommands.toMessage("/przedmiot miecz"));
+        assertNull(ChatCommands.toMessage("/i"), "an item needs a name");
+        assertArrayEquals(new String[] {"GOD", "MONSTER", "Stary Wilk"}, ChatCommands.toMessage("/m Stary Wilk"));
+        assertArrayEquals(new String[] {"GOD", "AHEAD", "5"}, ChatCommands.toMessage("/a 5"));
+        assertNull(ChatCommands.toMessage("/a"));
+        assertArrayEquals(new String[] {"GOD", "UP"}, ChatCommands.toMessage("/up"));
+        assertArrayEquals(new String[] {"GOD", "DOWN"}, ChatCommands.toMessage("/Down"));
+        assertArrayEquals(new String[] {"GOD", "GOTO", "Stary Wilk"}, ChatCommands.toMessage("/goto Stary Wilk"));
+        assertArrayEquals(new String[] {"GOD", "GOTO", "501,499,0"}, ChatCommands.toMessage("/goto 501,499,0"));
+        assertArrayEquals(new String[] {"GOD", "BRING", "Ola"}, ChatCommands.toMessage("/c Ola"));
+        assertArrayEquals(new String[] {"GOD", "TEMPLE"}, ChatCommands.toMessage("/t"));
+        assertArrayEquals(new String[] {"GOD", "TEMPLE", "Varden"}, ChatCommands.toMessage("/t Varden"));
+        assertArrayEquals(new String[] {"GOD", "GHOST"}, ChatCommands.toMessage("/ghost"));
+        assertArrayEquals(new String[] {"GOD", "GHOST"}, ChatCommands.toMessage("/duch"));
+        assertArrayEquals(new String[] {"GOD", "GODMODE", "off"}, ChatCommands.toMessage("/godmode off"));
+        assertArrayEquals(new String[] {"GOD", "LEVEL", "300"}, ChatCommands.toMessage("/level 300"));
+        assertArrayEquals(new String[] {"GOD", "ADDEXP", "5k"}, ChatCommands.toMessage("/addexp 5k"));
+        assertArrayEquals(new String[] {"GOD", "ADDSKILL", "miecz 10"}, ChatCommands.toMessage("/addskill miecz 10"));
+        assertArrayEquals(new String[] {"GOD", "SETHP", "100"}, ChatCommands.toMessage("/sethp 100"));
+        assertArrayEquals(new String[] {"GOD", "SETMANA", "50"}, ChatCommands.toMessage("/setmana 50"));
+        assertArrayEquals(new String[] {"GOD", "HEAL"}, ChatCommands.toMessage("/heal"));
+        assertArrayEquals(new String[] {"GOD", "MONEY", "2kk"}, ChatCommands.toMessage("/money 2kk"));
+        assertArrayEquals(new String[] {"GOD", "PREMIUM", "Ola 30"}, ChatCommands.toMessage("/premium Ola 30"));
+        assertArrayEquals(new String[] {"GOD", "PROMOTE", "Ola"}, ChatCommands.toMessage("/promote Ola"));
+        assertArrayEquals(new String[] {"GOD", "BLESS", "Stary Wilk"}, ChatCommands.toMessage("/bless Stary Wilk"));
+        assertArrayEquals(new String[] {"GOD", "FLAG", "Ola, star_sealed"}, ChatCommands.toMessage("/flag Ola, star_sealed"));
+        assertArrayEquals(new String[] {"GOD", "CLEAN"}, ChatCommands.toMessage("/clean"));
+        assertArrayEquals(new String[] {"GOD", "KILL"}, ChatCommands.toMessage("/zabij"));
+        assertArrayEquals(new String[] {"GOD", "SPEED", "400"}, ChatCommands.toMessage("/speed 400"));
+        assertArrayEquals(new String[] {"GOD", "INFO", "Ola"}, ChatCommands.toMessage("/info Ola"));
+        assertArrayEquals(new String[] {"GOD", "POS"}, ChatCommands.toMessage("/pos"));
+        assertArrayEquals(new String[] {"GOD", "HELP"}, ChatCommands.toMessage("/komendy"));
+        assertArrayEquals(new String[] {"GOD", "HELP"}, ChatCommands.toMessage("/Komendy"));
+        // aliasy istniejacych polecen administratora
+        assertArrayEquals(new String[] {"ADMIN", "SAY", "restart"}, ChatCommands.toMessage("/broadcast restart"));
+        assertArrayEquals(new String[] {"ADMIN", "INVASION"}, ChatCommands.toMessage("/raid"));
+        assertArrayEquals(new String[] {"ADMIN", "INVASION", "Varden"}, ChatCommands.toMessage("/raid Varden"));
+        assertArrayEquals(new String[] {"ADMIN", "SAVE"}, ChatCommands.toMessage("/save"));
+        assertArrayEquals(new String[] {"ADMIN", "SHUTDOWN", "10"}, ChatCommands.toMessage("/shutdown 10"));
+        assertArrayEquals(new String[] {"ADMIN", "SHUTDOWN"}, ChatCommands.toMessage("/shutdown"));
+        // zwykly czat i znane polecenia sie nie zmieniaja
+        assertArrayEquals(new String[] {"CHAT", "i miecz"}, ChatCommands.toMessage("i miecz"));
+        assertArrayEquals(new String[] {"ADMIN", "WHO"}, ChatCommands.toMessage("/kto"));
+        assertNull(ChatCommands.toMessage("/ighost"));
+    }
 }

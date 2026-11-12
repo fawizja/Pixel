@@ -145,12 +145,24 @@ public final class GameScreen extends ScreenAdapter {
         boolean mounted;
         String pet;
         String title;
+        /** Znacznik poziomu dostepu z serwera ("GOD", "GM", "TUTOR") albo null. */
+        String access;
         int outfit;
         /** Harmonia mnicha z serwera (0..5, -1 = nie mnich) i spokoj - kropki pod paskami. */
         int harmony = -1;
         boolean serene;
         final pl.fawizja.pixel.client.render.PetFollower petFollower = new pl.fawizja.pixel.client.render.PetFollower();
         boolean seen;
+    }
+
+    /** Kolor imienia personelu: GOD zloty, GM niebieski, tutor zielony; null dla zwyklego gracza. */
+    private static float[] staffTint(pl.fawizja.pixel.admin.AccessLevel l) {
+        switch (l) {
+            case GOD: return new float[] {1f, 0.82f, 0.2f};
+            case GAMEMASTER: return new float[] {0.4f, 0.85f, 1f};
+            case TUTOR: return new float[] {0.55f, 1f, 0.55f};
+            default: return null;
+        }
     }
 
     /** Wlasny pupil i czas ostatniej klatki (plynne podazanie). */
@@ -275,6 +287,8 @@ public final class GameScreen extends ScreenAdapter {
         if (net == null) monsters.populate(pc.position()); // online: potwory przychodza z serwera
         this.session = new GameSession(game.items(), game.world(), pc, monsters, new Random(seed + 1),
                 game.startingConfig().startLevel());
+        // gra lokalna jako GOD: tylko na zyczenie wlasciciela (-Dpixel.god=true, PIXEL_GOD=1 albo plik god.enabled); online decyduje serwer
+        if (net == null) pc.setAccessLevel(pl.fawizja.pixel.admin.LocalGod.level(game.platform().saveDirectory()));
         if (net != null) {
             // druzyna, znajomi i informacje o graczach: API sesji wysyla prosby do serwera
             session.setSocialLink(new pl.fawizja.pixel.social.SocialClient.Link() {
@@ -834,6 +848,53 @@ public final class GameScreen extends ScreenAdapter {
         }
     }
 
+    /** Polecenia GOD w grze lokalnej: poziom z {@link pl.fawizja.pixel.admin.LocalGod}, bez serwera. */
+    private final class LocalGodHost implements pl.fawizja.pixel.admin.GodCommands.Context {
+        @Override public pl.fawizja.pixel.admin.AccessLevel level() { return session.character().accessLevel(); }
+        @Override public pl.fawizja.pixel.game.GameSession session() { return session; }
+        @Override public long now() { return GameScreen.this.now(); }
+        @Override public boolean online() { return false; }
+
+        @Override
+        public pl.fawizja.pixel.game.GameSession find(String name) {
+            return name != null && name.trim().equalsIgnoreCase(session.character().name()) ? session : null;
+        }
+
+        @Override public void audit(String line) { Gdx.app.log("god", line); }
+
+        @Override
+        public void broadcast(String text) {
+            session.log().add(now(), EventLog.Kind.SYSTEM, "[" + Messages.get("server_world.ogloszenie") + "] " + text);
+        }
+
+        @Override public void save() { game.saveCharacter(session.character()); }
+
+        @Override
+        public String shutdown(String arg) {
+            game.saveCharacter(session.character());
+            Gdx.app.exit();
+            return Messages.get("god.local_exit");
+        }
+    }
+
+    private static final int COMMANDS_PER_PAGE = 16;
+
+    /** Okno /komendy: polecenia poziomu dostepu, po 16 na strone (zakladki "1", "2", ... pod lista). */
+    private void openCommandList(int page) {
+        pl.fawizja.pixel.admin.AccessLevel lv = session.character().accessLevel();
+        java.util.List<String[]> all = pl.fawizja.pixel.admin.GodCommands.helpRows(lv);
+        int pages = Math.max(1, (all.size() + COMMANDS_PER_PAGE - 1) / COMMANDS_PER_PAGE);
+        int p = Math.max(1, Math.min(pages, page));
+        java.util.List<String[]> rows = new java.util.ArrayList<>(all.subList((p - 1) * COMMANDS_PER_PAGE, Math.min(all.size(), p * COMMANDS_PER_PAGE)));
+        if (pages > 1) {
+            for (int i = 1; i <= pages; i++) rows.add(new String[] {String.valueOf(i), "", "", "cmd:/komendy " + i, i == p ? "tab_on" : "tab"});
+        }
+        hud.openInfo(Messages.get("god.window_title", lv.label()), rows);
+    }
+
+    /** Wpisuje tekst w czacie tak jak gracz (narzedzia: -Dpixel.chat="/komendy;/i miecz"). */
+    public void chat(String text) { sendChat(text); }
+
     private void sendChat(String text) {
         if (text == null || text.isBlank()) return;
         // zakladka kanalu (Handel, Gildia, Druzyna, rozmowa prywatna): zwykly tekst idzie na jej kanal
@@ -875,8 +936,19 @@ public final class GameScreen extends ScreenAdapter {
             openHunt();
             return;
         }
+        if (cmd.matches("/(komendy|commands)( \\d+)?")) {
+            // lista polecen poziomu dostepu (GOD/GM/tutor) w oknie ze stronami; serwer i tak sprawdza poziom przy kazdym poleceniu
+            openCommandList(cmd.contains(" ") ? Integer.parseInt(cmd.substring(cmd.indexOf(' ') + 1)) : 1);
+            return;
+        }
         if (cmd.equals("/pomoc") || cmd.equals("/polecenia") || cmd.equals("/help")) {
             hud.openInfo(Messages.get("game_screen.polecenia"), pl.fawizja.pixel.net.ChatCommands.helpRows());
+            // personel (GOD/GM/tutor): pod oknem tez lista polecen jego poziomu (/komendy)
+            if (cmd.equals("/help") && session.character().accessLevel().staff()) {
+                for (String l : pl.fawizja.pixel.admin.GodCommands.helpLines(session.character().accessLevel())) {
+                    session.log().add(now(), EventLog.Kind.INFO, l);
+                }
+            }
             return;
         }
         if (cmd.equals("/nowosci") || cmd.equals("/nowości") || cmd.equals("/zmiany")) {
@@ -1050,6 +1122,11 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         String[] social = pl.fawizja.pixel.net.ChatCommands.toMessage(text);
+        if (net == null && social != null && (social[0].equals("GOD") || social[0].equals("ADMIN"))) {
+            // gra lokalna: te same polecenia co na serwerze; poziom z flagi wlasciciela (zwykly gracz dostaje odmowe)
+            pl.fawizja.pixel.admin.GodCommands.execute(new LocalGodHost(), social);
+            return;
+        }
         if (session.social().command(social)) return; // /zaproś, /przyjmij, /drużyna, /znajomi dodaj ... (API sesji)
         if (net == null && social != null && social[0].equals("FRIEND")) {
             hud.openFriends(session.friends()); // offline: lista z zapisu postaci
@@ -3014,10 +3091,13 @@ public final class GameScreen extends ScreenAdapter {
             // imie zielone jak w Tibii (druzyna niebieska); czaszka PvP rysowana osobno pod paskami
             if (ally) font.setColor(0.45f, 0.75f, 1f, 1f);
             else font.setColor(PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], 1f);
-            String label = rp.name + (ally ? Messages.get("game_screen.druzyna") : "")
+            pl.fawizja.pixel.admin.AccessLevel rpLevel = pl.fawizja.pixel.admin.AccessLevel.fromTag(rp.access);
+            String label = (rpLevel.staff() ? "[" + rpLevel.tag() + "] " : "") + rp.name + (ally ? Messages.get("game_screen.druzyna") : "")
                     + (rp.guild == null ? "" : " <" + rp.guild + ">");
             nameLayout.setText(font, label);
             float lx = projected.x - nameLayout.width / 2f;
+            float[] rpTint = staffTint(rpLevel);
+            if (rpTint != null) font.setColor(rpTint[0], rpTint[1], rpTint[2], 1f);
             Color nameColor = font.getColor().cpy();
             // ciemny obrys: imie czytelne tez na jasnej podlodze
             outlined(batch, font, label, lx, projected.y, nameColor.r, nameColor.g, nameColor.b, ui);
@@ -3044,9 +3124,12 @@ public final class GameScreen extends ScreenAdapter {
             float ox = session.renderX(t), oy = worldRenderer.worldY(session.renderY(t));
             String sk = self.skull(t).name();
             projected.y = nameYAbove(ox, oy + 1.06f + BAR_TOP, font, ui);
-            String label = self.name();
+            pl.fawizja.pixel.admin.AccessLevel myLevel = self.accessLevel();
+            String label = (myLevel.staff() ? "[" + myLevel.tag() + "] " : "") + self.name();
             nameLayout.setText(font, label);
-            outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y, PLAYER_NAME[0], PLAYER_NAME[1], PLAYER_NAME[2], ui);
+            float[] myTint = staffTint(myLevel);
+            outlined(batch, font, label, projected.x - nameLayout.width / 2f, projected.y,
+                    myTint != null ? myTint[0] : PLAYER_NAME[0], myTint != null ? myTint[1] : PLAYER_NAME[1], myTint != null ? myTint[2] : PLAYER_NAME[2], ui);
             float myBarBottom = oy + 1.06f - 0.075f - 0.04f;
             float myDrop = self.vocation() == Vocation.MONK
                     ? drawHarmonyUnderBars(batch, self.harmony().points(), self.harmony().serene(), ox, myBarBottom, ui) : 0;
@@ -3300,6 +3383,7 @@ public final class GameScreen extends ScreenAdapter {
                 rp.outfit = e.outfit();
                 rp.harmony = e.harmony();
                 rp.serene = e.serene();
+                rp.access = e.access();
                 rp.seen = true;
             }
             Map<String, String> skulls = new java.util.HashMap<>();
@@ -3426,6 +3510,16 @@ public final class GameScreen extends ScreenAdapter {
                 case "CHAL":
                     hud.setOnlineChallenge(m.length > 1 ? m[1] : null);
                     break;
+                case "ACCESS": {
+                    // ACCESS poziom duch tryb_boga: tylko do wyswietlania (znacznik GOD, przezroczystosc); decyduje serwer
+                    if (m.length < 4) break;
+                    pl.fawizja.pixel.admin.AccessLevel lv = pl.fawizja.pixel.admin.AccessLevel.parse(m[1]);
+                    pl.fawizja.pixel.character.PlayerCharacter me = session.character();
+                    me.setAccessLevel(lv);
+                    me.setGhost("1".equals(m[2]));
+                    me.setGodMode("1".equals(m[3]));
+                    break;
+                }
                 case "LOOTLOG":
                     showLoot(pl.fawizja.pixel.combat.DeathRecap.decode(m, 1));
                     break;

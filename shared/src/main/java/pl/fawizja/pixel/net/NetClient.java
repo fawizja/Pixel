@@ -171,7 +171,8 @@ public final class NetClient implements AutoCloseable {
                                 f.length > 13 ? pl.fawizja.pixel.character.Outfit.clamp(intOr(f[13], 0)) : 0,
                                 f.length > 14 && f[14].equals("P"),
                                 f.length > 15 ? RemoteEntity.harmonyPoints(f[15]) : -1,
-                                f.length > 15 && RemoteEntity.harmonySerene(f[15])));
+                                f.length > 15 && RemoteEntity.harmonySerene(f[15]),
+                                f.length > 16 && !f[16].equals("-") ? f[16] : null)); // znacznik GOD/GM/TUTOR
                         break;
                     case "MO":
                         // f[7] (od 0.54.0): "E" = odmiana elitarna

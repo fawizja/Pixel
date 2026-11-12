@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Poziomy dostępu jak w Canary: gracz, tutor, game master i GOD (`admin/AccessLevel`). Istniejący administratorzy z `admins.txt` są game masterami
+  (moderacja jak dotąd); wpis `Imię:tutor` albo `Imię:god` nadaje inny poziom. Nowy plik `gods.txt` obok `admins.txt` (imię w linii) daje GOD-a.
+  Nic nie jest wpisane na stałe w kodzie: żadnego konta, hasła ani tokenu - właściciel rejestruje się zwykłą postacią, a operator nadaje GOD-a po
+  imieniu (plik albo konsola serwera: `god Imię`, `ungod Imię`, `reload` bez restartu). Poziom serwer liczy sam z nazwy postaci, klient go nie wysyła.
+- Polecenia GOD (`admin/GodCommands`, wspólne dla gry lokalnej i serwera): `/i` (przedmiot), `/m` (potwór), `/a N`, `/up`, `/down`, `/goto`,
+  `/c`, `/t`, `/ghost`, `/godmode`, `/level`, `/addexp`, `/addskill`, `/sethp`, `/setmana`, `/heal`, `/money`, `/premium`, `/promote`, `/bless`,
+  `/flag` (znaczniki zadań, np. `star_sealed`), `/clean`, `/kill`, `/speed`, `/info`, `/pos`, plus aliasy `/broadcast`, `/raid`, `/save`, `/shutdown`.
+  `/komendy` pokazuje w oknie polecenia Twojego poziomu. Każde polecenie sprawdza poziom na serwerze, a wynik (także odmowa) trafia do
+  `admin.log` obok `admins.txt`.
+- Duch (`/ghost`) i tryb boga (`/godmode`): bez obrażeń, duch niewidoczny dla graczy i potworów (tylko GOD). Nad postacią personelu widać znacznik
+  `[GOD]`/`[GM]`/`[TUTOR]` (nowy komunikat `ACCESS` i pole wiersza `PL`).
+- Gra lokalna jako GOD: `-Dpixel.god=true`, zmienna `PIXEL_GOD=1` albo pusty plik `god.enabled` w katalogu zapisów; domyślnie wyłączone,
+  nigdy nie działa online ani nie trafia do zapisu postaci.
+- Przewodnik dla właściciela: `analizy/komendy-god.md`. Testy: `GodCommandsTest`, `GodNetworkTest`, rozbudowany `ChatCommandsTest`; sceny
+  gui-regression `god_komendy` i `god_tag` (wzorce dopiero po scaleniu).
+
 ## [0.259.0] - 2026-11-12
 
 ### Dodano

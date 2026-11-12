@@ -100,6 +100,9 @@ public final class DesktopLauncher {
         private int frame;
         private boolean teleported;
         private boolean revealed;
+        /** Polecenia czatu do wpisania po kilku klatkach (-Dpixel.chat), zeby wpisy startowe ich nie zepchnely. */
+        private String pendingChat;
+        private int chatFrames;
 
         /** Odkrywa widok z kazdego pola odcinkow trasy (linie proste miedzy punktami, na pietrze punktu). */
         private static void exploreRoute(pl.fawizja.pixel.world.ExploredMap map, String route) {
@@ -158,6 +161,11 @@ public final class DesktopLauncher {
                         new pl.fawizja.pixel.time.WorldClock(-hour * pl.fawizja.pixel.time.WorldClock.GAME_HOUR_MS,
                                 pl.fawizja.pixel.time.WorldClock.REAL_DAY_MS, 0.38f));
             }
+            if (pendingChat != null && getScreen() instanceof GameScreen && ++chatFrames >= 12) {
+                String cmds = pendingChat;
+                pendingChat = null;
+                for (String c : cmds.split(";")) ((GameScreen) getScreen()).chat(c.trim());
+            }
             if (!revealed && getScreen() instanceof GameScreen) {
                 revealed = true;
                 if ("1".equals(System.getProperty("pixel.revealMap"))) {
@@ -203,6 +211,8 @@ public final class DesktopLauncher {
                         if (t != null) me.backpack().add(new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
                     }
                 }
+                // polecenia czatu po starcie (zrzuty GOD): -Dpixel.chat="/komendy;/i miecz 3" (rozdzielone srednikiem)
+                pendingChat = System.getProperty("pixel.chat");
                 String ask = System.getProperty("pixel.ask");
                 if (ask != null) ((GameScreen) getScreen()).session().askNpc(ask, 1L);
                 String open = System.getProperty("pixel.open");
