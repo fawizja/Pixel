@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Dodano
+- Bagienny łupieżca (`bog_reaver`, poziom 85, grafika Darka z Goblin3D, `docs/CREDITS.md`): potwór bagien wg Tibia Wiki (1300 HP, 800 exp, pancerz 20, odporności jak bagienne zjawy: ogień 85%, ziemia 30%; cios z zatruciem 0-180, wyssanie życia 90-140, bąbel 100-175, stalagmit 96-110, paraliż, leczenie ok. 100). Trzy spawny w Leżu Krokodyli i jaskiniach bagien (zamiast części bagiennych zjaw), 12 klatek grafiki (`tools/art/bog_raider_import.py`), spawny `tools/mapgen/bog_reaver_spawns.py`, scena regresji `bog_reaver`.
 - Silne potwory rzucają różne czary (analiza: `analizy/potwory-ataki.md`, sekcja 6): każdy potwór od poziomu 100 i każdy boss (poza
   smokami) ma uderzenie w jeden cel i czar obszarowy dobrane do żywiołu i klasy (demony: kule ognia i wyssanie many, mumie i upiory:
   uderzenie śmierci i fala klątwy, piraci: strzały i bomby, golemy: rzut kamieniem/lawą i kula, harpie: energia i promień), a od

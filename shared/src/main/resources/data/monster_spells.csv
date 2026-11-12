@@ -603,3 +603,9 @@ obsidian_sentinel;shatter_nova;SELF;CIRCLE5X5;PHYSICAL;433;1083;10;3;-;-
 # Pan Otchłani
 abyss_lord;death_strike;BOLT;POINT;DEATH;920;2300;15;4;-;shadow_star
 abyss_lord;abyss_wave;WAVE;WAVE7;DEATH;720;1800;18;5;CURSED:360-600:4000:50;-
+# Bagienny lupiezc (grafika Darka); wartosci z Tibia Wiki: zycie 1300, exp 800, pancerz 20; czary: life drain 90-140, bubble 100-175, stalagmit 96-110, paraliz, leczenie ok. 100
+bog_reaver;life_drain_bolt;BOLT;POINT;LIFE_DRAIN;90;140;15;4;-;shadow_star
+bog_reaver;bubble_berserk;SELF;CIRCLE1X1;EARTH;100;175;12;2;-;-
+bog_reaver;stalagmite;BALL;CIRCLE1X1;EARTH;96;110;12;4;-;earth
+bog_reaver;paralyze;BOLT;POINT;EARTH;0;0;10;4;SLOW:40:4000;earth
+bog_reaver;self_heal;HEAL;POINT;-;100;100;20;1;-;-
