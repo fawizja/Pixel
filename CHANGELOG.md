@@ -14,9 +14,31 @@
 - Wymaganie bramy `party:N` (minimalna liczba graczy online w drużynie), wiersz `gate;x;y;z;party:N`; użyte na wejściu questu ekstremalnego (3 graczy).
 - Wymaganie nagrody `reward;grupa;wymaganie` w `star_quest.csv`; właściwość `-Dpixel.quests=klucz:done,klucz:active:N` do zrzutów.
 - Analiza `analizy/questy-nagrody.md`, testy `StoryQuestsTest`, `QuestRewardAuditTest`, sceny gui-regression dla dziennika, tabliczki i NPC.
+- Ród pięciu smoków (`monsters.csv`, `monster_spells.csv`): zielony **Szmaragdowy smok** (`emerald_dragon`, poz. 205), lodowy
+  **Szronowy smok** (`hoarfrost_dragon`, 240), czarny **Węglowy smok** (`coal_dragon`, 320), złoty **Złocisty smok** (dawny
+  `dune_drake`, 410; klucz i grafika bez zmian) oraz bardzo rzadki biały **Perłowy smok** (`pearl_dragon`, 600). Od najsłabszego:
+  zielony, lodowy, czarny, złoty, biały. Grafika: przebarwione klatki złotego smoka 64x64 (`darekart_import.py --recolour`).
+- Czary potworów jak w Canary (`MonsterSpell`, `MonsterSpells`, `CombatSystem.monsterAttacks`): smok przy każdym ataku próbuje czarów
+  (każdy z własną szansą), inaczej gryzie z sąsiedniego pola. Fala (`WAVE4`, `WAVE7`, `SQUAREWAVE5`, promień `BEAM6/8`) obraca się
+  do celu, kula (`CIRCLE1X1`, wielka kula ognia `CIRCLE3X3`) leci w cel, wybuch (`CIRCLE5X5`) wokół smoka; trafienie podpala
+  (`BURNING`), zamraża (`FREEZING`), razi (`ELECTRIFIED`) albo spowalnia jak paraliż (`PlayerCharacter.addSlow`). Efekty
+  graficzne to zdarzenia kształtu z `CombatEvent.shaped`, więc działają offline i online. Zielony i czarny: ogień; lodowy: lód i
+  spowolnienie; złoty: ogień i piorun; biały: ogień, lód i piorun.
+- Rzadki biały smok (`RareSpawns`, `MonsterManager.rollRare`): przy odrodzeniu smoka na łowisku, na którym stoi gracz, z szansą 1,5%
+  zamiast niego pojawia się Perłowy smok; przerwa godzina, najwyżej jeden żywy, cicha wiadomość dla graczy w pobliżu. To samo w grze
+  offline (`GameSession`) i na serwerze (`ServerWorld`); `setRareRandom` pozwala testować z ziarnem.
+- Łup smoków: łuski (`emerald_scale`, `frost_scale`, `coal_scale`, `gilded_scale`, `pearl_scale`, skup w `camp_shop` i `isle_shop`),
+  tarcze i zbroje z łusek (`emeraldscale_shield`, `hoarscale_shield`, `coalscale_armor`, `gilded_helmet`, `pearl_aegis`), nazwy EN/ES.
+- Spawny: zielone i czarne smoki na Smoczych Wzgórzach, czarne także w wulkanie, szronowe w lodowych grotach
+  (`tools/mapgen/dragon_spawns.py`; `route_levels.py` bez naruszeń). Bestiariusz: wpisy dla czterech nowych smoków.
+- Gui-regression: `dragons_five`, `dragon_fire_wave`, `dragon_ice_breath` (`-Dpixel.dragonDemo=five|fire|gfb|ice|white`).
 
 ### Zmieniono
 - Przebalansowane nagrody 20 zadań obozów i wysp (bossy do 0,5 kosztu poziomu, zabicia 0,10-0,12) oraz ścięte nagrody `varden_smug1-3` do 1,2 poziomu.
+- Pasek życia, ikony i imię dużych potworów (smoki 2x2) leżą nad grafiką, nie w połowie sprajta (`OverheadLayout`, `TileArt.bigMonsterHeight`).
+- Pochodnia świeci wyraźnie dalej niż minimalna poświata: promień pochodni 7 (było 5), poświata postaci 2 (było 2,5), pochodnia
+  co najmniej `Lighting.TORCH_MIN_GAIN` = 3 razy dalej.
+- Złoty smok (`dune_drake`) walczy teraz wręcz i czarami (fala ognia, piorun, wielka kula ognia) zamiast trującego ciosu.
 
 ## [0.261.0] - 2026-11-12
 

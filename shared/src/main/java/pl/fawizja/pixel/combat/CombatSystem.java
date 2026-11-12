@@ -16,6 +16,9 @@ import pl.fawizja.pixel.monster.LootEntry;
 import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.monster.MonsterManager;
 import pl.fawizja.pixel.monster.MonsterState;
+import pl.fawizja.pixel.monster.MonsterConditions;
+import pl.fawizja.pixel.monster.MonsterSpell;
+import pl.fawizja.pixel.monster.MonsterSpells;
 import pl.fawizja.pixel.monster.MonsterType;
 import pl.fawizja.pixel.world.GroundItems;
 import pl.fawizja.pixel.world.Position;
@@ -521,28 +524,62 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
      * pocisk; czary potworow na dystans tarczy nie ucza.
      */
     public static boolean blockable(MonsterType t) {
-        return t.range() <= 1 || t.damageType() == DamageType.PHYSICAL;
+        return t.range() <= 1 || t.damageType() == DamageType.PHYSICAL || MonsterSpells.defaults().casts(t);
     }
 
     @Override
     public void monsterAttacks(Monster m, long now) {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
         MonsterType t = m.type();
-        MonsterType.Strike st = t.rollStrike(rng);
+        // smoki: czar (fala, kula ognia, oddech) z szansa, inaczej cios wrecz tylko z sasiedniego pola
+        MonsterSpells.Cast cast = null;
+        boolean caster = MonsterSpells.defaults().casts(t);
+        if (caster) {
+            cast = planSpell(m);
+            if (cast == null && m.position().distanceTo(pc.position()) > 1) return;
+        }
+        monsterStrike(m, cast, now);
+    }
+
+    /**
+     * Rzuca czar potwora o danym kluczu (np. "great_fireball") na postac, jesli stoi w jego obszarze; false, gdy potwor
+     * nie ma takiego czaru albo cel poza obszarem. Bez losowania szansy - testy i podglady GUI.
+     */
+    public boolean castMonsterSpell(Monster m, String spellKey, long now) {
+        if (pc.isDead() || world.isProtectionZone(pc.position()) || pc.position().z() != m.position().z()) return false;
+        for (MonsterSpell sp : MonsterSpells.defaults().of(m.type())) {
+            if (!sp.key().equals(spellKey)) continue;
+            double f = m.type().isElite() ? MonsterType.damageFactor(m.type().forgeStack()) : 1.0;
+            MonsterSpells.Cast c = MonsterSpells.plan(f == 1.0 ? sp : sp.scaled(f), m.position(), pc.position(), m.facing(), world);
+            if (c == null) return false;
+            monsterStrike(m, c, now);
+            return true;
+        }
+        return false;
+    }
+
+    /** Jeden atak potwora w gracza: czar (cast) albo cios; ochrony, obrazenia, stany, zdarzenia, smierc. */
+    private void monsterStrike(Monster m, MonsterSpells.Cast cast, long now) {
+        MonsterType t = m.type();
+        boolean caster = MonsterSpells.defaults().casts(t);
+        MonsterType.Strike st = cast != null ? new MonsterType.Strike(cast.spell().type(),
+                CombatFormulas.rollBetween(cast.spell().min(), cast.spell().max(), rng)) : t.rollStrike(rng);
+        boolean ranged = t.range() > 1 && !caster;
         lastHitTakenMs = now;
+        if (cast != null) showSpell(m, cast, now);
         if (pl.fawizja.pixel.item.ForgeEffects.rollRuse(pc, rng)) {
             // Unik (Ruse, zbroja z tierem): caly cios ominiety, jak "You dodged an attack." w Tibii
-            push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, t.range() > 1 ? null : m.position(), DODGE_EFFECT));
+            push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, ranged || cast != null ? null : m.position(), DODGE_EFFECT));
             return;
         }
         int dmg = pl.fawizja.pixel.item.ForgeEffects.avatarIncoming(pc,
                 pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), attackedRecently(now), rng)));
-        if (t.range() > 1) push(CombatEvent.projectile(now, m.position(), pc.position(), st.type().name()));
+        if (ranged) push(CombatEvent.projectile(now, m.position(), pc.position(), st.type().name()));
         pl.fawizja.pixel.charm.CharmEffects.Defense charm = pl.fawizja.pixel.charm.CharmEffects.onMonsterAttack(pc, m, st.type(), dmg, rng, now);
         for (pl.fawizja.pixel.charm.Charm c : charm.triggered()) log.add(now, EventLog.Kind.INFO, "Charm " + c.label() + " (" + t.name() + ").");
         if (charm.noDamage()) {
             // Unik albo Oczyszczenie: atak bez obrazen
-            push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, t.range() > 1 ? null : m.position(),
+            push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, ranged || cast != null ? null : m.position(),
                     pl.fawizja.pixel.charm.CharmEffects.eventEffect(charm.prevented())));
             return;
         }
@@ -557,7 +594,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             int drained = Math.min(dmg, pc.mana());
             pc.spendMana(drained);
             push(new CombatEvent(now, pc.position(), drained, drained > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
-                    t.range() > 1 ? null : m.position(), drained > 0 ? MANA_EFFECT : null));
+                    ranged || cast != null ? null : m.position(), drained > 0 ? MANA_EFFECT : null));
             return;
         }
         if (pc.incomingFactor() != 1.0) dmg = (int) Math.round(dmg * pc.incomingFactor()); // Krwawy szal: +15%
@@ -565,10 +602,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         showShield(now);
         pl.fawizja.pixel.wheel.WheelEffects.onMonsterStrike(pc); // Kolo Przeznaczenia: Leczenie w boju
         recap.record(t.name(), dealt, now);
-        if (dealt > 0) applyMonsterCondition(m, now);
-        if (blockable(t) && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
+        if (dealt > 0) {
+            if (cast != null) applySpellEffects(m, cast.spell(), now);
+            else applyMonsterCondition(m, now);
+        }
+        if (cast == null && blockable(t) && !isTrivial(t) && trainsShielding(pc)) pc.skills().train(Skill.SHIELDING, Balance.BLOCK_TRY_FACTOR);
         push(new CombatEvent(now, pc.position(), dealt, dealt > 0 ? CombatEvent.Kind.HIT_PLAYER : CombatEvent.Kind.BLOCKED,
-                t.range() > 1 ? null : m.position(), null));
+                ranged || cast != null ? null : m.position(), null));
         if (charm.parry() != null && dealt > 0 && !m.isDead()) {
             // Riposta: otrzymane obrazenia wracaja do atakujacego (neutralne, bez odpornosci)
             int back = m.damage(dealt);
@@ -577,6 +617,54 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
             if (m.isDead()) onMonsterDeath(m, now);
         }
         if (pc.isDead()) onPlayerDeath(m, now);
+    }
+
+    // ------------------------------------------------------------------ czary potworow (smoki)
+
+    /**
+     * Czar, ktory potwor rzuca teraz: czary po kolei, kazdy z wlasna szansa; liczy sie tylko taki, ktorego obszar
+     * obejmuje gracza (fala obraca sie do celu, kula leci w cel, wybuch wokol potwora). null - bije wrecz.
+     */
+    private MonsterSpells.Cast planSpell(Monster m) {
+        Position me = m.position(), tp = pc.position();
+        if (tp.z() != me.z()) return null;
+        int dist = me.distanceTo(tp);
+        double f = m.type().isElite() ? MonsterType.damageFactor(m.type().forgeStack()) : 1.0;
+        for (MonsterSpell base : MonsterSpells.defaults().of(m.type())) {
+            if (dist > base.range() || rng.nextInt(100) >= base.chance()) continue;
+            MonsterSpell sp = f == 1.0 ? base : base.scaled(f);
+            MonsterSpells.Cast c = MonsterSpells.plan(sp, me, tp, m.facing(), world);
+            if (c != null) return c;
+        }
+        return null;
+    }
+
+    /** Wyglad czaru: pocisk (kula), potem ksztalt obszaru na polach - klient rysuje dokladnie trafione pola. */
+    private void showSpell(Monster m, MonsterSpells.Cast c, long now) {
+        m.lookAt(pc.position());
+        String fx = c.spell().type().name();
+        if (c.spell().mode() == MonsterSpell.Mode.BALL && !m.position().equals(c.anchor())) {
+            push(CombatEvent.projectile(now, m.position(), c.anchor(), fx));
+        }
+        push(CombatEvent.shaped(now, c.anchor(), c.spell().area().encode(c.dir()), c.origin(), fx));
+    }
+
+    /** Stan i spowolnienie od czaru potwora, ktory trafil gracza (podpalenie od ognia, zamrozenie od lodu). */
+    private void applySpellEffects(Monster m, MonsterSpell sp, long now) {
+        MonsterConditions.Entry e = sp.condition();
+        if (e != null && !pc.isDead() && rng.nextInt(100) < e.chance()) {
+            boolean had = pc.conditions().has(e.type());
+            int total = e.rollTotal(rng, m.type().isElite() ? 1.3 : 1.0);
+            if (pc.conditions().addTotal(e.type(), total, e.intervalMs(), now, m.type().name()) && !had) {
+                log.add(now, EventLog.Kind.WARNING, e.type().label() + " (" + m.type().name() + ")"
+                        + (e.type().cure() != null ? Messages.get("combat_system.wylecz_czarem") + e.type().cure() + "." : "."));
+            }
+        }
+        if (sp.slowPercent() > 0 && !pc.isDead()) {
+            boolean had = pc.slowed();
+            pc.addSlow(sp.slowPercent(), sp.slowMs());
+            if (!had) log.add(now, EventLog.Kind.WARNING, Messages.get("combat_system.zwalniasz_od_mrozu") + m.type().name() + ").");
+        }
     }
 
     /** Tarcza many zabrala mane zamiast zdrowia: niebieska liczba nad postacia. */

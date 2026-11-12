@@ -27,6 +27,7 @@ import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.client.PixelGame;
 import pl.fawizja.pixel.client.render.HarmonyPips;
 import pl.fawizja.pixel.client.render.LightRenderer;
+import pl.fawizja.pixel.client.render.OverheadLayout;
 import pl.fawizja.pixel.client.render.TileArt;
 import pl.fawizja.pixel.client.render.WorldRenderer;
 import pl.fawizja.pixel.client.ui.Hud;
@@ -2977,9 +2978,11 @@ public final class GameScreen extends ScreenAdapter {
             if (m.isDead() || m.position().z() != z) continue;
             float mx = m.renderX(t);
             float my = worldRenderer.worldY(m.renderY(t));
+            // duzy potwor (smok 2x2): pasek, ikony i imie nad grafika, nie w polowie sprajta
+            float lift = OverheadLayout.lift(game.art().bigMonsterHeight(m.type().key()));
             if (session.combat().isBoosted(m.type())) {
                 // potwor dnia: zloty romb nad glowa
-                float cx = mx + 0.5f, cy = my + 1.3f;
+                float cx = mx + 0.5f, cy = my + 1.3f + lift;
                 shapes.setColor(0.15f, 0.1f, 0f, 0.8f);
                 shapes.triangle(cx - 0.17f, cy, cx + 0.17f, cy, cx, cy + 0.17f);
                 shapes.triangle(cx - 0.17f, cy, cx + 0.17f, cy, cx, cy - 0.17f);
@@ -2989,7 +2992,7 @@ public final class GameScreen extends ScreenAdapter {
             }
             if (m.type().isElite()) {
                 // Kuznia: ikona z lewej nad paskiem - pod wpływem fioletowa z kropkami stopnia, diaboliczny czerwona korona
-                float cx = mx - 0.08f, cy = my + 1.07f;
+                float cx = mx - 0.08f, cy = my + 1.07f + lift;
                 boolean fiend = m.type().isFiendish();
                 shapes.setColor(0.08f, 0f, 0.1f, 0.9f);
                 shapes.circle(cx, cy, fiend ? 0.17f : 0.14f, 14);
@@ -3003,11 +3006,11 @@ public final class GameScreen extends ScreenAdapter {
                 } else {
                     int n = m.type().forgeStack();
                     shapes.setColor(1f, 1f, 1f, 1f);
-                    for (int i = 0; i < n; i++) shapes.rect(mx + 0.1f + i * 0.09f, my + 1.13f, 0.06f, 0.06f);
+                    for (int i = 0; i < n; i++) shapes.rect(mx + 0.1f + i * 0.09f, my + 1.13f + lift, 0.06f, 0.06f);
                 }
             }
             // pasek zycia nad kazdym potworem jak w Tibii (kolor wg procentu)
-            overheadBar(shapes, mx, my + 1.02f, m.healthFraction(), null);
+            overheadBar(shapes, mx, my + OverheadLayout.BAR_ABOVE_TILE + lift, m.healthFraction(), null);
         }
         // nad graczami: HP, pod nim mana (wlasna postac; u innych serwer podaje tylko procent zycia)
         PlayerCharacter me0 = session.character();
@@ -3092,7 +3095,8 @@ public final class GameScreen extends ScreenAdapter {
         if (target != null && !target.isDead() && target.position().z() == z) {
             // imie celu w kolorze trudnosci wzgledem poziomu postaci
             pl.fawizja.pixel.monster.Difficulty d = pl.fawizja.pixel.monster.Difficulty.of(target.type().level(), session.character().level());
-            float ny = nameYAbove(target.renderX(t), worldRenderer.worldY(target.renderY(t)) + 1.02f + BAR_TOP, font, ui); // nad paskiem zycia
+            float ny = nameYAbove(target.renderX(t), OverheadLayout.barY(worldRenderer.worldY(target.renderY(t)),
+                    game.art().bigMonsterHeight(target.type().key())) + BAR_TOP, font, ui); // nad paskiem zycia (duzy potwor: nad grafika)
             projected.y = ny;
             String label = target.type().name() + " (" + d.label() + ")";
             nameLayout.setText(font, label);

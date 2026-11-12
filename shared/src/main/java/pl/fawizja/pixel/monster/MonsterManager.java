@@ -75,6 +75,9 @@ public final class MonsterManager {
         this.registry = registry;
         this.spawns = new ArrayList<>(spawns);
         this.rng = rng;
+        if (registry != null && this.spawns.size() >= FIENDISH_MIN_SPAWNS && registry.contains(RareSpawns.PEARL_DRAGON)) {
+            rare = RareSpawns.standard();
+        }
     }
 
     /** Spawny jednorazowe (wydarzenia): potwory z nich sie nie odradzaja. */
@@ -224,7 +227,8 @@ public final class MonsterManager {
         if (monsters.isEmpty()) return null;
         for (int tries = 0; tries < 60; tries++) {
             Monster m = monsters.get(forgeRng.nextInt(monsters.size()));
-            if (m.isDead() || !m.type().canBeForge() || eventSpawns.contains(m.spawn()) || fiendish.containsKey(m)) continue;
+            if (m.isDead() || !m.type().canBeForge() || eventSpawns.contains(m.spawn()) || fiendish.containsKey(m)
+                    || (rare != null && m.type().key().equals(rare.monsterKey()))) continue;
             if (world.isProtectionZone(m.position())) continue;
             return m;
         }
@@ -574,7 +578,14 @@ public final class MonsterManager {
             List<Long> times = e.getValue();
             if (e.getKey().nightOnly() && !night) continue;
             for (int i = times.size() - 1; i >= 0; i--) {
-                if (times.get(i) <= now && spawnOne(e.getKey(), targets, now)) times.remove(i);
+                if (times.get(i) > now) continue;
+                MonsterType rareType = rollRare(e.getKey(), targets, now);
+                if (rareType != null && spawnOne(e.getKey(), targets, now, rareType)) {
+                    rareCooldownUntilMs = now + rare.cooldownMs();
+                    times.remove(i);
+                } else if (spawnOne(e.getKey(), targets, now)) {
+                    times.remove(i);
+                }
             }
         }
         java.util.LinkedHashSet<Monster> active = new java.util.LinkedHashSet<>();
@@ -663,6 +674,10 @@ public final class MonsterManager {
     }
 
     private boolean spawnOne(SpawnPoint sp, List<? extends Target> players, long now) {
+        return spawnOne(sp, players, now, null);
+    }
+
+    private boolean spawnOne(SpawnPoint sp, List<? extends Target> players, long now, MonsterType forced) {
         for (int attempt = 0; attempt < 30; attempt++) {
             int dx = sp.radius() == 0 ? 0 : rng.nextInt(sp.radius() * 2 + 1) - sp.radius();
             int dy = sp.radius() == 0 ? 0 : rng.nextInt(sp.radius() * 2 + 1) - sp.radius();
@@ -672,14 +687,55 @@ public final class MonsterManager {
                 if (t.position().equals(p) || p.distanceTo(t.position()) <= 5) seen = true;
             }
             if (seen || !canOccupy(p, null)) continue;
-            Monster m = new Monster(nextId, spawnType(sp, nextId), sp, p);
+            Monster m = new Monster(nextId, forced != null ? forced : spawnType(sp, nextId), sp, p);
             nextId++;
             m.setNextActionMs(now + 500 + rng.nextInt(2000));
             monsters.add(m);
             grid.add(m);
+            if (forced != null && rareListener != null) rareListener.accept(m, now);
             return true;
         }
         return false;
+    }
+
+    // ------------------------------------------------------------------ rzadki bialy smok
+
+    /** Mniej spawnow = swiat testowy albo arena: bez rzadkich smokow (jak Kuznia, {@link #FIENDISH_MIN_SPAWNS}). */
+    private RareSpawns rare;
+    private Random rareRng = new Random();
+    private long rareCooldownUntilMs = Long.MIN_VALUE;
+    private java.util.function.BiConsumer<Monster, Long> rareListener;
+
+    /** Ustawienia rzadkiego spawnu (null = wylaczony); testy i serwery inne niz domyslne. */
+    public void setRareSpawns(RareSpawns r) { rare = r; }
+    public RareSpawns rareSpawns() { return rare; }
+    /** Testy: powtarzalne losowanie rzadkiego smoka (osobne od ruchu potworow). */
+    public void setRareRandom(Random r) { rareRng = r; }
+    /** Wywolywane, gdy pojawil sie rzadki smok (komunikat dla graczy w poblizu): potwor i czas gry. */
+    public void setRareListener(java.util.function.BiConsumer<Monster, Long> l) { rareListener = l; }
+    /** Do kiedy (czas gry) nie pojawi sie kolejny rzadki smok. */
+    public long rareCooldownUntil() { return rareCooldownUntilMs; }
+
+    /** Zyjacy rzadki smok (jest ich najwyzej jeden) albo null. */
+    public Monster rareAlive() {
+        if (rare == null) return null;
+        for (Monster m : monsters) if (!m.isDead() && m.type().key().equals(rare.monsterKey())) return m;
+        return null;
+    }
+
+    /**
+     * Przy odrodzeniu smoka na lowisku z graczem: rzadki smok zamiast zwyklego z szansa {@link RareSpawns#chancePermille}
+     * (po przerwie i gdy zaden jeszcze nie zyje). Zwraca rodzaj rzadkiego smoka albo null (los zuzywany tylko, gdy
+     * wszystkie warunki sa spelnione).
+     */
+    private MonsterType rollRare(SpawnPoint sp, List<? extends Target> players, long now) {
+        if (rare == null || remote || registry == null || !registry.contains(rare.monsterKey())) return null;
+        if (now < rareCooldownUntilMs || !rare.isDragonGround(registry.get(sp.monsterKey()))) return null;
+        boolean hunters = false;
+        for (Target t : players) if (t.attackable() && rare.playerOnGround(sp.center(), t.position())) { hunters = true; break; }
+        if (!hunters || rareAlive() != null) return null;
+        if (rareRng.nextInt(1000) >= rare.chancePermille()) return null;
+        return registry.get(rare.monsterKey());
     }
 
     private void think(Monster m, long now, Target target, AttackHandler handler) {

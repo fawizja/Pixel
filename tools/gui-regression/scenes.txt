@@ -326,3 +326,7 @@ god_tag|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.t
 journal_log|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=405,591,0 -Dpixel.open=journal -Dpixel.quests=mill_m1:done,mill_m2:done,mill_m3:done,crypt_m1:done,crypt_m2:active:3,barrow_m1:active:0
 chest_sign_mill|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=414,586,1 -Dpixel.tap=415,585,1
 quest_npc_mill|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=405,591,0
+# 2026-11-12: rod pieciu smokow - piec kolorow z paskami zycia nad grafika 2x2, fala ognia, wielka kula ognia, oddech lodu, bialy smok
+dragons_five|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1 -Dpixel.dragonDemo=five
+dragon_fire_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1 -Dpixel.dragonDemo=fire
+dragon_ice_breath|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1 -Dpixel.dragonDemo=ice

@@ -14,7 +14,7 @@
 25;training_sword;Miecz ćwiczebny;WEAPON;1;30;WEAPON;14;8;0;0;PALADIN,MONK,KNIGHT;0;1;PHYSICAL;SWORD;-;#b0b0b8;Tępy miecz ćwiczebny.
 30;health_potion;Mikstura zdrowia;POTION;100;45;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#d8263c;Przywraca część zdrowia.
 31;mana_potion;Mikstura many;POTION;100;50;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#3a5bd8;Przywraca część many.
-32;torch;Pochodnia;LIGHT;1;2;LIGHT;0;0;0;0;*;5;0;PHYSICAL;-;-;#ffb347;Pochodnia: załóż ją w polu obok butów i dotknij, aby zapalić. Pali się 20 minut.
+32;torch;Pochodnia;LIGHT;1;2;LIGHT;0;0;0;0;*;7;0;PHYSICAL;-;-;#ffb347;Pochodnia: załóż ją w polu obok butów i dotknij, aby zapalić. Pali się 20 minut.
 33;rope;Lina;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#c8a165;Lina do wspinania się z dziur.
 34;shovel;Łopata;TOOL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#8f8f8f;Łopata do odkopywania przejść.
 35;fishing_rod;Wędka;TOOL;1;150;WEAPON;0;0;0;0;*;0;0;PHYSICAL;-;-;#a07040;Wędka do łowienia ryb: weź ją do ręki (albo noś w plecaku) i użyj nad wodą. Robaki na przynętę trzymaj w plecaku.
@@ -402,3 +402,13 @@
 253;thorn_seed;Cierniowe ziarno;MATERIAL;100;450;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#4a8a3a;Ziarno, które kiełkuje w ciemności.
 254;mirror_shard;Odłamek zwierciadła;MATERIAL;100;500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#b0c8e0;Ostry odłamek, w którym widać cudzą twarz.
 255;maw_fang;Kieł z paszczy;MATERIAL;100;550;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#d8d0c0;Kieł wielkości sztyletu.
+4;emerald_scale;Szmaragdowa łuska;MATERIAL;100;600;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#3fae4a;Zielona łuska smoka z dolnych pieczar. Skupują ją kwatermistrzowie.
+5;frost_scale;Szronowa łuska;MATERIAL;100;1000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#9fdcff;Lodowata łuska szronowego smoka.
+6;coal_scale;Węglowa łuska;MATERIAL;100;1600;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#3a3436;Czarna łuska, wciąż ciepła od smoczego żaru.
+7;gilded_scale;Złocista łuska;MATERIAL;100;2600;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#e0b840;Błyszcząca łuska złocistego smoka.
+8;pearl_scale;Perłowa łuska;MATERIAL;100;3000;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#f4f0ff;Łuska legendarnego perłowego smoka. Warta fortunę.
+475;emeraldscale_shield;Tarcza z szmaragdowych łusek;SHIELD;1;18000;SHIELD;0;29;0;180;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:4,EARTH:2;#3fae4a;Lekka tarcza kuta ze smoczych łusek. Chroni przed ogniem.
+476;hoarscale_shield;Szronowa tarcza łuskowa;SHIELD;1;32000;SHIELD;0;31;0;250;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;ICE:5,FIRE:-2;#9fdcff;Tarcza ze szronowych łusek. Chroni przed mrozem.
+477;coalscale_armor;Pancerz z węglowych łusek;ARMOR;1;52000;ARMOR;0;0;13;320;*;0;0;PHYSICAL;-;FIRE:7,ICE:-4;#3a3436;Czarny pancerz, który nie boi się płomieni.
+478;gilded_helmet;Złocisty hełm smoczy;ARMOR;1;80000;HEAD;0;0;11;400;*;0;0;PHYSICAL;-;FIRE:5,ENERGY:4;#e0b840;Hełm z płyt złocistych łusek.
+479;pearl_aegis;Perłowa egida;SHIELD;1;230000;SHIELD;0;40;0;520;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:5,ICE:5,ENERGY:4;#f4f0ff;Tarcza z perłowych łusek. Najlepsza ochrona przed smoczym oddechem.

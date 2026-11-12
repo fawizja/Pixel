@@ -42,6 +42,7 @@ import boss_quests  # noqa: E402
 import wilds  # noqa: E402
 import homes  # noqa: E402
 import route_levels  # noqa: E402
+import dragon_spawns  # noqa: E402
 import town_npcs  # noqa: E402
 import strongholds  # noqa: E402
 import dwarves  # noqa: E402
@@ -2883,6 +2884,7 @@ def finish(ctx):
         vr[0] <= x <= vr[2] and vr[1] <= y <= vr[3]))
     print('towary na ladach:', len(ctx['displays']))
     party_packs(ctx)
+    print('smoki (szronowe, weglowe):', dragon_spawns.apply(ctx))
     snap_spawns(ctx)
     fix_transition_targets(ctx)
     # poziomy potworow rosna stopniowo wzdluz drog od swiatyn; silne spawny na drogach do slabszych lowisk obnizone

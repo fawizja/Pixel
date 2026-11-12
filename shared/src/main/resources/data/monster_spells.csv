@@ -1,0 +1,23 @@
+# Czary potworow jak w Canary (data-canary/monster): fala, wielka kula ognia, oddech. Obszary - magic/SpellArea.java.
+# potwor;czar;tryb (WAVE=przed potworem, BALL=wokol celu, SELF=wokol potwora);obszar;typ;min;max;szansa (%);zasieg;dodatek
+# dodatek: - | STAN:min-max:odstepMs:szansa% (stan od trafienia) | SLOW:procent:ms (spowolnienie jak paraliz)
+# Przy kazdym ataku potwor probuje czarow po kolei (kazdy z wlasna szansa), inaczej bije wrecz.
+# zielony: ognista fala i mala kula ognia
+emerald_dragon;fire_wave;WAVE;WAVE4;FIRE;100;260;22;4;BURNING:60-110:4000:60
+emerald_dragon;fireball;BALL;CIRCLE1X1;FIRE;80;200;14;5;-
+# lodowy: lodowa fala, oddech lodu (promien) i spowalniajace spojrzenie
+hoarfrost_dragon;ice_wave;WAVE;WAVE4;ICE;150;350;20;4;FREEZING:80-150:5000:50
+hoarfrost_dragon;ice_breath;WAVE;BEAM6;ICE;220;480;12;6;FREEZING:100-180:5000:60
+hoarfrost_dragon;chilling_gaze;BALL;CIRCLE1X1;ICE;40;90;14;5;SLOW:45:5000
+# czarny: potezna fala ognia i wielka kula ognia
+coal_dragon;great_fire_wave;WAVE;WAVE7;FIRE;200;520;22;5;BURNING:150-260:4000:70
+coal_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;150;420;16;5;BURNING:100-180:4000:50
+# zloty: wielka fala ognia, fala pioruna i wielka kula ognia
+dune_drake;great_fire_wave;WAVE;WAVE7;FIRE;280;700;20;5;BURNING:250-400:4000:80
+dune_drake;energy_wave;WAVE;SQUAREWAVE5;ENERGY;260;640;16;5;ELECTRIFIED:150-260:4000:60
+dune_drake;great_fireball;BALL;CIRCLE3X3;FIRE;220;560;16;6;BURNING:200-300:4000:60
+# bialy: ogien, lod i piorun, najmocniejsze obrazenia
+pearl_dragon;great_fire_wave;WAVE;WAVE7;FIRE;500;1250;18;6;BURNING:400-650:4000:80
+pearl_dragon;energy_beam;WAVE;BEAM8;ENERGY;450;1100;14;8;ELECTRIFIED:250-400:4000:60
+pearl_dragon;ice_nova;SELF;CIRCLE5X5;ICE;400;950;10;3;FREEZING:250-400:5000:70
+pearl_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;400;1000;14;7;BURNING:300-500:4000:60

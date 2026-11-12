@@ -73,6 +73,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..8; 5-7 wewnetrzny luk, 8 rog) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
+ *   -Dpixel.dragonDemo=five|fire|gfb|ice|white  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
+ *                        wielka kule ognia (gfb), oddech lodu (ice), bialy smok piorun (white) - rzut w postac stojaca przed nim
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
  */
@@ -951,6 +953,8 @@ public final class DesktopLauncher {
             }
             String facingDemo = System.getProperty("pixel.facingDemo");
             if (facingDemo != null && getScreen() instanceof GameScreen) facingDemo((GameScreen) getScreen(), facingDemo, frame);
+            String dragonDemo = System.getProperty("pixel.dragonDemo");
+            if (dragonDemo != null && getScreen() instanceof GameScreen) dragonDemo((GameScreen) getScreen(), dragonDemo, frame, frames);
             String spellDemo = System.getProperty("pixel.spellDemo");
             if (spellDemo != null && getScreen() instanceof GameScreen) spellDemo((GameScreen) getScreen(), spellDemo, frame, frames);
             if (Boolean.getBoolean("pixel.fx") && frame == frames - 8 && getScreen() instanceof GameScreen) {
@@ -1048,6 +1052,45 @@ public final class DesktopLauncher {
                 for (pl.fawizja.pixel.monster.Monster m : s.monsters().monsters()) {
                     int i = Math.floorMod(m.position().x() - me.x() + 3, 8) / 2;
                     m.lookAt(m.position().translate(dirs[i].dx, dirs[i].dy));
+                }
+            }
+        }
+
+        /** Podglad rodu smokow (-Dpixel.dragonDemo=...): stoja w miejscu (sparalizowane), postac jest niewidzialna i na poziomie 900. */
+        private static void dragonDemo(GameScreen gs, String demo, int frame, int frames) {
+            pl.fawizja.pixel.game.GameSession s = gs.session();
+            pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
+            Position me = pc.position();
+            long now = gs.worldTime();
+            if (frame == 2) {
+                for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
+                pc.setInvisible(600_000);
+                if (demo.equals("five")) {
+                    String[] keys = {"emerald_dragon", "hoarfrost_dragon", "coal_dragon", "dune_drake", "pearl_dragon"};
+                    int[][] at = {{-4, -2}, {0, -2}, {4, -2}, {-2, -5}, {2, -5}};
+                    for (int i = 0; i < keys.length; i++) {
+                        for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(keys[i], me.translate(at[i][0], at[i][1]), 1, 1, now)) {
+                            m.paralyze(now + 600_000);
+                            m.damage((int) (m.type().maxHealth() * (0.1 + 0.18 * i)));
+                        }
+                    }
+                } else {
+                    String key = demo.equals("ice") ? "hoarfrost_dragon" : demo.equals("white") ? "pearl_dragon" : "coal_dragon";
+                    for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(demo.equals("gfb") ? 1 : 0, demo.equals("gfb") ? -5 : -3), 0, 1, now)) {
+                        m.paralyze(now + 600_000);
+                    }
+                }
+            }
+            if (!demo.equals("five") && frame == frames - 5) {
+                for (pl.fawizja.pixel.monster.Monster m : s.monsters().monsters()) {
+                    if (m.isSummon() || !m.type().race().equals("Dragon") || m.position().z() != me.z() || m.position().distanceTo(me) > 8) continue;
+                    pc.heal(pc.maxHealth());
+                    String spell = demo.equals("fire") ? "great_fire_wave" : demo.equals("gfb") ? "great_fireball"
+                            : demo.equals("ice") ? "ice_breath" : "energy_beam";
+                    m.lookAt(me);
+                    boolean ok = s.combat().castMonsterSpell(m, spell, now);
+                    Gdx.app.log("Pixel", "dragonDemo cast " + spell + " " + ok + " dragon " + m.position() + " me " + me);
+                    break;
                 }
             }
         }
