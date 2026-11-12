@@ -377,3 +377,28 @@
 423;animate_dead_rune;Runa ożywienia zwłok;RUNE;100;760;NONE;0;0;0;27;*;0;0;DEATH;-;-;#808080;Runa ożywienia zwłok (Animate Dead): zwłoki wstają jako szkielet-sługa. Poziom 27, magia 4.
 202;warlord_helmet;Hełm Pana Twierdzy;ARMOR;1;6000;HEAD;0;0;7;50;*;0;0;PHYSICAL;-;PHYSICAL:3,FIRE:2;#5a7a3a;Rogaty hełm Urgotha ze skarbca Twierdzy Krwawego Kła. Jeden na każdego śmiałka.
 424;amulet_of_loss;Amulet Straty;ARMOR;1;10000;AMULET;0;0;0;0;*;0;0;PHYSICAL;-;-;#b03a2a;Czerwony amulet z wypalonym znakiem krzyża (Amulet of Loss): chroni cały ekwipunek razem z plecakiem przed utratą po śmierci, ale rozpada się przy niej. Czerwona i czarna czaszka go nie ochronią.
+203;star_blade;Gwiezdne Ostrze;WEAPON;1;90000;WEAPON;82;22;0;300;KNIGHT;0;1;PHYSICAL;SWORD;-;#e8e0a0;Miecz wykuty z odłamka gasnącej gwiazdy. Nagroda Pieczęci.
+204;star_axe;Gwiezdny Topór;WEAPON;1;90000;WEAPON;82;20;0;300;KNIGHT;0;1;PHYSICAL;AXE;-;#e8e0a0;Topór o ostrzu z gwiezdnego żelaza. Nagroda Pieczęci.
+205;star_maul;Gwiezdny Młot;WEAPON;1;90000;WEAPON;81;24;0;300;KNIGHT;0;1;PHYSICAL;CLUB;-;#e8e0a0;Ciężki młot z gwiezdnego żelaza. Nagroda Pieczęci.
+206;star_bow;Gwiezdny Łuk;WEAPON;1;90000;WEAPON;77;0;0;300;PALADIN;0;7;PHYSICAL;DISTANCE;-;#e8e0a0;Łuk, którego cięciwa lśni jak światło gwiazdy. Nagroda Pieczęci.
+207;star_wand;Różdżka Gasnącej Gwiazdy;WEAPON;1;90000;WEAPON;73;0;0;300;SORCERER;0;7;ENERGY;WAND;-;#e8e0a0;Różdżka z kryształu, w którym wciąż drga światło. Nagroda Pieczęci.
+208;star_rod;Laska Gasnącej Gwiazdy;WEAPON;1;90000;WEAPON;73;0;0;300;DRUID;0;7;ICE;WAND;-;#e8e0a0;Laska owinięta srebrnym światłem. Nagroda Pieczęci.
+209;star_fists;Gwiezdne Rękawice;WEAPON;1;90000;WEAPON;73;14;0;300;MONK;0;1;PHYSICAL;FIST;-;#e8e0a0;Rękawice z gwiezdnego żelaza. Nagroda Pieczęci.
+210;star_plate;Gwiezdna Zbroja;ARMOR;1;70000;ARMOR;0;0;14;300;*;0;0;PHYSICAL;-;HOLY:3,DEATH:3;#e8e0a0;Napierśnik z gwiezdnego żelaza. Nagroda Pieczęci.
+211;star_aegis;Gwiezdna Tarcza;SHIELD;1;65000;SHIELD;0;34;0;300;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;HOLY:3,DEATH:3;#e8e0a0;Tarcza z gwiezdnego żelaza. Nagroda Pieczęci.
+212;star_spellbook;Księga Gasnącej Gwiazdy;SHIELD;1;60000;SHIELD;0;23;0;300;SORCERER,DRUID;0;0;PHYSICAL;-;HOLY:3,DEATH:3;#e8e0a0;Księga, której strony świecą w ciemności. Nagroda Pieczęci.
+213;star_amulet;Amulet Gasnącej Gwiazdy;ARMOR;1;60000;AMULET;0;0;2;300;*;0;0;PHYSICAL;-;HOLY:5,DEATH:5;#e8e0a0;Srebrny amulet z gwiazdą w środku. Nagroda Pieczęci.
+214;penitent_cowl;Kaptur Pokutnika;ARMOR;1;45000;HEAD;0;0;9;330;*;0;0;PHYSICAL;-;FIRE:4;#7a6a60;Spopielony kaptur Vorgrima. Zostawia go tylko on.
+215;rimeheart_legs;Nogawice Szronowego Serca;ARMOR;1;60000;LEGS;0;0;9;380;*;0;0;PHYSICAL;-;ICE:5;#a8e0ff;Nogawice z lodu, który nigdy nie topnieje. Zostawia je tylko Ysmera.
+216;slagforged_boots;Buty z Żużla;ARMOR;1;55000;FEET;0;0;4;430;*;0;0;PHYSICAL;-;FIRE:5;#c04820;Buty odlane w kuźni gwiazdy. Zostawia je tylko Kharzul.
+217;thornmother_amulet;Amulet Matki Cierni;ARMOR;1;70000;AMULET;0;0;2;480;*;0;0;PHYSICAL;-;EARTH:6;#3a7a2a;Zielony amulet spleciony z cierni. Zostawia go tylko Vessara.
+218;mirror_crown;Zwierciadlana Korona;ARMOR;1;120000;HEAD;0;0;11;530;*;0;0;PHYSICAL;-;ENERGY:5;#c8d8f0;Korona ze szkła, w którym kręcą się odbicia. Zostawia ją tylko Ilmora.
+219;maw_greaves;Nagolenniki z Paszczy;ARMOR;1;110000;LEGS;0;0;10;600;*;0;0;PHYSICAL;-;DEATH:5;#802838;Nagolenniki z kłów. Zostawia je tylko Ugrath.
+237;dimmed_crown;Korona Przygaszonej Gwiazdy;ARMOR;1;250000;HEAD;0;0;13;650;*;0;0;PHYSICAL;-;HOLY:5,DEATH:5;#4a3a8a;Korona Noctharionu. Zostawia ją tylko on.
+238;dimmed_mantle;Płaszcz Przygaszonej Gwiazdy;ARMOR;1;300000;ARMOR;0;0;17;650;*;0;0;PHYSICAL;-;HOLY:5,DEATH:5;#4a3a8a;Płaszcz utkany z gasnącego światła. Zostawia go tylko Noctharion.
+239;ash_relic;Popielna relikwia;MATERIAL;100;300;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#8a8078;Szczątek pokutnika, wciąż ciepły.
+251;rime_sliver;Odłamek szronu;MATERIAL;100;350;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#9ac8e8;Kawałek lodu z klasztoru, który nie topnieje.
+252;slag_ingot;Sztaba żużlu;MATERIAL;100;400;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#a05a30;Ciężka sztaba z kuźni gwiazdy.
+253;thorn_seed;Cierniowe ziarno;MATERIAL;100;450;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#4a8a3a;Ziarno, które kiełkuje w ciemności.
+254;mirror_shard;Odłamek zwierciadła;MATERIAL;100;500;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#b0c8e0;Ostry odłamek, w którym widać cudzą twarz.
+255;maw_fang;Kieł z paszczy;MATERIAL;100;550;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#d8d0c0;Kieł wielkości sztyletu.

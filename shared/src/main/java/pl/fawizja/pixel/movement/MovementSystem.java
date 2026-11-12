@@ -47,6 +47,8 @@ public final class MovementSystem {
         Position from = pc.position();
         Position to = from.translate(d.dx, d.dy);
         if (world.levelDoorAt(to) > pc.level() && world.isWalkable(to) && !occupied.test(to)) return MoveResult.LEVEL_TOO_LOW;
+        pl.fawizja.pixel.world.QuestGate gate = world.questGateAt(to);
+        if (gate != null && !gate.passes(pc) && world.isWalkable(to) && !occupied.test(to)) return MoveResult.GATE_SEALED;
         if (world.openings().isClosedDoor(to) && world.isWalkable(to) && !occupied.test(to)) return MoveResult.DOOR_CLOSED;
         if (!canStep(from, d)) return MoveResult.BLOCKED;
         if (world.requiredLevelAt(to) > pc.level()) return MoveResult.LEVEL_TOO_LOW;

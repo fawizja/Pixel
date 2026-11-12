@@ -136,6 +136,7 @@ public final class MapLoader {
         readAltarQuests(base + "altar_quests.csv", world);
         readBossQuests(base + "boss_quests.csv", world);
         readLootChests(base + "chests.csv", world);
+        readStarQuest(base + "star_quest.csv", world);
         return world;
     }
 
@@ -202,6 +203,34 @@ public final class MapLoader {
             Position p = new Position(i(f[0]), i(f[1]), i(f[2]));
             String item = f[4].trim();
             world.addLootChest(new WorldMap.LootChest(p, Long.parseLong(f[3].trim()), "-".equals(item) ? null : item, i(f[5])));
+        }
+    }
+
+    /**
+     * Pieczec Gasnacej Gwiazdy (plik opcjonalny): wiersze {@code gate;x;y;z;wymaganie} (przejscie strzezone zadaniem, patrz
+     * {@link QuestGate}) i {@code choice;grupa;x;y;z;przedmiot} (skrzynia nagrody do wyboru).
+     */
+    private void readStarQuest(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            try {
+                if (f[0].equals("gate") && f.length == 5) {
+                    Position p = new Position(i(f[1]), i(f[2]), i(f[3]));
+                    if (!world.isWalkable(p)) throw new IOException(path + ": gate not walkable at " + p);
+                    world.addQuestGate(new QuestGate(p, f[4].trim()));
+                } else if (f[0].equals("choice") && f.length == 6) {
+                    Position p = new Position(i(f[2]), i(f[3]), i(f[4]));
+                    if (!world.isWalkable(p)) throw new IOException(path + ": reward chest not walkable at " + p);
+                    world.addRewardChoice(new WorldMap.RewardChoice(f[1].trim(), p, f[5].trim()));
+                } else {
+                    throw new IOException(path + ": bad line '" + line + "'");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IOException(path + ": " + e.getMessage() + " in '" + line + "'", e);
+            }
         }
     }
 

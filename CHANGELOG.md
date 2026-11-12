@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.258.0] - 2026-11-12
+
+### Dodano
+- Pieczęć Gasnącej Gwiazdy: bardzo długi quest endgame (poziom 300+) na nowej wyspie premium "Wyspa Gasnącej Gwiazdy" (dojazd tylko statkiem,
+  przewoźnik Captain Brannoc, trasy z Varden, Qasirah i Valmir; pieszo z Varden nie ma drogi). Generator `tools/mapgen/citadel.py`:
+  dziedziniec z przystanią i Warden Thessaly (zleceniodawca), Świątynia Pieczęci za drzwiami poziomu 300, siedem portali do sekcji,
+  siedem sekcji pod morzem po trzy piętra (-1..-3): Cytadela Popiołu, Klasztor Szronu, Kuźnia Żużlu, Ogrody Cierni, Sale Zwierciadeł,
+  Paszcza Głodu i Komnata Pożeracza Światła. Każda sekcja kończy się bossem (Vorgrim 360, Ysmera 420, Kharzul 470, Vessara 520,
+  Ilmora 575, Ugrath 640 i końcowy Noctharion 700); ok. 360 punktów spawnu.
+- Siedem misji w łańcuchu (`star_m1`..`star_m6` na potworach sekcji, `star_final` na Noctharionie), zapisywane w postaci (`QuestLog`).
+  Bramy: budka bramna w każdej sekcji otwiera się po misji (`quest:star_mK`), drzwi za bossem po jego pokonaniu (`boss:<klucz>`), portal do
+  sekcji k po bossie sekcji k-1, sala nagród (pod świątynią, na -1) po `star_final`. Wszystkie drzwi bram są też drzwiami poziomu 300 (`QuestGate`, `star_quest.csv`).
+- Znacznik wyprawy `star_sealed` w postaci (`CharacterCodec`, pole `qflags`); ustawia go oddanie ostatniej misji.
+- Sala nagród: jedenaście skrzyń z jednym elementem ekwipunku każda (miecz, topór, młot, łuk, różdżka, laska, rękawice, zbroja, tarcza,
+  księga, amulet; poziom 300); postać wybiera dokładnie jeden, przedmiot cudzej profesji nie zużywa wyboru, wybór zostaje po zapisie.
+- Herold Matthias (nowa rola NPC `HERALD`) w świątyni Varden sprzedaje wszystkie brakujące błogosławieństwa naraz (pięć zwykłych i Zrządzenie
+  losu) za jedną cenę (80% sumy cen u mnichów, w setkach gp), ale tylko z `star_sealed`; bez niego odmawia i tłumaczy, jak je zdobyć.
+  Sześciu mnichów z kaplic bez zmian. Działa tak samo offline i na serwerze (sesja gracza).
+- Trzynaście nowych potworów z grafiką OTSP (cztery kierunki, klatki marszu), siedmiu bossów, nazwy EN/ES, wpisy bestiariusza i łupy;
+  25 nowych przedmiotów (11 nagród, 8 przedmiotów tylko z bossów, 6 materiałów sekcji; `tools/art/star_art.py`).
+- Testy `StarQuestTest` (misje, bramy bossów, wybór jednej nagrody, kodek, Herold z flagą i bez, dostęp od przystani i brak drogi z Varden),
+  sceny gui-regression `star_*`.
+
+### Zmieniono
+- Mapa świata wygenerowana ponownie (nowa wyspa; numeracja legendy przetasowana, stąd duży diff plików pięter).
+- `MovementSystem` zwraca `GATE_SEALED` na zapieczętowanym przejściu; `WorldRenderer` rysuje fioletową tabliczkę bramy zadania.
+
 ## [0.257.0] - 2026-11-12
 
 ### Dodano

@@ -33,6 +33,7 @@ import pl.fawizja.pixel.world.Position;
  *                        -Dpixel.open=virtues okienko wyboru cnoty; -Dpixel.open=monks inni mnisi z harmonia obok
  *   -Dpixel.skills=AXE:82,SHIELDING:77  nowa postac z tymi poziomami umiejetnosci (np. z symulacji polowania)
  *   -Dpixel.npcPage=N    strona listy kupca przy -Dpixel.open=npc
+ *   -Dpixel.flags=a,b    znaczniki postaci (np. star_sealed, boss.vorgrim); -Dpixel.ask=slowo - rozmowa z NPC obok
  *   -Dpixel.partySize=N  przy -Dpixel.open=party: wielkosc podgladanej druzyny (2..5, rozne profesje, premia exp)
  *   -Dpixel.button=id    akcja przycisku/wiersza menu (np. journal:goto:varden_guide)
  *   -Dpixel.exportArt=dir zapisuje obecne grafiki jako PNG pod nazwami z docs/GRAPHICS.md (dla grafikow)
@@ -173,6 +174,10 @@ public final class DesktopLauncher {
                 int level = Integer.getInteger("pixel.level", 0);
                 pl.fawizja.pixel.character.PlayerCharacter me = ((GameScreen) getScreen()).session().character();
                 while (me.level() < level) me.addExperience(Math.max(1000L, me.experience()));
+                // podglad Pieczeci Gasnacej Gwiazdy: -Dpixel.flags=star_sealed,boss.vorgrim (znaczniki postaci),
+                // -Dpixel.ask=zadanie (slowo do NPC obok: rozmowa w dzienniku)
+                String flags = System.getProperty("pixel.flags");
+                if (flags != null) for (String f : flags.split(",")) if (!f.isBlank()) me.setQuestFlag(f.trim());
                 // podglad harmonii mnicha: -Dpixel.harmony=0..5, -Dpixel.virtue=HARMONY|JUSTICE|SUSTAIN
                 Integer harmony = Integer.getInteger("pixel.harmony");
                 if (harmony != null) me.harmony().build(harmony - me.harmony().points());
@@ -198,6 +203,8 @@ public final class DesktopLauncher {
                         if (t != null) me.backpack().add(new pl.fawizja.pixel.item.ItemStack(t.id(), 1));
                     }
                 }
+                String ask = System.getProperty("pixel.ask");
+                if (ask != null) ((GameScreen) getScreen()).session().askNpc(ask, 1L);
                 String open = System.getProperty("pixel.open");
                 if ("virtues".equals(open)) ((GameScreen) getScreen()).hud().openVirtues();
                 if ("book".equals(open)) ((GameScreen) getScreen()).hud().toggleBook();

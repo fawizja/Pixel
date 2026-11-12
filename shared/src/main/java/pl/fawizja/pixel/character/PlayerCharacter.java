@@ -44,6 +44,12 @@ public final class PlayerCharacter {
     private final java.util.Set<String> openedChests = new java.util.LinkedHashSet<>();
     /** Ukonczone wyprawy na bossa w piec postaci (identyfikatory z boss_quests.csv) - kazda raz na postac. */
     private final java.util.Set<String> completedBossQuests = new java.util.LinkedHashSet<>();
+    /**
+     * Znaczniki zadan postaci (zapisywane): pokonani bossowie Pieczeci Gasnacej Gwiazdy ({@code boss.<klucz potwora>}) i
+     * odblokowania ({@link pl.fawizja.pixel.quest.StarQuest#FLAG_SEALED}). Sprawdzaja je przejscia strzezone mapy
+     * ({@link pl.fawizja.pixel.world.QuestGate}).
+     */
+    private final java.util.Set<String> questFlags = new java.util.LinkedHashSet<>();
 
     public static final int DEPOT_SLOTS = 60;
     /** Odkryta mapa (mgla minimapy) - nie kopiowana w copyStateFrom: klient online odkrywa sam i dostaje FOG. */
@@ -137,6 +143,8 @@ public final class PlayerCharacter {
         openedChests.addAll(o.openedChests);
         completedBossQuests.clear();
         completedBossQuests.addAll(o.completedBossQuests);
+        questFlags.clear();
+        questFlags.addAll(o.questFlags);
         crates = o.crates;
         wallLights = o.wallLights;
         actionBar = o.actionBar;
@@ -593,6 +601,14 @@ public final class PlayerCharacter {
     }
     public java.util.Set<String> openedChests() { return openedChests; }
     public java.util.Set<String> completedBossQuests() { return completedBossQuests; }
+    public java.util.Set<String> questFlags() { return questFlags; }
+    public boolean hasQuestFlag(String flag) { return questFlags.contains(flag); }
+    public boolean setQuestFlag(String flag) { return questFlags.add(flag); }
+
+    /** Czy postac spelnia wymaganie przejscia strzezonego (ukonczone zadanie, pokonany boss albo znacznik). */
+    public boolean passes(pl.fawizja.pixel.world.QuestGate gate) {
+        return gate == null || gate.passes(this);
+    }
 
     /** Gra offline: przesuniete skrzynie i ich zawartosc ({@link pl.fawizja.pixel.world.Crates#encode()}). */
     private String crates = "";

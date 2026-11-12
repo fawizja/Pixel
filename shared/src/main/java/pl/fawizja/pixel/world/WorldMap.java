@@ -197,6 +197,39 @@ public final class WorldMap {
         addLevelGate(p.x(), p.y(), p.x(), p.y(), p.z(), minLevel);
     }
 
+    // ------------------------------------------------------------------ Pieczec Gasnacej Gwiazdy (star_quest.csv)
+    /** Przejscie strzezone zadaniem: pole -> wymaganie. */
+    private final Map<Position, QuestGate> questGates = new java.util.LinkedHashMap<>();
+    private final List<RewardChoice> rewardChoices = new ArrayList<>();
+
+    /** Skrzynia nagrody do wyboru: z jednej grupy postac otwiera tylko jedna (jak w sali nagrod Tibii). */
+    public record RewardChoice(String group, Position position, String itemKey) {
+        public String chestId() { return "rc_" + group + "_" + itemKey; }
+    }
+
+    public void addQuestGate(QuestGate g) { questGates.put(g.at(), g); }
+
+    /** Przejscie strzezone zadaniem w tym polu albo null. */
+    public QuestGate questGateAt(Position p) { return questGates.isEmpty() ? null : questGates.get(p); }
+
+    public Map<Position, QuestGate> questGates() { return Collections.unmodifiableMap(questGates); }
+
+    /** Klucze potworow, ktorych zabicie otwiera przejscia ({@code boss:klucz}). */
+    public java.util.Set<String> gateBosses() {
+        java.util.Set<String> out = new java.util.LinkedHashSet<>();
+        for (QuestGate g : questGates.values()) if (g.kind() == QuestGate.Kind.BOSS) out.add(g.target());
+        return out;
+    }
+
+    public void addRewardChoice(RewardChoice c) { rewardChoices.add(c); }
+
+    public List<RewardChoice> rewardChoices() { return Collections.unmodifiableList(rewardChoices); }
+
+    public RewardChoice rewardChoiceAt(Position p) {
+        for (RewardChoice c : rewardChoices) if (c.position().equals(p)) return c;
+        return null;
+    }
+
     /** Minimalny poziom drzwi poziomu w tym polu albo 0, gdy to nie sa drzwi poziomu. */
     public int levelDoorAt(Position p) {
         Integer v = levelDoors.get(p);

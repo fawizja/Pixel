@@ -407,6 +407,12 @@ TINTED = {
     # 2026-11-12: Miasto Rogatych (minotaur.py): saper (stroj maruderow 44, rudy), gladiator (rycerz 3, braz), wyrocznia (mag 33,
     # fiolet); zwiadowca, mistrz areny i Grozdar sa w STOCKY (rogaty stwor 46 w innym rozmiarze i barwie)
     "horn_sapper": (44, (190, 115, 60)), "horn_gladiator": (3, (200, 130, 70)), "horn_oracle": (33, (205, 120, 195)),
+    # 2026-11-12: Wyspa Gasnacej Gwiazdy (citadel.py): potwory sekcji na strojach paczki w barwach sekcji
+    "ash_penitent": (18, (115, 105, 100)), "cinder_revenant": (3, (215, 110, 70)), "rimebound_monk": (26, (150, 205, 240)),
+    "hoarfrost_warden": (12, (165, 210, 245)), "slag_forgehand": (22, (175, 95, 55)), "molten_cultist": (10, (235, 110, 40)),
+    "thorn_maiden": (32, (95, 175, 70)), "spore_stalker": (13, (130, 175, 85)), "mirror_acolyte": (33, (185, 210, 240)),
+    "glass_phantom": (2, (215, 235, 245)), "maw_crawler": (31, (155, 70, 90)), "gore_harbinger": (46, (175, 35, 60)),
+    "dimmed_seraph": (34, (140, 125, 205)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.
@@ -430,6 +436,11 @@ STOCKY = {
     "horn_scout": (46, None, (205, 160, 105), 0.86, 0.86),
     "horn_champion": (46, None, (105, 65, 60), 1.14, 1.14),
     "horn_overlord": (46, None, (70, 50, 58), 1.45, 1.45),
+    # 2026-11-12: bossowie Wyspy Gasnacej Gwiazdy (wieksze stroje paczki w barwach sekcji)
+    "vorgrim": (19, None, (125, 105, 95), 1.3, 1.3), "ysmera": (34, None, (160, 215, 255), 1.25, 1.25),
+    "kharzul": (12, None, (205, 85, 40), 1.5, 1.5), "vessara": (32, None, (70, 150, 50), 1.4, 1.4),
+    "ilmora": (33, None, (205, 225, 250), 1.35, 1.35), "ugrath": (31, None, (135, 40, 60), 1.8, 1.8),
+    "noctharion": (46, None, (85, 60, 155), 1.7, 1.7),
 }
 CHARACTERS = {
     "paladin": (19, None),
@@ -462,6 +473,9 @@ _ROLE = {
     "imbuer": (18, ((60, 40, 90), (110, 60, 170), (80, 50, 130), (40, 30, 40))),
     # 2026-11-12: mnisi z kaplic blogoslawienstw (tools/mapgen/chapels.py, klucze *_blesser): brazowa szata z kapturem (stroj monk)
     "blesser": (26, None),
+    # 2026-11-12: Straznik Pieczeci (zbroja) i Herold ze swiatyni Varden (biala szata ze zlotem)
+    "warden": (19, ((200, 200, 215), (60, 90, 150), (120, 125, 140), (60, 50, 40))),
+    "herald": (18, ((240, 235, 220), (245, 240, 225), (215, 175, 70), (120, 90, 50))),
 }
 # wladcy miast: krolewski stroj w barwach miasta (krol Aurelian w Varden ma swoj "king")
 RULER_COLORS = {

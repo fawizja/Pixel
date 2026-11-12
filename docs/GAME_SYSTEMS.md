@@ -1062,6 +1062,39 @@ pieter i bardzo duzo silnych potworow i +7 bardzo duzo potworow mieszanych - exp
   (lodowa polnoc, 100, Ysolde), Krypta Neferakha (zachodnia pustynia, 200, Faraon Neferakh), Kuznia Ignarotha
   (zbocze wulkanu, 400, Ignaroth).
 
+## Pieczec Gasnacej Gwiazdy (Z logika, S serwer, C okno Herolda, generator `tools/mapgen/citadel.py`) - 2026-11-12
+
+Bardzo dlugi quest endgame (poziom 300+) na wyspie premium "Wyspa Gasnacej Gwiazdy" i nagroda w swiatyni Varden.
+
+- Wyspa: powierzchnia od (80,770), osiagalna tylko statkiem (przewoznik `star_captain` Captain Brannoc przy przystani (88,796), trasy
+  do Varden, Qasirah i Valmir; statki wymagaja konta premium). Pieszo z Varden nie ma drogi (generator sprawdza `realms.Graph`, test
+  `StarQuestTest`). Dziedziniec ze Straznikiem Pieczeci (`star_warden`, rola GUIDE, zadania z `quests.csv`), Swiatynia Pieczeci za drzwiami
+  poziomu 300 (126,792), siedem portali (TUNNEL, obiekt `boss_portal`) w rzedzie y=778 i schody (140,784) do sali nagrod pod swiatynia (-1, brama zadania (142,784,-1), skrzynie od (144,784,-1)).
+- Sekcje: siedem planow po trzy pietra (-1..-3), kladzionych przez `structures.stamp` pod morzem (x 12-318, y 850-975): F1 komora z
+  portalem powrotnym, jaskinie (`isles.rooms_floor`), budka bramna (drzwi poziomu 300 + brama `quest:star_mK`) i schody; F2 jaskinie;
+  F3 jaskinie, sala bossa, drzwi za bossem (brama `boss:<klucz>`) i alkowa z portalem do nastepnej sekcji. Sekcja 7 nie ma budki:
+  Noctharion zamyka Pieczec, portal wraca do swiatyni. Kazdy start sekcji ma portal powrotny do swiatyni.
+- Bossowie: Vorgrim (360), Ysmera (420), Kharzul (470), Vessara (520), Ilmora (575), Ugrath (640), Noctharion (700); lupy w `loot.csv`,
+  przedmioty tylko z bossow w `boss_items.csv`. Potwory sekcji: `ash_penitent`, `cinder_revenant`, `rimebound_monk`, `hoarfrost_warden`,
+  `slag_forgehand`, `molten_cultist`, `thorn_maiden`, `spore_stalker`, `mirror_acolyte`, `glass_phantom`, `maw_crawler`,
+  `gore_harbinger`, `dimmed_seraph` (poziomy 310-600, w `HAND_PLACED`).
+- Bramy: plik mapy `star_quest.csv` (`MapLoader.readStarQuest`, `world/QuestGate`): `gate;x;y;z;wymog` z wymogiem `quest:<klucz>` (zadanie
+  oddane), `boss:<potwor>` (znacznik `boss.<potwor>` w postaci ustawia `GameSession.taskKill`, takze `partyKill`) albo `flag:<znacznik>`.
+  `MovementSystem.step` zwraca `MoveResult.GATE_SEALED`, `GameSession.useAt` wypisuje, czego brakuje (`gateRefusal`). Drzwi bram sa tez
+  w `level_doors.csv` (300). Siatka dostepu (`Reachability`, `TreasureChests`) bram nie widzi.
+- Misje (`quests.csv`, `quest_chains.csv`; stan w `QuestLog`, zapisywany): `star_m1`..`star_m6` (50-70 zabic potworow sekcji 1-6) i
+  `star_final` (Noctharion), kazda wymaga poprzedniej i daje mikstury. Oddanie `star_final` (`QuestSystem.turnIn` -> `StarQuest.onCompleted`)
+  ustawia znacznik postaci `star_sealed` (`PlayerCharacter.questFlags()`, zapis `qflags` w `CharacterCodec`).
+- Sala nagrod: `choice;grupa;x;y;z;przedmiot` w `star_quest.csv` + zwykle skrzynie lupu w `chests.csv` (id `d<x>_<y>_<z>`). Z grupy
+  `star_reward` mozna otworzyc jedna (`GameSession.openRewardChoice`, znacznik `rcg_star_reward` w `openedChests`); przedmiot innej
+  profesji nie zuzywa wyboru, przed `star_sealed` skrzynie sa zamkniete.
+- Herold (`varden_herald`, Herald Matthias, rola `HERALD`, swiatynia Varden (500,497)): `GameSession.blessAll` (akcja `npc:blessall`,
+  rozmowa "blogoslawienstwa" / "tak") sprzedaje wszystkie brakujace blogoslawienstwa za `StarQuest.bundlePrice` (80% sumy cen u mnichow,
+  w setkach gp), tylko z `star_sealed`; bez niego odmawia (`star.herald_locked`). Szesciu mnichow z kaplic (`BLESSER`) bez zmian.
+  Offline i serwer uzywaja tej samej sesji, wiec zachowuja sie tak samo. Napisy: `Messages` (`star.*`, pl/en/es).
+- Testy: `StarQuestTest` (lancuch misji, kodek, bramy, dostep od przystani, brak drogi z Varden, wybor jednej nagrody, Herold z flaga i bez).
+  Podglad: `-Dpixel.flags=star_sealed,boss.vorgrim` (regresja GUI, sceny `star_*`).
+
 ## Minimapa (Z kolory, C rysowanie)
 
 `world/MinimapPalette.color/paint`: piksel RGBA8888 na kafelek - przejscie zolte, sciana ciemna, podloze w kolorze

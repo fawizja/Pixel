@@ -17,3 +17,10 @@ isle_bloodbeard;isle_gunners;coral_armor:1
 isle_morvena;isle_mist;crystal_coin:20
 isle_horns;isle_drakes;ultimate_spirit_potion:20
 isle_pyrrax;isle_horns;coral_legs:1
+star_m1;-;ultimate_health_potion:20
+star_m2;star_m1;ultimate_mana_potion:20
+star_m3;star_m2;ultimate_spirit_potion:20
+star_m4;star_m3;supreme_health_potion:15
+star_m5;star_m4;supreme_mana_potion:15
+star_m6;star_m5;supreme_health_potion:25
+star_final;star_m6;supreme_mana_potion:30

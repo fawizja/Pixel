@@ -142,6 +142,9 @@ durn_guide;Przewodnik Dvalin;GUIDE;Durnkar;520;320;-5;-;#8a6a3a;Kopalnie wokół
 durn_smith;Kowal Brokk;MERCHANT;Durnkar;494;334;-6;durn_arms;#a0703a;Topory, młoty i kusze z kuźni Durnkaru. Skupuję też broń i rudę.
 durn_armorer;Płatnerz Hagar;MERCHANT;Durnkar;534;336;-6;durn_armor;#a0703a;Zbroje kute w żarze lawy: hełmy, kolczugi i tarcze dla każdego wojownika.
 durn_imbuer;Zaklinacz Runnar;IMBUER;Durnkar;556;332;-6;-;#7050b0;Runy wyryte w kamieniu trzymają moc nasyceń. Kradzież życia, many, krytyk, żywioły i ochrony.
+star_warden;Warden Thessaly;GUIDE;Wyspa Gasnącej Gwiazdy;129;796;0;-;#c0c8e0;Gwiazda nad nami gaśnie. Strzegę Pieczęci i mam zadania dla tych od poziomu 300.
+star_captain;Captain Brannoc;CAPTAIN;Wyspa Gasnącej Gwiazdy;88;796;0;-;#4a6a8a;Pływam na kontynent. Tylko konta premium.
+varden_herald;Herald Matthias;HERALD;Varden;500;497;0;-;#d8c060;Witaj w świątyni. Zapytaj mnie o błogosławieństwa.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

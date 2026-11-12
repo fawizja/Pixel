@@ -61,3 +61,10 @@ isle_skaldra;Lodowa wiedźma;isle_guide;KILL;skaldra;1;6000000;300000;520;Skaldr
 isle_drakes;Ogień z głębin;isle_guide;KILL;magma_drake;20;1600000;80000;670;Magmowe smoki z Serca Wulkanu palą nasze statki.
 isle_horns;Rogi smoków;isle_guide;COLLECT;drake_horn;5;2000000;0;670;Przynieś 5 rogów magmowych smoków dla alchemików floty.
 isle_pyrrax;Władca wulkanu;isle_guide;KILL;pyrrax;1;12000000;600000;750;Pyrrax śpi w najgłębszym piętrze Serca Wulkanu. Obudź go i pokonaj.
+star_m1;Popielne pokuty;star_warden;KILL;ash_penitent;50;800000;20000;300;Pokutnicy z Cytadeli Popiołu nie zaznają spokoju. Pokonaj 50 skruszonych pokutników.
+star_m2;Cisza klasztoru;star_warden;KILL;rimebound_monk;55;1200000;30000;300;Mnisi z Klasztoru Szronu zamarzli w modlitwie. Pokonaj 55 skutych lodem mnichów.
+star_m3;Ogień kuźni;star_warden;KILL;slag_forgehand;60;1800000;45000;300;Kuźnia gwiazdy pracuje bez kowali. Rozbij 60 żużlowych kowalczyków.
+star_m4;Zarośnięte ogrody;star_warden;KILL;thorn_maiden;60;2600000;60000;300;Ogrody Cierni pochłaniają wszystko, co żywe. Wytnij 60 cierniowych panien.
+star_m5;Odbicia;star_warden;KILL;mirror_acolyte;65;3600000;80000;300;W Salach Zwierciadeł nikt nie jest sam. Pokonaj 65 akolitów zwierciadeł.
+star_m6;Głód paszczy;star_warden;KILL;maw_crawler;70;5000000;120000;300;Paszcza jest wiecznie głodna. Wytęp 70 pełzaczy z paszczy, zanim wypełzną na świat.
+star_final;Pieczęć Gasnącej Gwiazdy;star_warden;KILL;noctharion;1;12000000;400000;300;Noctharion gasi gwiazdy. Zejdź do Komnaty Pożeracza Światła i pokonaj go, aby zamknąć Pieczęć.
