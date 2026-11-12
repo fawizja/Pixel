@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.254.0] - 2026-11-12
+
+### Dodano
+- Trzy krainy wzgórz, każda z powierzchnią i podziemiami o nieregularnym, organicznym kształcie (generator
+  `tools/mapgen/hills.py`): grzbiety górskie z krętymi dolinami, jaskinie z wąskimi korytarzami, ślepymi komorami i
+  skrzyniami na każdym piętrze, spawny rozrzucone po całym terenie.
+  - Wzgórza Goblinów (kontynent główny, bez premium, x 578-627, y 411-484): goblin, szabrownik, szaman, nożownik i herszt
+    od najsłabszego do najsilniejszego; podziemia Nory Goblinów -1..-3 (herszt na dnie).
+  - Wzgórza Smoków (pustynia przy Qasirah, x 84-151, y 252-326): pisklęta, smoki łuskowe i skalne, potem smoki
+    piaskowe, magmowe i kostne; Smocze Pieczary -1..-4, najsilniejsze smoki najgłębiej.
+  - Wzgórza Hydr (duża wyspa wschodnia, tylko statkiem, x 891-960, y 381-450): jaszczury bagienne, hydry, wężyce i
+    gorgony; Legowiska Hydr -1..-5. Dojście z kontynentu po skosie przez las zasypują głazy, tunel pod morzem kończy się
+    na sąsiednim kawałku lądu.
+- 12 nowych potworów z grafiką (OTSP), łupem, wpisami w bestiariuszu i nazwami EN/ES: goblin szabrownik, nożownik,
+  herszt, jaszczur bagienny, jaszczur guślarz, hydra bagienna, wężyca bagienna, hydra jadowita, gorgona, smocze pisklę,
+  smok łuskowy, smok skalny.
+- Nazwy miejsc w angielskim i hiszpańskim (`Region.displayName()`, rodzaj `place` w `data_en.csv` i `data_es.csv`):
+  komunikat wejścia do regionu, tabliczki, bestiariusz i status bossów.
+- `HillsTest` (osiągalność, piętra, kształty, spawny, brak kolizji z miastami i zamkiem, tłumaczenia) i sześć scen
+  gui-regression `hills_*`.
+
 ## [0.253.0] - 2026-11-12
 
 ### Dodano

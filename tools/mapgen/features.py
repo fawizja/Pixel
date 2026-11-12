@@ -608,6 +608,8 @@ CAVE_STYLES = {
 CRYPT_STYLES = {'crypt', 'sewer', 'sandtomb', 'ruin', 'orc_hall', 'oneeye_hall', 'grove_cellar'}
 # zalane sale: jeziorka (jak lawa w carve_cave) zamieniane na wode
 WATER_STYLES = {'flooded'}
+# style z jeziorkami lawy (nieprzechodnie) w komorach jaskin: smocze legowiska
+LAVA_STYLES = set()
 
 
 def carve_rooms(w, h, points, style, rng, room=(3, 5), lava=0.0):
@@ -615,7 +617,8 @@ def carve_rooms(w, h, points, style, rng, room=(3, 5), lava=0.0):
     if style in CRYPT_STYLES:
         g = carve_crypt(w, h, points, style, rng)
     else:
-        g = carve_cave(w, h, points, style, rng, room=room, lava=max(lava, 0.06 if style in WATER_STYLES else 0.0))
+        g = carve_cave(w, h, points, style, rng, room=room,
+                       lava=max(lava, 0.06 if style in WATER_STYLES else (0.05 if style in LAVA_STYLES else 0.0)))
         for row in g:
             for x, c in enumerate(row):
                 if c is None:

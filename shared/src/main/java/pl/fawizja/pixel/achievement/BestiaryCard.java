@@ -110,7 +110,7 @@ public final class BestiaryCard {
         for (pl.fawizja.pixel.monster.SpawnPoint sp : spawns) {
             if (!sp.monsterKey().equals(key)) continue;
             pl.fawizja.pixel.world.Region r = world.regionAt(sp.center());
-            String name = r == null ? "dzicz" : r.name();
+            String name = r == null ? "dzicz" : r.displayName();
             names.merge(name, sp.nightOnly(), (a, b) -> a && b);
         }
         List<String> out = new ArrayList<>();

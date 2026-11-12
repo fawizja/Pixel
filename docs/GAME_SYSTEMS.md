@@ -1630,6 +1630,32 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   nazwe regionu i ostrzezenie przy wejsciu.
 - Zapis w wersji 3 (`map=world`); starsze zapisy z mapy Varden sa przenoszone o (+48, +64).
 
+## Wzgorza goblinow, smokow i hydr (Z dane, generator `tools/mapgen/hills.py`, 2026-11-12)
+
+- Trzy krainy: **Wzgorza Goblinow** (kontynent glowny, ziemia darmowa; Nory Goblinow -1..-3, poziomy 8-50), **Wzgorza
+  Smokow** (pustynia przy Qasirah; Smocze Pieczary -1..-4, poziomy 50-900, najsilniejsze smoki na dnie) i **Wzgorza
+  Hydr** (wyspa wschodnia, tylko statkiem - rejs wymaga premium albo promocji; Legowiska Hydr -1..-5, poziomy 22-505).
+- Prostokaty powierzchni: goblinow (573,406)-(632,489), smokow (79,247)-(156,331), hydr (886,376)-(965,455); podziemia
+  w prostokatach pieter (`regions=` w map.properties, nazwy `Nory Goblinow`, `Smocze Pieczary`, `Legowiska Hydr`).
+- `build_one`: ksztalt (suma kol wzdluz kregoslupa + szum), miejsce (`find_origin`, bez miast, drog, twierdz, zamku
+  Warownia Gorvalda x 750-814, y 336-390), grzbiety gorskie z dolinami i 3 przeleczami, stawy, wejscia (jaskinie u stop
+  grzbietow, 3-4 na krainę), spawny powierzchni wg drogi od swiatyni (najslabsze przy przelecz), podziemia (`floor_net`:
+  drzewo rozpinajace pokoi, petle, krete waypointy, slepe liczki, 2 schody w dol), skrzynie, regiony, `clear_surface`, stamp.
+- Nowe style jaskin w `features.py`: `goblin_den/mine/hold`, `fen_cave`, `flooded`, `moss_grot`, `venom_pit`,
+  `serpent_lair`, `dragon_den`, `ember_den`, `dragon_hoard` (`WATER_STYLES`, nowy `LAVA_STYLES`).
+- Potwory: `goblin_scrounger` 14, `goblin_knifer` 24, `goblin_warchief` 36, `marsh_lizard` 88, `lizard_hexer` 120,
+  `bog_hydra` 190, `bog_naga` 250, `venom_hydra` 310, `stone_gorgon` 400, `dragon_whelp` 50, `scale_dragon` 140,
+  `crag_dragon` 260 (nowe, w `HAND_PLACED`, wiec `route_levels` ich nie podmienia) oraz istniejace goblin, goblin_shaman,
+  cave_troll, dune_drake, magma_drake, bone_dragon i inne. Grafika z OTSP (`otsp_import.py`: TINTED i STOCKY).
+- `route_levels`: zasada luzu trasy (spawn w 8 polach od drogi do slabszego spawnu dostaje najwyzej slabszy + 25%) i
+  limity pasm drogowych dzialaja tez tu; spawny przydzielane wg `route_dist`, zeby slabsze lezaly blizej wejsc.
+- Wyspa hydr: tunel pod morzem (`generate_continent.tunnel`) konczy sie na sasiednim kawalku ladu, ktory z wyspa
+  laczy po skosie las (gra pozwala przejsc miedzy drzewami po skosie). `hills.sever_diagonals` zasypuje najwezsza
+  warstwe BFS (8 kierunkow) glazami, zeby wyspa byla dostepna tylko statkiem.
+- Nazwy miejsc: `Region.displayName()` (`Messages.data("place", nazwa, nazwa)`); wiersze `place;<nazwa PL>;name;<tekst>`
+  w `i18n/data_en.csv` i `data_es.csv`. Uzywane w `GameSession.checkRegion/signText`, `BestiaryCard.habitats`, `MonsterManager`.
+- Testy: `HillsTest`; sceny gui-regression `hills_goblin_*`, `hills_dragon_*`, `hills_hydra_*` (wzorce dopisze koordynator).
+
 ## Planowane
 
  fishing, NPC, zadania, handel, bank w UI, PvP,

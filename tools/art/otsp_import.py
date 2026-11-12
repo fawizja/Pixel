@@ -397,6 +397,13 @@ TINTED = {
     "horn_raider": (46, (165, 105, 65)), "horn_guard": (46, (115, 80, 60)), "horn_bowman": (19, (170, 120, 70)),
     "horn_mystic": (34, (170, 105, 175)), "keep_sentry": (3, (140, 150, 195)), "keep_hound": (11, (100, 100, 115)),
     "castellan_gorvald": (3, (75, 80, 115)),
+    # 2026-11-12: Wzgorza Goblinow, Hydr i Smokow (hills.py): goblin szabrownik (stroj goblina, piaskowy), goblin nozownik
+    # (zakapturzony stroj, zielony), jaszczur bagienny, wezyca i gorgona (pelzacze 37/38 i rogaty stwor 46), smoki
+    # luskowy (rudy) i skalny (karminowy) na stroju smoka 25; pisklak, herszt i hydry sa w STOCKY (skalowane)
+    "goblin_scrounger": (7, (205, 160, 85)), "goblin_knifer": (21, (120, 150, 95)),
+    "marsh_lizard": (37, (150, 170, 80)), "lizard_hexer": (33, (130, 170, 70)), "bog_naga": (38, (90, 190, 170)),
+    "stone_gorgon": (46, (130, 160, 110)),
+    "scale_dragon": (25, (210, 125, 70)), "crag_dragon": (25, (175, 50, 55)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.
@@ -412,6 +419,11 @@ STOCKY = {
     "rock_golem": (12, None, (150, 145, 135), 1.0, 1.0),
     "earth_spirit": (42, None, (135, 105, 60), 1.0, 1.0),
     "deep_behemot": (46, None, (165, 120, 80), 1.0, 1.0),
+    # 2026-11-12: herszt goblinow (stroj rozbojnika, szerszy), smocze pisklle (maly smok) i hydry (robak 29 powiekszony 2x)
+    "goblin_warchief": (19, None, (150, 190, 95), 0.95, 1.15),
+    "dragon_whelp": (25, None, (130, 210, 95), 0.62, 0.62),
+    "bog_hydra": (29, None, (95, 175, 140), 2.0, 2.0),
+    "venom_hydra": (29, None, (150, 105, 205), 2.0, 2.0),
 }
 CHARACTERS = {
     "paladin": (19, None),
