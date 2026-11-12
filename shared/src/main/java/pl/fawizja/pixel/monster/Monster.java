@@ -65,6 +65,32 @@ public final class Monster {
     public void holdFromFleeing(long untilMs) { fleeBlockedUntilMs = Math.max(fleeBlockedUntilMs, untilMs); }
     public boolean fleeBlocked(long now) { return now < fleeBlockedUntilMs; }
 
+    /** Haste (czar potwora): ruch szybszy o hastePercent do hasteUntilMs. */
+    private int hastePercent;
+    private long hasteUntilMs = Long.MIN_VALUE;
+
+    public void haste(int percent, long untilMs) {
+        hastePercent = percent;
+        hasteUntilMs = untilMs;
+    }
+    public boolean hasted(long now) { return now < hasteUntilMs; }
+    /** Mnoznik czasu kroku (100 = bez zmian; haste 50% - krok trwa 100/150). */
+    long stepScalePercent(long now) { return hasted(now) ? 10_000L / (100 + hastePercent) : 100; }
+
+    /** Przywolujacy (potwor, ktory przywolal tego pomocnika czarem) albo null; pomocnik znika z jego smiercia. */
+    private Monster master;
+    private final java.util.List<Monster> minions = new java.util.ArrayList<>();
+    private long nextSummonMs;
+
+    public Monster master() { return master; }
+    /** Czy to pomocnik przywolany przez innego potwora (bez lupu i doswiadczenia). */
+    public boolean isMinion() { return master != null; }
+    void setMaster(Monster m) { master = m; }
+    /** Zywi pomocnicy tego potwora. */
+    public java.util.List<Monster> minions() { return minions; }
+    long nextSummonMs() { return nextSummonMs; }
+    void setNextSummonMs(long t) { nextSummonMs = t; }
+
     /** Wlasciciel przywolanego/przekonanego stworzenia (imie gracza) albo null dla dzikiego potwora. */
     private String owner;
 

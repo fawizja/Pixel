@@ -75,6 +75,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.dragonDemo=five|fire|gfb|ice|white  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
  *                        wielka kule ognia (gfb), oddech lodu (ice), bialy smok piorun (white) - rzut w postac stojaca przed nim
+ *   -Dpixel.mobDemo=spear|caster|area|summon|flee  style ataku potworow: wlocznik trzyma dystans, uderzenie w cel, fala jadu, przywolywacz, ranny strzelec ucieka
  *   -Dpixel.fakePing=MS   udaje opoznienie sieciowe (kropka pingu obok FPS; zielona <100, pomaranczowa 100-250, czerwona >250)
  *   -Dpixel.bagSlots=N, -Dpixel.bagScroll=W, -Dpixel.depotScroll=W  przy open=bigbag / depotwin: pojemnosc plecaka i przewiniecie siatek
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
@@ -995,6 +996,8 @@ public final class DesktopLauncher {
             if (facingDemo != null && getScreen() instanceof GameScreen) facingDemo((GameScreen) getScreen(), facingDemo, frame);
             String dragonDemo = System.getProperty("pixel.dragonDemo");
             if (dragonDemo != null && getScreen() instanceof GameScreen) dragonDemo((GameScreen) getScreen(), dragonDemo, frame, frames);
+            String mobDemo = System.getProperty("pixel.mobDemo");
+            if (mobDemo != null && getScreen() instanceof GameScreen) mobDemo((GameScreen) getScreen(), mobDemo, frame, frames);
             String spellDemo = System.getProperty("pixel.spellDemo");
             if (spellDemo != null && getScreen() instanceof GameScreen) spellDemo((GameScreen) getScreen(), spellDemo, frame, frames);
             if (Boolean.getBoolean("pixel.fx") && frame == frames - 8 && getScreen() instanceof GameScreen) {
@@ -1132,6 +1135,51 @@ public final class DesktopLauncher {
                     Gdx.app.log("Pixel", "dragonDemo cast " + spell + " " + ok + " dragon " + m.position() + " me " + me);
                     break;
                 }
+            }
+        }
+
+        /**
+         * Podglad stylow ataku potworow (-Dpixel.mobDemo=spear|caster|area|summon|flee): wloczni na zywym AI (trzyma
+         * dystans i rzuca), uderzenie w cel, fala jadu, przywolywacz z pomocnikami, ranny strzelec uciekajacy.
+         */
+        private static void mobDemo(GameScreen gs, String demo, int frame, int frames) {
+            pl.fawizja.pixel.game.GameSession s = gs.session();
+            pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
+            Position me = pc.position();
+            long now = gs.worldTime();
+            pc.heal(pc.maxHealth());   // podglad: wokol sa prawdziwe potwory jaskini
+            String key = demo.equals("spear") ? "orc_spearman" : demo.equals("caster") ? "orc_shaman" : demo.equals("area") ? "venom_hydra"
+                    : demo.equals("summon") ? "candle_acolyte" : "elf_scout";
+            if (frame == 2) {
+                for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
+                for (pl.fawizja.pixel.monster.Monster m : new java.util.ArrayList<>(s.monsters().monsters())) {
+                    if (!m.isSummon() && m.position().z() == me.z() && m.position().distanceTo(me) <= 24) s.monsters().dismiss(m);   // pusta scena
+                }
+                String unused = demo.equals("spear") ? "orc_spearman" : demo.equals("caster") ? "orc_shaman" : demo.equals("area") ? "venom_hydra"
+                        : demo.equals("summon") ? "candle_acolyte" : "elf_scout";
+                int dy = demo.equals("spear") ? -6 : -3;
+                for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(0, dy), 0, 1, now)) {
+                    if (!demo.equals("spear") && !demo.equals("flee")) m.paralyze(now + 600_000);
+                    if (demo.equals("flee")) m.damage(m.type().maxHealth() * 95 / 100);
+                }
+            }
+            pl.fawizja.pixel.monster.Monster who = null;
+            for (pl.fawizja.pixel.monster.Monster m : s.monsters().monsters()) {
+                if (!m.isSummon() && !m.isMinion() && m.position().z() == me.z() && m.position().distanceTo(me) <= 12 && m.type().key().equals(key)) who = m;
+            }
+            if (who == null) return;
+            if (demo.equals("summon") && frame == frames - 40) {
+                s.monsters().summonMinion(who, "skeleton", now);
+                s.monsters().summonMinion(who, "skeleton", now);
+                s.combat().monsterEffect(who, who.position(), "MAGIC", now);
+            }
+            if (frame == frames - (demo.equals("area") ? 7 : 3)) {
+                who.lookAt(me);
+                String spell = demo.equals("caster") ? "fire_strike" : demo.equals("area") ? "poison_wave" : null;
+                Gdx.app.log("Pixel", "mobDemo " + demo + " " + who.type().key() + " at " + who.position() + " me " + me
+                        + " dist " + who.position().distanceTo(me) + " state " + who.state());
+                if (spell != null) Gdx.app.log("Pixel", "mobDemo cast " + spell + " " + s.combat().castMonsterSpell(who, spell, now));
+                else if (demo.equals("spear")) s.combat().monsterAttacks(who, now);
             }
         }
 

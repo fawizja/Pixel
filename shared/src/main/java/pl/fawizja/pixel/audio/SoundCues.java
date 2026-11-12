@@ -37,7 +37,7 @@ public final class SoundCues {
             case LEVEL_UP: return Sfx.LEVEL_UP;
             case DEATH: return Sfx.DEATH;
             case PROJECTILE:
-            case AREA: return elementSfx(e.effect());
+            case AREA: return elementSfx(e.effectType());
             default: return null;
         }
     }

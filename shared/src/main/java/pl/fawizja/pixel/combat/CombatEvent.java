@@ -22,6 +22,25 @@ public record CombatEvent(long timeMs, Position position, int amount, Kind kind,
         return new CombatEvent(now, to, 0, Kind.PROJECTILE, from, effect);
     }
 
+    /** Efekt pocisku z nazwa grafiki: "TYP/pocisk", np. "PHYSICAL/spear" (wlocznia), "FIRE/fire" (kula ognia). */
+    public static String withMissile(String type, String missile) {
+        return missile == null || missile.isBlank() ? type : type + "/" + missile;
+    }
+
+    /** Rodzaj obrazen z efektu ("PHYSICAL/spear" -> "PHYSICAL") albo null. */
+    public String effectType() {
+        if (effect == null) return null;
+        int i = effect.indexOf('/');
+        return i < 0 ? effect : effect.substring(0, i);
+    }
+
+    /** Nazwa grafiki pocisku z efektu ("PHYSICAL/spear" -> "spear") albo null, gdy wybiera klient wg rodzaju obrazen. */
+    public String missileName() {
+        if (effect == null) return null;
+        int i = effect.indexOf('/');
+        return i < 0 ? null : effect.substring(i + 1);
+    }
+
     public static CombatEvent area(long now, Position center, int radius, String effect) {
         return new CombatEvent(now, center, radius, Kind.AREA, null, effect);
     }

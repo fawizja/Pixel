@@ -48,6 +48,12 @@ public final class MonsterManager {
     public interface AttackHandler {
         void monsterAttacks(Monster m, long now);
         void monsterHeals(Monster healer, Monster target, int amount, long now);
+
+        /**
+         * Efekt czaru wsparcia potwora na polu at (przywolanie - "MAGIC", przyspieszenie - "HASTE"): klient rysuje
+         * blysk; domyslnie nic (testy, atrapy).
+         */
+        default void monsterEffect(Monster caster, Position at, String effect, long now) {}
     }
 
     /** Minimalny widok gracza potrzebny AI (w trybie online - wielu graczy). */
@@ -98,6 +104,7 @@ public final class MonsterManager {
     public void clearEvent(java.util.Collection<Integer> ids) {
         for (Monster m : new ArrayList<>(monsters)) {
             if (ids.contains(m.id()) && eventSpawns.contains(m.spawn())) {
+                detach(m);
                 monsters.remove(m);
                 grid.remove(m, m.position());
             }
@@ -428,8 +435,13 @@ public final class MonsterManager {
 
     /** Usuwa zabitego potwora i planuje odrodzenie. */
     public void kill(Monster m, long now) {
+        detach(m);
         monsters.remove(m);
         grid.remove(m, m.position());
+        if (m.isMinion()) {
+            eventSpawns.remove(m.spawn());
+            return;
+        }
         if (eventSpawns.contains(m.spawn())) return;
         respawnQueue.computeIfAbsent(m.spawn(), k -> new ArrayList<>()).add(now + m.spawn().respawnSeconds() * 1000L);
     }
@@ -522,8 +534,49 @@ public final class MonsterManager {
 
     /** Odwolanie slugi (smierc wlasciciela, wylogowanie): znika bez ciala i lupu. */
     public void dismiss(Monster m) {
+        detach(m);
         monsters.remove(m);
         grid.remove(m, m.position());
+        if (m.isMinion()) eventSpawns.remove(m.spawn());
+    }
+
+    // ------------------------------------------------------------------ pomocnicy przywolani przez potwory (Canary: summon)
+
+    /**
+     * Przywoluje pomocnika potwora master na wolnym polu obok niego (czar SUMMON, jak "summon" w Canary): pomocnik
+     * poluje na gracza, nie odradza sie, nie daje lupu ani doswiadczenia i znika wraz z przywolujacym.
+     * Zwraca pomocnika albo null, gdy nie ma miejsca.
+     */
+    public Monster summonMinion(Monster master, String monsterKey, long now) {
+        if (registry == null || !registry.contains(monsterKey) || master.isDead()) return null;
+        Position spot = freeSpotNear(master.position(), 2);
+        if (spot == null) return null;
+        SpawnPoint sp = new SpawnPoint(monsterKey, spot, 3, 1, 1);
+        eventSpawns.add(sp);
+        Monster m = new Monster(nextId++, registry.get(monsterKey), sp, spot);
+        m.setMaster(master);
+        m.setTarget(master.target());
+        m.setState(MonsterState.CHASE);
+        m.setNextAttackMs(now + 1200);
+        monsters.add(m);
+        grid.add(m);
+        master.minions().add(m);
+        return m;
+    }
+
+    /** Zywi pomocnicy przywolani przez potwora. */
+    public int minionCount(Monster master) { return master.minions().size(); }
+
+    /** Odpina potwora od przywolujacego i (smierc przywolujacego) usuwa jego pomocnikow - jak w Canary bez lupu. */
+    private void detach(Monster m) {
+        if (m.master() != null) m.master().minions().remove(m);
+        if (m.minions().isEmpty()) return;
+        for (Monster c : new ArrayList<>(m.minions())) {
+            monsters.remove(c);
+            grid.remove(c, c.position());
+            eventSpawns.remove(c.spawn());
+        }
+        m.minions().clear();
     }
 
     /** Potwor trafiony z daleka (czar, runa) przestaje stac bezczynnie i rusza na gracza. */
@@ -535,8 +588,13 @@ public final class MonsterManager {
     public void evict(Position p, long now) {
         Monster m = grid.at(p);
         if (m == null) return;
+        detach(m);
         monsters.remove(m);
         grid.remove(m, p);
+        if (m.isMinion()) {
+            eventSpawns.remove(m.spawn());
+            return;
+        }
         if (eventSpawns.contains(m.spawn())) return;
         respawnQueue.computeIfAbsent(m.spawn(), k -> new ArrayList<>()).add(now);
     }
@@ -634,6 +692,7 @@ public final class MonsterManager {
                 if (t.position().z() == m.position().z() && t.position().distanceTo(m.position()) <= DESPAWN_SIGHT) { seen = true; break; }
             }
             if (seen) continue;
+            detach(m);
             monsters.remove(m);
             grid.remove(m, m.position());
         }
@@ -768,11 +827,17 @@ public final class MonsterManager {
             case FLEE:
                 if (!targetValid || (!inView && !remembers) || tooFarFromHome) m.setState(MonsterState.RETURN);
                 else if (m.state() == MonsterState.FLEE && m.fleeBlocked(now)) m.setState(MonsterState.CHASE); // charm Smiertelny chwyt
-                else if (!m.cornered() && !m.fleeBlocked(now) && t.fleeHealthPercent() > 0 && m.healthFraction() * 100 < t.fleeHealthPercent()) {
+                else if (!m.cornered() && !m.fleeBlocked(now) && runPercent(t) > 0 && m.healthFraction() * 100 < runPercent(t)) {
                     m.setState(MonsterState.FLEE);
+                } else if (m.state() == MonsterState.FLEE && runPercent(t) > 0 && m.healthFraction() * 100 >= runPercent(t) + FLEE_RECOVER_PCT) {
+                    m.setState(MonsterState.CHASE);   // wyleczyl sie czarem: wraca do walki
                 }
                 break;
             case RETURN:
+                if (m.isMinion()) {
+                    dismiss(m);   // pomocnik bez celu znika (Canary: przywolance znikaja, gdy przywolujacy traci cel)
+                    return;
+                }
                 if (mp.distanceTo(m.spawn().center()) <= m.spawn().radius()) {
                     m.heal(t.maxHealth());
                     m.setCornered(false);
@@ -803,7 +868,9 @@ public final class MonsterManager {
                         acted = true;
                     }
                 }
-                if (!acted && dist <= t.range() && (dist <= 1 || los) && m.state() == MonsterState.CHASE) {
+                if (!acted && !MonsterSpells.defaults().support(t).isEmpty()) acted = castSupport(m, dist, los, now, handler);
+                if (!acted && dist <= reach(t) && (dist <= 1 || los)
+                        && (m.state() == MonsterState.CHASE || m.state() == MonsterState.FLEE && keepsDistance(t))) {
                     if (!m.isMoving(now)) m.lookAt(tp);   // atak: potwor patrzy na cel
                     handler.monsterAttacks(m, now);
                     acted = true;
@@ -873,25 +940,89 @@ public final class MonsterManager {
      */
     private Direction chaseStep(Monster m, Position tp, int dist, boolean los, long now) {
         MonsterType t = m.type();
-        if (keepsDistance(t)) {
-            int keep = t.range();
+        MonsterProfile pr = MonsterProfiles.defaults().of(t);
+        if (pr.keepsDistance()) {
+            int keep = pr.keepDistance();
+            int hold = holdDistance(t);
             if (dist < keep) {
                 Direction away = fleeStep(m, tp);
                 if (away != null) return away;
                 if (los) return null; // osaczony: strzela z miejsca
             }
-            if (dist <= keep && los) return null;
-            return pathStep(m, tp, los ? keep : 1, tp, now);
+            if (dist <= hold && los) return null;
+            return pathStep(m, tp, los ? hold : 1, tp, now);
         }
         if (dist <= 1) return null;
         return pathStep(m, tp, 1, tp, now);
     }
 
-    /** Potwor trzymajacy dystans (zasieg ataku &gt; 1 i zachowanie strzelca, maga albo uzdrowiciela). */
-    static boolean keepsDistance(MonsterType t) {
-        return t.range() > 1 && (t.behavior() == MonsterBehavior.RANGED || t.behavior() == MonsterBehavior.MAGIC
-                || t.behavior() == MonsterBehavior.HEALER);
+    /** Odleglosc, do ktorej strzelec podchodzi: najwyzej pole dalej niz trzyma (stoi 3-4 pola od celu) i nie dalej niz zasieg. */
+    static int holdDistance(MonsterType t) {
+        MonsterProfile pr = MonsterProfiles.defaults().of(t);
+        return Math.max(pr.keepDistance(), Math.min(t.range(), pr.keepDistance() + 1));
     }
+
+    /** Zasieg ataku: zasieg z monsters.csv albo dalszy zasieg czarow (potwor wrecz z falą ognia, rzucajacy kamieniami). */
+    static int reach(MonsterType t) {
+        return Math.max(t.range(), MonsterSpells.defaults().maxRange(t));
+    }
+
+    /** Ponizej tylu procent zdrowia potwor ucieka: profil (Canary runonhealth) albo kolumna monsters.csv. */
+    static int runPercent(MonsterType t) {
+        int p = MonsterProfiles.defaults().of(t).runPercent();
+        return p >= 0 ? p : t.fleeHealthPercent();
+    }
+
+    /** Ucieczka konczy sie, gdy zdrowie wzrosnie o tyle procent ponad prog (potwor sie wyleczyl). */
+    public static final int FLEE_RECOVER_PCT = 25;
+
+    /** Potwor trzymajacy dystans (profil: strzelec albo mag trzymajacy co najmniej 2 pola od celu). */
+    static boolean keepsDistance(MonsterType t) {
+        return MonsterProfiles.defaults().of(t).keepsDistance();
+    }
+
+    /**
+     * Czary wsparcia na ataku (Canary: spells self/summon): leczenie siebie ponizej 70% zdrowia, przyspieszenie przed
+     * pogonia, przywolanie pomocnikow (najwyzej summonCap naraz). Zwraca true, gdy potwor rzucil czar zamiast ataku.
+     */
+    private boolean castSupport(Monster m, int dist, boolean los, long now, AttackHandler handler) {
+        MonsterType t = m.type();
+        boolean fleeing = m.state() == MonsterState.FLEE;
+        for (MonsterSpell sp : MonsterSpells.defaults().support(t)) {
+            if (rng.nextInt(100) >= sp.chance()) continue;
+            switch (sp.mode()) {
+                case HEAL: {
+                    if (m.healthFraction() >= 0.7f) break;
+                    int amount = sp.min() + rng.nextInt(sp.max() - sp.min() + 1);
+                    int healed = m.heal(amount);
+                    if (healed <= 0) break;
+                    handler.monsterHeals(m, m, healed, now);
+                    return true;
+                }
+                case HASTE: {
+                    if (fleeing || m.hasted(now) || dist > sp.range() || dist <= 1) break;
+                    m.haste(sp.hastePercent(), now + sp.hasteMs());
+                    handler.monsterEffect(m, m.position(), "HASTE", now);
+                    return true;
+                }
+                case SUMMON: {
+                    if (fleeing || dist > sp.range() || !los || now < m.nextSummonMs() || m.minions().size() >= sp.summonCap()) break;
+                    Monster minion = summonMinion(m, sp.summonKey(), now);
+                    if (minion == null) break;
+                    m.setNextSummonMs(now + SUMMON_COOLDOWN_MS);
+                    m.lookAt(m.target() == null ? m.position() : m.target().position());
+                    handler.monsterEffect(m, m.position(), "MAGIC", now);
+                    handler.monsterEffect(minion, minion.position(), "POOF", now);
+                    return true;
+                }
+                default:
+            }
+        }
+        return false;
+    }
+
+    /** Przerwa miedzy dwoma przywolaniami tego samego potwora. */
+    public static final long SUMMON_COOLDOWN_MS = 6_000;
 
     /**
      * Krok z wyszukiwania drogi w ramach budzetu na krok symulacji; bez drogi potwor odczekuje {@link #NO_PATH_RETRY_MS}.
@@ -936,6 +1067,7 @@ public final class MonsterManager {
         long ms = Balance.stepDurationMs(m.type().speed(), false)
                 * (d.diagonal() ? pl.fawizja.pixel.movement.MovementSystem.DIAGONAL_STEP_FACTOR : 1);
         if (m.paralyzed(now)) ms *= pl.fawizja.pixel.charm.CharmEffects.PARALYZE_STEP_FACTOR; // charm Okaleczenie / Odretwienie
+        ms = ms * m.stepScalePercent(now) / 100;   // czar przyspieszenia (haste)
         m.moveTo(to, d, now, ms);
         grid.moved(m, from);
     }

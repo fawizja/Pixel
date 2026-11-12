@@ -170,12 +170,12 @@ class TibiaCombatTest {
                 List.of(new SpawnPoint("void_priest", new Position(11, 12, 0), 0, 1, 60)), new Random(3));
         mm.populate(null);
         Monster priest = mm.monsters().get(0);
-        // nextInt 0: atak dodatkowy (wyssanie many) zawsze wypada
+        // kaplan pustki wysysa mane uderzeniem w cel (czar mana_drain_strike) - zabiera mane, nie zdrowie
         CombatSystem cs = new CombatSystem(pc, TestData.varden(), TestData.ITEMS, mm, new GroundItems(), new EventLog(50),
                 new FixedRandom(false), 8);
         int hp = pc.health();
         int mana = pc.mana();
-        cs.monsterAttacks(priest, 1000);
+        assertTrue(cs.castMonsterSpell(priest, "mana_drain_strike", 1000));
         assertEquals(hp, pc.health(), "mana drain does not hurt");
         assertTrue(pc.mana() < mana || mana == 0);
         CombatEvent e = cs.latestEvents(1).get(0);

@@ -2629,7 +2629,9 @@ public final class GameScreen extends ScreenAdapter {
      * i pajakow, ciemna gwiazdka czarow smierci.
      */
     private String missileFor(CombatEvent e) {
-        String fx = e.effect() == null ? "PHYSICAL" : e.effect();
+        String named = e.missileName();   // grafika z danych potwora (monster_behaviour.csv / monster_spells.csv)
+        if (named != null && game.art().missile(named, 1, 0) != null) return named;
+        String fx = e.effectType() == null ? "PHYSICAL" : e.effectType();
         String key = "";
         boolean player = e.from().equals(session.character().position());
         if (!player) for (Monster m : session.monsters().near(e.from(), 0)) if (m.position().equals(e.from())) key = m.type().key();
@@ -2721,13 +2723,13 @@ public final class GameScreen extends ScreenAdapter {
                         float my = worldRenderer.worldY(e.from().y() + dy * p);
                         b.draw(r, mx, my, 1f, 1f);
                     } else {
-                        drawEffectFrame(b, impactFor(e.effect(), false), age - CombatEvent.PROJECTILE_MS, SPRITE_EFFECT_MS, x, wy);
+                        drawEffectFrame(b, impactFor(e.effectType(), false), age - CombatEvent.PROJECTILE_MS, SPRITE_EFFECT_MS, x, wy);
                     }
                     break;
                 }
                 case AREA: {
                     int r = e.amount();
-                    String name = impactFor(e.effect(), true);
+                    String name = impactFor(e.effectType(), true);
                     if (e.isShapedArea()) {
                         // ksztalt czaru z Canary: dokladnie trafione pola, dalsze od rzucajacego zaczynaja pozniej
                         Position o = e.from() != null ? e.from() : e.position();
@@ -2781,7 +2783,7 @@ public final class GameScreen extends ScreenAdapter {
                 shapes.begin(ShapeRenderer.ShapeType.Filled);
                 begun = true;
             }
-            Color c = effectColor(e.effect());
+            Color c = effectColor(e.effectType());
             long age = t - e.timeMs();
             if (slash) {
                 // cios wrecz: jasne ciecie po skosie celu, krotko

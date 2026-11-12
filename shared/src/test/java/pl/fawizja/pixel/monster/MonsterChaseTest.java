@@ -130,7 +130,8 @@ class MonsterChaseTest {
         // gracz podchodzi: goblin sie cofa do swojego dystansu
         d.pos = g.position().translate(0, 2);
         run(mm, d, 20_000, 35_000);
-        assertEquals(keep, g.position().distanceTo(d.pos), "backed off to its range: " + g.position() + " vs " + d.pos);
+        int back = g.position().distanceTo(d.pos);
+        assertTrue(back >= 3 && back <= keep, "backed off to 3-4 tiles like a Tibia archer: " + g.position() + " vs " + d.pos);
     }
 
     @Test

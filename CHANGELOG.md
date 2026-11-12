@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Style ataku potworów jak w Tibii (analiza: `analizy/potwory-ataki.md`): każdy potwór ma profil w `data/monster_behaviour.csv`
+  (archetyp: wręcz, dystans, czarodziej w cel, czarodziej obszarowy, przywoływacz, mieszany, wsparcie; dystans; pocisk; ucieczka)
+  i czary w `data/monster_spells.csv`: uderzenie w cel (`BOLT`), fala/kula/wybuch (`WAVE`/`BALL`/`SELF`), leczenie siebie (`HEAL`),
+  przyspieszenie (`HASTE`), przywołanie pomocników (`SUMMON`), paraliż (`SLOW`), wyssanie życia i many.
+- Strzelcy i czarodzieje trzymają 3-4 pola od gracza i cofają się, gdy podejdzie; ranni uciekają (Canary `runonhealth`), leczą się
+  i wracają do walki; ucieczka nie przerywa strzelania ani czarów.
+- Widoczne pociski potworów (włócznie, strzały, bełty, kamienie, noże, kule żywiołów) z nazwą grafiki w zdarzeniu (`PHYSICAL/spear`).
+- Przywoływacze (np. Akolita Czarnej Świecy, Orczy szaman, Ysmera) przywołują pomocników z limitem naraz; pomocnicy znikają ze
+  śmiercią pana, nie dają łupu ani doświadczenia.
+- Online: czar obszarowy potwora trafia każdego gracza w obszarze (nie tylko cel), a pociski i efekty widzą wszyscy gracze w pobliżu.
+- Nowe sceny regresji GUI `mob_*` (`-Dpixel.mobDemo=spear|caster|area|summon|flee`).
+
+### Zmieniono
+- Strzelec nie stoi dokładnie w zasięgu, lecz 3-4 pola od celu (test `MonsterChaseTest`).
+- Tarcza trenuje się od ataków podstawowych wręcz i fizycznych pocisków (czary nie, jak dotąd); kapłan pustki wysysa manę czarem
+  `mana_drain_strike`.
+
 ## [0.262.0] - 2026-11-12
 
 ### Dodano
