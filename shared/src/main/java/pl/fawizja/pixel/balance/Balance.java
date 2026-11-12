@@ -224,33 +224,54 @@ public final class Balance {
         return Math.max(1, Math.round(monsterExp * factor));
     }
 
-    /** Utrata doswiadczenia przy smierci: 5%, ale nie ponizej progu poziomu minLevel. */
-    public static long experienceAfterDeath(long experience, int minLevel) {
-        return experienceAfterDeath(experience, minLevel, 0, 99);
-    }
-
     /**
-     * Jak wyzej, z blogoslawienstwami: kazde zmniejsza strate o 8% (jak w Canary); ponizej poziomu 24 piec
-     * blogoslawienstw (40%) daje 50%.
+     * Ulamek (0..1) doswiadczenia, umiejetnosci i poziomu magii tracony przy smierci - wzor z Canary
+     * ({@code Player::getLostPercent}). Strata bazowa od poziomu 24: {@code (L+50)*50*(L^2-5L+8)/doswiadczenie} procent,
+     * gdzie L to poziom z ulamkiem; ponizej 24 stale 10%. Kazde z pieciu zwyklych blogoslawienstw zmniejsza ja o 8%
+     * (ponizej poziomu 24 piec daje 50%), promocja o dalsze 30%.
      */
+    public static double deathLossFraction(int level, long experience, int blessings, boolean promoted) {
+        int b = Math.max(0, Math.min(pl.fawizja.pixel.character.Blessing.REGULAR_COUNT, blessings));
+        double reduction = b * pl.fawizja.pixel.character.Blessing.REDUCTION_EACH_PERCENT / 100.0;
+        double base;
+        if (level >= 24 && experience > 0) {
+            double cur = experienceForLevel(level), next = experienceForLevel(Math.min(level + 1, MAX_LEVEL + 1));
+            double l = level + (next > cur ? Math.max(0, Math.min(99, Math.floor((experience - cur) * 100.0 / (next - cur)))) / 100.0 : 0);
+            base = ((l + 50) * 50 * (l * l - 5 * l + 8)) / experience;
+        } else {
+            reduction = reduction >= 0.40 ? 0.50 : reduction;
+            base = 10;
+        }
+        if (promoted) reduction += 0.30;
+        return base * (1 - Math.min(1.0, reduction)) / 100.0;
+    }
+
+    /** Doswiadczenie po smierci (bez promocji), nigdy ponizej progu poziomu minLevel. */
     public static long experienceAfterDeath(long experience, int minLevel, int blessings, int level) {
-        int reductionPct = Math.min(100, blessings * 8);
-        if (level < 24 && reductionPct >= 40) reductionPct = 50;
-        long lost = experience * 5 * (100 - reductionPct) / 10_000;
+        return experienceAfterDeath(experience, minLevel, deathLossFraction(level, experience, blessings, false));
+    }
+
+    /** Doswiadczenie po smierci przy gotowym ulamku straty (zaokraglonym w gore jak w Canary). */
+    public static long experienceAfterDeath(long experience, int minLevel, double lossFraction) {
+        long lost = (long) Math.ceil(experience * lossFraction);
         long floor = experienceForLevel(minLevel);
-        long after = experience - lost;
-        return Math.max(Math.min(experience, floor), after);
+        return Math.max(Math.min(experience, floor), experience - lost);
     }
 
-    /** Opis straty doswiadczenia przy smierci, np. "3,0% (bez blogoslawienstw 5%)". */
-    public static String deathLossLabel(int blessings, int level) {
-        int reductionPct = Math.min(100, blessings * 8);
-        if (level < 24 && reductionPct >= 40) reductionPct = 50;
-        String pct = pl.fawizja.pixel.i18n.Messages.decimal(5 * (100 - reductionPct) / 100.0, 1);
-        return blessings == 0 ? pl.fawizja.pixel.i18n.Messages.get("bless.loss_zero") : pl.fawizja.pixel.i18n.Messages.get("bless.loss_fmt", pct);
+    /** Utrata doswiadczenia przy smierci bez blogoslawienstw, nie ponizej progu poziomu minLevel. */
+    public static long experienceAfterDeath(long experience, int minLevel) {
+        return experienceAfterDeath(experience, minLevel, 0, Math.max(1, levelForExperience(experience)));
     }
 
-    /** Cena zwyklego blogoslawienstwa u kaplana (patrz {@link pl.fawizja.pixel.character.Blessing#price}). */
+    /** Opis straty doswiadczenia przy smierci, np. "3,1% (bez blogoslawienstw 4,5%)". */
+    public static String deathLossLabel(int blessings, int level, long experience, boolean promoted) {
+        String pct = Messages.decimal(100 * deathLossFraction(level, experience, blessings, promoted), 1);
+        if (blessings <= 0 && !promoted) return Messages.get("bless.loss_zero", pct);
+        String base = Messages.decimal(100 * deathLossFraction(level, experience, 0, false), 1);
+        return Messages.get("bless.loss_fmt", pct, base);
+    }
+
+    /** Cena zwyklego blogoslawienstwa u mnicha (patrz {@link pl.fawizja.pixel.character.Blessing#price}). */
     public static long blessingPrice(int level) {
         return pl.fawizja.pixel.character.Blessing.WISDOM.price(level);
     }

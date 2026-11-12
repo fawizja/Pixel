@@ -50,6 +50,7 @@ import realms  # noqa: E402
 import castle  # noqa: E402
 import hills  # noqa: E402
 import camps  # noqa: E402
+import chapels  # noqa: E402
 import structures as St  # noqa: E402
 import minotaur  # noqa: E402
 
@@ -2856,6 +2857,9 @@ def finish(ctx):
     # opiekun zwierzat, wladca i zaklinacz w kazdym miescie (town_npcs.py; na gotowych budynkach, przed towarami na ladach)
     for n in town_npcs.place(ctx):
         print("uslugi miasta:", n[3], n[0], n[1], n[4], n[5])
+    # kaplice blogoslawienstw: szesc malych kaplic z mnichami przy miastach (chapels.py; 3 kontynent glowny, 3 ziemie premium)
+    for n in chapels.place(ctx):
+        print("kaplica blogoslawienstw:", n[3], n[0], n[1], 'mnich', n[4], n[5], 'budynek', n[10], 'usuniete spawny', n[12])
     shops = {}
     with open(os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'shops.csv'), encoding='utf-8') as f:
         for line in f:

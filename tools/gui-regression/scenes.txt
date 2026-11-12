@@ -143,8 +143,8 @@ quest_approach_grimtooth|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.s
 skills_train_knight|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.train=SWORD:2000
 skills_train_sorcerer|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.train=SWORD:2000
 # 2026-11-05: umiejetnosci z symulacji polowania do poziomu 100 (HuntBalanceSimulationTest#skillsFollowTheLevel)
-skills_hunt_knight_100|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.startLevel=100 -Dpixel.open=character -Dpixel.skills=SWORD:82,AXE:82,CLUB:82,SHIELDING:77,MAGIC:9,FIST:10,DISTANCE:10
-skills_hunt_sorcerer_100|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.startLevel=100 -Dpixel.open=character -Dpixel.skills=MAGIC:72,FIST:24,SHIELDING:10,CLUB:10,SWORD:10,AXE:10,DISTANCE:10
+skills_hunt_knight_100|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.skills=SWORD:82,AXE:82,CLUB:82,SHIELDING:77,MAGIC:9,FIST:10,DISTANCE:10
+skills_hunt_sorcerer_100|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=character -Dpixel.skills=MAGIC:72,FIST:24,SHIELDING:10,CLUB:10,SWORD:10,AXE:10,DISTANCE:10
 route_low_varden|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=491,525,0
 route_west_rising|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=433,495,0
 route_mid_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=407,594,-1
@@ -250,13 +250,16 @@ volcano_crater|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -
 amber_deep|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=600 -Dpixel.teleport=714,912,-3
 amazon_camp|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.level=40 -Dpixel.teleport=757,622,0
 cyclopolis_forge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=80 -Dpixel.teleport=571,889,0
-spell_gfb_circle|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=gfb -Dpixel.frames=30
-spell_wave_cone|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=100 -Dpixel.spellDemo=wave -Dpixel.frames=30
+spell_gfb_circle|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.spellDemo=gfb -Dpixel.frames=30
+spell_wave_cone|-Dpixel.autostart=Test:SORCERER -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.spellDemo=wave -Dpixel.frames=30
 chest_reward_mobile|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.startLevel=80 -Dpixel.spellDemo=chest -Dpixel.frames=30 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2
-# 2026-11-11: blogoslawienstwa jak w Tibii (poziom 340): lista u kaplana, okno stanu, smierc z pieciom blogoslawienstwami
-bless_priest|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless
-bless_status|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_status
-bless_death|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=340 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_death
+# 2026-11-12: blogoslawienstwa u mnichow w kaplicach (Varden: Brat Anzelm 494,458), smierc bez blogoslawienstw (strata i cialo z przedmiotami)
+bless_chapel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=494,464,0
+bless_monk|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=494,459,0 -Dpixel.open=bless_monk
+bless_talk|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=494,459,0 -Dpixel.open=bless_talk
+bless_status|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=501,499,0 -Dpixel.open=bless_status
+bless_death|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=494,470,0 -Dpixel.open=bless_death
+bless_corpse|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=494,470,0 -Dpixel.open=bless_corpse -Dpixel.noDeathWindow=true
 # jezyki (angielski i hiszpanski): wybor jezyka w menu, okno kupca i ksiega czarow; wzorce do dopisania (--update)
 lang_menu_es|-Dpixel.lang=es
 lang_shop_en|-Dpixel.lang=en -Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=507,497,0 -Dpixel.open=npc

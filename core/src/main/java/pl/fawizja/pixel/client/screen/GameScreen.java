@@ -909,7 +909,7 @@ public final class GameScreen extends ScreenAdapter {
             return;
         }
         if (cmd.equals("/blogoslawienstwa") || cmd.equals("/błogosławieństwa") || cmd.equals("/bless")) {
-            hud.openInfo(Messages.get("skill_sheet.blogoslawienstwa"), pl.fawizja.pixel.character.BlessingStatus.rows(session.character()));
+            hud.openInfo(Messages.get("skill_sheet.blogoslawienstwa"), pl.fawizja.pixel.character.BlessingStatus.rows(session.character(), session.npcs()));
             return;
         }
         if (cmd.equals("/emotki")) {
@@ -1312,6 +1312,7 @@ public final class GameScreen extends ScreenAdapter {
         pl.fawizja.pixel.combat.DeathRecap.Report d = session.combat().lastDeath();
         if (net != null || d == null || d == shownDeath) return;
         shownDeath = d;
+        if (Boolean.getBoolean("pixel.noDeathWindow")) return;   // podglad GUI: zrzut samego ciala, bez okna podsumowania
         showDeath(pl.fawizja.pixel.combat.DeathRecap.rows(d));
     }
 
@@ -2380,7 +2381,7 @@ public final class GameScreen extends ScreenAdapter {
     /** Cialo z paczki OTSP albo null (wtedy lezacy sprite potwora). */
     static String corpseOf(String key) {
         if (key == null) return null;
-        if (key.matches(".*(bandit|hunter|pirate|sailor|witch|priest|bloodbeard|morvena|cutthroat|gunner).*")) return "corpse_human";
+        if (key.matches(".*(bandit|hunter|pirate|sailor|witch|priest|bloodbeard|morvena|cutthroat|gunner|player_corpse).*")) return "corpse_human";
         if (key.matches(".*(goblin|orc|grimtooth).*")) return "corpse_goblin";
         if (key.matches(".*(skeleton|bone_dragon).*")) return "corpse_bones";
         return null;

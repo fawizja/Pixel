@@ -128,7 +128,7 @@ zamiast 2 s). Pozostale potwory bez zmian. Symulacje i test "godzina na wilkach"
 - Gracz: fizyczne minus `0..pancerz/2` i `0..obrona/3` (tarcza * defenseFactor * shielding); zywioly ignoruja pancerz.
 - Exp za potwora: pelny do poziomu `4 * poziom_potwora + 20`, potem proporcjonalnie mniej (min. 10%,
   ale realnie ~0 przy wielkiej roznicy). Potwory elitarne (ok. 4% zwyklych): 2x HP, 1,3x obrazenia, 3x exp, 2x szansa lupow.
-  Smierc: -5% exp, kazde z 7 blogoslawienstw (5 zwyklych + 2 gorskie) zmniejsza strate o 8% (pelne: -56%; ponizej poz. 24 piec = -50%), nigdy ponizej poziomu startowego. Blogoslawienstwa znikaja przy smierci (Zrzadzenie losu tylko w PvP), do poz. 30 chroni darmowe Blogoslawienstwo Poszukiwacza. Ceny jak w Tibii (`Blessing.price`): zwykle do poz. 30 2000 gp, 200 gp x (poz.-20), od poz. 120 20 000 + 75 x (poz.-120); gorskie 260 x (poz.-20) / 26 000 + 100 x (poz.-120); Zrzadzenie losu 200 x (poz.-20), max 50 000; wszystkie piec naraz +10%. Gra nie odbiera umiejetnosci ani przedmiotow przy zwyklej smierci (tylko czerwona czaszka), wiec blogoslawienstwa zmniejszaja tylko strate exp.
+  Smierc: ulamek jak w Canary ((L+50)*50*(L^2-5L+8)/exp, ponizej poz. 24 10%), kazde z 5 zwyklych blogoslawienstw zmniejsza strate o 8% (piec = -40%, ponizej poz. 24 -50%), promocja -30%; ten sam ulamek dotyczy umiejetnosci i poziomu magicznego; nigdy ponizej poziomu startowego. Przedmioty: plecak 100/70/45/25/10/0%, noszone 10/7/4,5/2,5/1/0% (0-5 blogoslawienstw), Amulet Straty chroni wszystko, czerwona czaszka traci wszystko. Ceny (`Blessing.price`): do poz. 30 2000 gp, 200 gp x (poz.-20), od poz. 120 20 000 + 75 x (poz.-120); Zrzadzenie losu 200 x (poz.-20), max 50 000. Sprzedaja je mnisi w kaplicach, nie sklep.
 
 ## Potwory Varden
 

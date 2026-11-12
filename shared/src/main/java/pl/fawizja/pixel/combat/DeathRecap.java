@@ -20,7 +20,12 @@ public final class DeathRecap {
 
     public record Row(String source, long total, int hits) { }
 
-    public record Report(long timeMs, String killer, long expLost, int blessings, List<Row> rows) { }
+    public record Report(long timeMs, String killer, long expLost, int blessings, List<Row> rows, int itemsLost,
+                         boolean backpackLost, int skillLevelsLost, boolean amuletUsed) {
+        public Report(long timeMs, String killer, long expLost, int blessings, List<Row> rows) {
+            this(timeMs, killer, expLost, blessings, rows, 0, false, 0, false);
+        }
+    }
 
     private final ArrayDeque<Hit> hits = new ArrayDeque<>();
 
@@ -33,6 +38,11 @@ public final class DeathRecap {
 
     /** Raport z trafien z okna przed smiercia; potem lista trafien jest czyszczona. */
     public Report build(String killer, long expLost, int blessings, long now) {
+        return build(killer, expLost, blessings, now, null);
+    }
+
+    /** Raport ze strata przedmiotow i umiejetnosci ({@code loss} moze byc null). */
+    public Report build(String killer, long expLost, int blessings, long now, pl.fawizja.pixel.character.DeathLoss loss) {
         Map<String, long[]> by = new LinkedHashMap<>();
         for (Hit h : hits) {
             if (h.timeMs() < now - WINDOW_MS) continue;
@@ -44,7 +54,8 @@ public final class DeathRecap {
         List<Row> rows = new ArrayList<>();
         for (Map.Entry<String, long[]> e : by.entrySet()) rows.add(new Row(e.getKey(), e.getValue()[0], (int) e.getValue()[1]));
         rows.sort((x, y) -> Long.compare(y.total(), x.total()));
-        return new Report(now, killer, expLost, blessings, rows);
+        if (loss == null) return new Report(now, killer, expLost, blessings, rows);
+        return new Report(now, killer, expLost, blessings, rows, loss.itemCount(), loss.backpackDropped(), loss.skillLevelsLost(), loss.amuletUsed());
     }
 
     /** Wiersze okna informacyjnego {etykieta, opis}. */
@@ -52,6 +63,11 @@ public final class DeathRecap {
         List<String[]> out = new ArrayList<>();
         out.add(new String[] {Messages.get("death_recap.zabojca"), r.killer()});
         out.add(new String[] {Messages.get("death_recap.strata"), r.expLost() + " exp" + blessingNote(r.blessings())});
+        if (r.itemsLost() > 0) out.add(new String[] {Messages.get("death_recap.przedmioty"),
+                Messages.get(r.backpackLost() ? "death_recap.przedmioty_plecak" : "death_recap.przedmioty_fmt", r.itemsLost())});
+        else if (r.amuletUsed()) out.add(new String[] {Messages.get("death_recap.przedmioty"), Messages.get("death_recap.amulet")});
+        if (r.skillLevelsLost() > 0) out.add(new String[] {Messages.get("death_recap.umiejetnosci"),
+                Messages.get("death_recap.umiejetnosci_fmt", r.skillLevelsLost())});
         for (Row row : r.rows()) {
             out.add(new String[] {row.source(), row.total() + Messages.get("death_recap.obrazen_w") + row.hits() + " " + hitsWord(row.hits())
                     + " (ostatnie " + WINDOW_MS / 1000 + " s)"});
@@ -62,7 +78,8 @@ public final class DeathRecap {
     /** Dopisek do straty: " (3 błogosławieństwa: -24%)" albo pusty. */
     public static String blessingNote(int blessings) {
         if (blessings <= 0) return "";
-        int pct = Math.min(100, blessings * pl.fawizja.pixel.character.Blessing.REDUCTION_EACH_PERCENT);
+        int pct = blessings >= pl.fawizja.pixel.character.Blessing.REGULAR_COUNT ? 40
+                : blessings * pl.fawizja.pixel.character.Blessing.REDUCTION_EACH_PERCENT;
         return Messages.get(blessings == 1 ? "bless.note_1" : blessings < 5 ? "bless.note_2_4" : "bless.note_5", blessings, pct);
     }
 

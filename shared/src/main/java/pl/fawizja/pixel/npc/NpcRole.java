@@ -22,5 +22,7 @@ public enum NpcRole {
     /** Straznik przy bramie miasta: tylko powitanie (bez uslug), stoi w strefie ochronnej. */
     GUARD,
     /** Zaklinacz (klucz *_imbuer, w kazdym miescie): nasycenia (imbuementy) jak u kowala, bez sklepu. */
-    IMBUER
+    IMBUER,
+    /** Mnich z kaplicy poza miastem: sprzedaje jedno blogoslawienstwo (zob. {@code Blessing#sellerKey()}), jak mnisi z oddalonych swiatyn w Tibii. */
+    BLESSER
 }

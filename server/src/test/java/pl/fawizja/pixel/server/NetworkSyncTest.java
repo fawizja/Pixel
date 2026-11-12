@@ -529,6 +529,39 @@ class NetworkSyncTest {
         }
     }
 
+    @Test
+    void aDeathWithoutBlessingsLeavesABodyWithTheBackpackThatEveryoneSees() throws Exception {
+        try (NetClient a = connect();
+             NetClient b = connect()) {
+            a.hello("Weronika", "KNIGHT", "tajne-Weronika");
+            b.hello("Bartek", "KNIGHT", "tajne-Bartek");
+            await("welcome", () -> a.playerId() > 0 && b.playerId() > 0);
+            Position field = new Position(149, 351, 0);
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    p.session.teleport(field.translate(p.name().equals("Weronika") ? 0 : 1, 0), server.now());
+                    if (p.name().equals("Weronika")) {
+                        // poziom 100 bez blogoslawienstw: plecak wypada zawsze
+                        p.session.character().addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(100));
+                        p.session.character().backpack().add(new pl.fawizja.pixel.item.ItemStack(
+                                p.session.items().byKey("gold_coin").id(), 77));
+                    }
+                }
+            });
+            await("on the field", () -> a.frame() != null && a.frame().self().equals(field));
+            server.enqueueTest(() -> {
+                for (ServerPlayer p : server.world().players()) {
+                    if (p.name().equals("Weronika")) {
+                        p.session.combat().diedFromPlayer("Kuba", false, server.now());
+                        assertTrue(p.session.character().backpack().contents().isEmpty(), "the backpack went into the body");
+                    }
+                }
+            });
+            await("both see the body with loot", () -> b.frame() != null && b.frame().corpses().stream()
+                    .anyMatch(c -> c.position().equals(field) && c.monsterKey().equals("player_corpse") && c.hasLoot()));
+        }
+    }
+
     static boolean logged(NetClient c, String text) {
         String[] m;
         while ((m = c.poll()) != null) if (m[0].equals("LOG") && m.length > 2 && m[2].contains(text)) return true;

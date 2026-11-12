@@ -851,23 +851,42 @@ public final class DesktopLauncher {
                     gs.hud().openDepot(gs.session());
                 }
                 if (open != null && open.startsWith("bless")) {
-                    // podglad blogoslawienstw (z -Dpixel.startLevel=340): bless = lista u kaplana, bless_status = okno stanu,
-                    // bless_death = smierc z pieciu blogoslawienstwami
+                    // podglad blogoslawienstw (z -Dpixel.startLevel=...): bless_monk = rozmowa z mnichem obok (teleport do jego
+                    // kaplicy), bless_status = okno informacyjne, bless_death = smierc bez blogoslawienstw (podsumowanie),
+                    // bless_corpse = ta sama smierc i powrot do ciala (przedmioty lezace w ciele; z -Dpixel.noDeathWindow=true bez okna smierci), bless_death5 = smierc z pieciu, bless_talk = rozmowa
                     GameScreen gs = (GameScreen) getScreen();
                     pl.fawizja.pixel.character.PlayerCharacter pc = gs.session().character();
                     pl.fawizja.pixel.character.Blessing[] all = pl.fawizja.pixel.character.Blessing.values();
-                    if (open.equals("bless_death")) {
+                    if (open.startsWith("bless_death") || open.equals("bless_corpse")) {
                         pc.addExperience(pl.fawizja.pixel.balance.Balance.experienceForLevel(400) - pc.experience());
-                        for (pl.fawizja.pixel.character.Blessing b : all) if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR) pc.addBlessing(b);
+                        pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                        for (String[] it : new String[][] {{"health_potion", "12"}, {"rope", "1"}, {"wolf_pelt", "9"}, {"gold_coin", "85"}}) {
+                            if (reg.byKey(it[0]) != null) pc.backpack().add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(it[0]).id(), Integer.parseInt(it[1])));
+                        }
+                        if (open.equals("bless_death5")) {
+                            for (pl.fawizja.pixel.character.Blessing b : all) if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR) pc.addBlessing(b);
+                        }
                         long t = gs.worldTime();
                         for (int i = 0; i < 3; i++) gs.session().combat().recordDamage("Goblin szaman", 60 + i, t);
+                        pl.fawizja.pixel.world.Position at = pc.position();
                         gs.session().combat().diedFromPlayer("Kuba", false, t);
+                        if (open.equals("bless_corpse")) {
+                            gs.session().teleport(at.translate(0, 3), t);   // 3 pola od ciala: bez automatycznego zbierania
+                        }
                     } else if (open.equals("bless_status")) {
                         pc.addBlessing(all[1]); pc.addBlessing(all[3]); pc.addBlessing(all[5]); pc.addBlessing(all[0]);
-                        gs.hud().openInfo(pl.fawizja.pixel.i18n.Messages.get("skill_sheet.blogoslawienstwa"), pl.fawizja.pixel.character.BlessingStatus.rows(pc));
+                        gs.hud().openInfo(pl.fawizja.pixel.i18n.Messages.get("skill_sheet.blogoslawienstwa"),
+                                pl.fawizja.pixel.character.BlessingStatus.rows(pc, gs.session().npcs()));
                     } else {
-                        pc.addBlessing(all[2]);
-                        gs.hud().openBlessings(gs.session());
+                        // bless_monk: okno rozmowy z mnichem obok, bless_talk: rozmowa slowami (oferta z cena) na czacie
+                        pc.setPremium(true);
+                        pl.fawizja.pixel.economy.Money.add(pc.backpack(), 300_000);
+                        if (open.equals("bless_talk")) {
+                            gs.session().askNpc("błogosławieństwo", gs.worldTime());
+                            gs.session().askNpc("gdzie", gs.worldTime() + 1);
+                        } else {
+                            gs.hud().openNpc(gs.session());
+                        }
                     }
                 }
                 if ("npc".equals(open)) {

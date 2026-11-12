@@ -376,3 +376,4 @@
 422;convince_creature_rune;Runa przekonania;RUNE;100;162;NONE;0;0;0;16;*;0;0;PHYSICAL;-;-;#e0b040;Runa przekonania stworzenia (Convince Creature): oswaja słabe stworzenie. Poziom 16, magia 5.
 423;animate_dead_rune;Runa ożywienia zwłok;RUNE;100;760;NONE;0;0;0;27;*;0;0;DEATH;-;-;#808080;Runa ożywienia zwłok (Animate Dead): zwłoki wstają jako szkielet-sługa. Poziom 27, magia 4.
 202;warlord_helmet;Hełm Pana Twierdzy;ARMOR;1;6000;HEAD;0;0;7;50;*;0;0;PHYSICAL;-;PHYSICAL:3,FIRE:2;#5a7a3a;Rogaty hełm Urgotha ze skarbca Twierdzy Krwawego Kła. Jeden na każdego śmiałka.
+424;amulet_of_loss;Amulet Straty;ARMOR;1;10000;AMULET;0;0;0;0;*;0;0;PHYSICAL;-;-;#b03a2a;Czerwony amulet z wypalonym znakiem krzyża (Amulet of Loss): chroni cały ekwipunek razem z plecakiem przed utratą po śmierci, ale rozpada się przy niej. Czerwona i czarna czaszka go nie ochronią.

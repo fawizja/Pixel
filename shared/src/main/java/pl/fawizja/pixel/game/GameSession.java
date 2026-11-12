@@ -1772,24 +1772,11 @@ public final class GameSession {
         return true;
     }
 
-    /** Cena wszystkich brakujacych zwyklych blogoslawienstw naraz (+10%, jak u Henricusa); 0, gdy nic nie brakuje. */
-    public long bulkBlessingPrice() {
-        int missing = 0;
-        for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
-            if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR && !pc.boughtBlessing(b)) missing++;
-        }
-        return Math.round(missing * pl.fawizja.pixel.character.Blessing.WISDOM.price(pc.level())
-                * pl.fawizja.pixel.character.Blessing.BULK_MULTIPLIER);
-    }
-
-    /** Powod, dla ktorego blogoslawienstwa nie da sie teraz kupic u kaplana w miescie town (null = mozna). */
-    public String blessingBlocked(pl.fawizja.pixel.character.Blessing b, String town) {
+    /** Powod, dla ktorego blogoslawienstwa b nie da sie teraz kupic (null = mozna). */
+    public String blessingBlocked(pl.fawizja.pixel.character.Blessing b) {
         if (pc.boughtBlessing(b)) return Messages.get("bless.already");
-        if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.ENHANCED) {
-            return pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN.equalsIgnoreCase(town) ? null
-                    : Messages.get("bless.only_town", pl.fawizja.pixel.character.Blessing.MOUNTAIN_TOWN);
-        }
         if (pc.adventurerBlessing()) return Messages.get("bless.adv_protects", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL);
+        if (b.premium() && !pc.isPremium()) return Messages.get("bless.need_premium");
         if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP) {
             boolean other = false;
             for (pl.fawizja.pixel.character.Blessing o : pl.fawizja.pixel.character.Blessing.values()) {
@@ -1800,56 +1787,84 @@ public final class GameSession {
         return null;
     }
 
-    /** Kaplan: wszystkie brakujace zwykle blogoslawienstwa naraz (monety z plecaka). */
-    public boolean priestBless(long nowMs) { return priestBless("all", nowMs); }
+    /** Blogoslawienstwo sprzedawane przez mnicha obok (null, gdy obok nie stoi mnich). */
+    public pl.fawizja.pixel.character.Blessing blessingOfNearbyMonk() {
+        Npc n = npcNearby();
+        return n == null || n.role() != NpcRole.BLESSER ? null : pl.fawizja.pixel.character.Blessing.soldBy(n.key());
+    }
 
-    /**
-     * Kaplan: blogoslawienstwo za monety z plecaka. which: "all" (wszystkie brakujace zwykle, +10%) albo klucz
-     * {@link pl.fawizja.pixel.character.Blessing#key()}. Gorskie sprzedaje tylko kaplan w Durnkarze.
-     */
-    public boolean priestBless(String which, long nowMs) {
-        Npc n = talkTo(NpcRole.PRIEST, nowMs);
+    /** Mnich: kupno jego blogoslawienstwa za monety z plecaka (akcja "npc:bless:klucz"; klucz musi byc jego towarem). */
+    public boolean blessBuy(String which, long nowMs) {
+        Npc n = talkTo(NpcRole.BLESSER, nowMs);
         if (n == null) return false;
-        java.util.List<pl.fawizja.pixel.character.Blessing> buy = new java.util.ArrayList<>();
-        long price;
-        if (which.equals("all")) {
-            if (pc.adventurerBlessing()) {
-                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + Messages.get("bless.adv_protects_free", pl.fawizja.pixel.character.Blessing.ADVENTURER_LEVEL));
-                return false;
-            }
-            for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
-                if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR && !pc.boughtBlessing(b)) buy.add(b);
-            }
-            if (buy.isEmpty()) {
-                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + Messages.get("bless.have_all_regular"));
-                return false;
-            }
-            price = bulkBlessingPrice();
-        } else {
-            pl.fawizja.pixel.character.Blessing b = pl.fawizja.pixel.character.Blessing.byKey(which);
-            if (b == null) return false;
-            String why = blessingBlocked(b, n.town());
-            if (why != null) {
-                log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + b.label() + " - " + why + ".");
-                return false;
-            }
-            buy.add(b);
-            price = b.price(pc.level());
+        pl.fawizja.pixel.character.Blessing b = pl.fawizja.pixel.character.Blessing.soldBy(n.key());
+        if (b == null || which != null && !which.equals("all") && !which.equals(b.key())) return false;
+        String why = blessingBlocked(b);
+        if (why != null) {
+            log.add(nowMs, EventLog.Kind.INFO, n.name() + ": " + b.label() + " - " + why + ".");
+            return false;
         }
+        long price = b.price(pc.level());
         pl.fawizja.pixel.inventory.Container tx = pc.backpack().copy();
         if (Money.totalValue(tx) < price || !Money.pay(tx, price).ok()) {
             log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + Messages.get("bless.costs", price));
             return false;
         }
         pc.backpack().commitFrom(tx);
-        StringBuilder names = new StringBuilder();
-        for (pl.fawizja.pixel.character.Blessing b : buy) {
-            pc.addBlessing(b);
-            if (names.length() > 0) names.append(", ");
-            names.append(b.label());
-        }
-        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("bless.received", names.toString(), price));
+        pc.addBlessing(b);
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("bless.received", b.label(), price));
         return true;
+    }
+
+    /** Czeka na "tak" po ofercie mnicha (klucz NPC); czyszczone innym tematem albo odejsciem. */
+    private String pendingBlessNpc;
+
+    private static final java.util.Set<String> BLESS_WORDS = java.util.Set.of("blogoslawienstwo", "blogoslawienstwa",
+            "blessing", "blessings", "bless", "blogoslaw", "bendicion", "bendiciones", "cena", "price", "precio", "kup", "buy", "comprar");
+    private static final java.util.Set<String> YES_WORDS = java.util.Set.of("tak", "yes", "si", "ok");
+    private static final java.util.Set<String> NO_WORDS = java.util.Set.of("nie", "no");
+    private static final java.util.Set<String> WHERE_WORDS = java.util.Set.of("gdzie", "inne", "pozostale", "where", "others", "donde", "otras");
+
+    /** Rozmowa z mnichem: "blogoslawienstwo" - oferta z cena, "tak" - kupno, "gdzie" - gdzie sa pozostale (jak w Tibii). */
+    private String monkSays(Npc n, String said, long nowMs) {
+        String w = pl.fawizja.pixel.npc.DialogueRegistry.normalize(said);
+        pl.fawizja.pixel.character.Blessing b = pl.fawizja.pixel.character.Blessing.soldBy(n.key());
+        if (b == null) return null;
+        boolean pending = n.key().equals(pendingBlessNpc);
+        pendingBlessNpc = null;
+        String line;
+        if (pending && YES_WORDS.contains(w)) {
+            boolean ok = blessBuy(b.key(), nowMs);
+            line = ok ? Messages.get("bless.npc_bought", b.label()) : blessingBlocked(b) != null
+                    ? b.label() + " - " + blessingBlocked(b) + "." : Messages.get("bless.costs", b.price(pc.level()));
+        } else if (pending && NO_WORDS.contains(w)) {
+            line = Messages.get("bless.npc_no");
+        } else if (WHERE_WORDS.contains(w)) {
+            StringBuilder sb = new StringBuilder();
+            for (pl.fawizja.pixel.character.Blessing o : pl.fawizja.pixel.character.Blessing.values()) {
+                if (o == b) continue;
+                Npc seller = null;
+                for (Npc c : npcs.all()) if (c.key().equals(o.sellerKey())) seller = c;
+                if (seller == null) continue;
+                if (sb.length() > 0) sb.append("; ");
+                sb.append(o.label()).append(" - ").append(seller.name()).append(" (").append(seller.town()).append(")");
+            }
+            line = Messages.get("bless.npc_where", sb.toString());
+        } else if (BLESS_WORDS.contains(w) || w.contains("blogoslaw") || w.contains("bless")) {
+            String why = blessingBlocked(b);
+            if (why != null) {
+                line = Messages.get("bless.npc_blocked", b.label(), why);
+            } else {
+                pendingBlessNpc = n.key();
+                line = Messages.get(b.kind() == pl.fawizja.pixel.character.Blessing.Kind.PVP ? "bless.npc_offer_pvp" : "bless.npc_offer",
+                        b.label(), b.price(pc.level()), pc.level());
+            }
+        } else {
+            return null;
+        }
+        String out = n.name() + ": " + line;
+        log.add(nowMs, EventLog.Kind.CHAT, out);
+        return out;
     }
 
     /**
@@ -1886,12 +1901,6 @@ public final class GameSession {
             case "promote":
                 pc.setPromoted(true);
                 done = Messages.get("game_session.jestes_teraz") + pc.vocationTitle() + Messages.get("game_session.regenerujesz_sie_o_polowe");
-                break;
-            case "bless":
-                for (pl.fawizja.pixel.character.Blessing b : pl.fawizja.pixel.character.Blessing.values()) {
-                    if (b.kind() == pl.fawizja.pixel.character.Blessing.Kind.REGULAR) pc.addBlessing(b);
-                }
-                done = Messages.get("bless.five");
                 break;
             default:
                 if (key.startsWith("enchant_")) {
@@ -1937,6 +1946,10 @@ public final class GameSession {
             if (PREMIUM_WORDS.contains(said)) buyPremium(nowMs);
             else buyPromotion(nowMs);
             return n.name() + ": " + (PREMIUM_WORDS.contains(said) ? "premium" : "promocja");
+        }
+        if (n.role() == NpcRole.BLESSER) {
+            String monk = monkSays(n, text, nowMs);
+            if (monk != null) return monk;
         }
         pl.fawizja.pixel.npc.DialogueRegistry d = pl.fawizja.pixel.npc.DialogueRegistry.defaults();
         String answer = d.answer(n, text);
@@ -3826,6 +3839,7 @@ public final class GameSession {
             case CAPTAIN: return Messages.get("game_session.kapitan_statku");
             case KING: return Messages.get("game_session.wladca_miasta");
             case IMBUER: return "zaklinacz";
+            case BLESSER: return Messages.get("game_session.mnich");
             case GUARD: return Messages.get("game_session.straznik");
             default: return r.name().toLowerCase(java.util.Locale.ROOT);
         }
@@ -3848,7 +3862,8 @@ public final class GameSession {
         if (dummies != null && dummies.at(p)) parts.add(Messages.get("game_session.manekin_treningowy"));
         GroundItems.Corpse c = ground.corpseAt(p);
         if (c != null) {
-            String who = monsters != null && monsters.registry() != null && monsters.registry().contains(c.monsterKey())
+            String who = GroundItems.PLAYER_CORPSE.equals(c.monsterKey()) ? Messages.get("game_session.cialo_gracza")
+                    : monsters != null && monsters.registry() != null && monsters.registry().contains(c.monsterKey())
                     ? monsters.registry().get(c.monsterKey()).name() : c.monsterKey();
             parts.add(Messages.get("game_session.cialo") + who + (c.hasLoot() ? Messages.get("game_session.jest_lup") : Messages.get("game_session.puste_nawias")));
         }
