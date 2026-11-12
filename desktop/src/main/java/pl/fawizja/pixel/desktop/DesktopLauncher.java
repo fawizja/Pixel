@@ -60,7 +60,7 @@ import pl.fawizja.pixel.world.Position;
  *                        paska: wielka kula ognia z celownikiem; aimthrow rzuca ja na pole -Dpixel.aimHover), "Uzyj z..."
  *                        z plecaka, menu trybu runy (cel / siebie / celownik), pole combo i jego edycja
  *   -Dpixel.aimHover=x,y pole pod kursorem celownika (Xvfb nie ma myszy)
- *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet(+ -Dpixel.petCard=1)|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bagpages|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
+ *   -Dpixel.open=playerpopup|vip|buffs|book|bag|bagitem|character|npc|depot|friends|market|mount|pet(+ -Dpixel.petCard=1)|smith|chest|map|chat|journal|achievements|bestiary|diag|trade|player|pvp|pzblock|skull_red|skull_white|party|ranking|death|bagmess|bigbag|depotwin|statue|bagkeep|trap|battle|picker|pickerrune   otwiera ksiege, plecak, karte postaci, rozmowe z NPC, diagnostyke albo podglad okna handlu
  *   -Dpixel.open=wheel[=id]  podglad Kola Przeznaczenia (np. wheel=wheel:q:P, wheel=wheel:perks, wheel=wheel:gems:0); -Dpixel.wheelOrder=PRBG,
  *                           -Dpixel.wheelAvatar=true, -Dpixel.wheelGems=true (klejnoty, naczynia i okruchy do podgladu)
  *   -Dpixel.open=bestcard|bestclass|charms[=id]  podglad bestiariusza i charmow (np. charms=charm:sel:WOUND); -Dpixel.charmProc=true liczby charmow
@@ -75,6 +75,8 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.dragonDemo=five|fire|gfb|ice|white  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
  *                        wielka kule ognia (gfb), oddech lodu (ice), bialy smok piorun (white) - rzut w postac stojaca przed nim
+ *   -Dpixel.fakePing=MS   udaje opoznienie sieciowe (kropka pingu obok FPS; zielona <100, pomaranczowa 100-250, czerwona >250)
+ *   -Dpixel.bagSlots=N, -Dpixel.bagScroll=W, -Dpixel.depotScroll=W  przy open=bigbag / depotwin: pojemnosc plecaka i przewiniecie siatek
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
  */
@@ -259,19 +261,57 @@ public final class DesktopLauncher {
                         }
                     }
                 }
-                if ("bagpages".equals(open)) {
-                    // podglad wielu plecakow (etap 14): dwa dodatkowe plecaki, monety i lup na drugiej stronie
+                if ("bigbag".equals(open)) {
+                    // podglad wiekszego plecaka (24/36 pol): przewijany pionowo na jednej stronie; -Dpixel.bagSlots=N, -Dpixel.bagScroll=wiersz
                     GameScreen gs = (GameScreen) getScreen();
                     pl.fawizja.pixel.character.PlayerCharacter hero = gs.session().character();
-                    while (hero.extraBags() < 2) hero.attachBag();
+                    hero.setBackpackSlots(Integer.getInteger("pixel.bagSlots", 36));
                     pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
-                    String[][] loot = {{"gold_coin", "100", "20"}, {"gold_coin", "100", "21"}, {"platinum_coin", "37", "22"},
-                            {"crystal_coin", "3", "23"}, {"coral_helmet", "1", "25"}, {"pearl", "12", "26"}, {"backpack", "1", "27"}};
-                    for (String[] m : loot) {
-                        if (reg.containsKey(m[0])) hero.backpack().putInSlot(Integer.parseInt(m[2]), new pl.fawizja.pixel.item.ItemStack(reg.byKey(m[0]).id(), Integer.parseInt(m[1])));
+                    String[] keys = {"gold_coin", "platinum_coin", "health_potion", "mana_potion", "iron_sword", "leather_armor", "pearl", "backpack"};
+                    for (int k = 0; k < hero.backpack().size() - 4; k++) {
+                        String key = keys[k % keys.length];
+                        if (reg.containsKey(key) && k % 5 != 4) hero.backpack().putInSlot(k, new pl.fawizja.pixel.item.ItemStack(reg.byKey(key).id(), key.endsWith("coin") || key.endsWith("potion") ? 3 + k : 1));
                     }
                     gs.hud().toggleBag();
-                    gs.hud().showBagPage(Integer.getInteger("pixel.bagPage", 1));
+                    gs.hud().showBagScroll(Integer.getInteger("pixel.bagScroll", 1));
+                }
+                if ("depotwin".equals(open) || "statue".equals(open)) {
+                    // depotwin: postac przy skrzyni depozytu w Vardenie, okno depozytu obok plecaka (siatka z przewijaniem);
+                    // statue: przy posagu treningowym w swiatyni, okno wyboru umiejetnosci (-Dpixel.premium=1)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.game.GameSession s = gs.session();
+                    pl.fawizja.pixel.character.PlayerCharacter hero = s.character();
+                    String key = open.equals("statue") ? "training_statue" : "depot_locker";
+                    int tid = s.world().tiles().byKey(key).id();
+                    pl.fawizja.pixel.world.FloorMap f = s.world().floor(0);
+                    Position target = null;
+                    for (int r = 0; r < 60 && target == null; r++) {
+                        for (int dy = -r; dy <= r && target == null; dy++) {
+                            for (int dx = -r; dx <= r && target == null; dx++) {
+                                if (Math.max(Math.abs(dx), Math.abs(dy)) != r) continue;
+                                if (f.get(pl.fawizja.pixel.world.Layer.OBJECT, 502 + dx, 500 + dy) == tid) target = new Position(502 + dx, 500 + dy, 0);
+                            }
+                        }
+                    }
+                    Position stand = null;
+                    for (pl.fawizja.pixel.world.Direction d : pl.fawizja.pixel.world.Direction.values()) {
+                        Position n = target.translate(d.dx, d.dy);
+                        if (s.world().isWalkable(n)) { stand = n; break; }
+                    }
+                    System.out.println("[Pixel] scena " + open + ": " + key + " " + target + " stoj " + stand);
+                    s.teleport(stand, 0L);
+                    if (open.equals("depotwin")) {
+                        pl.fawizja.pixel.item.ItemRegistry reg = s.items();
+                        String[] keys = {"gold_coin", "health_potion", "mana_potion", "iron_sword", "leather_armor", "pearl"};
+                        for (int k = 0; k < 47; k++) {
+                            String ik = keys[k % keys.length];
+                            if (reg.containsKey(ik) && k % 4 != 3) hero.depot().putInSlot(k, new pl.fawizja.pixel.item.ItemStack(reg.byKey(ik).id(), ik.endsWith("coin") || ik.endsWith("potion") ? 2 + k : 1));
+                        }
+                        gs.tapTile(target);
+                        gs.hud().showDepotScroll(Integer.getInteger("pixel.depotScroll", 0));
+                    } else {
+                        gs.tapTile(target);
+                    }
                 }
                 if ("bagmess".equals(open)) {
                     // podglad porzadkowania: rozrzucone stosy i dziury w plecaku (z -Dpixel.button=bag_sort po sortowaniu)

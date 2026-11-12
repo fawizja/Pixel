@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.262.0] - 2026-11-12
 
 ### Dodano
 - Tabliczki przy skrzyniach questowych (`treasure/ChestSigns`): przy każdej skrzyni z wyborem nagrody i skrzyni questowej stoi nieblokująca
@@ -32,6 +32,19 @@
 - Spawny: zielone i czarne smoki na Smoczych Wzgórzach, czarne także w wulkanie, szronowe w lodowych grotach
   (`tools/mapgen/dragon_spawns.py`; `route_levels.py` bez naruszeń). Bestiariusz: wpisy dla czterech nowych smoków.
 - Gui-regression: `dragons_five`, `dragon_fire_wave`, `dragon_ice_breath` (`-Dpixel.dragonDemo=five|fire|gfb|ice|white`).
+- Wskaźnik pingu pod ramką widoku, obok FPS: kropka (zielona poniżej 100 ms, pomarańczowa 100-250, czerwona powyżej 250 albo brak odpowiedzi)
+  i wartość w ms. Prawdziwy czas obiegu: klient wysyła `PING` co 2 s, serwer odpowiada `PONG` natychmiast poza kolejką świata, pokazywana
+  jest mediana 5 pomiarów (`net/PingMeter`, `NetClient.ping`). Gra lokalna kropki nie pokazuje; do zrzutów `-Dpixel.fakePing=MS`.
+- Depozyt jak w Tibii: dotknięcie skrzyni depozytu (`depot_locker`, w każdym mieście) otwiera okno depozytu obok plecaka (100 miejsc,
+  przewijane), przenoszenie przeciąganiem albo dotknięciem w obie strony, przycisk "Odłóż łup" (`GameSession.depotTransfer`, akcja
+  `depot_move`). Online i offline, zawartość w zapisie postaci i wspólna dla miast. Na telefonie depozyt zostaje listą.
+- Trening offline przy posągach treningowych: w świątyni każdego miasta stoi posąg (`training_statue`, generator `tools/mapgen/trainers.py`).
+  Dotknięcie: wybór Miecz / Topór / Maczuga / Pięści / Dystans / Poziom magii i wylogowanie (tylko konto premium, jak w Canary). Po powrocie
+  (min. 10 min offline, maks. 12 godz. na pasku) umiejętność i tarcza dostają próby wg wzorów Canary, raport w dzienniku. Pasek
+  "Trening offline" w panelu umiejętności odnawia się podczas gry. Opis w `docs/GAME_SYSTEMS.md`.
+- Nowe kontenery: Plecak podróżnika (24 pola) i Plecak badacza (36 pól) jako przyszłe nagrody za zadania (ikony z odcieniem plecaka).
+- Analiza modułów Canary i OTClient względem Pixela z listą priorytetów: `analizy/canary-moduly.md`.
+- Sceny gui-regression: `bag_big`, `depot_window`, `training_statue`, `skills_offline`, `ping_green`, `ping_red` (wzorce dopiero po scaleniu).
 
 ### Zmieniono
 - Przebalansowane nagrody 20 zadań obozów i wysp (bossy do 0,5 kosztu poziomu, zabicia 0,10-0,12) oraz ścięte nagrody `varden_smug1-3` do 1,2 poziomu.
@@ -39,6 +52,11 @@
 - Pochodnia świeci wyraźnie dalej niż minimalna poświata: promień pochodni 7 (było 5), poświata postaci 2 (było 2,5), pochodnia
   co najmniej `Lighting.TORCH_MIN_GAIN` = 3 razy dalej.
 - Złoty smok (`dune_drake`) walczy teraz wręcz i czarami (fala ognia, piorun, wielka kula ognia) zamiast trującego ciosu.
+- Plecak: 20 pól na jednej stronie, bez zakładek i stron. Większe kontenery przewijają się w pionie (kółko myszy, pasek przewijania na
+  komputerze, przyciski `<` `>` na telefonie) zamiast przechodzić na kolejną stronę. Użycie większego plecaka zastępuje obecny, a poprzedni
+  wraca do torby. Usunięto przycisk ODEPNIJ i akcję `bag_detach`; weteran (poziom 250+) startuje z plecakiem na 24 pola.
+- Zapis postaci: nowe pola `bagslots` i `offtrain`; stary zapis z `bags=<n>` (strony) wczytuje się jako jeden przewijany plecak
+  `20 * (1 + n)` pól, nic nie ginie. Mapa świata przegenerowana (posągi w świątyniach); wiersz Skills ma o jeden wiersz więcej.
 
 ## [0.261.0] - 2026-11-12
 

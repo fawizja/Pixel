@@ -137,6 +137,8 @@ item;ultimate_spirit_potion;name;Poción de espíritu suprema
 item;ultimate_mana_potion;name;Poción de maná suprema
 item;ultimate_health_potion;name;Poción de vida suprema
 item;backpack;name;Mochila
+item;backpack_traveler;name;Mochila de viajero
+item;backpack_explorer;name;Mochila de explorador
 item;wyvern_scale;name;Escama de wyvern
 item;crab_pincer;name;Pinza de cangrejo de coral
 item;pirate_hook;name;Garfio de pirata

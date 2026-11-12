@@ -1883,8 +1883,10 @@ final class ServerWorld {
             return null;
         }
         PlayerCharacter pc;
+        boolean returning = false;
         try {
             pc = load(name);
+            returning = pc != null;
             if (pc == null) {
                 pc = new CharacterFactory(config, items).createIn(world, name, Vocation.valueOf(vocation),
                         town, config.startLevel());
@@ -1905,6 +1907,11 @@ final class ServerWorld {
         ServerPlayer p = new ServerPlayer(nextId++, s, client, now,
                 pvp.computeIfAbsent(pc.name().toLowerCase(java.util.Locale.ROOT), k -> loadPvp(k, now)));
         p.language = language;
+        // trening offline (Canary): pasek odnawia sie za czas poza gra, a wybrana na posagu umiejetnosc dostaje proby
+        if (returning) {
+            final GameSession joined = s;
+            Messages.runAs(language, () -> joined.settleOfflineTraining(wallClock.getAsLong(), now));
+        }
         if (p.pvp.fightUntil() > now) s.lockProtectionZonesUntil(p.pvp.fightUntil());
         s.setOtherPlayers(pos -> {
             for (ServerPlayer o : players.values()) {
@@ -2601,6 +2608,13 @@ final class ServerWorld {
                     save(p);
                     p.client.send("SLEEP", String.valueOf(bed.x()), String.valueOf(bed.y()), String.valueOf(bed.z()));
                     LOG.info("sleep " + p.name() + " at " + bed);
+                }
+                // posag treningowy w swiatyni: wybor zapisany w postaci, klient sie wylogowuje (trening liczy sie przy wejsciu)
+                pl.fawizja.pixel.training.OfflineTraining.Choice train = p.session.takeTrainingLogout();
+                if (train != null) {
+                    save(p);
+                    p.client.send("TRAINLOGOUT", train.name());
+                    LOG.info("offline training " + p.name() + " " + train);
                 }
                 break;
             case "ATTACK":

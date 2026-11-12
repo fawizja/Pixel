@@ -57,6 +57,7 @@ import structures as St  # noqa: E402
 import minotaur  # noqa: E402
 import citadel  # noqa: E402
 import story_quests  # noqa: E402
+import trainers  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -2869,6 +2870,9 @@ def finish(ctx):
     # kaplice blogoslawienstw: szesc malych kaplic z mnichami przy miastach (chapels.py; 3 kontynent glowny, 3 ziemie premium)
     for n in chapels.place(ctx):
         print("kaplica blogoslawienstw:", n[3], n[0], n[1], 'mnich', n[4], n[5], 'budynek', n[10], 'usuniete spawny', n[12])
+    # posag treningowy offline w swiatyni kazdego miasta (trainers.py; Tibia: logout przy posagu = trening offline)
+    for t in trainers.place(ctx):
+        print("posag treningowy:", *t)
     shops = {}
     with open(os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'data', 'shops.csv'), encoding='utf-8') as f:
         for line in f:

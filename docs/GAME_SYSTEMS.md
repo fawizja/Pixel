@@ -116,6 +116,28 @@ jako `serverTimeMs`.
 - Budzet wydajnosci (`ServerLoadBudgetTest`): 200 graczy przy spawnach calej mapy 256x232, pelna populacja
   potworow - srednio ok. 0,5 ms na tik AI lokalnie (budzet testu 25 ms z 50 ms tiku).
 
+## Trening offline przy posagu (Z logika, S serwer, C okno, generator `tools/mapgen/trainers.py`) - 2026-11-12
+
+Wzorowane na Canary (`offline_training` w `player.cpp`, `skill_trainer.lua`), z uproszczeniami opisanymi nizej.
+- Posag treningowy (`training_statue`, grafika z brazowym odcieniem) stoi w swiatyni kazdego miasta (generator wstawia go przy scianie
+  pokoju swiatyni, nie na dywanie ani przy drzwiach/ oltarzu/ NPC, bez zamykania przejsc). Dotkniecie posagu otwiera okno wyboru:
+  Miecz, Topor, Maczuga, Piesci, Dystans, Poziom magii (`OfflineTraining.Choice`) albo "Zostan w grze".
+- Tylko konto premium (jak w Canary `offlineTrainingSkill`: tylko premium); bez premium komunikat odmowy, brak wylogowania. Odmowa tez w
+  trakcie walki albo blokady strefy ochronnej (jak zwykle wylogowanie) i dla martwej postaci.
+- Wybor zapisuje sie w postaci (`offtrain=sekundy,wybor,czas_scienny`), postac sie wylogowuje (offline: powrot do menu, online: serwer
+  zapisuje i wysyla `TRAINLOGOUT`, klient odlacza sie). Przy nastepnym wejsciu `OfflineTraining.onLogin` rozlicza trening:
+  czas offline krotszy niz 10 min = bez treningu i komunikat; dluzszy niz 21 dni = liczy sie 21; trening trwa tyle, ile zostalo na pasku
+  (maks. 12 godz.), reszta czasu odnawia pasek.
+- Wzory (Canary): proby bronia `(sekundy / szybkosc_ataku_profesji) / 2`, dystans `/ 4`; magia `sekundy * mana_na_sekunde` (regeneracja
+  many profesji z `Balance`); tarcza `sekundy / 4`, ale tylko gdy wybrana umiejetnosc sie zmienila (jak w Canary). Proby przechodza przez
+  `Skills.train` czyli mnoznik serwera dla etapu umiejetnosci. Raport trafia do dziennika ("Podczas nieobecnosci trenowales przez ...",
+  "Twoja umiejetnosc ... zmienila sie z poziomu ... na ...").
+- Pasek "Trening offline" w panelu umiejetnosci (komputer) i oknie Umiejetnosci (telefon) pod Stamina: 12:00 po pelnym naladowaniu,
+  odnawia sie 1:1 podczas gry (`SkillSheet.offlineTraining`), niebieski.
+- Uproszczenia wzgledem Canary: brak osobnego "czasu treningu" w sekundach liczonych z `offlineTrainingTime` w bazie (u nas pole `offtrain`
+  w zapisie postaci), brak przyspieszenia przez dummy w domu (to osobny system), wszystkie umiejetnosci walki liczone mnoznikiem serwera.
+  Gra lokalna: wylogowanie to powrot do menu; rozliczenie przy "Graj lokalnie" (zegar scienny) i w komunikacie logowania.
+
 ## Postac (Z)
 
 - Tworzenie: poziom 8, 10 000 gp w plecaku, 0 gp w banku, zestaw startowy profesji, start w swiatyni Varden.
@@ -168,12 +190,20 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
   kazdy strzal zuzywa sztuke, pusty stos uzupelnia sie tym samym rodzajem z plecaka. Bez amunicji bron dziala jak dotad.
 - Wyrzucanie na ziemie i podnoszenie (`GroundItems`), lista przedmiotow ignorowanych przez autoloot.
 - UI: okno plecaka z ikonami, statystykami zaznaczonego przedmiotu, ZALOZ / WYRZUC, przenoszenie dotykiem.
-- Wiele plecakow (etap 14): przedmiot `backpack` (20 gp u zaopatrzeniowcow) uzyty z plecaka staje sie kolejna
-  strona po 20 miejsc (najwyzej 3 dodatkowe = 80). Logika widzi jeden pojemnik (`Container.resize`), wiec lup,
-  sklepy, handel i mikstury dzialaja na wszystkich stronach. Ostatni plecak mozna odpiac (ODEPNIJ), gdy jest pusty.
-  Zapis: `bags=<liczba>` przed slotami `bp.<n>`. Postac startujaca na 250+ ma od razu drugi plecak.
-- Przeciaganie (etap 14): przytrzymanie i przesuniecie przedmiotu przenosi go na inne pole, na zakladke innego
-  plecaka (pierwsze wolne pole tej strony) albo na panel ekwipunku (zalozenie). Krotkie dotkniecie dziala jak dotad.
+- Plecak jak w Tibii (2026-11-12, `inventory/ContainerGrid`, `inventory/ContainerType`, `client/ui/ContainerView`): domyslnie
+  20 pol na jednej stronie (komputer 5 x 4, telefon 10 x 2), bez zakladek i stron. Wieksze kontenery -
+  `backpack_traveler` (24 pola) i `backpack_explorer` (36 pol), przewidziane jako nagrody za zadania - zastepuja biezacy plecak po uzyciu
+  z plecaka (poprzedni wraca do torby, mniejszy lub rowny nic nie zmienia), a okno przewija je w pionie: kolko myszy, pasek przewijania
+  przy prawej krawedzi (przeciaganie suwaka, strzalki) i przyciski `<` `>` na telefonie. Okno ma zawsze te sama wysokosc.
+  Logika widzi jeden `Container` (`PlayerCharacter.setBackpackSlots`, 20..80), wiec lup, sklepy, handel i mikstury dzialaja bez zmian.
+  Zapis: `bagslots=<n>` (gdy inne niz 20); stary zapis z `bags=<n>` (strony po 20) wczytuje sie jako jeden przewijany plecak
+  `20 * (1 + n)` pol - nic nie ginie. Weteran (poziom 250+) startuje z plecakiem podroznika (24 pola). Akcja `bag_detach` zniknela.
+- Przeciaganie: przytrzymanie i przesuniecie przedmiotu przenosi go na inne pole albo na panel ekwipunku (zalozenie), a przy otwartym
+  depozycie na jego okno. Krotkie dotkniecie dziala jak dotad.
+- Wskaznik pingu (`net/PingMeter`, `NetClient.ping`): pod ramka widoku, obok FPS, kropka i wartosc w ms - zielona < 100 ms, pomaranczowa
+  100-250, czerwona > 250 (albo brak odpowiedzi > 6 s). Prawdziwy czas obiegu: klient wysyla `PING <nanoTime>` co 2 s, serwer odpowiada
+  `PONG` od razu w watku polaczenia (poza kolejka swiata), pokazywana jest mediana 5 ostatnich pomiarow. Gra lokalna (bez sieci) kropki
+  nie pokazuje; do zrzutow `-Dpixel.fakePing=MS`.
 
 ### Zestawy Hinasa (dane, 2026-11-10)
 - 11 zestawow z grafik Hinasa (OTLand, docs/CREDITS.md) i 8 pojedynczych przedmiotow, `items.csv` id 256..392
@@ -198,9 +228,14 @@ reszta) i polaczenie stosow przy przenoszeniu wymienia pelne 100 zlotych na 1 pl
 Stare zapisy ze stosami po 100 sztuk sa wymieniane przy odczycie (wartosc i saldo konta bez zmian). Uzycie monety
 tylko podaje wartosc; w plecaku monety wygladaja jak kupka (wiecej sztuk - wyzsza kupka).
 Wszystko transakcyjne, z ochrona przed przepelnieniem. Bankier w kazdym miescie (jedno konto).
-Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 60 miejsc, wspolny dla miast, tylko przy bankierze
+Depozyt przedmiotow (0.27.0): `PlayerCharacter.depot()` - 100 miejsc (`DEPOT_SLOTS`), wspolny dla miast, tylko przy bankierze albo skrzyni
 (`GameSession.depotStore/depotTake`, przenosi wszystkie sztuki ile sie zmiesci, monety odrzuca). Zapis: `dp.<slot>`.
 Szafki depozytu (`depot_locker`) w budynkach depozytu kazdego miasta otwieraja ten sam depozyt.
+Okno depozytu jak w Tibii (2026-11-12): dotkniecie skrzyni na mapie (`GameSession.useAt` -> `takeDepotOpen`) otwiera na komputerze siatke
+depozytu obok plecaka (5 x 4 z przewijaniem), przycisk "Odloz lup" i przeciaganie albo dotkniecie pola miedzy plecakiem a depozytem
+(`GameSession.depotTransfer`, akcja `depot_move:B|D:pole:B|D:pole`, `-1` = pierwsze wolne pole, stosy sie lacza). Okno zamyka sie po
+odejsciu od skrzyni. Dziala tak samo online (akcja `ACT`, serwer sprawdza bliskosc skrzyni) i offline; zawartosc jest w zapisie postaci.
+Na telefonie depozyt zostaje lista przy skrzyni (jak u bankiera).
 Domy: `maps/world/houses.csv` + `house/HouseRegistry`; kupno u agenta domow (rola HOUSING) za zloto z banku,
 jeden dom na postac, obcy nie wchodza do srodka, wlasciciele w `save/houses.txt` (serwer).
 Goscie (0.208.0): `HouseOwners.guests/addGuest/removeGuest/transfer/mayEnter`; `HouseOwnersMap` zapisuje linie

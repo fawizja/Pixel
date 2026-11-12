@@ -41,6 +41,8 @@ public final class NetClient implements AutoCloseable {
     private volatile Frame frame;
     private volatile boolean closed;
     private final ConcurrentLinkedQueue<String[]> messages = new ConcurrentLinkedQueue<>();
+    /** Pomiar opoznienia (PING/PONG), patrz {@link PingMeter}. */
+    private final PingMeter ping = new PingMeter();
 
     /**
      * Decyzja o zaufaniu certyfikatowi serwera po odcisku SHA-256 (przypinanie jak w SSH:
@@ -148,6 +150,14 @@ public final class NetClient implements AutoCloseable {
                 switch (f[0]) {
                     case "WELCOME": playerId = Integer.parseInt(f[1]); break;
                     case "ERR": error = f[1]; break;
+                    case "PONG":
+                        // echo znacznika z PING: czas obiegu w ms (znacznik = System.nanoTime klienta)
+                        try {
+                            ping.record((System.nanoTime() - Long.parseLong(f[1])) / 1_000_000L, System.currentTimeMillis());
+                        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                            // zly znacznik: pomijamy
+                        }
+                        break;
                     case "SELF": selfSave = f[1]; break;
                     case "FRAME":
                         frameTime = Long.parseLong(f[1]);
@@ -224,6 +234,21 @@ public final class NetClient implements AutoCloseable {
             closed = true;
         }
     }
+
+    /** Wysyla PING (znacznik = czas klienta); serwer odsyla go w PONG. */
+    public void ping() {
+        ping.sent(System.currentTimeMillis());
+        send("PING", Long.toString(System.nanoTime()));
+    }
+
+    /** Wysyla PING, gdy minal odstep {@link PingMeter#INTERVAL_MS} (wolane co klatke). */
+    public void pingIfDue() {
+        if (closed || playerId < 0) return;
+        if (ping.due(System.currentTimeMillis())) ping();
+    }
+
+    /** Opoznienie do serwera (kropka obok FPS). */
+    public PingMeter pingMeter() { return ping; }
 
     /** Logowanie (wersja 2: z haslem). Uwaga: polaczenie nie jest jeszcze szyfrowane. */
     public void hello(String name, String vocation, String password) {

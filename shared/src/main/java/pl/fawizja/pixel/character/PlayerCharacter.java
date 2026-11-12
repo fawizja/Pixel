@@ -51,7 +51,7 @@ public final class PlayerCharacter {
      */
     private final java.util.Set<String> questFlags = new java.util.LinkedHashSet<>();
 
-    public static final int DEPOT_SLOTS = 60;
+    public static final int DEPOT_SLOTS = 100;
     /** Odkryta mapa (mgla minimapy) - nie kopiowana w copyStateFrom: klient online odkrywa sam i dostaje FOG. */
     private final pl.fawizja.pixel.world.ExploredMap explored = new pl.fawizja.pixel.world.ExploredMap();
     private final Skills skills;
@@ -69,8 +69,6 @@ public final class PlayerCharacter {
     private long restedMs;
     private long lightBuffMs;
     private long hasteMs;
-    /** Dodatkowe plecaki (po 20 slotow kazdy) podpiete do plecaka glownego. */
-    private int extraBags;
     private int hastePercent;
     private int lightBuffRadius;
     /** Pozostaly czas palenia zalozonej pochodni (0 = nowa, nieuzywana). */
@@ -179,9 +177,9 @@ public final class PlayerCharacter {
         fedMs = o.fedMs;
         restedMs = o.restedMs;
         stamina.copyFrom(o.stamina);
+        offlineTraining.copyFrom(o.offlineTraining);
         lightBuffMs = o.lightBuffMs;
         hasteMs = o.hasteMs;
-        extraBags = o.extraBags;
         hastePercent = o.hastePercent;
         lightBuffRadius = o.lightBuffRadius;
         torchBurnMs = o.torchBurnMs;
@@ -279,33 +277,22 @@ public final class PlayerCharacter {
         return v;
     }
 
-    /** Najwiecej dodatkowych plecakow: plecak glowny + 3 = 80 slotow. */
-    public static final int MAX_EXTRA_BAGS = 3;
+    /** Liczba pol plecaka (standard 20; wiekszy rodzaj plecaka to nagroda z zadania, okno przewija go w pionie). */
+    public int backpackSlots() { return backpack.size(); }
 
-    public int extraBags() { return extraBags; }
-
-    /** Liczba stron plecaka (glowny + dodatkowe). */
-    public int bagPages() { return 1 + extraBags; }
-
-    /** Podpina kolejny plecak (+20 slotow); false, gdy osiagnieto limit. */
-    public boolean attachBag() {
-        if (extraBags >= MAX_EXTRA_BAGS) return false;
-        extraBags++;
-        backpack.resize(bagPages() * pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS);
-        return true;
+    /** Rodzaj plecaka o tej liczbie pol albo null (np. plecak ze starego zapisu). */
+    public pl.fawizja.pixel.inventory.ContainerType backpackType() {
+        return pl.fawizja.pixel.inventory.ContainerType.ofSlots(backpack.size());
     }
 
-    /** Odpina ostatni plecak; tylko gdy jego 20 slotow jest pustych. */
-    public boolean detachBag() {
-        if (extraBags == 0 || !backpack.resize((bagPages() - 1) * pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS)) return false;
-        extraBags--;
-        return true;
-    }
-
-    /** Odtwarzanie zapisu: liczba plecakow przed wczytaniem slotow. */
-    public void restoreBags(int n) {
-        while (extraBags > Math.max(0, n) && detachBag()) { }
-        while (extraBags < Math.min(MAX_EXTRA_BAGS, n) && attachBag()) { }
+    /**
+     * Ustawia liczbe pol plecaka (20..80). Powiekszenie zawsze sie udaje; pomniejszenie tylko gdy usuwane pola sa
+     * puste - przedmioty nigdy nie znikaja.
+     */
+    public boolean setBackpackSlots(int slots) {
+        int n = Math.max(pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS,
+                Math.min(pl.fawizja.pixel.inventory.ContainerType.MAX_SLOTS, slots));
+        return backpack.resize(n);
     }
 
     /** Przyspieszenie (utani hur / utani gran hur): nowy czar zastepuje poprzedni, jak w Tibii. */
@@ -939,6 +926,11 @@ public final class PlayerCharacter {
 
     /** Stamina jak w Tibii (42:00, zuzycie przy polowaniu, odnowienie offline). */
     public Stamina stamina() { return stamina; }
+
+    private final pl.fawizja.pixel.training.OfflineTraining offlineTraining = new pl.fawizja.pixel.training.OfflineTraining();
+
+    /** Trening offline jak w Canary: pasek do 12 h i umiejetnosc wybrana na posagu w swiatyni. */
+    public pl.fawizja.pixel.training.OfflineTraining offlineTraining() { return offlineTraining; }
 
     /** Ile walk z premia zostalo (zaokraglone w gore). */
     public int restedKills() { return (int) ((restedMs + RESTED_PER_KILL_MS - 1) / RESTED_PER_KILL_MS); }

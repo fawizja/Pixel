@@ -23,6 +23,8 @@ public record Npc(String key, String name, NpcRole role, String town, Position p
     public static final String DEPOT_LOCKER = "depot_locker";
     /** Otwarta zwykla skrzynia (schowek na mapie) - okno jak u bankiera w widoku depozytu. */
     public static final String CRATE = "crate";
+    /** Posag treningowy offline w swiatyni (obiekt mapy training_statue): okno wyboru umiejetnosci. */
+    public static final String TRAINING_STATUE = "training_statue";
 
     /**
      * Kowal (klucz "*_smith", np. varden_smith): ulepszenia, zaklecia, Kuznia i nasycenia. Inni kupcy (prowiant, magia,

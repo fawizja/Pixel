@@ -122,6 +122,9 @@ public class PixelGame extends Game {
             long now = System.currentTimeMillis();
             loaded.stamina().onLogin(now); // odnowienie staminy za czas poza gra
             loginNote = pl.fawizja.pixel.house.BedRest.wakeUp(loaded, now); // sen w lozku: zycie i mana
+            // trening offline (posag w swiatyni): pasek odnawia sie za czas poza gra, wybrana umiejetnosc dostaje proby
+            pl.fawizja.pixel.training.OfflineTraining.Report trained = loaded.offlineTraining().onLogin(loaded, now);
+            if (!trained.messages().isEmpty()) loginNote = (loginNote == null ? "" : loginNote + " ") + String.join(" ", trained.messages());
             startGame(loaded);
         } else {
             setScreen(new VocationSelectScreen(this));

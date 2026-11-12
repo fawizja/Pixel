@@ -23,7 +23,6 @@ public final class Actions {
             case "pvp": s.togglePvpMode(now); return true;
             case "fish": s.fish(now); return true;
             case "sort": s.sortBackpack(now); return true;
-            case "bag_detach": s.detachBag(now); return true;
             case "potion_hp": s.usePotion("health_potion", now); return true;
             case "potion_mp": s.usePotion("mana_potion", now); return true;
             case "tips_off": s.disableTips(now); return true;
@@ -69,6 +68,11 @@ public final class Actions {
                 case "slot_keep": s.toggleKeepSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_drop": s.dropFromSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_move": s.moveSlot(Integer.parseInt(p[1]), Integer.parseInt(p[2])); return true;
+                // okno depozytu: depot_move:zrodlo(B|D):pole:cel(B|D):pole (pole -1 = pierwsze wolne)
+                case "depot_move":
+                    s.depotTransfer(p[1].equals("D"), Integer.parseInt(p[2]), p[3].equals("D"), Integer.parseInt(p[4]), now);
+                    return true;
+                case "offtrain": s.startOfflineTraining(pl.fawizja.pixel.training.OfflineTraining.Choice.of(p[1]), now); return true;
                 case "npc": return npc(s, p, now);
                 case "store": s.storeBuy(p[1], now); return true;
                 case "charm": return charm(s, p, now);
