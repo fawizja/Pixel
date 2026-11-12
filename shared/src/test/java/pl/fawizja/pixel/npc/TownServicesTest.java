@@ -193,6 +193,7 @@ class TownServicesTest {
         }
         for (QuestType q : quests.all()) {
             if (q.kind() == QuestKind.KILL) assertTrue(spawned.contains(q.target()), q.key() + ": " + q.target() + " spawns");
+            else if (q.kind() == QuestKind.VISIT) assertTrue(world.regions().stream().anyMatch(r -> r.name().equals(q.target())), q.key() + ": region " + q.target() + " exists");
             else assertTrue(dropped.contains(id(q.target())), q.key() + ": " + q.target() + " drops from a spawned monster");
         }
         // pustynny lancuch Qasirah (0.64.0)

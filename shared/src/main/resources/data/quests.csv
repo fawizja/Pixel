@@ -16,19 +16,19 @@ camp_treants;Przeklęty las;camp_guide;KILL;cursed_treant;25;300000;20000;230;Dr
 camp_knights;Upiorna straż;camp_guide;KILL;wraith_knight;25;400000;30000;270;Upiorni rycerze pilnują ruin za lasem. Pokonaj 25.
 camp_golems;Rzeka lawy;camp_guide;KILL;lava_golem;20;500000;40000;320;Golemy lawy zalewają szlak na południe. Rozbij 20.
 camp_ignaroth;Pan wulkanu;camp_guide;KILL;ignaroth;1;3000000;150000;350;Ignaroth budzi wulkan. Zbierz drużynę i zgaś go.
-camp_giants;Mroźni olbrzymi;camp_guide;KILL;frost_giant;20;650000;50000;420;Olbrzymi zrzucają lawiny na szlak. Pokonaj 20.
-camp_dragons;Lodowe skrzydła;camp_guide;KILL;ice_dragon;20;800000;60000;450;Lodowe smoki porywają zwiadowców. Pokonaj 20.
-camp_hrimgar;Król lodu;camp_guide;KILL;hrimgar;1;5000000;250000;500;Hrimgar zamyka przełęcze. Strąć go ze szczytu.
-camp_stalkers;Polowanie w cieniu;camp_guide;KILL;shadow_stalker;20;900000;70000;570;Łowcy cieni porywają zwiadowców nocą. Pokonaj 20.
-camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1500000;0;600;Kapłani obozu badają cień. Przynieś 10 esencji.
-camp_khazuul;Pusty król;camp_guide;KILL;khazuul;1;8000000;400000;650;Kha'zuul woła cienie z ruin. Rozprosz go.
-camp_priests;Kapłani pustki;camp_guide;KILL;void_priest;15;1200000;90000;700;Kapłani pustki odprawiają rytuał przy Otchłani. Przerwij go, pokonując 15.
-camp_demons;Demony u bram;camp_guide;KILL;abyssal_demon;15;1500000;110000;780;Demony Otchłani szturmują ostatnie umocnienia. Pokonaj 15.
+camp_giants;Mroźni olbrzymi;camp_guide;KILL;frost_giant;20;876000;67400;420;Olbrzymi zrzucają lawiny na szlak. Pokonaj 20.
+camp_dragons;Lodowe skrzydła;camp_guide;KILL;ice_dragon;20;1006000;75000;450;Lodowe smoki porywają zwiadowców. Pokonaj 20.
+camp_hrimgar;Król lodu;camp_guide;KILL;hrimgar;1;6213000;311000;500;Hrimgar zamyka przełęcze. Strąć go ze szczytu.
+camp_stalkers;Polowanie w cieniu;camp_guide;KILL;shadow_stalker;20;1616000;126000;570;Łowcy cieni porywają zwiadowców nocą. Pokonaj 20.
+camp_essence;Esencja cienia;camp_guide;COLLECT;shadow_essence;10;1791000;0;600;Kapłani obozu badają cień. Przynieś 10 esencji.
+camp_khazuul;Pusty król;camp_guide;KILL;khazuul;1;10514000;526000;650;Kha'zuul woła cienie z ruin. Rozprosz go.
+camp_priests;Kapłani pustki;camp_guide;KILL;void_priest;15;2440000;183000;700;Kapłani pustki odprawiają rytuał przy Otchłani. Przerwij go, pokonując 15.
+camp_demons;Demony u bram;camp_guide;KILL;abyssal_demon;15;3030000;222000;780;Demony Otchłani szturmują ostatnie umocnienia. Pokonaj 15.
 camp_lords;Panowie Otchłani;camp_guide;KILL;abyss_lord;15;6000000;300000;850;Panowie Otchłani gromadzą armie. Pokonaj 15.
 camp_morgath;Serce Otchłani;camp_guide;KILL;morgath;1;20000000;1000000;900;Ostatnie zadanie świata: zniszcz Mor'gatha.
-varden_smug1;Ślady przemytników;varden_guide;KILL;bandit;8;8000;500;12;Bandyci na wschodnich drogach przemycają towar. Rozbij 8 i dowiedz się, dla kogo pracują.
-varden_smug2;Szamani i runy;varden_guide;KILL;goblin_shaman;6;15000;800;15;Bandyci kupują runy od szamanów goblinów w kopalni. Pokonaj 6 szamanów.
-varden_smug3;Ostatni transport;varden_guide;KILL;skeleton;12;30000;1200;20;Towar ukryto w starych grobach pod kopalnią (-3). Oczyść je z 12 szkieletów.
+varden_smug1;Ślady przemytników;varden_guide;KILL;bandit;8;6700;500;12;Bandyci na wschodnich drogach przemycają towar. Rozbij 8 i dowiedz się, dla kogo pracują.
+varden_smug2;Szamani i runy;varden_guide;KILL;goblin_shaman;6;11000;800;15;Bandyci kupują runy od szamanów goblinów w kopalni. Pokonaj 6 szamanów.
+varden_smug3;Ostatni transport;varden_guide;KILL;skeleton;12;20600;1200;20;Towar ukryto w starych grobach pod kopalnią (-3). Oczyść je z 12 szkieletów.
 selv_exp1;Zaginiona wyprawa;selv_guide;KILL;jungle_hunter;10;70000;2500;60;Łowcy z dżungli napadli wyprawę badaczy. Pokonaj 10 łowców.
 selv_exp2;Śladem węży;selv_guide;KILL;jungle_serpent;12;110000;3500;70;Ocalali badacze uciekli w gniazda węży. Oczyść im drogę.
 frost_storm;Zamieć;frost_guide;KILL;frost_witch;8;160000;5000;80;Wiedźmy mrozu sprowadzają zamieć na Frostholm. Pokonaj 8.
@@ -42,25 +42,25 @@ varden_boars;Dziki w zbożu;varden_guide;KILL;boar;10;3000;350;10;Dziki ryją po
 varden_spiders;Pajęcze gniazda;varden_guide;KILL;forest_spider;12;5000;450;12;Pająki leśne oplatają ścieżkę do lasu. Pokonaj 12, zanim złożą jaja.
 varden_crystals;Kryształowe serca;varden_guide;KILL;crystal_golem;10;60000;2500;40;W głębi kopalni ożyły kryształowe golemy. Rozbij 10, żeby górnicy mogli wrócić.
 camp_elementals;Płonące pola;camp_guide;KILL;fire_elemental;20;450000;35000;300;Żywiołaki ognia palą zapasy obozu. Ugaś 20.
-camp_harpies;Burza nad przełęczą;camp_guide;KILL;storm_harpy;20;700000;55000;460;Harpie burzy strącają zwiadowców z grani. Pokonaj 20.
-camp_titans;Piaskowe kolosy;camp_guide;KILL;sand_titan;15;1000000;80000;640;Piaskowe tytany zasypują drogę do ruin. Pokonaj 15.
-camp_bones;Kościane skrzydła;camp_guide;KILL;bone_dragon;10;2000000;150000;870;Kościane smoki krążą nad Otchłanią. Strąć 10.
+camp_harpies;Burza nad przełęczą;camp_guide;KILL;storm_harpy;20;1051000;83000;460;Harpie burzy strącają zwiadowców z grani. Pokonaj 20.
+camp_titans;Piaskowe kolosy;camp_guide;KILL;sand_titan;15;2038000;163000;640;Piaskowe tytany zasypują drogę do ruin. Pokonaj 15.
+camp_bones;Kościane skrzydła;camp_guide;KILL;bone_dragon;10;3771000;283000;870;Kościane smoki krążą nad Otchłanią. Strąć 10.
 # Etap 15: zlecenia Admirala Wendy (Przystan Wschodnia) - wyspy i lochy dla postaci 300+
-isle_wyverns;Skrzydła nad doliną;isle_guide;KILL;wyvern;25;400000;30000;300;Wiwerny z Doliny Wiwern porywają owce z farm. Pokonaj 25.
+isle_wyverns;Skrzydła nad doliną;isle_guide;KILL;wyvern;25;446000;33400;300;Wiwerny z Doliny Wiwern porywają owce z farm. Pokonaj 25.
 isle_scales;Łuski na tarcze;isle_guide;COLLECT;wyvern_scale;10;500000;20000;300;Kowale floty potrzebują łusek wiwern. Przynieś 10.
 isle_matriarch;Matka wiwern;isle_guide;KILL;wyvern_matriarch;1;2500000;100000;330;Na dnie Gniazda Wiwern czeka Matriarcha. Pokonaj ją.
 isle_crabs;Szczypce z rafy;isle_guide;KILL;coral_crab;25;450000;30000;310;Kraby koralowe niszczą sieci rybaków na Wyspie Koralowej.
-isle_pirates;Czarna bandera;isle_guide;KILL;pirate_cutthroat;30;600000;40000;350;Piraci z Wyspy Piratów napadają na statki. Rozpraw się z 30.
+isle_pirates;Czarna bandera;isle_guide;KILL;pirate_cutthroat;30;729000;48600;350;Piraci z Wyspy Piratów napadają na statki. Rozpraw się z 30.
 isle_hooks;Dowody zwycięstwa;isle_guide;COLLECT;pirate_hook;10;600000;30000;350;Przynieś 10 haków pirackich - flota zapłaci nagrodę.
 isle_gunners;Ciche działa;isle_guide;KILL;pirate_gunner;20;700000;40000;380;Kanonierzy ostrzeliwują nasze łodzie z Groty Przemytników.
-isle_bloodbeard;Krwawobrody;isle_guide;KILL;bloodbeard;1;3000000;150000;400;Herszt piratów ukrywa się na dnie Groty Przemytników. Skończ z nim.
+isle_bloodbeard;Krwawobrody;isle_guide;KILL;bloodbeard;1;3970000;198000;400;Herszt piratów ukrywa się na dnie Groty Przemytników. Skończ z nim.
 isle_drowned;Topielcy;isle_guide;KILL;drowned_sailor;30;600000;35000;330;Utopieni marynarze wychodzą z morza nocą. Pokonaj 30.
-isle_mist;Mgła nad wyspą;isle_guide;KILL;mist_wraith;25;1100000;60000;520;Upiory mgły z Wyspy Mgieł porywają dusze rybaków.
-isle_morvena;Pani Mgieł;isle_guide;KILL;morvena;1;7000000;350000;620;W Krypcie Mgieł czeka Morvena. Rozprosz ją na zawsze.
-isle_skaldra;Lodowa wiedźma;isle_guide;KILL;skaldra;1;6000000;300000;520;Skaldra zamraża morze wokół Lodowej Wyspy. Pokonaj ją w Lodowych Grotach.
-isle_drakes;Ogień z głębin;isle_guide;KILL;magma_drake;20;1600000;80000;670;Magmowe smoki z Serca Wulkanu palą nasze statki.
-isle_horns;Rogi smoków;isle_guide;COLLECT;drake_horn;5;2000000;0;670;Przynieś 5 rogów magmowych smoków dla alchemików floty.
-isle_pyrrax;Władca wulkanu;isle_guide;KILL;pyrrax;1;12000000;600000;750;Pyrrax śpi w najgłębszym piętrze Serca Wulkanu. Obudź go i pokonaj.
+isle_mist;Mgła nad wyspą;isle_guide;KILL;mist_wraith;25;1344000;73000;520;Upiory mgły z Wyspy Mgieł porywają dusze rybaków.
+isle_morvena;Pani Mgieł;isle_guide;KILL;morvena;1;9564000;478000;620;W Krypcie Mgieł czeka Morvena. Rozprosz ją na zawsze.
+isle_skaldra;Lodowa wiedźma;isle_guide;KILL;skaldra;1;6721000;336000;520;Skaldra zamraża morze wokół Lodowej Wyspy. Pokonaj ją w Lodowych Grotach.
+isle_drakes;Ogień z głębin;isle_guide;KILL;magma_drake;20;2234000;112000;670;Magmowe smoki z Serca Wulkanu palą nasze statki.
+isle_horns;Rogi smoków;isle_guide;COLLECT;drake_horn;5;2234000;0;670;Przynieś 5 rogów magmowych smoków dla alchemików floty.
+isle_pyrrax;Władca wulkanu;isle_guide;KILL;pyrrax;1;14006000;700000;750;Pyrrax śpi w najgłębszym piętrze Serca Wulkanu. Obudź go i pokonaj.
 star_m1;Popielne pokuty;star_warden;KILL;ash_penitent;50;800000;20000;300;Pokutnicy z Cytadeli Popiołu nie zaznają spokoju. Pokonaj 50 skruszonych pokutników.
 star_m2;Cisza klasztoru;star_warden;KILL;rimebound_monk;55;1200000;30000;300;Mnisi z Klasztoru Szronu zamarzli w modlitwie. Pokonaj 55 skutych lodem mnichów.
 star_m3;Ogień kuźni;star_warden;KILL;slag_forgehand;60;1800000;45000;300;Kuźnia gwiazdy pracuje bez kowali. Rozbij 60 żużlowych kowalczyków.
@@ -68,3 +68,44 @@ star_m4;Zarośnięte ogrody;star_warden;KILL;thorn_maiden;60;2600000;60000;300;O
 star_m5;Odbicia;star_warden;KILL;mirror_acolyte;65;3600000;80000;300;W Salach Zwierciadeł nikt nie jest sam. Pokonaj 65 akolitów zwierciadeł.
 star_m6;Głód paszczy;star_warden;KILL;maw_crawler;70;5000000;120000;300;Paszcza jest wiecznie głodna. Wytęp 70 pełzaczy z paszczy, zanim wypełzną na świat.
 star_final;Pieczęć Gasnącej Gwiazdy;star_warden;KILL;noctharion;1;12000000;400000;300;Noctharion gasi gwiazdy. Zejdź do Komnaty Pożeracza Światła i pokonaj go, aby zamknąć Pieczęć.
+# BEGIN story_quests (tools/mapgen/story_quests.py data)
+mill_m1;Do środka: Opuszczony Młyn;mill_bram;VISIT;Opuszczony Młyn (wnętrze);1;300;100;8;Młyn stoi pusty od jesieni: pająki zasnuły żarna, a wilki zadomowiły się w spichlerzu na piętrze. Wejdź do środka (Opuszczony Młyn (wnętrze)) i rozejrzyj się.
+mill_m2;Pajęczy rój;mill_bram;KILL;forest_spider;8;700;100;8;Pająki zasiedliły młyn. Pokonaj 8, żeby dało się znów zmielić ziarno.
+mill_m3;Wilki w spichlerzu;mill_bram;KILL;wolf;6;1200;100;8;Wilki leżą w spichlerzu na górze. Pokonaj 6, a skrzynie na szczycie młyna są twoje.
+crypt_m1;Do środka: Krypta Cichego Dzwonu;crypt_aldric;VISIT;Krypta Cichego Dzwonu (głębiny);1;800;100;12;Stary dzwonnik pochowany pod kaplicą nie zaznał spokoju. Jego szkielety krążą po krypcie, a stonogi gnieżdżą się w ścianach. Wejdź do środka (Krypta Cichego Dzwonu (głębiny)) i rozejrzyj się.
+crypt_m2;Niespokojne kości;crypt_aldric;KILL;skeleton;8;1700;100;12;Szkielety wędrują po krypcie. Pokonaj 8.
+crypt_m3;Gniazdo stonóg;crypt_aldric;KILL;cave_centipede;6;3100;200;12;Stonogi opanowały dolne komnaty. Pokonaj 6, a odblokujesz skarbiec dzwonnika.
+poacher_m1;Do środka: Jama Kłusownika;poacher_hild;VISIT;Jama Kłusownika (głębiny);1;1600;100;16;Banda kłusowników zakopała się w lodowej jamie i obdziera śnieżne wilki ze skór, a rannych zwierząt nie ma kto chronić. Wejdź do środka (Jama Kłusownika (głębiny)) i rozejrzyj się.
+poacher_m2;Wilki w sidłach;poacher_hild;KILL;snow_wolf;10;3200;200;16;Śnieżne wilki miotają się w sidłach. Pokonaj 10, zanim ruszą na karawany.
+poacher_m3;Banda kłusowników;poacher_hild;KILL;bandit;6;5800;300;16;Kłusownicy bronią skarbca w głębi jamy. Pokonaj 6 i zabierz łup.
+oasis_m1;Do środka: Studnia Zakopanej Oazy;oasis_zahir;VISIT;Studnia Zakopanej Oazy (głębiny);1;3200;200;22;Strażnik studni uciekł z oazy przed hienami i skorpionami. W zasypanych komnatach pod piaskiem ukryto zapasy karawan. Wejdź do środka (Studnia Zakopanej Oazy (głębiny)) i rozejrzyj się.
+oasis_m2;Hieny przy wodzie;oasis_zahir;KILL;hyena;10;6300;300;22;Hieny pilnują wody. Pokonaj 10.
+oasis_m3;Skorpiony w studni;oasis_zahir;KILL;scorpion;12;11600;600;22;Skorpiony zalęgły się w studni. Pokonaj 12, a dotrzesz do skrzyń karawan.
+barrow_m1;Do środka: Kurhan Dworu Świec;barrow_edda;VISIT;Kurhan Dworu Świec (głębiny);1;10100;500;35;Dwór zmarłych kupców płonie świecami w kurhanie. Akolici trzymają straż, a ich latarnie wabią w mrok wędrowców. Wejdź do środka (Kurhan Dworu Świec (głębiny)) i rozejrzyj się.
+barrow_m2;Akolici świec;barrow_edda;KILL;candle_acolyte;10;20200;1000;35;Akolici pilnują wejścia do dworu. Pokonaj 10.
+barrow_m3;Latarnie w mroku;barrow_edda;KILL;barrow_lantern;6;37100;1900;35;Latarnie krążą po komnacie tronowej. Pokonaj 6, a skarb dworu będzie twój.
+watch_m1;Do środka: Wieża Strażnicza Hrimvard;watch_rorik;VISIT;Wieża Strażnicza Hrimvard (wnętrze);1;21200;1100;50;Strażnicy z Hrimvard osłaniali przełęcz do Frostholm. Teraz po wieży krążą zamarznięte dziki i yeti, a skarbiec garnizonu leży na szczycie. Wejdź do środka (Wieża Strażnicza Hrimvard (wnętrze)) i rozejrzyj się.
+watch_m2;Zamrożone dziki;watch_rorik;KILL;frost_boar;8;42400;2100;50;Zamrożone dziki ryją pod wieżą. Pokonaj 8.
+watch_m3;Yeti na szczycie;watch_rorik;KILL;yeti;6;77700;3900;50;Yeti zajęły górne piętra. Pokonaj 6, a otworzysz skarbiec garnizonu.
+zig_m1;Do środka: Zigurat Spalonego Słońca;zig_nadira;VISIT;Zigurat Spalonego Słońca (głębiny);1;25800;1300;55;Kapłani spalonego słońca zamknęli się w ziguracie i oddali go żarłokom piasku. W głębi pilnują go pręgowani łowcy. Wejdź do środka (Zigurat Spalonego Słońca (głębiny)) i rozejrzyj się.
+zig_m2;Piaskowe żarłoki;zig_nadira;KILL;sand_devourer;10;51600;2600;55;Żarłoki podkopują zigurat. Pokonaj 10.
+zig_m3;Pręgowani łowcy;zig_nadira;KILL;striped_prowler;6;94500;4700;55;Pręgowani łowcy bronią skarbca kapłanów. Pokonaj 6.
+bog_m1;Do środka: Kaplica Bagiennej Wody;bog_alaric;VISIT;Kaplica Bagiennej Wody (głębiny);1;42200;2100;70;Wierni utonęli w bagnie razem z kaplicą. Ich upiory wędrują po nawie, a jaszczury wypełniły podziemia. Wejdź do środka (Kaplica Bagiennej Wody (głębiny)) i rozejrzyj się.
+bog_m2;Upiory z bagien;bog_alaric;KILL;bog_wraith;12;84500;4200;70;Upiory bagienne krążą po kaplicy. Pokonaj 12.
+bog_m3;Jaszczury w nawie;bog_alaric;KILL;marsh_lizard;8;154900;7700;70;Jaszczury zajęły nawę główną. Pokonaj 8, a skarbiec kaplicy się otworzy.
+coil_m1;Do środka: Sanktuarium Złotej Spirali;coil_itzal;VISIT;Sanktuarium Złotej Spirali (głębiny);1;70500;3500;90;Dżunglowi kapłani czcili złotego węża, aż złoto obudziło coś głodnego. Teraz węże i dawni łowcy skarbów pilnują sanktuarium. Wejdź do środka (Sanktuarium Złotej Spirali (głębiny)) i rozejrzyj się.
+coil_m2;Węże w korytarzach;coil_itzal;KILL;jungle_serpent;12;141000;7000;90;Węże wypełniły korytarze sanktuarium. Pokonaj 12.
+coil_m3;Łowcy skarbów;coil_itzal;KILL;jungle_hunter;8;258500;12900;90;Dawni łowcy skarbów strzegą ołtarza. Pokonaj 8, a skarb spirali jest twój.
+lantern_m1;Do środka: Latarnia Zielonych Mgieł;lantern_orsa;VISIT;Latarnia Zielonych Mgieł (wnętrze);1;106000;5300;110;Latarnik wzywał statki do portu, aż mgła przyniosła zaklinaczy jaszczurów i kamiennych wartowników. Latarnia czeka na kogoś, kto ją znów zapali. Wejdź do środka (Latarnia Zielonych Mgieł (wnętrze)) i rozejrzyj się.
+lantern_m2;Zaklinacze z mgły;lantern_orsa;KILL;lizard_hexer;10;211900;10600;110;Zaklinacze jaszczurów zajęli dolne piętra. Pokonaj 10.
+lantern_m3;Kamienni wartownicy;lantern_orsa;KILL;stone_sentinel;5;388500;19400;110;Kamienni wartownicy strzegą lampy. Pokonaj 5, a zapalisz latarnię i otworzysz skarbiec.
+stormgate_m1;Do środka: Cytadela Zburzonej Bramy Burz;storm_teodrin;VISIT;Cytadela Zburzonej Bramy Burz (głębiny);1;198500;9900;150;Marszałek stracił armię, gdy gargulce burzy zrzuciły mury. Straż bramy z kamienia pilnuje skarbca generałów. Wejdź do środka (Cytadela Zburzonej Bramy Burz (głębiny)) i rozejrzyj się.
+stormgate_m2;Gargulce burzy;storm_teodrin;KILL;sand_gargoyle;12;397000;19800;150;Gargulce krążą po murach cytadeli. Pokonaj 12.
+stormgate_m3;Straż bramy;storm_teodrin;KILL;temple_guardian;8;727800;36400;150;Straż bramy broni skarbca generałów. Pokonaj 8.
+wyrm_m1;Do środka: Smocze Moczary;wyrm_kaldor;VISIT;Smocze Moczary (głębiny);1;391300;19600;210;Łowca smoków odkrył, że nagi i smoki skalne dzielą jedno legowisko. Nikt, kto tam wszedł, nie wyszedł bez blizn. Wejdź do środka (Smocze Moczary (głębiny)) i rozejrzyj się.
+wyrm_m2;Nagi z moczarów;wyrm_kaldor;KILL;bog_naga;10;782500;39100;210;Nagi strzegą przejść do gniazda. Pokonaj 10.
+wyrm_m3;Smoki skalne;wyrm_kaldor;KILL;crag_dragon;6;1435000;71800;210;Smoki skalne strzegą skarbu w gnieździe. Pokonaj 6.
+crown_m1;Do środka: Skarbiec Pustej Korony;crown_isolde;VISIT;Skarbiec Pustej Korony (głębiny);1;1081000;54000;270;Ostatni król oddał duszę koronie, a jego gwardia stała się upiorami. Magowie popiołu pilnują sali, w której złożono skarbiec królestwa. Wejdź do środka (Skarbiec Pustej Korony (głębiny)) i rozejrzyj się.
+crown_m2;Upiorna gwardia;crown_isolde;KILL;wraith_knight;20;2163000;108200;270;Upiorni rycerze stoją na każdym piętrze. Pokonaj 20.
+crown_m3;Magowie popiołu;crown_isolde;KILL;ash_magus;10;3965000;198200;270;Magowie popiołu strzegą korony. Pokonaj 10, a skarbiec królestwa się otworzy.
+# END story_quests

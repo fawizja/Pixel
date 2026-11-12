@@ -1185,3 +1185,161 @@ place;Sale Zwierciadeł;name;Salas de Espejos
 place;Paszcza Głodu;name;Fauces del Hambre
 place;Komnata Pożeracza Światła;name;Cámara del Devorador de Luz
 place;Komnata Nagród Gwiazdy;name;Cámara de Recompensas de la Estrella
+# BEGIN story_quests (tools/mapgen/story_quests.py data)
+quest;mill_m1;name;Dentro: Molino abandonado
+quest;mill_m1;desc;Entra (Molino abandonado (interior)) y echa un vistazo.
+quest;mill_m2;name;Enjambre de arañas
+quest;mill_m2;desc;Las arañas se apoderaron del molino. Derrota a 8 para poder moler grano de nuevo.
+quest;mill_m3;name;Lobos en el granero
+quest;mill_m3;desc;Los lobos duermen en el granero de arriba. Derrota a 6 y los cofres de lo alto del molino son tuyos.
+quest;mill_m1;line;Molino de las arañas silenciosas
+quest;mill_m1;where;Molino abandonado, cerca de Varden
+place;Opuszczony Młyn;name;Molino abandonado
+place;Opuszczony Młyn (wnętrze);name;Molino abandonado (interior)
+npc;mill_bram;name;Miller Bram
+npc;mill_bram;greeting;Las telarañas se tragaron mi molino. ¿Me ayudas a recuperar el granero?
+quest;crypt_m1;name;Dentro: Cripta de la campana muda
+quest;crypt_m1;desc;Entra (Cripta de la campana muda (profundidades)) y echa un vistazo.
+quest;crypt_m2;name;Huesos inquietos
+quest;crypt_m2;desc;Los esqueletos vagan por la cripta. Derrota a 8.
+quest;crypt_m3;name;Nido de ciempiés
+quest;crypt_m3;desc;Los ciempiés dominan las cámaras bajas. Derrota a 6 y se abre el tesoro del campanero.
+quest;crypt_m1;line;La campana muda
+quest;crypt_m1;where;Cripta de la campana muda, cerca de Varden
+place;Krypta Cichego Dzwonu;name;Cripta de la campana muda
+place;Krypta Cichego Dzwonu (głębiny);name;Cripta de la campana muda (profundidades)
+npc;crypt_aldric;name;Sexton Aldric
+npc;crypt_aldric;greeting;La campana de la cripta enmudeció y de noche se oyen pasos. Alguien debe bajar.
+quest;poacher_m1;name;Dentro: La guarida del cazador furtivo
+quest;poacher_m1;desc;Entra (La guarida del cazador furtivo (profundidades)) y echa un vistazo.
+quest;poacher_m2;name;Lobos en los lazos
+quest;poacher_m2;desc;Los lobos de nieve se debaten en los lazos. Derrota a 10 antes de que ataquen a las caravanas.
+quest;poacher_m3;name;La banda de furtivos
+quest;poacher_m3;desc;Los furtivos guardan un botín al fondo de la guarida. Derrota a 6 y llévate el botín.
+quest;poacher_m1;line;La guarida del cazador furtivo
+quest;poacher_m1;where;La guarida del cazador furtivo, cerca de Frostholm
+place;Jama Kłusownika;name;La guarida del cazador furtivo
+place;Jama Kłusownika (głębiny);name;La guarida del cazador furtivo (profundidades)
+npc;poacher_hild;name;Trapper Hild
+npc;poacher_hild;greeting;Alguien tiende lazos a mis lobos. Encuentra la cueva de la que salen los furtivos.
+quest;oasis_m1;name;Dentro: Pozo del oasis enterrado
+quest;oasis_m1;desc;Entra (Pozo del oasis enterrado (profundidades)) y echa un vistazo.
+quest;oasis_m2;name;Hienas junto al agua
+quest;oasis_m2;desc;Las hienas vigilan el agua. Derrota a 10.
+quest;oasis_m3;name;Escorpiones en el pozo
+quest;oasis_m3;desc;Los escorpiones criaron en el pozo. Derrota a 12 y llega a los cofres de las caravanas.
+quest;oasis_m1;line;El oasis enterrado
+quest;oasis_m1;where;Pozo del oasis enterrado, cerca de Qasirah
+place;Studnia Zakopanej Oazy;name;Pozo del oasis enterrado
+place;Studnia Zakopanej Oazy (głębiny);name;Pozo del oasis enterrado (profundidades)
+npc;oasis_zahir;name;Warden Zahir
+npc;oasis_zahir;greeting;La arena enterró el oasis y unas bestias anidan en su pozo. Sin agua las caravanas mueren.
+quest;barrow_m1;name;Dentro: Túmulo de la Corte de las Velas
+quest;barrow_m1;desc;Entra (Túmulo de la Corte de las Velas (profundidades)) y echa un vistazo.
+quest;barrow_m2;name;Acólitos de las velas
+quest;barrow_m2;desc;Los acólitos guardan la entrada de la corte. Derrota a 10.
+quest;barrow_m3;name;Linternas en la oscuridad
+quest;barrow_m3;desc;Las linternas flotan por la sala del trono. Derrota a 6 y el tesoro de la corte es tuyo.
+quest;barrow_m1;line;La Corte de las Velas
+quest;barrow_m1;where;Túmulo de la Corte de las Velas, cerca de Varden
+place;Kurhan Dworu Świec;name;Túmulo de la Corte de las Velas
+place;Kurhan Dworu Świec (głębiny);name;Túmulo de la Corte de las Velas (profundidades)
+npc;barrow_edda;name;Lamplighter Edda
+npc;barrow_edda;greeting;Bajo el túmulo arden velas que nadie encendió. La corte de los muertos quiere ser recordada.
+quest;watch_m1;name;Dentro: Atalaya de Hrimvard
+quest;watch_m1;desc;Entra (Atalaya de Hrimvard (interior)) y echa un vistazo.
+quest;watch_m2;name;Jabalíes helados
+quest;watch_m2;desc;Jabalíes helados hozan bajo la torre. Derrota a 8.
+quest;watch_m3;name;Yetis en la cumbre
+quest;watch_m3;desc;Los yetis ocupan los pisos altos. Derrota a 6 y se abre la cámara de la guarnición.
+quest;watch_m1;line;La Guardia de Hrimvard
+quest;watch_m1;where;Atalaya de Hrimvard, cerca de Frostholm
+place;Wieża Strażnicza Hrimvard;name;Atalaya de Hrimvard
+place;Wieża Strażnicza Hrimvard (wnętrze);name;Atalaya de Hrimvard (interior)
+npc;watch_rorik;name;Sentinel Rorik
+npc;watch_rorik;greeting;La torre de Hrimvard calla desde el invierno. El último centinela se congeló arriba con su linterna.
+quest;zig_m1;name;Dentro: Zigurat del Sol Abrasado
+quest;zig_m1;desc;Entra (Zigurat del Sol Abrasado (profundidades)) y echa un vistazo.
+quest;zig_m2;name;Devoradores de arena
+quest;zig_m2;desc;Los devoradores socavan el zigurat. Derrota a 10.
+quest;zig_m3;name;Merodeadores rayados
+quest;zig_m3;desc;Los merodeadores rayados guardan la cámara de los sacerdotes. Derrota a 6.
+quest;zig_m1;line;El Sol Abrasado
+quest;zig_m1;where;Zigurat del Sol Abrasado, cerca de Qasirah
+place;Zigurat Spalonego Słońca;name;Zigurat del Sol Abrasado
+place;Zigurat Spalonego Słońca (głębiny);name;Zigurat del Sol Abrasado (profundidades)
+npc;zig_nadira;name;Seeker Nadira
+npc;zig_nadira;greeting;El zigurat bajo la duna despide calor incluso de noche. Busco a alguien que mire en sus cámaras.
+quest;bog_m1;name;Dentro: Capilla de Aguas Cenagosas
+quest;bog_m1;desc;Entra (Capilla de Aguas Cenagosas (profundidades)) y echa un vistazo.
+quest;bog_m2;name;Espectros del pantano
+quest;bog_m2;desc;Los espectros del pantano vagan por la capilla. Derrota a 12.
+quest;bog_m3;name;Lagartos en la nave
+quest;bog_m3;desc;Los lagartos ocupan la nave principal. Derrota a 8 y se abre la cámara de la capilla.
+quest;bog_m1;line;La Capilla Cenagosa
+quest;bog_m1;where;Capilla de Aguas Cenagosas, cerca de Valmir
+place;Kaplica Bagiennej Wody;name;Capilla de Aguas Cenagosas
+place;Kaplica Bagiennej Wody (głębiny);name;Capilla de Aguas Cenagosas (profundidades)
+npc;bog_alaric;name;Reverend Alaric
+npc;bog_alaric;greeting;La capilla se hundió en el pantano, pero sus campanas suenan bajo el agua. Necesito un brazo fuerte.
+quest;coil_m1;name;Dentro: Santuario de la Espiral Dorada
+quest;coil_m1;desc;Entra (Santuario de la Espiral Dorada (profundidades)) y echa un vistazo.
+quest;coil_m2;name;Serpientes en los pasillos
+quest;coil_m2;desc;Las serpientes llenan los pasillos del santuario. Derrota a 12.
+quest;coil_m3;name;Cazadores de tesoros
+quest;coil_m3;desc;Antiguos cazadores de tesoros guardan el altar. Derrota a 8 y el tesoro de la espiral es tuyo.
+quest;coil_m1;line;La Espiral Dorada
+quest;coil_m1;where;Santuario de la Espiral Dorada, cerca de Selvaran
+place;Sanktuarium Złotej Spirali;name;Santuario de la Espiral Dorada
+place;Sanktuarium Złotej Spirali (głębiny);name;Santuario de la Espiral Dorada (profundidades)
+npc;coil_itzal;name;Priest Itzal
+npc;coil_itzal;greeting;El Santuario de la Espiral Dorada ya no responde a las plegarias. Las serpientes salieron de las estatuas.
+quest;lantern_m1;name;Dentro: Faro de las Brumas Verdes
+quest;lantern_m1;desc;Entra (Faro de las Brumas Verdes (interior)) y echa un vistazo.
+quest;lantern_m2;name;Hechiceros de la niebla
+quest;lantern_m2;desc;Los hechiceros lagarto ocupan los pisos bajos. Derrota a 10.
+quest;lantern_m3;name;Centinelas de piedra
+quest;lantern_m3;desc;Los centinelas de piedra guardan la lámpara. Derrota a 5 para encender el faro y abrir la cámara.
+quest;lantern_m1;line;Las Brumas Verdes
+quest;lantern_m1;where;Faro de las Brumas Verdes, cerca de Nerys
+place;Latarnia Zielonych Mgieł;name;Faro de las Brumas Verdes
+place;Latarnia Zielonych Mgieł (wnętrze);name;Faro de las Brumas Verdes (interior)
+npc;lantern_orsa;name;Lightkeeper Orsa
+npc;lantern_orsa;greeting;El haz del faro se apagó y de la niebla salen seres que no deberían existir. Sube a la cima.
+quest;stormgate_m1;name;Dentro: Ciudadela de la Puerta de Tormentas Rota
+quest;stormgate_m1;desc;Entra (Ciudadela de la Puerta de Tormentas Rota (profundidades)) y echa un vistazo.
+quest;stormgate_m2;name;Gárgolas de la tormenta
+quest;stormgate_m2;desc;Las gárgolas rondan las murallas. Derrota a 12.
+quest;stormgate_m3;name;La guardia de la puerta
+quest;stormgate_m3;desc;La guardia de la puerta defiende la cámara de los generales. Derrota a 8.
+quest;stormgate_m1;line;La Puerta de Tormentas
+quest;stormgate_m1;where;Ciudadela de la Puerta de Tormentas Rota, cerca de Selvaran
+place;Cytadela Zburzonej Bramy Burz;name;Ciudadela de la Puerta de Tormentas Rota
+place;Cytadela Zburzonej Bramy Burz (głębiny);name;Ciudadela de la Puerta de Tormentas Rota (profundidades)
+npc;storm_teodrin;name;Marshal Teodrin
+npc;storm_teodrin;greeting;La ciudadela de la Tormenta cayó en una noche. Su puerta aún cruje con rayos y la guarnición no descansa.
+quest;wyrm_m1;name;Dentro: Hondonada del Pantano del Wyrm
+quest;wyrm_m1;desc;Entra (Hondonada del Pantano del Wyrm (profundidades)) y echa un vistazo.
+quest;wyrm_m2;name;Nagas del pantano
+quest;wyrm_m2;desc;Las nagas guardan los pasos al nido. Derrota a 10.
+quest;wyrm_m3;name;Dragones de risco
+quest;wyrm_m3;desc;Los dragones de risco guardan el tesoro del nido. Derrota a 6.
+quest;wyrm_m1;line;Pantano del Wyrm
+quest;wyrm_m1;where;Hondonada del Pantano del Wyrm, cerca de Nerys
+place;Smocze Moczary;name;Hondonada del Pantano del Wyrm
+place;Smocze Moczary (głębiny);name;Hondonada del Pantano del Wyrm (profundidades)
+npc;wyrm_kaldor;name;Drakehunter Kaldor
+npc;wyrm_kaldor;greeting;En el pantano hay un nido del que los cazadores no hablan. Quien vuelva gana un premio mejor que una armadura de dragón.
+quest;crown_m1;name;Dentro: Cámara de la Corona Hueca
+quest;crown_m1;desc;Entra (Cámara de la Corona Hueca (profundidades)) y echa un vistazo.
+quest;crown_m2;name;La guardia espectral
+quest;crown_m2;desc;Caballeros espectrales vigilan cada piso. Derrota a 20.
+quest;crown_m3;name;Magos de ceniza
+quest;crown_m3;desc;Los magos de ceniza guardan la corona. Derrota a 10 y se abre la cámara del reino.
+quest;crown_m1;line;La Corona Hueca
+quest;crown_m1;where;Cámara de la Corona Hueca, cerca de Valmir
+place;Skarbiec Pustej Korony;name;Cámara de la Corona Hueca
+place;Skarbiec Pustej Korony (głębiny);name;Cámara de la Corona Hueca (profundidades)
+npc;crown_isolde;name;Crownwarden Isolde
+npc;crown_isolde;greeting;La corona sin cabeza aún reclama poder. Sus guardianes no dejan salir a nadie con las manos vacías... ni vivo.
+# END story_quests

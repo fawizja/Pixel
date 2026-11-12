@@ -323,3 +323,6 @@ shop_torch_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=
 brick_grass_edge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=878,731,0
 god_komendy|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.chat=/komendy
 god_tag|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.conTab=1 -Dpixel.chat=/ghost
+journal_log|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=405,591,0 -Dpixel.open=journal -Dpixel.quests=mill_m1:done,mill_m2:done,mill_m3:done,crypt_m1:done,crypt_m2:active:3,barrow_m1:active:0
+chest_sign_mill|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=414,586,1 -Dpixel.tap=415,585,1
+quest_npc_mill|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=405,591,0

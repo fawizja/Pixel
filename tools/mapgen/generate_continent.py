@@ -55,6 +55,7 @@ import chapels  # noqa: E402
 import structures as St  # noqa: E402
 import minotaur  # noqa: E402
 import citadel  # noqa: E402
+import story_quests  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
 OUT = os.path.join(ROOT, 'world')
@@ -1059,6 +1060,9 @@ def build(ctx):
     print('miasto rogatych:', minotaur.build(ctx, cost, wh))
     # 2026-11-12: Wyspa Gasnacej Gwiazdy (premium, tylko statkiem): 7 sekcji x 3 pietra, 7 bossow, sala nagrod, Herold w Varden
     print('wyspa gasnacej gwiazdy:', citadel.build(ctx, cost, wh))
+    # 2026-11-12: 13 wypraw fabularnych w stylu Tibii (4 latwe i 3 srednie na kontynencie, 6 premium na ladach premium)
+    for rec in story_quests.build(ctx, cost, wh):
+        print('wyprawa fabularna:', rec['key'], rec['tier'], 'npc', rec['npc'], 'drzwi', rec['door'])
 
 
 def monster_levels():
@@ -2925,10 +2929,13 @@ def finish(ctx):
             f.write(';'.join(str(v) for v in c) + '\n')
     with open(os.path.join(OUT, 'star_quest.csv'), 'w', encoding='utf-8') as f:
         f.write('# Pieczec Gasnacej Gwiazdy (world/QuestGate, WorldMap.RewardChoice; tools/mapgen/citadel.py):\n'
-                '# gate;x;y;z;wymog (quest:<zadanie> | boss:<potwor> | flag:<znacznik>) - pole nieprzechodnie do spelnienia wymogu\n'
-                '# choice;grupa;x;y;z;przedmiot - skrzynie sali nagrod: z grupy mozna otworzyc jedna\n')
+                '# gate;x;y;z;wymog (quest:<zadanie> | boss:<potwor> | flag:<znacznik> | party:<N graczy>) - pole nieprzechodnie do spelnienia wymogu\n'
+                '# choice;grupa;x;y;z;przedmiot - skrzynie sali nagrod: z grupy mozna otworzyc jedna\n'
+                '# reward;grupa;wymog - kiedy grupa skrzyn sie otwiera (bez wiersza: ukonczona Pieczec Gwiazdy); tools/mapgen/story_quests.py\n')
         for (x, y, z, req) in ctx.get('star_gates', []):
             f.write(f'gate;{x};{y};{z};{req}\n')
+        for (grp, req) in ctx.get('reward_reqs', []):
+            f.write(f'reward;{grp};{req}\n')
         for (grp, x, y, z, item) in ctx.get('star_choices', []):
             f.write(f'choice;{grp};{x};{y};{z};{item}\n')
     with open(os.path.join(OUT, 'boss_quests.csv'), 'w', encoding='utf-8') as f:

@@ -1185,3 +1185,161 @@ place;Sale Zwierciadeł;name;Mirror Halls
 place;Paszcza Głodu;name;Maw of Hunger
 place;Komnata Pożeracza Światła;name;Chamber of the Light-Eater
 place;Komnata Nagród Gwiazdy;name;Star Reward Chamber
+# BEGIN story_quests (tools/mapgen/story_quests.py data)
+quest;mill_m1;name;Inside: Abandoned Mill
+quest;mill_m1;desc;Step inside (Abandoned Mill (interior)) and have a look around.
+quest;mill_m2;name;Spider Swarm
+quest;mill_m2;desc;Spiders have taken over the mill. Defeat 8 so the grain can be ground again.
+quest;mill_m3;name;Wolves in the Granary
+quest;mill_m3;desc;Wolves lie in the granary upstairs. Defeat 6 and the chests at the top of the mill are yours.
+quest;mill_m1;line;Mill of Quiet Spiders
+quest;mill_m1;where;Abandoned Mill, near Varden
+place;Opuszczony Młyn;name;Abandoned Mill
+place;Opuszczony Młyn (wnętrze);name;Abandoned Mill (interior)
+npc;mill_bram;name;Miller Bram
+npc;mill_bram;greeting;Cobwebs have swallowed my mill. Will you help me win back the granary?
+quest;crypt_m1;name;Inside: Crypt of the Silent Bell
+quest;crypt_m1;desc;Step inside (Crypt of the Silent Bell (depths)) and have a look around.
+quest;crypt_m2;name;Restless Bones
+quest;crypt_m2;desc;Skeletons roam the crypt. Defeat 8.
+quest;crypt_m3;name;Centipede Nest
+quest;crypt_m3;desc;Centipedes hold the lower chambers. Defeat 6 and the bellringer's hoard opens.
+quest;crypt_m1;line;The Silent Bell
+quest;crypt_m1;where;Crypt of the Silent Bell, near Varden
+place;Krypta Cichego Dzwonu;name;Crypt of the Silent Bell
+place;Krypta Cichego Dzwonu (głębiny);name;Crypt of the Silent Bell (depths)
+npc;crypt_aldric;name;Sexton Aldric
+npc;crypt_aldric;greeting;The bell in the crypt has gone silent and footsteps echo at night. Someone must go down.
+quest;poacher_m1;name;Inside: The Poacher's Den
+quest;poacher_m1;desc;Step inside (The Poacher's Den (depths)) and have a look around.
+quest;poacher_m2;name;Wolves in the Snares
+quest;poacher_m2;desc;Snow wolves thrash in the snares. Defeat 10 before they turn on the caravans.
+quest;poacher_m3;name;The Poacher Gang
+quest;poacher_m3;desc;The poachers guard a hoard deep in the den. Defeat 6 and take the loot.
+quest;poacher_m1;line;The Poacher's Den
+quest;poacher_m1;where;The Poacher's Den, near Frostholm
+place;Jama Kłusownika;name;The Poacher's Den
+place;Jama Kłusownika (głębiny);name;The Poacher's Den (depths)
+npc;poacher_hild;name;Trapper Hild
+npc;poacher_hild;greeting;Someone is snaring my wolves. Find the cave the poachers come out of.
+quest;oasis_m1;name;Inside: Well of the Buried Oasis
+quest;oasis_m1;desc;Step inside (Well of the Buried Oasis (depths)) and have a look around.
+quest;oasis_m2;name;Hyenas at the Water
+quest;oasis_m2;desc;Hyenas guard the water. Defeat 10.
+quest;oasis_m3;name;Scorpions in the Well
+quest;oasis_m3;desc;Scorpions have bred in the well. Defeat 12 and reach the caravan chests.
+quest;oasis_m1;line;The Buried Oasis
+quest;oasis_m1;where;Well of the Buried Oasis, near Qasirah
+place;Studnia Zakopanej Oazy;name;Well of the Buried Oasis
+place;Studnia Zakopanej Oazy (głębiny);name;Well of the Buried Oasis (depths)
+npc;oasis_zahir;name;Warden Zahir
+npc;oasis_zahir;greeting;Sand has buried the oasis and beasts nest in its well. Without water the caravans die.
+quest;barrow_m1;name;Inside: Barrow of the Candle Court
+quest;barrow_m1;desc;Step inside (Barrow of the Candle Court (depths)) and have a look around.
+quest;barrow_m2;name;Candle Acolytes
+quest;barrow_m2;desc;Acolytes guard the court entrance. Defeat 10.
+quest;barrow_m3;name;Lanterns in the Dark
+quest;barrow_m3;desc;Lanterns drift through the throne chamber. Defeat 6 and the court's treasure is yours.
+quest;barrow_m1;line;The Candle Court
+quest;barrow_m1;where;Barrow of the Candle Court, near Varden
+place;Kurhan Dworu Świec;name;Barrow of the Candle Court
+place;Kurhan Dworu Świec (głębiny);name;Barrow of the Candle Court (depths)
+npc;barrow_edda;name;Lamplighter Edda
+npc;barrow_edda;greeting;Candles burn under the barrow that no one lit. The dead court wants to be remembered.
+quest;watch_m1;name;Inside: Hrimvard Watchtower
+quest;watch_m1;desc;Step inside (Hrimvard Watchtower (interior)) and have a look around.
+quest;watch_m2;name;Frozen Boars
+quest;watch_m2;desc;Frozen boars root beneath the tower. Defeat 8.
+quest;watch_m3;name;Yetis at the Summit
+quest;watch_m3;desc;Yetis hold the upper floors. Defeat 6 and the garrison vault opens.
+quest;watch_m1;line;The Hrimvard Watch
+quest;watch_m1;where;Hrimvard Watchtower, near Frostholm
+place;Wieża Strażnicza Hrimvard;name;Hrimvard Watchtower
+place;Wieża Strażnicza Hrimvard (wnętrze);name;Hrimvard Watchtower (interior)
+npc;watch_rorik;name;Sentinel Rorik
+npc;watch_rorik;greeting;The Hrimvard tower has been silent since winter. The last sentinel froze at the top holding his lantern.
+quest;zig_m1;name;Inside: Ziggurat of the Scorched Sun
+quest;zig_m1;desc;Step inside (Ziggurat of the Scorched Sun (depths)) and have a look around.
+quest;zig_m2;name;Sand Devourers
+quest;zig_m2;desc;Devourers undermine the ziggurat. Defeat 10.
+quest;zig_m3;name;Striped Prowlers
+quest;zig_m3;desc;Striped prowlers guard the priests' vault. Defeat 6.
+quest;zig_m1;line;The Scorched Sun
+quest;zig_m1;where;Ziggurat of the Scorched Sun, near Qasirah
+place;Zigurat Spalonego Słońca;name;Ziggurat of the Scorched Sun
+place;Zigurat Spalonego Słońca (głębiny);name;Ziggurat of the Scorched Sun (depths)
+npc;zig_nadira;name;Seeker Nadira
+npc;zig_nadira;greeting;The ziggurat under the dune gives off heat even at night. I seek someone to look into its chambers.
+quest;bog_m1;name;Inside: Bogwater Chapel
+quest;bog_m1;desc;Step inside (Bogwater Chapel (depths)) and have a look around.
+quest;bog_m2;name;Bog Wraiths
+quest;bog_m2;desc;Bog wraiths drift through the chapel. Defeat 12.
+quest;bog_m3;name;Lizards in the Nave
+quest;bog_m3;desc;Lizards have taken the main nave. Defeat 8 and the chapel vault opens.
+quest;bog_m1;line;The Bogwater Chapel
+quest;bog_m1;where;Bogwater Chapel, near Valmir
+place;Kaplica Bagiennej Wody;name;Bogwater Chapel
+place;Kaplica Bagiennej Wody (głębiny);name;Bogwater Chapel (depths)
+npc;bog_alaric;name;Reverend Alaric
+npc;bog_alaric;greeting;The chapel sank into the bog, yet its bells still ring under water. I need someone with a strong arm.
+quest;coil_m1;name;Inside: Shrine of the Gilded Coil
+quest;coil_m1;desc;Step inside (Shrine of the Gilded Coil (depths)) and have a look around.
+quest;coil_m2;name;Serpents in the Halls
+quest;coil_m2;desc;Serpents fill the shrine halls. Defeat 12.
+quest;coil_m3;name;Treasure Hunters
+quest;coil_m3;desc;Former treasure hunters guard the altar. Defeat 8 and the coil's treasure is yours.
+quest;coil_m1;line;The Gilded Coil
+quest;coil_m1;where;Shrine of the Gilded Coil, near Selvaran
+place;Sanktuarium Złotej Spirali;name;Shrine of the Gilded Coil
+place;Sanktuarium Złotej Spirali (głębiny);name;Shrine of the Gilded Coil (depths)
+npc;coil_itzal;name;Priest Itzal
+npc;coil_itzal;greeting;The Shrine of the Gilded Coil no longer answers prayers. Snakes crawled out of the statues.
+quest;lantern_m1;name;Inside: Lighthouse of the Green Mists
+quest;lantern_m1;desc;Step inside (Lighthouse of the Green Mists (interior)) and have a look around.
+quest;lantern_m2;name;Hexers of the Mist
+quest;lantern_m2;desc;Lizard hexers hold the lower floors. Defeat 10.
+quest;lantern_m3;name;Stone Sentinels
+quest;lantern_m3;desc;Stone sentinels guard the lamp. Defeat 5 to light the beacon and open the vault.
+quest;lantern_m1;line;The Green Mists
+quest;lantern_m1;where;Lighthouse of the Green Mists, near Nerys
+place;Latarnia Zielonych Mgieł;name;Lighthouse of the Green Mists
+place;Latarnia Zielonych Mgieł (wnętrze);name;Lighthouse of the Green Mists (interior)
+npc;lantern_orsa;name;Lightkeeper Orsa
+npc;lantern_orsa;greeting;The lighthouse beam has gone out and things that should not exist walk out of the mist. Climb to the top.
+quest;stormgate_m1;name;Inside: Citadel of the Shattered Stormgate
+quest;stormgate_m1;desc;Step inside (Citadel of the Shattered Stormgate (depths)) and have a look around.
+quest;stormgate_m2;name;Storm Gargoyles
+quest;stormgate_m2;desc;Gargoyles circle the citadel walls. Defeat 12.
+quest;stormgate_m3;name;The Gate Guard
+quest;stormgate_m3;desc;The gate guard defends the generals' vault. Defeat 8.
+quest;stormgate_m1;line;The Stormgate
+quest;stormgate_m1;where;Citadel of the Shattered Stormgate, near Selvaran
+place;Cytadela Zburzonej Bramy Burz;name;Citadel of the Shattered Stormgate
+place;Cytadela Zburzonej Bramy Burz (głębiny);name;Citadel of the Shattered Stormgate (depths)
+npc;storm_teodrin;name;Marshal Teodrin
+npc;storm_teodrin;greeting;The Stormgate citadel fell in a single night. Its gate still cracks with lightning and the garrison never rests.
+quest;wyrm_m1;name;Inside: Wyrmfen Hollow
+quest;wyrm_m1;desc;Step inside (Wyrmfen Hollow (depths)) and have a look around.
+quest;wyrm_m2;name;Nagas of the Fen
+quest;wyrm_m2;desc;Nagas guard the passages to the nest. Defeat 10.
+quest;wyrm_m3;name;Crag Dragons
+quest;wyrm_m3;desc;Crag dragons guard the treasure in the nest. Defeat 6.
+quest;wyrm_m1;line;Wyrmfen Hollow
+quest;wyrm_m1;where;Wyrmfen Hollow, near Nerys
+place;Smocze Moczary;name;Wyrmfen Hollow
+place;Smocze Moczary (głębiny);name;Wyrmfen Hollow (depths)
+npc;wyrm_kaldor;name;Drakehunter Kaldor
+npc;wyrm_kaldor;greeting;A nest lies hidden in the fens that hunters will not speak of. Whoever returns earns a prize beyond dragon armour.
+quest;crown_m1;name;Inside: Vault of the Hollow Crown
+quest;crown_m1;desc;Step inside (Vault of the Hollow Crown (depths)) and have a look around.
+quest;crown_m2;name;The Wraith Guard
+quest;crown_m2;desc;Wraith knights stand on every floor. Defeat 20.
+quest;crown_m3;name;Ash Magi
+quest;crown_m3;desc;Ash magi guard the crown. Defeat 10 and the kingdom's vault opens.
+quest;crown_m1;line;The Hollow Crown
+quest;crown_m1;where;Vault of the Hollow Crown, near Valmir
+place;Skarbiec Pustej Korony;name;Vault of the Hollow Crown
+place;Skarbiec Pustej Korony (głębiny);name;Vault of the Hollow Crown (depths)
+npc;crown_isolde;name;Crownwarden Isolde
+npc;crown_isolde;greeting;The crown that has no head still calls for power. Its guards let no one leave empty-handed... or alive.
+# END story_quests

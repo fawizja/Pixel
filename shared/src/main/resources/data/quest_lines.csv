@@ -1,0 +1,61 @@
+# Linie zadan (dziennik zadan): pierwsza misja lancucha;poziom trudnosci (easy/medium/mediumhard/hard/extreme);premium (0/1);nazwa linii (puste = nazwa misji);miejsce (puste = zleceniodawca)
+# Generowane przez tools/mapgen/story_quests.py data
+varden_wolves;easy;0;;
+varden_ears;easy;0;;
+varden_trolls;medium;0;;
+varden_king;medium;0;;
+frost_pelts;medium;0;;
+frost_yeti;mediumhard;0;;
+frost_queen;hard;0;;
+selv_crocs;medium;1;;
+selv_idols;mediumhard;1;;
+selv_colossus;hard;1;;
+qas_scorpions;medium;0;;
+qas_mummies;hard;0;;
+qas_pharaoh;hard;0;;
+camp_treants;hard;0;;
+camp_knights;extreme;0;;
+camp_golems;extreme;0;;
+camp_ignaroth;extreme;0;;
+camp_giants;extreme;0;;
+camp_dragons;extreme;0;;
+camp_hrimgar;extreme;0;;
+camp_stalkers;extreme;0;;
+camp_essence;extreme;0;;
+camp_khazuul;extreme;0;;
+camp_priests;extreme;0;;
+camp_demons;extreme;0;;
+camp_lords;extreme;0;;
+camp_morgath;extreme;0;;
+varden_smug1;easy;0;;
+selv_exp1;mediumhard;1;;
+qas_caravan1;medium;0;;
+selv_skins;mediumhard;1;;
+varden_boars;easy;0;;
+varden_spiders;easy;0;;
+varden_crystals;medium;0;;
+camp_elementals;extreme;0;;
+camp_harpies;extreme;0;;
+camp_titans;extreme;0;;
+camp_bones;extreme;0;;
+isle_wyverns;extreme;1;;
+isle_crabs;extreme;1;;
+isle_pirates;extreme;1;;
+isle_drowned;extreme;1;;
+isle_mist;extreme;1;;
+isle_skaldra;extreme;1;;
+isle_drakes;extreme;1;;
+star_m1;extreme;1;;
+mill_m1;easy;0;Młyn Cichych Pająków;Opuszczony Młyn, okolice miasta Varden
+crypt_m1;easy;0;Cichy Dzwon;Krypta Cichego Dzwonu, okolice miasta Varden
+poacher_m1;easy;0;Jama Kłusownika;Jama Kłusownika, okolice miasta Frostholm
+oasis_m1;easy;0;Zakopana Oaza;Studnia Zakopanej Oazy, okolice miasta Qasirah
+barrow_m1;medium;0;Dwór Świec;Kurhan Dworu Świec, okolice miasta Varden
+watch_m1;medium;0;Straż Hrimvard;Wieża Strażnicza Hrimvard, okolice miasta Frostholm
+zig_m1;medium;0;Spalone Słońce;Zigurat Spalonego Słońca, okolice miasta Qasirah
+bog_m1;mediumhard;1;Bagienna Kaplica;Kaplica Bagiennej Wody, okolice miasta Valmir
+coil_m1;mediumhard;1;Złota Spirala;Sanktuarium Złotej Spirali, okolice miasta Selvaran
+lantern_m1;mediumhard;1;Zielone Mgły;Latarnia Zielonych Mgieł, okolice miasta Nerys
+stormgate_m1;hard;1;Brama Burz;Cytadela Zburzonej Bramy Burz, okolice miasta Selvaran
+wyrm_m1;hard;1;Smocze Moczary;Smocze Moczary, okolice miasta Nerys
+crown_m1;extreme;1;Pusta Korona;Skarbiec Pustej Korony, okolice miasta Valmir

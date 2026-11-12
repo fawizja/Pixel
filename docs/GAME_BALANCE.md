@@ -317,3 +317,10 @@ podstawowy (bez czarow i mikstur), srednia z 5 walk. Czas zabicia (atakujacy -> 
 
 Wymog testu: nikt nie ginie szybciej niz w 10 s. Magowie maja mniej zycia (krocej zyja), a ich sila w PvP
 przyjdzie z czarami na graczy (jeszcze niezaimplementowane) - do ponownego zbalansowania razem z nimi.
+
+## Nagrody questow (2026-11-12)
+
+Miara: koszt poziomu `L(l) = exp(l+1) - exp(l)`. Cel doswiadczenia: boss 0,50 L, zabicie N <= 25 0,10 L, N > 25 lub zbieranie 0,12 L (zlote 5% doswiadczenia);
+zadania ponizej 0,9 celu podniesiono (`story_quests.py rebalance apply`), `varden_smug1-3` sciete do 1,2 L.
+Nowe questy: laczny exp 1,0-1,2 L na quest (ekstremalny 2,0 L), podzial 15/30/55 na misje; tiery: latwy 8-30, sredni 30-60 (darmowe), sredniotrudny 60-120,
+trudny 120-250, ekstremalny 250+ (premium). Nagrody w skrzyniach z istniejacych przedmiotow rosnace z poziomem questu. Szczegoly: `analizy/questy-nagrody.md`.

@@ -1744,3 +1744,15 @@ serwer i synchronizacja - patrz [TODO.md](../TODO.md).
   `klucz_up|left|right.png` i `..._walk1|2.png` (32 px, ta sama skala co przód, osobny atlas kierunków w `TileArt`).
   Wszystkie 136 potworów są z OTSP i mają komplet (test `MonsterArtAndNamesTest`). NPC mają jedną klatkę (stoją w miejscu),
   więc nie obracają się; pupile i postacie graczy mają własną ścieżkę (`TileArt.character`).
+
+## Questy fabularne, tabliczki i dziennik (Z logika, C UI, G generator `tools/mapgen/story_quests.py`)
+
+- Misje: `quests.csv` ma teraz typ `VISIT` (cel = nazwa regionu, ilosc 1); `QuestSystem.onEnter` zalicza go po wejsciu do regionu.
+- 13 questow (`QUESTS` w `story_quests.py`): kazdy to `<klucz>_m1` (VISIT), `_m2`, `_m3` (KILL) i skrzynie z wyborem nagrody otwierane po `_m3`
+  (`reward;grupa;quest:<klucz>_m3` w `star_quest.csv`, znacznik `rcg_<grupa>`). Dane CSV/i18n generuje `python3 tools/mapgen/story_quests.py data`
+  miedzy znacznikami `# BEGIN story_quests`; `quest_lines.csv` opisuje linie dla dziennika.
+- Bramy: `QuestGate` ma wymagania `quest:`, `boss:`, `flag:` i `party:N` (liczba graczy online w druzynie, `PlayerCharacter.partyOnline` odswiezane
+  przez `GameSession`). Pole `gate` w tabeli `QUESTS` naklada wymaganie na wejscie questu; ekstremalny `crown` wymaga 3 graczy.
+- Tabliczki: `ChestSigns` liczy dla kazdej skrzyni questowej jedno pole obok (bez przejsc, drzwi, bram, obiektow, pulapek); `GameSession.useAt` czyta tekst
+  (`chest_sign.*`). Rysuje je `GameScreen.drawChests`.
+- Dziennik: `QuestJournal.build` zwraca wpisy (w toku, nowe, ukonczone), `Hud.rebuildJournalMenu` rysuje liste i szczegoly. `-Dpixel.quests` ustawia stan do zrzutow.

@@ -145,6 +145,19 @@ durn_imbuer;Zaklinacz Runnar;IMBUER;Durnkar;556;332;-6;-;#7050b0;Runy wyryte w k
 star_warden;Warden Thessaly;GUIDE;Wyspa Gasnącej Gwiazdy;129;796;0;-;#c0c8e0;Gwiazda nad nami gaśnie. Strzegę Pieczęci i mam zadania dla tych od poziomu 300.
 star_captain;Captain Brannoc;CAPTAIN;Wyspa Gasnącej Gwiazdy;88;796;0;-;#4a6a8a;Pływam na kontynent. Tylko konta premium.
 varden_herald;Herald Matthias;HERALD;Varden;498;494;0;-;#d8c060;Witaj w świątyni. Zapytaj mnie o błogosławieństwa.
+mill_bram;Miller Bram;GUIDE;Opuszczony Młyn;405;590;0;-;#c8a060;Mój młyn zarósł pajęczynami. Pomożesz mi odzyskać spichlerz?
+crypt_aldric;Sexton Aldric;GUIDE;Krypta Cichego Dzwonu;434;452;0;-;#8a8a9a;Dzwon w krypcie zamilkł, a w nocy słychać kroki. Ktoś musi tam zejść.
+poacher_hild;Trapper Hild;GUIDE;Jama Kłusownika;786;250;0;-;#7a9ab0;Ktoś zastawia sidła na moich wilkach. Znajdź jaskinię, z której wychodzą kłusownicy.
+oasis_zahir;Warden Zahir;GUIDE;Studnia Zakopanej Oazy;208;542;0;-;#d8b868;Piasek pogrzebał oazę, a w jej studni zagnieździły się bestie. Bez wody karawany giną.
+barrow_edda;Lamplighter Edda;GUIDE;Kurhan Dworu Świec;542;418;0;-;#e0c070;Pod kurhanem płoną świece, których nikt nie zapalał. Dwór zmarłych chce, by o nim pamiętano.
+watch_rorik;Sentinel Rorik;GUIDE;Wieża Strażnicza Hrimvard;777;111;0;-;#9ab8d0;Wieża Hrimvard milczy od zimy. Ostatni strażnik zamarzł na szczycie z latarnią w ręku.
+zig_nadira;Seeker Nadira;GUIDE;Zigurat Spalonego Słońca;202;409;0;-;#e0a050;Zigurat pod wydmą wypuszcza żar nawet nocą. Szukam kogoś, kto zajrzy do jego komnat.
+bog_alaric;Reverend Alaric;GUIDE;Kaplica Bagiennej Wody;403;801;0;-;#7a9a6a;Kaplica utonęła w bagnie, ale dzwony wciąż biją pod wodą. Potrzebuję kogoś z silnym ramieniem.
+coil_itzal;Priest Itzal;GUIDE;Sanktuarium Złotej Spirali;593;827;0;-;#c8a030;Sanktuarium Złotej Spirali przestało odpowiadać na modlitwy. Węże wyległy z posągów.
+lantern_orsa;Lightkeeper Orsa;GUIDE;Latarnia Zielonych Mgieł;854;649;0;-;#80c0a0;Światło latarni zgasło, a z mgły wychodzą istoty, które nie powinny istnieć. Wejdź na szczyt.
+storm_teodrin;Marshal Teodrin;GUIDE;Cytadela Zburzonej Bramy Burz;538;636;0;-;#a0a8c8;Cytadela Burz padła w jedną noc. Jej brama wciąż pęka od piorunów, a garnizon nie odpoczywa.
+wyrm_kaldor;Drakehunter Kaldor;GUIDE;Smocze Moczary;872;633;0;-;#c07040;W moczarach ukryto gniazdo, o którym milczą łowcy. Kto wróci, zbierze nagrodę lepszą od zbroi smoka.
+crown_isolde;Crownwarden Isolde;GUIDE;Skarbiec Pustej Korony;459;668;0;-;#b8a0d8;Korona, która nie ma głowy, wciąż woła o władzę. Jej strażnicy nie pozwolą nikomu wyjść z pustymi rękami... ani żywym.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

@@ -13,6 +13,7 @@ public final class StarGatesSupport {
             switch (g.kind()) {
                 case QUEST: pc.quests().finish(g.target()); break;
                 case BOSS: pc.setQuestFlag(QuestGate.bossFlag(g.target())); break;
+                case PARTY: pc.setPartyOnline(Math.max(pc.partyOnline(), g.partySize())); break;
                 default: pc.setQuestFlag(g.target());
             }
         }

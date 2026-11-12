@@ -62,7 +62,7 @@ class TreasureChestsTest {
         assertEquals(loot.size(), loot.stream().map(TreasureChests.Chest::id).distinct().count(), "loot chest ids unique");
         for (TreasureChests.Chest x : loot) {
             // skrzynie w dziczy leza pod ziemia i sa skromne; nagroda zadania za drzwiami poziomu (Warownia Gorvalda, +3) moze byc wyzej
-            boolean quest = x.doorLevel() >= 20;
+            boolean quest = x.doorLevel() >= 20 || world.rewardChoiceAt(x.position()) != null; // sala nagrod wyprawy (wybor jednej skrzyni)
             assertTrue(x.gold() > 0 && (quest ? x.gold() <= 10_000 : x.position().z() < 0 && x.gold() < 5_000), x.id());
         }
         assertTrue(loot.stream().anyMatch(x -> x.position().z() == 3 && x.doorLevel() == 55), "the castle quest chest behind the level door");

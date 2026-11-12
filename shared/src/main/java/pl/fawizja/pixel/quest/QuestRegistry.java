@@ -40,7 +40,8 @@ public final class QuestRegistry {
                         f[4].trim(), Integer.parseInt(f[5].trim()), Long.parseLong(f[6].trim()),
                         Long.parseLong(f[7].trim()), Integer.parseInt(f[8].trim()), f[9].trim());
                 if (q.kind() == QuestKind.KILL) monsters.get(q.target());
-                else items.byKey(q.target());
+                else if (q.kind() == QuestKind.COLLECT) items.byKey(q.target());
+                else if (q.amount() != 1) throw new IllegalArgumentException("VISIT needs amount 1: " + q.key());
                 if (map.put(q.key(), q) != null) throw new IllegalArgumentException("duplicate quest " + q.key());
             } catch (IllegalArgumentException e) {
                 throw new IOException("quests.csv line " + n + ": " + e.getMessage(), e);

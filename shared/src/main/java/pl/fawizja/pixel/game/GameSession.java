@@ -625,6 +625,25 @@ public final class GameSession {
     public ShopRegistry shops() { return shops; }
     public QuestSystem quests() { return quests; }
 
+    private pl.fawizja.pixel.quest.QuestLines questLines;
+
+    /** Linie zadan do dziennika (data/quest_lines.csv); null bez zadan. */
+    public pl.fawizja.pixel.quest.QuestLines questLines() {
+        if (quests == null) return null;
+        if (questLines == null) questLines = pl.fawizja.pixel.quest.QuestLines.loadDefault(quests.registry());
+        return questLines;
+    }
+
+    /** Dziennik zadan postaci: linie w toku, nowe i ukonczone z misjami i miejscem (patrz QuestJournal). */
+    public java.util.List<pl.fawizja.pixel.quest.QuestJournal.Entry> questJournal() {
+        return quests == null ? java.util.List.of() : pl.fawizja.pixel.quest.QuestJournal.build(pc, quests, questLines(), npcs);
+    }
+
+    /** Wiersz podpowiedzi biezacego kroku wpisu dziennika (co zrobic i dokad isc). */
+    public String questHint(pl.fawizja.pixel.quest.QuestJournal.Entry e) {
+        return pl.fawizja.pixel.quest.QuestJournal.hint(e, quests, this::monsterName, this::itemName);
+    }
+
     /** NPC, z ktorym mozna teraz rozmawiac (albo null); skrzynia depozytu obok postaci ma pierwszenstwo. */
     public Npc npcNearby() {
         if (pc.isDead()) return null;
@@ -2782,8 +2801,17 @@ public final class GameSession {
     public boolean isMoving() { return moving; }
 
     /** Krok symulacji. requested = kierunek z joysticka/klawiatury albo null. */
+    /** Liczba graczy w grze w druzynie (bramy {@code party:N}); bez druzyny 1. */
+    private void syncPartySize() {
+        if (social == null) { pc.setPartyOnline(1); return; }
+        int n = 0;
+        for (pl.fawizja.pixel.party.PartyView.Member m : social().party().members()) if (m.online()) n++;
+        pc.setPartyOnline(n);
+    }
+
     public void update(long nowMs, Direction requested) {
         syncPvp(nowMs);
+        syncPartySize();
         pc.explored().revealView(pc.position()); // mgla mapy: odkryte to, co postac widzi (tani test bez ruchu)
         if (!achievementsChecked || nowMs - achievementsCheckedMs >= 1000 || nowMs < achievementsCheckedMs) checkAchievements(nowMs);
         if (nowMs - loginCheckedMs >= 60_000 || nowMs < loginCheckedMs) checkLoginReward(nowMs);
@@ -2899,6 +2927,10 @@ public final class GameSession {
         if (r == currentRegion) return;
         currentRegion = r;
         if (r == null) return;
+        QuestType visited = quests == null ? null : quests.onEnter(pc, r.name());
+        if (visited != null) {
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zadanie") + visited.name() + Messages.get("quest.visit_done"));
+        }
         log.add(nowMs, EventLog.Kind.INFO, r.displayName() + Messages.get("game_session.zalecany_poziom") + r.levelMin() + "-" + r.levelMax() + ")");
         if (r.levelMin() > pc.level() + 15) {
             log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.uwaga_ten_region_jest") + pc.level() + ".");
@@ -3442,7 +3474,7 @@ public final class GameSession {
      * do pola i go uzywa zamiast wejsc na nie.
      */
     public boolean usableAt(Position p) {
-        if (chestAt(p) || world.openings().isDoor(p) || world.openings().isWindow(p) || world.crates().isStorage(p)
+        if (chestAt(p) || chestSignAt(p) || world.openings().isDoor(p) || world.openings().isWindow(p) || world.crates().isStorage(p)
                 || world.wallLights().isWallLight(p) || world.altarQuestByLever(p) != null || world.altarAt(p) != null
                 || world.bossQuestByLever(p) != null || dummies.at(p)) return true;
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
@@ -3460,6 +3492,54 @@ public final class GameSession {
     public void setChests(pl.fawizja.pixel.treasure.TreasureChests chests) { this.chests = chests; }
 
     public pl.fawizja.pixel.treasure.TreasureChests chests() { return chests; }
+
+    private pl.fawizja.pixel.treasure.ChestSigns chestSigns;
+
+    /** Tabliczki przy skrzyniach zadan (liczone raz, z mapy i skrzyn; klient rysuje, dotkniecie czyta {@link #chestSignText}). */
+    public pl.fawizja.pixel.treasure.ChestSigns chestSigns() {
+        if (chestSigns == null) chestSigns = pl.fawizja.pixel.treasure.ChestSigns.compute(chests, world, monsters, items);
+        return chestSigns;
+    }
+
+    public boolean chestSignAt(Position p) { return chests != null && chestSigns().at(p) != null; }
+
+    /**
+     * Tekst tabliczki przy skrzyni zadania: co jest w skrzyni dla tej postaci (zloto, przedmioty), a przy nagrodzie
+     * do wyboru - przedmiot tej skrzyni, dla kogo jest i ile jest skrzyn do wyboru. Nazwy z danych (PL/EN/ES).
+     */
+    public String chestSignText(pl.fawizja.pixel.treasure.ChestSigns.Sign sign) {
+        pl.fawizja.pixel.treasure.TreasureChests.Chest c = sign.chest();
+        pl.fawizja.pixel.world.WorldMap.RewardChoice rc = world.rewardChoiceAt(c.position());
+        if (rc != null) {
+            pl.fawizja.pixel.item.ItemType it = items.byKey(rc.itemKey());
+            int n = 0;
+            for (pl.fawizja.pixel.world.WorldMap.RewardChoice o : world.rewardChoices()) if (o.group().equals(rc.group())) n++;
+            StringBuilder who = new StringBuilder();
+            for (pl.fawizja.pixel.vocation.Vocation v : it.vocations()) {
+                if (it.vocations().size() >= pl.fawizja.pixel.vocation.Vocation.values().length) break;
+                if (who.length() > 0) who.append(", ");
+                who.append(v.displayName());
+            }
+            String need = world.rewardRequirement(rc.group());
+            return Messages.get("chest_sign.choice", it.name(), who.length() == 0 ? Messages.get("chest_sign.everyone") : who.toString(),
+                    it.minLevel(), n) + (need == null ? "" : Messages.get("chest_sign.requires", requirementText(need)));
+        }
+        if (c.vocation() != null) {
+            return Messages.get("chest_sign.vocation", c.vocation().displayName(), moneyText(
+                    pl.fawizja.pixel.treasure.ChestRewards.reward(c, world, monsters, items, c.vocation()).gold()));
+        }
+        pl.fawizja.pixel.treasure.ChestRewards.Reward r = chestReward(c);
+        StringBuilder b = new StringBuilder();
+        for (pl.fawizja.pixel.item.ItemStack st : r.items()) {
+            if (b.length() > 0) b.append(", ");
+            b.append(st.count() > 1 ? st.count() + "x " : "").append(items.get(st.itemId()).name());
+        }
+        return Messages.get("chest_sign.quest", r.difficulty(), moneyText(r.gold()), b.length() == 0 ? "-" : b.toString());
+    }
+
+    private static String moneyText(long gold) {
+        return String.format(java.util.Locale.ROOT, "%,d gp", gold).replace(',', ' ');
+    }
 
     /** Na skrzynie skarbow nie mozna wejsc - otwiera sie ja dotknieciem z sasiedniego pola. */
     public boolean chestAt(Position p) {
@@ -3606,7 +3686,7 @@ public final class GameSession {
         }
     }
 
-    private String itemName(String key) {
+    String itemName(String key) {
         pl.fawizja.pixel.item.ItemType t = items.byKeyOrNull(key);
         return t == null ? key : t.name();
     }
@@ -3663,6 +3743,10 @@ public final class GameSession {
         if (chests != null && chests.at(p) != null) {
             pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests.at(p);
             return openChestAt(c, nowMs);
+        }
+        if (chestSignAt(p)) {
+            log.add(nowMs, EventLog.Kind.INFO, chestSignText(chestSigns().at(p)));
+            return true;
         }
         if (world.crates().isStorage(p)) return useCrate(p, nowMs);
         pl.fawizja.pixel.world.BossQuest bossLever = world.bossQuestByLever(p);
@@ -3785,11 +3869,14 @@ public final class GameSession {
      * innej profesji nie zuzywa wyboru. Dziala tylko po ukonczeniu wyprawy ({@link pl.fawizja.pixel.quest.StarQuest#completed}).
      */
     private boolean openRewardChoice(pl.fawizja.pixel.world.WorldMap.RewardChoice rc, long nowMs) {
-        if (!pl.fawizja.pixel.quest.StarQuest.completed(pc)) {
-            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("star.reward_locked"));
+        String need = world.rewardRequirement(rc.group());
+        String taken = "rcg_" + rc.group();
+        if (need == null ? !pl.fawizja.pixel.quest.StarQuest.completed(pc) : !pl.fawizja.pixel.world.QuestGate.passes(need, pc)) {
+            log.add(nowMs, EventLog.Kind.WARNING, need == null ? Messages.get("star.reward_locked")
+                    : Messages.get("quest.reward_locked", requirementText(need)));
             return true;
         }
-        if (pc.openedChests().contains(pl.fawizja.pixel.quest.StarQuest.REWARD_TAKEN)) {
+        if (pc.openedChests().contains(taken)) {
             log.add(nowMs, EventLog.Kind.INFO, Messages.get("star.reward_taken"));
             return true;
         }
@@ -3804,12 +3891,21 @@ public final class GameSession {
             return true;
         }
         pc.backpack().commitFrom(tx);
-        pc.openedChests().add(pl.fawizja.pixel.quest.StarQuest.REWARD_TAKEN);
+        pc.openedChests().add(taken);
         for (pl.fawizja.pixel.world.WorldMap.RewardChoice o : world.rewardChoices()) {
             if (o.group().equals(rc.group())) pc.openedChests().add(chestIdAt(o.position()));
         }
         log.add(nowMs, EventLog.Kind.LOOT, Messages.get("star.reward_chosen", it.name()));
         return true;
+    }
+
+    /** Wymaganie bramy / nagrody jako zdanie: nazwa zadania albo potwora. */
+    String requirementText(String requirement) {
+        pl.fawizja.pixel.world.QuestGate g = new pl.fawizja.pixel.world.QuestGate(new Position(0, 0, 0), requirement);
+        return g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.QUEST
+                ? (quests == null || quests.registry().get(g.target()) == null ? g.target() : quests.registry().get(g.target()).name())
+                : g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.BOSS ? monsterName(g.target())
+                : g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.PARTY ? Messages.get("star.gate_party", g.target()) : g.target();
     }
 
     private String chestIdAt(Position p) {
@@ -3826,6 +3922,7 @@ public final class GameSession {
                 return Messages.get("star.gate_quest", q == null ? g.target() : q.name());
             }
             case BOSS: return Messages.get("star.gate_boss", monsterName(g.target()));
+            case PARTY: return Messages.get("star.gate_party", g.target());
             default: return Messages.get("star.gate_flag");
         }
     }
