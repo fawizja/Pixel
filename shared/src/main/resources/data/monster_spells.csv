@@ -1,23 +1,402 @@
 # Czary potworow jak w Canary (data-canary/monster): fala, wielka kula ognia, oddech. Obszary - magic/SpellArea.java.
-# potwor;czar;tryb (WAVE=przed potworem, BALL=wokol celu, SELF=wokol potwora);obszar;typ;min;max;szansa (%);zasieg;dodatek
-# dodatek: - | STAN:min-max:odstepMs:szansa% (stan od trafienia) | SLOW:procent:ms (spowolnienie jak paraliz)
+# potwor;czar;tryb (WAVE=przed potworem, BALL=wokol celu, SELF=wokol potwora, BOLT=pocisk w jeden cel, HEAL=leczy siebie, HASTE=przyspiesza, SUMMON=przywoluje);obszar;typ;min;max;szansa (%);zasieg;dodatek;pocisk
+# dodatek: - | STAN:min-max:odstepMs:szansa% | SLOW:procent:ms (paraliz) | SUMMON:potwor:najwiecej_naraz | HASTE:procent:ms. pocisk: grafika z assets/art/missiles albo -
 # Przy kazdym ataku potwor probuje czarow po kolei (kazdy z wlasna szansa), inaczej bije wrecz.
 # zielony: ognista fala i mala kula ognia
-emerald_dragon;fire_wave;WAVE;WAVE4;FIRE;100;260;22;4;BURNING:60-110:4000:60
-emerald_dragon;fireball;BALL;CIRCLE1X1;FIRE;80;200;14;5;-
+emerald_dragon;fire_wave;WAVE;WAVE4;FIRE;100;260;22;4;BURNING:60-110:4000:60;-
+emerald_dragon;fireball;BALL;CIRCLE1X1;FIRE;80;200;14;5;-;-
 # lodowy: lodowa fala, oddech lodu (promien) i spowalniajace spojrzenie
-hoarfrost_dragon;ice_wave;WAVE;WAVE4;ICE;150;350;20;4;FREEZING:80-150:5000:50
-hoarfrost_dragon;ice_breath;WAVE;BEAM6;ICE;220;480;12;6;FREEZING:100-180:5000:60
-hoarfrost_dragon;chilling_gaze;BALL;CIRCLE1X1;ICE;40;90;14;5;SLOW:45:5000
+hoarfrost_dragon;ice_wave;WAVE;WAVE4;ICE;150;350;20;4;FREEZING:80-150:5000:50;-
+hoarfrost_dragon;ice_breath;WAVE;BEAM6;ICE;220;480;12;6;FREEZING:100-180:5000:60;-
+hoarfrost_dragon;chilling_gaze;BALL;CIRCLE1X1;ICE;40;90;14;5;SLOW:45:5000;-
 # czarny: potezna fala ognia i wielka kula ognia
-coal_dragon;great_fire_wave;WAVE;WAVE7;FIRE;200;520;22;5;BURNING:150-260:4000:70
-coal_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;150;420;16;5;BURNING:100-180:4000:50
+coal_dragon;great_fire_wave;WAVE;WAVE7;FIRE;200;520;22;5;BURNING:150-260:4000:70;-
+coal_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;150;420;16;5;BURNING:100-180:4000:50;-
 # zloty: wielka fala ognia, fala pioruna i wielka kula ognia
-dune_drake;great_fire_wave;WAVE;WAVE7;FIRE;280;700;20;5;BURNING:250-400:4000:80
-dune_drake;energy_wave;WAVE;SQUAREWAVE5;ENERGY;260;640;16;5;ELECTRIFIED:150-260:4000:60
-dune_drake;great_fireball;BALL;CIRCLE3X3;FIRE;220;560;16;6;BURNING:200-300:4000:60
+dune_drake;great_fire_wave;WAVE;WAVE7;FIRE;280;700;20;5;BURNING:250-400:4000:80;-
+dune_drake;energy_wave;WAVE;SQUAREWAVE5;ENERGY;260;640;16;5;ELECTRIFIED:150-260:4000:60;-
+dune_drake;great_fireball;BALL;CIRCLE3X3;FIRE;220;560;16;6;BURNING:200-300:4000:60;-
 # bialy: ogien, lod i piorun, najmocniejsze obrazenia
-pearl_dragon;great_fire_wave;WAVE;WAVE7;FIRE;500;1250;18;6;BURNING:400-650:4000:80
-pearl_dragon;energy_beam;WAVE;BEAM8;ENERGY;450;1100;14;8;ELECTRIFIED:250-400:4000:60
-pearl_dragon;ice_nova;SELF;CIRCLE5X5;ICE;400;950;10;3;FREEZING:250-400:5000:70
-pearl_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;400;1000;14;7;BURNING:300-500:4000:60
+pearl_dragon;great_fire_wave;WAVE;WAVE7;FIRE;500;1250;18;6;BURNING:400-650:4000:80;-
+pearl_dragon;energy_beam;WAVE;BEAM8;ENERGY;450;1100;14;8;ELECTRIFIED:250-400:4000:60;-
+pearl_dragon;ice_nova;SELF;CIRCLE5X5;ICE;400;950;10;3;FREEZING:250-400:5000:70;-
+pearl_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;400;1000;14;7;BURNING:300-500:4000:60;-
+
+# ---- profile wszystkich potworow (generowane z tools: patrz analizy/potwory-ataki.md) ----
+# Wilk
+wolf;haste;HASTE;POINT;-;0;0;20;6;HASTE:30:4000;-
+# Pająk leśny
+forest_spider;web_spit;WAVE;SHORTWAVE3;EARTH;5;13;20;3;POISON:3-4:4000:50;-
+# Bandyta
+bandit;throw_knife;BOLT;POINT;PHYSICAL;12;30;18;3;-;knife
+# Goblin
+goblin;power_shot;BOLT;POINT;PHYSICAL;7;18;15;4;-;stone
+goblin;haste;HASTE;POINT;-;0;0;10;4;HASTE:30:4000;-
+# Goblin szaman
+goblin_shaman;fire_strike;BOLT;POINT;FIRE;10;25;25;4;-;fire
+goblin_shaman;energy_strike;BOLT;POINT;ENERGY;9;22;15;4;-;energy
+goblin_shaman;self_heal;HEAL;POINT;-;10;20;30;1;-;-
+# Troll jaskiniowy
+cave_troll;throw_stone;BOLT;POINT;PHYSICAL;22;55;18;4;-;stone
+# Kryształowy golem
+crystal_golem;energy_strike;BOLT;POINT;ENERGY;25;63;15;2;-;energy
+crystal_golem;shard_ball;BALL;CIRCLE1X1;ENERGY;18;44;18;2;ELECTRIFIED:10-16:4000:50;-
+# Grimtooth, Król Kopalni
+grimtooth;summon_mine_grub;SUMMON;POINT;-;0;0;18;7;SUMMON:mine_grub:3;-
+# Mroźna wiedźma
+frost_witch;ice_strike;BOLT;POINT;ICE;51;126;25;4;-;ice
+frost_witch;paralyze;BOLT;POINT;ICE;31;77;12;4;SLOW:40:4000;ice
+frost_witch;self_heal;HEAL;POINT;-;33;66;30;1;-;-
+# Lodowy golem
+ice_golem;ice_strike;BOLT;POINT;ICE;69;172;15;2;-;ice
+ice_golem;paralyze;BOLT;POINT;ICE;42;105;12;2;SLOW:40:4000;ice
+ice_golem;frost_ball;BALL;CIRCLE1X1;ICE;48;120;18;2;FREEZING:27-45:4000:50;-
+# Łowca z dżungli
+jungle_hunter;power_shot;BOLT;POINT;PHYSICAL;39;98;15;4;-;arrow_red
+jungle_hunter;poison_dart;BOLT;POINT;EARTH;15;38;18;4;SLOW:35:4000;poison
+# Strażnik świątyni
+temple_guardian;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;59;147;14;2;-;-
+# Hiena
+hyena;haste;HASTE;POINT;-;0;0;20;6;HASTE:40:5000;-
+# Piaskowy upiór
+sand_wraith;death_strike;BOLT;POINT;DEATH;60;150;25;3;-;shadow_star
+sand_wraith;paralyze;BOLT;POINT;DEATH;36;91;12;3;SLOW:35:4000;shadow_star
+# Mumia
+mummy;dust_wave;WAVE;SHORTWAVE3;DEATH;74;184;18;3;-;-
+# Ysolde, Królowa Lodu
+frost_queen;ice_strike;BOLT;POINT;ICE;83;207;15;4;-;ice
+frost_queen;ice_wave;WAVE;WAVE4;ICE;58;144;18;4;FREEZING:32-54:4000:50;-
+frost_queen;summon_snow_wolf;SUMMON;POINT;-;0;0;18;7;SUMMON:snow_wolf:3;-
+# Kolos z ruin
+ruin_colossus;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;73;182;16;2;-;-
+ruin_colossus;magma_ball;BALL;CIRCLE2X2;FIRE;83;208;14;4;BURNING:47-78:4000:50;-
+# Faraon Neferakh
+pharaoh;death_strike;BOLT;POINT;DEATH;115;288;15;3;-;shadow_star
+pharaoh;curse_wave;WAVE;WAVE4;DEATH;80;200;18;4;-;-
+pharaoh;summon_skeleton;SUMMON;POINT;-;0;0;18;7;SUMMON:skeleton:3;-
+# Żywiołak ognia
+fire_elemental;fire_strike;BOLT;POINT;FIRE;207;518;15;3;-;fire
+fire_elemental;fire_burst;BALL;CIRCLE1X1;FIRE;162;405;25;4;BURNING:81-135:4000:50;-
+fire_elemental;fire_nova;SELF;CIRCLE3X3;FIRE;126;315;12;2;BURNING:81-135:4000:50;-
+# Lawowy golem
+lava_golem;lava_nova;SELF;CIRCLE3X3;FIRE;123;308;14;2;BURNING:79-132:4000:50;-
+# Ignaroth Roztopiony
+ignaroth;fire_strike;BOLT;POINT;FIRE;566;1414;15;3;-;fire
+ignaroth;great_fire_wave;WAVE;WAVE7;FIRE;443;1107;18;5;BURNING:221-369:4000:50;-
+ignaroth;great_fireball;BALL;CIRCLE3X3;FIRE;394;984;14;5;BURNING:221-369:4000:50;-
+ignaroth;summon_dragon_whelp;SUMMON;POINT;-;0;0;18;7;SUMMON:dragon_whelp:3;-
+# Mroźny olbrzym
+frost_giant;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;202;504;14;2;-;-
+frost_giant;throw_ice_boulder;BOLT;POINT;ICE;288;720;18;5;-;ice
+# Harpia burzy
+storm_harpy;haste;HASTE;POINT;-;0;0;20;6;HASTE:50:6000;-
+# Lodowy smok
+ice_dragon;ice_strike;BOLT;POINT;ICE;584;1460;15;3;-;ice
+ice_dragon;ice_wave;WAVE;WAVE4;ICE;457;1143;22;4;FREEZING:229-381:4000:50;-
+ice_dragon;ice_breath;WAVE;BEAM6;ICE;406;1016;12;6;FREEZING:229-381:4000:50;-
+# Hrimgar, Król Lodowców
+hrimgar;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;532;1330;16;2;-;-
+hrimgar;frost_wave;WAVE;WAVE4;ICE;608;1520;16;4;FREEZING:342-570:4000:50;-
+# Łowca cieni
+shadow_stalker;haste;HASTE;POINT;-;0;0;20;6;HASTE:60:6000;-
+# Piaskowy tytan
+sand_titan;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;276;690;14;2;-;-
+# Kapłan pustki
+void_priest;death_strike;BOLT;POINT;DEATH;656;1639;25;4;-;shadow_star
+void_priest;mana_drain_strike;BOLT;POINT;MANA_DRAIN;570;1425;15;4;-;star
+void_priest;self_heal;HEAL;POINT;-;750;1500;30;1;-;-
+void_priest;summon_sand_wraith;SUMMON;POINT;-;0;0;18;7;SUMMON:sand_wraith:2;-
+# Kha'zuul Pusty
+khazuul;death_strike;BOLT;POINT;DEATH;1242;3105;15;3;-;shadow_star
+khazuul;death_wave;WAVE;WAVE7;DEATH;972;2430;18;5;-;-
+khazuul;death_beam;WAVE;BEAM8;DEATH;864;2160;12;7;-;-
+khazuul;summon_sand_wraith;SUMMON;POINT;-;0;0;18;7;SUMMON:sand_wraith:2;-
+# Demon Otchłani
+abyssal_demon;hell_wave;WAVE;WAVE4;FIRE;448;1120;18;4;BURNING:252-420:4000:50;-
+# Kościany smok
+bone_dragon;death_strike;BOLT;POINT;DEATH;699;1748;15;3;-;shadow_star
+bone_dragon;death_wave;WAVE;WAVE4;DEATH;547;1368;22;4;-;-
+bone_dragon;bone_nova;SELF;CIRCLE3X3;DEATH;426;1064;12;2;-;-
+# Pan Otchłani
+abyss_lord;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;560;1400;14;2;-;-
+# Mor'gath, Serce Otchłani
+morgath;death_strike;BOLT;POINT;DEATH;1375;3438;15;3;-;shadow_star
+morgath;abyss_wave;WAVE;WAVE7;DEATH;1076;2691;18;5;-;-
+morgath;abyss_ball;BALL;CIRCLE3X3;DEATH;957;2392;14;6;-;-
+morgath;summon_crimson_shade;SUMMON;POINT;-;0;0;18;7;SUMMON:crimson_shade:2;-
+# Wiwerna
+wyvern;venom_spit;WAVE;SHORTWAVE3;EARTH;137;342;20;3;POISON:68-114:4000:50;-
+# Pirat rzezimieszek
+pirate_cutthroat;throw_dagger;BOLT;POINT;PHYSICAL;184;460;18;3;-;knife
+# Pirat kanonier
+pirate_gunner;cannon_shot;BOLT;POINT;PHYSICAL;224;560;18;4;-;stone
+# Upiór mgły
+mist_wraith;death_strike;BOLT;POINT;DEATH;405;1012;25;3;-;shadow_star
+mist_wraith;life_drain_strike;BOLT;POINT;LIFE_DRAIN;352;880;15;3;-;shadow_star
+mist_wraith;paralyze;BOLT;POINT;DEATH;246;616;12;3;SLOW:35:4000;shadow_star
+# Smok magmy
+magma_drake;fire_strike;BOLT;POINT;FIRE;529;1322;15;3;-;fire
+magma_drake;lava_wave;WAVE;WAVE7;FIRE;414;1035;20;5;BURNING:207-345:4000:50;-
+magma_drake;lava_ball;BALL;CIRCLE3X3;FIRE;368;920;14;5;BURNING:207-345:4000:50;-
+# Matka Wiwern
+wyvern_matriarch;venom_wave;WAVE;WAVE4;EARTH;252;630;20;4;POISON:126-210:4000:50;-
+# Kapitan Krwawa Broda
+bloodbeard;powder_keg;BALL;CIRCLE1X1;FIRE;272;680;18;4;BURNING:153-255:4000:50;-
+# Skaldra, Lodowa Matka
+skaldra;ice_strike;BOLT;POINT;ICE;782;1955;15;3;-;ice
+skaldra;ice_wave;WAVE;WAVE7;ICE;612;1530;20;5;FREEZING:306-510:4000:50;-
+skaldra;blizzard;BALL;CIRCLE3X3;ICE;544;1360;15;5;FREEZING:306-510:4000:50;-
+# Morvena, Pani Mgieł
+morvena;death_strike;BOLT;POINT;DEATH;920;2300;15;3;-;shadow_star
+morvena;death_wave;WAVE;WAVE7;DEATH;720;1800;20;5;-;-
+morvena;mist_nova;SELF;CIRCLE5X5;DEATH;560;1400;10;3;-;-
+# Pyrrax, Serce Wulkanu
+pyrrax;fire_strike;BOLT;POINT;FIRE;1104;2760;15;3;-;fire
+pyrrax;great_fire_wave;WAVE;WAVE7;FIRE;864;2160;20;5;BURNING:432-720:4000:50;-
+pyrrax;great_fireball;BALL;CIRCLE3X3;FIRE;768;1920;15;5;BURNING:432-720:4000:50;-
+pyrrax;eruption;SELF;CIRCLE5X5;FIRE;672;1680;10;3;BURNING:432-720:4000:50;-
+# Orczy szaman
+orc_shaman;fire_strike;BOLT;POINT;FIRE;18;46;25;4;-;fire
+orc_shaman;energy_strike;BOLT;POINT;ENERGY;16;40;15;4;-;energy
+orc_shaman;self_heal;HEAL;POINT;-;20;40;30;1;-;-
+orc_shaman;summon_wolf;SUMMON;POINT;-;0;0;18;7;SUMMON:wolf:2;-
+# Ork berserker
+orc_berserker;haste;HASTE;POINT;-;0;0;20;6;HASTE:40:6000;-
+# Sidlarz
+snare_setter;power_shot;BOLT;POINT;PHYSICAL;9;23;15;4;-;arrow
+snare_setter;poison_dart;BOLT;POINT;EARTH;4;9;18;4;SLOW:35:4000;poison
+# Jaskiniowa wij
+cave_centipede;acid_spit;WAVE;SHORTWAVE3;EARTH;7;17;20;3;POISON:3-6:4000:50;-
+# Łamacz kamieni
+quarry_brute;throw_stone;BOLT;POINT;PHYSICAL;10;26;18;3;-;stone
+# Iskrzyk
+spark_wisp;energy_strike;BOLT;POINT;ENERGY;15;38;15;3;-;energy
+spark_wisp;spark_ball;BALL;CIRCLE1X1;ENERGY;12;30;25;4;ELECTRIFIED:6-10:4000:50;-
+# Akolita Czarnej Świecy
+candle_acolyte;death_strike;BOLT;POINT;DEATH;18;45;25;3;-;shadow_star
+candle_acolyte;self_heal;HEAL;POINT;-;11;23;30;1;-;-
+candle_acolyte;summon_skeleton;SUMMON;POINT;-;0;0;18;7;SUMMON:skeleton:2;-
+# Paser z tuneli
+tunnel_fence;throw_knife;BOLT;POINT;PHYSICAL;18;44;18;3;-;knife
+# Szroniasty odyniec
+frost_boar;paralyze;BOLT;POINT;ICE;15;37;12;1;SLOW:30:4000;ice
+# Bagienny szerszeń
+swamp_hornet;sting_burst;WAVE;SHORTWAVE3;EARTH;27;68;20;3;POISON:14-22:4000:50;-
+# Piaskowy pożeracz
+sand_devourer;sand_burst;SELF;CIRCLE1X1;EARTH;19;48;15;1;POISON:12-21:4000:50;-
+# Pręgowany skradacz
+striped_prowler;haste;HASTE;POINT;-;0;0;20;6;HASTE:50:5000;-
+# Bagienna zjawa
+bog_wraith;earth_strike;BOLT;POINT;EARTH;44;109;25;3;-;earth
+bog_wraith;life_drain_strike;BOLT;POINT;LIFE_DRAIN;38;95;15;3;-;shadow_star
+# Szronowy czerw
+rime_crawler;paralyze;BOLT;POINT;ICE;26;66;12;1;SLOW:30:4000;ice
+# Lodowa wij
+frost_centipede;paralyze;BOLT;POINT;ICE;34;85;12;1;SLOW:30:4000;ice
+# Fanatyk Białego Słońca
+dune_zealot;holy_strike;BOLT;POINT;HOLY;61;152;25;4;-;holy
+dune_zealot;self_heal;HEAL;POINT;-;75;150;30;1;-;-
+# Kamienny wartownik
+stone_sentinel;shock_stomp;SELF;CIRCLE1X1;PHYSICAL;62;154;15;1;-;-
+# Wirujący strażnik
+blade_warden;blade_storm;SELF;CIRCLE3X3;PHYSICAL;81;204;18;2;-;-
+# Krwawa zmora
+crimson_shade;life_drain_strike;BOLT;POINT;LIFE_DRAIN;167;419;25;4;-;shadow_star
+# Mag Popiołu
+ash_magus;fire_strike;BOLT;POINT;FIRE;238;595;25;4;-;fire
+ash_magus;mana_drain_strike;BOLT;POINT;MANA_DRAIN;207;517;15;4;-;star
+ash_magus;self_heal;HEAL;POINT;-;155;310;30;1;-;-
+ash_magus;summon_goblin_scrounger;SUMMON;POINT;-;0;0;18;7;SUMMON:goblin_scrounger:2;-
+# Burzowy ognik
+storm_wisp;energy_strike;BOLT;POINT;ENERGY;337;843;15;4;-;energy
+storm_wisp;storm_ball;BALL;CIRCLE2X2;ENERGY;264;660;22;4;ELECTRIFIED:132-220:4000:50;-
+storm_wisp;energy_wave;WAVE;SQUAREWAVE5;ENERGY;235;586;15;4;ELECTRIFIED:132-220:4000:50;-
+# Zmierzchnik
+dusk_gargoyle;death_strike;BOLT;POINT;DEATH;525;1312;25;4;-;shadow_star
+dusk_gargoyle;life_drain_strike;BOLT;POINT;LIFE_DRAIN;456;1141;15;4;-;shadow_star
+# Czerw Otchłani
+abyss_crawler;lava_nova;SELF;CIRCLE3X3;FIRE;340;850;14;2;BURNING:219-364:4000:50;-
+# Skrzydlaty pomiot
+winged_spawn;haste;HASTE;POINT;-;0;0;20;6;HASTE:50:6000;-
+# Wroniec, Kruczy Kniaź
+wroniec;summon_carrion_crow;SUMMON;POINT;-;0;0;18;7;SUMMON:carrion_crow:3;-
+# Szlamiara, Matka Topieli
+szlamiara;earth_strike;BOLT;POINT;EARTH;69;172;25;3;-;earth
+szlamiara;summon_sewer_rat;SUMMON;POINT;-;0;0;18;7;SUMMON:sewer_rat:3;-
+# Velmira, Szkarłatna Pani
+velmira;death_strike;BOLT;POINT;DEATH;285;713;25;3;-;shadow_star
+velmira;summon_sand_wraith;SUMMON;POINT;-;0;0;18;7;SUMMON:sand_wraith:2;-
+# Suweren Ostrzy
+suweren;blade_storm;SELF;CIRCLE5X5;PHYSICAL;588;1470;14;3;-;-
+# Ork włócznik
+orc_spearman;power_shot;BOLT;POINT;PHYSICAL;15;36;15;4;-;spear
+# Ork jeździec
+orc_rider;throw_spear;BOLT;POINT;PHYSICAL;22;55;18;4;-;spear
+orc_rider;haste;HASTE;POINT;-;0;0;20;6;HASTE:50:6000;-
+# Ork maruder
+orc_marauder;power_shot;BOLT;POINT;PHYSICAL;34;84;15;5;-;arrow
+# Kapłan orczego kultu
+orc_cult_priest;death_strike;BOLT;POINT;DEATH;51;126;25;4;-;shadow_star
+orc_cult_priest;self_heal;HEAL;POINT;-;60;120;30;1;-;-
+orc_cult_priest;summon_orc;SUMMON;POINT;-;0;0;18;7;SUMMON:orc:2;-
+# Urgoth, Pan Twierdzy
+urgoth;summon_orc_warrior;SUMMON;POINT;-;0;0;18;7;SUMMON:orc_warrior:2;-
+# Elf
+elf;shoot_arrow;BOLT;POINT;PHYSICAL;12;30;18;4;-;arrow
+# Zwiadowca elfów
+elf_scout;power_shot;BOLT;POINT;PHYSICAL;21;52;15;5;-;arrow
+# Elfi arkanista
+elf_arcanist;energy_strike;BOLT;POINT;ENERGY;22;55;25;4;-;energy
+elf_arcanist;fire_strike;BOLT;POINT;FIRE;19;48;15;4;-;fire
+elf_arcanist;self_heal;HEAL;POINT;-;22;45;30;1;-;-
+# Krasnolud żołnierz
+dwarf_soldier;power_shot;BOLT;POINT;PHYSICAL;15;36;15;4;-;bolt
+# Kamienny golem
+rock_golem;quake;SELF;CIRCLE1X1;PHYSICAL;17;42;15;1;-;-
+# Krasnolud geomanta
+dwarf_earthcaller;earth_strike;BOLT;POINT;EARTH;32;80;25;4;-;earth
+dwarf_earthcaller;self_heal;HEAL;POINT;-;20;40;30;1;-;-
+dwarf_earthcaller;summon_mine_grub;SUMMON;POINT;-;0;0;18;7;SUMMON:mine_grub:2;-
+# Behemot
+deep_behemot;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;84;210;14;2;-;-
+deep_behemot;throw_boulder;BOLT;POINT;PHYSICAL;120;300;18;5;-;stone
+# Popielna salamandra
+cinder_salamander;ember_spit;WAVE;SHORTWAVE3;FIRE;166;416;20;3;BURNING:94-156:4000:50;-
+cinder_salamander;haste;HASTE;POINT;-;0;0;20;6;HASTE:40:5000;-
+# Ogar Pożogi
+ember_hound;ember_breath;WAVE;SHORTWAVE3;FIRE;230;576;20;3;BURNING:130-216:4000:50;-
+ember_hound;haste;HASTE;POINT;-;0;0;20;6;HASTE:50:6000;-
+# Magmowy kolos
+magma_colossus;magma_nova;SELF;CIRCLE3X3;FIRE;274;686;14;2;BURNING:176-294:4000:50;-
+# Łowczyni Gaju
+grove_huntress;throw_knife;BOLT;POINT;PHYSICAL;18;45;18;3;-;knife
+# Tarczowniczka Gaju
+grove_shieldmaiden;power_shot;BOLT;POINT;PHYSICAL;26;65;15;4;-;spear
+# Guślarka Gaju
+grove_crone;fire_strike;BOLT;POINT;FIRE;14;34;25;4;-;fire
+grove_crone;earth_strike;BOLT;POINT;EARTH;12;30;15;4;-;earth
+grove_crone;self_heal;HEAL;POINT;-;9;18;30;1;-;-
+grove_crone;summon_forest_spider;SUMMON;POINT;-;0;0;18;7;SUMMON:forest_spider:2;-
+# Jednooki olbrzym
+oneeye_brute;throw_boulder;BOLT;POINT;PHYSICAL;42;105;18;4;-;stone
+# Jednooki tragarz
+oneeye_hauler;throw_stone;BOLT;POINT;PHYSICAL;48;120;18;4;-;stone
+# Rogaty rozbójnik
+horn_raider;throw_axe;BOLT;POINT;PHYSICAL;21;52;18;3;-;knife
+# Rogaty łucznik
+horn_bowman;power_shot;BOLT;POINT;PHYSICAL;24;60;15;5;-;bolt
+# Rogaty mistyk
+horn_mystic;energy_strike;BOLT;POINT;ENERGY;39;98;25;4;-;energy
+horn_mystic;fire_strike;BOLT;POINT;FIRE;34;85;15;4;-;fire
+horn_mystic;self_heal;HEAL;POINT;-;25;51;30;1;-;-
+# Ogar warowni
+keep_hound;haste;HASTE;POINT;-;0;0;20;6;HASTE:40:5000;-
+# Kusznik warowni
+keep_crossbow;power_shot;BOLT;POINT;PHYSICAL;41;101;15;6;-;bolt
+# Kapelan warowni
+keep_chaplain;death_strike;BOLT;POINT;DEATH;48;121;25;4;-;shadow_star
+keep_chaplain;holy_strike;BOLT;POINT;HOLY;42;105;15;4;-;holy
+keep_chaplain;self_heal;HEAL;POINT;-;55;110;30;1;-;-
+keep_chaplain;summon_skeleton;SUMMON;POINT;-;0;0;18;7;SUMMON:skeleton:2;-
+# Gorvald, Kasztelan Warowni
+castellan_gorvald;summon_keep_hound;SUMMON;POINT;-;0;0;18;7;SUMMON:keep_hound:2;-
+# Goblin szabrownik
+goblin_scrounger;throw_stone;BOLT;POINT;PHYSICAL;10;24;18;3;-;stone
+# Goblin nożownik
+goblin_knifer;throw_knife;BOLT;POINT;PHYSICAL;22;55;18;3;-;knife
+# Goblin herszt
+goblin_warchief;summon_goblin_scrounger;SUMMON;POINT;-;0;0;18;7;SUMMON:goblin_scrounger:2;-
+# Jaszczur guślarz
+lizard_hexer;earth_strike;BOLT;POINT;EARTH;55;138;25;4;-;earth
+lizard_hexer;paralyze;BOLT;POINT;EARTH;34;84;12;4;SLOW:35:4000;earth
+lizard_hexer;self_heal;HEAL;POINT;-;36;72;30;1;-;-
+# Hydra bagienna
+bog_hydra;earth_strike;BOLT;POINT;EARTH;120;299;15;3;-;earth
+bog_hydra;poison_wave;WAVE;WAVE4;EARTH;94;234;22;4;POISON:47-78:4000:50;-
+# Wężyca bagienna
+bog_naga;earth_strike;BOLT;POINT;EARTH;120;299;25;3;-;earth
+bog_naga;paralyze;BOLT;POINT;EARTH;73;182;12;3;SLOW:35:4000;earth
+bog_naga;self_heal;HEAL;POINT;-;30;60;30;1;-;-
+bog_naga;summon_sewer_rat;SUMMON;POINT;-;0;0;18;7;SUMMON:sewer_rat:2;-
+# Hydra jadowita
+venom_hydra;earth_strike;BOLT;POINT;EARTH;152;379;15;3;-;earth
+venom_hydra;poison_wave;WAVE;WAVE4;EARTH;119;297;22;4;POISON:59-99:4000:50;-
+venom_hydra;poison_ball;BALL;CIRCLE2X2;EARTH;106;264;14;4;POISON:59-99:4000:50;-
+# Gorgona
+stone_gorgon;petrify_wave;WAVE;WAVE4;EARTH;150;376;18;4;POISON:85-141:4000:50;-
+stone_gorgon;paralyze;BOLT;POINT;EARTH;132;329;12;1;SLOW:50:4000;earth
+# Smocze pisklę
+dragon_whelp;small_fire_wave;WAVE;SHORTWAVE3;FIRE;25;63;25;3;BURNING:13-21:4000:50;-
+# Smok łuskowy
+scale_dragon;fire_strike;BOLT;POINT;FIRE;87;218;15;4;-;fire
+scale_dragon;fire_wave;WAVE;WAVE4;FIRE;68;171;22;4;BURNING:34-57:4000:50;-
+scale_dragon;fireball;BALL;CIRCLE1X1;FIRE;61;152;15;5;BURNING:34-57:4000:50;-
+# Smok skalny
+crag_dragon;fire_strike;BOLT;POINT;FIRE;156;391;15;4;-;fire
+crag_dragon;fire_wave;WAVE;WAVE4;FIRE;122;306;22;4;BURNING:61-102:4000:50;-
+crag_dragon;fireball;BALL;CIRCLE1X1;FIRE;109;272;15;5;BURNING:61-102:4000:50;-
+# Rogaty zwiadowca
+horn_scout;throw_knife;BOLT;POINT;PHYSICAL;16;40;18;3;-;knife
+# Rogaty saper
+horn_sapper;powder_keg_throw;BOLT;POINT;FIRE;38;96;20;5;-;fire
+# Rogata wyrocznia
+horn_oracle;energy_strike;BOLT;POINT;ENERGY;69;172;15;5;-;energy
+horn_oracle;lightning_ball;BALL;CIRCLE1X1;ENERGY;54;135;25;5;ELECTRIFIED:27-45:4000:50;-
+horn_oracle;self_heal;HEAL;POINT;-;60;120;30;1;-;-
+horn_oracle;summon_horn_scout;SUMMON;POINT;-;0;0;18;7;SUMMON:horn_scout:2;-
+# Grozdar, Pan Labiryntu
+horn_overlord;thunder_wave;WAVE;WAVE4;ENERGY;96;240;18;4;ELECTRIFIED:54-90:4000:50;-
+# Skuty Lodem Mnich
+rimebound_monk;chill_wave;WAVE;SHORTWAVE3;ICE;179;448;18;3;FREEZING:101-168:4000:50;-
+rimebound_monk;paralyze;BOLT;POINT;ICE;157;392;12;1;SLOW:30:4000;ice
+# Szronowy Strażnik
+hoarfrost_warden;frost_nova;SELF;CIRCLE3X3;ICE;168;420;14;2;FREEZING:108-180:4000:50;-
+hoarfrost_warden;paralyze;BOLT;POINT;ICE;168;420;12;1;SLOW:30:4000;ice
+# Kultysta Stopionej Gwiazdy
+molten_cultist;fire_strike;BOLT;POINT;FIRE;313;782;15;4;-;fire
+molten_cultist;lava_ball;BALL;CIRCLE2X2;FIRE;245;612;25;4;BURNING:122-204:4000:50;-
+molten_cultist;self_heal;HEAL;POINT;-;204;408;30;1;-;-
+# Cierniowa Panna
+thorn_maiden;thorn_burst;SELF;CIRCLE3X3;EARTH;196;490;15;2;POISON:126-210:4000:50;-
+# Zarodnikowy Tropiciel
+spore_stalker;spore_cloud;SELF;CIRCLE3X3;EARTH;207;518;15;2;POISON:133-222:4000:50;-
+# Akolita Zwierciadeł
+mirror_acolyte;energy_strike;BOLT;POINT;ENERGY;359;897;25;4;-;energy
+mirror_acolyte;paralyze;BOLT;POINT;ENERGY;218;546;12;4;SLOW:35:4000;energy
+mirror_acolyte;self_heal;HEAL;POINT;-;234;468;30;1;-;-
+# Szklany Upiór
+glass_phantom;haste;HASTE;POINT;-;0;0;20;6;HASTE:40:5000;-
+# Zwiastun Posoki
+gore_harbinger;blood_wave;WAVE;WAVE4;DEATH;294;736;18;4;-;-
+# Przygaszony Serafin
+dimmed_seraph;death_strike;BOLT;POINT;DEATH;451;1127;25;3;-;shadow_star
+dimmed_seraph;paralyze;BOLT;POINT;HOLY;274;686;12;3;SLOW:35:4000;holy
+dimmed_seraph;self_heal;HEAL;POINT;-;294;588;30;1;-;-
+# Vorgrim, Popielny Strażnik
+vorgrim;hammer_nova;SELF;CIRCLE3X3;FIRE;322;805;16;2;BURNING:207-345:4000:50;-
+# Ysmera, Lodowa Matrona
+ysmera;ice_strike;BOLT;POINT;ICE;621;1552;15;3;-;ice
+ysmera;paralyze;BOLT;POINT;ICE;378;945;12;3;SLOW:45:4000;ice
+ysmera;ice_wave;WAVE;WAVE7;ICE;486;1215;20;5;FREEZING:243-405:4000:50;-
+ysmera;ice_beam;WAVE;BEAM8;ICE;432;1080;12;7;FREEZING:243-405:4000:50;-
+# Kharzul, Mistrz Kuźni
+kharzul;forge_nova;SELF;CIRCLE5X5;FIRE;420;1050;14;3;BURNING:270-450:4000:50;-
+kharzul;slag_ball;BALL;CIRCLE2X2;FIRE;480;1200;16;5;BURNING:270-450:4000:50;-
+# Vessara, Matka Cierni
+vessara;earth_strike;BOLT;POINT;EARTH;759;1897;15;3;-;earth
+vessara;thorn_wave;WAVE;WAVE4;EARTH;594;1485;20;4;POISON:297-495:4000:50;-
+vessara;summon_swamp_hornet;SUMMON;POINT;-;0;0;18;7;SUMMON:swamp_hornet:3;-
+# Ilmora, Pani Zwierciadeł
+ilmora;energy_strike;BOLT;POINT;ENERGY;851;2128;15;4;-;energy
+ilmora;paralyze;BOLT;POINT;ENERGY;518;1295;12;4;SLOW:35:4000;energy
+ilmora;lightning_wave;WAVE;SQUAREWAVE5;ENERGY;666;1665;18;5;ELECTRIFIED:333-555:4000:50;-
+ilmora;self_heal;HEAL;POINT;-;2000;4000;30;1;-;-
+ilmora;summon_glass_phantom;SUMMON;POINT;-;0;0;18;7;SUMMON:glass_phantom:2;-
+# Ugrath, Pożeracz z Paszczy
+ugrath;devour_wave;WAVE;WAVE4;LIFE_DRAIN;656;1640;18;4;-;-
+ugrath;summon_maw_crawler;SUMMON;POINT;-;0;0;18;7;SUMMON:maw_crawler:2;-
+# Noctharion, Pożeracz Światła
+noctharion;death_strike;BOLT;POINT;DEATH;1081;2702;15;4;-;shadow_star
+noctharion;night_wave;WAVE;WAVE7;DEATH;846;2115;18;5;-;-
+noctharion;night_nova;SELF;CIRCLE5X5;DEATH;658;1645;10;3;-;-
+noctharion;summon_crimson_shade;SUMMON;POINT;-;0;0;18;7;SUMMON:crimson_shade:2;-

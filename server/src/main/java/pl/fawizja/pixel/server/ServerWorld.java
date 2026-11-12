@@ -16,6 +16,7 @@ import pl.fawizja.pixel.character.CharacterFactory;
 import pl.fawizja.pixel.character.PlayerCharacter;
 import pl.fawizja.pixel.config.StartingConfig;
 import pl.fawizja.pixel.combat.CombatEvent;
+import pl.fawizja.pixel.combat.CombatSystem;
 import pl.fawizja.pixel.game.Actions;
 import pl.fawizja.pixel.game.EventLog;
 import pl.fawizja.pixel.game.GameSession;
@@ -3209,7 +3210,12 @@ final class ServerWorld {
             @Override
             public void monsterAttacks(Monster m, long t) {
                 ServerPlayer p = byTarget.get(m.target());
-                if (p != null) Messages.runAs(p.language, () -> p.session.combat().monsterAttacks(m, t));
+                if (p != null) monsterAttack(m, p, t, null);
+            }
+
+            @Override
+            public void monsterEffect(Monster caster, Position at, String effect, long t) {
+                broadcastEffect(CombatEvent.area(t, at, 0, effect), null);
             }
 
             @Override
@@ -3247,6 +3253,50 @@ final class ServerWorld {
                 save(p);
                 p.lastSaveMs = now;
             }
+        }
+    }
+
+    /**
+     * Atak potwora w gracza p (jego cel): zwykly atak albo - gdy podano spellKey (testy, deterministycznie) - dany czar.
+     * Czar obszarowy (fala, kula, wybuch) trafia kazdego gracza w obszarze, nie tylko cel, a pociski i efekty widza
+     * wszyscy gracze w poblizu (efekty trafiaja do zdarzen kazdej sesji, stad do ramek /EV).
+     */
+    boolean monsterAttack(Monster m, ServerPlayer p, long t, String spellKey) {
+        CombatSystem cs = p.session.combat();
+        long before = cs.eventTotal();
+        boolean[] cast = {true};
+        Messages.runAs(p.language, () -> {
+            if (spellKey == null) cs.monsterAttacks(m, t);
+            else cast[0] = cs.castMonsterSpell(m, spellKey, t);
+        });
+        if (!cast[0]) return false;
+        long fresh = cs.eventTotal() - before;
+        if (fresh > 0) {
+            for (CombatEvent e : cs.latestEvents((int) Math.min(fresh, 64))) {
+                if (e.isVisualEffect()) broadcastEffect(e, p);
+            }
+        }
+        pl.fawizja.pixel.monster.MonsterSpells.Cast area = cs.takeLastCast();
+        if (area != null) {
+            for (ServerPlayer o : new ArrayList<>(players.values())) {
+                if (o == p || o.session.character().isDead()) continue;
+                Position op = o.session.character().position();
+                if (op.z() != m.position().z() || !area.hits(op)) continue;
+                Messages.runAs(o.language, () -> o.session.combat().monsterSpellHit(m, area, t));
+            }
+        }
+        return true;
+    }
+
+    /** Efekt graficzny (pocisk, obszar czaru) do zdarzen kazdego gracza w zasiegu widoku, oprocz skip (zrodlo ma juz swoj). */
+    private void broadcastEffect(CombatEvent e, ServerPlayer skip) {
+        Position from = e.from() != null ? e.from() : e.position();
+        for (ServerPlayer o : players.values()) {
+            if (o == skip) continue;
+            Position op = o.session.character().position();
+            if (op.z() != e.position().z()) continue;
+            if (op.distanceTo(e.position()) > Protocol.VIEW_RADIUS && op.distanceTo(from) > Protocol.VIEW_RADIUS) continue;
+            o.session.combat().addEvent(e);
         }
     }
 

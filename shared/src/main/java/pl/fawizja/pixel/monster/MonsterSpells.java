@@ -25,7 +25,16 @@ public final class MonsterSpells {
 
     private final Map<String, List<MonsterSpell>> byMonster;
 
-    private MonsterSpells(Map<String, List<MonsterSpell>> byMonster) { this.byMonster = Collections.unmodifiableMap(byMonster); }
+    private final Map<String, List<MonsterSpell>> supportByMonster = new LinkedHashMap<>();
+
+    private MonsterSpells(Map<String, List<MonsterSpell>> byMonster) {
+        this.byMonster = Collections.unmodifiableMap(byMonster);
+        for (Map.Entry<String, List<MonsterSpell>> e : byMonster.entrySet()) {
+            List<MonsterSpell> l = new ArrayList<>();
+            for (MonsterSpell sp : e.getValue()) if (!sp.attack()) l.add(sp);
+            if (!l.isEmpty()) supportByMonster.put(e.getKey(), Collections.unmodifiableList(l));
+        }
+    }
 
     public static MonsterSpells defaults() {
         MonsterSpells d = defaults;
@@ -47,28 +56,40 @@ public final class MonsterSpells {
             String t = line.trim();
             if (t.isEmpty() || t.startsWith("#")) continue;
             String[] f = t.split(";");
-            if (f.length != 10) throw new IOException("monster_spells.csv line " + n + ": expected 10 fields");
+            if (f.length != 10 && f.length != 11) throw new IOException("monster_spells.csv line " + n + ": expected 11 fields");
             try {
                 SpellArea area = SpellArea.byName(f[3].trim());
                 if (area == null) throw new IllegalArgumentException("unknown area " + f[3]);
                 MonsterConditions.Entry cond = null;
                 int slow = 0;
                 long slowMs = 0;
+                String summon = null;
+                int cap = 0, haste = 0;
+                long hasteMs = 0;
+                String missile = f.length == 11 && !f[10].trim().equals("-") ? f[10].trim() : null;
                 String x = f[9].trim();
                 if (!x.equals("-")) {
                     String[] p = x.split(":");
                     if (p[0].equals("SLOW")) {
                         slow = Integer.parseInt(p[1]);
                         slowMs = Long.parseLong(p[2]);
+                    } else if (p[0].equals("SUMMON")) {
+                        summon = p[1];
+                        cap = Integer.parseInt(p[2]);
+                    } else if (p[0].equals("HASTE")) {
+                        haste = Integer.parseInt(p[1]);
+                        hasteMs = Long.parseLong(p[2]);
                     } else {
                         String[] mm = p[1].split("-");
                         cond = new MonsterConditions.Entry(ConditionType.valueOf(p[0]), Integer.parseInt(mm[0]), Integer.parseInt(mm[1]),
                                 Integer.parseInt(p[2]), Integer.parseInt(p[3]));
                     }
                 }
+                String ty = f[4].trim();
                 m.computeIfAbsent(f[0].trim(), k -> new ArrayList<>()).add(new MonsterSpell(f[1].trim(),
-                        MonsterSpell.Mode.valueOf(f[2].trim()), area, DamageType.valueOf(f[4].trim()), Integer.parseInt(f[5].trim()),
-                        Integer.parseInt(f[6].trim()), Integer.parseInt(f[7].trim()), Integer.parseInt(f[8].trim()), cond, slow, slowMs));
+                        MonsterSpell.Mode.valueOf(f[2].trim()), area, ty.equals("-") ? DamageType.PHYSICAL : DamageType.valueOf(ty),
+                        Integer.parseInt(f[5].trim()), Integer.parseInt(f[6].trim()), Integer.parseInt(f[7].trim()),
+                        Integer.parseInt(f[8].trim()), cond, slow, slowMs, missile, summon, cap, haste, hasteMs));
             } catch (RuntimeException e) {
                 throw new IOException("monster_spells.csv line " + n + ": " + e.getMessage(), e);
             }
@@ -85,12 +106,25 @@ public final class MonsterSpells {
         return l == null ? Collections.emptyList() : l;
     }
 
-    public boolean casts(MonsterType t) { return !of(t).isEmpty(); }
+    /** Czy potwor ma czary zadajace obrazenia (fala, kula, wybuch, uderzenie w cel). */
+    public boolean casts(MonsterType t) {
+        for (MonsterSpell s : of(t)) if (s.attack()) return true;
+        return false;
+    }
 
-    /** Najdalszy zasieg czarow potwora (0 = nie rzuca czarow). */
+    /** Czy potwor ma jakikolwiek czar (takze leczenie, przyspieszenie, przywolanie). */
+    public boolean hasAny(MonsterType t) { return !of(t).isEmpty(); }
+
+    /** Czary wsparcia potwora: leczenie siebie, przyspieszenie, przywolanie. */
+    public List<MonsterSpell> support(MonsterType t) {
+        List<MonsterSpell> l = t == null ? null : supportByMonster.get(t.key());
+        return l == null ? Collections.emptyList() : l;
+    }
+
+    /** Najdalszy zasieg czarow zadajacych obrazenia (0 = nie rzuca czarow). */
     public int maxRange(MonsterType t) {
         int r = 0;
-        for (MonsterSpell s : of(t)) r = Math.max(r, s.range());
+        for (MonsterSpell s : of(t)) if (s.attack()) r = Math.max(r, s.range());
         return r;
     }
 
@@ -107,6 +141,15 @@ public final class MonsterSpells {
     public static Cast plan(MonsterSpell sp, Position me, Position tp, Direction facing, WorldMap world) {
         SpellArea a = sp.area();
         switch (sp.mode()) {
+            case BOLT: {
+                // pocisk w jeden cel: linia strzalu (z pola obok bez sprawdzania)
+                if (world != null && me.distanceTo(tp) > 1 && !world.hasLineOfSight(me, tp)) return null;
+                return new Cast(sp, tp, null, me, List.of(tp));
+            }
+            case HEAL:
+            case HASTE:
+            case SUMMON:
+                return null;
             case BALL: {
                 if (world != null && me.distanceTo(tp) > 1 && !world.hasLineOfSight(me, tp)) return null;
                 return new Cast(sp, tp, null, tp, a.visibleTiles(tp, null, tp, world));

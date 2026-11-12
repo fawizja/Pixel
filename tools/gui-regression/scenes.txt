@@ -336,3 +336,9 @@ training_statue|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=
 skills_offline|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0
 ping_green|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.fakePing=40
 ping_red|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.fakePing=400
+# 2026-11-12: style ataku potworow - wlocznik trzyma dystans i rzuca, szaman uderza w cel, hydra zieje jadem, przywolywacz, uciekajacy strzelec
+mob_spear|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=160 -Dpixel.mobDemo=spear
+mob_caster_bolt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=caster
+mob_area_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=area
+mob_summoner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=summon
+mob_flee|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=30 -Dpixel.mobDemo=flee

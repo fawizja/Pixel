@@ -1774,6 +1774,28 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
  fishing, NPC, zadania, handel, bank w UI, PvP,
 serwer i synchronizacja - patrz [TODO.md](../TODO.md).
 
+## Style ataku potworów (Z logika, C grafika, 2026-11-12)
+
+Wzorzec: Tibia/Canary (`attacks`, `defenses`, `summons`, `runonhealth`, `targetdistance`). Analiza i tabela wszystkich potworów:
+`analizy/potwory-ataki.md`.
+
+* **Profil** (`MonsterProfiles`, `data/monster_behaviour.csv`): `potwor;archetyp;dystans;pocisk;ucieczka`. Archetypy: `MELEE`, `DISTANCE`,
+  `CASTER` (czary w cel), `AREA`, `SUMMONER`, `MIXED`, `SUPPORT`. Dystans 0 = podchodzi i bije wręcz; N >= 2 = trzyma N..N+1 pól,
+  cofa się przy bliższym graczu, atak podstawowy to pocisk (`pocisk` = grafika z `assets/art/missiles`). Ucieczka nadpisuje
+  `fleeHpPct` z `monsters.csv`; po wyleczeniu o 25 pp ponad progiem potwór wraca do walki.
+* **Czary** (`MonsterSpells`, `data/monster_spells.csv`, 11 kolumn: `potwor;czar;tryb;obszar;typ;min;max;szansa;zasieg;dodatek;pocisk`):
+  `WAVE`/`BALL`/`SELF` z kształtami `SpellArea`, `BOLT` (pocisk w jeden cel, obszar `POINT`), `HEAL` (siebie, gdy HP < 70%),
+  `HASTE` (`HASTE:procent:ms`), `SUMMON` (`SUMMON:potwor:limit`). Dodatek `SLOW:procent:ms` = paraliż, `STAN:min-max:odstep:szansa`.
+  Zasięg ataku potwora to większy z `range` i zasięgu jego czarów (`MonsterManager.reach`).
+* **Przywołańcy** (`MonsterManager.summonMinion`): limit naraz na pana, przerwa 6 s, pomocnik poluje na gracza, znika ze śmiercią pana lub
+  gdy traci cel, nie odradza się, nie daje łupu ani doświadczenia (`Monster.isMinion`).
+* **Walka** (`CombatSystem.monsterAttacks`) jest wspólna dla offline i serwera. Pociski mają w zdarzeniu efekt `TYP/pocisk`
+  (`CombatEvent.withMissile`), klient dobiera grafikę z nazwy.
+* **Online** (`ServerWorld.monsterAttack`): czar obszarowy trafia każdego gracza w obszarze (`CombatSystem.monsterSpellHit`), a efekty
+  (pociski, obszary, blask przywołania i przyspieszenia) trafiają do zdarzeń wszystkich graczy w zasięgu widoku (`EV`).
+* Strojenie: obrażenia czarów liczone z `attackMax` potwora (cel ≈ 1,15× przy 25%, obszar 0,7-0,9×); poziomy i spawny bez zmian.
+* Podgląd: `-Dpixel.mobDemo=spear|caster|area|summon|flee`; testy `MonsterStyleTest`, `MonsterAttackNetworkTest`.
+
 ## Zwrot i chód potworów (`Monster.facing4`, `CreatureFrames`, `TileArt.monster`)
 
 - Kierunek: `Monster.facing()` ustawia ruch (`moveTo`), rozglądanie się bezczynnego potwora i atak

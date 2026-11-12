@@ -17,6 +17,8 @@ import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.monster.MonsterManager;
 import pl.fawizja.pixel.monster.MonsterState;
 import pl.fawizja.pixel.monster.MonsterConditions;
+import pl.fawizja.pixel.monster.MonsterProfile;
+import pl.fawizja.pixel.monster.MonsterProfiles;
 import pl.fawizja.pixel.monster.MonsterSpell;
 import pl.fawizja.pixel.monster.MonsterSpells;
 import pl.fawizja.pixel.monster.MonsterType;
@@ -416,6 +418,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public LootLog lootLog() { return lootLog; }
 
     private void onMonsterDeath(Monster m, long now) {
+        if (m.isMinion()) {
+            // pomocnik przywolany czarem potwora: znika bez lupu, ciala i doswiadczenia (nie do farmienia)
+            monsters.kill(m, now);
+            if (target == m) target = null;
+            push(CombatEvent.area(now, m.position(), 0, "POOF"));
+            return;
+        }
         MonsterType t = m.type();
         kills++;
         // stamina 0:00 jak w Tibii: bez lupu (strefa sprzed zuzycia za to zabicie - ostatnia minuta jeszcze daje lup)
@@ -524,21 +533,46 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
      * pocisk; czary potworow na dystans tarczy nie ucza.
      */
     public static boolean blockable(MonsterType t) {
-        return t.range() <= 1 || t.damageType() == DamageType.PHYSICAL || MonsterSpells.defaults().casts(t);
+        return !MonsterProfiles.defaults().of(t).keepsDistance() || t.damageType() == DamageType.PHYSICAL;
     }
 
     @Override
     public void monsterAttacks(Monster m, long now) {
         if (pc.isDead() || world.isProtectionZone(pc.position())) return;
         MonsterType t = m.type();
-        // smoki: czar (fala, kula ognia, oddech) z szansa, inaczej cios wrecz tylko z sasiedniego pola
+        // czar (fala, kula, uderzenie w cel...) z szansa, inaczej atak podstawowy: pocisk strzelca albo cios wrecz
+        // tylko z sasiedniego pola
         MonsterSpells.Cast cast = null;
-        boolean caster = MonsterSpells.defaults().casts(t);
-        if (caster) {
-            cast = planSpell(m);
-            if (cast == null && m.position().distanceTo(pc.position()) > 1) return;
-        }
-        monsterStrike(m, cast, now);
+        if (MonsterSpells.defaults().casts(t)) cast = planSpell(m);
+        if (cast == null && !MonsterProfiles.defaults().of(t).keepsDistance() && m.position().distanceTo(pc.position()) > 1) return;
+        monsterStrike(m, cast, now, true);
+    }
+
+    @Override
+    public void monsterEffect(Monster caster, Position at, String effect, long now) {
+        push(CombatEvent.area(now, at, 0, effect));
+    }
+
+    private MonsterSpells.Cast lastCast;
+
+    /**
+     * Ostatni rzut czaru potwora w tej postaci (serwer: czar obszarowy trafia tez inne postacie w obszarze) i zerowanie.
+     * Zwraca null, gdy ostatni atak nie byl czarem.
+     */
+    public MonsterSpells.Cast takeLastCast() {
+        MonsterSpells.Cast c = lastCast;
+        lastCast = null;
+        return c;
+    }
+
+    /**
+     * Serwer: ta postac stoi w obszarze czaru potwora rzuconego w innego gracza - obrazenia, stany i spowolnienie jak
+     * od trafienia (efekty graficzne rozsyla serwer). Bez losowania szansy czaru.
+     */
+    public void monsterSpellHit(Monster m, MonsterSpells.Cast cast, long now) {
+        if (pc.isDead() || world.isProtectionZone(pc.position()) || pc.position().z() != m.position().z()) return;
+        if (!cast.hits(pc.position())) return;
+        monsterStrike(m, cast, now, false);
     }
 
     /**
@@ -548,25 +582,28 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     public boolean castMonsterSpell(Monster m, String spellKey, long now) {
         if (pc.isDead() || world.isProtectionZone(pc.position()) || pc.position().z() != m.position().z()) return false;
         for (MonsterSpell sp : MonsterSpells.defaults().of(m.type())) {
-            if (!sp.key().equals(spellKey)) continue;
+            if (!sp.key().equals(spellKey) || !sp.attack()) continue;
             double f = m.type().isElite() ? MonsterType.damageFactor(m.type().forgeStack()) : 1.0;
             MonsterSpells.Cast c = MonsterSpells.plan(f == 1.0 ? sp : sp.scaled(f), m.position(), pc.position(), m.facing(), world);
             if (c == null) return false;
-            monsterStrike(m, c, now);
+            monsterStrike(m, c, now, true);
             return true;
         }
         return false;
     }
 
     /** Jeden atak potwora w gracza: czar (cast) albo cios; ochrony, obrazenia, stany, zdarzenia, smierc. */
-    private void monsterStrike(Monster m, MonsterSpells.Cast cast, long now) {
+    private void monsterStrike(Monster m, MonsterSpells.Cast cast, long now, boolean visuals) {
         MonsterType t = m.type();
-        boolean caster = MonsterSpells.defaults().casts(t);
+        MonsterProfile profile = MonsterProfiles.defaults().of(t);
         MonsterType.Strike st = cast != null ? new MonsterType.Strike(cast.spell().type(),
                 CombatFormulas.rollBetween(cast.spell().min(), cast.spell().max(), rng)) : t.rollStrike(rng);
-        boolean ranged = t.range() > 1 && !caster;
+        boolean ranged = cast == null && profile.keepsDistance();   // atak podstawowy strzelca / maga to pocisk
         lastHitTakenMs = now;
-        if (cast != null) showSpell(m, cast, now);
+        if (cast != null && visuals) {
+            lastCast = cast;
+            showSpell(m, cast, now);
+        }
         if (pl.fawizja.pixel.item.ForgeEffects.rollRuse(pc, rng)) {
             // Unik (Ruse, zbroja z tierem): caly cios ominiety, jak "You dodged an attack." w Tibii
             push(new CombatEvent(now, pc.position(), 0, CombatEvent.Kind.BLOCKED, ranged || cast != null ? null : m.position(), DODGE_EFFECT));
@@ -574,7 +611,10 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         }
         int dmg = pl.fawizja.pixel.item.ForgeEffects.avatarIncoming(pc,
                 pc.enchantments().incoming(CombatFormulas.mitigateOnPlayer(pc, st.raw(), st.type(), attackedRecently(now), rng)));
-        if (ranged) push(CombatEvent.projectile(now, m.position(), pc.position(), st.type().name()));
+        if (ranged && visuals) {
+            m.lookAt(pc.position());
+            push(CombatEvent.projectile(now, m.position(), pc.position(), CombatEvent.withMissile(st.type().name(), profile.missile())));
+        }
         pl.fawizja.pixel.charm.CharmEffects.Defense charm = pl.fawizja.pixel.charm.CharmEffects.onMonsterAttack(pc, m, st.type(), dmg, rng, now);
         for (pl.fawizja.pixel.charm.Charm c : charm.triggered()) log.add(now, EventLog.Kind.INFO, "Charm " + c.label() + " (" + t.name() + ").");
         if (charm.noDamage()) {
@@ -631,7 +671,7 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
         int dist = me.distanceTo(tp);
         double f = m.type().isElite() ? MonsterType.damageFactor(m.type().forgeStack()) : 1.0;
         for (MonsterSpell base : MonsterSpells.defaults().of(m.type())) {
-            if (dist > base.range() || rng.nextInt(100) >= base.chance()) continue;
+            if (!base.attack() || dist > base.range() || rng.nextInt(100) >= base.chance()) continue;
             MonsterSpell sp = f == 1.0 ? base : base.scaled(f);
             MonsterSpells.Cast c = MonsterSpells.plan(sp, me, tp, m.facing(), world);
             if (c != null) return c;
@@ -643,8 +683,13 @@ public final class CombatSystem implements MonsterManager.AttackHandler {
     private void showSpell(Monster m, MonsterSpells.Cast c, long now) {
         m.lookAt(pc.position());
         String fx = c.spell().type().name();
+        if (c.spell().mode() == MonsterSpell.Mode.BOLT) {
+            // uderzenie w jeden cel: sam pocisk (na koncu lotu klient rysuje trafienie)
+            push(CombatEvent.projectile(now, m.position(), c.anchor(), CombatEvent.withMissile(fx, c.spell().missile())));
+            return;
+        }
         if (c.spell().mode() == MonsterSpell.Mode.BALL && !m.position().equals(c.anchor())) {
-            push(CombatEvent.projectile(now, m.position(), c.anchor(), fx));
+            push(CombatEvent.projectile(now, m.position(), c.anchor(), CombatEvent.withMissile(fx, c.spell().missile())));
         }
         push(CombatEvent.shaped(now, c.anchor(), c.spell().area().encode(c.dir()), c.origin(), fx));
     }
