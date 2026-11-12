@@ -10,8 +10,10 @@ import pl.fawizja.pixel.item.ItemRegistry;
  */
 public final class Lighting {
 
-    /** Promien poswiaty postaci bez pochodni (w kafelkach). */
-    public static final float BASE_PLAYER_GLOW = 2.5f;
+    /** Promien poswiaty postaci bez pochodni (w kafelkach): ledwie widac najblizsze pola, pochodnia ({@link #TORCH_MIN_GAIN} razy wieksza) ma sens. */
+    public static final float BASE_PLAYER_GLOW = 2.0f;
+    /** Zapalona pochodnia ma swiecic co najmniej tyle razy dalej niz sama poswiata (Tibia: pochodnia ~ promien 7). */
+    public static final float TORCH_MIN_GAIN = 3f;
     public static final float MIN_UNDERGROUND_AMBIENT = 0.04f;
     /** Jasnosc otoczenia pierwszego podziemia: prawie ciemno jak w Tibii - widac tylko swiatlo postaci, pochodni i lawy. */
     public static final float UNDERGROUND_AMBIENT = 0.10f;

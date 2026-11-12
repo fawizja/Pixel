@@ -47,7 +47,7 @@ class HinasItemsTest {
             assertTrue(sources.contains(t.id()), t.key() + ": ani lup, ani sklep");
             assertTrue(t.minLevel() > 0 && t.slot() != EquipSlot.NONE, t.key());
         }
-        assertEquals(137, n, "przedmioty Hinasa");
+        assertEquals(142, n, "przedmioty Hinasa (+5 smoczych: tarcze, pancerz, helm)");
     }
 
     /** Ksiegi czarow to tarcze magow, amulety nie biora udzialu w Kuzni ani nasyceniach. */

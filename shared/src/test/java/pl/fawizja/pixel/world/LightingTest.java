@@ -38,7 +38,8 @@ class LightingTest {
         assertFalse(pc.setTorchLit(true, torch), "torch only in the backpack");
         pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, pl.fawizja.pixel.item.ItemStack.of(torch));
         assertTrue(pc.setTorchLit(true, torch));
-        assertEquals(5f, Lighting.playerLightRadius(pc, TestData.ITEMS));
+        assertEquals(7f, Lighting.playerLightRadius(pc, TestData.ITEMS));
+        assertTrue(Lighting.playerLightRadius(pc, TestData.ITEMS) >= Lighting.TORCH_MIN_GAIN * Lighting.BASE_PLAYER_GLOW, "torch clearly larger than the bare glow");
         pc.equipment().setDirect(pl.fawizja.pixel.item.EquipSlot.LIGHT, null);
         assertEquals(Lighting.BASE_PLAYER_GLOW, Lighting.playerLightRadius(pc, TestData.ITEMS), "torch gone");
         assertFalse(pc.setTorchLit(true, torch));

@@ -728,12 +728,23 @@ public final class TileArt implements Disposable {
         return r;
     }
 
+    private final Map<String, Float> bigHeights = new HashMap<>();
+
+    /** Wysokosc grafiki duzego potwora w polach (2 = 64x64) albo 1, gdy potwor jest zwyklej wielkosci - pasek zycia nad grafika. */
+    public float bigMonsterHeight(String key) {
+        if (bigFrames(key).length == 0) return OverheadLayout.NORMAL_HEIGHT;
+        Float h = bigHeights.get(key);
+        return h == null ? 2f : h;
+    }
+
     private TextureRegion[] loadBigMonster(String key) {
         Pixmap idle = loadArt("monsters/" + key + ".png");
         if (idle == null) return NO_BIG;
         int side = Math.max(idle.getWidth(), idle.getHeight());
+        int idleHeight = idle.getHeight();
         idle.dispose();
         if (side < BIG_MONSTER_MIN) return NO_BIG;
+        bigHeights.put(key, OverheadLayout.spriteTiles(idleHeight));
         Pixmap atlas = new Pixmap(3 * 4 * 64, 64, Pixmap.Format.RGBA8888);
         atlas.setBlending(Pixmap.Blending.None);
         boolean[] has = new boolean[4];

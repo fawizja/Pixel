@@ -1175,3 +1175,13 @@ durn_shop;worm_slime;0;30
 durn_shop;chitin_plate;0;180
 durn_shop;ectoplasm;0;350
 durn_shop;gargoyle_shard;0;700
+camp_shop;emerald_scale;0;250
+camp_shop;frost_scale;0;420
+camp_shop;coal_scale;0;650
+camp_shop;gilded_scale;0;1050
+camp_shop;pearl_scale;0;1200
+isle_shop;emerald_scale;0;500
+isle_shop;frost_scale;0;850
+isle_shop;coal_scale;0;1300
+isle_shop;gilded_scale;0;2100
+isle_shop;pearl_scale;0;2400

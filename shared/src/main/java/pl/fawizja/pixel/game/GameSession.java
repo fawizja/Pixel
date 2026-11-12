@@ -59,6 +59,8 @@ public final class GameSession {
     private final GroundItems ground;
     /** Tryb serwera: potwory i przedmioty na ziemi sa wspolne, petla swiata aktualizuje potwory raz. */
     private final boolean sharedWorld;
+    /** Z jak daleka (pola) gracz slyszy pojawienie sie rzadkiego smoka. */
+    public static final int RARE_SPAWN_HEARING = 40;
     private final EventLog log = new EventLog(50);
     private final int torchId;
     private final MonsterManager monsters;
@@ -161,6 +163,14 @@ public final class GameSession {
         this.monsters = monsters != null ? monsters
                 : new MonsterManager(world, null, Collections.emptyList(), rng);
         this.combat = new CombatSystem(pc, world, items, this.monsters, ground, log, rng, minLevel);
+        if (!sharedWorld) {
+            // rzadki bialy smok (MonsterManager.rollRare): cicha wskazowka dla gracza w poblizu, jak rzadkie spawny w Tibii
+            this.monsters.setRareListener((m, t) -> {
+                if (m.position().z() == pc.position().z() && m.position().distanceTo(pc.position()) <= RARE_SPAWN_HEARING) {
+                    log.add(t, EventLog.Kind.WARNING, Messages.get("monster_manager.rzadki_smok"));
+                }
+            });
+        }
         this.fishing = new FishingSystem(world, items, rng);
         this.herbs = new pl.fawizja.pixel.gathering.HerbGathering(world);
         this.berries = new pl.fawizja.pixel.gathering.BerryBushes(world);

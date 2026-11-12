@@ -458,7 +458,7 @@ monster;blade_warden;name;Blade Warden
 monster;crimson_shade;name;Crimson Shade
 monster;ember_beetle;name;Ember Beetle
 monster;ash_magus;name;Ash Magus
-monster;dune_drake;name;Dune Drake
+monster;dune_drake;name;Gilded Dragon
 monster;storm_wisp;name;Storm Wisp
 monster;rime_gargoyle;name;Rime Gargoyle
 monster;dusk_gargoyle;name;Dusk Gargoyle
@@ -1185,3 +1185,17 @@ place;Sale Zwierciadeł;name;Mirror Halls
 place;Paszcza Głodu;name;Maw of Hunger
 place;Komnata Pożeracza Światła;name;Chamber of the Light-Eater
 place;Komnata Nagród Gwiazdy;name;Star Reward Chamber
+monster;emerald_dragon;name;Emerald Dragon
+monster;hoarfrost_dragon;name;Hoarfrost Dragon
+monster;coal_dragon;name;Coal Dragon
+monster;pearl_dragon;name;Pearl Dragon
+item;emerald_scale;name;Emerald Scale
+item;frost_scale;name;Hoarfrost Scale
+item;coal_scale;name;Coal Scale
+item;gilded_scale;name;Gilded Scale
+item;pearl_scale;name;Pearl Scale
+item;emeraldscale_shield;name;Emerald Scale Shield
+item;hoarscale_shield;name;Hoarfrost Scale Shield
+item;coalscale_armor;name;Coal Scale Armor
+item;gilded_helmet;name;Gilded Dragon Helmet
+item;pearl_aegis;name;Pearl Aegis

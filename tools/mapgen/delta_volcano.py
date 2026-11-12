@@ -62,9 +62,9 @@ F.CAVE_STYLES.setdefault('magma_deep', ('abyss_floor', 'obsidian_wall', [], ['ma
 
 # Trzewia (-1..-7): bardzo duzo silnych potworow ognia; (potwory w kolejnosci od schodow, liczba w stadzie)
 DEEP = {
-    -1: (['fire_elemental', 'ember_beetle', 'ash_magus', 'fire_elemental', 'cinder_salamander'], (5, 6)),
-    -2: (['ash_magus', 'lava_golem', 'cinder_salamander', 'lava_golem', 'ember_beetle'], (5, 6)),
-    -3: (['lava_golem', 'cinder_salamander', 'ember_hound', 'cinder_salamander', 'ember_hound'], (5, 6)),
+    -1: (['fire_elemental', 'ember_beetle', 'ash_magus', 'coal_dragon', 'cinder_salamander'], (5, 6)),
+    -2: (['ash_magus', 'lava_golem', 'cinder_salamander', 'lava_golem', 'coal_dragon'], (5, 6)),
+    -3: (['lava_golem', 'cinder_salamander', 'ember_hound', 'coal_dragon', 'ember_hound'], (5, 6)),
     -4: (['ember_hound', 'magma_colossus', 'ember_hound', 'magma_colossus', 'ember_hound'], (5, 6)),
     -5: (['magma_colossus', 'magma_drake', 'magma_colossus', 'magma_drake', 'abyss_crawler'], (6, 6)),
     -6: (['magma_drake', 'abyss_crawler', 'abyssal_demon', 'abyss_crawler', 'magma_drake'], (6, 6)),
@@ -74,7 +74,7 @@ DEEP_STYLE = {-1: 'fire', -2: 'fire', -3: 'fire', -4: 'magma_deep', -5: 'magma_d
 DEEP_LAVA = {-1: 0.03, -2: 0.04, -3: 0.05, -4: 0.05, -5: 0.06, -6: 0.07, -7: 0.08}
 # Stozek (+1..+7): bardzo duzo potworow mieszanych (ogien, powietrze, mroz, cienie) - wyzej silniejsze
 CONE_MONSTERS = {
-    1: ['fire_elemental', 'wyvern', 'cinder_salamander', 'ash_magus', 'ember_beetle'],
+    1: ['fire_elemental', 'wyvern', 'cinder_salamander', 'ash_magus', 'coal_dragon'],
     2: ['wyvern', 'storm_wisp', 'cinder_salamander', 'dune_drake', 'lava_golem'],
     3: ['storm_harpy', 'lava_golem', 'frost_giant', 'ember_hound', 'dune_drake'],
     4: ['rime_gargoyle', 'mist_wraith', 'ember_hound', 'storm_harpy', 'frost_giant'],

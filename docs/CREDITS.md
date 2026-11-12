@@ -39,6 +39,12 @@ wszystkie pliki z ponizszej listy i przywrocic poprzednie wersje z historii git 
 - Pochodzenie: `4c56d725-88613-4471d4c306fdc774dacd5e070db0199c.webp` (zloty smok, 4 kierunki x 3 klatki, 256x192):
   - `assets/art/monsters/dune_drake.png`, `dune_drake_walk1.png`, `dune_drake_walk2.png`
   - `assets/art/monsters/dune_drake_up*.png`, `dune_drake_left*.png`, `dune_drake_right*.png` (kazdy: postoj, `_walk1`, `_walk2`)
+  - Przebarwienia tych klatek (krok `recolour_dragons` w `tools/art/darekart_import.py`, ta sama odpowiedzialnosc wlasciciela):
+    `assets/art/monsters/emerald_dragon*.png` (zielony), `hoarfrost_dragon*.png` (lodowy), `coal_dragon*.png` (czarny z czerwonymi
+    akcentami), `pearl_dragon*.png` (bialy) - po 12 plikow: postoj, `_walk1`, `_walk2` i `_up*`, `_left*`, `_right*`
+  - Ikony lupu smokow, przebarwione ikony wiwerny i smoczej tarczy/pancerza/helmu z paczki Hinasa: `assets/art/items/emerald_scale.png`,
+    `frost_scale.png`, `coal_scale.png`, `gilded_scale.png`, `pearl_scale.png`, `emeraldscale_shield.png`, `hoarscale_shield.png`,
+    `coalscale_armor.png`, `gilded_helmet.png`, `pearl_aegis.png`
 - Przejrzane i odrzucone: `49c74bca-Nubes.rar` (chmury: rozmyte, brak miejsca w grze), `c292351d-WebbyImagesDownloader.zip`
   (rune-kamienie: JPG z artefaktami, male, rozowe tlo), `8de7fbf0-WebbyImagesDownloader.zip` (brak schodow, drabin, dziur ani dachow;
   przedmioty `item_NNNNN` i inne to grafiki Tibii albo innych gier - wykluczone).

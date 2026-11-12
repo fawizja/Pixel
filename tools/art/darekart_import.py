@@ -9,9 +9,14 @@ Zrodla leza poza repo; do assets/ trafiaja tylko wyciete kawalki:
 - tiles/rock*.png (warianty `rock`: 12 malych kamieni 32x32 z arkuszy 1-3, bez skalowania) oraz native/rock_v13..v16.png
   (duze glazy 64x64, rysowane 2x2 pola jak krzaki) - zastepuja kamienie OTSP;
 - tiles/snow_rock*.png (4 male z arkusza 4) i native/snow_rock_v5.png (duzy glaz);
-- monsters/dune_drake*.png: zloty smok (cztery kierunki x trzy klatki; srodkowy wiersz = postoj) w oryginalnym 64x64.
+- monsters/dune_drake*.png: zloty smok (cztery kierunki x trzy klatki; srodkowy wiersz = postoj) w oryginalnym 64x64;
+- monsters/{emerald,hoarfrost,coal,pearl}_dragon*.png: cztery pozostale kolory rodu smokow, przebarwione z klatek zlotego
+  (`recolour_dragons`: przesuniecie barwy/nasycenia, osobno oczy i jasne akcenty); ikony lusek i tarcz z lupu
+  (`items/*_scale.png`, `items/*_shield.png` itd.) to przebarwione ikony wiwerny i smoczej tarczy.
+  Samo przebarwienie: ``python3 tools/art/darekart_import.py --recolour [assets]`` (bez arkuszy zrodlowych).
 Nieuzyte: chmury (Nubes: rozmyte, nie pikselart), kamienie jak arkusz 4 do `sandstone_rock`/`obsidian_rock` (brak piaskowych).
 """
+import colorsys
 import os
 import sys
 
@@ -96,7 +101,97 @@ def main():
         # kolejnosc nazw jak w grze: dune_drake_up_walk1.png, dune_drake_walk1.png
         fn = "dune_drake" + side_names[c] + frames[r] + ".png"
         sm.save(os.path.join(art, "monsters", fn))
+    recolour_dragons(assets)
+
+
+# ----------------------------------------------------------------------------------------------- rod smokow
+SIDES = ("", "_walk1", "_walk2", "_up", "_up_walk1", "_up_walk2", "_left", "_left_walk1", "_left_walk2",
+         "_right", "_right_walk1", "_right_walk2")
+
+
+def _eye(h, s, v):
+    """Zielone oczy zlotego smoka (barwa 70-170 st.) - przy przebarwieniu dostaja wlasny kolor."""
+    return 70 <= h <= 170 and s > 0.35 and v > 0.3
+
+
+def _recolour_px(variant, r, g, b):
+    h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+    h *= 360
+    eye = _eye(h, s, v)
+    if variant == "emerald":
+        if eye:
+            return colorsys.hsv_to_rgb(48 / 360, 0.95, min(1.0, v * 1.15))      # zolte slepia
+        return colorsys.hsv_to_rgb(((h - 30) * 0.5 + 125) / 360 % 1, min(1.0, s * 0.78), v * 0.82)
+    if variant == "hoarfrost":
+        if eye:
+            return colorsys.hsv_to_rgb(185 / 360, 0.25, 1.0)                    # jasne, lodowe slepia
+        return colorsys.hsv_to_rgb(((h - 30) * 0.25 + 206) / 360 % 1, min(1.0, 0.1 + s * 0.75), min(1.0, 0.1 + v * 0.9))
+    if variant == "coal":
+        if eye:
+            return colorsys.hsv_to_rgb(8 / 360, 0.95, 1.0)                      # rozzarzone slepia
+        if s > 0.55 and v > 0.84:
+            return colorsys.hsv_to_rgb(358 / 360, 0.85, min(1.0, v * 0.95))     # czerwone akcenty (grzbiet, krawedzie skrzydel)
+        return colorsys.hsv_to_rgb(0.03, min(0.22, s * 0.25), v * 0.5)
+    if variant == "pearl":
+        if eye:
+            return colorsys.hsv_to_rgb(355 / 360, 0.85, 0.95)                   # czerwone slepia na bialej luesce
+        return colorsys.hsv_to_rgb(262 / 360, min(0.12, s * 0.12), min(1.0, 0.3 + v * 0.72))
+    raise ValueError(variant)
+
+
+def recolour_image(img, variant):
+    out = img.convert("RGBA")
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a == 0:
+                continue
+            nr, ng, nb = _recolour_px(variant, r, g, b)
+            px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
+    return out
+
+
+def tint_icon(img, hue, sat, val):
+    """Ikona przedmiotu w barwie smoka: barwa i nasycenie zadane, jasnosc z oryginalu (x val)."""
+    out = img.convert("RGBA")
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            if a == 0:
+                continue
+            _h, _s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            nr, ng, nb = colorsys.hsv_to_rgb(hue / 360, sat, min(1.0, v * val))
+            px[x, y] = (round(nr * 255), round(ng * 255), round(nb * 255), a)
+    return out
+
+
+DRAGONS = {"emerald": "emerald_dragon", "hoarfrost": "hoarfrost_dragon", "coal": "coal_dragon", "pearl": "pearl_dragon"}
+# lupy: (plik zrodlowy ikony, plik docelowy, barwa, nasycenie, jasnosc)
+DRAGON_ICONS = [
+    ("wyvern_scale", "emerald_scale", 120, 0.7, 1.0), ("wyvern_scale", "frost_scale", 200, 0.45, 1.2),
+    ("wyvern_scale", "coal_scale", 0, 0.1, 0.55), ("wyvern_scale", "gilded_scale", 44, 0.85, 1.25),
+    ("wyvern_scale", "pearl_scale", 262, 0.1, 1.5),
+    ("dragon_shield", "emeraldscale_shield", 120, 0.7, 1.0), ("dragon_shield", "hoarscale_shield", 200, 0.45, 1.2),
+    ("dragon_shield", "pearl_aegis", 262, 0.1, 1.5), ("dragon_armor", "coalscale_armor", 0, 0.1, 0.55),
+    ("dragon_helmet", "gilded_helmet", 44, 0.85, 1.25),
+]
+
+
+def recolour_dragons(assets):
+    """Cztery kolory smoka z klatek zlotego (dune_drake*.png) i ikony ich lupu; zloty zostaje jak jest."""
+    art = os.path.join(assets, "art")
+    for variant, key in DRAGONS.items():
+        for side in SIDES:
+            src = Image.open(os.path.join(art, "monsters", "dune_drake" + side + ".png"))
+            recolour_image(src, variant).save(os.path.join(art, "monsters", key + side + ".png"))
+    for src, dst, hue, sat, val in DRAGON_ICONS:
+        tint_icon(Image.open(os.path.join(art, "items", src + ".png")), hue, sat, val).save(os.path.join(art, "items", dst + ".png"))
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--recolour":
+        recolour_dragons(sys.argv[2] if len(sys.argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets"))
+    else:
+        main()

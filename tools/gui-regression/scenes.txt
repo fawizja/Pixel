@@ -321,3 +321,7 @@ stairs_down_pit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=4
 gold_dragon|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1
 shop_torch_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=546,497,0
 brick_grass_edge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=878,731,0
+# 2026-11-12: rod pieciu smokow - piec kolorow z paskami zycia nad grafika 2x2, fala ognia, wielka kula ognia, oddech lodu, bialy smok
+dragons_five|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1 -Dpixel.dragonDemo=five
+dragon_fire_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1 -Dpixel.dragonDemo=fire
+dragon_ice_breath|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1 -Dpixel.dragonDemo=ice

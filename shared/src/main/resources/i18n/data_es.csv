@@ -458,7 +458,7 @@ monster;blade_warden;name;Guardián de la hoja
 monster;crimson_shade;name;Sombra carmesí
 monster;ember_beetle;name;Escarabajo de brasas
 monster;ash_magus;name;Mago de ceniza
-monster;dune_drake;name;Draco de las dunas
+monster;dune_drake;name;Dragon dorado
 monster;storm_wisp;name;Fuego fatuo de tormenta
 monster;rime_gargoyle;name;Gárgola de escarcha
 monster;dusk_gargoyle;name;Gárgola del crepúsculo
@@ -1185,3 +1185,17 @@ place;Sale Zwierciadeł;name;Salas de Espejos
 place;Paszcza Głodu;name;Fauces del Hambre
 place;Komnata Pożeracza Światła;name;Cámara del Devorador de Luz
 place;Komnata Nagród Gwiazdy;name;Cámara de Recompensas de la Estrella
+monster;emerald_dragon;name;Dragon esmeralda
+monster;hoarfrost_dragon;name;Dragon de escarcha
+monster;coal_dragon;name;Dragon de carbon
+monster;pearl_dragon;name;Dragon perlado
+item;emerald_scale;name;Escama esmeralda
+item;frost_scale;name;Escama de escarcha
+item;coal_scale;name;Escama de carbon
+item;gilded_scale;name;Escama dorada
+item;pearl_scale;name;Escama perlada
+item;emeraldscale_shield;name;Escudo de escamas esmeralda
+item;hoarscale_shield;name;Escudo de escamas de escarcha
+item;coalscale_armor;name;Armadura de escamas de carbon
+item;gilded_helmet;name;Yelmo dragon dorado
+item;pearl_aegis;name;Egida perlada

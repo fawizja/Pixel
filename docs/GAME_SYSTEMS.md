@@ -1704,6 +1704,19 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   Potwory: horn_scout/raider/bowman/guard/mystic/sapper/gladiator/oracle/champion, boss horn_overlord (poziom 100).
   Test: `MinotaurCityTest`. Nic nie tworzy drogi pieszej do ziem premium.
 
+## Ród pięciu smoków i czary potworów (Z dane, 2026-11-12)
+- Smoki od najsłabszego: `emerald_dragon` (zielony, poz. 205, 3000 HP), `hoarfrost_dragon` (lodowy, 240, 4500), `coal_dragon`
+  (czarny, 320, 6600), `dune_drake` (złoty, 410, 8900) i `pearl_dragon` (biały, 600, 21000, nie boss: ma wpis w bestiariuszu).
+  Wszystkie: zachowanie MELEE (podchodzą i gryzą fizycznie), zasięg = najdalszy czar. Test: `DragonFamilyTest`.
+- `data/monster_spells.csv`: `potwor;czar;tryb;obszar;typ;min;max;szansa;zasieg;dodatek`. Tryb WAVE (przed potworem, obrót do celu
+  jak `SpellSystem.aimDirection`), BALL (pocisk i obszar wokół celu), SELF (wokół potwora). Dodatek: stan (`BURNING:60-110:4000:60`)
+  albo `SLOW:procent:ms`. Rzut: `MonsterSpells.plan` (kształt `SpellArea`, linia wzroku), `CombatSystem.planSpell/showSpell/
+  applySpellEffects`; odmiany Kuźni mnożą obrażenia jak ciosy. `castMonsterSpell` rzuca czar bez losowania (testy, podglądy).
+- Rzadki spawn: `RareSpawns.standard()` = 15 promili na odrodzenie smoka (klasa Dragon, poz. >= 100) przy graczu do 32 pól,
+  przerwa 1 h, jeden żywy; ziarno testów: `MonsterManager.setRareRandom`. Bez rejestru z `pearl_dragon` albo przy < 50 spawnach wyłączony.
+- Spawny stałe: `tools/mapgen/dragon_spawns.py` (na gotowym świecie: `python3 tools/mapgen/dragon_spawns.py`; idempotentny).
+- Pasek życia dużych potworów: `OverheadLayout`. Światło: `Lighting.BASE_PLAYER_GLOW` 2, pochodnia 7.
+
 ## Planowane
 
  fishing, NPC, zadania, handel, bank w UI, PvP,

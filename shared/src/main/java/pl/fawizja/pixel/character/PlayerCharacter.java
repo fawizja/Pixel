@@ -274,6 +274,8 @@ public final class PlayerCharacter {
         int v = hasteMs > 0 ? base + base * hastePercent / 100 : base;
         // Snajper (utito tempo san) spowalnia jak paraliz w Tibii, zamrozenie tez
         if (spellBuffMs(BUFF_SHARPSHOOTER) > 0) v = v * 70 / 100;
+        // lodowa fala i spojrzenie smoka (czary potworow): spowolnienie jak paraliz, nie zapisuje sie w postaci
+        if (slowMs > 0) v = Math.max(1, v * (100 - slowPercent) / 100);
         return v;
     }
 
@@ -311,6 +313,21 @@ public final class PlayerCharacter {
         hastePercent = Math.max(0, percent);
         hasteMs = Math.max(0, ms);
     }
+
+    /** Spowolnienie od czaru potwora (paraliz): wolniejszy marsz przez ms; silniejsze zastepuje slabsze. */
+    public void addSlow(int percent, long ms) {
+        if (percent <= 0 || ms <= 0) return;
+        if (slowMs > 0 && percent < slowPercent) return;
+        slowPercent = Math.min(90, percent);
+        slowMs = Math.max(slowMs, ms);
+    }
+
+    public boolean slowed() { return slowMs > 0; }
+    public int slowPercent() { return slowMs > 0 ? slowPercent : 0; }
+    public long slowMs() { return slowMs; }
+
+    private long slowMs;
+    private int slowPercent;
 
     public long hasteMs() { return hasteMs; }
     public int hastePercent() { return hasteMs > 0 ? hastePercent : 0; }
@@ -844,6 +861,7 @@ public final class PlayerCharacter {
         if (isDead() || deltaMs <= 0) return;
         lightBuffMs = Math.max(0, lightBuffMs - deltaMs);
         hasteMs = Math.max(0, hasteMs - deltaMs);
+        slowMs = Math.max(0, slowMs - deltaMs);
         tickSpellEffects(deltaMs);
         wheel.tick(deltaMs);
         if (resting) restedMs = Math.min(MAX_RESTED_MS, restedMs + deltaMs);

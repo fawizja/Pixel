@@ -215,6 +215,15 @@ final class ServerWorld {
         world = new MapLoader(TileRegistry.loadDefault()).load(WorldLayout.WORLD_MAP);
         monsterTypes = MonsterRegistry.loadDefault(items);
         monsters = new MonsterManager(world, monsterTypes, SpawnTable.load(WorldLayout.WORLD_MAP, world, monsterTypes), rng);
+        monsters.setRareListener((m, t) -> {
+            // rzadki bialy smok: cicha wskazowka dla graczy w poblizu (offline robi to GameSession)
+            for (ServerPlayer p : players.values()) {
+                pl.fawizja.pixel.world.Position at = p.session.character().position();
+                if (at.z() == m.position().z() && at.distanceTo(m.position()) <= GameSession.RARE_SPAWN_HEARING) {
+                    Messages.runAs(p.language, () -> p.session.log().add(t, EventLog.Kind.WARNING, Messages.get("monster_manager.rzadki_smok")));
+                }
+            }
+        });
         monsters.populate(null);
         bossQuests = new pl.fawizja.pixel.game.BossQuestRuntime(world, items, monsters, new Random(rng.nextLong()));
         shops = ShopRegistry.loadDefault(items);
