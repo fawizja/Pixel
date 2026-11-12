@@ -73,10 +73,11 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.open=mobile_win_bag|mobile_win_equip|mobile_win_skills|mobile_win_vip|mobile_win_settings|mobile_chat|mobile_picker|mobile_logout|mobile_journal
  *                        stany ukladu na telefon (kilka po przecinku); -Dpixel.pickerButton=N (0..8; 5-7 wewnetrzny luk, 8 rog) przy mobile_picker
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
- *   -Dpixel.dragonDemo=five|fire|gfb|ice|white  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
+ *   -Dpixel.dragonDemo=five|fire|gfb|ice|white|wave9|star|gfb4  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
  *                        wielka kule ognia (gfb), oddech lodu (ice), bialy smok piorun (white) - rzut w postac stojaca przed nim
  *   -Dpixel.mobDemo=spear|caster|area|summon|flee  style ataku potworow: wlocznik trzyma dystans, uderzenie w cel, fala jadu, przywolywacz, ranny strzelec ucieka
  *   -Dpixel.fakePing=MS   udaje opoznienie sieciowe (kropka pingu obok FPS; zielona <100, pomaranczowa 100-250, czerwona >250)
+ *   -Dpixel.open=nestbag [-Dpixel.nestDemo=open|loot]  plecak w plecaku: okno plecaka z otwartym plecakiem z pola 0; loot: pelny glowny plecak, lup z ciala trafia do plecaka z miejscem
  *   -Dpixel.bagSlots=N, -Dpixel.bagScroll=W, -Dpixel.depotScroll=W  przy open=bigbag / depotwin: pojemnosc plecaka i przewiniecie siatek
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
  *   -Dpixel.fx=true                   tuz przed zrzutem pokazuje efekty (pociski, wybuch ognia, mrozna fala, kamienie, leczenie) i dwa ciala
@@ -260,6 +261,49 @@ public final class DesktopLauncher {
                             gs.hud().selectSlot(i);
                             break;
                         }
+                    }
+                }
+                if ("nestbag".equals(open)) {
+                    // plecak w plecaku: -Dpixel.nestDemo=open (okno plecaka i plecak z pola 0 obok, a w nim kolejny plecak) albo
+                    // loot (pelny glowny plecak, lup z ciala trafia do plecaka z miejscem; wynik widac w oknie dziecka)
+                    GameScreen gs = (GameScreen) getScreen();
+                    pl.fawizja.pixel.character.PlayerCharacter hero = gs.session().character();
+                    pl.fawizja.pixel.item.ItemRegistry reg = gs.session().items();
+                    pl.fawizja.pixel.inventory.Container bp = hero.backpack();
+                    bp.clear();
+                    boolean loot = "loot".equals(System.getProperty("pixel.nestDemo"));
+                    bp.putInSlot(0, new pl.fawizja.pixel.item.ItemStack(reg.byKey("backpack_explorer").id(), 1));
+                    pl.fawizja.pixel.inventory.Container big = bp.bagAt(0);
+                    String[] inside = {"health_potion", "mana_potion", "rope", "hunting_spear", "leather_armor", "gold_coin"};
+                    for (int k = 0; k < inside.length; k++) {
+                        if (reg.containsKey(inside[k])) big.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey(inside[k]).id(), k < 2 || k == 5 ? 12 + k : 1));
+                    }
+                    big.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("backpack_traveler").id(), 1));
+                    pl.fawizja.pixel.inventory.Container small = null;
+                    for (int i = 0; i < big.size() && small == null; i++) if (big.isBag(i)) small = big.bagAt(i);
+                    small.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("backpack").id(), 1));
+                    small.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("health_potion").id(), 30));
+                    // lup: glowny plecak pelny i bez stosow, ktore dalyby sie dopelnic (inaczej lup zmiesci sie bez plecaka w plecaku)
+                    String[] filler = loot ? new String[] {"rope", "wooden_shield", "leather_helmet", "leather_boots", "leather_legs", "leather_armor", "hunting_spear", "torch"}
+                            : new String[] {"gold_coin", "platinum_coin", "pearl", "worm", "torch", "rope", "wooden_shield", "leather_helmet"};
+                    int f = 0;
+                    for (int i = 1; i < bp.size() && (loot || i < 8); i++) {
+                        String key = filler[f++ % filler.length];
+                        if (!reg.containsKey(key)) key = "rope";
+                        int cnt = !loot && reg.maxStack(reg.byKey(key).id()) > 1 ? 4 + i : 1;
+                        bp.putInSlot(i, new pl.fawizja.pixel.item.ItemStack(reg.byKey(key).id(), cnt));
+                    }
+                    gs.hud().toggleBag();
+                    gs.hud().openChildBag(new int[] {0});
+                    if (loot) {
+                        Position at = hero.position();
+                        java.util.List<pl.fawizja.pixel.item.ItemStack> drop = new java.util.ArrayList<>();
+                        drop.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("health_potion").id(), 7));
+                        drop.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("pearl").id(), 3));
+                        drop.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("gold_coin").id(), 45));
+                        drop.add(new pl.fawizja.pixel.item.ItemStack(reg.byKey("wolf_pelt").id(), 2));
+                        gs.session().ground().addCorpse(at, "wolf", drop, 1L);
+                        gs.session().searchCorpse(2L);
                     }
                 }
                 if ("bigbag".equals(open)) {
@@ -1108,6 +1152,12 @@ public final class DesktopLauncher {
             if (frame == 2) {
                 for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
                 pc.setInvisible(600_000);
+                if (demo.equals("wave9") || demo.equals("star") || demo.equals("gfb4")) {
+                    // pusta scena: inne potwory w poblizu znikaja (ogladamy tylko jeden czar)
+                    for (pl.fawizja.pixel.monster.Monster m : new java.util.ArrayList<>(s.monsters().monsters())) {
+                        if (!m.isSummon() && m.position().z() == me.z() && m.position().distanceTo(me) <= 24) s.monsters().dismiss(m);
+                    }
+                }
                 if (demo.equals("five")) {
                     String[] keys = {"emerald_dragon", "hoarfrost_dragon", "coal_dragon", "dune_drake", "pearl_dragon"};
                     int[][] at = {{-4, -2}, {0, -2}, {4, -2}, {-2, -5}, {2, -5}};
@@ -1118,18 +1168,20 @@ public final class DesktopLauncher {
                         }
                     }
                 } else {
-                    String key = demo.equals("ice") ? "hoarfrost_dragon" : demo.equals("white") ? "pearl_dragon" : "coal_dragon";
-                    for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(demo.equals("gfb") ? 1 : 0, demo.equals("gfb") ? -5 : -3), 0, 1, now)) {
+                    String key = demo.equals("ice") ? "hoarfrost_dragon" : demo.equals("white") || demo.equals("wave9") || demo.equals("star") ? "pearl_dragon"
+                            : demo.equals("gfb4") ? "dune_drake" : "coal_dragon";
+                    for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(demo.equals("gfb") || demo.equals("gfb4") ? 1 : 0, demo.equals("gfb") || demo.equals("gfb4") ? -5 : demo.equals("star") ? -2 : demo.equals("wave9") ? 3 : -3), 0, 1, now)) {
                         m.paralyze(now + 600_000);
                     }
                 }
             }
-            if (!demo.equals("five") && frame == frames - 5) {
+            int castAt = demo.equals("wave9") || demo.equals("star") || demo.equals("gfb4") ? frames - 8 : frames - 5;   // duze obszary: dluzej widac caly efekt
+            if (!demo.equals("five") && frame == castAt) {
                 for (pl.fawizja.pixel.monster.Monster m : s.monsters().monsters()) {
                     if (m.isSummon() || !m.type().race().equals("Dragon") || m.position().z() != me.z() || m.position().distanceTo(me) > 8) continue;
                     pc.heal(pc.maxHealth());
-                    String spell = demo.equals("fire") ? "great_fire_wave" : demo.equals("gfb") ? "great_fireball"
-                            : demo.equals("ice") ? "ice_breath" : "energy_beam";
+                    String spell = demo.equals("fire") || demo.equals("wave9") ? "great_fire_wave" : demo.equals("gfb") || demo.equals("gfb4") ? "great_fireball"
+                            : demo.equals("ice") ? "ice_breath" : demo.equals("star") ? "energy_star" : "energy_beam";
                     m.lookAt(me);
                     boolean ok = s.combat().castMonsterSpell(m, spell, now);
                     Gdx.app.log("Pixel", "dragonDemo cast " + spell + " " + ok + " dragon " + m.position() + " me " + me);

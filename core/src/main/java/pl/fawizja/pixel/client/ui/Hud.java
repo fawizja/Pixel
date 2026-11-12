@@ -403,6 +403,7 @@ public final class Hud {
         int rows = amount > 0 ? 1 : amount < 0 ? -1 : 0;
         if (bagOpen && rows != 0) {
             if (depotWinOpen && depotGrid.contains(p.x, p.y)) { depotGrid.scrollRows(rows); return true; }
+            if (childPath != null && childView.contains(p.x, p.y)) { childView.scrollRows(rows); return true; }
             if (bagView.contains(p.x, p.y)) { bagView.scrollRows(rows); return true; }
         }
         if (mobile && mWin == MobileWin.BAG && rows != 0) {
@@ -596,6 +597,20 @@ public final class Hud {
     private boolean depotWinOpen;
     /** Przeciagany przedmiot pochodzi z depozytu (inaczej z plecaka). */
     private boolean dragFromDepot;
+    /**
+     * Okno plecaka w plecaku (komputer): sciezka numerow pol od glownego plecaka (null = zamkniete). Plecak z pola
+     * otwiera sie obok glownego okna; plecak w nim otwiera sie w tym samym oknie ("Wstecz" wraca o poziom wyzej).
+     */
+    private int[] childPath;
+    private final ContainerView childView = new ContainerView(pl.fawizja.pixel.inventory.ContainerGrid.DESKTOP);
+    private int childSelected = -1;
+    private final HudButton childClose = new HudButton("child_close", "X");
+    private final HudButton childBack = new HudButton("child_back", "<");
+    private final HudButton childUse = new HudButton("child_use", Messages.get("hud.uzyj_2"));
+    private final HudButton childEquip = new HudButton("child_equip", Messages.get("hud.zaloz"));
+    private final HudButton childDrop = new HudButton("child_drop", Messages.get("hud.wyrzuc"));
+    /** Przeciagany przedmiot pochodzi z okna plecaka w plecaku (a nie z glownego); rysowanie siatki dziecka. */
+    private boolean dragFromChild, gridIsChild;
     /** Suwak przewijania wlasnie przeciagany palcem / mysza i jego okno. */
     private int barPointer = -1;
     private ContainerView barView;
@@ -1515,8 +1530,49 @@ public final class Hud {
     public void closeBag() {
         bagOpen = false;
         depotWinOpen = false;
+        closeChildBag();
         selectedSlot = -1;
         if (mobile && mWin == MobileWin.BAG) mWin = null;
+    }
+
+    // ------------------------------------------------------------------ plecak w plecaku (okno dziecka)
+
+    /** Otwiera plecak wskazany sciezka (numery pol od glownego plecaka) w oknie obok plecaka. */
+    public void openChildBag(int[] path) {
+        if (mobile || path == null || path.length == 0) return;
+        childPath = path.clone();
+        childSelected = -1;
+        childView.scroll = 0;
+        bagOpen = true;
+        menuOpen = false;
+    }
+
+    public void closeChildBag() {
+        childPath = null;
+        childSelected = -1;
+        if (dragFromChild) { dragSlot = -1; dragging = false; dragFromChild = false; }
+    }
+
+    public boolean childBagOpen() { return childPath != null; }
+
+    public int[] childPath() { return childPath == null ? null : childPath.clone(); }
+
+    public int childSelected() { return childSelected; }
+
+    public void clearChildSelection() { childSelected = -1; }
+
+    /** Cofa okno dziecka o poziom (plecak nadrzedny) albo zamyka je, gdy nadrzednym jest glowny plecak. */
+    private void childUp() {
+        if (childPath == null) return;
+        if (childPath.length <= 1) closeChildBag();
+        else { childPath = java.util.Arrays.copyOf(childPath, childPath.length - 1); childSelected = -1; childView.scroll = 0; }
+    }
+
+    private pl.fawizja.pixel.inventory.Container childContainer(GameSession session) {
+        if (childPath == null) return null;
+        pl.fawizja.pixel.inventory.Container c = session.character().backpack().resolve(childPath);
+        if (c == null) closeChildBag();
+        return c;
     }
 
     public void toggleBag() {
@@ -1524,7 +1580,7 @@ public final class Hud {
             openMobileWin(MobileWin.BAG);
             return;
         }
-        bagOpen = !bagOpen; selectedSlot = -1; dragSlot = -1; dragging = false; if (bagOpen) menuOpen = false; else depotWinOpen = false;
+        bagOpen = !bagOpen; selectedSlot = -1; dragSlot = -1; dragging = false; if (bagOpen) menuOpen = false; else { depotWinOpen = false; closeChildBag(); }
     }
 
     /** Przewija plecak do wiersza (desktop: -Dpixel.bagScroll, zrzuty ekranu). */
@@ -1543,6 +1599,26 @@ public final class Hud {
         float closeX = bagX + bagView.gridW() + bagView.barSpace() + 4;
         bagClose.x = closeX;
         bagClose.y = bagY + slotSize * 4f + 18;
+        pl.fawizja.pixel.inventory.Container child = childContainer(session);
+        if (child != null) {
+            float cx = closeX + 24;
+            childView.place(cx, bagY, slotSize, 0, child.size());
+            // brak miejsca po prawej (kolumna panelu): okno dziecka po lewej stronie plecaka, chyba ze jest tam depozyt
+            if (!depotWinOpen && cx + gridWinW(childView) > gx + gw) {
+                cx = bagX - 14 - gridWinW(childView);
+                childView.place(cx, bagY, slotSize, 0, child.size());
+            }
+            childClose.x = childView.x + childView.gridW() + childView.barSpace() + 4;
+            childClose.y = bagY + slotSize * 4f + 18;
+            childClose.r = 14;
+            childBack.x = childView.x + childView.gridW() + childView.barSpace() - 14;
+            childBack.y = childClose.y;
+            childBack.r = 11;
+            float bbr = slotSize * 0.55f;
+            childEquip.x = childView.x + slotSize * 1.0f; childEquip.y = bagY - bbr * 1.4f; childEquip.r = bbr;
+            childUse.x = childView.x + slotSize * 2.5f; childUse.y = childEquip.y; childUse.r = bbr;
+            childDrop.x = childView.x + slotSize * 4.0f; childDrop.y = childEquip.y; childDrop.r = bbr;
+        }
         if (depotWinOpen) {
             depotGrid.place(0, bagY, slotSize, 0, session.character().depot().size());    // rozmiar daje szerokosc okna
             depotGrid.place(bagX - 14 - gridWinW(depotGrid), bagY, slotSize, 0, session.character().depot().size());
@@ -3522,6 +3598,7 @@ public final class Hud {
         if (bagOpen) {
             placeGridViews(session);
             if (depotWinOpen && depotTouch(p, pointer, session, actions)) return true;
+            if (childPath != null && childTouch(p, pointer, session, actions)) return true;
             if (bagClose.hit(p.x, p.y)) { toggleBag(); return true; }
             if (bagView.pressBar(p.x, p.y)) {
                 if (bagView.draggingThumb()) { barView = bagView; barPointer = pointer; }
@@ -3537,6 +3614,11 @@ public final class Hud {
                 if (depotWinOpen) {
                     // z otwartym depozytem dotkniecie przedmiotu przenosi go do depozytu, a przeciagniecie na pole - tam
                     if (session.character().backpack().get(slot) != null) startDrag(slot, false, p, pointer, actions, session);
+                } else if (childSelected >= 0 && childPath != null) {
+                    // zaznaczony przedmiot z okna plecaka w plecaku: dotkniecie pola glownego plecaka przenosi go tutaj
+                    actions.onButton("bag_move:" + pl.fawizja.pixel.inventory.Container.pathText(childPath) + ":" + childSelected
+                            + ":-:" + slot);
+                    childSelected = -1;
                 } else if (selectedSlot < 0) {
                     if (session.character().backpack().get(slot) != null) {
                         selectedSlot = slot;
@@ -3673,6 +3755,7 @@ public final class Hud {
 
     private void startDrag(int slot, boolean fromDepot, Vector2 p, int pointer, Actions actions, GameSession session) {
         dragSlot = slot;
+        dragFromChild = false;
         dragFromDepot = fromDepot;
         dragPointer = pointer;
         dragging = false;
@@ -3680,6 +3763,39 @@ public final class Hud {
         dragStartY = dragY = p.y;
         dragActions = actions;
         dragSession = session;
+    }
+
+    /** Dotkniecie w oknie plecaka w plecaku: zamkniecie, "Wstecz", suwak, przyciski zaznaczonego pola, pole (zaznacza / zaczyna przeciaganie). */
+    private boolean childTouch(Vector2 p, int pointer, GameSession session, Actions actions) {
+        pl.fawizja.pixel.inventory.Container c = childContainer(session);
+        if (c == null) return false;
+        if (childClose.hit(p.x, p.y)) { closeChildBag(); return true; }
+        if (childBack.hit(p.x, p.y)) { childUp(); return true; }
+        if (childView.pressBar(p.x, p.y)) {
+            if (childView.draggingThumb()) { barView = childView; barPointer = pointer; }
+            return true;
+        }
+        if (childSelected >= 0) {
+            if (childEquip.hit(p.x, p.y)) { actions.onButton("child_equip"); return true; }
+            if (childDrop.hit(p.x, p.y)) { actions.onButton("child_drop"); return true; }
+            if (childUse.hit(p.x, p.y)) { actions.onButton("child_use"); return true; }
+        }
+        int slot = childView.slotAt(p.x, p.y);
+        if (slot >= 0) {
+            if (c.get(slot) != null) {
+                childSelected = slot;
+                selectedSlot = -1;
+                dragFromChild = true;
+                startDrag(slot, false, p, pointer, actions, session);
+                dragFromChild = true;
+            } else if (childSelected >= 0 && childSelected != slot) {
+                actions.onButton("bag_move:" + pl.fawizja.pixel.inventory.Container.pathText(childPath) + ":" + childSelected
+                        + ":" + pl.fawizja.pixel.inventory.Container.pathText(childPath) + ":" + slot);
+                childSelected = -1;
+            } else childSelected = -1;
+            return true;
+        }
+        return false;
     }
 
     /** Dotkniecie w oknie depozytu: zamkniecie, suwak, przycisk "Odloz lup", pole z przedmiotem (przenosi / zaczyna przeciaganie). */
@@ -3732,9 +3848,13 @@ public final class Hud {
     private boolean dropDragged(float x, float y) {
         int from = dragSlot;
         boolean fromDepot = dragFromDepot;
+        boolean fromChild = dragFromChild && childPath != null;
+        int[] fromPath = fromChild ? childPath.clone() : new int[0];
         dragSlot = -1;
         dragPointer = -1;
         dragFromDepot = false;
+        dragFromChild = false;
+        if (!dragging && fromChild) return true;      // zwykle dotkniecie: zaznaczenie zostaje
         if (!dragging) {
             // zwykle dotkniecie: z otwartym depozytem szybkie przeniesienie na druga strone, inaczej zaznaczenie zostaje
             if (depotWinOpen && dragActions != null) dragActions.onButton("depot_move:" + (fromDepot ? "D" : "B") + ":" + from + ":" + (fromDepot ? "B" : "D") + ":-1");
@@ -3743,6 +3863,24 @@ public final class Hud {
         dragging = false;
         int bagSlot = bagOpen ? bagView.slotAt(x, y) : -1;
         int depotSlot = depotWinOpen ? depotGrid.slotAt(x, y) : -1;
+        int childSlot = childPath != null ? childView.slotAt(x, y) : -1;
+        if (!fromDepot && (fromChild || childSlot >= 0) && depotSlot < 0 && !depotWinOpen) {
+            // przeciaganie z udzialem okna plecaka w plecaku: bag_move:sciezkaZ:pole:sciezkaDo:pole
+            int[] toPath = childSlot >= 0 ? childPath : bagSlot >= 0 ? new int[0] : null;
+            int to = childSlot >= 0 ? childSlot : bagSlot;
+            if (toPath == null && fromChild && !bagView.contains(x, y) && !childView.contains(x, y) && inEquipPanel(x, y)) {
+                childSelected = from;
+                dragActions.onButton("child_equip");
+                return true;
+            }
+            if (toPath != null && !(toPath.length == fromPath.length && java.util.Arrays.equals(toPath, fromPath) && to == from)) {
+                dragActions.onButton("bag_move:" + pl.fawizja.pixel.inventory.Container.pathText(fromPath) + ":" + from + ":"
+                        + pl.fawizja.pixel.inventory.Container.pathText(toPath) + ":" + to);
+            }
+            selectedSlot = -1;
+            childSelected = -1;
+            return true;
+        }
         if (!fromDepot && depotSlot < 0 && bagSlot < 0 && inEquipPanel(x, y)) {
             selectedSlot = from;
             dragActions.onButton("bag_equip");
@@ -5918,7 +6056,7 @@ public final class Hud {
                 if (s == null) continue;
                 float sx = v.cellX(col), sy = v.cellY(r);
                 TextureRegion reg = art.item(s.itemId());
-                if (dragging && slot == dragSlot && dragFromDepot == isDepot) batch.setColor(1f, 1f, 1f, 0.35f); // przeciagany - blady w miejscu zrodla
+                if (dragging && slot == dragSlot && dragFromDepot == isDepot && dragFromChild == gridIsChild) batch.setColor(1f, 1f, 1f, 0.35f); // przeciagany - blady w miejscu zrodla
                 float ip = 1 + slotPad(v.cell - 2);
                 if (reg != null) drawStackIcon(batch, reg, s, sx + ip, sy + ip, v.cell - ip * 2);
                 batch.setColor(Color.WHITE);
@@ -5942,6 +6080,25 @@ public final class Hud {
         }
         if (slotImg == null) drawGridSlotsFallback(shapes, bagView, session.character().backpack(), selectedSlot);
         drawScrollBar(shapes, bagView);
+        pl.fawizja.pixel.inventory.Container childC = childContainer(session);
+        if (childC != null) {
+            float cextra = childSelected >= 0 ? slotSize * 0.55f * 1.6f + 6 : 0;
+            miniWindow(shapes, "wood", childView.x - 8, bagY - 50 - cextra, gridWinW(childView), slotSize * 4 + 80 + cextra);
+            if (slotImg == null) drawGridSlotsFallback(shapes, childView, childC, childSelected);
+            drawScrollBar(shapes, childView);
+            if (childSelected >= 0 && childC.get(Math.min(childSelected, childC.size() - 1)) != null) {
+                for (HudButton b : new HudButton[] {childEquip, childDrop, childUse}) {
+                    shapes.setColor(b == childDrop ? 0.5f : 0.25f, b == childDrop ? 0.2f : 0.45f, b == childDrop ? 0.2f : 0.3f, 0.95f);
+                    shapes.rect(b.x - b.r * 1.3f, b.y - b.r * 0.6f, b.r * 2.6f, b.r * 1.2f);
+                }
+            }
+            if (closeImg == null) {
+                shapes.setColor(0.6f, 0.15f, 0.15f, 0.95f);
+                shapes.circle(childClose.x, childClose.y, childClose.r, 20);
+            }
+            shapes.setColor(0.35f, 0.4f, 0.55f, 0.95f);
+            shapes.circle(childBack.x, childBack.y, childBack.r, 16);
+        }
         if (depotWinOpen) {
             miniWindow(shapes, "wood", depotGrid.x - 8, bagY - 50, gridWinW(depotGrid), slotSize * 4 + 80);
             if (slotImg == null) drawGridSlotsFallback(shapes, depotGrid, session.character().depot(), -1);
@@ -5983,6 +6140,18 @@ public final class Hud {
         }
     }
 
+    /** Plecak o sciezce path (jako stos w pojemniku nadrzednym) albo null. */
+    private static ItemStack bagStackAt(pl.fawizja.pixel.inventory.Container root, int[] path) {
+        if (path == null || path.length == 0) return null;
+        pl.fawizja.pixel.inventory.Container c = root.resolve(java.util.Arrays.copyOf(path, path.length - 1));
+        return c == null || path[path.length - 1] >= c.size() ? null : c.get(path[path.length - 1]);
+    }
+
+    /** Etykieta przycisku "uzyj" w oknie dziecka: plecak sie otwiera, reszta jest uzywana. */
+    private String childContainerBagLabel(pl.fawizja.pixel.inventory.Container c, int slot) {
+        return c.isBag(slot) ? Messages.get("hud.plecak_otworz") : childUse.label;
+    }
+
     private void drawBagContents(SpriteBatch batch, GameSession session) {
         PlayerCharacter pc = session.character();
         placeGridViews(session);
@@ -5990,6 +6159,34 @@ public final class Hud {
         text(batch, Messages.get("hud.plecak") + " (" + used + "/" + pc.backpack().size() + ")", bagX, bagY + slotSize * 4 + 22);
         closeButton(batch, bagClose.x, bagClose.y);
         drawGridContents(batch, bagView, pc, pc.backpack(), selectedSlot, false);
+        // udzwig: waga zawartosci plecaka (z plecakami w plecaku) wobec cap postaci
+        String wt = Messages.get("hud.plecak_waga", String.valueOf(pc.backpack().weight() / pl.fawizja.pixel.inventory.ItemWeights.PER_OZ), String.valueOf(pc.capacity()));
+        font.getData().setScale(0.8f);
+        font.setColor(pc.backpack().freeWeight() <= 0 ? new Color(1f, 0.55f, 0.45f, 1f) : new Color(0.85f, 0.85f, 0.7f, 1f));
+        layout.setText(font, wt);
+        text(batch, wt, bagX + bagView.gridW() - layout.width - 8, bagY + slotSize * 4 + 21);
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1f);
+        pl.fawizja.pixel.inventory.Container childC = childContainer(session);
+        if (childC != null) {
+            ItemStack bagStack = bagStackAt(pc.backpack(), childPath);
+            String nm = bagStack == null ? Messages.get("hud.plecak") : session.items().get(bagStack.itemId()).name();
+            int cUsed = childC.size() - childC.freeSlots();
+            text(batch, clip(nm, gridWinW(childView) - 50) + " (" + cUsed + "/" + childC.size() + ")", childView.x, bagY + slotSize * 4 + 22);
+            closeButton(batch, childClose.x, childClose.y);
+            centered(batch, "<", childBack.x, childBack.y);
+            gridIsChild = true;
+            drawGridContents(batch, childView, pc, childC, childSelected, false);
+            gridIsChild = false;
+            if (childSelected >= 0 && childC.get(Math.min(childSelected, childC.size() - 1)) != null) {
+                ItemStack cs = childC.get(Math.min(childSelected, childC.size() - 1));
+                ItemType ct = session.items().get(cs.itemId());
+                if (ct.slot() != EquipSlot.NONE) centered(batch, childEquip.label, childEquip.x, childEquip.y);
+                centered(batch, childDrop.label, childDrop.x, childDrop.y);
+                centered(batch, childContainerBagLabel(childC, childSelected), childUse.x, childUse.y);
+                text(batch, clip(ct.name(), gridWinW(childView) - 12), childView.x, bagY + slotSize * 4 + 40);
+            }
+        }
         if (depotWinOpen) {
             int dUsed = pc.depot().size() - pc.depot().freeSlots();
             text(batch, Messages.get("hud.depozyt_okno") + " (" + dUsed + "/" + pc.depot().size() + ")", depotGrid.x, bagY + slotSize * 4 + 22);
@@ -5999,7 +6196,7 @@ public final class Hud {
             centered(batch, depotLoot.label, depotLoot.x, depotLoot.y);
             font.setColor(Color.WHITE);
         }
-        pl.fawizja.pixel.inventory.Container dragFrom = dragFromDepot ? pc.depot() : pc.backpack();
+        pl.fawizja.pixel.inventory.Container dragFrom = dragFromDepot ? pc.depot() : dragFromChild && childContainer(session) != null ? childContainer(session) : pc.backpack();
         if (dragging && dragSlot >= 0 && dragSlot < dragFrom.size() && dragFrom.get(dragSlot) != null) {
             TextureRegion r = art.item(dragFrom.get(dragSlot).itemId());
             if (r != null) batch.draw(r, dragX - slotSize * 0.45f, dragY - slotSize * 0.45f, slotSize * 0.9f, slotSize * 0.9f);
@@ -6023,9 +6220,9 @@ public final class Hud {
                 }
                 font.setColor(Color.WHITE);
                 font.getData().setScale(1f);
-                if (t.slot() != EquipSlot.NONE) centered(batch, bagEquip.label, bagEquip.x, bagEquip.y);
+                if (t.slot() != EquipSlot.NONE || pc.backpack().isBag(selectedSlot)) centered(batch, pc.backpack().isBag(selectedSlot) ? Messages.get("hud.plecak_zaloz") : bagEquip.label, bagEquip.x, bagEquip.y);
                 centered(batch, bagDrop.label, bagDrop.x, bagDrop.y);
-                centered(batch, bagUse.label, bagUse.x, bagUse.y);
+                centered(batch, pc.backpack().isBag(selectedSlot) ? Messages.get("hud.plecak_otworz") : bagUse.label, bagUse.x, bagUse.y);
                 if (zid()) font.setColor(Z_DARK_TEXT); // ciemny napis na zoltym przycisku
                 centered(batch, pc.isKept(s.itemId()) ? "ODBLOKUJ" : bagKeep.label, bagKeep.x, bagKeep.y);
                 font.setColor(Color.WHITE);

@@ -342,3 +342,8 @@ mob_caster_bolt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel
 mob_area_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=area
 mob_summoner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=summon
 mob_flee|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=30 -Dpixel.mobDemo=flee
+# 2026-11-12: plecak w plecaku (okno dziecka obok plecaka), lup do plecaka z miejscem, wielkie obszary czarow smokow
+nested_bag_open|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=nestbag -Dpixel.nestDemo=open
+nested_bag_loot|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.open=nestbag -Dpixel.nestDemo=loot
+dragon_wave9|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,545,0 -Dpixel.dragonDemo=wave9
+dragon_star|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,545,0 -Dpixel.dragonDemo=star

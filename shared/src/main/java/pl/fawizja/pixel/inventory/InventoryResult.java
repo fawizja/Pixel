@@ -12,7 +12,11 @@ public enum InventoryResult {
     WRONG_VOCATION,
     LEVEL_TOO_LOW,
     EMPTY_SLOT,
-    INSUFFICIENT_FUNDS;
+    INSUFFICIENT_FUNDS,
+    /** Udzwig (cap) postaci nie pozwala unies tego przedmiotu razem z zawartoscia plecaka. */
+    TOO_HEAVY,
+    /** Plecaka nie mozna wlozyc do samego siebie (ani do wlasnej zawartosci). */
+    CYCLE;
 
     public boolean ok() { return this == OK; }
 }
