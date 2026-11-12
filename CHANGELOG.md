@@ -1,5 +1,30 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Szlif mapy (`tools/mapgen/wall_lights.py`, `tools/mapgen/stairs.py`, renderer): analiza wad w `analizy/mapa-szlif.md`.
+  - Ciemne wnętrza: pokój (zwarte wnętrze budynku, od 14 pól) bez żadnej pochodni dostaje ją na ścianie widocznej z wnętrza,
+    jedna na ok. 36 pól (do 6), z odstępem co najmniej 3 pól od innych świateł i nigdy na drzwiach i oknach (`light_rooms`).
+  - Schody w górę i drabiny w lochach opierają się o ścianę (`stairs.back_stairs`): na polu na północ od nich staje mur (i dwa pola
+    obok), tylko tam, gdzie nie rozspaja to siatki pieszej, nie ma obiektów i celów przejść; wyjście zostaje od południa.
+  - Schody w dół rysowane w ramie z ciemnym otworem wpuszczonym w podłogę (`TileArt.stairPit`), nie na gołej ziemi.
+  - Duże potwory (plik postoju od 41 px: smoki, demony, hydry, bossowie) rysowane w naturalnym rozmiarze 64x64 na 2x2 polach od prawego
+    dolnego rogu ich pola, jak smok w Tibii (`TileArt.bigMonster`, `GameScreen`). Złoty smok (`dune_drake`) ma teraz oryginalne klatki
+    64x64 bez skalowania (`tools/art/darekart_import.py`).
+  - Testy `MapPolishTest` (pochodnie: mur i przechodnie pole przed nimi, nie na drzwiach i oknach; obiekty nie wiszą w murach; pokoje
+    bez ciemnych; schody oparte o ścianę), `BigMonsterArtTest`, `LightingTest` (loch ciemny, ale postać ma minimalne światło).
+  - Sceny gui-regression: `cave_dark`, `cave_torch`, `stairs_down_pit`, `gold_dragon`, `shop_torch_night`, `brick_grass_edge`
+    (wzorce do wygenerowania po scaleniu); `-Dpixel.gear=torch` zapala założoną pochodnię.
+
+### Zmieniono
+- Jaskinie i lochy są prawie ciemne poza światłem (jasność otoczenia -1: 0,10, niżej do 0,04), więc pochodnie i światło postaci
+  mają znaczenie jak w Tibii; postać zawsze ma minimalną poświatę (`Lighting`).
+- Obrzeża: kostka z cegły (`brick_paving`) i bruk (`paving`) mają priorytet obrzeży, więc trawa nachodzi na nie poszarpaną krawędzią
+  zamiast twardego kwadratu (Nerys, Valmir, miasta z ceglanym placem).
+- Mur budynku stoi na podłożu z zewnątrz (trawa, ziemia), nie na podłodze wnętrza: koniec z paskiem parkietu w rogu domów z bali
+  (Elandor, `WorldRenderer.wallBase`).
+
 ## [0.259.0] - 2026-11-12
 
 ### Dodano

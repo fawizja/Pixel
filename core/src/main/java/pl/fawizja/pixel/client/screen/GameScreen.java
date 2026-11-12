@@ -2121,13 +2121,24 @@ public final class GameScreen extends ScreenAdapter {
                 Monster m = visibleMonsters.get(i);
                 if (m.position().y() != row || m.position().z() != z) continue;
                 float mrx = m.renderX(t), mry = m.renderY(t);
-                TextureRegion tr = game.art().monster(m.type().key(), m.facing4(),
-                        TileArt.walkFrame(mrx, mry, m.position().x(), m.position().y()), monsterFlip);
+                int mframe = TileArt.walkFrame(mrx, mry, m.position().x(), m.position().y());
+                TextureRegion big = game.art().bigMonster(m.type().key(), m.facing4(), mframe, monsterFlip);
+                boolean isBig = big != null;
+                TextureRegion tr = isBig ? big : game.art().monster(m.type().key(), m.facing4(), mframe, monsterFlip);
                 if (tr == null) continue;
                 float[] lg = lunges.get(m.position());
                 float mx = mrx + (lg == null ? 0f : lg[0]);
                 float my = worldRenderer.worldY(mry + (lg == null ? 0f : lg[1]));
                 boolean flip = monsterFlip[0];
+                if (isBig) {
+                    // duzy potwor (smok, demon, hydra): 64x64 na 2x2 pola, jego pole to prawy dolny kwadrat (jak w Tibii)
+                    boolean tinted = m.type().isFiendish() || m.type().isInfluenced();
+                    if (m.type().isFiendish()) b.setColor(1f, 0.55f, 0.75f, 1f);
+                    else if (m.type().isInfluenced()) b.setColor(0.85f, 0.75f, 1f, 1f);
+                    b.draw(tr, flip ? mx + 2f : mx - 1f, my, flip ? -2f : 2f, 2f);
+                    if (tinted) b.setColor(Color.WHITE);
+                    continue;
+                }
                 if (m.type().isFiendish()) {
                     // diaboliczny (Kuznia): wiekszy, czerwono-fioletowy
                     b.setColor(1f, 0.55f, 0.75f, 1f);

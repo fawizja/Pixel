@@ -36,6 +36,7 @@ import newtowns  # noqa: E402
 import organic  # noqa: E402
 import underground as U  # noqa: E402
 import wall_lights  # noqa: E402
+import stairs as stair_rules  # noqa: E402
 import quests  # noqa: E402
 import boss_quests  # noqa: E402
 import wilds  # noqa: E402
@@ -2883,6 +2884,7 @@ def finish(ctx):
     # poziomy potworow rosna stopniowo wzdluz drog od swiatyn; silne spawny na drogach do slabszych lowisk obnizone
     # (route_levels.py, Darek 2026-11-04); regiony dostaja zalecane poziomy wg spawnow, ktore w nich zostaly
     # swiatla i domy zmieniaja pola przejscia - poziomy drog licza sie na gotowym ukladzie
+    print('schody przy scianie:', stair_rules.back_stairs(ctx, S, FLOORS))
     print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
     print('domy na sprzedaz:', homes.check_houses(ctx))
     regions = route_levels.apply(ctx, all_regions(ctx))

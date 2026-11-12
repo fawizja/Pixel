@@ -9,7 +9,7 @@ Zrodla leza poza repo; do assets/ trafiaja tylko wyciete kawalki:
 - tiles/rock*.png (warianty `rock`: 12 malych kamieni 32x32 z arkuszy 1-3, bez skalowania) oraz native/rock_v13..v16.png
   (duze glazy 64x64, rysowane 2x2 pola jak krzaki) - zastepuja kamienie OTSP;
 - tiles/snow_rock*.png (4 male z arkusza 4) i native/snow_rock_v5.png (duzy glaz);
-- monsters/dune_drake*.png: zloty smok (cztery kierunki x trzy klatki; srodkowy wiersz = postoj) w 41x41.
+- monsters/dune_drake*.png: zloty smok (cztery kierunki x trzy klatki; srodkowy wiersz = postoj) w oryginalnym 64x64.
 Nieuzyte: chmury (Nubes: rozmyte, nie pikselart), kamienie jak arkusz 4 do `sandstone_rock`/`obsidian_rock` (brak piaskowych).
 """
 import os
@@ -87,21 +87,12 @@ def main():
             cell = sh.crop((c * 64, r * 64, c * 64 + 64, r * 64 + 64))
             cells[(r, c)] = cell
             boxes.append(cell.getbbox())
-    x0 = min(b[0] for b in boxes); y0 = min(b[1] for b in boxes)
-    x1 = max(b[2] for b in boxes); y1 = max(b[3] for b in boxes)
-    side = max(x1 - x0, y1 - y0)
+    # natywny rozmiar jak smok w Tibii: cala komorka 64x64 bez skalowania (renderer rysuje go na 2x2 pola od
+    # prawego dolnego rogu pola potwora - TileArt.bigMonster)
     side_names = {0: "_up", 1: "_right", 2: "", 3: "_left"}
     frames = {0: "_walk1", 1: "", 2: "_walk2"}
     for (r, c), cell in cells.items():
-        sq = Image.new("RGBA", (side, side), (0, 0, 0, 0))
-        sq.paste(cell.crop((x0, y0, x1, y1)), ((side - (x1 - x0)) // 2, (side - (y1 - y0)) // 2))
-        # skalowanie z usrednianiem, potem twarde krawedzie alfa (bez rozmytego obrysu)
-        sm = sq.resize((41, 41), Image.LANCZOS)
-        px = sm.load()
-        for y in range(41):
-            for x in range(41):
-                p = px[x, y]
-                px[x, y] = (p[0], p[1], p[2], 255) if p[3] >= 128 else (0, 0, 0, 0)
+        sm = cell.copy()
         # kolejnosc nazw jak w grze: dune_drake_up_walk1.png, dune_drake_walk1.png
         fn = "dune_drake" + side_names[c] + frames[r] + ".png"
         sm.save(os.path.join(art, "monsters", fn))

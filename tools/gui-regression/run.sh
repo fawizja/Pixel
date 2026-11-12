@@ -21,7 +21,7 @@ while IFS='|' read -r name opts; do
   # osobny HOME: zapamietany login i ustawienia gracza nie wplywaja na wyglad
   # -Dpixel.revealMap=1: bez mgly mapy (scena moze nadpisac: -Dpixel.revealMap=0)
   # -Dpixel.lang=pl: wzorce sa polskie (domyslny jezyk gry to angielski); scena moze nadpisac -Dpixel.lang=en|es
-  HOME="$OUT/home" JAVA_OPTS="-Dpixel.revealMap=1 -Dpixel.lang=pl $opts -Duser.home=$OUT/home -Dpixel.seed=1 -Dpixel.startLevel=8 -Dpixel.frames=45 -Dpixel.saveDir=$OUT/save -Dpixel.screenshot=$OUT/shots/$name.png" \
+  HOME="$OUT/home" JAVA_OPTS="-Dpixel.revealMap=1 -Dpixel.lang=pl -Dpixel.startLevel=8 $opts -Duser.home=$OUT/home -Dpixel.seed=1 -Dpixel.frames=45 -Dpixel.saveDir=$OUT/save -Dpixel.screenshot=$OUT/shots/$name.png" \
     timeout 120 "$BIN" > "$OUT/$name.log" 2>&1 || true
   if [ -f "$OUT/shots/$name.png" ]; then echo "zrzut: $name"; else echo "BLAD: brak zrzutu $name (log: $OUT/$name.log)"; missing=$((missing + 1)); fi
 done < "$HERE/scenes.txt"

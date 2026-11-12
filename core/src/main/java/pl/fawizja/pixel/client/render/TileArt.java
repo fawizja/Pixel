@@ -706,6 +706,74 @@ public final class TileArt implements Disposable {
         if (any) dirSlots.put(key, slots);
     }
 
+    // ------------------------------------------------------------------ duze potwory (smoki, demony, hydry)
+    /** Potwory z plikiem od tylu pikseli maja grafike w naturalnym rozmiarze, 64x64 na 2x2 pola (jak smok w Tibii). */
+    public static final int BIG_MONSTER_MIN = 41;
+    private static final TextureRegion[] NO_BIG = new TextureRegion[0];
+    /** key -> 12 klatek (strona*3 + klatka; 64x64, potwor przy prawym dolnym rogu) albo NO_BIG. */
+    private final Map<String, TextureRegion[]> bigMonsters = new HashMap<>();
+    private final List<Texture> bigMonsterTextures = new ArrayList<>();
+
+    /** Czy potwor jest rysowany w naturalnym rozmiarze na 2x2 polach (plik postoju co najmniej BIG_MONSTER_MIN px). */
+    public boolean isBigMonster(String key) {
+        return bigFrames(key).length > 0;
+    }
+
+    private TextureRegion[] bigFrames(String key) {
+        TextureRegion[] r = bigMonsters.get(key);
+        if (r == null) {
+            r = loadBigMonster(key);
+            bigMonsters.put(key, r);
+        }
+        return r;
+    }
+
+    private TextureRegion[] loadBigMonster(String key) {
+        Pixmap idle = loadArt("monsters/" + key + ".png");
+        if (idle == null) return NO_BIG;
+        int side = Math.max(idle.getWidth(), idle.getHeight());
+        idle.dispose();
+        if (side < BIG_MONSTER_MIN) return NO_BIG;
+        Pixmap atlas = new Pixmap(3 * 4 * 64, 64, Pixmap.Format.RGBA8888);
+        atlas.setBlending(Pixmap.Blending.None);
+        boolean[] has = new boolean[4];
+        String[] suffix = {"", "_up", "_left", "_right"};
+        for (int d = 0; d < 4; d++) {
+            for (int k = 0; k < 3; k++) {
+                Pixmap src = loadArt("monsters/" + key + suffix[d] + (k == 0 ? "" : "_walk" + k) + ".png");
+                if (src == null) continue;
+                has[d] = true;
+                int w = Math.min(64, src.getWidth()), h = Math.min(64, src.getHeight());
+                int sw = Math.max(src.getWidth(), src.getHeight());
+                float t = Math.max(0f, Math.min(1f, (sw - 48) / 16f));
+                int ox = Math.round((1f - t) * (48f - w / 2f) + t * (64f - w));
+                atlas.drawPixmap(src, 0, 0, w, h, (d * 3 + k) * 64 + Math.max(0, ox), 64 - h, w, h);
+                src.dispose();
+            }
+        }
+        Texture tex = new Texture(atlas);
+        tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        atlas.dispose();
+        bigMonsterTextures.add(tex);
+        TextureRegion[] out = new TextureRegion[12];
+        for (int i = 0; i < 12; i++) out[i] = has[i / 3] ? new TextureRegion(tex, i * 64, 0, 64, 64) : null;
+        return out;
+    }
+
+    /**
+     * Potwor w naturalnym rozmiarze (64x64, rysowany na 2x2 pola od prawego dolnego rogu jego pola) albo null, gdy
+     * jest zwyklej wielkosci; flip[0] = odbij w poziomie (wokol srodka pola, jak {@link #monster}).
+     */
+    public TextureRegion bigMonster(String key, Direction facing, int frame, boolean[] flip) {
+        TextureRegion[] r = bigFrames(key);
+        if (r.length == 0) return null;
+        boolean[] has = {true, r[3] != null, r[6] != null, r[9] != null};
+        CreatureFrames.Pick p = CreatureFrames.pick(has, facing);
+        if (flip != null) flip[0] = p.flip();
+        TextureRegion t = r[p.dir() * 3 + Math.max(0, Math.min(frame, 2))];
+        return t != null ? t : r[p.dir() * 3];
+    }
+
     private boolean[] sidesOf(String key) {
         TextureRegion[] r = dirRegions.get(key);
         if (r == null) return null;
@@ -1310,6 +1378,44 @@ public final class TileArt implements Disposable {
         else if (facing.dx > 0) d = 3;
         else d = 0;
         return characters[v.ordinal()][d];
+    }
+
+    private Texture stairPitTexture;
+    private TextureRegion stairPit;
+
+    /**
+     * Otwor schodow w dol (jak w Tibii): ciemna dziura w kamiennej ramie wpuszczonej w podloge; schody z paczki
+     * rysowane sa na niej, wiec nie wisza juz na golej ziemi. Rysowane procedurowo, 32x32.
+     */
+    public TextureRegion stairPit() {
+        if (stairPit == null) {
+            int s = 32;
+            Pixmap p = new Pixmap(s, s, Pixmap.Format.RGBA8888);
+            Color outline = Color.valueOf("#2a2622"), rimLight = Color.valueOf("#9a9488"), rim = Color.valueOf("#76705f");
+            for (int y = 0; y < s; y++) {
+                for (int x = 0; x < s; x++) {
+                    int d = Math.min(Math.min(x, s - 1 - x), Math.min(y, s - 1 - y));
+                    if (d < 1) continue;                                       // naroza i brzeg: przezroczyste
+                    Color c;
+                    if (d == 1) c = outline;
+                    else if (d == 2) c = rimLight;
+                    else if (d < 5) c = rim;
+                    else if (d == 5) c = outline;
+                    else {
+                        float t = Math.min(1f, (d - 6) / 6f);
+                        c = new Color(0.10f - 0.07f * t, 0.085f - 0.06f * t, 0.07f - 0.05f * t, 1f);
+                    }
+                    if (d == 1 && (x == 1 || x == s - 2) && (y == 1 || y == s - 2)) continue; // zaokraglone rogi
+                    p.setColor(c);
+                    p.drawPixel(x, y);
+                }
+            }
+            stairPitTexture = new Texture(p);
+            stairPitTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            p.dispose();
+            stairPit = new TextureRegion(stairPitTexture);
+        }
+        return stairPit;
     }
 
     private static Texture buildLightTexture() {
@@ -2093,6 +2199,8 @@ public final class TileArt implements Disposable {
         if (rockAtlas != null) rockAtlas.dispose();
         if (terrain != null) terrain.dispose();
         if (bigAtlas != null) bigAtlas.dispose();
+        for (Texture t : bigMonsterTextures) t.dispose();
+        if (stairPitTexture != null) stairPitTexture.dispose();
         if (nativeAtlas != null) nativeAtlas.dispose();
         if (dummyNativeTexture != null) dummyNativeTexture.dispose();
         if (fxAtlas != null) fxAtlas.dispose();

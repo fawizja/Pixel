@@ -34,6 +34,16 @@ po kawałku.
   Nie uzyto: chmur (rozmyte, nie pikselart), run-kamieni z JPG (artefakty kompresji, 15-20 px, rozowe tlo), schodow, drabin, dziur
   i dachow (paczka 238 obrazkow ich nie ma; zostaly tam same przedmioty z Tibii i inne cudze, wykluczone).
 
+- Duże potwory: plik postoju `monsters/klucz.png` od 41 px (`TileArt.BIG_MONSTER_MIN`) jest rysowany w naturalnym rozmiarze na płótnie 64x64
+  (2x2 pola, pole potwora = prawy dolny kwadrat, jak smok w Tibii; `TileArt.bigMonster`, rysowanie w `GameScreen`); mniejsze
+  grafiki (do 40 px) zostają w jednym polu. Pliki większe niż 64 px są przycinane do 64. Złoty smok `dune_drake*.png` ma
+  oryginalne 64x64.
+- Schody w dół (`stairs_down`) stoją w ramie z ciemnym otworem rysowanej procedurowo (`TileArt.stairPit`, 32x32, kamienna obwódka);
+  grafika schodów z OTSP leży na niej. Schody w górę i drabiny w lochach generator ustawia przy ścianie (`tools/mapgen/stairs.py`).
+- Obrzeża: kostka (`paving`, `brick_paving`) ma priorytet obrzeży 8 jak bruk, więc trawa nachodzi na nią; mur budynku jest rysowany
+  na podłożu z zewnątrz (`WorldRenderer.wallBase`). Pochodnie na ścianach: `tools/mapgen/wall_lights.py` (przenosi światła na mury
+  i dokłada pochodnię do pokoi bez światła). Światło w lochach: `Lighting` (jasność otoczenia -1 = 0,10).
+
 Razem: 144 kafelków, 400 przedmiotów, 174 potworów, 169 NPC, 16 obrazków postaci, 9 obiektów, 4 pupili. Podmienione: 886.
 
 Lista jest generowana: `python3 tools/art/list_graphics.py`.

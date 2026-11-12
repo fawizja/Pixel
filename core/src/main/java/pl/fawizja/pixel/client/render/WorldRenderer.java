@@ -54,12 +54,15 @@ public final class WorldRenderer {
     private final pl.fawizja.pixel.world.WallLights wallLights;
     /** Pietro rysowane w tej chwili (drzwi w murze sa pomijane w przebiegu obiektow). */
     private FloorMap drawingFloor;
+    private final int stairsDownId;
 
     public WorldRenderer(WorldMap world, TileArt art) {
         this.world = world;
         this.openings = world.openings();
         this.wallLights = world.wallLights();
         this.art = art;
+        pl.fawizja.pixel.world.TileType sd = world.tiles().byKeyOrNull("stairs_down");
+        this.stairsDownId = sd == null ? -1 : sd.id();
         int max = 0;
         for (pl.fawizja.pixel.world.TileType t : world.tiles().all()) max = Math.max(max, t.id());
         tall = new boolean[max + 1];
@@ -141,7 +144,7 @@ public final class WorldRenderer {
         // kazdy z jednej tekstury, zamiast przelaczac atlasy na kazdym polu (etap 18: mniej wywolan rysowania)
         for (int y = y0; y <= y1; y++) {
             float wy = worldY(y);
-            for (int x = x0; x <= x1; x++) drawGround(batch, f, f.get(Layer.GROUND, x, y), x, y, wy);
+            for (int x = x0; x <= x1; x++) drawGround(batch, f, wallBase(f, x, y), x, y, wy);
         }
         if (f.z() == 0) drawOutside(batch, f);
         for (int y = y0; y <= y1; y++) {
@@ -177,6 +180,26 @@ public final class WorldRenderer {
             if (rows != null) rows.drawRow(batch, y);
         }
         if (art.terrain() != null && f.z() <= 0) drawFog(batch, f, x0, x1, y0, y1);
+    }
+
+    /**
+     * Podloze pola do narysowania. Pod murem budynku z podloga wnetrza (drewno, kamien) przeswitywalaby ta podloga w
+     * kacie sprite'a muru (naroznik poludniowo-zachodni budynku z bali pokazywal pasek parkietu na trawie), wiec
+     * mur stoi na podlozu z pola od poludnia albo zachodu, jesli to naturalne podloze na zewnatrz (trawa, piasek, ziemia).
+     */
+    private int wallBase(FloorMap f, int x, int y) {
+        int g = f.get(Layer.GROUND, x, y);
+        int w = f.get(Layer.WALL, x, y);
+        GroundBorders b = art.borders();
+        if (w == 0 || g == 0 || b == null || b.priority(g) >= 0) return g;
+        if (art.rockShape(w, 0) != null || art.wallPiece(w, TileArt.WALL_V) == null) return g;
+        for (int k = 0; k < 2; k++) {
+            int nx = k == 0 ? x : x - 1, ny = k == 0 ? y + 1 : y;
+            if (!f.inBounds(nx, ny) || f.get(Layer.WALL, nx, ny) != 0) continue;
+            int gn = f.get(Layer.GROUND, nx, ny);
+            if (gn != 0 && b.priority(gn) >= 0) return gn;
+        }
+        return g;
     }
 
     /** Towary na ladach sklepow (z mapy): pole -> numer przedmiotu; tylko grafika, gracz ich nie podnosi. */
@@ -348,6 +371,7 @@ public final class WorldRenderer {
 
     private void drawObject(SpriteBatch batch, int id, int mx, int my, float x, float wy) {
         if (id == 0) return;
+        if (id == stairsDownId) batch.draw(art.stairPit(), x, wy, 1f, 1f); // schody w dol: otwor w podlodze w kamiennej ramie
         if (drawBush(batch, id, mx, my, x, wy)) return;
         if (doors.contains(id) && drawingFloor != null && doorArt(drawingFloor, mx, my) != 0) return; // drzwi w murze - drawWall
         if (wallLights.isLightTile(id) && drawingFloor != null && drawingFloor.get(Layer.WALL, mx, my) != 0) return; // na murze - drawWall
