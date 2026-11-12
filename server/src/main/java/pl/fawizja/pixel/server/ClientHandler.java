@@ -80,6 +80,11 @@ final class ClientHandler {
                     break;
                 }
                 String[] f = Protocol.parse(l);
+                if (f[0].equals("PING")) {
+                    // pomiar opoznienia: odpowiedz od razu z watku odczytu (bez kolejki ticku), echo znacznika klienta
+                    send("PONG", f.length > 1 ? f[1] : "");
+                    continue;
+                }
                 server.enqueue(this, f);
                 if (f[0].equals("BYE")) break;
             }

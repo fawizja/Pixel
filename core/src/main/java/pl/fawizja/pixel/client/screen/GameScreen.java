@@ -400,7 +400,27 @@ public final class GameScreen extends ScreenAdapter {
     /** Akcja gracza: lokalnie wykonana od razu, online - wyslana do serwera (jedyne zrodlo prawdy). */
     private void act(String action, long t) {
         if (net != null) net.send("ACT", action);
-        else Actions.apply(session, action, t);
+        else {
+            Actions.apply(session, action, t);
+            pl.fawizja.pixel.training.OfflineTraining.Choice trained = session.takeTrainingLogout();
+            if (trained != null) logoutForTraining(trained);
+        }
+    }
+
+    private boolean trainingLogout;
+
+    /**
+     * Posag treningowy w swiatyni: postac sie wylogowuje (offline zapis lokalny, online serwer zapisal ja przed
+     * TRAINLOGOUT); trening zostaje rozliczony przy nastepnym wejsciu do gry.
+     */
+    private void logoutForTraining(pl.fawizja.pixel.training.OfflineTraining.Choice c) {
+        if (trainingLogout) return;
+        trainingLogout = true;
+        hud.closeTop(session);
+        stopWalk();
+        if (net == null) game.saveCharacter(session.character());
+        String msg = Messages.get("offline_training.logout", c.skill().label());
+        Gdx.app.postRunnable(() -> game.backToMenu(msg));
     }
 
     @Override
@@ -1304,6 +1324,14 @@ public final class GameScreen extends ScreenAdapter {
     /** Otwiera albo zamyka drzwi i okna, otwiera skrzynie (online: serwer decyduje, drzwi i okna od razu na ekranie). */
     private void useOpening(Position p) {
         long t = now();
+        if (session.isDepotLocker(p)) {                  // skrzynia depozytu: okno depozytu (zawartosc z zapisu postaci)
+            hud.openDepotWindow(session);
+            return;
+        }
+        if (session.isTrainingStatue(p)) {               // posag treningowy: wybor umiejetnosci i wylogowanie
+            hud.openNpc(session);
+            return;
+        }
         GameSession.DoorTap tap = session.houseDoorTap(p);
         if (tap != null && tap != GameSession.DoorTap.TOGGLE) {
             // drzwi domu: okno jak w Tibii (wolny/zajety, cena, czynsz, Kup) albo okno wlasciciela w srodku
@@ -2296,6 +2324,7 @@ public final class GameScreen extends ScreenAdapter {
 
         if (profiler != null && profiler.isEnabled()) worldDrawCalls = profiler.getDrawCalls();
         feedHud(t);
+        updateNetStatus();
         hud.render(batch, game.shapes(), session, session.clock(), t, this::diagnosticsLines);
         endProfiling();
         limitFrameRate();
@@ -3451,6 +3480,12 @@ public final class GameScreen extends ScreenAdapter {
                     }
                     break;
                 }
+                case "TRAINLOGOUT": {
+                    // serwer zapisal postac przy posagu treningowym: wylogowanie, trening liczy sie przy nastepnym wejsciu
+                    pl.fawizja.pixel.training.OfflineTraining.Choice c = m.length > 1 ? pl.fawizja.pixel.training.OfflineTraining.Choice.of(m[1]) : null;
+                    if (c != null) logoutForTraining(c);
+                    break;
+                }
                 case "SLEEP": {
                     // serwer polozyl postac w lozku (SLEEP x y z): sen na ekranie, potem wylogowanie
                     if (m.length < 4 || sleepBed != null) break;
@@ -3662,6 +3697,28 @@ public final class GameScreen extends ScreenAdapter {
         int cap = guard.fpsCap(settings.effectiveFpsCap());
         if (Gdx.app.getType() != Application.ApplicationType.Android) {
             Gdx.graphics.setForegroundFPS(cap);
+        }
+    }
+
+    /** Symulowany ping do zrzutow ekranu i podgladu (-Dpixel.fakePing=ms, takze offline); -1 = brak. */
+    private static final int FAKE_PING_MS = Integer.getInteger("pixel.fakePing", -1);
+
+    /**
+     * FPS i ping w lewym gornym rogu: online mierzymy czas obiegu PING/PONG ({@link pl.fawizja.pixel.net.PingMeter}),
+     * offline nie ma czego mierzyc, wiec wskaznik jest ukryty (chyba ze -Dpixel.fakePing).
+     */
+    private void updateNetStatus() {
+        long nowWall = System.currentTimeMillis();
+        int fps = System.getProperty("pixel.screenshot") != null ? 60 : Gdx.graphics.getFramesPerSecond();
+        if (net != null) {
+            net.pingIfDue();
+            pl.fawizja.pixel.net.PingMeter m = net.pingMeter();
+            if (FAKE_PING_MS >= 0) hud.setNetStatus(fps, true, pl.fawizja.pixel.net.PingMeter.classify(FAKE_PING_MS), FAKE_PING_MS + " ms");
+            else hud.setNetStatus(fps, true, m.quality(nowWall), m.label(nowWall));
+        } else if (FAKE_PING_MS >= 0) {
+            hud.setNetStatus(fps, true, pl.fawizja.pixel.net.PingMeter.classify(FAKE_PING_MS), FAKE_PING_MS + " ms");
+        } else {
+            hud.setNetStatus(-1, false, null, null);
         }
     }
 

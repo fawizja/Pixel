@@ -26,5 +26,7 @@ public enum NpcRole {
     /** Mnich z kaplicy poza miastem: sprzedaje jedno blogoslawienstwo (zob. {@code Blessing#sellerKey()}), jak mnisi z oddalonych swiatyn w Tibii. */
     BLESSER,
     /** Herold Pieczeci w swiatyni Varden: po ukonczeniu wyprawy Gasnacej Gwiazdy sprzedaje wszystkie blogoslawienstwa naraz. */
-    HERALD
+    HERALD,
+    /** Posag treningowy offline w swiatyni (pole mapy dzialajace jak rozmowa): wybor umiejetnosci i wylogowanie. */
+    TRAINER
 }

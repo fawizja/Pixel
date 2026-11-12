@@ -61,7 +61,8 @@ public final class CharacterCodec {
         if (pc.restedMs() > 0) m.put("rested", Long.toString(pc.restedMs()));
         // osobne pole (bez podbijania wersji): stary zapis bez niego = pelna stamina 42:00
         m.put("stamina", pc.stamina().encode(wallClock.getAsLong()));
-        if (pc.extraBags() > 0) m.put("bags", Integer.toString(pc.extraBags()));
+        m.put("offtrain", pc.offlineTraining().encode(wallClock.getAsLong()));   // stary zapis bez pola = pelny pasek 12:00
+        if (pc.backpackSlots() != pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS) m.put("bagslots", Integer.toString(pc.backpackSlots()));
         for (int i = 0; i < pc.backpack().size(); i++) {
             ItemStack s = pc.backpack().get(i);
             if (s != null) m.put("bp." + i, stackText(s));
@@ -240,7 +241,10 @@ public final class CharacterCodec {
         PlayerCharacter pc = new PlayerCharacter(require(m, "id"), require(m, "name"), voc,
                 Balance.levelForExperience(exp), p, items, bank, m.getOrDefault("hometown", "varden"));
         pc.restoreState(exp, Integer.parseInt(require(m, "health")), Integer.parseInt(require(m, "mana")));
-        pc.restoreBags(Integer.parseInt(m.getOrDefault("bags", "0")));
+        // liczba pol plecaka; stary zapis z dodatkowymi "stronami" (bags = n) ma 20 * (1 + n) pol, nic nie ginie
+        int bagSlots = m.containsKey("bagslots") ? Integer.parseInt(m.get("bagslots").trim())
+                : pl.fawizja.pixel.inventory.Container.BACKPACK_SLOTS * (1 + Math.max(0, Integer.parseInt(m.getOrDefault("bags", "0"))));
+        pc.setBackpackSlots(bagSlots);
         java.util.TreeMap<Integer, String> friends = new java.util.TreeMap<>();
         ItemStack wormsFromAmmo = null;
         for (Map.Entry<String, String> e : m.entrySet()) {
@@ -286,6 +290,7 @@ public final class CharacterCodec {
             if (!pc.backpack().add(wormsFromAmmo).ok()) pc.depot().add(wormsFromAmmo);
         }
         pc.stamina().restore(m.get("stamina"));
+        pc.offlineTraining().restore(m.get("offtrain"));
         String flags = m.getOrDefault("flags", "");
         pc.setRunning(flags.contains("R"));
         pc.setFightMode(pl.fawizja.pixel.combat.FightMode.fromFlags(flags)); // stare "D" (Tarcza) = defensywny

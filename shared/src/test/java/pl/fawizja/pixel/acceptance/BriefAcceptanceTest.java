@@ -54,14 +54,13 @@ class BriefAcceptanceTest {
     }
 
     @Test
-    void everyVocationStartsAtLevel300WithTenMillionAndTwoBackpacks() {
+    void everyVocationStartsAtLevel300WithTenMillionAndATravelerBackpack() {
         for (Vocation v : Vocation.values()) {
             PlayerCharacter pc = new CharacterFactory(config, TestData.ITEMS).create("Brief", v, world.towns().get(0).temple());
             assertEquals(300, pc.level(), v.name());
             assertEquals(10_000_000L, pc.bank().balance(), v.name());
             assertEquals(pc.maxHealth(), pc.health(), v.name());
-            assertEquals(2, pc.bagPages(), v + ": main backpack plus one extra");
-            assertEquals(40, pc.backpack().size(), v.name());
+            assertEquals(24, pc.backpack().size(), v.name());
         }
     }
 

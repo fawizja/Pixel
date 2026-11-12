@@ -5,20 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Wiersze okna umiejetnosci (jak okno Skills w Tibii): poziom, doswiadczenie, stamina (hh:mm), potem umiejetnosci
+ * Wiersze okna umiejetnosci (jak okno Skills w Tibii): poziom, doswiadczenie, stamina (hh:mm), pasek treningu offline, potem umiejetnosci
  * w kolejnosci {@link Skill#values()} - piesci, maczuga, miecz, topor, dystans, tarcza, wedkarstwo, magia.
  * Wspolne dla HUD-u na komputer i telefon.
  */
 public final class SkillSheet {
 
     /** Kolor paska wiersza. */
-    public enum Bar { NONE, EXPERIENCE, SKILL, STAMINA_BONUS, STAMINA, STAMINA_LOW, STAMINA_EMPTY }
+    public enum Bar { NONE, EXPERIENCE, SKILL, STAMINA_BONUS, STAMINA, STAMINA_LOW, STAMINA_EMPTY, OFFLINE_TRAINING }
 
     /** label, wartosc, postep paska 0..1 (ujemny = bez paska) i jego kolor. */
     public record Row(String label, String value, double progress, Bar bar) {}
 
-    /** Tyle wierszy przed umiejetnosciami (poziom, doswiadczenie, stamina). */
-    public static final int HEAD_ROWS = 3;
+    /** Tyle wierszy przed umiejetnosciami (poziom, doswiadczenie, stamina, trening offline). */
+    public static final int HEAD_ROWS = 4;
 
     private SkillSheet() {}
 
@@ -29,6 +29,7 @@ public final class SkillSheet {
         out.add(new Row(Messages.get("hud.poziom"), pc.level() + " (" + expRateLabel(pc) + ")", -1, Bar.NONE));
         out.add(new Row(Messages.get("hud.doswiadczenie"), (int) (pc.levelProgress() * 100) + "%", pc.levelProgress(), Bar.EXPERIENCE));
         out.add(stamina(pc));
+        out.add(offlineTraining(pc));
         for (Skill sk : Skill.values()) {
             double prog = pc.skills().progress(sk);
             out.add(new Row(sk.label(), String.valueOf(pc.skills().level(sk)), prog, Bar.SKILL));
@@ -59,6 +60,12 @@ public final class SkillSheet {
         return new Row("Stamina", s.display(), s.fraction(), bar);
     }
 
+    /** Pasek treningu offline (jak w Tibii pod Stamina): hh:mm z 12:00, odnawia sie w grze. */
+    public static Row offlineTraining(PlayerCharacter pc) {
+        pl.fawizja.pixel.training.OfflineTraining t = pc.offlineTraining();
+        return new Row(Messages.get("offline_training.bar"), t.display(), t.fraction(), Bar.OFFLINE_TRAINING);
+    }
+
     /** Kolor paska RGB (0xRRGGBB): zielony premii, pomaranczowy niskiej staminy, czerwony pustej. */
     public static int color(Bar bar) {
         switch (bar) {
@@ -67,6 +74,7 @@ public final class SkillSheet {
             case STAMINA: return 0xd8d040;
             case STAMINA_LOW: return 0xf08a20;
             case STAMINA_EMPTY: return 0xd02a20;
+            case OFFLINE_TRAINING: return 0x4a9be0;
             default: return 0x4dbf66;
         }
     }

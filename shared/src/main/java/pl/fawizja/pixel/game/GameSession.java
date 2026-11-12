@@ -631,8 +631,20 @@ public final class GameSession {
         Npc crate = crateNearby();
         if (crate != null) return crate;
         Npc locker = depotLockerNearby();
-        return locker != null ? locker : npcs.nearest(pc.position(), world);
+        if (locker != null) return locker;
+        Npc statue = trainingStatueNpc();
+        return statue != null ? statue : npcs.nearest(pc.position(), world);
     }
+
+    /** Posag treningowy na sasiednim polu jako "rozmowca" (okno wyboru umiejetnosci) albo null. */
+    public Npc trainingStatueNpc() {
+        Position q = trainingStatueNearby();
+        if (q == null) return null;
+        return statues.computeIfAbsent(q, k -> new Npc(Npc.TRAINING_STATUE, Messages.get("offline_training.statue_name"),
+                NpcRole.TRAINER, nearestTown(k), k, null, Messages.get("offline_training.look"), "#b08a50"));
+    }
+
+    private final java.util.Map<Position, Npc> statues = new java.util.HashMap<>();
 
     /** Skrzynia depozytu (jak w Tibii) na sasiednim polu: dziala jak bankier otwarty w widoku depozytu. */
     public Npc depotLockerNearby() {
@@ -951,6 +963,81 @@ public final class GameSession {
             }
         }
         return out;
+    }
+
+    // ------------------------------------------------------------------ depozyt i posagi treningowe
+
+    private boolean depotOpenRequest;
+    private Position statueRequest;
+    private pl.fawizja.pixel.training.OfflineTraining.Choice trainingLogout;
+
+    /** Uzyto skrzyni depozytu na mapie: klient otwiera okno depozytu (odczyt zeruje). */
+    public boolean takeDepotOpen() {
+        boolean b = depotOpenRequest;
+        depotOpenRequest = false;
+        return b;
+    }
+
+    /** Uzyto posagu treningowego: pole posagu, klient pokazuje wybor umiejetnosci (odczyt zeruje). */
+    public Position takeStatueRequest() {
+        Position p = statueRequest;
+        statueRequest = null;
+        return p;
+    }
+
+    /** Czy na polu stoi posag treningowy offline (swiatynie miast). */
+    public boolean isTrainingStatue(Position p) {
+        pl.fawizja.pixel.world.TileType o = objectAt(p);
+        return o != null && o.key().equals("training_statue");
+    }
+
+    /** Posag na sasiednim polu (w tym po skosie) albo null. */
+    public Position trainingStatueNearby() {
+        Position me = pc.position();
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                Position q = me.translate(dx, dy);
+                if (isTrainingStatue(q)) return q;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Wybor umiejetnosci na posagu (akcja "offtrain:SKILL"): jak {@code skill_trainer.lua} z Canary - wymaga konta
+     * premium i braku blokady walki, zapisuje wybor i zleca wylogowanie ({@link #takeTrainingLogout}). Trening liczy
+     * sie przy nastepnym wejsciu do gry ({@link pl.fawizja.pixel.training.OfflineTraining#onLogin}).
+     */
+    public boolean startOfflineTraining(pl.fawizja.pixel.training.OfflineTraining.Choice c, long nowMs) {
+        if (c == null || trainingStatueNearby() == null) {
+            log.add(nowMs, EventLog.Kind.WARNING, TradeResult.TOO_FAR.message());
+            return false;
+        }
+        String refusal = pl.fawizja.pixel.training.OfflineTraining.refusal(pc, nowMs);
+        if (refusal != null) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get(refusal));
+            return false;
+        }
+        if (trainingLogout != null) return false;
+        pc.offlineTraining().setChoice(c);
+        trainingLogout = c;
+        moving = false;
+        log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("offline_training.logout", c.skill().label()));
+        return true;
+    }
+
+    /** Wybrana umiejetnosc po uzyciu posagu (klient albo serwer wylogowuje postac); odczyt zeruje. */
+    public pl.fawizja.pixel.training.OfflineTraining.Choice takeTrainingLogout() {
+        pl.fawizja.pixel.training.OfflineTraining.Choice c = trainingLogout;
+        trainingLogout = null;
+        return c;
+    }
+
+    /** Rozliczenie treningu offline po wejsciu do gry: komunikaty trafiaja do dziennika. */
+    public pl.fawizja.pixel.training.OfflineTraining.Report settleOfflineTraining(long nowWallMs, long nowMs) {
+        pl.fawizja.pixel.training.OfflineTraining.Report r = pc.offlineTraining().onLogin(pc, nowWallMs);
+        for (String m : r.messages()) log.add(nowMs, EventLog.Kind.SYSTEM, m);
+        return r;
     }
 
     // ------------------------------------------------------------------ lozka (jak w Tibii: sen = wylogowanie)
@@ -1310,6 +1397,45 @@ public final class GameSession {
     public int depotTake(int itemId, long nowMs) {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
         return moveAll(pc.depot(), pc.backpack(), itemId, nowMs, Messages.get("game_session.wyjeto_z_depozytu"), Messages.get("server_world.brak_miejsca_w_plecaku"));
+    }
+
+    /**
+     * Okno depozytu jak w Tibii: przeniesienie calego stosu miedzy plecakiem a depozytem (albo w obrebie depozytu)
+     * przez przeciagniecie albo dotkniecie. {@code to < 0} = pierwsze wolne pole (laczy stosy). Wymaga skrzyni
+     * depozytu (albo bankiera) obok postaci - serwer sprawdza to tak samo jak przy starych akcjach.
+     */
+    public InventoryResult depotTransfer(boolean fromDepot, int from, boolean toDepot, int to, long nowMs) {
+        if (talkTo(NpcRole.BANKER, nowMs) == null) return InventoryResult.INVALID_SLOT;
+        pl.fawizja.pixel.inventory.Container src = fromDepot ? pc.depot() : pc.backpack();
+        pl.fawizja.pixel.inventory.Container dst = toDepot ? pc.depot() : pc.backpack();
+        if (from < 0 || from >= src.size() || to >= dst.size()) return InventoryResult.INVALID_SLOT;
+        ItemStack st = src.get(from);
+        if (st == null) return InventoryResult.EMPTY_SLOT;
+        if (src == dst) return to < 0 ? InventoryResult.OK : src.move(from, to, st.count());
+        InventoryResult r;
+        if (to >= 0 && dst.get(to) == null) {
+            ItemStack part = src.takeFromSlot(from, st.count());
+            r = dst.putInSlot(to, part);
+            if (!r.ok()) src.putInSlot(from, part);
+        } else {
+            // docelowe pole zajete albo "gdziekolwiek": laczy stosy i szuka wolnego miejsca (bez zamiany miejscami)
+            ItemStack part = src.takeFromSlot(from, st.count());
+            r = dst.add(part);
+            if (!r.ok()) src.putInSlot(from, part);
+        }
+        if (r.ok()) {
+            log.add(nowMs, EventLog.Kind.INFO, (toDepot ? Messages.get("game_session.odlozono_do_depozytu") : Messages.get("game_session.wyjeto_z_depozytu"))
+                    + ": " + st.count() + "x " + items.get(st.itemId()).name() + ".");
+        } else {
+            log.add(nowMs, EventLog.Kind.WARNING, toDepot ? Messages.get("game_session.depozyt_jest_pelny") : Messages.get("server_world.brak_miejsca_w_plecaku"));
+        }
+        return r;
+    }
+
+    /** Skrzynia depozytu pod punktem (obiekt depot_locker na mapie). */
+    public boolean isDepotLocker(Position p) {
+        pl.fawizja.pixel.world.TileType o = objectAt(p);
+        return o != null && o.key().equals("depot_locker");
     }
 
     private int moveAll(pl.fawizja.pixel.inventory.Container from, pl.fawizja.pixel.inventory.Container to, int itemId,
@@ -2282,37 +2408,29 @@ public final class GameSession {
         if (st != null && pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(items.get(st.itemId()).key()) != null) return drinkBuff(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("challenge_scroll")) return startChallenge(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
-        if (st != null && items.get(st.itemId()).key().equals("backpack")) return attachBag(slot, nowMs);
+        if (st != null && pl.fawizja.pixel.inventory.ContainerType.ofItem(items.get(st.itemId()).key()) != null) return attachBag(slot, nowMs);
         if (st != null && pl.fawizja.pixel.economy.Currency.isCoin(st.itemId())) return exchangeCoins(slot, nowMs);
         return spells.useItem(slot, nowMs);
     }
 
-    /** Uzycie plecaka z plecaka: staje sie kolejna strona (+20 slotow), jak plecak w plecaku w Tibii. */
+    /**
+     * Uzycie plecaka z plecaka: wiekszy rodzaj ({@link pl.fawizja.pixel.inventory.ContainerType}) zastepuje obecny -
+     * postac dostaje wiecej pol (okno przewija je w pionie), a poprzedni plecak wraca do torby. Taki sam albo mniejszy
+     * plecak nic nie zmienia.
+     */
     private CastResult attachBag(int slot, long nowMs) {
-        if (pc.extraBags() >= PlayerCharacter.MAX_EXTRA_BAGS) {
-            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_juz") + PlayerCharacter.MAX_EXTRA_BAGS + Messages.get("game_session.dodatkowe_plecaki"));
+        pl.fawizja.pixel.inventory.ContainerType type = pl.fawizja.pixel.inventory.ContainerType.ofItem(items.get(pc.backpack().get(slot).itemId()).key());
+        if (type == null) return CastResult.NOT_USABLE;
+        if (type.slots() <= pc.backpackSlots()) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_juz_wiekszy_plecak", pc.backpackSlots()));
             return CastResult.NOT_USABLE;
         }
+        pl.fawizja.pixel.inventory.ContainerType old = pc.backpackType();
         pc.backpack().takeFromSlot(slot, 1);
-        pc.attachBag();
-        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.plecak_dolaczony") + pc.backpack().size() + Messages.get("game_session.miejsc_strony") + pc.bagPages() + ").");
+        pc.setBackpackSlots(type.slots());
+        if (old != null && items.containsKey(old.itemKey())) pc.backpack().add(ItemStack.of(items.byKey(old.itemKey()).id()));
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.plecak_wymieniony", items.get(items.byKey(type.itemKey()).id()).name(), type.slots()));
         return CastResult.OK;
-    }
-
-    /** Odpina ostatni dodatkowy plecak (musi byc pusty) i kladzie go do plecaka glownego. */
-    public boolean detachBag(long nowMs) {
-        if (pc.extraBags() == 0) return false;
-        if (!pc.detachBag()) {
-            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.najpierw_oproznij_ostatni_plec"));
-            return false;
-        }
-        if (!pc.backpack().add(ItemStack.of(items.byKey("backpack").id())).ok()) {
-            pc.attachBag();
-            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.brak_miejsca_na_odpiety"));
-            return false;
-        }
-        log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.plecak_odpiety") + pc.backpack().size() + " miejsc.");
-        return true;
     }
 
     /** Uzycie monet: monety lacza sie i wymieniaja same, wiec tylko opis wartosci. */
@@ -2809,6 +2927,7 @@ public final class GameSession {
         if (lastUpdateMs >= 0) {
             long dt = Math.min(1000, nowMs - lastUpdateMs);
             pc.tickRegeneration(dt, isResting(nowMs));
+            pc.offlineTraining().regenerate(dt); // pasek treningu offline odnawia sie 1:1 z czasem w grze (Canary)
             spells.updateSerenity(dt, nowMs); // mnich: spokoj (Serene) wg druzyny i tlumu wokol
             pc.stats().addPlayTime(dt);
             forge().tick(nowMs, dt, world.isProtectionZone(pc.position()));
@@ -3421,6 +3540,13 @@ public final class GameSession {
                 return true;
             case "bed":
                 return useBed(p, nowMs);
+            case "depot_locker":
+                // jak w Tibii: stajesz przy skrzyni i ja uzywasz - okno depozytu otwiera klient (zawartosc z zapisu postaci)
+                depotOpenRequest = true;
+                return true;
+            case "training_statue":
+                statueRequest = p;
+                return true;
             case "lectern":
                 log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.na_pulpicie_lezy_otwarta"));
                 return true;
@@ -3452,7 +3578,7 @@ public final class GameSession {
         return obj != null && USABLE_OBJECTS.contains(obj.key());
     }
 
-    private static final java.util.Set<String> USABLE_OBJECTS = java.util.Set.of("signpost", "well", "bed", "lectern");
+    private static final java.util.Set<String> USABLE_OBJECTS = java.util.Set.of("signpost", "well", "bed", "lectern", "depot_locker", "training_statue");
 
     private pl.fawizja.pixel.treasure.TreasureChests chests;
 

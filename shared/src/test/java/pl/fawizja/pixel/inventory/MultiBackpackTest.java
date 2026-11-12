@@ -13,7 +13,7 @@ import pl.fawizja.pixel.item.ItemStack;
 import pl.fawizja.pixel.vocation.Vocation;
 import pl.fawizja.pixel.world.Position;
 
-/** Etap 14: plecak 20 pol, dodatkowe plecaki jako kolejne strony, monety 100 gp = 1 platinum, 100 platinum = 1 crystal. */
+/** Plecak 20 pol na jednej stronie, wieksze kontenery 24/36 przewijane w pionie, monety 100 gp = 1 platinum, 100 platinum = 1 crystal. */
 class MultiBackpackTest {
 
     static int id(String key) { return TestData.ITEMS.byKey(key).id(); }
@@ -30,58 +30,69 @@ class MultiBackpackTest {
     }
 
     @Test
-    void usingABackpackAddsAPageOfTwentySlotsUpToThreeExtra() {
+    void startsWithTwentySlotsAndOnlyBiggerContainersReplaceIt() {
         PlayerCharacter pc = TestData.newCharacter(Vocation.DRUID);
         GameSession s = session(pc);
+        pc.backpack().clear();
         assertEquals(Container.BACKPACK_SLOTS, pc.backpack().size());
-        for (int i = 1; i <= PlayerCharacter.MAX_EXTRA_BAGS; i++) {
-            pc.backpack().add(ItemStack.of(id("backpack")));
-            s.useSlot(slotOf(pc.backpack(), "backpack"), i * 1000L);
-            assertEquals(20 * (i + 1), pc.backpack().size());
-            assertEquals(0, pc.backpack().count(id("backpack")), "the backpack became a page");
-        }
+        assertEquals(ContainerType.BACKPACK, pc.backpackType());
         pc.backpack().add(ItemStack.of(id("backpack")));
-        s.useSlot(slotOf(pc.backpack(), "backpack"), 9000);
-        assertEquals(80, pc.backpack().size(), "no more than 3 extra backpacks");
+        s.useSlot(slotOf(pc.backpack(), "backpack"), 1000);
+        assertEquals(20, pc.backpack().size(), "an ordinary backpack is not an upgrade");
         assertEquals(1, pc.backpack().count(id("backpack")));
+        pc.backpack().add(ItemStack.of(id("backpack_traveler")));
+        s.useSlot(slotOf(pc.backpack(), "backpack_traveler"), 2000);
+        assertEquals(24, pc.backpack().size());
+        assertEquals(ContainerType.TRAVELER, pc.backpackType());
+        assertEquals(0, pc.backpack().count(id("backpack_traveler")), "the new backpack is worn");
+        assertEquals(2, pc.backpack().count(id("backpack")), "the old one returns to the bag");
+        pc.backpack().add(ItemStack.of(id("backpack_explorer")));
+        s.useSlot(slotOf(pc.backpack(), "backpack_explorer"), 3000);
+        assertEquals(36, pc.backpack().size());
+        pc.backpack().add(ItemStack.of(id("backpack_traveler")));
+        s.useSlot(slotOf(pc.backpack(), "backpack_traveler"), 4000);
+        assertEquals(36, pc.backpack().size(), "never downgrades");
+        assertEquals(2, pc.backpack().count(id("backpack_traveler")), "the one returned by the explorer swap plus the new one");
     }
 
     @Test
-    void itemsMoveBetweenPagesAndTheLastBackpackDetachesOnlyWhenEmpty() {
-        PlayerCharacter pc = TestData.newCharacter(Vocation.PALADIN);
-        GameSession s = session(pc);
-        pc.attachBag();
-        int sword = pc.backpack().add(ItemStack.of(id("iron_sword"))).ok() ? slotOf(pc.backpack(), "iron_sword") : -1;
-        assertTrue(s.moveSlot(sword, 25).ok(), "drag onto the second page");
-        assertEquals(id("iron_sword"), pc.backpack().get(25).itemId());
-        assertFalse(s.detachBag(1000), "page 2 is not empty");
-        assertEquals(40, pc.backpack().size());
-        assertTrue(s.moveSlot(25, slotFree(pc.backpack(), 0, 20)).ok());
-        assertTrue(s.detachBag(2000));
-        assertEquals(20, pc.backpack().size());
-        assertEquals(1, pc.backpack().count(id("backpack")), "detached backpack goes back into the bag");
-    }
-
-    static int slotFree(Container c, int from, int to) {
-        for (int i = from; i < to; i++) if (c.get(i) == null) return i;
-        return -1;
+    void containerTypesAreKnownByItemAndSize() {
+        assertEquals(20, ContainerType.BACKPACK.slots());
+        assertEquals(ContainerType.EXPLORER, ContainerType.ofItem("backpack_explorer"));
+        assertEquals(ContainerType.TRAVELER, ContainerType.ofSlots(24));
+        assertNull(ContainerType.ofItem("iron_sword"));
+        for (ContainerType t : ContainerType.values()) assertTrue(TestData.ITEMS.containsKey(t.itemKey()), t.itemKey());
     }
 
     @Test
-    void extraBackpacksAndTheirItemsSurviveSaveAndMirror() throws Exception {
+    void biggerBackpackKeepsItemsAndSurvivesSaveAndMirror() throws Exception {
         PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
-        pc.attachBag();
-        pc.attachBag();
-        pc.backpack().putInSlot(55, new ItemStack(id("pearl"), 7));
+        pc.setBackpackSlots(36);
+        pc.backpack().putInSlot(33, new ItemStack(id("pearl"), 7));
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         PlayerCharacter back = codec.decode(codec.encode(pc));
-        assertEquals(2, back.extraBags());
-        assertEquals(60, back.backpack().size());
-        assertEquals(7, back.backpack().get(55).count());
+        assertEquals(36, back.backpack().size());
+        assertEquals(7, back.backpack().get(33).count());
         PlayerCharacter copy = TestData.newCharacter(Vocation.SORCERER);
         copy.copyStateFrom(back);
-        assertEquals(60, copy.backpack().size());
-        assertEquals(id("pearl"), copy.backpack().get(55).itemId());
+        assertEquals(36, copy.backpack().size());
+        assertEquals(id("pearl"), copy.backpack().get(33).itemId());
+        assertFalse(pc.setBackpackSlots(20), "shrinking is refused while the cut slots hold items");
+    }
+
+    @Test
+    void legacySavesWithExtraBagPagesBecomeOneScrollableBackpack() throws Exception {
+        PlayerCharacter pc = TestData.newCharacter(Vocation.SORCERER);
+        CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
+        String text = codec.encode(pc);
+        int crcAt = text.lastIndexOf("crc=");
+        String body = text.substring(0, crcAt).replaceAll("(?m)^bagslots=.*\\n", "") + "bags=2\n";
+        int head = body.indexOf('\n') + 1;
+        java.lang.reflect.Method crc = CharacterCodec.class.getDeclaredMethod("crc", String.class);
+        crc.setAccessible(true);
+        String legacy = body + "crc=" + crc.invoke(null, body.substring(head)) + "\n";
+        PlayerCharacter back = codec.decode(legacy);
+        assertEquals(60, back.backpack().size());
     }
 
     @Test
@@ -107,8 +118,8 @@ class MultiBackpackTest {
     }
 
     @Test
-    void level300CharactersStartWithTwoBackpacks() {
+    void level300CharactersStartWithATravelerBackpack() {
         PlayerCharacter pc = new CharacterFactory(StartingConfig.defaults(), TestData.ITEMS).create("Wet", Vocation.DRUID, new Position(31, 16, 0), 300);
-        assertEquals(40, pc.backpack().size());
+        assertEquals(24, pc.backpack().size());
     }
 }

@@ -23,11 +23,16 @@ import java.util.List;
  *                                               harmonia mnicha: "-" = nie mnich, "N" = N punktow, "NS" = N i spokoj;
  *                                               starsi klienci pomijaja dodatkowe pole, wersja protokolu bez zmian)
  *                                       PVP     1|0 czaszka czaszkaDo blokadaPzDo (po zmianie; czasy serwera, 0 = brak)
+ * PING  znacznik                      PONG    znacznik               (pomiar opoznienia: serwer odsyla od razu to samo
+ *                                               pole; klient liczy czas obiegu, patrz PingMeter; starsze serwery nie
+ *                                               znaja PING i go pomijaja - wskaznik zostaje szary)
  * BYE                                   MO      id klucz x y z hp%     (potwor w zasiegu)
  *                                       END                            (koniec klatki)
  *                                       LOG     RODZAJ tekst
  *                                       CHAT    imie tekst
  *                                       FOG     czesc odkrytej mapy (ExploredMap, deflate+base64; po zalogowaniu)
+ *                                       TRAINLOGOUT UMIEJETNOSC (posag treningowy w swiatyni: postac zapisana,
+ *                                               klient sie wylogowuje; trening liczy sie przy kolejnym HELLO)
  * </pre>
  */
 public final class Protocol {

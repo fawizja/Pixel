@@ -137,6 +137,8 @@ item;ultimate_spirit_potion;name;Ultimate Spirit Potion
 item;ultimate_mana_potion;name;Ultimate Mana Potion
 item;ultimate_health_potion;name;Ultimate Health Potion
 item;backpack;name;Backpack
+item;backpack_traveler;name;Traveler's Backpack
+item;backpack_explorer;name;Explorer's Backpack
 item;wyvern_scale;name;Wyvern Scale
 item;crab_pincer;name;Crab Pincer
 item;pirate_hook;name;Pirate Hook
