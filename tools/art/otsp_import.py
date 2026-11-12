@@ -570,21 +570,48 @@ def walk_frames(t):
     return [0, 1, 2] if n == 3 else [0, max(1, n // 4), max(1, 3 * n // 4)] if n > 1 else [0]
 
 
-def save_outfit(spr, t, d, colors, path, rgb=None, squash=None):
+def save_outfit(spr, t, d, colors, path, rgb=None, squash=None, all_dirs=False):
     """Postoj jako path.png i kroki jako path_walk1.png / path_walk2.png, przyciete wspolnym prostokatem (bez drgan).
-    squash = (skala szerokosci, wysokosci): niska, kreca postac (krasnoludy), piksele bez wygladzania."""
-    imgs = [outfit(spr, t, d, colors, f) for f in walk_frames(t)]
-    if rgb:
-        imgs = [tint(i, rgb) for i in imgs]
-    if squash and squash != (1.0, 1.0):
-        imgs = [i.resize((max(1, round(i.width * squash[0])), max(1, round(i.height * squash[1]))), Image.NEAREST)
-                for i in imgs]
-    boxes = [i.getbbox() for i in imgs if i.getbbox()]
-    box = (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
-    save(trim_square(imgs[0], box), path + ".png")
-    for k, img in enumerate(imgs[1:], 1):
-        save(trim_square(img, box), f"{path}_walk{k}.png")
-    return len(imgs)
+    squash = (skala szerokosci, wysokosci): niska, kreca postac (krasnoludy), piksele bez wygladzania.
+    all_dirs (potwory): obok przodu (d) zapisuje tez tyl, lewo i prawo jako path_up / path_left / path_right
+    (+ _walk1/_walk2) w tej samej skali co przod (potwor nie zmienia rozmiaru przy obrocie)."""
+    dirs = [(d, "")]
+    if all_dirs:
+        dirs += [(ot.DIRS.index(n), "_" + n) for n in ("up", "left", "right")]
+    sets = []
+    for dd, suffix in dirs:
+        imgs = [outfit(spr, t, dd, colors, f) for f in walk_frames(t)]
+        if rgb:
+            imgs = [tint(i, rgb) for i in imgs]
+        if squash and squash != (1.0, 1.0):
+            imgs = [i.resize((max(1, round(i.width * squash[0])), max(1, round(i.height * squash[1]))), Image.NEAREST)
+                    for i in imgs]
+        sets.append((suffix, imgs))
+
+    def union(imgs):
+        bs = [i.getbbox() for i in imgs if i.getbbox()]
+        return (min(b[0] for b in bs), min(b[1] for b in bs), max(b[2] for b in bs), max(b[3] for b in bs))
+
+    n = 0
+    front = sets[0][1]
+    fbox = union(front)
+    save(trim_square(front[0], fbox), path + ".png")
+    for k, img in enumerate(front[1:], 1):
+        save(trim_square(img, fbox), f"{path}_walk{k}.png")
+    n += len(front)
+    side = max(fbox[2] - fbox[0], fbox[3] - fbox[1], 32)   # bok kwadratu przodu: inne kierunki w tej samej skali
+    for suffix, imgs in sets[1:]:
+        box = union(imgs)
+        w, h = box[2] - box[0], box[3] - box[1]
+        s2 = max(side, w, h)
+        for k, img in enumerate(imgs):
+            canvas = Image.new("RGBA", (s2, s2), (0, 0, 0, 0))
+            canvas.alpha_composite(img.crop(box), ((s2 - w) // 2, s2 - h))
+            if s2 > side:
+                canvas = canvas.resize((side, side), Image.NEAREST)
+            save(canvas, f"{path}{suffix}.png" if k == 0 else f"{path}{suffix}_walk{k}.png")
+        n += len(imgs)
+    return n
 
 
 def save(img, path):
@@ -808,18 +835,18 @@ def main(client, art):
                 save(tint(img, rgb) if rgb else img, f"{art}/missiles/{name}_{px}{py}.png"); n += 1
     south = ot.DIRS.index("down")
     for name, (i, rgb) in MORE_TINTED.items():
-        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)
+        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb, all_dirs=True)
     for name, (i, rgb) in PET_TINTED.items():
         n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/pets/{name}", rgb)
     for folder, table in (("monsters", MONSTERS), ("npcs", NPCS), ("pets", PETS)):
         for name, (i, colors) in table.items():
-            n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}")
+            n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/{folder}/{name}", all_dirs=folder == "monsters")
     for name, (i, rgb) in TINTED.items():
-        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb)
+        n += save_outfit(spr, things["outfit"][i], south, None, f"{art}/monsters/{name}", rgb, all_dirs=True)
     for name, (i, colors) in DWARF_NPCS.items():
         n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/npcs/{name}", None, squash=(1.12, 0.78))
     for name, (i, colors, rgb, sy, sx) in STOCKY.items():
-        n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/monsters/{name}", rgb, squash=(sx, sy))
+        n += save_outfit(spr, things["outfit"][i], south, colors, f"{art}/monsters/{name}", rgb, squash=(sx, sy), all_dirs=True)
     for voc, (i, colors) in CHARACTERS.items():
         for d, dname in enumerate(ot.DIRS):
             n += save_outfit(spr, things["outfit"][i], d, colors, f"{art}/characters/{voc}_{dname}")

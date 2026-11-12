@@ -77,6 +77,20 @@ class MonsterArtAndNamesTest {
     }
 
     @Test
+    void everyMonsterHasAllFourDirectionsWithWalkFrames() {
+        Path dir = artDir();
+        List<String> missing = new ArrayList<>();
+        for (MonsterType t : REG.all()) {
+            for (String side : new String[] {"_up", "_left", "_right"}) {
+                for (String suffix : new String[] {"", "_walk1", "_walk2"}) {
+                    if (!Files.isRegularFile(dir.resolve(t.key() + side + suffix + ".png"))) missing.add(t.key() + side + suffix + ".png");
+                }
+            }
+        }
+        assertEquals(List.of(), missing, "monsters without direction frames (tools/art/otsp_import.py)");
+    }
+
+    @Test
     void noMonsterIsNamedAfterAWellKnownTibiaMonster() {
         assertTrue(TIBIA_NAMES.size() >= 150, "name list size " + TIBIA_NAMES.size());
         for (MonsterType t : REG.all()) {

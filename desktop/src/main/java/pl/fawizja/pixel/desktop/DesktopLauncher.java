@@ -903,6 +903,8 @@ public final class DesktopLauncher {
                 GameScreen gs = (GameScreen) getScreen();
                 gs.session().debugDefeatQuestBoss(gs.worldTime());
             }
+            String facingDemo = System.getProperty("pixel.facingDemo");
+            if (facingDemo != null && getScreen() instanceof GameScreen) facingDemo((GameScreen) getScreen(), facingDemo, frame);
             String spellDemo = System.getProperty("pixel.spellDemo");
             if (spellDemo != null && getScreen() instanceof GameScreen) spellDemo((GameScreen) getScreen(), spellDemo, frame, frames);
             if (Boolean.getBoolean("pixel.fx") && frame == frames - 8 && getScreen() instanceof GameScreen) {
@@ -966,6 +968,44 @@ public final class DesktopLauncher {
          * beam (promien), ultimate (hells core / rage of the skies wokol postaci), chest (skrzynia zadania i komunikat nagrody,
          * -Dpixel.chest=id).
          */
+        /** Podglad zwrotu potworow (-Dpixel.facingDemo=...): "dirs" - wilk i dzik stoja twarza na N, E, S, W; "walk" - dzik idzie
+         *  prosto na zachod do postaci (klatki chodu); "attack" - dzik stoi obok postaci i bije ja, patrzac na nia. */
+        private static void facingDemo(GameScreen gs, String demo, int frame) {
+            pl.fawizja.pixel.game.GameSession s = gs.session();
+            pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
+            Position me = pc.position();
+            long now = gs.worldTime();
+            pl.fawizja.pixel.world.Direction[] dirs = {pl.fawizja.pixel.world.Direction.NORTH, pl.fawizja.pixel.world.Direction.EAST,
+                    pl.fawizja.pixel.world.Direction.SOUTH, pl.fawizja.pixel.world.Direction.WEST};
+            if (frame == 2) {
+                pc.skills().set(pl.fawizja.pixel.character.Skill.MAGIC, 20, 0);
+                for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
+                if (demo.equals("dirs")) {
+                    pc.setInvisible(600_000);
+                    String[] keys = {"wolf", "boar", "goblin"};
+                    for (int row = 0; row < keys.length; row++) {
+                        for (int i = 0; i < 4; i++) {
+                            for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(keys[row], me.translate(i * 2 - 3, -2 - row), 0, 1, now)) {
+                                m.paralyze(now + 600_000);
+                            }
+                        }
+                    }
+                } else if (demo.equals("walk")) {
+                    s.monsters().spawnEvent("boar", me.translate(6, 0), 0, 1, now);
+                } else if (demo.equals("attack")) {
+                    s.monsters().spawnEvent("boar", me.translate(1, 0), 0, 1, now);
+                    s.monsters().spawnEvent("wolf", me.translate(0, 1), 0, 1, now);
+                    s.monsters().spawnEvent("goblin", me.translate(-1, 0), 0, 1, now);
+                }
+            }
+            if (demo.equals("dirs")) {
+                for (pl.fawizja.pixel.monster.Monster m : s.monsters().monsters()) {
+                    int i = Math.floorMod(m.position().x() - me.x() + 3, 8) / 2;
+                    m.lookAt(m.position().translate(dirs[i].dx, dirs[i].dy));
+                }
+            }
+        }
+
         private static final java.util.Set<String> AREA_DEMOS = java.util.Set.of("gfb", "wave", "beam", "ultimate");
 
         private static void spellDemo(GameScreen gs, String demo, int frame, int frames) {

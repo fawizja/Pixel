@@ -1634,3 +1634,21 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
 
  fishing, NPC, zadania, handel, bank w UI, PvP,
 serwer i synchronizacja - patrz [TODO.md](../TODO.md).
+
+## Zwrot i chód potworów (`Monster.facing4`, `CreatureFrames`, `TileArt.monster`)
+
+- Kierunek: `Monster.facing()` ustawia ruch (`moveTo`), rozglądanie się bezczynnego potwora i atak
+  (`MonsterManager` wywołuje `Monster.lookAt(cel)` w chwili ciosu lub czaru, o ile potwór nie jest w połowie kroku).
+  Na ekranie liczą się 4 strony: `Direction.cardinal()` (skos patrzy na wschód albo zachód), a `Direction.toward`
+  wybiera oś o większej odległości (przy remisie poziomo).
+- Online serwer wysyła tylko pozycję, typ i % zdrowia (`RemoteEntity`), więc klient wylicza kierunek z różnicy pozycji
+  w `MonsterManager.syncRemote` (skok dalej niż 1 pole to teleport, bez zmiany kierunku). Atak nie jest widoczny w klatce,
+  dlatego `MonsterManager.faceAdjacent` obraca stojącego potwora (nie w kroku) twarzą do gracza, gdy stoi obok niego.
+- Klatka: `TileArt.walkFrame` daje 0 (postój) gdy potwór stoi, a w marszu 1 albo 2 (zmiana w połowie pola i na kolejnym
+  polu). `CreatureFrames.pick` wybiera stronę plików (dół, góra, lewo, prawo); bez grafiki strony: lewo/prawo odbija
+  drugą z tych stron, a bez żadnej odbity przód dla zachodu (tył zostaje przodem). `TileArt.monster(klucz, kierunek,
+  klatka, odbicie)` zwraca region i znacznik odbicia.
+- Grafiki: `assets/art/monsters/klucz.png` (przód, postój), `klucz_walk1|2.png`, a dla pozostałych stron
+  `klucz_up|left|right.png` i `..._walk1|2.png` (32 px, ta sama skala co przód, osobny atlas kierunków w `TileArt`).
+  Wszystkie 136 potworów są z OTSP i mają komplet (test `MonsterArtAndNamesTest`). NPC mają jedną klatkę (stoją w miejscu),
+  więc nie obracają się; pupile i postacie graczy mają własną ścieżkę (`TileArt.character`).

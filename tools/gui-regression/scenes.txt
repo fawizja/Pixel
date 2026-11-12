@@ -264,3 +264,6 @@ lang_spellbook_es|-Dpixel.lang=es -Dpixel.autostart=Test:SORCERER -Dpixel.hour=1
 castle_tunnel|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=822,490,-1
 castle_keep_top|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=781,357,3
 durnkar_market|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.level=60 -Dpixel.teleport=500,322,-5
+# zwrot potworow (0.253): wilk, dzik i goblin twarza na N, E, S, W oraz potwory bijace gracza patrza na niego
+monster_facing_dirs|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=524,524,0 -Dpixel.facingDemo=dirs -Dpixel.frames=30
+monster_facing_attack|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=500,540,0 -Dpixel.facingDemo=attack -Dpixel.frames=40

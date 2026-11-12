@@ -158,6 +158,8 @@ public final class GameScreen extends ScreenAdapter {
     private long lastPetMs = -1;
 
     private static final long REMOTE_STEP_MS = 300L;
+    /** Odbicie poziome potwora wybrane przez {@code TileArt.monster(klucz, kierunek, klatka, odbicie)}. */
+    private final boolean[] monsterFlip = new boolean[1];
 
     /** Dymki czatu nad postaciami: imie (male litery) -> {tekst, do kiedy (ms zegara)}. */
     private final Map<String, Object[]> bubbles = new java.util.HashMap<>();
@@ -2118,13 +2120,13 @@ public final class GameScreen extends ScreenAdapter {
                 Monster m = visibleMonsters.get(i);
                 if (m.position().y() != row || m.position().z() != z) continue;
                 float mrx = m.renderX(t), mry = m.renderY(t);
-                TextureRegion tr = game.art().monster(m.type().key(),
-                        TileArt.walkFrame(mrx, mry, m.position().x(), m.position().y()));
+                TextureRegion tr = game.art().monster(m.type().key(), m.facing4(),
+                        TileArt.walkFrame(mrx, mry, m.position().x(), m.position().y()), monsterFlip);
                 if (tr == null) continue;
                 float[] lg = lunges.get(m.position());
                 float mx = mrx + (lg == null ? 0f : lg[0]);
                 float my = worldRenderer.worldY(mry + (lg == null ? 0f : lg[1]));
-                boolean flip = m.facing() != null && m.facing().dx < 0;
+                boolean flip = monsterFlip[0];
                 if (m.type().isFiendish()) {
                     // diaboliczny (Kuznia): wiekszy, czerwono-fioletowy
                     b.setColor(1f, 0.55f, 0.75f, 1f);
@@ -3250,6 +3252,7 @@ public final class GameScreen extends ScreenAdapter {
                 predictor.onServer(session, f.self(), facing, now);
             }
             session.monsters().syncRemote(f.monsters(), now, REMOTE_STEP_MS);
+            session.monsters().faceAdjacent(session.character().position(), now);
             Monster target = null;
             for (Monster m : session.monsters().monsters()) if (m.id() == f.targetId()) target = m;
             session.combat().setTarget(target);
