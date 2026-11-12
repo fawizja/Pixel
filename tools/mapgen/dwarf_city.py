@@ -500,7 +500,8 @@ def build(p, ox, oy, rng, house_fn, keep_free, add_npc_text):
     pc = (ox + pen[0] + 4, oy + pen[1] + 2)
     c0 = p.get(pc[0], pc[1], z)
     if c0 is None or not St.walk(c0) or c0[2] != NONE or (pen[0] + 4, pen[1] + 2) not in M.cave:
-        pc = min(((ox + x, oy + y) for (x, y) in M.street if (x, y) not in M.pillars and abs(x - 46) + abs(y - 42) < 12),
+        pc = min(((ox + x, oy + y) for (x, y) in M.street if (x, y) not in M.pillars and abs(x - 46) + abs(y - 42) < 12
+                  and (lambda q: q is not None and St.walk(q) and q[2] == NONE)(p.get(ox + x, oy + y, z))),
                  key=lambda c: abs(c[0] - ox - 46) + abs(c[1] - oy - 42))
     npcs.append(['durn_petkeeper', 'Opiekun zwierząt Bodvar', 'MERCHANT', CITY, pc[0], pc[1], z, 'durn_pets', '#6a8a3a',
                  'Kruki z górskich turni lecą za krasnoludem i w głąb kopalni. Pupil u boku daje +5% doświadczenia z potworów.'])

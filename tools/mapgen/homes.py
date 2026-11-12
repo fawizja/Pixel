@@ -9,6 +9,7 @@ nimi, nawet na wioskach").
   w dziczy z dala od miast; dom z drzwiami do drogi, sciezka do niej i strefa ochronna nad domem.
 - check_houses: kontrola na koniec generowania (drzwi, lozka, przejscie od drzwi do kazdego pola).
 """
+import camps
 import random
 from collections import deque
 
@@ -310,7 +311,8 @@ def homesteads(ctx, cost, extra_gates=None, per_town=2, wild=6):
     for y in range(20, S - 20, 9):
         for x in range(20, S - 20, 9):
             if road[y, x] and all(abs(x - t[0]) + abs(y - t[1]) > 70 for t in temples) \
-                    and all(abs(x - v[0]) + abs(y - v[1]) > 30 for v in villages) and region_level(x, y) <= 45:
+                    and all(abs(x - v[0]) + abs(y - v[1]) > 30 for v in villages) and region_level(x, y) <= 45 \
+                    and not any(a <= x <= c and b <= y <= d for (a, b, c, d) in camps.HOLD):
                 far.append((x, y))
     rng.shuffle(far)
     chosen = []

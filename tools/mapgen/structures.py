@@ -41,7 +41,9 @@ HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader',
                'keep_chaplain', 'castellan_gorvald',
                # 2026-11-12: Wzgorza Goblinow, Hydr i Smokow (hills.py)
                'goblin_scrounger', 'goblin_knifer', 'goblin_warchief', 'marsh_lizard', 'lizard_hexer', 'bog_hydra',
-               'bog_naga', 'venom_hydra', 'stone_gorgon', 'dragon_whelp', 'scale_dragon', 'crag_dragon'}
+               'bog_naga', 'venom_hydra', 'stone_gorgon', 'dragon_whelp', 'scale_dragon', 'crag_dragon',
+               # 2026-11-12: Miasto Rogatych (minotaur.py)
+               'horn_scout', 'horn_sapper', 'horn_gladiator', 'horn_oracle', 'horn_champion', 'horn_overlord'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 

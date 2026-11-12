@@ -27,6 +27,7 @@ QUEST_LEVEL = 55
 REWARD = (6000, 'croc_legs', 1)
 STONE, SWALL, WOOD, WWALL = 'stone_floor', 'stone_wall', 'wood_floor', 'wood_wall'
 COBBLE = 'cobblestone'
+PIN = (750, 336)              # dawny lewy gorny rog planu zamku na powierzchni
 ENTRANCE = (-10, 61)          # pole schodow w dol na powierzchni (w planie)
 
 F.CAVE_STYLES.setdefault('warren', ('cave_floor', 'cave_wall', [], ['rubble', 'crate', 'barrel'], 'wall_torch'))
@@ -333,8 +334,13 @@ def build(ctx, cost, helpers):
     rng = random.Random(SEED)
     world = ctx['world']
     tw, th = W + ML + MR, H + MT + MB
-    tx, ty = St.find_site(ctx, helpers, cost, (730, 345), tw, th, core=(ML - 1, MT - 1, ML + W, MT + H), radius=300, min_temple=45, bounds=(8, 8, 1100, 540),
-                          max_water=0.2)
+    # 2026-11-12: miejsce przypiete (dawny wynik, plan od (750, 336)): obozy i dzicz nie przesuwaja zamku; brak miejsca = szukanie
+    try:
+        tx, ty = St.find_site(ctx, helpers, cost, (PIN[0] - ML + tw // 2, PIN[1] - MT + th // 2), tw, th,
+                              core=(ML - 1, MT - 1, ML + W, MT + H), radius=1, min_temple=45, bounds=(8, 8, 1100, 540), max_water=0.2)
+    except AssertionError:
+        tx, ty = St.find_site(ctx, helpers, cost, (730, 345), tw, th, core=(ML - 1, MT - 1, ML + W, MT + H), radius=300,
+                              min_temple=45, bounds=(8, 8, 1100, 540), max_water=0.2)
     origin = (tx + ML, ty + MT)
     plan = castle_plan(world, origin, rng)
     plan.check()

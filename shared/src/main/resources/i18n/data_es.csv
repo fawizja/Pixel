@@ -509,6 +509,12 @@ monster;keep_crossbow;name;Ballestero de la Fortaleza
 monster;keep_sentry;name;Centinela de la Fortaleza
 monster;keep_chaplain;name;Capellán de la Fortaleza
 monster;castellan_gorvald;name;Gorvald, Castellano de la Fortaleza
+monster;horn_scout;name;Explorador Astado
+monster;horn_sapper;name;Zapador Astado
+monster;horn_gladiator;name;Gladiador Astado
+monster;horn_oracle;name;Oráculo Astado
+monster;horn_champion;name;Campeón de la Arena Astado
+monster;horn_overlord;name;Grozdar, Señor del Laberinto
 monster;goblin_scrounger;name;Goblin saqueador
 monster;goblin_knifer;name;Goblin cuchillero
 monster;goblin_warchief;name;Jefe de guerra goblin
@@ -1096,3 +1102,5 @@ place;Wzgórza Hydr;name;Colinas de las Hidras
 place;Legowiska Hydr;name;Guaridas de las Hidras
 place;Wzgórza Smoków;name;Colinas de los Dragones
 place;Smocze Pieczary;name;Cavernas de los Dragones
+place;Miasto Rogatych;name;Ciudad de los Astados
+place;Labirynt Rogatych;name;Laberinto de los Astados
