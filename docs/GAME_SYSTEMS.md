@@ -1704,6 +1704,24 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   Potwory: horn_scout/raider/bowman/guard/mystic/sapper/gladiator/oracle/champion, boss horn_overlord (poziom 100).
   Test: `MinotaurCityTest`. Nic nie tworzy drogi pieszej do ziem premium.
 
+## Poziomy dostepu i polecenia GOD (Z logika `admin/*`, S serwer, C znacznik i okno)
+
+- **Poziomy** (`AccessLevel`): `PLAYER`, `TUTOR`, `GAMEMASTER`, `GOD`. Serwer liczy poziom z nazwy postaci (`Moderation.level`): `admins.txt`
+  (`Imie` = game master, `Imie:tutor`, `Imie:god`) i `gods.txt` (`Imie` = GOD), wyzszy wygrywa. Konto = imie postaci, wiec operator nadaje GOD-a
+  imieniem po zwyklej rejestracji; w repozytorium nie ma zadnego konta, hasla ani tokenu. Konsola serwera: `god Imie`, `ungod Imie`, `admin Imie`
+  (game master), `reload` (ponowne wczytanie plikow, bez restartu). `PlayerCharacter.accessLevel()` jest tylko w pamieci (nie ma go w zapisie
+  postaci); serwer odswieza je co takt.
+- **Polecenia** (`GodCommands.COMMANDS`: tabela z poziomem, aliasami, skladnia i kluczem opisu): parser czatu `ChatCommands` -> `GOD SUB [arg]`
+  (albo `ADMIN SUB` dla aliasow `/broadcast`, `/raid`, `/save`, `/shutdown`). `GodCommands.execute(Context, pola)` sprawdza poziom z `Context.level()`
+  (hosta, nie klienta), wykonuje polecenie na `GameSession` i zapisuje wynik w `Context.audit` (serwer: `admin.log` z czasem, imieniem i poziomem;
+  odmowy tez). Host serwera: `ServerWorld.GodHost`, gra lokalna: `GameScreen.LocalGodHost`. Teksty w `Messages` (`god.*`, PL/EN/ES).
+- **Ghost / godmode**: `PlayerCharacter.isGhost()` (niewidzialnosc dla potworow przez `isInvisible`, wiersz `PL` pomija ducha dla nie-GOD-ow,
+  tez ATTACK/INSPECT/lista znajomych) i `isGodMode()`; `damage()` zwraca 0. Oba tylko dla GOD-a (utrata poziomu zdejmuje je).
+- **Klient**: komunikat `ACCESS poziom duch tryb_boga` (tylko wyswietlanie), znacznik `[GOD]` nad imieniem (zloty; GM niebieski, tutor zielony),
+  pole 17 wiersza `PL` ze znacznikiem innych graczy, okno `/komendy [strona]`.
+- **Gra lokalna**: `LocalGod` (`-Dpixel.god=true`, `PIXEL_GOD=1`, plik `god.enabled`); domyslnie wylaczone, nigdy online.
+- Opis dla wlasciciela: `analizy/komendy-god.md`. Testy: `GodCommandsTest`, `GodNetworkTest`, `ChatCommandsTest`.
+
 ## Planowane
 
  fishing, NPC, zadania, handel, bank w UI, PvP,

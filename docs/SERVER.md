@@ -58,6 +58,10 @@ WantedBy=multi-user.target
 ## Moderacja
 
 Administratorzy: imiona w pliku `<dane>/admins.txt` (jedno w linii) albo polecenie konsoli `admin Imie`.
+Poziomy dostepu (jak w Canary): `admins.txt` = game master (`Imie:tutor` = tutor), `<dane>/gods.txt` albo konsola `god Imie` = GOD
+(wszystkie polecenia, takze `/i`, `/m`, `/level`, `/ghost`...); `ungod Imie` odbiera, `reload` wczytuje pliki bez restartu. Dziennik polecen:
+`<dane>/admin.log`. W repozytorium nie ma zadnego konta GOD - nadajesz go po imieniu postaci zalozonej w grze. Opis: `analizy/komendy-god.md`
+(po scaleniu: sekcja w `docs/GAME_SYSTEMS.md`).
 Konsola serwera to standardowe wejscie: terminal, a w Dockerze `docker attach pixel` (wyjscie: Ctrl+P, Ctrl+Q).
 
 | Konsola | Czat administratora | Dzialanie |

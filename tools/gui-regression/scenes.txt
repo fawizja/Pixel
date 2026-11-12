@@ -321,3 +321,5 @@ stairs_down_pit|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=4
 gold_dragon|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=872,826,-1
 shop_torch_night|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=22 -Dpixel.teleport=546,497,0
 brick_grass_edge|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=878,731,0
+god_komendy|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.chat=/komendy
+god_tag|-Dpixel.autostart=Test:KNIGHT -Dpixel.god=true -Dpixel.hour=12 -Dpixel.teleport=475,506,-1 -Dpixel.conTab=1 -Dpixel.chat=/ghost
