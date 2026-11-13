@@ -12,6 +12,7 @@ import pl.fawizja.pixel.monster.Monster;
 import pl.fawizja.pixel.monster.MonsterManager;
 import pl.fawizja.pixel.monster.MonsterRegistry;
 import pl.fawizja.pixel.economy.Money;
+import pl.fawizja.pixel.inventory.Container;
 import pl.fawizja.pixel.inventory.InventoryResult;
 import pl.fawizja.pixel.item.ItemRegistry;
 import pl.fawizja.pixel.item.ItemStack;
@@ -1282,7 +1283,7 @@ public final class GameSession {
                 }
             }
         }
-        for (ItemStack st : pc.backpack().contents()) if (st != null && isRefillable(items.get(st.itemId()))) ids.add(st.itemId());
+        for (ItemStack st : pc.backpack().allContents()) if (st != null && isRefillable(items.get(st.itemId()))) ids.add(st.itemId());
         ItemStack ammo = pc.equipment().get(pl.fawizja.pixel.item.EquipSlot.AMMO);
         if (ammo != null && isRefillable(items.get(ammo.itemId()))) ids.add(ammo.itemId());
         for (int id : ids) {
@@ -1331,7 +1332,7 @@ public final class GameSession {
         if (n == null) return 0;
         java.util.Set<Integer> keep = questItems();
         java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
-        for (ItemStack s : pc.backpack().contents()) {
+        for (ItemStack s : pc.backpack().allContents()) {
             if (s != null && items.get(s.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.MATERIAL) ids.add(s.itemId());
         }
         int sold = 0;
@@ -1399,7 +1400,7 @@ public final class GameSession {
         if (talkTo(NpcRole.BANKER, nowMs) == null) return 0;
         java.util.Set<Integer> keep = questItems();
         java.util.Set<Integer> ids = new java.util.LinkedHashSet<>();
-        for (ItemStack s : pc.backpack().contents()) {
+        for (ItemStack s : pc.backpack().allContents()) {
             if (s != null && items.get(s.itemId()).category() == pl.fawizja.pixel.item.ItemCategory.MATERIAL && !keep.contains(s.itemId())) {
                 ids.add(s.itemId());
             }
@@ -2437,17 +2438,20 @@ public final class GameSession {
         if (st != null && pl.fawizja.pixel.item.Enchantments.Kind.ofPotion(items.get(st.itemId()).key()) != null) return drinkBuff(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().equals("challenge_scroll")) return startChallenge(slot, nowMs);
         if (st != null && items.get(st.itemId()).key().startsWith("pet_")) return togglePet(items.get(st.itemId()), nowMs);
-        if (st != null && pl.fawizja.pixel.inventory.ContainerType.ofItem(items.get(st.itemId()).key()) != null) return attachBag(slot, nowMs);
+        // plecak (jak w Tibii): uzycie go otwiera, wiec nic do zrobienia po stronie logiki (okno otwiera klient);
+        // zalozenie wiekszego plecaka na plecy to osobna akcja slot_wear
+        if (st != null && pl.fawizja.pixel.inventory.ContainerType.ofItem(items.get(st.itemId()).key()) != null) return CastResult.OK;
         if (st != null && pl.fawizja.pixel.economy.Currency.isCoin(st.itemId())) return exchangeCoins(slot, nowMs);
         return spells.useItem(slot, nowMs);
     }
 
     /**
-     * Uzycie plecaka z plecaka: wiekszy rodzaj ({@link pl.fawizja.pixel.inventory.ContainerType}) zastepuje obecny -
+     * Zalozenie plecaka (akcja slot_wear): wiekszy rodzaj ({@link pl.fawizja.pixel.inventory.ContainerType}) zastepuje obecny -
      * postac dostaje wiecej pol (okno przewija je w pionie), a poprzedni plecak wraca do torby. Taki sam albo mniejszy
      * plecak nic nie zmienia.
      */
-    private CastResult attachBag(int slot, long nowMs) {
+    public CastResult wearBag(int slot, long nowMs) {
+        if (slot < 0 || slot >= pc.backpack().size() || pc.backpack().get(slot) == null) return CastResult.MISSING_ITEM;
         pl.fawizja.pixel.inventory.ContainerType type = pl.fawizja.pixel.inventory.ContainerType.ofItem(items.get(pc.backpack().get(slot).itemId()).key());
         if (type == null) return CastResult.NOT_USABLE;
         if (type.slots() <= pc.backpackSlots()) {
@@ -2861,8 +2865,27 @@ public final class GameSession {
                 pl.fawizja.pixel.item.ItemStack st = pc.backpack().get(i);
                 if (st != null && st.itemId() == id) return useSlot(i, nowMs);
             }
+            CastResult nested = usePotionFromBags(pc.backpack(), new int[0], id, nowMs);
+            if (nested != null) return nested;
         }
         return spells.useFirst(itemKey, nowMs);
+    }
+
+    /** Pierwsza mikstura o danym id w plecakach w plecaku (glebokosc najpierw) albo null. */
+    private CastResult usePotionFromBags(Container c, int[] path, int id, long nowMs) {
+        for (int i = 0; i < c.size(); i++) {
+            if (c.get(i) == null || !c.isBag(i)) continue;
+            int[] sub = java.util.Arrays.copyOf(path, path.length + 1);
+            sub[path.length] = i;
+            Container child = c.bagAt(i);
+            for (int j = 0; j < child.size(); j++) {
+                ItemStack st = child.get(j);
+                if (st != null && st.itemId() == id) return bagUse(sub, j, nowMs);
+            }
+            CastResult r = usePotionFromBags(child, sub, id, nowMs);
+            if (r != null) return r;
+        }
+        return null;
     }
 
     public CastResult craft(String recipeKey, long nowMs) {
@@ -4207,8 +4230,101 @@ public final class GameSession {
     }
 
     public InventoryResult moveSlot(int from, int to) {
-        ItemStack s = pc.backpack().get(from);
-        return s == null ? InventoryResult.EMPTY_SLOT : pc.backpack().move(from, to, s.count());
+        return bagMove(new int[0], from, new int[0], to);
+    }
+
+    /**
+     * Przeniesienie miedzy pojemnikami drzewa plecakow (sciezki to numery pol plecakow od glownego plecaka, pusta =
+     * glowny). Upuszczenie na pole z plecakiem wklada przedmiot do tego plecaka (jak w Tibii), chyba ze to ten sam
+     * stos do dolozenia; plecak nie wejdzie do siebie. Udzwig nie blokuje - waga drzewa sie nie zmienia.
+     */
+    public InventoryResult bagMove(int[] fromPath, int fromSlot, int[] toPath, int toSlot) {
+        Container root = pc.backpack();
+        Container a = root.resolve(fromPath), b = root.resolve(toPath);
+        if (a == null || b == null || fromSlot < 0 || fromSlot >= a.size() || toSlot < 0 || toSlot >= b.size()) return InventoryResult.INVALID_SLOT;
+        ItemStack src = a.get(fromSlot), dst = b.get(toSlot);
+        if (src == null) return InventoryResult.EMPTY_SLOT;
+        if (a == b && fromSlot == toSlot) return InventoryResult.OK;
+        boolean sameStack = dst != null && dst.itemId() == src.itemId() && items.maxStack(src.itemId()) > 1;
+        if (dst != null && !sameStack && b.isBag(toSlot)) {
+            Container inner = b.bagAt(toSlot);
+            if (src.contents() != null && src.contents().containsDeep(inner)) return InventoryResult.CYCLE;
+            if (inner.spaceFor(src.itemId()) >= src.count()) {
+                ItemStack taken = a.takeFromSlot(fromSlot, src.count());
+                // a mogl byc wnetrzem inner albo odwrotnie; wstawiamy dopiero po zdjeciu
+                return inner.insert(taken);
+            }
+        }
+        return Container.moveBetween(a, fromSlot, b, toSlot, src.count());
+    }
+
+    private int[] pathOrNull(String text) { return Container.parsePath(text); }
+
+    /** Akcje na przedmiocie w plecaku w plecaku: uzycie, wyrzucenie, zalozenie (sciezka jak w {@link #bagMove}). */
+    public CastResult bagUse(int[] path, int slot, long nowMs) {
+        if (path.length == 0) return useSlot(slot, nowMs);
+        Container c = pc.backpack().resolve(path);
+        if (c == null || slot < 0 || slot >= c.size() || c.get(slot) == null) return CastResult.MISSING_ITEM;
+        ItemStack st = c.get(slot);
+        if (c.isBag(slot)) return CastResult.OK; // otwiera klient
+        // przedmiot z zagniezdzonego plecaka: sztuka wedruje chwilowo do wolnego pola glownego plecaka i tam jest uzyta
+        int free = -1;
+        for (int i = 0; i < pc.backpack().size(); i++) if (pc.backpack().get(i) == null) { free = i; break; }
+        if (free < 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.glowny_plecak_pelny_uzycie"));
+            return CastResult.NOT_USABLE;
+        }
+        ItemStack one = c.takeFromSlot(slot, 1);
+        pc.backpack().putInSlot(free, one);
+        CastResult r = useSlot(free, nowMs);
+        ItemStack left = pc.backpack().get(free);
+        if (left != null) {
+            // nie zuzyto (np. nie da sie uzyc): wraca na miejsce
+            pc.backpack().takeFromSlot(free, left.count());
+            if (c.get(slot) == null) c.putInSlot(slot, left); else c.insert(left);
+        }
+        return r;
+    }
+
+    /** Wyjmuje przedmiot z otwartego plecaka do wolnego pola plecaka nadrzednego (przycisk "Wyjmij" na telefonie). */
+    public InventoryResult bagOut(int[] path, int slot, long nowMs) {
+        if (path.length == 0) return InventoryResult.INVALID_SLOT;
+        Container c = pc.backpack().resolve(path);
+        Container parent = pc.backpack().resolve(java.util.Arrays.copyOf(path, path.length - 1));
+        if (c == null || parent == null || slot < 0 || slot >= c.size() || c.get(slot) == null) return InventoryResult.EMPTY_SLOT;
+        int free = -1;
+        for (int i = 0; i < parent.size(); i++) if (parent.get(i) == null) { free = i; break; }
+        if (free < 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.plecak_jest_pelny_nie"));
+            return InventoryResult.NO_SPACE;
+        }
+        return Container.moveBetween(c, slot, parent, free, c.get(slot).count());
+    }
+
+    public void bagDrop(int[] path, int slot, long nowMs) {
+        if (path.length == 0) { dropFromSlot(slot, nowMs); return; }
+        Container c = pc.backpack().resolve(path);
+        if (c == null || slot < 0 || slot >= c.size() || c.get(slot) == null) return;
+        ItemStack s = c.get(slot);
+        if (pc.isKept(s.itemId())) {
+            log.add(nowMs, EventLog.Kind.WARNING, items.get(s.itemId()).name() + Messages.get("game_session.jest_oznaczony_jako_zachowany"));
+            return;
+        }
+        if (!mayHandle(pc.position())) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.masz_w_tym_domu_4"));
+            return;
+        }
+        InventoryResult r = ground.dropFrom(c, slot, s.count(), pc.position(), world);
+        if (r.ok()) log.add(nowMs, EventLog.Kind.INFO, Messages.get("game_session.wyrzucono") + describe(s));
+    }
+
+    public void bagEquip(int[] path, int slot, long nowMs) {
+        if (path.length == 0) { equipFromSlot(slot, nowMs); return; }
+        Container c = pc.backpack().resolve(path);
+        if (c == null || slot < 0 || slot >= c.size()) return;
+        InventoryResult r = pc.equipment().equipFromBackpack(c, slot, pc.vocation(), pc.level());
+        log.add(nowMs, r.ok() ? EventLog.Kind.INFO : EventLog.Kind.WARNING,
+                r.ok() ? Messages.get("game_session.zalozono_przedmiot") : Messages.get("game_session.tego_nie_da_sie_2"));
     }
 
     /** Porzadkuje plecak (przycisk SORTUJ, akcja "sort"). */

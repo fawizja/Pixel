@@ -98,6 +98,7 @@ public final class PlayerCharacter {
         this.experience = Balance.experienceForLevel(level);
         this.position = Objects.requireNonNull(position);
         this.backpack = Container.backpack(registry);
+        this.backpack.setWeightLimit(() -> (long) capacity() * pl.fawizja.pixel.inventory.ItemWeights.PER_OZ);
         this.equipment = new Equipment(registry);
         this.bank = new BankAccount(bankBalance);
         this.depot = new Container(registry, DEPOT_SLOTS);

@@ -177,7 +177,7 @@ class ActionBarTest {
         assertEquals(bar.encode(), pc.actionBar());
         CharacterCodec codec = new CharacterCodec(TestData.ITEMS);
         String text = codec.encode(pc);
-        assertTrue(text.startsWith("PIXELSAVE 9\n"));
+        assertTrue(text.startsWith("PIXELSAVE " + CharacterCodec.CURRENT_VERSION + "\n"));
         PlayerCharacter back = codec.decode(text);
         assertEquals(bar.encode(), back.actionBar(), "round trip");
         assertEquals(SpellBar.MODE_AIM, SpellBar.mode(SpellBar.decode(back.actionBar()).custom(1)));

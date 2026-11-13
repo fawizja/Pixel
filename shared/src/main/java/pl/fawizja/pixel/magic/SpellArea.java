@@ -219,6 +219,42 @@ public final class SpellArea {
             "11011",
             "00000");
 
+    /** Smocza fala ognia (smoczy lord, pearl dragon): szeroki stozek 8 pol dlugosci, 40 pol. */
+    public static final SpellArea WAVE9 = dir("WAVE9",
+            "111111111",
+            "011111110",
+            "011111110",
+            "001111100",
+            "001111100",
+            "000111000",
+            "000111000",
+            "000030000");
+    /** Szeroki promien (oddech): trzy pola szerokosci, 8 dlugosci, 24 pola. */
+    public static final SpellArea WIDE_BEAM8 = dir("WIDE_BEAM8",
+            "111",
+            "111",
+            "111",
+            "111",
+            "111",
+            "111",
+            "111",
+            "131");
+    /** Gwiazda wokol celu albo rzucajacego: krzyz i przekatne o promieniu 5 (41 pol). */
+    public static final SpellArea CROSS_NOVA = area("CROSS_NOVA", crossRows(5));
+
+    private static String[] crossRows(int r) {
+        String[] rows = new String[2 * r + 1];
+        for (int y = 0; y < rows.length; y++) {
+            StringBuilder b = new StringBuilder();
+            for (int x = 0; x < rows.length; x++) {
+                boolean hit = x == r || y == r || Math.abs(x - r) == Math.abs(y - r);
+                b.append(x == r && y == r ? '3' : hit ? '1' : '0');
+            }
+            rows[y] = b.toString();
+        }
+        return rows;
+    }
+
     // promienie: linia od pola przed rzucajacym
     public static final SpellArea BEAM5 = beamArea(5);
     public static final SpellArea BEAM6 = beamArea(6);

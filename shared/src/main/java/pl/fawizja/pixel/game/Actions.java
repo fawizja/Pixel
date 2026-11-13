@@ -67,6 +67,13 @@ public final class Actions {
                 case "unequip": s.unequip(pl.fawizja.pixel.item.EquipSlot.valueOf(p[1]), now); return true;
                 case "slot_keep": s.toggleKeepSlot(Integer.parseInt(p[1]), now); return true;
                 case "slot_drop": s.dropFromSlot(Integer.parseInt(p[1]), now); return true;
+                case "slot_wear": s.wearBag(Integer.parseInt(p[1]), now); return true;
+                // plecaki w plecaku: bag_X:sciezka:pole (sciezka "-" = glowny plecak, "3.0" = plecak z pola 3, w nim z pola 0)
+                case "bag_use": s.bagUse(path(p[1]), Integer.parseInt(p[2]), now); return true;
+                case "bag_drop": s.bagDrop(path(p[1]), Integer.parseInt(p[2]), now); return true;
+                case "bag_equip": s.bagEquip(path(p[1]), Integer.parseInt(p[2]), now); return true;
+                case "bag_out": s.bagOut(path(p[1]), Integer.parseInt(p[2]), now); return true;
+                case "bag_move": s.bagMove(path(p[1]), Integer.parseInt(p[2]), path(p[3]), Integer.parseInt(p[4])); return true;
                 case "slot_move": s.moveSlot(Integer.parseInt(p[1]), Integer.parseInt(p[2])); return true;
                 // okno depozytu: depot_move:zrodlo(B|D):pole:cel(B|D):pole (pole -1 = pierwsze wolne)
                 case "depot_move":
@@ -82,6 +89,12 @@ public final class Actions {
         } catch (RuntimeException e) {
             return false; // zle sformatowana akcja od klienta - ignorujemy
         }
+    }
+
+    private static int[] path(String text) {
+        int[] p = pl.fawizja.pixel.inventory.Container.parsePath(text);
+        if (p == null) throw new IllegalArgumentException("bad bag path");
+        return p;
     }
 
     private static pl.fawizja.pixel.world.Position pos(String[] p, int i) {

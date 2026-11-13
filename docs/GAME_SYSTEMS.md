@@ -198,6 +198,26 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
   Logika widzi jeden `Container` (`PlayerCharacter.setBackpackSlots`, 20..80), wiec lup, sklepy, handel i mikstury dzialaja bez zmian.
   Zapis: `bagslots=<n>` (gdy inne niz 20); stary zapis z `bags=<n>` (strony po 20) wczytuje sie jako jeden przewijany plecak
   `20 * (1 + n)` pol - nic nie ginie. Weteran (poziom 250+) startuje z plecakiem podroznika (24 pola). Akcja `bag_detach` zniknela.
+- Plecak w plecaku (2026-11-12, `inventory/Container`, `inventory/ItemWeights`): kazdy przedmiot-plecak (`ContainerType`: 20/24/36 pol)
+  mozna wlozyc do pola innego plecaka i otworzyc, bez limitu glebokosci - ogranicza tylko liczba pol i udzwig (cap) postaci. Uzycie
+  plecaka (przycisk "Otworz", `bag_use`) otwiera go w oknie obok glownego plecaka (`<` wraca o poziom wyzej, plecak w plecaku otwiera sie
+  w tym samym oknie); dawne zastepowanie glownego plecaka to teraz osobna akcja `slot_wear:n` ("Zaloz" przy zaznaczonym plecaku).
+  Zawartosc zyje w `ItemStack.contents()` (pojemnik w stosie, tylko dla plecakow, ilosc 1); `Container.copy()` jest gleboka kopia, wiec
+  transakcje na kopii nie zmieniaja zagniezdzonych plecakow. `count`, `countPlain`, `remove`, `spaceFor`, `canAdd` i `add` wchodza w glab.
+  Przepelnienie: `add` dopelnia najpierw istniejace stosy (glowny plecak, potem plecaki w glab), potem zajmuje wolne pola glownego plecaka,
+  a gdy pelny - pierwszego plecaka z miejscem (glebokosc najpierw, jak w Tibii); dotyczy lupu z ciala (takze autolootu), nagrod, kupna,
+  zbierania i podnoszenia z ziemi. Gdy wszystko pelne, przedmiot zostaje (`NO_SPACE`).
+  Udzwig: `PlayerCharacter.capacity()` (uncje) kontra waga zawartosci plecaka z plecakami w srodku (`ItemWeights`: setne uncji, waga z
+  kategorii przedmiotu: bron 12, zbroja 12, tarcza 10, narzedzie 3, mikstura 0,5, moneta 0,02 oz, plecak 8/9/10 oz); `add` przy przekroczeniu
+  zwraca `TOO_HEAVY`. Przenoszenie w obrebie drzewa plecakow nie zmienia wagi, wiec cap go nie blokuje; plecak nie wejdzie do samego
+  siebie ani do wlasnej zawartosci (`CYCLE`). Upuszczenie przedmiotu na pole z plecakiem wklada go do srodka.
+  Akcje sieciowe: `bag_move:sciezkaZ:pole:sciezkaDo:pole`, `bag_use|bag_drop|bag_equip:sciezka:pole`; sciezka to numery pol plecakow od
+  glownego plecaka rozdzielone kropka (`-` = glowny plecak, `3.0` = plecak z pola 3, w nim plecak z pola 0). Uzycie przedmiotu z
+  zagniezdzonego plecaka przenosi jedna sztuke do wolnego pola glownego plecaka (mikstury z paska HP/MP szukaja tez w plecakach).
+  Zapis: wersja 10 - stos plecaka niesie `{rozmiar|pole=stos|...}` (zagniezdzone w tych samych nawiasach); zapisy v1-v9 wczytuja sie
+  bez zmian (plecak bez zawartosci jest pusty). Ten sam zapis idzie w komunikacie SELF (klient online) i w skrzyniach/depozycie.
+  Smierc: plecak z zawartoscia wypada do ciala jako jeden stos; plecak z zawartoscia nie jest "zwykly" (nie da sie go sprzedac, wystawic
+  ani wyslac razem z zawartoscia). Ograniczenie: telefon (mobilne okno plecaka) pokazuje tylko glowny plecak. Test: `NestedBackpackTest`.
 - Przeciaganie: przytrzymanie i przesuniecie przedmiotu przenosi go na inne pole albo na panel ekwipunku (zalozenie), a przy otwartym
   depozycie na jego okno. Krotkie dotkniecie dziala jak dotad.
 - Wskaznik pingu (`net/PingMeter`, `NetClient.ping`): pod ramka widoku, obok FPS, kropka i wartosc w ms - zielona < 100 ms, pomaranczowa
@@ -1764,6 +1784,14 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   jak `SpellSystem.aimDirection`), BALL (pocisk i obszar wokół celu), SELF (wokół potwora). Dodatek: stan (`BURNING:60-110:4000:60`)
   albo `SLOW:procent:ms`. Rzut: `MonsterSpells.plan` (kształt `SpellArea`, linia wzroku), `CombatSystem.planSpell/showSpell/
   applySpellEffects`; odmiany Kuźni mnożą obrażenia jak ciosy. `castMonsterSpell` rzuca czar bez losowania (testy, podglądy).
+- Czary smokow (2026-11-12, `DragonSpellAreasTest`): kazdy smok ma wlasny, rozny zestaw; silniejsze rzucaja wyrazniej wieksze obszary.
+  Nowe ksztalty `SpellArea`: `WAVE9` (stozek 8 pol dlugosci, 40 pol), `WIDE_BEAM8` (oddech 3 x 8, 24 pola), `CROSS_NOVA` (gwiazda: krzyz
+  i przekatne promienia 5, 41 pol); w uzyciu tez `CIRCLE2X2` (21), `CIRCLE3X3` (37, GFB), `CIRCLE3X4` (57), `CIRCLE5X5` (61), `BEAM5/7`.
+  Zielony: fala ognia, kula 2x2, jadowity oddech; lodowy: fala lodu, oddech, spowalniajace spojrzenie 2x2; czarny: wielka fala, GFB, oddech
+  popiolu; zloty: wielka fala `WAVE9`, fala pioruna, kula 3x4; bialy: `WAVE9`, szeroki promien pioruna, lodowy wybuch 5x5, kula 3x4, gwiazda
+  pioruna. Smok lodu, kosci, magmy, Skaldra i Ignaroth dostaly wielkie fale, kule i gwiazdy. Oczekiwane obrazenia na atak (zalozenie: jeden cel)
+  zostaly dopasowane do dawnych (+-10%), wiec to rozne ksztalty, a nie wiecej obrazen; bilans lowiecki dziala bez zmian.
+  Klient rysuje efekt z kodu ksztaltu (`SpellArea.encode`), wiec cale pole obszaru jest widoczne offline i online.
 - Rzadki spawn: `RareSpawns.standard()` = 15 promili na odrodzenie smoka (klasa Dragon, poz. >= 100) przy graczu do 32 pól,
   przerwa 1 h, jeden żywy; ziarno testów: `MonsterManager.setRareRandom`. Bez rejestru z `pearl_dragon` albo przy < 50 spawnach wyłączony.
 - Spawny stałe: `tools/mapgen/dragon_spawns.py` (na gotowym świecie: `python3 tools/mapgen/dragon_spawns.py`; idempotentny).
