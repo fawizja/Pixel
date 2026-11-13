@@ -62,3 +62,11 @@ wolf;BLEEDING;7-10;4000;30
 drowned_sailor;DROWNING;166-237;5000;50
 coral_crab;DROWNING;154-220;5000;50
 bog_reaver;POISON;40-60;4000;100
+# BEGIN premium_quests (tools/mapgen/premium_quests.py data)
+drown_warden;POISON;40-60;4000;100
+leaf_matriarch;POISON;127-182;4000;100
+ritual_pharaoh;CURSED;89-127;4000;100
+quarter_overseer;BURNING;199-284;9000;100
+ember_colossus;BURNING;169-242;9000;100
+arena_overlord;FREEZING;489-698;8000;35
+# END premium_quests

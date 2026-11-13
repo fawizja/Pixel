@@ -1655,3 +1655,341 @@ place;Dom Perłowego Poszukiwacza (piwnica);name;Pearl Seeker's House (cellar)
 npc;house_nerys_warden;name;Warden Marina
 npc;house_nerys_warden;greeting;The pearl seeker built a house with a cellar full of chests. The hall belongs to all, the rooms to the brave.
 # END quest_houses
+# BEGIN postman (tools/mapgen/postman.py data)
+quest;postman_m1;name;The First Letter
+quest;postman_m1;desc;Kevan hands you your first letter. Post it in the Varden mailbox (Mailbox: Varden): stand next to it and tap it.
+quest;postman_m2;name;Wolves on the Road
+quest;postman_m2;desc;Wolves have already shredded two courier satchels. Defeat 8 to make the road to the mill safe.
+quest;postman_m3;name;Measuring the Route: the Mill
+quest;postman_m3;desc;Kevan is drawing a route map and needs walking times. Tap the mailbox at the mill (Mailbox: Abandoned Mill).
+quest;postman_m4;name;Measuring the Route: the Crypt
+quest;postman_m4;desc;The second branch of the route runs to the chapel with the crypt. Tap the mailbox there (Mailbox: Crypt of the Silent Bell).
+quest;postman_m5;name;The Lost Mailbag
+quest;postman_m5;desc;A courier lost his bag of letters and the road bandits took it as loot. Take the lost mailbag back from the bandits.
+quest;postman_m6;name;Delivery to Frostholm
+quest;postman_m6;desc;The recovered letters are addressed to Frostholm. Post them in the mailbox in that town (Mailbox: Frostholm).
+quest;postman_m7;name;Measuring the Route: the Poachers
+quest;postman_m7;desc;The last stretch of the route leads through the snow to the poacher den. Tap the mailbox there (Mailbox: The Poacher's Den).
+quest;postman_m8;name;Sodden Post
+quest;postman_m8;desc;Snow wolves dug up a buried mailbox and dragged the letters across the ice. Gather 3 sodden letters from their spoils.
+quest;postman_m9;name;Delivery to Qasirah
+quest;postman_m9;desc;The dried letters are bound for the desert town. Post them in the Qasirah mailbox (Mailbox: Qasirah).
+quest;postman_m10;name;Parcel from the Depths
+quest;postman_m10;desc;The last parcel for the dead merchants goes to the vault of the Barrow of the Candle Court. Fight past the guards and tap the vault mailbox (Mailbox: Barrow of the Candle Court (vault)). Door level: 35.
+quest;postman_m1;line;Postman Quest
+quest;postman_m1;where;Varden, near the temple
+npc;postmaster_kevan;name;Postmaster Kevan
+npc;postmaster_kevan;greeting;The post never sleeps and letters do not deliver themselves. Want to become a Varden Postman? Ask me about the post.
+item;postman_cap;name;Postman Cap
+item;lost_mailbag;name;Lost Mailbag
+item;sodden_letters;name;Sodden Letter
+mailbox;mb_varden;name;Mailbox: Varden
+place;Skrzynka: Varden;name;Mailbox: Varden
+mailbox;mb_frostholm;name;Mailbox: Frostholm
+place;Skrzynka: Frostholm;name;Mailbox: Frostholm
+mailbox;mb_qasirah;name;Mailbox: Qasirah
+place;Skrzynka: Qasirah;name;Mailbox: Qasirah
+mailbox;mb_selvaran;name;Mailbox: Selvaran
+place;Skrzynka: Selvaran;name;Mailbox: Selvaran
+mailbox;mb_valmir;name;Mailbox: Valmir
+place;Skrzynka: Valmir;name;Mailbox: Valmir
+mailbox;mb_nerys;name;Mailbox: Nerys
+place;Skrzynka: Nerys;name;Mailbox: Nerys
+mailbox;mb_mill;name;Mailbox: Abandoned Mill
+place;Skrzynka: Opuszczony Młyn;name;Mailbox: Abandoned Mill
+mailbox;mb_crypt;name;Mailbox: Crypt of the Silent Bell
+place;Skrzynka: Krypta Cichego Dzwonu;name;Mailbox: Crypt of the Silent Bell
+mailbox;mb_poacher;name;Mailbox: The Poacher's Den
+place;Skrzynka: Jama Kłusownika;name;Mailbox: The Poacher's Den
+mailbox;mb_oasis;name;Mailbox: Well of the Buried Oasis
+place;Skrzynka: Studnia Zakopanej Oazy;name;Mailbox: Well of the Buried Oasis
+mailbox;mb_barrow;name;Mailbox: Barrow of the Candle Court (vault)
+place;Skrzynka: Kurhan Dworu Świec (skarbiec);name;Mailbox: Barrow of the Candle Court (vault)
+mailbox;mb_watch;name;Mailbox: Hrimvard Watchtower (summit)
+place;Skrzynka: Wieża Strażnicza Hrimvard (szczyt);name;Mailbox: Hrimvard Watchtower (summit)
+mailbox;mb_zig;name;Mailbox: Ziggurat of the Scorched Sun
+place;Skrzynka: Zigurat Spalonego Słońca;name;Mailbox: Ziggurat of the Scorched Sun
+mailbox;mb_drown;name;Mailbox: Vault of the Drowned Guild
+place;Skrzynka: Skarbnica Utopionej Gildii;name;Mailbox: Vault of the Drowned Guild
+mailbox;mb_oakgrove;name;Mailbox: Grove of the Whispering Oak
+place;Skrzynka: Gaj Szeptanego Dębu;name;Mailbox: Grove of the Whispering Oak
+mailbox;mb_ember;name;Mailbox: The Ember Gate
+place;Skrzynka: Żarowa Brama;name;Mailbox: The Ember Gate
+mailbox;mb_storm;name;Mailbox: The Storm Arena
+place;Skrzynka: Arena Burzy;name;Mailbox: The Storm Arena
+# END postman
+# BEGIN premium_quests (tools/mapgen/premium_quests.py data)
+quest;drown_m1;name;Inside: Vault of the Drowned Guild
+quest;drown_m1;desc;The merchants' guild flooded its vault to keep it from robbers. Three levers in the side chambers open the sluice to the warden's hall. Step inside (Vault of the Drowned Guild (depths)) and have a look around.
+quest;drown_m2;name;Lever Wardens: Bog Wraith
+quest;drown_m2;desc;Wardens stand in the side chambers. Defeat 12 (Bog Wraith) to reach the first levers.
+quest;drown_m3;name;Chamber Keepers: Marsh Lizard
+quest;drown_m3;desc;Keepers hold the farther lever chambers. Defeat 8 (Marsh Lizard) and pull all three levers.
+quest;drown_m4;name;Defeat: Warden of the Sunken Coffers
+quest;drown_m4;desc;When the three levers are down the gate to the boss hall yields. Defeat Warden of the Sunken Coffers and open the vault.
+quest;drown_m1;line;Levers of the Drowned Guild
+quest;drown_m1;where;Vault of the Drowned Guild, near Valmir
+place;Skarbnica Utopionej Gildii;name;Vault of the Drowned Guild
+place;Skarbnica Utopionej Gildii (głębiny);name;Vault of the Drowned Guild (depths)
+npc;drown_ottilie;name;Guildwarden Ottilie
+npc;drown_ottilie;greeting;The merchants' guild drowned together with its vault. Three levers still hold the water back from the last chamber.
+quest;pit_m1;name;Inside: Brinepit Arena
+quest;pit_m1;desc;An old salt mine became an arena for mercenaries from the whole coast. Each round unlocks the next and the champion waits at the bottom. Step inside (Brinepit Arena (depths)) and have a look around.
+quest;pit_m2;name;Round One: Jungle Hunter
+quest;pit_m2;desc;Round one of the arena. Defeat 10 (Jungle Hunter) to unlock round two.
+quest;pit_m3;name;Round Two: Striped Prowler
+quest;pit_m3;desc;Round two is open. Defeat 10 (Striped Prowler) to unlock round three.
+quest;pit_m4;name;Round Three: Marsh Lizard
+quest;pit_m4;desc;Round three is the hardest. Defeat 8 (Marsh Lizard) and you may challenge the arena champion.
+quest;pit_m5;name;Arena Champion: Champion of the Brinepit
+quest;pit_m5;desc;The champion waits in the middle of the arena. Defeat Champion of the Brinepit and the victors' treasure is yours.
+quest;pit_m1;line;The Brinepit Arena
+quest;pit_m1;where;Brinepit Arena, near Nerys
+place;Arena Solnego Dołu;name;Brinepit Arena
+place;Arena Solnego Dołu (głębiny);name;Brinepit Arena (depths)
+npc;pit_hector;name;Pitmaster Hector
+npc;pit_hector;greeting;Three rounds are fought in the Brinepit, then the champion. Whoever survives all of them earns gold and gear.
+quest;oakgrove_m1;name;Inside: Grove of the Whispering Oak
+quest;oakgrove_m1;desc;Druids planted an oak over an old spring. Now serpents and prowlers roam around the altar and the rite there wakes the oak itself. Step inside (Grove of the Whispering Oak (depths)) and have a look around.
+quest;oakgrove_m2;name;Before the Grove: Jungle Serpent
+quest;oakgrove_m2;desc;Monsters block the road to the altar. Defeat 12 (Jungle Serpent).
+quest;oakgrove_m3;name;Rite at the Altar: Striped Prowler
+quest;oakgrove_m3;desc;The rite draws creatures. Defeat 10 (Striped Prowler), pull the lever at the altar and the gate to the boss hall yields.
+quest;oakgrove_m4;name;The Awakening: The Whispering Oak
+quest;oakgrove_m4;desc;The rite has woken the guardian. Defeat The Whispering Oak and open the vault.
+quest;oakgrove_m1;line;Rite of the Whispering Oak
+quest;oakgrove_m1;where;Grove of the Whispering Oak, near Selvaran
+place;Gaj Szeptanego Dębu;name;Grove of the Whispering Oak
+place;Gaj Szeptanego Dębu (głębiny);name;Grove of the Whispering Oak (depths)
+npc;oak_rowan;name;Druid Rowan
+npc;oak_rowan;greeting;The old oak in the grove has spoken. Its whisper calls a guardian if someone completes the rite at the altar.
+quest;fleet_m1;name;Inside: Palace of the Shattered Fleet
+quest;fleet_m1;desc;The admiral's palace was built from wrecks. The wings are joined by gates that yield only once the task in the previous wing is done. Step inside (Palace of the Shattered Fleet (depths)) and have a look around.
+quest;fleet_m2;name;First Wing: Marsh Lizard
+quest;fleet_m2;desc;A guard holds the first wing. Defeat 10 (Marsh Lizard) and the gate of the second wing yields.
+quest;fleet_m3;name;Second Wing: Lizard Hexer
+quest;fleet_m3;desc;The second wing is open. Defeat 10 (Lizard Hexer) to unlock the third.
+quest;fleet_m4;name;Third Wing: Stone Sentinel
+quest;fleet_m4;desc;The strongest nest in the third wing. Defeat 8 (Stone Sentinel) to move on.
+quest;fleet_m5;name;Fourth Wing: Horned Oracle
+quest;fleet_m5;desc;The last guard stands before the throne hall. Defeat 6 (Horned Oracle) and the throne hall gate yields.
+quest;fleet_m6;name;The Throne Hall: Admiral of the Shattered Fleet
+quest;fleet_m6;desc;All wings are open. Defeat Admiral of the Shattered Fleet in the throne hall and open the vault.
+quest;fleet_m1;line;Palace of the Shattered Fleet
+quest;fleet_m1;where;Palace of the Shattered Fleet, near Nerys
+place;Pałac Rozbitej Floty;name;Palace of the Shattered Fleet
+place;Pałac Rozbitej Floty (głębiny);name;Palace of the Shattered Fleet (depths)
+npc;fleet_oren;name;Quartermaster Oren
+npc;fleet_oren;greeting;The admiral wrecked his fleet against his own palace. Four wings, and each opens only after the task in the previous one.
+quest;toll_m1;name;Inside: Toll-Keeper's Bridge
+quest;toll_m1;desc;The bridge over the fen stands on four pillars and a toll square waits at each. The keeper comes out only when a party holds all four squares. Step inside (Toll-Keeper's Bridge (depths)) and have a look around.
+quest;toll_m2;name;Gate Guard: Lizard Hexer
+quest;toll_m2;desc;A guard holds the party gate. Defeat 12 (Lizard Hexer) before you go on.
+quest;toll_m3;name;Hall of the Four Squares: Stone Sentinel
+quest;toll_m3;desc;Stronger guards wait beyond the party gate. Defeat 8 (Stone Sentinel) with your party (3 players).
+quest;toll_m4;name;Defeat: The Toll-Keeper
+quest;toll_m4;desc;Stand on the four squares of the hall and defeat The Toll-Keeper. The vault opens once this mission is turned in.
+quest;toll_m1;line;The Toll-Keeper's Bridge
+quest;toll_m1;where;Toll-Keeper's Bridge, near Valmir
+place;Most Poborcy;name;Toll-Keeper's Bridge
+place;Most Poborcy (głębiny);name;Toll-Keeper's Bridge (depths)
+npc;toll_brannoch;name;Bridgewarden Brannoch
+npc;toll_brannoch;greeting;The toll-keeper takes a toll from everyone who wants to cross. Alone you have no business there; it takes three.
+quest;pendulum_m1;name;Inside: Hall of Pendulums
+quest;pendulum_m1;desc;The pendulum mechanism spins up only after three levers in the side chambers are thrown. Only then does the way to the regent open. Step inside (Hall of Pendulums (depths)) and have a look around.
+quest;pendulum_m2;name;Lever Wardens: Canopy Lurker
+quest;pendulum_m2;desc;Wardens stand in the side chambers. Defeat 12 (Canopy Lurker) to reach the first levers.
+quest;pendulum_m3;name;Chamber Keepers: Temple Guardian
+quest;pendulum_m3;desc;Keepers hold the farther lever chambers. Defeat 8 (Temple Guardian) and pull all three levers.
+quest;pendulum_m4;name;Defeat: Regent of the Pendulums
+quest;pendulum_m4;desc;When the three levers are down the gate to the boss hall yields. Defeat Regent of the Pendulums and open the vault.
+quest;pendulum_m1;line;Levers of the Hall of Pendulums
+quest;pendulum_m1;where;Hall of Pendulums, near Selvaran
+place;Sala Wahadeł;name;Hall of Pendulums
+place;Sala Wahadeł (głębiny);name;Hall of Pendulums (depths)
+npc;pendulum_ixchel;name;Mechanist Ixchel
+npc;pendulum_ixchel;greeting;The priests built a hall of pendulums that moves only once someone pulls all three levers. Careful, the guards never sleep.
+quest;cells_m1;name;Inside: The Three Archon Cells
+quest;cells_m1;desc;The port inquisitors locked three archons under the quay. Each cell opens only once the previous warden is dead, and beyond lies their vault. Step inside (The Three Archon Cells (depths)) and have a look around.
+quest;cells_m2;name;First Cell: Archon of the First Cell
+quest;cells_m2;desc;An archon waits in the first cell. Defeat Archon of the First Cell.
+quest;cells_m3;name;Second Cell: Archon of the Second Cell
+quest;cells_m3;desc;The gate of the second cell has yielded. Defeat Archon of the Second Cell.
+quest;cells_m4;name;Third Cell: Archon of the Third Cell
+quest;cells_m4;desc;The last cell is open. Defeat Archon of the Third Cell.
+quest;cells_m5;name;Vault Guard: Dune Zealot
+quest;cells_m5;desc;The last guards watch the vault. Defeat 12 (Dune Zealot) and the chests are yours.
+quest;cells_m1;line;The Three Archon Cells
+quest;cells_m1;where;The Three Archon Cells, near Nerys
+place;Trzy Cele Archontów;name;The Three Archon Cells
+place;Trzy Cele Archontów (głębiny);name;The Three Archon Cells (depths)
+npc;cells_veyra;name;Inquisitor Veyra
+npc;cells_veyra;greeting;Under the port lie three cells, an archon in each. You may enter the next only after the previous one falls. At the end waits the inquisitors' vault.
+quest;sunorder_m1;name;Inside: Court of the Two Orders
+quest;sunorder_m1;desc;Two orders share a court under the jungle: sun priests from the desert and the leaf guardians. Whoever takes one order's tasks strikes the other and cannot go back. Step inside (Court of the Two Orders (depths)) and have a look around.
+quest;sunorder_m2;name;Rival Guards: Orchid Mimic
+quest;sunorder_m2;desc;The rival order holds a camp across the court. Defeat 10 (Orchid Mimic).
+quest;sunorder_m3;name;The Rival Leader: Matriarch of the Living Leaf
+quest;sunorder_m3;desc;The gate to the leader's chamber has yielded. Defeat Matriarch of the Living Leaf and your order's vault opens.
+quest;sunorder_m1;line;Order of the Setting Sun
+quest;sunorder_m1;where;Court of the Two Orders, near Selvaran
+place;Dwór Dwóch Zakonów;name;Court of the Two Orders
+place;Dwór Dwóch Zakonów (głębiny);name;Court of the Two Orders (depths)
+npc;sun_sahir;name;Sunwarden Sahir
+npc;sun_sahir;greeting;Join the Order of the Sun and we will deal with the Leaf. You choose once: whoever starts my tasks cannot help the other side.
+quest;leaforder_m1;name;Inside: Court of the Two Orders
+quest;leaforder_m1;desc;The leaf guardians defend the jungle against the sun priests. Whoever takes the Leaf's tasks fights the Sun and cannot become its ally. Step inside (Court of the Two Orders (depths)) and have a look around.
+quest;leaforder_m2;name;Rival Guards: Dune Zealot
+quest;leaforder_m2;desc;The rival order holds a camp across the court. Defeat 12 (Dune Zealot).
+quest;leaforder_m3;name;The Rival Leader: Hierophant of the Setting Sun
+quest;leaforder_m3;desc;The gate to the leader's chamber has yielded. Defeat Hierophant of the Setting Sun and your order's vault opens.
+quest;leaforder_m1;line;Order of the Living Leaf
+quest;leaforder_m1;where;Court of the Two Orders, near Selvaran
+npc;leaf_imara;name;Leafwarden Imara
+npc;leaf_imara;greeting;The Order of the Leaf guards the jungle from the Sun. You choose once: if you start my tasks you can no longer help the desert order.
+quest;seals_m1;name;Inside: Hall of the Six Seals
+quest;seals_m1;desc;Six chambers around the central hall each guard one seal. When all have fallen, the gate to the warden of the fen yields. Step inside (Hall of the Six Seals (depths)) and have a look around.
+quest;seals_m2;name;The First Three Seals: Bog Hydra
+quest;seals_m2;desc;Guards hold the chambers of the first three seals. Defeat 14 (Bog Hydra) and pull the levers.
+quest;seals_m3;name;The Last Three Seals: Lizard Hexer
+quest;seals_m3;desc;The remaining chambers are even more dangerous. Defeat 10 (Lizard Hexer) and pull the other levers.
+quest;seals_m4;name;The Seal Warden: Warden of the Seven Seals
+quest;seals_m4;desc;When the six seals fall the gate to the boss yields. Defeat Warden of the Seven Seals and open the vault.
+quest;seals_m1;line;The Six Seals of the Fen
+quest;seals_m1;where;Hall of the Six Seals, near Valmir
+place;Sala Sześciu Pieczęci;name;Hall of the Six Seals
+place;Sala Sześciu Pieczęci (głębiny);name;Hall of the Six Seals (depths)
+npc;seals_morwen;name;Sealkeeper Morwen
+npc;seals_morwen;greeting;Six seals bind the warden of the fen. A separate lever in a separate chamber opens each. Only all six will let you reach him.
+quest;sandrite_m1;name;Inside: Crypt of the Sand Rite
+quest;sandrite_m1;desc;The sand crypt guards a priest the embalmers buried alive. Mummies and dragons watch the altar and the rite there wakes the priest. Step inside (Crypt of the Sand Rite (depths)) and have a look around.
+quest;sandrite_m2;name;Before the Grove: Mummy
+quest;sandrite_m2;desc;Monsters block the road to the altar. Defeat 12 (Mummy).
+quest;sandrite_m3;name;Rite at the Altar: Emerald Dragon
+quest;sandrite_m3;desc;The rite draws creatures. Defeat 6 (Emerald Dragon), pull the lever at the altar and the gate to the boss hall yields.
+quest;sandrite_m4;name;The Awakening: The Buried Sand Priest
+quest;sandrite_m4;desc;The rite has woken the guardian. Defeat The Buried Sand Priest and open the vault.
+quest;sandrite_m1;line;Rite of the Sand Crypt
+quest;sandrite_m1;where;Crypt of the Sand Rite, near Nerys
+place;Krypta Piaskowego Rytuału;name;Crypt of the Sand Rite
+place;Krypta Piaskowego Rytuału (głębiny);name;Crypt of the Sand Rite (depths)
+npc;sandrite_zefyr;name;Embalmer Zefyr
+npc;sandrite_zefyr;greeting;The embalmers left a living altar in the crypt. Complete the rite and you wake the priest who lies beneath the sand.
+quest;throne_m1;name;Inside: The Scorched Throne
+quest;throne_m1;desc;The emperor's palace burns from within. The wings open one after another and in the throne hall wait the emperor and his dragons. Step inside (The Scorched Throne (depths)) and have a look around.
+quest;throne_m2;name;First Wing: Blade Warden
+quest;throne_m2;desc;A guard holds the first wing. Defeat 10 (Blade Warden) and the gate of the second wing yields.
+quest;throne_m3;name;Second Wing: Cursed Treant
+quest;throne_m3;desc;The second wing is open. Defeat 8 (Cursed Treant) to unlock the third.
+quest;throne_m4;name;Third Wing: Bog Serpentess
+quest;throne_m4;desc;The strongest nest in the third wing. Defeat 8 (Bog Serpentess) to move on.
+quest;throne_m5;name;Fourth Wing: Temple Guardian
+quest;throne_m5;desc;The last guard stands before the throne hall. Defeat 8 (Temple Guardian) and the throne hall gate yields.
+quest;throne_m6;name;The Throne Hall: Emperor of the Scorched Throne
+quest;throne_m6;desc;All wings are open. Defeat Emperor of the Scorched Throne in the throne hall and open the vault.
+quest;throne_m1;line;The Emperor's Scorched Throne
+quest;throne_m1;where;The Scorched Throne, near Selvaran
+place;Spalony Tron;name;The Scorched Throne
+place;Spalony Tron (głębiny);name;The Scorched Throne (depths)
+npc;throne_kaya;name;Chamberlain Kaya
+npc;throne_kaya;greeting;The emperor sits on a throne that has burned for ages. Five wings lead to his hall and each demands a different proof of courage.
+quest;quarters_m1;name;Inside: The Four Ashen Quarters
+quest;quarters_m1;desc;The burned city splits into four quarters around a square. Each has its own guards and the overseer shuts the last. Step inside (The Four Ashen Quarters (depths)) and have a look around.
+quest;quarters_m2;name;First Quarter: Wraith Knight
+quest;quarters_m2;desc;The first quarter is open. Defeat 12 (Wraith Knight).
+quest;quarters_m3;name;Second Quarter: Crimson Shade
+quest;quarters_m3;desc;The gate of the second quarter has yielded. Defeat 10 (Crimson Shade).
+quest;quarters_m4;name;Third Quarter: Ash Penitent
+quest;quarters_m4;desc;The third quarter awaits. Defeat 10 (Ash Penitent).
+quest;quarters_m5;name;Fourth Quarter: Venom Hydra
+quest;quarters_m5;desc;The overseer lives in the fourth quarter. Defeat 8 (Venom Hydra) to reach his hall.
+quest;quarters_m6;name;The Overseer: Overseer of the Four Quarters
+quest;quarters_m6;desc;All quarters stand open. Defeat Overseer of the Four Quarters and the gate to the vault yields.
+quest;quarters_m1;line;The Four Ashen Quarters
+quest;quarters_m1;where;The Four Ashen Quarters, near Valmir
+place;Cztery Dzielnice Popiołu;name;The Four Ashen Quarters
+place;Cztery Dzielnice Popiołu (głębiny);name;The Four Ashen Quarters (depths)
+npc;quarters_dorian;name;Magistrate Dorian
+npc;quarters_dorian;greeting;The city of ash has four quarters and one square. The quarters open one by one and the overseer waits behind the last.
+quest;ember_m1;name;Inside: The Ember Gate
+quest;ember_m1;desc;A gate of molten stone guards a hall with four squares. Only four characters on the squares wake the colossus. Step inside (The Ember Gate (depths)) and have a look around.
+quest;ember_m2;name;Gate Guard: Cinder Revenant
+quest;ember_m2;desc;A guard holds the party gate. Defeat 12 (Cinder Revenant) before you go on.
+quest;ember_m3;name;Hall of the Four Squares: Coal Dragon
+quest;ember_m3;desc;Stronger guards wait beyond the party gate. Defeat 8 (Coal Dragon) with your party (4 players).
+quest;ember_m4;name;Defeat: Colossus of the Ember Gate
+quest;ember_m4;desc;Stand on the four squares of the hall and defeat Colossus of the Ember Gate. The vault opens once this mission is turned in.
+quest;ember_m1;line;The Ember Gate
+quest;ember_m1;where;The Ember Gate, near Nerys
+place;Żarowa Brama;name;The Ember Gate
+place;Żarowa Brama (głębiny);name;The Ember Gate (depths)
+npc;ember_thane;name;Gatekeeper Thane
+npc;ember_thane;greeting;The Ember Gate opens only for four. One of you stands on each square and the colossus rises from the embers.
+quest;trials_m1;name;Inside: The Three Trials of the Forge
+quest;trials_m1;desc;The smiths of the slag forge tested apprentices with three trials. The archons guard them still and the master's vault lies behind the last. Step inside (The Three Trials of the Forge (depths)) and have a look around.
+quest;trials_m2;name;First Cell: Archon of the Trial of Stone
+quest;trials_m2;desc;An archon waits in the first cell. Defeat Archon of the Trial of Stone.
+quest;trials_m3;name;Second Cell: Archon of the Trial of Slag
+quest;trials_m3;desc;The gate of the second cell has yielded. Defeat Archon of the Trial of Slag.
+quest;trials_m4;name;Third Cell: Archon of the Trial of Flame
+quest;trials_m4;desc;The last cell is open. Defeat Archon of the Trial of Flame.
+quest;trials_m5;name;Vault Guard: Molten Cultist
+quest;trials_m5;desc;The last guards watch the vault. Defeat 10 (Molten Cultist) and the chests are yours.
+quest;trials_m1;line;The Three Trials of the Forge
+quest;trials_m1;where;The Three Trials of the Forge, near Valmir
+place;Trzy Próby Kuźni;name;The Three Trials of the Forge
+place;Trzy Próby Kuźni (głębiny);name;The Three Trials of the Forge (depths)
+npc;trials_halvard;name;Forgemaster Halvard
+npc;trials_halvard;greeting;The forge has three trials: stone, slag and flame. An archon guards each. Each one that falls opens the next.
+quest;storm_m1;name;Inside: The Storm Arena
+quest;storm_m1;desc;The arena stands atop a rock where storms never quiet. Each round brings worse foes and the overlord accepts no surrender. Step inside (The Storm Arena (depths)) and have a look around.
+quest;storm_m2;name;Round One: Thorn Maiden
+quest;storm_m2;desc;Round one of the arena. Defeat 10 (Thorn Maiden) to unlock round two.
+quest;storm_m3;name;Round Two: Storm Harpy
+quest;storm_m3;desc;Round two is open. Defeat 10 (Storm Harpy) to unlock round three.
+quest;storm_m4;name;Round Three: Frost Giant
+quest;storm_m4;desc;Round three is the hardest. Defeat 8 (Frost Giant) and you may challenge the arena champion.
+quest;storm_m5;name;Arena Champion: Overlord of the Storm Arena
+quest;storm_m5;desc;The champion waits in the middle of the arena. Defeat Overlord of the Storm Arena and the victors' treasure is yours.
+quest;storm_m1;line;The Storm Arena
+quest;storm_m1;where;The Storm Arena, near Selvaran
+place;Arena Burzy;name;The Storm Arena
+place;Arena Burzy (głębiny);name;The Storm Arena (depths)
+npc;storm_valka;name;Arenamaster Valka
+npc;storm_valka;greeting;Lightning strikes every round of the Storm Arena. Three rounds, then the overlord. Whoever lives takes the victors' treasure.
+quest;mirror_m1;name;Inside: Hall of the Glass Seals
+quest;mirror_m1;desc;The glass seals shatter only from levers in chambers watched by phantoms and seraphs. Only with the sixth seal does the regent lose his shield. Step inside (Hall of the Glass Seals (depths)) and have a look around.
+quest;mirror_m2;name;The First Three Seals: Mist Wraith
+quest;mirror_m2;desc;Guards hold the chambers of the first three seals. Defeat 12 (Mist Wraith) and pull the levers.
+quest;mirror_m3;name;The Last Three Seals: Glass Phantom
+quest;mirror_m3;desc;The remaining chambers are even more dangerous. Defeat 10 (Glass Phantom) and pull the other levers.
+quest;mirror_m4;name;The Seal Warden: Regent of the Six Seals
+quest;mirror_m4;desc;When the six seals fall the gate to the boss yields. Defeat Regent of the Six Seals and open the vault.
+quest;mirror_m1;line;The Glass Seals
+quest;mirror_m1;where;Hall of the Glass Seals, near Nerys
+place;Sala Szklanych Pieczęci;name;Hall of the Glass Seals
+place;Sala Szklanych Pieczęci (głębiny);name;Hall of the Glass Seals (depths)
+npc;mirror_selene;name;Glasskeeper Selene
+npc;mirror_selene;greeting;Six glass seals bind the regent. You break them with levers, but each chamber has its own guards. Go with a party.
+monster;drown_warden;name;Warden of the Sunken Coffers
+monster;pit_champion;name;Champion of the Brinepit
+monster;whisper_oak;name;The Whispering Oak
+monster;fleet_admiral;name;Admiral of the Shattered Fleet
+monster;toll_keeper;name;The Toll-Keeper
+monster;lever_regent;name;Regent of the Pendulums
+monster;chain_archon_a;name;Archon of the First Cell
+monster;chain_archon_b;name;Archon of the Second Cell
+monster;chain_archon_c;name;Archon of the Third Cell
+monster;sun_hierophant;name;Hierophant of the Setting Sun
+monster;leaf_matriarch;name;Matriarch of the Living Leaf
+monster;seal_warden;name;Warden of the Seven Seals
+monster;ritual_pharaoh;name;The Buried Sand Priest
+monster;wrath_emperor;name;Emperor of the Scorched Throne
+monster;quarter_overseer;name;Overseer of the Four Quarters
+monster;ember_colossus;name;Colossus of the Ember Gate
+monster;trial_stone;name;Archon of the Trial of Stone
+monster;trial_slag;name;Archon of the Trial of Slag
+monster;trial_flame;name;Archon of the Trial of Flame
+monster;arena_overlord;name;Overlord of the Storm Arena
+monster;seal_regent;name;Regent of the Six Seals
+# END premium_quests

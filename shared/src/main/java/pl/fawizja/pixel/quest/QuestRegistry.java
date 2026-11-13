@@ -105,6 +105,8 @@ public final class QuestRegistry {
     /**
      * Zaleznosci miedzy liniami zadan (data/quest_requires.csv): {@code misja;wymagana1,wymagana2}. Misja jest odblokowana
      * dopiero po oddaniu wszystkich wymaganych zadan (poza lancuchem {@code requires}, ktory laczy misje jednego zleceniodawcy).
+     * Wymaganie z wykrzyknikiem ({@code misja;!inna}) to wykluczenie: misja jest dostepna tylko, dopoki postac nie zaczela
+     * zadania {@code inna} (wybor frakcji: rozpoczecie jednej linii zamyka druga).
      */
     public QuestRegistry withRequires(List<String> lines) throws IOException {
         Map<String, List<String>> map = new LinkedHashMap<>();
@@ -118,7 +120,7 @@ public final class QuestRegistry {
             if (!byKey.containsKey(f[0].trim())) throw new IOException("quest_requires.csv line " + n + ": unknown quest " + f[0]);
             List<String> req = new ArrayList<>();
             for (String r : f[1].split(",")) {
-                if (!byKey.containsKey(r.trim())) throw new IOException("quest_requires.csv line " + n + ": unknown required quest " + r);
+                if (!byKey.containsKey(r.trim().replaceFirst("^!", ""))) throw new IOException("quest_requires.csv line " + n + ": unknown required quest " + r);
                 req.add(r.trim());
             }
             map.put(f[0].trim(), List.copyOf(req));
@@ -131,6 +133,7 @@ public final class QuestRegistry {
                 String c = todo.poll();
                 for (QuestType q = byKey.get(c); q != null; q = q.requires() == null ? null : byKey.get(q.requires())) {
                     for (String r : prereqs(map, q.key())) {
+                        if (r.startsWith("!")) continue;      // wykluczenie ("!misja") nie jest zaleznoscia
                         if (r.equals(k)) throw new IOException("quest_requires.csv: loop at " + k);
                         if (seen.add(r)) todo.add(r);
                     }

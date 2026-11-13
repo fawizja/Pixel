@@ -1655,3 +1655,341 @@ place;Dom Perłowego Poszukiwacza (piwnica);name;Casa del buscador de perlas (s�
 npc;house_nerys_warden;name;Warden Marina
 npc;house_nerys_warden;greeting;El buscador de perlas construyó una casa con sótano lleno de cofres. El vestíbulo es de todos, las salas de los valientes.
 # END quest_houses
+# BEGIN postman (tools/mapgen/postman.py data)
+quest;postman_m1;name;La primera carta
+quest;postman_m1;desc;Kevan te da tu primera carta. Échala en el buzón de Varden (Buzón: Varden): colócate al lado y tócalo.
+quest;postman_m2;name;Lobos en el camino
+quest;postman_m2;desc;Los lobos ya destrozaron dos bolsas de mensajeros. Derrota a 8 para que el camino al molino sea seguro.
+quest;postman_m3;name;Medir la ruta: el molino
+quest;postman_m3;desc;Kevan dibuja un mapa de rutas y necesita los tiempos. Toca el buzón del molino (Buzón: Molino abandonado).
+quest;postman_m4;name;Medir la ruta: la cripta
+quest;postman_m4;desc;El segundo tramo de la ruta llega a la capilla con la cripta. Toca el buzón de allí (Buzón: Cripta de la campana muda).
+quest;postman_m5;name;La bolsa perdida
+quest;postman_m5;desc;Un mensajero perdió su bolsa de cartas y los bandidos del camino se la llevaron. Recupera la bolsa perdida de los bandidos.
+quest;postman_m6;name;Entrega a Frostholm
+quest;postman_m6;desc;Las cartas recuperadas van a Frostholm. Échalas en el buzón de esa ciudad (Buzón: Frostholm).
+quest;postman_m7;name;Medir la ruta: los cazadores furtivos
+quest;postman_m7;desc;El último tramo de la ruta cruza la nieve hasta la guarida del cazador furtivo. Toca el buzón de allí (Buzón: La guarida del cazador furtivo).
+quest;postman_m8;name;Correo empapado
+quest;postman_m8;desc;Los lobos de nieve desenterraron un buzón y arrastraron las cartas por el hielo. Reúne 3 cartas empapadas de su botín.
+quest;postman_m9;name;Entrega a Qasirah
+quest;postman_m9;desc;Las cartas secas van a la ciudad del desierto. Échalas en el buzón de Qasirah (Buzón: Qasirah).
+quest;postman_m10;name;Paquete de las profundidades
+quest;postman_m10;desc;El último paquete para los mercaderes muertos va a la cámara del Túmulo de la Corte de Velas. Abriéndote paso entre los guardias, toca el buzón de la cámara (Buzón: Túmulo de la Corte de las Velas (cámara)). Nivel de la puerta: 35.
+quest;postman_m1;line;Misión del cartero
+quest;postman_m1;where;Varden, cerca del templo
+npc;postmaster_kevan;name;Postmaster Kevan
+npc;postmaster_kevan;greeting;El correo nunca duerme y las cartas no se reparten solas. ¿Quieres ser cartero de Varden? Pregúntame por el correo.
+item;postman_cap;name;Gorra de cartero
+item;lost_mailbag;name;Bolsa de correo perdida
+item;sodden_letters;name;Carta empapada
+mailbox;mb_varden;name;Buzón: Varden
+place;Skrzynka: Varden;name;Buzón: Varden
+mailbox;mb_frostholm;name;Buzón: Frostholm
+place;Skrzynka: Frostholm;name;Buzón: Frostholm
+mailbox;mb_qasirah;name;Buzón: Qasirah
+place;Skrzynka: Qasirah;name;Buzón: Qasirah
+mailbox;mb_selvaran;name;Buzón: Selvaran
+place;Skrzynka: Selvaran;name;Buzón: Selvaran
+mailbox;mb_valmir;name;Buzón: Valmir
+place;Skrzynka: Valmir;name;Buzón: Valmir
+mailbox;mb_nerys;name;Buzón: Nerys
+place;Skrzynka: Nerys;name;Buzón: Nerys
+mailbox;mb_mill;name;Buzón: Molino abandonado
+place;Skrzynka: Opuszczony Młyn;name;Buzón: Molino abandonado
+mailbox;mb_crypt;name;Buzón: Cripta de la campana muda
+place;Skrzynka: Krypta Cichego Dzwonu;name;Buzón: Cripta de la campana muda
+mailbox;mb_poacher;name;Buzón: La guarida del cazador furtivo
+place;Skrzynka: Jama Kłusownika;name;Buzón: La guarida del cazador furtivo
+mailbox;mb_oasis;name;Buzón: Pozo del oasis enterrado
+place;Skrzynka: Studnia Zakopanej Oazy;name;Buzón: Pozo del oasis enterrado
+mailbox;mb_barrow;name;Buzón: Túmulo de la Corte de las Velas (cámara)
+place;Skrzynka: Kurhan Dworu Świec (skarbiec);name;Buzón: Túmulo de la Corte de las Velas (cámara)
+mailbox;mb_watch;name;Buzón: Atalaya de Hrimvard (cima)
+place;Skrzynka: Wieża Strażnicza Hrimvard (szczyt);name;Buzón: Atalaya de Hrimvard (cima)
+mailbox;mb_zig;name;Buzón: Zigurat del Sol Abrasado
+place;Skrzynka: Zigurat Spalonego Słońca;name;Buzón: Zigurat del Sol Abrasado
+mailbox;mb_drown;name;Buzón: Cámara del Gremio Ahogado
+place;Skrzynka: Skarbnica Utopionej Gildii;name;Buzón: Cámara del Gremio Ahogado
+mailbox;mb_oakgrove;name;Buzón: Arboleda del Roble Susurrante
+place;Skrzynka: Gaj Szeptanego Dębu;name;Buzón: Arboleda del Roble Susurrante
+mailbox;mb_ember;name;Buzón: La Puerta Ardiente
+place;Skrzynka: Żarowa Brama;name;Buzón: La Puerta Ardiente
+mailbox;mb_storm;name;Buzón: La Arena de la Tormenta
+place;Skrzynka: Arena Burzy;name;Buzón: La Arena de la Tormenta
+# END postman
+# BEGIN premium_quests (tools/mapgen/premium_quests.py data)
+quest;drown_m1;name;Dentro: Cámara del Gremio Ahogado
+quest;drown_m1;desc;El gremio de mercaderes inundó su cámara para protegerla de los ladrones. Tres palancas en las salas laterales abren la esclusa de la sala del guardián. Entra (Cámara del Gremio Ahogado (profundidades)) y echa un vistazo.
+quest;drown_m2;name;Guardianes de las palancas: Espectro del cenagal
+quest;drown_m2;desc;Hay guardianes en las salas laterales. Derrota a 12 (Espectro del cenagal) para llegar a las primeras palancas.
+quest;drown_m3;name;Vigilantes de las salas: Lagarto del pantano
+quest;drown_m3;desc;Los vigilantes guardan las salas de palancas más lejanas. Derrota a 8 (Lagarto del pantano) y tira de las tres palancas.
+quest;drown_m4;name;Derrota a: Guardián de las Arcas Hundidas
+quest;drown_m4;desc;Con las tres palancas bajadas cede la puerta de la sala del jefe. Derrota a Guardián de las Arcas Hundidas y abre la cámara.
+quest;drown_m1;line;Palancas del Gremio Ahogado
+quest;drown_m1;where;Cámara del Gremio Ahogado, cerca de Valmir
+place;Skarbnica Utopionej Gildii;name;Cámara del Gremio Ahogado
+place;Skarbnica Utopionej Gildii (głębiny);name;Cámara del Gremio Ahogado (profundidades)
+npc;drown_ottilie;name;Guildwarden Ottilie
+npc;drown_ottilie;greeting;El gremio de mercaderes se ahogó con su cámara. Tres palancas aún contienen el agua ante la última sala.
+quest;pit_m1;name;Dentro: Arena del Foso Salobre
+quest;pit_m1;desc;Una antigua mina de sal se convirtió en arena para mercenarios de toda la costa. Cada ronda abre la siguiente y el campeón espera en el fondo. Entra (Arena del Foso Salobre (profundidades)) y echa un vistazo.
+quest;pit_m2;name;Primera ronda: Cazador de la jungla
+quest;pit_m2;desc;Primera ronda de la arena. Derrota a 10 (Cazador de la jungla) para abrir la segunda.
+quest;pit_m3;name;Segunda ronda: Merodeador rayado
+quest;pit_m3;desc;La segunda ronda está abierta. Derrota a 10 (Merodeador rayado) para abrir la tercera.
+quest;pit_m4;name;Tercera ronda: Lagarto del pantano
+quest;pit_m4;desc;La tercera ronda es la más dura. Derrota a 8 (Lagarto del pantano) y podrás retar al campeón de la arena.
+quest;pit_m5;name;Campeón de la arena: Campeón del Foso Salobre
+quest;pit_m5;desc;El campeón espera en medio de la arena. Derrota a Campeón del Foso Salobre y el tesoro de los vencedores será tuyo.
+quest;pit_m1;line;La Arena del Foso Salobre
+quest;pit_m1;where;Arena del Foso Salobre, cerca de Nerys
+place;Arena Solnego Dołu;name;Arena del Foso Salobre
+place;Arena Solnego Dołu (głębiny);name;Arena del Foso Salobre (profundidades)
+npc;pit_hector;name;Pitmaster Hector
+npc;pit_hector;greeting;En el Foso Salobre se luchan tres rondas y luego el campeón. Quien las supere gana oro y equipo.
+quest;oakgrove_m1;name;Dentro: Arboleda del Roble Susurrante
+quest;oakgrove_m1;desc;Unos druidas plantaron un roble sobre una vieja fuente. Ahora serpientes y merodeadores rondan el altar y el rito despierta al propio roble. Entra (Arboleda del Roble Susurrante (profundidades)) y echa un vistazo.
+quest;oakgrove_m2;name;Ante la arboleda: Serpiente de la jungla
+quest;oakgrove_m2;desc;Unos monstruos bloquean el camino al altar. Derrota a 12 (Serpiente de la jungla).
+quest;oakgrove_m3;name;Rito en el altar: Merodeador rayado
+quest;oakgrove_m3;desc;El rito atrae criaturas. Derrota a 10 (Merodeador rayado), tira de la palanca del altar y cederá la puerta de la sala del jefe.
+quest;oakgrove_m4;name;El despertar: El Roble Susurrante
+quest;oakgrove_m4;desc;El rito despertó al guardián. Derrota a El Roble Susurrante y abre la cámara.
+quest;oakgrove_m1;line;Rito del Roble Susurrante
+quest;oakgrove_m1;where;Arboleda del Roble Susurrante, cerca de Selvaran
+place;Gaj Szeptanego Dębu;name;Arboleda del Roble Susurrante
+place;Gaj Szeptanego Dębu (głębiny);name;Arboleda del Roble Susurrante (profundidades)
+npc;oak_rowan;name;Druid Rowan
+npc;oak_rowan;greeting;El viejo roble de la arboleda habló. Su susurro llama a un guardián si alguien completa el rito en el altar.
+quest;fleet_m1;name;Dentro: Palacio de la Flota Rota
+quest;fleet_m1;desc;El palacio del almirante se construyó con naufragios. Las alas se unen con puertas que ceden solo tras cumplir la tarea del ala anterior. Entra (Palacio de la Flota Rota (profundidades)) y echa un vistazo.
+quest;fleet_m2;name;Primera ala: Lagarto del pantano
+quest;fleet_m2;desc;Una guardia mantiene la primera ala. Derrota a 10 (Lagarto del pantano) y cederá la puerta de la segunda.
+quest;fleet_m3;name;Segunda ala: Lagarto hechicero
+quest;fleet_m3;desc;La segunda ala está abierta. Derrota a 10 (Lagarto hechicero) para abrir la tercera.
+quest;fleet_m4;name;Tercera ala: Centinela de piedra
+quest;fleet_m4;desc;Los más fuertes anidan en la tercera ala. Derrota a 8 (Centinela de piedra) para seguir.
+quest;fleet_m5;name;Cuarta ala: Oráculo Astado
+quest;fleet_m5;desc;La última guardia está ante la sala del trono. Derrota a 6 (Oráculo Astado) y cederá la puerta de la sala del trono.
+quest;fleet_m6;name;La sala del trono: Almirante de la Flota Rota
+quest;fleet_m6;desc;Todas las alas están abiertas. Derrota a Almirante de la Flota Rota en la sala del trono y abre la cámara.
+quest;fleet_m1;line;Palacio de la Flota Rota
+quest;fleet_m1;where;Palacio de la Flota Rota, cerca de Nerys
+place;Pałac Rozbitej Floty;name;Palacio de la Flota Rota
+place;Pałac Rozbitej Floty (głębiny);name;Palacio de la Flota Rota (profundidades)
+npc;fleet_oren;name;Quartermaster Oren
+npc;fleet_oren;greeting;El almirante estrelló su flota contra su propio palacio. Cuatro alas, y cada una se abre tras la tarea de la anterior.
+quest;toll_m1;name;Dentro: Puente del Recaudador
+quest;toll_m1;desc;El puente sobre el pantano se alza sobre cuatro pilares y en cada uno espera una casilla de peaje. El recaudador sale solo cuando un grupo ocupa las cuatro. Entra (Puente del Recaudador (profundidades)) y echa un vistazo.
+quest;toll_m2;name;Guardia de la puerta: Lagarto hechicero
+quest;toll_m2;desc;Una guardia custodia la puerta del grupo. Derrota a 12 (Lagarto hechicero) antes de seguir.
+quest;toll_m3;name;Sala de las cuatro casillas: Centinela de piedra
+quest;toll_m3;desc;Más allá de la puerta esperan guardias más fuertes. Derrota a 8 (Centinela de piedra) con tu grupo (3 jugadores).
+quest;toll_m4;name;Derrota a: El Recaudador del Puente
+quest;toll_m4;desc;Colocaos en las cuatro casillas de la sala y derrotad a El Recaudador del Puente. La cámara se abre al entregar esta misión.
+quest;toll_m1;line;El Puente del Recaudador
+quest;toll_m1;where;Puente del Recaudador, cerca de Valmir
+place;Most Poborcy;name;Puente del Recaudador
+place;Most Poborcy (głębiny);name;Puente del Recaudador (profundidades)
+npc;toll_brannoch;name;Bridgewarden Brannoch
+npc;toll_brannoch;greeting;El recaudador cobra peaje a todo el que quiera cruzar. Solo no tienes nada que hacer allí; hacen falta tres.
+quest;pendulum_m1;name;Dentro: Sala de los Péndulos
+quest;pendulum_m1;desc;El mecanismo de los péndulos solo arranca al accionar tres palancas en las salas laterales. Solo entonces se abre el camino al regente. Entra (Sala de los Péndulos (profundidades)) y echa un vistazo.
+quest;pendulum_m2;name;Guardianes de las palancas: Acechador del dosel
+quest;pendulum_m2;desc;Hay guardianes en las salas laterales. Derrota a 12 (Acechador del dosel) para llegar a las primeras palancas.
+quest;pendulum_m3;name;Vigilantes de las salas: Guardián del templo
+quest;pendulum_m3;desc;Los vigilantes guardan las salas de palancas más lejanas. Derrota a 8 (Guardián del templo) y tira de las tres palancas.
+quest;pendulum_m4;name;Derrota a: Regente de los Péndulos
+quest;pendulum_m4;desc;Con las tres palancas bajadas cede la puerta de la sala del jefe. Derrota a Regente de los Péndulos y abre la cámara.
+quest;pendulum_m1;line;Palancas de la Sala de los Péndulos
+quest;pendulum_m1;where;Sala de los Péndulos, cerca de Selvaran
+place;Sala Wahadeł;name;Sala de los Péndulos
+place;Sala Wahadeł (głębiny);name;Sala de los Péndulos (profundidades)
+npc;pendulum_ixchel;name;Mechanist Ixchel
+npc;pendulum_ixchel;greeting;Los sacerdotes construyeron una sala de péndulos que solo se mueve cuando alguien tira de las tres palancas. Cuidado, los guardias no duermen.
+quest;cells_m1;name;Dentro: Las Tres Celdas de los Arcontes
+quest;cells_m1;desc;Los inquisidores del puerto encerraron a tres arcontes bajo el muelle. Cada celda se abre solo cuando muere el guardián anterior y más allá yace su cámara. Entra (Las Tres Celdas de los Arcontes (profundidades)) y echa un vistazo.
+quest;cells_m2;name;Primera celda: Arconte de la Primera Celda
+quest;cells_m2;desc;Un arconte espera en la primera celda. Derrota a Arconte de la Primera Celda.
+quest;cells_m3;name;Segunda celda: Arconte de la Segunda Celda
+quest;cells_m3;desc;La puerta de la segunda celda cedió. Derrota a Arconte de la Segunda Celda.
+quest;cells_m4;name;Tercera celda: Arconte de la Tercera Celda
+quest;cells_m4;desc;La última celda está abierta. Derrota a Arconte de la Tercera Celda.
+quest;cells_m5;name;Guardia de la cámara: Fanático de las dunas
+quest;cells_m5;desc;Los últimos guardias vigilan la cámara. Derrota a 12 (Fanático de las dunas) y los cofres serán tuyos.
+quest;cells_m1;line;Las Tres Celdas de los Arcontes
+quest;cells_m1;where;Las Tres Celdas de los Arcontes, cerca de Nerys
+place;Trzy Cele Archontów;name;Las Tres Celdas de los Arcontes
+place;Trzy Cele Archontów (głębiny);name;Las Tres Celdas de los Arcontes (profundidades)
+npc;cells_veyra;name;Inquisitor Veyra
+npc;cells_veyra;greeting;Bajo el puerto hay tres celdas, un arconte en cada una. Solo entrarás en la siguiente cuando caiga la anterior. Al final espera la cámara de los inquisidores.
+quest;sunorder_m1;name;Dentro: Corte de las Dos Órdenes
+quest;sunorder_m1;desc;Dos órdenes comparten una corte bajo la selva: los sacerdotes del sol del desierto y los guardianes de la hoja. Quien acepta las tareas de una ataca a la otra y no puede volver. Entra (Corte de las Dos Órdenes (profundidades)) y echa un vistazo.
+quest;sunorder_m2;name;Guardias rivales: Mímica de orquídea
+quest;sunorder_m2;desc;La orden rival tiene un campamento al otro lado de la corte. Derrota a 10 (Mímica de orquídea).
+quest;sunorder_m3;name;El líder rival: Matriarca de la Hoja Viva
+quest;sunorder_m3;desc;Cedió la puerta de la cámara del líder. Derrota a Matriarca de la Hoja Viva y se abre la cámara de tu orden.
+quest;sunorder_m1;line;Orden del Sol Poniente
+quest;sunorder_m1;where;Corte de las Dos Órdenes, cerca de Selvaran
+place;Dwór Dwóch Zakonów;name;Corte de las Dos Órdenes
+place;Dwór Dwóch Zakonów (głębiny);name;Corte de las Dos Órdenes (profundidades)
+npc;sun_sahir;name;Sunwarden Sahir
+npc;sun_sahir;greeting;Únete a la Orden del Sol y nos ocuparemos de la Hoja. Eliges una vez: quien empiece mis tareas no podrá ayudar al otro bando.
+quest;leaforder_m1;name;Dentro: Corte de las Dos Órdenes
+quest;leaforder_m1;desc;Los guardianes de la hoja defienden la selva de los sacerdotes del sol. Quien acepta las tareas de la Hoja combate al Sol y ya no podrá aliarse con él. Entra (Corte de las Dos Órdenes (profundidades)) y echa un vistazo.
+quest;leaforder_m2;name;Guardias rivales: Fanático de las dunas
+quest;leaforder_m2;desc;La orden rival tiene un campamento al otro lado de la corte. Derrota a 12 (Fanático de las dunas).
+quest;leaforder_m3;name;El líder rival: Hierofante del Sol Poniente
+quest;leaforder_m3;desc;Cedió la puerta de la cámara del líder. Derrota a Hierofante del Sol Poniente y se abre la cámara de tu orden.
+quest;leaforder_m1;line;Orden de la Hoja Viva
+quest;leaforder_m1;where;Corte de las Dos Órdenes, cerca de Selvaran
+npc;leaf_imara;name;Leafwarden Imara
+npc;leaf_imara;greeting;La Orden de la Hoja protege la selva del Sol. Eliges una vez: si empiezas mis tareas ya no podrás ayudar a la orden del desierto.
+quest;seals_m1;name;Dentro: Sala de los Seis Sellos
+quest;seals_m1;desc;Seis salas alrededor de la sala central guardan un sello cada una. Cuando caen todos, cede la puerta del guardián del pantano. Entra (Sala de los Seis Sellos (profundidades)) y echa un vistazo.
+quest;seals_m2;name;Los tres primeros sellos: Hidra del cenagal
+quest;seals_m2;desc;Una guardia custodia las salas de los tres primeros sellos. Derrota a 14 (Hidra del cenagal) y tira de las palancas.
+quest;seals_m3;name;Los tres últimos sellos: Lagarto hechicero
+quest;seals_m3;desc;Las salas restantes son aún más peligrosas. Derrota a 10 (Lagarto hechicero) y tira de las demás palancas.
+quest;seals_m4;name;El guardián de los sellos: Guardián de los Siete Sellos
+quest;seals_m4;desc;Cuando caen los seis sellos cede la puerta del jefe. Derrota a Guardián de los Siete Sellos y abre la cámara.
+quest;seals_m1;line;Los Seis Sellos del Pantano
+quest;seals_m1;where;Sala de los Seis Sellos, cerca de Valmir
+place;Sala Sześciu Pieczęci;name;Sala de los Seis Sellos
+place;Sala Sześciu Pieczęci (głębiny);name;Sala de los Seis Sellos (profundidades)
+npc;seals_morwen;name;Sealkeeper Morwen
+npc;seals_morwen;greeting;Seis sellos atan al guardián del pantano. Una palanca distinta en una sala distinta abre cada uno. Solo los seis te dejarán llegar hasta él.
+quest;sandrite_m1;name;Dentro: Cripta del Rito de Arena
+quest;sandrite_m1;desc;La cripta de arena custodia a un sacerdote que los embalsamadores enterraron vivo. Momias y dragones vigilan el altar y el rito despierta al sacerdote. Entra (Cripta del Rito de Arena (profundidades)) y echa un vistazo.
+quest;sandrite_m2;name;Ante la arboleda: Momia
+quest;sandrite_m2;desc;Unos monstruos bloquean el camino al altar. Derrota a 12 (Momia).
+quest;sandrite_m3;name;Rito en el altar: Dragon esmeralda
+quest;sandrite_m3;desc;El rito atrae criaturas. Derrota a 6 (Dragon esmeralda), tira de la palanca del altar y cederá la puerta de la sala del jefe.
+quest;sandrite_m4;name;El despertar: El Sacerdote Enterrado
+quest;sandrite_m4;desc;El rito despertó al guardián. Derrota a El Sacerdote Enterrado y abre la cámara.
+quest;sandrite_m1;line;Rito de la Cripta de Arena
+quest;sandrite_m1;where;Cripta del Rito de Arena, cerca de Nerys
+place;Krypta Piaskowego Rytuału;name;Cripta del Rito de Arena
+place;Krypta Piaskowego Rytuału (głębiny);name;Cripta del Rito de Arena (profundidades)
+npc;sandrite_zefyr;name;Embalmer Zefyr
+npc;sandrite_zefyr;greeting;Los embalsamadores dejaron en la cripta un altar aún vivo. Completa el rito y despertarás al sacerdote que yace bajo la arena.
+quest;throne_m1;name;Dentro: El Trono Abrasado
+quest;throne_m1;desc;El palacio del emperador arde por dentro. Las alas se abren una tras otra y en la sala del trono esperan el emperador y sus dragones. Entra (El Trono Abrasado (profundidades)) y echa un vistazo.
+quest;throne_m2;name;Primera ala: Guardián de la hoja
+quest;throne_m2;desc;Una guardia mantiene la primera ala. Derrota a 10 (Guardián de la hoja) y cederá la puerta de la segunda.
+quest;throne_m3;name;Segunda ala: Ent maldito
+quest;throne_m3;desc;La segunda ala está abierta. Derrota a 8 (Ent maldito) para abrir la tercera.
+quest;throne_m4;name;Tercera ala: Serpentina del cenagal
+quest;throne_m4;desc;Los más fuertes anidan en la tercera ala. Derrota a 8 (Serpentina del cenagal) para seguir.
+quest;throne_m5;name;Cuarta ala: Guardián del templo
+quest;throne_m5;desc;La última guardia está ante la sala del trono. Derrota a 8 (Guardián del templo) y cederá la puerta de la sala del trono.
+quest;throne_m6;name;La sala del trono: Emperador del Trono Abrasado
+quest;throne_m6;desc;Todas las alas están abiertas. Derrota a Emperador del Trono Abrasado en la sala del trono y abre la cámara.
+quest;throne_m1;line;El Trono Abrasado del Emperador
+quest;throne_m1;where;El Trono Abrasado, cerca de Selvaran
+place;Spalony Tron;name;El Trono Abrasado
+place;Spalony Tron (głębiny);name;El Trono Abrasado (profundidades)
+npc;throne_kaya;name;Chamberlain Kaya
+npc;throne_kaya;greeting;El emperador se sienta en un trono que arde desde hace siglos. Cinco alas llevan a su sala y cada una exige una prueba de valor distinta.
+quest;quarters_m1;name;Dentro: Los Cuatro Barrios de Ceniza
+quest;quarters_m1;desc;La ciudad quemada se divide en cuatro barrios en torno a una plaza. Cada uno tiene sus guardias y el supervisor cierra el último. Entra (Los Cuatro Barrios de Ceniza (profundidades)) y echa un vistazo.
+quest;quarters_m2;name;Primer barrio: Caballero espectral
+quest;quarters_m2;desc;El primer barrio está abierto. Derrota a 12 (Caballero espectral).
+quest;quarters_m3;name;Segundo barrio: Sombra carmesí
+quest;quarters_m3;desc;Cedió la puerta del segundo barrio. Derrota a 10 (Sombra carmesí).
+quest;quarters_m4;name;Tercer barrio: Penitente de ceniza
+quest;quarters_m4;desc;El tercer barrio espera. Derrota a 10 (Penitente de ceniza).
+quest;quarters_m5;name;Cuarto barrio: Hidra venenosa
+quest;quarters_m5;desc;El supervisor vive en el cuarto barrio. Derrota a 8 (Hidra venenosa) para llegar a su sala.
+quest;quarters_m6;name;El supervisor: Supervisor de los Cuatro Barrios
+quest;quarters_m6;desc;Todos los barrios están abiertos. Derrota a Supervisor de los Cuatro Barrios y cederá la puerta de la cámara.
+quest;quarters_m1;line;Los Cuatro Barrios de Ceniza
+quest;quarters_m1;where;Los Cuatro Barrios de Ceniza, cerca de Valmir
+place;Cztery Dzielnice Popiołu;name;Los Cuatro Barrios de Ceniza
+place;Cztery Dzielnice Popiołu (głębiny);name;Los Cuatro Barrios de Ceniza (profundidades)
+npc;quarters_dorian;name;Magistrate Dorian
+npc;quarters_dorian;greeting;La ciudad de ceniza tiene cuatro barrios y una plaza. Los barrios se abren uno a uno y el supervisor espera tras el último.
+quest;ember_m1;name;Dentro: La Puerta Ardiente
+quest;ember_m1;desc;Una puerta de piedra fundida custodia una sala con cuatro casillas. Solo cuatro personajes en las casillas despiertan al coloso. Entra (La Puerta Ardiente (profundidades)) y echa un vistazo.
+quest;ember_m2;name;Guardia de la puerta: Aparecido de brasas
+quest;ember_m2;desc;Una guardia custodia la puerta del grupo. Derrota a 12 (Aparecido de brasas) antes de seguir.
+quest;ember_m3;name;Sala de las cuatro casillas: Dragon de carbon
+quest;ember_m3;desc;Más allá de la puerta esperan guardias más fuertes. Derrota a 8 (Dragon de carbon) con tu grupo (4 jugadores).
+quest;ember_m4;name;Derrota a: Coloso de la Puerta Ardiente
+quest;ember_m4;desc;Colocaos en las cuatro casillas de la sala y derrotad a Coloso de la Puerta Ardiente. La cámara se abre al entregar esta misión.
+quest;ember_m1;line;La Puerta Ardiente
+quest;ember_m1;where;La Puerta Ardiente, cerca de Nerys
+place;Żarowa Brama;name;La Puerta Ardiente
+place;Żarowa Brama (głębiny);name;La Puerta Ardiente (profundidades)
+npc;ember_thane;name;Gatekeeper Thane
+npc;ember_thane;greeting;La Puerta Ardiente solo se abre para cuatro. Uno de vosotros se pone en cada casilla y el coloso surge de las brasas.
+quest;trials_m1;name;Dentro: Las Tres Pruebas de la Forja
+quest;trials_m1;desc;Los herreros de la forja de escoria ponían a prueba a los aprendices con tres pruebas. Los arcontes las guardan aún y la cámara del maestro yace tras la última. Entra (Las Tres Pruebas de la Forja (profundidades)) y echa un vistazo.
+quest;trials_m2;name;Primera celda: Arconte de la Prueba de Piedra
+quest;trials_m2;desc;Un arconte espera en la primera celda. Derrota a Arconte de la Prueba de Piedra.
+quest;trials_m3;name;Segunda celda: Arconte de la Prueba de Escoria
+quest;trials_m3;desc;La puerta de la segunda celda cedió. Derrota a Arconte de la Prueba de Escoria.
+quest;trials_m4;name;Tercera celda: Arconte de la Prueba de Llama
+quest;trials_m4;desc;La última celda está abierta. Derrota a Arconte de la Prueba de Llama.
+quest;trials_m5;name;Guardia de la cámara: Cultista fundido
+quest;trials_m5;desc;Los últimos guardias vigilan la cámara. Derrota a 10 (Cultista fundido) y los cofres serán tuyos.
+quest;trials_m1;line;Las Tres Pruebas de la Forja
+quest;trials_m1;where;Las Tres Pruebas de la Forja, cerca de Valmir
+place;Trzy Próby Kuźni;name;Las Tres Pruebas de la Forja
+place;Trzy Próby Kuźni (głębiny);name;Las Tres Pruebas de la Forja (profundidades)
+npc;trials_halvard;name;Forgemaster Halvard
+npc;trials_halvard;greeting;La forja tiene tres pruebas: piedra, escoria y llama. Un arconte guarda cada una. Cada uno que cae abre la siguiente.
+quest;storm_m1;name;Dentro: La Arena de la Tormenta
+quest;storm_m1;desc;La arena se alza en lo alto de una roca donde las tormentas nunca callan. Cada ronda trae peores rivales y el señor no acepta rendiciones. Entra (La Arena de la Tormenta (profundidades)) y echa un vistazo.
+quest;storm_m2;name;Primera ronda: Doncella de espinas
+quest;storm_m2;desc;Primera ronda de la arena. Derrota a 10 (Doncella de espinas) para abrir la segunda.
+quest;storm_m3;name;Segunda ronda: Arpía de la tormenta
+quest;storm_m3;desc;La segunda ronda está abierta. Derrota a 10 (Arpía de la tormenta) para abrir la tercera.
+quest;storm_m4;name;Tercera ronda: Gigante de escarcha
+quest;storm_m4;desc;La tercera ronda es la más dura. Derrota a 8 (Gigante de escarcha) y podrás retar al campeón de la arena.
+quest;storm_m5;name;Campeón de la arena: Señor de la Arena de la Tormenta
+quest;storm_m5;desc;El campeón espera en medio de la arena. Derrota a Señor de la Arena de la Tormenta y el tesoro de los vencedores será tuyo.
+quest;storm_m1;line;La Arena de la Tormenta
+quest;storm_m1;where;La Arena de la Tormenta, cerca de Selvaran
+place;Arena Burzy;name;La Arena de la Tormenta
+place;Arena Burzy (głębiny);name;La Arena de la Tormenta (profundidades)
+npc;storm_valka;name;Arenamaster Valka
+npc;storm_valka;greeting;En la Arena de la Tormenta cae un rayo en cada ronda. Tres rondas y luego el señor. Quien viva se lleva el tesoro de los vencedores.
+quest;mirror_m1;name;Dentro: Sala de los Sellos de Cristal
+quest;mirror_m1;desc;Los sellos de cristal solo se rompen con las palancas de las salas vigiladas por espectros y serafines. Solo con el sexto sello pierde el regente su escudo. Entra (Sala de los Sellos de Cristal (profundidades)) y echa un vistazo.
+quest;mirror_m2;name;Los tres primeros sellos: Espectro de la niebla
+quest;mirror_m2;desc;Una guardia custodia las salas de los tres primeros sellos. Derrota a 12 (Espectro de la niebla) y tira de las palancas.
+quest;mirror_m3;name;Los tres últimos sellos: Fantasma de cristal
+quest;mirror_m3;desc;Las salas restantes son aún más peligrosas. Derrota a 10 (Fantasma de cristal) y tira de las demás palancas.
+quest;mirror_m4;name;El guardián de los sellos: Regente de los Seis Sellos
+quest;mirror_m4;desc;Cuando caen los seis sellos cede la puerta del jefe. Derrota a Regente de los Seis Sellos y abre la cámara.
+quest;mirror_m1;line;Los Sellos de Cristal
+quest;mirror_m1;where;Sala de los Sellos de Cristal, cerca de Nerys
+place;Sala Szklanych Pieczęci;name;Sala de los Sellos de Cristal
+place;Sala Szklanych Pieczęci (głębiny);name;Sala de los Sellos de Cristal (profundidades)
+npc;mirror_selene;name;Glasskeeper Selene
+npc;mirror_selene;greeting;Seis sellos de cristal atan al regente. Los rompes con palancas, pero cada sala tiene sus guardias. Ve con un grupo.
+monster;drown_warden;name;Guardián de las Arcas Hundidas
+monster;pit_champion;name;Campeón del Foso Salobre
+monster;whisper_oak;name;El Roble Susurrante
+monster;fleet_admiral;name;Almirante de la Flota Rota
+monster;toll_keeper;name;El Recaudador del Puente
+monster;lever_regent;name;Regente de los Péndulos
+monster;chain_archon_a;name;Arconte de la Primera Celda
+monster;chain_archon_b;name;Arconte de la Segunda Celda
+monster;chain_archon_c;name;Arconte de la Tercera Celda
+monster;sun_hierophant;name;Hierofante del Sol Poniente
+monster;leaf_matriarch;name;Matriarca de la Hoja Viva
+monster;seal_warden;name;Guardián de los Siete Sellos
+monster;ritual_pharaoh;name;El Sacerdote Enterrado
+monster;wrath_emperor;name;Emperador del Trono Abrasado
+monster;quarter_overseer;name;Supervisor de los Cuatro Barrios
+monster;ember_colossus;name;Coloso de la Puerta Ardiente
+monster;trial_stone;name;Arconte de la Prueba de Piedra
+monster;trial_slag;name;Arconte de la Prueba de Escoria
+monster;trial_flame;name;Arconte de la Prueba de Llama
+monster;arena_overlord;name;Señor de la Arena de la Tormenta
+monster;seal_regent;name;Regente de los Seis Sellos
+# END premium_quests

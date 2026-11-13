@@ -217,8 +217,44 @@ public final class WorldMap {
     /** Klucze potworow, ktorych zabicie otwiera przejscia ({@code boss:klucz}). */
     public java.util.Set<String> gateBosses() {
         java.util.Set<String> out = new java.util.LinkedHashSet<>();
-        for (QuestGate g : questGates.values()) if (g.kind() == QuestGate.Kind.BOSS) out.add(g.target());
+        for (QuestGate g : questGates.values()) for (QuestGate part : g.parts()) if (part.kind() == QuestGate.Kind.BOSS) out.add(part.target());
         return out;
+    }
+
+    // ------------------------------------------------------------------ dzwignie ze znacznikiem i skrzynki pocztowe
+    private final Map<Position, String> leverFlags = new java.util.LinkedHashMap<>();
+    private final Map<Position, Mailbox> mailboxes = new java.util.LinkedHashMap<>();
+
+    /** Skrzynka pocztowa (mailboxes.csv): w miescie albo na polowisku; nazwa polska, tlumaczona kluczem {@code mailbox}. */
+    public record Mailbox(String key, Position position, boolean hunting, String name) {}
+
+    public void addLeverFlag(Position p, String flag) { leverFlags.put(p, flag); }
+
+    /** Znacznik ustawiany przez dzwignie w tym polu (star_quest.csv: {@code lever;znacznik;x;y;z}) albo null. */
+    public String leverFlagAt(Position p) { return leverFlags.isEmpty() ? null : leverFlags.get(p); }
+
+    public Map<Position, String> leverFlags() { return Collections.unmodifiableMap(leverFlags); }
+
+    public void addMailbox(Mailbox m) { mailboxes.put(m.position(), m); }
+
+    public Mailbox mailboxAt(Position p) { return mailboxes.isEmpty() ? null : mailboxes.get(p); }
+
+    public java.util.Collection<Mailbox> mailboxes() { return Collections.unmodifiableCollection(mailboxes.values()); }
+
+    public Mailbox mailboxByKey(String key) {
+        for (Mailbox m : mailboxes.values()) if (m.key().equals(key)) return m;
+        return null;
+    }
+
+    /** Skrzynka w odleglosci najwyzej 1 pola (z ukosami) od punktu albo null. */
+    public Mailbox mailboxNear(Position p) {
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                Mailbox m = mailboxAt(new Position(p.x() + dx, p.y() + dy, p.z()));
+                if (m != null) return m;
+            }
+        }
+        return null;
     }
 
     public void addRewardChoice(RewardChoice c) { rewardChoices.add(c); }

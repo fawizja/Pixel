@@ -655,6 +655,11 @@ public final class GameSession {
         return pl.fawizja.pixel.quest.QuestJournal.hint(e, quests, this::monsterName, this::itemName);
     }
 
+    /** Czy postac z ranga Listonosza stoi obok skrzynki pocztowej (wtedy skrzynka zastepuje bankiera przy /wyslij). */
+    public boolean atPostmanMailbox() {
+        return !pc.isDead() && pl.fawizja.pixel.quest.PostmanQuest.isPostman(pc) && world.mailboxNear(pc.position()) != null;
+    }
+
     /** NPC, z ktorym mozna teraz rozmawiac (albo null); skrzynia depozytu obok postaci ma pierwszenstwo. */
     public Npc npcNearby() {
         if (pc.isDead()) return null;
@@ -3644,7 +3649,7 @@ public final class GameSession {
     public boolean usableAt(Position p) {
         if (chestAt(p) || chestSignAt(p) || world.openings().isDoor(p) || world.openings().isWindow(p) || world.crates().isStorage(p)
                 || world.wallLights().isWallLight(p) || world.altarQuestByLever(p) != null || world.altarAt(p) != null
-                || world.bossQuestByLever(p) != null || dummies.at(p)) return true;
+                || world.bossQuestByLever(p) != null || dummies.at(p) || world.leverFlagAt(p) != null || world.mailboxAt(p) != null) return true;
         pl.fawizja.pixel.world.Transition tr = world.transitionAt(p);
         if (tr != null && !tr.type().triggeredByWalking()) return true;
         if (berries.kindAt(p) != null || herbs.isHerbBush(p)) return true;
@@ -3917,6 +3922,10 @@ public final class GameSession {
             return true;
         }
         if (world.crates().isStorage(p)) return useCrate(p, nowMs);
+        String leverFlag = world.leverFlagAt(p);
+        if (leverFlag != null) return pullFlagLever(leverFlag, nowMs);
+        pl.fawizja.pixel.world.WorldMap.Mailbox mailbox = world.mailboxAt(p);
+        if (mailbox != null) return useMailbox(mailbox, nowMs);
         pl.fawizja.pixel.world.BossQuest bossLever = world.bossQuestByLever(p);
         if (bossLever != null) return pullBossLever(bossLever, nowMs);
         pl.fawizja.pixel.world.AltarQuest leverOf = world.altarQuestByLever(p);
@@ -3997,6 +4006,42 @@ public final class GameSession {
         return true;
     }
 
+    /**
+     * Dzwignia zadania (star_quest.csv {@code lever;znacznik;x;y;z}): ustawia znacznik postaci, ktorego wymagaja bramy
+     * {@code flag:znacznik} (kilka dzwigni naraz = wymog zlozony z plusami). Zadziala raz na postac.
+     */
+    private boolean pullFlagLever(String flag, long nowMs) {
+        if (pc.setQuestFlag(flag)) {
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("quest.lever_pulled"));
+        } else {
+            log.add(nowMs, EventLog.Kind.INFO, Messages.get("quest.lever_already"));
+        }
+        return true;
+    }
+
+    /** Licznik czekajacych przesylek gracza (serwer ustawia z poczty; null = nie pokazujemy). */
+    private java.util.function.ToIntFunction<String> mailCounter;
+
+    public void setMailCounter(java.util.function.ToIntFunction<String> counter) { mailCounter = counter; }
+
+    /**
+     * Skrzynka pocztowa (mailboxes.csv): zalicza misje VISIT o jej nazwie (Zadanie Listonosza), pokazuje stan - czy
+     * postac ma range listonosza (wysylka przesylek ze skrzynki, polecenie /wyslij) i ile przesylek na nia czeka.
+     */
+    private boolean useMailbox(pl.fawizja.pixel.world.WorldMap.Mailbox mb, long nowMs) {
+        String shown = Messages.data("mailbox", mb.key(), "name", mb.name());
+        log.add(nowMs, EventLog.Kind.INFO, Messages.get("mailbox.use", shown));
+        QuestType done = quests == null ? null : quests.onMailbox(pc, mb.name());
+        if (done != null) {
+            log.add(nowMs, EventLog.Kind.SYSTEM, Messages.get("game_session.zadanie") + done.name() + Messages.get("mailbox.delivered"));
+        }
+        log.add(nowMs, EventLog.Kind.INFO, pl.fawizja.pixel.quest.PostmanQuest.isPostman(pc)
+                ? Messages.get("mailbox.postman") : Messages.get("mailbox.plain"));
+        int waiting = mailCounter == null ? 0 : mailCounter.applyAsInt(pc.name());
+        if (waiting > 0) log.add(nowMs, EventLog.Kind.INFO, Messages.get("mailbox.waiting", waiting));
+        return true;
+    }
+
     /** Skrzynia obok gracza: zloto i przedmioty do plecaka, raz na postac. false = nie ma skrzyni obok. */
     public boolean openChest(long nowMs) {
         pl.fawizja.pixel.treasure.TreasureChests.Chest c = chests == null ? null : chests.near(pc.position());
@@ -4067,13 +4112,18 @@ public final class GameSession {
         return true;
     }
 
-    /** Wymaganie bramy / nagrody jako zdanie: nazwa zadania albo potwora. */
+    /** Wymaganie bramy / nagrody jako zdanie: nazwa zadania albo potwora (zlozone wymagania laczy przecinkami). */
     String requirementText(String requirement) {
-        pl.fawizja.pixel.world.QuestGate g = new pl.fawizja.pixel.world.QuestGate(new Position(0, 0, 0), requirement);
-        return g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.QUEST
-                ? (quests == null || quests.registry().get(g.target()) == null ? g.target() : quests.registry().get(g.target()).name())
-                : g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.BOSS ? monsterName(g.target())
-                : g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.PARTY ? Messages.get("star.gate_party", g.target()) : g.target();
+        StringBuilder b = new StringBuilder();
+        for (pl.fawizja.pixel.world.QuestGate g : new pl.fawizja.pixel.world.QuestGate(new Position(0, 0, 0), requirement).parts()) {
+            if (b.length() > 0) b.append(", ");
+            b.append(g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.QUEST
+                    ? (quests == null || quests.registry().get(g.target()) == null ? g.target() : quests.registry().get(g.target()).name())
+                    : g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.BOSS ? monsterName(g.target())
+                    : g.kind() == pl.fawizja.pixel.world.QuestGate.Kind.PARTY ? Messages.get("star.gate_party", g.target())
+                    : g.target().startsWith("lv_") ? Messages.get("star.gate_lever") : g.target());
+        }
+        return b.toString();
     }
 
     private String chestIdAt(Position p) {
@@ -4081,9 +4131,11 @@ public final class GameSession {
         return c == null ? "" : c.id();
     }
 
-    /** Odmowa przejscia strzezonego zadaniem: co trzeba zrobic, zeby pieczec ustapila. */
-    String gateRefusal(pl.fawizja.pixel.world.QuestGate g) {
-        if (g == null) return Messages.get("star.gate_flag");
+    /** Odmowa przejscia strzezonego zadaniem: co trzeba zrobic, zeby pieczec ustapila (pierwszy niespelniony skladnik). */
+    String gateRefusal(pl.fawizja.pixel.world.QuestGate gate) {
+        if (gate == null) return Messages.get("star.gate_flag");
+        pl.fawizja.pixel.world.QuestGate g = gate.firstUnmet(pc);
+        if (g == null) g = gate.parts().get(0);
         switch (g.kind()) {
             case QUEST: {
                 QuestType q = quests == null ? null : quests.registry().get(g.target());
@@ -4091,7 +4143,7 @@ public final class GameSession {
             }
             case BOSS: return Messages.get("star.gate_boss", monsterName(g.target()));
             case PARTY: return Messages.get("star.gate_party", g.target());
-            default: return Messages.get("star.gate_flag");
+            default: return g.target().startsWith("lv_") ? Messages.get("star.gate_lever") : Messages.get("star.gate_flag");
         }
     }
 
@@ -4390,7 +4442,8 @@ public final class GameSession {
         for (int i = lying.size() - 1, shown = 0; i >= 0 && shown < 3; i--, shown++) parts.add(describe(lying.get(i)));
         pl.fawizja.pixel.world.AltarQuest.Slot altar = world.altarAt(p);
         if (altar != null) parts.add(Messages.get("game_session.oltarz_profesji") + altar.vocation().displayName() + " (" + itemName(altar.itemKey()) + ")");
-        if (world.altarQuestByLever(p) != null) parts.add(Messages.get("game_session.dzwignia"));
+        if (world.altarQuestByLever(p) != null || world.leverFlagAt(p) != null) parts.add(Messages.get("game_session.dzwignia"));
+        if (world.mailboxAt(p) != null) parts.add(Messages.get("mailbox.look", Messages.data("mailbox", world.mailboxAt(p).key(), "name", world.mailboxAt(p).name())));
         pl.fawizja.pixel.world.BossQuest bq = world.bossQuestByLever(p);
         if (bq != null) parts.add(Messages.get("game_session.dzwignia_wyprawy_2") + bq.name() + Messages.get("game_session.5_postaci_na_polach") + bq.minLevel() + ")");
         bq = world.bossQuestBySquare(p);

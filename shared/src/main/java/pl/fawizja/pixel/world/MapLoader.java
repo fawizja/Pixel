@@ -137,6 +137,7 @@ public final class MapLoader {
         readBossQuests(base + "boss_quests.csv", world);
         readLootChests(base + "chests.csv", world);
         readStarQuest(base + "star_quest.csv", world);
+        readMailboxes(base + "mailboxes.csv", world);
         return world;
     }
 
@@ -227,12 +228,37 @@ public final class MapLoader {
                     world.addRewardChoice(new WorldMap.RewardChoice(f[1].trim(), p, f[5].trim()));
                 } else if (f[0].equals("reward") && f.length == 3) {
                     world.addRewardRequirement(f[1].trim(), f[2].trim());
+                } else if (f[0].equals("lever") && f.length == 5) {
+                    // dzwignia, ktora ustawia znacznik postaci (wymog flag:<znacznik> w bramach); wymaga obiektu na polu
+                    Position p = new Position(i(f[2]), i(f[3]), i(f[4]));
+                    FloorMap fl = world.floor(p.z());
+                    if (fl == null || fl.get(Layer.OBJECT, p.x(), p.y()) == 0) throw new IOException(path + ": lever needs an object at " + p);
+                    world.addLeverFlag(p, f[1].trim());
                 } else {
                     throw new IOException(path + ": bad line '" + line + "'");
                 }
             } catch (IllegalArgumentException e) {
                 throw new IOException(path + ": " + e.getMessage() + " in '" + line + "'", e);
             }
+        }
+    }
+
+    /**
+     * Skrzynki pocztowe (plik opcjonalny mailboxes.csv): {@code klucz;x;y;z;TOWN|HUNT;nazwa}. Na polu musi stac obiekt
+     * {@code mailbox}. Uzycie skrzynki zalicza misje typu VISIT o celu {@code mailbox:klucz} (Zadanie Listonosza).
+     */
+    private void readMailboxes(String path, WorldMap world) throws IOException {
+        if (MapLoader.class.getResource(path) == null) return;
+        for (String line : readLines(path)) {
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 6) throw new IOException(path + ": expected 6 fields in '" + line + "'");
+            Position p = new Position(i(f[1]), i(f[2]), i(f[3]));
+            FloorMap fl = world.floor(p.z());
+            int obj = fl == null ? 0 : fl.get(Layer.OBJECT, p.x(), p.y());
+            if (obj == 0 || !"mailbox".equals(world.tiles().get(obj).key())) throw new IOException(path + ": no mailbox object at " + p);
+            world.addMailbox(new WorldMap.Mailbox(f[0].trim(), p, f[4].trim().equals("HUNT"), f[5].trim()));
         }
     }
 

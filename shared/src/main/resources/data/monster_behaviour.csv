@@ -205,3 +205,26 @@ bonewrap_tamer;SUMMONER;0;-;0
 ironjaw_splitter;MIXED;0;-;0
 rimeblood_walker;CASTER;3;-;15
 blizzard_warchief;MIXED;0;-;0
+# BEGIN premium_quests (tools/mapgen/premium_quests.py data)
+drown_warden;MIXED;0;-;-
+pit_champion;MIXED;0;-;-
+whisper_oak;MIXED;0;-;0
+fleet_admiral;MIXED;0;-;-
+toll_keeper;MIXED;0;-;-
+lever_regent;MIXED;0;-;-
+chain_archon_a;MIXED;0;-;-
+chain_archon_b;MIXED;0;-;-
+chain_archon_c;MIXED;0;-;-
+sun_hierophant;CASTER;3;-;15
+leaf_matriarch;MIXED;0;-;-
+seal_warden;SUMMONER;2;-;15
+ritual_pharaoh;MIXED;0;-;-
+wrath_emperor;AREA;3;-;15
+quarter_overseer;SUMMONER;3;-;15
+ember_colossus;MIXED;0;-;-
+trial_stone;MIXED;0;-;-
+trial_slag;MIXED;0;-;-
+trial_flame;AREA;3;-;15
+arena_overlord;AREA;2;-;15
+seal_regent;CASTER;2;-;15
+# END premium_quests

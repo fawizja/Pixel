@@ -175,3 +175,93 @@ oak_s200_m2;Wywerny z klifów;oak_maeve;KILL;wyvern;8;1182000;59100;200;Wywerny 
 oak_s320_m1;Przeklęte drzewce;oak_hollis;KILL;cursed_treant;10;2029000;101400;320;Drzewce duszą las. Pokonaj 10.
 oak_s320_m2;Upiorni rycerze;oak_hollis;KILL;wraith_knight;10;3043000;152200;320;Rycerze patrolują ruiny. Pokonaj 10.
 # END islands5
+# BEGIN postman (tools/mapgen/postman.py data)
+postman_m1;Pierwszy list;postmaster_kevan;VISIT;Skrzynka: Varden;1;100;100;5;Kevan wręcza ci pierwszy list. Wrzuć go do skrzynki w Varden (Skrzynka: Varden): stań obok i dotknij jej.
+postman_m2;Wilki na trakcie;postmaster_kevan;KILL;wolf;8;700;100;8;Wilki rozszarpały już dwie torby kurierów. Pokonaj 8, żeby trakt do młyna był bezpieczny.
+postman_m3;Pomiar trasy: młyn;postmaster_kevan;VISIT;Skrzynka: Opuszczony Młyn;1;300;100;8;Kevan rysuje mapę tras i potrzebuje czasu przejścia. Dotknij skrzynki przy młynie (Skrzynka: Opuszczony Młyn).
+postman_m4;Pomiar trasy: krypta;postmaster_kevan;VISIT;Skrzynka: Krypta Cichego Dzwonu;1;800;100;12;Druga odnoga trasy biegnie do kaplicy z kryptą. Dotknij skrzynki przy niej (Skrzynka: Krypta Cichego Dzwonu).
+postman_m5;Zgubiona torba;postmaster_kevan;COLLECT;lost_mailbag;1;2800;100;14;Kurier zgubił torbę z listami, a bandyci z traktu zabrali ją jako łup. Odbierz od bandytów zgubioną torbę pocztową.
+postman_m6;Przesyłka do Frostholm;postmaster_kevan;VISIT;Skrzynka: Frostholm;1;1800;100;15;Odzyskane listy mają adres w Frostholm. Wrzuć je do skrzynki w tamtejszym mieście (Skrzynka: Frostholm).
+postman_m7;Pomiar trasy: kłusownicy;postmaster_kevan;VISIT;Skrzynka: Jama Kłusownika;1;1600;100;16;Ostatni odcinek trasy prowadzi przez śniegi do jamy kłusownika. Dotknij skrzynki przy niej (Skrzynka: Jama Kłusownika).
+postman_m8;Rozmokła poczta;postmaster_kevan;COLLECT;sodden_letters;3;7700;400;20;Śnieżne wilki rozgrzebały zasypaną skrzynkę i rozwlekły listy po lodzie. Zbierz 3 rozmokłe listy z ich łupu.
+postman_m9;Przesyłka do Qasirah;postmaster_kevan;VISIT;Skrzynka: Qasirah;1;5300;300;22;Wysuszone listy mają trafić do pustynnego miasta. Wrzuć je do skrzynki w Qasirah (Skrzynka: Qasirah).
+postman_m10;Paczka z głębin;postmaster_kevan;VISIT;Skrzynka: Kurhan Dworu Świec (skarbiec);1;56200;2800;35;Ostatnia przesyłka dla zmarłych kupców leży w skarbcu Kurhanu Dworu Świec. Przedrzyj się przez straże i dotknij skrzynki w skarbcu (Skrzynka: Kurhan Dworu Świec (skarbiec)). Poziom drzwi: 35.
+# END postman
+# BEGIN premium_quests (tools/mapgen/premium_quests.py data)
+drown_m1;Do środka: Skarbnica Utopionej Gildii;drown_ottilie;VISIT;Skarbnica Utopionej Gildii (głębiny);1;22100;1100;68;Gildia kupców zatopiła skarbiec, by uchronić go przed rabusiami. Trzy dźwignie w bocznych komorach otwierają śluzę do sali strażnika. Wejdź do środka (Skarbnica Utopionej Gildii (głębiny)) i rozejrzyj się.
+drown_m2;Strażnicy dźwigni: Bagienna zjawa;drown_ottilie;KILL;bog_wraith;12;31000;1600;68;W bocznych komorach stoją strażnicy dźwigni. Pokonaj 12 (Bagienna zjawa), by dojść do pierwszych dźwigni.
+drown_m3;Dozorcy komór: Jaszczur bagienny;drown_ottilie;KILL;marsh_lizard;8;35400;1800;68;Dozorcy trzymają dalsze komory z dźwigniami. Pokonaj 8 (Jaszczur bagienny) i pociągnij wszystkie trzy dźwignie.
+drown_m4;Pokonaj: Strażnik Utopionej Kasy;drown_ottilie;KILL;drown_warden;1;199100;10000;68;Gdy trzy dźwignie opadną, brama do sali bossa ustąpi. Pokonaj Strażnik Utopionej Kasy i otwórz skarbiec.
+pit_m1;Do środka: Arena Solnego Dołu;pit_hector;VISIT;Arena Solnego Dołu (głębiny);1;27000;1400;75;Dawna kopalnia soli stała się areną dla najemników z całego wybrzeża. Każda runda odblokowuje następną, a mistrz czeka na dnie. Wejdź do środka (Arena Solnego Dołu (głębiny)) i rozejrzyj się.
+pit_m2;Pierwsza runda: Łowca z dżungli;pit_hector;KILL;jungle_hunter;10;37800;1900;75;Pierwsza runda areny. Pokonaj 10 (Łowca z dżungli), a odblokujesz drugą rundę.
+pit_m3;Druga runda: Pręgowany skradacz;pit_hector;KILL;striped_prowler;10;43200;2200;75;Druga runda jest otwarta. Pokonaj 10 (Pręgowany skradacz), a odblokujesz trzecią.
+pit_m4;Trzecia runda: Jaszczur bagienny;pit_hector;KILL;marsh_lizard;8;48600;2400;75;Trzecia runda jest najcięższa. Pokonaj 8 (Jaszczur bagienny), a wyzwiesz mistrza areny.
+pit_m5;Mistrz areny: Mistrz Solnego Dołu;pit_hector;KILL;pit_champion;1;243200;12200;75;Mistrz czeka w środku areny. Pokonaj Mistrz Solnego Dołu, a skarb zwycięzców będzie twój.
+oakgrove_m1;Do środka: Gaj Szeptanego Dębu;oak_rowan;VISIT;Gaj Szeptanego Dębu (głębiny);1;37400;1900;88;Druidzi zasadzili dąb nad starym źródłem. Teraz wokół ołtarza krążą węże i drapieżniki, a rytuał przy ołtarzu budzi samego dęba. Wejdź do środka (Gaj Szeptanego Dębu (głębiny)) i rozejrzyj się.
+oakgrove_m2;Przed gajem: Wąż z dżungli;oak_rowan;KILL;jungle_serpent;12;52400;2600;88;Drogę do ołtarza blokują potwory. Pokonaj 12 (Wąż z dżungli).
+oakgrove_m3;Rytuał przy ołtarzu: Pręgowany skradacz;oak_rowan;KILL;striped_prowler;10;59900;3000;88;Rytuał przyciąga stwory. Pokonaj 10 (Pręgowany skradacz), pociągnij dźwignię przy ołtarzu, a brama do sali bossa ustąpi.
+oakgrove_m4;Przebudzenie: Szepczący Dąb;oak_rowan;KILL;whisper_oak;1;336800;16800;88;Rytuał obudził strażnika. Pokonaj Szepczący Dąb i otwórz skarbiec.
+fleet_m1;Do środka: Pałac Rozbitej Floty;fleet_oren;VISIT;Pałac Rozbitej Floty (głębiny);1;53600;2700;105;Pałac admirała zbudowano z wraków. Skrzydła łączą bramy, które ustępują dopiero po wykonaniu zadania w poprzednim skrzydle. Wejdź do środka (Pałac Rozbitej Floty (głębiny)) i rozejrzyj się.
+fleet_m2;Pierwsze skrzydło: Jaszczur bagienny;fleet_oren;KILL;marsh_lizard;10;75000;3800;105;W pierwszym skrzydle stoi straż. Pokonaj 10 (Jaszczur bagienny), a brama drugiego skrzydła ustąpi.
+fleet_m3;Drugie skrzydło: Jaszczur guślarz;fleet_oren;KILL;lizard_hexer;10;85700;4300;105;Drugie skrzydło jest otwarte. Pokonaj 10 (Jaszczur guślarz), by odblokować trzecie.
+fleet_m4;Trzecie skrzydło: Kamienny wartownik;fleet_oren;KILL;stone_sentinel;8;96400;4800;105;W trzecim skrzydle gnieżdżą się najsilniejsi. Pokonaj 8 (Kamienny wartownik), a ruszysz dalej.
+fleet_m5;Czwarte skrzydło: Rogata wyrocznia;fleet_oren;KILL;horn_oracle;6;107100;5400;105;Przed salą tronową stoi ostatnia straż. Pokonaj 6 (Rogata wyrocznia), a brama sali tronowej ustąpi.
+fleet_m6;Sala tronowa: Admirał Rozbitej Floty;fleet_oren;KILL;fleet_admiral;1;482100;24100;105;Wszystkie skrzydła są otwarte. Pokonaj Admirał Rozbitej Floty w sali tronowej i otwórz skarbiec.
+toll_m1;Do środka: Most Poborcy;toll_brannoch;VISIT;Most Poborcy (głębiny);1;76300;3800;125;Most nad bagnem stoi na czterech filarach, a przy każdym czeka pole poboru. Poborca wychodzi dopiero, gdy cztery pola zajmie drużyna. Wejdź do środka (Most Poborcy (głębiny)) i rozejrzyj się.
+toll_m2;Straż przy bramie: Jaszczur guślarz;toll_brannoch;KILL;lizard_hexer;12;106800;5300;125;Przy bramie drużyny stoi straż. Pokonaj 12 (Jaszczur guślarz), nim ruszysz dalej.
+toll_m3;Sala czterech pól: Kamienny wartownik;toll_brannoch;KILL;stone_sentinel;8;122000;6100;125;Za bramą drużyny czekają silniejsi strażnicy. Pokonaj 8 (Kamienny wartownik) razem z drużyną (3 graczy).
+toll_m4;Pokonaj: Poborca Mostu;toll_brannoch;KILL;toll_keeper;1;686400;34300;125;Stańcie na czterech polach sali i pokonajcie Poborca Mostu. Skarbiec otworzy się po oddaniu tej misji.
+pendulum_m1;Do środka: Sala Wahadeł;pendulum_ixchel;VISIT;Sala Wahadeł (głębiny);1;89100;4500;135;Mechanizm sali wahadeł rozpędza się dopiero po uruchomieniu trzech dźwigni w bocznych komorach. Dopiero wtedy otwiera się droga do regenta. Wejdź do środka (Sala Wahadeł (głębiny)) i rozejrzyj się.
+pendulum_m2;Strażnicy dźwigni: Czyhacz Korony;pendulum_ixchel;KILL;canopy_lurker;12;124800;6200;135;W bocznych komorach stoją strażnicy dźwigni. Pokonaj 12 (Czyhacz Korony), by dojść do pierwszych dźwigni.
+pendulum_m3;Dozorcy komór: Strażnik świątyni;pendulum_ixchel;KILL;temple_guardian;8;142600;7100;135;Dozorcy trzymają dalsze komory z dźwigniami. Pokonaj 8 (Strażnik świątyni) i pociągnij wszystkie trzy dźwignie.
+pendulum_m4;Pokonaj: Regent Wahadeł;pendulum_ixchel;KILL;lever_regent;1;802100;40100;135;Gdy trzy dźwignie opadną, brama do sali bossa ustąpi. Pokonaj Regent Wahadeł i otwórz skarbiec.
+cells_m1;Do środka: Trzy Cele Archontów;cells_veyra;VISIT;Trzy Cele Archontów (głębiny);1;125600;6300;160;Inkwizytorzy portu zamknęli pod nabrzeżem trzech archontów. Każda cela otwiera się dopiero po śmierci poprzedniego strażnika, a dalej leży ich skarbiec. Wejdź do środka (Trzy Cele Archontów (głębiny)) i rozejrzyj się.
+cells_m2;Pierwsza cela: Archont Pierwszej Celi;cells_veyra;KILL;chain_archon_a;1;690900;34500;160;W pierwszej celi czeka archont. Pokonaj Archont Pierwszej Celi.
+cells_m3;Druga cela: Archont Drugiej Celi;cells_veyra;KILL;chain_archon_b;1;753700;37700;160;Brama drugiej celi ustąpiła. Pokonaj Archont Drugiej Celi.
+cells_m4;Trzecia cela: Archont Trzeciej Celi;cells_veyra;KILL;chain_archon_c;1;816500;40800;160;Ostatnia cela jest otwarta. Pokonaj Archont Trzeciej Celi.
+cells_m5;Straż skarbca: Fanatyk Białego Słońca;cells_veyra;KILL;dune_zealot;12;251200;12600;160;Skarbiec pilnują ostatni strażnicy. Pokonaj 12 (Fanatyk Białego Słońca), a skrzynie będą twoje.
+sunorder_m1;Do środka: Dwór Dwóch Zakonów;sun_sahir;VISIT;Dwór Dwóch Zakonów (głębiny);1;177700;8900;190;Dwa zakony dzielą dwór pod dżunglą: słoneczni kapłani z pustyni i strażnicy liścia. Kto przyjmie zadania jednego, atakuje drugiego i nie wróci do wroga. Wejdź do środka (Dwór Dwóch Zakonów (głębiny)) i rozejrzyj się.
+sunorder_m2;Wrogie straże: Storczykowa Mimikra;sun_sahir;KILL;orchid_mimic;10;248700;12400;190;Wrogi zakon trzyma obóz po drugiej stronie dworu. Pokonaj 10 (Storczykowa Mimikra).
+sunorder_m3;Przywódca wroga: Matrona Żywego Liścia;sun_sahir;KILL;leaf_matriarch;1;1599000;80000;190;Brama komnaty przywódcy ustąpiła. Pokonaj Matrona Żywego Liścia, a skarbiec twojego zakonu się otworzy.
+leaforder_m1;Do środka: Dwór Dwóch Zakonów;leaf_imara;VISIT;Dwór Dwóch Zakonów (głębiny);1;177700;8900;190;Strażnicy liścia bronią dżungli przed słonecznymi kapłanami. Kto przyjmie zadania Liścia, zwalcza Słońce i nie zostanie już jego sojusznikiem. Wejdź do środka (Dwór Dwóch Zakonów (głębiny)) i rozejrzyj się.
+leaforder_m2;Wrogie straże: Fanatyk Białego Słońca;leaf_imara;KILL;dune_zealot;12;248700;12400;190;Wrogi zakon trzyma obóz po drugiej stronie dworu. Pokonaj 12 (Fanatyk Białego Słońca).
+leaforder_m3;Przywódca wroga: Hierofant Zachodzącego Słońca;leaf_imara;KILL;sun_hierophant;1;1599000;80000;190;Brama komnaty przywódcy ustąpiła. Pokonaj Hierofant Zachodzącego Słońca, a skarbiec twojego zakonu się otworzy.
+seals_m1;Do środka: Sala Sześciu Pieczęci;seals_morwen;VISIT;Sala Sześciu Pieczęci (głębiny);1;197000;9800;200;Sześć komór wokół centralnej sali strzeże po jednej pieczęci. Gdy opadną wszystkie, brama strażnika bagien ustępuje. Wejdź do środka (Sala Sześciu Pieczęci (głębiny)) i rozejrzyj się.
+seals_m2;Pierwsze trzy pieczęcie: Hydra bagienna;seals_morwen;KILL;bog_hydra;14;275800;13800;200;Komory pierwszych trzech pieczęci strzeże straż. Pokonaj 14 (Hydra bagienna) i pociągnij dźwignie.
+seals_m3;Ostatnie trzy pieczęcie: Jaszczur guślarz;seals_morwen;KILL;lizard_hexer;10;315200;15800;200;Pozostałe komory są jeszcze groźniejsze. Pokonaj 10 (Jaszczur guślarz) i pociągnij pozostałe dźwignie.
+seals_m4;Strażnik pieczęci: Strażnik Siedmiu Pieczęci;seals_morwen;KILL;seal_warden;1;1773000;88600;200;Gdy opadnie sześć pieczęci, brama do bossa ustąpi. Pokonaj Strażnik Siedmiu Pieczęci i otwórz skarbiec.
+sandrite_m1;Do środka: Krypta Piaskowego Rytuału;sandrite_zefyr;VISIT;Krypta Piaskowego Rytuału (głębiny);1;238700;11900;220;Piaskowa krypta strzeże kapłana, którego balsamiści pochowali żywcem. Mumie i smoki pilnują ołtarza, a rytuał przy nim budzi kapłana. Wejdź do środka (Krypta Piaskowego Rytuału (głębiny)) i rozejrzyj się.
+sandrite_m2;Przed gajem: Mumia;sandrite_zefyr;KILL;mummy;12;334200;16700;220;Drogę do ołtarza blokują potwory. Pokonaj 12 (Mumia).
+sandrite_m3;Rytuał przy ołtarzu: Szmaragdowy smok;sandrite_zefyr;KILL;emerald_dragon;6;382000;19100;220;Rytuał przyciąga stwory. Pokonaj 6 (Szmaragdowy smok), pociągnij dźwignię przy ołtarzu, a brama do sali bossa ustąpi.
+sandrite_m4;Przebudzenie: Pogrzebany Kapłan Piasku;sandrite_zefyr;KILL;ritual_pharaoh;1;2148000;107400;220;Rytuał obudził strażnika. Pokonaj Pogrzebany Kapłan Piasku i otwórz skarbiec.
+throne_m1;Do środka: Spalony Tron;throne_kaya;VISIT;Spalony Tron (głębiny);1;400900;20000;260;Pałac cesarza płonie od wewnątrz. Skrzydła otwierają się jedno po drugim, a w sali tronowej czeka cesarz i jego smoki. Wejdź do środka (Spalony Tron (głębiny)) i rozejrzyj się.
+throne_m2;Pierwsze skrzydło: Wirujący strażnik;throne_kaya;KILL;blade_warden;10;561300;28100;260;W pierwszym skrzydle stoi straż. Pokonaj 10 (Wirujący strażnik), a brama drugiego skrzydła ustąpi.
+throne_m3;Drugie skrzydło: Przeklęty drzewiec;throne_kaya;KILL;cursed_treant;8;641500;32100;260;Drugie skrzydło jest otwarte. Pokonaj 8 (Przeklęty drzewiec), by odblokować trzecie.
+throne_m4;Trzecie skrzydło: Wężyca bagienna;throne_kaya;KILL;bog_naga;8;721700;36100;260;W trzecim skrzydle gnieżdżą się najsilniejsi. Pokonaj 8 (Wężyca bagienna), a ruszysz dalej.
+throne_m5;Czwarte skrzydło: Strażnik świątyni;throne_kaya;KILL;temple_guardian;8;801900;40100;260;Przed salą tronową stoi ostatnia straż. Pokonaj 8 (Strażnik świątyni), a brama sali tronowej ustąpi.
+throne_m6;Sala tronowa: Cesarz Spalonego Tronu;throne_kaya;KILL;wrath_emperor;1;3608000;180400;260;Wszystkie skrzydła są otwarte. Pokonaj Cesarz Spalonego Tronu w sali tronowej i otwórz skarbiec.
+quarters_m1;Do środka: Cztery Dzielnice Popiołu;quarters_dorian;VISIT;Cztery Dzielnice Popiołu (głębiny);1;534600;26700;300;Spalone miasto dzieli się na cztery dzielnice wokół placu. Każda ma własnych strażników, a nadzorca zamyka ostatnią. Wejdź do środka (Cztery Dzielnice Popiołu (głębiny)) i rozejrzyj się.
+quarters_m2;Pierwsza dzielnica: Upiorny rycerz;quarters_dorian;KILL;wraith_knight;12;748500;37400;300;Pierwsza dzielnica jest otwarta. Pokonaj 12 (Upiorny rycerz).
+quarters_m3;Druga dzielnica: Krwawa zmora;quarters_dorian;KILL;crimson_shade;10;855400;42800;300;Brama drugiej dzielnicy ustąpiła. Pokonaj 10 (Krwawa zmora).
+quarters_m4;Trzecia dzielnica: Skruszony Pokutnik;quarters_dorian;KILL;ash_penitent;10;962300;48100;300;Trzecia dzielnica czeka. Pokonaj 10 (Skruszony Pokutnik).
+quarters_m5;Czwarta dzielnica: Hydra jadowita;quarters_dorian;KILL;venom_hydra;8;1069000;53400;300;W czwartej dzielnicy mieszka nadzorca. Pokonaj 8 (Hydra jadowita), a dojdziesz do jego sali.
+quarters_m6;Nadzorca: Nadzorca Czterech Dzielnic;quarters_dorian;KILL;quarter_overseer;1;4812000;240600;300;Wszystkie dzielnice stoją otworem. Pokonaj Nadzorca Czterech Dzielnic, a brama do skarbca ustąpi.
+ember_m1;Do środka: Żarowa Brama;ember_thane;VISIT;Żarowa Brama (głębiny);1;647500;32400;330;Brama zbudowana ze stopionego kamienia strzeże sali z czterema polami. Dopiero cztery postacie na polach budzą kolosa. Wejdź do środka (Żarowa Brama (głębiny)) i rozejrzyj się.
+ember_m2;Straż przy bramie: Żarzący Upiór;ember_thane;KILL;cinder_revenant;12;906500;45300;330;Przy bramie drużyny stoi straż. Pokonaj 12 (Żarzący Upiór), nim ruszysz dalej.
+ember_m3;Sala czterech pól: Węglowy smok;ember_thane;KILL;coal_dragon;8;1036000;51800;330;Za bramą drużyny czekają silniejsi strażnicy. Pokonaj 8 (Węglowy smok) razem z drużyną (4 graczy).
+ember_m4;Pokonaj: Kolos Żarowej Bramy;ember_thane;KILL;ember_colossus;1;5827000;291400;330;Stańcie na czterech polach sali i pokonajcie Kolos Żarowej Bramy. Skarbiec otworzy się po oddaniu tej misji.
+trials_m1;Do środka: Trzy Próby Kuźni;trials_halvard;VISIT;Trzy Próby Kuźni (głębiny);1;952800;47600;400;Kowale żużlowej kuźni sprawdzali czeladników trzema próbami. Archonci strzegą ich do dziś, a skarbiec mistrza leży za ostatnią. Wejdź do środka (Trzy Próby Kuźni (głębiny)) i rozejrzyj się.
+trials_m2;Pierwsza cela: Archont Próby Kamienia;trials_halvard;KILL;trial_stone;1;5241000;262000;400;W pierwszej celi czeka archont. Pokonaj Archont Próby Kamienia.
+trials_m3;Druga cela: Archont Próby Żużlu;trials_halvard;KILL;trial_slag;1;5717000;285800;400;Brama drugiej celi ustąpiła. Pokonaj Archont Próby Żużlu.
+trials_m4;Trzecia cela: Archont Próby Płomienia;trials_halvard;KILL;trial_flame;1;6193000;309600;400;Ostatnia cela jest otwarta. Pokonaj Archont Próby Płomienia.
+trials_m5;Straż skarbca: Kultysta Stopionej Gwiazdy;trials_halvard;KILL;molten_cultist;10;1906000;95300;400;Skarbiec pilnują ostatni strażnicy. Pokonaj 10 (Kultysta Stopionej Gwiazdy), a skrzynie będą twoje.
+storm_m1;Do środka: Arena Burzy;storm_valka;VISIT;Arena Burzy (głębiny);1;1207000;60400;450;Arena stoi na szczycie skały, gdzie burze nigdy nie cichną. Każda runda sprowadza gorszych przeciwników, a pan areny nie uznaje poddania. Wejdź do środka (Arena Burzy (głębiny)) i rozejrzyj się.
+storm_m2;Pierwsza runda: Cierniowa Panna;storm_valka;KILL;thorn_maiden;10;1690000;84500;450;Pierwsza runda areny. Pokonaj 10 (Cierniowa Panna), a odblokujesz drugą rundę.
+storm_m3;Druga runda: Harpia burzy;storm_valka;KILL;storm_harpy;10;1931000;96600;450;Druga runda jest otwarta. Pokonaj 10 (Harpia burzy), a odblokujesz trzecią.
+storm_m4;Trzecia runda: Mroźny olbrzym;storm_valka;KILL;frost_giant;8;2172000;108600;450;Trzecia runda jest najcięższa. Pokonaj 8 (Mroźny olbrzym), a wyzwiesz mistrza areny.
+storm_m5;Mistrz areny: Pan Areny Burzy;storm_valka;KILL;arena_overlord;1;10862000;543100;450;Mistrz czeka w środku areny. Pokonaj Pan Areny Burzy, a skarb zwycięzców będzie twój.
+mirror_m1;Do środka: Sala Szklanych Pieczęci;mirror_selene;VISIT;Sala Szklanych Pieczęci (głębiny);1;1613000;80600;520;Szklane pieczęcie rozbijają się tylko dźwigniami z komór, w których czuwają widma i serafini. Dopiero szóstej pieczęci regent traci ochronę. Wejdź do środka (Sala Szklanych Pieczęci (głębiny)) i rozejrzyj się.
+mirror_m2;Pierwsze trzy pieczęcie: Upiór mgły;mirror_selene;KILL;mist_wraith;12;2258000;112900;520;Komory pierwszych trzech pieczęci strzeże straż. Pokonaj 12 (Upiór mgły) i pociągnij dźwignie.
+mirror_m3;Ostatnie trzy pieczęcie: Szklany Upiór;mirror_selene;KILL;glass_phantom;10;2581000;129000;520;Pozostałe komory są jeszcze groźniejsze. Pokonaj 10 (Szklany Upiór) i pociągnij pozostałe dźwignie.
+mirror_m4;Strażnik pieczęci: Regent Sześciu Pieczęci;mirror_selene;KILL;seal_regent;1;14518000;725900;520;Gdy opadnie sześć pieczęci, brama do bossa ustąpi. Pokonaj Regent Sześciu Pieczęci i otwórz skarbiec.
+# END premium_quests

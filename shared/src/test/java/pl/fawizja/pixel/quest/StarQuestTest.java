@@ -236,7 +236,7 @@ class StarQuestTest {
                 "gore_harbinger", "dimmed_seraph", "vorgrim", "ysmera", "kharzul", "vessara", "ilmora", "ugrath", "noctharion");
         int island = 0;
         for (SpawnPoint sp : spawns) {
-            if (!keys.contains(sp.monsterKey())) continue;
+            if (!keys.contains(sp.monsterKey()) || sp.center().x() > dock.x() + 250) continue; // te same potwory stoja tez w liniach premium na innych ladach
             island++;
             if (!near(c, sp.center())) missing.add(sp.monsterKey() + sp.center());
         }
