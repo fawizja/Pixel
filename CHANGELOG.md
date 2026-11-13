@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Plecak w plecaku jak w Tibii: każdy plecak (20/24/36 pól) można włożyć w pole innego plecaka i otworzyć, bez limitu głębokości; ograniczają
+  tylko pola i udźwig (cap) postaci (`ItemWeights`, waga zawartości liczy się rekurencyjnie, `TOO_HEAVY`). Komputer: okno plecaka obok głównego
+  z przyciskiem `<`; telefon: plecak otwiera się w miejscu panelu plecaka (nazwa w tytule, `< Wstecz`, "Wyjmij", przenoszenie dotknięciem,
+  użycie mikstur/run/jedzenia wprost z zagnieżdżonego plecaka). Upuszczenie przedmiotu na plecak wkłada go do środka.
+- Przepełnienie lupu: gdy główny plecak jest pełny, przedmioty (lup z ciała i autoloot, nagrody, kupno, zbieranie, podnoszenie) trafiają do
+  pierwszego plecaka z miejscem (w głąb); stosy łączą się najpierw z istniejącymi.
+- Zapis postaci v10 niesie zawartość plecaków (`{rozmiar|pole=stos|...}`), ten sam zapis idzie online (SELF); zapisy v1-v9 wczytują się bez zmian.
+- Akcje: `bag_move`, `bag_use`, `bag_drop`, `bag_equip`, `bag_out`, `slot_wear`.
+- Czary smoków: nowe obszary `WAVE9` (40 pól), `WIDE_BEAM8` (24), `CROSS_NOVA` (41); każdy smok ma własny zestaw (zielony, lodowy, czarny,
+  złoty, biały, lodu, kości, magmy, Skaldra, Ignaroth), silniejsze rzucają wielkie fale, kule 3x4/5x5 i gwiazdy; obrażenia na atak bez zmian (+-10%).
+- Sceny regresji GUI `nested_bag_*`, `dragon_wave9`, `dragon_star`; testy `NestedBackpackTest`, `DragonSpellAreasTest`.
+
+### Zmieniono
+- Użycie plecaka z plecaka otwiera go; dawne zastąpienie głównego plecaka to akcja "Załóż" (`slot_wear`).
+- Efekt dużych obszarów czarów na kliencie świeci naraz na całym obszarze (krótsze opóźnienie na pole).
+
 ## [0.263.0] - 2026-11-12
 
 ### Dodano

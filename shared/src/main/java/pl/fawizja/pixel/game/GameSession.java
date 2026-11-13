@@ -4286,6 +4286,21 @@ public final class GameSession {
         return r;
     }
 
+    /** Wyjmuje przedmiot z otwartego plecaka do wolnego pola plecaka nadrzednego (przycisk "Wyjmij" na telefonie). */
+    public InventoryResult bagOut(int[] path, int slot, long nowMs) {
+        if (path.length == 0) return InventoryResult.INVALID_SLOT;
+        Container c = pc.backpack().resolve(path);
+        Container parent = pc.backpack().resolve(java.util.Arrays.copyOf(path, path.length - 1));
+        if (c == null || parent == null || slot < 0 || slot >= c.size() || c.get(slot) == null) return InventoryResult.EMPTY_SLOT;
+        int free = -1;
+        for (int i = 0; i < parent.size(); i++) if (parent.get(i) == null) { free = i; break; }
+        if (free < 0) {
+            log.add(nowMs, EventLog.Kind.WARNING, Messages.get("game_session.plecak_jest_pelny_nie"));
+            return InventoryResult.NO_SPACE;
+        }
+        return Container.moveBetween(c, slot, parent, free, c.get(slot).count());
+    }
+
     public void bagDrop(int[] path, int slot, long nowMs) {
         if (path.length == 0) { dropFromSlot(slot, nowMs); return; }
         Container c = pc.backpack().resolve(path);

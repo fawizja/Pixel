@@ -308,6 +308,30 @@ class NestedBackpackTest {
         assertTrue(pc.health() > hp);
     }
 
+    /** Sciezka telefonu: "Wyjmij" (bag_out) z zagniezdzonego plecaka do plecaka nadrzednego, przenoszenie w obrebie otwartego plecaka. */
+    @Test
+    void takeOutOfAnOpenBagAndMoveInsideItWorkForThePhonePanel() {
+        PlayerCharacter pc = hero();
+        GameSession s = session(pc);
+        Container root = pc.backpack();
+        root.add(ItemStack.of(id("backpack")));
+        Container a = root.bagAt(0);
+        a.add(ItemStack.of(id("backpack")));
+        Container b = a.bagAt(0);
+        b.add(ItemStack.of(id("hunting_spear")));
+        b.add(ItemStack.of(id("rope")));
+        // ruch w obrebie otwartego plecaka 0.0: miecz z pola 0 na pole 7
+        assertTrue(Actions.apply(s, "bag_move:0.0:0:0.0:7", 1000));
+        assertEquals(id("hunting_spear"), b.get(7).itemId());
+        // wyjmij: trafia do wolnego pola plecaka nadrzednego (0)
+        assertTrue(Actions.apply(s, "bag_out:0.0:7", 1000));
+        assertNull(b.get(7));
+        assertEquals(1, a.count(id("hunting_spear")));
+        assertEquals(1, root.bagAt(0).bagAt(0).count(id("rope")));
+        // z glownego poziomu nie ma "nadrzednego"
+        assertEquals(InventoryResult.INVALID_SLOT, s.bagOut(new int[0], 0, 2000));
+    }
+
     private static int firstFree(Container c) {
         for (int i = 0; i < c.size(); i++) if (c.get(i) == null) return i;
         return -1;

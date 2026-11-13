@@ -72,6 +72,7 @@ public final class Actions {
                 case "bag_use": s.bagUse(path(p[1]), Integer.parseInt(p[2]), now); return true;
                 case "bag_drop": s.bagDrop(path(p[1]), Integer.parseInt(p[2]), now); return true;
                 case "bag_equip": s.bagEquip(path(p[1]), Integer.parseInt(p[2]), now); return true;
+                case "bag_out": s.bagOut(path(p[1]), Integer.parseInt(p[2]), now); return true;
                 case "bag_move": s.bagMove(path(p[1]), Integer.parseInt(p[2]), path(p[3]), Integer.parseInt(p[4])); return true;
                 case "slot_move": s.moveSlot(Integer.parseInt(p[1]), Integer.parseInt(p[2])); return true;
                 // okno depozytu: depot_move:zrodlo(B|D):pole:cel(B|D):pole (pole -1 = pierwsze wolne)

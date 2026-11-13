@@ -1539,7 +1539,16 @@ public final class Hud {
 
     /** Otwiera plecak wskazany sciezka (numery pol od glownego plecaka) w oknie obok plecaka. */
     public void openChildBag(int[] path) {
-        if (mobile || path == null || path.length == 0) return;
+        if (path == null || path.length == 0) return;
+        if (mobile) {
+            // telefon: plecak otwiera sie w miejscu panelu plecaka ("<" wraca o poziom wyzej)
+            if (mWin != MobileWin.BAG) openMobileWin(MobileWin.BAG);
+            childPath = path.clone();
+            childSelected = -1;
+            selectedSlot = -1;
+            mBagScroll = 0;
+            return;
+        }
         childPath = path.clone();
         childSelected = -1;
         childView.scroll = 0;
@@ -1564,7 +1573,7 @@ public final class Hud {
     /** Cofa okno dziecka o poziom (plecak nadrzedny) albo zamyka je, gdy nadrzednym jest glowny plecak. */
     private void childUp() {
         if (childPath == null) return;
-        if (childPath.length <= 1) closeChildBag();
+        if (childPath.length <= 1) { closeChildBag(); mBagScroll = 0; }
         else { childPath = java.util.Arrays.copyOf(childPath, childPath.length - 1); childSelected = -1; childView.scroll = 0; }
     }
 
@@ -1701,6 +1710,10 @@ public final class Hud {
         }
         if (charOpen) {
             charOpen = false;
+            return true;
+        }
+        if (mobile && mWin == MobileWin.BAG && childPath != null) {
+            childUp();
             return true;
         }
         if (mobile && mWin != null) {
@@ -3961,6 +3974,7 @@ public final class Hud {
         if (trade != null && !bagOpen) menuOpen = true; // po zamknieciu plecaka wraca okno handlu
         if (menuOpen || bagOpen) bigMapOpen = false;
         PlayerCharacter pc = session.character();
+        sessionForTitle = session;
         run.active = pc.isRunning();
         torch.active = pc.isTorchLit();
         bag.active = bagOpen;
@@ -6395,7 +6409,7 @@ public final class Hud {
         if (trade != null) return; // okno handlu ma pierwszenstwo
         closeMenus();
         mWin = win;
-        if (win == MobileWin.BAG) mBagScroll = 0;
+        if (win == MobileWin.BAG) { mBagScroll = 0; closeChildBag(); }
     }
 
     /** Zamyka okna menu (ksiega, NPC, dziennik, wybor, okienka) i mape. */
@@ -6682,27 +6696,50 @@ public final class Hud {
         boolean hit(float px, float py) { return px >= x && px <= x + w && py >= y && py <= y + h; }
     }
 
+    /** Telefon: pojemnik pokazany w oknie plecaka (glowny albo otwarty plecak w plecaku). */
+    private pl.fawizja.pixel.inventory.Container mBagContainer(GameSession session) {
+        if (childPath != null) {
+            pl.fawizja.pixel.inventory.Container c = childContainer(session);
+            if (c != null) return c;
+        }
+        return session.character().backpack();
+    }
+
+    private int mSelected() { return childPath != null ? childSelected : selectedSlot; }
+
+    private void mSetSelected(int slot) { if (childPath != null) childSelected = slot; else selectedSlot = slot; }
+
     /** Przyciski pod plecakiem: z zaznaczonym przedmiotem Zaloz/Uzyj/Wyrzuc/Zachowaj, inaczej Sortuj i strony. */
     private List<MBtn> mBagButtons(HudLayout.Rect win, GameSession session) {
         List<MBtn> out = new ArrayList<>();
         PlayerCharacter pc = session.character();
+        pl.fawizja.pixel.inventory.Container cont = mBagContainer(session);
+        boolean nested = childPath != null;
         float by = win.y + 6, bh = 36, x = win.x + 8;
-        ItemStack sel = selectedSlot >= 0 && selectedSlot < pc.backpack().size() ? pc.backpack().get(selectedSlot) : null;
+        int msel = mSelected();
+        ItemStack sel = msel >= 0 && msel < cont.size() ? cont.get(msel) : null;
         if (sel != null) {
             ItemType t = session.items().get(sel.itemId());
-            float bw = (win.w - 16 - 3 * 6) / 4f;
-            if (t.slot() != EquipSlot.NONE) out.add(new MBtn("bag_equip", Messages.get("hud.zaloz_2"), x, by, bw, bh));
-            out.add(new MBtn("bag_use", Messages.get("hud.uzyj"), x + (bw + 6), by, bw, bh));
-            out.add(new MBtn("bag_drop", Messages.get("hud.wyrzuc_2"), x + 2 * (bw + 6), by, bw, bh));
-            out.add(new MBtn("bag_keep", pc.isKept(sel.itemId()) ? Messages.get("hud.odblokuj") : Messages.get("hud.zachowaj"), x + 3 * (bw + 6), by, bw, bh));
+            boolean isBag = cont.isBag(msel);
+            int n = nested ? 5 : 4;
+            float bw = (win.w - 16 - (n - 1) * 6) / n;
+            int k = 0;
+            String pre = nested ? "child_" : "bag_";
+            if (t.slot() != EquipSlot.NONE || isBag && !nested) out.add(new MBtn(pre + "equip", isBag ? Messages.get("hud.plecak_zaloz") : Messages.get("hud.zaloz_2"), x + (bw + 6) * k++, by, bw, bh));
+            out.add(new MBtn(pre + "use", isBag ? Messages.get("hud.plecak_otworz") : Messages.get("hud.uzyj"), x + (bw + 6) * k++, by, bw, bh));
+            out.add(new MBtn(pre + "drop", Messages.get("hud.wyrzuc_2"), x + (bw + 6) * k++, by, bw, bh));
+            if (nested) out.add(new MBtn("child_out", Messages.get("hud.plecak_wyjmij"), x + (bw + 6) * k++, by, bw, bh));
+            else out.add(new MBtn("bag_keep", pc.isKept(sel.itemId()) ? Messages.get("hud.odblokuj") : Messages.get("hud.zachowaj"), x + (bw + 6) * k++, by, bw, bh));
             return out;
         }
-        out.add(new MBtn("bag_sort", Messages.get("hud.sortuj"), x, by, 76, bh));
-        int size = pc.backpack().size();
+        if (nested) out.add(new MBtn("child_back", "< " + Messages.get("hud.plecak_w_plecaku_wstecz"), x, by, 96, bh));
+        else out.add(new MBtn("bag_sort", Messages.get("hud.sortuj"), x, by, 76, bh));
+        int size = cont.size();
         if (pl.fawizja.pixel.inventory.ContainerGrid.PHONE.scrollable(size)) {
             mBagScroll = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.clamp(mBagScroll, size);
-            out.add(new MBtn("mbag:up", "<", x + 82, by, 36, bh));
-            out.add(new MBtn("mbag:down", ">", x + 122, by, 36, bh));
+            float sx = x + (nested ? 102 : 82);
+            out.add(new MBtn("mbag:up", "^", sx, by, 36, bh));
+            out.add(new MBtn("mbag:down", "v", sx + 40, by, 36, bh));
         }
         return out;
     }
@@ -6810,27 +6847,36 @@ public final class Hud {
         PlayerCharacter pc = session.character();
         switch (mWin) {
             case BAG: {
+                pl.fawizja.pixel.inventory.Container cont = mBagContainer(session);
                 for (MBtn b : mBagButtons(win, session)) {
                     if (!b.hit(px, py)) continue;
                     if (b.id().startsWith("mbag:")) {
-                        mBagScroll = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.scrollBy(mBagScroll, b.id().equals("mbag:up") ? -1 : 1, pc.backpack().size());
+                        mBagScroll = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.scrollBy(mBagScroll, b.id().equals("mbag:up") ? -1 : 1, cont.size());
+                    } else if (b.id().equals("child_back")) {
+                        childUp();
                     } else {
                         actions.onButton(b.id());
                     }
                     return;
                 }
                 HudLayout.Rect c = new HudLayout.Rect();
-                int firstSlot = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.firstVisibleSlot(mBagScroll, pc.backpack().size());
-                for (int i = 0; i < pl.fawizja.pixel.inventory.ContainerGrid.PHONE.cols() * pl.fawizja.pixel.inventory.ContainerGrid.PHONE.shownRows(pc.backpack().size()); i++) {
+                int firstSlot = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.firstVisibleSlot(mBagScroll, cont.size());
+                for (int i = 0; i < pl.fawizja.pixel.inventory.ContainerGrid.PHONE.cols() * pl.fawizja.pixel.inventory.ContainerGrid.PHONE.shownRows(cont.size()); i++) {
                     if (!mBagCell(win, i, c).contains(px, py)) continue;
                     int slot = firstSlot + i;
-                    if (slot >= pc.backpack().size()) return;
-                    if (selectedSlot < 0) {
-                        if (pc.backpack().get(slot) != null) selectedSlot = slot;
-                    } else if (selectedSlot == slot) {
-                        selectedSlot = -1;
+                    if (slot >= cont.size()) return;
+                    int msel = mSelected();
+                    if (msel < 0) {
+                        if (cont.get(slot) != null) mSetSelected(slot);
+                    } else if (msel == slot) {
+                        mSetSelected(-1);
+                    } else if (childPath != null) {
+                        // przeniesienie w obrebie otwartego plecaka (upuszczenie na plecak wklada do srodka)
+                        String pt = pl.fawizja.pixel.inventory.Container.pathText(childPath);
+                        actions.onButton("bag_move:" + pt + ":" + msel + ":" + pt + ":" + slot);
+                        childSelected = -1;
                     } else {
-                        actions.onButton("slot_move:" + selectedSlot + ":" + slot);
+                        actions.onButton("slot_move:" + msel + ":" + slot);
                         selectedSlot = -1;
                     }
                     return;
@@ -7925,9 +7971,15 @@ public final class Hud {
         font.getData().setScale(1f);
     }
 
+    /** Sesja ostatniej klatki (tytul okna plecaka w plecaku na telefonie). */
+    private GameSession sessionForTitle;
+
     private String mWinTitle() {
         switch (mWin) {
-            case BAG: return Messages.get("hud.plecak");
+            case BAG: {
+                ItemStack bs = childPath == null || sessionForTitle == null ? null : bagStackAt(sessionForTitle.character().backpack(), childPath);
+                return bs == null ? Messages.get("hud.plecak") : sessionForTitle.items().get(bs.itemId()).name();
+            }
             case EQUIP: return Messages.get("hud.ekwipunek");
             case SKILLS: return Messages.get("hud.umiejetnosci");
             case VIP: return Messages.get("hud.vip_znajomi");
@@ -8040,20 +8092,22 @@ public final class Hud {
                 break;
             }
             case BAG: {
-                int bagSize = pc.backpack().size();
+                pl.fawizja.pixel.inventory.Container cont = mBagContainer(session);
+                int msel = mSelected();
+                int bagSize = cont.size();
                 mBagScroll = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.clamp(mBagScroll, bagSize);
                 int base = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.firstVisibleSlot(mBagScroll, bagSize), used = 0;
-                used = bagSize - pc.backpack().freeSlots();
+                used = bagSize - cont.freeSlots();
                 int shown = pl.fawizja.pixel.inventory.ContainerGrid.PHONE.cols() * pl.fawizja.pixel.inventory.ContainerGrid.PHONE.shownRows(bagSize);
                 HudLayout.Rect c = new HudLayout.Rect();
                 for (int i = 0; i < shown; i++) {
                     int slot = base + i;
                     mBagCell(win, i, c);
-                    ItemStack st = slot < pc.backpack().size() ? pc.backpack().get(slot) : null;
-                    TextureRegion fr = slot == selectedSlot && slotSelectedImg() != null ? slotSelectedImg() : slotFrame(st, art.itemRegistry());
+                    ItemStack st = slot < cont.size() ? cont.get(slot) : null;
+                    TextureRegion fr = slot == msel && slotSelectedImg() != null ? slotSelectedImg() : slotFrame(st, art.itemRegistry());
                     if (fr != null) slotDraw(b, fr, c.x, c.y, c.w, c.h);
                     else bFill(b, c.x, c.y, c.w, c.h, M_CELL);
-                    if (slot == selectedSlot && !zid()) bStroke(b, c.x, c.y, c.w, c.h, 1.5f, hex(0xf2cc40, 1f));
+                    if (slot == msel && !zid()) bStroke(b, c.x, c.y, c.w, c.h, 1.5f, hex(0xf2cc40, 1f));
                     if (st == null) continue;
                     TextureRegion r = art.item(st.itemId());
                     float ip = slotPad(c.w);
@@ -8064,8 +8118,9 @@ public final class Hud {
                 }
                 float ty = c.y - 12;
                 String head = Messages.get("hud.pojemnosc") + used + " / " + bagSize
-                        + "  ·  " + String.format("%,d", session.gold()) + " gp";
-                ItemStack sel = selectedSlot >= 0 && selectedSlot < pc.backpack().size() ? pc.backpack().get(selectedSlot) : null;
+                        + "  ·  " + (childPath != null ? "" : String.format("%,d", session.gold()) + " gp  ·  ")
+                        + Messages.get("hud.plecak_waga", String.valueOf(pc.backpack().weight() / pl.fawizja.pixel.inventory.ItemWeights.PER_OZ), String.valueOf(pc.capacity()));
+                ItemStack sel = msel >= 0 && msel < cont.size() ? cont.get(msel) : null;
                 if (sel != null) {
                     ItemType t = session.items().get(sel.itemId());
                     ItemStack worn = t.slot() == EquipSlot.NONE ? null : pc.equipment().get(t.slot());

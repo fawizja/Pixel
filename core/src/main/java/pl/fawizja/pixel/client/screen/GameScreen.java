@@ -690,13 +690,14 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             }
-            case "child_use": case "child_equip": case "child_drop": {
+            case "child_use": case "child_equip": case "child_drop": case "child_out": {
                 int[] path = hud.childPath();
                 int sel = hud.childSelected();
                 pl.fawizja.pixel.inventory.Container cc = path == null ? null : session.character().backpack().resolve(path);
                 if (cc == null || sel < 0 || sel >= cc.size() || cc.get(sel) == null) break;
                 String where = pl.fawizja.pixel.inventory.Container.pathText(path) + ":" + sel;
                 if (id.equals("child_drop")) act("bag_drop:" + where, t);
+                else if (id.equals("child_out")) act("bag_out:" + where, t);
                 else if (id.equals("child_equip")) act("bag_equip:" + where, t);
                 else if (cc.isBag(sel)) {
                     int[] deeper = java.util.Arrays.copyOf(path, path.length + 1);
