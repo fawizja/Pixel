@@ -975,3 +975,8 @@ dune_drake;great_health_potion;250;1;2
 dune_drake;gilded_helmet;5;1;1
 dune_drake;coral_legs;2;1;1
 dune_drake;coral_boots;2;1;1
+bog_reaver;gold_coin;900;60;170
+bog_reaver;healing_herb;150;1;1
+bog_reaver;snake_skin;120;1;1
+bog_reaver;croc_leather;100;1;1
+bog_reaver;lesser_sage_gem;10;1;1

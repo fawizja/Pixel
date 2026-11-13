@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.264.0] - 2026-11-13
+
+### Dodano
+- Bagienny łupieżca (`bog_reaver`, poziom 85, grafika Darka z Goblin3D, `docs/CREDITS.md`): potwór bagien wg Tibia Wiki (1300 HP, 800 exp, pancerz 20, odporności jak bagienne zjawy: ogień 85%, ziemia 30%; cios z zatruciem 0-180, wyssanie życia 90-140, bąbel 100-175, stalagmit 96-110, paraliż, leczenie ok. 100). Trzy spawny w Leżu Krokodyli i jaskiniach bagien (zamiast części bagiennych zjaw), 12 klatek grafiki (`tools/art/bog_raider_import.py`), spawny `tools/mapgen/bog_reaver_spawns.py`, scena regresji `bog_reaver`.
+- Silne potwory rzucają różne czary (analiza: `analizy/potwory-ataki.md`, sekcja 6): każdy potwór od poziomu 100 i każdy boss (poza
+  smokami) ma uderzenie w jeden cel i czar obszarowy dobrane do żywiołu i klasy (demony: kule ognia i wyssanie many, mumie i upiory:
+  uderzenie śmierci i fala klątwy, piraci: strzały i bomby, golemy: rzut kamieniem/lawą i kula, harpie: energia i promień), a od
+  poziomu 300 co najmniej trzy czary ze stanem (podpalenie, zatrucie, zamrożenie, porażenie, klątwa, krwawienie) i większymi obszarami
+  (`WAVE7`, `BEAM6`, `CIRCLE3X3`, `CIRCLE5X5`). Zmieniono 68 potworów (`data/monster_spells.csv`, 18 przeszło z `MELEE` na `MIXED`);
+  oczekiwane obrażenia czarów pozostały w widełkach poprzednich potworów. Test `StrongMonsterSpellsTest`.
+- `-Dpixel.mobDemo=cast:potwor:czar[:klatki]` pokazuje dowolny czar dowolnego potwora; sceny regresji `mob_strong_bolt/ball/beam`.
+
 ## [0.263.0] - 2026-11-12
 
 ### Dodano

@@ -151,4 +151,6 @@ Copyright (c) 2010-2017 OTClient, Copyright (c) 2018-2023 OTClientV8. Licencja M
 pełny tekst: `assets/ui/otc/LICENSE-OTCV8.txt`. Pliki są użyte bez zmian; gra rysuje je jako
 rozciągane ramki (9-patch). Nie użyto ikon z napisami ani grafik postaci z tego klienta.
 
+## Własna grafika właściciela projektu
 
+- Bog Raider sprite: Darek (project owner), Goblin3D. Pliki `assets/art/monsters/bog_reaver*.png` (przeskalowane z 128x128 do ok. 40 px skryptem `tools/art/bog_raider_import.py`).

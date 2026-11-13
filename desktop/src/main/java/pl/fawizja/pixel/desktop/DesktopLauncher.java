@@ -75,7 +75,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.dragonDemo=five|fire|gfb|ice|white  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
  *                        wielka kule ognia (gfb), oddech lodu (ice), bialy smok piorun (white) - rzut w postac stojaca przed nim
- *   -Dpixel.mobDemo=spear|caster|area|summon|flee  style ataku potworow: wlocznik trzyma dystans, uderzenie w cel, fala jadu, przywolywacz, ranny strzelec ucieka
+ *   -Dpixel.mobDemo=spear|caster|area|summon|flee|cast:potwor:czar[:klatki]  style ataku potworow: wlocznik trzyma dystans, uderzenie w cel, fala jadu, przywolywacz, ranny strzelec ucieka
  *   -Dpixel.fakePing=MS   udaje opoznienie sieciowe (kropka pingu obok FPS; zielona <100, pomaranczowa 100-250, czerwona >250)
  *   -Dpixel.bagSlots=N, -Dpixel.bagScroll=W, -Dpixel.depotScroll=W  przy open=bigbag / depotwin: pojemnosc plecaka i przewiniecie siatek
  *   -Dpixel.seed=1                    stale ziarno potworow (testy regresji GUI)
@@ -1148,15 +1148,14 @@ public final class DesktopLauncher {
             Position me = pc.position();
             long now = gs.worldTime();
             pc.heal(pc.maxHealth());   // podglad: wokol sa prawdziwe potwory jaskini
-            String key = demo.equals("spear") ? "orc_spearman" : demo.equals("caster") ? "orc_shaman" : demo.equals("area") ? "venom_hydra"
+            String[] castArg = demo.startsWith("cast:") ? demo.split(":") : null;   // cast:potwor:czar - dowolny czar dowolnego potwora
+            String key = castArg != null ? castArg[1] : demo.equals("spear") ? "orc_spearman" : demo.equals("caster") ? "orc_shaman" : demo.equals("area") ? "venom_hydra"
                     : demo.equals("summon") ? "candle_acolyte" : "elf_scout";
             if (frame == 2) {
                 for (int bit = 0; bit < 64; bit++) pc.markTip(bit);
                 for (pl.fawizja.pixel.monster.Monster m : new java.util.ArrayList<>(s.monsters().monsters())) {
                     if (!m.isSummon() && m.position().z() == me.z() && m.position().distanceTo(me) <= 24) s.monsters().dismiss(m);   // pusta scena
                 }
-                String unused = demo.equals("spear") ? "orc_spearman" : demo.equals("caster") ? "orc_shaman" : demo.equals("area") ? "venom_hydra"
-                        : demo.equals("summon") ? "candle_acolyte" : "elf_scout";
                 int dy = demo.equals("spear") ? -6 : -3;
                 for (pl.fawizja.pixel.monster.Monster m : s.monsters().spawnEvent(key, me.translate(0, dy), 0, 1, now)) {
                     if (!demo.equals("spear") && !demo.equals("flee")) m.paralyze(now + 600_000);
@@ -1173,9 +1172,9 @@ public final class DesktopLauncher {
                 s.monsters().summonMinion(who, "skeleton", now);
                 s.combat().monsterEffect(who, who.position(), "MAGIC", now);
             }
-            if (frame == frames - (demo.equals("area") ? 7 : 3)) {
+            if (frame == frames - (castArg != null && castArg.length > 3 ? Integer.parseInt(castArg[3]) : demo.equals("area") || castArg != null ? 7 : 3)) {
                 who.lookAt(me);
-                String spell = demo.equals("caster") ? "fire_strike" : demo.equals("area") ? "poison_wave" : null;
+                String spell = castArg != null ? castArg[2] : demo.equals("caster") ? "fire_strike" : demo.equals("area") ? "poison_wave" : null;
                 Gdx.app.log("Pixel", "mobDemo " + demo + " " + who.type().key() + " at " + who.position() + " me " + me
                         + " dist " + who.position().distanceTo(me) + " state " + who.state());
                 if (spell != null) Gdx.app.log("Pixel", "mobDemo cast " + spell + " " + s.combat().castMonsterSpell(who, spell, now));

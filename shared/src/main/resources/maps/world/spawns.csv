@@ -332,7 +332,7 @@ jungle_serpent;757;515;-1;4;3;180;stado
 candle_acolyte;743;523;-1;3;2;180
 jungle_serpent;739;531;-2;4;4;180;stado
 jungle_serpent;733;517;-2;4;3;180;stado
-bog_wraith;739;531;-2;4;3;180;stado
+bog_reaver;739;531;-2;4;3;180;stado
 szlamiara;733;517;-2;2;1;3600
 crystal_golem;654;596;-1;4;4;180;stado
 striped_prowler;668;588;-1;5;4;180;stado
@@ -1440,7 +1440,7 @@ jungle_hunter;777;539;-3;5;6;180;stado
 jungle_hunter;782;534;-3;4;3;180;stado
 jungle_hunter;781;528;-3;5;6;180;stado
 striped_prowler;783;556;-3;5;6;180;stado
-bog_wraith;790;552;-3;5;6;180;stado
+bog_reaver;790;552;-3;5;6;180;stado
 striped_prowler;830;541;-4;5;6;180;stado
 bog_wraith;824;550;-4;5;6;180;stado
 bog_wraith;819;555;-4;4;3;180;stado
@@ -2603,7 +2603,7 @@ candle_acolyte;599;640;-2;4;4;180;stado
 crystal_golem;592;647;-2;4;4;180;stado
 crystal_golem;590;660;-2;4;4;180;stado
 crystal_golem;605;655;-2;4;4;180;stado
-bog_wraith;628;662;-2;4;3;180
+bog_reaver;628;662;-2;4;3;180
 candle_acolyte;623;646;-2;3;2;180
 cave_centipede;935;809;-1;4;3;180
 orc_shaman;944;818;-1;3;2;180
