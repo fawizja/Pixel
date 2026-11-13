@@ -3,24 +3,27 @@
 # dodatek: - | STAN:min-max:odstepMs:szansa% | SLOW:procent:ms (paraliz) | SUMMON:potwor:najwiecej_naraz | HASTE:procent:ms. pocisk: grafika z assets/art/missiles albo -
 # Przy kazdym ataku potwor probuje czarow po kolei (kazdy z wlasna szansa), inaczej bije wrecz.
 # zielony: ognista fala i mala kula ognia
-emerald_dragon;fire_wave;WAVE;WAVE4;FIRE;100;260;22;4;BURNING:60-110:4000:60;-
-emerald_dragon;fireball;BALL;CIRCLE1X1;FIRE;80;200;14;5;-;-
+emerald_dragon;fire_wave;WAVE;WAVE4;FIRE;89;233;22;4;BURNING:60-110:4000:60;-
+emerald_dragon;fireball;BALL;CIRCLE2X2;FIRE;72;179;12;5;BURNING:30-50:4000:40;-
+emerald_dragon;venom_breath;WAVE;BEAM5;EARTH;54;134;12;5;POISON:20-40:4000:50;-
 # lodowy: lodowa fala, oddech lodu (promien) i spowalniajace spojrzenie
 hoarfrost_dragon;ice_wave;WAVE;WAVE4;ICE;150;350;20;4;FREEZING:80-150:5000:50;-
 hoarfrost_dragon;ice_breath;WAVE;BEAM6;ICE;220;480;12;6;FREEZING:100-180:5000:60;-
-hoarfrost_dragon;chilling_gaze;BALL;CIRCLE1X1;ICE;40;90;14;5;SLOW:45:5000;-
+hoarfrost_dragon;chilling_gaze;BALL;CIRCLE2X2;ICE;40;90;14;5;SLOW:45:5000;-
 # czarny: potezna fala ognia i wielka kula ognia
-coal_dragon;great_fire_wave;WAVE;WAVE7;FIRE;200;520;22;5;BURNING:150-260:4000:70;-
-coal_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;150;420;16;5;BURNING:100-180:4000:50;-
+coal_dragon;great_fire_wave;WAVE;WAVE7;FIRE;200;520;20;5;BURNING:150-260:4000:70;-
+coal_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;150;420;14;5;BURNING:100-180:4000:50;-
+coal_dragon;ash_breath;WAVE;BEAM7;FIRE;120;300;8;5;BURNING:60-100:4000:50;-
 # zloty: wielka fala ognia, fala pioruna i wielka kula ognia
-dune_drake;great_fire_wave;WAVE;WAVE7;FIRE;280;700;20;5;BURNING:250-400:4000:80;-
-dune_drake;energy_wave;WAVE;SQUAREWAVE5;ENERGY;260;640;16;5;ELECTRIFIED:150-260:4000:60;-
-dune_drake;great_fireball;BALL;CIRCLE3X3;FIRE;220;560;16;6;BURNING:200-300:4000:60;-
+dune_drake;great_fire_wave;WAVE;WAVE9;FIRE;299;748;18;5;BURNING:250-400:4000:80;-
+dune_drake;energy_wave;WAVE;SQUAREWAVE5;ENERGY;278;684;16;5;ELECTRIFIED:150-260:4000:60;-
+dune_drake;great_fireball;BALL;CIRCLE3X4;FIRE;235;598;14;6;BURNING:200-300:4000:60;-
 # bialy: ogien, lod i piorun, najmocniejsze obrazenia
-pearl_dragon;great_fire_wave;WAVE;WAVE7;FIRE;500;1250;18;6;BURNING:400-650:4000:80;-
-pearl_dragon;energy_beam;WAVE;BEAM8;ENERGY;450;1100;14;8;ELECTRIFIED:250-400:4000:60;-
-pearl_dragon;ice_nova;SELF;CIRCLE5X5;ICE;400;950;10;3;FREEZING:250-400:5000:70;-
-pearl_dragon;great_fireball;BALL;CIRCLE3X3;FIRE;400;1000;14;7;BURNING:300-500:4000:60;-
+pearl_dragon;great_fire_wave;WAVE;WAVE9;FIRE;513;1282;16;6;BURNING:400-650:4000:80;-
+pearl_dragon;energy_beam;WAVE;WIDE_BEAM8;ENERGY;462;1128;12;8;ELECTRIFIED:250-400:4000:60;-
+pearl_dragon;ice_nova;SELF;CIRCLE5X5;ICE;410;974;10;3;FREEZING:250-400:5000:70;-
+pearl_dragon;great_fireball;BALL;CIRCLE3X4;FIRE;410;1026;12;7;BURNING:300-500:4000:60;-
+pearl_dragon;energy_star;SELF;CROSS_NOVA;ENERGY;308;718;8;3;ELECTRIFIED:150-250:4000:60;-
 
 # ---- profile wszystkich potworow (generowane z tools: patrz analizy/potwory-ataki.md) ----
 # Wilk
@@ -81,9 +84,9 @@ fire_elemental;fire_nova;SELF;CIRCLE3X3;FIRE;126;315;12;2;BURNING:81-135:4000:50
 # Lawowy golem
 lava_golem;lava_nova;SELF;CIRCLE3X3;FIRE;123;308;14;2;BURNING:79-132:4000:50;-
 # Ignaroth Roztopiony
-ignaroth;fire_strike;BOLT;POINT;FIRE;566;1414;15;3;-;fire
-ignaroth;great_fire_wave;WAVE;WAVE7;FIRE;443;1107;18;5;BURNING:221-369:4000:50;-
-ignaroth;great_fireball;BALL;CIRCLE3X3;FIRE;394;984;14;5;BURNING:221-369:4000:50;-
+ignaroth;fire_strike;BOLT;POINT;FIRE;605;1511;15;3;-;fire
+ignaroth;great_fire_wave;WAVE;WAVE9;FIRE;473;1183;16;5;BURNING:221-369:4000:50;-
+ignaroth;great_fireball;BALL;CIRCLE3X4;FIRE;421;1051;12;5;BURNING:221-369:4000:50;-
 ignaroth;summon_dragon_whelp;SUMMON;POINT;-;0;0;18;7;SUMMON:dragon_whelp:3;-
 # Mroźny olbrzym
 frost_giant;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;202;504;14;2;-;-
@@ -91,9 +94,10 @@ frost_giant;throw_ice_boulder;BOLT;POINT;ICE;288;720;18;5;-;ice
 # Harpia burzy
 storm_harpy;haste;HASTE;POINT;-;0;0;20;6;HASTE:50:6000;-
 # Lodowy smok
-ice_dragon;ice_strike;BOLT;POINT;ICE;584;1460;15;3;-;ice
-ice_dragon;ice_wave;WAVE;WAVE4;ICE;457;1143;22;4;FREEZING:229-381:4000:50;-
-ice_dragon;ice_breath;WAVE;BEAM6;ICE;406;1016;12;6;FREEZING:229-381:4000:50;-
+ice_dragon;ice_strike;BOLT;POINT;ICE;550;1375;15;3;-;ice
+ice_dragon;ice_wave;WAVE;WAVE7;ICE;430;1076;20;4;FREEZING:229-381:4000:50;-
+ice_dragon;ice_breath;WAVE;BEAM6;ICE;382;957;12;6;FREEZING:229-381:4000:50;-
+ice_dragon;blizzard;BALL;CIRCLE3X3;ICE;311;772;10;5;FREEZING:150-250:4000:40;-
 # Hrimgar, Król Lodowców
 hrimgar;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;532;1330;16;2;-;-
 hrimgar;frost_wave;WAVE;WAVE4;ICE;608;1520;16;4;FREEZING:342-570:4000:50;-
@@ -114,9 +118,10 @@ khazuul;summon_sand_wraith;SUMMON;POINT;-;0;0;18;7;SUMMON:sand_wraith:2;-
 # Demon Otchłani
 abyssal_demon;hell_wave;WAVE;WAVE4;FIRE;448;1120;18;4;BURNING:252-420:4000:50;-
 # Kościany smok
-bone_dragon;death_strike;BOLT;POINT;DEATH;699;1748;15;3;-;shadow_star
-bone_dragon;death_wave;WAVE;WAVE4;DEATH;547;1368;22;4;-;-
-bone_dragon;bone_nova;SELF;CIRCLE3X3;DEATH;426;1064;12;2;-;-
+bone_dragon;death_strike;BOLT;POINT;DEATH;660;1650;15;3;-;shadow_star
+bone_dragon;death_wave;WAVE;WAVE9;DEATH;516;1291;20;4;-;-
+bone_dragon;bone_nova;SELF;CIRCLE5X5;DEATH;402;1004;12;2;-;-
+bone_dragon;grave_ball;BALL;CIRCLE3X3;DEATH;359;897;10;4;-;-
 # Pan Otchłani
 abyss_lord;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;560;1400;14;2;-;-
 # Mor'gath, Serce Otchłani
@@ -135,17 +140,19 @@ mist_wraith;death_strike;BOLT;POINT;DEATH;405;1012;25;3;-;shadow_star
 mist_wraith;life_drain_strike;BOLT;POINT;LIFE_DRAIN;352;880;15;3;-;shadow_star
 mist_wraith;paralyze;BOLT;POINT;DEATH;246;616;12;3;SLOW:35:4000;shadow_star
 # Smok magmy
-magma_drake;fire_strike;BOLT;POINT;FIRE;529;1322;15;3;-;fire
-magma_drake;lava_wave;WAVE;WAVE7;FIRE;414;1035;20;5;BURNING:207-345:4000:50;-
-magma_drake;lava_ball;BALL;CIRCLE3X3;FIRE;368;920;14;5;BURNING:207-345:4000:50;-
+magma_drake;fire_strike;BOLT;POINT;FIRE;519;1298;15;3;-;fire
+magma_drake;lava_wave;WAVE;WAVE9;FIRE;406;1016;18;5;BURNING:207-345:4000:50;-
+magma_drake;lava_ball;BALL;CIRCLE3X4;FIRE;361;903;12;5;BURNING:207-345:4000:50;-
+magma_drake;magma_nova;SELF;CROSS_NOVA;FIRE;295;736;8;3;BURNING:150-250:4000:50;-
 # Matka Wiwern
 wyvern_matriarch;venom_wave;WAVE;WAVE4;EARTH;252;630;20;4;POISON:126-210:4000:50;-
 # Kapitan Krwawa Broda
 bloodbeard;powder_keg;BALL;CIRCLE1X1;FIRE;272;680;18;4;BURNING:153-255:4000:50;-
 # Skaldra, Lodowa Matka
 skaldra;ice_strike;BOLT;POINT;ICE;782;1955;15;3;-;ice
-skaldra;ice_wave;WAVE;WAVE7;ICE;612;1530;20;5;FREEZING:306-510:4000:50;-
-skaldra;blizzard;BALL;CIRCLE3X3;ICE;544;1360;15;5;FREEZING:306-510:4000:50;-
+skaldra;ice_wave;WAVE;WAVE9;ICE;612;1530;18;5;FREEZING:306-510:4000:50;-
+skaldra;blizzard;BALL;CIRCLE5X5;ICE;544;1360;12;5;FREEZING:306-510:4000:50;-
+skaldra;frost_star;SELF;CROSS_NOVA;ICE;450;1100;8;3;FREEZING:250-400:4000:50;-
 # Morvena, Pani Mgieł
 morvena;death_strike;BOLT;POINT;DEATH;920;2300;15;3;-;shadow_star
 morvena;death_wave;WAVE;WAVE7;DEATH;720;1800;20;5;-;-
@@ -326,7 +333,8 @@ venom_hydra;poison_ball;BALL;CIRCLE2X2;EARTH;106;264;14;4;POISON:59-99:4000:50;-
 stone_gorgon;petrify_wave;WAVE;WAVE4;EARTH;150;376;18;4;POISON:85-141:4000:50;-
 stone_gorgon;paralyze;BOLT;POINT;EARTH;132;329;12;1;SLOW:50:4000;earth
 # Smocze pisklę
-dragon_whelp;small_fire_wave;WAVE;SHORTWAVE3;FIRE;25;63;25;3;BURNING:13-21:4000:50;-
+dragon_whelp;small_fire_wave;WAVE;SHORTWAVE3;FIRE;20;51;25;3;BURNING:13-21:4000:50;-
+dragon_whelp;ember_spit;BALL;CIRCLE1X1;FIRE;12;36;12;3;-;-
 # Smok łuskowy
 scale_dragon;fire_strike;BOLT;POINT;FIRE;87;218;15;4;-;fire
 scale_dragon;fire_wave;WAVE;WAVE4;FIRE;68;171;22;4;BURNING:34-57:4000:50;-
@@ -334,7 +342,7 @@ scale_dragon;fireball;BALL;CIRCLE1X1;FIRE;61;152;15;5;BURNING:34-57:4000:50;-
 # Smok skalny
 crag_dragon;fire_strike;BOLT;POINT;FIRE;156;391;15;4;-;fire
 crag_dragon;fire_wave;WAVE;WAVE4;FIRE;122;306;22;4;BURNING:61-102:4000:50;-
-crag_dragon;fireball;BALL;CIRCLE1X1;FIRE;109;272;15;5;BURNING:61-102:4000:50;-
+crag_dragon;fireball;BALL;CIRCLE2X2;FIRE;109;272;15;5;BURNING:61-102:4000:50;-
 # Rogaty zwiadowca
 horn_scout;throw_knife;BOLT;POINT;PHYSICAL;16;40;18;3;-;knife
 # Rogaty saper
@@ -609,3 +617,62 @@ bog_reaver;bubble_berserk;SELF;CIRCLE1X1;EARTH;100;175;12;2;-;-
 bog_reaver;stalagmite;BALL;CIRCLE1X1;EARTH;96;110;12;4;-;earth
 bog_reaver;paralyze;BOLT;POINT;EARTH;0;0;10;4;SLOW:40:4000;earth
 bog_reaver;self_heal;HEAL;POINT;-;100;100;20;1;-;-
+# 2026-11-13: wyspy (islands5): czary potworow wysp i barbarzyncow
+whisper_shade;shade_bolt;BOLT;POINT;DEATH;34;49;20;4;-;shadow_star
+rimecloak_pilgrim;frost_bolt;BOLT;POINT;ICE;122;175;22;4;-;ice
+moor_crone;hex_bolt;BOLT;POINT;EARTH;169;243;22;4;-;poison
+moor_crone;bog_burst;BALL;CIRCLE2X2;EARTH;101;169;14;4;-;-
+moor_crone;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+cairn_lord;death_strike;BOLT;POINT;DEATH;88;126;20;4;-;shadow_star
+cairn_lord;tomb_quake;SELF;CIRCLE2X2;PHYSICAL;52;88;14;2;-;-
+cairn_lord;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+magpie_king;knife_throw;BOLT;POINT;PHYSICAL;47;67;22;4;-;knife
+magpie_king;scatter_loot;SELF;CIRCLE1X1;PHYSICAL;28;47;14;1;-;-
+magpie_king;haste;HASTE;POINT;-;0;0;15;6;HASTE:30:4000;-
+skarn_hetman;spear_throw;BOLT;POINT;PHYSICAL;84;121;22;4;-;spear
+skarn_hetman;war_cry;SELF;CIRCLE2X2;PHYSICAL;50;84;14;2;-;-
+skarn_hetman;haste;HASTE;POINT;-;0;0;15;6;HASTE:30:4000;-
+frost_lurker;snow_spit;BOLT;POINT;ICE;232;333;20;4;-;ice
+frost_lurker;frost_burst;SELF;CIRCLE1X1;ICE;139;232;14;1;-;-
+rime_jarl;ice_axe;BOLT;POINT;ICE;376;540;20;4;-;ice
+rime_jarl;rime_wave;WAVE;WAVE4;ICE;253;423;18;4;FREEZING:80-150:5000:50;-
+rime_jarl;winter_stomp;SELF;CIRCLE3X3;ICE;225;376;14;2;-;-
+rime_jarl;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+dune_skulker;sand_spit;BOLT;POINT;EARTH;208;299;20;4;-;earth
+dune_skulker;dust_burst;SELF;CIRCLE1X1;EARTH;124;208;14;1;-;-
+obelisk_priest;sun_bolt;BOLT;POINT;FIRE;272;390;24;4;-;fire
+obelisk_priest;sun_flare;BALL;CIRCLE2X2;FIRE;163;272;14;4;BURNING:60-110:4000:50;-
+obelisk_priest;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+sand_regent;sun_lance;BOLT;POINT;FIRE;413;594;20;4;-;fire
+sand_regent;scorch_wave;WAVE;WAVE4;FIRE;279;465;18;4;BURNING:60-110:4000:60;-
+sand_regent;dune_blast;BALL;CIRCLE3X3;FIRE;248;413;12;5;-;-
+sand_regent;haste;HASTE;POINT;-;0;0;15;6;HASTE:30:4000;-
+canopy_lurker;venom_dart;BOLT;POINT;EARTH;162;233;20;4;-;poison
+canopy_lurker;spore_burst;SELF;CIRCLE1X1;EARTH;97;162;14;1;POISON:20-40:4000:50;-
+orchid_mimic;petal_dart;BOLT;POINT;EARTH;214;308;20;4;-;poison
+orchid_mimic;pollen_cloud;BALL;CIRCLE2X2;EARTH;128;214;14;4;POISON:30-60:4000:50;-
+vine_empress;thorn_bolt;BOLT;POINT;EARTH;432;621;20;4;-;earth
+vine_empress;venom_beam;WAVE;BEAM5;EARTH;291;486;16;5;POISON:40-80:4000:60;-
+vine_empress;root_quake;SELF;CIRCLE3X3;EARTH;259;432;14;2;-;-
+vine_empress;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+oak_sovereign;acorn_hail;BOLT;POINT;EARTH;376;540;20;4;-;stone
+oak_sovereign;ground_shaker;SELF;CIRCLE3X3;PHYSICAL;225;376;14;2;-;-
+oak_sovereign;bark_wave;WAVE;WAVE4;EARTH;225;376;16;4;-;-
+oak_sovereign;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+icefang_hunter;spear_throw;BOLT;POINT;PHYSICAL;187;269;25;4;-;spear
+icefang_hunter;axe_spin;SELF;CIRCLE1X1;PHYSICAL;112;187;14;1;-;-
+bonewrap_tamer;knife_throw;BOLT;POINT;PHYSICAL;238;342;20;4;-;knife
+bonewrap_tamer;bone_rattle;SELF;CIRCLE1X1;PHYSICAL;143;238;14;1;-;-
+bonewrap_tamer;summon_snow_wolf;SUMMON;POINT;-;0;0;18;7;SUMMON:snow_wolf:3;-
+bonewrap_tamer;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+ironjaw_splitter;axe_throw;BOLT;POINT;PHYSICAL;268;385;20;4;-;knife
+ironjaw_splitter;cleave;SELF;CIRCLE2X2;PHYSICAL;160;268;16;2;-;-
+ironjaw_splitter;haste;HASTE;POINT;-;0;0;15;6;HASTE:30:4000;-
+rimeblood_walker;blood_frost;BOLT;POINT;ICE;266;382;24;4;-;ice
+rimeblood_walker;rime_wave;WAVE;WAVE4;ICE;179;299;16;4;FREEZING:80-150:5000:40;-
+rimeblood_walker;self_heal;HEAL;POINT;-;10;20;20;1;-;-
+blizzard_warchief;spear_throw;BOLT;POINT;PHYSICAL;404;580;20;4;-;spear
+blizzard_warchief;war_stomp;SELF;CIRCLE3X3;PHYSICAL;242;404;14;2;-;-
+blizzard_warchief;blizzard_wave;WAVE;WAVE7;ICE;272;454;16;5;FREEZING:100-180:5000:50;-
+blizzard_warchief;summon_yeti;SUMMON;POINT;-;0;0;18;7;SUMMON:yeti:2;-
+blizzard_warchief;haste;HASTE;POINT;-;0;0;15;6;HASTE:30:4000;-

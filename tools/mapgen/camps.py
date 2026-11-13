@@ -50,6 +50,7 @@ SPECS = {
     'Bagienna Osada': dict(style='palisade', family='lizard'),
     'Lodowy Kurhan': dict(style='rocks', family='yeti'),
     'Piaskowy Obóz': dict(style='rocks', family='hyena'),
+    'Obóz Hetmana Skarna': dict(style='palisade', family='barbarian'),
 }
 TREES = {'tree', 'pine', 'palm', 'bush', 'jungle_tree', 'jungle_bush', 'frost_pine', 'frost_bush', 'dry_bush', 'autumn_tree',
          'dead_tree', 'burnt_tree', 'cactus', 'rock', 'snow_rock', 'sandstone_rock', 'obsidian_rock', 'ice_crystal'}

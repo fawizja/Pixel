@@ -243,7 +243,7 @@ public final class Crates {
                 int colon = part.indexOf(':');
                 int slot = Integer.parseInt(part.substring(0, colon));
                 String v = part.substring(colon + 1);
-                ItemStack st = ItemStack.parse(v);
+                ItemStack st = ItemStack.parse(v, c.registry());
                 if (!c.registry().contains(st.itemId())) continue;
                 c.putInSlot(slot, st);
             } catch (RuntimeException e) {

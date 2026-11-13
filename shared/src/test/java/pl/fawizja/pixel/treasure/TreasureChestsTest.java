@@ -17,6 +17,12 @@ import pl.fawizja.pixel.world.WorldMap;
 
 class TreasureChestsTest {
 
+    /** Dom Zadan w miescie (tools/mapgen/quest_houses.py): skromne skrzynie zadan takze na parterze i pietrach. */
+    static boolean inQuestHouse(pl.fawizja.pixel.world.Position p) {
+        pl.fawizja.pixel.world.Region r = TestData.world().regionAt(p);
+        return r != null && (r.name().startsWith("Dom ") || r.name().startsWith("Dwór Skarbnika"));
+    }
+
     @Test
     void chestsAreReachableOutsideSafeZonesAndTheSameEveryTime() {
         WorldMap world = TestData.world();
@@ -62,7 +68,7 @@ class TreasureChestsTest {
         assertEquals(loot.size(), loot.stream().map(TreasureChests.Chest::id).distinct().count(), "loot chest ids unique");
         for (TreasureChests.Chest x : loot) {
             // skrzynie w dziczy leza pod ziemia i sa skromne; nagroda zadania za drzwiami poziomu (Warownia Gorvalda, +3) moze byc wyzej
-            boolean quest = x.doorLevel() >= 20 || world.rewardChoiceAt(x.position()) != null; // sala nagrod wyprawy (wybor jednej skrzyni)
+            boolean quest = x.doorLevel() >= 20 || world.rewardChoiceAt(x.position()) != null || inQuestHouse(x.position()); // sala nagrod wyprawy (wybor jednej skrzyni)
             assertTrue(x.gold() > 0 && (quest ? x.gold() <= 10_000 : x.position().z() < 0 && x.gold() < 5_000), x.id());
         }
         assertTrue(loot.stream().anyMatch(x -> x.position().z() == 3 && x.doorLevel() == 55), "the castle quest chest behind the level door");

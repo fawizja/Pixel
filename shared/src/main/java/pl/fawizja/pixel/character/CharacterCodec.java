@@ -20,7 +20,7 @@ import pl.fawizja.pixel.world.WorldLayout;
 public final class CharacterCodec {
 
     public static final String MAGIC = "PIXELSAVE";
-    public static final int CURRENT_VERSION = 9;
+    public static final int CURRENT_VERSION = 10;
 
     private final ItemRegistry items;
     /** Zegar scienny do znacznika czasu zapisu staminy (testy podmieniaja). */
@@ -200,6 +200,8 @@ public final class CharacterCodec {
             }
             m.put("map", WorldLayout.WORLD_MAP);
         }
+        // v10: stos plecaka moze niesc zawartosc "{rozmiar|pole=stos...}" (plecak w plecaku); starsze zapisy jej nie maja
+        // i czytaja sie bez zmian (plecak bez zawartosci jest pusty), wiec migracja nic nie przepisuje
         if (version < 9) m.remove("bar"); // klucz zarezerwowany od v9 (pasek byl tylko w Preferences klienta)
         if (version < 5) {
             // v4 (kontynent 448x448) i starsze: swiat 1000x1000 z mapy Darka ma miasta w innych miejscach -
@@ -415,7 +417,7 @@ public final class CharacterCodec {
     }
 
     private ItemStack parseStack(String v) {
-        ItemStack s = ItemStack.parse(v);
+        ItemStack s = ItemStack.parse(v, items);
         if (s.tier() > pl.fawizja.pixel.item.Forge.maxTier(items.get(s.itemId()))) {
             s = s.withTier(pl.fawizja.pixel.item.Forge.maxTier(items.get(s.itemId())));  // zmiana klasy przedmiotu w danych
         }

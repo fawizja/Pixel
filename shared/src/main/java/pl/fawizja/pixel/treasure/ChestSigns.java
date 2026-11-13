@@ -56,15 +56,64 @@ public final class ChestSigns {
         Map<Position, Sign> taken = new HashMap<>();
         List<TreasureChests.Chest> quest = new ArrayList<>();
         for (TreasureChests.Chest c : chests.all()) if (needsSign(c, world, monsters, items)) quest.add(c);
-        for (TreasureChests.Chest c : quest) {
-            Position at = spot(c, chests, world, taken);
-            if (at == null) continue;
-            Sign s = new Sign(at, c);
-            taken.put(at, s);
-            out.add(s);
+        // skrzynie jednego pomieszczenia (odleglosc <= 2, przechodnio) tworza grupe; cala grupa dostaje tabliczki
+        // w tym samym kierunku wzgledem skrzyni (za nia, a gdy sciana - przed nia, potem z boku)
+        List<List<TreasureChests.Chest>> groups = new ArrayList<>();
+        boolean[] used = new boolean[quest.size()];
+        for (int i = 0; i < quest.size(); i++) {
+            if (used[i]) continue;
+            List<TreasureChests.Chest> g = new ArrayList<>();
+            ArrayList<Integer> stack = new ArrayList<>(List.of(i));
+            used[i] = true;
+            while (!stack.isEmpty()) {
+                int k = stack.remove(stack.size() - 1);
+                g.add(quest.get(k));
+                for (int j = 0; j < quest.size(); j++) {
+                    if (used[j]) continue;
+                    Position a = quest.get(k).position(), b = quest.get(j).position();
+                    if (a.z() == b.z() && Math.abs(a.x() - b.x()) <= 2 && Math.abs(a.y() - b.y()) <= 2) {
+                        used[j] = true;
+                        stack.add(j);
+                    }
+                }
+            }
+            g.sort((p, q) -> p.position().y() != q.position().y() ? Integer.compare(p.position().y(), q.position().y())
+                    : Integer.compare(p.position().x(), q.position().x()));
+            groups.add(g);
+        }
+        for (List<TreasureChests.Chest> g : groups) {
+            List<Sign> chosen = null;
+            for (int[] d : DIRS) {
+                Map<Position, Sign> local = new HashMap<>(taken);
+                List<Sign> tmp = new ArrayList<>();
+                boolean ok = true;
+                for (TreasureChests.Chest c : g) {
+                    Position p = c.position().translate(d[0], d[1]);
+                    if (!free(p, chests, world, local)) { ok = false; break; }
+                    Sign s = new Sign(p, c);
+                    local.put(p, s);
+                    tmp.add(s);
+                }
+                if (ok) { chosen = tmp; break; }
+            }
+            if (chosen == null) {
+                chosen = new ArrayList<>();
+                for (TreasureChests.Chest c : g) {
+                    Position at = spot(c, chests, world, taken);
+                    if (at == null) continue;
+                    Sign s = new Sign(at, c);
+                    taken.put(at, s);
+                    chosen.add(s);
+                }
+            }
+            for (Sign s : chosen) taken.put(s.at(), s);
+            out.addAll(chosen);
         }
         return new ChestSigns(out);
     }
+
+    /** Kierunki tabliczki wzgledem skrzyni: za (polnoc), przed (poludnie), z boku. */
+    public static final int[][] DIRS = {{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
 
     // kolejnosc prob: pod skrzynia (przed nia), obok, nad nia (za nia), potem dalej o 2 pola
     private static final int[][] NEAR = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}, {1, 1}, {-1, 1}, {1, -1}, {-1, -1}};

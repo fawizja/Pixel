@@ -38,3 +38,18 @@ wyrm_kaldor;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpusz
 crown_isolde;historia,skarbiec,crown;Ostatni król oddał duszę koronie, a jego gwardia stała się upiorami. Magowie popiołu pilnują sali, w której złożono skarbiec królestwa.
 crown_isolde;wejście,drzwi,poziom,nagroda,skrzynia,skarb;Drzwi do wnętrza wpuszczą tylko od poziomu 270. Na końcu czeka sala ze skrzyniami: otworzysz tylko jedną, po oddaniu mojego ostatniego zadania. Każda ma tabliczkę z opisem.
 # END story_quests
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+ferry_oswin;broszka,wyspa,statek,plyn,sroka,krol;Moją srebrną broszkę ukradł Król Sroczy i schował w norze na polach na wschód od Varden. Przynieś ją, a Boatwoman Brenna zabierze cię na Wyspę Szeptów.
+ice_halvar;pozwolenie,wyspa,rejs,zamiec;Pozwolenie dostajesz po pokonaniu Pana Kopca z Wyspy Szeptów, ale najpierw musisz ukończyć quest Oswina i polowanie na yeti.
+desert_idris;zgoda,wyspa,rejs,wydmy;Szlak sprzedaję tym, którzy ukończyli quest Halvara i przynieśli jad skorpionów. Jarla Szronu pokonasz tylko w drużynie.
+tropic_ilvane;przepustka,wyspa,rejs,mgla;Przepustkę dostanie ten, kto ukończył quest Idrisa i pomógł Selvaran z krokodylami. Regenta z pustyni pokonaj sam albo z drużyną.
+oak_corwin;list,wyspa,rejs,debowa;List dostanie ten, kto ukończył quest Ilvane i Halvara. Cesarzowa Pnączy czeka na Mgle.
+# END islands5
+# BEGIN quest_houses (tools/mapgen/quest_houses.py data)
+house_varden_warden;dom,skrzynie,skrzynia,nagroda,pietro,piwnica,straznicy;Skrzynie stoją przy ścianach, każda ma tabliczkę z opisem. Hol jest strefą ochronną. Część sal otwiera poziom 10, a sala na piętrze zadanie. W salach ze strażnikami nie ma ochrony.
+house_frost_warden;dom,skrzynie,skrzynia,nagroda,pietro,piwnica,straznicy;Skrzynie stoją przy ścianach, każda ma tabliczkę z opisem. Hol jest strefą ochronną. Część sal otwiera poziom 18, a sala na piętrze zadanie. W salach ze strażnikami nie ma ochrony.
+house_qas_warden;dom,skrzynie,skrzynia,nagroda,pietro,piwnica,straznicy;Skrzynie stoją przy ścianach, każda ma tabliczkę z opisem. Hol jest strefą ochronną. Część sal otwiera poziom 18, a sala na piętrze zadanie. W salach ze strażnikami nie ma ochrony.
+house_selv_warden;dom,skrzynie,skrzynia,nagroda,pietro,piwnica,straznicy;Skrzynie stoją przy ścianach, każda ma tabliczkę z opisem. Hol jest strefą ochronną. Część sal otwiera poziom 30, a sala na piętrze zadanie. W salach ze strażnikami nie ma ochrony.
+house_valmir_warden;dom,skrzynie,skrzynia,nagroda,pietro,piwnica,straznicy;Skrzynie stoją przy ścianach, każda ma tabliczkę z opisem. Hol jest strefą ochronną. Część sal otwiera poziom 35, a sala na piętrze zadanie. W salach ze strażnikami nie ma ochrony.
+house_nerys_warden;dom,skrzynie,skrzynia,nagroda,pietro,piwnica,straznicy;Skrzynie stoją przy ścianach, każda ma tabliczkę z opisem. Hol jest strefą ochronną. Część sal otwiera poziom 35, a sala na piętrze zadanie. W salach ze strażnikami nie ma ochrony.
+# END quest_houses

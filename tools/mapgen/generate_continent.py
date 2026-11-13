@@ -57,7 +57,10 @@ import chapels  # noqa: E402
 import structures as St  # noqa: E402
 import minotaur  # noqa: E402
 import citadel  # noqa: E402
+import islands5  # noqa: E402
 import story_quests  # noqa: E402
+import quest_houses  # noqa: E402
+import shapes  # noqa: E402
 import trainers  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -1063,9 +1066,15 @@ def build(ctx):
     print('miasto rogatych:', minotaur.build(ctx, cost, wh))
     # 2026-11-12: Wyspa Gasnacej Gwiazdy (premium, tylko statkiem): 7 sekcji x 3 pietra, 7 bossow, sala nagrod, Herold w Varden
     print('wyspa gasnacej gwiazdy:', citadel.build(ctx, cost, wh))
+    # 2026-11-12: piec nowych wysp (darmowa Wyspa Szeptow po queście promowego Oswina i cztery wyspy premium z questami dostepu)
+    print('piec wysp:', islands5.build(ctx, cost, wh))
+    villages(ctx, cost, late=True)       # maly oboz barbarzyncow
     # 2026-11-12: 13 wypraw fabularnych w stylu Tibii (4 latwe i 3 srednie na kontynencie, 6 premium na ladach premium)
     for rec in story_quests.build(ctx, cost, wh):
         print('wyprawa fabularna:', rec['key'], rec['tier'], 'npc', rec['npc'], 'drzwi', rec['door'])
+    # 2026-11-12: Domy Zadan w szesciu glownych miastach (po 20 skrzyn, PZ, pietra +1/+2 albo piwnica -1)
+    for rec in quest_houses.build(ctx, cost, wh):
+        print('dom zadan:', rec['town'], rec['site'], 'wejscie', rec['ent'], 'pietra', rec['floors'], 'piwnica', rec['cellar'], 'lustro', rec['flip'], 'w miescie', rec['in_town'], 'odleglosc', rec['dist'])
 
 
 def monster_levels():
@@ -1101,6 +1110,8 @@ VILLAGES = [
     ('Lodowy Kurhan', 'occupied', (650, 150), [('yeti', 4, 3), ('frost_witch', 3, 1)]),
     ('Gniazdo Rabusiów', 'occupied', (740, 420), [('bandit', 4, 4), ('skeleton', 3, 2)]),
     ('Piaskowy Obóz', 'occupied', (90, 520), [('hyena', 4, 3), ('scorpion', 3, 2)]),
+    # 2026-11-12: maly darmowy oboz barbarzyncow na lodowych skalach kontynentu (palisada z klod, nieregularny obrys)
+    ('Obóz Hetmana Skarna', 'occupied', (600, 100), [('skarn_hetman', 2, 1), ('snowclub_brute', 4, 3), ('frostfur_raider', 4, 3)]),
 ]
 VILLAGE_NPCS = {
     'Wierzbowo': ('wierzbowo_merchant', 'Sołtys Bogumił', 'Witaj w Wierzbowie. Chleb, mięso i pochodnie dla wędrowców.'),
@@ -1110,12 +1121,21 @@ VILLAGE_NPCS = {
 }
 
 
-def villages(ctx, cost):
+LATE_VILLAGES = {'Obóz Hetmana Skarna'}      # budowane po wzgorzach i wyspach (nie przesuwaja kosztow dla starszych budowli)
+
+
+def villages(ctx, cost, late=False):
     world, T = ctx['world'], ctx['T']
     taken = ctx['footprint'].copy()
-    rng = random.Random(20261034)
-    out = []
+    rng = random.Random(20261034 + (1 if late else 0))
+    out = list(ctx.get('villages', [])) if late else []
     placed = []          # srodki obozow (camps.py): odstepy miedzy obozami i rodzinami potworow
+    if late:
+        for v in out:
+            x0, y0, x1, y1 = v['rect']
+            taken[y0 - 6:y1 + 7, x0 - 6:x1 + 7] = True
+            if v.get('family'):
+                placed.append((v['centre_xy'][0], v['centre_xy'][1], v['family']))
     # lad, do ktorego da sie dojsc od swiatyni Varden (obozy maja miec droge do traktu)
     land = np.zeros((S, S), bool)
     t0 = dict(ctx['towns'])['Varden'][:2]
@@ -1131,6 +1151,8 @@ def villages(ctx, cost):
                 land[b, a] = True
                 stack.append((a, b))
     for name, kind, near, monsters in VILLAGES:
+        if (name in LATE_VILLAGES) != late:
+            continue
         organic = kind == 'occupied'
         if organic:
             # 2026-11-12: oboz potworow to nieregularna plama z palisada, kamiennym pierscieniem albo ruinami, daleko od innych
@@ -2798,6 +2820,8 @@ def walk_near(world, x, y, z, steps):
 
 def party_packs(ctx):
     rng = random.Random(PACK_SEED)
+    rng_new = random.Random(PACK_SEED + 7)      # spawny pieciu wysp i obozow barbarzyncow: osobny los, by nie przesuwac reszty swiata
+    mine = set(ctx.get('islands5_spawns', ())) | {'skarn_hetman', 'snowclub_brute', 'frostfur_raider'}   # klucze potworow i pola (x, y, z)
     bosses = monster_bosses()
     regions = all_regions(ctx)
 
@@ -2817,6 +2841,7 @@ def party_packs(ctx):
         f = line.split(';')
         key, x, y, z, r, count, respawn = f[0], int(f[1]), int(f[2]), int(f[3]), int(f[4]), int(f[5]), int(f[6])
         night = len(f) > 7
+        rg = rng_new if ((x, y, z) in mine or key in mine) else rng
         before += count
         points += 1
         level = MONSTER_LEVEL.get(key, 0)
@@ -2835,7 +2860,7 @@ def party_packs(ctx):
             r = max(r, 5)
         out.append(f'{key};{x};{y};{z};{r};{count};{respawn};stado')
         after += count
-        if tier == 2 and rng.random() < 0.4:
+        if tier == 2 and rg.random() < 0.4:
             # drugie stado obok: tylko na polu osiagalnym pieszo z pierwszego (bez schodow, do 12 krokow)
             reach = walk_near(ctx['world'], x, y, z, 12)
             cand = [(x + dx, y + dy) for dx, dy in ((7, 0), (-7, 0), (0, 7), (0, -7), (5, 5), (-5, -5), (5, -5), (-5, 5))
@@ -2846,9 +2871,9 @@ def party_packs(ctx):
             cand = [p for p in cand if not any((p[0] + a, p[1] + b, z) in occupied for a in range(-3, 4) for b in range(-3, 4)
                                                if abs(a) + abs(b) < 4)]
             if cand:
-                sx, sy = rng.choice(cand)
+                sx, sy = rg.choice(cand)
                 occupied.add((sx, sy, z))
-                k2 = rng.choice((3, 4))
+                k2 = rg.choice((3, 4))
                 out.append(f'{key};{sx};{sy};{z};4;{k2};{respawn};stado')
                 after += k2
                 extra += 1
@@ -2910,6 +2935,9 @@ def finish(ctx):
     # poziomy potworow rosna stopniowo wzdluz drog od swiatyn; silne spawny na drogach do slabszych lowisk obnizone
     # (route_levels.py, Darek 2026-11-04); regiony dostaja zalecane poziomy wg spawnow, ktore w nich zostaly
     # swiatla i domy zmieniaja pola przejscia - poziomy drog licza sie na gotowym ukladzie
+    # regula wlasciciela: zadnych idealnych prostokatow (shapes.py) - po zlozeniu swiata, przed schodami przy scianach i swiatlami na murach
+    n_shaped, shapes_left = shapes.reshape(ctx, FLOORS, (lambda b_: (b_.rect[0] + b_.dx, b_.rect[1] + b_.dy, b_.rect[2] + b_.dx, b_.rect[3] + b_.dy))(next(bb for bb in ctx['blocks'] if bb.name == 'varden')))
+    print('ksztalty: przekszalcone pokoje', n_shaped, 'pozostale prostokaty', len(shapes_left), shapes_left[:40])
     print('schody przy scianie:', stair_rules.back_stairs(ctx, S, FLOORS))
     print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
     print('domy na sprzedaz:', homes.check_houses(ctx))

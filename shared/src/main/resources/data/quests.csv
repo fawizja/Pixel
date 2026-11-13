@@ -109,3 +109,69 @@ crown_m1;Do środka: Skarbiec Pustej Korony;crown_isolde;VISIT;Skarbiec Pustej K
 crown_m2;Upiorna gwardia;crown_isolde;KILL;wraith_knight;20;2163000;108200;270;Upiorni rycerze stoją na każdym piętrze. Pokonaj 20.
 crown_m3;Magowie popiołu;crown_isolde;KILL;ash_magus;10;3965000;198200;270;Magowie popiołu strzegą korony. Pokonaj 10, a skarbiec królestwa się otworzy.
 # END story_quests
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+ferry_m1;Do nory złodziei;ferry_oswin;VISIT;Nora Sroki;1;200;100;8;Oswin nie pożyczy łodzi nikomu, kto nie zna drogi: odszukaj Norę Sroki na polach na wschód od Varden i wejdź do jej wnętrza. Wejście pilnują bandyci.
+ferry_m2;Straż Sroki;ferry_oswin;KILL;bandit;12;400;100;8;Bandyci pilnują norę. Pokonaj 12, a brama do komnaty króla ustąpi.
+ferry_m3;Król Sroczy;ferry_oswin;KILL;magpie_king;1;1100;100;8;Król Sroczy trzyma broszkę w skarbcu za swoją komnatą. Pokonaj go, a klucz do skarbca spadnie z jego pasa.
+ferry_m4;Srebrna broszka;ferry_oswin;COLLECT;silver_brooch;1;900;100;8;Otwórz skrzynię w skarbcu i przynieś Oswinowi srebrną broszkę jego rodziny. Za to zabierze cię na Wyspę Szeptów.
+wh_crabs_m1;Szczypce na plaży;whisper_keeper;KILL;shore_scuttler;10;900;100;8;Kraby podcinają sieci rybaków. Pokonaj 10.
+wh_crabs_m2;Perły z krabów;whisper_keeper;COLLECT;pearl;3;1300;100;8;W skorupach kryją się perły. Przynieś 3.
+wh_wolves_m1;Wilcza wataha;whisper_hermit;KILL;wolf;10;1500;100;10;Wataha wyje pod chatą pustelniczki. Pokonaj 10 wilków.
+wh_wolves_m2;Dziki w uprawach;whisper_hermit;KILL;boar;6;2200;100;10;Dziki rozkopują ogródek. Pokonaj 6.
+wh_spiders_m1;Pająki w grotach;whisper_hermit;KILL;forest_spider;10;3200;200;14;Pająki zasnuły groty. Pokonaj 10.
+wh_spiders_m2;Jedwab na szaty;whisper_hermit;COLLECT;spider_silk;8;4700;200;14;Pustelniczka tka szaty. Przynieś 8 kłębków jedwabiu.
+wh_goblins_m1;Najeźdźcy szybu;whisper_miner;KILL;goblin;12;6900;300;20;Gobliny zajęły szyb. Pokonaj 12.
+wh_goblins_m2;Szamani szybu;whisper_miner;KILL;goblin_shaman;6;10300;500;20;Szamani podjudzają resztę. Pokonaj 6.
+wh_shades_m1;Do grot;whisper_keeper;VISIT;Groty Szeptów;1;12000;600;26;Latarnik słyszy w nocy szepty z grot pod latarnią. Zejdź i sprawdź.
+wh_shades_m2;Cienie szeptów;whisper_keeper;KILL;whisper_shade;10;18100;900;26;Cienie szepczą imiona. Uciszyj 10.
+wh_bones_m1;Szkielety sztolni;whisper_miner;KILL;skeleton;12;18600;900;32;Szkielety wędrują sztolniami. Pokonaj 12.
+wh_bones_m2;Stonogi w kościach;whisper_miner;KILL;cave_centipede;10;28000;1400;32;Stonogi mieszkają w żebrach. Pokonaj 10.
+wh_bandits_m1;Pułapki na plaży;whisper_keeper;KILL;snare_setter;10;26700;1300;38;Przemytnicy zastawiają sidła. Pokonaj 10.
+wh_bandits_m2;Paserzy;whisper_keeper;KILL;tunnel_fence;8;40000;2000;38;Paserzy skupują łup. Pokonaj 8.
+wh_cairn_m1;Strażnicy kopca;whisper_miner;KILL;cairn_wight;12;36200;1800;44;Upiory pilnują wejścia do komnaty króla. Pokonaj 12.
+wh_cairn_m2;Koniec dynastii;whisper_miner;KILL;cairn_lord;1;54200;2700;44;Pan Kopca wciąż rządzi martwymi. Pokonaj go na dnie kopca.
+ice_m1;Latarnia Halvara;ice_halvar;VISIT;Punkt Halvara;1;17100;900;60;Kartograf Halvar rysuje mapę mroźnej wyspy, ale potrzebuje pewnych rąk. Stań przy jego stole map na nabrzeżu.
+ice_m2;Futra dla przewodników;ice_halvar;COLLECT;yeti_fur;8;26400;1300;60;Przewodnicy wyprawy potrzebują ciepłych futer. Przynieś 8 futer yeti.
+ice_m3;Golemy na szlaku;ice_halvar;KILL;ice_golem;10;37700;1900;60;Lodowe golemy zagradzają szlak na północ. Pokonaj 10.
+ice_m4;Dowód ze świata;ice_halvar;KILL;cairn_lord;1;85600;4300;60;Halvar chce dowodu, że sprostasz wyspie: Pan Kopca z Wyspy Szeptów musi upaść. Gdy wrócisz, dostaniesz pozwolenie na rejs.
+ice_m5;Pierwsza zaspa;ice_halvar;VISIT;Wyspa Białej Zamieci;1;56500;2800;60;Z pozwoleniem popłyń na Wyspę Białej Zamieci i postaw stopę na jej brzegu. Halvar odliczy resztę nagrody.
+desert_m1;Namiot Idrisa;desert_idris;VISIT;Namiot Idrisa;1;39200;2000;90;Karawaniarz Idris zbiera ludzi na wyprawę przez Złote Wydmy. Odwiedź jego namiot w porcie.
+desert_m2;Jad na wyprawę;desert_idris;COLLECT;scorpion_tail;12;60300;3000;90;Medyk karawany potrzebuje jadu. Przynieś 12 żądeł skorpionów.
+desert_m3;Widma szlaku;desert_idris;KILL;sand_wraith;12;86200;4300;90;Widma pustyni gubią karawany. Pokonaj 12.
+desert_m4;Jarl i piasek;desert_idris;KILL;rime_jarl;1;195800;9800;90;Idris sprzedaje szlak tylko tym, którzy pokonali Jarla Szronu na Wyspie Białej Zamieci (drzwi wymagają drużyny).
+desert_m5;Pierwsza wydma;desert_idris;VISIT;Wyspa Złotych Wydm;1;129300;6500;90;Popłyń na Wyspę Złotych Wydm i wejdź na jej piasek. Idris zapłaci resztę.
+tropic_m1;Szklarnia Ilvane;tropic_ilvane;VISIT;Szklarnia Ilvane;1;70200;3500;120;Botanik Ilvane bada kwiaty ze Szmaragdowej Mgły. Odwiedź jej szklarnię przy przystani.
+tropic_m2;Skóra na buty;tropic_ilvane;COLLECT;croc_leather;10;108100;5400;120;Wyprawa potrzebuje mocnych butów. Przynieś 10 skór krokodyla.
+tropic_m3;Węże na przesmyku;tropic_ilvane;KILL;jungle_serpent;15;154500;7700;120;Węże roją się przy mglistym przesmyku. Pokonaj 15.
+tropic_m4;Regent z pustyni;tropic_ilvane;KILL;sand_regent;1;351100;17600;120;Ilvane zna szlak, ale chce ręczyć za ciebie: pokonaj Regenta Burzy Piaskowej na Złotych Wydmach.
+tropic_m5;Pierwsza mgła;tropic_ilvane;VISIT;Wyspa Szmaragdowej Mgły;1;231700;11600;120;Wejdź na Wyspę Szmaragdowej Mgły. Ilvane wypłaci resztę.
+oak_m1;Posterunek Corwina;oak_corwin;VISIT;Posterunek Corwina;1;159300;8000;180;Strażnik Corwin pilnuje listy gości Starych Dębów. Zgłoś się na jego posterunek w porcie.
+oak_m2;Łuski na pieczęć;oak_corwin;COLLECT;wyvern_scale;6;245400;12300;180;Pieczęć listu odlewa się z łusek. Przynieś 6 łusek wiwerny.
+oak_m3;Upiory szlaku;oak_corwin;KILL;wraith_knight;12;350500;17500;180;Rycerze-upiory zagradzają drogę do portu. Pokonaj 12.
+oak_m4;Cesarzowa i dąb;oak_corwin;KILL;vine_empress;1;796600;39800;180;Corwin wpisze cię na listę, gdy pokonasz Cesarzową Pnączy na Szmaragdowej Mgle.
+oak_m5;Pierwszy dąb;oak_corwin;VISIT;Wyspa Starych Dębów;1;525800;26300;180;Wejdź pod Stare Dęby. Corwin wypłaci resztę.
+ice_s65_m1;Yeti na lodowisku;ice_skuld;KILL;yeti;12;80700;4000;65;Yeti niszczą obóz. Pokonaj 12.
+ice_s65_m2;Czyhacze zasp;ice_skuld;KILL;frost_lurker;10;121000;6000;65;Białe czyhacze ukryte w zaspach. Pokonaj 10.
+ice_s110_m1;Zamarznięci pielgrzymi;ice_ragna;KILL;rimecloak_pilgrim;12;235500;11800;110;Pielgrzymi krążą po jaskiniach. Pokonaj 12.
+ice_s110_m2;Golemy lodowych sal;ice_ragna;KILL;ice_golem;10;353200;17700;110;Golemy strzegą sal. Pokonaj 10.
+ice_s200_m1;Szronowe smoki;ice_skuld;KILL;hoarfrost_dragon;8;788100;39400;200;Smoki gnieżdżą się w turni. Pokonaj 8.
+ice_s200_m2;Stonogi lodowych sal;ice_skuld;KILL;frost_centipede;10;1182000;59100;200;Stonogi gryzą wędrowców. Pokonaj 10.
+desert_s95_m1;Pożeracze piasku;desert_nadira;KILL;sand_devourer;12;174900;8700;95;Pożeracze podkopują szlak. Pokonaj 12.
+desert_s95_m2;Złociste żuki;desert_nadira;KILL;gilded_beetle;10;262300;13100;95;Żuki gryzą wozy. Pokonaj 10.
+desert_s150_m1;Łaziki wydm;desert_omar;KILL;dune_skulker;12;441100;22100;150;Łaziki napadają z piasku. Pokonaj 12.
+desert_s150_m2;Fanatycy wydm;desert_omar;KILL;dune_zealot;10;661600;33100;150;Fanatycy palą pielgrzymów. Pokonaj 10.
+desert_s240_m1;Smoki skalne;desert_nadira;KILL;crag_dragon;8;1138000;56900;240;Smoki gnieżdżą się w skałach. Pokonaj 8.
+desert_s240_m2;Kapłani obelisków;desert_nadira;KILL;obelisk_priest;10;1707000;85400;240;Kapłani palą ścieżki. Pokonaj 10.
+tropic_s120_m1;Jaszczury bagien;tropic_tupa;KILL;marsh_lizard;12;280900;14000;120;Jaszczury zalegają w brodach. Pokonaj 12.
+tropic_s120_m2;Czyhacze koron;tropic_tupa;KILL;canopy_lurker;10;421300;21100;120;Koty spadają z drzew. Pokonaj 10.
+tropic_s200_m1;Storczyki zabójcy;tropic_inez;KILL;orchid_mimic;12;788100;39400;200;Storczyki wabią zapachem. Pokonaj 12.
+tropic_s200_m2;Hydry mokradeł;tropic_inez;KILL;bog_hydra;8;1182000;59100;200;Hydry zagrażają zbieraczom. Pokonaj 8.
+tropic_s300_m1;Jadowite hydry;tropic_tupa;KILL;venom_hydra;8;1782000;89100;300;Hydry zatruwają strumienie. Pokonaj 8.
+tropic_s300_m2;Gorgony ruin;tropic_tupa;KILL;stone_gorgon;8;2673000;133600;300;Gorgony zamieniają w kamień. Pokonaj 8.
+oak_s130_m1;Cierniowe odyńce;oak_hollis;KILL;briar_boar;12;330300;16500;130;Odyńce niszczą pola. Pokonaj 12.
+oak_s130_m2;Wiedźmy wrzosowisk;oak_hollis;KILL;moor_crone;10;495400;24800;130;Wiedźmy rzucają klątwy. Pokonaj 10.
+oak_s200_m1;Szkarłatne cienie;oak_maeve;KILL;crimson_shade;10;788100;39400;200;Cienie pojawiają się o zmroku. Pokonaj 10.
+oak_s200_m2;Wywerny z klifów;oak_maeve;KILL;wyvern;8;1182000;59100;200;Wywerny porywają bydło. Pokonaj 8.
+oak_s320_m1;Przeklęte drzewce;oak_hollis;KILL;cursed_treant;10;2029000;101400;320;Drzewce duszą las. Pokonaj 10.
+oak_s320_m2;Upiorni rycerze;oak_hollis;KILL;wraith_knight;10;3043000;152200;320;Rycerze patrolują ruiny. Pokonaj 10.
+# END islands5

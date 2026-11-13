@@ -51,19 +51,19 @@ class DragonFamilyTest {
     void everyDragonHasItsOwnSpellsWithShapedAreasAndConditions() {
         MonsterSpells ms = MonsterSpells.defaults();
         // zielony: ognista fala + mala kula; bez lodu
-        assertSpells(ms, "emerald_dragon", Set3.of("fire_wave", "fireball"), DamageType.FIRE);
+        assertSpells(ms, "emerald_dragon", Set3.of("fire_wave", "fireball", "venom_breath"), DamageType.FIRE);
         MonsterSpell wave = spell(ms, "emerald_dragon", "fire_wave");
         assertSame(SpellArea.WAVE4, wave.area());
         assertEquals(MonsterSpell.Mode.WAVE, wave.mode());
         assertEquals(ConditionType.BURNING, wave.condition().type());
-        assertSame(SpellArea.CIRCLE1X1, spell(ms, "emerald_dragon", "fireball").area());
+        assertSame(SpellArea.CIRCLE2X2, spell(ms, "emerald_dragon", "fireball").area());
         // lodowy: fala, oddech (promien), spowalniajace spojrzenie; stan zamrozenia
         assertSpells(ms, "hoarfrost_dragon", Set3.of("ice_wave", "ice_breath", "chilling_gaze"), DamageType.ICE);
         assertEquals(ConditionType.FREEZING, spell(ms, "hoarfrost_dragon", "ice_wave").condition().type());
         assertSame(SpellArea.BEAM6, spell(ms, "hoarfrost_dragon", "ice_breath").area());
         assertTrue(spell(ms, "hoarfrost_dragon", "chilling_gaze").slowPercent() >= 30, "slows");
         // czarny: wielka fala ognia i wielka kula ognia (obszar GFB z Canary)
-        assertSpells(ms, "coal_dragon", Set3.of("great_fire_wave", "great_fireball"), DamageType.FIRE);
+        assertSpells(ms, "coal_dragon", Set3.of("great_fire_wave", "great_fireball", "ash_breath"), DamageType.FIRE);
         assertSame(SpellArea.WAVE7, spell(ms, "coal_dragon", "great_fire_wave").area());
         assertSame(SpellArea.CIRCLE3X3, spell(ms, "coal_dragon", "great_fireball").area());
         // zloty: ogien i piorun

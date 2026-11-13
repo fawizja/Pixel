@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import pl.fawizja.pixel.world.Direction;
 
-/** Spokojniejszy joystick (2026-10-29, Darek: "joystick za czuly"). */
+/** Spokojniejszy joystick (2026-10-29) z 8 rownymi sektorami bez opoznienia (2026-11-12). */
 class StickFilterTest {
 
     private static float[] at(double deg, double len) {
@@ -30,44 +30,29 @@ class StickFilterTest {
     }
 
     @Test
-    void straightDirectionsWinAndDiagonalNeedsAClearDiagonal() {
-        StickFilter f = new StickFilter();
-        assertEquals(Direction.EAST, push(f, 30, 1, 0));
-        f.reset();
-        assertEquals(Direction.NORTH, push(f, 60, 1, 0));
-        f.reset();
-        assertEquals(Direction.NORTH_EAST, push(f, 45, 1, 0));
-        f.reset();
-        assertEquals(Direction.NORTH, push(f, 45, 0.5, 0), "slabe wychylenie po skosie - prosto");
-        f.reset();
-        assertEquals(Direction.SOUTH_WEST, push(f, 228, 0.9, 0));
-        f.reset();
-        assertEquals(Direction.WEST, push(f, 200, 0.9, 0));
+    void eightEqualSectorsAnswerImmediately() {
+        Direction[] expect = {Direction.EAST, Direction.NORTH_EAST, Direction.NORTH, Direction.NORTH_WEST,
+                Direction.WEST, Direction.SOUTH_WEST, Direction.SOUTH, Direction.SOUTH_EAST};
+        for (int i = 0; i < 8; i++) {
+            for (double off : new double[] {-20, 0, 20}) {
+                StickFilter f = new StickFilter();
+                assertEquals(expect[i], push(f, i * 45 + off, 1, 0), "sektor " + i + " przesuniecie " + off + " od razu, bez czekania");
+            }
+        }
+        // nawet slabe wychylenie ponad martwa strefa daje skos (zadnego progu mocy dla skosu)
+        assertEquals(Direction.NORTH_EAST, push(new StickFilter(), 45, 0.5, 0));
     }
 
     @Test
-    void jitterAroundABoundaryDoesNotFlipDirections() {
+    void jitterAroundASectorBoundaryDoesNotFlicker() {
         StickFilter f = new StickFilter();
         assertEquals(Direction.EAST, push(f, 20, 1, 0));
-        // kciuk drga miedzy 25 a 34 stopniami (poza klinem skosu): zostaje wschod
-        long t = 0;
-        for (int i = 0; i < 20; i++) {
-            t += 16;
-            assertEquals(Direction.EAST, push(f, i % 2 == 0 ? 25 : 34, 1, t));
-        }
-        // slabe wychylenie drgajace wokol granicy 45 stopni (40/50): bez skakania wschod/polnoc
-        for (int i = 0; i < 20; i++) {
-            t += 100;
-            assertEquals(Direction.EAST, push(f, i % 2 == 0 ? 40 : 50, 0.5, t));
-        }
-        // wyrazny skret na polnoc: zmiana dopiero po chwili trzymania
-        assertEquals(Direction.EAST, push(f, 80, 1, t += 16));
-        assertEquals(Direction.EAST, push(f, 80, 1, t += 30));
-        assertEquals(Direction.NORTH, push(f, 80, 1, t += StickFilter.SETTLE_MS));
-        // skos trzyma sie w szerszym klinie
-        f.reset();
-        assertEquals(Direction.NORTH_EAST, push(f, 45, 1, 0));
-        assertEquals(Direction.NORTH_EAST, push(f, 60, 1, 200));
-        assertEquals(Direction.NORTH_EAST, push(f, 60, 1, 400));
+        // granica E/NE lezy na 22,5 stopnia; drgania +-8 stopni wokol niej (14..31) nie zmieniaja kierunku
+        for (int i = 0; i < 30; i++) assertEquals(Direction.EAST, push(f, i % 2 == 0 ? 15 : 31, 1, 16L * i));
+        // wyrazne przejscie dalej niz histereza: zmiana od razu
+        assertEquals(Direction.NORTH_EAST, push(f, 40, 1, 600));
+        // i z powrotem: skos trzyma sie jeszcze za granica
+        for (int i = 0; i < 30; i++) assertEquals(Direction.NORTH_EAST, push(f, i % 2 == 0 ? 25 : 15 + 12, 1, 700 + 16L * i));
+        assertEquals(Direction.EAST, push(f, 5, 1, 1300));
     }
 }

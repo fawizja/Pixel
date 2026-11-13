@@ -660,7 +660,7 @@ public final class TileArt implements Disposable {
      * Strony potworow poza przodem: pliki monsters/klucz_up|left|right[_walk1|_walk2].png (tools/art/otsp_import.py).
      * Osobny atlas 32 px (sloty po 3 klatki: postoj, krok 1, krok 2); strona bez kompletu plikow nie ma wpisu.
      */
-    private static final String[] SIDE_NAMES = {"up", "left", "right"};
+    private static final String[] SIDE_NAMES = {"up", "left", "right", "ne", "nw", "se", "sw"};
     private static final int MAX_DIR_SLOTS = 32 * 64;
     private final Map<String, int[]> dirSlots = new HashMap<>();
     private final Map<String, TextureRegion[]> dirRegions = new HashMap<>();
@@ -669,12 +669,14 @@ public final class TileArt implements Disposable {
     private int dirUsed;
 
     private void loadMonsterDirs(String key) {
-        int[] slots = new int[9];
+        int[] slots = new int[SIDE_NAMES.length * 3];
         java.util.Arrays.fill(slots, -1);
         boolean any = false;
-        for (int s = 0; s < 3; s++) {
+        boolean[] present = CreatureFrames.sidesPresent(key, rel ->
+                Gdx.files.internal("art/" + rel).exists() || Gdx.files.internal("assets/art/" + rel).exists());
+        for (int s = 0; s < SIDE_NAMES.length; s++) {
             Pixmap[] frames = new Pixmap[3];
-            boolean ok = dirUsed + 3 <= MAX_DIR_SLOTS;
+            boolean ok = present[s + 1] && dirUsed + 3 <= MAX_DIR_SLOTS;
             for (int k = 0; k < 3 && ok; k++) {
                 String rel = "monsters/" + key + "_" + SIDE_NAMES[s] + (k == 0 ? "" : "_walk" + k) + ".png";
                 com.badlogic.gdx.files.FileHandle f = Gdx.files.internal("art/" + rel);
@@ -745,11 +747,11 @@ public final class TileArt implements Disposable {
         idle.dispose();
         if (side < BIG_MONSTER_MIN) return NO_BIG;
         bigHeights.put(key, OverheadLayout.spriteTiles(idleHeight));
-        Pixmap atlas = new Pixmap(3 * 4 * 64, 64, Pixmap.Format.RGBA8888);
+        Pixmap atlas = new Pixmap(3 * CreatureFrames.SIDES * 64, 64, Pixmap.Format.RGBA8888);
         atlas.setBlending(Pixmap.Blending.None);
-        boolean[] has = new boolean[4];
-        String[] suffix = {"", "_up", "_left", "_right"};
-        for (int d = 0; d < 4; d++) {
+        boolean[] has = new boolean[CreatureFrames.SIDES];
+        String[] suffix = CreatureFrames.SIDE_SUFFIX;
+        for (int d = 0; d < CreatureFrames.SIDES; d++) {
             for (int k = 0; k < 3; k++) {
                 Pixmap src = loadArt("monsters/" + key + suffix[d] + (k == 0 ? "" : "_walk" + k) + ".png");
                 if (src == null) continue;
@@ -766,8 +768,8 @@ public final class TileArt implements Disposable {
         tex.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         atlas.dispose();
         bigMonsterTextures.add(tex);
-        TextureRegion[] out = new TextureRegion[12];
-        for (int i = 0; i < 12; i++) out[i] = has[i / 3] ? new TextureRegion(tex, i * 64, 0, 64, 64) : null;
+        TextureRegion[] out = new TextureRegion[3 * CreatureFrames.SIDES];
+        for (int i = 0; i < out.length; i++) out[i] = has[i / 3] ? new TextureRegion(tex, i * 64, 0, 64, 64) : null;
         return out;
     }
 
@@ -778,7 +780,9 @@ public final class TileArt implements Disposable {
     public TextureRegion bigMonster(String key, Direction facing, int frame, boolean[] flip) {
         TextureRegion[] r = bigFrames(key);
         if (r.length == 0) return null;
-        boolean[] has = {true, r[3] != null, r[6] != null, r[9] != null};
+        boolean[] has = new boolean[CreatureFrames.SIDES];
+        has[0] = true;
+        for (int i = 1; i < has.length; i++) has[i] = r[i * 3] != null;
         CreatureFrames.Pick p = CreatureFrames.pick(has, facing);
         if (flip != null) flip[0] = p.flip();
         TextureRegion t = r[p.dir() * 3 + Math.max(0, Math.min(frame, 2))];
@@ -788,7 +792,10 @@ public final class TileArt implements Disposable {
     private boolean[] sidesOf(String key) {
         TextureRegion[] r = dirRegions.get(key);
         if (r == null) return null;
-        return new boolean[] {true, r[0] != null, r[3] != null, r[6] != null};
+        boolean[] has = new boolean[CreatureFrames.SIDES];
+        has[0] = true;
+        for (int i = 1; i < has.length; i++) has[i] = r[(i - 1) * 3] != null;
+        return has;
     }
 
     /**

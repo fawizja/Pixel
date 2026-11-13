@@ -1,5 +1,56 @@
 # Changelog
 
+## [0.265.0] - 2026-11-13
+
+### Dodano
+- Plecak w plecaku jak w Tibii: każdy plecak (20/24/36 pól) można włożyć w pole innego plecaka i otworzyć, bez limitu głębokości; ograniczają
+  tylko pola i udźwig (cap) postaci (`ItemWeights`, waga zawartości liczy się rekurencyjnie, `TOO_HEAVY`). Komputer: okno plecaka obok głównego
+  z przyciskiem `<`; telefon: plecak otwiera się w miejscu panelu plecaka (nazwa w tytule, `< Wstecz`, "Wyjmij", przenoszenie dotknięciem,
+  użycie mikstur/run/jedzenia wprost z zagnieżdżonego plecaka). Upuszczenie przedmiotu na plecak wkłada go do środka.
+- Przepełnienie lupu: gdy główny plecak jest pełny, przedmioty (lup z ciała i autoloot, nagrody, kupno, zbieranie, podnoszenie) trafiają do
+  pierwszego plecaka z miejscem (w głąb); stosy łączą się najpierw z istniejącymi.
+- Zapis postaci v10 niesie zawartość plecaków (`{rozmiar|pole=stos|...}`), ten sam zapis idzie online (SELF); zapisy v1-v9 wczytują się bez zmian.
+- Akcje: `bag_move`, `bag_use`, `bag_drop`, `bag_equip`, `bag_out`, `slot_wear`.
+- Czary smoków: nowe obszary `WAVE9` (40 pól), `WIDE_BEAM8` (24), `CROSS_NOVA` (41); każdy smok ma własny zestaw (zielony, lodowy, czarny,
+  złoty, biały, lodu, kości, magmy, Skaldra, Ignaroth), silniejsze rzucają wielkie fale, kule 3x4/5x5 i gwiazdy; obrażenia na atak bez zmian (+-10%).
+- Sceny regresji GUI `nested_bag_*`, `dragon_wave9`, `dragon_star`; testy `NestedBackpackTest`, `DragonSpellAreasTest`.
+
+### Zmieniono
+- Użycie plecaka z plecaka otwiera go; dawne zastąpienie głównego plecaka to akcja "Załóż" (`slot_wear`).
+- Efekt dużych obszarów czarów na kliencie świeci naraz na całym obszarze (krótsze opóźnienie na pole).
+### Zmieniono
+- 8 kierunków jak w Tibii (skos kosztuje 3 zwykłe kroki): joystick (stały i pod kciukiem; wariant „Joystick (8 kierunków)”), krzyżyk i przytrzymanie
+  na mapie dają 8 kierunków od razu (8 równych sektorów po 45°, martwa strefa i histereza bez zmian, kierunek nie migocze na granicy sektora);
+  „Pływający, 4 kierunki” zostaje do wyboru w ustawieniach. Marsz po dotknięciu mapy nadal idzie prosto, a skosem tylko przy przeciskaniu się.
+- Potwory wędrują też po skosie (krok po skosie trwa 3x), ucieczka i trzymanie dystansu używają 8 kierunków.
+
+### Dodano
+- Klawiatura: dwa klawisze naraz = skos, blok numeryczny 1/3/7/9 = skosy (`KeyboardDirection`).
+- Opcjonalna grafika 8 kierunków potworów: `klucz_ne|nw|se|sw` + `_walk1/_walk2`; bez niej skos patrzy w lewo/prawo jak w Tibii (docs/GRAPHICS.md).
+- Testy 8 sektorów joysticka, klawiatury, spaceru potworów po skosie, czasu kroku x3 i wyboru grafiki; sceny regresji `eight_*`.
+
+- Pięć nowych wysp (generator `tools/mapgen/islands5.py`, dane `islands5_data.py`, podpięte w `generate_continent.py`): darmowa
+  **Wyspa Szeptów** (okolice 894-926, 94-155; poz. 8-60; powierzchnia plus 3 piętra w dół i dwa lochy: Kopiec Sroki i Wieża Szeptów)
+  oraz cztery wyspy premium (poz. ok. 60-400, piętra od -5 do +2, kilka łowisk): lodowa **Biała Zamieć** (122-177, 73-134),
+  pustynna **Złote Wydmy** (886-940, 901-974), tropikalna **Szmaragdowa Mgła** (49-119, 879-936) i umiarkowana **Wyspa Starych Dębów**
+  (182-231, 822-902). Żadna nie jest osiągalna pieszo z Varden (sprawdza `IslandsFiveTest`).
+- 17 nowych potworów (stałe w `monsters.csv`, łupy, bestiariusz, nazwy EN/ES, grafika OTSP 4 kierunki): m.in. Pan Kopca, Król Sroczy,
+  Jarl Szronu, Regent Piasku, Cesarzowa Pnączy i Suwerenny Dąb. Stawiane tylko ręcznie (`HAND_PLACED`).
+- Rejs na nowe wyspy wymaga znacznika postaci (`data/ship_access.csv`, `npc/ShipAccess`): kapitan odmawia z podpowiedzią, dopóki quest
+  dostępowy nie ustawi znacznika; wyspy premium wymagają też konta premium lub promocji. Menu kapitana blokuje wiersze (`ship.row_locked`).
+- Przewoźnik Oswin na nabrzeżu Cichej Przystani (845, 283) na wschodnim wybrzeżu, osiągalny pieszo z Varden: czteroetapowy quest
+  ze srebrną broszką z Nory Sroki (mała strzeżona lochowa z drzwiami wymagającymi klucza i dźwigni) otwiera darmowy rejs.
+- 25 linii questów (64 misje: 9 darmowych i 16 premium) z NPC o angielskich imionach, powiązanych między sobą nowym plikiem
+  `data/quest_requires.csv` (wymagania między liniami; `QuestRegistry.withRequires`), z drzwiami `party:N`, poziomem, przedmiotami,
+  zabójstwami i krokami VISIT; dziennik ukrywa linie z zablokowanym pierwszym krokiem.
+- Obozy barbarzyńców: duży obóz (**Obóz Wodza Zamieci**, piętra 0, +1 i +2) na wyspie lodowej: nieregularna palisada z kłód, trzy bramy,
+  chaty, wieże strażnicze (platformy na drabinach) z drugim poziomem na dwóch z nich, skrzynie z tabliczkami przy chacie wodza i
+  boss **Wódz Zamieci** (poz. 330); mały darmowy **Obóz Hetmana Skarna** na lodowych skałach kontynentu (poz. 30-58, bez premium).
+  8 nowych potworów (`frostfur_raider`, `snowclub_brute`, `skarn_hetman`, `icefang_hunter`, `bonewrap_tamer`, `ironjaw_splitter`,
+  `rimeblood_walker`, `blizzard_warchief`) z nazwami PL/EN/ES, łupem, bestiariuszem i grafiką OTSP.
+- Zasada „żadnych prostokątów”: wieże, sale bossów, skarbiec i chata Nory Sroki mają teraz nieregularne obrysy (`islands5.noisy`).
+- Grafika: `tools/art/islands_art.py` (srebrna broszka), nowe wpisy w `otsp_import.py`; test `IslandsFiveTest`.
+
 ## [0.264.0] - 2026-11-13
 
 ### Dodano

@@ -37,20 +37,20 @@ class MultiBackpackTest {
         assertEquals(Container.BACKPACK_SLOTS, pc.backpack().size());
         assertEquals(ContainerType.BACKPACK, pc.backpackType());
         pc.backpack().add(ItemStack.of(id("backpack")));
-        s.useSlot(slotOf(pc.backpack(), "backpack"), 1000);
+        s.wearBag(slotOf(pc.backpack(), "backpack"), 1000);
         assertEquals(20, pc.backpack().size(), "an ordinary backpack is not an upgrade");
         assertEquals(1, pc.backpack().count(id("backpack")));
         pc.backpack().add(ItemStack.of(id("backpack_traveler")));
-        s.useSlot(slotOf(pc.backpack(), "backpack_traveler"), 2000);
+        s.wearBag(slotOf(pc.backpack(), "backpack_traveler"), 2000);
         assertEquals(24, pc.backpack().size());
         assertEquals(ContainerType.TRAVELER, pc.backpackType());
         assertEquals(0, pc.backpack().count(id("backpack_traveler")), "the new backpack is worn");
         assertEquals(2, pc.backpack().count(id("backpack")), "the old one returns to the bag");
         pc.backpack().add(ItemStack.of(id("backpack_explorer")));
-        s.useSlot(slotOf(pc.backpack(), "backpack_explorer"), 3000);
+        s.wearBag(slotOf(pc.backpack(), "backpack_explorer"), 3000);
         assertEquals(36, pc.backpack().size());
         pc.backpack().add(ItemStack.of(id("backpack_traveler")));
-        s.useSlot(slotOf(pc.backpack(), "backpack_traveler"), 4000);
+        s.wearBag(slotOf(pc.backpack(), "backpack_traveler"), 4000);
         assertEquals(36, pc.backpack().size(), "never downgrades");
         assertEquals(2, pc.backpack().count(id("backpack_traveler")), "the one returned by the explorer swap plus the new one");
     }

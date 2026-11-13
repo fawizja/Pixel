@@ -9,8 +9,6 @@ public final class ControlTuning {
     public static final int MIN = 1, MAX = 5, DEFAULT = 3;
 
     private static final float[] ENGAGE = {0.60f, 0.52f, 0.45f, 0.38f, 0.30f};
-    private static final double[] CLASSIC_DIAGONAL = {6, 8, 10, 13, 16};
-    private static final float[] CLASSIC_DIAGONAL_PUSH = {0.75f, 0.68f, 0.60f, 0.55f, 0.50f};
     private static final double[] FLOAT4_DIAGONAL = {8, 10, 12, 15, 18};
     private static final long[] FLOAT4_DIAGONAL_HOLD = {450, 350, 250, 180, 120};
     private static final long[] HOLD_DELAY = {300, 250, 200, 160, 120};
@@ -26,12 +24,6 @@ public final class ControlTuning {
 
     /** Wychylenie, ponizej ktorego postac staje (2/3 progu ruszenia - histereza). */
     public static float release(int s) { return engage(s) * 2f / 3f; }
-
-    /** Klasyczny joystick: polowa klina skosu przy wejsciu w skos (stopnie wokol 45). */
-    public static double classicDiagonal(int s) { return CLASSIC_DIAGONAL[i(s)]; }
-
-    /** Klasyczny joystick: minimalne wychylenie dla skosu. */
-    public static float classicDiagonalPush(int s) { return CLASSIC_DIAGONAL_PUSH[i(s)]; }
 
     /** Plywajacy joystick (4 kierunki): polowa klina skosu (stopnie wokol 45). */
     public static double float4Diagonal(int s) { return FLOAT4_DIAGONAL[i(s)]; }

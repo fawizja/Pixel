@@ -198,6 +198,26 @@ odstep atakow i zestaw startowy. Czary i zasady PvP/PvM: etapy 7 i 13.
   Logika widzi jeden `Container` (`PlayerCharacter.setBackpackSlots`, 20..80), wiec lup, sklepy, handel i mikstury dzialaja bez zmian.
   Zapis: `bagslots=<n>` (gdy inne niz 20); stary zapis z `bags=<n>` (strony po 20) wczytuje sie jako jeden przewijany plecak
   `20 * (1 + n)` pol - nic nie ginie. Weteran (poziom 250+) startuje z plecakiem podroznika (24 pola). Akcja `bag_detach` zniknela.
+- Plecak w plecaku (2026-11-12, `inventory/Container`, `inventory/ItemWeights`): kazdy przedmiot-plecak (`ContainerType`: 20/24/36 pol)
+  mozna wlozyc do pola innego plecaka i otworzyc, bez limitu glebokosci - ogranicza tylko liczba pol i udzwig (cap) postaci. Uzycie
+  plecaka (przycisk "Otworz", `bag_use`) otwiera go w oknie obok glownego plecaka (`<` wraca o poziom wyzej, plecak w plecaku otwiera sie
+  w tym samym oknie); dawne zastepowanie glownego plecaka to teraz osobna akcja `slot_wear:n` ("Zaloz" przy zaznaczonym plecaku).
+  Zawartosc zyje w `ItemStack.contents()` (pojemnik w stosie, tylko dla plecakow, ilosc 1); `Container.copy()` jest gleboka kopia, wiec
+  transakcje na kopii nie zmieniaja zagniezdzonych plecakow. `count`, `countPlain`, `remove`, `spaceFor`, `canAdd` i `add` wchodza w glab.
+  Przepelnienie: `add` dopelnia najpierw istniejace stosy (glowny plecak, potem plecaki w glab), potem zajmuje wolne pola glownego plecaka,
+  a gdy pelny - pierwszego plecaka z miejscem (glebokosc najpierw, jak w Tibii); dotyczy lupu z ciala (takze autolootu), nagrod, kupna,
+  zbierania i podnoszenia z ziemi. Gdy wszystko pelne, przedmiot zostaje (`NO_SPACE`).
+  Udzwig: `PlayerCharacter.capacity()` (uncje) kontra waga zawartosci plecaka z plecakami w srodku (`ItemWeights`: setne uncji, waga z
+  kategorii przedmiotu: bron 12, zbroja 12, tarcza 10, narzedzie 3, mikstura 0,5, moneta 0,02 oz, plecak 8/9/10 oz); `add` przy przekroczeniu
+  zwraca `TOO_HEAVY`. Przenoszenie w obrebie drzewa plecakow nie zmienia wagi, wiec cap go nie blokuje; plecak nie wejdzie do samego
+  siebie ani do wlasnej zawartosci (`CYCLE`). Upuszczenie przedmiotu na pole z plecakiem wklada go do srodka.
+  Akcje sieciowe: `bag_move:sciezkaZ:pole:sciezkaDo:pole`, `bag_use|bag_drop|bag_equip:sciezka:pole`; sciezka to numery pol plecakow od
+  glownego plecaka rozdzielone kropka (`-` = glowny plecak, `3.0` = plecak z pola 3, w nim plecak z pola 0). Uzycie przedmiotu z
+  zagniezdzonego plecaka przenosi jedna sztuke do wolnego pola glownego plecaka (mikstury z paska HP/MP szukaja tez w plecakach).
+  Zapis: wersja 10 - stos plecaka niesie `{rozmiar|pole=stos|...}` (zagniezdzone w tych samych nawiasach); zapisy v1-v9 wczytuja sie
+  bez zmian (plecak bez zawartosci jest pusty). Ten sam zapis idzie w komunikacie SELF (klient online) i w skrzyniach/depozycie.
+  Smierc: plecak z zawartoscia wypada do ciala jako jeden stos; plecak z zawartoscia nie jest "zwykly" (nie da sie go sprzedac, wystawic
+  ani wyslac razem z zawartoscia). Ograniczenie: telefon (mobilne okno plecaka) pokazuje tylko glowny plecak. Test: `NestedBackpackTest`.
 - Przeciaganie: przytrzymanie i przesuniecie przedmiotu przenosi go na inne pole albo na panel ekwipunku (zalozenie), a przy otwartym
   depozycie na jego okno. Krotkie dotkniecie dziala jak dotad.
 - Wskaznik pingu (`net/PingMeter`, `NetClient.ping`): pod ramka widoku, obok FPS, kropka i wartosc w ms - zielona < 100 ms, pomaranczowa
@@ -475,11 +495,17 @@ Kolizje (etap 12): poza strefa ochronna gracze blokuja sobie pola (na serwerze, 
 w strefie ochronnej mozna przez siebie przejsc jak w Tibii; potwory nie wchodza na pole zadnego gracza (nie tylko celu).
 Przyspieszenie: czary utani hur / utani gran hur (`SpellKind.HASTE`, w spells.csv baza = procent, zasieg = sekundy),
 ikona stanu w HUD i pole na automatycznym pasku czarow (zamiast poswiaty, gdy postac zna przyspieszenie).
-Joystick (`StickFilter`): rusza przy wychyleniu 45%, staje ponizej 30%, kierunki proste maja pierwszenstwo (skos
-tylko w klinie +-10 stopni i przy wychyleniu 60%, potem trzyma sie w +-18), zmiana prosty-prosty z histereza 8 stopni,
-nowy kierunek musi trwac 70 ms (bez drgan kciuka); klawiatura na PC.
+8 kierunkow (2026-11-12, decyzja wlasciciela: "jak w Tibii, skos x3"): gracz i potwory chodza w 8 kierunkach, krok po skosie
+trwa `MovementSystem.DIAGONAL_STEP_FACTOR` = 3 zwykle kroki, rogi wg `WorldMap.diagonalCornersOpen`; ta sama logika
+(`GameSession.update`) dziala offline i na serwerze (serwer przyjmuje wszystkie 8 nazw `Direction`).
+Joystick (`StickFilter`, wariant "Joystick (8 kierunkow)", staly albo pod kciukiem wg ustawien): rusza przy wychyleniu 45%,
+staje ponizej 30% (martwa strefa jak dotad), 8 rownych sektorow po 45 stopni bez zadnego opoznienia, histereza kata 10 stopni
+za granica sektora (drgajacy kciuk nie przeskakuje). Krzyzyk (`DpadInput`) i przytrzymanie na mapie (`HoldToWalk`) tez daja 8 kierunkow
+od razu; "Plywajacy, 4 kierunki" (`FourWayStick`, skos po chwili trzymania w klinie) zostaje do wyboru w ustawieniach.
+Klawiatura (`KeyboardDirection`): dwa klawisze naraz (strzalki / WASD) = skos, klawisze przeciwne sie znosza; blok numeryczny
+1/3/7/9 = skosy (Q/E/Z/C maja inne funkcje: cel, uzycie, mikstura, dziennik). Domyslny wariant (krzyzyk) byl i jest 8-kierunkowy.
 Marsz po dotknieciu mapy (`Pathfinder.path`, A*): krok prosty 100, skos 350 (trwa jak 3 proste + zapas), drobna kara
-za zakret - trasa prosta / w ksztalcie L, skos tylko przy przecisnieciu sie miedzy przeszkodami.
+za zakret - trasa prosta / w ksztalcie L, skos tylko przy przecisnieciu sie miedzy przeszkodami (marsz po dotknieciu mapy zostaje 4-kierunkowy).
 Sterowanie dotykiem (etap 17, `GameScreen` + `Hud.floatJoystick`): dotkniecie mapy rozstrzyga sie przy puszczeniu
 palca. Krotkie dotkniecie = pole (cel, marsz, rozmowa, lup), przytrzymanie 450 ms = podglad pola
 (`GameSession.lookAt`: potwor z poziomem i zdrowiem, NPC z rola, cialo, przedmioty, przejscia, strefa ochronna,
@@ -694,6 +720,10 @@ przy pauzie, utracie fokusu i zamknieciu.
   RANGED / MAGIC / HEALER z zasiegiem > 1 trzymaja dystans rowny zasiegowi ataku (za blisko - odchodza, za daleko
   albo bez linii strzalu - podchodza), strzelaja z linii wzroku; HEALER (leczy najslabszego
   sojusznika < 70% w promieniu 4), boss (leczenie raz ponizej 30%, atak 30% szybszy ponizej 50%).
+- 8 kierunkow (2026-11-12): wedrowka (IDLE) losuje 8 kierunkow (skos x3 czasu kroku jak u gracza), ucieczka i trzymanie dystansu
+  wybieraja kierunek z 8 wg przyrostu odleglosci na jednostke czasu (skos tylko, gdy prosto nie da sie uciec), poscig to A* z skosami.
+  Zwrot (`Monster.facing`) ma 8 wartosci; grafika: `CreatureFrames.pick` bierze `klucz_ne|nw|se|sw` (+ `_walk1/_walk2`), gdy
+  sa komplety, inaczej jak w Tibii skos patrzy w prawo (NE, SE) albo w lewo (NW, SW); konwencja plikow w docs/GRAPHICS.md.
 - Potwory nie wchodza na strefy ochronne, przejscia, gracza ani siebie nawzajem; nie pojawiaja sie
   blizej niz 5 kafelkow od gracza.
 - Wydajnosc: `SpatialGrid` (komorki 8x8); symulowane sa tylko potwory w promieniu 20 kafelkow.
@@ -1764,6 +1794,14 @@ Jak w Tibii; liczby z serwera Canary (`player.cpp` buildHarmony/spendHarmony/get
   jak `SpellSystem.aimDirection`), BALL (pocisk i obszar wokół celu), SELF (wokół potwora). Dodatek: stan (`BURNING:60-110:4000:60`)
   albo `SLOW:procent:ms`. Rzut: `MonsterSpells.plan` (kształt `SpellArea`, linia wzroku), `CombatSystem.planSpell/showSpell/
   applySpellEffects`; odmiany Kuźni mnożą obrażenia jak ciosy. `castMonsterSpell` rzuca czar bez losowania (testy, podglądy).
+- Czary smokow (2026-11-12, `DragonSpellAreasTest`): kazdy smok ma wlasny, rozny zestaw; silniejsze rzucaja wyrazniej wieksze obszary.
+  Nowe ksztalty `SpellArea`: `WAVE9` (stozek 8 pol dlugosci, 40 pol), `WIDE_BEAM8` (oddech 3 x 8, 24 pola), `CROSS_NOVA` (gwiazda: krzyz
+  i przekatne promienia 5, 41 pol); w uzyciu tez `CIRCLE2X2` (21), `CIRCLE3X3` (37, GFB), `CIRCLE3X4` (57), `CIRCLE5X5` (61), `BEAM5/7`.
+  Zielony: fala ognia, kula 2x2, jadowity oddech; lodowy: fala lodu, oddech, spowalniajace spojrzenie 2x2; czarny: wielka fala, GFB, oddech
+  popiolu; zloty: wielka fala `WAVE9`, fala pioruna, kula 3x4; bialy: `WAVE9`, szeroki promien pioruna, lodowy wybuch 5x5, kula 3x4, gwiazda
+  pioruna. Smok lodu, kosci, magmy, Skaldra i Ignaroth dostaly wielkie fale, kule i gwiazdy. Oczekiwane obrazenia na atak (zalozenie: jeden cel)
+  zostaly dopasowane do dawnych (+-10%), wiec to rozne ksztalty, a nie wiecej obrazen; bilans lowiecki dziala bez zmian.
+  Klient rysuje efekt z kodu ksztaltu (`SpellArea.encode`), wiec cale pole obszaru jest widoczne offline i online.
 - Rzadki spawn: `RareSpawns.standard()` = 15 promili na odrodzenie smoka (klasa Dragon, poz. >= 100) przy graczu do 32 pól,
   przerwa 1 h, jeden żywy; ziarno testów: `MonsterManager.setRareRandom`. Bez rejestru z `pearl_dragon` albo przy < 50 spawnach wyłączony.
 - Spawny stałe: `tools/mapgen/dragon_spawns.py` (na gotowym świecie: `python3 tools/mapgen/dragon_spawns.py`; idempotentny).
@@ -1825,3 +1863,17 @@ Wzorzec: Tibia/Canary (`attacks`, `defenses`, `summons`, `runonhealth`, `targetd
 - Tabliczki: `ChestSigns` liczy dla kazdej skrzyni questowej jedno pole obok (bez przejsc, drzwi, bram, obiektow, pulapek); `GameSession.useAt` czyta tekst
   (`chest_sign.*`). Rysuje je `GameScreen.drawChests`.
 - Dziennik: `QuestJournal.build` zwraca wpisy (w toku, nowe, ukonczone), `Hud.rebuildJournalMenu` rysuje liste i szczegoly. `-Dpixel.quests` ustawia stan do zrzutow.
+
+## Pięć wysp i rejsy za zgodą (Z dane, G generator `tools/mapgen/islands5.py`, 2026-11-12)
+- Wyspa Szeptów (darmowa, poz. 8-60) i cztery wyspy premium (Biała Zamieć NW, Złote Wydmy SE, Szmaragdowa Mgła SW, Wyspa Starych Dębów
+  W-SW; poz. ok. 60-400). Każda ma przystań z kapitanem (`whisper_captain`, `ice5_captain`, `desert5_captain`, `tropic5_captain`,
+  `oak5_captain`), piętra do -5 i +1/+2 (premium), łowiska i wieżę z sanktum bossa za drzwiami. Mapa jest w `maps/world`, dane w
+  `data/*.csv` między znacznikami `# BEGIN islands5` / `# END islands5` (zapis: `python3 tools/mapgen/islands5_data.py`).
+- Rejs: `ShipAccess.check(pc, z, do)` zwraca `NONE`, `PREMIUM` (konto premium albo promocja, poza darmowym promem Cichej Przystani
+  - Wyspa Szeptów) lub `FLAG` (brak znacznika `ship.<wyspa>` celu). Znacznik ustawia `StarQuest.onCompleted` po oddaniu
+  zadania z kolumny 4 `data/ship_access.csv` (`ferry_m4`, `ice_m4`, `desert_m4`, `tropic_m4`, `oak_m4`). Powrót z wyspy jest zawsze możliwy.
+- Questy dostępowe: linie `ferry_*` (Oswin, broszka z Nory Sroki), `ice_*` (Halvar, Frostholm), `desert_*` (Idris, Qasirah), `tropic_*`
+  (Ilvane, Selvaran), `oak_*` (Corwin, Varden). Wymagania między liniami: `data/quest_requires.csv` (`klucz;wymagany1,wymagany2`).
+- Test: `IslandsFiveTest` (brak drogi pieszo z Varden, bramka rejsu, piętra i spawny, lańcuchy questów); `route_levels.py` 0 naruszeń.
+- Obozy barbarzyńców (generator `islands5._build_camp`, `camps.py`): na Białej Zamieci duży Obóz Wodza Zamieci (z0, +1, +2, drabiny na wieże,
+  boss `blizzard_warchief`), na kontynencie mały Obóz Hetmana Skarna (`skarn_hetman`, poz. 30-58). Wszystkie obrysy są nieregularne.

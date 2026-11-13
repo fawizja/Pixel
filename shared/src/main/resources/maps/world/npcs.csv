@@ -131,7 +131,7 @@ durn_guard_west;Strażnik bramy Hroald;GUARD;Durnkar;482;319;-4;-;#8a8a9a;Stój!
 durn_guard_east;Strażnik bramy Sigvald;GUARD;Durnkar;565;317;-5;-;#8a8a9a;Za tą bramą Kopalnia Żelaznej Brody. Drzwi przepuszczą tylko tych, którzy przeżyją w głębinach.
 durn_priest;Kapłan Thorvin;PRIEST;Durnkar;524;327;-4;-;#f0f0f0;Witaj w świątyni Durnkaru, synu i córko kamienia. Mogę cię uleczyć albo przyjąć do miasta.
 durn_banker;Bankier Grimbald;BANKER;Durnkar;488;329;-4;-;#d8c070;Złoto w skarbcu Durnkaru leży pod tysiącem sążni skały. Bank prowadzi konta we wszystkich miastach.
-durn_housing;Zarządca Durgan;HOUSING;Durnkar;483;325;-4;-;#6a5a8a;Domy w grotach Durnkaru, ciepłe od lawy. Płacisz z konta w banku.
+durn_housing;Zarządca Durgan;HOUSING;Durnkar;493;325;-4;-;#6a5a8a;Domy w grotach Durnkaru, ciepłe od lawy. Płacisz z konta w banku.
 durn_ruler;Król Thorgrim;KING;Durnkar;536;309;-4;-;#c8a040;Durnkar pamięta czasy, gdy nad górami nie było jeszcze miast. Konto premium i promocję dam ci tak jak król w Varden: napisz premium albo promocja.
 durn_innkeeper;Karczmarz Ulfrik;MERCHANT;Durnkar;538;309;-5;durn_supplies;#a0703a;Piwo z grzybów jaskiniowych, chleb, mięso i lina na drogę. Siadaj, przybyszu.
 durn_merchant;Kupiec Gunnar;MERCHANT;Durnkar;505;315;-5;durn_shop;#a0703a;Kupię łupy z kopalń i sprzedam to, czego brakuje w drodze.
@@ -145,6 +145,28 @@ durn_imbuer;Zaklinacz Runnar;IMBUER;Durnkar;556;332;-6;-;#7050b0;Runy wyryte w k
 star_warden;Warden Thessaly;GUIDE;Wyspa Gasnącej Gwiazdy;129;796;0;-;#c0c8e0;Gwiazda nad nami gaśnie. Strzegę Pieczęci i mam zadania dla tych od poziomu 300.
 star_captain;Captain Brannoc;CAPTAIN;Wyspa Gasnącej Gwiazdy;88;796;0;-;#4a6a8a;Pływam na kontynent. Tylko konta premium.
 varden_herald;Herald Matthias;HERALD;Varden;498;494;0;-;#d8c060;Witaj w świątyni. Zapytaj mnie o błogosławieństwa.
+quay_captain;Helmsman Brenn;CAPTAIN;Cicha Przystań;845;283;0;-;#4a6a8a;Płyniemy na Wyspę Szeptów, ale tylko z listem przewoźnika Oswina. Pytaj go o broszkę.
+ferry_oswin;Ferryman Oswin;GUIDE;Cicha Przystań;851;283;0;-;#4a6a8a;Statek jest mój, ale łódź na wyspę pożyczę tylko komuś, kto odzyska rodzinną broszkę od Króla Sroczego.
+whisper_captain;Boatwoman Brenna;CAPTAIN;Wyspa Szeptów;893;129;0;-;#4a6a8a;Pływam na kontynent. Płynę za darmo, jeśli wiesz, po co.
+whisper_hermit;Hermit Maren;GUIDE;Wyspa Szeptów;898;129;0;-;#7a8a6a;Wilki i pająki wyją mi pod chatą. Pomożesz starej pustelniczce?
+whisper_keeper;Lightkeeper Dunstan;GUIDE;Wyspa Szeptów;902;129;0;-;#8a8aa0;Latarnia świeci, ale z grot pod nią słychać szepty. Ktoś musi to zbadać.
+whisper_miner;Prospector Hale;GUIDE;Wyspa Szeptów;898;133;0;-;#a08060;Kopalnia i kopiec to moje życie, a teraz roją się tam gobliny i kości.
+ice5_captain;Captain Skuld;CAPTAIN;Wyspa Białej Zamieci;907;922;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+ice_skuld;Outfitter Skuld;GUIDE;Wyspa Białej Zamieci;907;926;0;-;#a8c8e8;Futra, haki i raki dla wyprawy. Mam też zlecenia na yeti i lodowe stwory.
+ice_ragna;Warden Ragna;GUIDE;Wyspa Białej Zamieci;907;930;0;-;#88a8c8;Pielgrzymi i golemy chodzą po jaskiniach. Pomożesz?
+desert5_captain;Captain Zahir;CAPTAIN;Wyspa Złotych Wydm;315;963;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+desert_nadira;Scout Nadira;GUIDE;Wyspa Złotych Wydm;315;959;0;-;#d8b060;Wydmy się przesuwają, a pod nimi czają się żądła. Mam zlecenia.
+desert_omar;Priest-Hunter Omar;GUIDE;Wyspa Złotych Wydm;315;955;0;-;#c09040;Obeliski gniewają się na ludzi. Pomóż mi je uciszyć.
+tropic5_captain;Captain Marisol;CAPTAIN;Wyspa Szmaragdowej Mgły;115;935;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+tropic_tupa;Guide Tupa;GUIDE;Wyspa Szmaragdowej Mgły;114;931;0;-;#78a868;Dżungla zjada nieostrożnych. Znam ścieżki i zlecenia.
+tropic_inez;Herbalist Inez;GUIDE;Wyspa Szmaragdowej Mgły;114;927;0;-;#b87898;Storczyki i hydry mi przeszkadzają w zbiorach. Pomożesz?
+oak5_captain;Captain Edwin;CAPTAIN;Wyspa Starych Dębów;191;832;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+oak_hollis;Ranger Hollis;GUIDE;Wyspa Starych Dębów;192;837;0;-;#6a8a4a;Odyńce i wiedźmy psują lasy Dębów. Pomóż straży.
+oak_maeve;Knight-Captain Maeve;GUIDE;Wyspa Starych Dębów;191;841;0;-;#8a7a8a;Orkowie i strażnicy ruin to problem dla stolicy. Mam zlecenia na nich.
+ice_halvar;Cartographer Halvar;GUIDE;Frostholm;817;206;0;-;#9ab8d8;Mapa Białej Zamieci jest niedokończona. Pomóż, a dostaniesz pozwolenie na rejs.
+desert_idris;Caravaneer Idris;GUIDE;Qasirah;60;465;0;-;#d0a050;Złote Wydmy są piękne i zabójcze. Karawana ruszy z tobą, jeśli zasłużysz na zgodę.
+tropic_ilvane;Botanist Ilvane;GUIDE;Selvaran;686;723;0;-;#60a070;Szmaragdowa Mgła kryje kwiaty, jakich nikt nie widział. Dam ci przepustkę, gdy się wykażesz.
+oak_corwin;Warden Corwin;GUIDE;Varden;494;560;0;-;#7a6a4a;Stare Dęby wpuszczają tylko tych, których znam. Zasłuż na mój list.
 mill_bram;Miller Bram;GUIDE;Opuszczony Młyn;405;590;0;-;#c8a060;Mój młyn zarósł pajęczynami. Pomożesz mi odzyskać spichlerz?
 crypt_aldric;Sexton Aldric;GUIDE;Krypta Cichego Dzwonu;434;452;0;-;#8a8a9a;Dzwon w krypcie zamilkł, a w nocy słychać kroki. Ktoś musi tam zejść.
 poacher_hild;Trapper Hild;GUIDE;Jama Kłusownika;786;250;0;-;#7a9ab0;Ktoś zastawia sidła na moich wilkach. Znajdź jaskinię, z której wychodzą kłusownicy.
@@ -158,6 +180,12 @@ lantern_orsa;Lightkeeper Orsa;GUIDE;Latarnia Zielonych Mgieł;854;649;0;-;#80c0a
 storm_teodrin;Marshal Teodrin;GUIDE;Cytadela Zburzonej Bramy Burz;538;636;0;-;#a0a8c8;Cytadela Burz padła w jedną noc. Jej brama wciąż pęka od piorunów, a garnizon nie odpoczywa.
 wyrm_kaldor;Drakehunter Kaldor;GUIDE;Smocze Moczary;872;633;0;-;#c07040;W moczarach ukryto gniazdo, o którym milczą łowcy. Kto wróci, zbierze nagrodę lepszą od zbroi smoka.
 crown_isolde;Crownwarden Isolde;GUIDE;Skarbiec Pustej Korony;459;668;0;-;#b8a0d8;Korona, która nie ma głowy, wciąż woła o władzę. Jej strażnicy nie pozwolą nikomu wyjść z pustymi rękami... ani żywym.
+house_varden_warden;Dozorca Walenty;GUIDE;Dom Starego Skarbnika;439;424;0;-;#b89050;Skarbnik zostawił po sobie skrzynie w każdym kącie. Zajrzyj do sal, ale uważaj na straże.
+house_frost_warden;Dozorczyni Gunhild;GUIDE;Dwór Skarbnika Zimy;758;293;0;-;#b89050;Mróz tu nie sięga, ale skrzynie owszem. Hol jest bezpieczny, w salach czekają strażnicy.
+house_qas_warden;Dozorca Hakim;GUIDE;Dom Piaskowego Kupca;210;441;0;-;#b89050;Kupiec ukrył towary pod piaskiem i na piętrze. W holu nikt cię nie tknie.
+house_selv_warden;Dozorca Teodoro;GUIDE;Dom Portowego Celnika;648;665;0;-;#b89050;Celnik trzymał w tym domu skonfiskowane skrzynie. Część jest dla każdego, część za pieczęcią.
+house_valmir_warden;Dozorca Ambroży;GUIDE;Dom Zatopionego Kapitana;431;769;0;-;#b89050;Kapitan utonął, a jego skrzynie zostały. W holu możesz odpocząć, dalej bądź czujny.
+house_nerys_warden;Dozorczyni Marina;GUIDE;Dom Perłowego Poszukiwacza;865;678;0;-;#b89050;Poszukiwacz pereł zbudował dom z piwnicą pełną skrzyń. Hol należy do wszystkich, sale do odważnych.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

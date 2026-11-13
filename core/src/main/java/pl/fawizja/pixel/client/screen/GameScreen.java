@@ -670,7 +670,10 @@ public final class GameScreen extends ScreenAdapter {
                 int sel = hud.selectedSlot();
                 ItemStack st = sel >= 0 ? session.character().backpack().get(sel) : null;
                 pl.fawizja.pixel.item.ItemType it = st == null ? null : session.items().get(st.itemId());
-                if (it != null && it.category() == pl.fawizja.pixel.item.ItemCategory.RUNE && session.spells().registry().find(it.key()) != null) {
+                if (st != null && sel >= 0 && session.character().backpack().isBag(sel)) {
+                    // plecak w plecaku: uzycie otwiera go w osobnym oknie (jak w Tibii)
+                    hud.openChildBag(new int[] {sel});
+                } else if (it != null && it.category() == pl.fawizja.pixel.item.ItemCategory.RUNE && session.spells().registry().find(it.key()) != null) {
                     hud.closeBag();
                     startAim("slot_at:" + sel, it.key(), -1);
                 } else {
@@ -679,10 +682,32 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             }
-            case "bag_equip":
-                act("slot_equip:" + hud.selectedSlot(), t);
+            case "bag_equip": {
+                int sel = hud.selectedSlot();
+                // plecak z pola: "Zaloz" = zalozenie wiekszego plecaka na plecy (dawne uzycie)
+                if (sel >= 0 && session.character().backpack().isBag(sel)) act("slot_wear:" + sel, t);
+                else act("slot_equip:" + sel, t);
                 hud.clearSelection();
                 break;
+            }
+            case "child_use": case "child_equip": case "child_drop": case "child_out": {
+                int[] path = hud.childPath();
+                int sel = hud.childSelected();
+                pl.fawizja.pixel.inventory.Container cc = path == null ? null : session.character().backpack().resolve(path);
+                if (cc == null || sel < 0 || sel >= cc.size() || cc.get(sel) == null) break;
+                String where = pl.fawizja.pixel.inventory.Container.pathText(path) + ":" + sel;
+                if (id.equals("child_drop")) act("bag_drop:" + where, t);
+                else if (id.equals("child_out")) act("bag_out:" + where, t);
+                else if (id.equals("child_equip")) act("bag_equip:" + where, t);
+                else if (cc.isBag(sel)) {
+                    int[] deeper = java.util.Arrays.copyOf(path, path.length + 1);
+                    deeper[path.length] = sel;
+                    hud.openChildBag(deeper);
+                } else act("bag_use:" + where, t);
+                hud.clearChildSelection();
+                break;
+            }
+
             case "bag_keep":
                 act("slot_keep:" + hud.selectedSlot(), t);
                 break;
@@ -695,7 +720,9 @@ public final class GameScreen extends ScreenAdapter {
                 hud.clearSelection();
                 break;
             default:
-                if (id.startsWith("bplayer:")) {
+                if (id.startsWith("bag_move:")) {
+                    act(id, t);
+                } else if (id.startsWith("bplayer:")) {
                     // lista walki: okienko gracza
                     int pid = Integer.parseInt(id.substring(8));
                     RemotePlayer rp = remotePlayers.get(pid);
@@ -2096,13 +2123,14 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private Direction keyboardDirection() {
-        int dx = 0, dy = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) dx -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) dx += 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) dy -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) dy += 1;
-        for (Direction d : Direction.values()) if (d.dx == dx && d.dy == dy) return d;
-        return null;
+        boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean up = Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
+        // blok numeryczny: 1/3/7/9 to skosy (Q/E/Z/C maja inne funkcje: cel, uzycie, mikstura, dziennik)
+        int numpad = 0;
+        for (int n = 1; n <= 9 && numpad == 0; n++) if (Gdx.input.isKeyPressed(Input.Keys.NUMPAD_0 + n)) numpad = n;
+        return pl.fawizja.pixel.movement.KeyboardDirection.of(left, right, up, down, numpad);
     }
 
     @Override
@@ -2733,9 +2761,14 @@ public final class GameScreen extends ScreenAdapter {
                     if (e.isShapedArea()) {
                         // ksztalt czaru z Canary: dokladnie trafione pola, dalsze od rzucajacego zaczynaja pozniej
                         Position o = e.from() != null ? e.from() : e.position();
-                        for (Position q : shapedTiles(e)) {
+                        List<Position> shaped = shapedTiles(e);
+                        // duze obszary (fale smokow, gwiazdy): opoznienie na pole maleje, zeby caly obszar swiecil naraz
+                        int far = 1;
+                        for (Position q : shaped) far = Math.max(far, o.distanceTo(q));
+                        long step = far > 4 ? Math.max(15L, 240L / far) : 60L;
+                        for (Position q : shaped) {
                             if (q.z() != z) continue;
-                            drawEffectFrame(b, name, age - o.distanceTo(q) * 60L, SPRITE_EFFECT_MS, q.x(), worldRenderer.worldY(q.y()));
+                            drawEffectFrame(b, name, age - o.distanceTo(q) * step, SPRITE_EFFECT_MS, q.x(), worldRenderer.worldY(q.y()));
                         }
                         break;
                     }
