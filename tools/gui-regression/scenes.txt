@@ -342,3 +342,7 @@ mob_caster_bolt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel
 mob_area_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=area
 mob_summoner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=summon
 mob_flee|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=30 -Dpixel.mobDemo=flee
+# 2026-11-12: 8 kierunkow jak w Tibii - krzyzyk i joystick ze skosem, wilk idacy po skosie
+eight_dpad_se|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.controls=dpad -Dpixel.dpad=SE
+eight_joystick_nw|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.mobileHud=1 -Dpixel.width=1600 -Dpixel.height=720 -Dpixel.uiScale=2 -Dpixel.controls=classic -Dpixel.joy=0.25,0.4 -Dpixel.joyDrag=-60,-60
+eight_monster_diagonal|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=60 -Dpixel.mobDemo=diag

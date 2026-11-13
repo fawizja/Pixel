@@ -90,6 +90,26 @@ class MonsterArtAndNamesTest {
         assertEquals(List.of(), missing, "monsters without direction frames (tools/art/otsp_import.py)");
     }
 
+    /**
+     * Opcjonalna grafika 8 kierunkow: klucz_ne, _nw, _se, _sw, kazda z postojem i dwiema klatkami kroku (_walk1, _walk2).
+     * Skos ma albo komplet 3 plikow, albo zadnego (konwencja w docs/GAME_SYSTEMS.md); brak skosow jest poprawny.
+     */
+    @Test
+    void optionalDiagonalArtComesInCompleteSetsOrNotAtAll() {
+        Path dir = artDir();
+        List<String> partial = new ArrayList<>();
+        for (MonsterType t : REG.all()) {
+            for (String diag : new String[] {"_ne", "_nw", "_se", "_sw"}) {
+                int have = 0;
+                for (String suffix : new String[] {"", "_walk1", "_walk2"}) {
+                    if (Files.isRegularFile(dir.resolve(t.key() + diag + suffix + ".png"))) have++;
+                }
+                if (have != 0 && have != 3) partial.add(t.key() + diag + " has " + have + "/3 files");
+            }
+        }
+        assertEquals(List.of(), partial, "incomplete diagonal sets (need idle + _walk1 + _walk2 or nothing)");
+    }
+
     @Test
     void noMonsterIsNamedAfterAWellKnownTibiaMonster() {
         assertTrue(TIBIA_NAMES.size() >= 150, "name list size " + TIBIA_NAMES.size());

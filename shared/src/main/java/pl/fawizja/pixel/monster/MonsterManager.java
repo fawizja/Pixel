@@ -898,8 +898,8 @@ public final class MonsterManager {
             case IDLE:
                 // regeneracja poza walka: 5% zdrowia na kazdy "oddech" bezczynnosci
                 if (m.health() < t.maxHealth()) m.heal(Math.max(1, t.maxHealth() / 20));
-                if (rng.nextInt(3) == 0) step = Direction.values()[rng.nextInt(4)]; // spacer bez skosow
-                else if (rng.nextInt(2) == 0) m.face(Direction.values()[rng.nextInt(4)]); // rozglada sie
+                if (rng.nextInt(3) == 0) step = Direction.values()[rng.nextInt(8)]; // spacer w 8 kierunkach (skos x3 czasu)
+                else if (rng.nextInt(2) == 0) m.face(Direction.values()[rng.nextInt(8)]); // rozglada sie
                 m.setNextActionMs(now + 1500 + rng.nextInt(2500));
                 break;
             default:
@@ -1038,21 +1038,26 @@ public final class MonsterManager {
     }
 
     private Direction fleeStep(Monster m, Position tp) {
+        // 8 kierunkow: najwiekszy przyrost odleglosci (kwadrat) na jednostke czasu - skos kosztuje DIAGONAL_STEP_FACTOR razy
+        // wiecej, wiec wygrywa tylko, gdy prosto nie da sie uciec
         Direction best = null;
-        int bestDist = m.position().distanceTo(tp);
-        // ucieczka tez najpierw prosto (N/S/E/W), skos dopiero gdy prosto nie oddala od gracza
+        Position me = m.position();
+        long cur = sq(me.x() - tp.x(), me.y() - tp.y());
+        double bestGain = 0;
         for (Direction d : Direction.values()) {
-            if (d.diagonal() && best != null) break;
-            Position n = m.position().translate(d.dx, d.dy);
-            if (!canOccupy(n, tp) || !cornerFree(m.position(), d)) continue;
-            int nd = n.distanceTo(tp);
-            if (nd > bestDist) {
-                bestDist = nd;
+            Position n = me.translate(d.dx, d.dy);
+            if (!canOccupy(n, tp) || !cornerFree(me, d)) continue;
+            double gain = (sq(n.x() - tp.x(), n.y() - tp.y()) - cur)
+                    / (d.diagonal() ? (double) pl.fawizja.pixel.movement.MovementSystem.DIAGONAL_STEP_FACTOR : 1.0);
+            if (gain > bestGain) {
+                bestGain = gain;
                 best = d;
             }
         }
         return best;
     }
+
+    private static long sq(int dx, int dy) { return (long) dx * dx + (long) dy * dy; }
 
     private boolean cornerFree(Position from, Direction d) {
         return world.diagonalCornersOpen(from, d);

@@ -2096,13 +2096,14 @@ public final class GameScreen extends ScreenAdapter {
     }
 
     private Direction keyboardDirection() {
-        int dx = 0, dy = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) dx -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) dx += 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W)) dy -= 1;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S)) dy += 1;
-        for (Direction d : Direction.values()) if (d.dx == dx && d.dy == dy) return d;
-        return null;
+        boolean left = Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean right = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean up = Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean down = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
+        // blok numeryczny: 1/3/7/9 to skosy (Q/E/Z/C maja inne funkcje: cel, uzycie, mikstura, dziennik)
+        int numpad = 0;
+        for (int n = 1; n <= 9 && numpad == 0; n++) if (Gdx.input.isKeyPressed(Input.Keys.NUMPAD_0 + n)) numpad = n;
+        return pl.fawizja.pixel.movement.KeyboardDirection.of(left, right, up, down, numpad);
     }
 
     @Override
