@@ -116,7 +116,7 @@ public final class Monster {
     long nextAttackMs() { return nextAttackMs; }
     void setNextAttackMs(long t) { nextAttackMs = t; }
     long nextActionMs() { return nextActionMs; }
-    void setNextActionMs(long t) { nextActionMs = t; }
+    public void setNextActionMs(long t) { nextActionMs = t; }
 
     public boolean isMoving(long now) { return now - stepStartMs < stepDurationMs; }
 

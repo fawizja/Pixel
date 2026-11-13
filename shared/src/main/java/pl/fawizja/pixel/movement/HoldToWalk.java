@@ -8,15 +8,13 @@ import pl.fawizja.pixel.world.Direction;
  * <ul>
  *   <li>krotkie dotkniecie (krocej niz {@link ControlTuning#holdDelayMs}) zostaje zwyklym dotknieciem pola:
  *       marsz do pola, cel, rozmowa, uzycie - {@link #release} zwraca wtedy true,</li>
- *   <li>po przytrzymaniu: kierunek od postaci do palca, 8 kierunkow z waskim klinem skosu ({@link #DIAGONAL_HALF}),</li>
+ *   <li>po przytrzymaniu: kierunek od postaci do palca, 8 rownych sektorow po 45 stopni,</li>
  *   <li>palec na polu postaci ({@link #DEAD_ZONE}) = postoj,</li>
  *   <li>kierunek zablokowany na czas kroku.</li>
  * </ul>
  */
 public final class HoldToWalk {
 
-    /** Polowa klina skosu w stopniach (kliny prostych maja po 90 - 2 * 12 = 66 stopni). */
-    public static final double DIAGONAL_HALF = 12.0;
     /** Palec blizej niz tyle pol od srodka postaci w obu osiach: postoj. */
     public static final float DEAD_ZONE = 0.5f;
 
@@ -81,8 +79,6 @@ public final class HoldToWalk {
     public static Direction classify(float dx, float dy) {
         if (Math.abs(dx) < DEAD_ZONE && Math.abs(dy) < DEAD_ZONE) return null;
         double angle = StickFilter.angleOf(dx, -dy);
-        Direction diag = StickFilter.nearest(angle, true);
-        if (StickFilter.dist(angle, diag) <= DIAGONAL_HALF) return diag;
-        return StickFilter.nearest(angle, false);
+        return StickFilter.classify(angle, null);
     }
 }

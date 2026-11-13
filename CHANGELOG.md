@@ -18,6 +18,17 @@
 ### Zmieniono
 - Użycie plecaka z plecaka otwiera go; dawne zastąpienie głównego plecaka to akcja "Załóż" (`slot_wear`).
 - Efekt dużych obszarów czarów na kliencie świeci naraz na całym obszarze (krótsze opóźnienie na pole).
+### Zmieniono
+- 8 kierunków jak w Tibii (skos kosztuje 3 zwykłe kroki): joystick (stały i pod kciukiem; wariant „Joystick (8 kierunków)”), krzyżyk i przytrzymanie
+  na mapie dają 8 kierunków od razu (8 równych sektorów po 45°, martwa strefa i histereza bez zmian, kierunek nie migocze na granicy sektora);
+  „Pływający, 4 kierunki” zostaje do wyboru w ustawieniach. Marsz po dotknięciu mapy nadal idzie prosto, a skosem tylko przy przeciskaniu się.
+- Potwory wędrują też po skosie (krok po skosie trwa 3x), ucieczka i trzymanie dystansu używają 8 kierunków.
+
+### Dodano
+- Klawiatura: dwa klawisze naraz = skos, blok numeryczny 1/3/7/9 = skosy (`KeyboardDirection`).
+- Opcjonalna grafika 8 kierunków potworów: `klucz_ne|nw|se|sw` + `_walk1/_walk2`; bez niej skos patrzy w lewo/prawo jak w Tibii (docs/GRAPHICS.md).
+- Testy 8 sektorów joysticka, klawiatury, spaceru potworów po skosie, czasu kroku x3 i wyboru grafiki; sceny regresji `eight_*`.
+
 ## [0.264.0] - 2026-11-13
 
 ### Dodano

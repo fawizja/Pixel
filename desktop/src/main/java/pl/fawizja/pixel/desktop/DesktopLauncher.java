@@ -75,7 +75,7 @@ import pl.fawizja.pixel.world.Position;
  *   -Dpixel.conTab=N     zakladka czatu (0 Lokalny, 1 Serwer, 2 Handel, potem Gildia/Druzyna i rozmowy); -Dpixel.open=chattabs: przykladowe wiadomosci
  *   -Dpixel.dragonDemo=five|fire|gfb|ice|white|wave9|star|gfb4  smoki: piec kolorow w rzedzie z paskami zycia (five); smok rzuca falę ognia (fire),
  *                        wielka kule ognia (gfb), oddech lodu (ice), bialy smok piorun (white) - rzut w postac stojaca przed nim
- *   -Dpixel.mobDemo=spear|caster|area|summon|flee|cast:potwor:czar[:klatki]  style ataku potworow: wlocznik trzyma dystans, uderzenie w cel, fala jadu, przywolywacz, ranny strzelec ucieka
+ *   -Dpixel.mobDemo=spear|caster|area|summon|flee|diag|cast:potwor:czar[:klatki]  style ataku potworow (diag = wilk idzie po skosie): wlocznik trzyma dystans, uderzenie w cel, fala jadu, przywolywacz, ranny strzelec ucieka
  *   -Dpixel.fakePing=MS   udaje opoznienie sieciowe (kropka pingu obok FPS; zielona <100, pomaranczowa 100-250, czerwona >250)
  *   -Dpixel.open=nestbag [-Dpixel.nestDemo=open|loot]  plecak w plecaku: okno plecaka z otwartym plecakiem z pola 0; loot: pelny glowny plecak, lup z ciala trafia do plecaka z miejscem
  *   -Dpixel.bagSlots=N, -Dpixel.bagScroll=W, -Dpixel.depotScroll=W  przy open=bigbag / depotwin: pojemnosc plecaka i przewiniecie siatek
@@ -1194,11 +1194,35 @@ public final class DesktopLauncher {
          * Podglad stylow ataku potworow (-Dpixel.mobDemo=spear|caster|area|summon|flee): wloczni na zywym AI (trzyma
          * dystans i rzuca), uderzenie w cel, fala jadu, przywolywacz z pomocnikami, ranny strzelec uciekajacy.
          */
+        private static boolean diagStepped;
+
         private static void mobDemo(GameScreen gs, String demo, int frame, int frames) {
             pl.fawizja.pixel.game.GameSession s = gs.session();
             pl.fawizja.pixel.character.PlayerCharacter pc = s.character();
             Position me = pc.position();
             long now = gs.worldTime();
+            if (demo.equals("diag")) {
+                // wilk idacy po skosie (8 kierunkow): pusta scena, wilk 3 pola na pn.-wsch., krok na poludniowy zachod w polowie
+                if (frame == 2) {
+                    for (pl.fawizja.pixel.monster.Monster m : new java.util.ArrayList<>(s.monsters().monsters())) {
+                        if (m.position().z() == me.z() && m.position().distanceTo(me) <= 24) s.monsters().dismiss(m);
+                    }
+                    pc.setInvisible(600_000);
+                    java.util.List<pl.fawizja.pixel.monster.Monster> spawned = s.monsters().spawnEvent("wolf", me.translate(2, -3), 1, 1, now);
+                    Gdx.app.log("Pixel", "diag spawn " + spawned.size() + (spawned.isEmpty() ? "" : " at " + spawned.get(0).position()));
+                }
+                if (frame == frames - 6 && !diagStepped) {
+                    for (pl.fawizja.pixel.monster.Monster m : s.monsters().monsters()) {
+                        if (m.type().key().equals("wolf") && m.position().distanceTo(me) <= 6) {
+                            Position from = m.position();
+                            m.setNextActionMs(0);
+                            diagStepped = s.monsters().stepToward(m, from.translate(-3, 3), me, now);
+                            if (diagStepped) Gdx.app.log("Pixel", "diag step facing " + m.facing() + " from " + from + " to " + m.position() + " frame " + frame);
+                        }
+                    }
+                }
+                return;
+            }
             pc.heal(pc.maxHealth());   // podglad: wokol sa prawdziwe potwory jaskini
             String[] castArg = demo.startsWith("cast:") ? demo.split(":") : null;   // cast:potwor:czar - dowolny czar dowolnego potwora
             String key = castArg != null ? castArg[1] : demo.equals("spear") ? "orc_spearman" : demo.equals("caster") ? "orc_shaman" : demo.equals("area") ? "venom_hydra"

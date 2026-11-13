@@ -34,6 +34,13 @@ po kawałku.
   Nie uzyto: chmur (rozmyte, nie pikselart), run-kamieni z JPG (artefakty kompresji, 15-20 px, rozowe tlo), schodow, drabin, dziur
   i dachow (paczka 238 obrazkow ich nie ma; zostaly tam same przedmioty z Tibii i inne cudze, wykluczone).
 
+- Kierunki potworów: poza przodem (`klucz.png`) są pliki `klucz_up`, `klucz_left`, `klucz_right`, każdy z klatkami `_walk1`, `_walk2`.
+  Opcjonalnie (8 kierunków, od 2026-11-12) skosy: `klucz_ne`, `klucz_nw`, `klucz_se`, `klucz_sw` (północny wschód, północny zachód,
+  południowy wschód, południowy zachód; `n` = górna krawędź ekranu), każdy w komplecie 3 plików: postój, `_walk1`, `_walk2`
+  (np. `monsters/wolf_ne.png`, `wolf_ne_walk1.png`, `wolf_ne_walk2.png`). Rozmiar jak plik postoju potwora (32x32, duże potwory
+  64x64). Skos bez kompletu 3 plików jest ignorowany (test `MonsterArtAndNamesTest`). Bez grafik skosu gra robi jak Tibia:
+  NE i SE używają grafiki „w prawo”, NW i SW „w lewo” (`CreatureFrames.pick`); można dodać dowolną liczbę skosów, reszta zostaje na zastępstwie.
+  Postać gracza ma na razie 4 strony (`characters/<profesja>_down|up|left|right`), skosy też patrzą w lewo/prawo.
 - Duże potwory: plik postoju `monsters/klucz.png` od 41 px (`TileArt.BIG_MONSTER_MIN`) jest rysowany w naturalnym rozmiarze na płótnie 64x64
   (2x2 pola, pole potwora = prawy dolny kwadrat, jak smok w Tibii; `TileArt.bigMonster`, rysowanie w `GameScreen`); mniejsze
   grafiki (do 40 px) zostają w jednym polu. Pliki większe niż 64 px są przycinane do 64. Złoty smok `dune_drake*.png` ma

@@ -153,8 +153,9 @@ class ControlSchemesTest {
         assertEquals(Direction.EAST, HoldToWalk.classify(4, 0));
         assertEquals(Direction.SOUTH, HoldToWalk.classify(0.2f, 3), "y rosnie na poludnie");
         assertEquals(Direction.NORTH_EAST, HoldToWalk.classify(3, -3));
-        assertEquals(Direction.NORTH_EAST, HoldToWalk.classify(3, -2.5f), "okolo 40 stopni: jeszcze skos");
-        assertEquals(Direction.EAST, HoldToWalk.classify(3, -1.5f), "okolo 27 stopni: prosto (waski klin skosu)");
+        assertEquals(Direction.NORTH_EAST, HoldToWalk.classify(3, -2.5f), "okolo 40 stopni: skos");
+        assertEquals(Direction.NORTH_EAST, HoldToWalk.classify(3, -1.5f), "okolo 27 stopni: sektor skosu ma 45 stopni");
+        assertEquals(Direction.EAST, HoldToWalk.classify(3, -1f), "okolo 18 stopni: prosto");
         assertEquals(Direction.SOUTH_WEST, HoldToWalk.classify(-2, 2));
         assertEquals(Direction.WEST, HoldToWalk.classify(-5, 2));
     }
@@ -177,19 +178,12 @@ class ControlSchemesTest {
     void classicStickKeepsItsDefaultsAndFollowsSensitivity() {
         assertEquals(StickFilter.ENGAGE, ControlTuning.engage(ControlTuning.DEFAULT), 1e-6);
         assertEquals(StickFilter.RELEASE, ControlTuning.release(ControlTuning.DEFAULT), 1e-6);
-        assertEquals(StickFilter.DIAGONAL_ENTER, ControlTuning.classicDiagonal(ControlTuning.DEFAULT), 1e-9);
-        assertEquals(StickFilter.DIAGONAL_PUSH, ControlTuning.classicDiagonalPush(ControlTuning.DEFAULT), 1e-6);
         StickFilter f = new StickFilter();
         f.setSensitivity(1);
         assertNull(f.update(0.5f, 0, 0), "niska czulosc: wieksze wychylenie");
         assertEquals(Direction.EAST, f.update(0.7f, 0, 10));
         f.reset();
-        float[] v = at(52, 1);
-        assertEquals(Direction.NORTH, f.update(v[0], v[1], 0), "niska czulosc: waski klin skosu");
-        f.reset();
         f.setSensitivity(5);
-        assertEquals(Direction.NORTH_EAST, f.update(v[0], v[1], 0), "wysoka czulosc: szerszy klin skosu");
-        f.reset();
         assertEquals(Direction.EAST, f.update(0.32f, 0, 0));
         // czulosc spoza zakresu
         assertEquals(ControlTuning.engage(1), ControlTuning.engage(-4), 1e-6);

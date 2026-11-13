@@ -3,14 +3,14 @@ package pl.fawizja.pixel.movement;
 import pl.fawizja.pixel.world.Direction;
 
 /**
- * Spokojniejszy joystick na telefon (2026-10-29, Darek: "joystick za czuly"): wektor galki 0..1 (os y w gore)
- * zamieniany na kierunek kroku z histereza.
+ * Joystick na telefon, 8 kierunkow (2026-11-12, wlasciciel: "8 kierunkow jak w Tibii"): wektor galki 0..1 (os y w gore)
+ * zamieniany na kierunek kroku. Zadnego czekania na skos - ruszenie i zmiana kierunku dzieja sie od razu.
  * <ul>
- *   <li>ruch rusza dopiero przy wyraznym wychyleniu ({@link #ENGAGE}), a gasnie ponizej {@link #RELEASE},</li>
- *   <li>kierunki proste maja pierwszenstwo: skos tylko w waskim klinie wokol 45 stopni ({@link #DIAGONAL_ENTER})
- *       i przy mocnym wychyleniu ({@link #DIAGONAL_PUSH}); raz wybrany skos trzyma sie w szerszym klinie,</li>
- *   <li>zmiana kierunku prostego na inny prosty wymaga przejscia {@link #HYSTERESIS} stopni za granice,</li>
- *   <li>nowy kierunek musi sie utrzymac {@link #SETTLE_MS} ms, zanim zastapi biezacy (bez drgan kciuka).</li>
+ *   <li>ruch rusza dopiero przy wyraznym wychyleniu ({@link #ENGAGE}), a gasnie ponizej {@link #RELEASE}
+ *       (martwa strefa z histereza, spokojniejszy joystick z 2026-10-29),</li>
+ *   <li>8 rownych sektorow po 45 stopni (kierunki proste i skosy tak samo szerokie),</li>
+ *   <li>histereza kata: biezacy kierunek trzyma sie jeszcze {@link #HYSTERESIS} stopni za granica sektora, wiec
+ *       drgajacy kciuk na granicy nie przeskakuje miedzy sasiednimi kierunkami.</li>
  * </ul>
  */
 public final class StickFilter {
@@ -19,33 +19,20 @@ public final class StickFilter {
     public static final float ENGAGE = 0.45f;
     /** Wychylenie, ponizej ktorego postac staje (mniejsze niz ENGAGE - histereza). */
     public static final float RELEASE = 0.30f;
-    /** Polowa klina skosu przy wejsciu w skos (stopnie wokol 45). */
-    public static final double DIAGONAL_ENTER = 10.0;
-    /** Polowa klina, w ktorym raz wybrany skos sie utrzymuje. */
-    public static final double DIAGONAL_KEEP = 18.0;
-    /** Minimalne wychylenie dla skosu. */
-    public static final float DIAGONAL_PUSH = 0.6f;
-    /** O ile stopni za granica 45 trzeba wyjsc, zeby zmienic kierunek prosty na sasiedni. */
-    public static final double HYSTERESIS = 8.0;
-    /** Ile ms nowy kierunek musi trwac, zanim zastapi poprzedni. */
-    public static final long SETTLE_MS = 70;
+    /** O ile stopni za granica sektora (22,5 od srodka kierunku) biezacy kierunek jeszcze sie trzyma. */
+    public static final double HYSTERESIS = 10.0;
 
     /** Kopia Direction.values() - bez nowej tablicy w kazdej klatce. */
     private static final Direction[] DIRS = Direction.values();
 
     private Direction current;
-    private Direction pending;
-    private long pendingSinceMs;
     /** Progi z suwaka czulosci ({@link ControlTuning}); domyslnie stale powyzej (czulosc 3). */
-    private float engage = ENGAGE, release = RELEASE, diagonalPush = DIAGONAL_PUSH;
-    private double diagonalEnter = DIAGONAL_ENTER;
+    private float engage = ENGAGE, release = RELEASE;
 
-    /** Czulosc 1..5 z ustawien (3 = stale {@link #ENGAGE}, {@link #DIAGONAL_ENTER} itd.). */
+    /** Czulosc 1..5 z ustawien (3 = stale {@link #ENGAGE}, {@link #RELEASE}). */
     public void setSensitivity(int s) {
         engage = ControlTuning.engage(s);
         release = ControlTuning.release(s);
-        diagonalEnter = ControlTuning.classicDiagonal(s);
-        diagonalPush = ControlTuning.classicDiagonalPush(s);
     }
 
     /** Kierunek dla wychylenia (vx, vy) w chwili nowMs albo null (postoj). */
@@ -55,39 +42,23 @@ public final class StickFilter {
             reset();
             return null;
         }
-        double angle = angleOf(vx, vy);
-        Direction want = classify(angle, len);
-        if (current == null) {
-            current = want;
-            pending = null;
-            return current;
-        }
-        if (want == current) {
-            pending = null;
-        } else if (want != pending) {
-            pending = want;
-            pendingSinceMs = nowMs;
-        } else if (nowMs - pendingSinceMs >= SETTLE_MS) {
-            current = want;
-            pending = null;
-        }
+        current = classify(angleOf(vx, vy), current);
         return current;
     }
 
     /** Puszczona galka: nastepny ruch znow wymaga wyraznego wychylenia. */
     public void reset() {
         current = null;
-        pending = null;
     }
 
     public Direction current() { return current; }
 
-    private Direction classify(double angle, double len) {
-        Direction diag = nearest(angle, true), card = nearest(angle, false);
-        if (current != null && current.diagonal() && len >= release && dist(angle, current) <= diagonalEnter + DIAGONAL_KEEP - DIAGONAL_ENTER) return current;
-        if (len >= diagonalPush && dist(angle, diag) <= diagonalEnter) return diag;
-        if (current != null && !current.diagonal() && dist(angle, current) <= 45 + HYSTERESIS) return current;
-        return card;
+    /** Sektor 8 kierunkow dla kata (0 = wschod, 90 = polnoc) z histereza wokol biezacego kierunku (moze byc null). */
+    public static Direction classify(double angle, Direction current) {
+        if (current != null && dist(angle, current) <= 22.5 + HYSTERESIS) return current;
+        Direction best = null;
+        for (Direction d : DIRS) if (best == null || dist(angle, d) < dist(angle, best)) best = d;
+        return best;
     }
 
     /** Kat srodka kierunku (0 = wschod, 90 = polnoc). */

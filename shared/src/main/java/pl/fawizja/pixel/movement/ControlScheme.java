@@ -6,14 +6,14 @@ import pl.fawizja.pixel.i18n.Messages;
  * do wyboru w ustawieniach). Klawiatura dziala zawsze, niezaleznie od wariantu.
  */
 public enum ControlScheme {
-    /** Staly krzyzyk w lewym dolnym rogu: 4 strzalki i skosy w rogach, przytrzymanie = krok za krokiem. */
+    /** Staly krzyzyk w lewym dolnym rogu: 8 kierunkow (4 strzalki i skosy w rogach), przytrzymanie = krok za krokiem. */
     DPAD("dpad", "Krzyżyk", "Krzyżyk"),
-    /** Joystick pojawia sie pod kciukiem; 4 kierunki, skos tylko po chwili trzymania w klinie skosu. */
+    /** Joystick pod kciukiem tylko w 4 kierunkach (do wyboru w opcjach); skos dopiero po chwili trzymania w klinie skosu. */
     FLOAT4("float4", "Pływający joystick (4 kierunki)", "Pływający, 4 kierunki"),
     /** Bez galki: przytrzymanie palca na mapie prowadzi postac w strone palca (jak chodzenie mysza w Tibii). */
     HOLD("hold", "Przytrzymanie na mapie", "Przytrzymanie na mapie"),
-    /** Dotychczasowy joystick ({@link StickFilter}). */
-    CLASSIC("classic", "Klasyczny joystick", "Klasyczny joystick");
+    /** Joystick (staly albo pod kciukiem wg ustawien), 8 kierunkow od razu ({@link StickFilter}). */
+    CLASSIC("classic", "Joystick (8 kierunków)", "Joystick, 8 kierunków");
 
     public static final ControlScheme DEFAULT = DPAD;
 

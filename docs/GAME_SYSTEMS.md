@@ -495,11 +495,17 @@ Kolizje (etap 12): poza strefa ochronna gracze blokuja sobie pola (na serwerze, 
 w strefie ochronnej mozna przez siebie przejsc jak w Tibii; potwory nie wchodza na pole zadnego gracza (nie tylko celu).
 Przyspieszenie: czary utani hur / utani gran hur (`SpellKind.HASTE`, w spells.csv baza = procent, zasieg = sekundy),
 ikona stanu w HUD i pole na automatycznym pasku czarow (zamiast poswiaty, gdy postac zna przyspieszenie).
-Joystick (`StickFilter`): rusza przy wychyleniu 45%, staje ponizej 30%, kierunki proste maja pierwszenstwo (skos
-tylko w klinie +-10 stopni i przy wychyleniu 60%, potem trzyma sie w +-18), zmiana prosty-prosty z histereza 8 stopni,
-nowy kierunek musi trwac 70 ms (bez drgan kciuka); klawiatura na PC.
+8 kierunkow (2026-11-12, decyzja wlasciciela: "jak w Tibii, skos x3"): gracz i potwory chodza w 8 kierunkach, krok po skosie
+trwa `MovementSystem.DIAGONAL_STEP_FACTOR` = 3 zwykle kroki, rogi wg `WorldMap.diagonalCornersOpen`; ta sama logika
+(`GameSession.update`) dziala offline i na serwerze (serwer przyjmuje wszystkie 8 nazw `Direction`).
+Joystick (`StickFilter`, wariant "Joystick (8 kierunkow)", staly albo pod kciukiem wg ustawien): rusza przy wychyleniu 45%,
+staje ponizej 30% (martwa strefa jak dotad), 8 rownych sektorow po 45 stopni bez zadnego opoznienia, histereza kata 10 stopni
+za granica sektora (drgajacy kciuk nie przeskakuje). Krzyzyk (`DpadInput`) i przytrzymanie na mapie (`HoldToWalk`) tez daja 8 kierunkow
+od razu; "Plywajacy, 4 kierunki" (`FourWayStick`, skos po chwili trzymania w klinie) zostaje do wyboru w ustawieniach.
+Klawiatura (`KeyboardDirection`): dwa klawisze naraz (strzalki / WASD) = skos, klawisze przeciwne sie znosza; blok numeryczny
+1/3/7/9 = skosy (Q/E/Z/C maja inne funkcje: cel, uzycie, mikstura, dziennik). Domyslny wariant (krzyzyk) byl i jest 8-kierunkowy.
 Marsz po dotknieciu mapy (`Pathfinder.path`, A*): krok prosty 100, skos 350 (trwa jak 3 proste + zapas), drobna kara
-za zakret - trasa prosta / w ksztalcie L, skos tylko przy przecisnieciu sie miedzy przeszkodami.
+za zakret - trasa prosta / w ksztalcie L, skos tylko przy przecisnieciu sie miedzy przeszkodami (marsz po dotknieciu mapy zostaje 4-kierunkowy).
 Sterowanie dotykiem (etap 17, `GameScreen` + `Hud.floatJoystick`): dotkniecie mapy rozstrzyga sie przy puszczeniu
 palca. Krotkie dotkniecie = pole (cel, marsz, rozmowa, lup), przytrzymanie 450 ms = podglad pola
 (`GameSession.lookAt`: potwor z poziomem i zdrowiem, NPC z rola, cialo, przedmioty, przejscia, strefa ochronna,
@@ -714,6 +720,10 @@ przy pauzie, utracie fokusu i zamknieciu.
   RANGED / MAGIC / HEALER z zasiegiem > 1 trzymaja dystans rowny zasiegowi ataku (za blisko - odchodza, za daleko
   albo bez linii strzalu - podchodza), strzelaja z linii wzroku; HEALER (leczy najslabszego
   sojusznika < 70% w promieniu 4), boss (leczenie raz ponizej 30%, atak 30% szybszy ponizej 50%).
+- 8 kierunkow (2026-11-12): wedrowka (IDLE) losuje 8 kierunkow (skos x3 czasu kroku jak u gracza), ucieczka i trzymanie dystansu
+  wybieraja kierunek z 8 wg przyrostu odleglosci na jednostke czasu (skos tylko, gdy prosto nie da sie uciec), poscig to A* z skosami.
+  Zwrot (`Monster.facing`) ma 8 wartosci; grafika: `CreatureFrames.pick` bierze `klucz_ne|nw|se|sw` (+ `_walk1/_walk2`), gdy
+  sa komplety, inaczej jak w Tibii skos patrzy w prawo (NE, SE) albo w lewo (NW, SW); konwencja plikow w docs/GRAPHICS.md.
 - Potwory nie wchodza na strefy ochronne, przejscia, gracza ani siebie nawzajem; nie pojawiaja sie
   blizej niz 5 kafelkow od gracza.
 - Wydajnosc: `SpatialGrid` (komorki 8x8); symulowane sa tylko potwory w promieniu 20 kafelkow.
