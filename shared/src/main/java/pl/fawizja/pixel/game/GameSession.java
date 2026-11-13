@@ -1517,14 +1517,23 @@ public final class GameSession {
             return false;
         }
         boolean ship = n.role() == NpcRole.CAPTAIN;
-        if (ship && !pc.canSail()) {
-            log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.rejsy_tylko_dla_kont")
-                    + premiumHint(n.town()));
-            return false;
-        }
         pl.fawizja.pixel.npc.Travel.Route route = null;
         for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(npcs, n)) {
             if (r.to().town().equalsIgnoreCase(town)) route = r;
+        }
+        if (ship) {
+            pl.fawizja.pixel.npc.ShipAccess.Block block = route == null
+                    ? (pc.canSail() ? pl.fawizja.pixel.npc.ShipAccess.Block.NONE : pl.fawizja.pixel.npc.ShipAccess.Block.PREMIUM)
+                    : pl.fawizja.pixel.npc.ShipAccess.check(pc, n.key(), route.to().key());
+            if (block == pl.fawizja.pixel.npc.ShipAccess.Block.PREMIUM) {
+                log.add(nowMs, EventLog.Kind.WARNING, n.name() + Messages.get("game_session.rejsy_tylko_dla_kont")
+                        + premiumHint(n.town()));
+                return false;
+            }
+            if (block == pl.fawizja.pixel.npc.ShipAccess.Block.FLAG) {
+                log.add(nowMs, EventLog.Kind.WARNING, n.name() + ": " + pl.fawizja.pixel.npc.ShipAccess.hint(route.to().key()));
+                return false;
+            }
         }
         if (route == null) {
             log.add(nowMs, EventLog.Kind.WARNING, n.name() + (ship ? Messages.get("game_session.tam_nie_plywam") : Messages.get("game_session.tam_nie_jezdze")));

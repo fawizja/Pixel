@@ -14,13 +14,20 @@ import pl.fawizja.pixel.monster.MonsterRegistry;
 /** Zadania z data/quests.csv (cele sprawdzane wzgledem potworow i przedmiotow). */
 public final class QuestRegistry {
     private final Map<String, QuestType> byKey;
+    private final Map<String, List<String>> prereqs;
 
-    private QuestRegistry(Map<String, QuestType> byKey) { this.byKey = Collections.unmodifiableMap(byKey); }
+    private QuestRegistry(Map<String, QuestType> byKey) { this(byKey, Map.of()); }
+
+    private QuestRegistry(Map<String, QuestType> byKey, Map<String, List<String>> prereqs) {
+        this.byKey = Collections.unmodifiableMap(byKey);
+        this.prereqs = Collections.unmodifiableMap(prereqs);
+    }
 
     public static QuestRegistry loadDefault(ItemRegistry items, MonsterRegistry monsters) {
         try {
             QuestRegistry r = parse(SpellRegistry.readLines("/data/quests.csv"), items, monsters);
-            return r.withChains(SpellRegistry.readLines("/data/quest_chains.csv"), items);
+            return r.withChains(SpellRegistry.readLines("/data/quest_chains.csv"), items)
+                    .withRequires(SpellRegistry.readLines("/data/quest_requires.csv"));
         } catch (IOException e) {
             throw new IllegalStateException("Cannot read quests", e);
         }
@@ -94,6 +101,49 @@ public final class QuestRegistry {
         }
         return new QuestRegistry(map);
     }
+
+    /**
+     * Zaleznosci miedzy liniami zadan (data/quest_requires.csv): {@code misja;wymagana1,wymagana2}. Misja jest odblokowana
+     * dopiero po oddaniu wszystkich wymaganych zadan (poza lancuchem {@code requires}, ktory laczy misje jednego zleceniodawcy).
+     */
+    public QuestRegistry withRequires(List<String> lines) throws IOException {
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        int n = 0;
+        for (String line : lines) {
+            n++;
+            String t = line.trim();
+            if (t.isEmpty() || t.startsWith("#")) continue;
+            String[] f = t.split(";");
+            if (f.length != 2) throw new IOException("quest_requires.csv line " + n + ": expected 2 fields");
+            if (!byKey.containsKey(f[0].trim())) throw new IOException("quest_requires.csv line " + n + ": unknown quest " + f[0]);
+            List<String> req = new ArrayList<>();
+            for (String r : f[1].split(",")) {
+                if (!byKey.containsKey(r.trim())) throw new IOException("quest_requires.csv line " + n + ": unknown required quest " + r);
+                req.add(r.trim());
+            }
+            map.put(f[0].trim(), List.copyOf(req));
+        }
+        // bez petli miedzy liniami
+        for (String k : map.keySet()) {
+            java.util.Set<String> seen = new java.util.HashSet<>();
+            java.util.ArrayDeque<String> todo = new java.util.ArrayDeque<>(List.of(k));
+            while (!todo.isEmpty()) {
+                String c = todo.poll();
+                for (QuestType q = byKey.get(c); q != null; q = q.requires() == null ? null : byKey.get(q.requires())) {
+                    for (String r : prereqs(map, q.key())) {
+                        if (r.equals(k)) throw new IOException("quest_requires.csv: loop at " + k);
+                        if (seen.add(r)) todo.add(r);
+                    }
+                }
+            }
+        }
+        return new QuestRegistry(new LinkedHashMap<>(byKey), map);
+    }
+
+    private static List<String> prereqs(Map<String, List<String>> m, String key) { return m.getOrDefault(key, List.of()); }
+
+    /** Zadania, ktore trzeba ukonczyc przed ta misja (poza jej poprzednikiem w lancuchu); pusta lista, gdy brak. */
+    public List<String> prereqs(String key) { return prereqs(prereqs, key); }
 
     public QuestType get(String key) { return byKey.get(key); }
     public Collection<QuestType> all() { return byKey.values(); }

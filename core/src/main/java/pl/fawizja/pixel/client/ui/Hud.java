@@ -3307,9 +3307,12 @@ public final class Hud {
                 long gold = session.gold();
                 String verb = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN ? Messages.get("hud.plyn") : Messages.get("hud.jedz_do");
                 for (pl.fawizja.pixel.npc.Travel.Route r : pl.fawizja.pixel.npc.Travel.routes(session.npcs(), npc)) {
-                    boolean locked = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN && !pc.canSail();
+                    pl.fawizja.pixel.npc.ShipAccess.Block block = npc.role() == pl.fawizja.pixel.npc.NpcRole.CAPTAIN
+                            ? pl.fawizja.pixel.npc.ShipAccess.check(pc, npc.key(), r.to().key()) : pl.fawizja.pixel.npc.ShipAccess.Block.NONE;
+                    boolean locked = block != pl.fawizja.pixel.npc.ShipAccess.Block.NONE;
                     left.add(new MenuRow("npc:travel:" + r.to().town(), verb + r.to().town(),
-                            String.format("%,d gp", r.price()) + (locked ? Messages.get("hud.wymaga_premium_lub_promocji")
+                            String.format("%,d gp", r.price()) + (block == pl.fawizja.pixel.npc.ShipAccess.Block.FLAG ? Messages.get("ship.row_locked")
+                                    : locked ? Messages.get("hud.wymaga_premium_lub_promocji")
                                     : gold < r.price() ? Messages.get("hud.za_malo_monet_w") : ""), !locked && gold >= r.price()));
                 }
                 break;

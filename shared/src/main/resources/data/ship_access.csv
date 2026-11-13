@@ -1,0 +1,10 @@
+
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+# kapitan (cel rejsu);wymog wejscia (flaga postaci) albo -;konto: premium wymagane (1) albo rejs darmowy (0);quest ustawiajacy flage;podpowiedz kapitana (pl)
+quay_captain;-;0;-;
+whisper_captain;ship.whisper;0;ferry_m4;Nie wpuszczę cię na pokład bez broszki. Pogadaj z Oswinem przy nabrzeżu i przynieś mu to, co ukradł Król Sroczy.
+ice5_captain;ship.ice5;1;ice_m4;Na Białą Zamieć płynę tylko z pozwoleniem Halvara z Frostholm. Zdobądź je, zanim zawiniemy.
+desert5_captain;ship.desert5;1;desert_m4;Złote Wydmy są zamknięte. Karawaniarz Idris w Qasirah wie, jak zdobyć zgodę.
+tropic5_captain;ship.tropic5;1;tropic_m4;Mgła jest gęsta, a rafy zdradliwe. Botanik Ilvane w Selvaran da ci przepustkę, jeśli na nią zasłużysz.
+oak5_captain;ship.oak5;1;oak_m4;Stare Dęby wpuszczają tylko znanych gościom Straży Corwina z Varden. Zdobądź jego list.
+# END islands5

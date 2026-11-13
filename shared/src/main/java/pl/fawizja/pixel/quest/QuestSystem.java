@@ -33,7 +33,9 @@ public final class QuestSystem {
 
     /** Czy poprzedni etap lancucha jest ukonczony (albo zadanie nie ma poprzednika). */
     public boolean unlocked(PlayerCharacter pc, QuestType q) {
-        return q.requires() == null || pc.quests().state(q.requires()) == QuestLog.State.DONE;
+        if (q.requires() != null && pc.quests().state(q.requires()) != QuestLog.State.DONE) return false;
+        for (String r : registry.prereqs(q.key())) if (pc.quests().state(r) != QuestLog.State.DONE) return false;
+        return true;
     }
 
     /**

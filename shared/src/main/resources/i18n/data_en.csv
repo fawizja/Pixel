@@ -1360,3 +1360,272 @@ item;coalscale_armor;name;Coal Scale Armor
 item;gilded_helmet;name;Gilded Dragon Helmet
 item;pearl_aegis;name;Pearl Aegis
 monster;bog_reaver;name;Bog Raider
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+quest;ferry_m1;name;To the thieves' burrow
+quest;ferry_m1;desc;Oswin will lend his boat only to someone who knows the way: find the Magpie Burrow on the fields east of Varden and step inside. Bandits guard the door.
+quest;ferry_m2;name;The Magpie's Guard
+quest;ferry_m2;desc;Bandits guard the burrow. Defeat 12 and the gate to the king's hall will give way.
+quest;ferry_m3;name;The Magpie King
+quest;ferry_m3;desc;The Magpie King keeps the brooch in a vault behind his hall. Defeat him and the vault key falls from his belt.
+quest;ferry_m4;name;The Silver Brooch
+quest;ferry_m4;desc;Open the chest in the vault and bring Oswin his family's silver brooch. In return he will take you to the Isle of Whispers.
+quest;wh_crabs_m1;name;Pincers on the Beach
+quest;wh_crabs_m1;desc;Crabs cut the fishermen's nets. Defeat 10.
+quest;wh_crabs_m2;name;Pearls from Crabs
+quest;wh_crabs_m2;desc;Pearls hide in the shells. Bring 3.
+quest;wh_wolves_m1;name;The Wolf Pack
+quest;wh_wolves_m1;desc;A pack howls outside the hermit's hut. Defeat 10 wolves.
+quest;wh_wolves_m2;name;Boars in the Crops
+quest;wh_wolves_m2;desc;Boars dig up the garden. Defeat 6.
+quest;wh_spiders_m1;name;Spiders in the Grottos
+quest;wh_spiders_m1;desc;Spiders have webbed the grottos. Defeat 10.
+quest;wh_spiders_m2;name;Silk for Robes
+quest;wh_spiders_m2;desc;The hermit weaves robes. Bring 8 skeins of silk.
+quest;wh_goblins_m1;name;Raiders of the Shaft
+quest;wh_goblins_m1;desc;Goblins took the shaft. Defeat 12.
+quest;wh_goblins_m2;name;Shaft Shamans
+quest;wh_goblins_m2;desc;Shamans stir up the rest. Defeat 6.
+quest;wh_shades_m1;name;Into the Grottos
+quest;wh_shades_m1;desc;The lightkeeper hears whispers at night from the grottos below. Go down and see.
+quest;wh_shades_m2;name;The Whispering Shades
+quest;wh_shades_m2;desc;The shades whisper names. Silence 10.
+quest;wh_bones_m1;name;Gallery Skeletons
+quest;wh_bones_m1;desc;Skeletons roam the galleries. Defeat 12.
+quest;wh_bones_m2;name;Centipedes in the Bones
+quest;wh_bones_m2;desc;Centipedes live in the ribs. Defeat 10.
+quest;wh_bandits_m1;name;Traps on the Shore
+quest;wh_bandits_m1;desc;Smugglers set snares. Defeat 10.
+quest;wh_bandits_m2;name;The Fences
+quest;wh_bandits_m2;desc;Fences buy the loot. Defeat 8.
+quest;wh_cairn_m1;name;Wardens of the Cairn
+quest;wh_cairn_m1;desc;Wights guard the way to the king's chamber. Defeat 12.
+quest;wh_cairn_m2;name;End of a Dynasty
+quest;wh_cairn_m2;desc;The Lord of the Cairn still rules the dead. Defeat him at the bottom of the mound.
+quest;ice_m1;name;Halvar's Lantern
+quest;ice_m1;desc;Cartographer Halvar charts a frozen isle but needs steady hands. Stand at his map table on the quay.
+quest;ice_m2;name;Furs for the Guides
+quest;ice_m2;desc;Expedition guides need warm furs. Bring 8 yeti furs.
+quest;ice_m3;name;Golems on the Trail
+quest;ice_m3;desc;Ice golems block the northern trail. Defeat 10.
+quest;ice_m4;name;Proof from Afar
+quest;ice_m4;desc;Halvar wants proof you can handle an island: the Lord of the Cairn on the Isle of Whispers must fall. Then you earn the sailing leave.
+quest;ice_m5;name;First Snowdrift
+quest;ice_m5;desc;With the leave, sail to the Isle of the White Blizzard and set foot on its shore. Halvar will count out the rest of your reward.
+quest;desert_m1;name;Idris's Tent
+quest;desert_m1;desc;Caravaneer Idris is gathering a crew for the Golden Dunes. Visit his tent in the harbour.
+quest;desert_m2;name;Venom for the Journey
+quest;desert_m2;desc;The caravan healer needs venom. Bring 12 scorpion tails.
+quest;desert_m3;name;Wraiths of the Trail
+quest;desert_m3;desc;Desert wraiths lose caravans. Defeat 12.
+quest;desert_m4;name;The Jarl and the Sand
+quest;desert_m4;desc;Idris sells the way only to those who defeated the Jarl of the Rime on the Isle of the White Blizzard (the door needs a party).
+quest;desert_m5;name;First Dune
+quest;desert_m5;desc;Sail to the Isle of Golden Dunes and step onto its sand. Idris will pay the rest.
+quest;tropic_m1;name;Ilvane's Glasshouse
+quest;tropic_m1;desc;Botanist Ilvane studies flowers of the Emerald Mist. Visit her glasshouse by the dock.
+quest;tropic_m2;name;Hide for Boots
+quest;tropic_m2;desc;The expedition needs sturdy boots. Bring 10 crocodile hides.
+quest;tropic_m3;name;Serpents on the Isthmus
+quest;tropic_m3;desc;Serpents swarm the misty isthmus. Defeat 15.
+quest;tropic_m4;name;The Regent of the Desert
+quest;tropic_m4;desc;Ilvane knows the route but wants a voucher: defeat the Regent of the Sandstorm on the Golden Dunes.
+quest;tropic_m5;name;First Mist
+quest;tropic_m5;desc;Step onto the Isle of Emerald Mist. Ilvane will pay the rest.
+quest;oak_m1;name;Corwin's Post
+quest;oak_m1;desc;Warden Corwin keeps the guest list of the Ancient Oaks. Report to his post in the harbour.
+quest;oak_m2;name;Scales for the Seal
+quest;oak_m2;desc;The letter seal is cast from scales. Bring 6 wyvern scales.
+quest;oak_m3;name;Wraiths of the Road
+quest;oak_m3;desc;Wraith knights block the road to the port. Defeat 12.
+quest;oak_m4;name;The Empress and the Oak
+quest;oak_m4;desc;Corwin will add you to the list once you defeat the Empress of Vines in the Emerald Mist.
+quest;oak_m5;name;First Oak
+quest;oak_m5;desc;Walk beneath the Ancient Oaks. Corwin will pay the rest.
+quest;ice_s65_m1;name;Yetis on the Ice
+quest;ice_s65_m1;desc;Yetis wreck the camp. Defeat 12.
+quest;ice_s65_m2;name;Drift Lurkers
+quest;ice_s65_m2;desc;White lurkers hide in the drifts. Defeat 10.
+quest;ice_s110_m1;name;Frozen Pilgrims
+quest;ice_s110_m1;desc;Pilgrims wander the caves. Defeat 12.
+quest;ice_s110_m2;name;Golems of the Ice Halls
+quest;ice_s110_m2;desc;Golems guard the halls. Defeat 10.
+quest;ice_s200_m1;name;Rime Dragons
+quest;ice_s200_m1;desc;Dragons nest in the spire. Defeat 8.
+quest;ice_s200_m2;name;Centipedes of the Ice Halls
+quest;ice_s200_m2;desc;Centipedes bite travellers. Defeat 10.
+quest;desert_s95_m1;name;Sand Devourers
+quest;desert_s95_m1;desc;Devourers undermine the trail. Defeat 12.
+quest;desert_s95_m2;name;Gilded Beetles
+quest;desert_s95_m2;desc;Beetles gnaw the wagons. Defeat 10.
+quest;desert_s150_m1;name;Dune Skulkers
+quest;desert_s150_m1;desc;Skulkers ambush from the sand. Defeat 12.
+quest;desert_s150_m2;name;Dune Zealots
+quest;desert_s150_m2;desc;Zealots burn pilgrims. Defeat 10.
+quest;desert_s240_m1;name;Crag Dragons
+quest;desert_s240_m1;desc;Dragons nest in the crags. Defeat 8.
+quest;desert_s240_m2;name;Obelisk Priests
+quest;desert_s240_m2;desc;Priests burn the paths. Defeat 10.
+quest;tropic_s120_m1;name;Marsh Lizards
+quest;tropic_s120_m1;desc;Lizards lurk in the fords. Defeat 12.
+quest;tropic_s120_m2;name;Canopy Lurkers
+quest;tropic_s120_m2;desc;Cats drop from the trees. Defeat 10.
+quest;tropic_s200_m1;name;Killer Orchids
+quest;tropic_s200_m1;desc;Orchids lure with scent. Defeat 12.
+quest;tropic_s200_m2;name;Hydras of the Fens
+quest;tropic_s200_m2;desc;Hydras threaten gatherers. Defeat 8.
+quest;tropic_s300_m1;name;Venom Hydras
+quest;tropic_s300_m1;desc;Hydras poison the streams. Defeat 8.
+quest;tropic_s300_m2;name;Gorgons of the Ruins
+quest;tropic_s300_m2;desc;Gorgons turn men to stone. Defeat 8.
+quest;oak_s130_m1;name;Briar Boars
+quest;oak_s130_m1;desc;Boars ruin the fields. Defeat 12.
+quest;oak_s130_m2;name;Moor Crones
+quest;oak_s130_m2;desc;Crones cast curses. Defeat 10.
+quest;oak_s200_m1;name;Crimson Shades
+quest;oak_s200_m1;desc;Shades appear at dusk. Defeat 10.
+quest;oak_s200_m2;name;Wyverns of the Cliffs
+quest;oak_s200_m2;desc;Wyverns carry off cattle. Defeat 8.
+quest;oak_s320_m1;name;Cursed Treants
+quest;oak_s320_m1;desc;Treants strangle the forest. Defeat 10.
+quest;oak_s320_m2;name;Wraith Knights
+quest;oak_s320_m2;desc;Knights patrol the ruins. Defeat 10.
+quest;ferry_m1;line;The Ferryman's Brooch
+quest;ferry_m1;where;Quiet Landing on the east coast
+quest;wh_crabs_m1;line;Crab Beaches
+quest;wh_crabs_m1;where;beaches of the Isle of Whispers
+quest;wh_wolves_m1;line;Wolves of the Hills
+quest;wh_wolves_m1;where;hills of the Isle of Whispers
+quest;wh_spiders_m1;line;The Hermit's Webs
+quest;wh_spiders_m1;where;caves of the Isle of Whispers
+quest;wh_goblins_m1;line;Goblins of the Mine
+quest;wh_goblins_m1;where;Mine of Quiet Echoes
+quest;wh_shades_m1;line;Whispers in the Grottos
+quest;wh_shades_m1;where;Whispering Grottos
+quest;wh_bones_m1;line;Bones of the Old Gallery
+quest;wh_bones_m1;where;Mound of the Lord of Shadows
+quest;wh_bandits_m1;line;Smugglers of the Cove
+quest;wh_bandits_m1;where;coast of the Isle of Whispers
+quest;wh_cairn_m1;line;Lord of the Cairn
+quest;wh_cairn_m1;where;Mound of the Lord of Shadows
+quest;ice_m1;line;Halvar's Leave
+quest;ice_m1;where;Frostholm, the quay
+quest;desert_m1;line;The Caravaneer's Consent
+quest;desert_m1;where;Qasirah, the harbour
+quest;tropic_m1;line;The Botanist's Pass
+quest;tropic_m1;where;Selvaran, the dock
+quest;oak_m1;line;The Warden's Letter
+quest;oak_m1;where;Varden, the harbour
+quest;ice_s65_m1;line;Fangs of Winter
+quest;ice_s65_m1;where;Isle of the White Blizzard
+quest;ice_s110_m1;line;Rime in the Caves
+quest;ice_s110_m1;where;Isle of the White Blizzard
+quest;ice_s200_m1;line;Dragons of the Blizzard
+quest;ice_s200_m1;where;Isle of the White Blizzard
+quest;desert_s95_m1;line;Stings of the Dunes
+quest;desert_s95_m1;where;Isle of Golden Dunes
+quest;desert_s150_m1;line;Shadow of the Obelisks
+quest;desert_s150_m1;where;Isle of Golden Dunes
+quest;desert_s240_m1;line;Dragon Nests
+quest;desert_s240_m1;where;Isle of Golden Dunes
+quest;tropic_s120_m1;line;Jungle under Mist
+quest;tropic_s120_m1;where;Isle of Emerald Mist
+quest;tropic_s200_m1;line;The Mimic Garden
+quest;tropic_s200_m1;where;Isle of Emerald Mist
+quest;tropic_s300_m1;line;Heart of the Jungle
+quest;tropic_s300_m1;where;Isle of Emerald Mist
+quest;oak_s130_m1;line;Thorn and Tusk
+quest;oak_s130_m1;where;Isle of Ancient Oaks
+quest;oak_s200_m1;line;Wings over the Oakwood
+quest;oak_s200_m1;where;Isle of Ancient Oaks
+quest;oak_s320_m1;line;Oaks of the Night
+quest;oak_s320_m1;where;Isle of Ancient Oaks
+npc;quay_captain;name;Helmsman Brenn
+npc;quay_captain;greeting;We sail to the Isle of Whispers, but only with the ferryman Oswin's letter. Ask him about the brooch.
+npc;ferry_oswin;name;Ferryman Oswin
+npc;ferry_oswin;greeting;The ship is mine, but I lend the boat to the isle only to someone who gets my family brooch back from the Magpie King.
+npc;whisper_hermit;name;Hermit Maren
+npc;whisper_hermit;greeting;Wolves and spiders howl outside my hut. Will you help an old hermit?
+npc;whisper_keeper;name;Lightkeeper Dunstan
+npc;whisper_keeper;greeting;The lighthouse shines, but whispers rise from the grottos beneath. Someone must look.
+npc;whisper_miner;name;Prospector Hale
+npc;whisper_miner;greeting;The mine and the cairn are my life, and now goblins and bones infest them.
+npc;ice_halvar;name;Cartographer Halvar
+npc;ice_halvar;greeting;My chart of the White Blizzard is unfinished. Help me and you will earn leave to sail.
+npc;desert_idris;name;Caravaneer Idris
+npc;desert_idris;greeting;The Golden Dunes are beautiful and deadly. My caravan will go with you if you earn consent.
+npc;tropic_ilvane;name;Botanist Ilvane
+npc;tropic_ilvane;greeting;The Emerald Mist hides flowers no one has seen. I will give you a pass once you prove yourself.
+npc;oak_corwin;name;Warden Corwin
+npc;oak_corwin;greeting;The Ancient Oaks admit only those I know. Earn my letter.
+npc;ice_skuld;name;Outfitter Skuld
+npc;ice_skuld;greeting;Furs, hooks and crampons for the trip. I also have jobs about yetis and ice beasts.
+npc;ice_ragna;name;Warden Ragna
+npc;ice_ragna;greeting;Pilgrims and golems walk the caves. Will you help?
+npc;desert_nadira;name;Scout Nadira
+npc;desert_nadira;greeting;The dunes shift and stings lurk beneath. I have jobs.
+npc;desert_omar;name;Priest-Hunter Omar
+npc;desert_omar;greeting;The obelisks are angry at men. Help me quiet them.
+npc;tropic_tupa;name;Guide Tupa
+npc;tropic_tupa;greeting;The jungle eats the careless. I know the trails and the jobs.
+npc;tropic_inez;name;Herbalist Inez
+npc;tropic_inez;greeting;Orchids and hydras ruin my harvest. Will you help?
+npc;oak_hollis;name;Ranger Hollis
+npc;oak_hollis;greeting;Boars and crones spoil the Oak woods. Help the rangers.
+npc;oak_maeve;name;Knight-Captain Maeve
+npc;oak_maeve;greeting;Orcs and ruin sentries trouble the realm. I have jobs for them.
+npc;whisper_captain;name;Boatwoman Brenna
+npc;whisper_captain;shiphint;I will not take you aboard without the brooch. Talk to Oswin at the quay and bring him what the Magpie King stole.
+npc;whisper_captain;greeting;I sail to the mainland. Free, if you know why.
+place;Wyspa Szeptów;name;Isle of Whispers
+npc;ice5_captain;name;Captain Skuld
+npc;ice5_captain;shiphint;I sail to the White Blizzard only with Halvar of Frostholm's leave. Earn it first.
+npc;ice5_captain;greeting;I sail to the mainland. Premium accounts only.
+place;Wyspa Białej Zamieci;name;Isle of the White Blizzard
+npc;desert5_captain;name;Captain Zahir
+npc;desert5_captain;shiphint;The Golden Dunes are closed. Caravaneer Idris in Qasirah knows how to earn leave.
+npc;desert5_captain;greeting;I sail to the mainland. Premium accounts only.
+place;Wyspa Złotych Wydm;name;Isle of Golden Dunes
+npc;tropic5_captain;name;Captain Marisol
+npc;tropic5_captain;shiphint;The mist is thick and the reefs treacherous. Botanist Ilvane in Selvaran will give you a pass if you earn it.
+npc;tropic5_captain;greeting;I sail to the mainland. Premium accounts only.
+place;Wyspa Szmaragdowej Mgły;name;Isle of Emerald Mist
+npc;oak5_captain;name;Captain Edwin
+npc;oak5_captain;shiphint;The Ancient Oaks admit only guests known to Warden Corwin of Varden. Earn his letter.
+npc;oak5_captain;greeting;I sail to the mainland. Premium accounts only.
+place;Wyspa Starych Dębów;name;Isle of Ancient Oaks
+place;Nora Sroki;name;Magpie Burrow
+place;Obóz Wodza Zamieci;name;Camp of the Blizzard Warchief
+place;Obóz Hetmana Skarna;name;Hetman Skarn's Camp
+place;Skarbiec Sroki (głębiny);name;Magpie Hoard (depths)
+place;Groty Szeptów;name;Whispering Grottos
+place;Punkt Halvara;name;Halvar's Table
+place;Namiot Idrisa;name;Idris's Tent
+place;Szklarnia Ilvane;name;Ilvane's Glasshouse
+place;Posterunek Corwina;name;Corwin's Post
+monster;shore_scuttler;name;Shore Scuttler
+monster;whisper_shade;name;Whispering Shade
+monster;cairn_wight;name;Cairn Wight
+monster;cairn_lord;name;Lord of the Cairn
+monster;magpie_king;name;Magpie King
+monster;frost_lurker;name;Frost Lurker
+monster;rimecloak_pilgrim;name;Rimecloak Pilgrim
+monster;rime_jarl;name;Jarl of the Rime
+monster;dune_skulker;name;Dune Skulker
+monster;obelisk_priest;name;Obelisk Priest
+monster;sand_regent;name;Regent of the Sandstorm
+monster;canopy_lurker;name;Canopy Lurker
+monster;orchid_mimic;name;Orchid Mimic
+monster;vine_empress;name;Empress of Vines
+monster;briar_boar;name;Briar Boar
+monster;moor_crone;name;Moor Crone
+monster;oak_sovereign;name;Sovereign of the Oaks
+monster;frostfur_raider;name;Frostfur Raider
+monster;snowclub_brute;name;Snowclub Brute
+monster;skarn_hetman;name;Hetman Skarn
+monster;icefang_hunter;name;Icefang Hunter
+monster;bonewrap_tamer;name;Bonewrap Tamer
+monster;ironjaw_splitter;name;Ironjaw Splitter
+monster;rimeblood_walker;name;Rimeblood Walker
+monster;blizzard_warchief;name;Blizzard Warchief
+item;silver_brooch;name;Silver Brooch
+# END islands5

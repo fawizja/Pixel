@@ -1863,3 +1863,17 @@ Wzorzec: Tibia/Canary (`attacks`, `defenses`, `summons`, `runonhealth`, `targetd
 - Tabliczki: `ChestSigns` liczy dla kazdej skrzyni questowej jedno pole obok (bez przejsc, drzwi, bram, obiektow, pulapek); `GameSession.useAt` czyta tekst
   (`chest_sign.*`). Rysuje je `GameScreen.drawChests`.
 - Dziennik: `QuestJournal.build` zwraca wpisy (w toku, nowe, ukonczone), `Hud.rebuildJournalMenu` rysuje liste i szczegoly. `-Dpixel.quests` ustawia stan do zrzutow.
+
+## Pięć wysp i rejsy za zgodą (Z dane, G generator `tools/mapgen/islands5.py`, 2026-11-12)
+- Wyspa Szeptów (darmowa, poz. 8-60) i cztery wyspy premium (Biała Zamieć NW, Złote Wydmy SE, Szmaragdowa Mgła SW, Wyspa Starych Dębów
+  W-SW; poz. ok. 60-400). Każda ma przystań z kapitanem (`whisper_captain`, `ice5_captain`, `desert5_captain`, `tropic5_captain`,
+  `oak5_captain`), piętra do -5 i +1/+2 (premium), łowiska i wieżę z sanktum bossa za drzwiami. Mapa jest w `maps/world`, dane w
+  `data/*.csv` między znacznikami `# BEGIN islands5` / `# END islands5` (zapis: `python3 tools/mapgen/islands5_data.py`).
+- Rejs: `ShipAccess.check(pc, z, do)` zwraca `NONE`, `PREMIUM` (konto premium albo promocja, poza darmowym promem Cichej Przystani
+  - Wyspa Szeptów) lub `FLAG` (brak znacznika `ship.<wyspa>` celu). Znacznik ustawia `StarQuest.onCompleted` po oddaniu
+  zadania z kolumny 4 `data/ship_access.csv` (`ferry_m4`, `ice_m4`, `desert_m4`, `tropic_m4`, `oak_m4`). Powrót z wyspy jest zawsze możliwy.
+- Questy dostępowe: linie `ferry_*` (Oswin, broszka z Nory Sroki), `ice_*` (Halvar, Frostholm), `desert_*` (Idris, Qasirah), `tropic_*`
+  (Ilvane, Selvaran), `oak_*` (Corwin, Varden). Wymagania między liniami: `data/quest_requires.csv` (`klucz;wymagany1,wymagany2`).
+- Test: `IslandsFiveTest` (brak drogi pieszo z Varden, bramka rejsu, piętra i spawny, lańcuchy questów); `route_levels.py` 0 naruszeń.
+- Obozy barbarzyńców (generator `islands5._build_camp`, `camps.py`): na Białej Zamieci duży Obóz Wodza Zamieci (z0, +1, +2, drabiny na wieże,
+  boss `blizzard_warchief`), na kontynencie mały Obóz Hetmana Skarna (`skarn_hetman`, poz. 30-58). Wszystkie obrysy są nieregularne.

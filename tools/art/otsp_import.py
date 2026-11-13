@@ -413,6 +413,9 @@ TINTED = {
     "thorn_maiden": (32, (95, 175, 70)), "spore_stalker": (13, (130, 175, 85)), "mirror_acolyte": (33, (185, 210, 240)),
     "glass_phantom": (2, (215, 235, 245)), "maw_crawler": (31, (155, 70, 90)), "gore_harbinger": (46, (175, 35, 60)),
     "dimmed_seraph": (34, (140, 125, 205)),
+    # 2026-11-12: piec nowych wysp (islands5.py): potwory na strojach paczki w barwach wysp
+    "shore_scuttler": (37, (200, 130, 90)), "whisper_shade": (2, (150, 160, 200)), "cairn_wight": (3, (120, 140, 120)), "frost_lurker": (38, (195, 225, 245)), "rimecloak_pilgrim": (26, (150, 185, 230)), "dune_skulker": (37, (220, 185, 105)), "obelisk_priest": (33, (225, 150, 60)), "canopy_lurker": (38, (95, 150, 70)), "orchid_mimic": (32, (205, 110, 175)), "briar_boar": (38, (120, 95, 60)), "moor_crone": (33, (130, 95, 150)),
+    "frostfur_raider": (19, (150, 130, 105)), "snowclub_brute": (12, (120, 105, 90)), "icefang_hunter": (19, (175, 170, 150)), "bonewrap_tamer": (26, (170, 160, 135)), "rimeblood_walker": (31, (140, 175, 215)),
 }
 # 2026-11-11: krasnoludy i potwory kopalni pod Durnkarem. Paczka nie ma krasnoludow: stroje ludzi z maska kolorow
 # (rude i siwe brody = kolor glowy), przebarwienie albo oba, sciskane w pionie (squash) - niskie i krepe postacie.
@@ -441,6 +444,9 @@ STOCKY = {
     "kharzul": (12, None, (205, 85, 40), 1.5, 1.5), "vessara": (32, None, (70, 150, 50), 1.4, 1.4),
     "ilmora": (33, None, (205, 225, 250), 1.35, 1.35), "ugrath": (31, None, (135, 40, 60), 1.8, 1.8),
     "noctharion": (46, None, (85, 60, 155), 1.7, 1.7),
+    # 2026-11-12: bossowie piecu nowych wysp (wieksze stroje)
+    "cairn_lord": (46, None, (80, 100, 100), 1.35, 1.35), "magpie_king": (19, None, (60, 60, 85), 1.15, 1.15), "rime_jarl": (12, None, (120, 170, 225), 1.25, 1.25), "sand_regent": (12, None, (215, 165, 50), 1.3, 1.3), "vine_empress": (32, None, (60, 170, 80), 1.3, 1.3), "oak_sovereign": (12, None, (100, 75, 40), 1.35, 1.35),
+    "skarn_hetman": (12, None, (105, 90, 75), 1.3, 1.3), "ironjaw_splitter": (12, None, (140, 135, 125), 1.1, 1.1), "blizzard_warchief": (46, None, (100, 85, 70), 1.4, 1.4),
 }
 CHARACTERS = {
     "paladin": (19, None),

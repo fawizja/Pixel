@@ -64,6 +64,7 @@ public final class QuestJournal {
             }
             Status status = finished == l.missions().size() ? Status.DONE : started ? Status.ACTIVE : Status.NEW;
             if (status == Status.NEW && pc.level() < l.minLevel()) continue;
+            if (status == Status.NEW && !quests.unlocked(pc, l.first())) continue;   // czeka na inne zadania (quest_requires.csv)
             if (status == Status.DONE) current = -1;
             // linia ukonczona czesciowo, bez misji w toku: nastepna misja czeka u zleceniodawcy (current ustawiony wyzej)
             Npc g = npcs == null ? null : npcs.get(l.giver());

@@ -145,6 +145,28 @@ durn_imbuer;Zaklinacz Runnar;IMBUER;Durnkar;556;332;-6;-;#7050b0;Runy wyryte w k
 star_warden;Warden Thessaly;GUIDE;Wyspa Gasnącej Gwiazdy;129;796;0;-;#c0c8e0;Gwiazda nad nami gaśnie. Strzegę Pieczęci i mam zadania dla tych od poziomu 300.
 star_captain;Captain Brannoc;CAPTAIN;Wyspa Gasnącej Gwiazdy;88;796;0;-;#4a6a8a;Pływam na kontynent. Tylko konta premium.
 varden_herald;Herald Matthias;HERALD;Varden;498;494;0;-;#d8c060;Witaj w świątyni. Zapytaj mnie o błogosławieństwa.
+quay_captain;Helmsman Brenn;CAPTAIN;Cicha Przystań;845;283;0;-;#4a6a8a;Płyniemy na Wyspę Szeptów, ale tylko z listem przewoźnika Oswina. Pytaj go o broszkę.
+ferry_oswin;Ferryman Oswin;GUIDE;Cicha Przystań;851;283;0;-;#4a6a8a;Statek jest mój, ale łódź na wyspę pożyczę tylko komuś, kto odzyska rodzinną broszkę od Króla Sroczego.
+whisper_captain;Boatwoman Brenna;CAPTAIN;Wyspa Szeptów;893;129;0;-;#4a6a8a;Pływam na kontynent. Płynę za darmo, jeśli wiesz, po co.
+whisper_hermit;Hermit Maren;GUIDE;Wyspa Szeptów;898;129;0;-;#7a8a6a;Wilki i pająki wyją mi pod chatą. Pomożesz starej pustelniczce?
+whisper_keeper;Lightkeeper Dunstan;GUIDE;Wyspa Szeptów;902;129;0;-;#8a8aa0;Latarnia świeci, ale z grot pod nią słychać szepty. Ktoś musi to zbadać.
+whisper_miner;Prospector Hale;GUIDE;Wyspa Szeptów;898;133;0;-;#a08060;Kopalnia i kopiec to moje życie, a teraz roją się tam gobliny i kości.
+ice5_captain;Captain Skuld;CAPTAIN;Wyspa Białej Zamieci;907;922;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+ice_skuld;Outfitter Skuld;GUIDE;Wyspa Białej Zamieci;907;926;0;-;#a8c8e8;Futra, haki i raki dla wyprawy. Mam też zlecenia na yeti i lodowe stwory.
+ice_ragna;Warden Ragna;GUIDE;Wyspa Białej Zamieci;907;930;0;-;#88a8c8;Pielgrzymi i golemy chodzą po jaskiniach. Pomożesz?
+desert5_captain;Captain Zahir;CAPTAIN;Wyspa Złotych Wydm;315;963;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+desert_nadira;Scout Nadira;GUIDE;Wyspa Złotych Wydm;315;959;0;-;#d8b060;Wydmy się przesuwają, a pod nimi czają się żądła. Mam zlecenia.
+desert_omar;Priest-Hunter Omar;GUIDE;Wyspa Złotych Wydm;315;955;0;-;#c09040;Obeliski gniewają się na ludzi. Pomóż mi je uciszyć.
+tropic5_captain;Captain Marisol;CAPTAIN;Wyspa Szmaragdowej Mgły;115;935;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+tropic_tupa;Guide Tupa;GUIDE;Wyspa Szmaragdowej Mgły;114;931;0;-;#78a868;Dżungla zjada nieostrożnych. Znam ścieżki i zlecenia.
+tropic_inez;Herbalist Inez;GUIDE;Wyspa Szmaragdowej Mgły;114;927;0;-;#b87898;Storczyki i hydry mi przeszkadzają w zbiorach. Pomożesz?
+oak5_captain;Captain Edwin;CAPTAIN;Wyspa Starych Dębów;191;832;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+oak_hollis;Ranger Hollis;GUIDE;Wyspa Starych Dębów;192;837;0;-;#6a8a4a;Odyńce i wiedźmy psują lasy Dębów. Pomóż straży.
+oak_maeve;Knight-Captain Maeve;GUIDE;Wyspa Starych Dębów;191;841;0;-;#8a7a8a;Orkowie i strażnicy ruin to problem dla stolicy. Mam zlecenia na nich.
+ice_halvar;Cartographer Halvar;GUIDE;Frostholm;817;206;0;-;#9ab8d8;Mapa Białej Zamieci jest niedokończona. Pomóż, a dostaniesz pozwolenie na rejs.
+desert_idris;Caravaneer Idris;GUIDE;Qasirah;60;465;0;-;#d0a050;Złote Wydmy są piękne i zabójcze. Karawana ruszy z tobą, jeśli zasłużysz na zgodę.
+tropic_ilvane;Botanist Ilvane;GUIDE;Selvaran;686;723;0;-;#60a070;Szmaragdowa Mgła kryje kwiaty, jakich nikt nie widział. Dam ci przepustkę, gdy się wykażesz.
+oak_corwin;Warden Corwin;GUIDE;Varden;494;560;0;-;#7a6a4a;Stare Dęby wpuszczają tylko tych, których znam. Zasłuż na mój list.
 mill_bram;Miller Bram;GUIDE;Opuszczony Młyn;405;590;0;-;#c8a060;Mój młyn zarósł pajęczynami. Pomożesz mi odzyskać spichlerz?
 crypt_aldric;Sexton Aldric;GUIDE;Krypta Cichego Dzwonu;434;452;0;-;#8a8a9a;Dzwon w krypcie zamilkł, a w nocy słychać kroki. Ktoś musi tam zejść.
 poacher_hild;Trapper Hild;GUIDE;Jama Kłusownika;786;250;0;-;#7a9ab0;Ktoś zastawia sidła na moich wilkach. Znajdź jaskinię, z której wychodzą kłusownicy.
