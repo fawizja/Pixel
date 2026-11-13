@@ -57,6 +57,7 @@ import structures as St  # noqa: E402
 import minotaur  # noqa: E402
 import citadel  # noqa: E402
 import story_quests  # noqa: E402
+import quest_houses  # noqa: E402
 import trainers  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -1065,6 +1066,9 @@ def build(ctx):
     # 2026-11-12: 13 wypraw fabularnych w stylu Tibii (4 latwe i 3 srednie na kontynencie, 6 premium na ladach premium)
     for rec in story_quests.build(ctx, cost, wh):
         print('wyprawa fabularna:', rec['key'], rec['tier'], 'npc', rec['npc'], 'drzwi', rec['door'])
+    # 2026-11-12: Domy Zadan w szesciu glownych miastach (po 20 skrzyn, PZ, pietra +1/+2 albo piwnica -1)
+    for rec in quest_houses.build(ctx, cost, wh):
+        print('dom zadan:', rec['town'], rec['site'], 'wejscie', rec['ent'], 'pietra', rec['floors'], 'piwnica', rec['cellar'], 'lustro', rec['flip'])
 
 
 def monster_levels():

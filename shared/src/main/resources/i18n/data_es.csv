@@ -1359,3 +1359,29 @@ item;hoarscale_shield;name;Escudo de escamas de escarcha
 item;coalscale_armor;name;Armadura de escamas de carbon
 item;gilded_helmet;name;Yelmo dragon dorado
 item;pearl_aegis;name;Egida perlada
+# BEGIN quest_houses (tools/mapgen/quest_houses.py data)
+place;Dom Starego Skarbnika;name;Casa del viejo tesorero
+place;Dom Starego Skarbnika (piwnica);name;Casa del viejo tesorero (sótano)
+npc;house_varden_warden;name;Warden Valentin
+npc;house_varden_warden;greeting;El tesorero dejó cofres en cada rincón. Mira las salas, pero cuidado con los guardias.
+place;Dwór Skarbnika Zimy;name;Mansión del tesorero del invierno
+place;Dwór Skarbnika Zimy (piwnica);name;Mansión del tesorero del invierno (sótano)
+npc;house_frost_warden;name;Warden Gunhild
+npc;house_frost_warden;greeting;La escarcha no llega adentro, pero los cofres sí. El vestíbulo es seguro; en las salas esperan guardias.
+place;Dom Piaskowego Kupca;name;Casa del mercader de arena
+place;Dom Piaskowego Kupca (piwnica);name;Casa del mercader de arena (sótano)
+npc;house_qas_warden;name;Warden Hakim
+npc;house_qas_warden;greeting;El mercader escondió sus bienes bajo la arena y arriba. En el vestíbulo nadie te tocará.
+place;Dom Portowego Celnika;name;Casa del aduanero del puerto
+place;Dom Portowego Celnika (piwnica);name;Casa del aduanero del puerto (sótano)
+npc;house_selv_warden;name;Warden Theodore
+npc;house_selv_warden;greeting;El aduanero guardaba aquí cofres confiscados. Algunos son para todos, otros están sellados.
+place;Dom Zatopionego Kapitana;name;Casa del capitán ahogado
+place;Dom Zatopionego Kapitana (piwnica);name;Casa del capitán ahogado (sótano)
+npc;house_valmir_warden;name;Warden Ambrose
+npc;house_valmir_warden;greeting;El capitán se ahogó, pero sus cofres quedaron. Puedes descansar en el vestíbulo; más allá, alerta.
+place;Dom Perłowego Poszukiwacza;name;Casa del buscador de perlas
+place;Dom Perłowego Poszukiwacza (piwnica);name;Casa del buscador de perlas (sótano)
+npc;house_nerys_warden;name;Warden Marina
+npc;house_nerys_warden;greeting;El buscador de perlas construyó una casa con sótano lleno de cofres. El vestíbulo es de todos, las salas de los valientes.
+# END quest_houses

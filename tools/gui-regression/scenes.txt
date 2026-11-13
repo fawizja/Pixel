@@ -342,3 +342,6 @@ mob_caster_bolt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel
 mob_area_wave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=area
 mob_summoner|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.mobDemo=summon
 mob_flee|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=505,540,0 -Dpixel.frames=30 -Dpixel.mobDemo=flee
+questhouse_signs|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=376,408,0
+questhouse_nerys_f1|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=941,751,1
+questhouse_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=225,579,-1

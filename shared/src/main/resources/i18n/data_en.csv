@@ -1359,3 +1359,29 @@ item;hoarscale_shield;name;Hoarfrost Scale Shield
 item;coalscale_armor;name;Coal Scale Armor
 item;gilded_helmet;name;Gilded Dragon Helmet
 item;pearl_aegis;name;Pearl Aegis
+# BEGIN quest_houses (tools/mapgen/quest_houses.py data)
+place;Dom Starego Skarbnika;name;Old Treasurer's House
+place;Dom Starego Skarbnika (piwnica);name;Old Treasurer's House (cellar)
+npc;house_varden_warden;name;Warden Valentin
+npc;house_varden_warden;greeting;The treasurer left chests in every corner. Look through the rooms, but beware the guards.
+place;Dwór Skarbnika Zimy;name;Winter Treasurer's Manor
+place;Dwór Skarbnika Zimy (piwnica);name;Winter Treasurer's Manor (cellar)
+npc;house_frost_warden;name;Warden Gunhild
+npc;house_frost_warden;greeting;The frost does not reach inside, but the chests do. The hall is safe; guards wait in the rooms.
+place;Dom Piaskowego Kupca;name;Sand Merchant's House
+place;Dom Piaskowego Kupca (piwnica);name;Sand Merchant's House (cellar)
+npc;house_qas_warden;name;Warden Hakim
+npc;house_qas_warden;greeting;The merchant hid his goods under the sand and upstairs. No one will touch you in the hall.
+place;Dom Portowego Celnika;name;Harbour Customs House
+place;Dom Portowego Celnika (piwnica);name;Harbour Customs House (cellar)
+npc;house_selv_warden;name;Warden Theodore
+npc;house_selv_warden;greeting;The customs officer kept confiscated chests here. Some are free for all, some sealed.
+place;Dom Zatopionego Kapitana;name;Drowned Captain's House
+place;Dom Zatopionego Kapitana (piwnica);name;Drowned Captain's House (cellar)
+npc;house_valmir_warden;name;Warden Ambrose
+npc;house_valmir_warden;greeting;The captain drowned, his chests remain. You can rest in the hall, stay alert beyond it.
+place;Dom Perłowego Poszukiwacza;name;Pearl Seeker's House
+place;Dom Perłowego Poszukiwacza (piwnica);name;Pearl Seeker's House (cellar)
+npc;house_nerys_warden;name;Warden Marina
+npc;house_nerys_warden;greeting;The pearl seeker built a house with a cellar full of chests. The hall belongs to all, the rooms to the brave.
+# END quest_houses
