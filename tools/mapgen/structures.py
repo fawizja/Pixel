@@ -47,7 +47,13 @@ HAND_PLACED = {'orc', 'orc_spearman', 'orc_rider', 'orc_marauder', 'orc_leader',
                # 2026-11-12: Wyspa Gasnacej Gwiazdy (citadel.py)
                'ash_penitent', 'cinder_revenant', 'rimebound_monk', 'hoarfrost_warden', 'slag_forgehand', 'molten_cultist',
                'thorn_maiden', 'spore_stalker', 'mirror_acolyte', 'glass_phantom', 'maw_crawler', 'gore_harbinger',
-               'dimmed_seraph', 'vorgrim', 'ysmera', 'kharzul', 'vessara', 'ilmora', 'ugrath', 'noctharion'}
+               'dimmed_seraph', 'vorgrim', 'ysmera', 'kharzul', 'vessara', 'ilmora', 'ugrath', 'noctharion',
+               # 2026-11-12: piec nowych wysp (islands5.py)
+               'shore_scuttler', 'whisper_shade', 'cairn_wight', 'cairn_lord', 'magpie_king', 'frost_lurker', 'rimecloak_pilgrim',
+               'rime_jarl', 'dune_skulker', 'obelisk_priest', 'sand_regent', 'canopy_lurker', 'orchid_mimic', 'vine_empress',
+               'briar_boar', 'moor_crone', 'oak_sovereign',
+               'frostfur_raider', 'snowclub_brute', 'skarn_hetman', 'icefang_hunter', 'bonewrap_tamer', 'ironjaw_splitter',
+               'rimeblood_walker', 'blizzard_warchief'}
 DIRS4 = ((0, 1), (1, 0), (-1, 0), (0, -1))
 
 
@@ -380,6 +386,14 @@ def stamp(ctx, plan, origin, mark, per_floor=False):
                 avoid.append((int(f[1]), int(f[2]), int(f[3])))
         # przypiete podziemia (ctx['under_pin'][nazwa planu] = swiat pola (0, 0) planu pod ziemia): szukanie zaczyna
         # sie tam - budowla zostaje na swoim miejscu, gdy zmiany gdzie indziej zwolnia jej dawne sasiedztwo
+        if ctx.get('avoid_regions'):
+            # cudze regiony podziemne: punkty co 6 pol w prostokacie (spawny nowego planu nie wpadaja w cudzy region)
+            for r in list(ctx.get('regions_new', [])) + list(ctx.get('regions', [])):
+                if len(r) >= 7 and r[5] < 0:
+                    for z in range(r[5], r[6] + 1):
+                        for x in list(range(r[1], r[3] + 1, 6)) + [r[3]]:
+                            for y in list(range(r[2], r[4] + 1, 6)) + [r[4]]:
+                                avoid.append((x, y, z))
         pin = ctx.get('under_pin', {}).get(plan.name)
         sx, sy = (pin[0] + bx0, pin[1] + by0) if pin else (ox + bx0, oy + by0)
         nx, ny = free_under(world, masks, sx, sy, S, avoid=avoid, per_floor=per_floor)

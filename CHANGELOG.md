@@ -1,5 +1,30 @@
 # Changelog
 
+## [Unreleased]
+
+### Dodano
+- Pięć nowych wysp (generator `tools/mapgen/islands5.py`, dane `islands5_data.py`, podpięte w `generate_continent.py`): darmowa
+  **Wyspa Szeptów** (okolice 894-926, 94-155; poz. 8-60; powierzchnia plus 3 piętra w dół i dwa lochy: Kopiec Sroki i Wieża Szeptów)
+  oraz cztery wyspy premium (poz. ok. 60-400, piętra od -5 do +2, kilka łowisk): lodowa **Biała Zamieć** (122-177, 73-134),
+  pustynna **Złote Wydmy** (886-940, 901-974), tropikalna **Szmaragdowa Mgła** (49-119, 879-936) i umiarkowana **Wyspa Starych Dębów**
+  (182-231, 822-902). Żadna nie jest osiągalna pieszo z Varden (sprawdza `IslandsFiveTest`).
+- 17 nowych potworów (stałe w `monsters.csv`, łupy, bestiariusz, nazwy EN/ES, grafika OTSP 4 kierunki): m.in. Pan Kopca, Król Sroczy,
+  Jarl Szronu, Regent Piasku, Cesarzowa Pnączy i Suwerenny Dąb. Stawiane tylko ręcznie (`HAND_PLACED`).
+- Rejs na nowe wyspy wymaga znacznika postaci (`data/ship_access.csv`, `npc/ShipAccess`): kapitan odmawia z podpowiedzią, dopóki quest
+  dostępowy nie ustawi znacznika; wyspy premium wymagają też konta premium lub promocji. Menu kapitana blokuje wiersze (`ship.row_locked`).
+- Przewoźnik Oswin na nabrzeżu Cichej Przystani (845, 283) na wschodnim wybrzeżu, osiągalny pieszo z Varden: czteroetapowy quest
+  ze srebrną broszką z Nory Sroki (mała strzeżona lochowa z drzwiami wymagającymi klucza i dźwigni) otwiera darmowy rejs.
+- 25 linii questów (64 misje: 9 darmowych i 16 premium) z NPC o angielskich imionach, powiązanych między sobą nowym plikiem
+  `data/quest_requires.csv` (wymagania między liniami; `QuestRegistry.withRequires`), z drzwiami `party:N`, poziomem, przedmiotami,
+  zabójstwami i krokami VISIT; dziennik ukrywa linie z zablokowanym pierwszym krokiem.
+- Obozy barbarzyńców: duży obóz (**Obóz Wodza Zamieci**, piętra 0, +1 i +2) na wyspie lodowej: nieregularna palisada z kłód, trzy bramy,
+  chaty, wieże strażnicze (platformy na drabinach) z drugim poziomem na dwóch z nich, skrzynie z tabliczkami przy chacie wodza i
+  boss **Wódz Zamieci** (poz. 330); mały darmowy **Obóz Hetmana Skarna** na lodowych skałach kontynentu (poz. 30-58, bez premium).
+  8 nowych potworów (`frostfur_raider`, `snowclub_brute`, `skarn_hetman`, `icefang_hunter`, `bonewrap_tamer`, `ironjaw_splitter`,
+  `rimeblood_walker`, `blizzard_warchief`) z nazwami PL/EN/ES, łupem, bestiariuszem i grafiką OTSP.
+- Zasada „żadnych prostokątów”: wieże, sale bossów, skarbiec i chata Nory Sroki mają teraz nieregularne obrysy (`islands5.noisy`).
+- Grafika: `tools/art/islands_art.py` (srebrna broszka), nowe wpisy w `otsp_import.py`; test `IslandsFiveTest`.
+
 ## [0.262.0] - 2026-11-12
 
 ### Dodano

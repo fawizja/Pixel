@@ -153,3 +153,22 @@ emerald_dragon;Dragon;3;0
 hoarfrost_dragon;Frost Dragon;3;0
 coal_dragon;Dragon Lord;4;0
 pearl_dragon;Elder Wyrm;5;3
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+shore_scuttler;Shore Scuttler;2;0
+whisper_shade;Whispering Shade;2;0
+cairn_wight;Cairn Wight;2;0
+frost_lurker;Frost Lurker;3;1
+rimecloak_pilgrim;Rimecloak Pilgrim;2;0
+dune_skulker;Dune Skulker;3;0
+obelisk_priest;Obelisk Priest;3;1
+canopy_lurker;Canopy Lurker;3;0
+orchid_mimic;Orchid Mimic;3;1
+briar_boar;Briar Boar;2;0
+moor_crone;Moor Crone;3;0
+frostfur_raider;Frostfur Raider;2;0
+snowclub_brute;Snowclub Brute;2;0
+icefang_hunter;Icefang Hunter;3;0
+bonewrap_tamer;Bonewrap Tamer;3;1
+ironjaw_splitter;Ironjaw Splitter;3;1
+rimeblood_walker;Rimeblood Walker;3;1
+# END islands5

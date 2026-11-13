@@ -22,7 +22,14 @@ gate;152;949;-3;boss:ugrath
 gate;137;778;0;boss:ugrath
 gate;230;949;-3;boss:noctharion
 gate;142;784;-1;quest:star_final
+gate;674;542;-2;quest:ferry_m2
+gate;696;542;-2;boss:magpie_king
+gate;934;951;-5;quest:ice_m3
+gate;341;975;-5;party:2
+gate;108;835;-5;quest:tropic_m3
+gate;203;828;-5;party:3
 gate;465;668;0;party:3
+reward;warchief;boss:blizzard_warchief
 reward;mill;quest:mill_m3
 reward;crypt;quest:crypt_m3
 reward;poacher;quest:poacher_m3
@@ -47,6 +54,11 @@ choice;star_reward;158;780;-1;star_plate
 choice;star_reward;146;788;-1;star_aegis
 choice;star_reward;150;788;-1;star_spellbook
 choice;star_reward;154;788;-1;star_amulet
+choice;warchief;924;941;0;blizzard_sword
+choice;warchief;929;941;0;blizzard_bow
+choice;warchief;923;945;0;blizzard_wand
+choice;warchief;929;944;0;blizzard_rod
+choice;warchief;926;941;0;blizzard_shield
 choice;mill;413;586;1;hand_axe
 choice;mill;415;586;1;hunting_bow
 choice;mill;417;586;1;wand_of_embers

@@ -59,3 +59,30 @@ lantern_m1;mediumhard;1;Zielone Mgły;Latarnia Zielonych Mgieł, okolice miasta 
 stormgate_m1;hard;1;Brama Burz;Cytadela Zburzonej Bramy Burz, okolice miasta Selvaran
 wyrm_m1;hard;1;Smocze Moczary;Smocze Moczary, okolice miasta Nerys
 crown_m1;extreme;1;Pusta Korona;Skarbiec Pustej Korony, okolice miasta Valmir
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+ferry_m1;easy;0;Broszka Przewoźnika;Cicha Przystań na wschodnim wybrzeżu
+wh_crabs_m1;easy;0;Krabie Plaże;plaże Wyspy Szeptów
+wh_wolves_m1;easy;0;Wilki z Wzgórz;wzgórza Wyspy Szeptów
+wh_spiders_m1;easy;0;Pajęczyna Pustelniczki;jaskinie Wyspy Szeptów
+wh_goblins_m1;easy;0;Gobliny z Kopalni;Kopalnia Cichych Ech
+wh_shades_m1;medium;0;Szepty w Grotach;Groty Szeptów
+wh_bones_m1;medium;0;Kości Starej Sztolni;Kopiec Pana Cieni
+wh_bandits_m1;medium;0;Przemytnicy z Zatoki;wybrzeże Wyspy Szeptów
+wh_cairn_m1;medium;0;Pan Kopca;Kopiec Pana Cieni
+ice_m1;mediumhard;1;Pozwolenie Halvara;Frostholm, nabrzeże
+desert_m1;mediumhard;1;Zgoda Karawaniarza;Qasirah, port
+tropic_m1;hard;1;Przepustka Botaniczki;Selvaran, przystań
+oak_m1;hard;1;List Strażnika;Varden, przystań
+ice_s65_m1;mediumhard;1;Kły Zimy;Wyspa Białej Zamieci
+ice_s110_m1;mediumhard;1;Szron w Jaskiniach;Wyspa Białej Zamieci
+ice_s200_m1;hard;1;Smoki Zamieci;Wyspa Białej Zamieci
+desert_s95_m1;mediumhard;1;Żądła Wydm;Wyspa Złotych Wydm
+desert_s150_m1;hard;1;Cień Obelisków;Wyspa Złotych Wydm
+desert_s240_m1;hard;1;Smocze Gniazda;Wyspa Złotych Wydm
+tropic_s120_m1;hard;1;Dżungla pod Mgłą;Wyspa Szmaragdowej Mgły
+tropic_s200_m1;hard;1;Ogród Mimików;Wyspa Szmaragdowej Mgły
+tropic_s300_m1;extreme;1;Głębia Dżungli;Wyspa Szmaragdowej Mgły
+oak_s130_m1;hard;1;Cierń i Kieł;Wyspa Starych Dębów
+oak_s200_m1;hard;1;Skrzydła nad Dębiną;Wyspa Starych Dębów
+oak_s320_m1;extreme;1;Dęby Nocy;Wyspa Starych Dębów
+# END islands5

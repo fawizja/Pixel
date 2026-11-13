@@ -1359,3 +1359,277 @@ item;hoarscale_shield;name;Escudo de escamas de escarcha
 item;coalscale_armor;name;Armadura de escamas de carbon
 item;gilded_helmet;name;Yelmo dragon dorado
 item;pearl_aegis;name;Egida perlada
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+quest;ferry_m1;name;A la madriguera de los ladrones
+quest;ferry_m1;desc;Oswin solo presta su barca a quien conoce el camino: busca la Madriguera de la Urraca en los campos al este de Varden y entra. Unos bandidos vigilan la puerta.
+quest;ferry_m2;name;La guardia de la urraca
+quest;ferry_m2;desc;Los bandidos guardan la madriguera. Derrota a 12 y se abrirá la puerta de la sala del rey.
+quest;ferry_m3;name;El Rey de las urracas
+quest;ferry_m3;desc;El Rey de las urracas guarda el broche en una cámara tras su sala. Véncelo y la llave caerá de su cinto.
+quest;ferry_m4;name;El broche de plata
+quest;ferry_m4;desc;Abre el cofre de la cámara y llévale a Oswin el broche de plata de su familia. A cambio te llevará a la Isla de los Susurros.
+quest;wh_crabs_m1;name;Pinzas en la playa
+quest;wh_crabs_m1;desc;Los cangrejos cortan las redes. Derrota a 10.
+quest;wh_crabs_m2;name;Perlas de cangrejo
+quest;wh_crabs_m2;desc;Hay perlas en los caparazones. Trae 3.
+quest;wh_wolves_m1;name;La manada de lobos
+quest;wh_wolves_m1;desc;Una manada aúlla frente a la cabaña. Derrota a 10 lobos.
+quest;wh_wolves_m2;name;Jabalíes en los cultivos
+quest;wh_wolves_m2;desc;Los jabalíes escarban el huerto. Derrota a 6.
+quest;wh_spiders_m1;name;Arañas en las grutas
+quest;wh_spiders_m1;desc;Las arañas cubrieron las grutas. Derrota a 10.
+quest;wh_spiders_m2;name;Seda para túnicas
+quest;wh_spiders_m2;desc;La ermitaña teje túnicas. Trae 8 madejas de seda.
+quest;wh_goblins_m1;name;Invasores del pozo
+quest;wh_goblins_m1;desc;Los goblins ocuparon el pozo. Derrota a 12.
+quest;wh_goblins_m2;name;Chamanes del pozo
+quest;wh_goblins_m2;desc;Los chamanes incitan al resto. Derrota a 6.
+quest;wh_shades_m1;name;A las grutas
+quest;wh_shades_m1;desc;El farero oye susurros de noche en las grutas. Baja y mira.
+quest;wh_shades_m2;name;Las sombras susurrantes
+quest;wh_shades_m2;desc;Las sombras susurran nombres. Silencia a 10.
+quest;wh_bones_m1;name;Esqueletos de la galería
+quest;wh_bones_m1;desc;Los esqueletos vagan por las galerías. Derrota a 12.
+quest;wh_bones_m2;name;Ciempiés entre huesos
+quest;wh_bones_m2;desc;Los ciempiés viven en las costillas. Derrota a 10.
+quest;wh_bandits_m1;name;Trampas en la orilla
+quest;wh_bandits_m1;desc;Los contrabandistas ponen trampas. Derrota a 10.
+quest;wh_bandits_m2;name;Los receptadores
+quest;wh_bandits_m2;desc;Los receptadores compran el botín. Derrota a 8.
+quest;wh_cairn_m1;name;Guardianes del túmulo
+quest;wh_cairn_m1;desc;Los aparecidos guardan la cámara del rey. Derrota a 12.
+quest;wh_cairn_m2;name;Fin de una dinastía
+quest;wh_cairn_m2;desc;El Señor del túmulo aún manda a los muertos. Véncelo en el fondo.
+quest;ice_m1;name;El faro de Halvar
+quest;ice_m1;desc;El cartógrafo Halvar dibuja una isla helada y necesita manos firmes. Ponte junto a su mesa de mapas en el muelle.
+quest;ice_m2;name;Pieles para los guías
+quest;ice_m2;desc;Los guías necesitan pieles abrigadas. Trae 8 pieles de yeti.
+quest;ice_m3;name;Gólems en el sendero
+quest;ice_m3;desc;Los gólems de hielo bloquean el sendero norte. Derrota a 10.
+quest;ice_m4;name;Prueba de lejos
+quest;ice_m4;desc;Halvar quiere pruebas de que puedes con una isla: el Señor del túmulo en la Isla de los Susurros debe caer. Luego tendrás el permiso.
+quest;ice_m5;name;Primera ventisca
+quest;ice_m5;desc;Con el permiso, navega a la Isla de la Ventisca Blanca y pisa su orilla. Halvar te dará el resto de la recompensa.
+quest;desert_m1;name;La tienda de Idris
+quest;desert_m1;desc;El caravanero Idris reúne gente para las Dunas Doradas. Visita su tienda en el puerto.
+quest;desert_m2;name;Veneno para el viaje
+quest;desert_m2;desc;El curandero necesita veneno. Trae 12 aguijones de escorpión.
+quest;desert_m3;name;Espectros del camino
+quest;desert_m3;desc;Los espectros pierden caravanas. Derrota a 12.
+quest;desert_m4;name;El jarl y la arena
+quest;desert_m4;desc;Idris vende el camino solo a quien venció al Jarl de la escarcha en la Isla de la Ventisca Blanca (la puerta exige grupo).
+quest;desert_m5;name;Primera duna
+quest;desert_m5;desc;Navega a la Isla de las Dunas Doradas y pisa su arena. Idris pagará el resto.
+quest;tropic_m1;name;El invernadero de Ilvane
+quest;tropic_m1;desc;La botánica Ilvane estudia las flores de la Niebla Esmeralda. Visita su invernadero junto al muelle.
+quest;tropic_m2;name;Cuero para botas
+quest;tropic_m2;desc;La expedición necesita botas fuertes. Trae 10 cueros de cocodrilo.
+quest;tropic_m3;name;Serpientes en el istmo
+quest;tropic_m3;desc;Las serpientes pululan en el istmo. Derrota a 15.
+quest;tropic_m4;name;El regente del desierto
+quest;tropic_m4;desc;Ilvane conoce la ruta pero quiere un aval: vence al Regente de la tormenta de arena en las Dunas Doradas.
+quest;tropic_m5;name;Primera niebla
+quest;tropic_m5;desc;Pisa la Isla de la Niebla Esmeralda. Ilvane pagará el resto.
+quest;oak_m1;name;El puesto de Corwin
+quest;oak_m1;desc;El guardián Corwin lleva la lista de invitados de los Robles Antiguos. Preséntate en su puesto del puerto.
+quest;oak_m2;name;Escamas para el sello
+quest;oak_m2;desc;El sello se funde con escamas. Trae 6 escamas de wyvern.
+quest;oak_m3;name;Espectros del camino
+quest;oak_m3;desc;Los caballeros espectro bloquean el camino. Derrota a 12.
+quest;oak_m4;name;La emperatriz y el roble
+quest;oak_m4;desc;Corwin te añadirá a la lista cuando venzas a la Emperatriz de las enredaderas en la Niebla Esmeralda.
+quest;oak_m5;name;Primer roble
+quest;oak_m5;desc;Camina bajo los Robles Antiguos. Corwin pagará el resto.
+quest;ice_s65_m1;name;Yetis en el hielo
+quest;ice_s65_m1;desc;Los yetis destrozan el campamento. Derrota a 12.
+quest;ice_s65_m2;name;Acechadores de ventisca
+quest;ice_s65_m2;desc;Los acechadores se ocultan en la nieve. Derrota a 10.
+quest;ice_s110_m1;name;Peregrinos helados
+quest;ice_s110_m1;desc;Los peregrinos vagan por las cuevas. Derrota a 12.
+quest;ice_s110_m2;name;Gólems de las salas heladas
+quest;ice_s110_m2;desc;Los gólems guardan las salas. Derrota a 10.
+quest;ice_s200_m1;name;Dragones de escarcha
+quest;ice_s200_m1;desc;Los dragones anidan en la aguja. Derrota a 8.
+quest;ice_s200_m2;name;Ciempiés de las salas heladas
+quest;ice_s200_m2;desc;Los ciempiés muerden a los viajeros. Derrota a 10.
+quest;desert_s95_m1;name;Devoradores de arena
+quest;desert_s95_m1;desc;Los devoradores socavan el sendero. Derrota a 12.
+quest;desert_s95_m2;name;Escarabajos dorados
+quest;desert_s95_m2;desc;Los escarabajos roen los carros. Derrota a 10.
+quest;desert_s150_m1;name;Rondadores de dunas
+quest;desert_s150_m1;desc;Los rondadores atacan desde la arena. Derrota a 12.
+quest;desert_s150_m2;name;Fanáticos de las dunas
+quest;desert_s150_m2;desc;Los fanáticos queman peregrinos. Derrota a 10.
+quest;desert_s240_m1;name;Dragones de risco
+quest;desert_s240_m1;desc;Los dragones anidan en los riscos. Derrota a 8.
+quest;desert_s240_m2;name;Sacerdotes de obelisco
+quest;desert_s240_m2;desc;Los sacerdotes queman los senderos. Derrota a 10.
+quest;tropic_s120_m1;name;Lagartos del pantano
+quest;tropic_s120_m1;desc;Los lagartos acechan en los vados. Derrota a 12.
+quest;tropic_s120_m2;name;Acechadores del dosel
+quest;tropic_s120_m2;desc;Los felinos caen de los árboles. Derrota a 10.
+quest;tropic_s200_m1;name;Orquídeas asesinas
+quest;tropic_s200_m1;desc;Las orquídeas atraen con su aroma. Derrota a 12.
+quest;tropic_s200_m2;name;Hidras de los pantanos
+quest;tropic_s200_m2;desc;Las hidras amenazan a los recolectores. Derrota a 8.
+quest;tropic_s300_m1;name;Hidras venenosas
+quest;tropic_s300_m1;desc;Las hidras envenenan los arroyos. Derrota a 8.
+quest;tropic_s300_m2;name;Gorgonas de las ruinas
+quest;tropic_s300_m2;desc;Las gorgonas petrifican. Derrota a 8.
+quest;oak_s130_m1;name;Jabalíes de zarzas
+quest;oak_s130_m1;desc;Los jabalíes arruinan los campos. Derrota a 12.
+quest;oak_s130_m2;name;Brujas del páramo
+quest;oak_s130_m2;desc;Las brujas lanzan maldiciones. Derrota a 10.
+quest;oak_s200_m1;name;Sombras carmesíes
+quest;oak_s200_m1;desc;Las sombras aparecen al anochecer. Derrota a 10.
+quest;oak_s200_m2;name;Wyverns de los acantilados
+quest;oak_s200_m2;desc;Los wyverns se llevan el ganado. Derrota a 8.
+quest;oak_s320_m1;name;Troncos malditos
+quest;oak_s320_m1;desc;Los troncos ahogan el bosque. Derrota a 10.
+quest;oak_s320_m2;name;Caballeros espectro
+quest;oak_s320_m2;desc;Los caballeros patrullan las ruinas. Derrota a 10.
+quest;ferry_m1;line;El broche del barquero
+quest;ferry_m1;where;Embarcadero Tranquilo en la costa este
+quest;wh_crabs_m1;line;Playas de cangrejos
+quest;wh_crabs_m1;where;playas de la Isla de los Susurros
+quest;wh_wolves_m1;line;Lobos de las colinas
+quest;wh_wolves_m1;where;colinas de la Isla de los Susurros
+quest;wh_spiders_m1;line;Las telarañas de la ermitaña
+quest;wh_spiders_m1;where;cuevas de la Isla de los Susurros
+quest;wh_goblins_m1;line;Goblins de la mina
+quest;wh_goblins_m1;where;Mina de los Ecos Silenciosos
+quest;wh_shades_m1;line;Susurros en las grutas
+quest;wh_shades_m1;where;Grutas de los Susurros
+quest;wh_bones_m1;line;Huesos de la vieja galería
+quest;wh_bones_m1;where;Túmulo del Señor de las Sombras
+quest;wh_bandits_m1;line;Contrabandistas de la cala
+quest;wh_bandits_m1;where;costa de la Isla de los Susurros
+quest;wh_cairn_m1;line;El señor del túmulo
+quest;wh_cairn_m1;where;Túmulo del Señor de las Sombras
+quest;ice_m1;line;El permiso de Halvar
+quest;ice_m1;where;Frostholm, el muelle
+quest;desert_m1;line;El consentimiento del caravanero
+quest;desert_m1;where;Qasirah, el puerto
+quest;tropic_m1;line;El pase de la botánica
+quest;tropic_m1;where;Selvaran, el muelle
+quest;oak_m1;line;La carta del guardián
+quest;oak_m1;where;Varden, el puerto
+quest;ice_s65_m1;line;Colmillos del invierno
+quest;ice_s65_m1;where;Isla de la Ventisca Blanca
+quest;ice_s110_m1;line;Escarcha en las cuevas
+quest;ice_s110_m1;where;Isla de la Ventisca Blanca
+quest;ice_s200_m1;line;Dragones de la ventisca
+quest;ice_s200_m1;where;Isla de la Ventisca Blanca
+quest;desert_s95_m1;line;Aguijones de las dunas
+quest;desert_s95_m1;where;Isla de las Dunas Doradas
+quest;desert_s150_m1;line;Sombra de los obeliscos
+quest;desert_s150_m1;where;Isla de las Dunas Doradas
+quest;desert_s240_m1;line;Nidos de dragón
+quest;desert_s240_m1;where;Isla de las Dunas Doradas
+quest;tropic_s120_m1;line;Selva bajo la niebla
+quest;tropic_s120_m1;where;Isla de la Niebla Esmeralda
+quest;tropic_s200_m1;line;El jardín de las mímicas
+quest;tropic_s200_m1;where;Isla de la Niebla Esmeralda
+quest;tropic_s300_m1;line;Corazón de la selva
+quest;tropic_s300_m1;where;Isla de la Niebla Esmeralda
+quest;oak_s130_m1;line;Espina y colmillo
+quest;oak_s130_m1;where;Isla de los Robles Antiguos
+quest;oak_s200_m1;line;Alas sobre el robledal
+quest;oak_s200_m1;where;Isla de los Robles Antiguos
+quest;oak_s320_m1;line;Robles de la noche
+quest;oak_s320_m1;where;Isla de los Robles Antiguos
+npc;quay_captain;name;Helmsman Brenn
+npc;quay_captain;greeting;Navegamos a la Isla de los Susurros, pero solo con la carta del barquero Oswin. Pregúntale por el broche.
+npc;ferry_oswin;name;Ferryman Oswin
+npc;ferry_oswin;greeting;El barco es mío, pero solo presto la barca a quien recupere el broche de mi familia del Rey de las urracas.
+npc;whisper_hermit;name;Hermit Maren
+npc;whisper_hermit;greeting;Lobos y arañas aúllan frente a mi cabaña. ¿Ayudas a una vieja ermitaña?
+npc;whisper_keeper;name;Lightkeeper Dunstan
+npc;whisper_keeper;greeting;El faro brilla, pero de las grutas suben susurros. Alguien debe mirar.
+npc;whisper_miner;name;Prospector Hale
+npc;whisper_miner;greeting;La mina y el túmulo son mi vida, y ahora los infestan goblins y huesos.
+npc;ice_halvar;name;Cartographer Halvar
+npc;ice_halvar;greeting;Mi mapa de la Ventisca Blanca está inconclusa. Ayúdame y tendrás permiso para navegar.
+npc;desert_idris;name;Caravaneer Idris
+npc;desert_idris;greeting;Las Dunas Doradas son hermosas y mortales. Mi caravana irá contigo si ganas el consentimiento.
+npc;tropic_ilvane;name;Botanist Ilvane
+npc;tropic_ilvane;greeting;La Niebla Esmeralda oculta flores nunca vistas. Te daré un pase cuando te lo ganes.
+npc;oak_corwin;name;Warden Corwin
+npc;oak_corwin;greeting;Los Robles Antiguos solo admiten a quienes conozco. Gánate mi carta.
+npc;ice_skuld;name;Outfitter Skuld
+npc;ice_skuld;greeting;Pieles, ganchos y crampones. También tengo encargos de yetis y bestias de hielo.
+npc;ice_ragna;name;Warden Ragna
+npc;ice_ragna;greeting;Peregrinos y gólems caminan por las cuevas. ¿Ayudas?
+npc;desert_nadira;name;Scout Nadira
+npc;desert_nadira;greeting;Las dunas se mueven y bajo ellas acechan aguijones. Tengo encargos.
+npc;desert_omar;name;Priest-Hunter Omar
+npc;desert_omar;greeting;Los obeliscos están furiosos con los hombres. Ayúdame a calmarlos.
+npc;tropic_tupa;name;Guide Tupa
+npc;tropic_tupa;greeting;La selva se come a los descuidados. Conozco senderos y encargos.
+npc;tropic_inez;name;Herbalist Inez
+npc;tropic_inez;greeting;Orquídeas e hidras arruinan mi cosecha. ¿Ayudas?
+npc;oak_hollis;name;Ranger Hollis
+npc;oak_hollis;greeting;Jabalíes y brujas arruinan el robledal. Ayuda a los guardas.
+npc;oak_maeve;name;Knight-Captain Maeve
+npc;oak_maeve;greeting;Orcos y centinelas dan problemas al reino. Tengo encargos para ellos.
+npc;whisper_captain;name;Boatwoman Brenna
+npc;whisper_captain;shiphint;No te llevo sin el broche. Habla con Oswin en el muelle y tráele lo que robó el Rey de las urracas.
+npc;whisper_captain;greeting;Navego al continente. Gratis, si sabes por qué.
+place;Wyspa Szeptów;name;Isla de los Susurros
+npc;ice5_captain;name;Captain Skuld
+npc;ice5_captain;shiphint;Solo navego a la Ventisca Blanca con permiso de Halvar de Frostholm. Consíguelo antes.
+npc;ice5_captain;greeting;Navego al continente. Solo cuentas premium.
+place;Wyspa Białej Zamieci;name;Isla de la Ventisca Blanca
+npc;desert5_captain;name;Captain Zahir
+npc;desert5_captain;shiphint;Las Dunas Doradas están cerradas. El caravanero Idris en Qasirah sabe cómo obtener permiso.
+npc;desert5_captain;greeting;Navego al continente. Solo cuentas premium.
+place;Wyspa Złotych Wydm;name;Isla de las Dunas Doradas
+npc;tropic5_captain;name;Captain Marisol
+npc;tropic5_captain;shiphint;La niebla es espesa y los arrecifes traicioneros. La botánica Ilvane en Selvaran te dará un pase si lo mereces.
+npc;tropic5_captain;greeting;Navego al continente. Solo cuentas premium.
+place;Wyspa Szmaragdowej Mgły;name;Isla de la Niebla Esmeralda
+npc;oak5_captain;name;Captain Edwin
+npc;oak5_captain;shiphint;Los Robles Antiguos solo admiten a quienes conoce el guardián Corwin de Varden. Consigue su carta.
+npc;oak5_captain;greeting;Navego al continente. Solo cuentas premium.
+place;Wyspa Starych Dębów;name;Isla de los Robles Antiguos
+place;Nora Sroki;name;Madriguera de la Urraca
+place;Obóz Wodza Zamieci;name;Campamento del Jefe de la Ventisca
+place;Obóz Hetmana Skarna;name;Campamento del hetman Skarn
+place;Skarbiec Sroki (głębiny);name;Tesoro de la Urraca (profundidades)
+place;Groty Szeptów;name;Grutas de los Susurros
+place;Punkt Halvara;name;Mesa de Halvar
+place;Namiot Idrisa;name;Tienda de Idris
+place;Szklarnia Ilvane;name;Invernadero de Ilvane
+place;Posterunek Corwina;name;Puesto de Corwin
+place;Wyspa Szeptów;name;Isla de los Susurros
+place;Wyspa Białej Zamieci;name;Isla de la Ventisca Blanca
+place;Wyspa Złotych Wydm;name;Isla de las Dunas Doradas
+place;Wyspa Szmaragdowej Mgły;name;Isla de la Niebla Esmeralda
+place;Wyspa Starych Dębów;name;Isla de los Robles Antiguos
+monster;shore_scuttler;name;Cangrejo costero
+monster;whisper_shade;name;Sombra susurrante
+monster;cairn_wight;name;Aparecido del túmulo
+monster;cairn_lord;name;Señor del túmulo
+monster;magpie_king;name;Rey de las urracas
+monster;frost_lurker;name;Acechador escarchado
+monster;rimecloak_pilgrim;name;Peregrino de escarcha
+monster;rime_jarl;name;Jarl de la escarcha
+monster;dune_skulker;name;Rondador de dunas
+monster;obelisk_priest;name;Sacerdote del obelisco
+monster;sand_regent;name;Regente de la tormenta de arena
+monster;canopy_lurker;name;Acechador del dosel
+monster;orchid_mimic;name;Mímica de orquídea
+monster;vine_empress;name;Emperatriz de las enredaderas
+monster;briar_boar;name;Jabalí de zarzas
+monster;moor_crone;name;Bruja del páramo
+monster;oak_sovereign;name;Soberano de los robles
+monster;frostfur_raider;name;Asaltante de pelaje escarchado
+monster;snowclub_brute;name;Bruto de la maza nevada
+monster;skarn_hetman;name;Hetman Skarn
+monster;icefang_hunter;name;Cazador del colmillo helado
+monster;bonewrap_tamer;name;Domador de vendas de hueso
+monster;ironjaw_splitter;name;Partidor de mandíbula de hierro
+monster;rimeblood_walker;name;Caminante de sangre escarcha
+monster;blizzard_warchief;name;Jefe de la ventisca
+item;silver_brooch;name;Broche de plata
+# END islands5

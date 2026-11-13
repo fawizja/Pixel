@@ -414,3 +414,6 @@
 477;coalscale_armor;Pancerz z węglowych łusek;ARMOR;1;52000;ARMOR;0;0;13;320;*;0;0;PHYSICAL;-;FIRE:7,ICE:-4;#3a3436;Czarny pancerz, który nie boi się płomieni.
 478;gilded_helmet;Złocisty hełm smoczy;ARMOR;1;80000;HEAD;0;0;11;400;*;0;0;PHYSICAL;-;FIRE:5,ENERGY:4;#e0b840;Hełm z płyt złocistych łusek.
 479;pearl_aegis;Perłowa egida;SHIELD;1;230000;SHIELD;0;40;0;520;PALADIN,MONK,KNIGHT;0;0;PHYSICAL;-;FIRE:5,ICE:5,ENERGY:4;#f4f0ff;Tarcza z perłowych łusek. Najlepsza ochrona przed smoczym oddechem.
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+9;silver_brooch;Srebrna broszka;MATERIAL;20;50;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#d8dce8;Broszka z herbem rodziny przewoźnika. Król Sroczy ukradł ją dawno temu.
+# END islands5

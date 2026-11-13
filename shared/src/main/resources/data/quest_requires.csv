@@ -1,0 +1,19 @@
+
+# BEGIN islands5 (tools/mapgen/islands5_data.py)
+ice_m1;ferry_m4,frost_yeti
+desert_m1;ice_m5,qas_scorpions
+tropic_m1;desert_m5,selv_crocs
+oak_m1;tropic_m5,ice_m5
+ice_s65_m1;ice_m4
+ice_s110_m1;ice_m4
+ice_s200_m1;ice_m4
+desert_s95_m1;desert_m4
+desert_s150_m1;desert_m4
+desert_s240_m1;desert_m4
+tropic_s120_m1;tropic_m4
+tropic_s200_m1;tropic_m4
+tropic_s300_m1;tropic_m4
+oak_s130_m1;oak_m4
+oak_s200_m1;oak_m4
+oak_s320_m1;oak_m4
+# END islands5

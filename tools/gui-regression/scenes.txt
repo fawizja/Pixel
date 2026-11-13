@@ -336,3 +336,19 @@ training_statue|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=
 skills_offline|-Dpixel.autostart=Test:DRUID -Dpixel.hour=12 -Dpixel.teleport=498,499,0
 ping_green|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.fakePing=40
 ping_red|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=498,499,0 -Dpixel.fakePing=400
+quay_ferryman|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=851,284,0
+quay_dialogue|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=851,284,0 -Dpixel.open=npc
+whisper_surface|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=909,111,0
+whisper_deep|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=901,133,-3
+ice_surface|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=958,909,0
+ice_deep|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=944,910,-5
+desert_surface|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=331,947,0
+desert_deep|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=334,956,-5
+tropic_surface|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=88,898,0
+tropic_deep|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=58,886,-3
+oak_surface|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=213,873,0
+oak_deep|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=178,861,-3
+access_quest_halvar|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=817,207,0 -Dpixel.open=npc
+barbarian_camp_ground|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=925,946,0 -Dpixel.premium=1
+barbarian_camp_watchtower|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=921,938,2 -Dpixel.premium=1
+barbarian_camp_small|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=675,73,0
