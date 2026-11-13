@@ -131,7 +131,7 @@ durn_guard_west;Strażnik bramy Hroald;GUARD;Durnkar;482;319;-4;-;#8a8a9a;Stój!
 durn_guard_east;Strażnik bramy Sigvald;GUARD;Durnkar;565;317;-5;-;#8a8a9a;Za tą bramą Kopalnia Żelaznej Brody. Drzwi przepuszczą tylko tych, którzy przeżyją w głębinach.
 durn_priest;Kapłan Thorvin;PRIEST;Durnkar;524;327;-4;-;#f0f0f0;Witaj w świątyni Durnkaru, synu i córko kamienia. Mogę cię uleczyć albo przyjąć do miasta.
 durn_banker;Bankier Grimbald;BANKER;Durnkar;488;329;-4;-;#d8c070;Złoto w skarbcu Durnkaru leży pod tysiącem sążni skały. Bank prowadzi konta we wszystkich miastach.
-durn_housing;Zarządca Durgan;HOUSING;Durnkar;483;325;-4;-;#6a5a8a;Domy w grotach Durnkaru, ciepłe od lawy. Płacisz z konta w banku.
+durn_housing;Zarządca Durgan;HOUSING;Durnkar;493;325;-4;-;#6a5a8a;Domy w grotach Durnkaru, ciepłe od lawy. Płacisz z konta w banku.
 durn_ruler;Król Thorgrim;KING;Durnkar;536;309;-4;-;#c8a040;Durnkar pamięta czasy, gdy nad górami nie było jeszcze miast. Konto premium i promocję dam ci tak jak król w Varden: napisz premium albo promocja.
 durn_innkeeper;Karczmarz Ulfrik;MERCHANT;Durnkar;538;309;-5;durn_supplies;#a0703a;Piwo z grzybów jaskiniowych, chleb, mięso i lina na drogę. Siadaj, przybyszu.
 durn_merchant;Kupiec Gunnar;MERCHANT;Durnkar;505;315;-5;durn_shop;#a0703a;Kupię łupy z kopalń i sprzedam to, czego brakuje w drodze.
@@ -180,6 +180,12 @@ lantern_orsa;Lightkeeper Orsa;GUIDE;Latarnia Zielonych Mgieł;854;649;0;-;#80c0a
 storm_teodrin;Marshal Teodrin;GUIDE;Cytadela Zburzonej Bramy Burz;538;636;0;-;#a0a8c8;Cytadela Burz padła w jedną noc. Jej brama wciąż pęka od piorunów, a garnizon nie odpoczywa.
 wyrm_kaldor;Drakehunter Kaldor;GUIDE;Smocze Moczary;872;633;0;-;#c07040;W moczarach ukryto gniazdo, o którym milczą łowcy. Kto wróci, zbierze nagrodę lepszą od zbroi smoka.
 crown_isolde;Crownwarden Isolde;GUIDE;Skarbiec Pustej Korony;459;668;0;-;#b8a0d8;Korona, która nie ma głowy, wciąż woła o władzę. Jej strażnicy nie pozwolą nikomu wyjść z pustymi rękami... ani żywym.
+house_varden_warden;Dozorca Walenty;GUIDE;Dom Starego Skarbnika;439;424;0;-;#b89050;Skarbnik zostawił po sobie skrzynie w każdym kącie. Zajrzyj do sal, ale uważaj na straże.
+house_frost_warden;Dozorczyni Gunhild;GUIDE;Dwór Skarbnika Zimy;758;293;0;-;#b89050;Mróz tu nie sięga, ale skrzynie owszem. Hol jest bezpieczny, w salach czekają strażnicy.
+house_qas_warden;Dozorca Hakim;GUIDE;Dom Piaskowego Kupca;210;441;0;-;#b89050;Kupiec ukrył towary pod piaskiem i na piętrze. W holu nikt cię nie tknie.
+house_selv_warden;Dozorca Teodoro;GUIDE;Dom Portowego Celnika;648;665;0;-;#b89050;Celnik trzymał w tym domu skonfiskowane skrzynie. Część jest dla każdego, część za pieczęcią.
+house_valmir_warden;Dozorca Ambroży;GUIDE;Dom Zatopionego Kapitana;431;769;0;-;#b89050;Kapitan utonął, a jego skrzynie zostały. W holu możesz odpocząć, dalej bądź czujny.
+house_nerys_warden;Dozorczyni Marina;GUIDE;Dom Perłowego Poszukiwacza;865;678;0;-;#b89050;Poszukiwacz pereł zbudował dom z piwnicą pełną skrzyń. Hol należy do wszystkich, sale do odważnych.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

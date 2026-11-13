@@ -77,6 +77,7 @@ class Plan:
         self.entries = []           # pola wejsc na powierzchni (start sprawdzania drogi)
         self.links = []             # dodatkowe polaczenia do check (np. wejscie z jaskini poza planem)
         self.behind = []            # pola (x, y, z) osiagalne tylko przez drzwi poziomu
+        self._cuts = {}             # (x, y, z) -> pole przed sciecie rogu (box organic_shape)
 
     # ------------------------------------------------------------------ pola
     def get(self, x, y, z):
@@ -111,7 +112,7 @@ class Plan:
         return min(xs), min(ys), max(xs), max(ys)
 
     # ------------------------------------------------------------------ klocki
-    def box(self, z, x0, y0, w, h, floor, wall, doors=(), gaps=(), door_obj='door_open'):
+    def box(self, z, x0, y0, w, h, floor, wall, doors=(), gaps=(), door_obj='door_open', organic_shape=True):
         """Budynek w x h (z murami). doors - pola drzwi w murze, gaps - przejscia bez drzwi. Zwraca wnetrze."""
         inner = []
         for y in range(y0, y0 + h):
@@ -124,7 +125,37 @@ class Plan:
             self.put(x, y, z, (floor, NONE, door_obj, NONE))
         for (x, y) in gaps:
             self.put(x, y, z, (floor, NONE, NONE, NONE))
+        if organic_shape:
+            inner = self._organic_corners(z, x0, y0, w, h, wall, inner, list(doors) + list(gaps))
         return inner
+
+    def _organic_corners(self, z, x0, y0, w, h, wall, inner, keep):
+        """Regula "zadnych idealnych prostokatow": sciete rogi wnetrza (2x2 / schodek) a w duzych budynkach wyrwany
+        blok narozny (ksztalt L). Deterministyczne wg polozenia (nie rusza generatora losowego). Pola przy drzwiach i
+        przejsciach zostaja bez zmian."""
+        if w < 7 or h < 6:
+            return inner
+        hsh = (x0 * 73856093) ^ (y0 * 19349663) ^ (z * 83492791) ^ (w * 2654435761) ^ (h * 40503)
+        corners = [(x0 + 1, y0 + 1, 1, 1), (x0 + w - 2, y0 + 1, -1, 1), (x0 + 1, y0 + h - 2, 1, -1), (x0 + w - 2, y0 + h - 2, -1, -1)]
+        order = sorted(range(4), key=lambda i: (hsh >> (3 * i)) & 7)
+        big = w >= 11 and h >= 9
+        cut = set()
+        for rank, i in enumerate(order[:3]):
+            cx, cy, dx, dy = corners[i]
+            a, b = (3, 3) if (big and rank == 0) else (2, 1 + ((hsh >> (7 + i)) & 1))
+            for u in range(a):
+                for v in range(b if u == 0 or a == 3 else 1):
+                    cut.add((cx + dx * u, cy + dy * v))
+        near = {(kx + i, ky + j) for (kx, ky) in keep for i in (-2, -1, 0, 1, 2) for j in (-2, -1, 0, 1, 2)}
+        out = []
+        for c in inner:
+            cell = self.get(c[0], c[1], z)
+            if c in cut and c not in near and cell is not None and cell[2] == NONE:
+                self._cuts[(c[0], c[1], z)] = cell
+                self.put(c[0], c[1], z, (cell[0], NONE, NONE, wall))
+            else:
+                out.append(c)
+        return out
 
     def platform(self, z, x0, y0, x1, y1, floor, rail=None, rail_gaps=()):
         """Podloga bez murow; rail - obiekt barierki na brzegu (np. 'fence'), rail_gaps - przerwy w barierce."""
@@ -214,6 +245,35 @@ class Plan:
         raise AssertionError(f'{self.name}: no landing next to {(x, y, z)}')
 
     def finish(self):
+        # sciete rogi wracaja na podloge przy schodach, drabinach, skrzyniach, NPC i spawnach (zawsze wolne sasiedztwo)
+        pts = []
+        for (z, up, down, *_r) in self._stairs:
+            pts += [(up[0], up[1], z), (down[0], down[1], z + 1)]
+        for (z, at, top) in self._ladders:
+            pts += [(at[0], at[1], z), (top[0], top[1], z + 1)]
+        pts += [(c[0], c[1], c[2]) for c in self.chests] + [(n[4], n[5], n[6]) for n in self.npcs]
+        pts += [(sp[1], sp[2], sp[3]) for sp in self.spawns] + [(d[0], d[1], d[2]) for d in self.doors]
+        for (px, py, pz) in pts:
+            for dx in (-2, -1, 0, 1, 2):
+                for dy in (-2, -1, 0, 1, 2):
+                    orig = self._cuts.pop((px + dx, py + dy, pz), None)
+                    cur = self.get(px + dx, py + dy, pz)
+                    if orig is not None and cur is not None and cur[3] != NONE:
+                        self.put(px + dx, py + dy, pz, orig)
+        for (cx, cy, cz) in list(self._cuts):
+            if any((self.get(cx + dx, cy + dy, cz) or (0, 0, NONE, 0))[2] != NONE for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+                cur = self.get(cx, cy, cz)
+                if cur is not None and cur[3] != NONE:
+                    self.put(cx, cy, cz, self._cuts[(cx, cy, cz)])
+        # skrzynie i NPC postawione po scietych rogach (box) wracaja na podloge: stoja zawsze na wolnym polu
+        for (x, y, z, *_r) in self.chests:
+            c = self.get(x, y, z)
+            if c is not None and c[3] != NONE:
+                self.put(x, y, z, (c[0], c[1], NONE, NONE))
+        for n in self.npcs:
+            c = self.get(n[4], n[5], n[6])
+            if c is not None and c[3] != NONE:
+                self.put(n[4], n[5], n[6], (c[0], c[1], NONE, NONE))
         for (z, up, down, lu, ld) in self._stairs:
             lu = lu or self._land(down[0], down[1], z + 1)
             ld = ld or self._land(up[0], up[1], z)

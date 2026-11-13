@@ -372,3 +372,8 @@ access_quest_halvar|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.telep
 barbarian_camp_ground|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=925,946,0 -Dpixel.premium=1
 barbarian_camp_watchtower|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=921,938,2 -Dpixel.premium=1
 barbarian_camp_small|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=675,73,0
+questhouse_signs|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=376,408,0
+questhouse_nerys_f1|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=941,751,1
+questhouse_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=225,579,-1
+questhouse_varden_town|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=512,598,0
+shape_underground_L|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=68,106,-2
