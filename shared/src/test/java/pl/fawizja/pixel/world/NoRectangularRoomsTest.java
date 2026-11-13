@@ -17,7 +17,7 @@ import pl.fawizja.pixel.TestData;
 class NoRectangularRoomsTest {
 
     /** Liczba prostokatnych pokoi z czasow przed regula (nie wolno jej przekraczac). */
-    static final int LEGACY_MAX = 104;
+    static final int LEGACY_MAX = 0;   // pozostale prostokaty poza kopia maps/varden: zero
 
     record Rect(int z, int x0, int y0, int x1, int y1) {
         @Override public String toString() { return "z" + z + " (" + x0 + "," + y0 + ")-(" + x1 + "," + y1 + ")"; }
@@ -81,7 +81,17 @@ class NoRectangularRoomsTest {
     @Test
     void newBuildingsAreNeverPerfectRectangles() {
         WorldMap world = TestData.world();
-        List<Rect> rects = rectangles(world);
+        List<Rect> all = rectangles(world);
+        // jedyny wyjatek: kopia recznej mapy maps/varden (GameWorldTest.vardenRegionIsIdenticalToTheVardenMap porownuje ja pole po polu)
+        WorldMap v = TestData.varden();
+        List<Rect> rects = new ArrayList<>();
+        List<Rect> whitelisted = new ArrayList<>();
+        for (Rect r : all) {
+            boolean inVarden = r.x0() >= WorldLayout.VARDEN_OFFSET_X && r.y0() >= WorldLayout.VARDEN_OFFSET_Y
+                    && r.x1() < WorldLayout.VARDEN_OFFSET_X + v.width() && r.y1() < WorldLayout.VARDEN_OFFSET_Y + v.height();
+            (inVarden ? whitelisted : rects).add(r);
+        }
+        System.out.println("whitelisted (maps/varden copy): " + whitelisted.size() + " " + whitelisted);
         List<String> inHouses = new ArrayList<>();
         for (Rect r : rects) {
             for (Region reg : world.regions()) {

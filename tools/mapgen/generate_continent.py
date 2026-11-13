@@ -58,6 +58,7 @@ import minotaur  # noqa: E402
 import citadel  # noqa: E402
 import story_quests  # noqa: E402
 import quest_houses  # noqa: E402
+import shapes  # noqa: E402
 import trainers  # noqa: E402
 
 ROOT = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources', 'maps')
@@ -1068,7 +1069,7 @@ def build(ctx):
         print('wyprawa fabularna:', rec['key'], rec['tier'], 'npc', rec['npc'], 'drzwi', rec['door'])
     # 2026-11-12: Domy Zadan w szesciu glownych miastach (po 20 skrzyn, PZ, pietra +1/+2 albo piwnica -1)
     for rec in quest_houses.build(ctx, cost, wh):
-        print('dom zadan:', rec['town'], rec['site'], 'wejscie', rec['ent'], 'pietra', rec['floors'], 'piwnica', rec['cellar'], 'lustro', rec['flip'])
+        print('dom zadan:', rec['town'], rec['site'], 'wejscie', rec['ent'], 'pietra', rec['floors'], 'piwnica', rec['cellar'], 'lustro', rec['flip'], 'w miescie', rec['in_town'], 'odleglosc', rec['dist'])
 
 
 def monster_levels():
@@ -2912,6 +2913,9 @@ def finish(ctx):
     # poziomy potworow rosna stopniowo wzdluz drog od swiatyn; silne spawny na drogach do slabszych lowisk obnizone
     # (route_levels.py, Darek 2026-11-04); regiony dostaja zalecane poziomy wg spawnow, ktore w nich zostaly
     # swiatla i domy zmieniaja pola przejscia - poziomy drog licza sie na gotowym ukladzie
+    # regula wlasciciela: zadnych idealnych prostokatow (shapes.py) - po zlozeniu swiata, przed schodami przy scianach i swiatlami na murach
+    n_shaped, shapes_left = shapes.reshape(ctx, FLOORS, (lambda b_: (b_.rect[0] + b_.dx, b_.rect[1] + b_.dy, b_.rect[2] + b_.dx, b_.rect[3] + b_.dy))(next(bb for bb in ctx['blocks'] if bb.name == 'varden')))
+    print('ksztalty: przekszalcone pokoje', n_shaped, 'pozostale prostokaty', len(shapes_left), shapes_left[:40])
     print('schody przy scianie:', stair_rules.back_stairs(ctx, S, FLOORS))
     print('swiatla na murach:', wall_lights.mount(ctx['world'], S, FLOORS))
     print('domy na sprzedaz:', homes.check_houses(ctx))

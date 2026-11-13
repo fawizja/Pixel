@@ -25,8 +25,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(HERE, '..', '..', 'shared', 'src', 'main', 'resources')
 SEED = 20261213
 
-CW, CH = 44, 34              # plansza w polach
-HALL_X0 = 13                 # hol zaczyna sie nie wczesniej niz tu (na zachod dziedziniec)
+CW, CH = 36, 28              # plansza w polach
+HALL_X0 = 9                  # hol zaczyna sie nie wczesniej niz tu (na zachod dziedziniec)
 CHEST_TOTAL = 20
 
 HOUSES = [
@@ -141,13 +141,13 @@ def cheb(a, b):
 def hall_shape(rng, S, west):
     """Hol: kilka prostokatow (L, T, krzyz) zawierajacych punkt S; west - ramie do zachodniego wejscia."""
     sx, sy = S
-    cells = rect_cells(sx - rng.randint(2, 4), sy - rng.randint(2, 3), rng.randint(6, 8), rng.randint(5, 7))
-    cells |= rect_cells(sx - rng.randint(0, 3), sy - rng.randint(4, 6), rng.randint(3, 4), rng.randint(9, 12))
+    cells = rect_cells(sx - rng.randint(2, 3), sy - rng.randint(1, 2), rng.randint(5, 6), rng.randint(4, 5))
+    cells |= rect_cells(sx - rng.randint(0, 2), sy - rng.randint(3, 4), 3, rng.randint(7, 9))
     if west:
         ey = sy + rng.randint(-2, 2)
         cells |= rect_cells(HALL_X0, ey - 1, sx - HALL_X0 + 1, 3)
     elif rng.random() < 0.7:
-        cells |= rect_cells(sx - rng.randint(5, 8), sy + rng.randint(-1, 1), rng.randint(6, 9), 3)
+        cells |= rect_cells(sx - rng.randint(4, 6), sy + rng.randint(-1, 1), rng.randint(5, 7), 3)
     cells = {(x, y) for (x, y) in cells if HALL_X0 <= x <= CW - 3 and 3 <= y <= CH - 4}
     out = chip(cells, rng, 0.5)
     return out if S in out else out | {S}
@@ -233,7 +233,7 @@ def cave_chambers(rng, n, box):
     pts = []
     for _ in range(400):
         p = (rng.randint(x0, x1), rng.randint(y0, y1))
-        if all(abs(p[0] - q[0]) + abs(p[1] - q[1]) >= 9 for q in pts):
+        if all(abs(p[0] - q[0]) + abs(p[1] - q[1]) >= 7 for q in pts):
             pts.append(p)
         if len(pts) == n:
             break
@@ -245,17 +245,17 @@ def build_house(h, k, attempt):
     town = h['town']
     fl_hall, fl_room, wall = h['floors']
     p = St.Plan(h['place'][0])
-    S = (rng.randint(24, 30), rng.randint(14, 20))          # schody parter -> +1
+    S = (rng.randint(19, 23), rng.randint(12, 15))          # schody parter -> +1
     layouts = {}
 
     hall0 = hall_shape(rng, S, west=True)
     L0 = Layout(rng, hall0)
     for name in ('open', 'level', 'guard'):
-        assert L0.add_room(name, 'hall', ((5, 8), (4, 6))), f'{town}: no room {name} on floor 0'
+        assert L0.add_room(name, 'hall', ((5, 7), (4, 5))), f'{town}: no room {name} on floor 0'
     layouts[0] = L0
     L1 = Layout(rng, hall_shape(rng, S, west=False))
-    for name, parent, size in (('open', 'hall', ((5, 8), (4, 6))), ('qroom', 'hall', ((5, 7), (4, 6))),
-                               ('vault', 'qroom', ((4, 6), (4, 5))), ('guard', 'hall', ((5, 8), (4, 6)))):
+    for name, parent, size in (('open', 'hall', ((5, 7), (4, 5))), ('qroom', 'hall', ((5, 6), (4, 5))),
+                               ('vault', 'qroom', ((5, 6), (4, 4))), ('guard', 'hall', ((5, 7), (4, 5)))):
         assert L1.add_room(name, parent, size), f'{town}: no room {name} on floor 1'
     layouts[1] = L1
     S2 = S3 = None
@@ -319,8 +319,8 @@ def build_house(h, k, attempt):
         chosen += [(x, y, 2, 'attic') for (x, y) in spots]
     guards_cells = []
     if S3:
-        cx0, cy0 = 12, 5
-        pts = [(rng.randint(16, 20), rng.randint(8, 24))] + cave_chambers(rng, 3, (22, 6, 40, 28))
+        cx0, cy0 = 9, 4
+        pts = [(rng.randint(13, 16), rng.randint(8, 20))] + cave_chambers(rng, 3, (18, 6, 31, 23))
         assert len(pts) == 4, f'{town}: cave chambers'
         p.cave(-1, cx0, cy0, CW - cx0, CH - cy0, pts, h['cave'], rng, room=(2, 3))
         p.stairs(-1, pts[0], S3)
@@ -355,10 +355,10 @@ def build_house(h, k, attempt):
                     put += 1
 
     yard = set()
-    cx, cy = ent[0] - 5, ey
-    for y in range(cy - 7, cy + 8):
+    cx, cy = ent[0] - 3, ey
+    for y in range(cy - 6, cy + 7):
         for x in range(1, ent[0]):
-            d = ((x - cx) / 6.0) ** 2 + ((y - cy) / 5.5) ** 2
+            d = ((x - cx) / 3.6) ** 2 + ((y - cy) / 4.2) ** 2
             if d <= 1.0 + 0.35 * (rng.random() - 0.5) and (x, y) not in hall0:
                 yard.add((x, y))
     for x in range(cx, ent[0]):
@@ -367,7 +367,7 @@ def build_house(h, k, attempt):
     assert (ent[0] - 1, ey) in yard
     for (x, y) in yard:
         p.put(x, y, 0, ('cobblestone', NONE, NONE, NONE))
-    npc_at = (ent[0] - 3, ey + 1) if (ent[0] - 3, ey + 1) in yard else (ent[0] - 2, ey)
+    npc_at = (ent[0] - 2, ey + 1) if (ent[0] - 2, ey + 1) in yard else (ent[0] - 2, ey)
     p.npcs.append([f"house_{h['key']}_warden", h['npc'][0], 'GUIDE', h['place'][0], npc_at[0], npc_at[1], 0, '-', '#b89050', h['greet'][0]])
     for r in organic.rect_cover(yard | hall0 | {ent}):
         p.pz.append((*r, 0))
@@ -384,11 +384,14 @@ def build_house(h, k, attempt):
         p.spawn(g[i % len(g)], c[0], c[1], -1, radius=2, count=2, respawn=170)
 
     lo, hi = h['lv']
-    p.regions.append((h['place'][0], 0, 0, CW - 1, CH - 1, 0, max(layouts), lo, hi))
-    if S3:
-        xs = [c[0] for c in p.f[-1]]
-        ys = [c[1] for c in p.f[-1]]
-        p.regions.append((cellar_name(h, 0), min(xs), min(ys), max(xs), max(ys), -1, -1, lo, hi))
+    for z, cells in sorted(p.f.items()):
+        if z >= 0:                              # region po obrysie (rect_cover), nie po calej planszy
+            for (a, b, c, d) in organic.rect_cover(set(cells)):
+                p.regions.append((h['place'][0], a, b, c, d, z, z, lo, hi))
+        else:
+            xs = [c[0] for c in cells]
+            ys = [c[1] for c in cells]
+            p.regions.append((cellar_name(h, 0), min(xs), min(ys), max(xs), max(ys), z, z, lo, hi))
     p.check()
     meta = dict(gates=gates, quest=h['quest'], choice_group=f"house_{h['key']}", vault=vault, ent=ent,
                 top=max(layouts), cellar=bool(S3))
@@ -467,6 +470,137 @@ def mirror(p, fx, fy):
     return q, T
 
 
+TREES = {'tree', 'pine', 'palm', 'bush', 'rock', 'cactus', 'snow_rock', 'sandstone_rock', 'dead_tree', 'jungle_tree', 'jungle_bush',
+         'frost_pine', 'frost_bush', 'dry_bush', 'autumn_tree', 'burnt_tree', 'sandstone_rock', 'obsidian_rock', 'ice_crystal'}
+
+
+def town_site(ctx, helpers, plan0, temple, rng, k, radius=100):
+    """Miejsce w miescie albo na jego skraju: najblizsze swiatyni, gdzie caly obrys planu (z 1 polem zapasu) lezy na wolnym
+    terenie (trawa, drzewa i krzewy do wyciecia), z dala od budynkow, dróg, stref ochronnych, NPC i przejsc. Probuje
+    czterech odbic lustrzanych. Zwraca (plan, T, origin, (fx, fy)) albo None."""
+    import numpy as np
+    world = ctx['world']
+    natural = helpers['natural']
+    tx, ty = temple
+    x0, y0 = max(5, tx - radius - 30), max(5, ty - radius - 30)
+    x1, y1 = min(len(world.floors[0][0]) - 6, tx + radius + 30), min(len(world.floors[0]) - 6, ty + radius + 30)
+    W, H = x1 - x0 + 1, y1 - y0 + 1
+    free = np.zeros((H, W), bool)
+    g = world.floors[0]
+    for y in range(y0, y1 + 1):
+        row = g[y]
+        for x in range(x0, x1 + 1):
+            if natural(row[x]):
+                free[y - y0, x - x0] = True
+
+    def block(ax0, ay0, ax1, ay1, m):
+        free[max(0, ay0 - m - y0):max(0, ay1 + m + 1 - y0), max(0, ax0 - m - x0):max(0, ax1 + m + 1 - x0)] = False
+    for (a, b, c, d, z) in ctx['pz']:
+        if z == 0:
+            block(a, b, c, d, 3)
+    for r in ctx['houses']:
+        if len(r) > 7 and str(r[7]) == '0':
+            block(int(r[3]), int(r[4]), int(r[5]), int(r[6]), 4)
+    for r in ctx.get('regions_new', []):               # miejsca specjalne (wzgorza, twierdze, obozy): bez domu zadan
+        if r[5] <= 0 <= r[6]:
+            block(r[1], r[2], r[3], r[4], 4)
+    for r in ctx.get('reserved', []):
+        block(r[0], r[1], r[2], r[3], 2)
+    for t in ctx['transitions']:
+        if t[2] == 0:
+            block(t[0], t[1], t[0], t[1], 3)
+            block(t[4], t[5], t[4], t[5], 3)
+    for n in ctx['npcs']:
+        if int(n[6]) == 0:
+            block(int(n[4]), int(n[5]), int(n[4]), int(n[5]), 3)
+    for ln in ctx['spawns']:
+        f = ln.split(';')
+        if not ln.startswith('#') and len(f) > 3 and f[3] == '0':
+            block(int(f[1]), int(f[2]), int(f[1]), int(f[2]), 2)
+    for zz in world.floors:
+        if zz > 0:
+            for y in range(y0, y1 + 1, 2):
+                for x in range(x0, x1 + 1, 2):
+                    if world.floors[zz][y][x] is not None:
+                        block(x, y, x, y, 2)
+    flips = [(a, b) for a in (False, True) for b in (False, True)]
+    rng2 = random.Random(SEED + 77 * k)
+    rng2.shuffle(flips)
+    best = None
+    offs = sorted(((dx, dy) for dx in range(-radius, radius + 1, 2) for dy in range(-radius, radius + 1, 2)),
+                  key=lambda d: d[0] * d[0] + d[1] * d[1])
+    for (fx, fy) in flips:
+        plan, T = mirror(plan0, fx, fy)
+        cells = np.array(sorted(plan.f[0].keys()))
+        cx, cy = int(cells[:, 0].mean()), int(cells[:, 1].mean())
+        # zapas 1 pola dookola
+        mask = {(x + dx, y + dy) for (x, y) in plan.f[0] for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+        mxy = np.array(sorted(mask))
+        for (dx, dy) in offs:
+            ox, oy = tx + dx - cx, ty + dy - cy
+            if best is not None and dx * dx + dy * dy >= best[0]:
+                break
+            xs, ys = mxy[:, 0] + ox - x0, mxy[:, 1] + oy - y0
+            if xs.min() < 0 or ys.min() < 0 or xs.max() >= W or ys.max() >= H:
+                continue
+            if free[ys, xs].all():
+                best = (dx * dx + dy * dy, plan, T, (ox, oy), (fx, fy))
+                break
+    if best is None:
+        return None
+    return best[1], best[2], best[3], best[4]
+
+
+def link_to_town(ctx, W, T, meta):
+    """Sciezka od dziedzinca do najblizszej drogi (drzewa i krzewy na trasie wycinane)."""
+    import features as F
+    world = ctx['world']
+    ent = W(*T(*meta['ent']), 0)
+    ex, ey = ent
+    # dziedziniec leży przed wejściem: start w sasiednim polu poza murem budynku
+    starts = [(ex + dx, ey + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+    start = None
+    for s_ in starts:
+        c = world.get(s_[0], s_[1])
+        if c is not None and F.walk(c):
+            start = s_
+            break
+    if start is None:
+        return 0
+    from collections import deque
+    prev = {start: None}
+    dq = deque([start])
+    end = None
+    while dq:
+        p = dq.popleft()
+        c = world.get(p[0], p[1])
+        if p != start and c[0] in F.ROAD_GROUND and F.walk(c) and abs(p[0] - start[0]) + abs(p[1] - start[1]) > 6:
+            end = p
+            break
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            n = (p[0] + dx, p[1] + dy)
+            if n in prev or abs(n[0] - start[0]) > 70 or abs(n[1] - start[1]) > 70:
+                continue
+            cn = world.get(n[0], n[1])
+            if cn is None or cn[3] != NONE or cn[0] in ('water', 'deep_water', 'lava', 'swamp', 'chasm'):
+                continue
+            if not (F.walk(cn) or cn[2] in TREES):
+                continue
+            prev[n] = p
+            dq.append(n)
+    if end is None:
+        return 0
+    n = 0
+    p = end
+    while p is not None:
+        c = world.get(p[0], p[1])
+        if c[2] in TREES:
+            world.put(p[0], p[1], 0, (c[0], c[1], NONE, NONE))
+            n += 1
+        p = prev[p]
+    return n
+
+
 def build(ctx, cost, helpers):
     import story_quests as SQ
     world = ctx['world']
@@ -488,28 +622,39 @@ def build(ctx, cost, helpers):
         assert plan is not None, f'{h["town"]}: quest house not built: {last}'
         rng = random.Random(SEED + 31 * k)
         fx, fy = rng.random() < 0.5, rng.random() < 0.5
-        plan, T = mirror(plan, fx, fy)
-        gate_cells = [(T(*g[0]), g[1], g[2]) for g in meta['gates']]
-        vault = [T(*v) for v in meta['vault']]
+        plan0 = plan
         temple = towns[h['town']][:2]
-        hh = dict(helpers, reach=SQ._reach(world, temple))
-        w, hgt = CW + 6, CH + 6
-        best = None
-        for i in range(8):                      # najblizsze miejsce wsrod osmiu kierunkow od swiatyni
-            ang = (rng.random() + i) * 6.283 / 8
-            near = (int(temple[0] + 62 * math.cos(ang)), int(temple[1] + 62 * math.sin(ang)))
-            try:
-                cand = St.find_site(ctx, hh, cost, near, w, hgt, radius=200, min_temple=34, max_water=0.12)
-            except AssertionError:
-                continue
-            d = math.hypot(cand[0] + w / 2 - temple[0], cand[1] + hgt / 2 - temple[1])
-            if best is None or d < best[0]:
-                best = (d, cand)
-        assert best is not None, f'{h["town"]}: no site for the quest house'
-        tx, ty = best[1]
-        origin = (tx + 3, ty + 3)
+        site = town_site(ctx, helpers, plan0, temple, rng, k)
+        if site is None:
+            plan, T = mirror(plan0, fx, fy)
+            gate_cells = [(T(*g[0]), g[1], g[2]) for g in meta['gates']]
+            vault = [T(*v) for v in meta['vault']]
+        else:
+            plan, T, origin, (fx, fy) = site
+            gate_cells = [(T(*g[0]), g[1], g[2]) for g in meta['gates']]
+            vault = [T(*v) for v in meta['vault']]
+            tx, ty = origin[0] - 3, origin[1] - 3
+            w, hgt = CW + 6, CH + 6
+        if site is None:
+            hh = dict(helpers, reach=SQ._reach(world, temple))
+            w, hgt = CW + 6, CH + 6
+            best = None
+            for i in range(8):                      # zapas: najblizsze wolne miejsce wsrod osmiu kierunkow
+                ang = (rng.random() + i) * 6.283 / 8
+                near = (int(temple[0] + 62 * math.cos(ang)), int(temple[1] + 62 * math.sin(ang)))
+                try:
+                    cand = St.find_site(ctx, hh, cost, near, w, hgt, radius=200, min_temple=34, max_water=0.12)
+                except AssertionError:
+                    continue
+                d = math.hypot(cand[0] + w / 2 - temple[0], cand[1] + hgt / 2 - temple[1])
+                if best is None or d < best[0]:
+                    best = (d, cand)
+            assert best is not None, f'{h["town"]}: no site for the quest house'
+            tx, ty = best[1]
+            origin = (tx + 3, ty + 3)
         St.clear_surface(ctx, tx - 2, ty - 2, tx + w + 1, ty + hgt + 1)
         W = St.stamp(ctx, plan, origin, mark)
+        linked = link_to_town(ctx, W, T, meta) if site is not None else -1
         for (xy, z, req) in gate_cells:
             a = W(xy[0], xy[1], z)
             ctx['star_gates'].append((a[0], a[1], z, req))
@@ -523,7 +668,8 @@ def build(ctx, cost, helpers):
         ctx['reward_reqs'].append((grp, 'quest:' + meta['quest']))
         ent = W(*T(*meta['ent']), 0)
         rec = dict(key=h['key'], town=h['town'], origin=origin, ent=ent, chests=CHEST_TOTAL, floors=meta['top'],
-                   cellar=meta['cellar'], flip=(fx, fy), site=(tx, ty))
+                   cellar=meta['cellar'], flip=(fx, fy), site=(tx, ty), in_town=site is not None, cleared=linked,
+                   dist=round(math.hypot(ent[0] - temple[0], ent[1] - temple[1])))
         out.append(rec)
         ctx['quest_houses'].append(rec)
     return out
