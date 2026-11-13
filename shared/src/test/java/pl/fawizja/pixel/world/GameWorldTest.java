@@ -155,7 +155,7 @@ class GameWorldTest {
         // pochodnie i latarnie przeniesione z podlogi na mury (tools/mapgen/wall_lights.py) - poza porownaniem
         java.util.Set<Integer> lights = new java.util.HashSet<>();
         // posag treningowy w swiatyni dodaje tools/mapgen/trainers.py (tylko w swiecie, nie w samodzielnej mapie Varden)
-        for (String k : new String[] {"wall_torch", "street_lamp", "wall_lantern", "training_statue"}) lights.add(world.tiles().byKey(k).id());
+        for (String k : new String[] {"wall_torch", "street_lamp", "wall_lantern", "training_statue", "mailbox"}) lights.add(world.tiles().byKey(k).id());
         for (int z = -5; z <= 5; z++) {
             FloorMap a = v.floor(z), b = world.floor(z);
             for (int y = 0; y < v.height(); y++) {

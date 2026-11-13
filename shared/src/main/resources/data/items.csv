@@ -417,3 +417,8 @@
 # BEGIN islands5 (tools/mapgen/islands5_data.py)
 9;silver_brooch;Srebrna broszka;MATERIAL;20;50;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#d8dce8;Broszka z herbem rodziny przewoźnika. Król Sroczy ukradł ją dawno temu.
 # END islands5
+# BEGIN postman (tools/mapgen/postman.py data)
+14;postman_cap;Czapka listonosza;ARMOR;1;400;HEAD;0;0;2;0;*;0;0;PHYSICAL;-;-;#3662a8;Granatowa czapka z rogiem poczty (nagroda Zadania Listonosza).
+15;lost_mailbag;Zgubiona torba pocztowa;MATERIAL;1;50;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#7e522a;Torba kuriera z listami, zabrana przez bandytów.
+16;sodden_letters;Rozmokły list;MATERIAL;20;10;NONE;0;0;0;0;*;0;0;PHYSICAL;-;-;#9aa4b4;List rozmoknięty od śniegu i wilczej śliny. Kevan zdoła go wysuszyć.
+# END postman

@@ -377,3 +377,12 @@ questhouse_nerys_f1|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startL
 questhouse_cave|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=225,579,-1
 questhouse_varden_town|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=512,598,0
 shape_underground_L|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.teleport=68,106,-2
+premium_party_gate|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.premium=1 -Dpixel.teleport=365,829,-1
+premium_lever_room|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.premium=1 -Dpixel.teleport=389,884,-1
+premium_boss_room|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=900 -Dpixel.premium=1 -Dpixel.teleport=413,899,-1
+postman_npc|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,505,0 -Dpixel.open=npc
+postman_mailbox_town|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.teleport=498,510,0 -Dpixel.tap=498,508
+postman_mailbox_hunt|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=20 -Dpixel.teleport=402,592,0 -Dpixel.tap=402,590
+journal_premium_lines|-Dpixel.autostart=Test:KNIGHT -Dpixel.hour=12 -Dpixel.startLevel=300 -Dpixel.premium=1 -Dpixel.teleport=498,503,0 -Dpixel.open=journal -Dpixel.quests=postman_m1:done,postman_m2:active:3,drown_m1:done,drown_m2:active:4,toll_m1:active:0
+camp_platform_plus1|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=922,924,1 -Dpixel.premium=1
+camp_platform_plus2|-Dpixel.autostart=Test:PALADIN -Dpixel.hour=12 -Dpixel.teleport=928,934,2 -Dpixel.premium=1

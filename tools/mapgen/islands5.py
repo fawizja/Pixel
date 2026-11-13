@@ -41,6 +41,36 @@ def noisy(rng, rx, ry, amp=0.2):
     return out
 
 
+def biggest(cells):
+    """Największa spójna (4 kierunki) część zbioru pól."""
+    left, best = set(cells), set()
+    while left:
+        st = [next(iter(left))]
+        comp = set()
+        while st:
+            c = st.pop()
+            if c in comp or c not in left:
+                continue
+            comp.add(c)
+            st += [(c[0] + dx, c[1] + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+        left -= comp
+        if len(comp) > len(best):
+            best = comp
+    return best
+
+
+def irregular(rng, k):
+    """Platforma wieży obozu: falujący blob o różnych rozmiarach (k = numer wieży), z wypustem (pomost) i wgryzionym stopniem."""
+    rx, ry = [(3.9, 2.7), (2.8, 3.7), (3.4, 3.1)][k % 3]
+    cells = noisy(rng, rx, ry, amp=0.3)
+    sx, sy = rng.choice((-1, 1)), rng.choice((-1, 1))
+    lobe = shift(noisy(rng, 1.5, 1.4, amp=0.3), int(sx * rx * 0.65), int(sy * ry * 0.4))
+    cells |= lobe
+    bx, by = -sx * int(rx * 0.7), sy * int(ry * 0.5)
+    cells = {c for c in cells if not (abs(c[0] - bx) <= 1 and (c[1] - by) * sy >= 0 and (c[1] - by) * sy <= 1 and abs(c[0]) > rx * 0.5)}
+    return biggest(cells)
+
+
 def shift(cells, ox, oy):
     return {(x + ox, y + oy) for (x, y) in cells}
 
@@ -463,7 +493,9 @@ def _build_camp(p, sf, th, cfg, rng, site):
         q = pick(erode(cells, 3), (tx_, ty_))
         if q in hut_cells or any(math.hypot(q[0] - t[0], q[1] - t[1]) < 8 for t in towers) or math.hypot(q[0] - cx, q[1] - cy) < 5:
             continue
-        pc = shift(noisy(rng, 3.9, 3.5, amp=0.16), q[0], q[1])
+        for _ in range(3):
+            rng.uniform(0, 6.28)          # jak dawne noisy(): reszta obozu zostaje taka sama
+        pc = shift(irregular(random.Random(7919 * len(towers) + q[0] * 31 + q[1]), len(towers)), q[0], q[1])
         if pc & hut_cells or not pc <= erode(cells, 1) or any(g in pc for g in gates):
             continue
         towers.append(q)
@@ -476,7 +508,11 @@ def _build_camp(p, sf, th, cfg, rng, site):
         p.ladder(0, at0)
         # poziom +2 na dwóch wieżach
         if len(towers) <= 2:
-            p2 = erode(pc, 1)
+            p2 = biggest({c for c in erode(pc, 1) if not (c[0] >= q[0] + 2 and c[1] <= q[1] - 1)})
+            if len(p2 - ring4(p2)) < 6:
+                p2 = biggest(erode(pc, 1))
+            if len(p2 - ring4(p2)) < 6:
+                p2 = set(pc)
             r2 = ring4(p2)
             for (x, y) in p2:
                 p.put(x, y, 2, ('wood_floor', NONE, 'fence' if (x, y) in r2 else NONE, NONE))

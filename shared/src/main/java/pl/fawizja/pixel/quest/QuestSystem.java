@@ -34,7 +34,13 @@ public final class QuestSystem {
     /** Czy poprzedni etap lancucha jest ukonczony (albo zadanie nie ma poprzednika). */
     public boolean unlocked(PlayerCharacter pc, QuestType q) {
         if (q.requires() != null && pc.quests().state(q.requires()) != QuestLog.State.DONE) return false;
-        for (String r : registry.prereqs(q.key())) if (pc.quests().state(r) != QuestLog.State.DONE) return false;
+        for (String r : registry.prereqs(q.key())) {
+            if (r.startsWith("!")) {
+                if (pc.quests().state(r.substring(1)) != QuestLog.State.AVAILABLE) return false;   // wybrano inna frakcje
+            } else if (pc.quests().state(r) != QuestLog.State.DONE) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -112,6 +118,11 @@ public final class QuestSystem {
             if (before < q.amount() && pc.quests().progress(key) >= q.amount()) completedNow = q;
         }
         return completedNow;
+    }
+
+    /** Uzycie skrzynki pocztowej (nazwa z mailboxes.csv): zalicza aktywne zadania VISIT o tym celu, jak {@link #onEnter}. */
+    public QuestType onMailbox(PlayerCharacter pc, String mailboxName) {
+        return onEnter(pc, mailboxName);
     }
 
     /** Wejscie do regionu mapy (nazwa z mapy): zalicza aktywne zadania typu VISIT; zwraca pierwsze zaliczone albo null. */

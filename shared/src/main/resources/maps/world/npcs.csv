@@ -151,9 +151,9 @@ whisper_captain;Boatwoman Brenna;CAPTAIN;Wyspa Szeptów;893;129;0;-;#4a6a8a;Pły
 whisper_hermit;Hermit Maren;GUIDE;Wyspa Szeptów;898;129;0;-;#7a8a6a;Wilki i pająki wyją mi pod chatą. Pomożesz starej pustelniczce?
 whisper_keeper;Lightkeeper Dunstan;GUIDE;Wyspa Szeptów;902;129;0;-;#8a8aa0;Latarnia świeci, ale z grot pod nią słychać szepty. Ktoś musi to zbadać.
 whisper_miner;Prospector Hale;GUIDE;Wyspa Szeptów;898;133;0;-;#a08060;Kopalnia i kopiec to moje życie, a teraz roją się tam gobliny i kości.
-ice5_captain;Captain Skuld;CAPTAIN;Wyspa Białej Zamieci;907;922;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
-ice_skuld;Outfitter Skuld;GUIDE;Wyspa Białej Zamieci;907;926;0;-;#a8c8e8;Futra, haki i raki dla wyprawy. Mam też zlecenia na yeti i lodowe stwory.
-ice_ragna;Warden Ragna;GUIDE;Wyspa Białej Zamieci;907;930;0;-;#88a8c8;Pielgrzymi i golemy chodzą po jaskiniach. Pomożesz?
+ice5_captain;Captain Skuld;CAPTAIN;Wyspa Białej Zamieci;934;912;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
+ice_skuld;Outfitter Skuld;GUIDE;Wyspa Białej Zamieci;934;921;0;-;#a8c8e8;Futra, haki i raki dla wyprawy. Mam też zlecenia na yeti i lodowe stwory.
+ice_ragna;Warden Ragna;GUIDE;Wyspa Białej Zamieci;923;913;0;-;#88a8c8;Pielgrzymi i golemy chodzą po jaskiniach. Pomożesz?
 desert5_captain;Captain Zahir;CAPTAIN;Wyspa Złotych Wydm;315;963;0;-;#4a6a8a;Pływam na kontynent. Rejsy tylko dla kont premium.
 desert_nadira;Scout Nadira;GUIDE;Wyspa Złotych Wydm;315;959;0;-;#d8b060;Wydmy się przesuwają, a pod nimi czają się żądła. Mam zlecenia.
 desert_omar;Priest-Hunter Omar;GUIDE;Wyspa Złotych Wydm;315;955;0;-;#c09040;Obeliski gniewają się na ludzi. Pomóż mi je uciszyć.
@@ -186,6 +186,24 @@ house_qas_warden;Dozorca Hakim;GUIDE;Dom Piaskowego Kupca;210;441;0;-;#b89050;Ku
 house_selv_warden;Dozorca Teodoro;GUIDE;Dom Portowego Celnika;648;665;0;-;#b89050;Celnik trzymał w tym domu skonfiskowane skrzynie. Część jest dla każdego, część za pieczęcią.
 house_valmir_warden;Dozorca Ambroży;GUIDE;Dom Zatopionego Kapitana;431;769;0;-;#b89050;Kapitan utonął, a jego skrzynie zostały. W holu możesz odpocząć, dalej bądź czujny.
 house_nerys_warden;Dozorczyni Marina;GUIDE;Dom Perłowego Poszukiwacza;865;678;0;-;#b89050;Poszukiwacz pereł zbudował dom z piwnicą pełną skrzyń. Hol należy do wszystkich, sale do odważnych.
+drown_ottilie;Guildwarden Ottilie;GUIDE;Valmir;373;856;0;-;#6a9aa8;Gildia kupców utonęła razem ze skarbcem. Trzy dźwignie wciąż trzymają wodę poza ostatnią komorą.
+pit_hector;Pitmaster Hector;GUIDE;Nerys;914;591;0;-;#b08060;W Solnym Dole walczą trzy rundy, a po nich mistrz. Kto przeżyje wszystkie, dostanie złoto i sprzęt.
+oak_rowan;Druid Rowan;GUIDE;Selvaran;513;600;0;-;#6aa850;Stary dąb w gaju przemówił. Jego szept przyzywa strażnika, jeśli ktoś dopełni rytuału przy ołtarzu.
+fleet_oren;Quartermaster Oren;GUIDE;Nerys;930;789;0;-;#7a98b8;Admirał rozbił flotę o własny pałac. Cztery skrzydła, a każde otwiera się dopiero po zadaniu w poprzednim.
+toll_brannoch;Bridgewarden Brannoch;GUIDE;Valmir;371;831;0;-;#a08858;Poborca pobiera myto od każdego, kto chce przejść na drugą stronę. Samotnie nie masz tam czego szukać, potrzeba trzech.
+pendulum_ixchel;Mechanist Ixchel;GUIDE;Selvaran;455;623;0;-;#c0a050;Kapłani zbudowali salę wahadeł, która ruszy dopiero, gdy ktoś pociągnie wszystkie trzy dźwignie. Ostrożnie, strażnicy nie śpią.
+cells_veyra;Inquisitor Veyra;GUIDE;Nerys;887;657;0;-;#9a98b8;Pod portem są trzy cele, a w każdej archont. Do następnej wejdziesz dopiero po śmierci poprzedniego. Na końcu skarbiec inkwizytorów.
+sun_sahir;Sunwarden Sahir;GUIDE;Selvaran;736;694;0;-;#e0a040;Dołącz do Zakonu Słońca i rozprawimy się z Liściem. Wybierasz raz: kto zacznie moje zadania, nie pomoże drugiej stronie.
+leaf_imara;Leafwarden Imara;GUIDE;Selvaran;738;695;0;-;#70b050;Zakon Liścia chroni dżunglę przed Słońcem. Wybierasz raz: jeśli zaczniesz moje zadania, nie pomożesz już zakonowi z pustyni.
+seals_morwen;Sealkeeper Morwen;GUIDE;Valmir;375;781;0;-;#8878b8;Sześć pieczęci zamyka strażnika bagien. Każdą otwiera osobna dźwignia w osobnej komorze. Dopiero wszystkie sześć wpuści cię do niego.
+sandrite_zefyr;Embalmer Zefyr;GUIDE;Nerys;940;767;0;-;#d0b070;Balsamiści zostawili w krypcie ołtarz, który wciąż żyje. Dopełnij rytuału, a obudzisz kapłana, który leży pod piaskiem.
+throne_kaya;Chamberlain Kaya;GUIDE;Selvaran;552;706;0;-;#c85a38;Cesarz siedzi na tronie, który płonie od dawna. Do jego sali prowadzi pięć skrzydeł, a każde wymaga innego dowodu odwagi.
+quarters_dorian;Magistrate Dorian;GUIDE;Valmir;550;774;0;-;#a098c0;Miasto popiołu ma cztery dzielnice i jeden plac. Dzielnice otwierają się po kolei, a nadzorca czeka za ostatnią.
+ember_thane;Gatekeeper Thane;GUIDE;Nerys;921;728;0;-;#d07038;Żarowa Brama otwiera się tylko przed czterema. Jeden z was stanie na każdym polu, a kolos wyjdzie z żaru.
+trials_halvard;Forgemaster Halvard;GUIDE;Valmir;439;686;0;-;#c07040;Kuźnia ma trzy próby: kamienia, żużlu i płomienia. Każdą strzeże archont. Poległego nie zastąpi nikt, ale każdy otwiera następną.
+storm_valka;Arenamaster Valka;GUIDE;Selvaran;735;657;0;-;#7aa8d8;W Arenie Burzy piorun uderza w każdą rundę. Trzy rundy, potem pan areny. Kto przeżyje, zabierze skarb zwycięzców.
+mirror_selene;Glasskeeper Selene;GUIDE;Nerys;813;680;0;-;#98b8d8;Sześć szklanych pieczęci zamyka regenta. Rozbijasz je dźwigniami, ale każda komora ma własnych strażników. Idź z drużyną.
+postmaster_kevan;Postmaster Kevan;GUIDE;Varden;498;504;0;-;#3a62a8;Poczta nie śpi, a listy same się nie doniosą. Chcesz zostać Listonoszem Varden? Zapytaj mnie o pocztę.
 varden_petkeeper;Opiekun zwierząt Maciej;MERCHANT;Varden;548;495;0;varden_pets;#6a8a3a;Szczenięta z Varden: wierne i wesołe. Pupil u boku daje +5% doświadczenia z potworów.
 varden_imbuer;Zaklinacz Teodor;IMBUER;Varden;562;508;0;-;#7050b0;Nasycam broń i zbroje: kradzież życia, many, krytyk, żywioły i ochrony. Kowal robi to samo.
 frost_petkeeper;Opiekunka zwierząt Halszka;MERCHANT;Frostholm;731;210;0;frost_pets;#6a8a3a;Kruki z gór nie boją się mrozu. Pupil u boku daje +5% doświadczenia z potworów.

@@ -60,6 +60,8 @@ import citadel  # noqa: E402
 import islands5  # noqa: E402
 import story_quests  # noqa: E402
 import quest_houses  # noqa: E402
+import premium_quests  # noqa: E402
+import postman  # noqa: E402
 import shapes  # noqa: E402
 import trainers  # noqa: E402
 
@@ -1075,6 +1077,11 @@ def build(ctx):
     # 2026-11-12: Domy Zadan w szesciu glownych miastach (po 20 skrzyn, PZ, pietra +1/+2 albo piwnica -1)
     for rec in quest_houses.build(ctx, cost, wh):
         print('dom zadan:', rec['town'], rec['site'], 'wejscie', rec['ent'], 'pietra', rec['floors'], 'piwnica', rec['cellar'], 'lustro', rec['flip'], 'w miescie', rec['in_town'], 'odleglosc', rec['dist'])
+    # 2026-11-13: 17 nowych linii zadan premium (dzwignie, bramy party:N, bossowie, skarbce z wyborem nagrody)
+    for rec in premium_quests.build(ctx, cost, wh):
+        print('linia premium:', rec['key'], rec['tpl'], rec['town'], 'poziom', rec['level'], 'npc', rec['npc'], 'drzwi', rec['door'])
+    # 2026-11-13: Zadanie Listonosza: Postmaster Kevan w Varden i skrzynki pocztowe w miastach i na polowiskach
+    print('skrzynki pocztowe:', len(postman.build(ctx, cost, wh)))
 
 
 def monster_levels():
@@ -2904,6 +2911,7 @@ def fix_transition_targets(ctx):
 
 
 def finish(ctx):
+    premium_quests.finalize(ctx)
     # opiekun zwierzat, wladca i zaklinacz w kazdym miescie (town_npcs.py; na gotowych budynkach, przed towarami na ladach)
     for n in town_npcs.place(ctx):
         print("uslugi miasta:", n[3], n[0], n[1], n[4], n[5])
@@ -2981,13 +2989,20 @@ def finish(ctx):
         f.write('# Pieczec Gasnacej Gwiazdy (world/QuestGate, WorldMap.RewardChoice; tools/mapgen/citadel.py):\n'
                 '# gate;x;y;z;wymog (quest:<zadanie> | boss:<potwor> | flag:<znacznik> | party:<N graczy>) - pole nieprzechodnie do spelnienia wymogu\n'
                 '# choice;grupa;x;y;z;przedmiot - skrzynie sali nagrod: z grupy mozna otworzyc jedna\n'
-                '# reward;grupa;wymog - kiedy grupa skrzyn sie otwiera (bez wiersza: ukonczona Pieczec Gwiazdy); tools/mapgen/story_quests.py\n')
+                '# reward;grupa;wymog - kiedy grupa skrzyn sie otwiera (bez wiersza: ukonczona Pieczec Gwiazdy); tools/mapgen/story_quests.py\n'
+                '# lever;znacznik;x;y;z - dzwignia ustawiajaca znacznik lv_... dla wymogu flag:<znacznik> (tools/mapgen/premium_quests.py)\n')
         for (x, y, z, req) in ctx.get('star_gates', []):
             f.write(f'gate;{x};{y};{z};{req}\n')
         for (grp, req) in ctx.get('reward_reqs', []):
             f.write(f'reward;{grp};{req}\n')
         for (grp, x, y, z, item) in ctx.get('star_choices', []):
             f.write(f'choice;{grp};{x};{y};{z};{item}\n')
+        for (flag, x, y, z) in ctx.get('lever_flags', []):
+            f.write(f'lever;{flag};{x};{y};{z}\n')
+    with open(os.path.join(OUT, 'mailboxes.csv'), 'w', encoding='utf-8') as f:
+        f.write('# skrzynki pocztowe (world/WorldMap.Mailbox, Zadanie Listonosza; tools/mapgen/postman.py): klucz;x;y;z;TOWN|HUNT;nazwa\n')
+        for line in ctx.get('mailboxes', []):
+            f.write(line + '\n')
     with open(os.path.join(OUT, 'boss_quests.csv'), 'w', encoding='utf-8') as f:
         f.write('# wyprawy na bossa w piec postaci (world/BossQuest, game/BossQuestRuntime):\n'
                 '# quest;id;nazwa;poziom;boss;dzwignia x,y,z;przedsionek x0,y0,x1,y1,z;arena x0,y0,x1,y1,z;'

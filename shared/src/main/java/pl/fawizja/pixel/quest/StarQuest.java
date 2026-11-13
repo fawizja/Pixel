@@ -33,6 +33,7 @@ public final class StarQuest {
     /** Wywolywane po oddaniu zadania: ostatnie zadanie ustawia znacznik wyprawy. */
     static void onCompleted(PlayerCharacter pc, String questKey) {
         if (FINAL_MISSION.equals(questKey)) pc.setQuestFlag(FLAG_SEALED);
+        if (PostmanQuest.FINAL_MISSION.equals(questKey)) pc.setQuestFlag(PostmanQuest.FLAG_RANK);
         String ship = pl.fawizja.pixel.npc.ShipAccess.grantedFlag(questKey);
         if (ship != null) pc.setQuestFlag(ship);
     }

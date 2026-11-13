@@ -1,0 +1,18 @@
+# skrzynki pocztowe (world/WorldMap.Mailbox, Zadanie Listonosza; tools/mapgen/postman.py): klucz;x;y;z;TOWN|HUNT;nazwa
+mb_varden;498;508;0;TOWN;Skrzynka: Varden
+mb_frostholm;743;196;0;TOWN;Skrzynka: Frostholm
+mb_qasirah;225;489;0;TOWN;Skrzynka: Qasirah
+mb_selvaran;676;686;0;TOWN;Skrzynka: Selvaran
+mb_valmir;493;749;0;TOWN;Skrzynka: Valmir
+mb_nerys;876;728;0;TOWN;Skrzynka: Nerys
+mb_mill;402;590;0;HUNT;Skrzynka: Opuszczony Młyn
+mb_crypt;431;452;0;HUNT;Skrzynka: Krypta Cichego Dzwonu
+mb_poacher;783;250;0;HUNT;Skrzynka: Jama Kłusownika
+mb_oasis;208;539;0;HUNT;Skrzynka: Studnia Zakopanej Oazy
+mb_barrow;580;401;-2;HUNT;Skrzynka: Kurhan Dworu Świec (skarbiec)
+mb_watch;785;109;2;HUNT;Skrzynka: Wieża Strażnicza Hrimvard (szczyt)
+mb_zig;202;406;0;HUNT;Skrzynka: Zigurat Spalonego Słońca
+mb_drown;373;853;0;HUNT;Skrzynka: Skarbnica Utopionej Gildii
+mb_oakgrove;513;597;0;HUNT;Skrzynka: Gaj Szeptanego Dębu
+mb_ember;918;728;0;HUNT;Skrzynka: Żarowa Brama
+mb_storm;732;657;0;HUNT;Skrzynka: Arena Burzy

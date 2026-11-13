@@ -17,3 +17,22 @@ oak_s130_m1;oak_m4
 oak_s200_m1;oak_m4
 oak_s320_m1;oak_m4
 # END islands5
+# BEGIN premium_quests (tools/mapgen/premium_quests.py data)
+drown_m1;selv_crocs
+pit_m1;selv_crocs
+oakgrove_m1;drown_m4,selv_idols
+fleet_m1;pit_m5,bog_m3
+toll_m1;fleet_m6,coil_m3
+pendulum_m1;toll_m4
+cells_m1;lantern_m3,pendulum_m4
+sunorder_m1;toll_m4,!leaforder_m1
+leaforder_m1;toll_m4,!sunorder_m1
+seals_m1;cells_m5
+sandrite_m1;stormgate_m3,seals_m4
+throne_m1;wyrm_m3,sandrite_m4
+quarters_m1;seals_m4,throne_m6
+ember_m1;quarters_m6,crown_m3
+trials_m1;ember_m4
+storm_m1;trials_m5,quarters_m6
+mirror_m1;storm_m5,isle_mist
+# END premium_quests

@@ -9,7 +9,7 @@ public final class StarGatesSupport {
     private StarGatesSupport() {}
 
     public static void openAll(PlayerCharacter pc, WorldMap world) {
-        for (QuestGate g : world.questGates().values()) {
+        for (QuestGate whole : world.questGates().values()) for (QuestGate g : whole.parts()) {
             switch (g.kind()) {
                 case QUEST: pc.quests().finish(g.target()); break;
                 case BOSS: pc.setQuestFlag(QuestGate.bossFlag(g.target())); break;

@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.266.0] - 2026-11-13
+
+### Dodano
+- 17 nowych linii zadań premium (razem 52, w tym zakon dwóch frakcji Słońca i Liścia, z którego wybiera się jeden), wzorowanych na Canary:
+  Skarbnica Utopionej Gildii i Sala Wahadeł (dźwignie i boss), Arena Solnego Dołu i Arena Burzy (rundy areny), Gaj Szeptanego Dębu i Krypta
+  Piaskowego Rytuału (rytuały), Pałac Rozbitej Floty i Spalony Tron (długie łańcuchy z odblokowaniem dostępu), Most Poborcy i Żarowa Brama (bramy
+  drużynowe dla 3 i 4 graczy), Trzy Cele Archontów, Trzy Próby Kuźni, Cztery Dzielnice Popiołu, Sala Sześciu Pieczęci i Sala Szklanych Pieczęci
+  (sześć pieczęci, boss na końcu). Każda ma zleceniodawcę z angielskim imieniem,
+  poziom, 3-6 misji, nieregularne podziemie bez prostokątnych sal, skarbiec "jedna skrzynia do wyboru" i wymagania `quest_requires.csv` łączące linie.
+  Generator: `tools/mapgen/premium_quests.py` + `premium_data.py` (21 nowych bossów).
+- Wymagania bram łączone znakiem `+` (np. `boss:x+flag:lv_y`), nowe wiersze `lever;znacznik;x;y;z` w `star_quest.csv` (dźwignie ustawiające
+  znacznik postaci) i wykluczenia `!misja` w `quest_requires.csv` (wybór frakcji).
+- Zadanie Listonosza (darmowe, 10 misji, Postmaster Kevan w Varden): listy do Frostholm i Qasirah, pomiar tras, zgubiona torba (bandyci),
+  rozmokła poczta (śnieżne wilki), paczka ze skarbca Kurhanu Dworu Świec. Nagrody: plecak podróżnika, czapka listonosza i ranga Listonosza.
+- Skrzynki pocztowe (obiekt `mailbox`, `mailboxes.csv`): w sześciu miastach i na 11 polowiskach. Dotknięcie skrzynki zalicza misję VISIT i pokazuje
+  stan; Listonosz może ze skrzynki wysyłać paczki poleceniem `/wyślij` (jak u bankiera). Grafiki skrzynki i czapki rysowane kodem (`tools/art/postman_art.py`).
+- Testy `PremiumQuestsTest`, `PostmanQuestTest`; sceny regresji GUI `premium_*`, `postman_*`, `journal_premium_lines`, `camp_platform_plus1/2`.
+
+### Zmieniono
+- Platformy wież strażniczych dużego obozu barbarzyńców na wyspie lodu (+1/+2) mają nieregularne kontury (różne rozmiary, wypusty i wgryzione stopnie) zamiast kwadratów; drabiny i spawny łuczników bez zmian.
+
 ## [0.265.0] - 2026-11-13
 
 ### Dodano

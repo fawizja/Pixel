@@ -798,7 +798,8 @@ final class ServerWorld {
     /** MAIL SEND imie tekst: przesylka z plecaka do depozytu innej postaci (takze offline), tylko przy bankierze. */
     private void mailCommand(ServerPlayer p, String[] f, long now) {
         if (f.length < 4 || !f[1].equals("SEND")) return;
-        if (!atBanker(p, now)) return;
+        // ranga Listonosza (Zadanie Listonosza): skrzynka pocztowa zastepuje bankiera
+        if (!p.session.atPostmanMailbox() && !atBanker(p, now)) return;
         String to = knownName(f[2].trim());
         if (to == null) {
             warn(p, Messages.get("server_world.nie_ma_takiej_postaci"), now);
@@ -1902,6 +1903,7 @@ final class ServerWorld {
         GameSession s = new GameSession(items, world, pc, monsters, ground, new Random(rng.nextLong()),
                 config.startLevel(), spells, consumables, recipes);
         s.setTownServices(npcs, shops, quests);
+        s.setMailCounter(who -> mail.waiting(who).size());
         s.setWallClock(() -> wallClock.getAsLong());
         s.setHouses(houses, savedHouseOwners);
         s.setChests(chests);
